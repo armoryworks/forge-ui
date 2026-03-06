@@ -1,0 +1,42 @@
+@use 'styles/variables' as *;
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+}
+
+.bar-row__label {
+  width: 80px;
+  flex-shrink: 0;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.bar-row__track {
+  flex: 1;
+  height: 14px;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+}
+
+.bar-row__fill {
+  height: 100%;
+  transition: width 300ms ease;
+}
+
+.bar-row__count {
+  width: 18px;
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 700;
+  color: var(--text);
+  text-align: right;
+}

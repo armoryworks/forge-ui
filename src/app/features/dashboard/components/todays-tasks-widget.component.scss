@@ -1,0 +1,46 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-bottom: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+
+  &:hover {
+    background: var(--bg);
+  }
+}
+
+.task-item__time {
+  width: 40px;
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.task-item__bar {
+  width: 3px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.task-item__title {
+  flex: 1;
+  font-weight: 600;
+  @include truncate;
+}
+
+.task-item__job {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: var(--primary-dark);
+  width: 60px;
+  flex-shrink: 0;
+  letter-spacing: 0.3px;
+}

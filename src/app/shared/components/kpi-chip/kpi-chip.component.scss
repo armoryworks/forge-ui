@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex: 1;
+}
+
+.kpi-chip {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  flex: 1;
+}
+
+.kpi-chip__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  line-height: 1;
+
+  &--warn {
+    color: var(--warn);
+  }
+
+  &--success {
+    color: var(--success);
+  }
+
+  &--primary {
+    color: var(--primary);
+  }
+}
+
+.kpi-chip__meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.kpi-chip__label {
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-secondary);
+}
+
+.kpi-chip__change {
+  font-size: $font-size-xs;
+  font-weight: 600;
+
+  &--up {
+    color: var(--success);
+  }
+
+  &--down {
+    color: var(--warn);
+  }
+
+  &--neutral {
+    color: var(--text-muted);
+  }
+}

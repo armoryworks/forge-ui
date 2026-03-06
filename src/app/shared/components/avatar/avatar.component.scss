@@ -1,0 +1,23 @@
+@use 'styles/variables' as *;
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  flex-shrink: 0;
+  border-radius: $border-radius;
+
+  &--sm {
+    width: 18px;
+    height: 18px;
+    font-size: 8px;
+  }
+
+  &--md {
+    width: 20px;
+    height: 20px;
+    font-size: $font-size-xxs;
+  }
+}

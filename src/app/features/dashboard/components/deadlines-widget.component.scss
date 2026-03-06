@@ -1,0 +1,48 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.deadline-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: 5px 12px;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.deadline-item__date {
+  width: 40px;
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: var(--text-secondary);
+
+  .deadline-item--overdue & {
+    color: var(--warn);
+    font-weight: 600;
+  }
+}
+
+.deadline-item__job {
+  width: 58px;
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: var(--primary-dark);
+
+  .deadline-item--overdue & {
+    color: var(--warn);
+  }
+}
+
+.deadline-item__desc {
+  flex: 1;
+  font-size: $font-size-sm;
+  @include truncate;
+
+  .deadline-item--overdue & {
+    color: var(--warn);
+    font-weight: 600;
+  }
+}

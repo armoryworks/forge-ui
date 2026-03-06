@@ -1,0 +1,43 @@
+<aside class="sidebar" [class.sidebar--expanded]="!collapsed()">
+  <button class="nav-item nav-item--toggle" (click)="toggleCollapse()" [title]="collapsed() ? 'Expand' : 'Collapse'">
+    <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+    @if (!collapsed()) {
+      <span class="nav-item__label">Collapse</span>
+    }
+  </button>
+
+  @for (group of navGroups; track $index) {
+    @if ($index > 0) {
+      <div class="sidebar__divider"></div>
+    }
+    @for (item of group.items; track item.route) {
+      <a class="nav-item"
+         [routerLink]="item.route"
+         routerLinkActive="nav-item--active"
+         [title]="item.label">
+        <span class="material-icons-outlined">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-item__label">{{ item.label }}</span>
+        }
+        @if (item.badge) {
+          <span class="nav-item__badge">{{ item.badge }}</span>
+        }
+      </a>
+    }
+  }
+
+  <div class="sidebar__spacer"></div>
+
+  <div class="sidebar__divider"></div>
+  @for (item of bottomItems.items; track item.route) {
+    <a class="nav-item"
+       [routerLink]="item.route"
+       routerLinkActive="nav-item--active"
+       [title]="item.label">
+      <span class="material-icons-outlined">{{ item.icon }}</span>
+      @if (!collapsed()) {
+        <span class="nav-item__label">{{ item.label }}</span>
+      }
+    </a>
+  }
+</aside>

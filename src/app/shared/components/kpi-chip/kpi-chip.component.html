@@ -1,0 +1,13 @@
+<div class="kpi-chip">
+  <span class="kpi-chip__value" [class]="'kpi-chip__value--' + valueColor()">
+    {{ value() }}
+  </span>
+  <div class="kpi-chip__meta">
+    <span class="kpi-chip__label">{{ label() }}</span>
+    @if (change()) {
+      <span class="kpi-chip__change" [class]="'kpi-chip__change--' + changeDirection()">
+        {{ change() }}
+      </span>
+    }
+  </div>
+</div>

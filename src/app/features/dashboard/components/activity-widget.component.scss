@@ -1,0 +1,40 @@
+@use 'styles/variables' as *;
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: 5px 12px;
+  border-bottom: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+}
+
+.activity-item__icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.activity-item__text {
+  flex: 1;
+  color: var(--text-secondary);
+  line-height: 1.3;
+
+  :host ::ng-deep b,
+  :host ::ng-deep strong {
+    color: var(--text);
+    font-weight: 700;
+  }
+}
+
+.activity-item__time {
+  flex-shrink: 0;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  white-space: nowrap;
+  text-transform: uppercase;
+}

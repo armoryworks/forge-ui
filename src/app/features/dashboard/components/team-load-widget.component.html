@@ -1,0 +1,14 @@
+@for (member of team(); track member.initials) {
+  <div class="workload-item">
+    <app-avatar [initials]="member.initials" [color]="member.color" size="md" />
+    <span class="workload-item__name">{{ member.name }}</span>
+    <div class="workload-item__bar">
+      <div
+        class="workload-item__fill"
+        [style.width.%]="(member.taskCount / member.maxTasks) * 100"
+        [style.background]="member.color">
+      </div>
+    </div>
+    <span class="workload-item__count">{{ member.taskCount }}</span>
+  </div>
+}

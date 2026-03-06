@@ -1,0 +1,70 @@
+@use 'variables' as *;
+
+// ─── Text Utilities ───
+@mixin truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@mixin uppercase-label($size: $font-size-xs, $spacing: 0.5px, $weight: 600) {
+  font-size: $size;
+  font-weight: $weight;
+  text-transform: uppercase;
+  letter-spacing: $spacing;
+}
+
+// ─── Layout Utilities ───
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+// ─── Scrollbar ───
+@mixin custom-scrollbar($width: 4px) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+
+    &:hover {
+      background: var(--text-muted);
+    }
+  }
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+// ─── Responsive Breakpoints ───
+@mixin mobile {
+  @media (max-width: $breakpoint-mobile) {
+    @content;
+  }
+}
+
+@mixin tablet {
+  @media (max-width: $breakpoint-tablet) {
+    @content;
+  }
+}
+
+@mixin desktop {
+  @media (min-width: $breakpoint-desktop) {
+    @content;
+  }
+}

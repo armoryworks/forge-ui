@@ -1,0 +1,27 @@
+<div class="widget" [class.widget--accent]="accent()">
+  <div class="widget__header">
+    <span class="widget__title">
+      @if (icon()) {
+        <span class="material-icons-outlined widget__icon">{{ icon() }}</span>
+      }
+      {{ title() }}
+      @if (count() !== null) {
+        <span class="widget__count">{{ count() }}</span>
+      }
+    </span>
+    <div class="widget__actions">
+      <button class="widget__action-btn" title="Filter">
+        <span class="material-icons-outlined">filter_list</span>
+      </button>
+      <button class="widget__action-btn" title="Sort">
+        <span class="material-icons-outlined">swap_vert</span>
+      </button>
+      <button class="widget__action-btn" title="Customize">
+        <span class="material-icons-outlined">tune</span>
+      </button>
+    </div>
+  </div>
+  <div class="widget__body">
+    <ng-content />
+  </div>
+</div>

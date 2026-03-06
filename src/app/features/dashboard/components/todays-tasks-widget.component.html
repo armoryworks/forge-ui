@@ -1,0 +1,10 @@
+@for (task of tasks(); track task.jobNumber + task.time) {
+  <div class="task-item">
+    <span class="task-item__time">{{ task.time }}</span>
+    <span class="task-item__bar" [style.background]="task.barColor"></span>
+    <span class="task-item__title">{{ task.title }}</span>
+    <span class="task-item__job">{{ task.jobNumber }}</span>
+    <app-avatar [initials]="task.assignee.initials" [color]="task.assignee.color" size="sm" />
+    <app-status-badge [status]="task.status" [statusColor]="task.statusColor" />
+  </div>
+}

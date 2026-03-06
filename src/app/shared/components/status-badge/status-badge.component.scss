@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  text-align: center;
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 1px 0;
+  border: 1px solid;
+
+  &--active {
+    color: var(--success);
+    background: var(--success-light);
+    border-color: var(--success);
+  }
+
+  &--upcoming {
+    color: var(--text-muted);
+    background: var(--bg);
+    border-color: var(--text-muted);
+  }
+
+  &--overdue {
+    color: var(--warn);
+    background: var(--warn-light);
+    border-color: var(--warn);
+  }
+
+  &--completed {
+    color: var(--primary);
+    background: var(--primary-light);
+    border-color: var(--primary);
+  }
+}

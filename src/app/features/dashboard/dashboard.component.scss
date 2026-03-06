@@ -1,0 +1,124 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ─── Page Header ───
+.page-header {
+  display: flex;
+  align-items: center;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border-bottom: 3px solid var(--header);
+  flex-shrink: 0;
+  height: 40px;
+  gap: $sp-md;
+
+  [data-theme='dark'] & {
+    border-bottom-color: var(--primary);
+  }
+}
+
+.page-header__title {
+  font-size: $font-size-title;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.page-header__sep {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+.page-header__ctx {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.page-header__actions {
+  margin-left: auto;
+  display: flex;
+  gap: $sp-sm;
+  align-items: center;
+}
+
+// ─── Buttons ───
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 10px;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: $font-size-xs;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: $border-radius;
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &--primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+
+    &:hover {
+      background: var(--primary-dark);
+    }
+  }
+}
+
+.btn__icon {
+  font-size: 14px;
+}
+
+// ─── Page Body ───
+.page-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $sp-md $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+// ─── Today Section (hero — fills remaining space) ───
+.today-section {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ─── Content Grid ───
+.content-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  gap: 6px;
+  min-height: 0;
+  flex-shrink: 0;
+}
+
+.kpi-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.span-2 {
+  grid-column: span 2;
+}

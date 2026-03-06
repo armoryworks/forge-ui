@@ -1,0 +1,13 @@
+@for (stage of stages(); track stage.label) {
+  <div class="bar-row">
+    <span class="bar-row__label">{{ stage.label }}</span>
+    <div class="bar-row__track">
+      <div
+        class="bar-row__fill"
+        [style.width.%]="(stage.count / stage.maxCount) * 100"
+        [style.background]="stage.color">
+      </div>
+    </div>
+    <span class="bar-row__count">{{ stage.count }}</span>
+  </div>
+}

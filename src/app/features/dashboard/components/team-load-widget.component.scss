@@ -1,0 +1,38 @@
+@use 'styles/variables' as *;
+
+.workload-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: 5px 12px;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.workload-item__name {
+  width: 60px;
+  flex-shrink: 0;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.workload-item__bar {
+  flex: 1;
+  height: 4px;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+}
+
+.workload-item__fill {
+  height: 100%;
+}
+
+.workload-item__count {
+  width: 24px;
+  flex-shrink: 0;
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-align: right;
+}

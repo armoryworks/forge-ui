@@ -1,0 +1,127 @@
+@use 'styles/variables' as *;
+
+.app-header {
+  height: $header-height;
+  background: var(--header);
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 0 $sp-lg;
+  gap: $sp-md;
+  flex-shrink: 0;
+  z-index: $z-sticky;
+}
+
+.app-header__logo {
+  font-size: $font-size-title;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+
+  span {
+    color: var(--accent);
+  }
+}
+
+.header-sep {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.breadcrumb {
+  font-size: $font-size-sm;
+  color: white;
+  display: flex;
+  gap: $sp-sm;
+  align-items: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.breadcrumb__current {
+  font-weight: 600;
+}
+
+.app-header__search {
+  flex: 1;
+  background: var(--bg);
+  border: $border-width solid var(--bg);
+  border-radius: $border-radius;
+  padding: $sp-sm 10px;
+  color: var(--text);
+  font-size: $font-size-sm;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+
+  kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0 5px;
+    border-radius: $border-radius;
+    font-size: $font-size-xs;
+    font-family: $font-family-mono;
+    margin-left: auto;
+  }
+}
+
+.app-header__actions {
+  display: flex;
+  gap: $sp-xs;
+  align-items: center;
+}
+
+.icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: $border-radius;
+  border: none;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 18px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .material-icons-outlined {
+    font-size: 18px;
+  }
+}
+
+.badge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  background: var(--accent);
+  color: white;
+  font-size: 8px;
+  font-weight: 700;
+  min-width: 14px;
+  height: 14px;
+  border-radius: $border-radius;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+}
+
+.app-header__avatar {
+  width: 26px;
+  height: 26px;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  border-radius: $border-radius;
+  margin-left: $sp-sm;
+}

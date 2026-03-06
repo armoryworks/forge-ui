@@ -1,0 +1,115 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.widget {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+
+  &--accent {
+    border-color: var(--header);
+  }
+}
+
+.widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: $border-width solid var(--border);
+
+  .widget--accent & {
+    background: var(--header);
+    color: white;
+    border-bottom: none;
+  }
+}
+
+.widget__title {
+  @include uppercase-label($font-size-xs, 1px, 700);
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  color: var(--text-secondary);
+
+  .widget--accent & {
+    color: white;
+  }
+}
+
+.widget__icon {
+  font-size: 16px;
+}
+
+.widget__count {
+  background: var(--primary);
+  color: white;
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  min-width: 20px;
+  height: 18px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+
+  .widget--accent & {
+    background: var(--accent);
+  }
+}
+
+.widget__actions {
+  display: flex;
+  gap: $sp-xs;
+}
+
+.widget__action-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $border-radius;
+
+  &:hover {
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  .material-icons-outlined {
+    font-size: 14px;
+  }
+
+  .widget--accent & {
+    color: rgba(255, 255, 255, 0.7);
+    border: $border-width-thin solid rgba(255, 255, 255, 0.2);
+
+    &:hover {
+      color: white;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+}
+
+.widget__body {
+  flex: 1;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}

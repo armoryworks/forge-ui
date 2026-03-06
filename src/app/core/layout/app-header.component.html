@@ -1,0 +1,30 @@
+<header class="app-header">
+  <div class="app-header__logo">QB<span>:</span>Eng</div>
+  <div class="header-sep"></div>
+  <nav class="breadcrumb">
+    <span>Home</span>
+    <span class="material-icons-outlined" style="font-size: 14px">chevron_right</span>
+    <span class="breadcrumb__current">Dashboard</span>
+  </nav>
+
+  <div class="app-header__search">
+    <span class="material-icons-outlined" style="font-size: 16px; color: var(--text-muted)">search</span>
+    <span style="color: var(--text-muted)">Search jobs, parts, people...</span>
+    <kbd>Ctrl+K</kbd>
+  </div>
+
+  <div class="app-header__actions">
+    <button class="icon-btn" title="Chat">
+      <span class="material-icons-outlined">chat_bubble_outline</span>
+      <span class="badge">2</span>
+    </button>
+    <button class="icon-btn" title="Notifications">
+      <span class="material-icons-outlined">notifications_none</span>
+      <span class="badge">5</span>
+    </button>
+    <button class="icon-btn" title="Toggle theme" (click)="toggleTheme()">
+      <span class="material-icons-outlined">{{ themeIcon() }}</span>
+    </button>
+    <div class="app-header__avatar">DH</div>
+  </div>
+</header>

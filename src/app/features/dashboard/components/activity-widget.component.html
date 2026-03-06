@@ -1,0 +1,9 @@
+@for (entry of entries(); track $index) {
+  <div class="activity-item">
+    <span class="material-icons-outlined activity-item__icon" [style.color]="entry.iconColor">
+      {{ entry.icon }}
+    </span>
+    <span class="activity-item__text" [innerHTML]="entry.text"></span>
+    <span class="activity-item__time">{{ entry.time }}</span>
+  </div>
+}
