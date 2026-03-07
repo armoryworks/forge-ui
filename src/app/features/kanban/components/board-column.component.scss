@@ -1,0 +1,104 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  max-width: 260px;
+  flex: 1 0 200px;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  height: 100%;
+  overflow: hidden;
+
+  &--over-wip {
+    border-color: var(--warn);
+  }
+}
+
+.column__header {
+  @include flex-between;
+  flex-wrap: wrap;
+  padding: $sp-md;
+  border-top: 4px solid;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+  gap: $sp-xs;
+}
+
+.column__name {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text);
+  flex: 1;
+}
+
+.column__count {
+  font-size: $font-size-xs;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.column__wip {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+
+  &--warn {
+    color: var(--warn);
+    font-weight: 700;
+  }
+}
+
+.column__lock {
+  color: var(--text-muted);
+}
+
+.column__lock-icon {
+  font-size: 12px;
+}
+
+.column__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $sp-sm;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  min-height: 60px;
+  @include custom-scrollbar;
+}
+
+.column__empty {
+  @include flex-center;
+  padding: $sp-xl;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+// CDK Drag-Drop States
+:host ::ng-deep {
+  .cdk-drag-preview {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0.9;
+  }
+
+  .cdk-drag-placeholder {
+    opacity: 0.3;
+  }
+
+  .cdk-drag-animating {
+    transition: transform 200ms ease;
+  }
+
+  .cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
+    transition: transform 200ms ease;
+  }
+}

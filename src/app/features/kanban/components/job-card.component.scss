@@ -1,0 +1,76 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.card {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  border-left: 3px solid;
+  padding: $sp-md;
+  cursor: grab;
+  transition: box-shadow $transition-fast;
+
+  &:hover {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.card__header {
+  @include flex-between;
+  margin-bottom: $sp-xs;
+}
+
+.card__job-number {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+  font-family: $font-family-mono;
+}
+
+.card__overdue {
+  color: var(--warn);
+}
+
+.card__overdue-icon {
+  font-size: 12px;
+}
+
+.card__title {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.3;
+  @include truncate;
+}
+
+.card__footer {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  margin-top: $sp-sm;
+}
+
+.card__customer {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  @include truncate;
+  flex: 1;
+}
+
+.card__due {
+  font-size: $font-size-xxs;
+  color: var(--text-secondary);
+  margin-left: auto;
+  white-space: nowrap;
+
+  &--overdue {
+    color: var(--warn);
+    font-weight: 700;
+  }
+}

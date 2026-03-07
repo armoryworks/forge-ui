@@ -1,0 +1,36 @@
+@if (loading() && !columns().length) {
+  <div class="page-loading">
+    <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+    <p>Loading board...</p>
+  </div>
+} @else if (error()) {
+  <div class="page-error">
+    <span class="material-icons-outlined page-error__icon">error_outline</span>
+    <p>{{ error() }}</p>
+  </div>
+} @else {
+  <div class="page-header">
+    <h1 class="page-header__title">Board</h1>
+    <span class="page-header__sep"></span>
+    <div class="page-header__track-types">
+      @for (tt of trackTypes(); track tt.id) {
+        <button
+          class="track-type-btn"
+          [class.track-type-btn--active]="tt.id === selectedTrackTypeId()"
+          (click)="selectTrackType(tt.id)">
+          {{ tt.name }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="board">
+    @for (col of columns(); track col.stage.id; let i = $index) {
+      <app-board-column
+        [column]="col"
+        [dropListId]="'column-' + i"
+        [allDropListIds]="dropListIds()"
+        (dropped)="onCardDropped($event)" />
+    }
+  </div>
+}

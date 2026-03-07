@@ -15,7 +15,11 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTES),
       },
-      { path: 'kanban', component: PlaceholderComponent, data: { featureName: 'Kanban Board' } },
+      {
+        path: 'kanban',
+        loadChildren: () =>
+          import('./features/kanban/kanban.routes').then((m) => m.KANBAN_ROUTES),
+      },
       { path: 'backlog', component: PlaceholderComponent, data: { featureName: 'Backlog' } },
       { path: 'calendar', component: PlaceholderComponent, data: { featureName: 'Calendar' } },
       { path: 'parts', component: PlaceholderComponent, data: { featureName: 'Parts Catalog' } },

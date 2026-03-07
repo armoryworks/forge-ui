@@ -1,0 +1,31 @@
+<div class="column" [class.column--over-wip]="isOverWip()">
+  <div class="column__header" [style.border-top-color]="column().stage.color">
+    <span class="column__name">{{ column().stage.name }}</span>
+    <span class="column__count">{{ jobCount() }}</span>
+    @if (wipLimit() !== null) {
+      <span class="column__wip" [class.column__wip--warn]="isOverWip()">
+        / {{ wipLimit() }}
+      </span>
+    }
+    @if (column().stage.isIrreversible) {
+      <span class="column__lock" title="Irreversible — jobs cannot be moved backward from this stage">
+        <span class="material-icons-outlined column__lock-icon">lock</span>
+      </span>
+    }
+  </div>
+  <div
+    class="column__body"
+    cdkDropList
+    [id]="dropListId()"
+    [cdkDropListData]="column().jobs"
+    [cdkDropListConnectedTo]="allDropListIds()"
+    [cdkDropListEnterPredicate]="canEnter"
+    (cdkDropListDropped)="onDrop($event)">
+    @for (job of column().jobs; track job.id) {
+      <app-job-card [job]="job" cdkDrag [cdkDragData]="job" />
+    }
+    @empty {
+      <div class="column__empty">No jobs</div>
+    }
+  </div>
+</div>

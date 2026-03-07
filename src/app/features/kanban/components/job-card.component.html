@@ -1,0 +1,27 @@
+<div class="card" [style.border-left-color]="priorityColor()">
+  <div class="card__header">
+    <span class="card__job-number">{{ job().jobNumber }}</span>
+    @if (job().isOverdue) {
+      <span class="card__overdue" title="Overdue">
+        <span class="material-icons-outlined card__overdue-icon">warning</span>
+      </span>
+    }
+  </div>
+  <div class="card__title">{{ job().title }}</div>
+  <div class="card__footer">
+    @if (job().assigneeInitials) {
+      <app-avatar
+        [initials]="job().assigneeInitials!"
+        [color]="job().assigneeColor ?? '#0d9488'"
+        size="sm" />
+    }
+    @if (job().customerName) {
+      <span class="card__customer">{{ job().customerName }}</span>
+    }
+    @if (formattedDueDate()) {
+      <span class="card__due" [class.card__due--overdue]="job().isOverdue">
+        {{ formattedDueDate() }}
+      </span>
+    }
+  </div>
+</div>
