@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { TeamMember } from '../models/dashboard.model';
-import { MOCK_TEAM } from '../services/dashboard-mock.data';
 
 @Component({
   selector: 'app-team-load-widget',
@@ -13,5 +12,5 @@ import { MOCK_TEAM } from '../services/dashboard-mock.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TeamLoadWidgetComponent {
-  protected readonly team = signal<TeamMember[]>(MOCK_TEAM);
+  readonly team = input.required<TeamMember[]>();
 }

@@ -1,9 +1,8 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { DashboardTask } from '../models/dashboard.model';
-import { MOCK_TASKS } from '../services/dashboard-mock.data';
 
 @Component({
   selector: 'app-todays-tasks-widget',
@@ -14,5 +13,5 @@ import { MOCK_TASKS } from '../services/dashboard-mock.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TodaysTasksWidgetComponent {
-  protected readonly tasks = signal<DashboardTask[]>(MOCK_TASKS);
+  readonly tasks = input.required<DashboardTask[]>();
 }

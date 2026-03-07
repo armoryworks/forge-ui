@@ -1,52 +1,77 @@
-<div class="page-header">
-  <h1 class="page-header__title">Dashboard</h1>
-  <span class="page-header__sep"></span>
-  <span class="page-header__ctx">Production · March 2026</span>
-  <div class="page-header__actions">
-    <button class="btn">
-      <span class="material-icons-outlined btn__icon">date_range</span> This Week
-    </button>
-    <button class="btn">
-      <span class="material-icons-outlined btn__icon">download</span> Export
-    </button>
-    <button class="btn btn--primary">
-      <span class="material-icons-outlined btn__icon">tune</span> Customize
-    </button>
+@if (loading()) {
+  <div class="page-loading">
+    <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+    <p>Loading dashboard...</p>
   </div>
-</div>
-
-<div class="page-body">
-  <app-dashboard-widget
-    title="Today's Tasks"
-    icon="today"
-    [count]="taskCount()"
-    widgetKey="todays-tasks"
-    [accent]="true"
-    class="today-section">
-    <app-todays-tasks-widget />
-  </app-dashboard-widget>
-
-  <div class="content-grid">
-    <div class="kpi-stack">
-      <app-kpi-chip value="23" label="Active" change="+3" changeDirection="up" />
-      <app-kpi-chip value="4" valueColor="warn" label="Overdue" change="+2" changeDirection="down" />
-      <app-kpi-chip value="312h" label="Hours" change="On track" changeDirection="up" />
+} @else if (error()) {
+  <div class="page-error">
+    <span class="material-icons-outlined page-error__icon">error_outline</span>
+    <p>{{ error() }}</p>
+  </div>
+} @else if (data(); as d) {
+  <div class="page-header">
+    <h1 class="page-header__title">Dashboard</h1>
+    <span class="page-header__sep"></span>
+    <span class="page-header__ctx">Production · March 2026</span>
+    <div class="page-header__actions">
+      <button class="btn">
+        <span class="material-icons-outlined btn__icon">date_range</span> This Week
+      </button>
+      <button class="btn">
+        <span class="material-icons-outlined btn__icon">download</span> Export
+      </button>
+      <button class="btn btn--primary">
+        <span class="material-icons-outlined btn__icon">tune</span> Customize
+      </button>
     </div>
-
-    <app-dashboard-widget title="Jobs by Stage" widgetKey="jobs-by-stage">
-      <app-jobs-by-stage-widget />
-    </app-dashboard-widget>
-
-    <app-dashboard-widget title="Team Load" widgetKey="team-load">
-      <app-team-load-widget />
-    </app-dashboard-widget>
-
-    <app-dashboard-widget title="Activity" widgetKey="activity" class="span-2">
-      <app-activity-widget />
-    </app-dashboard-widget>
-
-    <app-dashboard-widget title="Deadlines" widgetKey="deadlines">
-      <app-deadlines-widget />
-    </app-dashboard-widget>
   </div>
-</div>
+
+  <div class="page-body">
+    <app-dashboard-widget
+      title="Today's Tasks"
+      icon="today"
+      [count]="d.tasks.length"
+      widgetKey="todays-tasks"
+      [accent]="true"
+      class="today-section">
+      <app-todays-tasks-widget [tasks]="d.tasks" />
+    </app-dashboard-widget>
+
+    <div class="content-grid">
+      <div class="kpi-stack">
+        <app-kpi-chip
+          [value]="'' + d.kpis.activeCount"
+          label="Active"
+          [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
+          changeDirection="up" />
+        <app-kpi-chip
+          [value]="'' + d.kpis.overdueCount"
+          valueColor="warn"
+          label="Overdue"
+          [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
+          changeDirection="down" />
+        <app-kpi-chip
+          [value]="d.kpis.totalHours"
+          label="Hours"
+          [change]="d.kpis.hoursStatus"
+          changeDirection="up" />
+      </div>
+
+      <app-dashboard-widget title="Jobs by Stage" widgetKey="jobs-by-stage">
+        <app-jobs-by-stage-widget [stages]="d.stages" />
+      </app-dashboard-widget>
+
+      <app-dashboard-widget title="Team Load" widgetKey="team-load">
+        <app-team-load-widget [team]="d.team" />
+      </app-dashboard-widget>
+
+      <app-dashboard-widget title="Activity" widgetKey="activity" class="span-2">
+        <app-activity-widget [entries]="d.activity" />
+      </app-dashboard-widget>
+
+      <app-dashboard-widget title="Deadlines" widgetKey="deadlines">
+        <app-deadlines-widget [deadlines]="d.deadlines" />
+      </app-dashboard-widget>
+    </div>
+  </div>
+}

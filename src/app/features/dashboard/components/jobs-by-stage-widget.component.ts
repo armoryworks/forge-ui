@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { StageCount } from '../models/dashboard.model';
-import { MOCK_STAGES } from '../services/dashboard-mock.data';
 
 @Component({
   selector: 'app-jobs-by-stage-widget',
@@ -11,5 +10,5 @@ import { MOCK_STAGES } from '../services/dashboard-mock.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobsByStageWidgetComponent {
-  protected readonly stages = signal<StageCount[]>(MOCK_STAGES);
+  readonly stages = input.required<StageCount[]>();
 }

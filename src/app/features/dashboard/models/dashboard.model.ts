@@ -36,3 +36,21 @@ export interface DeadlineEntry {
   description: string;
   isOverdue: boolean;
 }
+
+export interface DashboardKPIs {
+  activeCount: number;
+  activeChange: number;
+  overdueCount: number;
+  overdueChange: number;
+  totalHours: string;
+  hoursStatus: string;
+}
+
+export interface DashboardData {
+  tasks: DashboardTask[];
+  stages: StageCount[];
+  team: TeamMember[];
+  activity: ActivityEntry[];
+  deadlines: DeadlineEntry[];
+  kpis: DashboardKPIs;
+}

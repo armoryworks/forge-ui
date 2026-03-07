@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 import { AppHeaderComponent } from './core/layout/app-header.component';
 import { SidebarComponent } from './core/layout/sidebar.component';
+import { AuthService } from './shared/services/auth.service';
+import { environment } from '../environments/environment';
 
 @Component({
   selector: 'app-root',
@@ -12,4 +14,10 @@ import { SidebarComponent } from './core/layout/sidebar.component';
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppComponent {}
+export class AppComponent {
+  private readonly authService = inject(AuthService);
+
+  protected readonly showShell = computed(
+    () => environment.mockIntegrations || this.authService.isAuthenticated(),
+  );
+}

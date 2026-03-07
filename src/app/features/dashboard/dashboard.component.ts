@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 
 import { DashboardWidgetComponent } from '../../shared/components/dashboard-widget/dashboard-widget.component';
 import { KpiChipComponent } from '../../shared/components/kpi-chip/kpi-chip.component';
@@ -7,7 +7,8 @@ import { DeadlinesWidgetComponent } from './components/deadlines-widget.componen
 import { JobsByStageWidgetComponent } from './components/jobs-by-stage-widget.component';
 import { TeamLoadWidgetComponent } from './components/team-load-widget.component';
 import { TodaysTasksWidgetComponent } from './components/todays-tasks-widget.component';
-import { MOCK_TASKS } from './services/dashboard-mock.data';
+import { DashboardData } from './models/dashboard.model';
+import { DashboardService } from './services/dashboard.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,6 +26,23 @@ import { MOCK_TASKS } from './services/dashboard-mock.data';
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent {
-  protected readonly taskCount = signal(MOCK_TASKS.length);
+export class DashboardComponent implements OnInit {
+  private readonly dashboardService = inject(DashboardService);
+
+  protected readonly data = signal<DashboardData | null>(null);
+  protected readonly loading = signal(true);
+  protected readonly error = signal<string | null>(null);
+
+  ngOnInit(): void {
+    this.dashboardService.getDashboard().subscribe({
+      next: (data) => {
+        this.data.set(data);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to load dashboard data');
+        this.loading.set(false);
+      },
+    });
+  }
 }

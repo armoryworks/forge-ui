@@ -1,5 +1,7 @@
 import {
   ActivityEntry,
+  DashboardData,
+  DashboardKPIs,
   DashboardTask,
   DeadlineEntry,
   StageCount,
@@ -62,3 +64,21 @@ export const MOCK_DEADLINES: DeadlineEntry[] = [
   { date: 'Mar 10', jobNumber: 'J-1038', description: 'Shaft Housing — Delivery', isOverdue: false },
   { date: 'Mar 12', jobNumber: 'J-1036', description: 'Pneumatic Manifold — Ship', isOverdue: false },
 ];
+
+export const MOCK_KPIS: DashboardKPIs = {
+  activeCount: 23,
+  activeChange: 3,
+  overdueCount: 4,
+  overdueChange: 2,
+  totalHours: '312h',
+  hoursStatus: 'On track',
+};
+
+export const MOCK_DASHBOARD: DashboardData = {
+  tasks: MOCK_TASKS,
+  stages: MOCK_STAGES,
+  team: MOCK_TEAM,
+  activity: MOCK_ACTIVITY,
+  deadlines: MOCK_DEADLINES,
+  kpis: MOCK_KPIS,
+};

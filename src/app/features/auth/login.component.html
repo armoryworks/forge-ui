@@ -1,0 +1,50 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-card__header">
+      <span class="material-icons-outlined login-card__icon">precision_manufacturing</span>
+      <h1 class="login-card__title">QB Engineer</h1>
+      <p class="login-card__subtitle">Manufacturing Operations Platform</p>
+    </div>
+
+    <form class="login-card__form" (ngSubmit)="onSubmit()">
+      @if (error()) {
+        <div class="login-card__error">{{ error() }}</div>
+      }
+
+      <label class="login-card__label">
+        <span>Email</span>
+        <input
+          type="email"
+          class="login-card__input"
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+          name="email"
+          autocomplete="email"
+          required />
+      </label>
+
+      <label class="login-card__label">
+        <span>Password</span>
+        <input
+          type="password"
+          class="login-card__input"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+          name="password"
+          autocomplete="current-password"
+          required />
+      </label>
+
+      <button
+        type="submit"
+        class="login-card__submit"
+        [disabled]="loading() || !email() || !password()">
+        @if (loading()) {
+          Signing in...
+        } @else {
+          Sign In
+        }
+      </button>
+    </form>
+  </div>
+</div>

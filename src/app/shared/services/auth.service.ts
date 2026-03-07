@@ -1,0 +1,65 @@
+import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
+export interface AuthUser {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  initials: string | null;
+  avatarColor: string | null;
+  roles: string[];
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  expiresAt: string;
+  user: AuthUser;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private readonly http = inject(HttpClient);
+  private readonly _token = signal<string | null>(this.loadToken());
+  private readonly _user = signal<AuthUser | null>(this.loadUser());
+
+  readonly token = this._token.asReadonly();
+  readonly user = this._user.asReadonly();
+  readonly isAuthenticated = computed(() => this._token() !== null);
+
+  login(credentials: LoginRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap((response) => {
+          this._token.set(response.token);
+          this._user.set(response.user);
+          localStorage.setItem('qbe-token', response.token);
+          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+        }),
+      );
+  }
+
+  clearAuth(): void {
+    this._token.set(null);
+    this._user.set(null);
+    localStorage.removeItem('qbe-token');
+    localStorage.removeItem('qbe-user');
+  }
+
+  private loadToken(): string | null {
+    return localStorage.getItem('qbe-token');
+  }
+
+  private loadUser(): AuthUser | null {
+    const raw = localStorage.getItem('qbe-user');
+    return raw ? JSON.parse(raw) : null;
+  }
+}
