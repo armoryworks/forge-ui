@@ -58,6 +58,7 @@ export class DataTableComponent implements OnInit {
   readonly emptyIcon = input('search_off');
   readonly emptyMessage = input('No data found');
   readonly rowClass = input<((row: unknown) => string) | null>(null);
+  readonly rowStyle = input<((row: unknown) => Record<string, string>) | null>(null);
 
   readonly rowClick = output<unknown>();
   readonly selectionChange = output<unknown[]>();
@@ -215,6 +216,11 @@ export class DataTableComponent implements OnInit {
   getRowClasses(row: unknown): string {
     const fn = this.rowClass();
     return fn ? fn(row) : '';
+  }
+
+  getRowStyles(row: unknown): Record<string, string> {
+    const fn = this.rowStyle();
+    return fn ? fn(row) : {};
   }
 
   getColumnWidth(col: ColumnDef): string | null {

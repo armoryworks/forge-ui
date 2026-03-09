@@ -22,7 +22,8 @@
 
   <div class="page-content page-content--table">
   <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
-    [rowClass]="backlogRowClass" emptyIcon="search_off" emptyMessage="No jobs match your filters"
+    [rowClass]="backlogRowClass" [rowStyle]="backlogRowStyle"
+    emptyIcon="search_off" emptyMessage="No jobs match your filters"
     (rowClick)="onRowClicked($any($event))">
     <ng-template appColumnCell="jobNumber" let-job>
       <span class="job-number">{{ job.jobNumber }}</span>

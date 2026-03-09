@@ -1,0 +1,91 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.stages-section {
+  margin-top: $sp-lg;
+}
+
+.stages-header {
+  @include flex-between;
+  margin-bottom: $sp-md;
+}
+
+.stages-title {
+  @include uppercase-label($font-size-xs, 0.5px, 700);
+  color: var(--text-secondary);
+}
+
+.stages-empty {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  padding: $sp-lg;
+  text-align: center;
+  border: $border-width-thin dashed var(--border);
+}
+
+.stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.stage-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+
+  &__order {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    .icon-btn {
+      width: 18px;
+      height: 14px;
+
+      .material-icons-outlined { font-size: 12px; }
+    }
+  }
+
+  &__color {
+    input[type='color'] {
+      width: 24px;
+      height: 24px;
+      border: $border-width-thin solid var(--border);
+      padding: 0;
+      cursor: pointer;
+      background: none;
+
+      &::-webkit-color-swatch-wrapper { padding: 1px; }
+      &::-webkit-color-swatch { border: none; }
+    }
+  }
+
+  &__input {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+
+    &:focus { border-color: var(--primary); }
+    &--name { flex: 2; }
+    &--code { flex: 1; font-family: $font-family-mono; font-size: $font-size-xs; }
+    &--wip { width: 52px; flex: none; text-align: center; }
+  }
+
+  &__irreversible {
+    @include flex-center;
+    cursor: pointer;
+    color: var(--text-muted);
+
+    input[type='checkbox'] { display: none; }
+    input[type='checkbox']:checked + .material-icons-outlined { color: var(--warning); }
+    .material-icons-outlined { font-size: 16px; }
+  }
+}

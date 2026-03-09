@@ -98,9 +98,52 @@ export interface UserRef {
   color: string;
 }
 
+export interface JobLink {
+  id: number;
+  sourceJobId: number;
+  targetJobId: number;
+  linkType: string;
+  linkedJobId: number;
+  linkedJobNumber: string;
+  linkedJobTitle: string;
+  linkedJobStageName: string;
+  linkedJobStageColor: string;
+  createdAt: string;
+}
+
+export const LINK_TYPE_OPTIONS = [
+  { value: 'RelatedTo', label: 'Related to' },
+  { value: 'Blocks', label: 'Blocks' },
+  { value: 'Parent', label: 'Parent of' },
+];
+
+export const LINK_TYPE_ICONS: Record<string, string> = {
+  RelatedTo: 'link',
+  Blocks: 'block',
+  BlockedBy: 'block',
+  Parent: 'account_tree',
+  Child: 'account_tree',
+};
+
+export const LINK_TYPE_LABELS: Record<string, string> = {
+  RelatedTo: 'related to',
+  Blocks: 'blocks',
+  BlockedBy: 'blocked by',
+  Parent: 'parent of',
+  Child: 'child of',
+};
+
 export const PRIORITY_COLORS: Record<string, string> = {
   Low: '#94a3b8',
   Normal: '#0d9488',
   High: '#f59e0b',
   Urgent: '#dc2626',
 };
+
+export const PRIORITY_OPTIONS = ['Low', 'Normal', 'High', 'Urgent'];
+
+export interface BulkResult {
+  successCount: number;
+  failureCount: number;
+  errors: { jobId: number; message: string }[];
+}

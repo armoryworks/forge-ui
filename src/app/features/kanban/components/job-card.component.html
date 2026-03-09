@@ -1,4 +1,9 @@
-<div class="card" [style.border-left-color]="priorityColor()" (click)="cardClicked.emit(job())">
+<div class="card" [style.border-left-color]="priorityColor()" [class.card--selected]="selected()" (click)="cardClicked.emit({ job: job(), event: $event })">
+  @if (selected()) {
+    <span class="card__check">
+      <span class="material-icons-outlined">check</span>
+    </span>
+  }
   <div class="card__header">
     <span class="card__job-number">{{ job().jobNumber }}</span>
     @if (job().isOverdue) {

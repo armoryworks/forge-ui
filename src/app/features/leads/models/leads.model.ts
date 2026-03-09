@@ -37,3 +37,8 @@ export interface UpdateLeadRequest {
 }
 
 export type LeadStatus = 'New' | 'Contacted' | 'Quoting' | 'Converted' | 'Lost';
+
+export interface ConvertLeadResult {
+  customerId: number;
+  jobId: number | null;
+}

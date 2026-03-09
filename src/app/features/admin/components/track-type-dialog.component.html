@@ -1,0 +1,66 @@
+<app-dialog [title]="title()" width="680px" (closed)="closed.emit()">
+  <div [formGroup]="form">
+    <app-input label="Name" formControlName="name" />
+    <div class="dialog-row">
+      <app-input label="Code" formControlName="code" placeholder="e.g. CUSTOM_TRACK" />
+      <div></div>
+    </div>
+    <app-input label="Description" formControlName="description" />
+  </div>
+
+  <div class="stages-section">
+    <div class="stages-header">
+      <span class="stages-title">Stages</span>
+      <button class="action-btn action-btn--sm" (click)="addStage()">
+        <span class="material-icons-outlined">add</span>
+        Add Stage
+      </button>
+    </div>
+
+    @if (!hasStages()) {
+      <p class="stages-empty">No stages defined. Add at least one stage.</p>
+    } @else {
+      <div class="stages-list">
+        @for (stage of stages(); track $index; let i = $index; let first = $first; let last = $last) {
+          <div class="stage-row">
+            <div class="stage-row__order">
+              <button class="icon-btn" [disabled]="first" (click)="moveStageUp(i)" title="Move up">
+                <span class="material-icons-outlined">arrow_upward</span>
+              </button>
+              <button class="icon-btn" [disabled]="last" (click)="moveStageDown(i)" title="Move down">
+                <span class="material-icons-outlined">arrow_downward</span>
+              </button>
+            </div>
+            <div class="stage-row__color">
+              <input type="color" [value]="stage.color" (input)="updateStage(i, 'color', $any($event.target).value)" />
+            </div>
+            <input class="stage-row__input stage-row__input--name" placeholder="Stage name" [value]="stage.name"
+              (input)="updateStage(i, 'name', $any($event.target).value)" />
+            <input class="stage-row__input stage-row__input--code" placeholder="Code" [value]="stage.code"
+              (input)="updateStage(i, 'code', $any($event.target).value)" />
+            <input class="stage-row__input stage-row__input--wip" type="number" placeholder="WIP" [value]="stage.wipLimit"
+              (input)="updateStage(i, 'wipLimit', $any($event.target).value ? +$any($event.target).value : null)" />
+            <label class="stage-row__irreversible" title="Irreversible (cannot move jobs backward from this stage)">
+              <input type="checkbox" [checked]="stage.isIrreversible"
+                (change)="updateStage(i, 'isIrreversible', $any($event.target).checked)" />
+              <span class="material-icons-outlined">lock</span>
+            </label>
+            <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" title="Remove stage">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="closed.emit()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || !hasStages() || saving()"
+      (click)="onSubmit()">
+      {{ isEdit() ? 'Save Changes' : 'Create' }}
+    </button>
+  </div>
+</app-dialog>

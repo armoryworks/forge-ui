@@ -76,6 +76,7 @@
             <tr
               class="data-table__row"
               [class]="getRowClasses(row)"
+              [style]="getRowStyles(row)"
               (click)="onRowClick(row)">
               @if (selectable()) {
                 <td class="data-table__td data-table__td--checkbox" (click)="toggleRowSelection(row, $event)">

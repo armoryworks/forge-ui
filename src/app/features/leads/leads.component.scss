@@ -100,3 +100,31 @@
   &:hover { background: var(--bg); color: var(--text); }
   &--active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 }
+
+// ─── Convert Actions ───
+.convert-actions {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.convert-btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.converted-info {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--success-light);
+  color: var(--success);
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.converted-icon {
+  font-size: 20px;
+}

@@ -8,6 +8,7 @@ import { ConnectionBannerComponent } from './shared/components/connection-banner
 import { AuthService } from './shared/services/auth.service';
 import { SignalrService } from './shared/services/signalr.service';
 import { NotificationHubService } from './shared/services/notification-hub.service';
+import { NotificationService } from './shared/services/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -21,6 +22,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly signalr = inject(SignalrService);
   private readonly notificationHub = inject(NotificationHubService);
+  private readonly notificationService = inject(NotificationService);
 
   protected readonly showShell = computed(() => this.authService.isAuthenticated());
 
@@ -36,6 +38,7 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     if (this.authService.isAuthenticated()) {
       this.notificationHub.connect();
+      this.notificationService.load();
     }
   }
 

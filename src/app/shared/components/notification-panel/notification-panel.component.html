@@ -1,0 +1,61 @@
+<div class="notification-panel">
+  <div class="notification-panel__header">
+    <div class="notification-panel__tabs">
+      @for (tab of tabs; track tab.key) {
+        <button class="notification-tab"
+          [class.notification-tab--active]="filter().tab === tab.key"
+          (click)="setTab(tab.key)">
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+    @if (unreadCount() > 0) {
+      <button class="icon-btn notification-panel__action" title="Mark all read" (click)="markAllRead()">
+        <span class="material-icons-outlined">done_all</span>
+      </button>
+    }
+  </div>
+
+  <div class="notification-panel__list">
+    @if (isEmpty()) {
+      <div class="notification-panel__empty">
+        <span class="material-icons-outlined notification-panel__empty-icon">notifications_none</span>
+        <span>No notifications</span>
+      </div>
+    } @else {
+      @for (n of notifications(); track n.id) {
+        <div class="notification-item"
+          [class.notification-item--unread]="!n.isRead"
+          [class.notification-item--pinned]="n.isPinned"
+          (click)="onNotificationClick(n)">
+          <div class="notification-item__icon">
+            @if (n.senderInitials) {
+              <app-avatar [initials]="n.senderInitials" [color]="n.senderColor ?? '#94a3b8'" size="sm" />
+            } @else {
+              <span class="material-icons-outlined notification-item__severity-icon notification-item__severity-icon--{{ n.severity }}">
+                {{ getSeverityIcon(n.severity) }}
+              </span>
+            }
+          </div>
+          <div class="notification-item__content">
+            <div class="notification-item__title">{{ n.title }}</div>
+            <div class="notification-item__message">{{ n.message }}</div>
+            <div class="notification-item__time">{{ n.createdAt | date:'short' }}</div>
+          </div>
+          <div class="notification-item__actions">
+            <button class="icon-btn" [title]="n.isPinned ? 'Unpin' : 'Pin'" (click)="togglePin(n, $event)">
+              <span class="material-icons-outlined">{{ n.isPinned ? 'push_pin' : 'push_pin' }}</span>
+            </button>
+            <button class="icon-btn" title="Dismiss" (click)="dismiss(n, $event)">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <div class="notification-panel__footer">
+    <button class="notification-panel__dismiss-all" (click)="dismissAll()">Dismiss All</button>
+  </div>
+</div>

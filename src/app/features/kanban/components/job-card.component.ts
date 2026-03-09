@@ -12,7 +12,8 @@ import { KanbanJob, PRIORITY_COLORS } from '../models/kanban.model';
 })
 export class JobCardComponent {
   readonly job = input.required<KanbanJob>();
-  readonly cardClicked = output<KanbanJob>();
+  readonly selected = input(false);
+  readonly cardClicked = output<{ job: KanbanJob; event: MouseEvent }>();
 
   protected readonly priorityColor = computed(
     () => PRIORITY_COLORS[this.job().priorityName] ?? PRIORITY_COLORS['Normal'],

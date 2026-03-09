@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from './services/admin.service';
-import { AdminUser, TrackType, ReferenceDataGroup } from './models/admin.model';
+import { AdminUser, StageRequest, TrackType, ReferenceDataGroup, TerminologyEntryItem } from './models/admin.model';
+import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { MatDialog } from '@angular/material/dialog';
+import { SnackbarService } from '../../shared/services/snackbar.service';
+import { TerminologyService } from '../../shared/services/terminology.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
@@ -20,7 +25,7 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
   imports: [
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
-    ColumnCellDirective, ValidationPopoverDirective,
+    ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -28,8 +33,11 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 })
 export class AdminComponent {
   private readonly adminService = inject(AdminService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly terminologyService = inject(TerminologyService);
 
-  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data'>('users');
+  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology'>('users');
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -58,10 +66,16 @@ export class AdminComponent {
   // Track Types
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly expandedTrackType = signal<number | null>(null);
+  protected readonly showTrackTypeDialog = signal(false);
+  protected readonly editingTrackType = signal<TrackType | null>(null);
 
   // Reference Data
   protected readonly referenceDataGroups = signal<ReferenceDataGroup[]>([]);
   protected readonly expandedGroup = signal<string | null>(null);
+
+  // Terminology
+  protected readonly terminologyEntries = signal<TerminologyEntryItem[]>([]);
+  protected readonly terminologyEdits = signal<Map<string, string>>(new Map());
 
   protected readonly userColumns: ColumnDef[] = [
     { field: 'avatar', header: '', width: '36px' },
@@ -88,11 +102,12 @@ export class AdminComponent {
     this.loadUsers();
   }
 
-  protected switchTab(tab: 'users' | 'track-types' | 'reference-data'): void {
+  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology'): void {
     this.activeTab.set(tab);
     if (tab === 'users' && this.users().length === 0) this.loadUsers();
     if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
     if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
+    if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
   }
 
   // ── Users ──
@@ -195,6 +210,68 @@ export class AdminComponent {
     this.expandedTrackType.set(this.expandedTrackType() === id ? null : id);
   }
 
+  protected openCreateTrackType(): void {
+    this.editingTrackType.set(null);
+    this.showTrackTypeDialog.set(true);
+  }
+
+  protected openEditTrackType(tt: TrackType): void {
+    this.editingTrackType.set(tt);
+    this.showTrackTypeDialog.set(true);
+  }
+
+  protected closeTrackTypeDialog(): void {
+    this.showTrackTypeDialog.set(false);
+  }
+
+  protected saveTrackType(data: { name: string; code: string; description: string | null; stages: StageRequest[] }): void {
+    this.saving.set(true);
+    const editing = this.editingTrackType();
+
+    if (editing) {
+      this.adminService.updateTrackType(editing.id, data).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.closeTrackTypeDialog();
+          this.loadTrackTypes();
+          this.snackbar.success('Track type updated');
+        },
+        error: () => { this.saving.set(false); this.snackbar.error('Failed to update track type'); },
+      });
+    } else {
+      this.adminService.createTrackType(data).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.closeTrackTypeDialog();
+          this.loadTrackTypes();
+          this.snackbar.success('Track type created');
+        },
+        error: () => { this.saving.set(false); this.snackbar.error('Failed to create track type'); },
+      });
+    }
+  }
+
+  protected deleteTrackType(tt: TrackType): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Track Type?',
+        message: `This will deactivate "${tt.name}" and all its stages. Existing jobs will remain.`,
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.adminService.deleteTrackType(tt.id).subscribe({
+        next: () => {
+          this.loadTrackTypes();
+          this.snackbar.success('Track type deleted');
+        },
+        error: () => this.snackbar.error('Failed to delete track type'),
+      });
+    });
+  }
+
   // ── Reference Data ──
 
   private loadReferenceData(): void {
@@ -211,5 +288,54 @@ export class AdminComponent {
 
   protected formatGroupCode(code: string): string {
     return code.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  }
+
+  // ── Terminology ──
+
+  private loadTerminology(): void {
+    this.loading.set(true);
+    this.adminService.getTerminology().subscribe({
+      next: (entries) => {
+        this.terminologyEntries.set(entries);
+        this.terminologyEdits.set(new Map(entries.map(e => [e.key, e.label])));
+        this.loading.set(false);
+      },
+      error: () => { this.error.set('Failed to load terminology'); this.loading.set(false); },
+    });
+  }
+
+  protected onTerminologyChange(key: string, label: string): void {
+    this.terminologyEdits.update(map => {
+      const updated = new Map(map);
+      updated.set(key, label);
+      return updated;
+    });
+    this.terminologyService.set(key, label);
+  }
+
+  protected hasTerminologyChanges(): boolean {
+    const edits = this.terminologyEdits();
+    return this.terminologyEntries().some(e => edits.get(e.key) !== e.label);
+  }
+
+  protected saveTerminology(): void {
+    const entries = Array.from(this.terminologyEdits()).map(([key, label]) => ({ key, label }));
+    this.saving.set(true);
+    this.adminService.updateTerminology(entries).subscribe({
+      next: (updated) => {
+        this.terminologyEntries.set(updated);
+        this.terminologyEdits.set(new Map(updated.map(e => [e.key, e.label])));
+        this.saving.set(false);
+        this.snackbar.success('Terminology saved');
+      },
+      error: () => { this.saving.set(false); this.snackbar.error('Failed to save terminology'); },
+    });
+  }
+
+  protected getTerminologyDefault(key: string): string {
+    return key
+      .replace(/^(entity_|status_|action_|label_|field_)/, '')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, c => c.toUpperCase());
   }
 }

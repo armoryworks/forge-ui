@@ -15,6 +15,10 @@
       <span class="material-icons-outlined">dataset</span>
       Reference Data
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'terminology'" (click)="switchTab('terminology')">
+      <span class="material-icons-outlined">translate</span>
+      Terminology
+    </button>
   </div>
 
   @if (loading()) {
@@ -72,6 +76,10 @@
       <div class="tab-panel">
         <div class="panel-header">
           <span class="panel-header__count">{{ trackTypes().length }} track types</span>
+          <button class="action-btn action-btn--primary" (click)="openCreateTrackType()">
+            <span class="material-icons-outlined">add</span>
+            New Track Type
+          </button>
         </div>
 
         <div class="accordion-list">
@@ -87,6 +95,16 @@
                   <span class="default-badge">Default</span>
                 }
                 <span class="stage-count">{{ track.stages.length }} stages</span>
+                <span class="accordion-actions">
+                  <button class="icon-btn" title="Edit" (click)="openEditTrackType(track); $event.stopPropagation()">
+                    <span class="material-icons-outlined">edit</span>
+                  </button>
+                  @if (!track.isDefault) {
+                    <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteTrackType(track); $event.stopPropagation()">
+                      <span class="material-icons-outlined">delete</span>
+                    </button>
+                  }
+                </span>
               </button>
 
               @if (expandedTrackType() === track.id) {
@@ -138,6 +156,50 @@
             </div>
           }
         </div>
+      </div>
+    }
+
+    <!-- Terminology Tab -->
+    @if (activeTab() === 'terminology') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-header__count">{{ terminologyEntries().length }} entries</span>
+          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasTerminologyChanges()" (click)="saveTerminology()">
+            <span class="material-icons-outlined">save</span>
+            Save Changes
+          </button>
+        </div>
+
+        @if (terminologyEntries().length === 0) {
+          <div class="terminology-empty">
+            <span class="material-icons-outlined">translate</span>
+            <p>No terminology entries configured yet.</p>
+            <p class="text-muted">Terminology entries will appear here once they are created via the API.</p>
+          </div>
+        } @else {
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Key</th>
+                <th>Default</th>
+                <th>Custom Label</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of terminologyEntries(); track entry.key) {
+                <tr class="admin-row">
+                  <td class="text-muted terminology-key">{{ entry.key }}</td>
+                  <td class="text-muted">{{ getTerminologyDefault(entry.key) }}</td>
+                  <td>
+                    <input class="terminology-input"
+                      [value]="terminologyEdits().get(entry.key) ?? entry.label"
+                      (input)="onTerminologyChange(entry.key, $any($event.target).value)" />
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
       </div>
     }
 
@@ -193,6 +255,15 @@
     }
   }
 </div>
+
+<!-- Track Type Dialog -->
+@if (showTrackTypeDialog()) {
+  <app-track-type-dialog
+    [trackType]="editingTrackType()"
+    [saving]="saving()"
+    (closed)="closeTrackTypeDialog()"
+    (saved)="saveTrackType($event)" />
+}
 
 <!-- User Dialog -->
 @if (showUserDialog()) {

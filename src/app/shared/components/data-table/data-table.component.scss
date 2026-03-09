@@ -169,13 +169,14 @@
 // ─── Rows ───
 .data-table__row {
   cursor: pointer;
+  background: color-mix(in srgb, var(--row-tint, transparent) 5%, var(--surface));
 
   &:nth-child(even) {
-    background: var(--row-alt);
+    background: color-mix(in srgb, var(--row-tint, transparent) 5%, var(--row-alt));
   }
 
   &:hover {
-    background: var(--bg);
+    background: color-mix(in srgb, var(--row-tint, transparent) 8%, var(--bg));
   }
 }
 

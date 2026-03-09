@@ -1,4 +1,4 @@
-<div class="column" [class.column--over-wip]="isOverWip()">
+<div class="column" [class.column--over-wip]="isOverWip()" [style.--col-tint]="column().stage.color">
   <div class="column__header" [style.border-top-color]="column().stage.color">
     <span class="column__name">{{ column().stage.name }}</span>
     <span class="column__count">{{ jobCount() }}</span>
@@ -22,7 +22,7 @@
     [cdkDropListEnterPredicate]="canEnter"
     (cdkDropListDropped)="onDrop($event)">
     @for (job of column().jobs; track job.id) {
-      <app-job-card [job]="job" cdkDrag [cdkDragData]="job" (cardClicked)="cardClicked.emit($event)" />
+      <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cardClicked)="cardClicked.emit($event)" />
     }
     @empty {
       <div class="column__empty">No jobs</div>

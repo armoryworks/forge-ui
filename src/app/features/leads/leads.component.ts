@@ -17,6 +17,9 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../shared/utils/date.utils';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-leads',
@@ -33,6 +36,8 @@ import { toIsoDate } from '../../shared/utils/date.utils';
 })
 export class LeadsComponent {
   private readonly leadsService = inject(LeadsService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -232,5 +237,48 @@ export class LeadsComponent {
   protected isFollowUpOverdue(lead: LeadItem): boolean {
     if (!lead.followUpDate) return false;
     return new Date(lead.followUpDate) < new Date();
+  }
+
+  protected convertLead(): void {
+    const lead = this.selectedLead();
+    if (!lead) return;
+
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Convert to Customer',
+        message: `Convert "${lead.companyName}" to a customer? You can also create a job for the new customer.`,
+        confirmLabel: 'Convert Only',
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed === undefined) return;
+      this.executeConversion(lead.id, false);
+    });
+  }
+
+  protected convertLeadWithJob(): void {
+    const lead = this.selectedLead();
+    if (!lead) return;
+    this.executeConversion(lead.id, true);
+  }
+
+  private executeConversion(leadId: number, createJob: boolean): void {
+    this.saving.set(true);
+    this.leadsService.convertLead(leadId, createJob).subscribe({
+      next: (result) => {
+        this.saving.set(false);
+        const msg = createJob
+          ? `Lead converted to customer and job created.`
+          : `Lead converted to customer.`;
+        this.snackbar.success(msg);
+        this.selectedLead.set(null);
+        this.loadLeads();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error('Failed to convert lead.');
+      },
+    });
   }
 }

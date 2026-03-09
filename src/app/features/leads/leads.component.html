@@ -138,6 +138,29 @@
           </div>
         }
 
+        @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
+          <div class="convert-actions">
+            <span class="info-label">Convert</span>
+            <div class="convert-btn-group">
+              <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
+                <span class="material-icons-outlined">person</span>
+                Convert to Customer
+              </button>
+              <button class="action-btn" [disabled]="saving()" (click)="convertLeadWithJob()">
+                <span class="material-icons-outlined">work</span>
+                Convert &amp; Create Job
+              </button>
+            </div>
+          </div>
+        }
+
+        @if (lead.status === 'Converted') {
+          <div class="converted-info">
+            <span class="material-icons-outlined converted-icon">check_circle</span>
+            <span>This lead has been converted to a customer.</span>
+          </div>
+        }
+
         @if (lead.status === 'Lost') {
           <div class="status-actions">
             <button class="action-btn" (click)="updateStatus('New')">

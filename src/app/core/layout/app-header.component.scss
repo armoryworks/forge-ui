@@ -125,3 +125,13 @@
   border-radius: $border-radius;
   margin-left: $sp-sm;
 }
+
+:host {
+  position: relative;
+}
+
+.notification-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-dropdown - 1;
+}

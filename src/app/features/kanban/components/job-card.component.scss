@@ -12,6 +12,7 @@
   padding: $sp-md;
   cursor: grab;
   transition: box-shadow $transition-fast;
+  position: relative;
 
   &:hover {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -19,6 +20,26 @@
 
   &:active {
     cursor: grabbing;
+  }
+
+  &--selected {
+    box-shadow: inset 0 0 0 2px var(--primary);
+  }
+}
+
+.card__check {
+  position: absolute;
+  top: $sp-sm;
+  right: $sp-sm;
+  width: 16px;
+  height: 16px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  @include flex-center;
+
+  .material-icons-outlined {
+    font-size: 11px;
   }
 }
 

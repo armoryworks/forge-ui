@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { LeadItem, CreateLeadRequest, UpdateLeadRequest, LeadStatus } from '../models/leads.model';
+import { LeadItem, CreateLeadRequest, UpdateLeadRequest, LeadStatus, ConvertLeadResult } from '../models/leads.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
@@ -26,5 +26,11 @@ export class LeadsService {
 
   updateLead(id: number, request: UpdateLeadRequest): Observable<LeadItem> {
     return this.http.patch<LeadItem>(`${this.base}/${id}`, request);
+  }
+
+  convertLead(id: number, createJob: boolean): Observable<ConvertLeadResult> {
+    let params = new HttpParams();
+    if (createJob) params = params.set('createJob', 'true');
+    return this.http.post<ConvertLeadResult>(`${this.base}/${id}/convert`, null, { params });
   }
 }

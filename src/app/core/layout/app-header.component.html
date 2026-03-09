@@ -18,9 +18,11 @@
       <span class="material-icons-outlined">chat_bubble_outline</span>
       <span class="badge">2</span>
     </button>
-    <button class="icon-btn" title="Notifications">
+    <button class="icon-btn" title="Notifications" (click)="toggleNotifications()">
       <span class="material-icons-outlined">notifications_none</span>
-      <span class="badge">5</span>
+      @if (unreadCount() > 0) {
+        <span class="badge">{{ unreadCount() }}</span>
+      }
     </button>
     <button class="icon-btn" title="Toggle theme" (click)="toggleTheme()">
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
@@ -28,3 +30,8 @@
     <div class="app-header__avatar">DH</div>
   </div>
 </header>
+
+@if (panelOpen()) {
+  <div class="notification-backdrop" (click)="toggleNotifications()"></div>
+  <app-notification-panel />
+}

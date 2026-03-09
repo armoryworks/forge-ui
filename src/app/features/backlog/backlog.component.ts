@@ -86,6 +86,11 @@ export class BacklogComponent implements OnInit {
     return classes.join(' ');
   };
 
+  protected readonly backlogRowStyle = (row: unknown): Record<string, string> => {
+    const job = row as KanbanJob;
+    return job.stageColor ? { '--row-tint': job.stageColor } : {};
+  };
+
   protected readonly trackTypeOptions = computed<SelectOption[]>(() => [
     { value: null, label: 'All Tracks' },
     ...this.trackTypes().map(tt => ({ value: tt.id, label: tt.name })),

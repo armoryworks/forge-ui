@@ -63,3 +63,31 @@ export interface ReferenceDataEntry {
   isActive: boolean;
   metadata: string | null;
 }
+
+export interface StageRequest {
+  name: string;
+  code: string;
+  sortOrder: number;
+  color: string;
+  wipLimit: number | null;
+  isIrreversible: boolean;
+}
+
+export interface CreateTrackTypeRequest {
+  name: string;
+  code: string;
+  description: string | null;
+  stages: StageRequest[];
+}
+
+export interface UpdateTrackTypeRequest {
+  name: string;
+  code: string;
+  description: string | null;
+  stages: StageRequest[];
+}
+
+export interface TerminologyEntryItem {
+  key: string;
+  label: string;
+}

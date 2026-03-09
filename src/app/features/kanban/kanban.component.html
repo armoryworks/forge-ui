@@ -32,6 +32,7 @@
         [column]="col"
         [dropListId]="'column-' + i"
         [allDropListIds]="dropListIds()"
+        [selectedJobIds]="selectedJobIds()"
         (dropped)="onCardDropped($event)"
         (cardClicked)="onCardClicked($event)" />
     }
@@ -51,5 +52,60 @@
       [trackTypes]="trackTypes()"
       (saved)="onDialogSaved()"
       (cancelled)="onDialogCancelled()" />
+  }
+
+  @if (selectionCount() > 0) {
+    <div class="bulk-bar">
+      <span class="bulk-bar__count">{{ selectionCount() }} selected</span>
+
+      <button class="bulk-bar__btn" [matMenuTriggerFor]="moveMenu">
+        <span class="material-icons-outlined">drive_file_move</span>
+        Move
+      </button>
+      <mat-menu #moveMenu="matMenu">
+        @for (stage of currentStages(); track stage.id) {
+          <button mat-menu-item (click)="bulkMoveToStage(stage)">
+            <span class="bulk-bar__stage-dot" [style.background]="stage.color"></span>
+            {{ stage.name }}
+          </button>
+        }
+      </mat-menu>
+
+      <button class="bulk-bar__btn" [matMenuTriggerFor]="assignMenu">
+        <span class="material-icons-outlined">person</span>
+        Assign
+      </button>
+      <mat-menu #assignMenu="matMenu">
+        <button mat-menu-item (click)="bulkAssign(null)">
+          <span class="material-icons-outlined bulk-bar__menu-icon">person_off</span>
+          Unassign
+        </button>
+        @for (user of users(); track user.id) {
+          <button mat-menu-item (click)="bulkAssign(user)">
+            <span class="material-icons-outlined bulk-bar__menu-icon">person</span>
+            {{ user.name }}
+          </button>
+        }
+      </mat-menu>
+
+      <button class="bulk-bar__btn" [matMenuTriggerFor]="priorityMenu">
+        <span class="material-icons-outlined">flag</span>
+        Priority
+      </button>
+      <mat-menu #priorityMenu="matMenu">
+        @for (p of priorityOptions; track p) {
+          <button mat-menu-item (click)="bulkSetPriority(p)">{{ p }}</button>
+        }
+      </mat-menu>
+
+      <button class="bulk-bar__btn bulk-bar__btn--danger" (click)="bulkArchive()">
+        <span class="material-icons-outlined">archive</span>
+        Archive
+      </button>
+
+      <button class="bulk-bar__close" (click)="clearSelection()" title="Clear selection">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
   }
 }

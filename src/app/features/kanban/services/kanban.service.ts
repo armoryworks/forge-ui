@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, forkJoin } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { TrackType, KanbanJob, BoardColumn, JobDetail, Subtask, Activity, CustomerRef, UserRef } from '../models/kanban.model';
+import { TrackType, KanbanJob, BoardColumn, JobDetail, Subtask, Activity, CustomerRef, UserRef, JobLink, BulkResult } from '../models/kanban.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -41,6 +41,10 @@ export class KanbanService {
     return this.http.get<Activity[]>(`${environment.apiUrl}/jobs/${jobId}/activity`);
   }
 
+  addComment(jobId: number, comment: string): Observable<Activity> {
+    return this.http.post<Activity>(`${environment.apiUrl}/jobs/${jobId}/comments`, { comment });
+  }
+
   toggleSubtask(jobId: number, subtaskId: number, isCompleted: boolean): Observable<unknown> {
     return this.http.patch(`${environment.apiUrl}/jobs/${jobId}/subtasks/${subtaskId}`, { isCompleted });
   }
@@ -71,6 +75,40 @@ export class KanbanService {
 
   updateJob(id: number, changes: Partial<JobDetail>): Observable<unknown> {
     return this.http.put(`${environment.apiUrl}/jobs/${id}`, changes);
+  }
+
+  getJobLinks(jobId: number): Observable<JobLink[]> {
+    return this.http.get<JobLink[]>(`${environment.apiUrl}/jobs/${jobId}/links`);
+  }
+
+  createJobLink(jobId: number, targetJobId: number, linkType: string): Observable<JobLink> {
+    return this.http.post<JobLink>(`${environment.apiUrl}/jobs/${jobId}/links`, { targetJobId, linkType });
+  }
+
+  deleteJobLink(jobId: number, linkId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/jobs/${jobId}/links/${linkId}`);
+  }
+
+  searchJobs(search: string): Observable<KanbanJob[]> {
+    return this.http.get<KanbanJob[]>(`${environment.apiUrl}/jobs`, {
+      params: { search, isArchived: 'false' },
+    });
+  }
+
+  bulkMoveStage(jobIds: number[], stageId: number): Observable<BulkResult> {
+    return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/stage`, { jobIds, stageId });
+  }
+
+  bulkAssign(jobIds: number[], assigneeId: number | null): Observable<BulkResult> {
+    return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/assign`, { jobIds, assigneeId });
+  }
+
+  bulkSetPriority(jobIds: number[], priority: string): Observable<BulkResult> {
+    return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/priority`, { jobIds, priority });
+  }
+
+  bulkArchive(jobIds: number[]): Observable<BulkResult> {
+    return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/archive`, { jobIds });
   }
 
   private buildBoard(trackType: TrackType, jobs: KanbanJob[]): BoardColumn[] {
