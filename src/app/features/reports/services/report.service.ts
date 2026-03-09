@@ -1,0 +1,47 @@
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../../../environments/environment';
+import { JobsByStageItem } from '../models/jobs-by-stage-item.model';
+import { OverdueJobItem } from '../models/overdue-job-item.model';
+import { TimeByUserItem } from '../models/time-by-user-item.model';
+import { ExpenseSummaryItem } from '../models/expense-summary-item.model';
+import { LeadPipelineItem } from '../models/lead-pipeline-item.model';
+import { JobCompletionTrendItem } from '../models/job-completion-trend-item.model';
+
+@Injectable({ providedIn: 'root' })
+export class ReportService {
+  private readonly http = inject(HttpClient);
+
+  getJobsByStage(trackTypeId?: number): Observable<JobsByStageItem[]> {
+    let params = new HttpParams();
+    if (trackTypeId) params = params.set('trackTypeId', trackTypeId.toString());
+    return this.http.get<JobsByStageItem[]>(`${environment.apiUrl}/reports/jobs-by-stage`, { params });
+  }
+
+  getOverdueJobs(): Observable<OverdueJobItem[]> {
+    return this.http.get<OverdueJobItem[]>(`${environment.apiUrl}/reports/overdue-jobs`);
+  }
+
+  getTimeByUser(start: string, end: string): Observable<TimeByUserItem[]> {
+    return this.http.get<TimeByUserItem[]>(`${environment.apiUrl}/reports/time-by-user`, {
+      params: { start, end },
+    });
+  }
+
+  getExpenseSummary(start: string, end: string): Observable<ExpenseSummaryItem[]> {
+    return this.http.get<ExpenseSummaryItem[]>(`${environment.apiUrl}/reports/expense-summary`, {
+      params: { start, end },
+    });
+  }
+
+  getLeadPipeline(): Observable<LeadPipelineItem[]> {
+    return this.http.get<LeadPipelineItem[]>(`${environment.apiUrl}/reports/lead-pipeline`);
+  }
+
+  getJobCompletionTrend(months: number = 6): Observable<JobCompletionTrendItem[]> {
+    return this.http.get<JobCompletionTrendItem[]>(`${environment.apiUrl}/reports/job-completion-trend`, {
+      params: { months: months.toString() },
+    });
+  }
+}

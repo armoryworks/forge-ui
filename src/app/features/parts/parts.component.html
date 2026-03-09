@@ -276,7 +276,7 @@
 @if (showBomDialog()) {
   <app-dialog title="Add BOM Entry" (closed)="closeBomDialog()">
     <div [formGroup]="bomForm">
-      <app-input label="Child Part ID" type="number" formControlName="childPartId" />
+      <app-entity-picker label="Child Part" entityType="parts" displayField="partNumber" formControlName="childPartId" />
 
       <div class="dialog-row">
         <app-input label="Quantity" type="number" formControlName="quantity" />

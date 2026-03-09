@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { JobCardComponent } from './job-card.component';
-import { BoardColumn, KanbanJob } from '../models/kanban.model';
+import { BoardColumn } from '../models/board-column.model';
+import { KanbanJob } from '../models/kanban-job.model';
 
 @Component({
   selector: 'app-board-column',

@@ -115,10 +115,10 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
     }
 
     return this.http
-      .get<{ data: Record<string, unknown>[] }>(`/api/v1/${this.entityType()}`, { params })
+      .get<Record<string, unknown>[] | { data: Record<string, unknown>[] }>(`/api/v1/${this.entityType()}`, { params })
       .pipe(
-        catchError(() => of({ data: [] })),
-        switchMap(res => of(res.data ?? [])),
+        catchError(() => of([])),
+        switchMap(res => of(Array.isArray(res) ? res : (res.data ?? []))),
       );
   }
 }

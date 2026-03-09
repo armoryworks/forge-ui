@@ -28,18 +28,11 @@ export class SignalrService {
       .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
       .build();
 
-    connection.onreconnecting((error) => {
-      if (!environment.production) console.warn(`[SignalR] ${hubPath} reconnecting...`, error);
-      this.updateGlobalState();
-    });
+    connection.onreconnecting(() => this.updateGlobalState());
 
-    connection.onreconnected((connectionId) => {
-      if (!environment.production) console.log(`[SignalR] ${hubPath} reconnected (${connectionId})`);
-      this._connectionState.set('connected');
-    });
+    connection.onreconnected(() => this._connectionState.set('connected'));
 
-    connection.onclose((error) => {
-      if (!environment.production) console.warn(`[SignalR] ${hubPath} closed`, error);
+    connection.onclose(() => {
       if (this.hasConnected) {
         this.updateGlobalState();
       }
@@ -110,10 +103,8 @@ export class SignalrService {
         await connection.start();
         this.hasConnected = true;
         this._connectionState.set('connected');
-        if (!environment.production) console.log(`[SignalR] Connected to ${hubPath}`);
         return;
-      } catch (err) {
-        if (!environment.production) console.warn(`[SignalR] Failed to connect to ${hubPath}, retrying in 5s...`, err);
+      } catch {
         await new Promise<void>(resolve => {
           this.retryTimers.set(hubPath, setTimeout(resolve, 5000));
         });

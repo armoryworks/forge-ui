@@ -2,7 +2,10 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ExpenseItem, CreateExpenseRequest, UpdateExpenseStatusRequest, ExpenseStatus } from '../models/expenses.model';
+import { ExpenseItem } from '../models/expense-item.model';
+import { CreateExpenseRequest } from '../models/create-expense-request.model';
+import { UpdateExpenseStatusRequest } from '../models/update-expense-status-request.model';
+import { ExpenseStatus } from '../models/expense-status.type';
 
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
@@ -23,5 +26,9 @@ export class ExpensesService {
 
   updateExpenseStatus(id: number, request: UpdateExpenseStatusRequest): Observable<ExpenseItem> {
     return this.http.patch<ExpenseItem>(`${this.base}/${id}/status`, request);
+  }
+
+  deleteExpense(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

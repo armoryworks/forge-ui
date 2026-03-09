@@ -4,7 +4,8 @@ import { DatePipe } from '@angular/common';
 
 import { NotificationService } from '../../services/notification.service';
 import { AvatarComponent } from '../avatar/avatar.component';
-import { AppNotification, NotificationTab } from '../../models/notification.model';
+import { AppNotification } from '../../models/app-notification.model';
+import { NotificationTab } from '../../models/notification-tab.type';
 
 @Component({
   selector: 'app-notification-panel',

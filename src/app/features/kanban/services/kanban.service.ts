@@ -2,7 +2,17 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, forkJoin } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { TrackType, KanbanJob, BoardColumn, JobDetail, Subtask, Activity, CustomerRef, UserRef, JobLink, BulkResult } from '../models/kanban.model';
+import { TrackType } from '../../../shared/models/track-type.model';
+import { KanbanJob } from '../models/kanban-job.model';
+import { BoardColumn } from '../models/board-column.model';
+import { JobDetail } from '../models/job-detail.model';
+import { Subtask } from '../models/subtask.model';
+import { Activity } from '../models/activity.model';
+import { CustomerRef } from '../models/customer-ref.model';
+import { UserRef } from '../models/user-ref.model';
+import { JobLink } from '../models/job-link.model';
+import { BulkResult } from '../models/bulk-result.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -54,7 +64,7 @@ export class KanbanService {
   }
 
   getCustomers(): Observable<CustomerRef[]> {
-    return this.http.get<CustomerRef[]>(`${environment.apiUrl}/customers`);
+    return this.http.get<CustomerRef[]>(`${environment.apiUrl}/customers/dropdown`);
   }
 
   getUsers(): Observable<UserRef[]> {
@@ -87,6 +97,18 @@ export class KanbanService {
 
   deleteJobLink(jobId: number, linkId: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/jobs/${jobId}/links/${linkId}`);
+  }
+
+  getJobFiles(jobId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${environment.apiUrl}/jobs/${jobId}/files`);
+  }
+
+  deleteJobFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}`;
   }
 
   searchJobs(search: string): Observable<KanbanJob[]> {

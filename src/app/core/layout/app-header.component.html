@@ -7,10 +7,28 @@
     <span class="breadcrumb__current">Dashboard</span>
   </nav>
 
-  <div class="app-header__search">
-    <span class="material-icons-outlined" style="font-size: 16px; color: var(--text-muted)">search</span>
-    <span style="color: var(--text-muted)">Search jobs, parts, people...</span>
+  <div class="app-header__search" [class.app-header__search--focused]="searchFocused()">
+    <span class="material-icons-outlined search-icon">search</span>
+    <input class="search-input" type="text" placeholder="Search jobs, parts, people..."
+           [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" />
     <kbd>Ctrl+K</kbd>
+
+    @if (showResults()) {
+      <div class="search-results">
+        @for (result of searchResults(); track result.entityId + result.entityType) {
+          <button class="search-result" (mousedown)="navigateToResult(result)">
+            <span class="material-icons-outlined search-result__icon">{{ result.icon }}</span>
+            <div class="search-result__content">
+              <span class="search-result__title">{{ result.title }}</span>
+              @if (result.subtitle) {
+                <span class="search-result__subtitle">{{ result.subtitle }}</span>
+              }
+            </div>
+            <span class="search-result__type">{{ result.entityType }}</span>
+          </button>
+        }
+      </div>
+    }
   </div>
 
   <div class="app-header__actions">

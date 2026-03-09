@@ -4,13 +4,11 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { InventoryService } from './services/inventory.service';
-import {
-  StorageLocation,
-  InventoryPartSummary,
-  BinContentItem,
-  BinMovementItem,
-  LocationType,
-} from './models/inventory.model';
+import { StorageLocation } from './models/storage-location.model';
+import { InventoryPartSummary } from './models/inventory-part-summary.model';
+import { BinContentItem } from './models/bin-content-item.model';
+import { BinMovementItem } from './models/bin-movement-item.model';
+import { LocationType } from './models/location-type.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';

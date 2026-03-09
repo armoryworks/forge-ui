@@ -95,12 +95,7 @@
         }
 
         <div class="subtask-add">
-          <input
-            type="text"
-            class="subtask-add__input"
-            placeholder="Add a subtask..."
-            [formControl]="newSubtaskControl"
-            (keydown.enter)="addSubtask()" />
+          <app-input label="" placeholder="Add a subtask..." [formControl]="newSubtaskControl" (keydown.enter)="addSubtask()" />
           <button class="subtask-add__btn" (click)="addSubtask()" [disabled]="!newSubtaskControl.value?.trim()">
             <span class="material-icons-outlined">add</span>
           </button>
@@ -137,12 +132,7 @@
 
         <div class="link-add">
           <div class="link-add__search-wrap">
-            <input
-              type="text"
-              class="link-add__input"
-              placeholder="Search jobs..."
-              [formControl]="linkSearchControl"
-              (blur)="dismissLinkResults()" />
+            <app-input label="" placeholder="Search jobs..." [formControl]="linkSearchControl" (blur)="dismissLinkResults()" />
             @if (showLinkResults() && linkSearchResults().length) {
               <div class="link-add__results">
                 @for (r of linkSearchResults(); track r.id) {
@@ -154,15 +144,46 @@
               </div>
             }
           </div>
-          <select class="link-add__type" [formControl]="linkTypeControl">
-            @for (opt of linkTypeOptions; track opt.value) {
-              <option [value]="opt.value">{{ opt.label }}</option>
-            }
-          </select>
+          <app-select label="" [options]="linkTypeOptions" [formControl]="linkTypeControl" />
           <button class="link-add__btn" (click)="addLink()" [disabled]="!selectedLinkTarget()">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
+      </div>
+
+      <!-- Files -->
+      <div class="panel__section">
+        <div class="panel__section-header">
+          <h3 class="panel__section-title">Files</h3>
+          @if (files().length) {
+            <span class="panel__section-count">{{ files().length }}</span>
+          }
+        </div>
+
+        <app-file-upload-zone
+          entityType="jobs"
+          [entityId]="jobId()"
+          (uploaded)="onFileUploaded($event)" />
+
+        @if (files().length) {
+          <div class="file-list">
+            @for (f of files(); track f.id) {
+              <div class="file-item">
+                <span class="material-icons-outlined file-item__icon">{{ fileIcon(f.contentType) }}</span>
+                <div class="file-item__info">
+                  <span class="file-item__name">{{ f.fileName }}</span>
+                  <span class="file-item__meta">{{ formatFileSize(f.size) }} · {{ formatActivityDate(f.createdAt) }}</span>
+                </div>
+                <button class="icon-btn" title="Download" (click)="downloadFile(f)">
+                  <span class="material-icons-outlined">download</span>
+                </button>
+                <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteFile(f)">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
       </div>
 
       <!-- Activity -->
@@ -170,41 +191,13 @@
         <h3 class="panel__section-title">Activity</h3>
 
         <div class="comment-add">
-          <input
-            type="text"
-            class="comment-add__input"
-            placeholder="Add a comment..."
-            [formControl]="commentControl"
-            (keydown.enter)="postComment()" />
+          <app-input label="" placeholder="Add a comment..." [formControl]="commentControl" (keydown.enter)="postComment()" />
           <button class="comment-add__btn" (click)="postComment()" [disabled]="!commentControl.value?.trim()">
             <span class="material-icons-outlined">send</span>
           </button>
         </div>
 
-        @if (activity().length) {
-          <div class="activity-list">
-            @for (a of activity(); track a.id) {
-              <div class="activity-item" [class.activity-item--comment]="isComment(a)">
-                <div class="activity-item__avatar">
-                  @if (a.userInitials) {
-                    <app-avatar [initials]="a.userInitials" color="#64748b" size="sm" />
-                  } @else {
-                    <span class="material-icons-outlined activity-item__system-icon">settings</span>
-                  }
-                </div>
-                <div class="activity-item__content">
-                  @if (isComment(a)) {
-                    <span class="activity-item__user">{{ a.userName }}</span>
-                    <span class="activity-item__comment">{{ a.description }}</span>
-                  } @else {
-                    <span class="activity-item__desc">{{ a.description }}</span>
-                  }
-                  <span class="activity-item__time">{{ formatActivityDate(a.createdAt) }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        }
+        <app-activity-timeline [activities]="mappedActivity()" [compact]="true" />
       </div>
     </div>
   }

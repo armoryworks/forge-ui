@@ -5,7 +5,8 @@ import { InputComponent } from '../../../shared/components/input/input.component
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
-import { TrackType, StageRequest } from '../models/admin.model';
+import { StageRequest } from '../models/stage-request.model';
+import { TrackType } from '../../../shared/models/track-type.model';
 
 const STAGE_COLORS = [
   '#94a3b8', '#0d9488', '#7c3aed', '#1d4ed8', '#15803d',

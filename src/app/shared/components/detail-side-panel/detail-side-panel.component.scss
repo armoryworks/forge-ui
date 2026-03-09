@@ -4,7 +4,7 @@
 .side-panel-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: $backdrop-color;
   z-index: $z-dropdown;
 }
 
@@ -13,7 +13,7 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 400px;
+  width: $detail-panel-width;
   background: var(--surface);
   border-left: $border-width solid var(--border);
   z-index: $z-dropdown + 1;

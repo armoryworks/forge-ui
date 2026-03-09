@@ -21,7 +21,8 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
 
 import { ColumnDef } from '../../models/column-def.model';
-import { SortState, TablePreferences } from '../../models/table-preferences.model';
+import { SortState } from '../../models/sort-state.model';
+import { TablePreferences } from '../../models/table-preferences.model';
 import { ColumnCellDirective } from '../../directives/column-cell.directive';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter-popover/column-filter-popover.component';

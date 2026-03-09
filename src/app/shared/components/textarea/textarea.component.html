@@ -1,0 +1,14 @@
+<mat-form-field appearance="outline">
+  <mat-label>{{ label() }}</mat-label>
+  <textarea matInput
+    [rows]="rows()"
+    [attr.maxlength]="maxlength()"
+    [disabled]="disabled()"
+    [value]="value()"
+    (input)="onInput($event)"
+    (blur)="markTouched()">
+  </textarea>
+  @if (hint()) {
+    <mat-hint>{{ hint() }}</mat-hint>
+  }
+</mat-form-field>

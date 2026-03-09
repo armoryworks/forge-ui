@@ -3,7 +3,9 @@ import { HttpClient } from '@angular/common/http';
 import { catchError, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AppNotification, NotificationFilter, NotificationTab } from '../models/notification.model';
+import { AppNotification } from '../models/app-notification.model';
+import { NotificationFilter } from '../models/notification-filter.model';
+import { NotificationTab } from '../models/notification-tab.type';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {

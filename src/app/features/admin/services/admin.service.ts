@@ -2,7 +2,15 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AdminUser, CreateUserRequest, UpdateUserRequest, CreateTrackTypeRequest, UpdateTrackTypeRequest, TrackType, ReferenceDataGroup, ReferenceDataEntry, TerminologyEntryItem } from '../models/admin.model';
+import { AdminUser } from '../models/admin-user.model';
+import { CreateUserRequest } from '../models/create-user-request.model';
+import { UpdateUserRequest } from '../models/update-user-request.model';
+import { CreateTrackTypeRequest } from '../models/create-track-type-request.model';
+import { UpdateTrackTypeRequest } from '../models/update-track-type-request.model';
+import { ReferenceDataGroup } from '../models/reference-data-group.model';
+import { ReferenceDataEntry } from '../models/reference-data-entry.model';
+import { TerminologyEntryItem } from '../models/terminology-entry-item.model';
+import { TrackType } from '../../../shared/models/track-type.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {

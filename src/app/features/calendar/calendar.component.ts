@@ -1,24 +1,42 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { CalendarService } from './services/calendar.service';
-import { CalendarJob, CalendarDay } from './models/calendar.model';
+import { CalendarJob } from './models/calendar-job.model';
+import { CalendarDay } from './models/calendar-day.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { KanbanService } from '../kanban/services/kanban.service';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [PageHeaderComponent],
+  imports: [ReactiveFormsModule, PageHeaderComponent, SelectComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarComponent {
   private readonly service = inject(CalendarService);
+  private readonly kanbanService = inject(KanbanService);
+  private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
-  protected readonly jobs = signal<CalendarJob[]>([]);
+  protected readonly allJobs = signal<CalendarJob[]>([]);
   protected readonly currentDate = signal(new Date());
+  protected readonly trackTypeOptions = signal<SelectOption[]>([]);
+  protected readonly trackTypeControl = new FormControl<number | null>(null);
+
+  protected readonly MAX_VISIBLE_JOBS = 3;
 
   protected readonly weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  protected readonly jobs = computed(() => {
+    const ttId = this.trackTypeControl.value;
+    const all = this.allJobs();
+    if (!ttId) return all;
+    return all.filter(j => j.trackTypeId === ttId);
+  });
 
   protected readonly monthLabel = computed(() => {
     const d = this.currentDate();
@@ -31,14 +49,37 @@ export class CalendarComponent {
 
   constructor() {
     this.loadJobs();
+    this.kanbanService.getTrackTypes().subscribe(types => {
+      this.trackTypeOptions.set([
+        { value: null, label: 'All Track Types' },
+        ...types.map(t => ({ value: t.id, label: t.name })),
+      ]);
+    });
+
+    this.trackTypeControl.valueChanges.subscribe(() => {
+      // Trigger recomputation via signal dependency
+      this.allJobs.update(j => [...j]);
+    });
   }
 
   protected loadJobs(): void {
     this.loading.set(true);
     this.service.getJobs().subscribe({
-      next: (jobs) => { this.jobs.set(jobs); this.loading.set(false); },
+      next: (jobs) => { this.allJobs.set(jobs); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
+  }
+
+  protected onJobClick(job: CalendarJob): void {
+    this.router.navigate(['/kanban'], { queryParams: { jobId: job.id } });
+  }
+
+  protected overflowCount(day: CalendarDay): number {
+    return Math.max(0, day.jobs.length - this.MAX_VISIBLE_JOBS);
+  }
+
+  protected visibleJobs(day: CalendarDay): CalendarJob[] {
+    return day.jobs.slice(0, this.MAX_VISIBLE_JOBS);
   }
 
   protected prevMonth(): void {

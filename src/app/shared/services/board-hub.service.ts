@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 
-import { environment } from '../../../environments/environment';
 import { SignalrService } from './signalr.service';
 
 @Injectable({ providedIn: 'root' })
@@ -24,13 +23,11 @@ export class BoardHubService {
 
     // Re-join groups after automatic reconnection (groups are server-side, lost on disconnect)
     this.connection.onreconnected(async () => {
-      if (!environment.production) console.log('[BoardHub] Reconnected — re-joining groups');
       await this.rejoinGroups();
     });
 
     this.connectPromise = this.signalr.startConnection('board');
     await this.connectPromise;
-    if (!environment.production) console.log('[BoardHub] Connected');
   }
 
   async disconnect(): Promise<void> {
@@ -43,17 +40,13 @@ export class BoardHubService {
 
   async joinBoard(trackTypeId: number): Promise<void> {
     await this.connectPromise;
-    if (!this.connection || this.connection.state !== HubConnectionState.Connected) {
-      if (!environment.production) console.warn('[BoardHub] joinBoard skipped — not connected');
-      return;
-    }
+    if (!this.connection || this.connection.state !== HubConnectionState.Connected) return;
 
     if (this.currentBoardGroup !== null) {
       await this.leaveBoard();
     }
     await this.connection.invoke('JoinBoard', trackTypeId);
     this.currentBoardGroup = trackTypeId;
-    if (!environment.production) console.log(`[BoardHub] Joined board:${trackTypeId}`);
   }
 
   async leaveBoard(): Promise<void> {
@@ -108,26 +101,11 @@ export class BoardHubService {
   private registerHandlers(): void {
     if (!this.connection) return;
 
-    this.connection.on('jobCreated', (event) => {
-      if (!environment.production) console.log('[BoardHub] Event: jobCreated', event);
-      this.onJobCreated?.(event);
-    });
-    this.connection.on('jobMoved', (event) => {
-      if (!environment.production) console.log('[BoardHub] Event: jobMoved', event);
-      this.onJobMoved?.(event);
-    });
-    this.connection.on('jobUpdated', (event) => {
-      if (!environment.production) console.log('[BoardHub] Event: jobUpdated', event);
-      this.onJobUpdated?.(event);
-    });
-    this.connection.on('jobPositionChanged', (event) => {
-      if (!environment.production) console.log('[BoardHub] Event: jobPositionChanged', event);
-      this.onJobPositionChanged?.(event);
-    });
-    this.connection.on('subtaskChanged', (event) => {
-      if (!environment.production) console.log('[BoardHub] Event: subtaskChanged', event);
-      this.onSubtaskChanged?.(event);
-    });
+    this.connection.on('jobCreated', (event) => this.onJobCreated?.(event));
+    this.connection.on('jobMoved', (event) => this.onJobMoved?.(event));
+    this.connection.on('jobUpdated', (event) => this.onJobUpdated?.(event));
+    this.connection.on('jobPositionChanged', (event) => this.onJobPositionChanged?.(event));
+    this.connection.on('subtaskChanged', (event) => this.onSubtaskChanged?.(event));
   }
 
   private async rejoinGroups(): Promise<void> {
@@ -136,13 +114,12 @@ export class BoardHubService {
     try {
       if (this.currentBoardGroup !== null) {
         await this.connection.invoke('JoinBoard', this.currentBoardGroup);
-        if (!environment.production) console.log(`[BoardHub] Re-joined board:${this.currentBoardGroup}`);
       }
       if (this.currentJobGroup !== null) {
         await this.connection.invoke('JoinJob', this.currentJobGroup);
       }
-    } catch (err) {
-      if (!environment.production) console.error('[BoardHub] Failed to re-join groups', err);
+    } catch {
+      // Connection may have dropped again — automatic reconnect will retry
     }
   }
 }

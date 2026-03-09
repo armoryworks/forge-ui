@@ -1,0 +1,103 @@
+<app-page-header title="Reports" />
+
+<div class="reports-layout">
+  <!-- Sidebar -->
+  <aside class="reports-sidebar">
+    @for (report of reports; track report.id) {
+      <button class="report-nav-item"
+              [class.report-nav-item--active]="activeReport() === report.id"
+              (click)="selectReport(report.id)">
+        <span class="material-icons-outlined report-nav-item__icon">{{ report.icon }}</span>
+        <span class="report-nav-item__label">{{ report.label }}</span>
+      </button>
+    }
+  </aside>
+
+  <!-- Main content -->
+  <main class="reports-main">
+    <div class="report-header">
+      <h2 class="report-header__title">{{ activeReportDef().label }}</h2>
+
+      @if (activeReportDef().needsDateRange) {
+        <div class="report-header__filters">
+          <app-datepicker label="From" [formControl]="startControl" />
+          <app-datepicker label="To" [formControl]="endControl" />
+          <button class="action-btn action-btn--primary action-btn--sm" (click)="loadReport()">Apply</button>
+        </div>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="page-loading">
+        <span class="material-icons-outlined spin">sync</span>
+        Loading report...
+      </div>
+    } @else {
+      <!-- Jobs by Stage -->
+      @if (activeReport() === 'jobs-by-stage') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="jobsByStageChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-jobs-by-stage" [columns]="stageColumns" [data]="jobsByStageData()"
+                        emptyIcon="view_kanban" emptyMessage="No jobs found" />
+      }
+
+      <!-- Overdue Jobs -->
+      @if (activeReport() === 'overdue-jobs') {
+        <app-data-table tableId="report-overdue-jobs" [columns]="overdueColumns" [data]="overdueJobsData()"
+                        emptyIcon="check_circle" emptyMessage="No overdue jobs" />
+      }
+
+      <!-- Time by User -->
+      @if (activeReport() === 'time-by-user') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="timeByUserChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-time-by-user" [columns]="timeColumns" [data]="timeByUserData()"
+                        emptyIcon="schedule" emptyMessage="No time entries found" />
+      }
+
+      <!-- Expense Summary -->
+      @if (activeReport() === 'expense-summary') {
+        <div class="chart-container chart-container--pie">
+          <canvas baseChart
+                  type="pie"
+                  [data]="expenseSummaryChart()"
+                  [options]="pieOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-expense-summary" [columns]="expenseColumns" [data]="expenseSummaryData()"
+                        emptyIcon="receipt_long" emptyMessage="No expenses found" />
+      }
+
+      <!-- Lead Pipeline -->
+      @if (activeReport() === 'lead-pipeline') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="leadPipelineChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-lead-pipeline" [columns]="leadColumns" [data]="leadPipelineData()"
+                        emptyIcon="filter_alt" emptyMessage="No leads found" />
+      }
+
+      <!-- Job Completion Trend -->
+      @if (activeReport() === 'job-completion-trend') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="line"
+                  [data]="completionTrendChart()"
+                  [options]="lineOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-completion-trend" [columns]="trendColumns" [data]="completionTrendData()"
+                        emptyIcon="trending_up" emptyMessage="No data" />
+      }
+    }
+  </main>
+</div>

@@ -1,13 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, HostListener } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 
 import { ThemeService } from '../../shared/services/theme.service';
 import { NotificationService } from '../../shared/services/notification.service';
+import { SearchService } from '../../shared/services/search.service';
+import { SearchResult } from '../../shared/models/search.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [NotificationPanelComponent],
+  imports: [ReactiveFormsModule, NotificationPanelComponent],
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -15,6 +20,8 @@ import { NotificationPanelComponent } from '../../shared/components/notification
 export class AppHeaderComponent {
   private readonly themeService = inject(ThemeService);
   private readonly notificationService = inject(NotificationService);
+  private readonly searchService = inject(SearchService);
+  private readonly router = inject(Router);
 
   protected readonly themeIcon = computed(() =>
     this.themeService.theme() === 'light' ? 'dark_mode' : 'light_mode',
@@ -22,6 +29,50 @@ export class AppHeaderComponent {
 
   protected readonly unreadCount = this.notificationService.unreadCount;
   protected readonly panelOpen = this.notificationService.panelOpen;
+
+  protected readonly searchControl = new FormControl('');
+  protected readonly searchResults = signal<SearchResult[]>([]);
+  protected readonly showResults = signal(false);
+  protected readonly searchFocused = signal(false);
+
+  constructor() {
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      filter(v => (v?.length ?? 0) >= 2),
+      switchMap(term => this.searchService.search(term!)),
+    ).subscribe(results => {
+      this.searchResults.set(results);
+      this.showResults.set(results.length > 0);
+    });
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+      event.preventDefault();
+      const input = document.querySelector<HTMLInputElement>('.search-input');
+      input?.focus();
+    }
+  }
+
+  protected onSearchFocus(): void {
+    this.searchFocused.set(true);
+    if (this.searchResults().length > 0) {
+      this.showResults.set(true);
+    }
+  }
+
+  protected onSearchBlur(): void {
+    this.searchFocused.set(false);
+    setTimeout(() => this.showResults.set(false), 200);
+  }
+
+  protected navigateToResult(result: SearchResult): void {
+    this.showResults.set(false);
+    this.searchControl.setValue('', { emitEvent: false });
+    this.router.navigateByUrl(result.url);
+  }
 
   protected toggleTheme(): void {
     this.themeService.toggle();

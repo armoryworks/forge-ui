@@ -1,5 +1,6 @@
 <app-page-header title="Calendar">
   <div class="calendar-nav">
+    <app-select label="Track Type" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
     <button class="icon-btn" (click)="prevMonth()">
       <span class="material-icons-outlined">chevron_left</span>
     </button>
@@ -30,14 +31,18 @@
           [class.calendar-cell--today]="day.isToday">
           <div class="cell-date">{{ day.date.getDate() }}</div>
           <div class="cell-jobs">
-            @for (job of day.jobs; track job.id) {
-              <div class="job-chip" [style.border-left-color]="job.stageColor">
+            @for (job of visibleJobs(day); track job.id) {
+              <div class="job-chip" [style.border-left-color]="job.stageColor"
+                   (click)="onJobClick(job)" [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')">
                 <span class="job-chip__number">{{ job.jobNumber }}</span>
                 <span class="job-chip__title">{{ job.title }}</span>
                 @if (job.isOverdue) {
                   <span class="material-icons-outlined job-chip__overdue">warning</span>
                 }
               </div>
+            }
+            @if (overflowCount(day) > 0) {
+              <div class="job-overflow">+{{ overflowCount(day) }} more</div>
             }
           </div>
         </div>

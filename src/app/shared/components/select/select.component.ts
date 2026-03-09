@@ -18,23 +18,8 @@ export interface SelectOption {
   selector: 'app-select',
   standalone: true,
   imports: [MatFormFieldModule, MatSelectModule],
-  template: `
-    <mat-form-field appearance="outline">
-      <mat-label>{{ label() }}</mat-label>
-      <mat-select
-        [value]="value()"
-        [multiple]="multiple()"
-        [placeholder]="placeholder()"
-        [disabled]="disabled()"
-        (selectionChange)="onSelectionChange($event.value)"
-        (blur)="markTouched()">
-        @for (opt of options(); track opt.value) {
-          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
-        }
-      </mat-select>
-    </mat-form-field>
-  `,
-  styles: `mat-form-field { width: 100%; }`,
+  templateUrl: './select.component.html',
+  styleUrl: './select.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

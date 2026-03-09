@@ -12,15 +12,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
   selector: 'app-toggle',
   standalone: true,
   imports: [MatSlideToggleModule],
-  template: `
-    <mat-slide-toggle
-      [checked]="value()"
-      [disabled]="disabled()"
-      (change)="onToggle($event.checked)"
-      (blur)="markTouched()">
-      {{ label() }}
-    </mat-slide-toggle>
-  `,
+  templateUrl: './toggle.component.html',
+  styleUrl: './toggle.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

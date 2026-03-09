@@ -1,0 +1,7 @@
+<mat-slide-toggle
+  [checked]="value()"
+  [disabled]="disabled()"
+  (change)="onToggle($event.checked)"
+  (blur)="markTouched()">
+  {{ label() }}
+</mat-slide-toggle>

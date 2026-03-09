@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-import { ActivityEntry } from '../models/dashboard.model';
+import { ActivityEntry } from '../models/activity-entry.model';
 
 @Component({
   selector: 'app-activity-widget',

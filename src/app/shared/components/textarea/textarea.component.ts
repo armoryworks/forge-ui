@@ -13,23 +13,8 @@ import { MatInputModule } from '@angular/material/input';
   selector: 'app-textarea',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule],
-  template: `
-    <mat-form-field appearance="outline">
-      <mat-label>{{ label() }}</mat-label>
-      <textarea matInput
-        [rows]="rows()"
-        [attr.maxlength]="maxlength()"
-        [disabled]="disabled()"
-        [value]="value()"
-        (input)="onInput($event)"
-        (blur)="markTouched()">
-      </textarea>
-      @if (hint()) {
-        <mat-hint>{{ hint() }}</mat-hint>
-      }
-    </mat-form-field>
-  `,
-  styles: `mat-form-field { width: 100%; }`,
+  templateUrl: './textarea.component.html',
+  styleUrl: './textarea.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-import { DeadlineEntry } from '../models/dashboard.model';
+import { DeadlineEntry } from '../models/deadline-entry.model';
 
 @Component({
   selector: 'app-deadlines-widget',

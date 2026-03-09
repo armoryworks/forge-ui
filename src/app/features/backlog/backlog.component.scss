@@ -22,7 +22,7 @@
   border-radius: $border-radius;
   margin-left: auto;
 
-  .material-icons-outlined { font-size: 14px; }
+  .material-icons-outlined { font-size: $icon-size-xs; }
 
   &:hover {
     background: var(--primary-dark);
@@ -46,8 +46,8 @@
 
 .priority-dot {
   display: inline-block;
-  width: 8px;
-  height: 8px;
+  width: $dot-size-sm;
+  height: $dot-size-sm;
   border-radius: 50%;
   vertical-align: middle;
   margin-right: $sp-sm;
@@ -68,12 +68,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 80px 24px;
+  gap: $sp-md + $sp-sm;
+  padding: $sp-4xl $sp-xl;
   color: var(--text-secondary);
 
   &__icon {
-    font-size: 48px;
+    font-size: $icon-size-hero;
     opacity: 0.5;
   }
 }

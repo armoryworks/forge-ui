@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from './services/admin.service';
-import { AdminUser, StageRequest, TrackType, ReferenceDataGroup, TerminologyEntryItem } from './models/admin.model';
+import { AdminUser } from './models/admin-user.model';
+import { StageRequest } from './models/stage-request.model';
+import { ReferenceDataGroup } from './models/reference-data-group.model';
+import { TerminologyEntryItem } from './models/terminology-entry-item.model';
+import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';

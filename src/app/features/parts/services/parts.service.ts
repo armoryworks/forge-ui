@@ -2,16 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import {
-  PartListItem,
-  PartDetail,
-  CreatePartRequest,
-  UpdatePartRequest,
-  CreateBOMEntryRequest,
-  UpdateBOMEntryRequest,
-  PartStatus,
-  PartType,
-} from '../models/parts.model';
+import { PartListItem } from '../models/part-list-item.model';
+import { PartDetail } from '../models/part-detail.model';
+import { CreatePartRequest } from '../models/create-part-request.model';
+import { UpdatePartRequest } from '../models/update-part-request.model';
+import { CreateBOMEntryRequest } from '../models/create-bom-entry-request.model';
+import { UpdateBOMEntryRequest } from '../models/update-bom-entry-request.model';
+import { PartStatus } from '../models/part-status.type';
+import { PartType } from '../models/part-type.type';
 
 @Injectable({ providedIn: 'root' })
 export class PartsService {
@@ -48,5 +46,9 @@ export class PartsService {
 
   deleteBOMEntry(partId: number, bomEntryId: number): Observable<PartDetail> {
     return this.http.delete<PartDetail>(`${this.base}/${partId}/bom/${bomEntryId}`);
+  }
+
+  deletePart(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

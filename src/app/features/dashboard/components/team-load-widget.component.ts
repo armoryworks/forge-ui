@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
-import { TeamMember } from '../models/dashboard.model';
+import { TeamMember } from '../models/team-member.model';
 
 @Component({
   selector: 'app-team-load-widget',

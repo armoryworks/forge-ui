@@ -59,7 +59,7 @@
 
 .status-dot {
   display: inline-block;
-  width: 8px; height: 8px;
+  width: $dot-size-sm; height: $dot-size-sm;
   border-radius: 50%;
   margin-right: $sp-sm;
   vertical-align: middle;
@@ -97,13 +97,13 @@
   &:hover { background: var(--bg); }
 }
 
-.accordion-icon { font-size: 18px; color: var(--text-muted); }
+.accordion-icon { font-size: $icon-size-md; color: var(--text-muted); }
 .accordion-title { font-weight: 700; }
 .accordion-code { @include uppercase-label($font-size-xxs, 0.5px, 500); color: var(--text-muted); }
 
 .default-badge {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 1px 6px;
+  padding: $sp-xxs 6px;
   background: var(--primary-light);
   color: var(--primary);
   border: $border-width-thin solid var(--primary);
@@ -131,13 +131,13 @@
 
 .color-swatch {
   display: inline-block;
-  width: 12px; height: 12px;
+  width: $dot-size-md; height: $dot-size-md;
   border-radius: 2px;
   vertical-align: middle;
   margin-right: $sp-sm;
 }
 
-.lock-icon { font-size: 14px; color: var(--error); }
+.lock-icon { font-size: $icon-size-xs; color: var(--error); }
 
 // ─── Dialog Layout ───
 .dialog-row { display: flex; gap: $sp-md; }
@@ -156,12 +156,12 @@
 .color-picker { display: flex; gap: $sp-sm; flex-wrap: wrap; }
 
 .color-option {
-  width: 24px; height: 24px;
-  border: 2px solid transparent;
+  width: $btn-icon-size; height: $btn-icon-size;
+  border: $border-width solid transparent;
   border-radius: 50%;
   cursor: pointer;
   padding: 0;
-  &--selected { border-color: var(--text); box-shadow: 0 0 0 2px var(--surface); }
+  &--selected { border-color: var(--text); box-shadow: 0 0 0 $border-width var(--surface); }
   &:hover { transform: scale(1.1); }
 }
 
@@ -213,6 +213,6 @@
   padding: $sp-xl * 2;
   color: var(--text-muted);
 
-  .material-icons-outlined { font-size: 48px; }
+  .material-icons-outlined { font-size: $icon-size-hero; }
   p { margin: 0; font-size: $font-size-sm; }
 }

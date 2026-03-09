@@ -14,42 +14,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   selector: 'app-input',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, MatTooltipModule],
-  template: `
-    <mat-form-field appearance="outline">
-      <mat-label>{{ label() }}</mat-label>
-      @if (prefix()) {
-        <span matPrefix>{{ prefix() }}&nbsp;</span>
-      }
-      <input matInput
-        [type]="type()"
-        [placeholder]="placeholder()"
-        [readonly]="isReadonly()"
-        [attr.maxlength]="maxlength()"
-        [autocomplete]="autocomplete()"
-        [disabled]="disabled()"
-        [value]="value()"
-        (input)="onInput($event)"
-        (blur)="markTouched()" />
-      @if (suffix()) {
-        <span matSuffix>&nbsp;{{ suffix() }}</span>
-      }
-      @if (info()) {
-        <span matSuffix class="material-icons-outlined info-icon"
-          [matTooltip]="info()" matTooltipPosition="above">info</span>
-      }
-    </mat-form-field>
-  `,
-  styles: `
-    mat-form-field { width: 100%; }
-    .info-icon {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-      margin-right: 4px;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-  `,
+  templateUrl: './input.component.html',
+  styleUrl: './input.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

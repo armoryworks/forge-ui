@@ -15,22 +15,8 @@ import { MatNativeDateModule } from '@angular/material/core';
   selector: 'app-datepicker',
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, MatDatepickerModule, MatNativeDateModule],
-  template: `
-    <mat-form-field appearance="outline">
-      <mat-label>{{ label() }}</mat-label>
-      <input matInput
-        [matDatepicker]="picker"
-        [min]="min()"
-        [max]="max()"
-        [disabled]="disabled()"
-        [value]="value()"
-        (dateChange)="onDateChange($event.value)"
-        (blur)="markTouched()" />
-      <mat-datepicker-toggle matSuffix [for]="picker" />
-      <mat-datepicker #picker />
-    </mat-form-field>
-  `,
-  styles: `mat-form-field { width: 100%; }`,
+  templateUrl: './datepicker.component.html',
+  styleUrl: './datepicker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 4px 12px;
+  padding: $sp-sm 12px;
 }
 
 .bar-row__label {
@@ -20,7 +20,7 @@
 
 .bar-row__track {
   flex: 1;
-  height: 14px;
+  height: $icon-size-xs;
   background: var(--bg);
   border: $border-width-thin solid var(--border);
   overflow: hidden;

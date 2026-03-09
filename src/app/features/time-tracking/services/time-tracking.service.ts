@@ -2,11 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import {
-  TimeEntry, CreateTimeEntryRequest, StartTimerRequest,
-  StopTimerRequest, UpdateTimeEntryRequest,
-  ClockEvent, CreateClockEventRequest,
-} from '../models/time-tracking.model';
+import { TimeEntry } from '../models/time-entry.model';
+import { CreateTimeEntryRequest } from '../models/create-time-entry-request.model';
+import { StartTimerRequest } from '../models/start-timer-request.model';
+import { StopTimerRequest } from '../models/stop-timer-request.model';
+import { UpdateTimeEntryRequest } from '../models/update-time-entry-request.model';
+import { ClockEvent } from '../models/clock-event.model';
+import { CreateClockEventRequest } from '../models/create-clock-event-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimeTrackingService {
@@ -48,5 +50,9 @@ export class TimeTrackingService {
 
   createClockEvent(request: CreateClockEventRequest): Observable<ClockEvent> {
     return this.http.post<ClockEvent>(`${this.base}/clock-events`, request);
+  }
+
+  deleteTimeEntry(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/entries/${id}`);
   }
 }

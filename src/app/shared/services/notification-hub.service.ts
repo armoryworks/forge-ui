@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 
 import { SignalrService } from './signalr.service';
 import { NotificationService } from './notification.service';
-import { AppNotification } from '../models/notification.model';
+import { AppNotification } from '../models/app-notification.model';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationHubService {

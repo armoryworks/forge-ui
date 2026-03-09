@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
-import { StageCount } from '../models/dashboard.model';
+import { StageCount } from '../models/stage-count.model';
 
 @Component({
   selector: 'app-jobs-by-stage-widget',

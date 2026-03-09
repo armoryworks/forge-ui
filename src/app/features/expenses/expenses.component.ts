@@ -4,7 +4,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { ExpensesService } from './services/expenses.service';
-import { ExpenseItem, ExpenseStatus } from './models/expenses.model';
+import { ExpenseItem } from './models/expense-item.model';
+import { ExpenseStatus } from './models/expense-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -17,6 +18,9 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../shared/utils/date.utils';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-expenses',
@@ -33,6 +37,8 @@ import { toIsoDate } from '../../shared/utils/date.utils';
 })
 export class ExpensesComponent {
   private readonly expensesService = inject(ExpensesService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -128,20 +134,20 @@ export class ExpensesComponent {
       description: form.description ?? '',
       expenseDate: toIsoDate(form.expenseDate) ?? new Date().toISOString().split('T')[0],
     }).subscribe({
-      next: () => { this.saving.set(false); this.closeDialog(); this.loadExpenses(); },
+      next: () => { this.saving.set(false); this.closeDialog(); this.loadExpenses(); this.snackbar.success('Expense submitted.'); },
       error: () => this.saving.set(false),
     });
   }
 
   protected approveExpense(expense: ExpenseItem): void {
     this.expensesService.updateExpenseStatus(expense.id, { status: 'Approved' }).subscribe({
-      next: () => this.loadExpenses(),
+      next: () => { this.loadExpenses(); this.snackbar.success('Expense approved.'); },
     });
   }
 
   protected rejectExpense(expense: ExpenseItem): void {
     this.expensesService.updateExpenseStatus(expense.id, { status: 'Rejected' }).subscribe({
-      next: () => this.loadExpenses(),
+      next: () => { this.loadExpenses(); this.snackbar.success('Expense rejected.'); },
     });
   }
 
@@ -159,5 +165,25 @@ export class ExpensesComponent {
 
   protected getTotalAmount(): number {
     return this.expenses().reduce((sum, e) => sum + e.amount, 0);
+  }
+
+  protected deleteExpense(expense: ExpenseItem): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Expense?',
+        message: 'This will permanently delete this expense record.',
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.expensesService.deleteExpense(expense.id).subscribe({
+        next: () => {
+          this.loadExpenses();
+          this.snackbar.success('Expense deleted.');
+        },
+      });
+    });
   }
 }

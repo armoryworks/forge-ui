@@ -28,7 +28,7 @@
 .data-table__filter-badge {
   @include uppercase-label($font-size-xxs, 0.3px, 600);
   color: var(--primary);
-  padding: 2px $sp-md;
+  padding: $sp-xs $sp-md;
   border: $border-width-thin solid var(--primary);
   border-radius: $border-radius;
 }
@@ -107,7 +107,7 @@
   padding: 0;
 
   .material-icons-outlined {
-    font-size: 14px;
+    font-size: $icon-size-xs;
   }
 
   &:hover {
@@ -120,15 +120,15 @@
 }
 
 .data-table__sort-icon {
-  font-size: 12px;
+  font-size: $font-size-base;
   vertical-align: middle;
-  margin-left: 2px;
+  margin-left: $sp-xs;
 }
 
 .data-table__filter-btn {
   @include flex-center;
-  width: 16px;
-  height: 16px;
+  width: $icon-size-sm;
+  height: $icon-size-sm;
   background: none;
   border: none;
   color: var(--text-muted);
@@ -141,7 +141,7 @@
   transition: opacity $transition-fast;
 
   .material-icons-outlined {
-    font-size: 12px;
+    font-size: $font-size-base;
   }
 
   &--active {

@@ -46,14 +46,14 @@
       width: 18px;
       height: 14px;
 
-      .material-icons-outlined { font-size: 12px; }
+      .material-icons-outlined { font-size: $font-size-base; }
     }
   }
 
   &__color {
     input[type='color'] {
-      width: 24px;
-      height: 24px;
+      width: $btn-icon-size;
+      height: $btn-icon-size;
       border: $border-width-thin solid var(--border);
       padding: 0;
       cursor: pointer;
@@ -86,6 +86,6 @@
 
     input[type='checkbox'] { display: none; }
     input[type='checkbox']:checked + .material-icons-outlined { color: var(--warning); }
-    .material-icons-outlined { font-size: 16px; }
+    .material-icons-outlined { font-size: $icon-size-sm; }
   }
 }

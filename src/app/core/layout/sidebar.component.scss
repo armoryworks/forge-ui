@@ -38,7 +38,7 @@
   overflow: hidden;
 
   .material-icons-outlined {
-    font-size: 20px;
+    font-size: $sidebar-icon-size;
     flex-shrink: 0;
   }
 
@@ -50,7 +50,7 @@
   .sidebar--expanded & {
     justify-content: flex-start;
     padding: 0 12px;
-    height: 36px;
+    height: $sidebar-nav-height;
     gap: 10px;
   }
 
@@ -84,20 +84,20 @@
   color: white;
   font-size: 8px;
   font-weight: 700;
-  min-width: 16px;
-  height: 16px;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
   border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 4px;
+  padding: 0 $sp-sm;
 
   .sidebar:not(.sidebar--expanded) & {
     position: absolute;
     top: 6px;
     right: 6px;
-    min-width: 14px;
-    height: 14px;
+    min-width: $badge-size-sm;
+    height: $badge-size-sm;
     font-size: 7px;
   }
 
@@ -107,7 +107,7 @@
 }
 
 .sidebar__divider {
-  height: 2px;
+  height: $border-width;
   background: var(--border);
   margin: $sp-sm $sp-md;
 }

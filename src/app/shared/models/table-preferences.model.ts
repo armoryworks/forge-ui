@@ -1,3 +1,5 @@
+import { SortState } from './sort-state.model';
+
 export interface TablePreferences {
   columnVisibility: Record<string, boolean>;
   columnOrder: string[];
@@ -5,9 +7,4 @@ export interface TablePreferences {
   sortState: SortState[];
   pageSize: number;
   filters: Record<string, unknown>;
-}
-
-export interface SortState {
-  field: string;
-  direction: 'asc' | 'desc';
 }

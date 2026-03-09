@@ -10,8 +10,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.3px;
-  padding: 1px 0;
-  border: 1px solid;
+  padding: $sp-xxs 0;
+  border: $border-width-thin solid;
 
   &--active {
     color: var(--success);

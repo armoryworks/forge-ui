@@ -2,7 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AssetItem, CreateAssetRequest, UpdateAssetRequest, AssetType, AssetStatus } from '../models/assets.model';
+import { AssetItem } from '../models/asset-item.model';
+import { CreateAssetRequest } from '../models/create-asset-request.model';
+import { UpdateAssetRequest } from '../models/update-asset-request.model';
+import { AssetType } from '../models/asset-type.type';
+import { AssetStatus } from '../models/asset-status.type';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -23,5 +27,9 @@ export class AssetsService {
 
   updateAsset(id: number, request: UpdateAssetRequest): Observable<AssetItem> {
     return this.http.patch<AssetItem>(`${this.base}/${id}`, request);
+  }
+
+  deleteAsset(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
   }
 }

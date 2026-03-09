@@ -1,0 +1,85 @@
+@use 'styles/variables' as *;
+
+:host {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: $z-toast;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+  pointer-events: auto;
+
+  &--info { border-left: 3px solid var(--info); }
+  &--success { border-left: 3px solid var(--success); }
+  &--warning { border-left: 3px solid var(--warning); }
+  &--error { border-left: 3px solid var(--error); }
+}
+
+.toast__icon {
+  font-size: 16px;
+  margin-top: 1px;
+}
+
+.toast--info .toast__icon { color: var(--info); }
+.toast--success .toast__icon { color: var(--success); }
+.toast--warning .toast__icon { color: var(--warning); }
+.toast--error .toast__icon { color: var(--error); }
+
+.toast__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.toast__title {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.toast__message {
+  margin: $sp-xs 0 0;
+  color: var(--text-secondary);
+}
+
+.toast__details {
+  margin: $sp-sm 0 0;
+  padding: $sp-sm;
+  background: var(--bg);
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.toast__actions {
+  display: flex;
+  gap: $sp-xs;
+}
+
+.toast__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $sp-xs;
+  color: var(--text-muted);
+  line-height: 1;
+
+  .material-icons-outlined { font-size: 14px; }
+
+  &:hover { color: var(--text); }
+}

@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 .app-header {
   height: $header-height;
@@ -47,23 +48,52 @@
   flex: 1;
   background: var(--bg);
   border: $border-width solid var(--bg);
-  border-radius: $border-radius;
   padding: $sp-sm 10px;
   color: var(--text);
   font-size: $font-size-sm;
   display: flex;
   align-items: center;
   gap: 6px;
-  cursor: pointer;
+  position: relative;
+
+  &--focused { border-color: var(--primary); }
 
   kbd {
     background: rgba(255, 255, 255, 0.1);
     padding: 0 5px;
-    border-radius: $border-radius;
     font-size: $font-size-xs;
     font-family: $font-family-mono;
     margin-left: auto;
+    flex-shrink: 0;
   }
+}
+
+.search-icon { font-size: 16px; color: var(--text-muted); flex-shrink: 0; }
+
+.search-input {
+  flex: 1; border: none; background: transparent; color: var(--text);
+  font-size: $font-size-sm; font-family: $font-family-primary; outline: none;
+  &::placeholder { color: var(--text-muted); }
+}
+
+.search-results {
+  position: absolute; top: 100%; left: 0; right: 0;
+  background: var(--surface); border: $border-width-thin solid var(--border);
+  z-index: $z-dropdown; max-height: 400px; overflow-y: auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.search-result {
+  display: flex; align-items: center; gap: $sp-md; width: 100%;
+  padding: $sp-md $sp-lg; border: none; background: transparent;
+  color: var(--text); font-size: $font-size-sm; font-family: $font-family-primary;
+  cursor: pointer; text-align: left;
+  &:hover { background: var(--bg); }
+  &__icon { font-size: 18px; color: var(--text-muted); flex-shrink: 0; }
+  &__content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  &__title { font-weight: 600; @include truncate; }
+  &__subtitle { font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
+  &__type { @include uppercase-label($font-size-xxs, 0.5px, 600); color: var(--text-muted); flex-shrink: 0; }
 }
 
 .app-header__actions {

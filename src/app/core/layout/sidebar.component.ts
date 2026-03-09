@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-import { NavGroup } from '../../shared/models/nav-item.model';
+import { NavGroup } from '../../shared/models/nav-group.model';
 
 @Component({
   selector: 'app-sidebar',
@@ -27,6 +27,7 @@ export class SidebarComponent {
       items: [
         { icon: 'precision_manufacturing', label: 'Parts', route: '/parts' },
         { icon: 'inventory_2', label: 'Inventory', route: '/inventory' },
+        { icon: 'people', label: 'Customers', route: '/customers' },
         { icon: 'people_outline', label: 'Leads', route: '/leads' },
         { icon: 'receipt_long', label: 'Expenses', route: '/expenses' },
       ],

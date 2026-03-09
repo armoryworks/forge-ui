@@ -1,0 +1,22 @@
+@for (toast of toastService.toasts(); track toast.id) {
+  <div class="toast toast--{{ toast.severity }}">
+    <span class="material-icons-outlined toast__icon">{{ iconFor(toast.severity) }}</span>
+    <div class="toast__body">
+      <strong class="toast__title">{{ toast.title }}</strong>
+      @if (toast.message) {
+        <p class="toast__message">{{ toast.message }}</p>
+      }
+      @if (toast.details) {
+        <pre class="toast__details">{{ toast.details }}</pre>
+      }
+    </div>
+    <div class="toast__actions">
+      <button class="toast__btn" (click)="copy(toast)" title="Copy">
+        <span class="material-icons-outlined">content_copy</span>
+      </button>
+      <button class="toast__btn" (click)="toastService.dismiss(toast.id)" title="Dismiss">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  </div>
+}

@@ -4,7 +4,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { LeadsService } from './services/leads.service';
-import { LeadItem, LeadStatus } from './models/leads.model';
+import { LeadItem } from './models/lead-item.model';
+import { LeadStatus } from './models/lead-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -279,6 +280,29 @@ export class LeadsComponent {
         this.saving.set(false);
         this.snackbar.error('Failed to convert lead.');
       },
+    });
+  }
+
+  protected deleteLead(): void {
+    const lead = this.selectedLead();
+    if (!lead) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Lead?',
+        message: `This will permanently delete "${lead.companyName}".`,
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.leadsService.deleteLead(lead.id).subscribe({
+        next: () => {
+          this.selectedLead.set(null);
+          this.loadLeads();
+          this.snackbar.success('Lead deleted.');
+        },
+      });
     });
   }
 }

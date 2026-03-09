@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
-import { DashboardTask } from '../models/dashboard.model';
+import { DashboardTask } from '../models/dashboard-task.model';
 
 @Component({
   selector: 'app-todays-tasks-widget',

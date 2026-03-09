@@ -17,7 +17,7 @@
 
 .workload-item__bar {
   flex: 1;
-  height: 4px;
+  height: $progress-bar-height;
   background: var(--bg);
   border: $border-width-thin solid var(--border);
   overflow: hidden;

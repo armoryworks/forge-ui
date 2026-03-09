@@ -2,15 +2,13 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import {
-  StorageLocation,
-  StorageLocationFlat,
-  BinContentItem,
-  BinMovementItem,
-  InventoryPartSummary,
-  CreateStorageLocationRequest,
-  PlaceBinContentRequest,
-} from '../models/inventory.model';
+import { StorageLocation } from '../models/storage-location.model';
+import { StorageLocationFlat } from '../models/storage-location-flat.model';
+import { BinContentItem } from '../models/bin-content-item.model';
+import { BinMovementItem } from '../models/bin-movement-item.model';
+import { InventoryPartSummary } from '../models/inventory-part-summary.model';
+import { CreateStorageLocationRequest } from '../models/create-storage-location-request.model';
+import { PlaceBinContentRequest } from '../models/place-bin-content-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {

@@ -10,14 +10,14 @@
   border-radius: $border-radius;
 
   &--sm {
-    width: 18px;
-    height: 18px;
+    width: $avatar-size-xs;
+    height: $avatar-size-xs;
     font-size: 8px;
   }
 
   &--md {
-    width: 20px;
-    height: 20px;
+    width: $avatar-size-sm;
+    height: $avatar-size-sm;
     font-size: $font-size-xxs;
   }
 }

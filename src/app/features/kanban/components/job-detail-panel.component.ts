@@ -1,20 +1,36 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
+import { FileUploadZoneComponent, UploadedFile } from '../../../shared/components/file-upload-zone/file-upload-zone.component';
+import { ActivityTimelineComponent } from '../../../shared/components/activity-timeline/activity-timeline.component';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import { SelectComponent } from '../../../shared/components/select/select.component';
+import { ActivityItem } from '../../../shared/models/activity.model';
+import { FileAttachment } from '../../../shared/models/file.model';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { KanbanService } from '../services/kanban.service';
-import { JobDetail, Subtask, Activity, JobLink, KanbanJob, PRIORITY_COLORS, LINK_TYPE_OPTIONS, LINK_TYPE_ICONS, LINK_TYPE_LABELS } from '../models/kanban.model';
+import { JobDetail } from '../models/job-detail.model';
+import { Subtask } from '../models/subtask.model';
+import { Activity } from '../models/activity.model';
+import { JobLink } from '../models/job-link.model';
+import { KanbanJob } from '../models/kanban-job.model';
+import { PRIORITY_COLORS } from '../models/priority-colors.const';
+import { LINK_TYPE_OPTIONS } from '../models/link-type-options.const';
+import { LINK_TYPE_ICONS } from '../models/link-type-icons.const';
+import { LINK_TYPE_LABELS } from '../models/link-type-labels.const';
 
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent],
+  imports: [ReactiveFormsModule, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class JobDetailPanelComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
+  private readonly snackbar = inject(SnackbarService);
 
   readonly jobId = input.required<number>();
   readonly closed = output<void>();
@@ -24,6 +40,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly subtasks = signal<Subtask[]>([]);
   protected readonly activity = signal<Activity[]>([]);
   protected readonly links = signal<JobLink[]>([]);
+  protected readonly files = signal<FileAttachment[]>([]);
   protected readonly loading = signal(true);
   protected readonly newSubtaskControl = new FormControl('');
   protected readonly commentControl = new FormControl('');
@@ -38,6 +55,16 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly selectedLinkTarget = signal<KanbanJob | null>(null);
   protected readonly showLinkResults = signal(false);
 
+  protected readonly mappedActivity = computed<ActivityItem[]>(() =>
+    this.activity().map(a => ({
+      id: a.id,
+      description: a.description,
+      createdAt: a.createdAt,
+      userInitials: a.userInitials ?? undefined,
+      action: a.action,
+    }))
+  );
+
   ngOnInit(): void {
     const id = this.jobId();
     this.kanbanService.getJobDetail(id).subscribe(detail => {
@@ -47,6 +74,7 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.getSubtasks(id).subscribe(s => this.subtasks.set(s));
     this.kanbanService.getJobActivity(id).subscribe(a => this.activity.set(a));
     this.kanbanService.getJobLinks(id).subscribe(l => this.links.set(l));
+    this.kanbanService.getJobFiles(id).subscribe(f => this.files.set(f));
 
     this.linkSearchControl.valueChanges.pipe(
       debounceTime(300),
@@ -97,6 +125,7 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.addSubtask(this.jobId(), text).subscribe(st => {
       this.subtasks.update(list => [...list, st]);
       this.newSubtaskControl.reset();
+      this.snackbar.success('Subtask added.');
     });
   }
 
@@ -116,12 +145,14 @@ export class JobDetailPanelComponent implements OnInit {
       this.selectedLinkTarget.set(null);
       this.linkSearchControl.reset();
       this.linkTypeControl.setValue('RelatedTo');
+      this.snackbar.success('Link added.');
     });
   }
 
   protected deleteLink(link: JobLink): void {
     this.kanbanService.deleteJobLink(this.jobId(), link.id).subscribe(() => {
       this.links.update(list => list.filter(l => l.id !== link.id));
+      this.snackbar.success('Link removed.');
     });
   }
 
@@ -136,11 +167,40 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.addComment(this.jobId(), text).subscribe(entry => {
       this.activity.update(list => [entry, ...list]);
       this.commentControl.reset();
+      this.snackbar.success('Comment posted.');
     });
   }
 
-  protected isComment(a: Activity): boolean {
-    return a.action === 'CommentAdded';
+  protected onFileUploaded(file: UploadedFile): void {
+    this.kanbanService.getJobFiles(this.jobId()).subscribe(f => {
+      this.files.set(f);
+      this.snackbar.success('File uploaded.');
+    });
+  }
+
+  protected deleteFile(file: FileAttachment): void {
+    this.kanbanService.deleteJobFile(file.id).subscribe(() => {
+      this.files.update(list => list.filter(f => f.id !== file.id));
+      this.snackbar.success('File deleted.');
+    });
+  }
+
+  protected downloadFile(file: FileAttachment): void {
+    window.open(this.kanbanService.downloadFileUrl(file.id), '_blank');
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  protected fileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType.includes('pdf')) return 'picture_as_pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
+    if (contentType.includes('word') || contentType.includes('document')) return 'description';
+    return 'attach_file';
   }
 
   protected close(): void {

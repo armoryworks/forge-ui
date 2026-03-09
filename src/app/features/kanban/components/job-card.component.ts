@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
-import { KanbanJob, PRIORITY_COLORS } from '../models/kanban.model';
+import { KanbanJob } from '../models/kanban-job.model';
+import { PRIORITY_COLORS } from '../models/priority-colors.const';
 
 @Component({
   selector: 'app-job-card',

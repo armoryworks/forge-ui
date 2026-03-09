@@ -12,14 +12,8 @@
   <app-page-header title="Dashboard">
     <span class="page-header__ctx">Production · March 2026</span>
     <div class="page-header__actions">
-      <button class="btn">
-        <span class="material-icons-outlined btn__icon">date_range</span> This Week
-      </button>
-      <button class="btn">
+      <button class="btn" (click)="exportDashboard()">
         <span class="material-icons-outlined btn__icon">download</span> Export
-      </button>
-      <button class="btn btn--primary">
-        <span class="material-icons-outlined btn__icon">tune</span> Customize
       </button>
     </div>
   </app-page-header>

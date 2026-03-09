@@ -3,7 +3,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { TimeTrackingService } from './services/time-tracking.service';
-import { TimeEntry } from './models/time-tracking.model';
+import { TimeEntry } from './models/time-entry.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -17,6 +17,9 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-time-tracking',
@@ -40,6 +43,8 @@ import { TimerHubService } from '../../shared/services/timer-hub.service';
 export class TimeTrackingComponent implements OnDestroy {
   private readonly service = inject(TimeTrackingService);
   private readonly timerHub = inject(TimerHubService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
@@ -171,6 +176,7 @@ export class TimeTrackingComponent implements OnDestroy {
         this.saving.set(false);
         this.closeDialog();
         this.loadEntries();
+        this.snackbar.success('Time entry added.');
       },
       error: () => this.saving.set(false),
     });
@@ -190,7 +196,7 @@ export class TimeTrackingComponent implements OnDestroy {
       category: form.category || undefined,
       notes: form.notes || undefined,
     }).subscribe({
-      next: () => { this.closeTimerDialog(); this.loadEntries(); },
+      next: () => { this.closeTimerDialog(); this.loadEntries(); this.snackbar.success('Timer started.'); },
     });
   }
 
@@ -205,7 +211,7 @@ export class TimeTrackingComponent implements OnDestroy {
     this.service.stopTimer({
       notes: this.stopNotesControl.value || undefined,
     }).subscribe({
-      next: () => { this.closeStopDialog(); this.loadEntries(); },
+      next: () => { this.closeStopDialog(); this.loadEntries(); this.snackbar.success('Timer stopped.'); },
     });
   }
 
@@ -225,5 +231,25 @@ export class TimeTrackingComponent implements OnDestroy {
   protected getTotalHours(): string {
     const total = this.entries().reduce((sum, e) => sum + e.durationMinutes, 0);
     return (total / 60).toFixed(1);
+  }
+
+  protected deleteTimeEntry(entry: TimeEntry): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Time Entry?',
+        message: 'This will permanently delete this time entry.',
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.service.deleteTimeEntry(entry.id).subscribe({
+        next: () => {
+          this.loadEntries();
+          this.snackbar.success('Time entry deleted.');
+        },
+      });
+    });
   }
 }

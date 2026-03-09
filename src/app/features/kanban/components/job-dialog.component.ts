@@ -5,7 +5,10 @@ import {
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { KanbanService } from '../services/kanban.service';
-import { JobDetail, TrackType, CustomerRef, UserRef } from '../models/kanban.model';
+import { JobDetail } from '../models/job-detail.model';
+import { CustomerRef } from '../models/customer-ref.model';
+import { UserRef } from '../models/user-ref.model';
+import { TrackType } from '../../../shared/models/track-type.model';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';

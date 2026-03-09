@@ -47,7 +47,7 @@
   border-radius: $border-radius;
   margin-left: auto;
 
-  .material-icons-outlined { font-size: 14px; }
+  .material-icons-outlined { font-size: $icon-size-xs; }
 
   &:hover {
     background: var(--primary-dark);
@@ -71,12 +71,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 80px 24px;
+  gap: $sp-md + $sp-sm;
+  padding: $sp-4xl $sp-xl;
   color: var(--text-secondary);
 
   &__icon {
-    font-size: 48px;
+    font-size: $icon-size-hero;
     opacity: 0.5;
   }
 }
@@ -92,7 +92,7 @@
   padding: $sp-md $sp-lg;
   background: var(--surface);
   border: $border-width solid var(--border);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: $shadow-dropdown;
   z-index: $z-dropdown;
 
   &__count {
@@ -114,7 +114,7 @@
     cursor: pointer;
     white-space: nowrap;
 
-    .material-icons-outlined { font-size: 14px; }
+    .material-icons-outlined { font-size: $icon-size-xs; }
 
     &:hover {
       background: var(--primary-light);
@@ -133,15 +133,15 @@
 
   &__close {
     @include flex-center;
-    width: 24px;
-    height: 24px;
+    width: $btn-icon-size;
+    height: $btn-icon-size;
     border: none;
     background: none;
     color: var(--text-muted);
     cursor: pointer;
     margin-left: $sp-sm;
 
-    .material-icons-outlined { font-size: 16px; }
+    .material-icons-outlined { font-size: $icon-size-sm; }
 
     &:hover {
       color: var(--text);
@@ -150,14 +150,14 @@
 
   &__stage-dot {
     display: inline-block;
-    width: 8px;
-    height: 8px;
+    width: $dot-size-sm;
+    height: $dot-size-sm;
     border-radius: 50%;
     margin-right: $sp-sm;
   }
 
   &__menu-icon {
-    font-size: 16px;
+    font-size: $icon-size-sm;
     margin-right: $sp-sm;
     color: var(--text-muted);
   }

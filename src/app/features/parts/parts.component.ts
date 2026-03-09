@@ -3,24 +3,26 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { PartsService } from './services/parts.service';
-import {
-  PartListItem,
-  PartDetail,
-  BOMEntry,
-  PartStatus,
-  PartType,
-  BOMSourceType,
-} from './models/parts.model';
+import { PartListItem } from './models/part-list-item.model';
+import { PartDetail } from './models/part-detail.model';
+import { BOMEntry } from './models/bom-entry.model';
+import { PartStatus } from './models/part-status.type';
+import { PartType } from './models/part-type.type';
+import { BOMSourceType } from './models/bom-source-type.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-parts',
@@ -29,7 +31,7 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
     ReactiveFormsModule,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective,
+    DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
@@ -37,6 +39,8 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 })
 export class PartsComponent {
   private readonly partsService = inject(PartsService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
@@ -218,6 +222,7 @@ export class PartsComponent {
           this.selectedPart.set(detail);
           this.closePartDialog();
           this.loadParts();
+          this.snackbar.success('Part updated.');
         },
       });
     } else {
@@ -233,6 +238,7 @@ export class PartsComponent {
           this.selectedPart.set(detail);
           this.closePartDialog();
           this.loadParts();
+          this.snackbar.success('Part created.');
         },
       });
     }
@@ -280,6 +286,7 @@ export class PartsComponent {
         this.selectedPart.set(detail);
         this.closeBomDialog();
         this.loadParts();
+        this.snackbar.success('BOM entry added.');
       },
     });
   }
@@ -287,11 +294,46 @@ export class PartsComponent {
   protected deleteBomEntry(entry: BOMEntry): void {
     const part = this.selectedPart();
     if (!part) return;
-    this.partsService.deleteBOMEntry(part.id, entry.id).subscribe({
-      next: (detail) => {
-        this.selectedPart.set(detail);
-        this.loadParts();
-      },
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete BOM Entry?',
+        message: 'This will permanently remove this BOM entry from the part.',
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.partsService.deleteBOMEntry(part.id, entry.id).subscribe({
+        next: (detail) => {
+          this.selectedPart.set(detail);
+          this.loadParts();
+          this.snackbar.success('BOM entry deleted.');
+        },
+      });
+    });
+  }
+
+  protected deletePart(): void {
+    const part = this.selectedPart();
+    if (!part) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Part?',
+        message: `This will permanently delete "${part.partNumber}".`,
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.partsService.deletePart(part.id).subscribe({
+        next: () => {
+          this.selectedPart.set(null);
+          this.loadParts();
+          this.snackbar.success('Part deleted.');
+        },
+      });
     });
   }
 

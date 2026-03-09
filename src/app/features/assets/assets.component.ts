@@ -3,7 +3,9 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { AssetsService } from './services/assets.service';
-import { AssetItem, AssetType, AssetStatus } from './models/assets.model';
+import { AssetItem } from './models/asset-item.model';
+import { AssetType } from './models/asset-type.type';
+import { AssetStatus } from './models/asset-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -14,6 +16,9 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-assets',
@@ -25,6 +30,8 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 })
 export class AssetsComponent {
   private readonly assetsService = inject(AssetsService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -160,7 +167,7 @@ export class AssetsComponent {
         serialNumber: form.serialNumber || undefined,
         notes: form.notes || undefined,
       }).subscribe({
-        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); },
+        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success('Asset updated.'); },
         error: () => this.saving.set(false),
       });
     } else {
@@ -173,7 +180,7 @@ export class AssetsComponent {
         serialNumber: form.serialNumber || undefined,
         notes: form.notes || undefined,
       }).subscribe({
-        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); },
+        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success('Asset created.'); },
         error: () => this.saving.set(false),
       });
     }
@@ -207,5 +214,28 @@ export class AssetsComponent {
 
   protected getStatusLabel(status: string): string {
     return status === 'OutOfService' ? 'Out of Service' : status;
+  }
+
+  protected deleteAsset(): void {
+    const asset = this.selectedAsset();
+    if (!asset) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Asset?',
+        message: `This will permanently delete "${asset.name}".`,
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.assetsService.deleteAsset(asset.id).subscribe({
+        next: () => {
+          this.selectedAsset.set(null);
+          this.loadAssets();
+          this.snackbar.success('Asset deleted.');
+        },
+      });
+    });
   }
 }
