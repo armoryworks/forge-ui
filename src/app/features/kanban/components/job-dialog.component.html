@@ -1,0 +1,41 @@
+<app-dialog [title]="mode() === 'create' ? 'New Job' : 'Edit Job'" width="520px" (closed)="cancel()">
+  @if (loadingRefs()) {
+    <div class="dialog-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+      Loading...
+    </div>
+  } @else {
+    <div [formGroup]="jobForm">
+      <app-input label="Title" formControlName="title" [maxlength]="200" placeholder="Job title" />
+      <app-textarea label="Description" formControlName="description" placeholder="Optional description..." [rows]="3" />
+
+      @if (mode() === 'create') {
+        <app-select label="Track Type" formControlName="trackTypeId" [options]="trackTypeOptions()" />
+      }
+
+      <div class="dialog-row">
+        <app-select label="Customer" formControlName="customerId" [options]="customerOptions()" />
+        <app-select label="Assignee" formControlName="assigneeId" [options]="assigneeOptions()" />
+      </div>
+
+      <div class="dialog-row">
+        <app-select label="Priority" formControlName="priority" [options]="priorityOptions" />
+        <app-datepicker label="Due Date" formControlName="dueDate" />
+      </div>
+    </div>
+  }
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()" [disabled]="saving()">Cancel</button>
+    <button
+      class="action-btn action-btn--primary"
+      (click)="onSubmit()"
+      [appValidationPopover]="violations"
+      [disabled]="saving() || loadingRefs() || jobForm.invalid">
+      @if (saving()) {
+        <span class="material-icons-outlined btn-spinner">refresh</span>
+      }
+      {{ mode() === 'create' ? 'Create Job' : 'Save Changes' }}
+    </button>
+  </div>
+</app-dialog>

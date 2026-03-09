@@ -26,9 +26,9 @@
   }
 
   &--overdue {
-    color: var(--warn);
-    background: var(--warn-light);
-    border-color: var(--warn);
+    color: var(--error);
+    background: var(--error-light);
+    border-color: var(--error);
   }
 
   &--completed {

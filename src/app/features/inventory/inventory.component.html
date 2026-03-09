@@ -1,0 +1,365 @@
+<app-page-header title="Inventory">
+  @if (activeTab() === 'locations') {
+    <button class="action-btn action-btn--primary" (click)="openCreateLocation()">
+      <span class="material-icons-outlined">add</span>
+      Add Location
+    </button>
+  }
+</app-page-header>
+
+<div class="inventory-content">
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="activeTab() === 'stock'" (click)="switchTab('stock')">
+      <span class="material-icons-outlined">inventory</span>
+      Stock Levels
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'locations'" (click)="switchTab('locations')">
+      <span class="material-icons-outlined">warehouse</span>
+      Locations
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'movements'" (click)="switchTab('movements')">
+      <span class="material-icons-outlined">swap_horiz</span>
+      Movement History
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading">
+      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+      <span>Loading...</span>
+    </div>
+  } @else {
+    <!-- Stock Levels Tab -->
+    @if (activeTab() === 'stock') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <app-input label="Search" [formControl]="searchControl" placeholder="Search parts..." />
+          @if (searchControl.value) {
+            <button class="icon-btn" (click)="clearSearch()">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          }
+          <span class="panel-count">{{ partSummaries().length }} parts with stock</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Part #</th>
+                <th>Description</th>
+                <th>Material</th>
+                <th class="text-right">On Hand</th>
+                <th class="text-right">Reserved</th>
+                <th class="text-right">Available</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (summary of partSummaries(); track summary.partId) {
+                <tr class="inv-row" [class]="getStockClass(summary)" (click)="togglePartExpand(summary.partId)">
+                  <td class="col-expand">
+                    <span class="material-icons-outlined expand-icon">
+                      {{ expandedPartId() === summary.partId ? 'expand_more' : 'chevron_right' }}
+                    </span>
+                  </td>
+                  <td class="part-number">{{ summary.partNumber }}</td>
+                  <td>{{ summary.description }}</td>
+                  <td class="text-muted">{{ summary.material ?? '—' }}</td>
+                  <td class="text-right qty-cell">{{ summary.onHand }}</td>
+                  <td class="text-right qty-cell">{{ summary.reserved > 0 ? summary.reserved : '—' }}</td>
+                  <td class="text-right qty-cell" [class.qty-zero]="summary.available <= 0">{{ summary.available }}</td>
+                </tr>
+                @if (expandedPartId() === summary.partId) {
+                  <tr class="bin-detail-row">
+                    <td colspan="7">
+                      <table class="bin-detail-table">
+                        <thead>
+                          <tr>
+                            <th>Bin Location</th>
+                            <th>Qty</th>
+                            <th>Status</th>
+                            <th>Lot #</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (bin of summary.binLocations; track bin.locationId) {
+                            <tr>
+                              <td>{{ bin.locationPath }}</td>
+                              <td>{{ bin.quantity }}</td>
+                              <td>
+                                <span [class]="getStatusClass(bin.status)">
+                                  {{ getStatusLabel(bin.status) }}
+                                </span>
+                              </td>
+                              <td class="text-muted">{{ bin.lotNumber ?? '—' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr>
+                  <td colspan="7" class="empty-row">
+                    <span class="material-icons-outlined">inventory_2</span>
+                    <span>No inventory data</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Locations Tab -->
+    @if (activeTab() === 'locations') {
+      <div class="tab-panel locations-layout">
+        <div class="locations-tree">
+          <div class="panel-header">
+            <span class="panel-count">Storage Hierarchy</span>
+          </div>
+          <div class="tree-content">
+            @for (loc of locationTree(); track loc.id) {
+              <ng-container>
+                <div class="tree-node" [class.tree-node--selected]="selectedLocation()?.id === loc.id"
+                  (click)="selectLocation(loc)">
+                  @if (loc.children.length > 0) {
+                    <button class="tree-toggle" (click)="toggleLocationExpand(loc.id); $event.stopPropagation()">
+                      <span class="material-icons-outlined">
+                        {{ isLocationExpanded(loc.id) ? 'expand_more' : 'chevron_right' }}
+                      </span>
+                    </button>
+                  } @else {
+                    <span class="tree-toggle-spacer"></span>
+                  }
+                  <span class="material-icons-outlined tree-icon">{{ getLocationIcon(loc.locationType) }}</span>
+                  <span class="tree-label">{{ loc.name }}</span>
+                  @if (loc.contentCount > 0) {
+                    <span class="tree-badge">{{ loc.contentCount }}</span>
+                  }
+                </div>
+                @if (isLocationExpanded(loc.id)) {
+                  @for (child of loc.children; track child.id) {
+                    <div class="tree-node tree-node--l1" [class.tree-node--selected]="selectedLocation()?.id === child.id"
+                      (click)="selectLocation(child)">
+                      @if (child.children.length > 0) {
+                        <button class="tree-toggle" (click)="toggleLocationExpand(child.id); $event.stopPropagation()">
+                          <span class="material-icons-outlined">
+                            {{ isLocationExpanded(child.id) ? 'expand_more' : 'chevron_right' }}
+                          </span>
+                        </button>
+                      } @else {
+                        <span class="tree-toggle-spacer"></span>
+                      }
+                      <span class="material-icons-outlined tree-icon">{{ getLocationIcon(child.locationType) }}</span>
+                      <span class="tree-label">{{ child.name }}</span>
+                      @if (child.contentCount > 0) {
+                        <span class="tree-badge">{{ child.contentCount }}</span>
+                      }
+                    </div>
+                    @if (isLocationExpanded(child.id)) {
+                      @for (grandchild of child.children; track grandchild.id) {
+                        <div class="tree-node tree-node--l2" [class.tree-node--selected]="selectedLocation()?.id === grandchild.id"
+                          (click)="selectLocation(grandchild)">
+                          @if (grandchild.children.length > 0) {
+                            <button class="tree-toggle" (click)="toggleLocationExpand(grandchild.id); $event.stopPropagation()">
+                              <span class="material-icons-outlined">
+                                {{ isLocationExpanded(grandchild.id) ? 'expand_more' : 'chevron_right' }}
+                              </span>
+                            </button>
+                          } @else {
+                            <span class="tree-toggle-spacer"></span>
+                          }
+                          <span class="material-icons-outlined tree-icon">{{ getLocationIcon(grandchild.locationType) }}</span>
+                          <span class="tree-label">{{ grandchild.name }}</span>
+                          @if (grandchild.contentCount > 0) {
+                            <span class="tree-badge">{{ grandchild.contentCount }}</span>
+                          }
+                        </div>
+                        @if (isLocationExpanded(grandchild.id)) {
+                          @for (leaf of grandchild.children; track leaf.id) {
+                            <div class="tree-node tree-node--l3" [class.tree-node--selected]="selectedLocation()?.id === leaf.id"
+                              (click)="selectLocation(leaf)">
+                              <span class="tree-toggle-spacer"></span>
+                              <span class="material-icons-outlined tree-icon">{{ getLocationIcon(leaf.locationType) }}</span>
+                              <span class="tree-label">{{ leaf.name }}</span>
+                              @if (leaf.contentCount > 0) {
+                                <span class="tree-badge">{{ leaf.contentCount }}</span>
+                              }
+                            </div>
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              </ng-container>
+            } @empty {
+              <div class="empty-state">
+                <span class="material-icons-outlined">warehouse</span>
+                <span>No locations configured</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Location Detail -->
+        <div class="location-detail">
+          @if (selectedLocation(); as loc) {
+            <div class="detail-header">
+              <span class="material-icons-outlined detail-type-icon">{{ getLocationIcon(loc.locationType) }}</span>
+              <div>
+                <div class="detail-name">{{ loc.name }}</div>
+                <div class="detail-path">{{ loc.locationPath }}</div>
+              </div>
+              <button class="action-btn action-btn--primary action-btn--sm" style="margin-left: auto"
+                (click)="openCreateLocation(loc.id)">
+                <span class="material-icons-outlined">add</span>
+                Add Child
+              </button>
+            </div>
+
+            <div class="detail-meta">
+              <div class="meta-item">
+                <span class="meta-label">Type</span>
+                <span class="meta-value">{{ loc.locationType }}</span>
+              </div>
+              @if (loc.barcode) {
+                <div class="meta-item">
+                  <span class="meta-label">Barcode</span>
+                  <span class="meta-value mono">{{ loc.barcode }}</span>
+                </div>
+              }
+              @if (loc.description) {
+                <div class="meta-item">
+                  <span class="meta-label">Description</span>
+                  <span class="meta-value">{{ loc.description }}</span>
+                </div>
+              }
+            </div>
+
+            @if (loc.locationType === 'Bin' && binContents().length > 0) {
+              <div class="contents-section">
+                <span class="section-title">Contents ({{ binContents().length }})</span>
+                <table class="bin-detail-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Qty</th>
+                      <th>Status</th>
+                      <th>Lot #</th>
+                      <th>Placed</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (item of binContents(); track item.id) {
+                      <tr>
+                        <td>{{ item.entityName }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>
+                          <span [class]="getStatusClass(item.status)">
+                            {{ getStatusLabel(item.status) }}
+                          </span>
+                        </td>
+                        <td class="text-muted">{{ item.lotNumber ?? '—' }}</td>
+                        <td class="text-muted">{{ item.placedAt | date:'short' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+
+            @if (loc.locationType === 'Bin' && binContents().length === 0) {
+              <div class="empty-state">
+                <span class="material-icons-outlined">inventory_2</span>
+                <span>Bin is empty</span>
+              </div>
+            }
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons-outlined">touch_app</span>
+              <span>Select a location to view details</span>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Movements Tab -->
+    @if (activeTab() === 'movements') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-count">{{ movements().length }} recent movements</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="inv-table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>From</th>
+                <th>To</th>
+                <th>Reason</th>
+                <th>By</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of movements(); track m.id) {
+                <tr class="inv-row">
+                  <td>{{ m.entityName }}</td>
+                  <td class="qty-cell">{{ m.quantity }}</td>
+                  <td class="text-muted">{{ m.fromLocationName ?? '—' }}</td>
+                  <td class="text-muted">{{ m.toLocationName ?? '—' }}</td>
+                  <td>
+                    <span class="chip">{{ getReasonLabel(m.reason) }}</span>
+                  </td>
+                  <td>{{ m.movedByName }}</td>
+                  <td class="text-muted">{{ m.movedAt | date:'short' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="empty-row">
+                    <span class="material-icons-outlined">swap_horiz</span>
+                    <span>No movement history</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Location Dialog -->
+@if (showLocationDialog()) {
+  <app-dialog title="Add Location" (closed)="closeLocationDialog()">
+    <div [formGroup]="locationForm">
+      <app-input label="Name" formControlName="name" />
+
+      <app-select label="Type" formControlName="locationType" [options]="locationTypeOptions" />
+
+      @if (locationForm.controls.locationType.value === 'Bin') {
+        <app-input label="Barcode" formControlName="barcode" />
+      }
+
+      <app-input label="Description" formControlName="description" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeLocationDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="locationViolations"
+        [disabled]="locationForm.invalid || saving()"
+        (click)="saveLocation()">Create Location</button>
+    </div>
+  </app-dialog>
+}

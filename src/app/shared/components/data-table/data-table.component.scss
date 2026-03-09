@@ -1,0 +1,233 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.data-table {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+// ─── Toolbar (filter badge only, shown conditionally) ───
+.data-table__toolbar {
+  display: flex;
+  align-items: center;
+  padding: $sp-sm $sp-lg;
+  flex-shrink: 0;
+}
+
+.data-table__filter-badge {
+  @include uppercase-label($font-size-xxs, 0.3px, 600);
+  color: var(--primary);
+  padding: 2px $sp-md;
+  border: $border-width-thin solid var(--primary);
+  border-radius: $border-radius;
+}
+
+// ─── Scroll Container ───
+.data-table__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  @include custom-scrollbar;
+}
+
+// ─── Table ───
+.data-table__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: $font-size-sm;
+  background: var(--surface);
+}
+
+// ─── Header ───
+.data-table__th {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  padding: $sp-md $sp-lg;
+  text-align: left;
+  color: var(--text-muted);
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+  white-space: nowrap;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: $z-sticky;
+
+  &--sortable {
+    cursor: pointer;
+
+    &:hover {
+      color: var(--text);
+    }
+  }
+
+  &--right {
+    text-align: right;
+  }
+
+  &--center {
+    text-align: center;
+  }
+
+  &--checkbox {
+    width: 40px;
+    padding: $sp-md $sp-md;
+  }
+
+  &--gear {
+    width: 32px;
+    padding: $sp-md $sp-sm;
+    text-align: center;
+  }
+
+  &:hover .data-table__resize-handle {
+    opacity: 0.3;
+  }
+}
+
+.data-table__gear-btn {
+  @include flex-center;
+  width: 22px;
+  height: 22px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+
+  .material-icons-outlined {
+    font-size: 14px;
+  }
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.data-table__th-content {
+  display: inline;
+}
+
+.data-table__sort-icon {
+  font-size: 12px;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+.data-table__filter-btn {
+  @include flex-center;
+  width: 16px;
+  height: 16px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  margin-left: $sp-sm;
+  display: inline-flex;
+  vertical-align: middle;
+  opacity: 0;
+  transition: opacity $transition-fast;
+
+  .material-icons-outlined {
+    font-size: 12px;
+  }
+
+  &--active {
+    opacity: 1;
+    color: var(--primary);
+  }
+}
+
+.data-table__th:hover .data-table__filter-btn {
+  opacity: 1;
+}
+
+.data-table__resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  opacity: 0;
+  background: var(--primary);
+  transition: opacity $transition-fast;
+}
+
+// ─── Rows ───
+.data-table__row {
+  cursor: pointer;
+
+  &:nth-child(even) {
+    background: var(--row-alt);
+  }
+
+  &:hover {
+    background: var(--bg);
+  }
+}
+
+.data-table__td {
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  vertical-align: middle;
+
+  &--right {
+    text-align: right;
+  }
+
+  &--center {
+    text-align: center;
+  }
+
+  &--checkbox {
+    width: 40px;
+    padding: $sp-md $sp-md;
+  }
+
+  &--gear {
+    width: 32px;
+    padding: 0;
+  }
+}
+
+// ─── Paginator ───
+mat-paginator {
+  flex-shrink: 0;
+  border-top: $border-width-thin solid var(--border);
+
+  --mat-paginator-container-background-color: var(--surface);
+  --mat-paginator-container-text-color: var(--text-secondary);
+  --mat-paginator-container-text-size: #{$font-size-xs};
+}
+
+// ─── Checkbox ───
+mat-checkbox {
+  --mdc-checkbox-selected-checkmark-color: white;
+  --mdc-checkbox-selected-focus-icon-color: var(--primary);
+  --mdc-checkbox-selected-hover-icon-color: var(--primary);
+  --mdc-checkbox-selected-icon-color: var(--primary);
+  --mdc-checkbox-selected-pressed-icon-color: var(--primary);
+  --mdc-checkbox-unselected-icon-color: var(--border);
+  --mdc-checkbox-unselected-hover-icon-color: var(--text-muted);
+}
+
+// ─── Context Menu Trigger (invisible, positioned at cursor) ───
+.data-table__context-trigger {
+  position: fixed;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}

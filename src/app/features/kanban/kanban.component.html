@@ -9,9 +9,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
-  <div class="page-header">
-    <h1 class="page-header__title">Board</h1>
-    <span class="page-header__sep"></span>
+  <app-page-header title="Board">
     <div class="page-header__track-types">
       @for (tt of trackTypes(); track tt.id) {
         <button
@@ -22,7 +20,11 @@
         </button>
       }
     </div>
-  </div>
+    <button class="new-job-btn" (click)="openCreateDialog()">
+      <span class="material-icons-outlined">add</span>
+      New Job
+    </button>
+  </app-page-header>
 
   <div class="board">
     @for (col of columns(); track col.stage.id; let i = $index) {
@@ -30,7 +32,24 @@
         [column]="col"
         [dropListId]="'column-' + i"
         [allDropListIds]="dropListIds()"
-        (dropped)="onCardDropped($event)" />
+        (dropped)="onCardDropped($event)"
+        (cardClicked)="onCardClicked($event)" />
     }
   </div>
+
+  @if (selectedJobId(); as jobId) {
+    <app-job-detail-panel
+      [jobId]="jobId"
+      (closed)="onPanelClose()"
+      (editRequested)="openEditDialog($event)" />
+  }
+
+  @if (showJobDialog()) {
+    <app-job-dialog
+      [mode]="dialogMode()"
+      [job]="dialogJob()"
+      [trackTypes]="trackTypes()"
+      (saved)="onDialogSaved()"
+      (cancelled)="onDialogCancelled()" />
+  }
 }

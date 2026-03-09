@@ -1,0 +1,24 @@
+<div class="confirm-dialog">
+  <div class="confirm-dialog__header">
+    <span class="confirm-dialog__title">{{ data.title }}</span>
+    <button class="icon-btn" (click)="cancel()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="confirm-dialog__body">
+    <p class="confirm-dialog__message">{{ data.message }}</p>
+  </div>
+
+  <div class="confirm-dialog__footer">
+    <button class="action-btn" (click)="cancel()">{{ cancelLabel }}</button>
+    <button
+      class="action-btn"
+      [class.action-btn--primary]="severity === 'info'"
+      [class.action-btn--warn]="severity === 'warn'"
+      [class.action-btn--danger]="severity === 'danger'"
+      (click)="confirm()">
+      {{ confirmLabel }}
+    </button>
+  </div>
+</div>

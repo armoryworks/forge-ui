@@ -17,6 +17,7 @@ export class BoardColumnComponent {
   readonly dropListId = input.required<string>();
 
   readonly dropped = output<CdkDragDrop<KanbanJob[]>>();
+  readonly cardClicked = output<KanbanJob>();
 
   protected readonly jobCount = computed(() => this.column().jobs.length);
   protected readonly wipLimit = computed(() => this.column().stage.wipLimit);

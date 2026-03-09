@@ -1,0 +1,135 @@
+<div class="panel-backdrop" (click)="close()"></div>
+<aside class="panel">
+  @if (loading()) {
+    <div class="panel__loading">
+      <span class="material-icons-outlined panel__loading-icon">hourglass_empty</span>
+      <p>Loading...</p>
+    </div>
+  } @else if (job(); as j) {
+    <!-- Header -->
+    <div class="panel__header">
+      <div class="panel__header-left">
+        <span class="panel__job-number">{{ j.jobNumber }}</span>
+        <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
+      </div>
+      <button class="panel__edit" (click)="editRequested.emit(job()!)" title="Edit Job">
+        <span class="material-icons-outlined">edit</span>
+      </button>
+      <button class="panel__close" (click)="close()" title="Close">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="panel__body">
+      <h2 class="panel__title">{{ j.title }}</h2>
+
+      <!-- Metadata Grid -->
+      <div class="panel__meta">
+        <div class="meta-row">
+          <span class="meta-row__label">Priority</span>
+          <span class="meta-row__value">
+            <span class="meta-row__dot" [style.background]="priorityColor(j.priority)"></span>
+            {{ j.priority }}
+          </span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-row__label">Assignee</span>
+          <span class="meta-row__value">
+            @if (j.assigneeInitials) {
+              <app-avatar [initials]="j.assigneeInitials" [color]="j.assigneeColor ?? '#0d9488'" size="sm" />
+              {{ j.assigneeName ?? j.assigneeInitials }}
+            } @else {
+              <span class="meta-row__empty">Unassigned</span>
+            }
+          </span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-row__label">Customer</span>
+          <span class="meta-row__value">{{ j.customerName ?? '—' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-row__label">Due Date</span>
+          <span class="meta-row__value">{{ formatDate(j.dueDate) }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-row__label">Start Date</span>
+          <span class="meta-row__value">{{ formatDate(j.startDate) }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-row__label">Track</span>
+          <span class="meta-row__value">{{ j.trackTypeName }}</span>
+        </div>
+      </div>
+
+      <!-- Description -->
+      @if (j.description) {
+        <div class="panel__section">
+          <h3 class="panel__section-title">Description</h3>
+          <p class="panel__description">{{ j.description }}</p>
+        </div>
+      }
+
+      <!-- Subtasks -->
+      <div class="panel__section">
+        <div class="panel__section-header">
+          <h3 class="panel__section-title">Subtasks</h3>
+          @if (subtasks().length) {
+            <span class="panel__section-count">{{ completedCount() }}/{{ subtasks().length }}</span>
+          }
+        </div>
+
+        @if (subtasks().length) {
+          <div class="subtask-list">
+            @for (st of subtasks(); track st.id) {
+              <label class="subtask" [class.subtask--done]="st.isCompleted">
+                <input
+                  type="checkbox"
+                  class="subtask__checkbox"
+                  [checked]="st.isCompleted"
+                  (change)="toggleSubtask(st)" />
+                <span class="subtask__text">{{ st.text }}</span>
+              </label>
+            }
+          </div>
+        }
+
+        <div class="subtask-add">
+          <input
+            type="text"
+            class="subtask-add__input"
+            placeholder="Add a subtask..."
+            [formControl]="newSubtaskControl"
+            (keydown.enter)="addSubtask()" />
+          <button class="subtask-add__btn" (click)="addSubtask()" [disabled]="!newSubtaskControl.value?.trim()">
+            <span class="material-icons-outlined">add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Activity -->
+      @if (activity().length) {
+        <div class="panel__section">
+          <h3 class="panel__section-title">Activity</h3>
+          <div class="activity-list">
+            @for (a of activity(); track a.id) {
+              <div class="activity-item">
+                <div class="activity-item__avatar">
+                  @if (a.userInitials) {
+                    <app-avatar [initials]="a.userInitials" color="#64748b" size="sm" />
+                  } @else {
+                    <span class="material-icons-outlined activity-item__system-icon">settings</span>
+                  }
+                </div>
+                <div class="activity-item__content">
+                  <span class="activity-item__desc">{{ a.description }}</span>
+                  <span class="activity-item__time">{{ formatActivityDate(a.createdAt) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</aside>

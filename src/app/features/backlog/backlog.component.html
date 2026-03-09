@@ -1,0 +1,71 @@
+@if (loading()) {
+  <div class="page-loading">
+    <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+    <p>Loading backlog...</p>
+  </div>
+} @else if (error()) {
+  <div class="page-error">
+    <span class="material-icons-outlined page-error__icon">error_outline</span>
+    <p>{{ error() }}</p>
+  </div>
+} @else {
+  <app-page-header title="Backlog">
+    <app-input label="Search" [formControl]="searchControl" placeholder="Search jobs..." />
+    <app-select label="Track" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
+    <app-select label="Priority" [formControl]="priorityControl" [options]="priorityOptions" />
+    <app-select label="Assignee" [formControl]="assigneeControl" [options]="assigneeOptions()" />
+    <button class="new-job-btn" (click)="openCreateDialog()">
+      <span class="material-icons-outlined">add</span>
+      New Job
+    </button>
+  </app-page-header>
+
+  <div class="page-content page-content--table">
+  <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
+    [rowClass]="backlogRowClass" emptyIcon="search_off" emptyMessage="No jobs match your filters"
+    (rowClick)="onRowClicked($any($event))">
+    <ng-template appColumnCell="jobNumber" let-job>
+      <span class="job-number">{{ job.jobNumber }}</span>
+    </ng-template>
+    <ng-template appColumnCell="title" let-job>
+      <span class="job-title">{{ job.title }}</span>
+    </ng-template>
+    <ng-template appColumnCell="stageName" let-job>
+      <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
+    </ng-template>
+    <ng-template appColumnCell="priorityName" let-job>
+      <span class="priority-dot" [style.background]="priorityColor(job.priorityName)"></span>
+      {{ job.priorityName }}
+    </ng-template>
+    <ng-template appColumnCell="assignee" let-job>
+      @if (job.assigneeInitials) {
+        <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#0d9488'" size="sm" />
+      } @else {
+        <span class="unassigned">—</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="customerName" let-job>
+      {{ job.customerName ?? '—' }}
+    </ng-template>
+    <ng-template appColumnCell="dueDate" let-job>
+      <span [class.overdue-text]="job.isOverdue">{{ formatDate(job.dueDate) }}</span>
+    </ng-template>
+  </app-data-table>
+  </div>
+
+  @if (selectedJobId(); as jobId) {
+    <app-job-detail-panel
+      [jobId]="jobId"
+      (closed)="onPanelClose()"
+      (editRequested)="openEditDialog($event)" />
+  }
+
+  @if (showJobDialog()) {
+    <app-job-dialog
+      [mode]="dialogMode()"
+      [job]="dialogJob()"
+      [trackTypes]="trackTypes()"
+      (saved)="onDialogSaved()"
+      (cancelled)="onDialogCancelled()" />
+  }
+}

@@ -22,7 +22,7 @@
     [cdkDropListEnterPredicate]="canEnter"
     (cdkDropListDropped)="onDrop($event)">
     @for (job of column().jobs; track job.id) {
-      <app-job-card [job]="job" cdkDrag [cdkDragData]="job" />
+      <app-job-card [job]="job" cdkDrag [cdkDragData]="job" (cardClicked)="cardClicked.emit($event)" />
     }
     @empty {
       <div class="column__empty">No jobs</div>

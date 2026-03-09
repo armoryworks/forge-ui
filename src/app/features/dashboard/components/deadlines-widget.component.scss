@@ -18,7 +18,7 @@
   color: var(--text-secondary);
 
   .deadline-item--overdue & {
-    color: var(--warn);
+    color: var(--error);
     font-weight: 600;
   }
 }
@@ -32,7 +32,7 @@
   color: var(--primary-dark);
 
   .deadline-item--overdue & {
-    color: var(--warn);
+    color: var(--error);
   }
 }
 
@@ -42,7 +42,7 @@
   @include truncate;
 
   .deadline-item--overdue & {
-    color: var(--warn);
+    color: var(--error);
     font-weight: 600;
   }
 }

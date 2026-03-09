@@ -1,0 +1,19 @@
+@if (open()) {
+  <div class="side-panel-backdrop" (click)="onBackdropClick()"></div>
+  <aside class="side-panel">
+    <div class="side-panel__header">
+      <span class="side-panel__title">{{ title() }}</span>
+      <button class="icon-btn" (click)="close()" title="Close">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="side-panel__body">
+      <ng-content />
+    </div>
+
+    <div class="side-panel__footer">
+      <ng-content select="[panel-actions]" />
+    </div>
+  </aside>
+}

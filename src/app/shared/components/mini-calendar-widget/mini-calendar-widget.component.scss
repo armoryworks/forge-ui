@@ -1,0 +1,17 @@
+@use 'styles/variables' as *;
+
+.mini-calendar {
+  --mat-datepicker-calendar-container-background-color: var(--surface);
+  --mat-datepicker-calendar-container-text-color: var(--text);
+  --mat-datepicker-calendar-header-text-color: var(--text-muted);
+
+  mat-calendar {
+    width: 100%;
+  }
+}
+
+// Highlight dates with events
+:host ::ng-deep .calendar-highlight {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  border-radius: 50%;
+}

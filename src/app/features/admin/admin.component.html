@@ -1,0 +1,243 @@
+<app-page-header title="Admin Settings" />
+
+<div class="admin-content">
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="activeTab() === 'users'" (click)="switchTab('users')">
+      <span class="material-icons-outlined">people</span>
+      Users
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'track-types'" (click)="switchTab('track-types')">
+      <span class="material-icons-outlined">route</span>
+      Track Types
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'reference-data'" (click)="switchTab('reference-data')">
+      <span class="material-icons-outlined">dataset</span>
+      Reference Data
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading">
+      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+      <span>Loading...</span>
+    </div>
+  } @else {
+    <!-- Users Tab -->
+    @if (activeTab() === 'users') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-header__count">{{ users().length }} users</span>
+          <button class="action-btn action-btn--primary" (click)="openCreateUser()">
+            <span class="material-icons-outlined">person_add</span>
+            Add User
+          </button>
+        </div>
+
+        <app-data-table tableId="admin-users" [columns]="userColumns" [data]="users()" emptyIcon="people" emptyMessage="No users found">
+          <ng-template appColumnCell="avatar" let-user>
+            <app-avatar [initials]="user.initials ?? '??'" [color]="user.avatarColor ?? '#94a3b8'" />
+          </ng-template>
+          <ng-template appColumnCell="name" let-user>
+            <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+          </ng-template>
+          <ng-template appColumnCell="email" let-user>
+            <span class="text-muted">{{ user.email }}</span>
+          </ng-template>
+          <ng-template appColumnCell="role" let-user>
+            <span class="chip" [class.chip--primary]="user.roles.includes('Admin')">
+              {{ user.roles.length ? user.roles[0] : 'None' }}
+            </span>
+          </ng-template>
+          <ng-template appColumnCell="status" let-user>
+            <span class="status-dot" [class.status-dot--active]="user.isActive" [class.status-dot--inactive]="!user.isActive"></span>
+            {{ user.isActive ? 'Active' : 'Inactive' }}
+          </ng-template>
+          <ng-template appColumnCell="actions" let-user>
+            <div class="action-cell">
+              <button class="icon-btn" title="Edit" (click)="openEditUser(user); $event.stopPropagation()">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="icon-btn" [title]="user.isActive ? 'Deactivate' : 'Activate'" (click)="toggleUserActive(user); $event.stopPropagation()">
+                <span class="material-icons-outlined">{{ user.isActive ? 'person_off' : 'person' }}</span>
+              </button>
+            </div>
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
+
+    <!-- Track Types Tab -->
+    @if (activeTab() === 'track-types') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-header__count">{{ trackTypes().length }} track types</span>
+        </div>
+
+        <div class="accordion-list">
+          @for (track of trackTypes(); track track.id) {
+            <div class="accordion-item">
+              <button class="accordion-header" (click)="toggleTrackType(track.id)">
+                <span class="material-icons-outlined accordion-icon">
+                  {{ expandedTrackType() === track.id ? 'expand_more' : 'chevron_right' }}
+                </span>
+                <span class="accordion-title">{{ track.name }}</span>
+                <span class="accordion-code">{{ track.code }}</span>
+                @if (track.isDefault) {
+                  <span class="default-badge">Default</span>
+                }
+                <span class="stage-count">{{ track.stages.length }} stages</span>
+              </button>
+
+              @if (expandedTrackType() === track.id) {
+                <div class="accordion-body">
+                  @if (track.description) {
+                    <p class="track-description">{{ track.description }}</p>
+                  }
+                  <table class="admin-table admin-table--nested">
+                    <thead>
+                      <tr>
+                        <th>Order</th>
+                        <th>Stage</th>
+                        <th>Code</th>
+                        <th>Color</th>
+                        <th>WIP Limit</th>
+                        <th>Document Type</th>
+                        <th>Irreversible</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (stage of track.stages; track stage.id) {
+                        <tr class="admin-row">
+                          <td>{{ stage.sortOrder }}</td>
+                          <td>
+                            <span class="stage-name-chip" [style.border-left-color]="stage.color">
+                              {{ stage.name }}
+                            </span>
+                          </td>
+                          <td class="text-muted">{{ stage.code }}</td>
+                          <td>
+                            <span class="color-swatch" [style.background]="stage.color"></span>
+                            {{ stage.color }}
+                          </td>
+                          <td>{{ stage.wipLimit ?? '—' }}</td>
+                          <td>{{ stage.accountingDocumentType ?? '—' }}</td>
+                          <td>
+                            @if (stage.isIrreversible) {
+                              <span class="material-icons-outlined lock-icon">lock</span>
+                            } @else {
+                              <span class="text-muted">—</span>
+                            }
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Reference Data Tab -->
+    @if (activeTab() === 'reference-data') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-header__count">{{ referenceDataGroups().length }} groups</span>
+        </div>
+
+        <div class="accordion-list">
+          @for (group of referenceDataGroups(); track group.groupCode) {
+            <div class="accordion-item">
+              <button class="accordion-header" (click)="toggleGroup(group.groupCode)">
+                <span class="material-icons-outlined accordion-icon">
+                  {{ expandedGroup() === group.groupCode ? 'expand_more' : 'chevron_right' }}
+                </span>
+                <span class="accordion-title">{{ formatGroupCode(group.groupCode) }}</span>
+                <span class="stage-count">{{ group.values.length }} entries</span>
+              </button>
+
+              @if (expandedGroup() === group.groupCode) {
+                <div class="accordion-body">
+                  <table class="admin-table admin-table--nested">
+                    <thead>
+                      <tr>
+                        <th>Order</th>
+                        <th>Code</th>
+                        <th>Label</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (entry of group.values; track entry.id) {
+                        <tr class="admin-row">
+                          <td>{{ entry.sortOrder }}</td>
+                          <td class="text-muted">{{ entry.code }}</td>
+                          <td>{{ entry.label }}</td>
+                          <td>
+                            <span class="status-dot" [class.status-dot--active]="entry.isActive" [class.status-dot--inactive]="!entry.isActive"></span>
+                            {{ entry.isActive ? 'Active' : 'Inactive' }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- User Dialog -->
+@if (showUserDialog()) {
+  <app-dialog [title]="editingUser() ? 'Edit User' : 'Add User'" width="400px" (closed)="closeUserDialog()">
+    <div [formGroup]="userForm">
+      <div class="dialog-row">
+        <app-input label="First Name" formControlName="firstName" />
+        <app-input label="Last Name" formControlName="lastName" />
+      </div>
+
+      @if (!editingUser()) {
+        <app-input label="Email" type="email" formControlName="email" />
+        <app-input label="Password" type="password" formControlName="password" />
+      }
+
+      <app-input label="Initials" formControlName="initials" [maxlength]="3" />
+
+      <app-select label="Role" formControlName="role" [options]="roleOptions" />
+
+      <div class="color-picker-row">
+        <label class="color-picker-label">Avatar Color</label>
+        <div class="color-picker">
+          @for (color of avatarColors; track color) {
+            <button class="color-option"
+              [style.background]="color"
+              [class.color-option--selected]="avatarColor() === color"
+              (click)="avatarColor.set(color)">
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (editingUser()) {
+        <app-toggle label="Active" formControlName="isActive" />
+      }
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeUserDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="userViolations"
+        [disabled]="userForm.invalid || saving()"
+        (click)="saveUser()">
+        {{ editingUser() ? 'Save Changes' : 'Create User' }}
+      </button>
+    </div>
+  </app-dialog>
+}

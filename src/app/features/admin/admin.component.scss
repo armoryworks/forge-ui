@@ -1,0 +1,160 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ─── Content ───
+.admin-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel-header__count {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+// ─── Nested Tables (Track Types, Reference Data) ───
+.admin-table--nested {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+  margin-top: $sp-md;
+
+  th, td { padding: $sp-sm $sp-lg; }
+  thead { position: sticky; top: 0; z-index: $z-sticky; }
+
+  th {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    text-align: left;
+    color: var(--text-muted);
+    background: var(--surface);
+    border-bottom: $border-width-thin solid var(--border);
+    white-space: nowrap;
+  }
+
+  .admin-row {
+    td { border-bottom: $border-width-thin solid var(--border); vertical-align: middle; }
+    &:hover { background: var(--bg); }
+  }
+}
+
+.action-cell {
+  display: flex;
+  gap: $sp-sm;
+  justify-content: flex-end;
+}
+
+// ─── User Styles ───
+.user-name { font-weight: 600; }
+
+.status-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: $sp-sm;
+  vertical-align: middle;
+  &--active { background: var(--success); }
+  &--inactive { background: var(--text-muted); }
+}
+
+// ─── Accordion ───
+.accordion-list {
+  flex: 1;
+  overflow: auto;
+  @include custom-scrollbar;
+  padding: 0 $sp-lg $sp-lg;
+}
+
+.accordion-item {
+  border: $border-width-thin solid var(--border);
+  margin-bottom: $sp-md;
+  &:last-child { margin-bottom: 0; }
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-md $sp-lg;
+  border: none;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  font-size: $font-size-sm;
+  text-align: left;
+  &:hover { background: var(--bg); }
+}
+
+.accordion-icon { font-size: 18px; color: var(--text-muted); }
+.accordion-title { font-weight: 700; }
+.accordion-code { @include uppercase-label($font-size-xxs, 0.5px, 500); color: var(--text-muted); }
+
+.default-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: 1px 6px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border: $border-width-thin solid var(--primary);
+  border-radius: $border-radius;
+}
+
+.stage-count { @include uppercase-label($font-size-xxs, 0.5px, 500); color: var(--text-muted); margin-left: auto; }
+
+.accordion-body {
+  padding: $sp-md $sp-lg $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  background: var(--bg);
+}
+
+.track-description { font-size: $font-size-sm; color: var(--text-secondary); margin: 0 0 $sp-md; }
+
+// ─── Stage Styles ───
+.stage-name-chip { padding-left: $sp-md; border-left: 3px solid; }
+
+.color-swatch {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: $sp-sm;
+}
+
+.lock-icon { font-size: 14px; color: var(--error); }
+
+// ─── Dialog Layout ───
+.dialog-row { display: flex; gap: $sp-md; }
+
+// ─── Color Picker ───
+.color-picker-row { margin-bottom: $sp-lg; }
+
+.color-picker-label {
+  display: block;
+  font-size: $font-size-xs;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: $sp-sm;
+}
+
+.color-picker { display: flex; gap: $sp-sm; flex-wrap: wrap; }
+
+.color-option {
+  width: 24px; height: 24px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  &--selected { border-color: var(--text); box-shadow: 0 0 0 2px var(--surface); }
+  &:hover { transform: scale(1.1); }
+}

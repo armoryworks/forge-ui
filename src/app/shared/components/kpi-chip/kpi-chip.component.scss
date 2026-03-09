@@ -21,7 +21,7 @@
   line-height: 1;
 
   &--warn {
-    color: var(--warn);
+    color: var(--error);
   }
 
   &--success {
@@ -55,7 +55,7 @@
   }
 
   &--down {
-    color: var(--warn);
+    color: var(--error);
   }
 
   &--neutral {

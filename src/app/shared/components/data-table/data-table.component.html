@@ -1,0 +1,196 @@
+<div class="data-table">
+  @if (pagedData().length || sortedData().length) {
+    <div class="data-table__scroll">
+      <table class="data-table__table">
+        <thead>
+          <tr>
+            @if (selectable()) {
+              <th class="data-table__th data-table__th--checkbox">
+                <mat-checkbox
+                  [checked]="allSelected()"
+                  [indeterminate]="someSelected()"
+                  (change)="toggleSelectAll()" />
+              </th>
+            }
+            @for (col of visibleColumns(); track col.field) {
+              <th
+                class="data-table__th"
+                [class.data-table__th--sortable]="col.sortable"
+                [class.data-table__th--right]="col.align === 'right'"
+                [class.data-table__th--center]="col.align === 'center'"
+                [style.width]="getColumnWidth(col)"
+                (click)="onHeaderClick(col, $event)"
+                (contextmenu)="onHeaderContextMenu(col, $event)">
+                <span class="data-table__th-content">
+                  {{ col.header }}
+                  @if (getSortState(col.field); as sort) {
+                    <span class="material-icons-outlined data-table__sort-icon">
+                      {{ sort.direction === 'asc' ? 'arrow_upward' : 'arrow_downward' }}
+                    </span>
+                  }
+                </span>
+                @if (col.filterable) {
+                  <button
+                    class="data-table__filter-btn"
+                    [class.data-table__filter-btn--active]="hasFilter(col.field)"
+                    (click)="openFilter(col.field, $event)"
+                    cdkOverlayOrigin
+                    #filterOrigin="cdkOverlayOrigin">
+                    <span class="material-icons-outlined">filter_list</span>
+                  </button>
+
+                  <ng-template
+                    cdkConnectedOverlay
+                    [cdkConnectedOverlayOrigin]="filterOrigin"
+                    [cdkConnectedOverlayOpen]="filterOpenField() === col.field"
+                    [cdkConnectedOverlayHasBackdrop]="true"
+                    cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                    (backdropClick)="closeFilter()">
+                    <app-column-filter-popover
+                      [column]="col"
+                      [currentValue]="filters()[col.field] ?? null"
+                      (filterApplied)="onFilterApplied($event)"
+                      (filterCleared)="onFilterCleared($event)"
+                      (closed)="closeFilter()" />
+                  </ng-template>
+                }
+                <span
+                  class="data-table__resize-handle"
+                  (mousedown)="onResizeStart(col.field, $event)"
+                  (dblclick)="onResizeDoubleClick(col.field, $event)"></span>
+              </th>
+            }
+            <th class="data-table__th data-table__th--gear">
+              <button
+                class="data-table__gear-btn"
+                (click)="toggleColumnManager($event)"
+                cdkOverlayOrigin
+                #colManagerOrigin="cdkOverlayOrigin">
+                <span class="material-icons-outlined">settings</span>
+              </button>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of pagedData(); track trackByFn($index, row)) {
+            <tr
+              class="data-table__row"
+              [class]="getRowClasses(row)"
+              (click)="onRowClick(row)">
+              @if (selectable()) {
+                <td class="data-table__td data-table__td--checkbox" (click)="toggleRowSelection(row, $event)">
+                  <mat-checkbox [checked]="isRowSelected(row)" />
+                </td>
+              }
+              @for (col of visibleColumns(); track col.field) {
+                <td
+                  class="data-table__td"
+                  [class.data-table__td--right]="col.align === 'right'"
+                  [class.data-table__td--center]="col.align === 'center'">
+                  @if (getCellTemplate(col.field); as tmpl) {
+                    <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: row }" />
+                  } @else {
+                    {{ $any(row)[col.field] }}
+                  }
+                </td>
+              }
+              <td class="data-table__td data-table__td--gear"></td>
+            </tr>
+          } @empty {
+            <tr>
+              <td [attr.colspan]="visibleColumns().length + (selectable() ? 1 : 0) + 1">
+                <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    @if (sortedData().length > 25) {
+      <mat-paginator
+        [length]="sortedData().length"
+        [pageSize]="pageSize()"
+        [pageIndex]="pageIndex()"
+        [pageSizeOptions]="[25, 50, 100]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons />
+    }
+
+    <!-- Column Manager Overlay -->
+    <ng-template
+      cdkConnectedOverlay
+      [cdkConnectedOverlayOrigin]="colManagerOrigin"
+      [cdkConnectedOverlayOpen]="columnManagerOpen()"
+      [cdkConnectedOverlayHasBackdrop]="true"
+      cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+      (backdropClick)="closeColumnManager()">
+      <app-column-manager-panel
+        [columns]="columns()"
+        [visibility]="columnVisibility()"
+        [order]="columnOrder()"
+        (stateChanged)="onColumnManagerChange($event)"
+        (resetRequested)="onColumnManagerReset()"
+        (closed)="closeColumnManager()" />
+    </ng-template>
+  } @else {
+    <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" />
+  }
+</div>
+
+<!-- Context Menu (positioned at cursor) -->
+<div class="data-table__context-trigger"
+     [style.left.px]="contextMenuPosition().x"
+     [style.top.px]="contextMenuPosition().y"
+     [matMenuTriggerFor]="headerContextMenu"
+     #contextMenuTrigger="matMenuTrigger"></div>
+
+<mat-menu #headerContextMenu="matMenu">
+  @if (contextMenuCol(); as col) {
+    @if (col.sortable) {
+      <button mat-menu-item (click)="contextSortAsc()">
+        <span class="material-icons-outlined">arrow_upward</span>
+        <span>Sort Ascending</span>
+      </button>
+      <button mat-menu-item (click)="contextSortDesc()">
+        <span class="material-icons-outlined">arrow_downward</span>
+        <span>Sort Descending</span>
+      </button>
+      @if (getSortState(col.field)) {
+        <button mat-menu-item (click)="contextClearSort()">
+          <span class="material-icons-outlined">sort</span>
+          <span>Clear Sort</span>
+        </button>
+      }
+      <mat-divider />
+    }
+    @if (col.filterable) {
+      <button mat-menu-item (click)="contextFilter()">
+        <span class="material-icons-outlined">filter_list</span>
+        <span>Filter...</span>
+      </button>
+      @if (hasFilter(col.field)) {
+        <button mat-menu-item (click)="contextClearFilter()">
+          <span class="material-icons-outlined">filter_list_off</span>
+          <span>Clear Filter</span>
+        </button>
+      }
+      @if (activeFilterCount() > 0) {
+        <button mat-menu-item (click)="contextClearAllFilters()">
+          <span class="material-icons-outlined">clear_all</span>
+          <span>Clear All Filters</span>
+        </button>
+      }
+      <mat-divider />
+    }
+    <button mat-menu-item (click)="contextHideColumn()">
+      <span class="material-icons-outlined">visibility_off</span>
+      <span>Hide Column</span>
+    </button>
+    @if (columnWidths()[col.field]) {
+      <button mat-menu-item (click)="contextResetWidth()">
+        <span class="material-icons-outlined">width_normal</span>
+        <span>Reset Width</span>
+      </button>
+    }
+  }
+</mat-menu>

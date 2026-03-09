@@ -1,0 +1,70 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.side-panel-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: $z-dropdown;
+}
+
+.side-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 400px;
+  background: var(--surface);
+  border-left: $border-width solid var(--border);
+  z-index: $z-dropdown + 1;
+  display: flex;
+  flex-direction: column;
+  animation: slide-in $transition-normal;
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.side-panel__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.side-panel__title {
+  @include uppercase-label($font-size-sm, 0.5px, 700);
+  @include truncate;
+  flex: 1;
+  margin-right: $sp-md;
+}
+
+.side-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $sp-lg;
+  @include custom-scrollbar;
+}
+
+.side-panel__footer {
+  flex-shrink: 0;
+  border-top: $border-width-thin solid var(--border);
+  padding: $sp-md $sp-lg;
+  display: flex;
+  gap: $sp-md;
+  justify-content: flex-end;
+
+  &:empty {
+    display: none;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+
+.assets-layout { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+
+.assets-list-panel { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+
+.row--selected { background: var(--bg); }
+.type-icon { font-size: 18px; color: var(--text-muted); }
+.asset-name { font-weight: 600; }
+.hours-cell { font-variant-numeric: tabular-nums; }
+
+.detail-panel {
+  width: 360px; border-left: $border-width-thin solid var(--border);
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+
+.detail-header {
+  @include flex-between; padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+.detail-header__info { display: flex; align-items: center; gap: $sp-md; }
+.detail-header__actions { display: flex; gap: $sp-sm; }
+.detail-icon { font-size: 24px; color: var(--text-muted); }
+.detail-name { font-weight: 700; }
+.detail-type { font-size: $font-size-xs; color: var(--text-muted); }
+
+.detail-body {
+  flex: 1; overflow: auto; @include custom-scrollbar;
+  padding: $sp-lg; display: flex; flex-direction: column; gap: $sp-lg;
+}
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: $sp-md; }
+.info-item { display: flex; flex-direction: column; gap: 2px; }
+.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: $font-size-sm; }
+.mono { font-family: monospace; }
+
+.notes-section { display: flex; flex-direction: column; gap: $sp-sm; }
+.notes-text { font-size: $font-size-sm; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+
+.status-actions { display: flex; flex-direction: column; gap: $sp-sm; }
+.status-btn-group { display: flex; gap: $sp-sm; flex-wrap: wrap; }
+.status-btn {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: 3px 8px; border: $border-width-thin solid var(--border);
+  background: var(--surface); color: var(--text-muted); cursor: pointer;
+  border-radius: $border-radius; font-family: $font-family-primary;
+  &:hover { background: var(--bg); color: var(--text); }
+  &--active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+}
+

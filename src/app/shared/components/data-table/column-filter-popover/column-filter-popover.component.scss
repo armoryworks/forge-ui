@@ -1,0 +1,85 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.filter-popover {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  min-width: 220px;
+  max-width: 280px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.filter-popover__header {
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.filter-popover__title {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.filter-popover__body {
+  padding: $sp-lg;
+}
+
+.filter-popover__range {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.filter-popover__enum-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  max-height: 200px;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
+.filter-popover__enum-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.filter-popover__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.filter-popover__btn {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: $sp-sm $sp-lg;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  cursor: pointer;
+
+  &--clear {
+    background: none;
+    color: var(--text-muted);
+
+    &:hover {
+      color: var(--text);
+      background: var(--bg);
+    }
+  }
+
+  &--apply {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+
+    &:hover {
+      background: var(--primary-dark);
+    }
+  }
+}

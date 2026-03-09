@@ -1,0 +1,18 @@
+<mat-form-field appearance="outline">
+  <mat-label>{{ label() }}</mat-label>
+  <input matInput
+    [formControl]="searchControl"
+    [matAutocomplete]="auto"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    (input)="onInput()"
+    (blur)="markTouched()" />
+  <span matSuffix class="material-icons-outlined entity-picker__icon">search</span>
+  <mat-autocomplete #auto="matAutocomplete"
+    [displayWith]="displayFn"
+    (optionSelected)="onOptionSelected($event)">
+    @for (entity of results(); track entity['id']) {
+      <mat-option [value]="entity">{{ getDisplayText(entity) }}</mat-option>
+    }
+  </mat-autocomplete>
+</mat-form-field>

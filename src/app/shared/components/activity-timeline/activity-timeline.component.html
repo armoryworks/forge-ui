@@ -1,0 +1,22 @@
+<div class="timeline" [class.timeline--compact]="compact()">
+  @for (activity of activities(); track activity.id) {
+    <div class="timeline__item">
+      <div class="timeline__avatar">
+        @if (activity.userInitials) {
+          <app-avatar
+            [initials]="activity.userInitials"
+            [color]="activity.userColor ?? '#64748b'"
+            size="sm" />
+        } @else {
+          <span class="material-icons-outlined timeline__system-icon">settings</span>
+        }
+      </div>
+      <div class="timeline__content">
+        <span class="timeline__desc">{{ activity.description }}</span>
+        <span class="timeline__time">{{ formatDate(activity.createdAt) }}</span>
+      </div>
+    </div>
+  } @empty {
+    <div class="timeline__empty">No activity yet</div>
+  }
+</div>

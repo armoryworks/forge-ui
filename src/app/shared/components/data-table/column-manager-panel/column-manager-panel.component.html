@@ -1,0 +1,18 @@
+<div class="col-manager" (click)="$event.stopPropagation()">
+  <div class="col-manager__header">
+    <span class="col-manager__title">Columns</span>
+    <button class="col-manager__reset" (click)="onReset()">Reset</button>
+  </div>
+
+  <div class="col-manager__list" cdkDropList (cdkDropListDropped)="onDrop($event)">
+    @for (field of localOrder(); track field) {
+      @if (getColumnByField(field); as col) {
+        <div class="col-manager__item" cdkDrag>
+          <span class="material-icons-outlined col-manager__drag" cdkDragHandle>drag_indicator</span>
+          <mat-checkbox [checked]="isVisible(field)" (change)="toggleVisibility(field)" />
+          <span class="col-manager__label">{{ col.header }}</span>
+        </div>
+      }
+    }
+  </div>
+</div>

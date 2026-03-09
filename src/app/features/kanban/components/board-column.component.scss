@@ -18,7 +18,7 @@
   overflow: hidden;
 
   &--over-wip {
-    border-color: var(--warn);
+    border-color: var(--error);
   }
 }
 
@@ -50,7 +50,7 @@
   color: var(--text-muted);
 
   &--warn {
-    color: var(--warn);
+    color: var(--error);
     font-weight: 700;
   }
 }

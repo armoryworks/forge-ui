@@ -1,0 +1,161 @@
+<app-page-header title="Assets">
+  <app-input label="Search" [formControl]="searchControl" placeholder="Search assets..."  />
+  <app-select label="Type" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
+  <app-select label="Status" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
+  <button class="action-btn action-btn--primary" (click)="openCreateAsset()">
+    <span class="material-icons-outlined">add</span>
+    Add Asset
+  </button>
+</app-page-header>
+
+<div class="assets-layout">
+  <!-- Left: Asset List -->
+  <div class="assets-list-panel">
+    @if (loading()) {
+      <div class="page-loading">
+        <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+        <span>Loading...</span>
+      </div>
+    } @else {
+      <app-data-table tableId="assets" [columns]="assetColumns" [data]="assets()"
+        [rowClass]="assetRowClass" emptyIcon="precision_manufacturing" emptyMessage="No assets found"
+        (rowClick)="selectAsset($any($event))">
+        <ng-template appColumnCell="icon" let-asset>
+          <span class="material-icons-outlined type-icon">{{ getTypeIcon(asset.assetType) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="name" let-asset>
+          <span class="asset-name">{{ asset.name }}</span>
+        </ng-template>
+        <ng-template appColumnCell="assetType" let-asset>
+          <span class="text-muted">{{ asset.assetType }}</span>
+        </ng-template>
+        <ng-template appColumnCell="location" let-asset>
+          <span class="text-muted">{{ asset.location ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="manufacturer" let-asset>
+          <span class="text-muted">{{ asset.manufacturer ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-asset>
+          <span [class]="getStatusClass(asset.status)">{{ getStatusLabel(asset.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="currentHours" let-asset>
+          <span class="text-muted hours-cell">{{ asset.currentHours > 0 ? asset.currentHours : '—' }}</span>
+        </ng-template>
+      </app-data-table>
+    }
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedAsset(); as asset) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">{{ getTypeIcon(asset.assetType) }}</span>
+          <div>
+            <div class="detail-name">{{ asset.name }}</div>
+            <div class="detail-type">{{ asset.assetType }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Edit" (click)="openEditAsset()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(asset.status)">{{ getStatusLabel(asset.status) }}</span>
+            </span>
+          </div>
+          @if (asset.location) {
+            <div class="info-item">
+              <span class="info-label">Location</span>
+              <span class="info-value">{{ asset.location }}</span>
+            </div>
+          }
+          @if (asset.manufacturer) {
+            <div class="info-item">
+              <span class="info-label">Manufacturer</span>
+              <span class="info-value">{{ asset.manufacturer }}</span>
+            </div>
+          }
+          @if (asset.model) {
+            <div class="info-item">
+              <span class="info-label">Model</span>
+              <span class="info-value">{{ asset.model }}</span>
+            </div>
+          }
+          @if (asset.serialNumber) {
+            <div class="info-item">
+              <span class="info-label">Serial Number</span>
+              <span class="info-value mono">{{ asset.serialNumber }}</span>
+            </div>
+          }
+          <div class="info-item">
+            <span class="info-label">Hours</span>
+            <span class="info-value">{{ asset.currentHours }}</span>
+          </div>
+        </div>
+
+        @if (asset.notes) {
+          <div class="notes-section">
+            <span class="info-label">Notes</span>
+            <p class="notes-text">{{ asset.notes }}</p>
+          </div>
+        }
+
+        <div class="status-actions">
+          <span class="info-label">Set Status</span>
+          <div class="status-btn-group">
+            @for (s of assetStatuses; track s) {
+              <button class="status-btn" [class.status-btn--active]="asset.status === s"
+                (click)="updateStatus(s)">
+                {{ getStatusLabel(s) }}
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Asset Dialog -->
+@if (showDialog()) {
+  <app-dialog [title]="editingAsset() ? 'Edit Asset' : 'Add Asset'" (closed)="closeDialog()">
+    <div [formGroup]="assetForm">
+      <app-input label="Name" formControlName="name" />
+
+      <div class="dialog-row">
+        <app-select label="Type" formControlName="assetType" [options]="assetTypeOptions" />
+        <app-input label="Location" formControlName="location" />
+      </div>
+
+      <div class="dialog-row">
+        <app-input label="Manufacturer" formControlName="manufacturer" />
+        <app-input label="Model" formControlName="model" />
+      </div>
+
+      <app-input label="Serial Number" formControlName="serialNumber" />
+
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="assetViolations"
+        [disabled]="assetForm.invalid || saving()"
+        (click)="saveAsset()">
+        {{ editingAsset() ? 'Save Changes' : 'Create Asset' }}
+      </button>
+    </div>
+  </app-dialog>
+}

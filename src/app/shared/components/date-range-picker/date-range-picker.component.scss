@@ -1,0 +1,43 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.date-range {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  flex-wrap: wrap;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 120px;
+  }
+}
+
+.date-range__presets {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  flex-wrap: wrap;
+}
+
+.date-range__preset {
+  @include uppercase-label($font-size-xxs, 0.3px, 600);
+  background: none;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  color: var(--text-secondary);
+  padding: $sp-xs $sp-md;
+  cursor: pointer;
+  font-family: $font-family-primary;
+
+  &:hover {
+    background: var(--bg);
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

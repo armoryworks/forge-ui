@@ -9,6 +9,7 @@ import { TeamLoadWidgetComponent } from './components/team-load-widget.component
 import { TodaysTasksWidgetComponent } from './components/todays-tasks-widget.component';
 import { DashboardData } from './models/dashboard.model';
 import { DashboardService } from './services/dashboard.service';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,6 +22,7 @@ import { DashboardService } from './services/dashboard.service';
     TeamLoadWidgetComponent,
     ActivityWidgetComponent,
     DeadlinesWidgetComponent,
+    PageHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',

@@ -1,4 +1,4 @@
-<div class="card" [style.border-left-color]="priorityColor()">
+<div class="card" [style.border-left-color]="priorityColor()" (click)="cardClicked.emit(job())">
   <div class="card__header">
     <span class="card__job-number">{{ job().jobNumber }}</span>
     @if (job().isOverdue) {

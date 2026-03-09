@@ -1,0 +1,38 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.expenses-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.total-amount {
+  @include uppercase-label($font-size-xs, 0.5px, 700);
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+// ─── Cell Styles ───
+.col-actions { width: 80px; text-align: right; }
+.amount-cell { font-weight: 600; font-variant-numeric: tabular-nums; }
+.icon-btn--success:hover { color: var(--success); }

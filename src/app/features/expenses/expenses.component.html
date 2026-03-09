@@ -1,0 +1,77 @@
+<app-page-header title="Expenses">
+  <button class="action-btn action-btn--primary" (click)="openCreateExpense()">
+    <span class="material-icons-outlined">add</span>
+    New Expense
+  </button>
+</app-page-header>
+
+<div class="expenses-content">
+  <div class="filters-bar">
+    <app-input label="Search" [formControl]="searchControl" placeholder="Search expenses..."
+      (keyup.enter)="applyFilters()" />
+    <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    <span class="total-amount">Total: {{ getTotalAmount() | currency }}</span>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading">
+      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+      <span>Loading...</span>
+    </div>
+  } @else {
+    <app-data-table tableId="expenses" [columns]="expenseColumns" [data]="expenses()"
+      emptyIcon="receipt_long" emptyMessage="No expenses found">
+      <ng-template appColumnCell="expenseDate" let-expense>
+        <span class="text-muted">{{ expense.expenseDate | date:'mediumDate' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="category" let-expense>
+        <span class="chip">{{ expense.category }}</span>
+      </ng-template>
+      <ng-template appColumnCell="jobNumber" let-expense>
+        <span class="text-muted">{{ expense.jobNumber ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="amount" let-expense>
+        <span class="amount-cell">{{ expense.amount | currency }}</span>
+      </ng-template>
+      <ng-template appColumnCell="status" let-expense>
+        <span [class]="getStatusClass(expense.status)">{{ getStatusLabel(expense.status) }}</span>
+      </ng-template>
+      <ng-template appColumnCell="actions" let-expense>
+        @if (expense.status === 'Pending') {
+          <div class="action-cell">
+            <button class="icon-btn icon-btn--success" title="Approve" (click)="approveExpense(expense); $event.stopPropagation()">
+              <span class="material-icons-outlined">check</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" title="Reject" (click)="rejectExpense(expense); $event.stopPropagation()">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        }
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+<!-- Expense Dialog -->
+@if (showDialog()) {
+  <app-dialog title="New Expense" (closed)="closeDialog()">
+    <div [formGroup]="expenseForm">
+      <div class="dialog-row">
+        <app-input label="Amount" type="number" formControlName="amount" prefix="$" />
+        <app-datepicker label="Date" formControlName="expenseDate" />
+      </div>
+
+      <app-select label="Category" formControlName="category" [options]="categoryOptions" />
+
+      <app-textarea label="Description" formControlName="description" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="expenseViolations"
+        [disabled]="expenseForm.invalid || saving()"
+        (click)="saveExpense()">Submit Expense</button>
+    </div>
+  </app-dialog>
+}

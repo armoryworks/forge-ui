@@ -1,0 +1,197 @@
+<app-page-header title="Leads">
+  <button class="action-btn action-btn--primary" (click)="openCreateLead()">
+    <span class="material-icons-outlined">person_add</span>
+    New Lead
+  </button>
+</app-page-header>
+
+<div class="leads-layout">
+  <!-- Left: Leads List -->
+  <div class="leads-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search leads..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    @if (loading()) {
+      <div class="page-loading">
+        <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+        <span>Loading...</span>
+      </div>
+    } @else {
+      <app-data-table tableId="leads" [columns]="leadColumns" [data]="leads()"
+        [rowClass]="leadRowClass" emptyIcon="person_search" emptyMessage="No leads found"
+        (rowClick)="selectLead($any($event))">
+        <ng-template appColumnCell="companyName" let-lead>
+          <span class="company-name">{{ lead.companyName }}</span>
+        </ng-template>
+        <ng-template appColumnCell="contactName" let-lead>
+          <span class="text-muted">{{ lead.contactName ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="source" let-lead>
+          <span class="text-muted">{{ lead.source ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-lead>
+          <span [class]="getStatusClass(lead.status)">{{ lead.status }}</span>
+        </ng-template>
+        <ng-template appColumnCell="followUpDate" let-lead>
+          @if (lead.followUpDate) {
+            <span [class.overdue]="isFollowUpOverdue(lead)">{{ lead.followUpDate | date:'mediumDate' }}</span>
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-lead>
+          <span class="text-muted">{{ lead.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    }
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedLead(); as lead) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">business</span>
+          <div>
+            <div class="detail-company">{{ lead.companyName }}</div>
+            @if (lead.contactName) {
+              <div class="detail-contact">{{ lead.contactName }}</div>
+            }
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Edit" (click)="openEditLead()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(lead.status)">{{ lead.status }}</span>
+            </span>
+          </div>
+          @if (lead.email) {
+            <div class="info-item">
+              <span class="info-label">Email</span>
+              <span class="info-value">{{ lead.email }}</span>
+            </div>
+          }
+          @if (lead.phone) {
+            <div class="info-item">
+              <span class="info-label">Phone</span>
+              <span class="info-value">{{ lead.phone }}</span>
+            </div>
+          }
+          @if (lead.source) {
+            <div class="info-item">
+              <span class="info-label">Source</span>
+              <span class="info-value">{{ lead.source }}</span>
+            </div>
+          }
+          @if (lead.followUpDate) {
+            <div class="info-item">
+              <span class="info-label">Follow-Up</span>
+              <span class="info-value" [class.overdue]="isFollowUpOverdue(lead)">
+                {{ lead.followUpDate | date:'mediumDate' }}
+              </span>
+            </div>
+          }
+          @if (lead.lostReason) {
+            <div class="info-item">
+              <span class="info-label">Lost Reason</span>
+              <span class="info-value">{{ lead.lostReason }}</span>
+            </div>
+          }
+        </div>
+
+        @if (lead.notes) {
+          <div class="notes-section">
+            <span class="info-label">Notes</span>
+            <p class="notes-text">{{ lead.notes }}</p>
+          </div>
+        }
+
+        @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
+          <div class="status-actions">
+            <span class="info-label">Update Status</span>
+            <div class="status-btn-group">
+              @for (s of statuses; track s) {
+                @if (s !== 'Converted') {
+                  <button class="status-btn" [class.status-btn--active]="lead.status === s"
+                    [class]="'status-btn--' + s.toLowerCase()"
+                    (click)="updateStatus(s)">
+                    {{ s }}
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        @if (lead.status === 'Lost') {
+          <div class="status-actions">
+            <button class="action-btn" (click)="updateStatus('New')">
+              <span class="material-icons-outlined">replay</span>
+              Reopen Lead
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Lead Dialog -->
+@if (showDialog()) {
+  <app-dialog [title]="editingLead() ? 'Edit Lead' : 'New Lead'" (closed)="closeDialog()">
+    <div [formGroup]="leadForm">
+      <app-input label="Company Name" formControlName="companyName" />
+
+      <app-input label="Contact Name" formControlName="contactName" />
+
+      <div class="dialog-row">
+        <app-input label="Email" type="email" formControlName="email" />
+        <app-input label="Phone" formControlName="phone" />
+      </div>
+
+      <div class="dialog-row">
+        <app-select label="Source" formControlName="source" [options]="sourceOptions" />
+        <app-datepicker label="Follow-Up Date" formControlName="followUpDate" />
+      </div>
+
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="leadViolations"
+        [disabled]="leadForm.invalid || saving()"
+        (click)="saveLead()">
+        {{ editingLead() ? 'Save Changes' : 'Create Lead' }}
+      </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Lost Reason Dialog -->
+@if (showLostDialog()) {
+  <app-dialog title="Mark as Lost" width="360px" (closed)="showLostDialog.set(false)">
+    <app-textarea label="Reason" [formControl]="lostReasonControl" />
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="showLostDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary" (click)="confirmLost()">Confirm Lost</button>
+    </div>
+  </app-dialog>
+}

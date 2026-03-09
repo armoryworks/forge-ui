@@ -1,0 +1,75 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.col-manager {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.col-manager__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.col-manager__title {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.col-manager__reset {
+  @include uppercase-label($font-size-xxs, 0.3px, 600);
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0;
+
+  &:hover {
+    color: var(--primary-dark);
+  }
+}
+
+.col-manager__list {
+  padding: $sp-md 0;
+  max-height: 300px;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
+.col-manager__item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-lg;
+  font-size: $font-size-sm;
+  color: var(--text);
+  cursor: grab;
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &.cdk-drag-preview {
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.col-manager__drag {
+  font-size: 14px;
+  color: var(--text-muted);
+  cursor: grab;
+}
+
+.col-manager__label {
+  flex: 1;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}

@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+
+.time-tracking-layout { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+
+.filters-bar {
+  display: flex; align-items: center; gap: $sp-lg;
+  padding: $sp-md $sp-lg; border-bottom: $border-width-thin solid var(--border); flex-shrink: 0;
+}
+.filter-group { display: flex; align-items: center; gap: $sp-sm; width: 180px; }
+.filter-summary { margin-left: auto; font-size: $font-size-sm; color: var(--text-muted); }
+
+.row--active { background: rgba(34, 197, 94, 0.04); }
+
+.type-icon { font-size: 18px; color: var(--text-muted); }
+.type-icon--running { color: var(--success); }
+.duration-cell { font-variant-numeric: tabular-nums; font-weight: 600; }
+.notes-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.job-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: 1px 6px; border-radius: $border-radius;
+  background: var(--primary-light); color: var(--primary); border: $border-width-thin solid var(--primary);
+}
+
+.running-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: 1px 6px; border-radius: $border-radius;
+  background: rgba(34, 197, 94, 0.1); color: var(--success); border: $border-width-thin solid var(--success);
+}
+
+.entry-type {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: 1px 6px; border-radius: $border-radius; border: $border-width-thin solid var(--border);
+  &--manual { background: var(--bg); color: var(--text-muted); }
+  &--timer { background: rgba(59, 130, 246, 0.05); border-color: var(--primary); color: var(--primary); }
+}
+
+.timer-info { font-size: $font-size-sm; color: var(--text-secondary); margin: 0 0 $sp-md 0; }

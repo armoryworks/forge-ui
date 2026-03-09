@@ -1,0 +1,48 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.quick-actions {
+  display: grid;
+  gap: $sp-md;
+  padding: $sp-md;
+}
+
+.quick-actions__btn {
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-md;
+  min-width: 88px;
+  min-height: 88px;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: background $transition-fast, border-color $transition-fast;
+  font-family: $font-family-primary;
+
+  &:hover:not(:disabled) {
+    background: var(--bg);
+    border-color: var(--action-color);
+  }
+
+  &:active:not(:disabled) {
+    background: color-mix(in srgb, var(--action-color) 10%, transparent);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.quick-actions__icon {
+  font-size: 28px;
+  color: var(--action-color);
+}
+
+.quick-actions__label {
+  @include uppercase-label($font-size-xs, 0.3px, 600);
+  color: var(--text);
+  text-align: center;
+}

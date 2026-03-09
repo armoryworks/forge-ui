@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.dialog-loading {
+  @include flex-center;
+  gap: $sp-md;
+  padding: $sp-xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined { font-size: 18px; opacity: 0.5; }
+}
+
+.btn-spinner {
+  font-size: 14px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,28 @@
+@use 'styles/variables' as *;
+
+.connection-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-lg;
+  background: var(--warning);
+  color: white;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  z-index: $z-sticky;
+  flex-shrink: 0;
+
+  &--disconnected {
+    background: var(--error);
+  }
+}
+
+.connection-banner__icon {
+  font-size: 14px;
+}
+
+.connection-banner__message {
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}

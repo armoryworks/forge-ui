@@ -1,0 +1,337 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// ─── Page Header ───
+.page-header {
+  display: flex;
+  align-items: center;
+  padding: $sp-sm $sp-lg;
+  background: var(--surface);
+  border-bottom: 3px solid var(--header);
+  flex-shrink: 0;
+  height: 48px;
+  gap: $sp-md;
+
+  [data-theme='dark'] & {
+    border-bottom-color: var(--primary);
+  }
+
+  // Compact form fields inside header — remove margin
+  app-input, app-select {
+    mat-form-field {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.page-header__title {
+  font-size: $font-size-title;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.page-header__spacer {
+  flex: 1;
+}
+
+// ─── Action Buttons ───
+.action-btn {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include flex-center;
+  gap: $sp-sm;
+  height: 2rem;
+  padding: 0 12px;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+  border-radius: $border-radius;
+  font-family: $font-family-primary;
+
+  .material-icons-outlined { font-size: 14px; }
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &--primary {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+
+    &:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+    }
+  }
+
+  &--sm {
+    padding: 2px 8px;
+    .material-icons-outlined { font-size: 12px; }
+  }
+}
+
+.icon-btn {
+  @include flex-center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: $border-radius;
+
+  .material-icons-outlined { font-size: 16px; }
+
+  &:hover {
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  &--danger:hover {
+    color: var(--error);
+  }
+}
+
+// ─── Dialog ───
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: $z-dialog;
+  @include flex-center;
+}
+
+.dialog {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.dialog__title {
+  @include uppercase-label($font-size-sm, 0.5px, 700);
+}
+
+.dialog__body {
+  padding: $sp-lg;
+  overflow: auto;
+  @include custom-scrollbar;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  // Apply spacing to projected form containers
+  > * {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+}
+
+.dialog__footer {
+  display: flex;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  gap: $sp-md;
+
+  // Projected [dialog-footer] wrapper inherits layout
+  > * {
+    display: flex;
+    gap: $sp-md;
+    flex: 1;
+  }
+
+  // Equal-width buttons, primary action on right
+  .action-btn {
+    flex: 1;
+  }
+}
+
+// ─── Dialog Row (side-by-side form fields) ───
+.dialog-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+
+  app-input, app-select, app-textarea, app-datepicker {
+    min-width: 0;
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ─── Tab Bar ───
+.tab-bar {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.tab {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  font-family: $font-family-primary;
+
+  .material-icons-outlined { font-size: 16px; }
+  &:hover { color: var(--text); background: var(--bg); }
+  &--active { color: var(--primary); border-bottom-color: var(--primary); }
+}
+
+.tab-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel-header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  flex-shrink: 0;
+}
+
+// ─── Table ───
+.table-wrapper {
+  flex: 1;
+  overflow: auto;
+  @include custom-scrollbar;
+}
+
+// ─── Loading ───
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: var(--text-secondary);
+
+  &__icon {
+    font-size: 48px;
+    opacity: 0.5;
+  }
+}
+
+// ─── Snackbar ───
+.snackbar--success .mdc-snackbar__surface {
+  background: var(--success) !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action { color: white !important; }
+}
+
+.snackbar--info .mdc-snackbar__surface {
+  background: var(--info) !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action { color: white !important; }
+}
+
+.snackbar--warn .mdc-snackbar__surface {
+  background: var(--warning) !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action { color: white !important; }
+}
+
+.snackbar--error .mdc-snackbar__surface {
+  background: var(--error) !important;
+  color: white !important;
+
+  .mat-mdc-snack-bar-action { color: white !important; }
+}
+
+// ─── Chip ───
+.chip {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: $border-radius;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: $border-width-thin solid var(--chip-color, var(--border));
+  color: var(--text);
+  background: color-mix(in srgb, var(--chip-color, var(--border)) 10%, transparent);
+
+  [data-theme='dark'] & {
+    background: color-mix(in srgb, var(--chip-color, var(--border)) 15%, transparent);
+  }
+
+  // Fill column width when inside a table cell
+  td > & {
+    display: block;
+    text-align: center;
+  }
+
+  &--primary { --chip-color: var(--primary); }
+  &--success { --chip-color: var(--success); }
+  &--warning { --chip-color: var(--warning); }
+  &--error   { --chip-color: var(--error); }
+  &--info    { --chip-color: var(--info); }
+  &--muted   { --chip-color: var(--text-muted); }
+}
+
+// ─── Page Content (standard padded content area below page header) ───
+// Apply to the scrollable body area of any feature page.
+// Page headers stay full-width; content beneath gets consistent padding.
+.page-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: $sp-md $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  @include custom-scrollbar;
+
+  // Use on pages where a data table (or similar flex child) manages its own scrolling.
+  // Prevents the page container from competing for scroll, enabling sticky headers.
+  &--table {
+    overflow: hidden;
+  }
+}
+
+// ─── Form Stack (vertical form layout with consistent spacing) ───
+// Use on any <form> or container holding stacked form fields.
+// Centralizes the gap so individual components never set their own.
+.form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+// ─── Utilities ───
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-center {
+  text-align: center;
+}

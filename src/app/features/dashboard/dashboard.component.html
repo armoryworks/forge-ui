@@ -9,9 +9,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else if (data(); as d) {
-  <div class="page-header">
-    <h1 class="page-header__title">Dashboard</h1>
-    <span class="page-header__sep"></span>
+  <app-page-header title="Dashboard">
     <span class="page-header__ctx">Production · March 2026</span>
     <div class="page-header__actions">
       <button class="btn">
@@ -24,9 +22,9 @@
         <span class="material-icons-outlined btn__icon">tune</span> Customize
       </button>
     </div>
-  </div>
+  </app-page-header>
 
-  <div class="page-body">
+  <div class="page-content">
     <app-dashboard-widget
       title="Today's Tasks"
       icon="today"

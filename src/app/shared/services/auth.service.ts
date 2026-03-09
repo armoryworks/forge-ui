@@ -24,6 +24,17 @@ export interface LoginResponse {
   user: AuthUser;
 }
 
+export interface SetupStatusResponse {
+  setupRequired: boolean;
+}
+
+export interface SetupRequest {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -37,6 +48,23 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
+      .pipe(
+        tap((response) => {
+          this._token.set(response.token);
+          this._user.set(response.user);
+          localStorage.setItem('qbe-token', response.token);
+          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+        }),
+      );
+  }
+
+  checkSetupStatus(): Observable<SetupStatusResponse> {
+    return this.http.get<SetupStatusResponse>(`${environment.apiUrl}/auth/status`);
+  }
+
+  setup(data: SetupRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/setup`, data)
       .pipe(
         tap((response) => {
           this._token.set(response.token);

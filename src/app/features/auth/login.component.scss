@@ -1,4 +1,6 @@
-.login-page {
+@use 'styles/variables' as *;
+
+.auth-page {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6,96 +8,33 @@
   background: var(--bg);
 }
 
-.login-card {
-  max-width: 400px;
+.auth-card {
+  max-width: 360px;
   width: 100%;
-  background: var(--surface);
-  border-radius: 12px;
-  padding: 40px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
 
   &__header {
     text-align: center;
   }
 
   &__icon {
-    font-size: 48px;
+    font-size: 32px;
     color: var(--accent);
   }
 
   &__title {
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 24px;
-    font-weight: 600;
+    font-family: $font-family-primary;
+    font-size: $font-size-title;
+    font-weight: 700;
     color: var(--text);
-    margin: 8px 0 4px;
   }
 
   &__subtitle {
     color: var(--text-secondary);
-    font-size: 14px;
-    margin: 0;
+    font-size: $font-size-sm;
   }
 
-  &__form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 32px;
-  }
-
-  &__error {
-    background: rgba(239, 68, 68, 0.1);
-    color: #ef4444;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 14px;
-  }
-
-  &__label > span {
-    display: block;
-    font-size: 13px;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-  }
-
-  &__input {
+  // form-stack class handles gap; button fills width
+  &__form button[mat-flat-button] {
     width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 14px;
-    outline: none;
-    transition: border-color 150ms ease;
-    box-sizing: border-box;
-
-    &:focus {
-      border-color: var(--accent);
-    }
-  }
-
-  &__submit {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 8px;
-    background: var(--accent);
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    cursor: pointer;
-    margin-top: 8px;
-    transition: opacity 150ms ease;
-
-    &:hover:not(:disabled) {
-      opacity: 0.9;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
   }
 }

@@ -1,0 +1,66 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.col-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border-top: 3px solid var(--primary);
+  background: var(--surface);
+  flex-shrink: 0;
+
+  &--over-wip {
+    background: var(--error-light);
+  }
+}
+
+.col-header__collapse {
+  @include flex-center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+
+  .material-icons-outlined {
+    font-size: 16px;
+  }
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.col-header__name {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text);
+  @include truncate;
+  flex: 1;
+}
+
+.col-header__count {
+  @include uppercase-label($font-size-xxs, 0, 700);
+  color: var(--text-muted);
+}
+
+.col-header__wip {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+
+  &--warn {
+    color: var(--error);
+    font-weight: 700;
+  }
+}
+
+.col-header__lock {
+  @include flex-center;
+}
+
+.col-header__lock-icon {
+  font-size: 12px;
+  color: var(--text-muted);
+}

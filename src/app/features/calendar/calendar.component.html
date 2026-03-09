@@ -1,0 +1,47 @@
+<app-page-header title="Calendar">
+  <div class="calendar-nav">
+    <button class="icon-btn" (click)="prevMonth()">
+      <span class="material-icons-outlined">chevron_left</span>
+    </button>
+    <span class="month-label">{{ monthLabel() }}</span>
+    <button class="icon-btn" (click)="nextMonth()">
+      <span class="material-icons-outlined">chevron_right</span>
+    </button>
+    <button class="action-btn action-btn--sm" (click)="today()">Today</button>
+  </div>
+</app-page-header>
+
+@if (loading()) {
+  <div class="page-loading">
+    <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+    <span>Loading...</span>
+  </div>
+} @else {
+  <div class="calendar-grid">
+    <div class="calendar-header">
+      @for (day of weekdays; track day) {
+        <div class="weekday-label">{{ day }}</div>
+      }
+    </div>
+    <div class="calendar-body">
+      @for (day of calendarDays(); track day.date.getTime()) {
+        <div class="calendar-cell"
+          [class.calendar-cell--other]="!day.isCurrentMonth"
+          [class.calendar-cell--today]="day.isToday">
+          <div class="cell-date">{{ day.date.getDate() }}</div>
+          <div class="cell-jobs">
+            @for (job of day.jobs; track job.id) {
+              <div class="job-chip" [style.border-left-color]="job.stageColor">
+                <span class="job-chip__number">{{ job.jobNumber }}</span>
+                <span class="job-chip__title">{{ job.title }}</span>
+                @if (job.isOverdue) {
+                  <span class="material-icons-outlined job-chip__overdue">warning</span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}

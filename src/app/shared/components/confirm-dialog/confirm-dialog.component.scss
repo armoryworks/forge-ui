@@ -1,0 +1,61 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.confirm-dialog {
+  display: flex;
+  flex-direction: column;
+}
+
+.confirm-dialog__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.confirm-dialog__title {
+  @include uppercase-label($font-size-sm, 0.5px, 700);
+}
+
+.confirm-dialog__body {
+  padding: $sp-lg;
+}
+
+.confirm-dialog__message {
+  font-size: $font-size-base;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.confirm-dialog__footer {
+  display: flex;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  gap: $sp-md;
+
+  .action-btn {
+    flex: 1;
+  }
+
+  .action-btn--warn {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: white;
+
+    &:hover {
+      background: var(--warning);
+      opacity: 0.9;
+    }
+  }
+
+  .action-btn--danger {
+    background: var(--error);
+    border-color: var(--error);
+    color: white;
+
+    &:hover {
+      background: var(--error);
+      opacity: 0.9;
+    }
+  }
+}

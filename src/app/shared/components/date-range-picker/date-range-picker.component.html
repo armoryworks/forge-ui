@@ -1,0 +1,42 @@
+<div class="date-range">
+  <mat-form-field appearance="outline">
+    <mat-label>From</mat-label>
+    <input matInput
+      [matDatepicker]="startPicker"
+      [min]="min()"
+      [max]="endDate() ?? max()"
+      [disabled]="disabled()"
+      [value]="startDate()"
+      (dateChange)="onStartChange($event.value)"
+      (blur)="markTouched()" />
+    <mat-datepicker-toggle matSuffix [for]="startPicker" />
+    <mat-datepicker #startPicker />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>To</mat-label>
+    <input matInput
+      [matDatepicker]="endPicker"
+      [min]="startDate() ?? min()"
+      [max]="max()"
+      [disabled]="disabled()"
+      [value]="endDate()"
+      (dateChange)="onEndChange($event.value)"
+      (blur)="markTouched()" />
+    <mat-datepicker-toggle matSuffix [for]="endPicker" />
+    <mat-datepicker #endPicker />
+  </mat-form-field>
+
+  @if (presets().length) {
+    <div class="date-range__presets">
+      @for (preset of presets(); track preset) {
+        <button
+          class="date-range__preset"
+          [disabled]="disabled()"
+          (click)="applyPreset(preset)">
+          {{ preset }}
+        </button>
+      }
+    </div>
+  }
+</div>

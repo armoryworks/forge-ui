@@ -1,0 +1,6 @@
+@if (visible()) {
+  <div class="connection-banner" [class.connection-banner--disconnected]="state() === 'disconnected'">
+    <span class="material-icons-outlined connection-banner__icon">wifi_off</span>
+    <span class="connection-banner__message">{{ message() }}</span>
+  </div>
+}

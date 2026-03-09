@@ -1,0 +1,9 @@
+<div class="list-panel">
+  @if (empty()) {
+    <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" />
+  } @else {
+    <div class="list-panel__content">
+      <ng-content />
+    </div>
+  }
+</div>

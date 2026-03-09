@@ -1,0 +1,144 @@
+<app-page-header title="Time Tracking">
+  @if (activeTimer()) {
+    <button class="action-btn action-btn--warn" (click)="openStopTimer()">
+      <span class="material-icons-outlined">stop_circle</span>
+      Stop Timer ({{ getTimerElapsed() }})
+    </button>
+  } @else {
+    <button class="action-btn action-btn--primary" (click)="openStartTimer()">
+      <span class="material-icons-outlined">play_circle</span>
+      Start Timer
+    </button>
+  }
+  <button class="action-btn" (click)="openManualEntry()">
+    <span class="material-icons-outlined">edit_note</span>
+    Manual Entry
+  </button>
+</app-page-header>
+
+<div class="time-tracking-layout">
+  <!-- Filters -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <app-datepicker label="From" [formControl]="dateFromControl" />
+    </div>
+    <div class="filter-group">
+      <app-datepicker label="To" [formControl]="dateToControl" />
+    </div>
+    <div class="filter-summary">
+      Total: <strong>{{ getTotalHours() }}h</strong> across <strong>{{ entries().length }}</strong> entries
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="page-loading">
+      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+      <span>Loading...</span>
+    </div>
+  } @else {
+      <app-data-table tableId="time-tracking" [columns]="timeColumns" [data]="entries()"
+        [rowClass]="timeRowClass" emptyIcon="schedule" emptyMessage="No time entries found">
+        <ng-template appColumnCell="icon" let-entry>
+          @if (entry.timerStart && !entry.timerStop) {
+            <span class="material-icons-outlined type-icon type-icon--running">timer</span>
+          } @else if (entry.isManual) {
+            <span class="material-icons-outlined type-icon">edit_note</span>
+          } @else {
+            <span class="material-icons-outlined type-icon">timer</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="jobNumber" let-entry>
+          @if (entry.jobNumber) {
+            <span class="job-badge">{{ entry.jobNumber }}</span>
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="category" let-entry>
+          <span class="text-muted">{{ entry.category ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="durationMinutes" let-entry>
+          @if (entry.timerStart && !entry.timerStop) {
+            <span class="running-badge">Running</span>
+          } @else {
+            {{ formatDuration(entry.durationMinutes) }}
+          }
+        </ng-template>
+        <ng-template appColumnCell="notes" let-entry>
+          <span class="text-muted notes-cell">{{ entry.notes ?? '' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="type" let-entry>
+          <span class="entry-type" [class]="entry.isManual ? 'entry-type--manual' : 'entry-type--timer'">
+            {{ entry.isManual ? 'Manual' : 'Timer' }}
+          </span>
+        </ng-template>
+      </app-data-table>
+  }
+</div>
+
+<!-- Manual Entry Dialog -->
+@if (showDialog()) {
+  <app-dialog title="Log Time Entry" (closed)="closeDialog()">
+    <div [formGroup]="entryForm">
+      <div class="dialog-row">
+        <app-datepicker label="Date" formControlName="date" />
+        <app-select label="Category" formControlName="category" [options]="categoryOptions" />
+      </div>
+
+      <div class="dialog-row">
+        <app-input label="Hours" type="number" formControlName="hours" />
+        <app-input label="Minutes" type="number" formControlName="minutes" />
+      </div>
+
+      <app-textarea label="Notes" formControlName="notes" [rows]="3" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="entryViolations"
+        [disabled]="entryForm.invalid || saving()"
+        (click)="saveEntry()">Log Entry</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Start Timer Dialog -->
+@if (showTimerDialog()) {
+  <app-dialog title="Start Timer" (closed)="closeTimerDialog()">
+    <div [formGroup]="timerForm">
+      <app-select label="Category" formControlName="category" [options]="categoryOptions" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeTimerDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary" (click)="startTimer()">
+        <span class="material-icons-outlined">play_circle</span>
+        Start
+      </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Stop Timer Dialog -->
+@if (showStopDialog()) {
+  <app-dialog title="Stop Timer" (closed)="closeStopDialog()">
+    <p class="timer-info">
+      Timer running for <strong>{{ getTimerElapsed() }}</strong>
+      @if (activeTimer()?.category) {
+        — {{ activeTimer()?.category }}
+      }
+    </p>
+
+    <app-textarea label="Notes (optional)" [formControl]="stopNotesControl" [rows]="2" />
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeStopDialog()">Cancel</button>
+      <button class="action-btn action-btn--warn" (click)="stopTimer()">
+        <span class="material-icons-outlined">stop_circle</span>
+        Stop Timer
+      </button>
+    </div>
+  </app-dialog>
+}

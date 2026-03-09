@@ -2,6 +2,7 @@
 @use 'styles/variables' as *;
 @use 'styles/reset';
 @use 'styles/mixins';
+@use 'styles/shared';
 
 // ─── Self-hosted Fonts ───
 @import '@fontsource/space-grotesk/400.css';
@@ -24,4 +25,77 @@ html {
       density: -1,
     )
   );
+
+  // ─── Shape Overrides — sharp corners to match mockup aesthetic ───
+  @include mat.button-overrides((
+    filled-container-shape: 0px,
+    outlined-container-shape: 0px,
+    text-container-shape: 0px,
+    protected-container-shape: 0px,
+  ));
+
+  @include mat.card-overrides((
+    elevated-container-shape: 0px,
+    outlined-container-shape: 0px,
+  ));
+
+  @include mat.form-field-overrides((
+    filled-container-shape: 0px,
+    outlined-container-shape: 0px,
+    // ─── Compact dimensions (rem for universal scaling) ───
+    container-height: 2rem,
+    container-vertical-padding: 0.25rem,
+    filled-with-label-container-padding-top: 0.25rem,
+    filled-with-label-container-padding-bottom: 0.25rem,
+    container-text-size: 0.75rem,
+    subscript-text-size: 0.625rem,
+    // ─── Error colors ───
+    outlined-error-outline-color: var(--error),
+    outlined-error-focus-outline-color: var(--error),
+    outlined-error-hover-outline-color: var(--error),
+    outlined-error-label-text-color: var(--error),
+    error-text-color: var(--error),
+  ));
+
+  @include mat.select-overrides((
+    arrow-transform: none,
+  ));
+
+  @include mat.datepicker-overrides((
+    calendar-container-shape: 0px,
+  ));
+
+  @include mat.dialog-overrides((
+    container-shape: 0px,
+  ));
+
+  @include mat.menu-overrides((
+    container-shape: 0px,
+  ));
+
+  @include mat.snack-bar-overrides((
+    container-shape: 0px,
+  ));
+
+  @include mat.autocomplete-overrides((
+    container-shape: 0px,
+  ));
+
+  // ─── Card padding — consistent internal spacing on all cards ───
+  .mat-mdc-card {
+    padding: $sp-lg;
+  }
+
+  // ─── Collapse subscript (hint/error) space globally ───
+  // Validation errors use popover directive, so subscript area is unused dead space.
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  // ─── Menu item icons — consistent sizing and spacing ───
+  .mat-mdc-menu-item .material-icons-outlined {
+    font-size: 18px;
+    margin-right: $sp-md;
+    color: var(--text-muted);
+  }
 }

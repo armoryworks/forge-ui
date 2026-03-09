@@ -1,0 +1,79 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.new-job-btn {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include flex-center;
+  gap: $sp-sm;
+  height: 2rem;
+  padding: 0 10px;
+  border: $border-width solid var(--primary);
+  background: var(--primary);
+  color: white;
+  cursor: pointer;
+  border-radius: $border-radius;
+  margin-left: auto;
+
+  .material-icons-outlined { font-size: 14px; }
+
+  &:hover {
+    background: var(--primary-dark);
+    border-color: var(--primary-dark);
+  }
+}
+
+// ─── Cell Styles ───
+.row--selected { background: var(--primary-light); }
+
+.job-number {
+  @include uppercase-label($font-size-xs, 0.5px, 700);
+  color: var(--text);
+}
+
+.job-title {
+  @include truncate;
+  display: block;
+  max-width: 360px;
+}
+
+.priority-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  vertical-align: middle;
+  margin-right: $sp-sm;
+}
+
+.unassigned {
+  color: var(--text-muted);
+}
+
+.overdue-text {
+  color: var(--error);
+  font-weight: 600;
+}
+
+// ─── Error State ───
+.page-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 80px 24px;
+  color: var(--text-secondary);
+
+  &__icon {
+    font-size: 48px;
+    opacity: 0.5;
+  }
+}

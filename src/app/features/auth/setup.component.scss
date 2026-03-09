@@ -1,0 +1,70 @@
+@use 'styles/variables' as *;
+
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.auth-card {
+  max-width: 360px;
+  width: 100%;
+  padding: $sp-lg;
+
+  &__header {
+    text-align: center;
+  }
+
+  &__icon {
+    font-size: 32px;
+    color: var(--accent);
+  }
+
+  &__title {
+    font-family: $font-family-primary;
+    font-size: $font-size-title;
+    font-weight: 700;
+    color: var(--text);
+    margin: $sp-sm 0 $sp-xs;
+  }
+
+  &__subtitle {
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
+    margin: 0;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    margin-top: $sp-lg;
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    button[mat-flat-button] {
+      width: 100%;
+      margin-top: $sp-md;
+    }
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+
+    app-input {
+      min-width: 0;
+    }
+  }
+
+  &__error {
+    background: var(--error-light);
+    color: var(--error);
+    padding: $sp-sm $sp-md;
+    font-size: $font-size-sm;
+  }
+}

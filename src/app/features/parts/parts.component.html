@@ -1,0 +1,299 @@
+<app-page-header title="Parts Catalog">
+  <button class="action-btn action-btn--primary" (click)="openCreatePart()">
+    <span class="material-icons-outlined">add</span>
+    New Part
+  </button>
+</app-page-header>
+
+<div class="parts-layout">
+  <!-- Left: Parts List -->
+  <div class="parts-list-panel">
+    <!-- Filters -->
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search parts..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
+      <app-select label="Type" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
+    </div>
+
+    @if (loading()) {
+      <div class="page-loading">
+        <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+        <span>Loading...</span>
+      </div>
+    } @else {
+      <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
+        [rowClass]="partRowClass" emptyIcon="inventory_2" emptyMessage="No parts found"
+        (rowClick)="selectPart($any($event))">
+        <ng-template appColumnCell="partNumber" let-part>
+          <span class="part-number">{{ part.partNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="description" let-part>
+          <span class="part-desc">{{ part.description }}</span>
+        </ng-template>
+        <ng-template appColumnCell="partType" let-part>
+          <span class="type-chip">
+            <span class="material-icons-outlined type-icon">{{ getTypeIcon(part.partType) }}</span>
+            {{ part.partType }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-part>
+          <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
+        </ng-template>
+        <ng-template appColumnCell="material" let-part>
+          <span class="text-muted">{{ part.material ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="bomEntryCount" let-part>
+          @if (part.bomEntryCount > 0) {
+            <span class="bom-count">{{ part.bomEntryCount }}</span>
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+      </app-data-table>
+    }
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedPart(); as part) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-type-icon">{{ getTypeIcon(part.partType) }}</span>
+          <div>
+            <div class="detail-part-number">{{ part.partNumber }}</div>
+            <div class="detail-description">{{ part.description }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Edit" (click)="openEditPart()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Detail Tabs -->
+      <div class="detail-tabs">
+        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'info'"
+          (click)="detailTab.set('info')">Info</button>
+        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'bom'"
+          (click)="detailTab.set('bom')">
+          BOM
+          @if (part.bomEntries.length > 0) {
+            <span class="tab-badge">{{ part.bomEntries.length }}</span>
+          }
+        </button>
+        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'usage'"
+          (click)="detailTab.set('usage')">
+          Used In
+          @if (part.usedIn.length > 0) {
+            <span class="tab-badge">{{ part.usedIn.length }}</span>
+          }
+        </button>
+      </div>
+
+      <div class="detail-body">
+        @if (detailLoading()) {
+          <div class="page-loading">
+            <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+          </div>
+        } @else {
+          <!-- Info Tab -->
+          @if (detailTab() === 'info') {
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Revision</span>
+                <span class="info-value">{{ part.revision }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Type</span>
+                <span class="info-value">{{ part.partType }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Status</span>
+                <span class="info-value">
+                  <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Material</span>
+                <span class="info-value">{{ part.material ?? '—' }}</span>
+              </div>
+              @if (part.moldToolRef) {
+                <div class="info-item">
+                  <span class="info-label">Mold / Tool Ref</span>
+                  <span class="info-value">{{ part.moldToolRef }}</span>
+                </div>
+              }
+              @if (part.externalRef) {
+                <div class="info-item">
+                  <span class="info-label">External Ref</span>
+                  <span class="info-value">{{ part.externalRef }}</span>
+                </div>
+              }
+            </div>
+
+            <div class="status-actions">
+              <span class="info-label">Set Status</span>
+              <div class="status-btn-group">
+                @for (s of partStatuses; track s) {
+                  <button class="status-btn" [class.status-btn--active]="part.status === s"
+                    [class]="'status-btn--' + s.toLowerCase()"
+                    (click)="updatePartStatus(s)">
+                    {{ s }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- BOM Tab -->
+          @if (detailTab() === 'bom') {
+            <div class="bom-header">
+              <span class="bom-count-label">{{ part.bomEntries.length }} components</span>
+              <button class="action-btn action-btn--primary action-btn--sm" (click)="openAddBom()">
+                <span class="material-icons-outlined">add</span>
+                Add
+              </button>
+            </div>
+
+            @if (part.bomEntries.length > 0) {
+              <table class="bom-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Part</th>
+                    <th>Qty</th>
+                    <th>Source</th>
+                    <th>Ref Des</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of part.bomEntries; track entry.id) {
+                    <tr class="bom-row">
+                      <td class="text-muted">{{ entry.sortOrder }}</td>
+                      <td>
+                        <div class="bom-part-info">
+                          <span class="bom-part-number">{{ entry.childPartNumber }}</span>
+                          <span class="bom-part-desc">{{ entry.childDescription }}</span>
+                        </div>
+                      </td>
+                      <td class="text-center">{{ entry.quantity }}</td>
+                      <td>
+                        <span class="source-chip" [class.source-chip--make]="entry.sourceType === 'Make'">
+                          {{ entry.sourceType }}
+                        </span>
+                      </td>
+                      <td class="text-muted">{{ entry.referenceDesignator ?? '—' }}</td>
+                      <td class="col-actions">
+                        <button class="icon-btn icon-btn--danger" title="Remove" (click)="deleteBomEntry(entry)">
+                          <span class="material-icons-outlined">delete_outline</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <div class="empty-state">
+                <span class="material-icons-outlined">inventory_2</span>
+                <span>No BOM entries</span>
+              </div>
+            }
+          }
+
+          <!-- Used In Tab -->
+          @if (detailTab() === 'usage') {
+            @if (part.usedIn.length > 0) {
+              <table class="bom-table">
+                <thead>
+                  <tr>
+                    <th>Parent Part</th>
+                    <th>Description</th>
+                    <th>Qty</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (usage of part.usedIn; track usage.id) {
+                    <tr class="bom-row bom-row--clickable" (click)="selectPart({id: usage.parentPartId, partNumber: usage.parentPartNumber, description: usage.parentDescription, revision: '', status: 'Active', partType: 'Assembly', material: null, bomEntryCount: 0, createdAt: ''})">
+                      <td class="bom-part-number">{{ usage.parentPartNumber }}</td>
+                      <td>{{ usage.parentDescription }}</td>
+                      <td class="text-center">{{ usage.quantity }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <div class="empty-state">
+                <span class="material-icons-outlined">link_off</span>
+                <span>Not used in any assemblies</span>
+              </div>
+            }
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Part Dialog -->
+@if (showPartDialog()) {
+  <app-dialog [title]="editingPart() ? 'Edit Part' : 'New Part'" (closed)="closePartDialog()">
+    <div [formGroup]="partForm">
+      @if (!editingPart()) {
+        <app-input label="Part Number" formControlName="partNumber" />
+      }
+
+      <app-input label="Description" formControlName="description" />
+
+      <div class="dialog-row">
+        <app-input label="Revision" formControlName="revision" [maxlength]="5" />
+        <app-select label="Type" formControlName="partType" [options]="partTypeOptions" />
+      </div>
+
+      <app-input label="Material" formControlName="material" />
+
+      <app-input label="Mold / Tool Reference" formControlName="moldToolRef" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closePartDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="partViolations"
+        [disabled]="partForm.invalid"
+        (click)="savePart()">
+        {{ editingPart() ? 'Save Changes' : 'Create Part' }}
+      </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- BOM Entry Dialog -->
+@if (showBomDialog()) {
+  <app-dialog title="Add BOM Entry" (closed)="closeBomDialog()">
+    <div [formGroup]="bomForm">
+      <app-input label="Child Part ID" type="number" formControlName="childPartId" />
+
+      <div class="dialog-row">
+        <app-input label="Quantity" type="number" formControlName="quantity" />
+        <app-select label="Source" formControlName="sourceType" [options]="sourceTypeOptions" />
+      </div>
+
+      <app-input label="Reference Designator" formControlName="referenceDesignator" />
+
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeBomDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="bomViolations"
+        [disabled]="bomForm.invalid"
+        (click)="saveBomEntry()">Add Entry</button>
+    </div>
+  </app-dialog>
+}

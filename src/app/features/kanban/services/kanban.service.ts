@@ -1,29 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, map, forkJoin } from 'rxjs';
+import { Observable, map, forkJoin } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { TrackType, KanbanJob, BoardColumn } from '../models/kanban.model';
-import { MOCK_TRACK_TYPES, MOCK_JOBS } from './kanban-mock.data';
+import { TrackType, KanbanJob, BoardColumn, JobDetail, Subtask, Activity, CustomerRef, UserRef } from '../models/kanban.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
   private readonly http = inject(HttpClient);
 
   getTrackTypes(): Observable<TrackType[]> {
-    if (environment.mockIntegrations) {
-      return of(MOCK_TRACK_TYPES);
-    }
     return this.http.get<TrackType[]>(`${environment.apiUrl}/track-types`);
   }
 
   getBoard(trackTypeId: number): Observable<BoardColumn[]> {
-    if (environment.mockIntegrations) {
-      const trackType = MOCK_TRACK_TYPES.find(t => t.id === trackTypeId)!;
-      const jobs = MOCK_JOBS.filter(j => {
-        return trackType.stages.some(s => s.name === j.stageName);
-      });
-      return of(this.buildBoard(trackType, jobs));
-    }
     return forkJoin({
       trackType: this.http.get<TrackType>(`${environment.apiUrl}/track-types/${trackTypeId}`),
       jobs: this.http.get<KanbanJob[]>(`${environment.apiUrl}/jobs`, {
@@ -33,17 +22,55 @@ export class KanbanService {
   }
 
   moveJobStage(jobId: number, stageId: number): Observable<unknown> {
-    if (environment.mockIntegrations) {
-      return of(null);
-    }
     return this.http.patch(`${environment.apiUrl}/jobs/${jobId}/stage`, { stageId });
   }
 
   updateJobPosition(jobId: number, position: number): Observable<void> {
-    if (environment.mockIntegrations) {
-      return of(undefined);
-    }
     return this.http.patch<void>(`${environment.apiUrl}/jobs/${jobId}/position`, { position });
+  }
+
+  getJobDetail(id: number): Observable<JobDetail> {
+    return this.http.get<JobDetail>(`${environment.apiUrl}/jobs/${id}`);
+  }
+
+  getSubtasks(jobId: number): Observable<Subtask[]> {
+    return this.http.get<Subtask[]>(`${environment.apiUrl}/jobs/${jobId}/subtasks`);
+  }
+
+  getJobActivity(jobId: number): Observable<Activity[]> {
+    return this.http.get<Activity[]>(`${environment.apiUrl}/jobs/${jobId}/activity`);
+  }
+
+  toggleSubtask(jobId: number, subtaskId: number, isCompleted: boolean): Observable<unknown> {
+    return this.http.patch(`${environment.apiUrl}/jobs/${jobId}/subtasks/${subtaskId}`, { isCompleted });
+  }
+
+  addSubtask(jobId: number, text: string): Observable<Subtask> {
+    return this.http.post<Subtask>(`${environment.apiUrl}/jobs/${jobId}/subtasks`, { text });
+  }
+
+  getCustomers(): Observable<CustomerRef[]> {
+    return this.http.get<CustomerRef[]>(`${environment.apiUrl}/customers`);
+  }
+
+  getUsers(): Observable<UserRef[]> {
+    return this.http.get<UserRef[]>(`${environment.apiUrl}/users`);
+  }
+
+  createJob(command: {
+    title: string;
+    description?: string;
+    trackTypeId: number;
+    assigneeId?: number | null;
+    customerId?: number | null;
+    priority?: string;
+    dueDate?: string | null;
+  }): Observable<JobDetail> {
+    return this.http.post<JobDetail>(`${environment.apiUrl}/jobs`, command);
+  }
+
+  updateJob(id: number, changes: Partial<JobDetail>): Observable<unknown> {
+    return this.http.put(`${environment.apiUrl}/jobs/${id}`, changes);
   }
 
   private buildBoard(trackType: TrackType, jobs: KanbanJob[]): BoardColumn[] {

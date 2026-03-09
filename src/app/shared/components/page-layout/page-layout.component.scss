@@ -1,0 +1,69 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.page-layout__header {
+  display: flex;
+  align-items: center;
+  padding: $sp-sm $sp-lg;
+  background: var(--surface);
+  border-bottom: 3px solid var(--header);
+  flex-shrink: 0;
+  height: 48px;
+  gap: $sp-md;
+
+  [data-theme='dark'] & {
+    border-bottom-color: var(--primary);
+  }
+
+  app-input, app-select {
+    mat-form-field {
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+}
+
+.page-layout__title {
+  font-size: $font-size-title;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.page-layout__spacer {
+  flex: 1;
+}
+
+.page-layout__content {
+  flex: 1;
+  overflow: auto;
+  min-height: 0;
+  @include custom-scrollbar;
+}
+
+.page-layout__actions {
+  flex-shrink: 0;
+  border-top: $border-width-thin solid var(--border);
+  padding: $sp-md $sp-lg;
+  display: flex;
+  gap: $sp-md;
+  justify-content: flex-end;
+
+  &:empty {
+    display: none;
+  }
+}

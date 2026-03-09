@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { KanbanJob, PRIORITY_COLORS } from '../models/kanban.model';
 
@@ -12,6 +12,7 @@ import { KanbanJob, PRIORITY_COLORS } from '../models/kanban.model';
 })
 export class JobCardComponent {
   readonly job = input.required<KanbanJob>();
+  readonly cardClicked = output<KanbanJob>();
 
   protected readonly priorityColor = computed(
     () => PRIORITY_COLORS[this.job().priorityName] ?? PRIORITY_COLORS['Normal'],

@@ -1,5 +1,6 @@
 @if (showShell()) {
   <app-header />
+  <app-connection-banner />
   <div class="app-body">
     <app-sidebar />
     <main class="app-main">
@@ -9,3 +10,5 @@
 } @else {
   <router-outlet />
 }
+
+<app-toast-container />

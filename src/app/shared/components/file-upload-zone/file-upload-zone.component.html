@@ -1,0 +1,40 @@
+<div
+  class="upload-zone"
+  [class.upload-zone--drag-over]="dragOver()"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)"
+  (click)="browse()">
+
+  <input
+    type="file"
+    #fileInput
+    class="upload-zone__input"
+    [accept]="accept()"
+    [multiple]="multiple()"
+    (change)="onFileSelected($event)" />
+
+  <span class="material-icons-outlined upload-zone__icon">cloud_upload</span>
+  <span class="upload-zone__text">Drag files here or click to browse</span>
+  <span class="upload-zone__hint">Max {{ maxSizeMb() }}MB per file</span>
+</div>
+
+@if (uploads().length) {
+  <div class="upload-list">
+    @for (upload of uploads(); track upload.fileName) {
+      <div class="upload-item" [class.upload-item--error]="upload.error">
+        <span class="material-icons-outlined upload-item__icon">
+          {{ upload.error ? 'error_outline' : 'insert_drive_file' }}
+        </span>
+        <span class="upload-item__name">{{ upload.fileName }}</span>
+        @if (upload.error) {
+          <span class="upload-item__error">{{ upload.error }}</span>
+        } @else {
+          <div class="upload-item__bar">
+            <div class="upload-item__progress" [style.width.%]="upload.progress"></div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

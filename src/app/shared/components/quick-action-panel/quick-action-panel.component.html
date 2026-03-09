@@ -1,0 +1,13 @@
+<div class="quick-actions" [style.grid-template-columns]="'repeat(' + columns() + ', 1fr)'">
+  @for (action of actions(); track action.id) {
+    <button
+      class="quick-actions__btn"
+      [class.quick-actions__btn--disabled]="action.disabled"
+      [style.--action-color]="action.color ?? 'var(--primary)'"
+      [disabled]="action.disabled ?? false"
+      (click)="onAction(action)">
+      <span class="material-icons-outlined quick-actions__icon">{{ action.icon }}</span>
+      <span class="quick-actions__label">{{ action.label }}</span>
+    </button>
+  }
+</div>

@@ -1,0 +1,59 @@
+<div class="filter-popover" (click)="$event.stopPropagation()">
+  <div class="filter-popover__header">
+    <span class="filter-popover__title">Filter: {{ column().header }}</span>
+  </div>
+
+  <div class="filter-popover__body">
+    @switch (column().type ?? 'text') {
+      @case ('text') {
+        <app-input
+          label="Contains"
+          [ngModel]="textValue()"
+          (ngModelChange)="textValue.set($event)" />
+      }
+      @case ('number') {
+        <div class="filter-popover__range">
+          <app-input
+            label="Min"
+            type="number"
+            [ngModel]="numberMin()"
+            (ngModelChange)="numberMin.set($event)" />
+          <app-input
+            label="Max"
+            type="number"
+            [ngModel]="numberMax()"
+            (ngModelChange)="numberMax.set($event)" />
+        </div>
+      }
+      @case ('date') {
+        <div class="filter-popover__range">
+          <app-datepicker
+            label="From"
+            [ngModel]="dateFrom()"
+            (ngModelChange)="dateFrom.set($event)" />
+          <app-datepicker
+            label="To"
+            [ngModel]="dateTo()"
+            (ngModelChange)="dateTo.set($event)" />
+        </div>
+      }
+      @case ('enum') {
+        <div class="filter-popover__enum-list">
+          @for (opt of column().filterOptions ?? []; track opt.value) {
+            <label class="filter-popover__enum-item">
+              <mat-checkbox
+                [checked]="isEnumSelected(opt.value)"
+                (change)="toggleEnum(opt.value)" />
+              <span>{{ opt.label }}</span>
+            </label>
+          }
+        </div>
+      }
+    }
+  </div>
+
+  <div class="filter-popover__actions">
+    <button class="filter-popover__btn filter-popover__btn--clear" (click)="onClear()">Clear</button>
+    <button class="filter-popover__btn filter-popover__btn--apply" (click)="onApply()">Apply</button>
+  </div>
+</div>
