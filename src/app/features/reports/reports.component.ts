@@ -22,11 +22,15 @@ import { TeamWorkloadItem } from './models/team-workload-item.model';
 import { CustomerActivityItem } from './models/customer-activity-item.model';
 import { MyWorkHistoryItem } from './models/my-work-history-item.model';
 import { MyTimeLogItem } from './models/my-time-log-item.model';
+import { ArAgingItem } from './models/ar-aging-item.model';
+import { RevenueItem } from './models/revenue-item.model';
+import { SimplePnlItem } from './models/simple-pnl-item.model';
+import { CurrencyPipe } from '@angular/common';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +51,9 @@ export class ReportsComponent {
     { id: 'customer-activity', label: 'Customer Activity', icon: 'business', needsDateRange: false },
     { id: 'my-work-history', label: 'My Work History', icon: 'assignment_ind', needsDateRange: false },
     { id: 'my-time-log', label: 'My Time Log', icon: 'timer', needsDateRange: true },
+    { id: 'ar-aging', label: 'AR Aging', icon: 'account_balance', needsDateRange: false },
+    { id: 'revenue', label: 'Revenue', icon: 'attach_money', needsDateRange: true },
+    { id: 'simple-pnl', label: 'Profit & Loss', icon: 'balance', needsDateRange: true },
   ];
 
   protected readonly activeReport = signal<ReportType>('jobs-by-stage');
@@ -70,6 +77,9 @@ export class ReportsComponent {
   protected readonly customerActivityData = signal<CustomerActivityItem[]>([]);
   protected readonly myWorkHistoryData = signal<MyWorkHistoryItem[]>([]);
   protected readonly myTimeLogData = signal<MyTimeLogItem[]>([]);
+  protected readonly arAgingData = signal<ArAgingItem[]>([]);
+  protected readonly revenueData = signal<RevenueItem[]>([]);
+  protected readonly simplePnlData = signal<SimplePnlItem[]>([]);
 
   // Chart configurations
   protected readonly jobsByStageChart = computed<ChartData<'bar'>>(() => {
@@ -180,6 +190,25 @@ export class ReportsComponent {
     };
   });
 
+  protected readonly revenueChart = computed<ChartData<'bar'>>(() => {
+    const data = this.revenueData();
+    return {
+      labels: data.map(d => d.customerName ?? d.period),
+      datasets: [{
+        data: data.map(d => d.total),
+        backgroundColor: 'rgba(34, 197, 94, 0.7)',
+        label: 'Revenue',
+      }],
+    };
+  });
+
+  protected readonly pnlTotals = computed(() => {
+    const data = this.simplePnlData();
+    const revenue = data.filter(d => d.type === 'Revenue').reduce((sum, d) => sum + d.amount, 0);
+    const expenses = data.filter(d => d.type === 'Expense').reduce((sum, d) => sum + d.amount, 0);
+    return { revenue, expenses, net: revenue - expenses };
+  });
+
   protected readonly barOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -281,6 +310,42 @@ export class ReportsComponent {
     { field: 'notes', header: 'Notes', sortable: false },
   ];
 
+  protected readonly arAgingColumns: ColumnDef[] = [
+    { field: 'invoiceNumber', header: 'Invoice #', sortable: true, width: '110px' },
+    { field: 'customerName', header: 'Customer', sortable: true },
+    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'total', header: 'Total', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'amountPaid', header: 'Paid', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'balanceDue', header: 'Balance', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'daysOverdue', header: 'Days Overdue', sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'agingBucket', header: 'Bucket', sortable: true, filterable: true, type: 'enum', width: '110px', filterOptions: [
+      { value: 'Current', label: 'Current' },
+      { value: '1-30 Days', label: '1-30 Days' },
+      { value: '31-60 Days', label: '31-60 Days' },
+      { value: '61-90 Days', label: '61-90 Days' },
+      { value: '90+ Days', label: '90+ Days' },
+    ]},
+  ];
+
+  protected readonly revenueColumns: ColumnDef[] = [
+    { field: 'period', header: 'Period', sortable: true },
+    { field: 'customerName', header: 'Customer', sortable: true },
+    { field: 'invoiceCount', header: 'Invoices', sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'subtotal', header: 'Subtotal', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'taxAmount', header: 'Tax', sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'total', header: 'Total', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'amountPaid', header: 'Paid', sortable: true, type: 'number', width: '110px', align: 'right' },
+  ];
+
+  protected readonly pnlColumns: ColumnDef[] = [
+    { field: 'category', header: 'Category', sortable: true },
+    { field: 'type', header: 'Type', sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
+      { value: 'Revenue', label: 'Revenue' },
+      { value: 'Expense', label: 'Expense' },
+    ]},
+    { field: 'amount', header: 'Amount', sortable: true, type: 'number', width: '130px', align: 'right' },
+  ];
+
   constructor() {
     this.loadReport('jobs-by-stage');
   }
@@ -331,6 +396,15 @@ export class ReportsComponent {
       case 'my-time-log':
         this.reportService.getMyTimeLog(this.startValue(), this.endValue()).subscribe(d => { this.myTimeLogData.set(d); this.loading.set(false); });
         break;
+      case 'ar-aging':
+        this.reportService.getArAging().subscribe(d => { this.arAgingData.set(d); this.loading.set(false); });
+        break;
+      case 'revenue':
+        this.reportService.getRevenue(this.startValue(), this.endValue()).subscribe(d => { this.revenueData.set(d); this.loading.set(false); });
+        break;
+      case 'simple-pnl':
+        this.reportService.getSimplePnl(this.startValue(), this.endValue()).subscribe(d => { this.simplePnlData.set(d); this.loading.set(false); });
+        break;
     }
   }
 
@@ -353,4 +427,13 @@ export class ReportsComponent {
   private defaultEnd(): Date {
     return new Date();
   }
+
+  protected readonly arAgingBuckets = computed(() => {
+    const data = this.arAgingData();
+    const buckets = ['Current', '1-30 Days', '31-60 Days', '61-90 Days', '90+ Days'];
+    return buckets.map(bucket => ({
+      bucket,
+      total: data.filter(d => d.agingBucket === bucket).reduce((sum, d) => sum + d.balanceDue, 0),
+    }));
+  });
 }

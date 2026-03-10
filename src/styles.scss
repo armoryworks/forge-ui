@@ -12,6 +12,7 @@
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
 @import '@fontsource/ibm-plex-mono/600.css';
+@import 'driver.js/dist/driver.css';
 
 // ─── Angular Material Theme ───
 html {
@@ -97,5 +98,22 @@ html {
     font-size: 18px;
     margin-right: $sp-md;
     color: var(--text-muted);
+  }
+}
+
+// ─── Driver.js Tour Overrides ───
+.qb-tour-popover {
+  font-family: $font-family-primary;
+  border-radius: $border-radius;
+
+  .driver-popover-title {
+    font-size: $font-size-md;
+    font-weight: 600;
+    font-family: $font-family-primary;
+  }
+
+  .driver-popover-description {
+    font-size: $font-size-base;
+    font-family: $font-family-primary;
   }
 }

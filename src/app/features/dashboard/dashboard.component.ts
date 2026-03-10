@@ -8,6 +8,8 @@ import { JobsByStageWidgetComponent } from './components/jobs-by-stage-widget.co
 import { TeamLoadWidgetComponent } from './components/team-load-widget.component';
 import { TodaysTasksWidgetComponent } from './components/todays-tasks-widget.component';
 import { CycleProgressWidgetComponent } from './components/cycle-progress-widget.component';
+import { OpenOrdersWidgetComponent } from './components/open-orders-widget.component';
+import { EodPromptWidgetComponent } from './components/eod-prompt-widget.component';
 import { DashboardData } from './models/dashboard-data.model';
 import { DashboardService } from './services/dashboard.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -25,6 +27,8 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
     ActivityWidgetComponent,
     DeadlinesWidgetComponent,
     CycleProgressWidgetComponent,
+    OpenOrdersWidgetComponent,
+    EodPromptWidgetComponent,
     PageHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',

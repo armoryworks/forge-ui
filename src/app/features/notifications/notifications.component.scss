@@ -1,0 +1,58 @@
+@use 'styles/variables' as *;
+
+.notifications-layout {
+  padding: $sp-lg;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.pref-section {
+  max-width: 600px;
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+    margin-top: $sp-xl;
+    margin-bottom: $sp-md;
+    padding-bottom: $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+}
+
+.pref-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md $sp-lg;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: var(--surface);
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 500;
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__toggle {
+    font-size: $icon-size-xxl;
+    color: var(--text-muted);
+
+    &--on {
+      color: var(--primary);
+    }
+  }
+}

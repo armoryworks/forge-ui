@@ -68,6 +68,14 @@ export class UserPreferencesService {
     this.flushSubject.next();
   }
 
+  remove(key: string): void {
+    this.reset(key);
+  }
+
+  getAll(): Record<string, unknown> {
+    return Object.fromEntries(this.cache());
+  }
+
   reset(key: string): void {
     this.cache.update(map => {
       const next = new Map(map);

@@ -178,6 +178,52 @@
         <app-data-table tableId="report-my-time" [columns]="timeLogColumns" [data]="myTimeLogData()"
                         emptyIcon="timer" emptyMessage="No time entries found" />
       }
+
+      <!-- AR Aging -->
+      @if (activeReport() === 'ar-aging') {
+        <div class="kpi-row">
+          @for (b of arAgingBuckets(); track b.bucket) {
+            <div class="kpi-card" [class.kpi-card--error]="b.bucket === '90+ Days'" [class.kpi-card--warning]="b.bucket === '61-90 Days'">
+              <span class="kpi-card__value">{{ b.total | currency }}</span>
+              <span class="kpi-card__label">{{ b.bucket }}</span>
+            </div>
+          }
+        </div>
+        <app-data-table tableId="report-ar-aging" [columns]="arAgingColumns" [data]="arAgingData()"
+                        emptyIcon="account_balance" emptyMessage="No outstanding invoices" />
+      }
+
+      <!-- Revenue -->
+      @if (activeReport() === 'revenue') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="revenueChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-revenue" [columns]="revenueColumns" [data]="revenueData()"
+                        emptyIcon="attach_money" emptyMessage="No revenue data" />
+      }
+
+      <!-- Simple P&L -->
+      @if (activeReport() === 'simple-pnl') {
+        <div class="kpi-row">
+          <div class="kpi-card kpi-card--success">
+            <span class="kpi-card__value">{{ pnlTotals().revenue | currency }}</span>
+            <span class="kpi-card__label">Total Revenue</span>
+          </div>
+          <div class="kpi-card kpi-card--error">
+            <span class="kpi-card__value">{{ pnlTotals().expenses | currency }}</span>
+            <span class="kpi-card__label">Total Expenses</span>
+          </div>
+          <div class="kpi-card" [class.kpi-card--success]="pnlTotals().net >= 0" [class.kpi-card--error]="pnlTotals().net < 0">
+            <span class="kpi-card__value">{{ pnlTotals().net | currency }}</span>
+            <span class="kpi-card__label">Net Income</span>
+          </div>
+        </div>
+        <app-data-table tableId="report-pnl" [columns]="pnlColumns" [data]="simplePnlData()"
+                        emptyIcon="balance" emptyMessage="No financial data" />
+      }
     }
   </main>
 </div>

@@ -1,0 +1,13 @@
+@if (isSaved()) {
+  <div class="eod-saved">
+    <span class="material-icons-outlined eod-saved__icon">check_circle</span>
+    <p class="eod-saved__text">{{ savedResponse() }}</p>
+    <button class="action-btn action-btn--sm" (click)="edit()">Edit</button>
+  </div>
+} @else {
+  <div class="eod-form">
+    <p class="eod-form__prompt">What are your top 3 priorities for tomorrow?</p>
+    <app-textarea label="Tomorrow's priorities" [formControl]="topThreeControl" [rows]="4" />
+    <button class="action-btn action-btn--primary action-btn--sm" (click)="save()">Save</button>
+  </div>
+}

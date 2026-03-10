@@ -121,6 +121,11 @@ export const routes: Routes = [
           import('./features/payments/payments.routes').then((m) => m.PAYMENTS_ROUTES),
       },
       {
+        path: 'notifications',
+        loadChildren: () =>
+          import('./features/notifications/notifications.routes').then((m) => m.NOTIFICATION_ROUTES),
+      },
+      {
         path: 'admin',
         canActivate: [roleGuard('Admin')],
         loadChildren: () =>

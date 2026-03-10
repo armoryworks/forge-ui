@@ -1,0 +1,34 @@
+@use 'styles/variables' as *;
+
+.eod-saved {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+
+  &__icon {
+    font-size: $icon-size-xxl;
+    color: var(--success);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    text-align: center;
+    line-height: 1.5;
+  }
+}
+
+.eod-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__prompt {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+}

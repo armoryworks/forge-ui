@@ -1,0 +1,86 @@
+<app-page-header title="Notifications" />
+
+<div class="notifications-layout">
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="activeTab() === 'all'" (click)="setTab('all')">
+      All Notifications
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'preferences'" (click)="setTab('preferences')">
+      Preferences
+    </button>
+  </div>
+
+  @if (activeTab() === 'all') {
+    <app-toolbar>
+      <app-input label="Search" [formControl]="searchControl" />
+      <app-select label="Severity" [formControl]="severityControl" [options]="severityOptions" />
+      <app-select label="Source" [formControl]="sourceControl" [options]="sourceOptions" />
+      <span appSpacer></span>
+      <button class="action-btn" (click)="markAllRead()">
+        <span class="material-icons-outlined">done_all</span> Mark All Read
+      </button>
+      <button class="action-btn" (click)="dismissAll()">
+        <span class="material-icons-outlined">clear_all</span> Dismiss All
+      </button>
+    </app-toolbar>
+
+    <app-data-table
+      tableId="notifications-list"
+      [columns]="notificationColumns"
+      [data]="filteredNotifications()"
+      emptyIcon="notifications_none"
+      emptyMessage="No notifications" />
+  }
+
+  @if (activeTab() === 'preferences') {
+    <div class="pref-section">
+      <h3 class="pref-section__title">Email Notifications</h3>
+
+      <div class="pref-row" (click)="togglePref('email_critical', emailOnCritical())">
+        <div class="pref-row__info">
+          <span class="pref-row__label">Critical Alerts</span>
+          <span class="pref-row__desc">Receive email for critical system alerts</span>
+        </div>
+        <span class="material-icons-outlined pref-row__toggle"
+              [class.pref-row__toggle--on]="emailOnCritical()">
+          {{ emailOnCritical() ? 'toggle_on' : 'toggle_off' }}
+        </span>
+      </div>
+
+      <div class="pref-row" (click)="togglePref('email_assignment', emailOnAssignment())">
+        <div class="pref-row__info">
+          <span class="pref-row__label">Job Assignments</span>
+          <span class="pref-row__desc">Receive email when assigned to a job</span>
+        </div>
+        <span class="material-icons-outlined pref-row__toggle"
+              [class.pref-row__toggle--on]="emailOnAssignment()">
+          {{ emailOnAssignment() ? 'toggle_on' : 'toggle_off' }}
+        </span>
+      </div>
+
+      <div class="pref-row" (click)="togglePref('email_mention', emailOnMention())">
+        <div class="pref-row__info">
+          <span class="pref-row__label">Mentions</span>
+          <span class="pref-row__desc">Receive email when mentioned in a comment</span>
+        </div>
+        <span class="material-icons-outlined pref-row__toggle"
+              [class.pref-row__toggle--on]="emailOnMention()">
+          {{ emailOnMention() ? 'toggle_on' : 'toggle_off' }}
+        </span>
+      </div>
+
+      <h3 class="pref-section__title">In-App Notifications</h3>
+
+      <div class="pref-row" (click)="togglePref('sound', soundEnabled())">
+        <div class="pref-row__info">
+          <span class="pref-row__label">Sound</span>
+          <span class="pref-row__desc">Play a sound when a notification arrives</span>
+        </div>
+        <span class="material-icons-outlined pref-row__toggle"
+              [class.pref-row__toggle--on]="soundEnabled()">
+          {{ soundEnabled() ? 'toggle_on' : 'toggle_off' }}
+        </span>
+      </div>
+    </div>
+  }
+</div>

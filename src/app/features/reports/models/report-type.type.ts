@@ -10,4 +10,7 @@ export type ReportType =
   | 'team-workload'
   | 'customer-activity'
   | 'my-work-history'
-  | 'my-time-log';
+  | 'my-time-log'
+  | 'ar-aging'
+  | 'revenue'
+  | 'simple-pnl';

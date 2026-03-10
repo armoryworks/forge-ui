@@ -14,6 +14,9 @@ import { TeamWorkloadItem } from '../models/team-workload-item.model';
 import { CustomerActivityItem } from '../models/customer-activity-item.model';
 import { MyWorkHistoryItem } from '../models/my-work-history-item.model';
 import { MyTimeLogItem } from '../models/my-time-log-item.model';
+import { ArAgingItem } from '../models/ar-aging-item.model';
+import { RevenueItem } from '../models/revenue-item.model';
+import { SimplePnlItem } from '../models/simple-pnl-item.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
@@ -75,6 +78,24 @@ export class ReportService {
 
   getMyTimeLog(start: string, end: string): Observable<MyTimeLogItem[]> {
     return this.http.get<MyTimeLogItem[]>(`${environment.apiUrl}/reports/my-time-log`, {
+      params: { start, end },
+    });
+  }
+
+  // ─── Financial Reports ───
+
+  getArAging(): Observable<ArAgingItem[]> {
+    return this.http.get<ArAgingItem[]>(`${environment.apiUrl}/reports/ar-aging`);
+  }
+
+  getRevenue(start: string, end: string, groupBy: string = 'period'): Observable<RevenueItem[]> {
+    return this.http.get<RevenueItem[]>(`${environment.apiUrl}/reports/revenue`, {
+      params: { start, end, groupBy },
+    });
+  }
+
+  getSimplePnl(start: string, end: string): Observable<SimplePnlItem[]> {
+    return this.http.get<SimplePnlItem[]>(`${environment.apiUrl}/reports/simple-pnl`, {
       params: { start, end },
     });
   }

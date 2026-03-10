@@ -1,0 +1,61 @@
+@use 'styles/variables' as *;
+
+.orders-summary {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.orders-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xs;
+
+  &__value {
+    font-size: $font-size-kpi;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.orders-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__row {
+    display: flex;
+    justify-content: space-between;
+    padding: $sp-sm $sp-md;
+    background: var(--surface);
+    font-size: $font-size-sm;
+  }
+
+  &__label {
+    color: var(--text-secondary);
+  }
+
+  &__count {
+    font-weight: 600;
+  }
+}
+
+.orders-link {
+  font-size: $font-size-sm;
+  color: var(--primary);
+  text-decoration: none;
+  text-align: center;
+  padding-top: $sp-sm;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
