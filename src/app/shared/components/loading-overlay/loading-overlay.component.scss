@@ -1,0 +1,91 @@
+@use 'sass:math';
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+$spinner-size: 48px;
+$arc-width: 3px;
+$exit-slide: 60px;
+$exit-duration: 400ms;
+$enter-duration: 300ms;
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: $z-loading;
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  animation: overlay-fade-in $enter-duration ease forwards;
+}
+
+// ─── Spinner — fixed at viewport center, absolutely positioned ───
+.loading-overlay__spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: $spinner-size;
+  height: $spinner-size;
+  transform: translate(-50%, -50%);
+}
+
+.loading-overlay__svg {
+  width: 100%;
+  height: 100%;
+  animation: spin 1.4s linear infinite;
+}
+
+.loading-overlay__track {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: $arc-width;
+}
+
+.loading-overlay__arc {
+  fill: none;
+  stroke: var(--primary);
+  stroke-width: $arc-width;
+  stroke-linecap: square;
+  stroke-dasharray: 90, 126;
+  stroke-dashoffset: 0;
+}
+
+// ─── Messages — anchored below the spinner, grow downward ───
+.loading-overlay__messages {
+  position: absolute;
+  top: calc(50% + #{math.div($spinner-size, 2)} + #{$sp-lg});
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.loading-overlay__cause {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  color: var(--text);
+  white-space: nowrap;
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity $enter-duration ease, transform $enter-duration ease;
+
+  &--enter {
+    opacity: 0;
+    transform: translateY($sp-md);
+  }
+
+  &--exit-left {
+    opacity: 0;
+    transform: translateX(-$exit-slide);
+    transition-duration: $exit-duration;
+  }
+
+  &--exit-right {
+    opacity: 0;
+    transform: translateX($exit-slide);
+    transition-duration: $exit-duration;
+  }
+}
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

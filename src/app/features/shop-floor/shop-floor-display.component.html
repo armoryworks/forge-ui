@@ -1,0 +1,83 @@
+@if (error()) {
+  <div class="sf-error">
+    <span class="material-icons-outlined sf-error__icon">error_outline</span>
+    <p>{{ error() }}</p>
+  </div>
+} @else {
+  <header class="sf-header">
+    <h1 class="sf-header__title">Shop Floor</h1>
+    <div class="sf-header__stats">
+      <div class="sf-stat">
+        <span class="sf-stat__value">{{ activeJobs().length }}</span>
+        <span class="sf-stat__label">Active Jobs</span>
+      </div>
+      <div class="sf-stat sf-stat--success">
+        <span class="sf-stat__value">{{ completedToday() }}</span>
+        <span class="sf-stat__label">Completed Today</span>
+      </div>
+      @if (maintenanceAlerts() > 0) {
+        <div class="sf-stat sf-stat--warning">
+          <span class="sf-stat__value">{{ maintenanceAlerts() }}</span>
+          <span class="sf-stat__label">Maintenance Alerts</span>
+        </div>
+      }
+    </div>
+    <span class="sf-header__clock">{{ clockDisplay() }}</span>
+  </header>
+
+  <div class="sf-body">
+    <!-- Worker Presence -->
+    <section class="sf-section sf-section--workers">
+      <h2 class="sf-section__title">
+        <span class="material-icons-outlined">group</span>
+        Who's Here ({{ workers().length }})
+      </h2>
+      <div class="sf-workers">
+        @for (worker of workers(); track worker.userId) {
+          <div class="sf-worker">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
+            <div class="sf-worker__info">
+              <span class="sf-worker__name">{{ worker.name }}</span>
+              @if (worker.currentTask) {
+                <span class="sf-worker__task">{{ worker.currentJobNumber }} — {{ worker.currentTask }}</span>
+              } @else {
+                <span class="sf-worker__task sf-worker__task--idle">Available</span>
+              }
+            </div>
+            <span class="sf-worker__time">{{ worker.timeOnTask }}</span>
+          </div>
+        } @empty {
+          <div class="sf-empty">No workers clocked in</div>
+        }
+      </div>
+    </section>
+
+    <!-- Active Jobs -->
+    <section class="sf-section sf-section--jobs">
+      <h2 class="sf-section__title">
+        <span class="material-icons-outlined">assignment</span>
+        Active Jobs
+      </h2>
+      <div class="sf-jobs">
+        @for (job of activeJobs(); track job.id) {
+          <div class="sf-job" [class.sf-job--overdue]="job.isOverdue">
+            <div class="sf-job__stage-dot" [style.background]="job.stageColor"></div>
+            <div class="sf-job__main">
+              <span class="sf-job__number">{{ job.jobNumber }}</span>
+              <span class="sf-job__title">{{ job.title }}</span>
+            </div>
+            <span class="sf-job__stage">{{ job.stageName }}</span>
+            <span class="sf-job__priority" [class]="priorityClass(job.priorityName)">
+              {{ job.priorityName }}
+            </span>
+            @if (job.assigneeInitials) {
+              <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#94a3b8'" size="sm" />
+            }
+          </div>
+        } @empty {
+          <div class="sf-empty">No active jobs</div>
+        }
+      </div>
+    </section>
+  </div>
+}

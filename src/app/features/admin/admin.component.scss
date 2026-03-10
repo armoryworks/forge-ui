@@ -216,3 +216,59 @@
   .material-icons-outlined { font-size: $icon-size-hero; }
   p { margin: 0; font-size: $font-size-sm; }
 }
+
+// ─── System Settings ───
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: 0 $sp-lg $sp-lg;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-xl;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+    flex: 1;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__description {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__control {
+    flex-shrink: 0;
+    width: 220px;
+  }
+}
+
+.settings-input,
+.settings-select {
+  width: 100%;
+  padding: $sp-xs $sp-sm;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: $font-family-primary;
+  font-size: $font-size-sm;
+  border-radius: $border-radius;
+  height: $input-height;
+  &:focus { outline: none; border-color: var(--primary); }
+}

@@ -1,6 +1,27 @@
+@if (filterable() && (actionOptions().length > 1 || userOptions().length > 1)) {
+  <div class="timeline__filters">
+    @if (actionOptions().length > 1) {
+      <select class="timeline__filter-select" (change)="onActionFilter($event)">
+        <option value="">All Actions</option>
+        @for (action of actionOptions(); track action) {
+          <option [value]="action">{{ action }}</option>
+        }
+      </select>
+    }
+    @if (userOptions().length > 1) {
+      <select class="timeline__filter-select" (change)="onUserFilter($event)">
+        <option value="">All Users</option>
+        @for (user of userOptions(); track user) {
+          <option [value]="user">{{ user }}</option>
+        }
+      </select>
+    }
+  </div>
+}
+
 <div class="timeline" [class.timeline--compact]="compact()">
-  @for (activity of activities(); track activity.id) {
-    <div class="timeline__item">
+  @for (activity of displayActivities(); track activity.id) {
+    <div class="timeline__item" [class.timeline__item--batch]="activity.batchedItems">
       <div class="timeline__avatar">
         @if (activity.userInitials) {
           <app-avatar
@@ -12,7 +33,23 @@
         }
       </div>
       <div class="timeline__content">
-        <span class="timeline__desc">{{ activity.description }}</span>
+        @if (activity.batchedItems) {
+          <button class="timeline__batch-toggle" (click)="toggleBatch(activity.id)">
+            <span class="material-icons-outlined timeline__batch-icon">
+              {{ expandedBatch() === activity.id ? 'expand_more' : 'chevron_right' }}
+            </span>
+            <span class="timeline__desc">{{ activity.description }}</span>
+          </button>
+          @if (expandedBatch() === activity.id) {
+            <div class="timeline__batch-detail">
+              @for (item of activity.batchedItems; track item.id) {
+                <span class="timeline__batch-line" [innerHTML]="item.description | mentionHighlight"></span>
+              }
+            </div>
+          }
+        } @else {
+          <span class="timeline__desc" [innerHTML]="activity.description | mentionHighlight"></span>
+        }
         <span class="timeline__time">{{ formatDate(activity.createdAt) }}</span>
       </div>
     </div>

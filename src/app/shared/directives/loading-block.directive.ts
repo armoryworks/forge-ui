@@ -41,7 +41,7 @@ export class LoadingBlockDirective {
     this.renderer.setStyle(this.overlay, 'display', 'flex');
     this.renderer.setStyle(this.overlay, 'align-items', 'center');
     this.renderer.setStyle(this.overlay, 'justify-content', 'center');
-    this.renderer.setStyle(this.overlay, 'background', 'rgba(255, 255, 255, 0.6)');
+    this.renderer.setStyle(this.overlay, 'background', 'color-mix(in srgb, var(--surface) 60%, transparent)');
     this.renderer.setStyle(this.overlay, 'z-index', '10');
     this.renderer.setStyle(this.overlay, 'opacity', '0');
     this.renderer.setStyle(this.overlay, 'transition', 'opacity 300ms ease');

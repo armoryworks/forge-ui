@@ -1,0 +1,20 @@
+@if (visible() || displayCauses().length > 0) {
+  <div class="loading-overlay" role="alert" aria-live="assertive" aria-label="Loading">
+    <!-- Spinner — fixed at center, never moves -->
+    <div class="loading-overlay__spinner">
+      <svg viewBox="0 0 48 48" class="loading-overlay__svg">
+        <circle class="loading-overlay__track" cx="24" cy="24" r="20" />
+        <circle class="loading-overlay__arc" cx="24" cy="24" r="20" />
+      </svg>
+    </div>
+
+    <!-- Messages — anchored below spinner, grow downward -->
+    <div class="loading-overlay__messages">
+      @for (cause of displayCauses(); track cause.key) {
+        <span class="loading-overlay__cause" [class]="getCauseClass(cause)">
+          {{ cause.message }}
+        </span>
+      }
+    </div>
+  </div>
+}

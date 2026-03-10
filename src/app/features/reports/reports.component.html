@@ -98,6 +98,86 @@
         <app-data-table tableId="report-completion-trend" [columns]="trendColumns" [data]="completionTrendData()"
                         emptyIcon="trending_up" emptyMessage="No data" />
       }
+
+      <!-- On-Time Delivery -->
+      @if (activeReport() === 'on-time-delivery') {
+        @if (onTimeDeliveryData(); as otd) {
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ otd.totalCompleted }}</span>
+              <span class="kpi-card__label">Total Completed</span>
+            </div>
+            <div class="kpi-card kpi-card--success">
+              <span class="kpi-card__value">{{ otd.onTime }}</span>
+              <span class="kpi-card__label">On Time</span>
+            </div>
+            <div class="kpi-card kpi-card--error">
+              <span class="kpi-card__value">{{ otd.late }}</span>
+              <span class="kpi-card__label">Late</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ otd.onTimePercent }}%</span>
+              <span class="kpi-card__label">On-Time Rate</span>
+            </div>
+          </div>
+          <div class="chart-container chart-container--pie">
+            <canvas baseChart
+                    type="pie"
+                    [data]="onTimeDeliveryChart()"
+                    [options]="pieOptions"></canvas>
+          </div>
+        } @else {
+          <div class="page-loading">No delivery data available</div>
+        }
+      }
+
+      <!-- Average Lead Time -->
+      @if (activeReport() === 'average-lead-time') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="averageLeadTimeChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-lead-time" [columns]="leadTimeColumns" [data]="averageLeadTimeData()"
+                        emptyIcon="hourglass_top" emptyMessage="No lead time data" />
+      }
+
+      <!-- Team Workload -->
+      @if (activeReport() === 'team-workload') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="teamWorkloadChart()"
+                  [options]="stackedBarOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-workload" [columns]="workloadColumns" [data]="teamWorkloadData()"
+                        emptyIcon="groups" emptyMessage="No workload data" />
+      }
+
+      <!-- Customer Activity -->
+      @if (activeReport() === 'customer-activity') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="customerActivityChart()"
+                  [options]="stackedBarOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-customer-activity" [columns]="customerColumns" [data]="customerActivityData()"
+                        emptyIcon="business" emptyMessage="No customer data" />
+      }
+
+      <!-- My Work History -->
+      @if (activeReport() === 'my-work-history') {
+        <app-data-table tableId="report-my-work" [columns]="workHistoryColumns" [data]="myWorkHistoryData()"
+                        emptyIcon="assignment_ind" emptyMessage="No jobs assigned to you" />
+      }
+
+      <!-- My Time Log -->
+      @if (activeReport() === 'my-time-log') {
+        <app-data-table tableId="report-my-time" [columns]="timeLogColumns" [data]="myTimeLogData()"
+                        emptyIcon="timer" emptyMessage="No time entries found" />
+      }
     }
   </main>
 </div>

@@ -5,6 +5,7 @@ import { InputComponent } from '../../../shared/components/input/input.component
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { StageRequest } from '../models/stage-request.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 
@@ -16,7 +17,7 @@ const STAGE_COLORS = [
 @Component({
   selector: 'app-track-type-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, InputComponent, ToggleComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, DialogComponent, InputComponent, ToggleComponent, ValidationPopoverDirective, EmptyStateComponent],
   templateUrl: './track-type-dialog.component.html',
   styleUrl: './track-type-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

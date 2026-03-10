@@ -1,0 +1,34 @@
+<app-dialog [title]="isEditing ? 'Edit Vendor' : 'New Vendor'" width="520px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input label="Company Name" formControlName="companyName" />
+    <app-input label="Contact Name" formControlName="contactName" />
+    <div class="dialog-row">
+      <app-input label="Email" type="email" formControlName="email" />
+      <app-input label="Phone" formControlName="phone" />
+    </div>
+    <app-input label="Address" formControlName="address" />
+    <div class="dialog-row">
+      <app-input label="City" formControlName="city" />
+      <app-input label="State" formControlName="state" />
+    </div>
+    <div class="dialog-row">
+      <app-input label="Zip Code" formControlName="zipCode" />
+      <app-input label="Country" formControlName="country" />
+    </div>
+    <app-select label="Payment Terms" formControlName="paymentTerms" [options]="paymentTermsOptions" />
+    <app-textarea label="Notes" formControlName="notes" [rows]="3" />
+    @if (isEditing) {
+      <app-toggle label="Active" formControlName="isActive" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      {{ isEditing ? 'Save Changes' : 'Create Vendor' }}
+    </button>
+  </div>
+</app-dialog>

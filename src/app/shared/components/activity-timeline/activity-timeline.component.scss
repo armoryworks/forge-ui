@@ -1,6 +1,30 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+// ─── Inline filter bar ───
+.timeline__filters {
+  display: flex;
+  gap: $sp-md;
+  padding-bottom: $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.timeline__filter-select {
+  font-family: $font-family-primary;
+  font-size: $font-size-xs;
+  color: var(--text);
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  padding: $sp-xs $sp-md;
+  height: $input-height;
+  cursor: pointer;
+
+  &:focus {
+    outline: $border-width solid var(--primary);
+    outline-offset: -$border-width;
+  }
+}
+
 .timeline {
   display: flex;
   flex-direction: column;
@@ -40,6 +64,12 @@
   font-size: $font-size-sm;
   color: var(--text);
   line-height: 1.4;
+
+  // @mention highlighting via innerHTML + MentionHighlightPipe
+  ::ng-deep .mention {
+    color: var(--primary);
+    font-weight: 600;
+  }
 }
 
 .timeline__time {
@@ -52,6 +82,39 @@
   color: var(--text-muted);
   padding: $sp-lg 0;
   text-align: center;
+}
+
+// ─── Batch collapsing ───
+.timeline__batch-toggle {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: $font-family-primary;
+  color: var(--text);
+}
+
+.timeline__batch-icon {
+  font-size: $icon-size-sm;
+  color: var(--text-muted);
+}
+
+.timeline__batch-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  padding-left: $sp-xl;
+  margin-top: $sp-xs;
+  border-left: $border-width solid var(--border);
+}
+
+.timeline__batch-line {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  line-height: 1.4;
 }
 
 // ─── Compact variant (sidebar) ───

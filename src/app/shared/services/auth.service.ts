@@ -45,6 +45,15 @@ export class AuthService {
   readonly user = this._user.asReadonly();
   readonly isAuthenticated = computed(() => this._token() !== null);
 
+  hasRole(role: string): boolean {
+    return this._user()?.roles.includes(role) ?? false;
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    const userRoles = this._user()?.roles ?? [];
+    return roles.some(r => userRoles.includes(r));
+  }
+
   login(credentials: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)

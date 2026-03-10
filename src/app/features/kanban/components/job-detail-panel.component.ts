@@ -9,6 +9,7 @@ import { SelectComponent } from '../../../shared/components/select/select.compon
 import { ActivityItem } from '../../../shared/models/activity.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { KanbanService } from '../services/kanban.service';
 import { JobDetail } from '../models/job-detail.model';
 import { Subtask } from '../models/subtask.model';
@@ -19,6 +20,8 @@ import { PRIORITY_COLORS } from '../models/priority-colors.const';
 import { LINK_TYPE_OPTIONS } from '../models/link-type-options.const';
 import { LINK_TYPE_ICONS } from '../models/link-type-icons.const';
 import { LINK_TYPE_LABELS } from '../models/link-type-labels.const';
+import { JobPart } from '../models/job-part.model';
+import { PartSearchResult } from '../models/part-search-result.model';
 
 @Component({
   selector: 'app-job-detail-panel',
@@ -41,6 +44,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly activity = signal<Activity[]>([]);
   protected readonly links = signal<JobLink[]>([]);
   protected readonly files = signal<FileAttachment[]>([]);
+  protected readonly timeEntries = signal<TimeEntry[]>([]);
   protected readonly loading = signal(true);
   protected readonly newSubtaskControl = new FormControl('');
   protected readonly commentControl = new FormControl('');
@@ -54,6 +58,25 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly linkSearchResults = signal<KanbanJob[]>([]);
   protected readonly selectedLinkTarget = signal<KanbanJob | null>(null);
   protected readonly showLinkResults = signal(false);
+
+  // Part add form
+  protected readonly jobParts = signal<JobPart[]>([]);
+  protected readonly partSearchControl = new FormControl('');
+  protected readonly partSearchResults = signal<PartSearchResult[]>([]);
+  protected readonly selectedPart = signal<PartSearchResult | null>(null);
+  protected readonly showPartResults = signal(false);
+
+  protected readonly totalTimeMinutes = computed(() =>
+    this.timeEntries().reduce((sum, e) => sum + e.durationMinutes, 0),
+  );
+
+  protected readonly formattedTotalTime = computed(() => {
+    const mins = this.totalTimeMinutes();
+    if (mins === 0) return '0h';
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+  });
 
   protected readonly mappedActivity = computed<ActivityItem[]>(() =>
     this.activity().map(a => ({
@@ -75,6 +98,21 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.getJobActivity(id).subscribe(a => this.activity.set(a));
     this.kanbanService.getJobLinks(id).subscribe(l => this.links.set(l));
     this.kanbanService.getJobFiles(id).subscribe(f => this.files.set(f));
+    this.kanbanService.getJobTimeEntries(id).subscribe(t => this.timeEntries.set(t));
+    this.kanbanService.getJobParts(id).subscribe(p => this.jobParts.set(p));
+
+    this.partSearchControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      filter(v => (v?.length ?? 0) >= 2),
+      switchMap(term => this.kanbanService.searchParts(term!)),
+    ).subscribe(results => {
+      const linkedPartIds = new Set(this.jobParts().map(jp => jp.partId));
+      this.partSearchResults.set(
+        results.filter(p => !linkedPartIds.has(p.id)).slice(0, 8)
+      );
+      this.showPartResults.set(true);
+    });
 
     this.linkSearchControl.valueChanges.pipe(
       debounceTime(300),
@@ -201,6 +239,41 @@ export class JobDetailPanelComponent implements OnInit {
     if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
     if (contentType.includes('word') || contentType.includes('document')) return 'description';
     return 'attach_file';
+  }
+
+  protected formatDuration(minutes: number): string {
+    const h = Math.floor(minutes / 60);
+    const m = minutes % 60;
+    return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+  }
+
+  protected selectPart(part: PartSearchResult): void {
+    this.selectedPart.set(part);
+    this.partSearchControl.setValue(part.partNumber + ' — ' + part.description, { emitEvent: false });
+    this.showPartResults.set(false);
+  }
+
+  protected addPart(): void {
+    const part = this.selectedPart();
+    if (!part) return;
+
+    this.kanbanService.addJobPart(this.jobId(), part.id).subscribe(jp => {
+      this.jobParts.update(list => [...list, jp]);
+      this.selectedPart.set(null);
+      this.partSearchControl.reset();
+      this.snackbar.success('Part added.');
+    });
+  }
+
+  protected removePart(jp: JobPart): void {
+    this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe(() => {
+      this.jobParts.update(list => list.filter(p => p.id !== jp.id));
+      this.snackbar.success('Part removed.');
+    });
+  }
+
+  protected dismissPartResults(): void {
+    setTimeout(() => this.showPartResults.set(false), 200);
   }
 
   protected close(): void {

@@ -1,0 +1,97 @@
+<div [appLoadingBlock]="loading()">
+  <app-page-header title="Planning">
+    <app-select label="Cycle" [formControl]="cycleControl" [options]="cycleOptions()" />
+    <button class="action-btn action-btn--primary" (click)="openCreateCycleDialog()">
+      <span class="material-icons-outlined">add</span>
+      New Cycle
+    </button>
+  </app-page-header>
+
+  <div class="planning-layout">
+    <!-- Left: Backlog Panel -->
+    <div class="backlog-panel">
+      <div class="backlog-panel__header">
+        <h3 class="backlog-panel__title">Backlog</h3>
+        <span class="backlog-panel__count">{{ filteredBacklog().length }} jobs</span>
+      </div>
+
+      <div class="backlog-panel__filters">
+        <app-input label="Search" [formControl]="searchControl" placeholder="Search jobs..." />
+        <app-select label="Priority" [formControl]="priorityControl" [options]="priorityOptions" />
+      </div>
+
+      <div class="backlog-panel__list">
+        @for (job of filteredBacklog(); track job.id) {
+          <div class="backlog-job">
+            <div class="backlog-job__content">
+              <div class="backlog-job__top">
+                <span class="backlog-job__number">{{ job.jobNumber }}</span>
+                <span class="backlog-job__title">{{ job.title }}</span>
+              </div>
+              <div class="backlog-job__bottom">
+                <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
+                <span class="backlog-job__priority-dot" [style.background]="priorityColor(job.priorityName)"></span>
+                <span class="backlog-job__priority-text">{{ job.priorityName }}</span>
+                @if (job.assigneeInitials) {
+                  <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#0d9488'" size="sm" />
+                }
+              </div>
+            </div>
+            @if (hasCycle()) {
+              <button class="icon-btn backlog-job__add" title="Commit to cycle" (click)="commitJob(job)">
+                <span class="material-icons-outlined">add_circle_outline</span>
+              </button>
+            }
+          </div>
+        } @empty {
+          <app-empty-state icon="inbox" message="No available jobs" />
+        }
+      </div>
+    </div>
+
+    <!-- Right: Cycle Board -->
+    <div class="cycle-panel">
+      @if (selectedCycle(); as cycle) {
+        <div class="cycle-panel__actions">
+          <button class="icon-btn" title="Edit cycle" (click)="openEditCycleDialog()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          @if (isDraftCycle()) {
+            <button class="action-btn action-btn--sm" (click)="activateCycle()">
+              <span class="material-icons-outlined">play_arrow</span>
+              Activate
+            </button>
+          }
+          @if (isActiveCycle()) {
+            <button class="action-btn action-btn--sm" (click)="completeCycle()">
+              <span class="material-icons-outlined">check</span>
+              Complete & Roll Over
+            </button>
+            <button class="action-btn action-btn--sm" (click)="completeWithoutRollover()">
+              <span class="material-icons-outlined">stop</span>
+              Complete
+            </button>
+          }
+        </div>
+
+        <app-cycle-board
+          [cycle]="cycle"
+          (entryCompleted)="onEntryCompleted($event)"
+          (entryRemoved)="onEntryRemoved($event)"
+          (entryReordered)="onEntryReordered($event)" />
+      } @else {
+        <app-empty-state icon="event_note" message="No planning cycle selected"
+          actionLabel="Create First Cycle" (action)="openCreateCycleDialog()" />
+      }
+    </div>
+  </div>
+
+  <!-- Cycle Dialog -->
+  @if (showCycleDialog()) {
+    <app-cycle-dialog
+      [cycle]="editingCycle()"
+      [saving]="saving()"
+      (saved)="onCycleDialogSaved($event)"
+      (cancelled)="onCycleDialogCancelled()" />
+  }
+</div>

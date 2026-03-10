@@ -1,0 +1,184 @@
+<app-page-header title="Shipments">
+  <button class="action-btn action-btn--primary" (click)="loadShipments()">
+    <span class="material-icons-outlined">add</span>
+    New Shipment
+  </button>
+</app-page-header>
+
+<div class="sh-layout">
+  <!-- Left: Shipment List -->
+  <div class="sh-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search shipments..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="shipments" [columns]="shipmentColumns" [data]="shipments()"
+        [rowClass]="shipmentRowClass" emptyIcon="local_shipping" emptyMessage="No shipments found"
+        (rowClick)="selectShipment($any($event))">
+        <ng-template appColumnCell="shipmentNumber" let-row>
+          <span class="sh-number">{{ row.shipmentNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="salesOrderNumber" let-row>
+          <span class="sh-number">{{ row.salesOrderNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="carrier" let-row>
+          <span>{{ row.carrier ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="trackingNumber" let-row>
+          <span class="sh-number">{{ row.trackingNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="shippedDate" let-row>
+          <span class="text-muted">{{ row.shippedDate ? (row.shippedDate | date:'mediumDate') : '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedShipment(); as shipment) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">local_shipping</span>
+          <div>
+            <div class="detail-name">{{ shipment.shipmentNumber }}</div>
+            <div class="detail-subtitle">{{ shipment.customerName }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <!-- Status & Info -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(shipment.status)">{{ getStatusLabel(shipment.status) }}</span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Sales Order</span>
+            <span class="info-value">{{ shipment.salesOrderNumber }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Customer</span>
+            <span class="info-value">{{ shipment.customerName }}</span>
+          </div>
+          @if (shipment.carrier) {
+            <div class="info-item">
+              <span class="info-label">Carrier</span>
+              <span class="info-value">{{ shipment.carrier }}</span>
+            </div>
+          }
+          @if (shipment.trackingNumber) {
+            <div class="info-item">
+              <span class="info-label">Tracking Number</span>
+              <span class="info-value sh-number">{{ shipment.trackingNumber }}</span>
+            </div>
+          }
+          @if (shipment.shippedDate) {
+            <div class="info-item">
+              <span class="info-label">Shipped</span>
+              <span class="info-value">{{ shipment.shippedDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (shipment.deliveredDate) {
+            <div class="info-item">
+              <span class="info-label">Delivered</span>
+              <span class="info-value">{{ shipment.deliveredDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (shipment.weight) {
+            <div class="info-item">
+              <span class="info-label">Weight</span>
+              <span class="info-value">{{ shipment.weight }} lbs</span>
+            </div>
+          }
+          @if (shipment.shippingCost) {
+            <div class="info-item">
+              <span class="info-label">Shipping Cost</span>
+              <span class="info-value">{{ shipment.shippingCost | currency }}</span>
+            </div>
+          }
+          @if (shipment.invoiceId) {
+            <div class="info-item">
+              <span class="info-label">Linked Invoice</span>
+              <span class="info-value">#{{ shipment.invoiceId }}</span>
+            </div>
+          }
+        </div>
+
+        @if (shipment.notes) {
+          <div class="info-section">
+            <span class="info-label">Notes</span>
+            <div class="info-notes">{{ shipment.notes }}</div>
+          </div>
+        }
+
+        <!-- Line Items -->
+        <div class="lines-section">
+          <span class="info-label">Line Items ({{ shipment.lines.length }})</span>
+          @if (shipment.lines.length > 0) {
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="lines-table__right">Quantity</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of shipment.lines; track line.id) {
+                  <tr>
+                    <td>{{ line.description }}</td>
+                    <td class="lines-table__right">{{ line.quantity }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ shipment.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Updated</span>
+            <span class="info-value">{{ shipment.updatedAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          @if (canShip(shipment.status)) {
+            <button class="action-btn action-btn--primary" (click)="markShipped()">
+              <span class="material-icons-outlined">local_shipping</span>
+              Mark Shipped
+            </button>
+          }
+          @if (canDeliver(shipment.status)) {
+            <button class="action-btn action-btn--primary" (click)="markDelivered()">
+              <span class="material-icons-outlined">check_circle</span>
+              Mark Delivered
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

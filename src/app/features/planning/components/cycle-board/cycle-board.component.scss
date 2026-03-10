@@ -1,0 +1,267 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.cycle-board {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  height: 100%;
+
+  &__header {
+    @include flex-between;
+    padding: $sp-md $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__dates {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+
+  &__days-left {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--warning);
+    background: var(--warning-light);
+    padding: $sp-xxs $sp-sm;
+  }
+
+  &__stats {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    font-family: $font-family-mono;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  &__status {
+    font-size: $font-size-xs;
+  }
+
+  &__progress {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: 0 $sp-lg;
+  }
+
+  &__progress-bar {
+    flex: 1;
+    height: $progress-bar-height;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: var(--success);
+    transition: width $transition-normal;
+  }
+
+  &__progress-label {
+    font-size: $font-size-xs;
+    font-family: $font-family-mono;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: right;
+  }
+
+  &__goals {
+    padding: $sp-sm $sp-lg;
+    border: $border-width-thin solid var(--border);
+    margin: 0 $sp-lg;
+    background: var(--surface);
+  }
+
+  &__goals-label {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: $sp-xs;
+  }
+
+  &__goals-text {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  &__entries {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 $sp-lg $sp-lg;
+    @include custom-scrollbar;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $sp-3xl $sp-xl;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  &__empty-icon {
+    font-size: $icon-size-hero;
+    opacity: 0.4;
+    margin-bottom: $sp-md;
+  }
+
+  &__empty-hint {
+    font-size: $font-size-xs;
+    margin-top: $sp-xs;
+  }
+}
+
+// ─── Entry Card ───
+.entry {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  cursor: default;
+  transition: border-color $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+  }
+
+  &--completed {
+    opacity: 0.6;
+
+    .entry__title {
+      text-decoration: line-through;
+    }
+
+    .entry__job-number {
+      text-decoration: line-through;
+    }
+  }
+
+  &--rolled-over {
+    border-left: $border-width solid var(--warning);
+  }
+
+  &__drag-handle {
+    cursor: grab;
+    color: var(--text-muted);
+    display: flex;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__top {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__job-number {
+    @include uppercase-label($font-size-xs, 0.5px, 700);
+    color: var(--text);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    @include truncate;
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  &__bottom {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    font-size: $font-size-xs;
+  }
+
+  &__priority {
+    font-size: $font-size-xxs;
+    font-weight: 600;
+
+    &--urgent { color: var(--error); }
+    &--high { color: var(--warning); }
+    &--normal { color: var(--text-secondary); }
+    &--low { color: var(--text-muted); }
+  }
+
+  &__assignee {
+    color: var(--text-muted);
+    font-size: $font-size-xxs;
+  }
+
+  &__rolled-over-badge {
+    color: var(--warning);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    flex-shrink: 0;
+  }
+
+  &__check {
+    font-size: $icon-size-md;
+    color: var(--success);
+  }
+}
+
+// ─── CDK Drag Styles ───
+.cdk-drag-preview {
+  border: $border-width solid var(--primary);
+  background: var(--surface);
+  box-shadow: $shadow-dropdown;
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+.cdk-drag-animating {
+  transition: transform $transition-normal;
+}

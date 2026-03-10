@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  contentChild,
   contentChildren,
   DestroyRef,
   effect,
@@ -24,6 +25,8 @@ import { ColumnDef } from '../../models/column-def.model';
 import { SortState } from '../../models/sort-state.model';
 import { TablePreferences } from '../../models/table-preferences.model';
 import { ColumnCellDirective } from '../../directives/column-cell.directive';
+import { RowExpandDirective } from '../../directives/row-expand.directive';
+import { LoadingBlockDirective } from '../../directives/loading-block.directive';
 import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter-popover/column-filter-popover.component';
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
@@ -39,6 +42,7 @@ import { UserPreferencesService } from '../../services/user-preferences.service'
     MatMenuModule,
     MatPaginatorModule,
     OverlayModule,
+    LoadingBlockDirective,
     EmptyStateComponent,
     ColumnFilterPopoverComponent,
     ColumnManagerPanelComponent,
@@ -58,6 +62,9 @@ export class DataTableComponent implements OnInit {
   readonly trackByField = input('id');
   readonly emptyIcon = input('search_off');
   readonly emptyMessage = input('No data found');
+  readonly expandable = input(false);
+  readonly loading = input(false);
+  readonly stickyFirstColumn = input(false);
   readonly rowClass = input<((row: unknown) => string) | null>(null);
   readonly rowStyle = input<((row: unknown) => Record<string, string>) | null>(null);
 
@@ -65,6 +72,7 @@ export class DataTableComponent implements OnInit {
   readonly selectionChange = output<unknown[]>();
 
   readonly cellTemplates = contentChildren(ColumnCellDirective);
+  readonly expandTemplate = contentChild(RowExpandDirective);
 
   protected readonly sortStates = signal<SortState[]>([]);
   protected readonly pageIndex = signal(0);
@@ -205,6 +213,22 @@ export class DataTableComponent implements OnInit {
     Object.keys(this.filters()).length
   );
 
+  protected readonly expandedRows = signal<Set<unknown>>(new Set());
+
+  protected readonly stickyLeftOffset = computed(() => {
+    let offset = 0;
+    if (this.expandable()) offset += 32;
+    if (this.selectable()) offset += 40;
+    return offset;
+  });
+
+  protected readonly totalColSpan = computed(() => {
+    let count = this.visibleColumns().length + 1; // +1 for gear column
+    if (this.selectable()) count++;
+    if (this.expandable()) count++;
+    return count;
+  });
+
   ngOnInit(): void {
     this.loadPreferences();
   }
@@ -313,6 +337,23 @@ export class DataTableComponent implements OnInit {
 
   trackByFn(_index: number, row: unknown): unknown {
     return this.getTrackValue(row);
+  }
+
+  // ─── Expandable Rows ───
+  toggleRowExpand(row: unknown, event?: Event): void {
+    event?.stopPropagation();
+    const key = this.getTrackValue(row);
+    const expanded = new Set(this.expandedRows());
+    if (expanded.has(key)) {
+      expanded.delete(key);
+    } else {
+      expanded.add(key);
+    }
+    this.expandedRows.set(expanded);
+  }
+
+  isRowExpanded(row: unknown): boolean {
+    return this.expandedRows().has(this.getTrackValue(row));
   }
 
   // ─── Filter ───

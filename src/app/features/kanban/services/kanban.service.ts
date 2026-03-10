@@ -13,6 +13,9 @@ import { UserRef } from '../models/user-ref.model';
 import { JobLink } from '../models/job-link.model';
 import { BulkResult } from '../models/bulk-result.model';
 import { FileAttachment } from '../../../shared/models/file.model';
+import { TimeEntry } from '../../time-tracking/models/time-entry.model';
+import { JobPart } from '../models/job-part.model';
+import { PartSearchResult } from '../models/part-search-result.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -109,6 +112,35 @@ export class KanbanService {
 
   downloadFileUrl(fileId: number): string {
     return `${environment.apiUrl}/files/${fileId}`;
+  }
+
+  getJobTimeEntries(jobId: number): Observable<TimeEntry[]> {
+    return this.http.get<TimeEntry[]>(`${environment.apiUrl}/time-tracking/entries`, {
+      params: { jobId: jobId.toString() },
+    });
+  }
+
+  // Job Parts
+  getJobParts(jobId: number): Observable<JobPart[]> {
+    return this.http.get<JobPart[]>(`${environment.apiUrl}/jobs/${jobId}/parts`);
+  }
+
+  addJobPart(jobId: number, partId: number, quantity: number = 1, notes?: string): Observable<JobPart> {
+    return this.http.post<JobPart>(`${environment.apiUrl}/jobs/${jobId}/parts`, { partId, quantity, notes });
+  }
+
+  updateJobPart(jobId: number, jobPartId: number, quantity: number, notes: string | null): Observable<JobPart> {
+    return this.http.patch<JobPart>(`${environment.apiUrl}/jobs/${jobId}/parts/${jobPartId}`, { quantity, notes });
+  }
+
+  removeJobPart(jobId: number, jobPartId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/jobs/${jobId}/parts/${jobPartId}`);
+  }
+
+  searchParts(search: string): Observable<PartSearchResult[]> {
+    return this.http.get<PartSearchResult[]>(
+      `${environment.apiUrl}/parts`, { params: { search } }
+    );
   }
 
   searchJobs(search: string): Observable<KanbanJob[]> {

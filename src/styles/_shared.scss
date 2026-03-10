@@ -327,6 +327,15 @@
   gap: $sp-md;
 }
 
+// ─── Animations ───
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
 // ─── Utilities ───
 .text-muted {
   color: var(--text-muted);

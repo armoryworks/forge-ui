@@ -3,6 +3,7 @@ import { PlaceholderComponent } from './shared/components/placeholder/placeholde
 import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { roleGuard } from './shared/guards/role.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
 
 export const routes: Routes = [
@@ -50,6 +51,7 @@ export const routes: Routes = [
       },
       {
         path: 'leads',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM')],
         loadChildren: () =>
           import('./features/leads/leads.routes').then((m) => m.LEADS_ROUTES),
       },
@@ -60,6 +62,7 @@ export const routes: Routes = [
       },
       {
         path: 'assets',
+        canActivate: [roleGuard('Admin', 'Manager')],
         loadChildren: () =>
           import('./features/assets/assets.routes').then((m) => m.ASSETS_ROUTES),
       },
@@ -70,14 +73,69 @@ export const routes: Routes = [
       },
       {
         path: 'reports',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM')],
         loadChildren: () =>
           import('./features/reports/reports.routes').then((m) => m.REPORTS_ROUTES),
       },
       {
+        path: 'planning',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM')],
+        loadChildren: () =>
+          import('./features/planning/planning.routes').then((m) => m.PLANNING_ROUTES),
+      },
+      {
+        path: 'vendors',
+        loadChildren: () =>
+          import('./features/vendors/vendors.routes').then((m) => m.VENDORS_ROUTES),
+      },
+      {
+        path: 'purchase-orders',
+        loadChildren: () =>
+          import('./features/purchase-orders/purchase-orders.routes').then((m) => m.PURCHASE_ORDERS_ROUTES),
+      },
+      {
+        path: 'sales-orders',
+        loadChildren: () =>
+          import('./features/sales-orders/sales-orders.routes').then((m) => m.SALES_ORDERS_ROUTES),
+      },
+      {
+        path: 'quotes',
+        loadChildren: () =>
+          import('./features/quotes/quotes.routes').then((m) => m.QUOTES_ROUTES),
+      },
+      {
+        path: 'shipments',
+        loadChildren: () =>
+          import('./features/shipments/shipments.routes').then((m) => m.SHIPMENTS_ROUTES),
+      },
+      {
+        path: 'invoices',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/invoices/invoices.routes').then((m) => m.INVOICES_ROUTES),
+      },
+      {
+        path: 'payments',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/payments/payments.routes').then((m) => m.PAYMENTS_ROUTES),
+      },
+      {
         path: 'admin',
+        canActivate: [roleGuard('Admin')],
         loadChildren: () =>
           import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
     ],
+  },
+  {
+    path: 'display/shop-floor',
+    loadChildren: () =>
+      import('./features/shop-floor/shop-floor.routes').then((m) => m.SHOP_FLOOR_ROUTES),
+  },
+  {
+    path: 'dev-tools',
+    loadChildren: () =>
+      import('./features/dev-tools/dev-tools.routes').then((m) => m.DEV_TOOLS_ROUTES),
   },
 ];

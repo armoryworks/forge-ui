@@ -22,6 +22,8 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-customers',
@@ -31,7 +33,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent,
     DataTableComponent, ColumnCellDirective, ValidationPopoverDirective,
-    AvatarComponent,
+    AvatarComponent, EmptyStateComponent, LoadingBlockDirective,
   ],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss',

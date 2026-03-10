@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from './services/admin.service';
 import { AdminUser } from './models/admin-user.model';
+import { SystemSetting } from './models/system-setting.model';
 import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
 import { TerminologyEntryItem } from './models/terminology-entry-item.model';
@@ -11,6 +12,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { MatDialog } from '@angular/material/dialog';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TerminologyService } from '../../shared/services/terminology.service';
+import { ThemeService } from '../../shared/services/theme.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
@@ -22,6 +24,8 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-admin',
@@ -30,6 +34,7 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
+    EmptyStateComponent, LoadingBlockDirective,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -40,8 +45,9 @@ export class AdminComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly terminologyService = inject(TerminologyService);
+  private readonly themeService = inject(ThemeService);
 
-  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology'>('users');
+  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings'>('users');
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -81,6 +87,23 @@ export class AdminComponent {
   protected readonly terminologyEntries = signal<TerminologyEntryItem[]>([]);
   protected readonly terminologyEdits = signal<Map<string, string>>(new Map());
 
+  // System Settings
+  protected readonly systemSettings = signal<SystemSetting[]>([]);
+  protected readonly settingsEdits = signal<Map<string, string>>(new Map());
+
+  protected readonly settingDefinitions: { key: string; label: string; description: string; type: 'text' | 'number' | 'boolean' }[] = [
+    { key: 'app.name', label: 'Application Name', description: 'Name displayed in the header and browser tab', type: 'text' },
+    { key: 'app.company_name', label: 'Company Name', description: 'Your company name for documents and invoices', type: 'text' },
+    { key: 'planning.cycle_duration_days', label: 'Planning Cycle (Days)', description: 'Default planning cycle length in days', type: 'number' },
+    { key: 'planning.nudge_hour', label: 'Daily Nudge Hour (24h)', description: 'Hour of day for daily planning nudge (0-23)', type: 'number' },
+    { key: 'files.max_upload_size_mb', label: 'Max Upload Size (MB)', description: 'Maximum file upload size in megabytes', type: 'number' },
+    { key: 'jobs.default_priority', label: 'Default Job Priority', description: 'Default priority for new jobs (Low, Normal, High, Urgent)', type: 'text' },
+    { key: 'jobs.auto_archive_days', label: 'Auto-Archive After (Days)', description: 'Days after completion before auto-archiving jobs (0 = disabled)', type: 'number' },
+    { key: 'notifications.email_enabled', label: 'Email Notifications', description: 'Enable email notifications for mentions and assignments', type: 'boolean' },
+    { key: 'theme.primary_color', label: 'Primary Brand Color', description: 'Primary theme color (hex, e.g. #0d9488)', type: 'text' },
+    { key: 'theme.accent_color', label: 'Accent Brand Color', description: 'Accent theme color (hex, e.g. #7c3aed)', type: 'text' },
+  ];
+
   protected readonly userColumns: ColumnDef[] = [
     { field: 'avatar', header: '', width: '36px' },
     { field: 'name', header: 'Name', sortable: true },
@@ -106,12 +129,13 @@ export class AdminComponent {
     this.loadUsers();
   }
 
-  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology'): void {
+  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings'): void {
     this.activeTab.set(tab);
     if (tab === 'users' && this.users().length === 0) this.loadUsers();
     if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
     if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
     if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
+    if (tab === 'settings' && this.systemSettings().length === 0) this.loadSystemSettings();
   }
 
   // ── Users ──
@@ -341,5 +365,71 @@ export class AdminComponent {
       .replace(/^(entity_|status_|action_|label_|field_)/, '')
       .replace(/_/g, ' ')
       .replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  // ── System Settings ──
+
+  private loadSystemSettings(): void {
+    this.loading.set(true);
+    this.adminService.getSystemSettings().subscribe({
+      next: (settings) => {
+        this.systemSettings.set(settings);
+        this.settingsEdits.set(new Map(settings.map(s => [s.key, s.value])));
+        this.loading.set(false);
+      },
+      error: () => { this.error.set('Failed to load system settings'); this.loading.set(false); },
+    });
+  }
+
+  protected onSettingChange(key: string, value: string): void {
+    this.settingsEdits.update(map => {
+      const updated = new Map(map);
+      updated.set(key, value);
+      return updated;
+    });
+  }
+
+  protected getSettingValue(key: string): string {
+    return this.settingsEdits().get(key) ?? '';
+  }
+
+  protected hasSettingsChanges(): boolean {
+    const edits = this.settingsEdits();
+    const current = new Map(this.systemSettings().map(s => [s.key, s.value]));
+    for (const [key, value] of edits) {
+      if (current.get(key) !== value) return true;
+    }
+    for (const def of this.settingDefinitions) {
+      if (edits.has(def.key) && !current.has(def.key) && edits.get(def.key) !== '') return true;
+    }
+    return false;
+  }
+
+  protected saveSettings(): void {
+    const edits = this.settingsEdits();
+    const settings = this.settingDefinitions
+      .filter(def => edits.has(def.key))
+      .map(def => ({
+        key: def.key,
+        value: edits.get(def.key)!,
+        description: def.description,
+      }));
+
+    this.saving.set(true);
+    this.adminService.updateSystemSettings(settings).subscribe({
+      next: (updated) => {
+        this.systemSettings.set(updated);
+        this.settingsEdits.set(new Map(updated.map(s => [s.key, s.value])));
+        this.saving.set(false);
+        this.snackbar.success('Settings saved');
+
+        const lookup = new Map(updated.map(s => [s.key, s.value]));
+        this.themeService.setBrandColors(
+          lookup.get('theme.primary_color') || undefined,
+          lookup.get('theme.accent_color') || undefined,
+        );
+      },
+      error: () => { this.saving.set(false); this.snackbar.error('Failed to save settings'); },
+    });
   }
 }

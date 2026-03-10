@@ -1,0 +1,82 @@
+<div class="cycle-board">
+  <div class="cycle-board__header">
+    <div class="cycle-board__info">
+      <h3 class="cycle-board__title">{{ cycle().name }}</h3>
+      <span class="cycle-board__dates">
+        {{ formatDate(cycle().startDate) }} – {{ formatDate(cycle().endDate) }}
+      </span>
+      @if (isActive()) {
+        <span class="cycle-board__days-left">{{ daysRemaining() }}d left</span>
+      }
+    </div>
+    <div class="cycle-board__stats">
+      <span class="cycle-board__count">{{ completedEntries() }} / {{ totalEntries() }}</span>
+      <span class="cycle-board__status chip" [class.chip--success]="cycle().status === 'Completed'"
+        [class.chip--primary]="cycle().status === 'Active'"
+        [class.chip--muted]="cycle().status === 'Draft'">
+        {{ cycle().status }}
+      </span>
+    </div>
+  </div>
+
+  <div class="cycle-board__progress">
+    <div class="cycle-board__progress-bar">
+      <div class="cycle-board__progress-fill" [style.width.%]="progressPercent()"></div>
+    </div>
+    <span class="cycle-board__progress-label">{{ progressPercent() }}%</span>
+  </div>
+
+  @if (cycle().goals) {
+    <div class="cycle-board__goals">
+      <span class="cycle-board__goals-label">Goals</span>
+      <p class="cycle-board__goals-text">{{ cycle().goals }}</p>
+    </div>
+  }
+
+  <div class="cycle-board__entries"
+    cdkDropList
+    [cdkDropListData]="sortedEntries()"
+    (cdkDropListDropped)="onDrop($event)">
+    @for (entry of sortedEntries(); track entry.jobId) {
+      <div class="entry" [class.entry--completed]="entry.completedAt" [class.entry--rolled-over]="entry.isRolledOver" cdkDrag>
+        <div class="entry__drag-handle" cdkDragHandle>
+          <span class="material-icons-outlined">drag_indicator</span>
+        </div>
+
+        <div class="entry__content">
+          <div class="entry__top">
+            <span class="entry__job-number">{{ entry.jobNumber }}</span>
+            <span class="entry__title">{{ entry.jobTitle }}</span>
+          </div>
+          <div class="entry__bottom">
+            <span class="chip" [style.--chip-color]="entry.stageColor">{{ entry.stageName }}</span>
+            <span class="entry__priority" [class]="getPriorityClass(entry.priority)">{{ entry.priority }}</span>
+            @if (entry.assigneeName) {
+              <span class="entry__assignee">{{ entry.assigneeName }}</span>
+            }
+            @if (entry.isRolledOver) {
+              <span class="entry__rolled-over-badge" title="Rolled over from previous cycle">
+                <span class="material-icons-outlined">replay</span>
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="entry__actions">
+          @if (!entry.completedAt) {
+            <button class="icon-btn" title="Mark complete" (click)="onComplete(entry, $event)">
+              <span class="material-icons-outlined">check_circle_outline</span>
+            </button>
+          } @else {
+            <span class="material-icons-outlined entry__check">check_circle</span>
+          }
+          <button class="icon-btn icon-btn--danger" title="Remove from cycle" (click)="onRemove(entry, $event)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+    } @empty {
+      <app-empty-state icon="assignment" message="No jobs committed to this cycle" />
+    }
+  </div>
+</div>

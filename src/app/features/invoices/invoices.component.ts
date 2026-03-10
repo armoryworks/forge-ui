@@ -1,0 +1,185 @@
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DatePipe, CurrencyPipe } from '@angular/common';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
+
+import { InvoiceService } from './services/invoice.service';
+import { InvoiceListItem } from './models/invoice-list-item.model';
+import { InvoiceDetail } from './models/invoice-detail.model';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { InputComponent } from '../../shared/components/input/input.component';
+import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../shared/models/column-def.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { SnackbarService } from '../../shared/services/snackbar.service';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+
+// ⚡ ACCOUNTING BOUNDARY
+@Component({
+  selector: 'app-invoices',
+  standalone: true,
+  imports: [
+    ReactiveFormsModule, DatePipe, CurrencyPipe,
+    PageHeaderComponent, InputComponent, SelectComponent,
+    DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+  ],
+  templateUrl: './invoices.component.html',
+  styleUrl: './invoices.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class InvoicesComponent {
+  private readonly invoiceService = inject(InvoiceService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
+
+  protected readonly loading = signal(false);
+  protected readonly invoices = signal<InvoiceListItem[]>([]);
+  protected readonly selectedInvoice = signal<InvoiceDetail | null>(null);
+
+  // Filters
+  protected readonly searchControl = new FormControl('');
+  protected readonly statusFilterControl = new FormControl<string | null>(null);
+
+  protected readonly statusOptions: SelectOption[] = [
+    { value: null, label: 'All Statuses' },
+    { value: 'Draft', label: 'Draft' },
+    { value: 'Sent', label: 'Sent' },
+    { value: 'PartiallyPaid', label: 'Partially Paid' },
+    { value: 'Paid', label: 'Paid' },
+    { value: 'Overdue', label: 'Overdue' },
+    { value: 'Voided', label: 'Voided' },
+  ];
+
+  protected readonly invoiceColumns: ColumnDef[] = [
+    { field: 'invoiceNumber', header: 'Invoice #', sortable: true, width: '120px' },
+    { field: 'customerName', header: 'Customer', sortable: true },
+    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: [
+      { value: 'Draft', label: 'Draft' },
+      { value: 'Sent', label: 'Sent' },
+      { value: 'PartiallyPaid', label: 'Partially Paid' },
+      { value: 'Paid', label: 'Paid' },
+      { value: 'Overdue', label: 'Overdue' },
+      { value: 'Voided', label: 'Voided' },
+    ]},
+    { field: 'invoiceDate', header: 'Invoice Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'total', header: 'Total', sortable: true, width: '100px', align: 'right' },
+    { field: 'amountPaid', header: 'Paid', sortable: true, width: '100px', align: 'right' },
+    { field: 'balanceDue', header: 'Balance', sortable: true, width: '100px', align: 'right' },
+    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+  ];
+
+  protected readonly invoiceRowClass = (row: unknown) => {
+    const inv = row as InvoiceListItem;
+    return inv.id === this.selectedInvoice()?.id ? 'row--selected' : '';
+  };
+
+  constructor() {
+    this.loadInvoices();
+  }
+
+  protected loadInvoices(): void {
+    this.loading.set(true);
+    const status = this.statusFilterControl.value ?? undefined;
+    this.invoiceService.getInvoices(undefined, status).subscribe({
+      next: (list) => { this.invoices.set(list); this.loading.set(false); },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  protected applyFilters(): void { this.loadInvoices(); }
+
+  protected selectInvoice(item: InvoiceListItem): void {
+    this.invoiceService.getInvoiceById(item.id).subscribe({
+      next: (detail) => this.selectedInvoice.set(detail),
+    });
+  }
+
+  protected closeDetail(): void { this.selectedInvoice.set(null); }
+
+  // --- Status Actions ---
+  protected sendInvoice(): void {
+    const inv = this.selectedInvoice();
+    if (!inv) return;
+    this.invoiceService.sendInvoice(inv.id).subscribe({
+      next: () => {
+        this.refreshDetail(inv.id);
+        this.loadInvoices();
+        this.snackbar.success('Invoice sent.');
+      },
+    });
+  }
+
+  protected voidInvoice(): void {
+    const inv = this.selectedInvoice();
+    if (!inv) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Void Invoice?',
+        message: `Void "${inv.invoiceNumber}"? This action cannot be undone.`,
+        confirmLabel: 'Void',
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.invoiceService.voidInvoice(inv.id).subscribe({
+        next: () => {
+          this.refreshDetail(inv.id);
+          this.loadInvoices();
+          this.snackbar.success('Invoice voided.');
+        },
+      });
+    });
+  }
+
+  protected deleteInvoice(): void {
+    const inv = this.selectedInvoice();
+    if (!inv) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Invoice?',
+        message: `Delete draft "${inv.invoiceNumber}"? This action cannot be undone.`,
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.invoiceService.deleteInvoice(inv.id).subscribe({
+        next: () => {
+          this.selectedInvoice.set(null);
+          this.loadInvoices();
+          this.snackbar.success('Invoice deleted.');
+        },
+      });
+    });
+  }
+
+  // --- Helpers ---
+  protected getStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      Draft: 'chip--muted',
+      Sent: 'chip--info',
+      PartiallyPaid: 'chip--warning',
+      Paid: 'chip--success',
+      Overdue: 'chip--error',
+      Voided: 'chip--muted',
+    };
+    return `chip ${map[status] ?? ''}`.trim();
+  }
+
+  protected getStatusLabel(status: string): string {
+    return status === 'PartiallyPaid' ? 'Partially Paid' : status;
+  }
+
+  protected canSend(status: string): boolean { return status === 'Draft'; }
+  protected canVoid(status: string): boolean { return status === 'Draft' || status === 'Sent'; }
+  protected canDelete(status: string): boolean { return status === 'Draft'; }
+
+  private refreshDetail(id: number): void {
+    this.invoiceService.getInvoiceById(id).subscribe(d => this.selectedInvoice.set(d));
+  }
+}

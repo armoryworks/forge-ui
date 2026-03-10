@@ -16,12 +16,7 @@
       <app-select label="Type" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
     </div>
 
-    @if (loading()) {
-      <div class="page-loading">
-        <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-        <span>Loading...</span>
-      </div>
-    } @else {
+    <div [appLoadingBlock]="loading()">
       <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
         [rowClass]="partRowClass" emptyIcon="inventory_2" emptyMessage="No parts found"
         (rowClick)="selectPart($any($event))">
@@ -51,7 +46,7 @@
           }
         </ng-template>
       </app-data-table>
-    }
+    </div>
   </div>
 
   <!-- Right: Detail Panel -->
@@ -95,12 +90,7 @@
         </button>
       </div>
 
-      <div class="detail-body">
-        @if (detailLoading()) {
-          <div class="page-loading">
-            <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-          </div>
-        } @else {
+      <div class="detail-body" [appLoadingBlock]="detailLoading()">
           <!-- Info Tab -->
           @if (detailTab() === 'info') {
             <div class="info-grid">
@@ -199,10 +189,7 @@
                 </tbody>
               </table>
             } @else {
-              <div class="empty-state">
-                <span class="material-icons-outlined">inventory_2</span>
-                <span>No BOM entries</span>
-              </div>
+              <app-empty-state icon="inventory_2" message="No BOM entries" />
             }
           }
 
@@ -228,13 +215,9 @@
                 </tbody>
               </table>
             } @else {
-              <div class="empty-state">
-                <span class="material-icons-outlined">link_off</span>
-                <span>Not used in any assemblies</span>
-              </div>
+              <app-empty-state icon="link_off" message="Not used in any assemblies" />
             }
           }
-        }
       </div>
     </div>
   }

@@ -3,4 +3,5 @@ export interface NavItem {
   label: string;
   route: string;
   badge?: number;
+  allowedRoles?: string[];
 }

@@ -106,12 +106,19 @@ export class TimeTrackingComponent implements OnDestroy {
     { field: 'durationMinutes', header: 'Duration', sortable: true },
     { field: 'notes', header: 'Notes' },
     { field: 'type', header: 'Type', width: '80px' },
+    { field: 'actions', header: '', width: '64px', align: 'right' },
   ];
 
   protected readonly timeRowClass = (row: unknown) => {
     const entry = row as TimeEntry;
     return entry.timerStart && !entry.timerStop ? 'row--active' : '';
   };
+
+  protected isEditable(entry: TimeEntry): boolean {
+    if (entry.isLocked) return false;
+    const today = new Date().toISOString().split('T')[0];
+    return entry.date >= today;
+  }
 
   constructor() {
     this.loadEntries();

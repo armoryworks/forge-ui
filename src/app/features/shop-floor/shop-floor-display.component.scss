@@ -1,0 +1,251 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+// ─── Header ───
+.sf-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-xl;
+  padding: $sp-lg $sp-xl;
+  background: var(--header);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.sf-header__title {
+  font-family: $font-family-primary;
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sf-header__stats {
+  display: flex;
+  gap: $sp-lg;
+  flex: 1;
+}
+
+.sf-header__clock {
+  font-family: $font-family-mono;
+  font-size: $font-size-lg;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.sf-stat {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sf-stat--success .sf-stat__value {
+  color: var(--success-light);
+}
+
+.sf-stat--warning .sf-stat__value {
+  color: var(--warning-light);
+}
+
+.sf-stat__value {
+  font-family: $font-family-mono;
+  font-size: $font-size-lg;
+  font-weight: 700;
+}
+
+.sf-stat__label {
+  font-size: $font-size-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+// ─── Body ───
+.sf-body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: $sp-lg;
+  flex: 1;
+  padding: $sp-lg;
+  overflow: hidden;
+}
+
+// ─── Sections ───
+.sf-section {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sf-section__title {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-md;
+  font-weight: 700;
+  margin: 0 0 $sp-md;
+  padding-bottom: $sp-md;
+  border-bottom: $border-width solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+}
+
+// ─── Workers ───
+.sf-workers {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
+}
+
+.sf-worker {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.sf-worker__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-worker__name {
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.sf-worker__task {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  @include truncate;
+
+  &--idle {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+.sf-worker__time {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+// ─── Jobs ───
+.sf-jobs {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
+}
+
+.sf-job {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+
+  &--overdue {
+    border-left: 3px solid var(--error);
+  }
+}
+
+.sf-job__stage-dot {
+  width: $dot-size-md;
+  height: $dot-size-md;
+  flex-shrink: 0;
+}
+
+.sf-job__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-job__number {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.sf-job__title {
+  font-size: $font-size-base;
+  @include truncate;
+}
+
+.sf-job__stage {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  width: 100px;
+  text-align: center;
+}
+
+.sf-job__priority {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  width: 60px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.priority--urgent {
+  color: var(--error);
+}
+
+.priority--high {
+  color: var(--warning);
+}
+
+// ─── Shared ───
+.sf-empty {
+  font-size: $font-size-md;
+  color: var(--text-muted);
+  text-align: center;
+  padding: $sp-2xl;
+}
+
+.sf-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: $sp-lg;
+}
+
+.sf-error__icon {
+  font-size: $icon-size-hero;
+  color: var(--error);
+}

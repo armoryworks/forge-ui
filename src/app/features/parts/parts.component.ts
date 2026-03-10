@@ -23,6 +23,8 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-parts',
@@ -32,6 +34,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
+    EmptyStateComponent, LoadingBlockDirective,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',

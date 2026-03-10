@@ -6,7 +6,7 @@
     }
   </button>
 
-  @for (group of navGroups; track $index) {
+  @for (group of navGroups(); track $index) {
     @if ($index > 0) {
       <div class="sidebar__divider"></div>
     }
@@ -29,7 +29,7 @@
   <div class="sidebar__spacer"></div>
 
   <div class="sidebar__divider"></div>
-  @for (item of bottomItems.items; track item.route) {
+  @for (item of bottomItems().items; track item.route) {
     <a class="nav-item"
        [routerLink]="item.route"
        routerLinkActive="nav-item--active"

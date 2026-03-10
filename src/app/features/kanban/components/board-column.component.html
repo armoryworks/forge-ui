@@ -25,7 +25,7 @@
       <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cardClicked)="cardClicked.emit($event)" />
     }
     @empty {
-      <div class="column__empty">No jobs</div>
+      <app-empty-state icon="work" message="No jobs" />
     }
   </div>
 </div>

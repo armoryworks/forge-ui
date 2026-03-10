@@ -15,6 +15,7 @@ import { Stage } from '../../shared/models/stage.model';
 import { TrackType } from '../../shared/models/track-type.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { BoardHubService } from '../../shared/services/board-hub.service';
+import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -29,13 +30,13 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 export class KanbanComponent implements OnInit, OnDestroy {
   private readonly kanbanService = inject(KanbanService);
   private readonly boardHub = inject(BoardHubService);
+  private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly selectedTrackTypeId = signal<number | null>(null);
   protected readonly columns = signal<BoardColumn[]>([]);
-  protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly selectedJobId = signal<number | null>(null);
   protected readonly showJobDialog = signal(false);
@@ -56,21 +57,17 @@ export class KanbanComponent implements OnInit, OnDestroy {
   );
 
   ngOnInit(): void {
-    this.kanbanService.getTrackTypes().subscribe({
-      next: (types) => {
-        this.trackTypes.set(types);
-        const defaultType = types.find(t => t.isDefault) ?? types[0];
-        if (defaultType) {
-          this.selectTrackType(defaultType.id);
-        } else {
-          this.loading.set(false);
-        }
-      },
-      error: () => {
-        this.error.set('Failed to load track types');
-        this.loading.set(false);
-      },
-    });
+    this.loadingService.track('Loading board...', this.kanbanService.getTrackTypes())
+      .subscribe({
+        next: (types) => {
+          this.trackTypes.set(types);
+          const defaultType = types.find(t => t.isDefault) ?? types[0];
+          if (defaultType) {
+            this.selectTrackType(defaultType.id);
+          }
+        },
+        error: () => this.error.set('Failed to load track types'),
+      });
 
     this.initBoardHub();
     this.kanbanService.getUsers().subscribe(u => this.users.set(u));
@@ -82,21 +79,15 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   protected selectTrackType(trackTypeId: number): void {
     this.selectedTrackTypeId.set(trackTypeId);
-    this.loading.set(true);
     this.error.set(null);
 
     this.boardHub.joinBoard(trackTypeId);
 
-    this.kanbanService.getBoard(trackTypeId).subscribe({
-      next: (columns) => {
-        this.columns.set(columns);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load board data');
-        this.loading.set(false);
-      },
-    });
+    this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId))
+      .subscribe({
+        next: (columns) => this.columns.set(columns),
+        error: () => this.error.set('Failed to load board data'),
+      });
   }
 
   private async initBoardHub(): Promise<void> {
@@ -104,7 +95,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
     const reloadBoard = () => {
       const trackTypeId = this.selectedTrackTypeId();
-      if (trackTypeId) this.selectTrackType(trackTypeId);
+      if (trackTypeId) this.reloadBoard();
     };
 
     this.boardHub.onJobCreatedEvent(reloadBoard);
@@ -157,10 +148,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected onDialogSaved(): void {
     this.showJobDialog.set(false);
     this.selectedJobId.set(null);
-    const currentTrackTypeId = this.selectedTrackTypeId();
-    if (currentTrackTypeId) {
-      this.selectTrackType(currentTrackTypeId);
-    }
+    this.reloadBoard();
   }
 
   protected onDialogCancelled(): void {
@@ -229,7 +217,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   private reloadBoard(): void {
     const trackTypeId = this.selectedTrackTypeId();
-    if (trackTypeId) this.selectTrackType(trackTypeId);
+    if (!trackTypeId) return;
+    this.kanbanService.getBoard(trackTypeId).subscribe({
+      next: (columns) => this.columns.set(columns),
+    });
   }
 
   protected onCardDropped(event: CdkDragDrop<KanbanJob[]>): void {

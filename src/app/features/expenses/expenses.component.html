@@ -13,12 +13,7 @@
     <span class="total-amount">Total: {{ getTotalAmount() | currency }}</span>
   </div>
 
-  @if (loading()) {
-    <div class="page-loading">
-      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-      <span>Loading...</span>
-    </div>
-  } @else {
+  <div [appLoadingBlock]="loading()">
     <app-data-table tableId="expenses" [columns]="expenseColumns" [data]="expenses()"
       emptyIcon="receipt_long" emptyMessage="No expenses found">
       <ng-template appColumnCell="expenseDate" let-expense>
@@ -49,7 +44,7 @@
         }
       </ng-template>
     </app-data-table>
-  }
+  </div>
 </div>
 
 <!-- Expense Dialog -->

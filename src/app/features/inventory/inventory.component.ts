@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
+
 import { InventoryService } from './services/inventory.service';
 import { StorageLocation } from './models/storage-location.model';
 import { InventoryPartSummary } from './models/inventory-part-summary.model';
@@ -13,13 +14,19 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
+import { RowExpandDirective } from '../../shared/directives/row-expand.directive';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { ColumnDef } from '../../shared/models/column-def.model';
+import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationPopoverDirective, EmptyStateComponent, LoadingBlockDirective],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,7 +42,22 @@ export class InventoryComponent {
   protected readonly partSummaries = signal<InventoryPartSummary[]>([]);
   protected readonly searchControl = new FormControl('');
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
-  protected readonly expandedPartId = signal<number | null>(null);
+
+  protected readonly stockColumns: ColumnDef[] = [
+    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'description', header: 'Description', sortable: true },
+    { field: 'material', header: 'Material', sortable: true, width: '140px' },
+    { field: 'onHand', header: 'On Hand', sortable: true, align: 'right', width: '90px' },
+    { field: 'reserved', header: 'Reserved', sortable: true, align: 'right', width: '90px' },
+    { field: 'available', header: 'Available', sortable: true, align: 'right', width: '90px' },
+  ];
+
+  protected readonly stockRowClass = (row: unknown) => {
+    const summary = row as InventoryPartSummary;
+    if (summary.available <= 0) return 'stock-level--empty';
+    if (summary.available < summary.onHand * 0.2) return 'stock-level--low';
+    return '';
+  };
 
   // Locations tab
   protected readonly locationTree = signal<StorageLocation[]>([]);
@@ -45,6 +67,16 @@ export class InventoryComponent {
 
   // Movements tab
   protected readonly movements = signal<BinMovementItem[]>([]);
+
+  protected readonly movementColumns: ColumnDef[] = [
+    { field: 'entityName', header: 'Item', sortable: true },
+    { field: 'quantity', header: 'Qty', sortable: true, width: '70px', align: 'right' },
+    { field: 'fromLocationName', header: 'From', sortable: true },
+    { field: 'toLocationName', header: 'To', sortable: true },
+    { field: 'reason', header: 'Reason', sortable: true, width: '120px' },
+    { field: 'movedByName', header: 'By', sortable: true },
+    { field: 'movedAt', header: 'When', sortable: true, type: 'date', width: '120px' },
+  ];
 
   // Location dialog
   protected readonly showLocationDialog = signal(false);
@@ -95,15 +127,6 @@ export class InventoryComponent {
     this.loadStock();
   }
 
-  protected togglePartExpand(partId: number): void {
-    this.expandedPartId.set(this.expandedPartId() === partId ? null : partId);
-  }
-
-  protected getStockClass(summary: InventoryPartSummary): string {
-    if (summary.available <= 0) return 'stock-level--empty';
-    if (summary.available < summary.onHand * 0.2) return 'stock-level--low';
-    return '';
-  }
 
   // ── Locations Tab ──
 

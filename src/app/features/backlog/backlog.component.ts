@@ -6,6 +6,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, startWith } from 'rxjs';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
+import { LoadingService } from '../../shared/services/loading.service';
 import { KanbanJob } from '../kanban/models/kanban-job.model';
 import { UserRef } from '../kanban/models/user-ref.model';
 import { JobDetail } from '../kanban/models/job-detail.model';
@@ -36,11 +37,11 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 export class BacklogComponent implements OnInit {
   private readonly backlogService = inject(BacklogService);
   private readonly kanbanService = inject(KanbanService);
+  private readonly loadingService = inject(LoadingService);
 
   protected readonly jobs = signal<KanbanJob[]>([]);
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly users = signal<UserRef[]>([]);
-  protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
   // Filters
@@ -142,21 +143,17 @@ export class BacklogComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    forkJoin({
+    this.loadingService.track('Loading backlog...', forkJoin({
       jobs: this.backlogService.getJobs(),
       trackTypes: this.kanbanService.getTrackTypes(),
       users: this.kanbanService.getUsers(),
-    }).subscribe({
+    })).subscribe({
       next: ({ jobs, trackTypes, users }) => {
         this.jobs.set(jobs);
         this.trackTypes.set(trackTypes);
         this.users.set(users);
-        this.loading.set(false);
       },
-      error: () => {
-        this.error.set('Failed to load backlog');
-        this.loading.set(false);
-      },
+      error: () => this.error.set('Failed to load backlog'),
     });
   }
 

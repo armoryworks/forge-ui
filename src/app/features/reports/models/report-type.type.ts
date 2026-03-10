@@ -4,4 +4,10 @@ export type ReportType =
   | 'time-by-user'
   | 'expense-summary'
   | 'lead-pipeline'
-  | 'job-completion-trend';
+  | 'job-completion-trend'
+  | 'on-time-delivery'
+  | 'average-lead-time'
+  | 'team-workload'
+  | 'customer-activity'
+  | 'my-work-history'
+  | 'my-time-log';

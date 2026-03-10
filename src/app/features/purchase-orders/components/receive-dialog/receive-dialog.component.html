@@ -1,0 +1,50 @@
+<app-dialog [title]="'Receive Items — ' + purchaseOrder().poNumber" width="700px" (closed)="close()">
+  @if (receivableLines().length === 0) {
+    <app-empty-state icon="check_circle" message="All items have been received." />
+  } @else {
+    <div class="receive-actions-top">
+      <button class="action-btn action-btn--sm" (click)="receiveAll()">
+        <span class="material-icons-outlined">done_all</span>
+        Receive All
+      </button>
+    </div>
+
+    <table class="receive-table">
+      <thead>
+        <tr>
+          <th>Part #</th>
+          <th>Description</th>
+          <th class="receive-table__right">Ordered</th>
+          <th class="receive-table__right">Received</th>
+          <th class="receive-table__right">Remaining</th>
+          <th class="receive-table__right">Receive Qty</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of receivableLines(); track line.id; let i = $index) {
+          <tr>
+            <td class="receive-table__mono">{{ line.partNumber }}</td>
+            <td>{{ line.description }}</td>
+            <td class="receive-table__right">{{ line.orderedQuantity }}</td>
+            <td class="receive-table__right">{{ line.receivedQuantity }}</td>
+            <td class="receive-table__right">{{ line.remainingQuantity }}</td>
+            <td class="receive-table__input">
+              <input type="number" [formControl]="lineControls()[i]"
+                [min]="0" [max]="line.remainingQuantity"
+                class="receive-qty-input" />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [disabled]="!hasAnyQuantity || saving()"
+      (click)="save()">
+      Receive Items
+    </button>
+  </div>
+</app-dialog>

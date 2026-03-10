@@ -1,0 +1,63 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.demo-content {
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
+.demo-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 700;
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}
+
+.demo-actions {
+  display: flex;
+  gap: $sp-md;
+  flex-wrap: wrap;
+}
+
+.demo-blocks {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-lg;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-block {
+  border: $border-width solid var(--border);
+  padding: $sp-lg;
+  background: var(--surface);
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__label {
+    @include uppercase-label($font-size-xs, 0.5px, 700);
+    color: var(--primary);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}

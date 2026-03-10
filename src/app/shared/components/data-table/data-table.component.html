@@ -1,9 +1,12 @@
 <div class="data-table">
   @if (pagedData().length || sortedData().length) {
-    <div class="data-table__scroll">
+    <div class="data-table__scroll" [appLoadingBlock]="loading()">
       <table class="data-table__table">
         <thead>
           <tr>
+            @if (expandable()) {
+              <th class="data-table__th data-table__th--expand"></th>
+            }
             @if (selectable()) {
               <th class="data-table__th data-table__th--checkbox">
                 <mat-checkbox
@@ -12,13 +15,15 @@
                   (change)="toggleSelectAll()" />
               </th>
             }
-            @for (col of visibleColumns(); track col.field) {
+            @for (col of visibleColumns(); track col.field; let first = $first) {
               <th
                 class="data-table__th"
                 [class.data-table__th--sortable]="col.sortable"
                 [class.data-table__th--right]="col.align === 'right'"
                 [class.data-table__th--center]="col.align === 'center'"
+                [class.data-table__th--sticky]="first && stickyFirstColumn()"
                 [style.width]="getColumnWidth(col)"
+                [style.left.px]="first && stickyFirstColumn() ? stickyLeftOffset() : null"
                 (click)="onHeaderClick(col, $event)"
                 (contextmenu)="onHeaderContextMenu(col, $event)">
                 <span class="data-table__th-content">
@@ -76,18 +81,28 @@
             <tr
               class="data-table__row"
               [class]="getRowClasses(row)"
+              [class.data-table__row--expanded]="expandable() && isRowExpanded(row)"
               [style]="getRowStyles(row)"
               (click)="onRowClick(row)">
+              @if (expandable()) {
+                <td class="data-table__td data-table__td--expand" (click)="toggleRowExpand(row, $event)">
+                  <span class="material-icons-outlined data-table__expand-icon">
+                    {{ isRowExpanded(row) ? 'expand_more' : 'chevron_right' }}
+                  </span>
+                </td>
+              }
               @if (selectable()) {
                 <td class="data-table__td data-table__td--checkbox" (click)="toggleRowSelection(row, $event)">
                   <mat-checkbox [checked]="isRowSelected(row)" />
                 </td>
               }
-              @for (col of visibleColumns(); track col.field) {
+              @for (col of visibleColumns(); track col.field; let first = $first) {
                 <td
                   class="data-table__td"
                   [class.data-table__td--right]="col.align === 'right'"
-                  [class.data-table__td--center]="col.align === 'center'">
+                  [class.data-table__td--center]="col.align === 'center'"
+                  [class.data-table__td--sticky]="first && stickyFirstColumn()"
+                  [style.left.px]="first && stickyFirstColumn() ? stickyLeftOffset() : null">
                   @if (getCellTemplate(col.field); as tmpl) {
                     <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: row }" />
                   } @else {
@@ -97,9 +112,18 @@
               }
               <td class="data-table__td data-table__td--gear"></td>
             </tr>
+            @if (expandable() && isRowExpanded(row) && expandTemplate(); as expandDir) {
+              <tr class="data-table__expand-row">
+                <td [attr.colspan]="totalColSpan()">
+                  <div class="data-table__expand-content">
+                    <ng-container *ngTemplateOutlet="expandDir.template; context: { $implicit: row }" />
+                  </div>
+                </td>
+              </tr>
+            }
           } @empty {
             <tr>
-              <td [attr.colspan]="visibleColumns().length + (selectable() ? 1 : 0) + 1">
+              <td [attr.colspan]="totalColSpan()">
                 <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" />
               </td>
             </tr>

@@ -1,0 +1,205 @@
+<app-page-header title="Invoices">
+</app-page-header>
+
+<div class="inv-layout">
+  <!-- Left: Invoice List -->
+  <div class="inv-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search invoices..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="invoices" [columns]="invoiceColumns" [data]="invoices()"
+        [rowClass]="invoiceRowClass" emptyIcon="receipt_long" emptyMessage="No invoices found"
+        (rowClick)="selectInvoice($any($event))">
+        <ng-template appColumnCell="invoiceNumber" let-row>
+          <span class="inv-number">{{ row.invoiceNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="customerName" let-row>
+          <span>{{ row.customerName }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="invoiceDate" let-row>
+          <span class="text-muted">{{ row.invoiceDate | date:'mediumDate' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="dueDate" let-row>
+          <span class="text-muted">{{ row.dueDate | date:'mediumDate' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="total" let-row>
+          <span>{{ row.total | currency }}</span>
+        </ng-template>
+        <ng-template appColumnCell="amountPaid" let-row>
+          <span>{{ row.amountPaid | currency }}</span>
+        </ng-template>
+        <ng-template appColumnCell="balanceDue" let-row>
+          <span [class.text-warning]="row.balanceDue > 0 && row.status !== 'Overdue'"
+                [class.text-error]="row.status === 'Overdue'">
+            {{ row.balanceDue | currency }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedInvoice(); as inv) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">receipt_long</span>
+          <div>
+            <div class="detail-name">{{ inv.invoiceNumber }}</div>
+            <div class="detail-customer">{{ inv.customerName }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <!-- Status & Info -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(inv.status)">{{ getStatusLabel(inv.status) }}</span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Customer</span>
+            <span class="info-value">{{ inv.customerName }}</span>
+          </div>
+          @if (inv.salesOrderNumber) {
+            <div class="info-item">
+              <span class="info-label">Sales Order</span>
+              <span class="info-value">{{ inv.salesOrderNumber }}</span>
+            </div>
+          }
+          @if (inv.shipmentNumber) {
+            <div class="info-item">
+              <span class="info-label">Shipment</span>
+              <span class="info-value">{{ inv.shipmentNumber }}</span>
+            </div>
+          }
+          <div class="info-item">
+            <span class="info-label">Invoice Date</span>
+            <span class="info-value">{{ inv.invoiceDate | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Due Date</span>
+            <span class="info-value">{{ inv.dueDate | date:'mediumDate' }}</span>
+          </div>
+          @if (inv.creditTerms) {
+            <div class="info-item">
+              <span class="info-label">Credit Terms</span>
+              <span class="info-value">{{ inv.creditTerms }}</span>
+            </div>
+          }
+        </div>
+
+        @if (inv.notes) {
+          <div class="info-section">
+            <span class="info-label">Notes</span>
+            <div class="info-notes">{{ inv.notes }}</div>
+          </div>
+        }
+
+        <!-- Line Items -->
+        <div class="lines-section">
+          <span class="info-label">Line Items ({{ inv.lines.length }})</span>
+          @if (inv.lines.length > 0) {
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Part #</th>
+                  <th>Description</th>
+                  <th class="lines-table__right">Qty</th>
+                  <th class="lines-table__right">Unit Price</th>
+                  <th class="lines-table__right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of inv.lines; track line.id) {
+                  <tr>
+                    <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
+                    <td>{{ line.description }}</td>
+                    <td class="lines-table__right">{{ line.quantity }}</td>
+                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <!-- Totals -->
+        <div class="totals-section">
+          <div class="totals-row">
+            <span class="totals-label">Subtotal</span>
+            <span class="totals-value">{{ inv.subtotal | currency }}</span>
+          </div>
+          <div class="totals-row">
+            <span class="totals-label">Tax ({{ inv.taxRate }}%)</span>
+            <span class="totals-value">{{ inv.taxAmount | currency }}</span>
+          </div>
+          <div class="totals-row totals-row--total">
+            <span class="totals-label">Total</span>
+            <span class="totals-value">{{ inv.total | currency }}</span>
+          </div>
+          <div class="totals-row">
+            <span class="totals-label">Amount Paid</span>
+            <span class="totals-value">{{ inv.amountPaid | currency }}</span>
+          </div>
+          <div class="totals-row totals-row--balance">
+            <span class="totals-label">Balance Due</span>
+            <span class="totals-value">{{ inv.balanceDue | currency }}</span>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ inv.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Updated</span>
+            <span class="info-value">{{ inv.updatedAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          @if (canSend(inv.status)) {
+            <button class="action-btn action-btn--primary" (click)="sendInvoice()">
+              <span class="material-icons-outlined">send</span>
+              Send
+            </button>
+          }
+          @if (canVoid(inv.status)) {
+            <button class="action-btn" (click)="voidInvoice()">
+              <span class="material-icons-outlined">block</span>
+              Void
+            </button>
+          }
+          @if (canDelete(inv.status)) {
+            <button class="action-btn action-btn--danger" (click)="deleteInvoice()">
+              <span class="material-icons-outlined">delete</span>
+              Delete
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

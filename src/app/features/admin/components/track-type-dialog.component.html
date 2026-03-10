@@ -18,7 +18,7 @@
     </div>
 
     @if (!hasStages()) {
-      <p class="stages-empty">No stages defined. Add at least one stage.</p>
+      <app-empty-state icon="layers" message="No stages defined. Add at least one stage." />
     } @else {
       <div class="stages-list">
         @for (stage of stages(); track $index; let i = $index; let first = $first; let last = $last) {

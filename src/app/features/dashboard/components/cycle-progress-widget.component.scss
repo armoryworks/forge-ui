@@ -1,0 +1,158 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// --- Loading / Empty ---
+.cycle-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-lg;
+  color: var(--text-muted);
+
+  &__icon {
+    font-size: $icon-size-lg;
+    animation: spin 1s linear infinite;
+  }
+}
+
+
+.cycle-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-lg;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  &__icon {
+    font-size: $icon-size-xxl;
+    opacity: 0.4;
+  }
+
+  &__link {
+    font-size: $font-size-xs;
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// --- Header ---
+.cycle-header {
+  @include flex-between;
+  padding: 0 $sp-md $sp-sm;
+}
+
+.cycle-name {
+  font-weight: 700;
+  font-size: $font-size-sm;
+  color: var(--text);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
+.cycle-status {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+
+  &--overdue {
+    color: var(--error);
+  }
+}
+
+// --- Progress ---
+.cycle-progress {
+  padding: 0 $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__bar {
+    height: $progress-bar-height;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width $transition-normal;
+
+    &--complete {
+      background: var(--success);
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+}
+
+// --- Entries ---
+.cycle-entries {
+  display: flex;
+  flex-direction: column;
+  margin-top: $sp-sm;
+}
+
+.cycle-entry {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+
+  &--done {
+    opacity: 0.5;
+  }
+
+  &--done &__title {
+    text-decoration: line-through;
+  }
+
+  &__check {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  &--done &__check {
+    color: var(--success);
+  }
+
+  &__number {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    width: 58px;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: $font-size-sm;
+    @include truncate;
+  }
+}
+
+.cycle-more {
+  font-size: $font-size-xs;
+  color: var(--primary);
+  text-decoration: none;
+  padding: $sp-sm $sp-md;
+  font-weight: 600;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

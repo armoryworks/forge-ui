@@ -1,0 +1,199 @@
+<app-page-header title="Vendors">
+  <button class="action-btn action-btn--primary" (click)="openCreateVendor()">
+    <span class="material-icons-outlined">add_business</span>
+    New Vendor
+  </button>
+</app-page-header>
+
+<div class="vendors-layout">
+  <!-- Left: Vendor List -->
+  <div class="vendors-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search vendors..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="activeFilterControl" [options]="activeOptions" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="vendors" [columns]="vendorColumns" [data]="vendors()"
+        [rowClass]="vendorRowClass" emptyIcon="store" emptyMessage="No vendors found"
+        (rowClick)="selectVendor($any($event))">
+        <ng-template appColumnCell="companyName" let-row>
+          <span class="vendor-name">{{ row.companyName }}</span>
+        </ng-template>
+        <ng-template appColumnCell="contactName" let-row>
+          <span class="text-muted">{{ row.contactName ?? '\u2014' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="email" let-row>
+          <span class="text-muted">{{ row.email ?? '\u2014' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="phone" let-row>
+          <span class="text-muted">{{ row.phone ?? '\u2014' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="isActive" let-row>
+          <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
+            {{ row.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedVendor(); as vendor) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">store</span>
+          <div>
+            <div class="detail-name">{{ vendor.companyName }}</div>
+            @if (vendor.contactName) {
+              <div class="detail-contact">{{ vendor.contactName }}</div>
+            }
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Edit" (click)="openEditVendor()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-bar">
+        <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">Info</button>
+        <button class="tab" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
+          Purchase Orders ({{ vendor.purchaseOrders.length }})
+        </button>
+      </div>
+
+      <div class="detail-body">
+        <!-- Info Tab -->
+        @if (activeTab() === 'info') {
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Status</span>
+              <span class="info-value">
+                <span [class]="vendor.isActive ? 'chip chip--success' : 'chip chip--muted'">
+                  {{ vendor.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </span>
+            </div>
+            @if (vendor.email) {
+              <div class="info-item">
+                <span class="info-label">Email</span>
+                <span class="info-value">{{ vendor.email }}</span>
+              </div>
+            }
+            @if (vendor.phone) {
+              <div class="info-item">
+                <span class="info-label">Phone</span>
+                <span class="info-value">{{ vendor.phone }}</span>
+              </div>
+            }
+            @if (vendor.paymentTerms) {
+              <div class="info-item">
+                <span class="info-label">Payment Terms</span>
+                <span class="info-value">{{ vendor.paymentTerms }}</span>
+              </div>
+            }
+          </div>
+
+          @if (vendor.address || vendor.city || vendor.state || vendor.zipCode || vendor.country) {
+            <div class="info-section">
+              <span class="info-label">Address</span>
+              <div class="info-address">
+                @if (vendor.address) { <div>{{ vendor.address }}</div> }
+                @if (vendor.city || vendor.state || vendor.zipCode) {
+                  <div>
+                    {{ vendor.city }}@if (vendor.city && vendor.state) {, }{{ vendor.state }} {{ vendor.zipCode }}
+                  </div>
+                }
+                @if (vendor.country) { <div>{{ vendor.country }}</div> }
+              </div>
+            </div>
+          }
+
+          @if (vendor.notes) {
+            <div class="info-section">
+              <span class="info-label">Notes</span>
+              <div class="info-notes">{{ vendor.notes }}</div>
+            </div>
+          }
+
+          @if (vendor.externalId) {
+            <div class="info-section">
+              <span class="info-label">Accounting</span>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">External ID</span>
+                  <span class="info-value">{{ vendor.externalId }}</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">Created</span>
+              <span class="info-value">{{ vendor.createdAt | date:'mediumDate' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Updated</span>
+              <span class="info-value">{{ vendor.updatedAt | date:'mediumDate' }}</span>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button class="action-btn" (click)="toggleActive()">
+              <span class="material-icons-outlined">{{ vendor.isActive ? 'block' : 'check_circle' }}</span>
+              {{ vendor.isActive ? 'Deactivate' : 'Activate' }}
+            </button>
+            <button class="action-btn action-btn--danger" (click)="deleteVendor()">
+              <span class="material-icons-outlined">delete</span>
+              Delete
+            </button>
+          </div>
+        }
+
+        <!-- Purchase Orders Tab -->
+        @if (activeTab() === 'purchase-orders') {
+          @if (vendor.purchaseOrders.length === 0) {
+            <app-empty-state icon="receipt_long" message="No purchase orders" />
+          } @else {
+            <div class="po-list">
+              @for (po of vendor.purchaseOrders; track po.id) {
+                <div class="po-item">
+                  <div class="po-item__info">
+                    <span class="po-item__number">{{ po.poNumber }}</span>
+                    @if (po.jobNumber) {
+                      <span class="po-item__job">{{ po.jobNumber }}</span>
+                    }
+                  </div>
+                  <div class="po-item__meta">
+                    <span [class]="getPoStatusClass(po.status)">{{ getPoStatusLabel(po.status) }}</span>
+                    <span class="po-item__date">{{ po.createdAt | date:'mediumDate' }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Vendor Dialog -->
+@if (showDialog()) {
+  <app-vendor-dialog
+    [vendor]="editingVendor()"
+    (closed)="closeDialog()"
+    (saved)="onDialogSaved()" />
+}

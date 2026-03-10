@@ -1,0 +1,46 @@
+<app-page-header title="Loading Demo" />
+
+<div class="demo-content">
+  <!-- Global Overlay Section -->
+  <section class="demo-section">
+    <h3 class="demo-section__title">Global Loading Overlay</h3>
+    <p class="demo-section__desc">Full-screen blocking overlay via LoadingService. Applies inert to main content.</p>
+    <div class="demo-actions">
+      <button class="action-btn" (click)="triggerGlobal(2000, 'Loading...')">2s — "Loading..."</button>
+      <button class="action-btn" (click)="triggerGlobal(3000, 'Saving job...')">3s — "Saving job..."</button>
+      <button class="action-btn" (click)="triggerGlobal(5000, 'Generating report...')">5s — "Generating report..."</button>
+      <button class="action-btn action-btn--primary" (click)="triggerAllAtOnce()">3 causes — all at once</button>
+      <button class="action-btn" (click)="triggerStaggered()">3 causes — staggered</button>
+    </div>
+  </section>
+
+  <!-- Block Loading Section -->
+  <section class="demo-section">
+    <h3 class="demo-section__title">Component-Level Loading (LoadingBlockDirective)</h3>
+    <p class="demo-section__desc">Local spinner overlay on a specific element.</p>
+    <div class="demo-actions">
+      <button class="action-btn" (click)="toggleBlock('a')">Toggle Block A</button>
+      <button class="action-btn" (click)="toggleBlock('b')">Toggle Block B</button>
+    </div>
+
+    <div class="demo-blocks">
+      <div class="demo-block" [appLoadingBlock]="blockLoading()">
+        <span class="demo-block__label">Block A</span>
+        <p class="demo-block__text">This content is covered by the loading overlay when active.</p>
+        <p class="demo-block__text">It uses the LoadingBlockDirective with a boolean signal.</p>
+      </div>
+
+      <div class="demo-block" [appLoadingBlock]="blockLoading2()">
+        <span class="demo-block__label">Block B</span>
+        <p class="demo-block__text">Independent loading state — each block has its own signal.</p>
+        <p class="demo-block__text">Background uses theme-aware color-mix for dark mode support.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Route Loading Section -->
+  <section class="demo-section">
+    <h3 class="demo-section__title">Route Navigation Loading</h3>
+    <p class="demo-section__desc">Navigate to any lazy-loaded route to see the global overlay during chunk loading. The overlay shows for a minimum of 400ms to prevent flicker.</p>
+  </section>
+</div>

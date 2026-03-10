@@ -24,9 +24,7 @@
   animation: slide-in $transition-normal;
   box-shadow: $shadow-panel;
 
-  @include mobile {
-    width: 100%;
-  }
+  @include mobile { width: 100%; }
 }
 
 @keyframes slide-in {
@@ -43,10 +41,7 @@
   color: var(--text-muted);
 }
 
-.panel__loading-icon {
-  font-size: $icon-size-xxl;
-  opacity: 0.5;
-}
+.panel__loading-icon { font-size: $icon-size-xxl; opacity: 0.5; }
 
 // ─── Header ───
 .panel__header {
@@ -57,61 +52,30 @@
   gap: $sp-sm;
 }
 
-.panel__header-left {
-  display: flex;
-  align-items: center;
-  gap: $sp-md;
-}
-
-.panel__job-number {
-  @include uppercase-label($font-size-sm, 1px, 700);
-  color: var(--text);
-}
+.panel__header-left { display: flex; align-items: center; gap: $sp-md; }
+.panel__job-number { @include uppercase-label($font-size-sm, 1px, 700); color: var(--text); }
 
 .panel__edit,
 .panel__close {
   @include flex-center;
-  width: $avatar-size-md;
-  height: $avatar-size-md;
+  width: $avatar-size-md; height: $avatar-size-md;
   border: $border-width-thin solid var(--border);
-  background: var(--surface);
-  color: var(--text-secondary);
-  cursor: pointer;
- 
-
-  .material-icons-outlined {
-    font-size: $icon-size-sm;
-  }
-
-  &:hover {
-    background: var(--bg);
-    color: var(--text);
-  }
+  background: var(--surface); color: var(--text-secondary); cursor: pointer;
+  .material-icons-outlined { font-size: $icon-size-sm; }
+  &:hover { background: var(--bg); color: var(--text); }
 }
 
 // ─── Body ───
 .panel__body {
-  flex: 1;
-  overflow-y: auto;
-  padding: $sp-lg;
-  display: flex;
-  flex-direction: column;
-  gap: $sp-lg;
+  flex: 1; overflow-y: auto; padding: $sp-lg;
+  display: flex; flex-direction: column; gap: $sp-lg;
   @include custom-scrollbar;
 }
 
-.panel__title {
-  font-size: $font-size-title;
-  font-weight: 700;
-  line-height: 1.3;
-}
+.panel__title { font-size: $font-size-title; font-weight: 700; line-height: 1.3; }
 
 // ─── Metadata ───
-.panel__meta {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-sm;
-}
+.panel__meta { display: flex; flex-direction: column; gap: $sp-sm; }
 
 .meta-row {
   display: flex; align-items: center; gap: $sp-md; font-size: $font-size-sm;
@@ -122,193 +86,136 @@
 }
 
 // ─── Section ───
-.panel__section {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-md;
-}
-
-.panel__section-header {
-  @include flex-between;
-}
-
-.panel__section-title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
-  color: var(--text-secondary);
-}
-
-.panel__section-count {
-  @include uppercase-label($font-size-xxs, 0, 600);
-  color: var(--text-muted);
-}
-
-.panel__description {
-  font-size: $font-size-base;
-  line-height: 1.5;
-  color: var(--text-secondary);
-}
+.panel__section { display: flex; flex-direction: column; gap: $sp-md; }
+.panel__section-header { @include flex-between; }
+.panel__section-title { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-secondary); }
+.panel__section-count { @include uppercase-label($font-size-xxs, 0, 600); color: var(--text-muted); }
+.panel__description { font-size: $font-size-base; line-height: 1.5; color: var(--text-secondary); }
+.panel__empty-hint { font-size: $font-size-xs; color: var(--text-muted); font-style: italic; }
 
 // ─── Subtasks ───
-.subtask-list {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-xxs;
-}
+.subtask-list { display: flex; flex-direction: column; gap: $sp-xxs; }
 
 .subtask {
-  display: flex;
-  align-items: center;
-  gap: $sp-md;
-  padding: $sp-sm $sp-md;
-  cursor: pointer;
- 
-
-  &:hover {
-    background: var(--bg);
-  }
-
-  &--done .subtask__text {
-    text-decoration: line-through;
-    color: var(--text-muted);
-  }
+  display: flex; align-items: center; gap: $sp-md; padding: $sp-sm $sp-md; cursor: pointer;
+  &:hover { background: var(--bg); }
+  &--done .subtask__text { text-decoration: line-through; color: var(--text-muted); }
 }
 
-.subtask__checkbox {
-  flex-shrink: 0;
-  width: $icon-size-xs;
-  height: $icon-size-xs;
-  accent-color: var(--primary);
-  cursor: pointer;
-}
+.subtask__checkbox { flex-shrink: 0; width: $icon-size-xs; height: $icon-size-xs; accent-color: var(--primary); cursor: pointer; }
+.subtask__text { font-size: $font-size-sm; color: var(--text); }
 
-.subtask__text {
-  font-size: $font-size-sm;
-  color: var(--text);
-}
-
-.subtask-add {
-  display: flex;
-  align-items: center;
-  gap: $sp-sm;
-
+// ─── Shared: inline add row + search dropdown ───
+.subtask-add,
+.link-add,
+.part-add,
+.comment-add {
+  display: flex; align-items: center; gap: $sp-sm;
   app-input { flex: 1; }
+}
 
-  &__btn {
-    @include flex-center; width: $avatar-size-md; height: $avatar-size-md; border: $border-width-thin solid var(--border);
-    background: var(--surface); color: var(--text-secondary); cursor: pointer;
-    .material-icons-outlined { font-size: $icon-size-sm; }
-    &:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
-    &:disabled { opacity: 0.4; cursor: default; }
-  }
+// Shared add/action button pattern
+%add-btn {
+  @include flex-center;
+  width: $avatar-size-md; height: $avatar-size-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface); color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
+  .material-icons-outlined { font-size: $icon-size-sm; }
+  &:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
+  &:disabled { opacity: 0.4; cursor: default; }
+}
+
+.subtask-add__btn, .link-add__btn, .part-add__btn { @extend %add-btn; }
+
+// Shared search dropdown
+%search-wrap { flex: 1; position: relative; }
+%search-results {
+  position: absolute; top: 100%; left: 0; right: 0; background: var(--surface);
+  border: $border-width-thin solid var(--border); border-top: none;
+  z-index: $z-dropdown; max-height: 200px; overflow-y: auto; @include custom-scrollbar;
+}
+%search-result {
+  display: flex; align-items: center; gap: $sp-sm; width: 100%; padding: $sp-sm $sp-md;
+  border: none; background: transparent; color: var(--text); font-size: $font-size-sm;
+  font-family: $font-family-primary; cursor: pointer; text-align: left;
+  &:hover { background: var(--bg); }
+}
+
+.link-add__search-wrap, .part-add__search-wrap { @extend %search-wrap; }
+.link-add__results, .part-add__results { @extend %search-results; }
+.link-add__result, .part-add__result { @extend %search-result; }
+.link-add__result-number, .part-add__result-number { font-weight: 600; flex-shrink: 0; }
+.link-add__result-title, .part-add__result-desc { @include truncate; color: var(--text-secondary); }
+
+.link-add app-select { flex-shrink: 0; width: 120px; }
+
+// Shared hover-reveal delete button
+%hover-delete {
+  @include flex-center;
+  width: $icon-size-lg; height: $icon-size-lg; border: none; background: transparent;
+  color: var(--text-muted); cursor: pointer; opacity: 0; flex-shrink: 0; transition: opacity $transition-fast;
+  .material-icons-outlined { font-size: $icon-size-xs; }
+  &:hover { color: var(--error); }
 }
 
 // ─── Linked Cards ───
-.link-list {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-xxs;
-}
+.link-list { display: flex; flex-direction: column; gap: $sp-xxs; }
 
 .link-item {
-  display: flex; align-items: center; gap: $sp-sm; padding: $sp-sm $sp-md;
-  min-height: 32px;
+  display: flex; align-items: center; gap: $sp-sm; padding: $sp-sm $sp-md; min-height: 32px;
   &:hover { background: var(--bg); .link-item__delete { opacity: 1; } }
   &__icon { font-size: $icon-size-xs; color: var(--text-muted); flex-shrink: 0; }
   &__type { @include uppercase-label($font-size-xxs, 0.3px, 600); color: var(--text-muted); flex-shrink: 0; width: 64px; }
   &__job { display: flex; align-items: center; gap: $sp-sm; min-width: 0; flex: 1; }
   &__number { font-size: $font-size-xs; font-weight: 600; color: var(--text); flex-shrink: 0; }
   &__title { font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
-  &__delete {
-    @include flex-center; width: $icon-size-lg; height: $icon-size-lg; border: none; background: transparent;
-    color: var(--text-muted); cursor: pointer; opacity: 0; flex-shrink: 0; transition: opacity $transition-fast;
-    .material-icons-outlined { font-size: $icon-size-xs; }
-    &:hover { color: var(--error); }
-  }
+  &__delete { @extend %hover-delete; }
 }
 
 .chip--sm { font-size: $font-size-xxs; padding: $sp-xxs $sp-sm; flex-shrink: 0; }
 
-.link-add {
-  display: flex;
-  gap: $sp-sm;
+// ─── Parts ───
+.part-list { display: flex; flex-direction: column; gap: $sp-xxs; }
 
-  &__search-wrap { flex: 1; position: relative; }
-
-  &__results {
-    position: absolute; top: 100%; left: 0; right: 0; background: var(--surface);
-    border: $border-width-thin solid var(--border); border-top: none;
-    z-index: $z-dropdown; max-height: 200px; overflow-y: auto; @include custom-scrollbar;
-  }
-
-  &__result {
-    display: flex; align-items: center; gap: $sp-sm; width: 100%; padding: $sp-sm $sp-md;
-    border: none; background: transparent; color: var(--text); font-size: $font-size-sm;
-    font-family: $font-family-primary; cursor: pointer; text-align: left;
-    &:hover { background: var(--bg); }
-    &-number { font-weight: 600; flex-shrink: 0; }
-    &-title { @include truncate; color: var(--text-secondary); }
-  }
-
-  app-select { flex-shrink: 0; width: 120px; }
-
-  &__btn {
-    @include flex-center; width: $avatar-size-md; height: $avatar-size-md; border: $border-width-thin solid var(--border);
-    background: var(--surface); color: var(--text-secondary); cursor: pointer;
-    flex-shrink: 0;
-    .material-icons-outlined { font-size: $icon-size-sm; }
-    &:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
-    &:disabled { opacity: 0.4; cursor: default; }
-  }
+.part-item {
+  display: flex; align-items: center; gap: $sp-sm; padding: $sp-sm $sp-md; min-height: 32px;
+  &:hover { background: var(--bg); .part-item__delete { opacity: 1; } }
+  &__icon { font-size: $icon-size-sm; color: var(--text-muted); flex-shrink: 0; }
+  &__info { display: flex; flex-direction: column; gap: $sp-xxs; min-width: 0; flex: 1; }
+  &__number { font-size: $font-size-xs; font-weight: 600; color: var(--text); }
+  &__description { font-size: $font-size-xxs; color: var(--text-secondary); @include truncate; }
+  &__qty { @include uppercase-label($font-size-xxs, 0, 600); font-family: $font-family-mono; color: var(--text-muted); flex-shrink: 0; }
+  &__delete { @extend %hover-delete; }
 }
 
 // ─── Files ───
-.file-list {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-xxs;
-  margin-top: $sp-md;
-}
+.file-list { display: flex; flex-direction: column; gap: $sp-xxs; margin-top: $sp-md; }
 
 .file-item {
-  display: flex;
-  align-items: center;
-  gap: $sp-md;
-  padding: $sp-sm $sp-md;
+  display: flex; align-items: center; gap: $sp-md; padding: $sp-sm $sp-md;
+  &:hover { background: var(--bg); }
+  &__icon { font-size: $icon-size-md; color: var(--text-muted); flex-shrink: 0; }
+  &__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: $sp-xxs; }
+  &__name { font-size: $font-size-sm; font-weight: 500; @include truncate; }
+  &__meta { font-size: $font-size-xxs; color: var(--text-muted); }
+}
 
-  &:hover {
-    background: var(--bg);
-  }
+// ─── Time Entries ───
+.time-list { display: flex; flex-direction: column; gap: $sp-xxs; }
 
-  &__icon {
-    font-size: $icon-size-md;
-    color: var(--text-muted);
-    flex-shrink: 0;
-  }
-
-  &__info {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    gap: $sp-xxs;
-  }
-
-  &__name {
-    font-size: $font-size-sm;
-    font-weight: 500;
-    @include truncate;
-  }
-
-  &__meta {
-    font-size: $font-size-xxs;
-    color: var(--text-muted);
-  }
+.time-item {
+  display: grid; grid-template-columns: 1fr auto auto; gap: $sp-sm $sp-md;
+  padding: $sp-sm $sp-md; font-size: $font-size-sm; align-items: center;
+  &:hover { background: var(--bg); }
+  &__user { font-weight: 600; color: var(--text); }
+  &__date { font-size: $font-size-xs; color: var(--text-muted); }
+  &__duration { font-family: $font-family-mono; font-weight: 600; color: var(--primary); text-align: right; }
+  &__notes { grid-column: 1 / -1; font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
 }
 
 // ─── Activity ───
 .comment-add {
-  display: flex; align-items: center; gap: $sp-sm; margin-bottom: $sp-md;
-  app-input { flex: 1; }
+  margin-bottom: $sp-md;
   &__btn {
     @include flex-center; width: $avatar-size-md; height: $avatar-size-md; border: none;
     background: var(--primary); color: white; cursor: pointer;

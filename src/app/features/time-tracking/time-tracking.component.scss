@@ -38,4 +38,6 @@
   &--timer { background: rgba(59, 130, 246, 0.05); border-color: var(--primary); color: var(--primary); }
 }
 
+.lock-icon { font-size: $icon-size-xs; color: var(--text-muted); }
+
 .timer-info { font-size: $font-size-sm; color: var(--text-secondary); margin: 0 0 $sp-md 0; }

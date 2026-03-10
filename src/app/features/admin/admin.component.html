@@ -19,14 +19,13 @@
       <span class="material-icons-outlined">translate</span>
       Terminology
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
+      <span class="material-icons-outlined">settings</span>
+      Settings
+    </button>
   </div>
 
-  @if (loading()) {
-    <div class="page-loading">
-      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-      <span>Loading...</span>
-    </div>
-  } @else {
+  <div [appLoadingBlock]="loading()">
     <!-- Users Tab -->
     @if (activeTab() === 'users') {
       <div class="tab-panel">
@@ -171,11 +170,7 @@
         </div>
 
         @if (terminologyEntries().length === 0) {
-          <div class="terminology-empty">
-            <span class="material-icons-outlined">translate</span>
-            <p>No terminology entries configured yet.</p>
-            <p class="text-muted">Terminology entries will appear here once they are created via the API.</p>
-          </div>
+          <app-empty-state icon="translate" message="No terminology entries configured yet" />
         } @else {
           <table class="admin-table">
             <thead>
@@ -200,6 +195,45 @@
             </tbody>
           </table>
         }
+      </div>
+    }
+
+    <!-- System Settings Tab -->
+    @if (activeTab() === 'settings') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-header__count">{{ settingDefinitions.length }} settings</span>
+          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
+            <span class="material-icons-outlined">save</span>
+            Save Changes
+          </button>
+        </div>
+
+        <div class="settings-grid">
+          @for (def of settingDefinitions; track def.key) {
+            <div class="settings-item">
+              <div class="settings-item__header">
+                <label class="settings-item__label">{{ def.label }}</label>
+                <span class="settings-item__description">{{ def.description }}</span>
+              </div>
+              <div class="settings-item__control">
+                @if (def.type === 'boolean') {
+                  <select class="settings-select"
+                    [value]="getSettingValue(def.key) || 'false'"
+                    (change)="onSettingChange(def.key, $any($event.target).value)">
+                    <option value="true">Enabled</option>
+                    <option value="false">Disabled</option>
+                  </select>
+                } @else {
+                  <input class="settings-input"
+                    [type]="def.type === 'number' ? 'number' : 'text'"
+                    [value]="getSettingValue(def.key)"
+                    (input)="onSettingChange(def.key, $any($event.target).value)" />
+                }
+              </div>
+            </div>
+          }
+        </div>
       </div>
     }
 
@@ -253,7 +287,7 @@
         </div>
       </div>
     }
-  }
+  </div>
 </div>
 
 <!-- Track Type Dialog -->

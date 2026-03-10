@@ -1,0 +1,202 @@
+<app-page-header title="Sales Orders">
+  <button class="action-btn action-btn--primary" disabled>
+    <span class="material-icons-outlined">add</span>
+    New Order
+  </button>
+</app-page-header>
+
+<div class="so-layout">
+  <!-- Left: SO List -->
+  <div class="so-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search orders..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Customer" [formControl]="customerFilterControl" [options]="customerOptions()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="sales-orders" [columns]="soColumns" [data]="salesOrders()"
+        [rowClass]="soRowClass" emptyIcon="receipt_long" emptyMessage="No sales orders found"
+        (rowClick)="selectSo($any($event))">
+        <ng-template appColumnCell="orderNumber" let-row>
+          <span class="so-number">{{ row.orderNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="customerName" let-row>
+          <span>{{ row.customerName }}</span>
+        </ng-template>
+        <ng-template appColumnCell="customerPO" let-row>
+          <span class="text-muted">{{ row.customerPO ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="total" let-row>
+          <span>{{ row.total | currency }}</span>
+        </ng-template>
+        <ng-template appColumnCell="requestedDeliveryDate" let-row>
+          <span class="text-muted">{{ row.requestedDeliveryDate ? (row.requestedDeliveryDate | date:'mediumDate') : '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedSo(); as so) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">receipt_long</span>
+          <div>
+            <div class="detail-name">{{ so.orderNumber }}</div>
+            <div class="detail-customer">{{ so.customerName }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <!-- Status & Info -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(so.status)">{{ getStatusLabel(so.status) }}</span>
+            </span>
+          </div>
+          @if (so.customerPO) {
+            <div class="info-item">
+              <span class="info-label">Customer PO</span>
+              <span class="info-value">{{ so.customerPO }}</span>
+            </div>
+          }
+          @if (so.quoteNumber) {
+            <div class="info-item">
+              <span class="info-label">Quote</span>
+              <span class="info-value">{{ so.quoteNumber }}</span>
+            </div>
+          }
+          @if (so.creditTerms) {
+            <div class="info-item">
+              <span class="info-label">Credit Terms</span>
+              <span class="info-value">{{ so.creditTerms }}</span>
+            </div>
+          }
+          @if (so.requestedDeliveryDate) {
+            <div class="info-item">
+              <span class="info-label">Requested Delivery</span>
+              <span class="info-value">{{ so.requestedDeliveryDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (so.confirmedDate) {
+            <div class="info-item">
+              <span class="info-label">Confirmed</span>
+              <span class="info-value">{{ so.confirmedDate | date:'mediumDate' }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Totals -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Subtotal</span>
+            <span class="info-value">{{ so.subtotal | currency }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Tax ({{ so.taxRate }}%)</span>
+            <span class="info-value">{{ so.taxAmount | currency }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Total</span>
+            <span class="info-value info-value--bold">{{ so.total | currency }}</span>
+          </div>
+        </div>
+
+        @if (so.notes) {
+          <div class="info-section">
+            <span class="info-label">Notes</span>
+            <div class="info-notes">{{ so.notes }}</div>
+          </div>
+        }
+
+        <!-- Line Items -->
+        <div class="lines-section">
+          <span class="info-label">Line Items ({{ so.lines.length }})</span>
+          @if (so.lines.length > 0) {
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Part #</th>
+                  <th>Description</th>
+                  <th class="lines-table__right">Qty</th>
+                  <th class="lines-table__right">Shipped</th>
+                  <th class="lines-table__right">Remaining</th>
+                  <th class="lines-table__right">Unit Price</th>
+                  <th class="lines-table__right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of so.lines; track line.id) {
+                  <tr>
+                    <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
+                    <td>{{ line.description }}</td>
+                    <td class="lines-table__right">{{ line.quantity }}</td>
+                    <td class="lines-table__right">
+                      <span [class.text-success]="line.isFullyShipped"
+                            [class.text-warning]="line.shippedQuantity > 0 && !line.isFullyShipped">
+                        {{ line.shippedQuantity }}
+                      </span>
+                    </td>
+                    <td class="lines-table__right">{{ line.remainingQuantity }}</td>
+                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ so.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Updated</span>
+            <span class="info-value">{{ so.updatedAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          @if (canConfirm(so.status)) {
+            <button class="action-btn action-btn--primary" (click)="confirmSo()">
+              <span class="material-icons-outlined">check_circle</span>
+              Confirm
+            </button>
+          }
+          @if (canCancel(so.status)) {
+            <button class="action-btn" (click)="cancelSo()">
+              <span class="material-icons-outlined">block</span>
+              Cancel
+            </button>
+          }
+          @if (canDelete(so.status)) {
+            <button class="action-btn action-btn--danger" (click)="deleteSo()">
+              <span class="material-icons-outlined">delete</span>
+              Delete
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

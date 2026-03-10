@@ -10,6 +10,7 @@ import { UpdateTrackTypeRequest } from '../models/update-track-type-request.mode
 import { ReferenceDataGroup } from '../models/reference-data-group.model';
 import { ReferenceDataEntry } from '../models/reference-data-entry.model';
 import { TerminologyEntryItem } from '../models/terminology-entry-item.model';
+import { SystemSetting } from '../models/system-setting.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 
 @Injectable({ providedIn: 'root' })
@@ -66,5 +67,14 @@ export class AdminService {
 
   updateTerminology(entries: TerminologyEntryItem[]): Observable<TerminologyEntryItem[]> {
     return this.http.put<TerminologyEntryItem[]>(`${environment.apiUrl}/terminology`, { entries });
+  }
+
+  // System Settings
+  getSystemSettings(): Observable<SystemSetting[]> {
+    return this.http.get<SystemSetting[]>(`${environment.apiUrl}/admin/system-settings`);
+  }
+
+  updateSystemSettings(settings: { key: string; value: string; description?: string | null }[]): Observable<SystemSetting[]> {
+    return this.http.put<SystemSetting[]>(`${environment.apiUrl}/admin/system-settings`, { settings });
   }
 }

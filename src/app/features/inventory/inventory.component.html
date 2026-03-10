@@ -24,12 +24,7 @@
     </button>
   </div>
 
-  @if (loading()) {
-    <div class="page-loading">
-      <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-      <span>Loading...</span>
-    </div>
-  } @else {
+  <div [appLoadingBlock]="loading()">
     <!-- Stock Levels Tab -->
     @if (activeTab() === 'stock') {
       <div class="tab-panel">
@@ -43,75 +38,59 @@
           <span class="panel-count">{{ partSummaries().length }} parts with stock</span>
         </div>
 
-        <div class="table-wrapper">
-          <table class="inv-table">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Part #</th>
-                <th>Description</th>
-                <th>Material</th>
-                <th class="text-right">On Hand</th>
-                <th class="text-right">Reserved</th>
-                <th class="text-right">Available</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (summary of partSummaries(); track summary.partId) {
-                <tr class="inv-row" [class]="getStockClass(summary)" (click)="togglePartExpand(summary.partId)">
-                  <td class="col-expand">
-                    <span class="material-icons-outlined expand-icon">
-                      {{ expandedPartId() === summary.partId ? 'expand_more' : 'chevron_right' }}
-                    </span>
-                  </td>
-                  <td class="part-number">{{ summary.partNumber }}</td>
-                  <td>{{ summary.description }}</td>
-                  <td class="text-muted">{{ summary.material ?? '—' }}</td>
-                  <td class="text-right qty-cell">{{ summary.onHand }}</td>
-                  <td class="text-right qty-cell">{{ summary.reserved > 0 ? summary.reserved : '—' }}</td>
-                  <td class="text-right qty-cell" [class.qty-zero]="summary.available <= 0">{{ summary.available }}</td>
+        <app-data-table
+          tableId="inventory-stock"
+          [columns]="stockColumns"
+          [data]="partSummaries()"
+          [expandable]="true"
+          trackByField="partId"
+          emptyIcon="inventory_2"
+          emptyMessage="No inventory data"
+          [rowClass]="stockRowClass">
+
+          <ng-template appColumnCell="partNumber" let-row>
+            <span class="part-number">{{ $any(row).partNumber }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="material" let-row>
+            <span class="text-muted">{{ $any(row).material ?? '—' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="reserved" let-row>
+            {{ $any(row).reserved > 0 ? $any(row).reserved : '—' }}
+          </ng-template>
+
+          <ng-template appColumnCell="available" let-row>
+            <span [class.qty-zero]="$any(row).available <= 0">{{ $any(row).available }}</span>
+          </ng-template>
+
+          <ng-template appRowExpand let-row>
+            <table class="bin-detail-table">
+              <thead>
+                <tr>
+                  <th>Bin Location</th>
+                  <th>Qty</th>
+                  <th>Status</th>
+                  <th>Lot #</th>
                 </tr>
-                @if (expandedPartId() === summary.partId) {
-                  <tr class="bin-detail-row">
-                    <td colspan="7">
-                      <table class="bin-detail-table">
-                        <thead>
-                          <tr>
-                            <th>Bin Location</th>
-                            <th>Qty</th>
-                            <th>Status</th>
-                            <th>Lot #</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          @for (bin of summary.binLocations; track bin.locationId) {
-                            <tr>
-                              <td>{{ bin.locationPath }}</td>
-                              <td>{{ bin.quantity }}</td>
-                              <td>
-                                <span [class]="getStatusClass(bin.status)">
-                                  {{ getStatusLabel(bin.status) }}
-                                </span>
-                              </td>
-                              <td class="text-muted">{{ bin.lotNumber ?? '—' }}</td>
-                            </tr>
-                          }
-                        </tbody>
-                      </table>
+              </thead>
+              <tbody>
+                @for (bin of $any(row).binLocations; track bin.locationId) {
+                  <tr>
+                    <td>{{ bin.locationPath }}</td>
+                    <td>{{ bin.quantity }}</td>
+                    <td>
+                      <span [class]="getStatusClass(bin.status)">
+                        {{ getStatusLabel(bin.status) }}
+                      </span>
                     </td>
+                    <td class="text-muted">{{ bin.lotNumber ?? '—' }}</td>
                   </tr>
                 }
-              } @empty {
-                <tr>
-                  <td colspan="7" class="empty-row">
-                    <span class="material-icons-outlined">inventory_2</span>
-                    <span>No inventory data</span>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </ng-template>
+        </app-data-table>
       </div>
     }
 
@@ -199,10 +178,7 @@
                 }
               </ng-container>
             } @empty {
-              <div class="empty-state">
-                <span class="material-icons-outlined">warehouse</span>
-                <span>No locations configured</span>
-              </div>
+              <app-empty-state icon="warehouse" message="No locations configured" />
             }
           </div>
         </div>
@@ -216,7 +192,7 @@
                 <div class="detail-name">{{ loc.name }}</div>
                 <div class="detail-path">{{ loc.locationPath }}</div>
               </div>
-              <button class="action-btn action-btn--primary action-btn--sm" style="margin-left: auto"
+              <button class="action-btn action-btn--primary action-btn--sm detail-header__add-child"
                 (click)="openCreateLocation(loc.id)">
                 <span class="material-icons-outlined">add</span>
                 Add Child
@@ -275,16 +251,10 @@
             }
 
             @if (loc.locationType === 'Bin' && binContents().length === 0) {
-              <div class="empty-state">
-                <span class="material-icons-outlined">inventory_2</span>
-                <span>Bin is empty</span>
-              </div>
+              <app-empty-state icon="inventory_2" message="Bin is empty" />
             }
           } @else {
-            <div class="empty-state">
-              <span class="material-icons-outlined">touch_app</span>
-              <span>Select a location to view details</span>
-            </div>
+            <app-empty-state icon="touch_app" message="Select a location to view details" />
           }
         </div>
       </div>
@@ -297,46 +267,24 @@
           <span class="panel-count">{{ movements().length }} recent movements</span>
         </div>
 
-        <div class="table-wrapper">
-          <table class="inv-table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Reason</th>
-                <th>By</th>
-                <th>When</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (m of movements(); track m.id) {
-                <tr class="inv-row">
-                  <td>{{ m.entityName }}</td>
-                  <td class="qty-cell">{{ m.quantity }}</td>
-                  <td class="text-muted">{{ m.fromLocationName ?? '—' }}</td>
-                  <td class="text-muted">{{ m.toLocationName ?? '—' }}</td>
-                  <td>
-                    <span class="chip">{{ getReasonLabel(m.reason) }}</span>
-                  </td>
-                  <td>{{ m.movedByName }}</td>
-                  <td class="text-muted">{{ m.movedAt | date:'short' }}</td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="7" class="empty-row">
-                    <span class="material-icons-outlined">swap_horiz</span>
-                    <span>No movement history</span>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+        <app-data-table tableId="inventory-movements" [columns]="movementColumns" [data]="movements()"
+          emptyIcon="swap_horiz" emptyMessage="No movement history">
+          <ng-template appColumnCell="fromLocationName" let-row>
+            <span class="text-muted">{{ $any(row).fromLocationName ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="toLocationName" let-row>
+            <span class="text-muted">{{ $any(row).toLocationName ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="reason" let-row>
+            <span class="chip">{{ getReasonLabel($any(row).reason) }}</span>
+          </ng-template>
+          <ng-template appColumnCell="movedAt" let-row>
+            <span class="text-muted">{{ $any(row).movedAt | date:'short' }}</span>
+          </ng-template>
+        </app-data-table>
       </div>
     }
-  }
+  </div>
 </div>
 
 <!-- Location Dialog -->

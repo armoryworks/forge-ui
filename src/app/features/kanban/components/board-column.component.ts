@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { JobCardComponent } from './job-card.component';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { BoardColumn } from '../models/board-column.model';
 import { KanbanJob } from '../models/kanban-job.model';
 
 @Component({
   selector: 'app-board-column',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, JobCardComponent],
+  imports: [CdkDropList, CdkDrag, JobCardComponent, EmptyStateComponent],
   templateUrl: './board-column.component.html',
   styleUrl: './board-column.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

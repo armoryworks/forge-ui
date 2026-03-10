@@ -21,6 +21,7 @@ import { toIsoDate } from '../../shared/utils/date.utils';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-expenses',
@@ -29,7 +30,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective,
+    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',

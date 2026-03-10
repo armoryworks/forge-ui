@@ -1,0 +1,76 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.receive-actions-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
+}
+
+.receive-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th,
+  td {
+    padding: $sp-sm $sp-md;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  th {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__right {
+    text-align: right;
+  }
+
+  &__mono {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+  }
+
+  &__input {
+    text-align: right;
+    width: 90px;
+  }
+}
+
+.receive-qty-input {
+  width: 70px;
+  height: $input-height;
+  padding: $sp-xs $sp-sm;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: $font-size-sm;
+  font-family: $font-family-mono;
+  text-align: right;
+
+  &:focus {
+    outline: $border-width solid var(--primary);
+  }
+}
+
+.empty-receive {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  &__icon {
+    font-size: $icon-size-xxl;
+    color: var(--success);
+    opacity: 0.6;
+  }
+}

@@ -151,6 +151,53 @@
         </div>
       </div>
 
+      <!-- Parts -->
+      <div class="panel__section">
+        <div class="panel__section-header">
+          <h3 class="panel__section-title">Parts</h3>
+          @if (jobParts().length) {
+            <span class="panel__section-count">{{ jobParts().length }}</span>
+          }
+        </div>
+
+        @if (jobParts().length) {
+          <div class="part-list">
+            @for (jp of jobParts(); track jp.id) {
+              <div class="part-item">
+                <span class="material-icons-outlined part-item__icon">settings</span>
+                <div class="part-item__info">
+                  <span class="part-item__number">{{ jp.partNumber }}</span>
+                  <span class="part-item__description">{{ jp.partDescription }}</span>
+                </div>
+                <span class="part-item__qty">x{{ jp.quantity }}</span>
+                <button class="part-item__delete" (click)="removePart(jp)" title="Remove part">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="part-add">
+          <div class="part-add__search-wrap">
+            <app-input label="" placeholder="Search parts..." [formControl]="partSearchControl" (blur)="dismissPartResults()" />
+            @if (showPartResults() && partSearchResults().length) {
+              <div class="part-add__results">
+                @for (p of partSearchResults(); track p.id) {
+                  <button class="part-add__result" (mousedown)="selectPart(p)">
+                    <span class="part-add__result-number">{{ p.partNumber }}</span>
+                    <span class="part-add__result-desc">{{ p.description }}</span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <button class="part-add__btn" (click)="addPart()" [disabled]="!selectedPart()">
+            <span class="material-icons-outlined">add</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Files -->
       <div class="panel__section">
         <div class="panel__section-header">
@@ -183,6 +230,33 @@
               </div>
             }
           </div>
+        }
+      </div>
+
+      <!-- Time Entries -->
+      <div class="panel__section">
+        <div class="panel__section-header">
+          <h3 class="panel__section-title">Time</h3>
+          @if (timeEntries().length) {
+            <span class="panel__section-count">{{ formattedTotalTime() }}</span>
+          }
+        </div>
+
+        @if (timeEntries().length) {
+          <div class="time-list">
+            @for (te of timeEntries(); track te.id) {
+              <div class="time-item">
+                <span class="time-item__user">{{ te.userName }}</span>
+                <span class="time-item__date">{{ formatDate(te.date) }}</span>
+                <span class="time-item__duration">{{ formatDuration(te.durationMinutes) }}</span>
+                @if (te.notes) {
+                  <span class="time-item__notes">{{ te.notes }}</span>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <p class="panel__empty-hint">No time logged</p>
         }
       </div>
 

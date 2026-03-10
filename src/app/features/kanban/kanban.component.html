@@ -1,9 +1,4 @@
-@if (loading() && !columns().length) {
-  <div class="page-loading">
-    <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-    <p>Loading board...</p>
-  </div>
-} @else if (error()) {
+@if (error()) {
   <div class="page-error">
     <span class="material-icons-outlined page-error__icon">error_outline</span>
     <p>{{ error() }}</p>

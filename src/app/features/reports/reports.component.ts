@@ -16,6 +16,12 @@ import { TimeByUserItem } from './models/time-by-user-item.model';
 import { ExpenseSummaryItem } from './models/expense-summary-item.model';
 import { LeadPipelineItem } from './models/lead-pipeline-item.model';
 import { JobCompletionTrendItem } from './models/job-completion-trend-item.model';
+import { OnTimeDeliveryItem } from './models/on-time-delivery-item.model';
+import { AverageLeadTimeItem } from './models/average-lead-time-item.model';
+import { TeamWorkloadItem } from './models/team-workload-item.model';
+import { CustomerActivityItem } from './models/customer-activity-item.model';
+import { MyWorkHistoryItem } from './models/my-work-history-item.model';
+import { MyTimeLogItem } from './models/my-time-log-item.model';
 
 @Component({
   selector: 'app-reports',
@@ -35,6 +41,12 @@ export class ReportsComponent {
     { id: 'expense-summary', label: 'Expense Summary', icon: 'receipt_long', needsDateRange: true },
     { id: 'lead-pipeline', label: 'Lead Pipeline', icon: 'filter_alt', needsDateRange: false },
     { id: 'job-completion-trend', label: 'Completion Trend', icon: 'trending_up', needsDateRange: false },
+    { id: 'on-time-delivery', label: 'On-Time Delivery', icon: 'verified', needsDateRange: true },
+    { id: 'average-lead-time', label: 'Avg Lead Time', icon: 'hourglass_top', needsDateRange: false },
+    { id: 'team-workload', label: 'Team Workload', icon: 'groups', needsDateRange: false },
+    { id: 'customer-activity', label: 'Customer Activity', icon: 'business', needsDateRange: false },
+    { id: 'my-work-history', label: 'My Work History', icon: 'assignment_ind', needsDateRange: false },
+    { id: 'my-time-log', label: 'My Time Log', icon: 'timer', needsDateRange: true },
   ];
 
   protected readonly activeReport = signal<ReportType>('jobs-by-stage');
@@ -52,6 +64,12 @@ export class ReportsComponent {
   protected readonly expenseSummaryData = signal<ExpenseSummaryItem[]>([]);
   protected readonly leadPipelineData = signal<LeadPipelineItem[]>([]);
   protected readonly completionTrendData = signal<JobCompletionTrendItem[]>([]);
+  protected readonly onTimeDeliveryData = signal<OnTimeDeliveryItem | null>(null);
+  protected readonly averageLeadTimeData = signal<AverageLeadTimeItem[]>([]);
+  protected readonly teamWorkloadData = signal<TeamWorkloadItem[]>([]);
+  protected readonly customerActivityData = signal<CustomerActivityItem[]>([]);
+  protected readonly myWorkHistoryData = signal<MyWorkHistoryItem[]>([]);
+  protected readonly myTimeLogData = signal<MyTimeLogItem[]>([]);
 
   // Chart configurations
   protected readonly jobsByStageChart = computed<ChartData<'bar'>>(() => {
@@ -116,6 +134,52 @@ export class ReportsComponent {
     };
   });
 
+  protected readonly onTimeDeliveryChart = computed<ChartData<'pie'>>(() => {
+    const data = this.onTimeDeliveryData();
+    if (!data) return { labels: [], datasets: [{ data: [] }] };
+    return {
+      labels: ['On Time', 'Late'],
+      datasets: [{
+        data: [data.onTime, data.late],
+        backgroundColor: ['#22c55e', '#ef4444'],
+      }],
+    };
+  });
+
+  protected readonly averageLeadTimeChart = computed<ChartData<'bar'>>(() => {
+    const data = this.averageLeadTimeData();
+    return {
+      labels: data.map(d => d.stageName),
+      datasets: [{
+        data: data.map(d => d.averageDays),
+        backgroundColor: data.map(d => d.stageColor),
+        label: 'Avg Days',
+      }],
+    };
+  });
+
+  protected readonly teamWorkloadChart = computed<ChartData<'bar'>>(() => {
+    const data = this.teamWorkloadData();
+    return {
+      labels: data.map(d => d.userName),
+      datasets: [
+        { data: data.map(d => d.activeJobs), label: 'Active', backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+        { data: data.map(d => d.overdueJobs), label: 'Overdue', backgroundColor: 'rgba(239, 68, 68, 0.7)' },
+      ],
+    };
+  });
+
+  protected readonly customerActivityChart = computed<ChartData<'bar'>>(() => {
+    const data = this.customerActivityData().slice(0, 10);
+    return {
+      labels: data.map(d => d.customerName),
+      datasets: [
+        { data: data.map(d => d.activeJobs), label: 'Active', backgroundColor: 'rgba(59, 130, 246, 0.7)' },
+        { data: data.map(d => d.completedJobs), label: 'Completed', backgroundColor: 'rgba(34, 197, 94, 0.7)' },
+      ],
+    };
+  });
+
   protected readonly barOptions: ChartOptions<'bar'> = {
     responsive: true,
     maintainAspectRatio: false,
@@ -166,10 +230,55 @@ export class ReportsComponent {
     { field: 'count', header: 'Count', sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
+  protected readonly stackedBarOptions: ChartOptions<'bar'> = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'top' } },
+    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { stepSize: 1 } } },
+  };
+
+  protected readonly leadTimeColumns: ColumnDef[] = [
+    { field: 'stageName', header: 'Stage', sortable: true },
+    { field: 'averageDays', header: 'Avg Days', sortable: true, type: 'number', width: '120px', align: 'right' },
+  ];
+
+  protected readonly workloadColumns: ColumnDef[] = [
+    { field: 'userName', header: 'Team Member', sortable: true },
+    { field: 'activeJobs', header: 'Active', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'overdueJobs', header: 'Overdue', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'hoursThisWeek', header: 'Hours (Week)', sortable: true, type: 'number', width: '120px', align: 'right' },
+  ];
+
+  protected readonly customerColumns: ColumnDef[] = [
+    { field: 'customerName', header: 'Customer', sortable: true },
+    { field: 'activeJobs', header: 'Active', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completedJobs', header: 'Completed', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalJobs', header: 'Total', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'lastJobDate', header: 'Last Job', sortable: true, type: 'date', width: '120px' },
+  ];
+
   protected readonly trendColumns: ColumnDef[] = [
     { field: 'month', header: 'Month', sortable: true },
     { field: 'created', header: 'Created', sortable: true, type: 'number', width: '100px', align: 'right' },
     { field: 'completed', header: 'Completed', sortable: true, type: 'number', width: '100px', align: 'right' },
+  ];
+
+  protected readonly workHistoryColumns: ColumnDef[] = [
+    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
+    { field: 'title', header: 'Title', sortable: true },
+    { field: 'stageName', header: 'Stage', sortable: true, width: '140px' },
+    { field: 'customerName', header: 'Customer', sortable: true, width: '140px' },
+    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '100px' },
+    { field: 'completedAt', header: 'Completed', sortable: true, type: 'date', width: '100px' },
+  ];
+
+  protected readonly timeLogColumns: ColumnDef[] = [
+    { field: 'date', header: 'Date', sortable: true, type: 'date', width: '100px' },
+    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
+    { field: 'jobTitle', header: 'Job', sortable: true },
+    { field: 'category', header: 'Category', sortable: true, width: '120px' },
+    { field: 'durationMinutes', header: 'Minutes', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'notes', header: 'Notes', sortable: false },
   ];
 
   constructor() {
@@ -203,6 +312,24 @@ export class ReportsComponent {
         break;
       case 'job-completion-trend':
         this.reportService.getJobCompletionTrend().subscribe(d => { this.completionTrendData.set(d); this.loading.set(false); });
+        break;
+      case 'on-time-delivery':
+        this.reportService.getOnTimeDelivery(this.startValue(), this.endValue()).subscribe(d => { this.onTimeDeliveryData.set(d); this.loading.set(false); });
+        break;
+      case 'average-lead-time':
+        this.reportService.getAverageLeadTime().subscribe(d => { this.averageLeadTimeData.set(d); this.loading.set(false); });
+        break;
+      case 'team-workload':
+        this.reportService.getTeamWorkload().subscribe(d => { this.teamWorkloadData.set(d); this.loading.set(false); });
+        break;
+      case 'customer-activity':
+        this.reportService.getCustomerActivity().subscribe(d => { this.customerActivityData.set(d); this.loading.set(false); });
+        break;
+      case 'my-work-history':
+        this.reportService.getMyWorkHistory().subscribe(d => { this.myWorkHistoryData.set(d); this.loading.set(false); });
+        break;
+      case 'my-time-log':
+        this.reportService.getMyTimeLog(this.startValue(), this.endValue()).subscribe(d => { this.myTimeLogData.set(d); this.loading.set(false); });
         break;
     }
   }

@@ -72,6 +72,15 @@
             {{ entry.isManual ? 'Manual' : 'Timer' }}
           </span>
         </ng-template>
+        <ng-template appColumnCell="actions" let-entry>
+          @if (!isEditable(entry)) {
+            <span class="material-icons-outlined lock-icon" title="Locked — past day or manually locked">lock</span>
+          } @else {
+            <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteTimeEntry(entry); $event.stopPropagation()">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          }
+        </ng-template>
       </app-data-table>
   }
 </div>

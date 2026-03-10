@@ -1,0 +1,196 @@
+<app-page-header title="Quotes">
+  <button class="action-btn action-btn--primary">
+    <span class="material-icons-outlined">add</span>
+    New Quote
+  </button>
+</app-page-header>
+
+<div class="qt-layout">
+  <!-- Left: Quote List -->
+  <div class="qt-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search quotes..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="quotes()"
+        [rowClass]="quoteRowClass" emptyIcon="request_quote" emptyMessage="No quotes found"
+        (rowClick)="selectQuote($any($event))">
+        <ng-template appColumnCell="quoteNumber" let-row>
+          <span class="qt-number">{{ row.quoteNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="total" let-row>
+          <span>{{ row.total | currency }}</span>
+        </ng-template>
+        <ng-template appColumnCell="expirationDate" let-row>
+          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'mediumDate') : '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedQuote(); as quote) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">request_quote</span>
+          <div>
+            <div class="detail-name">{{ quote.quoteNumber }}</div>
+            <div class="detail-customer">{{ quote.customerName }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <!-- Status & Dates -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(quote.status)">{{ getStatusLabel(quote.status) }}</span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Customer</span>
+            <span class="info-value">{{ quote.customerName }}</span>
+          </div>
+          @if (quote.expirationDate) {
+            <div class="info-item">
+              <span class="info-label">Expiration</span>
+              <span class="info-value">{{ quote.expirationDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (quote.sentDate) {
+            <div class="info-item">
+              <span class="info-label">Sent</span>
+              <span class="info-value">{{ quote.sentDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (quote.acceptedDate) {
+            <div class="info-item">
+              <span class="info-label">Accepted</span>
+              <span class="info-value">{{ quote.acceptedDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (quote.salesOrderId) {
+            <div class="info-item">
+              <span class="info-label">Linked Order</span>
+              <span class="info-value">{{ quote.salesOrderNumber }}</span>
+            </div>
+          }
+        </div>
+
+        @if (quote.notes) {
+          <div class="info-section">
+            <span class="info-label">Notes</span>
+            <div class="info-notes">{{ quote.notes }}</div>
+          </div>
+        }
+
+        <!-- Line Items -->
+        <div class="lines-section">
+          <span class="info-label">Line Items ({{ quote.lines.length }})</span>
+          @if (quote.lines.length > 0) {
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Part #</th>
+                  <th>Description</th>
+                  <th class="lines-table__right">Qty</th>
+                  <th class="lines-table__right">Unit Price</th>
+                  <th class="lines-table__right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of quote.lines; track line.id) {
+                  <tr>
+                    <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
+                    <td>{{ line.description }}</td>
+                    <td class="lines-table__right">{{ line.quantity }}</td>
+                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <!-- Totals -->
+        <div class="totals-section">
+          <div class="totals-row">
+            <span class="info-label">Subtotal</span>
+            <span class="totals-value">{{ quote.subtotal | currency }}</span>
+          </div>
+          <div class="totals-row">
+            <span class="info-label">Tax ({{ quote.taxRate }}%)</span>
+            <span class="totals-value">{{ quote.taxAmount | currency }}</span>
+          </div>
+          <div class="totals-row totals-row--total">
+            <span class="info-label">Total</span>
+            <span class="totals-value">{{ quote.total | currency }}</span>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ quote.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Updated</span>
+            <span class="info-value">{{ quote.updatedAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          @if (canSend(quote.status)) {
+            <button class="action-btn action-btn--primary" (click)="sendQuote()">
+              <span class="material-icons-outlined">send</span>
+              Send
+            </button>
+          }
+          @if (canAccept(quote.status)) {
+            <button class="action-btn action-btn--primary" (click)="acceptQuote()">
+              <span class="material-icons-outlined">thumb_up</span>
+              Accept
+            </button>
+          }
+          @if (canReject(quote.status)) {
+            <button class="action-btn" (click)="rejectQuote()">
+              <span class="material-icons-outlined">thumb_down</span>
+              Reject
+            </button>
+          }
+          @if (canConvert(quote.status)) {
+            <button class="action-btn action-btn--primary" (click)="convertToOrder()">
+              <span class="material-icons-outlined">shopping_cart</span>
+              Convert to Order
+            </button>
+          }
+          @if (canDelete(quote.status)) {
+            <button class="action-btn action-btn--danger" (click)="deleteQuote()">
+              <span class="material-icons-outlined">delete</span>
+              Delete
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

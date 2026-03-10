@@ -48,26 +48,19 @@
   &:hover { background: var(--bg); }
 }
 
-.col-expand { width: 24px; padding-right: 0 !important; }
-.expand-icon { font-size: 18px; color: var(--text-muted); }
-
 .part-number { font-weight: 600; }
 .text-right { text-align: right; }
-.qty-cell { font-variant-numeric: tabular-nums; }
 .qty-zero { color: var(--error); font-weight: 600; }
 
-.stock-level--empty { background: var(--error-light); }
-.stock-level--low { background: rgba(255, 193, 7, 0.05); }
+// Row class applied via DataTable rowClass callback
+:host ::ng-deep .stock-level--empty { background: var(--error-light) !important; }
+:host ::ng-deep .stock-level--low { background: rgba(255, 193, 7, 0.05) !important; }
 
-// ─── Bin Detail (expandable row) ───
-.bin-detail-row td { padding: $sp-sm $sp-lg $sp-md; background: var(--bg); }
-
+// ─── Bin Detail (expand content) ───
 .bin-detail-table {
   width: 100%;
   border-collapse: collapse;
   font-size: $font-size-xs;
-  margin-left: 24px;
-  max-width: calc(100% - 24px);
 
   th {
     @include uppercase-label($font-size-xxs, 0.5px, 700);
@@ -150,6 +143,8 @@
   gap: $sp-md;
   padding: $sp-md $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
+
+  &__add-child { margin-left: auto; }
 }
 
 .detail-type-icon { font-size: 24px; color: var(--text-muted); }

@@ -204,6 +204,58 @@
   }
 }
 
+// ─── Sticky First Column ───
+.data-table__th--sticky,
+.data-table__td--sticky {
+  position: sticky;
+  z-index: $z-sticky - 1;
+  background: inherit;
+}
+
+.data-table__th--sticky {
+  z-index: $z-sticky + 1; // Above other sticky headers
+}
+
+// ─── Expandable Rows ───
+.data-table__th--expand,
+.data-table__td--expand {
+  width: 32px;
+  padding: $sp-md $sp-sm;
+  text-align: center;
+  cursor: pointer;
+}
+
+.data-table__expand-icon {
+  font-size: $icon-size-sm;
+  color: var(--text-muted);
+  transition: transform $transition-fast;
+}
+
+.data-table__td--expand:hover .data-table__expand-icon {
+  color: var(--text);
+}
+
+.data-table__row--expanded {
+  background: var(--bg) !important; // Keep parent row highlighted when expanded
+}
+
+.data-table__expand-row {
+  background: var(--bg);
+
+  &:hover {
+    background: var(--bg); // No hover effect on expand row
+  }
+
+  td {
+    padding: 0;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+}
+
+.data-table__expand-content {
+  padding: $sp-md $sp-lg $sp-md ($sp-lg + 32px);
+}
+
 // ─── Paginator ───
 mat-paginator {
   flex-shrink: 0;

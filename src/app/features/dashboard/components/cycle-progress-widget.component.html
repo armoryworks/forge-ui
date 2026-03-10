@@ -1,0 +1,47 @@
+<div [appLoadingBlock]="loading()">
+  @if (!cycle()) {
+    <app-empty-state icon="event_note" message="No active cycle"
+      actionLabel="Start Planning" (action)="navigatePlanning()" />
+  } @else {
+    <div class="cycle-header">
+      <a routerLink="/planning" class="cycle-name">{{ cycle()!.name }}</a>
+      <span class="cycle-status" [class.cycle-status--overdue]="isOverdue()">
+        @if (isOverdue()) {
+          Overdue
+        } @else {
+          {{ daysRemaining() }}d left
+        }
+      </span>
+    </div>
+
+    <div class="cycle-progress">
+      <div class="cycle-progress__bar">
+        <div class="cycle-progress__fill"
+          [style.width.%]="progressPercent()"
+          [class.cycle-progress__fill--complete]="progressPercent() === 100">
+        </div>
+      </div>
+      <span class="cycle-progress__label">{{ completedEntries() }}/{{ totalEntries() }} ({{ progressPercent() }}%)</span>
+    </div>
+
+    @if (cycle()!.entries.length > 0) {
+      <div class="cycle-entries">
+        @for (entry of cycle()!.entries.slice(0, 5); track entry.id) {
+          <div class="cycle-entry" [class.cycle-entry--done]="entry.completedAt">
+            <span class="material-icons-outlined cycle-entry__check">
+              {{ entry.completedAt ? 'check_circle' : 'radio_button_unchecked' }}
+            </span>
+            <span class="cycle-entry__number">{{ entry.jobNumber }}</span>
+            <span class="cycle-entry__title">{{ entry.jobTitle }}</span>
+            @if (entry.stageName) {
+              <span class="chip" [style.--chip-color]="entry.stageColor">{{ entry.stageName }}</span>
+            }
+          </div>
+        }
+        @if (cycle()!.entries.length > 5) {
+          <a routerLink="/planning" class="cycle-more">+{{ cycle()!.entries.length - 5 }} more</a>
+        }
+      </div>
+    }
+  }
+</div>

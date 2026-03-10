@@ -7,8 +7,10 @@ import { DeadlinesWidgetComponent } from './components/deadlines-widget.componen
 import { JobsByStageWidgetComponent } from './components/jobs-by-stage-widget.component';
 import { TeamLoadWidgetComponent } from './components/team-load-widget.component';
 import { TodaysTasksWidgetComponent } from './components/todays-tasks-widget.component';
+import { CycleProgressWidgetComponent } from './components/cycle-progress-widget.component';
 import { DashboardData } from './models/dashboard-data.model';
 import { DashboardService } from './services/dashboard.service';
+import { LoadingService } from '../../shared/services/loading.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 
 @Component({
@@ -22,6 +24,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
     TeamLoadWidgetComponent,
     ActivityWidgetComponent,
     DeadlinesWidgetComponent,
+    CycleProgressWidgetComponent,
     PageHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -30,22 +33,17 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 })
 export class DashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
+  private readonly loadingService = inject(LoadingService);
 
   protected readonly data = signal<DashboardData | null>(null);
-  protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
 
   ngOnInit(): void {
-    this.dashboardService.getDashboard().subscribe({
-      next: (data) => {
-        this.data.set(data);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load dashboard data');
-        this.loading.set(false);
-      },
-    });
+    this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
+      .subscribe({
+        next: (data) => this.data.set(data),
+        error: () => this.error.set('Failed to load dashboard data'),
+      });
   }
 
   protected exportDashboard(): void {

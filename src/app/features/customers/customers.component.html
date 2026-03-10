@@ -14,12 +14,7 @@
       <app-select label="Status" [formControl]="activeFilterControl" [options]="activeOptions" />
     </div>
 
-    @if (loading()) {
-      <div class="page-loading">
-        <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-        <span>Loading...</span>
-      </div>
-    } @else {
+    <div [appLoadingBlock]="loading()">
       <app-data-table tableId="customers" [columns]="customerColumns" [data]="customers()"
         [rowClass]="customerRowClass" emptyIcon="people" emptyMessage="No customers found"
         (rowClick)="selectCustomer($any($event))">
@@ -44,7 +39,7 @@
           <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
         </ng-template>
       </app-data-table>
-    }
+    </div>
   </div>
 
   <!-- Right: Detail Panel -->
@@ -151,10 +146,7 @@
           </div>
 
           @if (customer.contacts.length === 0) {
-            <div class="empty-tab">
-              <span class="material-icons-outlined empty-tab__icon">contacts</span>
-              <span>No contacts yet</span>
-            </div>
+            <app-empty-state icon="contacts" message="No contacts yet" />
           } @else {
             <div class="contact-list">
               @for (contact of customer.contacts; track contact.id) {
@@ -196,10 +188,7 @@
         <!-- Jobs Tab -->
         @if (activeTab() === 'jobs') {
           @if (customer.jobs.length === 0) {
-            <div class="empty-tab">
-              <span class="material-icons-outlined empty-tab__icon">work</span>
-              <span>No jobs linked</span>
-            </div>
+            <app-empty-state icon="work" message="No jobs linked" />
           } @else {
             <div class="job-list">
               @for (job of customer.jobs; track job.id) {

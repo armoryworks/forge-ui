@@ -48,5 +48,19 @@
   &--pie { max-width: 500px; }
 }
 
-.spin { animation: spin 1s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.kpi-row {
+  display: flex; gap: $sp-lg; flex-wrap: wrap;
+}
+
+.kpi-card {
+  flex: 1; min-width: 120px; padding: $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface); text-align: center;
+  display: flex; flex-direction: column; gap: $sp-sm;
+
+  &__value { font-size: $font-size-kpi; font-weight: 700; color: var(--text); }
+  &__label { @include uppercase-label($font-size-xxs, 0.5px, 600); color: var(--text-muted); }
+  &--success .kpi-card__value { color: var(--success); }
+  &--error .kpi-card__value { color: var(--error); }
+}
+

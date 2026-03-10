@@ -1,0 +1,25 @@
+<app-dialog [title]="dialogTitle()" width="520px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input label="Cycle Name" formControlName="name" placeholder="e.g. Sprint 12" />
+
+    <div class="dialog-row">
+      <app-datepicker label="Start Date" formControlName="startDate" />
+      <app-datepicker label="End Date" formControlName="endDate" />
+    </div>
+
+    <app-textarea label="Goals" formControlName="goals" [rows]="3" placeholder="What should this cycle accomplish?" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined spin">sync</span>
+      }
+      {{ isEditMode() ? 'Update' : 'Create' }}
+    </button>
+  </div>
+</app-dialog>

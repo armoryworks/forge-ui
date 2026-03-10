@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
-import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-setup',
@@ -22,6 +23,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class SetupComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
 
@@ -39,29 +41,22 @@ export class SetupComponent {
     password: 'Password',
   });
 
-  protected readonly loading = signal(false);
+  protected readonly loading = this.loadingService.isLoading;
 
   protected onSubmit(): void {
     if (this.form.invalid) return;
 
-    this.loading.set(true);
-
     const { email, password, firstName, lastName } = this.form.getRawValue();
 
-    this.authService
-      .setup({
-        email: email!,
-        password: password!,
-        firstName: firstName!,
-        lastName: lastName!,
-      })
-      .subscribe({
-        next: () => this.router.navigate(['/dashboard']),
-        error: (err: HttpErrorResponse) => {
-          this.loading.set(false);
-          this.handleError(err);
-        },
-      });
+    this.loadingService.track('Setting up account...', this.authService.setup({
+      email: email!,
+      password: password!,
+      firstName: firstName!,
+      lastName: lastName!,
+    })).subscribe({
+      next: () => this.router.navigate(['/dashboard']),
+      error: (err: HttpErrorResponse) => this.handleError(err),
+    });
   }
 
   private handleError(err: HttpErrorResponse): void {

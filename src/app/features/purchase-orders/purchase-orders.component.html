@@ -1,0 +1,212 @@
+<app-page-header title="Purchase Orders">
+  <button class="action-btn action-btn--primary" (click)="openCreatePo()">
+    <span class="material-icons-outlined">add</span>
+    New PO
+  </button>
+</app-page-header>
+
+<div class="po-layout">
+  <!-- Left: PO List -->
+  <div class="po-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search POs..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Vendor" [formControl]="vendorFilterControl" [options]="vendorOptions()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
+        [rowClass]="poRowClass" emptyIcon="description" emptyMessage="No purchase orders found"
+        (rowClick)="selectPo($any($event))">
+        <ng-template appColumnCell="poNumber" let-row>
+          <span class="po-number">{{ row.poNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="vendorName" let-row>
+          <span>{{ row.vendorName }}</span>
+        </ng-template>
+        <ng-template appColumnCell="jobNumber" let-row>
+          <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="expectedDeliveryDate" let-row>
+          <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'mediumDate') : '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+
+  <!-- Right: Detail Panel -->
+  @if (selectedPo(); as po) {
+    <div class="detail-panel">
+      <div class="detail-header">
+        <div class="detail-header__info">
+          <span class="material-icons-outlined detail-icon">description</span>
+          <div>
+            <div class="detail-name">{{ po.poNumber }}</div>
+            <div class="detail-vendor">{{ po.vendorName }}</div>
+          </div>
+        </div>
+        <div class="detail-header__actions">
+          <button class="icon-btn" title="Close" (click)="closeDetail()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="detail-body">
+        <!-- Status & Dates -->
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">
+              <span [class]="getStatusClass(po.status)">{{ getStatusLabel(po.status) }}</span>
+            </span>
+          </div>
+          @if (po.jobNumber) {
+            <div class="info-item">
+              <span class="info-label">Job</span>
+              <span class="info-value">{{ po.jobNumber }}</span>
+            </div>
+          }
+          @if (po.expectedDeliveryDate) {
+            <div class="info-item">
+              <span class="info-label">Expected Delivery</span>
+              <span class="info-value">{{ po.expectedDeliveryDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (po.submittedDate) {
+            <div class="info-item">
+              <span class="info-label">Submitted</span>
+              <span class="info-value">{{ po.submittedDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (po.acknowledgedDate) {
+            <div class="info-item">
+              <span class="info-label">Acknowledged</span>
+              <span class="info-value">{{ po.acknowledgedDate | date:'mediumDate' }}</span>
+            </div>
+          }
+          @if (po.receivedDate) {
+            <div class="info-item">
+              <span class="info-label">Received</span>
+              <span class="info-value">{{ po.receivedDate | date:'mediumDate' }}</span>
+            </div>
+          }
+        </div>
+
+        @if (po.notes) {
+          <div class="info-section">
+            <span class="info-label">Notes</span>
+            <div class="info-notes">{{ po.notes }}</div>
+          </div>
+        }
+
+        <!-- Line Items -->
+        <div class="lines-section">
+          <span class="info-label">Line Items ({{ po.lines.length }})</span>
+          @if (po.lines.length > 0) {
+            <table class="lines-table">
+              <thead>
+                <tr>
+                  <th>Part #</th>
+                  <th>Description</th>
+                  <th class="lines-table__right">Ordered</th>
+                  <th class="lines-table__right">Received</th>
+                  <th class="lines-table__right">Unit Price</th>
+                  <th class="lines-table__right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (line of po.lines; track line.id) {
+                  <tr>
+                    <td class="lines-table__mono">{{ line.partNumber }}</td>
+                    <td>{{ line.description }}</td>
+                    <td class="lines-table__right">{{ line.orderedQuantity }}</td>
+                    <td class="lines-table__right">
+                      <span [class.text-success]="line.receivedQuantity >= line.orderedQuantity"
+                            [class.text-warning]="line.receivedQuantity > 0 && line.receivedQuantity < line.orderedQuantity">
+                        {{ line.receivedQuantity }}
+                      </span>
+                    </td>
+                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Created</span>
+            <span class="info-value">{{ po.createdAt | date:'mediumDate' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Updated</span>
+            <span class="info-value">{{ po.updatedAt | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="detail-actions">
+          @if (canSubmit(po.status)) {
+            <button class="action-btn action-btn--primary" (click)="submitPo()">
+              <span class="material-icons-outlined">send</span>
+              Submit
+            </button>
+          }
+          @if (canAcknowledge(po.status)) {
+            <button class="action-btn action-btn--primary" (click)="acknowledgePo()">
+              <span class="material-icons-outlined">thumb_up</span>
+              Acknowledge
+            </button>
+          }
+          @if (canReceive(po.status)) {
+            <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
+              <span class="material-icons-outlined">inventory</span>
+              Receive Items
+            </button>
+          }
+          @if (canClose(po.status)) {
+            <button class="action-btn" (click)="closePo()">
+              <span class="material-icons-outlined">check_circle</span>
+              Close
+            </button>
+          }
+          @if (canCancel(po.status)) {
+            <button class="action-btn" (click)="cancelPo()">
+              <span class="material-icons-outlined">block</span>
+              Cancel
+            </button>
+          }
+          @if (canDelete(po.status)) {
+            <button class="action-btn action-btn--danger" (click)="deletePo()">
+              <span class="material-icons-outlined">delete</span>
+              Delete
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Create PO Dialog -->
+@if (showCreateDialog()) {
+  <app-po-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}
+
+<!-- Receive Dialog -->
+@if (showReceiveDialog() && selectedPo()) {
+  <app-receive-dialog
+    [purchaseOrder]="selectedPo()!"
+    (closed)="closeReceiveDialog()"
+    (saved)="onReceiveSaved()" />
+}
