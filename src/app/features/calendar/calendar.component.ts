@@ -139,6 +139,18 @@ export class CalendarComponent {
     return `${h - 12} PM`;
   }
 
+  protected getPriorityIcon(priority: string): string {
+    switch (priority) {
+      case 'Critical': return 'priority_high';
+      case 'High': return 'arrow_upward';
+      default: return '';
+    }
+  }
+
+  protected getJobTint(job: CalendarJob): string {
+    return job.trackTypeColor ?? job.stageColor;
+  }
+
   private getWeekDays(d: Date): Date[] {
     const dayOfWeek = d.getDay();
     const start = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dayOfWeek);

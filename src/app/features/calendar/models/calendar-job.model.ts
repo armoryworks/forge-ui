@@ -11,4 +11,5 @@ export interface CalendarJob {
   isOverdue: boolean;
   customerName: string | null;
   trackTypeId: number;
+  trackTypeColor: string | null;
 }

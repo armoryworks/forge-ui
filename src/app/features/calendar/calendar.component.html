@@ -40,9 +40,14 @@
             <div class="cell-date">{{ day.date.getDate() }}</div>
             <div class="cell-jobs">
               @for (job of visibleJobs(day); track job.id) {
-                <div class="job-chip" [style.border-left-color]="job.stageColor"
-                     [style.--job-tint]="job.stageColor"
+                <div class="job-chip"
+                     [style.border-left-color]="job.stageColor"
+                     [style.--job-tint]="getJobTint(job)"
+                     [class.job-chip--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
                      (click)="onJobClick(job); $event.stopPropagation()" [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')">
+                  @if (getPriorityIcon(job.priorityName)) {
+                    <span class="material-icons-outlined job-chip__priority job-chip__priority--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
+                  }
                   <span class="job-chip__number">{{ job.jobNumber }}</span>
                   <span class="job-chip__title">{{ job.title }}</span>
                   @if (job.isOverdue) {
@@ -76,14 +81,21 @@
         @for (day of weekDays(); track day.date.getTime()) {
           <div class="week-column" [class.week-column--today]="day.isToday">
             @for (job of day.jobs; track job.id) {
-              <div class="job-chip job-chip--week" [style.border-left-color]="job.stageColor"
-                   [style.--job-tint]="job.stageColor"
+              <div class="job-chip job-chip--week"
+                   [style.border-left-color]="job.stageColor"
+                   [style.--job-tint]="getJobTint(job)"
+                   [class.job-chip--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
                    (click)="onJobClick(job)" [title]="job.title">
-                <span class="job-chip__number">{{ job.jobNumber }}</span>
+                <div class="job-chip__top-row">
+                  @if (getPriorityIcon(job.priorityName)) {
+                    <span class="material-icons-outlined job-chip__priority job-chip__priority--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
+                  }
+                  <span class="job-chip__number">{{ job.jobNumber }}</span>
+                  @if (job.isOverdue) {
+                    <span class="material-icons-outlined job-chip__overdue">warning</span>
+                  }
+                </div>
                 <span class="job-chip__title">{{ job.title }}</span>
-                @if (job.isOverdue) {
-                  <span class="material-icons-outlined job-chip__overdue">warning</span>
-                }
                 @if (job.customerName) {
                   <span class="job-chip__customer">{{ job.customerName }}</span>
                 }
@@ -106,8 +118,15 @@
       </div>
       <div class="day-view__list">
         @for (job of dayJobs(); track job.id) {
-          <div class="day-job" [style.border-left-color]="job.stageColor" [style.--job-tint]="job.stageColor" (click)="onJobClick(job)">
+          <div class="day-job"
+               [style.border-left-color]="job.stageColor"
+               [style.--job-tint]="getJobTint(job)"
+               [class.day-job--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
+               (click)="onJobClick(job)">
             <div class="day-job__header">
+              @if (getPriorityIcon(job.priorityName)) {
+                <span class="material-icons-outlined day-job__priority-icon day-job__priority-icon--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
+              }
               <span class="day-job__number">{{ job.jobNumber }}</span>
               <span class="day-job__title">{{ job.title }}</span>
               @if (job.isOverdue) {
@@ -128,7 +147,7 @@
                   <span class="material-icons-outlined">assignment_ind</span> {{ job.assigneeInitials }}
                 </span>
               }
-              <span class="day-job__priority chip chip--{{ job.priorityName === 'High' ? 'error' : job.priorityName === 'Medium' ? 'warning' : 'muted' }}">
+              <span class="day-job__priority chip chip--{{ job.priorityName === 'Critical' ? 'error' : job.priorityName === 'High' ? 'error' : job.priorityName === 'Medium' ? 'warning' : 'muted' }}">
                 {{ job.priorityName }}
               </span>
             </div>

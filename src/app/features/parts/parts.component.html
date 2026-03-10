@@ -88,6 +88,13 @@
             <span class="tab-badge">{{ part.usedIn.length }}</span>
           }
         </button>
+        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'files'"
+          (click)="detailTab.set('files')">
+          Files
+          @if (partFiles().length > 0) {
+            <span class="tab-badge">{{ partFiles().length }}</span>
+          }
+        </button>
         @if (stlFile()) {
           <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'viewer'"
             (click)="detailTab.set('viewer')">
@@ -131,7 +138,60 @@
                   <span class="info-value">{{ part.externalRef }}</span>
                 </div>
               }
+              @if (part.preferredVendorName) {
+                <div class="info-item">
+                  <span class="info-label">Preferred Vendor</span>
+                  <span class="info-value">{{ part.preferredVendorName }}</span>
+                </div>
+              }
             </div>
+
+            <!-- Inventory Summary -->
+            @if (inventorySummary(); as inv) {
+              <div class="inventory-summary">
+                <span class="info-label">Inventory</span>
+                <div class="inventory-summary__qty" [class.inventory-summary__qty--low]="isLowStock()">
+                  <span class="inventory-summary__value">{{ inv.totalQuantity }}</span>
+                  <span class="inventory-summary__label">Total Qty</span>
+                  @if (isLowStock()) {
+                    <span class="material-icons-outlined inventory-summary__warn">warning</span>
+                    <span class="inventory-summary__warn-text">Low Stock</span>
+                  }
+                </div>
+                <div class="info-grid">
+                  @if (part.minStockThreshold !== null) {
+                    <div class="info-item">
+                      <span class="info-label">Min Stock</span>
+                      <span class="info-value">{{ part.minStockThreshold }}</span>
+                    </div>
+                  }
+                  @if (part.reorderPoint !== null) {
+                    <div class="info-item">
+                      <span class="info-label">Reorder Point</span>
+                      <span class="info-value">{{ part.reorderPoint }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            } @else if (part.minStockThreshold !== null || part.reorderPoint !== null) {
+              <div class="inventory-thresholds">
+                <span class="info-label">Inventory Thresholds</span>
+                <div class="info-grid">
+                  @if (part.minStockThreshold !== null) {
+                    <div class="info-item">
+                      <span class="info-label">Min Stock</span>
+                      <span class="info-value">{{ part.minStockThreshold }}</span>
+                    </div>
+                  }
+                  @if (part.reorderPoint !== null) {
+                    <div class="info-item">
+                      <span class="info-label">Reorder Point</span>
+                      <span class="info-value">{{ part.reorderPoint }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
 
             <div class="status-actions">
               <span class="info-label">Set Status</span>
@@ -223,6 +283,32 @@
               </table>
             } @else {
               <app-empty-state icon="link_off" message="Not used in any assemblies" />
+            }
+          }
+
+          <!-- Files Tab -->
+          @if (detailTab() === 'files') {
+            <app-file-upload-zone
+              entityType="parts"
+              [entityId]="part.id"
+              accept=".pdf,.step,.stl,.dxf,.dwg,.png,.jpg,.jpeg"
+              [maxSizeMb]="50"
+              (uploaded)="onFileUploaded()" />
+
+            @if (partFiles().length > 0) {
+              <div class="files-list">
+                @for (file of partFiles(); track file.id) {
+                  <div class="file-item">
+                    <span class="material-icons-outlined file-item__icon">description</span>
+                    <div class="file-item__info">
+                      <a class="file-item__name" [href]="partsService.getFileDownloadUrl(file.id)" target="_blank">{{ file.fileName }}</a>
+                      <span class="file-item__size">{{ file.contentType }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <app-empty-state icon="attach_file" message="No files attached" />
             }
           }
 

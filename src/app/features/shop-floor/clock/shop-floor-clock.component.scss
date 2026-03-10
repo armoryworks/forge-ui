@@ -46,6 +46,119 @@
   opacity: 0.8;
 }
 
+// ─── Kiosk Scan Phase ───
+.kiosk-scan {
+  flex: 1;
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-xl;
+  padding: $sp-3xl;
+}
+
+.kiosk-scan__prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  text-align: center;
+}
+
+.kiosk-scan__icon {
+  font-size: $icon-size-hero;
+  color: var(--primary);
+}
+
+.kiosk-scan__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.kiosk-scan__subtitle {
+  font-size: $font-size-md;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.kiosk-scan__input-wrapper {
+  width: 100%;
+  max-width: 400px;
+}
+
+// ─── Kiosk PIN Phase ───
+.kiosk-pin {
+  flex: 1;
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-xl;
+  padding: $sp-3xl;
+}
+
+.kiosk-pin__prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  text-align: center;
+}
+
+.kiosk-pin__icon {
+  font-size: $icon-size-hero;
+  color: var(--primary);
+}
+
+.kiosk-pin__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.kiosk-pin__barcode {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.kiosk-pin__error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--error-light);
+  color: var(--error);
+  border: $border-width-thin solid var(--error);
+  font-size: $font-size-sm;
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.kiosk-pin__input-wrapper {
+  width: 100%;
+  max-width: 300px;
+}
+
+.kiosk-pin__actions {
+  display: flex;
+  gap: $sp-md;
+}
+
+.kiosk-pin__spinner {
+  animation: spin 1s linear infinite;
+}
+
+// ─── Kiosk Return Button ───
+.kiosk-return {
+  display: flex;
+  justify-content: center;
+  padding: $sp-lg;
+  flex-shrink: 0;
+  border-top: $border-width-thin solid var(--border);
+}
+
 // ─── Body ───
 .clock-body {
   display: grid;
@@ -154,11 +267,6 @@
   &--out {
     color: var(--error);
   }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }
 
 .clock-card__spinner {

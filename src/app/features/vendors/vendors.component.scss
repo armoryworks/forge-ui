@@ -141,6 +141,12 @@
   }
 }
 
+.po-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 700;
+}
+
 // --- Empty State ---
 .empty-tab {
   display: flex;

@@ -1,0 +1,77 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.training-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-sm $sp-lg;
+}
+
+.training-header__count {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.training-header__note {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.user-name {
+  font-weight: 600;
+}
+
+.completed-count {
+  font-weight: 700;
+  font-family: $font-family-mono;
+}
+
+.last-tour {
+  font-size: $font-size-sm;
+}
+
+.completion-bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.completion-bar {
+  flex: 1;
+  height: $progress-bar-height;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.completion-bar__fill {
+  height: 100%;
+  transition: width $transition-normal;
+}
+
+.completion--full {
+  background: var(--success);
+}
+
+.completion--half {
+  background: var(--warning);
+}
+
+.completion--low {
+  background: var(--error);
+}
+
+.completion-pct {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  font-weight: 600;
+  min-width: 36px;
+  text-align: right;
+}

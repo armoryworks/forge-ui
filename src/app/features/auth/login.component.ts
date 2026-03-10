@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDividerModule } from '@angular/material/divider';
 import { HttpErrorResponse } from '@angular/common/http';
+
 import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
@@ -11,16 +13,17 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
+import { SsoProvider } from '../../shared/models/sso-provider.model';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, MatDividerModule, InputComponent, ValidationPopoverDirective],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly loadingService = inject(LoadingService);
@@ -38,6 +41,26 @@ export class LoginComponent {
   });
 
   protected readonly loading = this.loadingService.isLoading;
+  protected readonly ssoProviders = signal<SsoProvider[]>([]);
+
+  ngOnInit(): void {
+    // Load available SSO providers
+    this.authService.getSsoProviders().subscribe(providers => {
+      this.ssoProviders.set(providers);
+    });
+  }
+
+  protected ssoLogin(provider: SsoProvider): void {
+    this.authService.ssoLogin(provider.id);
+  }
+
+  protected getSsoIcon(providerId: string): string {
+    switch (providerId) {
+      case 'google': return 'g_mobiledata';
+      case 'microsoft': return 'window';
+      default: return 'key';
+    }
+  }
 
   protected onSubmit(): void {
     if (this.form.invalid) return;

@@ -46,14 +46,39 @@
   padding: $sp-xs $sp-sm; border-radius: 2px;
   border-left: 3px solid var(--border);
   border-left-color: var(--job-tint, var(--border));
-  background: color-mix(in srgb, var(--job-tint, transparent) 8%, var(--surface));
+  background: color-mix(in srgb, var(--job-tint, transparent) 10%, var(--surface));
   font-size: $font-size-sm; cursor: pointer;
   overflow: hidden; white-space: nowrap;
-  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 12%, var(--bg)); }
+  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 15%, var(--bg)); }
+
+  &--high-priority {
+    border-left-width: 4px;
+  }
 }
+
+.job-chip__top-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  width: 100%;
+}
+
 .job-chip__number { font-weight: 700; flex-shrink: 0; }
 .job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
 .job-chip__overdue { font-size: $font-size-base; color: var(--error); flex-shrink: 0; }
+
+.job-chip__priority {
+  font-size: $icon-size-xs;
+  flex-shrink: 0;
+
+  &--high {
+    color: var(--warning);
+  }
+
+  &--critical {
+    color: var(--error);
+  }
+}
 
 .job-overflow {
   font-size: $font-size-xxs; color: var(--text-muted); padding: $sp-xxs $sp-sm;
@@ -135,14 +160,32 @@
   border-left: 4px solid var(--border);
   border-left-color: var(--job-tint, var(--border));
   padding: $sp-md $sp-lg;
-  background: color-mix(in srgb, var(--job-tint, transparent) 8%, var(--surface));
+  background: color-mix(in srgb, var(--job-tint, transparent) 10%, var(--surface));
   cursor: pointer;
-  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 12%, var(--bg)); }
+  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 15%, var(--bg)); }
+
+  &--high-priority {
+    border-left-width: 5px;
+  }
 }
+
 .day-job__header { display: flex; align-items: center; gap: $sp-md; margin-bottom: $sp-sm; }
 .day-job__number { font-weight: 700; font-size: $font-size-md; }
 .day-job__title { font-size: $font-size-base; color: var(--text); flex: 1; }
 .day-job__overdue { font-size: $font-size-md; color: var(--error); }
+
+.day-job__priority-icon {
+  font-size: $icon-size-md;
+
+  &--high {
+    color: var(--warning);
+  }
+
+  &--critical {
+    color: var(--error);
+  }
+}
+
 .day-job__meta {
   display: flex; align-items: center; gap: $sp-lg; flex-wrap: wrap;
 }

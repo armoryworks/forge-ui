@@ -13,63 +13,132 @@
   </div>
 </header>
 
-<div class="clock-body">
-  <!-- Clocked Out — Available to Clock In -->
-  <section class="clock-section">
-    <h2 class="clock-section__title">
-      <span class="material-icons-outlined">logout</span>
-      Not Clocked In ({{ clockedOut().length }})
-    </h2>
-    <div class="clock-grid">
-      @for (worker of clockedOut(); track worker.userId) {
-        <button
-          class="clock-card clock-card--out"
-          [class.clock-card--processing]="processing() === worker.userId"
-          [disabled]="processing() !== null"
-          (click)="toggleClock(worker)">
-          <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
-          <span class="clock-card__name">{{ worker.name }}</span>
-          <span class="clock-card__action">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined clock-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">login</span> Clock In
-            }
-          </span>
-        </button>
-      } @empty {
-        <div class="clock-empty">Everyone is clocked in</div>
-      }
+<!-- Kiosk Scan Phase -->
+@if (kioskPhase() === 'scan') {
+  <div class="kiosk-scan">
+    <div class="kiosk-scan__prompt">
+      <span class="material-icons-outlined kiosk-scan__icon">qr_code_scanner</span>
+      <h2 class="kiosk-scan__title">Scan Your Badge</h2>
+      <p class="kiosk-scan__subtitle">Scan your employee badge or enter your barcode manually</p>
     </div>
-  </section>
+    <div class="kiosk-scan__input-wrapper">
+      <app-barcode-scan-input
+        label="Employee Badge"
+        placeholder="Scan badge or type barcode..."
+        [autoFocus]="true"
+        (scanned)="onBarcodeScanned($event)" />
+    </div>
+  </div>
+}
 
-  <!-- Clocked In — Available to Clock Out -->
-  <section class="clock-section">
-    <h2 class="clock-section__title clock-section__title--active">
-      <span class="material-icons-outlined">login</span>
-      Clocked In ({{ clockedIn().length }})
-    </h2>
-    <div class="clock-grid">
-      @for (worker of clockedIn(); track worker.userId) {
-        <button
-          class="clock-card clock-card--in"
-          [class.clock-card--processing]="processing() === worker.userId"
-          [disabled]="processing() !== null"
-          (click)="toggleClock(worker)">
-          <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
-          <span class="clock-card__name">{{ worker.name }}</span>
-          <span class="clock-card__since">Since {{ formatTime(worker.clockedInAt) }}</span>
-          <span class="clock-card__action clock-card__action--out">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined clock-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">logout</span> Clock Out
-            }
-          </span>
-        </button>
-      } @empty {
-        <div class="clock-empty">No one is clocked in</div>
-      }
+<!-- Kiosk PIN Phase -->
+@if (kioskPhase() === 'pin') {
+  <div class="kiosk-pin">
+    <div class="kiosk-pin__prompt">
+      <span class="material-icons-outlined kiosk-pin__icon">lock</span>
+      <h2 class="kiosk-pin__title">Enter Your PIN</h2>
+      <p class="kiosk-pin__barcode">Badge: {{ scannedBarcode() }}</p>
     </div>
-  </section>
-</div>
+
+    @if (kioskAuthError()) {
+      <div class="kiosk-pin__error">
+        <span class="material-icons-outlined">warning</span>
+        {{ kioskAuthError() }}
+      </div>
+    }
+
+    <div class="kiosk-pin__input-wrapper">
+      <app-input label="PIN" type="password" [formControl]="pinControl"
+        placeholder="Enter PIN..." [maxlength]="8" />
+    </div>
+
+    <div class="kiosk-pin__actions">
+      <button class="action-btn" (click)="cancelPin()" [disabled]="kioskAuthenticating()">
+        <span class="material-icons-outlined">arrow_back</span>
+        Back
+      </button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="kioskAuthenticating() || !pinControl.value"
+        (click)="onPinSubmit()">
+        @if (kioskAuthenticating()) {
+          <span class="material-icons-outlined kiosk-pin__spinner">sync</span>
+          Authenticating...
+        } @else {
+          <span class="material-icons-outlined">login</span>
+          Submit
+        }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Kiosk Clock Phase (after auth) -->
+@if (kioskPhase() === 'clock') {
+  <div class="clock-body">
+    <!-- Clocked Out — Available to Clock In -->
+    <section class="clock-section">
+      <h2 class="clock-section__title">
+        <span class="material-icons-outlined">logout</span>
+        Not Clocked In ({{ clockedOut().length }})
+      </h2>
+      <div class="clock-grid">
+        @for (worker of clockedOut(); track worker.userId) {
+          <button
+            class="clock-card clock-card--out"
+            [class.clock-card--processing]="processing() === worker.userId"
+            [disabled]="processing() !== null"
+            (click)="toggleClock(worker)">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+            <span class="clock-card__name">{{ worker.name }}</span>
+            <span class="clock-card__action">
+              @if (processing() === worker.userId) {
+                <span class="material-icons-outlined clock-card__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">login</span> Clock In
+              }
+            </span>
+          </button>
+        } @empty {
+          <div class="clock-empty">Everyone is clocked in</div>
+        }
+      </div>
+    </section>
+
+    <!-- Clocked In — Available to Clock Out -->
+    <section class="clock-section">
+      <h2 class="clock-section__title clock-section__title--active">
+        <span class="material-icons-outlined">login</span>
+        Clocked In ({{ clockedIn().length }})
+      </h2>
+      <div class="clock-grid">
+        @for (worker of clockedIn(); track worker.userId) {
+          <button
+            class="clock-card clock-card--in"
+            [class.clock-card--processing]="processing() === worker.userId"
+            [disabled]="processing() !== null"
+            (click)="toggleClock(worker)">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+            <span class="clock-card__name">{{ worker.name }}</span>
+            <span class="clock-card__since">Since {{ formatTime(worker.clockedInAt) }}</span>
+            <span class="clock-card__action clock-card__action--out">
+              @if (processing() === worker.userId) {
+                <span class="material-icons-outlined clock-card__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">logout</span> Clock Out
+              }
+            </span>
+          </button>
+        } @empty {
+          <div class="clock-empty">No one is clocked in</div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <div class="kiosk-return">
+    <button class="action-btn" (click)="resetToScan()">
+      <span class="material-icons-outlined">arrow_back</span>
+      Back to Scan
+    </button>
+  </div>
+}

@@ -17,6 +17,8 @@ export interface PartDetail {
   provider: string | null;
   preferredVendorId: number | null;
   preferredVendorName: string | null;
+  minStockThreshold: number | null;
+  reorderPoint: number | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: string;

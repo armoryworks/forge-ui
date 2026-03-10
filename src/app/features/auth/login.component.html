@@ -20,5 +20,25 @@
         }
       </button>
     </form>
+
+    @if (ssoProviders().length > 0) {
+      <div class="auth-card__sso">
+        <div class="auth-card__divider">
+          <mat-divider />
+          <span class="auth-card__divider-text">or sign in with</span>
+          <mat-divider />
+        </div>
+
+        <div class="auth-card__sso-buttons">
+          @for (provider of ssoProviders(); track provider.id) {
+            <button mat-stroked-button class="auth-card__sso-btn" (click)="ssoLogin(provider)"
+              [disabled]="loading()">
+              <span class="material-icons-outlined">{{ getSsoIcon(provider.id) }}</span>
+              {{ provider.name }}
+            </button>
+          }
+        </div>
+      </div>
+    }
   </mat-card>
 </div>

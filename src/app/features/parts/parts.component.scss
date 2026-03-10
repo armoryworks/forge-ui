@@ -144,6 +144,109 @@
   &--make { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
 }
 
+// ─── Inventory Summary ───
+.inventory-summary {
+  margin-top: $sp-lg;
+  padding-top: $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.inventory-summary__qty {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+
+  &--low {
+    background: var(--error-light);
+    border-color: var(--error);
+  }
+}
+
+.inventory-summary__value {
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  font-family: $font-family-mono;
+}
+
+.inventory-summary__label {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.inventory-summary__warn {
+  font-size: $icon-size-md;
+  color: var(--error);
+  margin-left: auto;
+}
+
+.inventory-summary__warn-text {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--error);
+}
+
+// ─── Inventory Thresholds ───
+.inventory-thresholds {
+  margin-top: $sp-lg;
+  padding-top: $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+// ─── Files ───
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-top: $sp-lg;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__icon {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--primary);
+    text-decoration: none;
+    @include truncate;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__size {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+}
+
 .col-actions { width: 32px; text-align: right; }
 
 .empty-state {

@@ -1,10 +1,43 @@
-@for (task of tasks(); track task.jobNumber + task.time) {
-  <div class="task-item">
-    <span class="task-item__time">{{ task.time }}</span>
-    <span class="task-item__bar" [style.background]="task.barColor"></span>
-    <span class="task-item__title">{{ task.title }}</span>
-    <span class="task-item__job">{{ task.jobNumber }}</span>
-    <app-avatar [initials]="task.assignee.initials" [color]="task.assignee.color" size="sm" />
-    <app-status-badge [status]="task.status" [statusColor]="task.statusColor" />
-  </div>
+@if (priorityTasks().length === 0) {
+  <app-empty-state icon="task_alt" message="No tasks assigned for today" />
+} @else {
+  <!-- Overdue Alert -->
+  @if (overdueTasks().length > 0) {
+    <div class="overdue-banner">
+      <span class="material-icons-outlined overdue-banner__icon">warning</span>
+      <span class="overdue-banner__text">{{ overdueTasks().length }} overdue</span>
+    </div>
+  }
+
+  @for (task of priorityTasks(); track task.jobNumber + task.time) {
+    <div class="task-item" [class.task-item--overdue]="task.statusColor === 'overdue'">
+      <span class="task-item__time">{{ task.time }}</span>
+      <span class="task-item__bar" [style.background]="task.barColor"></span>
+      <span class="task-item__title">{{ task.title }}</span>
+      <span class="task-item__job">{{ task.jobNumber }}</span>
+      <app-avatar [initials]="task.assignee.initials" [color]="task.assignee.color" size="sm" />
+      <app-status-badge [status]="task.status" [statusColor]="task.statusColor" />
+      <div class="task-item__actions">
+        <button class="icon-btn" title="View Job" (click)="viewJob(task); $event.stopPropagation()" aria-label="View Job">
+          <span class="material-icons-outlined">open_in_new</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Top 3 for Tomorrow -->
+  @if (top3Tomorrow().length > 0) {
+    <div class="tomorrow-section">
+      <span class="tomorrow-section__label">
+        <span class="material-icons-outlined">upcoming</span>
+        Top 3 for Tomorrow
+      </span>
+      @for (item of top3Tomorrow(); track item) {
+        <div class="tomorrow-item">
+          <span class="tomorrow-item__bullet"></span>
+          <span class="tomorrow-item__text">{{ item }}</span>
+        </div>
+      }
+    </div>
+  }
 }

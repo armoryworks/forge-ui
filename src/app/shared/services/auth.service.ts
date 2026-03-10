@@ -1,7 +1,10 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, catchError, of } from 'rxjs';
+
 import { environment } from '../../../environments/environment';
+import { SsoProvider } from '../models/sso-provider.model';
+import { LinkedSsoProvider } from '../models/linked-sso-provider.model';
 
 export interface AuthUser {
   id: number;
@@ -119,6 +122,36 @@ export class AuthService {
           localStorage.setItem('qbe-user', JSON.stringify(response.user));
         }),
       );
+  }
+
+  getSsoProviders(): Observable<SsoProvider[]> {
+    return this.http.get<SsoProvider[]>(`${environment.apiUrl}/auth/sso/providers`).pipe(
+      catchError(() => of([])),
+    );
+  }
+
+  ssoLogin(provider: string): void {
+    window.location.href = `${environment.apiUrl}/auth/sso/${provider}/login`;
+  }
+
+  handleSsoToken(token: string): void {
+    this._token.set(token);
+    localStorage.setItem('qbe-token', token);
+    // Fetch user profile from /me endpoint to populate user signal
+    this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
+      next: (user) => {
+        this._user.set(user);
+        localStorage.setItem('qbe-user', JSON.stringify(user));
+      },
+    });
+  }
+
+  getLinkedSsoProviders(): Observable<LinkedSsoProvider[]> {
+    return this.http.get<LinkedSsoProvider[]>(`${environment.apiUrl}/auth/sso/linked`);
+  }
+
+  unlinkSso(provider: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/auth/sso/unlink/${provider}`);
   }
 
   clearAuth(): void {

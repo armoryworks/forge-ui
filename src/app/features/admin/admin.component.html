@@ -23,6 +23,10 @@
       <span class="material-icons-outlined">settings</span>
       Settings
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
+      <span class="material-icons-outlined">school</span>
+      Training
+    </button>
   </div>
 
   <div [appLoadingBlock]="loading()">
@@ -259,6 +263,13 @@
             </div>
           }
         </div>
+      </div>
+    }
+
+    <!-- Training Tab -->
+    @if (activeTab() === 'training') {
+      <div class="tab-panel">
+        <app-training-dashboard />
       </div>
     }
 

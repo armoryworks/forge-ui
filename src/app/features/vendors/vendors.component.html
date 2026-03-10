@@ -165,24 +165,27 @@
         <!-- Purchase Orders Tab -->
         @if (activeTab() === 'purchase-orders') {
           @if (vendor.purchaseOrders.length === 0) {
-            <app-empty-state icon="receipt_long" message="No purchase orders" />
+            <app-empty-state icon="receipt_long" message="No purchase orders for this vendor" />
           } @else {
-            <div class="po-list">
-              @for (po of vendor.purchaseOrders; track po.id) {
-                <div class="po-item">
-                  <div class="po-item__info">
-                    <span class="po-item__number">{{ po.poNumber }}</span>
-                    @if (po.jobNumber) {
-                      <span class="po-item__job">{{ po.jobNumber }}</span>
-                    }
-                  </div>
-                  <div class="po-item__meta">
-                    <span [class]="getPoStatusClass(po.status)">{{ getPoStatusLabel(po.status) }}</span>
-                    <span class="po-item__date">{{ po.createdAt | date:'mediumDate' }}</span>
-                  </div>
-                </div>
-              }
-            </div>
+            <app-data-table
+              tableId="vendor-pos"
+              [columns]="poColumns"
+              [data]="vendor.purchaseOrders"
+              emptyIcon="receipt_long"
+              emptyMessage="No purchase orders">
+              <ng-template appColumnCell="poNumber" let-row>
+                <span class="po-number">{{ row.poNumber }}</span>
+              </ng-template>
+              <ng-template appColumnCell="status" let-row>
+                <span [class]="getPoStatusClass(row.status)">{{ getPoStatusLabel(row.status) }}</span>
+              </ng-template>
+              <ng-template appColumnCell="expectedDeliveryDate" let-row>
+                <span class="text-muted">{{ row.expectedDeliveryDate | date:'mediumDate' }}</span>
+              </ng-template>
+              <ng-template appColumnCell="createdAt" let-row>
+                <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+              </ng-template>
+            </app-data-table>
           }
         }
       </div>

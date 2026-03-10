@@ -26,7 +26,9 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { StlViewerComponent } from '../../shared/components/stl-viewer/stl-viewer.component';
+import { FileUploadZoneComponent } from '../../shared/components/file-upload-zone/file-upload-zone.component';
 import { FileAttachment } from '../../shared/models/file.model';
+import { PartInventorySummary } from './models/part-inventory-summary.model';
 
 @Component({
   selector: 'app-parts',
@@ -36,14 +38,14 @@ import { FileAttachment } from '../../shared/models/file.model';
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
-    EmptyStateComponent, LoadingBlockDirective, StlViewerComponent,
+    EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartsComponent {
-  private readonly partsService = inject(PartsService);
+  protected readonly partsService = inject(PartsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
@@ -134,16 +136,24 @@ export class PartsComponent {
   ];
 
   // Detail tab
-  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'viewer'>('info');
+  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'viewer' | 'files'>('info');
 
-  // Files
+  // Files & Inventory
   protected readonly partFiles = signal<FileAttachment[]>([]);
+  protected readonly inventorySummary = signal<PartInventorySummary | null>(null);
   protected readonly stlFile = computed(() => {
     return this.partFiles().find(f => f.fileName.toLowerCase().endsWith('.stl')) ?? null;
   });
   protected readonly stlFileUrl = computed(() => {
     const file = this.stlFile();
     return file ? this.partsService.getFileDownloadUrl(file.id) : null;
+  });
+
+  protected readonly isLowStock = computed(() => {
+    const part = this.selectedPart();
+    const inv = this.inventorySummary();
+    if (!part?.minStockThreshold || !inv) return false;
+    return inv.totalQuantity < part.minStockThreshold;
   });
 
   protected readonly partStatuses: PartStatus[] = ['Active', 'Draft', 'Obsolete'];
@@ -178,12 +188,16 @@ export class PartsComponent {
     this.detailLoading.set(true);
     this.detailTab.set('info');
     this.partFiles.set([]);
+    this.inventorySummary.set(null);
     this.partsService.getPartById(part.id).subscribe({
       next: (detail) => {
         this.selectedPart.set(detail);
         this.detailLoading.set(false);
         this.partsService.getPartFiles(detail.id).subscribe({
           next: (files) => this.partFiles.set(files),
+        });
+        this.partsService.getPartInventorySummary(detail.id).subscribe({
+          next: (summary) => this.inventorySummary.set(summary),
         });
       },
       error: () => this.detailLoading.set(false),
@@ -366,6 +380,14 @@ export class PartsComponent {
       case 'Obsolete': return 'status-badge--obsolete';
       default: return '';
     }
+  }
+
+  protected onFileUploaded(): void {
+    const part = this.selectedPart();
+    if (!part) return;
+    this.partsService.getPartFiles(part.id).subscribe({
+      next: (files) => this.partFiles.set(files),
+    });
   }
 
   protected getTypeIcon(type: string): string {

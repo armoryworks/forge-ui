@@ -12,6 +12,7 @@ import { PartStatus } from '../models/part-status.type';
 import { PartType } from '../models/part-type.type';
 import { PartRevision } from '../models/part-revision.model';
 import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
+import { PartInventorySummary } from '../models/part-inventory-summary.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 
 @Injectable({ providedIn: 'root' })
@@ -69,6 +70,10 @@ export class PartsService {
 
   getPartFiles(partId: number): Observable<FileAttachment[]> {
     return this.http.get<FileAttachment[]>(`${environment.apiUrl}/parts/${partId}/files`);
+  }
+
+  getPartInventorySummary(partId: number): Observable<PartInventorySummary> {
+    return this.http.get<PartInventorySummary>(`${this.base}/${partId}/inventory-summary`);
   }
 
   getFileDownloadUrl(fileId: number): string {

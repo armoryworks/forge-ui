@@ -26,6 +26,7 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { TrainingDashboardComponent } from './components/training-dashboard/training-dashboard.component';
 
 @Component({
   selector: 'app-admin',
@@ -34,7 +35,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective,
+    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -47,7 +48,7 @@ export class AdminComponent {
   private readonly terminologyService = inject(TerminologyService);
   private readonly themeService = inject(ThemeService);
 
-  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings'>('users');
+  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'training'>('users');
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -132,7 +133,7 @@ export class AdminComponent {
     this.loadUsers();
   }
 
-  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings'): void {
+  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'training'): void {
     this.activeTab.set(tab);
     if (tab === 'users' && this.users().length === 0) this.loadUsers();
     if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();

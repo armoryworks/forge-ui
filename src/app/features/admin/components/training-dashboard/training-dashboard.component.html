@@ -1,0 +1,47 @@
+<div class="training-header">
+  <span class="training-header__count">{{ users().length }} users</span>
+  <span class="training-header__note">Tour completion is tracked per-device via browser storage</span>
+</div>
+
+<app-data-table
+  tableId="admin-training"
+  [columns]="columns"
+  [data]="users()"
+  [loading]="loading()"
+  emptyIcon="school"
+  emptyMessage="No users found">
+
+  <ng-template appColumnCell="name" let-row>
+    <span class="user-name">{{ row.name }}</span>
+  </ng-template>
+
+  <ng-template appColumnCell="role" let-row>
+    <span class="chip" [class.chip--primary]="row.role === 'Admin'">{{ row.role }}</span>
+  </ng-template>
+
+  <ng-template appColumnCell="toursCompleted" let-row>
+    <span class="completed-count">{{ row.toursCompleted }}</span>
+  </ng-template>
+
+  <ng-template appColumnCell="totalTours" let-row>
+    <span class="text-muted">{{ row.totalTours }}</span>
+  </ng-template>
+
+  <ng-template appColumnCell="lastTour" let-row>
+    @if (row.lastTour) {
+      <span class="last-tour">{{ row.lastTour }}</span>
+    } @else {
+      <span class="text-muted">--</span>
+    }
+  </ng-template>
+
+  <ng-template appColumnCell="completionPct" let-row>
+    <div class="completion-bar-wrapper">
+      <div class="completion-bar">
+        <div class="completion-bar__fill" [class]="getCompletionClass(row.completionPct)"
+             [style.width.%]="row.completionPct"></div>
+      </div>
+      <span class="completion-pct">{{ row.completionPct }}%</span>
+    </div>
+  </ng-template>
+</app-data-table>
