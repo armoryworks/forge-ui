@@ -41,6 +41,23 @@ export class ThemeService {
     localStorage.setItem('qbe-theme', next);
     this.applyTheme(next);
     this.applyBrandColors();
+    this._broadcastThemeChange?.(next);
+  }
+
+  /** Called by BroadcastService to sync theme from another tab without re-broadcasting. */
+  applyThemeFromBroadcast(theme: ThemeMode): void {
+    this._theme.set(theme);
+    localStorage.setItem('qbe-theme', theme);
+    this.applyTheme(theme);
+    this.applyBrandColors();
+  }
+
+  /** Set by BroadcastService to avoid circular dependency. */
+  private _broadcastThemeChange?: (theme: ThemeMode) => void;
+
+  /** @internal Used by BroadcastService to register the broadcast callback. */
+  registerBroadcastCallback(fn: (theme: ThemeMode) => void): void {
+    this._broadcastThemeChange = fn;
   }
 
   setBrandColors(primary?: string, accent?: string): void {

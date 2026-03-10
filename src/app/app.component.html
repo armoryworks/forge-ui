@@ -1,3 +1,4 @@
+<a class="skip-link" href="#main-content">Skip to main content</a>
 @if (showShell()) {
   <app-header />
   <app-connection-banner />
@@ -8,12 +9,14 @@
       }
       <app-sidebar />
     }
-    <main class="app-main">
+    <main class="app-main" id="main-content">
       <router-outlet />
     </main>
   </div>
 } @else {
-  <router-outlet />
+  <main id="main-content">
+    <router-outlet />
+  </main>
 }
 
 <app-loading-overlay />

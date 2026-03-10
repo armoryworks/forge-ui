@@ -20,6 +20,7 @@ import { ThemeService } from './shared/services/theme.service';
 import { HelpTourService } from './shared/services/help-tour.service';
 import { AccountingService } from './shared/services/accounting.service';
 import { KeyboardShortcutsService } from './shared/services/keyboard-shortcuts.service';
+import { BroadcastService } from './shared/services/broadcast.service';
 import { KANBAN_TOUR } from './shared/tours/kanban-tour';
 import { DASHBOARD_TOUR } from './shared/tours/dashboard-tour';
 import { PARTS_TOUR } from './shared/tours/parts-tour';
@@ -51,6 +52,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly helpTours = inject(HelpTourService);
   private readonly accountingService = inject(AccountingService);
   private readonly keyboardShortcuts = inject(KeyboardShortcutsService);
+  private readonly broadcast = inject(BroadcastService);
 
   protected readonly showShell = computed(() => this.authService.isAuthenticated());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
@@ -66,6 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.routeLoading.initialize();
+    this.broadcast.initialize();
     this.themeService.loadBrandSettings();
     this.registerTours();
     this.keyboardShortcuts.initialize();

@@ -1,6 +1,6 @@
 <header class="app-header">
   @if (layout.isMobile()) {
-    <button class="icon-btn hamburger-btn" title="Menu" (click)="layout.toggleSidebar()">
+    <button class="icon-btn hamburger-btn" title="Menu" aria-label="Toggle navigation menu" (click)="layout.toggleSidebar()">
       <span class="material-icons-outlined">{{ layout.mobileMenuOpen() ? 'close' : 'menu' }}</span>
     </button>
   }
@@ -41,19 +41,19 @@
   </div>
 
   <div class="app-header__actions">
-    <button class="icon-btn" title="Chat" (click)="chatPanel.toggle()">
+    <button class="icon-btn" title="Chat" aria-label="Open chat" (click)="chatPanel.toggle()">
       <span class="material-icons-outlined">chat_bubble_outline</span>
       @if (chatPanel.totalUnread() > 0) {
         <span class="badge">{{ chatPanel.totalUnread() }}</span>
       }
     </button>
-    <button class="icon-btn" title="Notifications" (click)="toggleNotifications()">
+    <button class="icon-btn" title="Notifications" aria-label="Toggle notifications" (click)="toggleNotifications()">
       <span class="material-icons-outlined">notifications_none</span>
       @if (unreadCount() > 0) {
         <span class="badge">{{ unreadCount() }}</span>
       }
     </button>
-    <button class="icon-btn" title="Toggle theme" (click)="toggleTheme()">
+    <button class="icon-btn" title="Toggle theme" aria-label="Toggle light and dark theme" (click)="toggleTheme()">
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
     </button>
     <div class="app-header__avatar">DH</div>

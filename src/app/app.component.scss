@@ -30,6 +30,30 @@
   z-index: $z-sidebar - 1;
 }
 
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+
+  &:focus {
+    position: fixed;
+    top: $sp-md;
+    left: $sp-md;
+    width: auto;
+    height: auto;
+    padding: $sp-md $sp-lg;
+    background: var(--surface);
+    color: var(--text);
+    border: $border-width solid var(--primary);
+    font-size: $font-size-base;
+    z-index: 9999;
+  }
+}
+
 @include mobile {
   .app-body app-sidebar {
     position: fixed;

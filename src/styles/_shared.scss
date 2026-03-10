@@ -336,6 +336,24 @@
   animation: spin 1s linear infinite;
 }
 
+// ─── Accessibility ───
+
+// Focus indicator for keyboard navigation
+*:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+// Respect user preference for reduced motion
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; // override component animations
+    animation-iteration-count: 1 !important; // override component animations
+    transition-duration: 0.01ms !important; // override component transitions
+    scroll-behavior: auto !important; // override smooth scroll
+  }
+}
+
 // ─── Utilities ───
 .text-muted {
   color: var(--text-muted);

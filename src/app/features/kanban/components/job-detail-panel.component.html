@@ -12,10 +12,10 @@
         <span class="panel__job-number">{{ j.jobNumber }}</span>
         <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
       </div>
-      <button class="panel__edit" (click)="editRequested.emit(job()!)" title="Edit Job">
+      <button class="panel__edit" (click)="editRequested.emit(job()!)" title="Edit Job" aria-label="Edit job">
         <span class="material-icons-outlined">edit</span>
       </button>
-      <button class="panel__close" (click)="close()" title="Close">
+      <button class="panel__close" (click)="close()" title="Close" aria-label="Close detail panel">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -109,7 +109,7 @@
 
         <div class="subtask-add">
           <app-input label="" placeholder="Add a subtask..." [formControl]="newSubtaskControl" (keydown.enter)="addSubtask()" />
-          <button class="subtask-add__btn" (click)="addSubtask()" [disabled]="!newSubtaskControl.value?.trim()">
+          <button class="subtask-add__btn" (click)="addSubtask()" [disabled]="!newSubtaskControl.value?.trim()" aria-label="Add subtask">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
@@ -135,7 +135,7 @@
                   <span class="link-item__title">{{ lk.linkedJobTitle }}</span>
                 </span>
                 <span class="chip chip--sm" [style.--chip-color]="lk.linkedJobStageColor">{{ lk.linkedJobStageName }}</span>
-                <button class="link-item__delete" (click)="deleteLink(lk)" title="Remove link">
+                <button class="link-item__delete" (click)="deleteLink(lk)" title="Remove link" aria-label="Remove link">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
@@ -158,7 +158,7 @@
             }
           </div>
           <app-select label="" [options]="linkTypeOptions" [formControl]="linkTypeControl" />
-          <button class="link-add__btn" (click)="addLink()" [disabled]="!selectedLinkTarget()">
+          <button class="link-add__btn" (click)="addLink()" [disabled]="!selectedLinkTarget()" aria-label="Add link">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
@@ -183,7 +183,7 @@
                   <span class="part-item__description">{{ jp.partDescription }}</span>
                 </div>
                 <span class="part-item__qty">x{{ jp.quantity }}</span>
-                <button class="part-item__delete" (click)="removePart(jp)" title="Remove part">
+                <button class="part-item__delete" (click)="removePart(jp)" title="Remove part" aria-label="Remove part">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
@@ -205,7 +205,7 @@
               </div>
             }
           </div>
-          <button class="part-add__btn" (click)="addPart()" [disabled]="!selectedPart()">
+          <button class="part-add__btn" (click)="addPart()" [disabled]="!selectedPart()" aria-label="Add part">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
@@ -234,10 +234,10 @@
                   <span class="file-item__name">{{ f.fileName }}</span>
                   <span class="file-item__meta">{{ formatFileSize(f.size) }} · {{ formatActivityDate(f.createdAt) }}</span>
                 </div>
-                <button class="icon-btn" title="Download" (click)="downloadFile(f)">
+                <button class="icon-btn" title="Download" aria-label="Download file" (click)="downloadFile(f)">
                   <span class="material-icons-outlined">download</span>
                 </button>
-                <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteFile(f)">
+                <button class="icon-btn icon-btn--danger" title="Delete" aria-label="Delete file" (click)="deleteFile(f)">
                   <span class="material-icons-outlined">delete</span>
                 </button>
               </div>
@@ -279,7 +279,7 @@
 
         <div class="comment-add">
           <app-input label="" placeholder="Add a comment..." [formControl]="commentControl" (keydown.enter)="postComment()" />
-          <button class="comment-add__btn" (click)="postComment()" [disabled]="!commentControl.value?.trim()">
+          <button class="comment-add__btn" (click)="postComment()" [disabled]="!commentControl.value?.trim()" aria-label="Post comment">
             <span class="material-icons-outlined">send</span>
           </button>
         </div>

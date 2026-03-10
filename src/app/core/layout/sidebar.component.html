@@ -1,5 +1,5 @@
 <aside class="sidebar" [class.sidebar--expanded]="!collapsed()">
-  <button class="nav-item nav-item--toggle" (click)="toggleCollapse()" [title]="collapsed() ? 'Expand' : 'Collapse'">
+  <button class="nav-item nav-item--toggle" (click)="toggleCollapse()" [title]="collapsed() ? 'Expand' : 'Collapse'" [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
     <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
     @if (!collapsed()) {
       <span class="nav-item__label">Collapse</span>

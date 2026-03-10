@@ -2,7 +2,7 @@
   <div class="dialog" [style.width]="width()" (click)="$event.stopPropagation()">
     <div class="dialog__header">
       <span class="dialog__title">{{ title() }}</span>
-      <button class="icon-btn" (click)="closed.emit()">
+      <button class="icon-btn" aria-label="Close dialog" (click)="closed.emit()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>

@@ -39,6 +39,7 @@
                     class="data-table__filter-btn"
                     [class.data-table__filter-btn--active]="hasFilter(col.field)"
                     (click)="openFilter(col.field, $event)"
+                    [attr.aria-label]="'Filter ' + col.header"
                     cdkOverlayOrigin
                     #filterOrigin="cdkOverlayOrigin">
                     <span class="material-icons-outlined">filter_list</span>
@@ -74,6 +75,7 @@
               </button>
               <button
                 class="data-table__gear-btn"
+                aria-label="Manage columns"
                 (click)="toggleColumnManager($event)"
                 cdkOverlayOrigin
                 #colManagerOrigin="cdkOverlayOrigin">

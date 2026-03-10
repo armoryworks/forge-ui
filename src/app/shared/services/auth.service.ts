@@ -154,11 +154,24 @@ export class AuthService {
     return this.http.delete<void>(`${environment.apiUrl}/auth/sso/unlink/${provider}`);
   }
 
+  logout(): void {
+    this.clearAuth();
+    this._broadcastLogout?.();
+  }
+
   clearAuth(): void {
     this._token.set(null);
     this._user.set(null);
     localStorage.removeItem('qbe-token');
     localStorage.removeItem('qbe-user');
+  }
+
+  /** Set by BroadcastService to avoid circular dependency. */
+  private _broadcastLogout?: () => void;
+
+  /** @internal Used by BroadcastService to register the broadcast callback. */
+  registerBroadcastCallback(fn: () => void): void {
+    this._broadcastLogout = fn;
   }
 
   private loadToken(): string | null {
