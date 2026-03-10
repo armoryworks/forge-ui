@@ -54,6 +54,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/ngx-extended-pdf-viewer/assets",
+                "output": "/assets/ngx-extended-pdf-viewer/"
               }
             ],
             "styles": [

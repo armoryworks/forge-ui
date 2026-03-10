@@ -1,0 +1,6 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+  border: $border-width solid var(--border);
+}
