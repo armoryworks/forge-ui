@@ -1,0 +1,86 @@
+<app-dialog title="New Invoice" width="800px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-select label="Customer" formControlName="customerId" [options]="customerOptions()" />
+      <app-input label="Sales Order ID" type="number" formControlName="salesOrderId" placeholder="Optional" />
+    </div>
+    <div class="dialog-row">
+      <app-datepicker label="Invoice Date" formControlName="invoiceDate" />
+      <app-datepicker label="Due Date" formControlName="dueDate" />
+    </div>
+    <div class="dialog-row">
+      <app-select label="Credit Terms" formControlName="creditTerms" [options]="creditTermsOptions" />
+      <app-input label="Tax Rate (%)" type="number" formControlName="taxRate" />
+      <app-input label="Shipment ID" type="number" formControlName="shipmentId" placeholder="Optional" />
+    </div>
+    <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+  </div>
+
+  <!-- Line Items -->
+  <div class="lines-section">
+    <div class="lines-header">
+      <span class="lines-title">Line Items</span>
+    </div>
+
+    @if (lines().length > 0) {
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Part #</th>
+            <th>Description</th>
+            <th class="lines-table__right">Qty</th>
+            <th class="lines-table__right">Unit Price</th>
+            <th class="lines-table__right">Total</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of lines(); track $index) {
+            <tr>
+              <td class="lines-table__mono">{{ line.partNumber }}</td>
+              <td>{{ line.description }}</td>
+              <td class="lines-table__right">{{ line.quantity }}</td>
+              <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+              <td class="lines-table__right">{{ line.quantity * line.unitPrice | currency }}</td>
+              <td>
+                <button class="icon-btn icon-btn--danger" title="Remove" (click)="removeLine($index)">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="lines-table__right lines-table__bold">Total</td>
+            <td class="lines-table__right lines-table__bold">{{ lineTotal() | currency }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    }
+
+    <!-- Add Line Form -->
+    <div class="add-line" [formGroup]="lineForm">
+      <app-input label="Part ID" type="number" formControlName="partId" />
+      <app-input label="Part #" formControlName="partNumber" />
+      <app-input label="Description" formControlName="description" />
+      <app-input label="Qty" type="number" formControlName="quantity" />
+      <app-input label="Price" type="number" formControlName="unitPrice" />
+      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid">
+        <span class="material-icons-outlined">add</span>
+        Add
+      </button>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || lines().length === 0 || saving()"
+      (click)="save()">
+      Create Invoice
+    </button>
+  </div>
+</app-dialog>

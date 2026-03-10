@@ -19,6 +19,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 
 @Component({
   selector: 'app-sales-orders',
@@ -27,6 +28,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    SoDialogComponent,
   ],
   templateUrl: './sales-orders.component.html',
   styleUrl: './sales-orders.component.scss',
@@ -38,6 +40,7 @@ export class SalesOrdersComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
+  protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly salesOrders = signal<SalesOrderListItem[]>([]);
   protected readonly selectedSo = signal<SalesOrderDetail | null>(null);
@@ -117,6 +120,14 @@ export class SalesOrdersComponent {
   }
 
   protected closeDetail(): void { this.selectedSo.set(null); }
+
+  // --- Create Dialog ---
+  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
+  protected onCreateSaved(): void {
+    this.closeCreateDialog();
+    this.loadSalesOrders();
+  }
 
   // --- Status Actions ---
   protected confirmSo(): void {

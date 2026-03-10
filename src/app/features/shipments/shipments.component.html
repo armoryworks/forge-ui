@@ -1,5 +1,5 @@
 <app-page-header title="Shipments">
-  <button class="action-btn action-btn--primary" (click)="loadShipments()">
+  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     New Shipment
   </button>
@@ -182,3 +182,7 @@
     </div>
   }
 </div>
+
+@if (showCreateDialog()) {
+  <app-shipment-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}

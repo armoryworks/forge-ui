@@ -1,0 +1,69 @@
+<app-dialog title="New Shipment" width="800px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input label="Sales Order ID" type="number" formControlName="salesOrderId" />
+      <app-input label="Carrier" formControlName="carrier" placeholder="Optional" />
+    </div>
+    <div class="dialog-row">
+      <app-input label="Tracking #" formControlName="trackingNumber" placeholder="Optional" />
+      <app-input label="Weight" type="number" formControlName="weight" placeholder="Optional" />
+      <app-input label="Shipping Cost" type="number" formControlName="shippingCost" placeholder="Optional" />
+    </div>
+    <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+  </div>
+
+  <!-- Line Items -->
+  <div class="lines-section">
+    <div class="lines-header">
+      <span class="lines-title">Shipment Lines</span>
+    </div>
+
+    @if (lines().length > 0) {
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>SO Line ID</th>
+            <th>Description</th>
+            <th class="lines-table__right">Qty</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of lines(); track $index) {
+            <tr>
+              <td class="lines-table__mono">{{ line.salesOrderLineId }}</td>
+              <td>{{ line.description }}</td>
+              <td class="lines-table__right">{{ line.quantity }}</td>
+              <td>
+                <button class="icon-btn icon-btn--danger" title="Remove" (click)="removeLine($index)">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+    <!-- Add Line Form -->
+    <div class="add-line" [formGroup]="lineForm">
+      <app-input label="SO Line ID" type="number" formControlName="salesOrderLineId" />
+      <app-input label="Description" formControlName="description" />
+      <app-input label="Qty" type="number" formControlName="quantity" />
+      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid">
+        <span class="material-icons-outlined">add</span>
+        Add
+      </button>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || lines().length === 0 || saving()"
+      (click)="save()">
+      Create Shipment
+    </button>
+  </div>
+</app-dialog>

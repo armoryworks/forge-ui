@@ -1,5 +1,5 @@
 <app-page-header title="Sales Orders">
-  <button class="action-btn action-btn--primary" disabled>
+  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     New Order
   </button>
@@ -200,3 +200,7 @@
     </div>
   }
 </div>
+
+@if (showCreateDialog()) {
+  <app-so-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}

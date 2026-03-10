@@ -1,5 +1,5 @@
 <app-page-header title="Quotes">
-  <button class="action-btn action-btn--primary">
+  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     New Quote
   </button>
@@ -194,3 +194,7 @@
     </div>
   }
 </div>
+
+@if (showCreateDialog()) {
+  <app-quote-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}

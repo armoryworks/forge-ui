@@ -15,6 +15,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { QuoteDialogComponent } from './components/quote-dialog/quote-dialog.component';
 
 @Component({
   selector: 'app-quotes',
@@ -23,6 +24,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    QuoteDialogComponent,
   ],
   templateUrl: './quotes.component.html',
   styleUrl: './quotes.component.scss',
@@ -33,6 +35,7 @@ export class QuotesComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
+  protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly quotes = signal<QuoteListItem[]>([]);
   protected readonly selectedQuote = signal<QuoteDetail | null>(null);
@@ -95,6 +98,14 @@ export class QuotesComponent {
   }
 
   protected closeDetail(): void { this.selectedQuote.set(null); }
+
+  // --- Create Dialog ---
+  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
+  protected onCreateSaved(): void {
+    this.closeCreateDialog();
+    this.loadQuotes();
+  }
 
   // --- Status Actions ---
   protected sendQuote(): void {

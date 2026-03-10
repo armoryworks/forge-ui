@@ -17,6 +17,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { MatDialog } from '@angular/material/dialog';
+import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-dialog.component';
 
 @Component({
   selector: 'app-shipments',
@@ -25,6 +26,7 @@ import { MatDialog } from '@angular/material/dialog';
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    ShipmentDialogComponent,
   ],
   templateUrl: './shipments.component.html',
   styleUrl: './shipments.component.scss',
@@ -35,6 +37,7 @@ export class ShipmentsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
+  protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly shipments = signal<ShipmentListItem[]>([]);
   protected readonly selectedShipment = signal<ShipmentDetail | null>(null);
@@ -100,6 +103,14 @@ export class ShipmentsComponent {
   }
 
   protected closeDetail(): void { this.selectedShipment.set(null); }
+
+  // --- Create Dialog ---
+  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
+  protected onCreateSaved(): void {
+    this.closeCreateDialog();
+    this.loadShipments();
+  }
 
   // --- Status Actions ---
   protected markShipped(): void {

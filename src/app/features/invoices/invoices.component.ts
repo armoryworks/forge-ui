@@ -15,6 +15,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dialog.component';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
@@ -24,6 +25,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    InvoiceDialogComponent,
   ],
   templateUrl: './invoices.component.html',
   styleUrl: './invoices.component.scss',
@@ -34,6 +36,7 @@ export class InvoicesComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
+  protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly invoices = signal<InvoiceListItem[]>([]);
   protected readonly selectedInvoice = signal<InvoiceDetail | null>(null);
@@ -98,6 +101,14 @@ export class InvoicesComponent {
   }
 
   protected closeDetail(): void { this.selectedInvoice.set(null); }
+
+  // --- Create Dialog ---
+  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
+  protected onCreateSaved(): void {
+    this.closeCreateDialog();
+    this.loadInvoices();
+  }
 
   // --- Status Actions ---
   protected sendInvoice(): void {

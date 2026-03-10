@@ -1,0 +1,74 @@
+<app-dialog title="New Payment" width="800px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-select label="Customer" formControlName="customerId" [options]="customerOptions()" />
+      <app-select label="Payment Method" formControlName="method" [options]="methodOptions" />
+    </div>
+    <div class="dialog-row">
+      <app-input label="Amount" type="number" formControlName="amount" placeholder="0.00" />
+      <app-datepicker label="Payment Date" formControlName="paymentDate" />
+    </div>
+    <app-input label="Reference #" formControlName="referenceNumber" placeholder="Optional" />
+    <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+  </div>
+
+  <!-- Invoice Applications -->
+  <div class="lines-section">
+    <div class="lines-header">
+      <span class="lines-title">Invoice Applications</span>
+    </div>
+
+    @if (applications().length > 0) {
+      <table class="lines-table">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th class="lines-table__right">Amount</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (app of applications(); track $index) {
+            <tr>
+              <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
+              <td class="lines-table__right">{{ app.amount | currency }}</td>
+              <td>
+                <button class="icon-btn icon-btn--danger" title="Remove" (click)="removeApplication($index)">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="lines-table__right lines-table__bold">Total Applied</td>
+            <td class="lines-table__right lines-table__bold">{{ totalApplied() | currency }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    }
+
+    <!-- Add Application Form -->
+    <div class="add-line" [formGroup]="appForm">
+      <app-input label="Invoice ID" type="number" formControlName="invoiceId" />
+      <app-input label="Invoice #" formControlName="invoiceNumber" />
+      <app-input label="Amount" type="number" formControlName="amount" placeholder="0.00" />
+      <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="appForm.invalid">
+        <span class="material-icons-outlined">add</span>
+        Add
+      </button>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      Create Payment
+    </button>
+  </div>
+</app-dialog>

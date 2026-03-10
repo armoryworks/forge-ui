@@ -17,6 +17,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 
 @Component({
   selector: 'app-payments',
@@ -25,6 +26,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    PaymentDialogComponent,
   ],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.scss',
@@ -36,6 +38,7 @@ export class PaymentsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
 
+  protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly payments = signal<PaymentListItem[]>([]);
   protected readonly selectedPayment = signal<PaymentDetail | null>(null);
@@ -116,6 +119,14 @@ export class PaymentsComponent {
   }
 
   protected closeDetail(): void { this.selectedPayment.set(null); }
+
+  // --- Create Dialog ---
+  protected openCreateDialog(): void { this.showCreateDialog.set(true); }
+  protected closeCreateDialog(): void { this.showCreateDialog.set(false); }
+  protected onCreateSaved(): void {
+    this.closeCreateDialog();
+    this.loadPayments();
+  }
 
   protected getMethodLabel(method: string): string {
     const map: Record<string, string> = {

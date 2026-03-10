@@ -1,4 +1,8 @@
 <app-page-header title="Invoices">
+  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+    <span class="material-icons-outlined">add</span>
+    New Invoice
+  </button>
 </app-page-header>
 
 <div class="inv-layout">
@@ -203,3 +207,7 @@
     </div>
   }
 </div>
+
+@if (showCreateDialog()) {
+  <app-invoice-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}

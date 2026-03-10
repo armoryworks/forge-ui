@@ -1,4 +1,8 @@
 <app-page-header title="Payments">
+  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+    <span class="material-icons-outlined">add</span>
+    New Payment
+  </button>
 </app-page-header>
 
 <div class="pmt-layout">
@@ -148,3 +152,7 @@
     </div>
   }
 </div>
+
+@if (showCreateDialog()) {
+  <app-payment-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}
