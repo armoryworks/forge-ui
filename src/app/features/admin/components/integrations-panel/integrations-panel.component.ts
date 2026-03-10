@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
+
+import { QuickBooksService } from '../../services/quickbooks.service';
 
 export interface IntegrationConfig {
   id: string;
@@ -17,16 +19,21 @@ export interface IntegrationConfig {
   styleUrl: './integrations-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class IntegrationsPanelComponent {
-  readonly integrations = signal<IntegrationConfig[]>([
-    {
-      id: 'quickbooks',
-      name: 'QuickBooks Online',
-      description: 'Accounting, invoicing, and payment sync',
-      icon: 'account_balance',
-      status: 'not_configured',
-      category: 'accounting',
-    },
+export class IntegrationsPanelComponent implements OnInit {
+  private readonly qbService = inject(QuickBooksService);
+
+  readonly qbStatus = this.qbService.status;
+  readonly qbLoading = this.qbService.loading;
+
+  readonly qbStatusLabel = computed(() => {
+    const status = this.qbStatus();
+    if (!status) return 'not_configured' as const;
+    return status.isConnected ? 'connected' as const : 'not_configured' as const;
+  });
+
+  readonly qbCompanyName = computed(() => this.qbStatus()?.companyName ?? null);
+
+  readonly staticIntegrations: IntegrationConfig[] = [
     {
       id: 'minio',
       name: 'MinIO Storage',
@@ -59,5 +66,21 @@ export class IntegrationsPanelComponent {
       status: 'not_configured',
       category: 'ai',
     },
-  ]);
+  ];
+
+  ngOnInit(): void {
+    this.qbService.loadStatus();
+  }
+
+  connectQuickBooks(): void {
+    this.qbService.connect();
+  }
+
+  disconnectQuickBooks(): void {
+    this.qbService.disconnect();
+  }
+
+  testQuickBooks(): void {
+    this.qbService.testConnection();
+  }
 }

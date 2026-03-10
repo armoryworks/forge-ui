@@ -1,5 +1,43 @@
 <div class="integrations-grid">
-  @for (integration of integrations(); track integration.id) {
+  <!-- QuickBooks card (dynamic) -->
+  <div class="integration-card">
+    <div class="integration-card__header">
+      <span class="material-icons-outlined integration-card__icon">account_balance</span>
+      <div class="integration-card__info">
+        <h3 class="integration-card__name">QuickBooks Online</h3>
+        <p class="integration-card__desc">Accounting, invoicing, and payment sync</p>
+        @if (qbCompanyName()) {
+          <p class="integration-card__company">{{ qbCompanyName() }}</p>
+        }
+      </div>
+    </div>
+    <div class="integration-card__footer">
+      <span class="integration-card__status integration-card__status--{{ qbStatusLabel() }}">
+        @if (qbStatusLabel() === 'connected') {
+          <span class="material-icons-outlined">check_circle</span> Connected
+        } @else {
+          <span class="material-icons-outlined">settings</span> Not Configured
+        }
+      </span>
+      <div class="integration-card__actions">
+        @if (qbStatusLabel() === 'connected') {
+          <button class="action-btn action-btn--sm" (click)="testQuickBooks()" [disabled]="qbLoading()">
+            Test
+          </button>
+          <button class="action-btn action-btn--sm" (click)="disconnectQuickBooks()" [disabled]="qbLoading()">
+            Disconnect
+          </button>
+        } @else {
+          <button class="action-btn action-btn--sm action-btn--primary" (click)="connectQuickBooks()" [disabled]="qbLoading()">
+            Connect
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Static integration cards -->
+  @for (integration of staticIntegrations; track integration.id) {
     <div class="integration-card">
       <div class="integration-card__header">
         <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>

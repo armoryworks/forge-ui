@@ -34,6 +34,18 @@
     margin: $sp-xs 0 0;
   }
 
+  &__company {
+    font-size: $font-size-xs;
+    color: var(--success);
+    font-weight: 500;
+    margin: $sp-xs 0 0;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-sm;
+  }
+
   &__footer {
     display: flex;
     justify-content: space-between;
