@@ -1,0 +1,27 @@
+<div class="integrations-grid">
+  @for (integration of integrations(); track integration.id) {
+    <div class="integration-card">
+      <div class="integration-card__header">
+        <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
+        <div class="integration-card__info">
+          <h3 class="integration-card__name">{{ integration.name }}</h3>
+          <p class="integration-card__desc">{{ integration.description }}</p>
+        </div>
+      </div>
+      <div class="integration-card__footer">
+        <span class="integration-card__status integration-card__status--{{ integration.status }}">
+          @if (integration.status === 'connected') {
+            <span class="material-icons-outlined">check_circle</span> Connected
+          } @else if (integration.status === 'disconnected') {
+            <span class="material-icons-outlined">error</span> Disconnected
+          } @else {
+            <span class="material-icons-outlined">settings</span> Not Configured
+          }
+        </span>
+        <button class="action-btn action-btn--sm" disabled>
+          Configure
+        </button>
+      </div>
+    </div>
+  }
+</div>
