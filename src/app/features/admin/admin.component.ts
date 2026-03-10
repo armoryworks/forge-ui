@@ -27,6 +27,7 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TrainingDashboardComponent } from './components/training-dashboard/training-dashboard.component';
+import { IntegrationsPanelComponent } from './components/integrations-panel/integrations-panel.component';
 
 @Component({
   selector: 'app-admin',
@@ -35,7 +36,7 @@ import { TrainingDashboardComponent } from './components/training-dashboard/trai
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent,
+    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -48,7 +49,7 @@ export class AdminComponent {
   private readonly terminologyService = inject(TerminologyService);
   private readonly themeService = inject(ThemeService);
 
-  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'training'>('users');
+  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'integrations' | 'training'>('users');
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -133,7 +134,7 @@ export class AdminComponent {
     this.loadUsers();
   }
 
-  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'training'): void {
+  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'integrations' | 'training'): void {
     this.activeTab.set(tab);
     if (tab === 'users' && this.users().length === 0) this.loadUsers();
     if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();

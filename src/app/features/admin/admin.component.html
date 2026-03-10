@@ -23,6 +23,10 @@
       <span class="material-icons-outlined">settings</span>
       Settings
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'integrations'" (click)="switchTab('integrations')">
+      <span class="material-icons-outlined">hub</span>
+      Integrations
+    </button>
     <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
       <span class="material-icons-outlined">school</span>
       Training
@@ -263,6 +267,13 @@
             </div>
           }
         </div>
+      </div>
+    }
+
+    <!-- Integrations Tab -->
+    @if (activeTab() === 'integrations') {
+      <div class="tab-panel">
+        <app-integrations-panel />
       </div>
     }
 
