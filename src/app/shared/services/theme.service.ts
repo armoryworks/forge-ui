@@ -8,6 +8,7 @@ interface BrandSettings {
   primaryColor: string | null;
   accentColor: string | null;
   appName: string | null;
+  hasLogo: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -16,6 +17,7 @@ export class ThemeService {
   private readonly _theme = signal<ThemeMode>('light');
   readonly theme = this._theme.asReadonly();
   readonly appName = signal('QB Engineer');
+  readonly logoUrl = signal<string | null>(null);
 
   private brandColors: { primary?: string; accent?: string } = {};
 
@@ -59,6 +61,7 @@ export class ThemeService {
           this.appName.set(brand.appName);
           document.title = brand.appName;
         }
+        this.logoUrl.set(brand.hasLogo ? `${environment.apiUrl}/admin/logo?t=${Date.now()}` : null);
       },
     });
   }

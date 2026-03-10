@@ -13,4 +13,17 @@ export type ReportType =
   | 'my-time-log'
   | 'ar-aging'
   | 'revenue'
-  | 'simple-pnl';
+  | 'simple-pnl'
+  | 'my-expense-history'
+  | 'quote-to-close'
+  | 'shipping-summary'
+  | 'time-in-stage'
+  | 'employee-productivity'
+  | 'inventory-levels'
+  | 'maintenance'
+  | 'quality-scrap'
+  | 'cycle-review'
+  | 'job-margin'
+  | 'my-cycle-summary'
+  | 'lead-sales'
+  | 'rd';

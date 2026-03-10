@@ -1,0 +1,65 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.approval-queue__summary {
+  @include uppercase-label($font-size-xs, 0.5px, 700);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.approval-queue__submitter {
+  font-weight: 600;
+}
+
+.approval-queue__amount {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.approval-queue__actions {
+  display: flex;
+  gap: $sp-xs;
+  justify-content: flex-end;
+}
+
+// ─── Review Dialog ───
+.review-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.review-detail__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: $sp-sm 0;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.review-detail__label {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.review-detail__value {
+  font-size: $font-size-base;
+  color: var(--text);
+}
+
+.review-detail__value--amount {
+  font-weight: 700;
+  font-size: $font-size-md;
+}
+
+.icon-btn--success:hover {
+  color: var(--success);
+}

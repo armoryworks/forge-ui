@@ -1,1 +1,1 @@
-export type BinMovementReason = 'Receive' | 'Pick' | 'Restock' | 'QcRelease' | 'Ship' | 'Move' | 'Adjustment' | 'Return';
+export type BinMovementReason = 'Receive' | 'Pick' | 'Restock' | 'QcRelease' | 'Ship' | 'Move' | 'Adjustment' | 'Return' | 'Transfer' | 'CycleCount';

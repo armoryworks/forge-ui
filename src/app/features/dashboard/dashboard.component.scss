@@ -84,6 +84,21 @@
   grid-column: span 2;
 }
 
+// ─── Mobile ───
+@include mobile {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kpi-stack {
+    flex-direction: column;
+  }
+
+  .span-2 {
+    grid-column: span 1;
+  }
+}
+
 // ─── Error State ───
 .page-error {
   display: flex;

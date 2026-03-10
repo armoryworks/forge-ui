@@ -6,6 +6,7 @@ import { ExpenseItem } from '../models/expense-item.model';
 import { CreateExpenseRequest } from '../models/create-expense-request.model';
 import { UpdateExpenseStatusRequest } from '../models/update-expense-status-request.model';
 import { ExpenseStatus } from '../models/expense-status.type';
+import { ExpenseSettings } from '../models/expense-settings.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
@@ -30,5 +31,13 @@ export class ExpensesService {
 
   deleteExpense(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getSettings(): Observable<ExpenseSettings> {
+    return this.http.get<ExpenseSettings>(`${this.base}/settings`);
+  }
+
+  updateSettings(settings: ExpenseSettings): Observable<void> {
+    return this.http.put<void>(`${this.base}/settings`, settings);
   }
 }

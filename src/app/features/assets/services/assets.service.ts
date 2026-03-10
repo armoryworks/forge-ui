@@ -7,6 +7,8 @@ import { CreateAssetRequest } from '../models/create-asset-request.model';
 import { UpdateAssetRequest } from '../models/update-asset-request.model';
 import { AssetType } from '../models/asset-type.type';
 import { AssetStatus } from '../models/asset-status.type';
+import { DowntimeLog } from '../models/downtime-log.model';
+import { CreateDowntimeRequest } from '../models/create-downtime-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -31,5 +33,24 @@ export class AssetsService {
 
   deleteAsset(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  // Machine hours
+  updateMachineHours(id: number, currentHours: number): Observable<AssetItem> {
+    return this.http.patch<AssetItem>(`${this.base}/${id}/hours`, { currentHours });
+  }
+
+  // Downtime logging
+  getDowntimeLogs(assetId?: number): Observable<DowntimeLog[]> {
+    const url = assetId ? `${this.base}/${assetId}/downtime` : `${this.base}/downtime`;
+    return this.http.get<DowntimeLog[]>(url);
+  }
+
+  createDowntimeLog(assetId: number, request: CreateDowntimeRequest): Observable<DowntimeLog> {
+    return this.http.post<DowntimeLog>(`${this.base}/${assetId}/downtime`, request);
+  }
+
+  createMaintenanceJob(scheduleId: number): Observable<{ jobId: number }> {
+    return this.http.post<{ jobId: number }>(`${this.base}/maintenance/${scheduleId}/create-job`, {});
   }
 }

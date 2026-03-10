@@ -2,7 +2,12 @@
   <app-header />
   <app-connection-banner />
   <div class="app-body" [attr.inert]="isGlobalLoading() || null">
-    <app-sidebar />
+    @if (layout.sidebarVisible()) {
+      @if (layout.isMobile()) {
+        <div class="mobile-sidebar-backdrop" (click)="layout.closeMobileMenu()"></div>
+      }
+      <app-sidebar />
+    }
     <main class="app-main">
       <router-outlet />
     </main>

@@ -7,6 +7,9 @@
   <app-page-header title="Dashboard">
     <span class="page-header__ctx">Production · March 2026</span>
     <div class="page-header__actions">
+      <button class="btn" (click)="ambientMode.set(true)" title="Ambient display mode">
+        <span class="material-icons-outlined btn__icon">nightlight</span> Ambient
+      </button>
       <button class="btn" (click)="exportDashboard()">
         <span class="material-icons-outlined btn__icon">download</span> Export
       </button>
@@ -71,6 +74,14 @@
       <app-dashboard-widget title="End of Day" icon="nightlight" widgetKey="eod-prompt">
         <app-eod-prompt-widget />
       </app-dashboard-widget>
+
+      <app-dashboard-widget title="Margin (30d)" icon="trending_up" widgetKey="margin-summary">
+        <app-margin-summary-widget />
+      </app-dashboard-widget>
     </div>
   </div>
+
+  @if (ambientMode()) {
+    <app-ambient-mode (exit)="ambientMode.set(false)" />
+  }
 }

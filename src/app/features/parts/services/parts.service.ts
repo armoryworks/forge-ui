@@ -10,6 +10,8 @@ import { CreateBOMEntryRequest } from '../models/create-bom-entry-request.model'
 import { UpdateBOMEntryRequest } from '../models/update-bom-entry-request.model';
 import { PartStatus } from '../models/part-status.type';
 import { PartType } from '../models/part-type.type';
+import { PartRevision } from '../models/part-revision.model';
+import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class PartsService {
@@ -50,5 +52,17 @@ export class PartsService {
 
   deletePart(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getRevisions(partId: number): Observable<PartRevision[]> {
+    return this.http.get<PartRevision[]>(`${this.base}/${partId}/revisions`);
+  }
+
+  createRevision(partId: number, request: CreatePartRevisionRequest): Observable<PartRevision> {
+    return this.http.post<PartRevision>(`${this.base}/${partId}/revisions`, request);
+  }
+
+  getFilesByRevision(partId: number, revisionId: number): Observable<unknown[]> {
+    return this.http.get<unknown[]>(`${environment.apiUrl}/parts/${partId}/revisions/${revisionId}/files`);
   }
 }

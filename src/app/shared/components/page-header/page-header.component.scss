@@ -1,0 +1,14 @@
+@use 'styles/variables' as *;
+
+.page-header__help {
+  color: var(--text-muted);
+  margin-left: $sp-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &:hover {
+    color: var(--primary);
+  }
+}

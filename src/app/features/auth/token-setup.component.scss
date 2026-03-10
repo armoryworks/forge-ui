@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+.setup-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+  padding: $sp-xl;
+}
+
+.setup-card {
+  max-width: 420px;
+  width: 100%;
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  margin-top: $sp-lg;
+}
+
+.setup-error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--error-light);
+  color: var(--error);
+  margin-bottom: $sp-lg;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+  }
+}

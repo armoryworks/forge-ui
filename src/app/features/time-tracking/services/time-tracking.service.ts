@@ -9,6 +9,7 @@ import { StopTimerRequest } from '../models/stop-timer-request.model';
 import { UpdateTimeEntryRequest } from '../models/update-time-entry-request.model';
 import { ClockEvent } from '../models/clock-event.model';
 import { CreateClockEventRequest } from '../models/create-clock-event-request.model';
+import { PayPeriod } from '../models/pay-period.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimeTrackingService {
@@ -54,5 +55,13 @@ export class TimeTrackingService {
 
   deleteTimeEntry(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/entries/${id}`);
+  }
+
+  getCurrentPayPeriod(): Observable<PayPeriod> {
+    return this.http.get<PayPeriod>(`${this.base}/pay-period`);
+  }
+
+  updatePayPeriodSettings(type: string, anchorDate?: string): Observable<void> {
+    return this.http.put<void>(`${this.base}/pay-period/settings`, { type, anchorDate });
   }
 }

@@ -1,9 +1,26 @@
 <app-page-header title="Invoices">
+  <button class="action-btn" (click)="openUninvoicedPanel()">
+    <span class="material-icons-outlined">pending_actions</span>
+    Uninvoiced Jobs
+    @if (uninvoicedCount() > 0) {
+      <span class="nudge-badge">{{ uninvoicedCount() }}</span>
+    }
+  </button>
   <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     New Invoice
   </button>
 </app-page-header>
+
+@if (uninvoicedCount() > 0) {
+  <div class="nudge-banner" (click)="openUninvoicedPanel()">
+    <span class="material-icons-outlined nudge-banner__icon">warning_amber</span>
+    <span class="nudge-banner__text">
+      {{ uninvoicedCount() }} completed {{ uninvoicedCount() === 1 ? 'job has' : 'jobs have' }} not been invoiced.
+    </span>
+    <span class="nudge-banner__action">Review</span>
+  </div>
+}
 
 <div class="inv-layout">
   <!-- Left: Invoice List -->
@@ -210,4 +227,11 @@
 
 @if (showCreateDialog()) {
   <app-invoice-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}
+
+@if (showUninvoicedPanel()) {
+  <app-uninvoiced-jobs-panel
+    [jobs]="uninvoicedJobs()"
+    (closed)="closeUninvoicedPanel()"
+    (createInvoice)="createInvoiceFromJob($event)" />
 }

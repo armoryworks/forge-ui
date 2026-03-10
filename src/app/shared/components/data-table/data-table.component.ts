@@ -21,6 +21,8 @@ import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
 
+import { unparse } from 'papaparse';
+
 import { ColumnDef } from '../../models/column-def.model';
 import { SortState } from '../../models/sort-state.model';
 import { TablePreferences } from '../../models/table-preferences.model';
@@ -354,6 +356,28 @@ export class DataTableComponent implements OnInit {
 
   isRowExpanded(row: unknown): boolean {
     return this.expandedRows().has(this.getTrackValue(row));
+  }
+
+  // ─── CSV Export ───
+  exportCsv(): void {
+    const cols = this.visibleColumns();
+    const rows = this.filteredData().map(row => {
+      const rec = row as Record<string, unknown>;
+      const mapped: Record<string, unknown> = {};
+      for (const col of cols) {
+        mapped[col.header] = rec[col.field] ?? '';
+      }
+      return mapped;
+    });
+
+    const csv = unparse(rows);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${this.tableId()}-export.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   }
 
   // ─── Filter ───

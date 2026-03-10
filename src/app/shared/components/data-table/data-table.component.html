@@ -68,6 +68,12 @@
             <th class="data-table__th data-table__th--gear">
               <button
                 class="data-table__gear-btn"
+                aria-label="Export CSV"
+                (click)="exportCsv()">
+                <span class="material-icons-outlined">download</span>
+              </button>
+              <button
+                class="data-table__gear-btn"
                 (click)="toggleColumnManager($event)"
                 cdkOverlayOrigin
                 #colManagerOrigin="cdkOverlayOrigin">

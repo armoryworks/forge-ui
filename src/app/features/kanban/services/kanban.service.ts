@@ -16,6 +16,7 @@ import { FileAttachment } from '../../../shared/models/file.model';
 import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { JobPart } from '../models/job-part.model';
 import { PartSearchResult } from '../models/part-search-result.model';
+import { CustomFieldValues } from '../models/custom-field-values.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -143,6 +144,17 @@ export class KanbanService {
     );
   }
 
+  // Custom field values
+  getCustomFieldValues(jobId: number): Observable<CustomFieldValues> {
+    return this.http.get<CustomFieldValues>(`${environment.apiUrl}/jobs/${jobId}/custom-fields`);
+  }
+
+  updateCustomFieldValues(jobId: number, values: CustomFieldValues): Observable<CustomFieldValues> {
+    return this.http.put<CustomFieldValues>(
+      `${environment.apiUrl}/jobs/${jobId}/custom-fields`,
+      { values });
+  }
+
   searchJobs(search: string): Observable<KanbanJob[]> {
     return this.http.get<KanbanJob[]>(`${environment.apiUrl}/jobs`, {
       params: { search, isArchived: 'false' },
@@ -163,6 +175,14 @@ export class KanbanService {
 
   bulkArchive(jobIds: number[]): Observable<BulkResult> {
     return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/archive`, { jobIds });
+  }
+
+  handoffToProduction(jobId: number): Observable<{ jobId: number }> {
+    return this.http.post<{ jobId: number }>(`${environment.apiUrl}/jobs/${jobId}/handoff-to-production`, {});
+  }
+
+  getInternalProjectTypes(): Observable<{ id: number; code: string; label: string }[]> {
+    return this.http.get<{ id: number; code: string; label: string }[]>(`${environment.apiUrl}/jobs/internal-project-types`);
   }
 
   private buildBoard(trackType: TrackType, jobs: KanbanJob[]): BoardColumn[] {

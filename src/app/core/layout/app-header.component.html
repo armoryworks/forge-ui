@@ -1,13 +1,22 @@
 <header class="app-header">
-  <div class="app-header__logo">QB<span>:</span>Eng</div>
-  <div class="header-sep"></div>
-  <nav class="breadcrumb">
+  @if (layout.isMobile()) {
+    <button class="icon-btn hamburger-btn" title="Menu" (click)="layout.toggleSidebar()">
+      <span class="material-icons-outlined">{{ layout.mobileMenuOpen() ? 'close' : 'menu' }}</span>
+    </button>
+  }
+  @if (logoUrl()) {
+    <img class="app-header__brand-logo" [src]="logoUrl()" alt="Logo" />
+  } @else {
+    <div class="app-header__logo">QB<span>:</span>Eng</div>
+  }
+  <div class="header-sep hide-mobile"></div>
+  <nav class="breadcrumb hide-mobile">
     <span>Home</span>
     <span class="material-icons-outlined" style="font-size: 14px">chevron_right</span>
     <span class="breadcrumb__current">Dashboard</span>
   </nav>
 
-  <div class="app-header__search" [class.app-header__search--focused]="searchFocused()">
+  <div class="app-header__search hide-mobile" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" type="text" placeholder="Search jobs, parts, people..."
            [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" />
@@ -32,9 +41,11 @@
   </div>
 
   <div class="app-header__actions">
-    <button class="icon-btn" title="Chat">
+    <button class="icon-btn" title="Chat" (click)="chatPanel.toggle()">
       <span class="material-icons-outlined">chat_bubble_outline</span>
-      <span class="badge">2</span>
+      @if (chatPanel.totalUnread() > 0) {
+        <span class="badge">{{ chatPanel.totalUnread() }}</span>
+      }
     </button>
     <button class="icon-btn" title="Notifications" (click)="toggleNotifications()">
       <span class="material-icons-outlined">notifications_none</span>
@@ -53,3 +64,5 @@
   <div class="notification-backdrop" (click)="toggleNotifications()"></div>
   <app-notification-panel />
 }
+
+<app-chat #chatPanel />

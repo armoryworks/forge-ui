@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { PlaceholderComponent } from './shared/components/placeholder/placeholder.component';
 import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
+import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
 import { roleGuard } from './shared/guards/role.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
@@ -9,6 +10,7 @@ import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.gu
 export const routes: Routes = [
   { path: 'login', canActivate: [setupCompleteGuard], component: LoginComponent },
   { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
+  { path: 'setup/:token', component: TokenSetupComponent },
   {
     path: '',
     canActivate: [authGuard],
@@ -36,16 +38,19 @@ export const routes: Routes = [
       },
       {
         path: 'parts',
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'PM')],
         loadChildren: () =>
           import('./features/parts/parts.routes').then((m) => m.PARTS_ROUTES),
       },
       {
         path: 'inventory',
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer', 'OfficeManager')],
         loadChildren: () =>
           import('./features/inventory/inventory.routes').then((m) => m.INVENTORY_ROUTES),
       },
       {
         path: 'customers',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
         loadChildren: () =>
           import('./features/customers/customers.routes').then((m) => m.CUSTOMERS_ROUTES),
       },
@@ -85,26 +90,31 @@ export const routes: Routes = [
       },
       {
         path: 'vendors',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
           import('./features/vendors/vendors.routes').then((m) => m.VENDORS_ROUTES),
       },
       {
         path: 'purchase-orders',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
           import('./features/purchase-orders/purchase-orders.routes').then((m) => m.PURCHASE_ORDERS_ROUTES),
       },
       {
         path: 'sales-orders',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
         loadChildren: () =>
           import('./features/sales-orders/sales-orders.routes').then((m) => m.SALES_ORDERS_ROUTES),
       },
       {
         path: 'quotes',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
         loadChildren: () =>
           import('./features/quotes/quotes.routes').then((m) => m.QUOTES_ROUTES),
       },
       {
         path: 'shipments',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
           import('./features/shipments/shipments.routes').then((m) => m.SHIPMENTS_ROUTES),
       },
@@ -124,6 +134,17 @@ export const routes: Routes = [
         path: 'notifications',
         loadChildren: () =>
           import('./features/notifications/notifications.routes').then((m) => m.NOTIFICATION_ROUTES),
+      },
+      {
+        path: 'worker',
+        loadChildren: () =>
+          import('./features/worker/worker.routes').then((m) => m.WORKER_ROUTES),
+      },
+      {
+        path: 'quality',
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
+        loadChildren: () =>
+          import('./features/quality/quality.routes').then((m) => m.QUALITY_ROUTES),
       },
       {
         path: 'admin',

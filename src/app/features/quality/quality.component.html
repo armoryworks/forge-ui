@@ -1,0 +1,260 @@
+<app-page-header title="Quality & Traceability">
+  @if (activeTab() === 'inspections') {
+    <button class="action-btn action-btn--primary" (click)="openCreateInspection()">
+      <span class="material-icons-outlined">add</span>
+      New Inspection
+    </button>
+  }
+  @if (activeTab() === 'lots') {
+    <button class="action-btn action-btn--primary" (click)="openCreateLot()">
+      <span class="material-icons-outlined">add</span>
+      New Lot
+    </button>
+  }
+</app-page-header>
+
+<div class="quality-content">
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="activeTab() === 'inspections'" (click)="switchTab('inspections')">
+      <span class="material-icons-outlined">fact_check</span>
+      QC Inspections
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'lots'" (click)="switchTab('lots')">
+      <span class="material-icons-outlined">qr_code_2</span>
+      Lot Tracking
+    </button>
+  </div>
+
+  <!-- Inspections Tab -->
+  @if (activeTab() === 'inspections') {
+    <div class="filters-bar">
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions"
+        (selectionChange)="applyInspectionFilters()" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="qc-inspections" [columns]="inspectionColumns" [data]="inspections()"
+        emptyIcon="fact_check" emptyMessage="No inspections found">
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="jobNumber" let-row>
+          <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="templateName" let-row>
+          {{ row.templateName ?? '—' }}
+        </ng-template>
+        <ng-template appColumnCell="lotNumber" let-row>
+          <span class="quality__lot-number">{{ row.lotNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="resultsSummary" let-row>
+          <span class="quality__results-summary">{{ getResultsSummary(row) }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  <!-- Lots Tab -->
+  @if (activeTab() === 'lots') {
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="lotSearchControl" placeholder="Search lots..."
+        (keyup.enter)="applyLotFilters()" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="lot-records" [columns]="lotColumns" [data]="lots()"
+        emptyIcon="qr_code_2" emptyMessage="No lot records found">
+        <ng-template appColumnCell="lotNumber" let-row>
+          <span class="quality__lot-number">{{ row.lotNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="expirationDate" let-row>
+          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'mediumDate') : '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="jobNumber" let-row>
+          <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="supplierLotNumber" let-row>
+          <span class="text-muted">{{ row.supplierLotNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" title="View Traceability" (click)="viewTraceability(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">account_tree</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>
+
+<!-- Create Inspection Dialog -->
+@if (showInspectionDialog()) {
+  <app-dialog title="New QC Inspection" (closed)="closeInspectionDialog()">
+    <div [formGroup]="inspectionForm">
+      <app-select label="Template" formControlName="templateId" [options]="templateOptions()" />
+
+      <div class="dialog-row">
+        <app-input label="Job ID" type="number" formControlName="jobId" />
+        <app-input label="Lot Number" formControlName="lotNumber" />
+      </div>
+
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeInspectionDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="inspectionViolations"
+        [disabled]="saving()"
+        (click)="saveInspection()">Create Inspection</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Create Lot Dialog -->
+@if (showLotDialog()) {
+  <app-dialog title="New Lot Record" (closed)="closeLotDialog()">
+    <div [formGroup]="lotForm">
+      <div class="dialog-row">
+        <app-input label="Part ID" type="number" formControlName="partId" />
+        <app-input label="Quantity" type="number" formControlName="quantity" />
+      </div>
+
+      <app-input label="Lot Number" formControlName="lotNumber" placeholder="Auto-generated if blank" />
+
+      <div class="dialog-row">
+        <app-input label="Job ID" type="number" formControlName="jobId" />
+        <app-input label="Supplier Lot #" formControlName="supplierLotNumber" />
+      </div>
+
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeLotDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="lotViolations"
+        [disabled]="lotForm.invalid || saving()"
+        (click)="saveLot()">Create Lot</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Traceability Dialog -->
+@if (showTraceDialog() && traceData()) {
+  <app-dialog [title]="'Traceability: ' + traceData()!.lotNumber" width="800px" (closed)="closeTraceDialog()">
+    <div class="trace-content">
+      <div class="trace-header">
+        <div class="trace-header__field">
+          <span class="trace-header__label">Part</span>
+          <span class="trace-header__value">{{ traceData()!.partNumber }}</span>
+        </div>
+        @if (traceData()!.partDescription) {
+          <div class="trace-header__field">
+            <span class="trace-header__label">Description</span>
+            <span class="trace-header__value">{{ traceData()!.partDescription }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Jobs -->
+      @if (traceData()!.jobs.length > 0) {
+        <div class="trace-section">
+          <h4 class="trace-section__title">
+            <span class="material-icons-outlined">work</span>
+            Jobs ({{ traceData()!.jobs.length }})
+          </h4>
+          @for (job of traceData()!.jobs; track job.id) {
+            <div class="trace-section__item">
+              <span class="trace-section__item-label">{{ job.jobNumber }}</span>
+              <span class="trace-section__item-value">{{ job.title }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Production Runs -->
+      @if (traceData()!.productionRuns.length > 0) {
+        <div class="trace-section">
+          <h4 class="trace-section__title">
+            <span class="material-icons-outlined">precision_manufacturing</span>
+            Production Runs ({{ traceData()!.productionRuns.length }})
+          </h4>
+          @for (run of traceData()!.productionRuns; track run.id) {
+            <div class="trace-section__item">
+              <span class="trace-section__item-label">{{ run.runNumber }}</span>
+              <span class="chip chip--muted">{{ run.status }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Purchase Orders -->
+      @if (traceData()!.purchaseOrders.length > 0) {
+        <div class="trace-section">
+          <h4 class="trace-section__title">
+            <span class="material-icons-outlined">receipt_long</span>
+            Purchase Orders ({{ traceData()!.purchaseOrders.length }})
+          </h4>
+          @for (po of traceData()!.purchaseOrders; track po.id) {
+            <div class="trace-section__item">
+              <span class="trace-section__item-label">{{ po.poNumber }}</span>
+              <span class="trace-section__item-value">{{ po.vendorName }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Bin Locations -->
+      @if (traceData()!.binLocations.length > 0) {
+        <div class="trace-section">
+          <h4 class="trace-section__title">
+            <span class="material-icons-outlined">warehouse</span>
+            Bin Locations ({{ traceData()!.binLocations.length }})
+          </h4>
+          @for (bin of traceData()!.binLocations; track bin.locationId) {
+            <div class="trace-section__item">
+              <span class="trace-section__item-label">{{ bin.locationName }}</span>
+              <span class="trace-section__item-value">Qty: {{ bin.quantity }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- QC Inspections -->
+      @if (traceData()!.inspections.length > 0) {
+        <div class="trace-section">
+          <h4 class="trace-section__title">
+            <span class="material-icons-outlined">fact_check</span>
+            QC Inspections ({{ traceData()!.inspections.length }})
+          </h4>
+          @for (insp of traceData()!.inspections; track insp.id) {
+            <div class="trace-section__item">
+              <span [class]="getStatusClass(insp.status)">{{ getStatusLabel(insp.status) }}</span>
+              <span class="trace-section__item-value">{{ insp.inspectorName }} &middot; {{ insp.createdAt | date:'mediumDate' }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      @if (traceData()!.jobs.length === 0 && traceData()!.productionRuns.length === 0 &&
+           traceData()!.purchaseOrders.length === 0 && traceData()!.binLocations.length === 0 &&
+           traceData()!.inspections.length === 0) {
+        <div class="trace-empty">
+          <span class="material-icons-outlined">info</span>
+          No linked records found for this lot.
+        </div>
+      }
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="closeTraceDialog()">Close</button>
+    </div>
+  </app-dialog>
+}

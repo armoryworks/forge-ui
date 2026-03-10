@@ -44,6 +44,18 @@
   text-transform: uppercase;
 }
 
+.page-layout__help {
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
 .page-layout__spacer {
   flex: 1;
 }

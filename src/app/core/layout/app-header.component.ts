@@ -5,14 +5,16 @@ import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 
 import { ThemeService } from '../../shared/services/theme.service';
 import { NotificationService } from '../../shared/services/notification.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { SearchService } from '../../shared/services/search.service';
 import { SearchResult } from '../../shared/models/search.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
+import { ChatComponent } from '../../features/chat/chat.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [ReactiveFormsModule, NotificationPanelComponent],
+  imports: [ReactiveFormsModule, NotificationPanelComponent, ChatComponent],
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +22,7 @@ import { NotificationPanelComponent } from '../../shared/components/notification
 export class AppHeaderComponent {
   private readonly themeService = inject(ThemeService);
   private readonly notificationService = inject(NotificationService);
+  protected readonly layout = inject(LayoutService);
   private readonly searchService = inject(SearchService);
   private readonly router = inject(Router);
 
@@ -29,6 +32,7 @@ export class AppHeaderComponent {
 
   protected readonly unreadCount = this.notificationService.unreadCount;
   protected readonly panelOpen = this.notificationService.panelOpen;
+  protected readonly logoUrl = this.themeService.logoUrl;
 
   protected readonly searchControl = new FormControl('');
   protected readonly searchResults = signal<SearchResult[]>([]);
@@ -81,4 +85,5 @@ export class AppHeaderComponent {
   protected toggleNotifications(): void {
     this.notificationService.togglePanel();
   }
+
 }

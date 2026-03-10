@@ -1,0 +1,58 @@
+<div class="worker">
+  <div class="worker__header">
+    <span class="material-icons-outlined worker__header-icon">engineering</span>
+    <div class="worker__header-text">
+      <h1 class="worker__title">My Tasks</h1>
+      <span class="worker__subtitle">{{ userName() }}</span>
+    </div>
+    <button class="icon-btn worker__refresh" title="Refresh" (click)="loadTasks()">
+      <span class="material-icons-outlined">refresh</span>
+    </button>
+  </div>
+
+  <div class="worker__content" [appLoadingBlock]="loading()">
+    @if (tasks().length === 0 && !loading()) {
+      <app-empty-state icon="check_circle" message="No tasks assigned to you" />
+    }
+
+    <div class="worker__task-list">
+      @for (task of tasks(); track task.id) {
+        <div class="task-card" (click)="openJob(task)">
+          <div class="task-card__header">
+            <span class="task-card__number">{{ task.jobNumber }}</span>
+            <span [class]="getPriorityClass(task.priority)">{{ task.priority }}</span>
+          </div>
+
+          <h3 class="task-card__title">{{ task.title }}</h3>
+
+          <div class="task-card__meta">
+            <span class="task-card__stage" [style.--stage-color]="task.stageColor">
+              {{ task.stageName }}
+            </span>
+            @if (task.customerName) {
+              <span class="task-card__customer">{{ task.customerName }}</span>
+            }
+          </div>
+
+          @if (task.dueDate) {
+            <div class="task-card__due">
+              <span class="material-icons-outlined task-card__due-icon">schedule</span>
+              Due {{ task.dueDate | date:'mediumDate' }}
+            </div>
+          }
+
+          @if (task.subtaskCount > 0) {
+            <div class="task-card__progress">
+              <div class="task-card__progress-bar">
+                <div class="task-card__progress-fill" [style.width.%]="getProgressPercent(task)"></div>
+              </div>
+              <span class="task-card__progress-label">
+                {{ task.subtasksCompleted }}/{{ task.subtaskCount }} subtasks
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

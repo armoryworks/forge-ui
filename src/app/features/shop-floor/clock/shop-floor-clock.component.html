@@ -1,0 +1,75 @@
+@if (error()) {
+  <div class="clock-error">
+    <span class="material-icons-outlined clock-error__icon">error_outline</span>
+    <p>{{ error() }}</p>
+  </div>
+}
+
+<header class="clock-header">
+  <h1 class="clock-header__title">Clock In / Out</h1>
+  <div class="clock-header__time">
+    <span class="clock-header__clock">{{ clockDisplay() }}</span>
+    <span class="clock-header__date">{{ dateDisplay() }}</span>
+  </div>
+</header>
+
+<div class="clock-body">
+  <!-- Clocked Out — Available to Clock In -->
+  <section class="clock-section">
+    <h2 class="clock-section__title">
+      <span class="material-icons-outlined">logout</span>
+      Not Clocked In ({{ clockedOut().length }})
+    </h2>
+    <div class="clock-grid">
+      @for (worker of clockedOut(); track worker.userId) {
+        <button
+          class="clock-card clock-card--out"
+          [class.clock-card--processing]="processing() === worker.userId"
+          [disabled]="processing() !== null"
+          (click)="toggleClock(worker)">
+          <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+          <span class="clock-card__name">{{ worker.name }}</span>
+          <span class="clock-card__action">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined clock-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">login</span> Clock In
+            }
+          </span>
+        </button>
+      } @empty {
+        <div class="clock-empty">Everyone is clocked in</div>
+      }
+    </div>
+  </section>
+
+  <!-- Clocked In — Available to Clock Out -->
+  <section class="clock-section">
+    <h2 class="clock-section__title clock-section__title--active">
+      <span class="material-icons-outlined">login</span>
+      Clocked In ({{ clockedIn().length }})
+    </h2>
+    <div class="clock-grid">
+      @for (worker of clockedIn(); track worker.userId) {
+        <button
+          class="clock-card clock-card--in"
+          [class.clock-card--processing]="processing() === worker.userId"
+          [disabled]="processing() !== null"
+          (click)="toggleClock(worker)">
+          <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+          <span class="clock-card__name">{{ worker.name }}</span>
+          <span class="clock-card__since">Since {{ formatTime(worker.clockedInAt) }}</span>
+          <span class="clock-card__action clock-card__action--out">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined clock-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">logout</span> Clock Out
+            }
+          </span>
+        </button>
+      } @empty {
+        <div class="clock-empty">No one is clocked in</div>
+      }
+    </div>
+  </section>
+</div>

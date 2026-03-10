@@ -20,6 +20,8 @@ export interface JobDetail {
   completedDate: string | null;
   isArchived: boolean;
   boardPosition: number;
+  iterationCount: number;
+  iterationNotes: string | null;
   createdAt: string;
   updatedAt: string;
 }

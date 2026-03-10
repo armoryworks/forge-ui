@@ -24,6 +24,13 @@
   }
 }
 
+.app-header__brand-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
 .header-sep {
   width: 1px;
   height: 20px;
@@ -164,4 +171,14 @@
   position: fixed;
   inset: 0;
   z-index: $z-dropdown - 1;
+}
+
+.hamburger-btn {
+  margin-right: $sp-sm;
+}
+
+@include mobile {
+  .hide-mobile {
+    display: none !important; // responsive layout override
+  }
 }

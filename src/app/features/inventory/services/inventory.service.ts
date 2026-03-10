@@ -9,6 +9,10 @@ import { BinMovementItem } from '../models/bin-movement-item.model';
 import { InventoryPartSummary } from '../models/inventory-part-summary.model';
 import { CreateStorageLocationRequest } from '../models/create-storage-location-request.model';
 import { PlaceBinContentRequest } from '../models/place-bin-content-request.model';
+import { ReceivingRecord } from '../models/receiving-record.model';
+import { TransferStockRequest } from '../models/transfer-stock-request.model';
+import { AdjustStockRequest } from '../models/adjust-stock-request.model';
+import { CycleCount } from '../models/cycle-count.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -48,5 +52,46 @@ export class InventoryService {
     if (entityId) params = params.set('entityId', entityId);
     params = params.set('take', take);
     return this.http.get<BinMovementItem[]>(`${this.base}/movements`, { params });
+  }
+
+  // ── Receiving ──
+
+  receiveGoods(request: { purchaseOrderLineId: number; quantityReceived: number; locationId?: number; lotNumber?: string; notes?: string }): Observable<ReceivingRecord> {
+    return this.http.post<ReceivingRecord>(`${this.base}/receive`, request);
+  }
+
+  getReceivingHistory(purchaseOrderId?: number, partId?: number, take = 50): Observable<ReceivingRecord[]> {
+    let params = new HttpParams();
+    if (purchaseOrderId) params = params.set('purchaseOrderId', purchaseOrderId);
+    if (partId) params = params.set('partId', partId);
+    params = params.set('take', take);
+    return this.http.get<ReceivingRecord[]>(`${this.base}/receiving-history`, { params });
+  }
+
+  // ── Stock Operations ──
+
+  transferStock(request: TransferStockRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/transfer`, request);
+  }
+
+  adjustStock(request: AdjustStockRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/adjust`, request);
+  }
+
+  // ── Cycle Counts ──
+
+  getCycleCounts(locationId?: number, status?: string): Observable<CycleCount[]> {
+    let params = new HttpParams();
+    if (locationId) params = params.set('locationId', locationId);
+    if (status) params = params.set('status', status);
+    return this.http.get<CycleCount[]>(`${this.base}/cycle-counts`, { params });
+  }
+
+  createCycleCount(locationId: number, notes?: string): Observable<CycleCount> {
+    return this.http.post<CycleCount>(`${this.base}/cycle-counts`, { locationId, notes });
+  }
+
+  updateCycleCount(id: number, request: { status?: string; notes?: string; lines?: { id: number; actualQuantity: number; notes?: string }[] }): Observable<void> {
+    return this.http.put<void>(`${this.base}/cycle-counts/${id}`, request);
   }
 }

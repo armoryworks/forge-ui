@@ -70,6 +70,19 @@
         </div>
       }
 
+      <!-- R&D Iteration (show when track type is R&D or iteration > 0) -->
+      @if (j.iterationCount > 0 || j.trackTypeName === 'R&D/Tooling') {
+        <div class="panel__section">
+          <div class="panel__section-header">
+            <h3 class="panel__section-title">R&D Iteration</h3>
+            <span class="panel__section-count">v{{ j.iterationCount }}</span>
+          </div>
+          @if (j.iterationNotes) {
+            <p class="panel__description">{{ j.iterationNotes }}</p>
+          }
+        </div>
+      }
+
       <!-- Subtasks -->
       <div class="panel__section">
         <div class="panel__section-header">

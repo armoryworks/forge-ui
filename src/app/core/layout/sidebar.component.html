@@ -14,7 +14,8 @@
       <a class="nav-item"
          [routerLink]="item.route"
          routerLinkActive="nav-item--active"
-         [title]="item.label">
+         [title]="item.label"
+         (click)="onNavClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>
         @if (!collapsed()) {
           <span class="nav-item__label">{{ item.label }}</span>
@@ -33,7 +34,8 @@
     <a class="nav-item"
        [routerLink]="item.route"
        routerLinkActive="nav-item--active"
-       [title]="item.label">
+       [title]="item.label"
+       (click)="onNavClick()">
       <span class="material-icons-outlined">{{ item.icon }}</span>
       @if (!collapsed()) {
         <span class="nav-item__label">{{ item.label }}</span>

@@ -1,0 +1,90 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.label {
+  border: $border-width solid var(--border);
+  background: white;
+  padding: $sp-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+  position: relative;
+  color: #000;
+
+  &--small { width: 200px; padding: $sp-sm; }
+  &--medium { width: 300px; }
+  &--large { width: 400px; padding: $sp-lg; }
+
+  &__header { text-align: center; }
+
+  &__title {
+    font-weight: 700;
+    font-size: $font-size-md;
+    display: block;
+  }
+
+  &__subtitle {
+    font-size: $font-size-xs;
+    color: #666;
+  }
+
+  &__barcode {
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  &__fields {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+    width: 100%;
+    border-top: $border-width-thin solid #ddd;
+    padding-top: $sp-sm;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__field-label {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: #999;
+  }
+
+  &__field-value {
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  &__print-btn {
+    position: absolute;
+    top: $sp-xs;
+    right: $sp-xs;
+    @include flex-center;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: $sp-xs;
+
+    &:hover { color: var(--primary); }
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+  }
+}
+
+@media print {
+  .label__print-btn { display: none; }
+}

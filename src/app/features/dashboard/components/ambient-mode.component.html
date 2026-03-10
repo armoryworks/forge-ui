@@ -1,0 +1,38 @@
+<div class="ambient">
+  <div class="ambient__clock">
+    <span class="ambient__time">{{ formatTime(currentTime()) }}</span>
+    <span class="ambient__date">{{ formatDate(currentTime()) }}</span>
+  </div>
+
+  @if (data(); as d) {
+    <div class="ambient__kpis">
+      <div class="ambient__kpi">
+        <span class="ambient__kpi-value">{{ d.kpis.activeCount }}</span>
+        <span class="ambient__kpi-label">Active Jobs</span>
+      </div>
+      <div class="ambient__kpi ambient__kpi--warning">
+        <span class="ambient__kpi-value">{{ d.kpis.overdueCount }}</span>
+        <span class="ambient__kpi-label">Overdue</span>
+      </div>
+      <div class="ambient__kpi">
+        <span class="ambient__kpi-value">{{ d.kpis.totalHours }}h</span>
+        <span class="ambient__kpi-label">Hours Today</span>
+      </div>
+    </div>
+
+    @if (d.deadlines.length > 0) {
+      <div class="ambient__deadlines">
+        <span class="ambient__section-label">Upcoming Deadlines</span>
+        @for (dl of d.deadlines.slice(0, 5); track dl.jobNumber) {
+          <div class="ambient__deadline" [class.ambient__deadline--overdue]="dl.isOverdue">
+            <span class="ambient__deadline-job">{{ dl.jobNumber }}</span>
+            <span class="ambient__deadline-desc">{{ dl.description }}</span>
+            <span class="ambient__deadline-date">{{ dl.date }}</span>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <div class="ambient__hint">Press Escape or click to exit</div>
+</div>

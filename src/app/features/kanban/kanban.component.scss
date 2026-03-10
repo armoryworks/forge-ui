@@ -162,3 +162,21 @@
     color: var(--text-muted);
   }
 }
+
+// ─── Mobile ───
+@include mobile {
+  .board {
+    padding: $sp-sm;
+  }
+
+  .page-header__track-types {
+    flex-wrap: wrap;
+  }
+
+  .bulk-bar {
+    left: $sp-md;
+    right: $sp-md;
+    transform: none;
+    flex-wrap: wrap;
+  }
+}

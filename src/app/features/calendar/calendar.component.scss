@@ -43,10 +43,13 @@
 
 .job-chip {
   display: flex; align-items: center; gap: $sp-sm;
-  padding: $sp-xs $sp-sm; border-radius: 2px; border-left: 3px solid var(--primary);
-  background: var(--surface); font-size: $font-size-sm; cursor: pointer;
+  padding: $sp-xs $sp-sm; border-radius: 2px;
+  border-left: 3px solid var(--border);
+  border-left-color: var(--job-tint, var(--border));
+  background: color-mix(in srgb, var(--job-tint, transparent) 8%, var(--surface));
+  font-size: $font-size-sm; cursor: pointer;
   overflow: hidden; white-space: nowrap;
-  &:hover { background: var(--bg); }
+  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 12%, var(--bg)); }
 }
 .job-chip__number { font-weight: 700; flex-shrink: 0; }
 .job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
@@ -55,4 +58,104 @@
 .job-overflow {
   font-size: $font-size-xxs; color: var(--text-muted); padding: $sp-xxs $sp-sm;
   cursor: default; font-weight: 600;
+}
+
+// View toggle
+.view-toggle {
+  display: flex; border: $border-width-thin solid var(--border); overflow: hidden;
+
+  &__btn {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    padding: $sp-xs $sp-md; background: var(--surface); border: none; cursor: pointer;
+    color: var(--text-secondary); transition: background $transition-fast, color $transition-fast;
+    &:hover { background: var(--bg); }
+    &--active { background: var(--primary); color: white; }
+    & + & { border-left: $border-width-thin solid var(--border); }
+  }
+}
+
+// Week View
+.week-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; @include custom-scrollbar; }
+
+.week-header {
+  display: grid; grid-template-columns: repeat(7, 1fr); flex-shrink: 0;
+  border-bottom: $border-width solid var(--border);
+
+  &__cell {
+    display: flex; flex-direction: column; align-items: center; gap: $sp-xxs;
+    padding: $sp-sm $sp-md; background: var(--surface); cursor: pointer;
+    border-right: $border-width-thin solid var(--border);
+    &:hover { background: var(--bg); }
+    &--today { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
+  }
+  &__weekday { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+  &__date {
+    font-size: $font-size-md; font-weight: 700; color: var(--text);
+    &--today {
+      background: var(--primary); color: white; border-radius: 50%;
+      width: $btn-icon-size; height: $btn-icon-size;
+      display: flex; align-items: center; justify-content: center;
+    }
+  }
+}
+
+.week-body {
+  display: grid; grid-template-columns: repeat(7, 1fr); flex: 1;
+}
+
+.week-column {
+  border-right: $border-width-thin solid var(--border);
+  padding: $sp-sm; display: flex; flex-direction: column; gap: $sp-sm;
+  min-height: 300px;
+  &--today { background: color-mix(in srgb, var(--primary) 4%, var(--bg)); }
+  &__empty { font-size: $font-size-xs; color: var(--text-muted); text-align: center; padding-top: $sp-xl; }
+}
+
+.job-chip--week {
+  flex-direction: column; align-items: flex-start; gap: $sp-xxs;
+  white-space: normal; padding: $sp-sm;
+  border-left: 3px solid var(--border);
+  border-left-color: var(--job-tint, var(--border));
+}
+.job-chip__customer { font-size: $font-size-xs; color: var(--text-muted); }
+
+// Day View
+.day-view {
+  flex: 1; display: flex; flex-direction: column; padding: $sp-lg; overflow: auto; @include custom-scrollbar;
+  max-width: 800px; width: 100%;
+}
+.day-view__header {
+  padding-bottom: $sp-md; border-bottom: $border-width-thin solid var(--border);
+  margin-bottom: $sp-lg;
+}
+.day-view__count { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-secondary); }
+.day-view__list { display: flex; flex-direction: column; gap: $sp-md; }
+
+.day-job {
+  border-left: 4px solid var(--border);
+  border-left-color: var(--job-tint, var(--border));
+  padding: $sp-md $sp-lg;
+  background: color-mix(in srgb, var(--job-tint, transparent) 8%, var(--surface));
+  cursor: pointer;
+  &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 12%, var(--bg)); }
+}
+.day-job__header { display: flex; align-items: center; gap: $sp-md; margin-bottom: $sp-sm; }
+.day-job__number { font-weight: 700; font-size: $font-size-md; }
+.day-job__title { font-size: $font-size-base; color: var(--text); flex: 1; }
+.day-job__overdue { font-size: $font-size-md; color: var(--error); }
+.day-job__meta {
+  display: flex; align-items: center; gap: $sp-lg; flex-wrap: wrap;
+}
+.day-job__customer,
+.day-job__stage,
+.day-job__assignee {
+  display: flex; align-items: center; gap: $sp-xs;
+  font-size: $font-size-sm; color: var(--text-secondary);
+  .material-icons-outlined { font-size: $icon-size-sm; }
+}
+
+.day-view__empty {
+  display: flex; flex-direction: column; align-items: center; gap: $sp-md;
+  padding: $sp-3xl; color: var(--text-muted);
+  .material-icons-outlined { font-size: $icon-size-hero; }
 }

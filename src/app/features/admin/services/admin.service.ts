@@ -12,6 +12,14 @@ import { ReferenceDataEntry } from '../models/reference-data-entry.model';
 import { TerminologyEntryItem } from '../models/terminology-entry-item.model';
 import { SystemSetting } from '../models/system-setting.model';
 import { TrackType } from '../../../shared/models/track-type.model';
+import { CustomFieldDefinition } from '../models/custom-field-definition.model';
+import { EmployeeDocument } from '../models/employee-document.model';
+import { SalesTaxRate } from '../models/sales-tax-rate.model';
+import { CreateSalesTaxRateRequest } from '../models/create-sales-tax-rate-request.model';
+import { AuditLogEntry } from '../models/audit-log-entry.model';
+import { StorageUsage } from '../models/storage-usage.model';
+import { ScheduledTask } from '../models/scheduled-task.model';
+import { CreateScheduledTaskRequest } from '../models/create-scheduled-task-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -47,6 +55,17 @@ export class AdminService {
     return this.http.delete<void>(`${environment.apiUrl}/admin/track-types/${id}`);
   }
 
+  // Custom Field Definitions
+  getCustomFieldDefinitions(trackTypeId: number): Observable<CustomFieldDefinition[]> {
+    return this.http.get<CustomFieldDefinition[]>(`${environment.apiUrl}/track-types/${trackTypeId}/custom-fields`);
+  }
+
+  updateCustomFieldDefinitions(trackTypeId: number, fields: CustomFieldDefinition[]): Observable<CustomFieldDefinition[]> {
+    return this.http.put<CustomFieldDefinition[]>(
+      `${environment.apiUrl}/track-types/${trackTypeId}/custom-fields`,
+      { fields });
+  }
+
   // Reference Data
   getReferenceData(): Observable<ReferenceDataGroup[]> {
     return this.http.get<ReferenceDataGroup[]>(`${environment.apiUrl}/admin/reference-data`);
@@ -76,5 +95,93 @@ export class AdminService {
 
   updateSystemSettings(settings: { key: string; value: string; description?: string | null }[]): Observable<SystemSetting[]> {
     return this.http.put<SystemSetting[]>(`${environment.apiUrl}/admin/system-settings`, { settings });
+  }
+
+  // Logo
+  uploadLogo(file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<void>(`${environment.apiUrl}/admin/logo`, formData);
+  }
+
+  deleteLogo(): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/logo`);
+  }
+
+  // Sales Tax Rates
+  getSalesTaxRates(): Observable<SalesTaxRate[]> {
+    return this.http.get<SalesTaxRate[]>(`${environment.apiUrl}/sales-tax-rates`);
+  }
+
+  createSalesTaxRate(request: CreateSalesTaxRateRequest): Observable<SalesTaxRate> {
+    return this.http.post<SalesTaxRate>(`${environment.apiUrl}/sales-tax-rates`, request);
+  }
+
+  updateSalesTaxRate(id: number, request: CreateSalesTaxRateRequest): Observable<SalesTaxRate> {
+    return this.http.put<SalesTaxRate>(`${environment.apiUrl}/sales-tax-rates/${id}`, request);
+  }
+
+  deleteSalesTaxRate(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/sales-tax-rates/${id}`);
+  }
+
+  getEmployeeDocuments(userId: number): Observable<EmployeeDocument[]> {
+    return this.http.get<EmployeeDocument[]>(`${environment.apiUrl}/admin/users/${userId}/documents`);
+  }
+
+  // Audit Log
+  getAuditLog(params: {
+    userId?: number; action?: string; entityType?: string;
+    from?: string; to?: string; page?: number; pageSize?: number;
+  }): Observable<{ data: AuditLogEntry[]; page: number; pageSize: number; totalCount: number; totalPages: number }> {
+    return this.http.get<{ data: AuditLogEntry[]; page: number; pageSize: number; totalCount: number; totalPages: number }>(
+      `${environment.apiUrl}/admin/audit-log`, { params: params as Record<string, string> });
+  }
+
+  // Storage Usage
+  getStorageUsage(): Observable<StorageUsage[]> {
+    return this.http.get<StorageUsage[]>(`${environment.apiUrl}/admin/storage-usage`);
+  }
+
+  // Scheduled Tasks
+  getScheduledTasks(): Observable<ScheduledTask[]> {
+    return this.http.get<ScheduledTask[]>(`${environment.apiUrl}/scheduled-tasks`);
+  }
+
+  createScheduledTask(request: CreateScheduledTaskRequest): Observable<ScheduledTask> {
+    return this.http.post<ScheduledTask>(`${environment.apiUrl}/scheduled-tasks`, request);
+  }
+
+  updateScheduledTask(id: number, request: Partial<CreateScheduledTaskRequest & { isActive: boolean }>): Observable<ScheduledTask> {
+    return this.http.put<ScheduledTask>(`${environment.apiUrl}/scheduled-tasks/${id}`, request);
+  }
+
+  deleteScheduledTask(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/scheduled-tasks/${id}`);
+  }
+
+  runScheduledTask(id: number): Observable<{ jobId: number }> {
+    return this.http.post<{ jobId: number }>(`${environment.apiUrl}/scheduled-tasks/${id}/run`, {});
+  }
+
+  // Setup Token & Invite
+  generateSetupToken(userId: number): Observable<{ token: string; expiresAt: string }> {
+    return this.http.post<{ token: string; expiresAt: string }>(`${environment.apiUrl}/admin/users/${userId}/setup-token`, {});
+  }
+
+  sendSetupInvite(userId: number, baseUrl: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/send-invite?baseUrl=${encodeURIComponent(baseUrl)}`, {});
+  }
+
+  resetUserPin(userId: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/reset-pin`, {});
+  }
+
+  deactivateUser(userId: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/deactivate`, {});
+  }
+
+  reactivateUser(userId: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/reactivate`, {});
   }
 }

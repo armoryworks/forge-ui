@@ -1,0 +1,39 @@
+<app-dialog [title]="'Uninvoiced Jobs (' + jobs().length + ')'" width="620px" (closed)="close()">
+  @if (jobs().length === 0) {
+    <div class="empty-state">
+      <span class="material-icons-outlined empty-state__icon">check_circle</span>
+      <span class="empty-state__text">All completed jobs have been invoiced.</span>
+    </div>
+  } @else {
+    <div class="uninvoiced-list">
+      @for (job of jobs(); track job.jobId) {
+        <div class="uninvoiced-item">
+          <div class="uninvoiced-item__info">
+            <div class="uninvoiced-item__header">
+              <span class="uninvoiced-item__number">{{ job.jobNumber }}</span>
+              <span class="uninvoiced-item__title">{{ job.title }}</span>
+            </div>
+            <div class="uninvoiced-item__meta">
+              @if (job.customerName) {
+                <span class="uninvoiced-item__customer">{{ job.customerName }}</span>
+                <span class="uninvoiced-item__sep">&middot;</span>
+              }
+              <span class="uninvoiced-item__date">Completed {{ job.completedDate | date:'mediumDate' }}</span>
+            </div>
+          </div>
+          <button class="action-btn action-btn--sm action-btn--primary"
+            [disabled]="!job.customerId"
+            [title]="job.customerId ? 'Create invoice for this job' : 'No customer assigned'"
+            (click)="onCreateInvoice(job.jobId)">
+            <span class="material-icons-outlined">receipt_long</span>
+            Invoice
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Close</button>
+  </div>
+</app-dialog>

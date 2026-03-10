@@ -1,0 +1,123 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.quality-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+// ─── Lot Number ───
+.quality__lot-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+.quality__results-summary {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+// ─── Traceability Dialog ───
+.trace-content {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.trace-header {
+  display: flex;
+  gap: $sp-xl;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--text);
+  }
+}
+
+.trace-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    font-size: $font-size-sm;
+  }
+
+  &__item-label {
+    font-family: $font-family-mono;
+    font-weight: 600;
+    min-width: 120px;
+  }
+
+  &__item-value {
+    color: var(--text-secondary);
+  }
+}
+
+.trace-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-md;
+  padding: $sp-xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+  }
+}

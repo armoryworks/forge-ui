@@ -25,12 +25,25 @@ import { MyTimeLogItem } from './models/my-time-log-item.model';
 import { ArAgingItem } from './models/ar-aging-item.model';
 import { RevenueItem } from './models/revenue-item.model';
 import { SimplePnlItem } from './models/simple-pnl-item.model';
-import { CurrencyPipe } from '@angular/common';
+import { MyExpenseHistoryItem } from './models/my-expense-history-item.model';
+import { QuoteToCloseItem } from './models/quote-to-close-item.model';
+import { ShippingSummaryItem } from './models/shipping-summary-item.model';
+import { TimeInStageItem } from './models/time-in-stage-item.model';
+import { EmployeeProductivityItem } from './models/employee-productivity-item.model';
+import { InventoryLevelItem } from './models/inventory-level-item.model';
+import { MaintenanceReportItem } from './models/maintenance-report-item.model';
+import { QualityScrapItem } from './models/quality-scrap-item.model';
+import { CycleReviewItem } from './models/cycle-review-item.model';
+import { JobMarginItem } from './models/job-margin-item.model';
+import { MyCycleSummaryItem } from './models/my-cycle-summary-item.model';
+import { LeadSalesItem } from './models/lead-sales-item.model';
+import { RdReportItem } from './models/rd-report-item.model';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -54,6 +67,19 @@ export class ReportsComponent {
     { id: 'ar-aging', label: 'AR Aging', icon: 'account_balance', needsDateRange: false },
     { id: 'revenue', label: 'Revenue', icon: 'attach_money', needsDateRange: true },
     { id: 'simple-pnl', label: 'Profit & Loss', icon: 'balance', needsDateRange: true },
+    { id: 'my-expense-history', label: 'My Expenses', icon: 'receipt', needsDateRange: true },
+    { id: 'quote-to-close', label: 'Quote-to-Close', icon: 'handshake', needsDateRange: true },
+    { id: 'shipping-summary', label: 'Shipping Summary', icon: 'local_shipping', needsDateRange: true },
+    { id: 'time-in-stage', label: 'Time in Stage', icon: 'hourglass_bottom', needsDateRange: false },
+    { id: 'employee-productivity', label: 'Employee Productivity', icon: 'person_search', needsDateRange: true },
+    { id: 'inventory-levels', label: 'Inventory Levels', icon: 'inventory_2', needsDateRange: false },
+    { id: 'maintenance', label: 'Maintenance', icon: 'build', needsDateRange: true },
+    { id: 'quality-scrap', label: 'Quality / Scrap Rate', icon: 'verified', needsDateRange: true },
+    { id: 'cycle-review', label: 'Cycle Review', icon: 'event_repeat', needsDateRange: false },
+    { id: 'job-margin', label: 'Job Margin', icon: 'trending_up', needsDateRange: true },
+    { id: 'my-cycle-summary', label: 'My Cycle Summary', icon: 'event_repeat', needsDateRange: false },
+    { id: 'lead-sales', label: 'Lead & Sales', icon: 'leaderboard', needsDateRange: true },
+    { id: 'rd', label: 'R&D Report', icon: 'science', needsDateRange: true },
   ];
 
   protected readonly activeReport = signal<ReportType>('jobs-by-stage');
@@ -80,6 +106,19 @@ export class ReportsComponent {
   protected readonly arAgingData = signal<ArAgingItem[]>([]);
   protected readonly revenueData = signal<RevenueItem[]>([]);
   protected readonly simplePnlData = signal<SimplePnlItem[]>([]);
+  protected readonly myExpenseHistoryData = signal<MyExpenseHistoryItem[]>([]);
+  protected readonly quoteToCloseData = signal<QuoteToCloseItem[]>([]);
+  protected readonly shippingSummaryData = signal<ShippingSummaryItem[]>([]);
+  protected readonly timeInStageData = signal<TimeInStageItem[]>([]);
+  protected readonly employeeProductivityData = signal<EmployeeProductivityItem[]>([]);
+  protected readonly inventoryLevelsData = signal<InventoryLevelItem[]>([]);
+  protected readonly maintenanceData = signal<MaintenanceReportItem[]>([]);
+  protected readonly qualityScrapData = signal<QualityScrapItem[]>([]);
+  protected readonly cycleReviewData = signal<CycleReviewItem[]>([]);
+  protected readonly jobMarginData = signal<JobMarginItem[]>([]);
+  protected readonly myCycleSummaryData = signal<MyCycleSummaryItem[]>([]);
+  protected readonly leadSalesData = signal<LeadSalesItem | null>(null);
+  protected readonly rdReportData = signal<RdReportItem[]>([]);
 
   // Chart configurations
   protected readonly jobsByStageChart = computed<ChartData<'bar'>>(() => {
@@ -190,6 +229,33 @@ export class ReportsComponent {
     };
   });
 
+  protected readonly quoteToCloseChart = computed<ChartData<'bar'>>(() => {
+    const data = this.quoteToCloseData();
+    const statusColors: Record<string, string> = {
+      Draft: '#94a3b8', Sent: '#3b82f6', Accepted: '#22c55e', Rejected: '#ef4444', Expired: '#f59e0b',
+    };
+    return {
+      labels: data.map(d => d.status),
+      datasets: [{
+        data: data.map(d => d.count),
+        backgroundColor: data.map(d => statusColors[d.status] ?? '#94a3b8'),
+        label: 'Quotes',
+      }],
+    };
+  });
+
+  protected readonly timeInStageChart = computed<ChartData<'bar'>>(() => {
+    const data = this.timeInStageData();
+    return {
+      labels: data.map(d => d.stageName),
+      datasets: [{
+        data: data.map(d => d.averageDays),
+        backgroundColor: data.map(d => d.stageColor),
+        label: 'Avg Days',
+      }],
+    };
+  });
+
   protected readonly revenueChart = computed<ChartData<'bar'>>(() => {
     const data = this.revenueData();
     return {
@@ -207,6 +273,89 @@ export class ReportsComponent {
     const revenue = data.filter(d => d.type === 'Revenue').reduce((sum, d) => sum + d.amount, 0);
     const expenses = data.filter(d => d.type === 'Expense').reduce((sum, d) => sum + d.amount, 0);
     return { revenue, expenses, net: revenue - expenses };
+  });
+
+  protected readonly employeeProductivityChart = computed<ChartData<'bar'>>(() => {
+    const data = this.employeeProductivityData();
+    return {
+      labels: data.map(d => d.userName),
+      datasets: [{
+        data: data.map(d => d.totalHours),
+        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+        label: 'Hours',
+      }],
+    };
+  });
+
+  protected readonly inventoryLevelsChart = computed<ChartData<'bar'>>(() => {
+    const data = this.inventoryLevelsData();
+    return {
+      labels: data.map(d => d.partNumber),
+      datasets: [{
+        data: data.map(d => d.currentStock),
+        backgroundColor: data.map(d => d.isLowStock ? 'rgba(239, 68, 68, 0.7)' : 'rgba(34, 197, 94, 0.7)'),
+        label: 'Stock',
+      }],
+    };
+  });
+
+  protected readonly maintenanceChart = computed<ChartData<'bar'>>(() => {
+    const data = this.maintenanceData();
+    return {
+      labels: data.map(d => d.assetName),
+      datasets: [{
+        data: data.map(d => d.completedCount),
+        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+        label: 'Completed',
+      }],
+    };
+  });
+
+  protected readonly qualityScrapChart = computed<ChartData<'bar'>>(() => {
+    const data = this.qualityScrapData();
+    return {
+      labels: data.map(d => d.partNumber),
+      datasets: [{
+        data: data.map(d => d.scrapRate),
+        backgroundColor: data.map(d => d.scrapRate > 10 ? 'rgba(239, 68, 68, 0.7)' : 'rgba(59, 130, 246, 0.7)'),
+        label: 'Scrap Rate %',
+      }],
+    };
+  });
+
+  protected readonly cycleReviewChart = computed<ChartData<'bar'>>(() => {
+    const data = this.cycleReviewData();
+    return {
+      labels: data.map(d => d.cycleName),
+      datasets: [{
+        data: data.map(d => d.completionRate),
+        backgroundColor: data.map(d => d.completionRate >= 80 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(245, 158, 11, 0.7)'),
+        label: 'Completion %',
+      }],
+    };
+  });
+
+  protected readonly jobMarginChart = computed<ChartData<'bar'>>(() => {
+    const data = this.jobMarginData();
+    return {
+      labels: data.map(d => d.jobNumber),
+      datasets: [{
+        data: data.map(d => d.margin),
+        backgroundColor: data.map(d => d.margin >= 0 ? 'rgba(34, 197, 94, 0.7)' : 'rgba(239, 68, 68, 0.7)'),
+        label: 'Margin',
+      }],
+    };
+  });
+
+  protected readonly jobMarginTotals = computed(() => {
+    const data = this.jobMarginData();
+    const totalRevenue = data.reduce((sum, d) => sum + d.revenue, 0);
+    const totalCost = data.reduce((sum, d) => sum + d.totalCost, 0);
+    const totalMargin = totalRevenue - totalCost;
+    const avgMarginPct = data.length > 0
+      ? data.reduce((sum, d) => sum + d.marginPercentage, 0) / data.length
+      : 0;
+    return { totalRevenue, totalCost, totalMargin, avgMarginPct: Math.round(avgMarginPct * 10) / 10 };
   });
 
   protected readonly barOptions: ChartOptions<'bar'> = {
@@ -346,6 +495,113 @@ export class ReportsComponent {
     { field: 'amount', header: 'Amount', sortable: true, type: 'number', width: '130px', align: 'right' },
   ];
 
+  protected readonly myExpenseColumns: ColumnDef[] = [
+    { field: 'expenseDate', header: 'Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'category', header: 'Category', sortable: true, width: '140px' },
+    { field: 'description', header: 'Description', sortable: true },
+    { field: 'amount', header: 'Amount', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'status', header: 'Status', sortable: true, width: '100px' },
+    { field: 'vendor', header: 'Vendor', sortable: true, width: '140px' },
+  ];
+
+  protected readonly quoteToCloseColumns: ColumnDef[] = [
+    { field: 'status', header: 'Status', sortable: true },
+    { field: 'count', header: 'Count', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalValue', header: 'Total Value', sortable: true, type: 'number', width: '130px', align: 'right' },
+  ];
+
+  protected readonly shippingSummaryColumns: ColumnDef[] = [
+    { field: 'status', header: 'Status', sortable: true },
+    { field: 'count', header: 'Shipments', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalItems', header: 'Total Items', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'onTimeCount', header: 'On Time', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'lateCount', header: 'Late', sortable: true, type: 'number', width: '80px', align: 'right' },
+  ];
+
+  protected readonly timeInStageColumns: ColumnDef[] = [
+    { field: 'stageName', header: 'Stage', sortable: true },
+    { field: 'averageDays', header: 'Avg Days', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'jobCount', header: 'Jobs', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'isBottleneck', header: 'Bottleneck', sortable: false, width: '100px' },
+  ];
+
+  protected readonly employeeProductivityColumns: ColumnDef[] = [
+    { field: 'userName', header: 'Employee', sortable: true },
+    { field: 'totalHours', header: 'Total Hours', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'jobsCompleted', header: 'Jobs Done', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'avgHoursPerJob', header: 'Avg Hrs/Job', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'onTimePercentage', header: 'On-Time %', sortable: true, type: 'number', width: '100px', align: 'right' },
+  ];
+
+  protected readonly inventoryLevelsColumns: ColumnDef[] = [
+    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'description', header: 'Description', sortable: true },
+    { field: 'currentStock', header: 'Stock', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'minStockThreshold', header: 'Min Threshold', sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'reorderPoint', header: 'Reorder Pt', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'isLowStock', header: 'Low Stock', sortable: true, width: '100px' },
+  ];
+
+  protected readonly maintenanceColumns: ColumnDef[] = [
+    { field: 'assetName', header: 'Asset', sortable: true },
+    { field: 'scheduledCount', header: 'Scheduled', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'completedCount', header: 'Completed', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'overdueCount', header: 'Overdue', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalCost', header: 'Total Cost', sortable: true, type: 'number', width: '120px', align: 'right' },
+  ];
+
+  protected readonly qualityScrapColumns: ColumnDef[] = [
+    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'totalProduced', header: 'Produced', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalScrapped', header: 'Scrapped', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'scrapRate', header: 'Scrap %', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'yieldRate', header: 'Yield %', sortable: true, type: 'number', width: '100px', align: 'right' },
+  ];
+
+  protected readonly cycleReviewColumns: ColumnDef[] = [
+    { field: 'cycleName', header: 'Cycle', sortable: true },
+    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '110px' },
+    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '110px' },
+    { field: 'totalEntries', header: 'Total', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completedEntries', header: 'Done', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completionRate', header: 'Rate %', sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'rolledOverCount', header: 'Rolled Over', sortable: true, type: 'number', width: '110px', align: 'right' },
+  ];
+
+  protected readonly jobMarginColumns: ColumnDef[] = [
+    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
+    { field: 'title', header: 'Title', sortable: true },
+    { field: 'customerName', header: 'Customer', sortable: true, width: '140px' },
+    { field: 'revenue', header: 'Revenue', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'laborCost', header: 'Labor', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'materialCost', header: 'Material', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'expenseCost', header: 'Expenses', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalCost', header: 'Total Cost', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'margin', header: 'Margin', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'marginPercentage', header: 'Margin %', sortable: true, type: 'number', width: '90px', align: 'right' },
+  ];
+
+  protected readonly myCycleSummaryColumns: ColumnDef[] = [
+    { field: 'cycleName', header: 'Cycle', sortable: true },
+    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '110px' },
+    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '110px' },
+    { field: 'totalEntries', header: 'Total', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completedEntries', header: 'Done', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completionRate', header: 'Rate %', sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'rolledOverCount', header: 'Rolled Over', sortable: true, type: 'number', width: '110px', align: 'right' },
+  ];
+
+  protected readonly rdReportColumns: ColumnDef[] = [
+    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
+    { field: 'title', header: 'Title', sortable: true },
+    { field: 'iterationCount', header: 'Iterations', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalHours', header: 'Hours', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'currentStage', header: 'Stage', sortable: true, width: '140px' },
+    { field: 'assigneeName', header: 'Assignee', sortable: true, width: '140px' },
+    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '100px' },
+    { field: 'completedDate', header: 'Completed', sortable: true, type: 'date', width: '100px' },
+  ];
+
   constructor() {
     this.loadReport('jobs-by-stage');
   }
@@ -404,6 +660,45 @@ export class ReportsComponent {
         break;
       case 'simple-pnl':
         this.reportService.getSimplePnl(this.startValue(), this.endValue()).subscribe(d => { this.simplePnlData.set(d); this.loading.set(false); });
+        break;
+      case 'my-expense-history':
+        this.reportService.getMyExpenseHistory(this.startValue(), this.endValue()).subscribe(d => { this.myExpenseHistoryData.set(d); this.loading.set(false); });
+        break;
+      case 'quote-to-close':
+        this.reportService.getQuoteToClose(this.startValue(), this.endValue()).subscribe(d => { this.quoteToCloseData.set(d); this.loading.set(false); });
+        break;
+      case 'shipping-summary':
+        this.reportService.getShippingSummary(this.startValue(), this.endValue()).subscribe(d => { this.shippingSummaryData.set(d); this.loading.set(false); });
+        break;
+      case 'time-in-stage':
+        this.reportService.getTimeInStage().subscribe(d => { this.timeInStageData.set(d); this.loading.set(false); });
+        break;
+      case 'employee-productivity':
+        this.reportService.getEmployeeProductivity(this.startValue(), this.endValue()).subscribe(d => { this.employeeProductivityData.set(d); this.loading.set(false); });
+        break;
+      case 'inventory-levels':
+        this.reportService.getInventoryLevels().subscribe(d => { this.inventoryLevelsData.set(d); this.loading.set(false); });
+        break;
+      case 'maintenance':
+        this.reportService.getMaintenance(this.startValue(), this.endValue()).subscribe(d => { this.maintenanceData.set(d); this.loading.set(false); });
+        break;
+      case 'quality-scrap':
+        this.reportService.getQualityScrap(this.startValue(), this.endValue()).subscribe(d => { this.qualityScrapData.set(d); this.loading.set(false); });
+        break;
+      case 'cycle-review':
+        this.reportService.getCycleReview().subscribe(d => { this.cycleReviewData.set(d); this.loading.set(false); });
+        break;
+      case 'job-margin':
+        this.reportService.getJobMargin(this.startValue(), this.endValue()).subscribe(d => { this.jobMarginData.set(d); this.loading.set(false); });
+        break;
+      case 'my-cycle-summary':
+        this.reportService.getMyCycleSummary().subscribe(d => { this.myCycleSummaryData.set(d); this.loading.set(false); });
+        break;
+      case 'lead-sales':
+        this.reportService.getLeadSales(this.startValue(), this.endValue()).subscribe(d => { this.leadSalesData.set(d); this.loading.set(false); });
+        break;
+      case 'rd':
+        this.reportService.getRdReport(this.startValue(), this.endValue()).subscribe(d => { this.rdReportData.set(d); this.loading.set(false); });
         break;
     }
   }

@@ -177,3 +177,105 @@
   gap: $sp-md;
   .material-icons-outlined { font-size: 32px; opacity: 0.5; }
 }
+
+// ─── Stock Ops ───
+.stock-ops-panel {
+  padding: $sp-lg;
+}
+
+.stock-ops-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: $sp-lg;
+}
+
+.stock-ops-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl $sp-lg;
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  cursor: pointer;
+  transition: border-color $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: var(--bg);
+  }
+
+  &__icon {
+    font-size: $icon-size-hero;
+    color: var(--primary);
+  }
+
+  &__title {
+    font-weight: 700;
+    font-size: $font-size-md;
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    text-align: center;
+  }
+}
+
+// ─── Cycle Count Detail ───
+.cycle-count-info {
+  display: flex;
+  gap: $sp-xl;
+  margin-bottom: $sp-lg;
+}
+
+.inline-input {
+  width: 64px;
+  padding: $sp-xs $sp-sm;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  font-size: $font-size-xs;
+  font-family: $font-family-primary;
+  background: var(--surface);
+  color: var(--text);
+  text-align: right;
+
+  &:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+}
+
+// ─── Variance ───
+.variance--positive {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.variance--negative {
+  color: var(--error);
+  font-weight: 600;
+}
+
+.text-center {
+  text-align: center;
+}
+
+// ─── Mobile ───
+@include mobile {
+  .locations-layout {
+    flex-direction: column !important;
+  }
+
+  .locations-tree {
+    width: 100%;
+    border-right: none;
+    border-bottom: $border-width-thin solid var(--border);
+    max-height: 200px;
+  }
+
+  .cycle-count-info {
+    flex-direction: column;
+    gap: $sp-md;
+  }
+}

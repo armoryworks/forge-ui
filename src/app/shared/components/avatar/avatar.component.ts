@@ -10,5 +10,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 export class AvatarComponent {
   readonly initials = input.required<string>();
   readonly color = input<string>('#0d9488');
-  readonly size = input<'sm' | 'md'>('sm');
+  readonly size = input<'sm' | 'md' | 'lg'>('sm');
 }

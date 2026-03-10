@@ -149,3 +149,20 @@
   gap: $sp-md; padding: $sp-xl; color: var(--text-muted);
   .material-icons-outlined { font-size: 32px; opacity: 0.5; }
 }
+
+// ─── Mobile ───
+@include mobile {
+  .parts-layout {
+    flex-direction: column;
+  }
+
+  .detail-panel {
+    width: 100%;
+    border-left: none;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

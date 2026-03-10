@@ -6,6 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { InvoiceService } from './services/invoice.service';
 import { InvoiceListItem } from './models/invoice-list-item.model';
 import { InvoiceDetail } from './models/invoice-detail.model';
+import { UninvoicedJob } from './models/uninvoiced-job.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -16,6 +17,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dialog.component';
+import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel/uninvoiced-jobs-panel.component';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
@@ -25,7 +27,7 @@ import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dial
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    InvoiceDialogComponent,
+    InvoiceDialogComponent, UninvoicedJobsPanelComponent,
   ],
   templateUrl: './invoices.component.html',
   styleUrl: './invoices.component.scss',
@@ -37,9 +39,12 @@ export class InvoicesComponent {
   private readonly snackbar = inject(SnackbarService);
 
   protected readonly showCreateDialog = signal(false);
+  protected readonly showUninvoicedPanel = signal(false);
   protected readonly loading = signal(false);
   protected readonly invoices = signal<InvoiceListItem[]>([]);
   protected readonly selectedInvoice = signal<InvoiceDetail | null>(null);
+  protected readonly uninvoicedJobs = signal<UninvoicedJob[]>([]);
+  protected readonly uninvoicedCount = signal(0);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -81,6 +86,7 @@ export class InvoicesComponent {
 
   constructor() {
     this.loadInvoices();
+    this.loadUninvoicedJobs();
   }
 
   protected loadInvoices(): void {
@@ -108,6 +114,29 @@ export class InvoicesComponent {
   protected onCreateSaved(): void {
     this.closeCreateDialog();
     this.loadInvoices();
+  }
+
+  // --- Uninvoiced Jobs ---
+  protected loadUninvoicedJobs(): void {
+    this.invoiceService.getUninvoicedJobs().subscribe({
+      next: (jobs) => {
+        this.uninvoicedJobs.set(jobs);
+        this.uninvoicedCount.set(jobs.length);
+      },
+    });
+  }
+
+  protected openUninvoicedPanel(): void { this.showUninvoicedPanel.set(true); }
+  protected closeUninvoicedPanel(): void { this.showUninvoicedPanel.set(false); }
+
+  protected createInvoiceFromJob(jobId: number): void {
+    this.invoiceService.createInvoiceFromJob(jobId).subscribe({
+      next: (invoice) => {
+        this.snackbar.success(`Invoice ${invoice.invoiceNumber} created.`);
+        this.loadInvoices();
+        this.loadUninvoicedJobs();
+      },
+    });
   }
 
   // --- Status Actions ---

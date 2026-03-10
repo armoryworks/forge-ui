@@ -26,10 +26,13 @@
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/space-grotesk": "^5.2.10",
     "@microsoft/signalr": "^10.0.0",
+    "@types/papaparse": "^5.5.2",
+    "bwip-js": "^4.8.0",
     "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
     "driver.js": "^1.4.0",
     "ng2-charts": "^10.0.0",
+    "papaparse": "^5.5.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

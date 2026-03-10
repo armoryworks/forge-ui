@@ -10,4 +10,5 @@ export interface KanbanJob {
   dueDate: string | null;
   isOverdue: boolean;
   customerName: string | null;
+  billingStatus: string | null;
 }

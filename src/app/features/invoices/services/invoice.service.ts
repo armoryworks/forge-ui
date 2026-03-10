@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { InvoiceListItem } from '../models/invoice-list-item.model';
 import { InvoiceDetail } from '../models/invoice-detail.model';
 import { CreateInvoiceRequest } from '../models/create-invoice-request.model';
+import { UninvoicedJob } from '../models/uninvoiced-job.model';
+import { InvoiceQueueSettings } from '../models/invoice-queue-settings.model';
 
 @Injectable({ providedIn: 'root' })
 export class InvoiceService {
@@ -37,5 +39,21 @@ export class InvoiceService {
 
   deleteInvoice(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getUninvoicedJobs(): Observable<UninvoicedJob[]> {
+    return this.http.get<UninvoicedJob[]>(`${this.base}/uninvoiced-jobs`);
+  }
+
+  createInvoiceFromJob(jobId: number): Observable<InvoiceListItem> {
+    return this.http.post<InvoiceListItem>(`${this.base}/from-job/${jobId}`, {});
+  }
+
+  getQueueSettings(): Observable<InvoiceQueueSettings> {
+    return this.http.get<InvoiceQueueSettings>(`${this.base}/queue-settings`);
+  }
+
+  updateQueueSettings(mode: string, assignedUserId: number | null): Observable<void> {
+    return this.http.put<void>(`${this.base}/queue-settings`, { mode, assignedUserId });
   }
 }

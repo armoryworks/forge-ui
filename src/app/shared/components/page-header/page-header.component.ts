@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
+
+import { HelpTourService } from '../../services/help-tour.service';
 
 @Component({
   selector: 'app-page-header',
@@ -8,5 +10,15 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PageHeaderComponent {
+  private readonly helpTourService = inject(HelpTourService);
+
   readonly title = input.required<string>();
+  readonly helpTourId = input<string>();
+
+  protected startTour(): void {
+    const tourId = this.helpTourId();
+    if (tourId) {
+      this.helpTourService.start(tourId);
+    }
+  }
 }

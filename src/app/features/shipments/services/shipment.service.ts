@@ -6,6 +6,8 @@ import { environment } from '../../../../environments/environment';
 import { ShipmentListItem } from '../models/shipment-list-item.model';
 import { ShipmentDetail } from '../models/shipment-detail.model';
 import { CreateShipmentRequest } from '../models/create-shipment-request.model';
+import { ShipmentPackage } from '../models/shipment-package.model';
+import { CreateShipmentPackageRequest } from '../models/create-shipment-package-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class ShipmentService {
@@ -37,5 +39,22 @@ export class ShipmentService {
 
   deliverShipment(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/deliver`, {});
+  }
+
+  // Packages
+  getPackages(shipmentId: number): Observable<ShipmentPackage[]> {
+    return this.http.get<ShipmentPackage[]>(`${this.base}/${shipmentId}/packages`);
+  }
+
+  addPackage(shipmentId: number, request: CreateShipmentPackageRequest): Observable<ShipmentPackage> {
+    return this.http.post<ShipmentPackage>(`${this.base}/${shipmentId}/packages`, request);
+  }
+
+  updatePackage(shipmentId: number, packageId: number, request: Partial<CreateShipmentPackageRequest & { status: string }>): Observable<ShipmentPackage> {
+    return this.http.patch<ShipmentPackage>(`${this.base}/${shipmentId}/packages/${packageId}`, request);
+  }
+
+  removePackage(shipmentId: number, packageId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${shipmentId}/packages/${packageId}`);
   }
 }

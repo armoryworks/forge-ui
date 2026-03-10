@@ -17,10 +17,24 @@ import { MyTimeLogItem } from '../models/my-time-log-item.model';
 import { ArAgingItem } from '../models/ar-aging-item.model';
 import { RevenueItem } from '../models/revenue-item.model';
 import { SimplePnlItem } from '../models/simple-pnl-item.model';
+import { MyExpenseHistoryItem } from '../models/my-expense-history-item.model';
+import { QuoteToCloseItem } from '../models/quote-to-close-item.model';
+import { ShippingSummaryItem } from '../models/shipping-summary-item.model';
+import { TimeInStageItem } from '../models/time-in-stage-item.model';
+import { EmployeeProductivityItem } from '../models/employee-productivity-item.model';
+import { InventoryLevelItem } from '../models/inventory-level-item.model';
+import { MaintenanceReportItem } from '../models/maintenance-report-item.model';
+import { QualityScrapItem } from '../models/quality-scrap-item.model';
+import { CycleReviewItem } from '../models/cycle-review-item.model';
+import { JobMarginItem } from '../models/job-margin-item.model';
+import { MyCycleSummaryItem } from '../models/my-cycle-summary-item.model';
+import { LeadSalesItem } from '../models/lead-sales-item.model';
+import { RdReportItem } from '../models/rd-report-item.model';
 
 @Injectable({ providedIn: 'root' })
 export class ReportService {
   private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/reports`;
 
   getJobsByStage(trackTypeId?: number): Observable<JobsByStageItem[]> {
     let params = new HttpParams();
@@ -95,8 +109,64 @@ export class ReportService {
   }
 
   getSimplePnl(start: string, end: string): Observable<SimplePnlItem[]> {
-    return this.http.get<SimplePnlItem[]>(`${environment.apiUrl}/reports/simple-pnl`, {
+    return this.http.get<SimplePnlItem[]>(`${this.base}/simple-pnl`, {
       params: { start, end },
     });
+  }
+
+  getMyExpenseHistory(start: string, end: string): Observable<MyExpenseHistoryItem[]> {
+    return this.http.get<MyExpenseHistoryItem[]>(`${this.base}/my-expense-history`, { params: { start, end } });
+  }
+
+  getQuoteToClose(start: string, end: string): Observable<QuoteToCloseItem[]> {
+    return this.http.get<QuoteToCloseItem[]>(`${this.base}/quote-to-close`, { params: { start, end } });
+  }
+
+  getShippingSummary(start: string, end: string): Observable<ShippingSummaryItem[]> {
+    return this.http.get<ShippingSummaryItem[]>(`${this.base}/shipping-summary`, { params: { start, end } });
+  }
+
+  getTimeInStage(): Observable<TimeInStageItem[]> {
+    return this.http.get<TimeInStageItem[]>(`${this.base}/time-in-stage`);
+  }
+
+  // ─── Batch 4 Reports ───
+
+  getEmployeeProductivity(start: string, end: string): Observable<EmployeeProductivityItem[]> {
+    return this.http.get<EmployeeProductivityItem[]>(`${this.base}/employee-productivity`, { params: { start, end } });
+  }
+
+  getInventoryLevels(): Observable<InventoryLevelItem[]> {
+    return this.http.get<InventoryLevelItem[]>(`${this.base}/inventory-levels`);
+  }
+
+  getMaintenance(start: string, end: string): Observable<MaintenanceReportItem[]> {
+    return this.http.get<MaintenanceReportItem[]>(`${this.base}/maintenance`, { params: { start, end } });
+  }
+
+  getQualityScrap(start: string, end: string): Observable<QualityScrapItem[]> {
+    return this.http.get<QualityScrapItem[]>(`${this.base}/quality-scrap`, { params: { start, end } });
+  }
+
+  getCycleReview(): Observable<CycleReviewItem[]> {
+    return this.http.get<CycleReviewItem[]>(`${this.base}/cycle-review`);
+  }
+
+  getJobMargin(start: string, end: string): Observable<JobMarginItem[]> {
+    return this.http.get<JobMarginItem[]>(`${this.base}/job-margin`, { params: { start, end } });
+  }
+
+  // ─── Batch 5 Reports ───
+
+  getMyCycleSummary(): Observable<MyCycleSummaryItem[]> {
+    return this.http.get<MyCycleSummaryItem[]>(`${this.base}/my-cycle-summary`);
+  }
+
+  getLeadSales(start: string, end: string): Observable<LeadSalesItem> {
+    return this.http.get<LeadSalesItem>(`${this.base}/lead-sales`, { params: { start, end } });
+  }
+
+  getRdReport(start: string, end: string): Observable<RdReportItem[]> {
+    return this.http.get<RdReportItem[]>(`${this.base}/rd`, { params: { start, end } });
   }
 }

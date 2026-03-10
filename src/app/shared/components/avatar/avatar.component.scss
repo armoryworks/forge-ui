@@ -20,4 +20,10 @@
     height: $avatar-size-sm;
     font-size: $font-size-xxs;
   }
+
+  &--lg {
+    width: $avatar-size-lg;
+    height: $avatar-size-lg;
+    font-size: $font-size-md;
+  }
 }

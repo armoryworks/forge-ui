@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AdminService } from './services/admin.service';
 import { AdminUser } from './models/admin-user.model';
@@ -90,6 +90,9 @@ export class AdminComponent {
   // System Settings
   protected readonly systemSettings = signal<SystemSetting[]>([]);
   protected readonly settingsEdits = signal<Map<string, string>>(new Map());
+
+  // Logo
+  protected readonly logoPreviewUrl = computed(() => this.themeService.logoUrl());
 
   protected readonly settingDefinitions: { key: string; label: string; description: string; type: 'text' | 'number' | 'boolean' }[] = [
     { key: 'app.name', label: 'Application Name', description: 'Name displayed in the header and browser tab', type: 'text' },
@@ -430,6 +433,43 @@ export class AdminComponent {
         );
       },
       error: () => { this.saving.set(false); this.snackbar.error('Failed to save settings'); },
+    });
+  }
+
+  // ── Logo ──
+
+  protected onLogoFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+
+    this.saving.set(true);
+    this.adminService.uploadLogo(file).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.snackbar.success('Logo uploaded');
+        this.themeService.loadBrandSettings();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error('Failed to upload logo');
+      },
+    });
+  }
+
+  protected removeLogo(): void {
+    this.saving.set(true);
+    this.adminService.deleteLogo().subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.snackbar.success('Logo removed');
+        this.themeService.loadBrandSettings();
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error('Failed to remove logo');
+      },
     });
   }
 }

@@ -209,6 +209,31 @@
           </button>
         </div>
 
+        <!-- Logo Upload -->
+        <div class="settings-item settings-item--logo">
+          <div class="settings-item__header">
+            <label class="settings-item__label">Company Logo</label>
+            <span class="settings-item__description">Upload a logo to replace the default text mark in the header (max 5MB, image files)</span>
+          </div>
+          <div class="logo-upload">
+            @if (logoPreviewUrl()) {
+              <img class="logo-preview" [src]="logoPreviewUrl()" alt="Current logo" />
+              <button class="action-btn action-btn--sm" (click)="removeLogo()">
+                <span class="material-icons-outlined">delete</span> Remove
+              </button>
+            } @else {
+              <div class="logo-placeholder">
+                <span class="material-icons-outlined">image</span>
+                <span>No logo uploaded</span>
+              </div>
+            }
+            <label class="action-btn action-btn--sm action-btn--primary logo-upload-btn">
+              <span class="material-icons-outlined">upload</span> Upload Logo
+              <input type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
+            </label>
+          </div>
+        </div>
+
         <div class="settings-grid">
           @for (def of settingDefinitions; track def.key) {
             <div class="settings-item">

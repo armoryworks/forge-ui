@@ -15,6 +15,8 @@ export interface PartDetail {
   externalId: string | null;
   externalRef: string | null;
   provider: string | null;
+  preferredVendorId: number | null;
+  preferredVendorName: string | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: string;

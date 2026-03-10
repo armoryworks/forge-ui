@@ -5,6 +5,28 @@
       Add Location
     </button>
   }
+  @if (activeTab() === 'receiving') {
+    <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
+      <span class="material-icons-outlined">add</span>
+      Receive Goods
+    </button>
+  }
+  @if (activeTab() === 'stockOps') {
+    <button class="action-btn" (click)="openTransferDialog()">
+      <span class="material-icons-outlined">swap_horiz</span>
+      Transfer
+    </button>
+    <button class="action-btn" (click)="openAdjustDialog()">
+      <span class="material-icons-outlined">tune</span>
+      Adjust
+    </button>
+  }
+  @if (activeTab() === 'cycleCounts') {
+    <button class="action-btn action-btn--primary" (click)="openCreateCycleCountDialog()">
+      <span class="material-icons-outlined">add</span>
+      New Count
+    </button>
+  }
 </app-page-header>
 
 <div class="inventory-content">
@@ -20,7 +42,19 @@
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'movements'" (click)="switchTab('movements')">
       <span class="material-icons-outlined">swap_horiz</span>
-      Movement History
+      Movements
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'receiving'" (click)="switchTab('receiving')">
+      <span class="material-icons-outlined">local_shipping</span>
+      Receiving
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'stockOps'" (click)="switchTab('stockOps')">
+      <span class="material-icons-outlined">tune</span>
+      Stock Ops
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'cycleCounts'" (click)="switchTab('cycleCounts')">
+      <span class="material-icons-outlined">fact_check</span>
+      Cycle Counts
     </button>
   </div>
 
@@ -284,6 +318,79 @@
         </app-data-table>
       </div>
     }
+
+    <!-- Receiving Tab -->
+    @if (activeTab() === 'receiving') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-count">{{ receivingHistory().length }} records</span>
+        </div>
+
+        <app-data-table tableId="inventory-receiving" [columns]="receivingColumns" [data]="receivingHistory()"
+          emptyIcon="local_shipping" emptyMessage="No receiving records">
+          <ng-template appColumnCell="purchaseOrderNumber" let-row>
+            <span class="part-number">{{ $any(row).purchaseOrderNumber ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="partNumber" let-row>
+            <span class="part-number">{{ $any(row).partNumber ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="storageLocationName" let-row>
+            <span class="text-muted">{{ $any(row).storageLocationName ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="lotNumber" let-row>
+            <span class="text-muted">{{ $any(row).lotNumber ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="createdAt" let-row>
+            <span class="text-muted">{{ $any(row).createdAt | date:'short' }}</span>
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
+
+    <!-- Stock Ops Tab -->
+    @if (activeTab() === 'stockOps') {
+      <div class="tab-panel stock-ops-panel">
+        <div class="stock-ops-grid">
+          <div class="stock-ops-card" (click)="openTransferDialog()">
+            <span class="material-icons-outlined stock-ops-card__icon">swap_horiz</span>
+            <div class="stock-ops-card__title">Transfer Stock</div>
+            <div class="stock-ops-card__desc">Move items between bin locations</div>
+          </div>
+          <div class="stock-ops-card" (click)="openAdjustDialog()">
+            <span class="material-icons-outlined stock-ops-card__icon">tune</span>
+            <div class="stock-ops-card__title">Adjust Stock</div>
+            <div class="stock-ops-card__desc">Manually adjust quantity for a bin content</div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Cycle Counts Tab -->
+    @if (activeTab() === 'cycleCounts') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-count">{{ cycleCounts().length }} cycle counts</span>
+        </div>
+
+        <app-data-table tableId="inventory-cycle-counts" [columns]="cycleCountColumns" [data]="cycleCounts()"
+          emptyIcon="fact_check" emptyMessage="No cycle counts"
+          (rowClick)="openCycleCountDetail($any($event))">
+          <ng-template appColumnCell="status" let-row>
+            <span [class]="getCycleCountStatusClass($any(row).status)">{{ $any(row).status }}</span>
+          </ng-template>
+          <ng-template appColumnCell="countedAt" let-row>
+            <span class="text-muted">{{ $any(row).countedAt | date:'short' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="variance" let-row>
+            @if ($any(row).variance > 0) {
+              <span class="variance--negative">{{ $any(row).variance }}</span>
+            } @else {
+              <span class="text-muted">0</span>
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
   </div>
 </div>
 
@@ -309,5 +416,150 @@
         [disabled]="locationForm.invalid || saving()"
         (click)="saveLocation()">Create Location</button>
     </div>
+  </app-dialog>
+}
+
+<!-- Receive Dialog -->
+@if (showReceiveDialog()) {
+  <app-dialog title="Receive Goods" width="520px" (closed)="closeReceiveDialog()">
+    <div [formGroup]="receiveForm">
+      <app-input label="PO Line ID" formControlName="purchaseOrderLineId" type="number" />
+      <app-input label="Quantity Received" formControlName="quantityReceived" type="number" />
+      <app-select label="Bin Location" formControlName="locationId" [options]="binLocationOptions()" />
+      <app-input label="Lot Number" formControlName="lotNumber" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeReceiveDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="receiveViolations"
+        [disabled]="receiveForm.invalid || saving()"
+        (click)="submitReceive()">Receive</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Transfer Dialog -->
+@if (showTransferDialog()) {
+  <app-dialog title="Transfer Stock" width="520px" (closed)="closeTransferDialog()">
+    <div [formGroup]="transferForm">
+      <app-input label="Source Bin Content ID" formControlName="sourceBinContentId" type="number" />
+      <app-select label="Destination Location" formControlName="destinationLocationId" [options]="binLocationOptions()" />
+      <app-input label="Quantity" formControlName="quantity" type="number" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeTransferDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="transferViolations"
+        [disabled]="transferForm.invalid || saving()"
+        (click)="submitTransfer()">Transfer</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Adjust Dialog -->
+@if (showAdjustDialog()) {
+  <app-dialog title="Adjust Stock" width="520px" (closed)="closeAdjustDialog()">
+    <div [formGroup]="adjustForm">
+      <app-input label="Bin Content ID" formControlName="binContentId" type="number" />
+      <app-input label="New Quantity" formControlName="newQuantity" type="number" />
+      <app-input label="Reason" formControlName="reason" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeAdjustDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="adjustViolations"
+        [disabled]="adjustForm.invalid || saving()"
+        (click)="submitAdjust()">Adjust</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Create Cycle Count Dialog -->
+@if (showCreateCycleCountDialog()) {
+  <app-dialog title="New Cycle Count" width="420px" (closed)="closeCreateCycleCountDialog()">
+    <div [formGroup]="createCycleCountForm">
+      <app-select label="Location" formControlName="locationId" [options]="binLocationOptions()" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreateCycleCountDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="createCycleCountViolations"
+        [disabled]="createCycleCountForm.invalid || saving()"
+        (click)="submitCreateCycleCount()">Create</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Cycle Count Detail Dialog -->
+@if (showCycleCountDialog() && selectedCycleCount(); as cc) {
+  <app-dialog [title]="'Cycle Count — ' + cc.locationName" width="800px" (closed)="closeCycleCountDialog()">
+    <div class="cycle-count-info">
+      <div class="meta-item">
+        <span class="meta-label">Counted By</span>
+        <span class="meta-value">{{ cc.countedByName }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Date</span>
+        <span class="meta-value">{{ cc.countedAt | date:'short' }}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Status</span>
+        <span [class]="getCycleCountStatusClass(cc.status)">{{ cc.status }}</span>
+      </div>
+    </div>
+
+    <table class="bin-detail-table">
+      <thead>
+        <tr>
+          <th>Item</th>
+          <th>Expected</th>
+          <th>Actual</th>
+          <th>Variance</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (line of cc.lines; track line.id) {
+          <tr>
+            <td>{{ line.entityName }}</td>
+            <td>{{ line.expectedQuantity }}</td>
+            <td>
+              @if (cc.status === 'Pending') {
+                <input type="number" class="inline-input"
+                  [value]="line.actualQuantity"
+                  (change)="updateCycleCountLine(line.id, +$any($event.target).value)" />
+              } @else {
+                {{ line.actualQuantity }}
+              }
+            </td>
+            <td>
+              <span [class]="getVarianceClass(line.variance)">
+                {{ line.variance > 0 ? '+' : '' }}{{ line.variance }}
+              </span>
+            </td>
+            <td class="text-muted">{{ line.notes ?? '—' }}</td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="text-muted text-center">No items at this location</td></tr>
+        }
+      </tbody>
+    </table>
+
+    @if (cc.status === 'Pending') {
+      <div dialog-footer>
+        <button class="action-btn action-btn--sm" style="color: var(--error)" (click)="rejectCycleCount()">Reject</button>
+        <button class="action-btn action-btn--primary"
+          [disabled]="saving()"
+          (click)="approveCycleCount()">Approve &amp; Adjust Stock</button>
+      </div>
+    }
   </app-dialog>
 }

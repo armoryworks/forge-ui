@@ -23,6 +23,11 @@
     @if (job().customerName) {
       <span class="card__customer">{{ job().customerName }}</span>
     }
+    @if (job().billingStatus) {
+      <span class="card__billing" [class.card__billing--invoiced]="job().billingStatus === 'Invoiced'" [class.card__billing--uninvoiced]="job().billingStatus === 'Uninvoiced'" [title]="job().billingStatus!">
+        <span class="material-icons-outlined card__billing-icon">{{ job().billingStatus === 'Invoiced' ? 'paid' : 'pending' }}</span>
+      </span>
+    }
     @if (formattedDueDate()) {
       <span class="card__due" [class.card__due--overdue]="job().isOverdue">
         {{ formattedDueDate() }}

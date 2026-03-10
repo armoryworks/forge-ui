@@ -1,0 +1,92 @@
+<app-page-layout pageTitle="Expense Approval Queue">
+  <ng-container toolbar>
+    <app-input label="Search" [formControl]="searchControl" placeholder="Search by name, category..."
+      (keyup.enter)="loadPending()" />
+    <span appSpacer></span>
+    <span class="approval-queue__summary">
+      {{ pendingExpenses().length }} pending &middot; {{ getPendingTotal() | currency }}
+    </span>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="expense-approval" [columns]="columns" [data]="pendingExpenses()"
+        emptyIcon="fact_check" emptyMessage="No expenses awaiting approval"
+        (rowClick)="openReview($any($event))">
+        <ng-template appColumnCell="expenseDate" let-row>
+          <span class="text-muted">{{ row.expenseDate | date:'mediumDate' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="userName" let-row>
+          <span class="approval-queue__submitter">{{ row.userName }}</span>
+        </ng-template>
+        <ng-template appColumnCell="category" let-row>
+          <span class="chip">{{ row.category }}</span>
+        </ng-template>
+        <ng-template appColumnCell="jobNumber" let-row>
+          <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="amount" let-row>
+          <span class="approval-queue__amount">{{ row.amount | currency }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <div class="approval-queue__actions">
+            <button class="icon-btn icon-btn--success" title="Approve"
+              (click)="openReview(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">check</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" title="Reject"
+              (click)="openReview(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (reviewExpense(); as expense) {
+  <app-dialog title="Review Expense" (closed)="closeReview()">
+    <div class="review-detail">
+      <div class="review-detail__row">
+        <span class="review-detail__label">Submitted By</span>
+        <span class="review-detail__value">{{ expense.userName }}</span>
+      </div>
+      <div class="review-detail__row">
+        <span class="review-detail__label">Date</span>
+        <span class="review-detail__value">{{ expense.expenseDate | date:'mediumDate' }}</span>
+      </div>
+      <div class="review-detail__row">
+        <span class="review-detail__label">Category</span>
+        <span class="review-detail__value">{{ expense.category }}</span>
+      </div>
+      <div class="review-detail__row">
+        <span class="review-detail__label">Amount</span>
+        <span class="review-detail__value review-detail__value--amount">{{ expense.amount | currency }}</span>
+      </div>
+      @if (expense.description) {
+        <div class="review-detail__row">
+          <span class="review-detail__label">Description</span>
+          <span class="review-detail__value">{{ expense.description }}</span>
+        </div>
+      }
+      @if (expense.jobNumber) {
+        <div class="review-detail__row">
+          <span class="review-detail__label">Job</span>
+          <span class="review-detail__value">{{ expense.jobNumber }}</span>
+        </div>
+      }
+
+      <app-textarea label="Approval Notes (optional)" [formControl]="notesControl" [rows]="3" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn action-btn--danger"
+        [disabled]="processing()"
+        (click)="reject()">Reject</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="processing()"
+        (click)="approve()">Approve</button>
+    </div>
+  </app-dialog>
+}

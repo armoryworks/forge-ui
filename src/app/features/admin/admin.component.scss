@@ -272,3 +272,43 @@
   height: $input-height;
   &:focus { outline: none; border-color: var(--primary); }
 }
+
+// ─── Logo Upload ───
+.settings-item--logo {
+  margin-bottom: $sp-xl;
+  padding-bottom: $sp-xl;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.logo-upload {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  margin-top: $sp-md;
+}
+
+.logo-preview {
+  height: 40px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  border: $border-width-thin solid var(--border);
+  padding: $sp-sm;
+  background: var(--surface);
+}
+
+.logo-placeholder {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+  }
+}
+
+.logo-upload-btn {
+  cursor: pointer;
+}

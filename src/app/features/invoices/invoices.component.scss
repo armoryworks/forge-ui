@@ -155,3 +155,53 @@
   padding-top: $sp-md;
   border-top: $border-width-thin solid var(--border);
 }
+
+// --- Nudge Banner ---
+.nudge-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--warning-light);
+  border-bottom: $border-width-thin solid var(--warning);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: color-mix(in srgb, var(--warning) 20%, transparent);
+  }
+
+  &__icon {
+    font-size: $icon-size-md;
+    color: var(--warning);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+  }
+
+  &__action {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--warning);
+  }
+}
+
+// --- Nudge Badge ---
+.nudge-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-sm;
+  border-radius: 99px;
+  background: var(--warning);
+  color: white;
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  line-height: 1;
+}

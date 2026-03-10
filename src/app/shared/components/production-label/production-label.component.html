@@ -1,0 +1,31 @@
+<div class="label" [class]="'label--' + size()">
+  <div class="label__header">
+    <span class="label__title">{{ label().title }}</span>
+    @if (label().subtitle) {
+      <span class="label__subtitle">{{ label().subtitle }}</span>
+    }
+  </div>
+
+  @if (barcodeDataUrl()) {
+    <div class="label__barcode">
+      <img [src]="barcodeDataUrl()" [alt]="label().barcodeValue" />
+    </div>
+  }
+
+  <div class="label__value">{{ label().barcodeValue }}</div>
+
+  @if (label().fields?.length) {
+    <div class="label__fields">
+      @for (field of label().fields!; track field.label) {
+        <div class="label__field">
+          <span class="label__field-label">{{ field.label }}</span>
+          <span class="label__field-value">{{ field.value }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <button class="label__print-btn" (click)="print()" title="Print label">
+    <span class="material-icons-outlined">print</span>
+  </button>
+</div>

@@ -84,6 +84,22 @@
   flex: 1;
 }
 
+.card__billing {
+  @include flex-center;
+
+  &--invoiced {
+    color: var(--success);
+  }
+
+  &--uninvoiced {
+    color: var(--warning);
+  }
+}
+
+.card__billing-icon {
+  font-size: $icon-size-xs;
+}
+
 .card__due {
   font-size: $font-size-xxs;
   color: var(--text-secondary);

@@ -1,0 +1,82 @@
+@if (panelOpen()) {
+  <div class="chat-backdrop" (click)="toggle()"></div>
+  <div class="chat-panel">
+    <div class="chat-panel__header">
+      @if (selectedConversation()) {
+        <button class="icon-btn chat-panel__back" (click)="backToList()" aria-label="Back to conversations">
+          <span class="material-icons-outlined">arrow_back</span>
+        </button>
+        <app-avatar
+          [initials]="selectedConversation()!.userInitials"
+          [color]="selectedConversation()!.userColor"
+          size="sm" />
+        <span class="chat-panel__header-name">{{ selectedConversation()!.userName }}</span>
+      } @else {
+        <span class="chat-panel__header-title">Chat</span>
+      }
+      <span class="chat-panel__spacer"></span>
+      <button class="icon-btn" (click)="toggle()" aria-label="Close chat">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    @if (!selectedConversation()) {
+      <div class="chat-panel__conversations">
+        @if (conversations().length === 0) {
+          <div class="chat-panel__empty">
+            <span class="material-icons-outlined chat-panel__empty-icon">chat_bubble_outline</span>
+            <span class="chat-panel__empty-text">No conversations yet</span>
+          </div>
+        }
+        @for (conv of conversations(); track conv.userId) {
+          <button class="conversation" (click)="selectConversation(conv)">
+            <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="sm" />
+            <div class="conversation__content">
+              <div class="conversation__top">
+                <span class="conversation__name">{{ conv.userName }}</span>
+                @if (conv.lastMessageAt) {
+                  <span class="conversation__time">{{ formatDate(conv.lastMessageAt) }}</span>
+                }
+              </div>
+              @if (conv.lastMessage) {
+                <span class="conversation__preview">{{ conv.lastMessage }}</span>
+              }
+            </div>
+            @if (conv.unreadCount > 0) {
+              <span class="conversation__badge">{{ conv.unreadCount }}</span>
+            }
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="chat-panel__messages" #messagesContainer>
+        @for (msg of messages(); track msg.id) {
+          <div class="message" [class.message--own]="isOwnMessage(msg)">
+            @if (!isOwnMessage(msg)) {
+              <app-avatar [initials]="msg.senderInitials" [color]="msg.senderColor" size="sm" />
+            }
+            <div class="message__bubble">
+              <span class="message__text">{{ msg.content }}</span>
+              <span class="message__time">{{ formatTime(msg.createdAt) }}</span>
+            </div>
+          </div>
+        }
+      </div>
+      <div class="chat-panel__input">
+        <input
+          class="chat-panel__input-field"
+          type="text"
+          placeholder="Type a message..."
+          [formControl]="messageControl"
+          (keydown)="onKeydown($event)" />
+        <button
+          class="icon-btn chat-panel__send"
+          [disabled]="!messageControl.value?.trim()"
+          (click)="sendMessage()"
+          aria-label="Send message">
+          <span class="material-icons-outlined">send</span>
+        </button>
+      </div>
+    }
+  </div>
+}

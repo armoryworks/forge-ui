@@ -1,0 +1,197 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+// ─── Header ───
+.clock-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-lg $sp-xl;
+  background: var(--header);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.clock-header__title {
+  font-family: $font-family-primary;
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.clock-header__time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $sp-xs;
+}
+
+.clock-header__clock {
+  font-family: $font-family-mono;
+  font-size: $font-size-xl;
+  font-weight: 600;
+}
+
+.clock-header__date {
+  font-size: $font-size-sm;
+  opacity: 0.8;
+}
+
+// ─── Body ───
+.clock-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-xl;
+  flex: 1;
+  padding: $sp-xl;
+  overflow: hidden;
+}
+
+// ─── Sections ───
+.clock-section {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.clock-section__title {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-md;
+  font-weight: 700;
+  margin: 0 0 $sp-lg;
+  padding-bottom: $sp-md;
+  border-bottom: $border-width solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+  }
+
+  &--active .material-icons-outlined {
+    color: var(--success);
+  }
+}
+
+// ─── Grid ───
+.clock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: $sp-lg;
+  overflow-y: auto;
+  padding: $sp-sm;
+  @include custom-scrollbar(4px);
+}
+
+// ─── Cards (touch targets) ───
+.clock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl $sp-lg;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+  min-height: 88px;
+  font-family: $font-family-primary;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--in {
+    border-left: 3px solid var(--success);
+  }
+
+  &--processing {
+    opacity: 0.7;
+  }
+}
+
+.clock-card__name {
+  font-size: $font-size-md;
+  font-weight: 600;
+  text-align: center;
+}
+
+.clock-card__since {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  font-family: $font-family-mono;
+}
+
+.clock-card__action {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--success);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &--out {
+    color: var(--error);
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.clock-card__spinner {
+  animation: spin 1s linear infinite;
+}
+
+// ─── Empty ───
+.clock-empty {
+  grid-column: 1 / -1;
+  font-size: $font-size-md;
+  color: var(--text-muted);
+  text-align: center;
+  padding: $sp-3xl;
+}
+
+// ─── Error (overlaid) ───
+.clock-error {
+  position: fixed;
+  top: $sp-xl;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  background: var(--error-light);
+  color: var(--error);
+  border: $border-width-thin solid var(--error);
+  z-index: $z-toast;
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.clock-error__icon {
+  font-size: $icon-size-xl;
+}

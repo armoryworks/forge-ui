@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { AuthService } from '../../shared/services/auth.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { NavGroup } from '../../shared/models/nav-group.model';
 import { NavItem } from '../../shared/models/nav-item.model';
 
@@ -15,8 +16,9 @@ import { NavItem } from '../../shared/models/nav-item.model';
 })
 export class SidebarComponent {
   private readonly auth = inject(AuthService);
+  protected readonly layout = inject(LayoutService);
 
-  protected readonly collapsed = signal(this.loadCollapsedState());
+  protected readonly collapsed = computed(() => !this.layout.sidebarExpanded());
 
   private readonly allNavGroups: NavGroup[] = [
     {
@@ -61,9 +63,13 @@ export class SidebarComponent {
   protected readonly bottomItems = computed(() => this.filterGroup(this.allBottomItems));
 
   protected toggleCollapse(): void {
-    const next = !this.collapsed();
-    this.collapsed.set(next);
-    localStorage.setItem('qbe-sidebar-collapsed', String(next));
+    this.layout.toggleSidebar();
+  }
+
+  protected onNavClick(): void {
+    if (this.layout.isMobile()) {
+      this.layout.closeMobileMenu();
+    }
   }
 
   private filterGroups(groups: NavGroup[]): NavGroup[] {
@@ -83,7 +89,4 @@ export class SidebarComponent {
     return this.auth.hasAnyRole(item.allowedRoles);
   }
 
-  private loadCollapsedState(): boolean {
-    return localStorage.getItem('qbe-sidebar-collapsed') !== 'false';
-  }
 }

@@ -1,0 +1,124 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: $z-loading;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-3xl;
+  cursor: pointer;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.ambient__clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.ambient__time {
+  font-size: 80px;
+  font-weight: 200;
+  letter-spacing: -2px;
+  font-family: $font-family-primary;
+}
+
+.ambient__date {
+  font-size: $font-size-xl;
+  font-weight: 300;
+  color: rgba(white, 0.6);
+}
+
+.ambient__kpis {
+  display: flex;
+  gap: $sp-3xl;
+}
+
+.ambient__kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+
+  &--warning .ambient__kpi-value {
+    color: #fbbf24;
+  }
+}
+
+.ambient__kpi-value {
+  font-size: $font-size-heading;
+  font-weight: 700;
+  font-family: $font-family-mono;
+}
+
+.ambient__kpi-label {
+  @include uppercase-label($font-size-xs, 1px, 500);
+  color: rgba(white, 0.5);
+}
+
+.ambient__deadlines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  max-width: 500px;
+  width: 100%;
+}
+
+.ambient__section-label {
+  @include uppercase-label($font-size-xs, 1px, 600);
+  color: rgba(white, 0.4);
+  margin-bottom: $sp-sm;
+}
+
+.ambient__deadline {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  background: rgba(white, 0.05);
+
+  &--overdue {
+    border-left: 3px solid #ef4444;
+  }
+}
+
+.ambient__deadline-job {
+  font-weight: 700;
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  min-width: 80px;
+}
+
+.ambient__deadline-desc {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: rgba(white, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ambient__deadline-date {
+  font-size: $font-size-xs;
+  color: rgba(white, 0.4);
+  font-family: $font-family-mono;
+}
+
+.ambient__hint {
+  position: absolute;
+  bottom: $sp-xl;
+  font-size: $font-size-xs;
+  color: rgba(white, 0.2);
+}

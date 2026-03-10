@@ -1,11 +1,16 @@
 <app-page-header title="Calendar">
   <div class="calendar-nav">
     <app-select label="Track Type" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
-    <button class="icon-btn" (click)="prevMonth()">
+    <div class="view-toggle">
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'month'" (click)="setView('month')">Month</button>
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'week'" (click)="setView('week')">Week</button>
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'day'" (click)="setView('day')">Day</button>
+    </div>
+    <button class="icon-btn" (click)="prev()">
       <span class="material-icons-outlined">chevron_left</span>
     </button>
-    <span class="month-label">{{ monthLabel() }}</span>
-    <button class="icon-btn" (click)="nextMonth()">
+    <span class="month-label">{{ headerLabel() }}</span>
+    <button class="icon-btn" (click)="next()">
       <span class="material-icons-outlined">chevron_right</span>
     </button>
     <button class="action-btn action-btn--sm" (click)="today()">Today</button>
@@ -18,35 +23,124 @@
     <span>Loading...</span>
   </div>
 } @else {
-  <div class="calendar-grid">
-    <div class="calendar-header">
-      @for (day of weekdays; track day) {
-        <div class="weekday-label">{{ day }}</div>
-      }
+  <!-- Month View -->
+  @if (view() === 'month') {
+    <div class="calendar-grid">
+      <div class="calendar-header">
+        @for (day of weekdays; track day) {
+          <div class="weekday-label">{{ day }}</div>
+        }
+      </div>
+      <div class="calendar-body">
+        @for (day of calendarDays(); track day.date.getTime()) {
+          <div class="calendar-cell"
+            [class.calendar-cell--other]="!day.isCurrentMonth"
+            [class.calendar-cell--today]="day.isToday"
+            (click)="onDayClick(day)">
+            <div class="cell-date">{{ day.date.getDate() }}</div>
+            <div class="cell-jobs">
+              @for (job of visibleJobs(day); track job.id) {
+                <div class="job-chip" [style.border-left-color]="job.stageColor"
+                     [style.--job-tint]="job.stageColor"
+                     (click)="onJobClick(job); $event.stopPropagation()" [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')">
+                  <span class="job-chip__number">{{ job.jobNumber }}</span>
+                  <span class="job-chip__title">{{ job.title }}</span>
+                  @if (job.isOverdue) {
+                    <span class="material-icons-outlined job-chip__overdue">warning</span>
+                  }
+                </div>
+              }
+              @if (overflowCount(day) > 0) {
+                <div class="job-overflow">+{{ overflowCount(day) }} more</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
     </div>
-    <div class="calendar-body">
-      @for (day of calendarDays(); track day.date.getTime()) {
-        <div class="calendar-cell"
-          [class.calendar-cell--other]="!day.isCurrentMonth"
-          [class.calendar-cell--today]="day.isToday">
-          <div class="cell-date">{{ day.date.getDate() }}</div>
-          <div class="cell-jobs">
-            @for (job of visibleJobs(day); track job.id) {
-              <div class="job-chip" [style.border-left-color]="job.stageColor"
-                   (click)="onJobClick(job)" [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')">
+  }
+
+  <!-- Week View -->
+  @if (view() === 'week') {
+    <div class="week-grid">
+      <div class="week-header">
+        @for (day of weekDays(); track day.date.getTime()) {
+          <div class="week-header__cell" [class.week-header__cell--today]="day.isToday"
+               (click)="onDayClick(day)">
+            <span class="week-header__weekday">{{ weekdays[day.date.getDay()] }}</span>
+            <span class="week-header__date" [class.week-header__date--today]="day.isToday">{{ day.date.getDate() }}</span>
+          </div>
+        }
+      </div>
+      <div class="week-body">
+        @for (day of weekDays(); track day.date.getTime()) {
+          <div class="week-column" [class.week-column--today]="day.isToday">
+            @for (job of day.jobs; track job.id) {
+              <div class="job-chip job-chip--week" [style.border-left-color]="job.stageColor"
+                   [style.--job-tint]="job.stageColor"
+                   (click)="onJobClick(job)" [title]="job.title">
                 <span class="job-chip__number">{{ job.jobNumber }}</span>
                 <span class="job-chip__title">{{ job.title }}</span>
                 @if (job.isOverdue) {
                   <span class="material-icons-outlined job-chip__overdue">warning</span>
                 }
+                @if (job.customerName) {
+                  <span class="job-chip__customer">{{ job.customerName }}</span>
+                }
               </div>
             }
-            @if (overflowCount(day) > 0) {
-              <div class="job-overflow">+{{ overflowCount(day) }} more</div>
+            @if (day.jobs.length === 0) {
+              <span class="week-column__empty">No jobs</span>
             }
           </div>
-        </div>
-      }
+        }
+      </div>
     </div>
-  </div>
+  }
+
+  <!-- Day View -->
+  @if (view() === 'day') {
+    <div class="day-view">
+      <div class="day-view__header">
+        <span class="day-view__count">{{ dayJobs().length }} job{{ dayJobs().length !== 1 ? 's' : '' }} due</span>
+      </div>
+      <div class="day-view__list">
+        @for (job of dayJobs(); track job.id) {
+          <div class="day-job" [style.border-left-color]="job.stageColor" [style.--job-tint]="job.stageColor" (click)="onJobClick(job)">
+            <div class="day-job__header">
+              <span class="day-job__number">{{ job.jobNumber }}</span>
+              <span class="day-job__title">{{ job.title }}</span>
+              @if (job.isOverdue) {
+                <span class="material-icons-outlined day-job__overdue">warning</span>
+              }
+            </div>
+            <div class="day-job__meta">
+              @if (job.customerName) {
+                <span class="day-job__customer">
+                  <span class="material-icons-outlined">person</span> {{ job.customerName }}
+                </span>
+              }
+              <span class="day-job__stage">
+                <span class="material-icons-outlined">view_kanban</span> {{ job.stageName }}
+              </span>
+              @if (job.assigneeInitials) {
+                <span class="day-job__assignee">
+                  <span class="material-icons-outlined">assignment_ind</span> {{ job.assigneeInitials }}
+                </span>
+              }
+              <span class="day-job__priority chip chip--{{ job.priorityName === 'High' ? 'error' : job.priorityName === 'Medium' ? 'warning' : 'muted' }}">
+                {{ job.priorityName }}
+              </span>
+            </div>
+          </div>
+        }
+        @if (dayJobs().length === 0) {
+          <div class="day-view__empty">
+            <span class="material-icons-outlined">event_available</span>
+            <span>No jobs due on this day</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
 }

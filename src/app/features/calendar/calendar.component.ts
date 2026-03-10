@@ -8,6 +8,8 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { KanbanService } from '../kanban/services/kanban.service';
 
+export type CalendarView = 'month' | 'week' | 'day';
+
 @Component({
   selector: 'app-calendar',
   standalone: true,
@@ -26,8 +28,10 @@ export class CalendarComponent {
   protected readonly currentDate = signal(new Date());
   protected readonly trackTypeOptions = signal<SelectOption[]>([]);
   protected readonly trackTypeControl = new FormControl<number | null>(null);
+  protected readonly view = signal<CalendarView>('month');
 
   protected readonly MAX_VISIBLE_JOBS = 3;
+  protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
 
   protected readonly weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
@@ -38,13 +42,31 @@ export class CalendarComponent {
     return all.filter(j => j.trackTypeId === ttId);
   });
 
-  protected readonly monthLabel = computed(() => {
+  protected readonly headerLabel = computed(() => {
     const d = this.currentDate();
-    return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const v = this.view();
+    if (v === 'month') return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    if (v === 'day') return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const week = this.getWeekDays(d);
+    const start = week[0];
+    const end = week[6];
+    if (start.getMonth() === end.getMonth()) {
+      return `${start.toLocaleDateString('en-US', { month: 'long' })} ${start.getDate()}–${end.getDate()}, ${start.getFullYear()}`;
+    }
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
   });
 
   protected readonly calendarDays = computed(() => {
     return this.buildCalendar(this.currentDate(), this.jobs());
+  });
+
+  protected readonly weekDays = computed(() => {
+    return this.buildWeek(this.currentDate(), this.jobs());
+  });
+
+  protected readonly dayJobs = computed(() => {
+    const dateStr = this.toDateStr(this.currentDate());
+    return this.jobs().filter(j => j.dueDate?.split('T')[0] === dateStr);
   });
 
   constructor() {
@@ -57,7 +79,6 @@ export class CalendarComponent {
     });
 
     this.trackTypeControl.valueChanges.subscribe(() => {
-      // Trigger recomputation via signal dependency
       this.allJobs.update(j => [...j]);
     });
   }
@@ -74,6 +95,11 @@ export class CalendarComponent {
     this.router.navigate(['/kanban'], { queryParams: { jobId: job.id } });
   }
 
+  protected onDayClick(day: CalendarDay): void {
+    this.currentDate.set(day.date);
+    this.view.set('day');
+  }
+
   protected overflowCount(day: CalendarDay): number {
     return Math.max(0, day.jobs.length - this.MAX_VISIBLE_JOBS);
   }
@@ -82,18 +108,54 @@ export class CalendarComponent {
     return day.jobs.slice(0, this.MAX_VISIBLE_JOBS);
   }
 
-  protected prevMonth(): void {
-    const d = this.currentDate();
-    this.currentDate.set(new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  protected setView(v: CalendarView): void {
+    this.view.set(v);
   }
 
-  protected nextMonth(): void {
+  protected prev(): void {
     const d = this.currentDate();
-    this.currentDate.set(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+    const v = this.view();
+    if (v === 'month') this.currentDate.set(new Date(d.getFullYear(), d.getMonth() - 1, 1));
+    else if (v === 'week') this.currentDate.set(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 7));
+    else this.currentDate.set(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
+  }
+
+  protected next(): void {
+    const d = this.currentDate();
+    const v = this.view();
+    if (v === 'month') this.currentDate.set(new Date(d.getFullYear(), d.getMonth() + 1, 1));
+    else if (v === 'week') this.currentDate.set(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 7));
+    else this.currentDate.set(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
   }
 
   protected today(): void {
     this.currentDate.set(new Date());
+  }
+
+  protected formatHour(h: number): string {
+    if (h === 0) return '12 AM';
+    if (h < 12) return `${h} AM`;
+    if (h === 12) return '12 PM';
+    return `${h - 12} PM`;
+  }
+
+  private getWeekDays(d: Date): Date[] {
+    const dayOfWeek = d.getDay();
+    const start = new Date(d.getFullYear(), d.getMonth(), d.getDate() - dayOfWeek);
+    return Array.from({ length: 7 }, (_, i) => new Date(start.getFullYear(), start.getMonth(), start.getDate() + i));
+  }
+
+  private buildWeek(current: Date, jobs: CalendarJob[]): CalendarDay[] {
+    const weekDates = this.getWeekDays(current);
+    const todayStr = this.toDateStr(new Date());
+    const jobsByDate = this.buildJobsByDate(jobs);
+
+    return weekDates.map(date => ({
+      date,
+      isCurrentMonth: date.getMonth() === current.getMonth(),
+      isToday: this.toDateStr(date) === todayStr,
+      jobs: jobsByDate.get(this.toDateStr(date)) ?? [],
+    }));
   }
 
   private buildCalendar(current: Date, jobs: CalendarJob[]): CalendarDay[] {
@@ -105,18 +167,8 @@ export class CalendarComponent {
     const startOffset = firstDay.getDay();
     const totalDays = lastDay.getDate();
 
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
-    // Build job-by-date map
-    const jobsByDate = new Map<string, CalendarJob[]>();
-    for (const job of jobs) {
-      if (!job.dueDate) continue;
-      const dateKey = job.dueDate.split('T')[0];
-      const list = jobsByDate.get(dateKey) ?? [];
-      list.push(job);
-      jobsByDate.set(dateKey, list);
-    }
+    const todayStr = this.toDateStr(new Date());
+    const jobsByDate = this.buildJobsByDate(jobs);
 
     const days: CalendarDay[] = [];
 
@@ -161,6 +213,18 @@ export class CalendarComponent {
     }
 
     return days;
+  }
+
+  private buildJobsByDate(jobs: CalendarJob[]): Map<string, CalendarJob[]> {
+    const map = new Map<string, CalendarJob[]>();
+    for (const job of jobs) {
+      if (!job.dueDate) continue;
+      const dateKey = job.dueDate.split('T')[0];
+      const list = map.get(dateKey) ?? [];
+      list.push(job);
+      map.set(dateKey, list);
+    }
+    return map;
   }
 
   private toDateStr(d: Date): string {

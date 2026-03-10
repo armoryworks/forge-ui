@@ -224,6 +224,177 @@
         <app-data-table tableId="report-pnl" [columns]="pnlColumns" [data]="simplePnlData()"
                         emptyIcon="balance" emptyMessage="No financial data" />
       }
+
+      <!-- My Expense History -->
+      @if (activeReport() === 'my-expense-history') {
+        <app-data-table tableId="report-my-expenses" [columns]="myExpenseColumns" [data]="myExpenseHistoryData()"
+                        emptyIcon="receipt" emptyMessage="No expenses found" />
+      }
+
+      <!-- Quote-to-Close -->
+      @if (activeReport() === 'quote-to-close') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="quoteToCloseChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-quote-to-close" [columns]="quoteToCloseColumns" [data]="quoteToCloseData()"
+                        emptyIcon="handshake" emptyMessage="No quote data" />
+      }
+
+      <!-- Shipping Summary -->
+      @if (activeReport() === 'shipping-summary') {
+        <app-data-table tableId="report-shipping-summary" [columns]="shippingSummaryColumns" [data]="shippingSummaryData()"
+                        emptyIcon="local_shipping" emptyMessage="No shipping data" />
+      }
+
+      <!-- Time in Stage -->
+      @if (activeReport() === 'time-in-stage') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="timeInStageChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-time-in-stage" [columns]="timeInStageColumns" [data]="timeInStageData()"
+                        emptyIcon="hourglass_bottom" emptyMessage="No stage data" />
+      }
+      <!-- Employee Productivity -->
+      @if (activeReport() === 'employee-productivity') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="employeeProductivityChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-employee-productivity" [columns]="employeeProductivityColumns" [data]="employeeProductivityData()"
+                        emptyIcon="person_search" emptyMessage="No productivity data" />
+      }
+
+      <!-- Inventory Levels -->
+      @if (activeReport() === 'inventory-levels') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="inventoryLevelsChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-inventory-levels" [columns]="inventoryLevelsColumns" [data]="inventoryLevelsData()"
+                        emptyIcon="inventory_2" emptyMessage="No inventory data" />
+      }
+
+      <!-- Maintenance -->
+      @if (activeReport() === 'maintenance') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="maintenanceChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-maintenance" [columns]="maintenanceColumns" [data]="maintenanceData()"
+                        emptyIcon="build" emptyMessage="No maintenance data" />
+      }
+
+      <!-- Quality / Scrap Rate -->
+      @if (activeReport() === 'quality-scrap') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="qualityScrapChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-quality-scrap" [columns]="qualityScrapColumns" [data]="qualityScrapData()"
+                        emptyIcon="verified" emptyMessage="No production data" />
+      }
+
+      <!-- Cycle Review -->
+      @if (activeReport() === 'cycle-review') {
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="cycleReviewChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-cycle-review" [columns]="cycleReviewColumns" [data]="cycleReviewData()"
+                        emptyIcon="event_repeat" emptyMessage="No cycle data" />
+      }
+
+      <!-- My Cycle Summary -->
+      @if (activeReport() === 'my-cycle-summary') {
+        <app-data-table tableId="report-my-cycle-summary" [columns]="myCycleSummaryColumns" [data]="myCycleSummaryData()"
+                        emptyIcon="event_repeat" emptyMessage="No cycle entries assigned to you" />
+      }
+
+      <!-- Lead & Sales -->
+      @if (activeReport() === 'lead-sales') {
+        @if (leadSalesData(); as ls) {
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ ls.newLeads }}</span>
+              <span class="kpi-card__label">New Leads</span>
+            </div>
+            <div class="kpi-card kpi-card--success">
+              <span class="kpi-card__value">{{ ls.convertedLeads }}</span>
+              <span class="kpi-card__label">Converted</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ ls.conversionRate | number:'1.1-1' }}%</span>
+              <span class="kpi-card__label">Conversion Rate</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ ls.totalQuotes }}</span>
+              <span class="kpi-card__label">Total Quotes</span>
+            </div>
+            <div class="kpi-card">
+              <span class="kpi-card__value">{{ ls.totalSalesOrders }}</span>
+              <span class="kpi-card__label">Total SOs</span>
+            </div>
+            <div class="kpi-card kpi-card--success">
+              <span class="kpi-card__value">{{ ls.totalSalesOrderValue | currency }}</span>
+              <span class="kpi-card__label">SO Value</span>
+            </div>
+          </div>
+        } @else {
+          <div class="page-loading">No lead & sales data available</div>
+        }
+      }
+
+      <!-- R&D Report -->
+      @if (activeReport() === 'rd') {
+        <app-data-table tableId="report-rd" [columns]="rdReportColumns" [data]="rdReportData()"
+                        emptyIcon="science" emptyMessage="No R&D jobs found" />
+      }
+
+      <!-- Job Margin -->
+      @if (activeReport() === 'job-margin') {
+        <div class="kpi-row">
+          <div class="kpi-card kpi-card--success">
+            <span class="kpi-card__value">{{ jobMarginTotals().totalRevenue | currency }}</span>
+            <span class="kpi-card__label">Total Revenue</span>
+          </div>
+          <div class="kpi-card kpi-card--error">
+            <span class="kpi-card__value">{{ jobMarginTotals().totalCost | currency }}</span>
+            <span class="kpi-card__label">Total Cost</span>
+          </div>
+          <div class="kpi-card" [class.kpi-card--success]="jobMarginTotals().totalMargin >= 0" [class.kpi-card--error]="jobMarginTotals().totalMargin < 0">
+            <span class="kpi-card__value">{{ jobMarginTotals().totalMargin | currency }}</span>
+            <span class="kpi-card__label">Total Margin</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-card__value">{{ jobMarginTotals().avgMarginPct }}%</span>
+            <span class="kpi-card__label">Avg Margin</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas baseChart
+                  type="bar"
+                  [data]="jobMarginChart()"
+                  [options]="barOptions"></canvas>
+        </div>
+        <app-data-table tableId="report-job-margin" [columns]="jobMarginColumns" [data]="jobMarginData()"
+                        emptyIcon="trending_up" emptyMessage="No job margin data" />
+      }
     }
   </main>
 </div>

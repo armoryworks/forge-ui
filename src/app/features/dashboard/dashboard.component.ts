@@ -10,6 +10,8 @@ import { TodaysTasksWidgetComponent } from './components/todays-tasks-widget.com
 import { CycleProgressWidgetComponent } from './components/cycle-progress-widget.component';
 import { OpenOrdersWidgetComponent } from './components/open-orders-widget.component';
 import { EodPromptWidgetComponent } from './components/eod-prompt-widget.component';
+import { MarginSummaryWidgetComponent } from './widgets/margin-summary-widget/margin-summary-widget.component';
+import { AmbientModeComponent } from './components/ambient-mode.component';
 import { DashboardData } from './models/dashboard-data.model';
 import { DashboardService } from './services/dashboard.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -29,6 +31,8 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
     CycleProgressWidgetComponent,
     OpenOrdersWidgetComponent,
     EodPromptWidgetComponent,
+    MarginSummaryWidgetComponent,
+    AmbientModeComponent,
     PageHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -41,6 +45,7 @@ export class DashboardComponent implements OnInit {
 
   protected readonly data = signal<DashboardData | null>(null);
   protected readonly error = signal<string | null>(null);
+  protected readonly ambientMode = signal(false);
 
   ngOnInit(): void {
     this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
