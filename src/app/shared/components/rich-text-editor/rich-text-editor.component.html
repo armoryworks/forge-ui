@@ -1,0 +1,12 @@
+@if (label()) {
+  <label class="rich-text-editor__label">{{ label() }}</label>
+}
+<quill-editor
+  [formControl]="editorControl"
+  [modules]="modules"
+  [placeholder]="placeholder()"
+  [readOnly]="isDisabled()"
+  [styles]="{ height: height() }"
+  (onContentChanged)="onContentChanged($event)"
+  (onBlur)="onBlur()"
+  theme="snow" />

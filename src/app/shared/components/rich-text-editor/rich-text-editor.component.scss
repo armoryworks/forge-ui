@@ -1,0 +1,58 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.rich-text-editor__label {
+  @include uppercase-label($font-size-xxs, 0.5px, 500);
+  display: block;
+  margin-bottom: $sp-sm;
+  color: var(--text-secondary);
+}
+
+/* stylelint-disable selector-pseudo-element-no-unknown */
+::ng-deep {
+  .ql-toolbar {
+    border-color: var(--border) !important; /* override third-party quill styles */
+    background: var(--surface);
+    font-family: $font-family-primary;
+    padding: $sp-sm $sp-md;
+  }
+
+  .ql-container {
+    border-color: var(--border) !important; /* override third-party quill styles */
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+  }
+
+  .ql-editor {
+    color: var(--text);
+
+    &.ql-blank::before {
+      color: var(--text-muted);
+      font-style: normal;
+    }
+  }
+
+  .ql-snow .ql-stroke {
+    stroke: var(--text-secondary);
+  }
+
+  .ql-snow .ql-fill {
+    fill: var(--text-secondary);
+  }
+
+  .ql-snow .ql-picker-label {
+    color: var(--text-secondary);
+  }
+
+  .ql-snow .ql-active .ql-stroke {
+    stroke: var(--primary);
+  }
+
+  .ql-snow .ql-active .ql-fill {
+    fill: var(--primary);
+  }
+}
