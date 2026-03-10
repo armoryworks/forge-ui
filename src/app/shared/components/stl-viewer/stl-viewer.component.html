@@ -1,0 +1,15 @@
+<div class="stl-viewer" #container [style.height]="height()">
+  @if (loading()) {
+    <div class="stl-viewer__loading">
+      <span class="material-icons-outlined spin">progress_activity</span>
+      <span>Loading 3D model...</span>
+    </div>
+  }
+  @if (error()) {
+    <div class="stl-viewer__error">
+      <span class="material-icons-outlined">error_outline</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+  <canvas #canvas [class.stl-viewer__canvas--hidden]="loading() || error()"></canvas>
+</div>

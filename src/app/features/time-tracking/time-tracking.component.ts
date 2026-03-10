@@ -134,8 +134,8 @@ export class TimeTrackingComponent implements OnDestroy {
 
   private async initTimerHub(): Promise<void> {
     await this.timerHub.connect();
-    this.timerHub.onTimerStartedEvent(() => this.loadEntries());
-    this.timerHub.onTimerStoppedEvent(() => this.loadEntries());
+    this.timerHub.onTimerStartedEvent((_event) => this.loadEntries());
+    this.timerHub.onTimerStoppedEvent((_event) => this.loadEntries());
   }
 
   protected loadEntries(): void {

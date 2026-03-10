@@ -88,6 +88,13 @@
             <span class="tab-badge">{{ part.usedIn.length }}</span>
           }
         </button>
+        @if (stlFile()) {
+          <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'viewer'"
+            (click)="detailTab.set('viewer')">
+            <span class="material-icons-outlined detail-tab__icon">view_in_ar</span>
+            3D View
+          </button>
+        }
       </div>
 
       <div class="detail-body" [appLoadingBlock]="detailLoading()">
@@ -217,6 +224,11 @@
             } @else {
               <app-empty-state icon="link_off" message="Not used in any assemblies" />
             }
+          }
+
+          <!-- 3D Viewer Tab -->
+          @if (detailTab() === 'viewer' && stlFileUrl()) {
+            <app-stl-viewer [url]="stlFileUrl()!" height="100%" />
           }
       </div>
     </div>

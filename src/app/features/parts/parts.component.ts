@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -25,6 +25,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { StlViewerComponent } from '../../shared/components/stl-viewer/stl-viewer.component';
+import { FileAttachment } from '../../shared/models/file.model';
 
 @Component({
   selector: 'app-parts',
@@ -34,7 +36,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
-    EmptyStateComponent, LoadingBlockDirective,
+    EmptyStateComponent, LoadingBlockDirective, StlViewerComponent,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
@@ -132,7 +134,17 @@ export class PartsComponent {
   ];
 
   // Detail tab
-  protected readonly detailTab = signal<'info' | 'bom' | 'usage'>('info');
+  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'viewer'>('info');
+
+  // Files
+  protected readonly partFiles = signal<FileAttachment[]>([]);
+  protected readonly stlFile = computed(() => {
+    return this.partFiles().find(f => f.fileName.toLowerCase().endsWith('.stl')) ?? null;
+  });
+  protected readonly stlFileUrl = computed(() => {
+    const file = this.stlFile();
+    return file ? this.partsService.getFileDownloadUrl(file.id) : null;
+  });
 
   protected readonly partStatuses: PartStatus[] = ['Active', 'Draft', 'Obsolete'];
 
@@ -165,8 +177,15 @@ export class PartsComponent {
   protected selectPart(part: PartListItem): void {
     this.detailLoading.set(true);
     this.detailTab.set('info');
+    this.partFiles.set([]);
     this.partsService.getPartById(part.id).subscribe({
-      next: (detail) => { this.selectedPart.set(detail); this.detailLoading.set(false); },
+      next: (detail) => {
+        this.selectedPart.set(detail);
+        this.detailLoading.set(false);
+        this.partsService.getPartFiles(detail.id).subscribe({
+          next: (files) => this.partFiles.set(files),
+        });
+      },
       error: () => this.detailLoading.set(false),
     });
   }

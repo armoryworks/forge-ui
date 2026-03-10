@@ -1,7 +1,19 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
 
 import { DashboardWidgetComponent } from '../../shared/components/dashboard-widget/dashboard-widget.component';
 import { KpiChipComponent } from '../../shared/components/kpi-chip/kpi-chip.component';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ActivityWidgetComponent } from './components/activity-widget.component';
 import { DeadlinesWidgetComponent } from './components/deadlines-widget.component';
 import { JobsByStageWidgetComponent } from './components/jobs-by-stage-widget.component';
@@ -13,9 +25,16 @@ import { EodPromptWidgetComponent } from './components/eod-prompt-widget.compone
 import { MarginSummaryWidgetComponent } from './widgets/margin-summary-widget/margin-summary-widget.component';
 import { AmbientModeComponent } from './components/ambient-mode.component';
 import { DashboardData } from './models/dashboard-data.model';
+import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
+import { DashboardSavedLayout, DashboardWidgetLayout } from './models/dashboard-widget-layout.model';
+import { WIDGET_REGISTRY } from './models/widget-registry';
 import { DashboardService } from './services/dashboard.service';
 import { LoadingService } from '../../shared/services/loading.service';
-import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+
+import type { GridStack, GridStackNode } from 'gridstack';
+
+const LAYOUT_PREF_KEY = 'dashboard:layout';
 
 @Component({
   selector: 'app-dashboard',
@@ -39,13 +58,35 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   private readonly loadingService = inject(LoadingService);
+  private readonly userPreferences = inject(UserPreferencesService);
+
+  private grid: GridStack | null = null;
+  private readonly gridContainer = viewChild<ElementRef<HTMLElement>>('gridContainer');
 
   protected readonly data = signal<DashboardData | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly ambientMode = signal(false);
+  protected readonly editing = signal(false);
+  protected readonly gridReady = signal(false);
+
+  protected readonly activeWidgetIds = signal<string[]>(
+    WIDGET_REGISTRY.map(w => w.id)
+  );
+
+  protected readonly activeWidgets = computed(() => {
+    const ids = this.activeWidgetIds();
+    return WIDGET_REGISTRY.filter(w => ids.includes(w.id));
+  });
+
+  protected readonly availableWidgets = computed(() => {
+    const ids = this.activeWidgetIds();
+    return WIDGET_REGISTRY.filter(w => !ids.includes(w.id));
+  });
+
+  protected readonly showAddMenu = signal(false);
 
   ngOnInit(): void {
     this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
@@ -53,6 +94,123 @@ export class DashboardComponent implements OnInit {
         next: (data) => this.data.set(data),
         error: () => this.error.set('Failed to load dashboard data'),
       });
+  }
+
+  async ngAfterViewInit(): Promise<void> {
+    const { GridStack } = await import('gridstack');
+    const container = this.gridContainer()?.nativeElement;
+    if (!container) return;
+
+    this.grid = GridStack.init({
+      column: 12,
+      cellHeight: 80,
+      margin: 6,
+      animate: true,
+      float: false,
+      disableDrag: true,
+      disableResize: true,
+    }, container);
+
+    this.loadSavedLayout();
+
+    this.grid.on('change', (_event: Event, nodes: GridStackNode[]) => {
+      if (nodes && this.editing()) {
+        this.saveLayout();
+      }
+    });
+
+    this.gridReady.set(true);
+  }
+
+  ngOnDestroy(): void {
+    if (this.grid) {
+      this.grid.destroy(false);
+      this.grid = null;
+    }
+  }
+
+  protected toggleEditing(): void {
+    const next = !this.editing();
+    this.editing.set(next);
+
+    if (this.grid) {
+      this.grid.enableMove(next);
+      this.grid.enableResize(next);
+    }
+
+    if (!next) {
+      this.showAddMenu.set(false);
+      this.saveLayout();
+    }
+  }
+
+  protected toggleAddMenu(): void {
+    this.showAddMenu.update(v => !v);
+  }
+
+  protected addWidget(config: DashboardWidgetConfig): void {
+    this.activeWidgetIds.update(ids => [...ids, config.id]);
+    this.showAddMenu.set(false);
+
+    // Allow DOM to update, then add the widget to grid
+    requestAnimationFrame(() => {
+      if (this.grid) {
+        const el = this.gridContainer()?.nativeElement
+          .querySelector(`[gs-id="${config.id}"]`) as HTMLElement;
+        if (el) {
+          this.grid.makeWidget(el);
+        }
+        this.saveLayout();
+      }
+    });
+  }
+
+  protected removeWidget(widgetId: string): void {
+    if (this.grid) {
+      const el = this.gridContainer()?.nativeElement
+        .querySelector(`[gs-id="${widgetId}"]`) as HTMLElement;
+      if (el) {
+        this.grid.removeWidget(el, false);
+      }
+    }
+    this.activeWidgetIds.update(ids => ids.filter(id => id !== widgetId));
+    this.saveLayout();
+  }
+
+  protected resetLayout(): void {
+    this.activeWidgetIds.set(WIDGET_REGISTRY.map(w => w.id));
+    this.userPreferences.remove(LAYOUT_PREF_KEY);
+
+    // Destroy and reinitialize grid with defaults
+    requestAnimationFrame(async () => {
+      if (this.grid) {
+        this.grid.destroy(false);
+      }
+
+      const { GridStack } = await import('gridstack');
+      const container = this.gridContainer()?.nativeElement;
+      if (!container) return;
+
+      this.grid = GridStack.init({
+        column: 12,
+        cellHeight: 80,
+        margin: 6,
+        animate: true,
+        float: false,
+        disableDrag: !this.editing(),
+        disableResize: !this.editing(),
+      }, container);
+
+      this.grid.on('change', (_event: Event, nodes: GridStackNode[]) => {
+        if (nodes && this.editing()) {
+          this.saveLayout();
+        }
+      });
+    });
+  }
+
+  protected getWidgetConfig(widgetId: string): DashboardWidgetConfig | undefined {
+    return WIDGET_REGISTRY.find(w => w.id === widgetId);
   }
 
   protected exportDashboard(): void {
@@ -87,5 +245,54 @@ export class DashboardComponent implements OnInit {
     a.download = `dashboard-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  private loadSavedLayout(): void {
+    const saved = this.userPreferences.get<DashboardSavedLayout>(LAYOUT_PREF_KEY);
+    if (!saved?.widgets?.length || !this.grid) return;
+
+    const savedIds = saved.widgets.map(w => w.id);
+    this.activeWidgetIds.set(savedIds);
+
+    // Apply saved positions after DOM settles
+    requestAnimationFrame(() => {
+      if (!this.grid) return;
+      for (const widget of saved.widgets) {
+        const el = this.gridContainer()?.nativeElement
+          .querySelector(`[gs-id="${widget.id}"]`) as HTMLElement;
+        if (el) {
+          this.grid.update(el, {
+            x: widget.x,
+            y: widget.y,
+            w: widget.w,
+            h: widget.h,
+          });
+        }
+      }
+    });
+  }
+
+  private saveLayout(): void {
+    if (!this.grid) return;
+
+    const nodes = this.grid.getGridItems();
+    const widgets: DashboardWidgetLayout[] = [];
+
+    for (const el of nodes) {
+      const id = el.getAttribute('gs-id');
+      const node = el.gridstackNode;
+      if (id && node) {
+        widgets.push({
+          id,
+          x: node.x ?? 0,
+          y: node.y ?? 0,
+          w: node.w ?? 4,
+          h: node.h ?? 3,
+        });
+      }
+    }
+
+    const layout: DashboardSavedLayout = { widgets };
+    this.userPreferences.set(LAYOUT_PREF_KEY, layout);
   }
 }

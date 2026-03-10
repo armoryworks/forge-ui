@@ -1,0 +1,5 @@
+<cdk-virtual-scroll-viewport [itemSize]="itemSize()" class="virtual-scroll-list">
+  <div *cdkVirtualFor="let item of items(); trackBy: trackByFn" class="virtual-scroll-list__item">
+    <ng-container [ngTemplateOutlet]="itemTemplate" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+  </div>
+</cdk-virtual-scroll-viewport>

@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.virtual-scroll-list {
+  height: 100%;
+  @include custom-scrollbar;
+}
+
+.virtual-scroll-list__item {
+  display: flex;
+  align-items: center;
+}

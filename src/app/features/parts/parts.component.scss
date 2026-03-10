@@ -85,6 +85,8 @@
   border-bottom: 2px solid transparent; font-family: $font-family-primary;
   &:hover { color: var(--text); }
   &--active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  &__icon { font-size: $icon-size-sm; }
 }
 
 .tab-badge {

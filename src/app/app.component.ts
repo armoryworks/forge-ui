@@ -6,6 +6,7 @@ import { SidebarComponent } from './core/layout/sidebar.component';
 import { ToastContainerComponent } from './shared/components/toast/toast.component';
 import { ConnectionBannerComponent } from './shared/components/connection-banner/connection-banner.component';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
+import { KeyboardShortcutsHelpComponent } from './shared/components/keyboard-shortcuts-help/keyboard-shortcuts-help.component';
 import { AuthService } from './shared/services/auth.service';
 import { LayoutService } from './shared/services/layout.service';
 import { SignalrService } from './shared/services/signalr.service';
@@ -18,6 +19,7 @@ import { RouteLoadingService } from './shared/services/route-loading.service';
 import { ThemeService } from './shared/services/theme.service';
 import { HelpTourService } from './shared/services/help-tour.service';
 import { AccountingService } from './shared/services/accounting.service';
+import { KeyboardShortcutsService } from './shared/services/keyboard-shortcuts.service';
 import { KANBAN_TOUR } from './shared/tours/kanban-tour';
 import { DASHBOARD_TOUR } from './shared/tours/dashboard-tour';
 import { PARTS_TOUR } from './shared/tours/parts-tour';
@@ -30,7 +32,7 @@ import { ADMIN_TOUR } from './shared/tours/admin-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, LoadingOverlayComponent],
+  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +50,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly themeService = inject(ThemeService);
   private readonly helpTours = inject(HelpTourService);
   private readonly accountingService = inject(AccountingService);
+  private readonly keyboardShortcuts = inject(KeyboardShortcutsService);
 
   protected readonly showShell = computed(() => this.authService.isAuthenticated());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
@@ -65,6 +68,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.routeLoading.initialize();
     this.themeService.loadBrandSettings();
     this.registerTours();
+    this.keyboardShortcuts.initialize();
 
     if (this.authService.isAuthenticated()) {
       this.notificationHub.connect();
@@ -77,6 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.signalr.stopAll();
+    this.keyboardShortcuts.destroy();
   }
 
   private registerTours(): void {

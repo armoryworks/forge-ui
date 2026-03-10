@@ -5,7 +5,7 @@
   </div>
 } @else if (data(); as d) {
   <app-page-header title="Dashboard">
-    <span class="page-header__ctx">Production · March 2026</span>
+    <span class="page-header__ctx">Production</span>
     <div class="page-header__actions">
       <button class="btn" (click)="ambientMode.set(true)" title="Ambient display mode">
         <span class="material-icons-outlined btn__icon">nightlight</span> Ambient
@@ -13,71 +13,126 @@
       <button class="btn" (click)="exportDashboard()">
         <span class="material-icons-outlined btn__icon">download</span> Export
       </button>
+      <button
+        class="btn"
+        [class.btn--primary]="editing()"
+        (click)="toggleEditing()"
+        [title]="editing() ? 'Done editing' : 'Customize layout'">
+        <span class="material-icons-outlined btn__icon">
+          {{ editing() ? 'check' : 'edit' }}
+        </span>
+        {{ editing() ? 'Done' : 'Customize' }}
+      </button>
     </div>
   </app-page-header>
 
-  <div class="page-content">
-    <app-dashboard-widget
-      title="Today's Tasks"
-      icon="today"
-      [count]="d.tasks.length"
-      widgetKey="todays-tasks"
-      [accent]="true"
-      class="today-section">
-      <app-todays-tasks-widget [tasks]="d.tasks" />
-    </app-dashboard-widget>
-
-    <div class="content-grid">
-      <div class="kpi-stack">
-        <app-kpi-chip
-          [value]="'' + d.kpis.activeCount"
-          label="Active"
-          [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
-          changeDirection="up" />
-        <app-kpi-chip
-          [value]="'' + d.kpis.overdueCount"
-          valueColor="warn"
-          label="Overdue"
-          [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
-          changeDirection="down" />
-        <app-kpi-chip
-          [value]="d.kpis.totalHours"
-          label="Hours"
-          [change]="d.kpis.hoursStatus"
-          changeDirection="up" />
+  @if (editing()) {
+    <div class="dashboard-edit-bar">
+      <div class="dashboard-edit-bar__left">
+        <span class="material-icons-outlined dashboard-edit-bar__icon">drag_indicator</span>
+        <span class="dashboard-edit-bar__label">Drag widgets to rearrange. Resize from edges.</span>
       </div>
+      <div class="dashboard-edit-bar__actions">
+        <div class="dashboard-edit-bar__add-wrapper">
+          <button
+            class="btn"
+            (click)="toggleAddMenu()"
+            [disabled]="availableWidgets().length === 0">
+            <span class="material-icons-outlined btn__icon">add</span> Add Widget
+          </button>
+          @if (showAddMenu()) {
+            <div class="widget-add-menu">
+              @for (widget of availableWidgets(); track widget.id) {
+                <button class="widget-add-menu__item" (click)="addWidget(widget)">
+                  <span class="material-icons-outlined widget-add-menu__icon">{{ widget.icon }}</span>
+                  <span class="widget-add-menu__label">{{ widget.title }}</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+        <button class="btn" (click)="resetLayout()">
+          <span class="material-icons-outlined btn__icon">restart_alt</span> Reset
+        </button>
+      </div>
+    </div>
+  }
 
-      <app-dashboard-widget title="Jobs by Stage" widgetKey="jobs-by-stage">
-        <app-jobs-by-stage-widget [stages]="d.stages" />
-      </app-dashboard-widget>
+  <div class="dashboard-content">
+    <div class="dashboard-kpis">
+      <app-kpi-chip
+        [value]="'' + d.kpis.activeCount"
+        label="Active"
+        [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
+        changeDirection="up" />
+      <app-kpi-chip
+        [value]="'' + d.kpis.overdueCount"
+        valueColor="warn"
+        label="Overdue"
+        [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
+        changeDirection="down" />
+      <app-kpi-chip
+        [value]="d.kpis.totalHours"
+        label="Hours"
+        [change]="d.kpis.hoursStatus"
+        changeDirection="up" />
+    </div>
 
-      <app-dashboard-widget title="Team Load" widgetKey="team-load">
-        <app-team-load-widget [team]="d.team" />
-      </app-dashboard-widget>
+    <div class="grid-stack" #gridContainer>
+      @for (widget of activeWidgets(); track widget.id) {
+        <div class="grid-stack-item"
+          [attr.gs-id]="widget.id"
+          [attr.gs-x]="widget.defaultX"
+          [attr.gs-y]="widget.defaultY"
+          [attr.gs-w]="widget.defaultW"
+          [attr.gs-h]="widget.defaultH"
+          [attr.gs-min-w]="widget.minW"
+          [attr.gs-min-h]="widget.minH">
+          <div class="grid-stack-item-content">
+            @if (editing()) {
+              <button
+                class="widget-remove-btn"
+                (click)="removeWidget(widget.id)"
+                title="Remove widget"
+                aria-label="Remove widget">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            }
 
-      <app-dashboard-widget title="Activity" widgetKey="activity" class="span-2">
-        <app-activity-widget [entries]="d.activity" />
-      </app-dashboard-widget>
-
-      <app-dashboard-widget title="Deadlines" widgetKey="deadlines">
-        <app-deadlines-widget [deadlines]="d.deadlines" />
-      </app-dashboard-widget>
-
-      <app-dashboard-widget title="Planning Cycle" icon="event_note" widgetKey="planning-cycle">
-        <app-cycle-progress-widget />
-      </app-dashboard-widget>
-
-      <app-dashboard-widget title="Open Orders" icon="shopping_cart" widgetKey="open-orders">
-        <app-open-orders-widget />
-      </app-dashboard-widget>
-
-      <app-dashboard-widget title="End of Day" icon="nightlight" widgetKey="eod-prompt">
-        <app-eod-prompt-widget />
-      </app-dashboard-widget>
-
-      <app-dashboard-widget title="Margin (30d)" icon="trending_up" widgetKey="margin-summary">
-        <app-margin-summary-widget />
-      </app-dashboard-widget>
+            <app-dashboard-widget [title]="widget.title" [icon]="widget.icon" [widgetKey]="widget.id">
+              @switch (widget.component) {
+                @case ('todays-tasks') {
+                  <app-todays-tasks-widget [tasks]="d.tasks" />
+                }
+                @case ('jobs-by-stage') {
+                  <app-jobs-by-stage-widget [stages]="d.stages" />
+                }
+                @case ('team-load') {
+                  <app-team-load-widget [team]="d.team" />
+                }
+                @case ('activity') {
+                  <app-activity-widget [entries]="d.activity" />
+                }
+                @case ('deadlines') {
+                  <app-deadlines-widget [deadlines]="d.deadlines" />
+                }
+                @case ('cycle-progress') {
+                  <app-cycle-progress-widget />
+                }
+                @case ('open-orders') {
+                  <app-open-orders-widget />
+                }
+                @case ('eod-prompt') {
+                  <app-eod-prompt-widget />
+                }
+                @case ('margin-summary') {
+                  <app-margin-summary-widget />
+                }
+              }
+            </app-dashboard-widget>
+          </div>
+        </div>
+      }
     </div>
   </div>
 

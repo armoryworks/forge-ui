@@ -9,6 +9,7 @@
   overflow: hidden;
 }
 
+// ─── Page Header ───
 .page-header__ctx {
   font-size: $font-size-xs;
   color: var(--text-muted);
@@ -28,7 +29,7 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 3px 10px;
+  padding: 3px $sp-md;
   border: $border-width solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -38,9 +39,15 @@
   text-transform: uppercase;
   cursor: pointer;
   border-radius: $border-radius;
+  transition: background $transition-fast;
 
   &:hover {
     background: var(--bg);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   &--primary {
@@ -55,47 +62,170 @@
 }
 
 .btn__icon {
-  font-size: 14px;
+  font-size: $icon-size-xs;
 }
 
-// ─── Today Section (hero — fills remaining space) ───
-.today-section {
+// ─── Edit Bar ───
+.dashboard-edit-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-sm $sp-lg;
+  background: var(--primary-light);
+  border-bottom: $border-width solid var(--primary);
+  flex-shrink: 0;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__icon {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__add-wrapper {
+    position: relative;
+  }
+}
+
+// ─── Add Widget Menu ───
+.widget-add-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: $z-dropdown;
+  min-width: 220px;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  box-shadow: $shadow-dropdown;
+  margin-top: $sp-sm;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    width: 100%;
+    padding: $sp-md $sp-lg;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: $font-size-base;
+    cursor: pointer;
+    text-align: left;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--bg);
+    }
+
+    & + & {
+      border-top: $border-width-thin solid var(--border);
+    }
+  }
+
+  &__icon {
+    font-size: $icon-size-md;
+    color: var(--text-secondary);
+  }
+
+  &__label {
+    font-weight: 500;
+  }
+}
+
+// ─── Dashboard Content ───
+.dashboard-content {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  padding: $sp-md;
+  @include custom-scrollbar;
 }
 
-// ─── Content Grid ───
-.content-grid {
-  display: grid;
-  grid-template-columns: 140px 1fr 1fr;
-  gap: 6px;
-  min-height: 0;
+// ─── KPIs Row ───
+.dashboard-kpis {
+  display: flex;
+  gap: $sp-md;
+  margin-bottom: $sp-md;
   flex-shrink: 0;
 }
 
-.kpi-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.span-2 {
-  grid-column: span 2;
-}
-
-// ─── Mobile ───
-@include mobile {
-  .content-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .kpi-stack {
+// ─── GridStack Overrides ───
+.grid-stack {
+  // Override gridstack defaults to match design system
+  // Sharp corners, proper borders
+  .grid-stack-item-content {
+    position: relative;
+    display: flex;
     flex-direction: column;
+    overflow: hidden;
+    border-radius: $border-radius;
+    inset: 0 !important; // override gridstack default margin
   }
 
-  .span-2 {
-    grid-column: span 1;
+  // Widget fills grid cell
+  app-dashboard-widget {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+// ─── Edit Mode Styles ───
+:host-context(.dashboard--editing) .grid-stack,
+.grid-stack {
+  .grid-stack-item {
+    &.ui-draggable-dragging {
+      opacity: 0.8;
+      z-index: $z-dropdown;
+    }
+  }
+}
+
+// ─── Resize Handles ───
+.grid-stack .gs-resizable-handle {
+  // Only visible in edit mode — gridstack handles this via enableResize
+}
+
+// ─── Widget Remove Button ───
+.widget-remove-btn {
+  position: absolute;
+  top: $sp-sm;
+  right: $sp-sm;
+  z-index: 2;
+  width: $btn-icon-size;
+  height: $btn-icon-size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: $border-radius;
+  transition: color $transition-fast, background $transition-fast;
+
+  &:hover {
+    color: var(--error);
+    background: var(--error-light);
+    border-color: var(--error);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
   }
 }
 
@@ -105,13 +235,36 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 80px 24px;
+  gap: $sp-lg;
+  padding: $sp-4xl $sp-xl;
   color: var(--text-secondary);
 
   &__icon {
-    font-size: 48px;
+    font-size: $icon-size-hero;
     opacity: 0.5;
-    color: var(--status-overdue);
+    color: var(--error);
+  }
+}
+
+// ─── Mobile ───
+@include mobile {
+  .dashboard-kpis {
+    flex-direction: column;
+  }
+
+  .dashboard-edit-bar {
+    flex-direction: column;
+    gap: $sp-md;
+    align-items: flex-start;
+
+    &__actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+  }
+
+  .widget-add-menu {
+    right: 0;
+    left: auto;
   }
 }

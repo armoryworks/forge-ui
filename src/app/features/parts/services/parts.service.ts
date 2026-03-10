@@ -12,6 +12,7 @@ import { PartStatus } from '../models/part-status.type';
 import { PartType } from '../models/part-type.type';
 import { PartRevision } from '../models/part-revision.model';
 import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 
 @Injectable({ providedIn: 'root' })
 export class PartsService {
@@ -64,5 +65,13 @@ export class PartsService {
 
   getFilesByRevision(partId: number, revisionId: number): Observable<unknown[]> {
     return this.http.get<unknown[]>(`${environment.apiUrl}/parts/${partId}/revisions/${revisionId}/files`);
+  }
+
+  getPartFiles(partId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${environment.apiUrl}/parts/${partId}/files`);
+  }
+
+  getFileDownloadUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}`;
   }
 }

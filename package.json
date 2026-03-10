@@ -27,13 +27,16 @@
     "@fontsource/space-grotesk": "^5.2.10",
     "@microsoft/signalr": "^10.0.0",
     "@types/papaparse": "^5.5.2",
+    "@types/three": "^0.183.1",
     "bwip-js": "^4.8.0",
     "chart.js": "^4.5.1",
     "date-fns": "^4.1.0",
     "driver.js": "^1.4.0",
+    "gridstack": "^12.4.2",
     "ng2-charts": "^10.0.0",
     "papaparse": "^5.5.3",
     "rxjs": "~7.8.0",
+    "three": "^0.183.2",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
