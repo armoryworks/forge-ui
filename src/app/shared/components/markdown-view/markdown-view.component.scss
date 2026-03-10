@@ -1,0 +1,29 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+  font-size: $font-size-base;
+  line-height: 1.5;
+
+  ::ng-deep {
+    p { margin: 0 0 $sp-md; }
+    code {
+      font-family: $font-family-mono;
+      font-size: $font-size-sm;
+      background: var(--surface);
+      padding: $sp-xs $sp-sm;
+    }
+    pre {
+      background: var(--surface);
+      padding: $sp-md;
+      overflow-x: auto;
+
+      code {
+        background: none;
+        padding: 0;
+      }
+    }
+    ul, ol { margin: 0 0 $sp-md; padding-left: $sp-xl; }
+    a { color: var(--primary); }
+  }
+}
