@@ -11,7 +11,8 @@
     "e2e:headed": "playwright test --config=e2e/playwright.config.ts --headed",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "audit:tours": "npx tsx scripts/audit-tours.ts"
+    "audit:tours": "npx tsx scripts/audit-tours.ts",
+    "test:a11y": "npx cypress run --spec cypress/e2e/accessibility/a11y.cy.ts"
   },
   "private": true,
   "packageManager": "npm@11.8.0",
