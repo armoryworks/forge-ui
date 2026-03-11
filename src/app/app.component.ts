@@ -36,6 +36,7 @@ import { EXPENSES_TOUR } from './shared/tours/expenses-tour';
 import { TIME_TRACKING_TOUR } from './shared/tours/time-tracking-tour';
 import { REPORTS_TOUR } from './shared/tours/reports-tour';
 import { ADMIN_TOUR } from './shared/tours/admin-tour';
+import { PLANNING_TOUR } from './shared/tours/planning-tour';
 
 @Component({
   selector: 'app-root',
@@ -135,7 +136,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private registerTours(): void {
     [KANBAN_TOUR, DASHBOARD_TOUR, PARTS_TOUR, INVENTORY_TOUR,
-     EXPENSES_TOUR, TIME_TRACKING_TOUR, REPORTS_TOUR, ADMIN_TOUR]
+     EXPENSES_TOUR, TIME_TRACKING_TOUR, REPORTS_TOUR, ADMIN_TOUR, PLANNING_TOUR]
       .forEach(t => this.helpTours.register(t));
   }
 }

@@ -11,13 +11,13 @@
   </div>
 
   <div class="worker__content" [appLoadingBlock]="loading()">
-    @if (tasks().length === 0 && !loading()) {
+    @if (sortedTasks().length === 0 && !loading()) {
       <app-empty-state icon="check_circle" message="No tasks assigned to you" />
     }
 
     <div class="worker__task-list">
-      @for (task of tasks(); track task.id) {
-        <div class="task-card" (click)="openJob(task)">
+      @for (task of sortedTasks(); track task.id) {
+        <div class="task-card" [class.task-card--overdue]="isOverdue(task)" (click)="openJob(task)">
           <div class="task-card__header">
             <span class="task-card__number">{{ task.jobNumber }}</span>
             <span [class]="getPriorityClass(task.priority)">{{ task.priority }}</span>
@@ -35,9 +35,9 @@
           </div>
 
           @if (task.dueDate) {
-            <div class="task-card__due">
-              <span class="material-icons-outlined task-card__due-icon">schedule</span>
-              Due {{ task.dueDate | date:'mediumDate' }}
+            <div class="task-card__due" [class.task-card__due--overdue]="isOverdue(task)">
+              <span class="material-icons-outlined task-card__due-icon">{{ isOverdue(task) ? 'warning' : 'schedule' }}</span>
+              {{ isOverdue(task) ? 'OVERDUE' : 'Due' }} {{ task.dueDate | date:'mediumDate' }}
             </div>
           }
 

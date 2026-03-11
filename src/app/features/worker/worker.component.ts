@@ -29,6 +29,19 @@ export class WorkerComponent {
     return user ? `${user.firstName} ${user.lastName}`.trim() : 'Worker';
   });
 
+  protected readonly sortedTasks = computed(() => {
+    const priorityOrder: Record<string, number> = { Critical: 0, High: 1, Normal: 2, Low: 3 };
+    return [...this.tasks()].sort((a, b) => {
+      const aOverdue = this.isOverdue(a) ? 0 : 1;
+      const bOverdue = this.isOverdue(b) ? 0 : 1;
+      if (aOverdue !== bOverdue) return aOverdue - bOverdue;
+      const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
+      const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+      if (aDate !== bDate) return aDate - bDate;
+      return (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2);
+    });
+  });
+
   constructor() {
     this.loadTasks();
   }
@@ -56,6 +69,11 @@ export class WorkerComponent {
       Low: 'chip--muted',
     };
     return `chip ${map[priority] ?? ''}`.trim();
+  }
+
+  protected isOverdue(task: WorkerTask): boolean {
+    if (!task.dueDate) return false;
+    return new Date(task.dueDate) < new Date();
   }
 
   protected getProgressPercent(task: WorkerTask): number {

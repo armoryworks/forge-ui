@@ -162,3 +162,12 @@
   color: var(--text-muted);
   white-space: nowrap;
 }
+
+.task-card--overdue {
+  border-color: var(--error);
+}
+
+.task-card__due--overdue {
+  color: var(--error);
+  font-weight: 600;
+}
