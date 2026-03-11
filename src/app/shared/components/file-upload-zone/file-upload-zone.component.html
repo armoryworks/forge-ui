@@ -33,6 +33,9 @@
           <div class="upload-item__bar">
             <div class="upload-item__progress" [style.width.%]="upload.progress"></div>
           </div>
+          @if (upload.chunked) {
+            <span class="upload-item__pct">{{ upload.progress }}%</span>
+          }
         }
       </div>
     }

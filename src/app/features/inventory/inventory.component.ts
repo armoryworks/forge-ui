@@ -11,6 +11,7 @@ import { BinContentItem } from './models/bin-content-item.model';
 import { BinMovementItem } from './models/bin-movement-item.model';
 import { ReceivingRecord } from './models/receiving-record.model';
 import { CycleCount } from './models/cycle-count.model';
+import { Reservation } from './models/reservation.model';
 import { LocationType } from './models/location-type.type';
 import { StorageLocationFlat } from './models/storage-location-flat.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -29,7 +30,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
-type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOps' | 'cycleCounts';
+type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOps' | 'cycleCounts' | 'reservations';
 
 @Component({
   selector: 'app-inventory',
@@ -185,6 +186,39 @@ export class InventoryComponent {
     reason: 'Reason',
   });
 
+  // Reservations tab
+  protected readonly reservations = signal<Reservation[]>([]);
+  protected readonly reservationFilterPartId = signal<number | null>(null);
+  protected readonly reservationFilterJobId = signal<number | null>(null);
+
+  protected readonly reservationColumns: ColumnDef[] = [
+    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'partDescription', header: 'Description', sortable: true },
+    { field: 'locationPath', header: 'Bin Location', sortable: true },
+    { field: 'quantity', header: 'Qty', sortable: true, align: 'right', width: '80px' },
+    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
+    { field: 'jobTitle', header: 'Job', sortable: true },
+    { field: 'notes', header: 'Notes', sortable: false },
+    { field: 'createdAt', header: 'Reserved', sortable: true, type: 'date', width: '120px' },
+    { field: 'actions', header: '', width: '60px' },
+  ];
+
+  // Create reservation dialog
+  protected readonly showReservationDialog = signal(false);
+  protected readonly reservationForm = new FormGroup({
+    partId: new FormControl<number | null>(null, [Validators.required]),
+    binContentId: new FormControl<number | null>(null, [Validators.required]),
+    jobId: new FormControl<number | null>(null),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.001)]),
+    notes: new FormControl(''),
+  });
+
+  protected readonly reservationViolations = FormValidationService.getViolations(this.reservationForm, {
+    partId: 'Part ID',
+    binContentId: 'Bin Content ID',
+    quantity: 'Quantity',
+  });
+
   // Cycle count detail dialog
   protected readonly showCycleCountDialog = signal(false);
   protected readonly selectedCycleCount = signal<CycleCount | null>(null);
@@ -222,6 +256,7 @@ export class InventoryComponent {
     if (tab === 'movements' && this.movements().length === 0) this.loadMovements();
     if (tab === 'receiving' && this.receivingHistory().length === 0) this.loadReceivingHistory();
     if (tab === 'cycleCounts' && this.cycleCounts().length === 0) this.loadCycleCounts();
+    if (tab === 'reservations' && this.reservations().length === 0) this.loadReservations();
   }
 
   private loadBinLocations(): void {
@@ -586,5 +621,66 @@ export class InventoryComponent {
   protected getVarianceClass(variance: number): string {
     if (variance === 0) return '';
     return variance > 0 ? 'variance--positive' : 'variance--negative';
+  }
+
+  // ── Reservations Tab ──
+
+  protected loadReservations(): void {
+    this.loading.set(true);
+    this.inventoryService.getReservations(
+      this.reservationFilterPartId() ?? undefined,
+      this.reservationFilterJobId() ?? undefined,
+    ).subscribe({
+      next: (data) => { this.reservations.set(data); this.loading.set(false); },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  protected openReservationDialog(): void {
+    this.reservationForm.reset();
+    this.showReservationDialog.set(true);
+  }
+
+  protected closeReservationDialog(): void {
+    this.showReservationDialog.set(false);
+  }
+
+  protected submitReservation(): void {
+    if (this.reservationForm.invalid) return;
+    this.saving.set(true);
+    const form = this.reservationForm.getRawValue();
+    this.inventoryService.createReservation({
+      partId: form.partId!,
+      binContentId: form.binContentId!,
+      jobId: form.jobId ?? undefined,
+      quantity: form.quantity!,
+      notes: form.notes || undefined,
+    }).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.closeReservationDialog();
+        this.loadReservations();
+        this.loadStock();
+        this.snackbar.success('Reservation created');
+      },
+      error: () => this.saving.set(false),
+    });
+  }
+
+  protected releaseReservation(id: number): void {
+    this.saving.set(true);
+    this.inventoryService.releaseReservation(id).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.loadReservations();
+        this.loadStock();
+        this.snackbar.info('Reservation released');
+      },
+      error: () => this.saving.set(false),
+    });
+  }
+
+  protected getReservedClass(reserved: number): string {
+    return reserved > 0 ? 'qty-reserved' : '';
   }
 }

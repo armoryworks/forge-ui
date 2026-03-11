@@ -13,6 +13,8 @@ import { ReceivingRecord } from '../models/receiving-record.model';
 import { TransferStockRequest } from '../models/transfer-stock-request.model';
 import { AdjustStockRequest } from '../models/adjust-stock-request.model';
 import { CycleCount } from '../models/cycle-count.model';
+import { Reservation } from '../models/reservation.model';
+import { CreateReservationRequest } from '../models/create-reservation-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -93,5 +95,22 @@ export class InventoryService {
 
   updateCycleCount(id: number, request: { status?: string; notes?: string; lines?: { id: number; actualQuantity: number; notes?: string }[] }): Observable<void> {
     return this.http.put<void>(`${this.base}/cycle-counts/${id}`, request);
+  }
+
+  // ── Reservations ──
+
+  getReservations(partId?: number, jobId?: number): Observable<Reservation[]> {
+    let params = new HttpParams();
+    if (partId) params = params.set('partId', partId);
+    if (jobId) params = params.set('jobId', jobId);
+    return this.http.get<Reservation[]>(`${this.base}/reservations`, { params });
+  }
+
+  createReservation(request: CreateReservationRequest): Observable<Reservation> {
+    return this.http.post<Reservation>(`${this.base}/reservations`, request);
+  }
+
+  releaseReservation(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/reservations/${id}`);
   }
 }

@@ -6,11 +6,20 @@
   }
   <div class="card__header">
     <span class="card__job-number">{{ job().jobNumber }}</span>
-    @if (job().isOverdue) {
-      <span class="card__overdue" title="Overdue">
-        <span class="material-icons-outlined card__overdue-icon">warning</span>
-      </span>
-    }
+    <span class="card__header-indicators">
+      @if (job().activeHolds.length > 0) {
+        <span class="job-card__hold-indicator"
+              [matTooltip]="holdTooltip()"
+              matTooltipClass="job-card__hold-tooltip">
+          <span class="material-icons-outlined">pause_circle</span>
+        </span>
+      }
+      @if (job().isOverdue) {
+        <span class="card__overdue" title="Overdue">
+          <span class="material-icons-outlined card__overdue-icon">warning</span>
+        </span>
+      }
+    </span>
   </div>
   <div class="card__title">{{ job().title }}</div>
   <div class="card__footer">

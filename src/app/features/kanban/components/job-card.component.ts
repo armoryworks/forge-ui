@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { KanbanJob } from '../models/kanban-job.model';
 import { PRIORITY_COLORS } from '../models/priority-colors.const';
@@ -6,7 +8,7 @@ import { PRIORITY_COLORS } from '../models/priority-colors.const';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [AvatarComponent],
+  imports: [AvatarComponent, MatTooltipModule],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,4 +28,6 @@ export class JobCardComponent {
     const date = new Date(d);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   });
+
+  protected readonly holdTooltip = computed(() => this.job().activeHolds.join('\n'));
 }

@@ -22,6 +22,14 @@ export interface FileUploadProgress {
   fileName: string;
   progress: number;
   error?: string;
+  chunked?: boolean;
+}
+
+interface ChunkedUploadResponse {
+  uploadId: string;
+  chunkIndex: number;
+  isComplete: boolean;
+  fileAttachment: UploadedFile | null;
 }
 
 @Component({
@@ -39,6 +47,8 @@ export class FileUploadZoneComponent {
   readonly accept = input<string>('');
   readonly maxSizeMb = input<number>(50);
   readonly multiple = input(true);
+  /** Files larger than this threshold use chunked upload. Default: 5MB. */
+  readonly chunkSizeMb = input<number>(5);
 
   readonly uploaded = output<UploadedFile>();
 
@@ -84,6 +94,7 @@ export class FileUploadZoneComponent {
   private handleFiles(fileList: FileList): void {
     const files = Array.from(fileList);
     const maxBytes = this.maxSizeMb() * 1024 * 1024;
+    const chunkBytes = this.chunkSizeMb() * 1024 * 1024;
 
     for (const file of files) {
       if (file.size > maxBytes) {
@@ -96,7 +107,11 @@ export class FileUploadZoneComponent {
         continue;
       }
 
-      this.uploadFile(file);
+      if (file.size > chunkBytes) {
+        this.uploadFileChunked(file, chunkBytes);
+      } else {
+        this.uploadFile(file);
+      }
     }
   }
 
@@ -109,6 +124,8 @@ export class FileUploadZoneComponent {
       a === ext || a === mime || (a.endsWith('/*') && mime.startsWith(a.replace('/*', '/')))
     );
   }
+
+  // ── Single-upload path (unchanged behavior) ─────────────────────────────────
 
   private uploadFile(file: File): void {
     const formData = new FormData();
@@ -135,6 +152,61 @@ export class FileUploadZoneComponent {
       },
     });
   }
+
+  // ── Chunked-upload path ──────────────────────────────────────────────────────
+
+  private uploadFileChunked(file: File, chunkBytes: number): void {
+    const uploadId = crypto.randomUUID();
+    const totalChunks = Math.ceil(file.size / chunkBytes);
+    const progress: FileUploadProgress = { fileName: file.name, progress: 0, chunked: true };
+    this.uploads.update(list => [...list, progress]);
+
+    this.sendNextChunk(file, uploadId, 0, totalChunks, chunkBytes);
+  }
+
+  private sendNextChunk(
+    file: File,
+    uploadId: string,
+    chunkIndex: number,
+    totalChunks: number,
+    chunkBytes: number,
+  ): void {
+    const start = chunkIndex * chunkBytes;
+    const end = Math.min(start + chunkBytes, file.size);
+    const chunkBlob = file.slice(start, end);
+
+    const formData = new FormData();
+    formData.append('uploadId', uploadId);
+    formData.append('fileName', file.name);
+    formData.append('contentType', file.type || 'application/octet-stream');
+    formData.append('chunkIndex', String(chunkIndex));
+    formData.append('totalChunks', String(totalChunks));
+    formData.append('chunk', chunkBlob, file.name);
+
+    this.http.post<ChunkedUploadResponse>(
+      `/api/v1/${this.entityType()}/${this.entityId()}/files/chunked`,
+      formData,
+    ).subscribe({
+      next: response => {
+        const sentChunks = chunkIndex + 1;
+        const pct = Math.round((sentChunks / totalChunks) * 100);
+        this.updateProgress(file.name, pct);
+
+        if (response.isComplete && response.fileAttachment) {
+          this.removeUpload(file.name);
+          this.uploaded.emit(response.fileAttachment);
+          return;
+        }
+
+        this.sendNextChunk(file, uploadId, chunkIndex + 1, totalChunks, chunkBytes);
+      },
+      error: () => {
+        this.updateUploadError(file.name, 'Upload failed');
+      },
+    });
+  }
+
+  // ── Progress helpers ─────────────────────────────────────────────────────────
 
   private addUploadError(fileName: string, error: string): void {
     this.uploads.update(list => [...list, { fileName, progress: 0, error }]);

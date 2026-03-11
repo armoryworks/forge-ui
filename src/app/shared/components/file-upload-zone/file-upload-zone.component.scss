@@ -95,3 +95,10 @@
   background: var(--primary);
   transition: width $transition-fast;
 }
+
+.upload-item__pct {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  min-width: 32px;
+  text-align: right;
+}

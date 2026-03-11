@@ -50,7 +50,9 @@
 
 .part-number { font-weight: 600; }
 .text-right { text-align: right; }
+.align-right { text-align: right; }
 .qty-zero { color: var(--error); font-weight: 600; }
+.qty-reserved { color: var(--warning); font-weight: 600; }
 
 // Row class applied via DataTable rowClass callback
 :host ::ng-deep .stock-level--empty { background: var(--error-light) !important; }

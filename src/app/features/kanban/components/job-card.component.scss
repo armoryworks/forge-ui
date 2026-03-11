@@ -54,6 +54,23 @@
   font-family: $font-family-mono;
 }
 
+.card__header-indicators {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+}
+
+.job-card__hold-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--warning);
+  cursor: default;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
 .card__overdue {
   color: var(--error);
 }

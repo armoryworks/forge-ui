@@ -15,4 +15,5 @@ export interface KanbanJob {
   accountingDocumentType: string | null;
   disposition: string | null;
   childJobCount: number;
+  activeHolds: string[];
 }

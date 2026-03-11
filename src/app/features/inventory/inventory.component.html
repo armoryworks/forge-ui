@@ -5,6 +5,12 @@
       Add Location
     </button>
   }
+  @if (activeTab() === 'reservations') {
+    <button class="action-btn action-btn--primary" (click)="openReservationDialog()">
+      <span class="material-icons-outlined">add</span>
+      Reserve Stock
+    </button>
+  }
   @if (activeTab() === 'receiving') {
     <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
       <span class="material-icons-outlined">add</span>
@@ -56,6 +62,10 @@
       <span class="material-icons-outlined">fact_check</span>
       Cycle Counts
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'reservations'" (click)="switchTab('reservations')">
+      <span class="material-icons-outlined">lock</span>
+      Reservations
+    </button>
   </div>
 
   <div [appLoadingBlock]="loading()">
@@ -103,7 +113,9 @@
               <thead>
                 <tr>
                   <th>Bin Location</th>
-                  <th>Qty</th>
+                  <th class="align-right">On Hand</th>
+                  <th class="align-right">Reserved</th>
+                  <th class="align-right">Available</th>
                   <th>Status</th>
                   <th>Lot #</th>
                 </tr>
@@ -112,7 +124,15 @@
                 @for (bin of $any(row).binLocations; track bin.locationId) {
                   <tr>
                     <td>{{ bin.locationPath }}</td>
-                    <td>{{ bin.quantity }}</td>
+                    <td class="align-right">{{ bin.quantity }}</td>
+                    <td class="align-right">
+                      <span [class]="getReservedClass(bin.reservedQuantity)">
+                        {{ bin.reservedQuantity > 0 ? bin.reservedQuantity : '—' }}
+                      </span>
+                    </td>
+                    <td class="align-right">
+                      <span [class.qty-zero]="bin.availableQuantity <= 0">{{ bin.availableQuantity }}</span>
+                    </td>
                     <td>
                       <span [class]="getStatusClass(bin.status)">
                         {{ getStatusLabel(bin.status) }}
@@ -391,8 +411,75 @@
         </app-data-table>
       </div>
     }
+
+    <!-- Reservations Tab -->
+    @if (activeTab() === 'reservations') {
+      <div class="tab-panel">
+        <div class="panel-header">
+          <span class="panel-count">{{ reservations().length }} active reservations</span>
+        </div>
+
+        <app-data-table
+          tableId="inventory-reservations"
+          [columns]="reservationColumns"
+          [data]="reservations()"
+          emptyIcon="lock"
+          emptyMessage="No active reservations">
+
+          <ng-template appColumnCell="partNumber" let-row>
+            <span class="part-number">{{ $any(row).partNumber }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="jobNumber" let-row>
+            <span class="text-muted">{{ $any(row).jobNumber ?? '—' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="jobTitle" let-row>
+            <span class="text-muted">{{ $any(row).jobTitle ?? '—' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="notes" let-row>
+            <span class="text-muted">{{ $any(row).notes ?? '—' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="createdAt" let-row>
+            <span class="text-muted">{{ $any(row).createdAt | date:'short' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="actions" let-row>
+            <button class="icon-btn icon-btn--danger"
+              [disabled]="saving()"
+              (click)="releaseReservation($any(row).id); $event.stopPropagation()"
+              aria-label="Release reservation">
+              <span class="material-icons-outlined">lock_open</span>
+            </button>
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
   </div>
 </div>
+
+<!-- Reserve Stock Dialog -->
+@if (showReservationDialog()) {
+  <app-dialog title="Reserve Stock" width="520px" (closed)="closeReservationDialog()">
+    <div [formGroup]="reservationForm">
+      <app-input label="Part ID" formControlName="partId" type="number" />
+      <app-input label="Bin Content ID" formControlName="binContentId" type="number" />
+      <app-input label="Job ID (optional)" formControlName="jobId" type="number" />
+      <app-input label="Quantity" formControlName="quantity" type="number" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeReservationDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="reservationViolations"
+        [disabled]="reservationForm.invalid || saving()"
+        (click)="submitReservation()">Reserve</button>
+    </div>
+  </app-dialog>
+}
 
 <!-- Location Dialog -->
 @if (showLocationDialog()) {

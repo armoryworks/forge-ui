@@ -5,6 +5,8 @@ export interface BinStock {
   locationName: string;
   locationPath: string;
   quantity: number;
+  reservedQuantity: number;
+  availableQuantity: number;
   status: BinContentStatus;
   lotNumber: string | null;
 }
