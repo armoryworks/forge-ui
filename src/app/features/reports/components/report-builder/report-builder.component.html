@@ -1,0 +1,129 @@
+<app-page-layout pageTitle="Report Builder">
+  <ng-container toolbar>
+    <app-select label="Saved Reports" [options]="savedReportOptions()" [formControl]="savedReportControl" />
+    @if (editingReport()) {
+      <button class="icon-btn icon-btn--danger" (click)="deleteSelectedReport()" aria-label="Delete saved report">
+        <span class="material-icons-outlined">delete</span>
+      </button>
+    }
+    <span appSpacer></span>
+    <button class="action-btn" (click)="newReport()">
+      <span class="material-icons-outlined">add</span> New Report
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="builder">
+      <div class="builder__config">
+        <!-- Step 1: Entity source -->
+        <div class="builder__section">
+          <h3 class="builder__section-title">Data Source</h3>
+          <app-select label="Entity" [options]="entityOptions()" [formControl]="entityControl" />
+        </div>
+
+        <!-- Step 2: Columns (multi-select checkboxes) -->
+        @if (availableFields().length > 0) {
+          <div class="builder__section">
+            <h3 class="builder__section-title">Columns</h3>
+            <div class="builder__column-list">
+              @for (field of availableFields(); track field.field) {
+                <label class="builder__column-check">
+                  <input type="checkbox" [checked]="isColumnSelected(field.field)" (change)="toggleColumn(field.field)" />
+                  {{ field.label }}
+                </label>
+              }
+            </div>
+          </div>
+
+          <!-- Step 3: Filters -->
+          <div class="builder__section">
+            <h3 class="builder__section-title">Filters</h3>
+            @for (filter of filters(); track $index) {
+              <div class="builder__filter-row">
+                <app-select label="Field" [options]="filterableFieldOptions()" [formControl]="filter.fieldControl" />
+                <app-select label="Operator" [options]="operatorOptions" [formControl]="filter.operatorControl" />
+                <app-input label="Value" [formControl]="filter.valueControl" />
+                <button class="icon-btn icon-btn--danger" (click)="removeFilter($index)" aria-label="Remove filter">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </div>
+            }
+            <button class="action-btn action-btn--sm" (click)="addFilter()">
+              <span class="material-icons-outlined">add</span> Add Filter
+            </button>
+          </div>
+
+          <!-- Step 4: Group By + Sort -->
+          <div class="builder__section">
+            <h3 class="builder__section-title">Group &amp; Sort</h3>
+            <app-select label="Group By" [options]="groupableFieldOptions()" [formControl]="groupByControl" />
+            <div class="builder__sort-row">
+              <app-select label="Sort By" [options]="sortableFieldOptions()" [formControl]="sortControl" />
+              <app-select label="Direction" [options]="directionOptions" [formControl]="directionControl" />
+            </div>
+          </div>
+
+          <!-- Step 5: Chart type -->
+          <div class="builder__section">
+            <h3 class="builder__section-title">Visualization</h3>
+            <app-select label="Chart Type" [options]="chartTypeOptions" [formControl]="chartTypeControl" />
+            @if (chartTypeControl.value && chartTypeControl.value !== 'table') {
+              <div class="builder__sort-row">
+                <app-select label="Label Field" [options]="fieldOptions()" [formControl]="chartLabelControl" />
+                <app-select label="Value Field" [options]="numericFieldOptions()" [formControl]="chartValueControl" />
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Actions -->
+        <div class="builder__actions">
+          <button class="action-btn action-btn--primary"
+                  [disabled]="!canRun()"
+                  (click)="runReport()">
+            <span class="material-icons-outlined">play_arrow</span> Run Report
+          </button>
+          <button class="action-btn"
+                  [disabled]="!canRun()"
+                  (click)="openSaveDialog()">
+            <span class="material-icons-outlined">save</span> Save
+          </button>
+          @if (reportResults()) {
+            <button class="action-btn" (click)="exportCsv()">
+              <span class="material-icons-outlined">download</span> CSV
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="builder__results" [appLoadingBlock]="isRunning()">
+        @if (reportResults()) {
+          <!-- Chart (if configured) -->
+          @if (chartTypeControl.value && chartTypeControl.value !== 'table' && chartData()) {
+            <div class="builder__chart">
+              <canvas baseChart
+                [type]="$any(chartTypeControl.value)"
+                [data]="chartData()!"
+                [options]="chartOptions">
+              </canvas>
+            </div>
+          }
+
+          <!-- Data table -->
+          <app-data-table
+            tableId="report-builder-results"
+            [columns]="resultColumns()"
+            [data]="reportResults()!.rows"
+            emptyIcon="assessment"
+            emptyMessage="No data matches your criteria" />
+
+          <div class="builder__result-meta">
+            {{ reportResults()!.totalCount }} record(s) found
+          </div>
+        } @else {
+          <app-empty-state icon="analytics" message="Configure your report and click Run" />
+        }
+      </div>
+    </div>
+  </ng-container>
+</app-page-layout>

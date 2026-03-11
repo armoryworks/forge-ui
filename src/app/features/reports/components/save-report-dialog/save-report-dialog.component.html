@@ -1,0 +1,17 @@
+<app-dialog title="Save Report" width="420px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input label="Report Name" formControlName="name" />
+    <app-textarea label="Description" formControlName="description" [rows]="3" />
+    <app-toggle label="Share with team" formControlName="isShared" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid"
+      (click)="save()">
+      Save Report
+    </button>
+  </div>
+</app-dialog>

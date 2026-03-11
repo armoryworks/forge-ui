@@ -29,6 +29,12 @@
   @include mobile { display: none; }
 }
 
+.report-nav-divider {
+  height: $border-width-thin;
+  background: var(--border);
+  margin: $sp-md $sp-lg;
+}
+
 .report-nav-item {
   display: flex; align-items: center; gap: $sp-md; padding: $sp-md $sp-lg;
   border: none; background: transparent; color: var(--text-secondary);

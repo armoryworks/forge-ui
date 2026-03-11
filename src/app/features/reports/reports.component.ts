@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -50,6 +51,7 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 })
 export class ReportsComponent {
   private readonly reportService = inject(ReportService);
+  private readonly router = inject(Router);
 
   protected readonly reports: ReportDef[] = [
     { id: 'jobs-by-stage', label: 'Jobs by Stage', icon: 'view_kanban', needsDateRange: false },
@@ -721,6 +723,10 @@ export class ReportsComponent {
 
   private defaultEnd(): Date {
     return new Date();
+  }
+
+  protected openReportBuilder(): void {
+    this.router.navigate(['/reports/builder']);
   }
 
   protected readonly arAgingBuckets = computed(() => {
