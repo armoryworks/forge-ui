@@ -8,4 +8,7 @@ export interface CreateAssetRequest {
   model?: string;
   serialNumber?: string;
   notes?: string;
+  isCustomerOwned?: boolean;
+  cavityCount?: number;
+  toolLifeExpectancy?: number;
 }

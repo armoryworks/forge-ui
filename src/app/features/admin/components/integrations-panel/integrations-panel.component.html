@@ -1,11 +1,22 @@
 <div class="integrations-grid">
-  <!-- QuickBooks card (dynamic) -->
-  <div class="integration-card">
+  <!-- Accounting Providers Section -->
+  <div class="section-header">
+    <span class="material-icons-outlined">account_balance</span>
+    <span>Accounting</span>
+    @if (isConfigured()) {
+      <span class="active-badge">{{ accountingService.providerName() }}</span>
+    } @else {
+      <span class="standalone-badge">Standalone Mode</span>
+    }
+  </div>
+
+  <!-- QuickBooks card -->
+  <div class="integration-card" [class.integration-card--active]="activeProviderId() === 'quickbooks'">
     <div class="integration-card__header">
       <span class="material-icons-outlined integration-card__icon">account_balance</span>
       <div class="integration-card__info">
         <h3 class="integration-card__name">QuickBooks Online</h3>
-        <p class="integration-card__desc">Accounting, invoicing, and payment sync</p>
+        <p class="integration-card__desc">Accounting, invoicing, and payment sync via Intuit</p>
         @if (qbCompanyName()) {
           <p class="integration-card__company">{{ qbCompanyName() }}</p>
         }
@@ -21,14 +32,14 @@
       </span>
       <div class="integration-card__actions">
         @if (qbStatusLabel() === 'connected') {
-          <button class="action-btn action-btn--sm" (click)="testQuickBooks()" [disabled]="qbLoading()">
+          <button class="action-btn action-btn--sm" (click)="testConnection()" [disabled]="loading() || qbLoading()">
             Test
           </button>
-          <button class="action-btn action-btn--sm" (click)="disconnectQuickBooks()" [disabled]="qbLoading()">
+          <button class="action-btn action-btn--sm" (click)="disconnectAccounting()" [disabled]="loading() || qbLoading()">
             Disconnect
           </button>
         } @else {
-          <button class="action-btn action-btn--sm action-btn--primary" (click)="connectQuickBooks()" [disabled]="qbLoading()">
+          <button class="action-btn action-btn--sm action-btn--primary" (click)="connectQuickBooks()" [disabled]="loading() || qbLoading()">
             Connect
           </button>
         }
@@ -36,7 +47,60 @@
     </div>
   </div>
 
-  <!-- Static integration cards -->
+  <!-- Other accounting providers (available but not yet implemented) -->
+  @for (provider of providers(); track provider.id) {
+    @if (provider.id !== 'quickbooks') {
+      <div class="integration-card integration-card--coming-soon">
+        <div class="integration-card__header">
+          <span class="material-icons-outlined integration-card__icon">{{ provider.icon }}</span>
+          <div class="integration-card__info">
+            <h3 class="integration-card__name">{{ provider.name }}</h3>
+            <p class="integration-card__desc">{{ provider.description }}</p>
+          </div>
+        </div>
+        <div class="integration-card__footer">
+          <span class="integration-card__status integration-card__status--not_configured">
+            <span class="material-icons-outlined">schedule</span> Coming Soon
+          </span>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Sync Status (when connected) -->
+  @if (isConfigured() && syncStatus()) {
+    <div class="sync-status-card">
+      <div class="sync-status-card__header">
+        <span class="material-icons-outlined">sync</span>
+        <span>Sync Status</span>
+      </div>
+      <div class="sync-status-card__body">
+        <div class="sync-stat">
+          <span class="sync-stat__label">Queue Depth</span>
+          <span class="sync-stat__value">{{ syncStatus()!.queueDepth }}</span>
+        </div>
+        <div class="sync-stat">
+          <span class="sync-stat__label">Failed</span>
+          <span class="sync-stat__value" [class.sync-stat__value--error]="syncStatus()!.failedCount > 0">
+            {{ syncStatus()!.failedCount }}
+          </span>
+        </div>
+        @if (syncStatus()!.lastSyncAt) {
+          <div class="sync-stat">
+            <span class="sync-stat__label">Last Sync</span>
+            <span class="sync-stat__value">{{ syncStatus()!.lastSyncAt }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Other Integration Cards -->
+  <div class="section-header">
+    <span class="material-icons-outlined">extension</span>
+    <span>Other Integrations</span>
+  </div>
+
   @for (integration of staticIntegrations; track integration.id) {
     <div class="integration-card">
       <div class="integration-card__header">

@@ -56,7 +56,7 @@
 
 .detail-header__info { display: flex; align-items: center; gap: $sp-md; }
 .detail-header__actions { display: flex; gap: $sp-sm; }
-.detail-icon { font-size: 24px; color: var(--text-muted); }
+.detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-company { font-weight: 700; }
 .detail-contact { font-size: $font-size-xs; color: var(--text-muted); }
 
@@ -76,7 +76,7 @@
   gap: $sp-md;
 }
 
-.info-item { display: flex; flex-direction: column; gap: 2px; }
+.info-item { display: flex; flex-direction: column; gap: $sp-xs; }
 .info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
 .info-value { font-size: $font-size-sm; }
 
@@ -90,7 +90,7 @@
 
 .status-btn {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 3px 8px;
+  padding: $sp-xxs $sp-md;
   border: $border-width-thin solid var(--border);
   background: var(--surface);
   color: var(--text-muted);
@@ -126,5 +126,5 @@
 }
 
 .converted-icon {
-  font-size: 20px;
+  font-size: $icon-size-lg;
 }

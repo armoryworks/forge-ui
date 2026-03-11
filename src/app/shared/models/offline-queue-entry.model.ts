@@ -4,6 +4,7 @@ export interface OfflineQueueEntry {
   url: string;
   body: unknown;
   timestamp: number;
+  description?: string;
 }
 
 export interface DrainResult {

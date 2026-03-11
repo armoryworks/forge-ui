@@ -9,5 +9,6 @@ export interface BOMEntry {
   referenceDesignator: string | null;
   sortOrder: number;
   sourceType: BOMSourceType;
+  leadTimeDays: number | null;
   notes: string | null;
 }

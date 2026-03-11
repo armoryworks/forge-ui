@@ -11,4 +11,8 @@ export interface KanbanJob {
   isOverdue: boolean;
   customerName: string | null;
   billingStatus: string | null;
+  externalRef: string | null;
+  accountingDocumentType: string | null;
+  disposition: string | null;
+  childJobCount: number;
 }

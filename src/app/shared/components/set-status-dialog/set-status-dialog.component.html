@@ -1,0 +1,14 @@
+<app-dialog title="Change Status" width="420px" (closed)="dialogRef.close()">
+  <div [formGroup]="form">
+    <app-select label="Status" formControlName="statusCode" [options]="data.statusOptions" />
+    <app-textarea label="Notes" formControlName="notes" [rows]="3" [maxlength]="2000" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="dialogRef.close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">Update</button>
+  </div>
+</app-dialog>

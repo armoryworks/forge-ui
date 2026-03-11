@@ -1,0 +1,260 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+$lightbox-thumb-size: 56px;
+$lightbox-nav-size: 40px;
+
+.lightbox__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-dialog + 50;
+  background: rgba(0, 0, 0, 0.92);
+  @include flex-center;
+}
+
+.lightbox {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: $sp-xl;
+  user-select: none;
+}
+
+// ─── Close Button ───
+
+.lightbox__close {
+  position: absolute;
+  top: $sp-md;
+  right: $sp-md;
+  z-index: 2;
+  @include flex-center;
+  width: $lightbox-nav-size;
+  height: $lightbox-nav-size;
+  border: none;
+  border-radius: $border-radius;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: $icon-size-xl;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+  }
+}
+
+// ─── Counter ───
+
+.lightbox__counter {
+  position: absolute;
+  top: $sp-md;
+  left: $sp-lg;
+  z-index: 2;
+  @include uppercase-label($font-size-sm, 0.5px, 500);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: $font-family-mono;
+}
+
+// ─── Stage ───
+
+.lightbox__stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 0;
+  position: relative;
+}
+
+// ─── Navigation Arrows ───
+
+.lightbox__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+  @include flex-center;
+  width: $lightbox-nav-size;
+  height: $lightbox-nav-size;
+  border: none;
+  border-radius: $border-radius;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xxl;
+  }
+
+  &--prev {
+    left: $sp-md;
+  }
+
+  &--next {
+    right: $sp-md;
+  }
+}
+
+// ─── Content ───
+
+.lightbox__content {
+  @include flex-center;
+  max-width: 100%;
+  max-height: 100%;
+  opacity: 1;
+  transition: opacity $transition-fast;
+
+  &--fade {
+    opacity: 0;
+  }
+}
+
+.lightbox__image {
+  max-width: calc(100vw - #{$sp-4xl * 2});
+  max-height: calc(100vh - 180px);
+  object-fit: contain;
+  border-radius: $border-radius;
+}
+
+// ─── Non-Image Placeholder ───
+
+.lightbox__placeholder {
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-3xl;
+}
+
+.lightbox__placeholder-icon {
+  font-size: 72px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.lightbox__placeholder-label {
+  font-size: $font-size-md;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: $font-family-primary;
+}
+
+.lightbox__download {
+  @include flex-center;
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid rgba(255, 255, 255, 0.3);
+  border-radius: $border-radius;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: $font-size-base;
+  font-family: $font-family-primary;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+// ─── Title ───
+
+.lightbox__title {
+  padding: $sp-md 0;
+  font-size: $font-size-base;
+  color: rgba(255, 255, 255, 0.8);
+  font-family: $font-family-primary;
+  text-align: center;
+  @include truncate;
+  max-width: 600px;
+}
+
+// ─── Thumbnail Strip ───
+
+.lightbox__thumbnails {
+  display: flex;
+  gap: $sp-sm;
+  padding: $sp-md 0;
+  overflow-x: auto;
+  max-width: 100%;
+  @include custom-scrollbar(3px);
+}
+
+.lightbox__thumb {
+  flex-shrink: 0;
+  @include flex-center;
+  width: $lightbox-thumb-size;
+  height: $lightbox-thumb-size;
+  border: $border-width solid transparent;
+  border-radius: $border-radius;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  &--active {
+    border-color: var(--primary);
+  }
+}
+
+.lightbox__thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lightbox__thumb-icon {
+  font-size: $icon-size-xl;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+// ─── Mobile ───
+
+@include mobile {
+  .lightbox {
+    padding: $sp-md;
+  }
+
+  .lightbox__image {
+    max-width: calc(100vw - #{$sp-xl * 2});
+    max-height: calc(100vh - 160px);
+  }
+
+  .lightbox__nav {
+    width: 32px;
+    height: 32px;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+    }
+  }
+
+  .lightbox__thumbnails {
+    gap: $sp-xs;
+  }
+
+  .lightbox__thumb {
+    width: 44px;
+    height: 44px;
+  }
+}

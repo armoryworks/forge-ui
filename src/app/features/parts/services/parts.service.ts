@@ -14,6 +14,9 @@ import { PartRevision } from '../models/part-revision.model';
 import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
 import { PartInventorySummary } from '../models/part-inventory-summary.model';
 import { FileAttachment } from '../../../shared/models/file.model';
+import { ProcessStep } from '../models/process-step.model';
+import { CreateProcessStepRequest } from '../models/create-process-step-request.model';
+import { UpdateProcessStepRequest } from '../models/update-process-step-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class PartsService {
@@ -74,6 +77,30 @@ export class PartsService {
 
   getPartInventorySummary(partId: number): Observable<PartInventorySummary> {
     return this.http.get<PartInventorySummary>(`${this.base}/${partId}/inventory-summary`);
+  }
+
+  linkAccountingItem(partId: number, externalId: string, externalRef: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${partId}/link-accounting-item`, { externalId, externalRef });
+  }
+
+  unlinkAccountingItem(partId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${partId}/link-accounting-item`);
+  }
+
+  getProcessSteps(partId: number): Observable<ProcessStep[]> {
+    return this.http.get<ProcessStep[]>(`${this.base}/${partId}/process-steps`);
+  }
+
+  createProcessStep(partId: number, request: CreateProcessStepRequest): Observable<ProcessStep> {
+    return this.http.post<ProcessStep>(`${this.base}/${partId}/process-steps`, request);
+  }
+
+  updateProcessStep(partId: number, stepId: number, request: UpdateProcessStepRequest): Observable<ProcessStep> {
+    return this.http.patch<ProcessStep>(`${this.base}/${partId}/process-steps/${stepId}`, request);
+  }
+
+  deleteProcessStep(partId: number, stepId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${partId}/process-steps/${stepId}`);
   }
 
   getFileDownloadUrl(fileId: number): string {

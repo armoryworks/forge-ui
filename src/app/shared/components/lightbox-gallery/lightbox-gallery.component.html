@@ -1,0 +1,83 @@
+<div class="lightbox__backdrop" (click)="onBackdropClick($event)">
+  <div class="lightbox" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
+    <!-- Close button -->
+    <button class="lightbox__close" (click)="close()" aria-label="Close gallery">
+      <span class="material-icons-outlined">close</span>
+    </button>
+
+    <!-- Counter -->
+    <div class="lightbox__counter">{{ counter() }}</div>
+
+    <!-- Main content area -->
+    <div class="lightbox__stage">
+      <!-- Previous arrow -->
+      @if (hasPrev()) {
+        <button class="lightbox__nav lightbox__nav--prev" (click)="prev()" aria-label="Previous image">
+          <span class="material-icons-outlined">chevron_left</span>
+        </button>
+      }
+
+      <!-- Current item -->
+      @if (currentItem(); as item) {
+        <div class="lightbox__content" [class.lightbox__content--fade]="transitioning()">
+          @if (item.type === 'image') {
+            <img
+              class="lightbox__image"
+              [src]="item.url"
+              [alt]="item.title ?? 'Gallery image'"
+              draggable="false" />
+          } @else {
+            <div class="lightbox__placeholder">
+              <span class="material-icons-outlined lightbox__placeholder-icon">
+                {{ getFileIcon(item.type) }}
+              </span>
+              <span class="lightbox__placeholder-label">
+                {{ item.type === 'pdf' ? 'PDF Document' : 'File' }}
+              </span>
+              <a class="lightbox__download" [href]="item.url" target="_blank" rel="noopener">
+                <span class="material-icons-outlined">download</span>
+                Download
+              </a>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Next arrow -->
+      @if (hasNext()) {
+        <button class="lightbox__nav lightbox__nav--next" (click)="next()" aria-label="Next image">
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      }
+    </div>
+
+    <!-- Title -->
+    @if (currentItem()?.title) {
+      <div class="lightbox__title">{{ currentItem()!.title }}</div>
+    }
+
+    <!-- Thumbnail strip -->
+    @if (items().length > 1) {
+      <div class="lightbox__thumbnails" #thumbnailStrip>
+        @for (item of items(); track item.url; let i = $index) {
+          <button
+            class="lightbox__thumb"
+            [class.lightbox__thumb--active]="i === currentIndex()"
+            (click)="goTo(i)"
+            [attr.aria-label]="'Go to image ' + (i + 1)">
+            @if (item.type === 'image') {
+              <img
+                class="lightbox__thumb-img"
+                [src]="item.thumbnailUrl ?? item.url"
+                [alt]="item.title ?? 'Thumbnail'" />
+            } @else {
+              <span class="material-icons-outlined lightbox__thumb-icon">
+                {{ getFileIcon(item.type) }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+    }
+  </div>
+</div>

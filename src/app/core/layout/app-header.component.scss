@@ -86,8 +86,53 @@
 .search-results {
   position: absolute; top: 100%; left: 0; right: 0;
   background: var(--surface); border: $border-width-thin solid var(--border);
-  z-index: $z-dropdown; max-height: 400px; overflow-y: auto;
+  z-index: $z-dropdown; max-height: 400px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  &--two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.search-results__col {
+  overflow-y: auto;
+  max-height: 400px;
+  @include custom-scrollbar;
+
+  &--ai {
+    border-left: $border-width-thin solid var(--border);
+    background: color-mix(in srgb, var(--accent) 2%, var(--surface));
+  }
+}
+
+.search-results__col-header {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  display: flex; align-items: center; gap: $sp-sm;
+  padding: $sp-sm $sp-lg; color: var(--text-muted);
+  border-bottom: $border-width-thin solid var(--border);
+  position: sticky; top: 0; background: var(--surface); z-index: 1;
+
+  .material-icons-outlined { font-size: $icon-size-sm; }
+
+  &--ai {
+    background: color-mix(in srgb, var(--accent) 2%, var(--surface));
+    .material-icons-outlined { color: var(--accent); }
+  }
+}
+
+.search-results__empty {
+  padding: $sp-xl $sp-lg;
+  text-align: center;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.search-results__thinking {
+  display: flex; align-items: center; gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-xs; color: var(--text-muted);
+  .material-icons-outlined { font-size: $icon-size-sm; color: var(--accent); }
 }
 
 .search-result {
@@ -101,7 +146,20 @@
   &__title { font-weight: 600; @include truncate; }
   &__subtitle { font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
   &__type { @include uppercase-label($font-size-xxs, 0.5px, 600); color: var(--text-muted); flex-shrink: 0; }
+
+  &--ai {
+    &:hover {
+      background: color-mix(in srgb, var(--accent) 5%, var(--bg));
+    }
+  }
+
+  &__arrow {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
 }
+
 
 .app-header__actions {
   display: flex;

@@ -1,0 +1,146 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.camera-capture__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-dialog;
+  background: $backdrop-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-capture {
+  position: relative;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  border-radius: $border-radius;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  @include mobile {
+    max-width: 100%;
+    max-height: 100vh;
+    height: 100%;
+    border: none;
+  }
+}
+
+.camera-capture__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.camera-capture__title {
+  font-size: $font-size-title;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.camera-capture__body {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+.camera-capture__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-capture__preview {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.camera-capture__status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl;
+  text-align: center;
+}
+
+.camera-capture__status-icon {
+  font-size: $icon-size-hero;
+  color: var(--text-muted);
+
+  &--error {
+    color: var(--error);
+  }
+}
+
+.camera-capture__status-text {
+  font-size: $font-size-md;
+  font-weight: 500;
+  color: var(--surface);
+}
+
+.camera-capture__status-hint {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  max-width: 280px;
+  line-height: 1.4;
+}
+
+.camera-capture__footer {
+  @include flex-center;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+  min-height: 72px;
+}
+
+.camera-capture__shutter {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 4px solid var(--primary);
+  background: transparent;
+  cursor: pointer;
+  padding: $sp-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform $transition-fast;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.camera-capture__shutter-ring {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.camera-capture__canvas {
+  display: none;
+}
+
+.camera-capture__file-input {
+  display: none;
+}

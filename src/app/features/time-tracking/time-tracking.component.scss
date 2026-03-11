@@ -12,30 +12,30 @@
 .filter-group { display: flex; align-items: center; gap: $sp-sm; width: 180px; }
 .filter-summary { margin-left: auto; font-size: $font-size-sm; color: var(--text-muted); }
 
-.row--active { background: rgba(34, 197, 94, 0.04); }
+.row--active { background: var(--success-light); }
 
-.type-icon { font-size: 18px; color: var(--text-muted); }
+.type-icon { font-size: $icon-size-md; color: var(--text-muted); }
 .type-icon--running { color: var(--success); }
 .duration-cell { font-variant-numeric: tabular-nums; font-weight: 600; }
 .notes-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .job-badge {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 1px 6px; border-radius: $border-radius;
+  padding: $sp-xxs $sp-sm; border-radius: $border-radius;
   background: var(--primary-light); color: var(--primary); border: $border-width-thin solid var(--primary);
 }
 
 .running-badge {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 1px 6px; border-radius: $border-radius;
-  background: rgba(34, 197, 94, 0.1); color: var(--success); border: $border-width-thin solid var(--success);
+  padding: $sp-xxs $sp-sm; border-radius: $border-radius;
+  background: var(--success-light); color: var(--success); border: $border-width-thin solid var(--success);
 }
 
 .entry-type {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 1px 6px; border-radius: $border-radius; border: $border-width-thin solid var(--border);
+  padding: $sp-xxs $sp-sm; border-radius: $border-radius; border: $border-width-thin solid var(--border);
   &--manual { background: var(--bg); color: var(--text-muted); }
-  &--timer { background: rgba(59, 130, 246, 0.05); border-color: var(--primary); color: var(--primary); }
+  &--timer { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
 }
 
 .lock-icon { font-size: $icon-size-xs; color: var(--text-muted); }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
@@ -17,6 +17,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ScannerService } from '../../shared/services/scanner.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 @Component({
@@ -32,6 +33,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly boardHub = inject(BoardHubService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly scanner = inject(ScannerService);
   private readonly dialog = inject(MatDialog);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -56,7 +58,23 @@ export class KanbanComponent implements OnInit, OnDestroy {
     () => this.columns().map((_, i) => 'column-' + i),
   );
 
+  private readonly scanEffect = effect(() => {
+    const scan = this.scanner.lastScan();
+    if (!scan || scan.context !== 'kanban') return;
+    this.scanner.clearLastScan();
+    const job = this.columns()
+      .flatMap(c => c.jobs)
+      .find(j => j.jobNumber.toLowerCase() === scan.value.toLowerCase());
+    if (job) {
+      this.selectedJobId.set(job.id);
+      this.snackbar.success(`Found job ${job.jobNumber}`);
+    } else {
+      this.snackbar.error(`Job "${scan.value}" not found on board`);
+    }
+  });
+
   ngOnInit(): void {
+    this.scanner.setContext('kanban');
     this.loadingService.track('Loading board...', this.kanbanService.getTrackTypes())
       .subscribe({
         next: (types) => {

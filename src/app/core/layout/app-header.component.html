@@ -23,18 +23,54 @@
     <kbd>Ctrl+K</kbd>
 
     @if (showResults()) {
-      <div class="search-results">
-        @for (result of searchResults(); track result.entityId + result.entityType) {
-          <button class="search-result" (mousedown)="navigateToResult(result)">
-            <span class="material-icons-outlined search-result__icon">{{ result.icon }}</span>
-            <div class="search-result__content">
-              <span class="search-result__title">{{ result.title }}</span>
-              @if (result.subtitle) {
-                <span class="search-result__subtitle">{{ result.subtitle }}</span>
-              }
+      <div class="search-results" [class.search-results--two-col]="aiService.available()">
+        <div class="search-results__col">
+          <div class="search-results__col-header">
+            <span class="material-icons-outlined">search</span>
+            Results
+          </div>
+          @for (result of searchResults(); track result.entityId + result.entityType) {
+            <button class="search-result" (mousedown)="navigateToResult(result)">
+              <span class="material-icons-outlined search-result__icon">{{ result.icon }}</span>
+              <div class="search-result__content">
+                <span class="search-result__title">{{ result.title }}</span>
+                @if (result.subtitle) {
+                  <span class="search-result__subtitle">{{ result.subtitle }}</span>
+                }
+              </div>
+              <span class="search-result__type">{{ result.entityType }}</span>
+            </button>
+          }
+          @if (searchResults().length === 0) {
+            <div class="search-results__empty">No matches</div>
+          }
+        </div>
+        @if (aiService.available()) {
+          <div class="search-results__col search-results__col--ai">
+            <div class="search-results__col-header search-results__col-header--ai">
+              <span class="material-icons-outlined">auto_awesome</span>
+              AI Suggestions
             </div>
-            <span class="search-result__type">{{ result.entityType }}</span>
-          </button>
+            @if (aiLoading()) {
+              <div class="search-results__thinking">
+                <span class="material-icons-outlined spin">auto_awesome</span>
+                Thinking...
+              </div>
+            }
+            @for (suggestion of aiSuggestions(); track suggestion.url) {
+              <button class="search-result search-result--ai" (mousedown)="navigateToSuggestion(suggestion)">
+                <span class="material-icons-outlined search-result__icon">{{ suggestion.icon }}</span>
+                <div class="search-result__content">
+                  <span class="search-result__title">{{ suggestion.label }}</span>
+                  <span class="search-result__subtitle">{{ suggestion.description }}</span>
+                </div>
+                <span class="material-icons-outlined search-result__arrow">arrow_forward</span>
+              </button>
+            }
+            @if (!aiLoading() && aiSuggestions().length === 0) {
+              <div class="search-results__empty">Type to get AI suggestions</div>
+            }
+          </div>
         }
       </div>
     }
@@ -47,6 +83,11 @@
         <span class="badge">{{ chatPanel.totalUnread() }}</span>
       }
     </button>
+    @if (aiService.available()) {
+      <button class="icon-btn" title="AI Assistant" aria-label="Open AI assistant" (click)="aiHelpPanel.toggle()">
+        <span class="material-icons-outlined">smart_toy</span>
+      </button>
+    }
     <button class="icon-btn" title="Notifications" aria-label="Toggle notifications" (click)="toggleNotifications()">
       <span class="material-icons-outlined">notifications_none</span>
       @if (unreadCount() > 0) {
@@ -66,3 +107,4 @@
 }
 
 <app-chat #chatPanel />
+<app-ai-help-panel #aiHelpPanel />

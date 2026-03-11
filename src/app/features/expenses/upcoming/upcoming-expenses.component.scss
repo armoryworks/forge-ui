@@ -1,0 +1,103 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ledger-toolbar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+
+  &__spacer { flex: 1; }
+}
+
+.ledger-summary {
+  display: flex;
+  gap: $sp-lg;
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: $sp-xxs;
+  }
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    font-family: $font-family-mono;
+    color: var(--primary);
+  }
+}
+
+.month-breakdown {
+  display: flex;
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  overflow-x: auto;
+  flex-shrink: 0;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.month-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xxs;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  min-width: 120px;
+  flex-shrink: 0;
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    font-family: $font-family-mono;
+  }
+
+  &__count {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+}
+
+.row-actions {
+  display: flex;
+  gap: $sp-xs;
+}
+
+// Highlighted row for filtered classification
+:host ::ng-deep .row--highlighted {
+  background: color-mix(in srgb, var(--warning) 10%, transparent) !important; // override for classification highlight
+  border-left: $border-width solid var(--warning);
+}
+
+@include mobile {
+  .ledger-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .month-breakdown {
+    padding: $sp-sm $sp-md;
+  }
+}

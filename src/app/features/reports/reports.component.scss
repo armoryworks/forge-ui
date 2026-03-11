@@ -1,10 +1,19 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .reports-layout {
   display: flex;
-  height: calc(100vh - $header-height - 48px);
-  gap: 0;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .reports-sidebar {
@@ -14,7 +23,7 @@
   padding: $sp-md 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: $sp-xxs;
   overflow-y: auto;
 
   @include mobile { display: none; }
@@ -25,10 +34,10 @@
   border: none; background: transparent; color: var(--text-secondary);
   font-size: $font-size-sm; font-family: $font-family-primary; cursor: pointer;
   text-align: left; width: 100%;
-  &__icon { font-size: 18px; }
+  &__icon { font-size: $icon-size-md; }
   &:hover { background: var(--bg); color: var(--text); }
   &--active { background: var(--bg); color: var(--text); font-weight: 600;
-    border-right: 2px solid var(--primary); }
+    border-right: $border-width solid var(--primary); }
 }
 
 .reports-main {
@@ -44,7 +53,7 @@
 }
 
 .chart-container {
-  width: 100%; height: 300px; position: relative;
+  width: 100%; height: $chart-height; position: relative;
   &--pie { max-width: 500px; }
 }
 

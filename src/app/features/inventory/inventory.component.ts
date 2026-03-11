@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,6 +24,7 @@ import { RowExpandDirective } from '../../shared/directives/row-expand.directive
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ScannerService } from '../../shared/services/scanner.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
@@ -41,6 +42,7 @@ type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOp
 export class InventoryComponent {
   private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly scanner = inject(ScannerService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -199,8 +201,18 @@ export class InventoryComponent {
   });
 
   constructor() {
+    this.scanner.setContext('inventory');
     this.loadStock();
     this.loadBinLocations();
+
+    effect(() => {
+      const scan = this.scanner.lastScan();
+      if (!scan || scan.context !== 'inventory') return;
+      this.scanner.clearLastScan();
+      this.searchControl.setValue(scan.value);
+      this.activeTab.set('stock');
+      this.loadStock();
+    });
   }
 
   protected switchTab(tab: InventoryTab): void {

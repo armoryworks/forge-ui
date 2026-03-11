@@ -22,6 +22,17 @@ export interface JobDetail {
   boardPosition: number;
   iterationCount: number;
   iterationNotes: string | null;
+  externalId: string | null;
+  externalRef: string | null;
+  provider: string | null;
+  disposition: string | null;
+  dispositionNotes: string | null;
+  dispositionAt: string | null;
+  partId: number | null;
+  partNumber: string | null;
+  parentJobId: number | null;
+  parentJobNumber: string | null;
+  childJobCount: number;
   createdAt: string;
   updatedAt: string;
 }

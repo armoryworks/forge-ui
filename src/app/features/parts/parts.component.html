@@ -88,6 +88,10 @@
             <span class="tab-badge">{{ part.usedIn.length }}</span>
           }
         </button>
+        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'process'"
+          (click)="detailTab.set('process')">
+          Process
+        </button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'files'"
           (click)="detailTab.set('files')">
           Files
@@ -126,16 +130,16 @@
                 <span class="info-label">Material</span>
                 <span class="info-value">{{ part.material ?? '—' }}</span>
               </div>
+              @if (part.externalPartNumber) {
+                <div class="info-item">
+                  <span class="info-label">External Part #</span>
+                  <span class="info-value">{{ part.externalPartNumber }}</span>
+                </div>
+              }
               @if (part.moldToolRef) {
                 <div class="info-item">
                   <span class="info-label">Mold / Tool Ref</span>
                   <span class="info-value">{{ part.moldToolRef }}</span>
-                </div>
-              }
-              @if (part.externalRef) {
-                <div class="info-item">
-                  <span class="info-label">External Ref</span>
-                  <span class="info-value">{{ part.externalRef }}</span>
                 </div>
               }
               @if (part.preferredVendorName) {
@@ -144,7 +148,43 @@
                   <span class="info-value">{{ part.preferredVendorName }}</span>
                 </div>
               }
+              @if (part.toolingAssetName) {
+                <div class="info-item">
+                  <span class="info-label">Tooling Asset</span>
+                  <span class="info-value">{{ part.toolingAssetName }}</span>
+                </div>
+              }
             </div>
+
+            <!-- Accounting Linkage -->
+            @if (accountingService.isConfigured()) {
+              <div class="accounting-link-section">
+                <div class="accounting-link-section__header">
+                  <span class="info-label">Accounting Item</span>
+                  @if (isLinked()) {
+                    <button class="icon-btn icon-btn--danger" title="Unlink" (click)="unlinkAccountingItem()">
+                      <span class="material-icons-outlined">link_off</span>
+                    </button>
+                  } @else {
+                    <button class="action-btn action-btn--sm" (click)="openLinkDialog()">
+                      <span class="material-icons-outlined">link</span>
+                      Link
+                    </button>
+                  }
+                </div>
+                @if (isLinked()) {
+                  <div class="accounting-link-card">
+                    <span class="material-icons-outlined accounting-link-card__icon">receipt_long</span>
+                    <div class="accounting-link-card__info">
+                      <span class="accounting-link-card__name">{{ part.externalRef }}</span>
+                      <span class="accounting-link-card__meta">{{ part.provider }} &middot; {{ part.externalId }}</span>
+                    </div>
+                  </div>
+                } @else {
+                  <span class="text-muted">Not linked to any accounting item</span>
+                }
+              </div>
+            }
 
             <!-- Inventory Summary -->
             @if (inventorySummary(); as inv) {
@@ -225,6 +265,7 @@
                     <th>Part</th>
                     <th>Qty</th>
                     <th>Source</th>
+                    <th>Lead Time</th>
                     <th>Ref Des</th>
                     <th></th>
                   </tr>
@@ -241,10 +282,11 @@
                       </td>
                       <td class="text-center">{{ entry.quantity }}</td>
                       <td>
-                        <span class="source-chip" [class.source-chip--make]="entry.sourceType === 'Make'">
+                        <span class="source-chip" [class.source-chip--make]="entry.sourceType === 'Make'" [class.source-chip--stock]="entry.sourceType === 'Stock'">
                           {{ entry.sourceType }}
                         </span>
                       </td>
+                      <td class="text-muted">{{ entry.leadTimeDays !== null ? entry.leadTimeDays + 'd' : '—' }}</td>
                       <td class="text-muted">{{ entry.referenceDesignator ?? '—' }}</td>
                       <td class="col-actions">
                         <button class="icon-btn icon-btn--danger" title="Remove" (click)="deleteBomEntry(entry)">
@@ -273,7 +315,7 @@
                 </thead>
                 <tbody>
                   @for (usage of part.usedIn; track usage.id) {
-                    <tr class="bom-row bom-row--clickable" (click)="selectPart({id: usage.parentPartId, partNumber: usage.parentPartNumber, description: usage.parentDescription, revision: '', status: 'Active', partType: 'Assembly', material: null, bomEntryCount: 0, createdAt: ''})">
+                    <tr class="bom-row bom-row--clickable" (click)="selectPart({id: usage.parentPartId, partNumber: usage.parentPartNumber, externalPartNumber: null, description: usage.parentDescription, revision: '', status: 'Active', partType: 'Assembly', material: null, bomEntryCount: 0, createdAt: ''})">
                       <td class="bom-part-number">{{ usage.parentPartNumber }}</td>
                       <td>{{ usage.parentDescription }}</td>
                       <td class="text-center">{{ usage.quantity }}</td>
@@ -284,6 +326,11 @@
             } @else {
               <app-empty-state icon="link_off" message="Not used in any assemblies" />
             }
+          }
+
+          <!-- Process Tab -->
+          @if (detailTab() === 'process') {
+            <app-process-plan [partId]="part.id" />
           }
 
           <!-- Files Tab -->
@@ -323,22 +370,31 @@
 
 <!-- Part Dialog -->
 @if (showPartDialog()) {
-  <app-dialog [title]="editingPart() ? 'Edit Part' : 'New Part'" (closed)="closePartDialog()">
+  <app-dialog [title]="editingPart() ? editingPart()!.partNumber : 'Create Part'" (closed)="closePartDialog()">
     <div [formGroup]="partForm">
-      @if (!editingPart()) {
-        <app-input label="Part Number" formControlName="partNumber" />
+      @if (editingPart()) {
+        <div class="auto-part-number">
+          <span class="info-label">Part Number</span>
+          <span class="info-value">{{ editingPart()!.partNumber }}</span>
+        </div>
       }
-
+      <app-select label="Type" formControlName="partType" [options]="partTypeOptions" />
       <app-input label="Description" formControlName="description" />
-
       <div class="dialog-row">
         <app-input label="Revision" formControlName="revision" [maxlength]="5" />
-        <app-select label="Type" formControlName="partType" [options]="partTypeOptions" />
+        <app-input label="External Part #" formControlName="externalPartNumber" placeholder="Vendor/supplier part number" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Material" formControlName="material" />
+        <app-input label="Mold/Tool Ref" formControlName="moldToolRef" />
       </div>
 
-      <app-input label="Material" formControlName="material" />
-
-      <app-input label="Mold / Tool Reference" formControlName="moldToolRef" />
+      <app-entity-picker
+        label="Tooling Asset"
+        entityType="assets"
+        displayField="name"
+        [filters]="{ assetType: 'Tooling' }"
+        formControlName="toolingAssetId" />
     </div>
 
     <div dialog-footer>
@@ -349,6 +405,36 @@
         (click)="savePart()">
         {{ editingPart() ? 'Save Changes' : 'Create Part' }}
       </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Link Accounting Item Dialog -->
+@if (showLinkDialog()) {
+  <app-dialog title="Link Accounting Item" width="520px" (closed)="closeLinkDialog()">
+    <div class="accounting-items-list" [appLoadingBlock]="accountingItemsLoading()">
+      @for (item of accountingService.items(); track item.externalId) {
+        <button class="accounting-item-row" [disabled]="linkSaving()" (click)="linkToAccountingItem(item)">
+          <div class="accounting-item-row__info">
+            <span class="accounting-item-row__name">{{ item.name }}</span>
+            @if (item.sku) {
+              <span class="accounting-item-row__sku">SKU: {{ item.sku }}</span>
+            }
+            @if (item.description) {
+              <span class="accounting-item-row__desc">{{ item.description }}</span>
+            }
+          </div>
+          @if (item.unitPrice !== null) {
+            <span class="accounting-item-row__price">{{ item.unitPrice | number:'1.2-2' }}</span>
+          }
+        </button>
+      } @empty {
+        <app-empty-state icon="receipt_long" message="No accounting items found" />
+      }
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeLinkDialog()">Cancel</button>
     </div>
   </app-dialog>
 }
@@ -364,7 +450,10 @@
         <app-select label="Source" formControlName="sourceType" [options]="sourceTypeOptions" />
       </div>
 
-      <app-input label="Reference Designator" formControlName="referenceDesignator" />
+      <div class="dialog-row">
+        <app-input label="Reference Designator" formControlName="referenceDesignator" />
+        <app-input label="Lead Time (days)" type="number" formControlName="leadTimeDays" />
+      </div>
 
       <app-textarea label="Notes" formControlName="notes" [rows]="2" />
     </div>

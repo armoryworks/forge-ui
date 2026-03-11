@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 
+import { AccountingService } from '../../../../shared/services/accounting.service';
 import { QuickBooksService } from '../../services/quickbooks.service';
 
 export interface IntegrationConfig {
@@ -20,7 +21,14 @@ export interface IntegrationConfig {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IntegrationsPanelComponent implements OnInit {
+  protected readonly accountingService = inject(AccountingService);
   private readonly qbService = inject(QuickBooksService);
+
+  readonly providers = this.accountingService.providers;
+  readonly activeProviderId = this.accountingService.providerId;
+  readonly isConfigured = this.accountingService.isConfigured;
+  readonly loading = this.accountingService.loading;
+  readonly syncStatus = this.accountingService.syncStatus;
 
   readonly qbStatus = this.qbService.status;
   readonly qbLoading = this.qbService.loading;
@@ -69,6 +77,8 @@ export class IntegrationsPanelComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    this.accountingService.loadProviders();
+    this.accountingService.loadSyncStatus();
     this.qbService.loadStatus();
   }
 
@@ -76,11 +86,17 @@ export class IntegrationsPanelComponent implements OnInit {
     this.qbService.connect();
   }
 
-  disconnectQuickBooks(): void {
-    this.qbService.disconnect();
+  disconnectAccounting(): void {
+    this.accountingService.disconnect();
   }
 
-  testQuickBooks(): void {
-    this.qbService.testConnection();
+  testConnection(): void {
+    this.accountingService.testConnection();
+  }
+
+  selectProvider(providerId: string): void {
+    if (providerId === 'quickbooks') {
+      this.qbService.connect();
+    }
   }
 }

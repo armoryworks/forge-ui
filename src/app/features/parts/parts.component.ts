@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -9,6 +10,9 @@ import { BOMEntry } from './models/bom-entry.model';
 import { PartStatus } from './models/part-status.type';
 import { PartType } from './models/part-type.type';
 import { BOMSourceType } from './models/bom-source-type.type';
+import { AccountingService } from '../../shared/services/accounting.service';
+import { ScannerService } from '../../shared/services/scanner.service';
+import { AccountingItem } from '../admin/models/accounting-item.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -29,16 +33,18 @@ import { StlViewerComponent } from '../../shared/components/stl-viewer/stl-viewe
 import { FileUploadZoneComponent } from '../../shared/components/file-upload-zone/file-upload-zone.component';
 import { FileAttachment } from '../../shared/models/file.model';
 import { PartInventorySummary } from './models/part-inventory-summary.model';
+import { ProcessPlanComponent } from './components/process-plan/process-plan.component';
 
 @Component({
   selector: 'app-parts',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    DecimalPipe, ReactiveFormsModule,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
     EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
+    ProcessPlanComponent,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
@@ -46,8 +52,10 @@ import { PartInventorySummary } from './models/part-inventory-summary.model';
 })
 export class PartsComponent {
   protected readonly partsService = inject(PartsService);
+  protected readonly accountingService = inject(AccountingService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly scanner = inject(ScannerService);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
@@ -67,6 +75,7 @@ export class PartsComponent {
     { value: '', label: 'All Statuses' },
     { value: 'Active', label: 'Active' },
     { value: 'Draft', label: 'Draft' },
+    { value: 'Prototype', label: 'Prototype' },
     { value: 'Obsolete', label: 'Obsolete' },
   ];
 
@@ -74,15 +83,22 @@ export class PartsComponent {
     { value: '', label: 'All Types' },
     { value: 'Part', label: 'Part' },
     { value: 'Assembly', label: 'Assembly' },
+    { value: 'RawMaterial', label: 'Raw Material' },
+    { value: 'Consumable', label: 'Consumable' },
+    { value: 'Tooling', label: 'Tooling' },
+    { value: 'Fastener', label: 'Fastener' },
+    { value: 'Electronic', label: 'Electronic' },
+    { value: 'Packaging', label: 'Packaging' },
   ];
 
   protected readonly partColumns: ColumnDef[] = [
     { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'externalPartNumber', header: 'Ext. Part #', sortable: true, width: '120px' },
     { field: 'description', header: 'Description', sortable: true },
     { field: 'revision', header: 'Rev', width: '60px', align: 'center' },
     { field: 'partType', header: 'Type', sortable: true },
     { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: [
-      { value: 'Active', label: 'Active' }, { value: 'Draft', label: 'Draft' }, { value: 'Obsolete', label: 'Obsolete' },
+      { value: 'Active', label: 'Active' }, { value: 'Draft', label: 'Draft' }, { value: 'Prototype', label: 'Prototype' }, { value: 'Obsolete', label: 'Obsolete' },
     ]},
     { field: 'material', header: 'Material' },
     { field: 'bomEntryCount', header: 'BOM', width: '60px', align: 'center' },
@@ -98,21 +114,28 @@ export class PartsComponent {
   protected readonly editingPart = signal<PartDetail | null>(null);
 
   protected readonly partForm = new FormGroup({
-    partNumber: new FormControl('', [Validators.required]),
     description: new FormControl('', [Validators.required]),
     revision: new FormControl('A'),
     partType: new FormControl('Part', [Validators.required]),
     material: new FormControl(''),
     moldToolRef: new FormControl(''),
+    externalPartNumber: new FormControl(''),
+    toolingAssetId: new FormControl<number | null>(null),
   });
 
   protected readonly partViolations = FormValidationService.getViolations(this.partForm, {
-    partNumber: 'Part Number', description: 'Description', partType: 'Type',
+    description: 'Description', partType: 'Type',
   });
 
   protected readonly partTypeOptions: SelectOption[] = [
     { value: 'Part', label: 'Part' },
     { value: 'Assembly', label: 'Assembly' },
+    { value: 'RawMaterial', label: 'Raw Material' },
+    { value: 'Consumable', label: 'Consumable' },
+    { value: 'Tooling', label: 'Tooling' },
+    { value: 'Fastener', label: 'Fastener' },
+    { value: 'Electronic', label: 'Electronic' },
+    { value: 'Packaging', label: 'Packaging' },
   ];
 
   // ── BOM Dialog ──
@@ -123,6 +146,7 @@ export class PartsComponent {
     quantity: new FormControl(1, [Validators.required, Validators.min(0.01)]),
     sourceType: new FormControl('Buy'),
     referenceDesignator: new FormControl(''),
+    leadTimeDays: new FormControl<number | null>(null),
     notes: new FormControl(''),
   });
 
@@ -133,10 +157,11 @@ export class PartsComponent {
   protected readonly sourceTypeOptions: SelectOption[] = [
     { value: 'Make', label: 'Make' },
     { value: 'Buy', label: 'Buy' },
+    { value: 'Stock', label: 'Stock' },
   ];
 
   // Detail tab
-  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'viewer' | 'files'>('info');
+  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'process' | 'viewer' | 'files'>('info');
 
   // Files & Inventory
   protected readonly partFiles = signal<FileAttachment[]>([]);
@@ -156,10 +181,28 @@ export class PartsComponent {
     return inv.totalQuantity < part.minStockThreshold;
   });
 
-  protected readonly partStatuses: PartStatus[] = ['Active', 'Draft', 'Obsolete'];
+  protected readonly partStatuses: PartStatus[] = ['Active', 'Draft', 'Prototype', 'Obsolete'];
+
+  // ── Accounting Link Dialog ──
+  protected readonly showLinkDialog = signal(false);
+  protected readonly accountingItems = signal<AccountingItem[]>([]);
+  protected readonly accountingItemsLoading = signal(false);
+  protected readonly selectedAccountingItem = signal<AccountingItem | null>(null);
+  protected readonly linkSaving = signal(false);
+
+  protected readonly isLinked = computed(() => !!this.selectedPart()?.externalId);
 
   constructor() {
+    this.scanner.setContext('parts');
     this.loadParts();
+
+    effect(() => {
+      const scan = this.scanner.lastScan();
+      if (!scan || scan.context !== 'parts') return;
+      this.scanner.clearLastScan();
+      this.searchControl.setValue(scan.value);
+      this.loadParts();
+    });
   }
 
   // ── List ──
@@ -213,10 +256,10 @@ export class PartsComponent {
   protected openCreatePart(): void {
     this.editingPart.set(null);
     this.partForm.reset({
-      partNumber: '', description: '', revision: 'A',
-      partType: 'Part', material: '', moldToolRef: '',
+      description: '', revision: 'A',
+      partType: 'Part', material: '', moldToolRef: '', externalPartNumber: '',
+      toolingAssetId: null,
     });
-    this.partForm.controls.partNumber.enable();
     this.showPartDialog.set(true);
   }
 
@@ -225,14 +268,14 @@ export class PartsComponent {
     if (!part) return;
     this.editingPart.set(part);
     this.partForm.patchValue({
-      partNumber: part.partNumber,
       description: part.description,
       revision: part.revision,
       partType: part.partType,
       material: part.material ?? '',
       moldToolRef: part.moldToolRef ?? '',
+      externalPartNumber: part.externalPartNumber ?? '',
+      toolingAssetId: part.toolingAssetId,
     });
-    this.partForm.controls.partNumber.disable();
     this.showPartDialog.set(true);
   }
 
@@ -253,6 +296,8 @@ export class PartsComponent {
         partType: (form.partType as PartType) ?? 'Part',
         material: form.material || undefined,
         moldToolRef: form.moldToolRef || undefined,
+        externalPartNumber: form.externalPartNumber || undefined,
+        toolingAssetId: form.toolingAssetId ?? undefined,
       }).subscribe({
         next: (detail) => {
           this.selectedPart.set(detail);
@@ -263,12 +308,13 @@ export class PartsComponent {
       });
     } else {
       this.partsService.createPart({
-        partNumber: form.partNumber ?? '',
         description: form.description ?? '',
         revision: form.revision || undefined,
         partType: (form.partType as PartType) ?? 'Part',
         material: form.material || undefined,
         moldToolRef: form.moldToolRef || undefined,
+        externalPartNumber: form.externalPartNumber || undefined,
+        toolingAssetId: form.toolingAssetId ?? undefined,
       }).subscribe({
         next: (detail) => {
           this.selectedPart.set(detail);
@@ -296,7 +342,7 @@ export class PartsComponent {
   protected openAddBom(): void {
     this.bomForm.reset({
       childPartId: null, quantity: 1, referenceDesignator: '',
-      sourceType: 'Buy', notes: '',
+      sourceType: 'Buy', leadTimeDays: null, notes: '',
     });
     this.showBomDialog.set(true);
   }
@@ -316,6 +362,7 @@ export class PartsComponent {
       quantity: form.quantity!,
       referenceDesignator: form.referenceDesignator || undefined,
       sourceType: (form.sourceType as BOMSourceType) ?? 'Buy',
+      leadTimeDays: form.leadTimeDays ?? undefined,
       notes: form.notes || undefined,
     }).subscribe({
       next: (detail) => {
@@ -373,10 +420,63 @@ export class PartsComponent {
     });
   }
 
+  // ── Accounting Linkage ──
+
+  protected openLinkDialog(): void {
+    this.selectedAccountingItem.set(null);
+    this.accountingItemsLoading.set(true);
+    this.accountingService.loadItems();
+    // Subscribe to items signal change via a one-time load
+    this.accountingItemsLoading.set(false);
+    this.showLinkDialog.set(true);
+  }
+
+  protected closeLinkDialog(): void {
+    this.showLinkDialog.set(false);
+  }
+
+  protected linkToAccountingItem(item: AccountingItem): void {
+    const part = this.selectedPart();
+    if (!part || !item.externalId) return;
+    this.linkSaving.set(true);
+    this.partsService.linkAccountingItem(part.id, item.externalId, item.name).subscribe({
+      next: () => {
+        this.linkSaving.set(false);
+        this.closeLinkDialog();
+        this.selectPart({ id: part.id } as PartListItem);
+        this.snackbar.success(`Linked to ${item.name}.`);
+      },
+      error: () => this.linkSaving.set(false),
+    });
+  }
+
+  protected unlinkAccountingItem(): void {
+    const part = this.selectedPart();
+    if (!part) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Unlink Accounting Item?',
+        message: `This will remove the link between "${part.partNumber}" and its accounting item.`,
+        confirmLabel: 'Unlink',
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.partsService.unlinkAccountingItem(part.id).subscribe({
+        next: () => {
+          this.selectPart({ id: part.id } as PartListItem);
+          this.snackbar.success('Accounting item unlinked.');
+        },
+      });
+    });
+  }
+
   protected getStatusClass(status: string): string {
     switch (status) {
       case 'Active': return 'status-badge--active';
       case 'Draft': return 'status-badge--draft';
+      case 'Prototype': return 'status-badge--prototype';
       case 'Obsolete': return 'status-badge--obsolete';
       default: return '';
     }

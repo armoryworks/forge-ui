@@ -1,0 +1,89 @@
+@use 'styles/variables' as *;
+
+.process-plan {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $sp-md;
+
+    h4 {
+      font-size: $font-size-title;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+
+  &__steps {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+}
+
+.step-card {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__number {
+    min-width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary);
+    color: white;
+    font-size: $font-size-sm;
+    font-weight: 700;
+    font-family: $font-family-mono;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__instructions {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin-top: $sp-xs;
+    white-space: pre-wrap;
+  }
+
+  &__meta {
+    display: flex;
+    gap: $sp-lg;
+    margin-top: $sp-sm;
+  }
+
+  &__tag {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-xs;
+    flex-shrink: 0;
+  }
+}

@@ -1,0 +1,132 @@
+@use 'styles/variables' as *;
+
+.status-timeline {
+  &__current {
+    margin-bottom: $sp-lg;
+  }
+
+  &__workflow {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    margin-bottom: $sp-md;
+  }
+
+  &__holds {
+    margin-bottom: $sp-md;
+  }
+
+  &__hold-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+    margin-top: $sp-xs;
+  }
+
+  &__notes {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-sm;
+    margin-bottom: $sp-lg;
+    padding-bottom: $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__history {
+    margin-top: $sp-md;
+  }
+
+  &__entries {
+    display: flex;
+    flex-direction: column;
+    margin-top: $sp-sm;
+  }
+}
+
+.hold-chip {
+  display: flex;
+  align-items: center;
+  gap: $sp-xxs;
+}
+
+.timeline-entry {
+  display: flex;
+  gap: $sp-md;
+  padding: $sp-sm 0;
+  position: relative;
+
+  &:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 22px;
+    bottom: -#{$sp-sm};
+    width: $border-width-thin;
+    background: var(--border);
+  }
+
+  &__dot {
+    width: $dot-size-md;
+    height: $dot-size-md;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    margin-top: $sp-xs;
+  }
+
+  &--active &__dot {
+    background: var(--success);
+  }
+
+  &--hold &__dot {
+    background: var(--error);
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 600;
+  }
+
+  &__meta {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin-top: $sp-xxs;
+  }
+
+  &__notes {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin-top: $sp-xs;
+  }
+}
+
+.chip--sm {
+  font-size: $font-size-xxs;
+  padding: 0 $sp-sm;
+  height: $badge-size-md;
+  line-height: $badge-size-md;
+}
+
+.icon-btn--sm {
+  width: $avatar-size-xs;
+  height: $avatar-size-xs;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+  }
+}

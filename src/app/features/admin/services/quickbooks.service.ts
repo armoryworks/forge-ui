@@ -2,11 +2,13 @@ import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { environment } from '../../../../environments/environment';
+import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { QuickBooksConnectionStatus } from '../models/quickbooks-connection-status.model';
 
 @Injectable({ providedIn: 'root' })
 export class QuickBooksService {
   private readonly http = inject(HttpClient);
+  private readonly snackbar = inject(SnackbarService);
 
   readonly status = signal<QuickBooksConnectionStatus | null>(null);
   readonly loading = signal(false);
@@ -54,6 +56,7 @@ export class QuickBooksService {
           lastSyncAt: null,
         });
         this.loading.set(false);
+        this.snackbar.success('QuickBooks disconnected');
       },
       error: (err) => {
         this.error.set(err.message ?? 'Failed to disconnect QuickBooks');
@@ -69,8 +72,10 @@ export class QuickBooksService {
     ).subscribe({
       next: (result) => {
         this.loading.set(false);
-        if (!result.success) {
-          this.error.set(result.message ?? 'Connection test failed');
+        if (result.success) {
+          this.snackbar.success(`Connection verified — ${result.companyName ?? 'QuickBooks'}`);
+        } else {
+          this.snackbar.error(result.message ?? 'Connection test failed');
         }
       },
       error: (err) => {

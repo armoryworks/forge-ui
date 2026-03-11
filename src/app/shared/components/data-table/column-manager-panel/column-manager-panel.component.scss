@@ -6,7 +6,7 @@
   border: $border-width solid var(--border);
   border-radius: $border-radius;
   min-width: 200px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: $shadow-dropdown;
 }
 
 .col-manager__header {
@@ -56,7 +56,7 @@
   &.cdk-drag-preview {
     background: var(--surface);
     border: $border-width-thin solid var(--border);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-panel;
   }
 }
 

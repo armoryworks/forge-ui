@@ -18,12 +18,13 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +60,9 @@ export class AssetsComponent {
     model: new FormControl(''),
     serialNumber: new FormControl(''),
     notes: new FormControl(''),
+    isCustomerOwned: new FormControl(false),
+    cavityCount: new FormControl<number | null>(null),
+    toolLifeExpectancy: new FormControl<number | null>(null),
   });
 
   protected readonly assetViolations = FormValidationService.getViolations(this.assetForm, {
@@ -128,6 +132,7 @@ export class AssetsComponent {
     this.assetForm.reset({
       name: '', assetType: 'Machine', location: '',
       manufacturer: '', model: '', serialNumber: '', notes: '',
+      isCustomerOwned: false, cavityCount: null, toolLifeExpectancy: null,
     });
     this.showDialog.set(true);
   }
@@ -144,6 +149,9 @@ export class AssetsComponent {
       model: asset.model ?? '',
       serialNumber: asset.serialNumber ?? '',
       notes: asset.notes ?? '',
+      isCustomerOwned: asset.isCustomerOwned ?? false,
+      cavityCount: asset.cavityCount,
+      toolLifeExpectancy: asset.toolLifeExpectancy,
     });
     this.showDialog.set(true);
   }
@@ -166,6 +174,9 @@ export class AssetsComponent {
         model: form.model || undefined,
         serialNumber: form.serialNumber || undefined,
         notes: form.notes || undefined,
+        isCustomerOwned: form.isCustomerOwned ?? false,
+        cavityCount: form.cavityCount ?? undefined,
+        toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
         next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success('Asset updated.'); },
         error: () => this.saving.set(false),
@@ -179,6 +190,9 @@ export class AssetsComponent {
         model: form.model || undefined,
         serialNumber: form.serialNumber || undefined,
         notes: form.notes || undefined,
+        isCustomerOwned: form.isCustomerOwned ?? false,
+        cavityCount: form.cavityCount ?? undefined,
+        toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
         next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success('Asset created.'); },
         error: () => this.saving.set(false),

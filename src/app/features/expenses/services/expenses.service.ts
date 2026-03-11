@@ -7,6 +7,9 @@ import { CreateExpenseRequest } from '../models/create-expense-request.model';
 import { UpdateExpenseStatusRequest } from '../models/update-expense-status-request.model';
 import { ExpenseStatus } from '../models/expense-status.type';
 import { ExpenseSettings } from '../models/expense-settings.model';
+import { RecurringExpense } from '../models/recurring-expense.model';
+import { CreateRecurringExpenseRequest } from '../models/create-recurring-expense-request.model';
+import { UpcomingExpense } from '../models/upcoming-expense.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExpensesService {
@@ -39,5 +42,31 @@ export class ExpensesService {
 
   updateSettings(settings: ExpenseSettings): Observable<void> {
     return this.http.put<void>(`${this.base}/settings`, settings);
+  }
+
+  // ─── Recurring Expenses ───
+
+  getRecurringExpenses(classification?: string): Observable<RecurringExpense[]> {
+    let params = new HttpParams();
+    if (classification) params = params.set('classification', classification);
+    return this.http.get<RecurringExpense[]>(`${this.base}/recurring`, { params });
+  }
+
+  createRecurringExpense(request: CreateRecurringExpenseRequest): Observable<RecurringExpense> {
+    return this.http.post<RecurringExpense>(`${this.base}/recurring`, request);
+  }
+
+  updateRecurringExpense(id: number, request: Partial<RecurringExpense>): Observable<RecurringExpense> {
+    return this.http.patch<RecurringExpense>(`${this.base}/recurring/${id}`, request);
+  }
+
+  deleteRecurringExpense(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/recurring/${id}`);
+  }
+
+  getUpcomingExpenses(daysAhead = 90, classification?: string): Observable<UpcomingExpense[]> {
+    let params = new HttpParams().set('daysAhead', daysAhead);
+    if (classification) params = params.set('classification', classification);
+    return this.http.get<UpcomingExpense[]>(`${this.base}/upcoming`, { params });
   }
 }

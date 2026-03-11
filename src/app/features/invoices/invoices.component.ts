@@ -16,6 +16,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { AccountingService } from '../../shared/services/accounting.service';
 import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dialog.component';
 import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel/uninvoiced-jobs-panel.component';
 
@@ -37,6 +38,10 @@ export class InvoicesComponent {
   private readonly invoiceService = inject(InvoiceService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly accountingService = inject(AccountingService);
+
+  protected readonly isStandalone = this.accountingService.isStandalone;
+  protected readonly providerName = this.accountingService.providerName;
 
   protected readonly showCreateDialog = signal(false);
   protected readonly showUninvoicedPanel = signal(false);

@@ -1,0 +1,146 @@
+<app-page-header title="Expense Ledger">
+  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+    <span class="material-icons-outlined">add</span> New Recurring
+  </button>
+</app-page-header>
+
+<!-- Tabs -->
+<div class="tab-bar">
+  <button class="tab" [class.tab--active]="activeTab() === 'upcoming'" (click)="switchTab('upcoming')">
+    <span class="material-icons-outlined tab__icon">calendar_month</span>
+    Upcoming (90 Days)
+  </button>
+  <button class="tab" [class.tab--active]="activeTab() === 'recurring'" (click)="switchTab('recurring')">
+    <span class="material-icons-outlined tab__icon">repeat</span>
+    Recurring Templates
+  </button>
+</div>
+
+<!-- Upcoming Tab -->
+@if (activeTab() === 'upcoming') {
+  <div class="ledger-toolbar">
+    <app-select
+      label="Highlight Classification"
+      [formControl]="classificationFilter"
+      [options]="classificationOptions"
+      (ngModelChange)="applyClassificationFilter()" />
+    <span class="ledger-toolbar__spacer"></span>
+    <div class="ledger-summary">
+      <div class="ledger-summary__item">
+        <span class="ledger-summary__label">90-Day Total</span>
+        <span class="ledger-summary__value">{{ upcomingTotal() | currency }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Monthly Breakdown -->
+  @if (upcomingByMonth().length > 0) {
+    <div class="month-breakdown">
+      @for (month of upcomingByMonth(); track month.month) {
+        <div class="month-chip">
+          <span class="month-chip__label">{{ month.month }}</span>
+          <span class="month-chip__value">{{ month.total | currency }}</span>
+          <span class="month-chip__count">{{ month.count }} items</span>
+        </div>
+      }
+    </div>
+  }
+
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="upcoming-expenses"
+      [columns]="upcomingColumns"
+      [data]="upcomingExpenses()"
+      [rowClass]="getRowClass"
+      emptyIcon="event_upcoming"
+      emptyMessage="No upcoming expenses in the next 90 days">
+
+      <ng-template appColumnCell="dueDate" let-row>
+        {{ row.dueDate | date:'MMM d, yyyy' }}
+      </ng-template>
+
+      <ng-template appColumnCell="classification" let-row>
+        <span [class]="getClassificationChipClass(row.classification)">{{ row.classification }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="amount" let-row>
+        <strong>{{ row.amount | currency }}</strong>
+      </ng-template>
+    </app-data-table>
+  </div>
+}
+
+<!-- Recurring Tab -->
+@if (activeTab() === 'recurring') {
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="recurring-expenses"
+      [columns]="recurringColumns"
+      [data]="recurringExpenses()"
+      emptyIcon="repeat"
+      emptyMessage="No recurring expenses set up">
+
+      <ng-template appColumnCell="classification" let-row>
+        <span [class]="getClassificationChipClass(row.classification)">{{ row.classification }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="amount" let-row>
+        <strong>{{ row.amount | currency }}</strong>
+      </ng-template>
+
+      <ng-template appColumnCell="nextOccurrenceDate" let-row>
+        {{ row.nextOccurrenceDate | date:'MMM d, yyyy' }}
+      </ng-template>
+
+      <ng-template appColumnCell="isActive" let-row>
+        @if (row.isActive) {
+          <span class="chip chip--success">Active</span>
+        } @else {
+          <span class="chip chip--muted">Paused</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        <div class="row-actions">
+          <button class="icon-btn" title="Toggle active" (click)="toggleActive(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">{{ row.isActive ? 'pause' : 'play_arrow' }}</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteRecurring(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </div>
+      </ng-template>
+    </app-data-table>
+  </div>
+}
+
+<!-- Create Recurring Expense Dialog -->
+@if (showDialog()) {
+  <app-dialog title="New Recurring Expense" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <div class="dialog-row">
+        <app-input label="Amount" type="number" formControlName="amount" prefix="$" />
+        <app-select label="Frequency" formControlName="frequency" [options]="frequencyOptions" />
+      </div>
+      <div class="dialog-row">
+        <app-select label="Category" formControlName="category" [options]="categoryOptions" />
+        <app-select label="Classification" formControlName="classification" [options]="classificationOptions.slice(1)" />
+      </div>
+      <app-input label="Description" formControlName="description" />
+      <app-input label="Vendor" formControlName="vendor" placeholder="e.g., Adobe, AWS, Verizon" />
+      <div class="dialog-row">
+        <app-datepicker label="Start Date" formControlName="startDate" />
+        <app-datepicker label="End Date (Optional)" formControlName="endDate" />
+      </div>
+      <app-toggle label="Auto-approve generated expenses" formControlName="autoApprove" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">Create</button>
+    </div>
+  </app-dialog>
+}

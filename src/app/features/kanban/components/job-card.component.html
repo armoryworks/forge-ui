@@ -28,6 +28,23 @@
         <span class="material-icons-outlined card__billing-icon">{{ job().billingStatus === 'Invoiced' ? 'paid' : 'pending' }}</span>
       </span>
     }
+    @if (job().externalRef) {
+      <span class="card__accounting" [title]="(job().accountingDocumentType ?? 'Document') + ' — ' + job().externalRef">
+        <span class="material-icons-outlined card__accounting-icon">receipt_long</span>
+        <span class="card__accounting-ref">{{ job().externalRef }}</span>
+      </span>
+    }
+    @if (job().disposition) {
+      <span class="card__disposition" [title]="job().disposition!">
+        <span class="material-icons-outlined">assignment_turned_in</span>
+      </span>
+    }
+    @if (job().childJobCount > 0) {
+      <span class="card__sub-jobs" title="Has sub-jobs">
+        <span class="material-icons-outlined">account_tree</span>
+        <span class="card__sub-jobs-count">{{ job().childJobCount }}</span>
+      </span>
+    }
     @if (formattedDueDate()) {
       <span class="card__due" [class.card__due--overdue]="job().isOverdue">
         {{ formattedDueDate() }}

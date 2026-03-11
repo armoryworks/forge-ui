@@ -115,6 +115,24 @@
   &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
 }
 
+// --- Accounting Managed Banner ---
+.accounting-managed-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--info-light);
+  border-bottom: $border-width-thin solid var(--info);
+  font-size: $font-size-sm;
+  color: var(--text);
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+    color: var(--info);
+  }
+}
+
 // --- Actions ---
 .detail-actions {
   display: flex;

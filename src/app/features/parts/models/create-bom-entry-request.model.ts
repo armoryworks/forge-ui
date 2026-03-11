@@ -5,5 +5,6 @@ export interface CreateBOMEntryRequest {
   quantity: number;
   referenceDesignator?: string;
   sourceType: BOMSourceType;
+  leadTimeDays?: number;
   notes?: string;
 }

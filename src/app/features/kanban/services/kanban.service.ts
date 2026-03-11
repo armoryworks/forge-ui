@@ -17,6 +17,9 @@ import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { JobPart } from '../models/job-part.model';
 import { PartSearchResult } from '../models/part-search-result.model';
 import { CustomFieldValues } from '../models/custom-field-values.model';
+import { DisposeJobRequest } from '../models/dispose-job-request.model';
+import { ChildJob } from '../models/child-job.model';
+import { BomExplosionResponse } from '../models/bom-explosion-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -177,8 +180,20 @@ export class KanbanService {
     return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/archive`, { jobIds });
   }
 
+  disposeJob(jobId: number, request: DisposeJobRequest): Observable<JobDetail> {
+    return this.http.post<JobDetail>(`${environment.apiUrl}/jobs/${jobId}/dispose`, request);
+  }
+
   handoffToProduction(jobId: number): Observable<{ jobId: number }> {
     return this.http.post<{ jobId: number }>(`${environment.apiUrl}/jobs/${jobId}/handoff-to-production`, {});
+  }
+
+  getChildJobs(jobId: number): Observable<ChildJob[]> {
+    return this.http.get<ChildJob[]>(`${environment.apiUrl}/jobs/${jobId}/child-jobs`);
+  }
+
+  explodeBom(jobId: number): Observable<BomExplosionResponse> {
+    return this.http.post<BomExplosionResponse>(`${environment.apiUrl}/jobs/${jobId}/explode-bom`, {});
   }
 
   getInternalProjectTypes(): Observable<{ id: number; code: string; label: string }[]> {

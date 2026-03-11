@@ -1,0 +1,46 @@
+<div class="sync-conflict-dialog">
+  <div class="sync-conflict-dialog__header">
+    <span class="material-icons-outlined sync-conflict-dialog__header-icon">warning</span>
+    <span class="sync-conflict-dialog__title">Sync Conflict</span>
+    <button class="icon-btn" aria-label="Close" (click)="cancel()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="sync-conflict-dialog__body">
+    <p class="sync-conflict-dialog__description">
+      A conflict occurred while syncing your offline changes. The server has a newer version of this data.
+    </p>
+
+    <div class="sync-conflict-dialog__detail">
+      <div class="sync-conflict-dialog__detail-row">
+        <span class="sync-conflict-dialog__label">Action</span>
+        <span class="sync-conflict-dialog__value">{{ conflict.description }}</span>
+      </div>
+
+      <div class="sync-conflict-dialog__detail-row">
+        <span class="sync-conflict-dialog__label">Server says</span>
+        <span class="sync-conflict-dialog__value">{{ conflict.serverMessage }}</span>
+      </div>
+
+      @if (hasLocalValue) {
+        <div class="sync-conflict-dialog__detail-row sync-conflict-dialog__detail-row--full">
+          <span class="sync-conflict-dialog__label">Your changes</span>
+          <pre class="sync-conflict-dialog__code">{{ localValuePreview }}</pre>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="sync-conflict-dialog__footer">
+    <button class="action-btn" (click)="cancel()">Cancel</button>
+    <button class="action-btn action-btn--warn" (click)="keepServer()">
+      <span class="material-icons-outlined action-btn__icon">cloud_download</span>
+      Keep Server
+    </button>
+    <button class="action-btn action-btn--primary" (click)="keepMine()">
+      <span class="material-icons-outlined action-btn__icon">cloud_upload</span>
+      Keep Mine
+    </button>
+  </div>
+</div>

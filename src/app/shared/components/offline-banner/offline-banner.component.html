@@ -1,0 +1,19 @@
+@if (visible()) {
+  <div
+    class="offline-banner"
+    [class.offline-banner--offline]="state() === 'offline'"
+    [class.offline-banner--syncing]="state() === 'syncing'"
+    [class.offline-banner--synced]="state() === 'synced'"
+    role="status"
+    aria-live="polite">
+    <span
+      class="material-icons-outlined offline-banner__icon"
+      [class.offline-banner__icon--spinning]="state() === 'syncing'">
+      {{ icon() }}
+    </span>
+    <span class="offline-banner__message">{{ message() }}</span>
+    @if (state() === 'offline' && pendingCount() > 0) {
+      <span class="offline-banner__badge">{{ pendingCount() }}</span>
+    }
+  </div>
+}

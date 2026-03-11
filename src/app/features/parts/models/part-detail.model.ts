@@ -12,6 +12,7 @@ export interface PartDetail {
   partType: PartType;
   material: string | null;
   moldToolRef: string | null;
+  externalPartNumber: string | null;
   externalId: string | null;
   externalRef: string | null;
   provider: string | null;
@@ -19,6 +20,8 @@ export interface PartDetail {
   preferredVendorName: string | null;
   minStockThreshold: number | null;
   reorderPoint: number | null;
+  toolingAssetId: number | null;
+  toolingAssetName: string | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: string;

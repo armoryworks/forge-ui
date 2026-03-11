@@ -28,8 +28,8 @@
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 3px $sp-md;
+  gap: $sp-xxs;
+  padding: $sp-xxs $sp-md;
   border: $border-width solid var(--border);
   background: var(--surface);
   color: var(--text);

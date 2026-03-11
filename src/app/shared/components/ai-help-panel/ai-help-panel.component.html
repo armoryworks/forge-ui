@@ -1,0 +1,51 @@
+@if (open()) {
+  <div class="ai-help-backdrop" (click)="toggle()"></div>
+  <div class="ai-help-panel">
+    <div class="ai-help-panel__header">
+      <span class="material-icons-outlined">smart_toy</span>
+      <span>QB Engineer Assistant</span>
+      <button class="icon-btn" (click)="toggle()" aria-label="Close assistant">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+    <div class="ai-help-panel__body" #messageContainer>
+      @if (messages().length === 0) {
+        <div class="ai-help-panel__welcome">
+          <span class="material-icons-outlined ai-help-panel__welcome-icon">school</span>
+          <p class="ai-help-panel__welcome-title">How can I help?</p>
+          <p class="ai-help-panel__welcome-text">Ask me anything about QB Engineer — features, workflows, how to do things.</p>
+          <div class="ai-help-panel__starters">
+            <button class="ai-help-panel__starter" (click)="askStarter('How do I create a new job?')">How do I create a new job?</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('How does the quote to order workflow work?')">Quote to order workflow</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('How do I track inventory?')">How do I track inventory?</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('What keyboard shortcuts are available?')">Keyboard shortcuts</button>
+          </div>
+        </div>
+      }
+      @for (msg of messages(); track $index) {
+        <div class="ai-help-msg" [class.ai-help-msg--user]="msg.role === 'user'" [class.ai-help-msg--assistant]="msg.role === 'assistant'">
+          @if (msg.role === 'assistant') {
+            <span class="material-icons-outlined ai-help-msg__avatar">smart_toy</span>
+          }
+          <div class="ai-help-msg__bubble">{{ msg.content }}</div>
+        </div>
+      }
+      @if (loading()) {
+        <div class="ai-help-msg ai-help-msg--assistant">
+          <span class="material-icons-outlined ai-help-msg__avatar">smart_toy</span>
+          <div class="ai-help-msg__bubble ai-help-msg__bubble--loading">
+            <span class="ai-help-msg__dot"></span><span class="ai-help-msg__dot"></span><span class="ai-help-msg__dot"></span>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="ai-help-panel__footer">
+      <input class="ai-help-panel__input" type="text" placeholder="Ask a question..."
+             [formControl]="inputControl"
+             (keydown.enter)="send()" />
+      <button class="icon-btn ai-help-panel__send" [disabled]="loading() || !inputControl.value?.trim()" (click)="send()" aria-label="Send">
+        <span class="material-icons-outlined">send</span>
+      </button>
+    </div>
+  </div>
+}

@@ -1,1 +1,1 @@
-export type PartType = 'Part' | 'Assembly';
+export type PartType = 'Part' | 'Assembly' | 'RawMaterial' | 'Consumable' | 'Tooling' | 'Fastener' | 'Electronic' | 'Packaging';

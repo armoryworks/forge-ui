@@ -1,1 +1,1 @@
-export type PartStatus = 'Active' | 'Obsolete' | 'Draft';
+export type PartStatus = 'Active' | 'Obsolete' | 'Draft' | 'Prototype';

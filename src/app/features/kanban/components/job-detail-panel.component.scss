@@ -93,6 +93,34 @@
 .panel__description { font-size: $font-size-base; line-height: 1.5; color: var(--text-secondary); }
 .panel__empty-hint { font-size: $font-size-xs; color: var(--text-muted); font-style: italic; }
 
+// ─── Sub-Jobs ───
+.sub-jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.sub-job-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+
+  &__number {
+    font-family: $font-family-mono;
+    font-weight: 600;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    flex: 1;
+    @include truncate;
+  }
+}
+
 // ─── Subtasks ───
 .subtask-list { display: flex; flex-direction: column; gap: $sp-xxs; }
 

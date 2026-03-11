@@ -1,12 +1,16 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterOutlet } from '@angular/router';
 
 import { AppHeaderComponent } from './core/layout/app-header.component';
 import { SidebarComponent } from './core/layout/sidebar.component';
 import { ToastContainerComponent } from './shared/components/toast/toast.component';
 import { ConnectionBannerComponent } from './shared/components/connection-banner/connection-banner.component';
+import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
 import { KeyboardShortcutsHelpComponent } from './shared/components/keyboard-shortcuts-help/keyboard-shortcuts-help.component';
+import { SyncConflictDialogComponent, SyncConflictDialogData } from './shared/components/sync-conflict-dialog/sync-conflict-dialog.component';
+import { SyncConflict, SyncConflictResolution } from './shared/models/sync-conflict.model';
 import { AuthService } from './shared/services/auth.service';
 import { LayoutService } from './shared/services/layout.service';
 import { SignalrService } from './shared/services/signalr.service';
@@ -22,6 +26,8 @@ import { AccountingService } from './shared/services/accounting.service';
 import { KeyboardShortcutsService } from './shared/services/keyboard-shortcuts.service';
 import { BroadcastService } from './shared/services/broadcast.service';
 import { LanguageService } from './shared/services/language.service';
+import { ScannerService } from './shared/services/scanner.service';
+import { OfflineQueueService } from './shared/services/offline-queue.service';
 import { KANBAN_TOUR } from './shared/tours/kanban-tour';
 import { DASHBOARD_TOUR } from './shared/tours/dashboard-tour';
 import { PARTS_TOUR } from './shared/tours/parts-tour';
@@ -34,7 +40,7 @@ import { ADMIN_TOUR } from './shared/tours/admin-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
+  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,15 +61,27 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly keyboardShortcuts = inject(KeyboardShortcutsService);
   private readonly broadcast = inject(BroadcastService);
   private readonly languageService = inject(LanguageService);
+  private readonly scanner = inject(ScannerService);
+  private readonly offlineQueue = inject(OfflineQueueService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly showShell = computed(() => this.authService.isAuthenticated());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
 
   constructor() {
-    // Disconnect all hubs when user logs out
+    // Disconnect all hubs and stop scanner when user logs out
     effect(() => {
       if (!this.authService.isAuthenticated()) {
         this.signalr.stopAll();
+        this.scanner.stop();
+      }
+    });
+
+    // Watch for sync conflicts and open resolution dialog
+    effect(() => {
+      const conflict = this.offlineQueue.conflict();
+      if (conflict) {
+        this.openConflictDialog(conflict);
       }
     });
   }
@@ -82,12 +100,37 @@ export class AppComponent implements OnInit, OnDestroy {
       this.notificationService.load();
       this.userPreferences.load();
       this.accountingService.load();
+      this.scanner.start();
     }
   }
 
   ngOnDestroy(): void {
     this.signalr.stopAll();
     this.keyboardShortcuts.destroy();
+    this.scanner.stop();
+  }
+
+  private openConflictDialog(conflict: SyncConflict): void {
+    this.dialog.open<SyncConflictDialogComponent, SyncConflictDialogData, SyncConflictResolution>(
+      SyncConflictDialogComponent,
+      {
+        width: '520px',
+        disableClose: true,
+        data: { conflict },
+      }
+    ).afterClosed().subscribe(resolution => {
+      switch (resolution) {
+        case 'keep-mine':
+          this.offlineQueue.resolveConflictKeepMine(conflict.entryId);
+          break;
+        case 'keep-server':
+          this.offlineQueue.resolveConflictKeepServer(conflict.entryId);
+          break;
+        default:
+          this.offlineQueue.resolveConflictCancel();
+          break;
+      }
+    });
   }
 
   private registerTours(): void {

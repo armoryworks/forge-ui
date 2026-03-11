@@ -17,6 +17,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { AccountingService } from '../../shared/services/accounting.service';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 
 @Component({
@@ -37,6 +38,10 @@ export class PaymentsComponent {
   private readonly paymentService = inject(PaymentService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly accountingService = inject(AccountingService);
+
+  protected readonly isStandalone = this.accountingService.isStandalone;
+  protected readonly providerName = this.accountingService.providerName;
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);

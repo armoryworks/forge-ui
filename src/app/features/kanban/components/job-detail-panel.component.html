@@ -60,6 +60,18 @@
           <span class="meta-row__label">Track</span>
           <span class="meta-row__value">{{ j.trackTypeName }}</span>
         </div>
+        @if (j.partNumber) {
+          <div class="meta-row">
+            <span class="meta-row__label">Part</span>
+            <span class="meta-row__value">{{ j.partNumber }}</span>
+          </div>
+        }
+        @if (j.parentJobNumber) {
+          <div class="meta-row">
+            <span class="meta-row__label">Parent Job</span>
+            <span class="meta-row__value">{{ j.parentJobNumber }}</span>
+          </div>
+        }
       </div>
 
       <!-- Description -->
@@ -80,6 +92,74 @@
           @if (j.iterationNotes) {
             <p class="panel__description">{{ j.iterationNotes }}</p>
           }
+        </div>
+      }
+
+      <!-- Disposition -->
+      @if (j.disposition) {
+        <div class="panel__section">
+          <h3 class="panel__section-title">Disposition</h3>
+          <div class="panel__meta">
+            <div class="meta-row">
+              <span class="meta-row__label">Type</span>
+              <span class="meta-row__value">{{ formatDisposition(j.disposition) }}</span>
+            </div>
+            @if (j.dispositionNotes) {
+              <div class="meta-row">
+                <span class="meta-row__label">Notes</span>
+                <span class="meta-row__value">{{ j.dispositionNotes }}</span>
+              </div>
+            }
+            @if (j.dispositionAt) {
+              <div class="meta-row">
+                <span class="meta-row__label">Date</span>
+                <span class="meta-row__value">{{ j.dispositionAt | date:'shortDate' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Dispose Action -->
+      @if (!j.disposition) {
+        <div class="panel__section">
+          <button class="action-btn" (click)="openDispose()">
+            <span class="material-icons-outlined">assignment_turned_in</span> Dispose
+          </button>
+        </div>
+      }
+
+      <!-- Status Lifecycle -->
+      <div class="panel__section">
+        <h3 class="panel__section-title">Status Tracking</h3>
+        <app-status-timeline entityType="Job" [entityId]="j.id" />
+      </div>
+
+      <!-- Sub-Jobs -->
+      @if (childJobs().length > 0) {
+        <div class="panel__section">
+          <div class="panel__section-header">
+            <h3 class="panel__section-title">Sub-Jobs</h3>
+            <span class="panel__section-count">{{ childJobs().length }}</span>
+          </div>
+          <div class="sub-jobs-list">
+            @for (child of childJobs(); track child.id) {
+              <div class="sub-job-item">
+                <span class="sub-job-item__number">{{ child.jobNumber }}</span>
+                <span class="sub-job-item__title">{{ child.title }}</span>
+                <span class="chip chip--muted">{{ child.stage }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- Explode BOM -->
+      @if (j.partId && j.childJobCount === 0) {
+        <div class="panel__section">
+          <button class="action-btn" (click)="explodeBom()">
+            <span class="material-icons-outlined">account_tree</span> Explode BOM
+          </button>
         </div>
       }
 

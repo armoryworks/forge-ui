@@ -1,0 +1,115 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.sync-conflict-dialog {
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+}
+
+.sync-conflict-dialog__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  gap: $sp-md;
+}
+
+.sync-conflict-dialog__header-icon {
+  font-size: $icon-size-lg;
+  color: var(--warning);
+}
+
+.sync-conflict-dialog__title {
+  @include uppercase-label($font-size-sm, 0.5px, 700);
+  flex: 1;
+}
+
+.sync-conflict-dialog__body {
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.sync-conflict-dialog__description {
+  font-size: $font-size-base;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sync-conflict-dialog__detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.sync-conflict-dialog__detail-row {
+  display: flex;
+  gap: $sp-md;
+  align-items: baseline;
+
+  &--full {
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+}
+
+.sync-conflict-dialog__label {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+
+.sync-conflict-dialog__value {
+  font-size: $font-size-base;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.sync-conflict-dialog__code {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  padding: $sp-md;
+  margin: 0;
+  max-height: 200px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  @include custom-scrollbar(4px);
+}
+
+.sync-conflict-dialog__footer {
+  display: flex;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  gap: $sp-md;
+
+  .action-btn {
+    flex: 1;
+  }
+
+  .action-btn__icon {
+    font-size: $icon-size-sm;
+    vertical-align: middle;
+    margin-right: $sp-xs;
+  }
+
+  .action-btn--warn {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: white;
+
+    &:hover {
+      background: var(--warning);
+      opacity: 0.9;
+    }
+  }
+}

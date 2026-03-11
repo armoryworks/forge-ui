@@ -104,6 +104,42 @@
           </div>
         </div>
 
+        @if (asset.assetType === 'Tooling') {
+          <div class="info-section">
+            <h4 class="info-section__title">Tooling Details</h4>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">Customer Owned</span>
+                <span class="info-value">{{ asset.isCustomerOwned ? 'Yes' : 'No' }}</span>
+              </div>
+              @if (asset.cavityCount) {
+                <div class="info-item">
+                  <span class="info-label">Cavity Count</span>
+                  <span class="info-value">{{ asset.cavityCount }}</span>
+                </div>
+              }
+              @if (asset.toolLifeExpectancy) {
+                <div class="info-item">
+                  <span class="info-label">Tool Life</span>
+                  <span class="info-value">{{ asset.currentShotCount }} / {{ asset.toolLifeExpectancy }}</span>
+                </div>
+              }
+              @if (asset.sourceJobNumber) {
+                <div class="info-item">
+                  <span class="info-label">Source Job</span>
+                  <span class="info-value">{{ asset.sourceJobNumber }}</span>
+                </div>
+              }
+              @if (asset.sourcePartNumber) {
+                <div class="info-item">
+                  <span class="info-label">Source Part</span>
+                  <span class="info-value">{{ asset.sourcePartNumber }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
         @if (asset.notes) {
           <div class="notes-section">
             <span class="info-label">Notes</span>
@@ -146,6 +182,14 @@
       <app-input label="Serial Number" formControlName="serialNumber" />
 
       <app-textarea label="Notes" formControlName="notes" />
+
+      @if (assetForm.get('assetType')?.value === 'Tooling') {
+        <app-toggle label="Customer Owned" formControlName="isCustomerOwned" />
+        <div class="dialog-row">
+          <app-input label="Cavity Count" type="number" formControlName="cavityCount" />
+          <app-input label="Tool Life Expectancy" type="number" formControlName="toolLifeExpectancy" />
+        </div>
+      }
     </div>
 
     <div dialog-footer>

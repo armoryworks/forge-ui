@@ -1,0 +1,78 @@
+<div class="status-timeline" [appLoadingBlock]="loading()">
+  <!-- Active Status Section -->
+  @if (activeStatus()) {
+    <div class="status-timeline__current">
+      @if (activeStatus()!.workflowStatus; as ws) {
+        <div class="status-timeline__workflow">
+          <span class="info-label">Current Status</span>
+          <span class="chip chip--primary">{{ ws.statusLabel }}</span>
+          @if (ws.notes) {
+            <span class="status-timeline__notes">{{ ws.notes }}</span>
+          }
+        </div>
+      }
+
+      @if (activeStatus()!.activeHolds.length > 0) {
+        <div class="status-timeline__holds">
+          <span class="info-label">Active Holds</span>
+          <div class="status-timeline__hold-chips">
+            @for (hold of activeStatus()!.activeHolds; track hold.id) {
+              <div class="hold-chip">
+                <span class="chip chip--error">{{ hold.statusLabel }}</span>
+                <button class="icon-btn icon-btn--sm" title="Release hold" aria-label="Release hold" (click)="releaseHold(hold)">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="status-timeline__actions">
+      <button class="action-btn action-btn--sm" (click)="openSetStatus()">
+        <span class="material-icons-outlined">swap_horiz</span> Change Status
+      </button>
+      <button class="action-btn action-btn--sm" (click)="openAddHold()">
+        <span class="material-icons-outlined">pause_circle</span> Add Hold
+      </button>
+    </div>
+  }
+
+  <!-- History Section -->
+  @if (history().length > 0) {
+    <div class="status-timeline__history">
+      <span class="info-label">Status History</span>
+      <div class="status-timeline__entries">
+        @for (entry of history(); track entry.id) {
+          <div class="timeline-entry" [class.timeline-entry--active]="!entry.endedAt" [class.timeline-entry--hold]="entry.category === 'hold'">
+            <div class="timeline-entry__dot"></div>
+            <div class="timeline-entry__content">
+              <div class="timeline-entry__header">
+                <span class="timeline-entry__label">{{ entry.statusLabel }}</span>
+                @if (entry.category === 'hold') {
+                  <span class="chip chip--error chip--sm">Hold</span>
+                }
+                @if (!entry.endedAt) {
+                  <span class="chip chip--success chip--sm">Active</span>
+                }
+              </div>
+              <div class="timeline-entry__meta">
+                <span>{{ entry.startedAt | date:'short' }}</span>
+                @if (entry.endedAt) {
+                  <span> &rarr; {{ entry.endedAt | date:'short' }}</span>
+                }
+                @if (entry.setByName) {
+                  <span> &middot; {{ entry.setByName }}</span>
+                }
+              </div>
+              @if (entry.notes) {
+                <div class="timeline-entry__notes">{{ entry.notes }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

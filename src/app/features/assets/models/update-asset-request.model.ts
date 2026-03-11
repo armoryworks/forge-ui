@@ -11,4 +11,7 @@ export interface UpdateAssetRequest {
   status?: AssetStatus;
   currentHours?: number;
   notes?: string;
+  isCustomerOwned?: boolean;
+  cavityCount?: number;
+  toolLifeExpectancy?: number;
 }

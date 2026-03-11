@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
@@ -9,8 +10,10 @@ import { SelectComponent } from '../../../shared/components/select/select.compon
 import { ActivityItem } from '../../../shared/models/activity.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { MatDialog } from '@angular/material/dialog';
 import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { KanbanService } from '../services/kanban.service';
+import { DisposeJobDialogComponent, DisposeJobDialogData } from './dispose-job-dialog.component';
 import { JobDetail } from '../models/job-detail.model';
 import { Subtask } from '../models/subtask.model';
 import { Activity } from '../models/activity.model';
@@ -22,11 +25,14 @@ import { LINK_TYPE_ICONS } from '../models/link-type-icons.const';
 import { LINK_TYPE_LABELS } from '../models/link-type-labels.const';
 import { JobPart } from '../models/job-part.model';
 import { PartSearchResult } from '../models/part-search-result.model';
+import { ChildJob } from '../models/child-job.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
 
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent, StatusTimelineComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +40,7 @@ import { PartSearchResult } from '../models/part-search-result.model';
 export class JobDetailPanelComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly matDialog = inject(MatDialog);
 
   readonly jobId = input.required<number>();
   readonly closed = output<void>();
@@ -58,6 +65,9 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly linkSearchResults = signal<KanbanJob[]>([]);
   protected readonly selectedLinkTarget = signal<KanbanJob | null>(null);
   protected readonly showLinkResults = signal(false);
+
+  // Child jobs
+  protected readonly childJobs = signal<ChildJob[]>([]);
 
   // Part add form
   protected readonly jobParts = signal<JobPart[]>([]);
@@ -93,6 +103,9 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.getJobDetail(id).subscribe(detail => {
       this.job.set(detail);
       this.loading.set(false);
+      if (detail.childJobCount > 0) {
+        this.kanbanService.getChildJobs(id).subscribe(children => this.childJobs.set(children));
+      }
     });
     this.kanbanService.getSubtasks(id).subscribe(s => this.subtasks.set(s));
     this.kanbanService.getJobActivity(id).subscribe(a => this.activity.set(a));
@@ -274,6 +287,61 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected dismissPartResults(): void {
     setTimeout(() => this.showPartResults.set(false), 200);
+  }
+
+  protected explodeBom(): void {
+    const j = this.job();
+    if (!j) return;
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Explode BOM?',
+        message: `This will create sub-jobs for all "Make" items in the BOM of part ${j.partNumber}. This action cannot be undone.`,
+        confirmLabel: 'Explode BOM',
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.kanbanService.explodeBom(j.id).subscribe(result => {
+        const jobCount = result.createdJobs.length;
+        const buyCount = result.buyItems.length;
+        const stockCount = result.stockItems.length;
+        const parts: string[] = [];
+        if (jobCount > 0) parts.push(`${jobCount} sub-job${jobCount > 1 ? 's' : ''} created`);
+        if (buyCount > 0) parts.push(`${buyCount} buy item${buyCount > 1 ? 's' : ''}`);
+        if (stockCount > 0) parts.push(`${stockCount} stock item${stockCount > 1 ? 's' : ''}`);
+        this.snackbar.success(`BOM exploded: ${parts.join(', ')}.`);
+        // Reload job detail and child jobs
+        this.kanbanService.getJobDetail(j.id).subscribe(detail => {
+          this.job.set(detail);
+        });
+        this.kanbanService.getChildJobs(j.id).subscribe(children => this.childJobs.set(children));
+      });
+    });
+  }
+
+  protected openDispose(): void {
+    const j = this.job();
+    if (!j) return;
+    this.matDialog.open(DisposeJobDialogComponent, {
+      width: '520px',
+      data: { jobId: j.id, jobNumber: j.jobNumber } satisfies DisposeJobDialogData,
+    }).afterClosed().subscribe(result => {
+      if (result) {
+        this.job.set(result);
+      }
+    });
+  }
+
+  protected formatDisposition(disposition: string): string {
+    const map: Record<string, string> = {
+      ShipToCustomer: 'Ship to Customer',
+      AddToInventory: 'Add to Inventory',
+      CapitalizeAsAsset: 'Capitalize as Asset',
+      Scrap: 'Scrap',
+      HoldForReview: 'Hold for Review',
+    };
+    return map[disposition] ?? disposition;
   }
 
   protected close(): void {

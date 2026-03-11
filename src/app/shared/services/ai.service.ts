@@ -1,0 +1,86 @@
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, catchError, of, tap } from 'rxjs';
+import { environment } from '../../../environments/environment';
+
+export interface AiGenerateRequest {
+  prompt: string;
+  systemPrompt?: string;
+}
+
+export interface AiGenerateResponse {
+  text: string;
+}
+
+export interface AiSummarizeRequest {
+  text: string;
+}
+
+export interface AiSummarizeResponse {
+  summary: string;
+}
+
+export interface AiAvailabilityResponse {
+  available: boolean;
+}
+
+export interface AiSearchSuggestion {
+  label: string;
+  description: string;
+  url: string;
+  icon: string;
+}
+
+export interface AiHelpMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+export interface AiHelpRequest {
+  question: string;
+  history?: AiHelpMessage[];
+}
+
+export interface AiHelpResponse {
+  answer: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class AiService {
+  private readonly http = inject(HttpClient);
+  private readonly base = `${environment.apiUrl}/ai`;
+
+  readonly available = signal(false);
+  readonly checking = signal(false);
+
+  checkAvailability(): void {
+    this.checking.set(true);
+    this.http.get<AiAvailabilityResponse>(`${this.base}/status`).pipe(
+      tap(res => {
+        this.available.set(res.available);
+        this.checking.set(false);
+      }),
+      catchError(() => {
+        this.available.set(false);
+        this.checking.set(false);
+        return of(null);
+      }),
+    ).subscribe();
+  }
+
+  generate(prompt: string): Observable<AiGenerateResponse> {
+    return this.http.post<AiGenerateResponse>(`${this.base}/generate`, { prompt });
+  }
+
+  summarize(text: string): Observable<AiSummarizeResponse> {
+    return this.http.post<AiSummarizeResponse>(`${this.base}/summarize`, { text });
+  }
+
+  searchSuggest(query: string): Observable<AiSearchSuggestion[]> {
+    return this.http.post<AiSearchSuggestion[]>(`${this.base}/search-suggest`, { query });
+  }
+
+  helpChat(question: string, history?: AiHelpMessage[]): Observable<AiHelpResponse> {
+    return this.http.post<AiHelpResponse>(`${this.base}/help`, { question, history });
+  }
+}

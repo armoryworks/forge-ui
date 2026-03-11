@@ -13,6 +13,12 @@ export interface AssetItem {
   photoFileId: string | null;
   currentHours: number;
   notes: string | null;
+  isCustomerOwned: boolean;
+  cavityCount: number | null;
+  toolLifeExpectancy: number | null;
+  currentShotCount: number | null;
+  sourceJobNumber: string | null;
+  sourcePartNumber: string | null;
   createdAt: string;
   updatedAt: string;
 }

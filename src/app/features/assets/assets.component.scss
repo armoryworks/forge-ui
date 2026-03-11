@@ -36,7 +36,10 @@
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
 .info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
 .info-value { font-size: $font-size-sm; }
-.mono { font-family: monospace; }
+.mono { font-family: $font-family-mono; }
+
+.info-section { display: flex; flex-direction: column; gap: $sp-md; }
+.info-section__title { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-secondary); }
 
 .notes-section { display: flex; flex-direction: column; gap: $sp-sm; }
 .notes-text { font-size: $font-size-sm; color: var(--text-secondary); margin: 0; line-height: 1.5; }
@@ -45,7 +48,7 @@
 .status-btn-group { display: flex; gap: $sp-sm; flex-wrap: wrap; }
 .status-btn {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 3px $sp-md; border: $border-width-thin solid var(--border);
+  padding: $sp-xxs $sp-md; border: $border-width-thin solid var(--border);
   background: var(--surface); color: var(--text-muted); cursor: pointer;
   border-radius: $border-radius; font-family: $font-family-primary;
   &:hover { background: var(--bg); color: var(--text); }

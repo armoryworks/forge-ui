@@ -12,6 +12,13 @@
   </button>
 </app-page-header>
 
+@if (!isStandalone()) {
+  <div class="accounting-managed-banner">
+    <span class="material-icons-outlined">cloud_sync</span>
+    Invoices are managed by {{ providerName() ?? 'your accounting provider' }}. Changes here are read-only.
+  </div>
+}
+
 @if (uninvoicedCount() > 0) {
   <div class="nudge-banner" (click)="openUninvoicedPanel()">
     <span class="material-icons-outlined nudge-banner__icon">warning_amber</span>

@@ -16,7 +16,7 @@
 
 .track-type-btn {
   @include uppercase-label($font-size-xs, 0.5px, 600);
-  padding: 3px 10px;
+  padding: $sp-xxs $sp-md;
   border: $border-width solid var(--border);
   background: var(--surface);
   color: var(--text-secondary);
@@ -39,7 +39,7 @@
   @include uppercase-label($font-size-xs, 0.5px, 600);
   @include flex-center;
   gap: $sp-sm;
-  padding: 3px 10px;
+  padding: $sp-xxs $sp-md;
   border: $border-width solid var(--primary);
   background: var(--primary);
   color: white;

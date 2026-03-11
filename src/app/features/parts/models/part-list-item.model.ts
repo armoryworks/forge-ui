@@ -4,6 +4,7 @@ import { PartType } from './part-type.type';
 export interface PartListItem {
   id: number;
   partNumber: string;
+  externalPartNumber: string | null;
   description: string;
   revision: string;
   status: PartStatus;

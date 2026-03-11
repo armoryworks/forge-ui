@@ -54,7 +54,7 @@
 
 // Row class applied via DataTable rowClass callback
 :host ::ng-deep .stock-level--empty { background: var(--error-light) !important; }
-:host ::ng-deep .stock-level--low { background: rgba(255, 193, 7, 0.05) !important; }
+:host ::ng-deep .stock-level--low { background: var(--warning-light) !important; }
 
 // ─── Bin Detail (expand content) ───
 .bin-detail-table {
@@ -100,7 +100,7 @@
   cursor: pointer;
   font-size: $font-size-sm;
   &:hover { background: var(--bg); }
-  &--selected { background: var(--bg); border-left: 2px solid var(--primary); }
+  &--selected { background: var(--bg); border-left: $border-width solid var(--primary); }
   &--l1 { padding-left: #{$sp-lg + $sp-md}; }
   &--l2 { padding-left: #{$sp-lg * 2 + $sp-md}; }
   &--l3 { padding-left: #{$sp-lg * 3 + $sp-md}; }
@@ -108,19 +108,19 @@
 
 .tree-toggle {
   @include flex-center;
-  width: 18px; height: 18px;
+  width: $icon-size-md; height: $icon-size-md;
   border: none; background: none; padding: 0; cursor: pointer;
   color: var(--text-muted);
-  .material-icons-outlined { font-size: 16px; }
+  .material-icons-outlined { font-size: $icon-size-sm; }
 }
 
-.tree-toggle-spacer { width: 18px; flex-shrink: 0; }
-.tree-icon { font-size: 16px; color: var(--text-muted); }
+.tree-toggle-spacer { width: $icon-size-md; flex-shrink: 0; }
+.tree-icon { font-size: $icon-size-sm; color: var(--text-muted); }
 .tree-label { flex: 1; }
 
 .tree-badge {
   @include uppercase-label($font-size-xxs, 0.5px, 600);
-  padding: 0 4px;
+  padding: 0 $sp-sm;
   background: var(--bg);
   border: $border-width-thin solid var(--border);
   border-radius: $border-radius;
@@ -147,7 +147,7 @@
   &__add-child { margin-left: auto; }
 }
 
-.detail-type-icon { font-size: 24px; color: var(--text-muted); }
+.detail-type-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; font-size: $font-size-base; }
 .detail-path { font-size: $font-size-xs; color: var(--text-muted); }
 
@@ -158,10 +158,10 @@
   padding: $sp-md $sp-lg;
 }
 
-.meta-item { display: flex; flex-direction: column; gap: 2px; }
+.meta-item { display: flex; flex-direction: column; gap: $sp-xs; }
 .meta-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
 .meta-value { font-size: $font-size-sm; }
-.mono { font-family: monospace; }
+.mono { font-family: $font-family-mono; }
 
 .contents-section { padding: $sp-md $sp-lg; }
 .section-title { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-muted); display: block; margin-bottom: $sp-md; }
@@ -175,7 +175,7 @@
   flex-direction: column;
   align-items: center;
   gap: $sp-md;
-  .material-icons-outlined { font-size: 32px; opacity: 0.5; }
+  .material-icons-outlined { font-size: $icon-size-xxl; opacity: 0.5; }
 }
 
 // ─── Stock Ops ───

@@ -8,4 +8,6 @@ export interface UpdatePartRequest {
   partType?: PartType;
   material?: string;
   moldToolRef?: string;
+  externalPartNumber?: string;
+  toolingAssetId?: number;
 }

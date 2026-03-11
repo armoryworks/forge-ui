@@ -5,6 +5,13 @@
   </button>
 </app-page-header>
 
+@if (!isStandalone()) {
+  <div class="accounting-managed-banner">
+    <span class="material-icons-outlined">cloud_sync</span>
+    Payments are managed by {{ providerName() ?? 'your accounting provider' }}. Changes here are read-only.
+  </div>
+}
+
 <div class="pmt-layout">
   <!-- Left: Payment List -->
   <div class="pmt-list-panel">

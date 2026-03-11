@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { AdminService } from './services/admin.service';
 import { AdminUser } from './models/admin-user.model';
 import { SystemSetting } from './models/system-setting.model';
@@ -48,8 +51,20 @@ export class AdminComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly terminologyService = inject(TerminologyService);
   private readonly themeService = inject(ThemeService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
-  protected readonly activeTab = signal<'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'integrations' | 'training'>('users');
+  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training']);
+
+  protected readonly activeTab = toSignal(
+    this.route.paramMap.pipe(
+      map(params => {
+        const tab = params.get('tab') ?? 'users';
+        return AdminComponent.VALID_TABS.has(tab) ? tab : 'users';
+      }),
+    ),
+    { initialValue: 'users' },
+  );
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly error = signal<string | null>(null);
@@ -131,16 +146,18 @@ export class AdminComponent {
   ];
 
   constructor() {
-    this.loadUsers();
+    effect(() => {
+      const tab = this.activeTab();
+      if (tab === 'users' && this.users().length === 0) this.loadUsers();
+      if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
+      if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
+      if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
+      if (tab === 'settings' && this.systemSettings().length === 0) this.loadSystemSettings();
+    });
   }
 
-  protected switchTab(tab: 'users' | 'track-types' | 'reference-data' | 'terminology' | 'settings' | 'integrations' | 'training'): void {
-    this.activeTab.set(tab);
-    if (tab === 'users' && this.users().length === 0) this.loadUsers();
-    if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
-    if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
-    if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
-    if (tab === 'settings' && this.systemSettings().length === 0) this.loadSystemSettings();
+  protected switchTab(tab: string): void {
+    this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
   // ── Users ──

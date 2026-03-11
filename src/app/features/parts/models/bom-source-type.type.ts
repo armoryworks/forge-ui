@@ -1,1 +1,1 @@
-export type BOMSourceType = 'Make' | 'Buy';
+export type BOMSourceType = 'Make' | 'Buy' | 'Stock';

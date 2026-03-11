@@ -8,14 +8,14 @@
 .card {
   background: var(--surface);
   border: $border-width-thin solid var(--border);
-  border-left: 3px solid;
+  border-left: $border-width solid;
   padding: $sp-md;
   cursor: grab;
   transition: box-shadow $transition-fast;
   position: relative;
 
   &:hover {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: $shadow-panel;
   }
 
   &:active {
@@ -23,7 +23,7 @@
   }
 
   &--selected {
-    box-shadow: inset 0 0 0 2px var(--primary);
+    box-shadow: inset 0 0 0 $border-width var(--primary);
   }
 }
 
@@ -31,15 +31,15 @@
   position: absolute;
   top: $sp-sm;
   right: $sp-sm;
-  width: 16px;
-  height: 16px;
+  width: $icon-size-sm;
+  height: $icon-size-sm;
   background: var(--primary);
   color: white;
   border-radius: 50%;
   @include flex-center;
 
   .material-icons-outlined {
-    font-size: 11px;
+    font-size: $font-size-sm;
   }
 }
 
@@ -59,7 +59,7 @@
 }
 
 .card__overdue-icon {
-  font-size: 12px;
+  font-size: $font-size-base;
 }
 
 .card__title {
@@ -98,6 +98,41 @@
 
 .card__billing-icon {
   font-size: $icon-size-xs;
+}
+
+.card__accounting {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-xxs;
+  color: var(--info);
+}
+
+.card__accounting-icon {
+  font-size: $icon-size-xs;
+}
+
+.card__accounting-ref {
+  @include truncate;
+  max-width: 60px;
+}
+
+.card__disposition {
+  color: var(--text-muted);
+  font-size: $icon-size-sm;
+  .material-icons-outlined { font-size: $icon-size-sm; }
+}
+
+.card__sub-jobs {
+  display: flex;
+  align-items: center;
+  gap: $sp-xxs;
+  color: var(--text-muted);
+  font-size: $font-size-xs;
+
+  .material-icons-outlined { font-size: $icon-size-sm; }
+
+  &-count { font-family: $font-family-mono; }
 }
 
 .card__due {

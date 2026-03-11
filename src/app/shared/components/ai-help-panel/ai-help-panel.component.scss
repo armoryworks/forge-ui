@@ -1,0 +1,238 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.ai-help-backdrop {
+  position: fixed;
+  inset: 0;
+  background: $backdrop-color;
+  z-index: $z-dropdown - 1;
+}
+
+.ai-help-panel {
+  position: fixed;
+  right: 0;
+  top: $header-height;
+  bottom: 0;
+  width: $notification-panel-width;
+  background: var(--surface);
+  border-left: $border-width-thin solid var(--border);
+  z-index: $z-dropdown;
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-panel;
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.ai-help-panel__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--primary);
+  color: white;
+  font-size: $font-size-base;
+  font-weight: 600;
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+  }
+
+  .icon-btn {
+    margin-left: auto;
+    color: white;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
+}
+
+.ai-help-panel__body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  @include custom-scrollbar(6px);
+}
+
+.ai-help-panel__welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: $sp-3xl $sp-lg $sp-lg;
+  gap: $sp-md;
+}
+
+.ai-help-panel__welcome-icon {
+  font-size: $icon-size-hero;
+  color: var(--primary);
+}
+
+.ai-help-panel__welcome-title {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.ai-help-panel__welcome-text {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.ai-help-panel__starters {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  width: 100%;
+  margin-top: $sp-md;
+}
+
+.ai-help-panel__starter {
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  background: var(--bg);
+  color: var(--text);
+  font-size: $font-size-sm;
+  font-family: $font-family-primary;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+.ai-help-msg {
+  display: flex;
+  gap: $sp-md;
+  align-items: flex-start;
+
+  &--user {
+    justify-content: flex-end;
+  }
+
+  &--assistant {
+    justify-content: flex-start;
+  }
+}
+
+.ai-help-msg__avatar {
+  font-size: $icon-size-lg;
+  color: var(--primary);
+  flex-shrink: 0;
+  margin-top: $sp-xs;
+}
+
+.ai-help-msg__bubble {
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+  line-height: 1.5;
+  max-width: 85%;
+  word-wrap: break-word;
+
+  .ai-help-msg--user & {
+    background: var(--primary);
+    color: white;
+  }
+
+  .ai-help-msg--assistant & {
+    background: var(--bg);
+    color: var(--text);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &--loading {
+    display: flex;
+    gap: $sp-sm;
+    padding: $sp-lg;
+  }
+}
+
+.ai-help-msg__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  animation: ai-dot-pulse 1.4s infinite ease-in-out both;
+
+  &:nth-child(1) {
+    animation-delay: 0s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes ai-dot-pulse {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ai-help-panel__footer {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.ai-help-panel__input {
+  flex: 1;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+  font-family: $font-family-primary;
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  height: $input-height;
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+
+  &:focus {
+    border-color: var(--primary);
+  }
+}
+
+.ai-help-panel__send {
+  color: var(--primary);
+  flex-shrink: 0;
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 10%, var(--bg));
+  }
+}

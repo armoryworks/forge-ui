@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
 
@@ -18,6 +18,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 
 type QualityTab = 'inspections' | 'lots';
@@ -39,6 +40,7 @@ type QualityTab = 'inspections' | 'lots';
 export class QualityComponent {
   private readonly qualityService = inject(QualityService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly scanner = inject(ScannerService);
 
   protected readonly activeTab = signal<QualityTab>('inspections');
   protected readonly loading = signal(false);
@@ -131,8 +133,20 @@ export class QualityComponent {
   });
 
   constructor() {
+    this.scanner.setContext('quality');
     this.loadInspections();
     this.loadTemplates();
+
+    effect(() => {
+      const scan = this.scanner.lastScan();
+      if (!scan || scan.context !== 'quality') return;
+      this.scanner.clearLastScan();
+      if (this.activeTab() === 'lots') {
+        this.lotSearchControl.setValue(scan.value);
+      } else {
+        this.inspectionSearchControl.setValue(scan.value);
+      }
+    });
   }
 
   protected switchTab(tab: QualityTab): void {
