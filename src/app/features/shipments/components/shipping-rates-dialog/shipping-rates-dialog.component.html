@@ -1,0 +1,74 @@
+<app-dialog title="Shipping Rates" width="520px" (closed)="close()">
+  <div [appLoadingBlock]="loadingRates()">
+    @if (createdLabel(); as label) {
+      <div class="label-result">
+        <span class="material-icons-outlined label-result__icon">check_circle</span>
+        <div class="label-result__info">
+          <span class="label-result__title">Label Created</span>
+          <div class="label-result__detail">
+            <span class="label-result__label">Carrier</span>
+            <span class="label-result__value">{{ label.carrierName }}</span>
+          </div>
+          <div class="label-result__detail">
+            <span class="label-result__label">Tracking #</span>
+            <span class="label-result__value label-result__value--mono">{{ label.trackingNumber }}</span>
+          </div>
+          @if (label.labelUrl) {
+            <a class="action-btn action-btn--sm label-result__link" [href]="label.labelUrl" target="_blank" rel="noopener noreferrer">
+              <span class="material-icons-outlined">download</span>
+              Download Label
+            </a>
+          }
+        </div>
+      </div>
+    } @else {
+      @if (rates().length === 0 && !loadingRates()) {
+        <div class="rates-empty">
+          <span class="material-icons-outlined rates-empty__icon">local_shipping</span>
+          <span class="rates-empty__text">No rates available for this shipment.</span>
+        </div>
+      }
+      @if (rates().length > 0) {
+        <table class="rates-table">
+          <thead>
+            <tr>
+              <th>Carrier</th>
+              <th>Service</th>
+              <th class="rates-table__right">Price</th>
+              <th class="rates-table__right">Days</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (rate of rates(); track rate.carrierId + rate.serviceName) {
+              <tr class="rates-table__row"
+                  [class.rates-table__row--selected]="selectedRate() === rate"
+                  (click)="selectRate(rate)">
+                <td>{{ rate.carrierName }}</td>
+                <td>{{ rate.serviceName }}</td>
+                <td class="rates-table__right rates-table__mono">{{ rate.price | currency }}</td>
+                <td class="rates-table__right">{{ rate.estimatedDays }}d</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">
+      {{ createdLabel() ? 'Done' : 'Cancel' }}
+    </button>
+    @if (!createdLabel()) {
+      <button class="action-btn action-btn--primary"
+        [disabled]="!selectedRate() || creatingLabel()"
+        (click)="createLabel()">
+        @if (creatingLabel()) {
+          Creating...
+        } @else {
+          Create Label
+        }
+      </button>
+    }
+  </div>
+</app-dialog>

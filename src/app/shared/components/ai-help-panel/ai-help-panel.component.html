@@ -4,6 +4,11 @@
     <div class="ai-help-panel__header">
       <span class="material-icons-outlined">smart_toy</span>
       <span>QB Engineer Assistant</span>
+      @if (messages().length > 0) {
+        <button class="icon-btn" (click)="clearChat()" aria-label="Clear chat" title="New conversation">
+          <span class="material-icons-outlined">restart_alt</span>
+        </button>
+      }
       <button class="icon-btn" (click)="toggle()" aria-label="Close assistant">
         <span class="material-icons-outlined">close</span>
       </button>

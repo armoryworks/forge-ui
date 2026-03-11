@@ -1,0 +1,52 @@
+<div class="tracking">
+  <div class="tracking__header">
+    <div class="tracking__status">
+      <span class="material-icons-outlined tracking__status-icon">local_shipping</span>
+      <span class="tracking__status-text">{{ tracking().status }}</span>
+    </div>
+    <div class="tracking__meta">
+      <div class="tracking__meta-item">
+        <span class="tracking__meta-label">Tracking #</span>
+        <span class="tracking__meta-value">{{ tracking().trackingNumber }}</span>
+      </div>
+      @if (tracking().estimatedDelivery) {
+        <div class="tracking__meta-item">
+          <span class="tracking__meta-label">Est. Delivery</span>
+          <span class="tracking__meta-value">{{ tracking().estimatedDelivery | date:'mediumDate' }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (tracking().events.length > 0) {
+    <div class="timeline">
+      @for (event of tracking().events; track $index; let first = $first) {
+        <div class="timeline__item" [class.timeline__item--first]="first">
+          <div class="timeline__marker">
+            <div class="timeline__dot" [class.timeline__dot--active]="first"></div>
+            @if (!$last) {
+              <div class="timeline__line"></div>
+            }
+          </div>
+          <div class="timeline__content">
+            <span class="timeline__description">{{ event.description }}</span>
+            <div class="timeline__details">
+              <span class="timeline__time">{{ event.timestamp | date:'medium' }}</span>
+              @if (event.location) {
+                <span class="timeline__location">
+                  <span class="material-icons-outlined timeline__location-icon">place</span>
+                  {{ event.location }}
+                </span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="tracking__empty">
+      <span class="material-icons-outlined tracking__empty-icon">schedule</span>
+      <span class="tracking__empty-text">No tracking events yet.</span>
+    </div>
+  }
+</div>

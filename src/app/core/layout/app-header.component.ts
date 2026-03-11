@@ -9,6 +9,7 @@ import { LayoutService } from '../../shared/services/layout.service';
 import { SearchService } from '../../shared/services/search.service';
 import { AiService, AiSearchSuggestion } from '../../shared/services/ai.service';
 import { SearchResult } from '../../shared/models/search.model';
+import { RagSearchResult } from '../../shared/models/rag-search-result.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
 import { ChatComponent } from '../../features/chat/chat.component';
 import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-help-panel.component';
@@ -40,6 +41,8 @@ export class AppHeaderComponent implements OnInit {
   protected readonly searchControl = new FormControl('');
   protected readonly searchResults = signal<SearchResult[]>([]);
   protected readonly aiSuggestions = signal<AiSearchSuggestion[]>([]);
+  protected readonly ragResults = signal<RagSearchResult[]>([]);
+  protected readonly ragAnswer = signal<string | null>(null);
   protected readonly aiLoading = signal(false);
   protected readonly showResults = signal(false);
   protected readonly searchFocused = signal(false);
@@ -67,15 +70,16 @@ export class AppHeaderComponent implements OnInit {
       switchMap(term => {
         this.aiLoading.set(true);
         this.showResults.set(true);
-        return this.aiService.searchSuggest(term!).pipe(
-          catchError(() => of([] as AiSearchSuggestion[])),
+        return this.aiService.ragSearch(term!, undefined, true).pipe(
+          catchError(() => of({ results: [] as RagSearchResult[], generatedAnswer: null })),
         );
       }),
-    ).subscribe(suggestions => {
-      this.aiSuggestions.set(suggestions);
+    ).subscribe(response => {
+      this.ragResults.set(response.results);
+      this.ragAnswer.set(response.generatedAnswer);
       this.aiLoading.set(false);
       this.showResults.set(
-        this.searchResults().length > 0 || suggestions.length > 0,
+        this.searchResults().length > 0 || response.results.length > 0 || !!response.generatedAnswer,
       );
     });
 
@@ -83,6 +87,8 @@ export class AppHeaderComponent implements OnInit {
       filter(v => !v || v.length < 2),
     ).subscribe(() => {
       this.aiSuggestions.set([]);
+      this.ragResults.set([]);
+      this.ragAnswer.set(null);
       this.aiLoading.set(false);
     });
   }
@@ -98,7 +104,7 @@ export class AppHeaderComponent implements OnInit {
 
   protected onSearchFocus(): void {
     this.searchFocused.set(true);
-    if (this.searchResults().length > 0 || this.aiSuggestions().length > 0) {
+    if (this.searchResults().length > 0 || this.aiSuggestions().length > 0 || this.ragResults().length > 0 || this.ragAnswer()) {
       this.showResults.set(true);
     }
   }
@@ -122,6 +128,59 @@ export class AppHeaderComponent implements OnInit {
     this.searchResults.set([]);
     this.aiSuggestions.set([]);
     this.router.navigateByUrl(suggestion.url);
+  }
+
+  protected navigateToRagResult(result: RagSearchResult): void {
+    this.showResults.set(false);
+    this.searchControl.setValue('', { emitEvent: false });
+    this.searchResults.set([]);
+    this.ragResults.set([]);
+    this.ragAnswer.set(null);
+    const url = this.getEntityRoute(result.entityType, result.entityId);
+    if (url) {
+      this.router.navigateByUrl(url);
+    }
+  }
+
+  protected getEntityRoute(entityType: string, entityId: number): string {
+    const routeMap: Record<string, string> = {
+      job: '/kanban',
+      part: '/parts',
+      customer: '/customers',
+      lead: '/leads',
+      asset: '/assets',
+      expense: '/expenses',
+      vendor: '/vendors',
+      'sales-order': '/sales-orders',
+      'purchase-order': '/purchase-orders',
+      quote: '/quotes',
+      shipment: '/shipments',
+      invoice: '/invoices',
+    };
+    const base = routeMap[entityType.toLowerCase()];
+    return base ? `${base}/${entityId}` : `/${entityType.toLowerCase()}s`;
+  }
+
+  protected getEntityIcon(entityType: string): string {
+    const iconMap: Record<string, string> = {
+      job: 'work',
+      part: 'inventory_2',
+      customer: 'person',
+      lead: 'handshake',
+      asset: 'precision_manufacturing',
+      expense: 'receipt_long',
+      vendor: 'store',
+      'sales-order': 'shopping_cart',
+      'purchase-order': 'receipt',
+      quote: 'request_quote',
+      shipment: 'local_shipping',
+      invoice: 'description',
+    };
+    return iconMap[entityType.toLowerCase()] ?? 'article';
+  }
+
+  protected getScorePercent(score: number): number {
+    return Math.round(score * 100);
   }
 
   protected toggleTheme(): void {

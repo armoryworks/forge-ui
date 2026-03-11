@@ -1,0 +1,129 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+// --- Rates Table ---
+.rates-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th,
+  td {
+    padding: $sp-md;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  th {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__right {
+    text-align: right;
+  }
+
+  &__mono {
+    font-family: $font-family-mono;
+  }
+
+  &__row {
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover {
+      background: var(--bg);
+    }
+
+    &--selected {
+      background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+      border-left: $border-width solid var(--primary);
+
+      &:hover {
+        background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+      }
+    }
+  }
+}
+
+// --- Empty State ---
+.rates-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-3xl $sp-lg;
+  text-align: center;
+
+  &__icon {
+    font-size: $icon-size-hero;
+    color: var(--text-muted);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}
+
+// --- Label Result ---
+.label-result {
+  display: flex;
+  gap: $sp-lg;
+  padding: $sp-xl;
+  background: color-mix(in srgb, var(--success) 5%, var(--surface));
+  border: $border-width-thin solid color-mix(in srgb, var(--success) 20%, var(--border));
+
+  &__icon {
+    font-size: $icon-size-xxl;
+    color: var(--success);
+    flex-shrink: 0;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__title {
+    font-weight: 700;
+    font-size: $font-size-md;
+    color: var(--success);
+  }
+
+  &__detail {
+    display: flex;
+    gap: $sp-md;
+    align-items: baseline;
+  }
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+    min-width: 70px;
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    color: var(--text);
+
+    &--mono {
+      font-family: $font-family-mono;
+      font-weight: 600;
+    }
+  }
+
+  &__link {
+    margin-top: $sp-sm;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-sm;
+    width: fit-content;
+  }
+}

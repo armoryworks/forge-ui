@@ -1,7 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, tap } from 'rxjs';
+
 import { environment } from '../../../environments/environment';
+import { RagSearchResponse } from '../models/rag-search-response.model';
 
 export interface AiGenerateRequest {
   prompt: string;
@@ -82,5 +84,21 @@ export class AiService {
 
   helpChat(question: string, history?: AiHelpMessage[]): Observable<AiHelpResponse> {
     return this.http.post<AiHelpResponse>(`${this.base}/help`, { question, history });
+  }
+
+  ragSearch(query: string, entityTypeFilter?: string, includeAnswer = false): Observable<RagSearchResponse> {
+    return this.http.post<RagSearchResponse>(`${this.base}/search`, {
+      query,
+      entityTypeFilter,
+      includeAnswer,
+    });
+  }
+
+  ragHelpChat(message: string, conversationHistory?: string[]): Observable<string> {
+    return this.http.post(`${this.base}/chat`, { message, conversationHistory }, { responseType: 'text' });
+  }
+
+  indexDocument(entityType: string, entityId: number): Observable<number> {
+    return this.http.post<number>(`${this.base}/index`, { entityType, entityId });
   }
 }

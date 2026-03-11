@@ -113,6 +113,20 @@
   &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
 }
 
+// --- Tracking Section ---
+.tracking-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+
+  &__header {
+    @include flex-between;
+  }
+}
+
 // --- Actions ---
 .detail-actions {
   display: flex;

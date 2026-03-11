@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 
@@ -21,10 +21,18 @@ export class AiHelpPanelComponent {
 
   protected readonly inputControl = new FormControl('');
 
+  protected readonly conversationHistory = computed(() =>
+    this.messages().map(m => `${m.role}: ${m.content}`),
+  );
+
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLDivElement>;
 
   toggle(): void {
     this.open.update(v => !v);
+  }
+
+  protected clearChat(): void {
+    this.messages.set([]);
   }
 
   protected askStarter(question: string): void {
@@ -45,12 +53,12 @@ export class AiHelpPanelComponent {
     this.loading.set(true);
     this.scrollToBottom();
 
-    const history = this.messages().slice(0, -1);
+    const history = this.conversationHistory().slice(0, -1);
 
-    this.aiService.helpChat(question, history).pipe(
-      catchError(() => of({ answer: 'Sorry, I was unable to process your question. Please try again.' })),
-    ).subscribe(response => {
-      const assistantMessage: AiHelpMessage = { role: 'assistant', content: response.answer };
+    this.aiService.ragHelpChat(question, history.length > 0 ? history : undefined).pipe(
+      catchError(() => of('Sorry, I was unable to process your question. Please try again.')),
+    ).subscribe(answer => {
+      const assistantMessage: AiHelpMessage = { role: 'assistant', content: answer };
       this.messages.update(msgs => [...msgs, assistantMessage]);
       this.loading.set(false);
       this.scrollToBottom();

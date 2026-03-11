@@ -163,12 +163,37 @@
           </div>
         </div>
 
+        <!-- Tracking Timeline -->
+        @if (trackingData(); as tracking) {
+          <div class="tracking-section">
+            <div class="tracking-section__header">
+              <span class="info-label">Tracking</span>
+              <button class="icon-btn" title="Close tracking" (click)="closeTracking()">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+            <div [appLoadingBlock]="trackingLoading()">
+              <app-tracking-timeline [tracking]="tracking" />
+            </div>
+          </div>
+        }
+
         <!-- Actions -->
         <div class="detail-actions">
           @if (canShip(shipment.status)) {
+            <button class="action-btn" (click)="openRatesDialog()">
+              <span class="material-icons-outlined">request_quote</span>
+              Get Rates
+            </button>
             <button class="action-btn action-btn--primary" (click)="markShipped()">
               <span class="material-icons-outlined">local_shipping</span>
               Mark Shipped
+            </button>
+          }
+          @if (shipment.trackingNumber && !trackingData()) {
+            <button class="action-btn" (click)="loadTracking()">
+              <span class="material-icons-outlined">location_searching</span>
+              Track
             </button>
           }
           @if (canDeliver(shipment.status)) {
@@ -185,4 +210,11 @@
 
 @if (showCreateDialog()) {
   <app-shipment-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}
+
+@if (showRatesDialog() && selectedShipment()) {
+  <app-shipping-rates-dialog
+    [shipmentId]="selectedShipment()!.id"
+    (closed)="closeRatesDialog()"
+    (labelCreated)="onLabelCreated($event)" />
 }

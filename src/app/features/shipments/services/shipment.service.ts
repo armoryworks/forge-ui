@@ -8,6 +8,9 @@ import { ShipmentDetail } from '../models/shipment-detail.model';
 import { CreateShipmentRequest } from '../models/create-shipment-request.model';
 import { ShipmentPackage } from '../models/shipment-package.model';
 import { CreateShipmentPackageRequest } from '../models/create-shipment-package-request.model';
+import { ShippingRate } from '../models/shipping-rate.model';
+import { ShippingLabel } from '../models/shipping-label.model';
+import { ShipmentTracking } from '../models/shipment-tracking.model';
 
 @Injectable({ providedIn: 'root' })
 export class ShipmentService {
@@ -56,5 +59,19 @@ export class ShipmentService {
 
   removePackage(shipmentId: number, packageId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${shipmentId}/packages/${packageId}`);
+  }
+
+  // Shipping Rates
+  getRates(shipmentId: number): Observable<ShippingRate[]> {
+    return this.http.get<ShippingRate[]>(`${this.base}/${shipmentId}/rates`);
+  }
+
+  createLabel(shipmentId: number, carrierId: string, serviceName: string): Observable<ShippingLabel> {
+    return this.http.post<ShippingLabel>(`${this.base}/${shipmentId}/label`, { carrierId, serviceName });
+  }
+
+  // Tracking
+  getTracking(shipmentId: number): Observable<ShipmentTracking> {
+    return this.http.get<ShipmentTracking>(`${this.base}/${shipmentId}/tracking`);
   }
 }

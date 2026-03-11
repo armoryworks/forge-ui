@@ -49,7 +49,7 @@
           <div class="search-results__col search-results__col--ai">
             <div class="search-results__col-header search-results__col-header--ai">
               <span class="material-icons-outlined">auto_awesome</span>
-              AI Suggestions
+              AI Results
             </div>
             @if (aiLoading()) {
               <div class="search-results__thinking">
@@ -57,17 +57,28 @@
                 Thinking...
               </div>
             }
-            @for (suggestion of aiSuggestions(); track suggestion.url) {
-              <button class="search-result search-result--ai" (mousedown)="navigateToSuggestion(suggestion)">
-                <span class="material-icons-outlined search-result__icon">{{ suggestion.icon }}</span>
+            @if (ragAnswer()) {
+              <div class="search-results__answer">
+                <span class="material-icons-outlined search-results__answer-icon">lightbulb</span>
+                <div class="search-results__answer-text">{{ ragAnswer() }}</div>
+              </div>
+            }
+            @for (result of ragResults(); track result.entityId + result.entityType) {
+              <button class="search-result search-result--ai" (mousedown)="navigateToRagResult(result)">
+                <span class="material-icons-outlined search-result__icon">{{ getEntityIcon(result.entityType) }}</span>
                 <div class="search-result__content">
-                  <span class="search-result__title">{{ suggestion.label }}</span>
-                  <span class="search-result__subtitle">{{ suggestion.description }}</span>
+                  <span class="search-result__title">{{ result.chunkText }}</span>
+                  @if (result.sourceField) {
+                    <span class="search-result__subtitle">{{ result.sourceField }}</span>
+                  }
                 </div>
-                <span class="material-icons-outlined search-result__arrow">arrow_forward</span>
+                <div class="search-result__meta">
+                  <span class="search-result__type">{{ result.entityType }}</span>
+                  <span class="search-result__score">{{ getScorePercent(result.score) }}%</span>
+                </div>
               </button>
             }
-            @if (!aiLoading() && aiSuggestions().length === 0) {
+            @if (!aiLoading() && ragResults().length === 0 && !ragAnswer()) {
               <div class="search-results__empty">Type to get AI suggestions</div>
             }
           </div>

@@ -7,6 +7,8 @@ import { startWith } from 'rxjs';
 import { ShipmentService } from './services/shipment.service';
 import { ShipmentListItem } from './models/shipment-list-item.model';
 import { ShipmentDetail } from './models/shipment-detail.model';
+import { ShipmentTracking } from './models/shipment-tracking.model';
+import { ShippingLabel } from './models/shipping-label.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -18,6 +20,8 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-dialog.component';
+import { ShippingRatesDialogComponent } from './components/shipping-rates-dialog/shipping-rates-dialog.component';
+import { TrackingTimelineComponent } from './components/tracking-timeline/tracking-timeline.component';
 
 @Component({
   selector: 'app-shipments',
@@ -26,7 +30,7 @@ import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-d
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    ShipmentDialogComponent,
+    ShipmentDialogComponent, ShippingRatesDialogComponent, TrackingTimelineComponent,
   ],
   templateUrl: './shipments.component.html',
   styleUrl: './shipments.component.scss',
@@ -38,9 +42,12 @@ export class ShipmentsComponent {
   private readonly snackbar = inject(SnackbarService);
 
   protected readonly showCreateDialog = signal(false);
+  protected readonly showRatesDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly shipments = signal<ShipmentListItem[]>([]);
   protected readonly selectedShipment = signal<ShipmentDetail | null>(null);
+  protected readonly trackingData = signal<ShipmentTracking | null>(null);
+  protected readonly trackingLoading = signal(false);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -102,7 +109,10 @@ export class ShipmentsComponent {
     });
   }
 
-  protected closeDetail(): void { this.selectedShipment.set(null); }
+  protected closeDetail(): void {
+    this.selectedShipment.set(null);
+    this.trackingData.set(null);
+  }
 
   // --- Create Dialog ---
   protected openCreateDialog(): void { this.showCreateDialog.set(true); }
@@ -111,6 +121,36 @@ export class ShipmentsComponent {
     this.closeCreateDialog();
     this.loadShipments();
   }
+
+  // --- Rates Dialog ---
+  protected openRatesDialog(): void { this.showRatesDialog.set(true); }
+  protected closeRatesDialog(): void { this.showRatesDialog.set(false); }
+  protected onLabelCreated(label: ShippingLabel): void {
+    const shipment = this.selectedShipment();
+    if (shipment) {
+      this.refreshDetail(shipment.id);
+      this.loadShipments();
+    }
+  }
+
+  // --- Tracking ---
+  protected loadTracking(): void {
+    const shipment = this.selectedShipment();
+    if (!shipment || !shipment.trackingNumber) return;
+    this.trackingLoading.set(true);
+    this.shipmentService.getTracking(shipment.id).subscribe({
+      next: (tracking) => {
+        this.trackingData.set(tracking);
+        this.trackingLoading.set(false);
+      },
+      error: () => {
+        this.trackingLoading.set(false);
+        this.snackbar.error('Failed to load tracking info.');
+      },
+    });
+  }
+
+  protected closeTracking(): void { this.trackingData.set(null); }
 
   // --- Status Actions ---
   protected markShipped(): void {
