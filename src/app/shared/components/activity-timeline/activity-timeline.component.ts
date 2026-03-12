@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, signal } from '@an
 
 import { AvatarComponent } from '../avatar/avatar.component';
 import { MentionHighlightPipe } from '../../pipes/mention-highlight.pipe';
+import { formatDate } from '../../utils/date.utils';
 import { ActivityItem } from '../../models/activity.model';
 
 export interface DisplayActivity {
@@ -130,6 +131,6 @@ export class ActivityTimelineComponent {
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
 
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return formatDate(date);
   }
 }

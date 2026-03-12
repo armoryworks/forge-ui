@@ -1,0 +1,93 @@
+<!-- Admin Login Phase -->
+@if (phase() === 'admin-login') {
+  <div class="setup">
+    <div class="setup__card">
+      <span class="material-icons-outlined setup__icon">settings</span>
+      <h1 class="setup__title">Terminal Setup</h1>
+      <p class="setup__subtitle">An administrator must configure this kiosk before use</p>
+
+      @if (loginError()) {
+        <div class="setup__error">
+          <span class="material-icons-outlined">warning</span>
+          {{ loginError() }}
+        </div>
+      }
+
+      <div class="setup__field">
+        <app-input label="Admin Email" type="email" [formControl]="emailControl"
+          placeholder="admin@company.com" />
+      </div>
+      <div class="setup__field">
+        <app-input label="Password" type="password" [formControl]="passwordControl"
+          placeholder="Enter password..." />
+      </div>
+
+      <button class="action-btn action-btn--primary setup__submit"
+        [disabled]="loggingIn() || !emailControl.value || !passwordControl.value"
+        (click)="onLoginSubmit()">
+        @if (loggingIn()) {
+          <span class="material-icons-outlined setup__spinner">sync</span>
+          Signing in...
+        } @else {
+          <span class="material-icons-outlined">login</span>
+          Sign In as Admin
+        }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Configure Phase -->
+@if (phase() === 'configure') {
+  <div class="setup">
+    <div class="setup__card setup__card--wide">
+      <span class="material-icons-outlined setup__icon">dns</span>
+      <h1 class="setup__title">Configure Terminal</h1>
+      <p class="setup__subtitle">Name this terminal and assign it to a team</p>
+
+      @if (configError()) {
+        <div class="setup__error">
+          <span class="material-icons-outlined">warning</span>
+          {{ configError() }}
+        </div>
+      }
+
+      <div class="setup__field">
+        <app-input label="Terminal Name" [formControl]="terminalNameControl"
+          placeholder="e.g. Shop Floor East, Assembly Bay 2..." />
+      </div>
+
+      @if (!showNewTeam()) {
+        <div class="setup__field">
+          <app-select label="Team" [formControl]="teamControl"
+            [options]="teamOptions()" placeholder="Select a team..." />
+        </div>
+        <button class="action-btn setup__toggle" (click)="toggleNewTeam()">
+          <span class="material-icons-outlined">add</span>
+          Create New Team
+        </button>
+      } @else {
+        <div class="setup__field">
+          <app-input label="New Team Name" [formControl]="newTeamNameControl"
+            placeholder="e.g. Assembly, CNC, Welding..." />
+        </div>
+        <button class="action-btn setup__toggle" (click)="toggleNewTeam()">
+          <span class="material-icons-outlined">list</span>
+          Select Existing Team
+        </button>
+      }
+
+      <button class="action-btn action-btn--primary setup__submit"
+        [disabled]="saving() || !terminalNameControl.value"
+        (click)="onSave()">
+        @if (saving()) {
+          <span class="material-icons-outlined setup__spinner">sync</span>
+          Saving...
+        } @else {
+          <span class="material-icons-outlined">check</span>
+          Activate Terminal
+        }
+      </button>
+    </div>
+  </div>
+}

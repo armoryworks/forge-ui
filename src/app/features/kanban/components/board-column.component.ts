@@ -21,7 +21,8 @@ export class BoardColumnComponent {
   readonly selectedJobIds = input<Set<number>>(new Set());
 
   readonly dropped = output<CdkDragDrop<KanbanJob[]>>();
-  readonly cardClicked = output<{ job: KanbanJob; event: MouseEvent }>();
+  readonly cardClicked = output<{ job: KanbanJob; event: Event }>();
+  readonly jobNumberClicked = output<{ job: KanbanJob; event: Event }>();
 
   protected readonly jobCount = computed(() => this.column().jobs.length);
   protected readonly wipLimit = computed(() => this.column().stage.wipLimit);

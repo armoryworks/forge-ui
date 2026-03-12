@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -5,6 +6,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { AdminService } from './services/admin.service';
 import { AdminUser } from './models/admin-user.model';
+import { ScanIdentifier } from './models/scan-identifier.model';
 import { SystemSetting } from './models/system-setting.model';
 import { StageRequest } from './models/stage-request.model';
 import { ReferenceDataGroup } from './models/reference-data-group.model';
@@ -31,6 +33,9 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TrainingDashboardComponent } from './components/training-dashboard/training-dashboard.component';
 import { IntegrationsPanelComponent } from './components/integrations-panel/integrations-panel.component';
+import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { ScannerService } from '../../shared/services/scanner.service';
+import { WebHidRfidService } from '../../shared/services/web-hid-rfid.service';
 
 @Component({
   selector: 'app-admin',
@@ -39,7 +44,7 @@ import { IntegrationsPanelComponent } from './components/integrations-panel/inte
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent,
+    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, BarcodeInfoComponent, DatePipe,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -51,6 +56,8 @@ export class AdminComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly terminologyService = inject(TerminologyService);
   private readonly themeService = inject(ThemeService);
+  private readonly scanner = inject(ScannerService);
+  protected readonly rfid = inject(WebHidRfidService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
@@ -78,17 +85,32 @@ export class AdminComponent {
     firstName: new FormControl('', [Validators.required]),
     lastName: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
     initials: new FormControl('', [Validators.maxLength(3)]),
     role: new FormControl('Engineer', [Validators.required]),
     isActive: new FormControl(true),
   });
   protected readonly userViolations = FormValidationService.getViolations(this.userForm, {
     firstName: 'First Name', lastName: 'Last Name', email: 'Email',
-    password: 'Password', initials: 'Initials', role: 'Role',
+    initials: 'Initials', role: 'Role',
   });
 
+  // Setup token shown after creating a user (so admin can share it)
+  protected readonly setupToken = signal<string | null>(null);
+  protected readonly setupTokenExpiresAt = signal<string | null>(null);
+
   protected readonly avatarColor = signal('#0d9488');
+
+  // Scan Identifiers (shown when editing a user)
+  protected readonly scanIdentifiers = signal<ScanIdentifier[]>([]);
+  protected readonly scanIdLoading = signal(false);
+  protected readonly newScanType = new FormControl('rfid');
+  protected readonly newScanValue = new FormControl('');
+  protected readonly scanTypeOptions: SelectOption[] = [
+    { value: 'rfid', label: 'RFID Card' },
+    { value: 'nfc', label: 'NFC Tag' },
+    { value: 'barcode', label: 'Barcode' },
+    { value: 'biometric', label: 'Biometric' },
+  ];
 
   // Track Types
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -132,7 +154,7 @@ export class AdminComponent {
       { value: 'Admin', label: 'Admin' }, { value: 'Engineer', label: 'Engineer' }, { value: 'Viewer', label: 'Viewer' },
     ]},
     { field: 'status', header: 'Status', sortable: true },
-    { field: 'actions', header: 'Actions', width: '80px', align: 'right' },
+    { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
   ];
 
   protected readonly roleOptions: SelectOption[] = [
@@ -154,6 +176,30 @@ export class AdminComponent {
       if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
       if (tab === 'settings' && this.systemSettings().length === 0) this.loadSystemSettings();
     });
+
+    // When editing a user and a keyboard-wedge scan is detected, populate the scan value field
+    effect(() => {
+      const scan = this.scanner.lastScan();
+      if (!scan || !this.editingUser()) return;
+      this.scanner.clearLastScan();
+      this.newScanValue.setValue(scan.value);
+      this.snackbar.success(`Scanned: ${scan.value}`);
+    });
+
+    // When editing a user and an RFID card is tapped via WebHID, auto-add as scan identifier
+    effect(() => {
+      const scan = this.rfid.lastScan();
+      const user = this.editingUser();
+      if (!scan || !user) return;
+      this.rfid.clearLastScan();
+      this.newScanType.setValue('rfid');
+      this.newScanValue.setValue(scan.uid);
+      // Auto-add the scan identifier immediately
+      this.addScanIdentifier();
+    });
+
+    // Auto-reconnect to a previously paired RFID reader
+    this.rfid.reconnect();
   }
 
   protected switchTab(tab: string): void {
@@ -172,35 +218,40 @@ export class AdminComponent {
 
   protected openCreateUser(): void {
     this.editingUser.set(null);
+    this.setupToken.set(null);
+    this.setupTokenExpiresAt.set(null);
     this.userForm.reset({
-      firstName: '', lastName: '', email: '', password: '',
+      firstName: '', lastName: '', email: '',
       initials: '', role: 'Engineer', isActive: true,
     });
     this.userForm.controls.email.enable();
-    this.userForm.controls.password.enable();
     this.avatarColor.set('#0d9488');
     this.showUserDialog.set(true);
   }
 
   protected openEditUser(user: AdminUser): void {
     this.editingUser.set(user);
+    this.setupToken.set(null);
+    this.setupTokenExpiresAt.set(null);
     this.userForm.patchValue({
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      password: '',
       initials: user.initials ?? '',
       role: user.roles[0] ?? 'Engineer',
       isActive: user.isActive,
     });
     this.userForm.controls.email.disable();
-    this.userForm.controls.password.disable();
     this.avatarColor.set(user.avatarColor ?? '#0d9488');
+    this.scanIdentifiers.set([]);
+    this.newScanValue.reset();
+    this.loadScanIdentifiers(user.id);
     this.showUserDialog.set(true);
   }
 
   protected closeUserDialog(): void {
     this.showUserDialog.set(false);
+    this.scanIdentifiers.set([]);
   }
 
   protected saveUser(): void {
@@ -230,13 +281,71 @@ export class AdminComponent {
         lastName: form.lastName!,
         initials: form.initials || undefined,
         avatarColor: this.avatarColor(),
-        password: form.password!,
         role: form.role!,
       }).subscribe({
-        next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
-        error: (err) => { this.saving.set(false); this.error.set('Failed to create user'); },
+        next: (result) => {
+          this.saving.set(false);
+          this.loadUsers();
+
+          // Transition into edit mode with the newly created user
+          const newUser: AdminUser = {
+            id: result.id,
+            email: result.email,
+            firstName: result.firstName,
+            lastName: result.lastName,
+            initials: result.initials,
+            avatarColor: result.avatarColor,
+            isActive: result.isActive,
+            roles: result.roles,
+            createdAt: result.createdAt,
+            hasPassword: false,
+            hasPendingSetupToken: true,
+            hasRfidIdentifier: false,
+            hasBarcodeIdentifier: false,
+          };
+          this.editingUser.set(newUser);
+          this.setupToken.set(result.setupToken);
+          this.setupTokenExpiresAt.set(result.setupTokenExpiresAt);
+          this.userForm.controls.email.disable();
+          this.loadScanIdentifiers(result.id);
+          this.snackbar.success(`User created — share the setup code with ${form.firstName}`);
+        },
+        error: () => { this.saving.set(false); this.error.set('Failed to create user'); },
       });
     }
+  }
+
+  protected async pairRfidReader(): Promise<void> {
+    this.rfid.clearError();
+    const success = await this.rfid.requestDevice();
+    if (success) {
+      this.snackbar.success(`RFID reader connected: ${this.rfid.deviceName()}`);
+    } else if (this.rfid.error()) {
+      this.snackbar.error(this.rfid.error()!);
+    }
+  }
+
+  protected async unpairRfidReader(): Promise<void> {
+    await this.rfid.disconnect();
+    this.snackbar.info('RFID reader disconnected');
+  }
+
+  protected copySetupCode(): void {
+    const code = this.setupToken();
+    if (!code) return;
+    navigator.clipboard.writeText(code);
+    this.snackbar.success('Setup code copied to clipboard');
+  }
+
+  protected regenerateSetupToken(user: AdminUser): void {
+    this.adminService.generateSetupToken(user.id).subscribe({
+      next: (result) => {
+        this.setupToken.set(result.token);
+        this.setupTokenExpiresAt.set(result.expiresAt);
+        this.snackbar.success(`Setup link generated for ${user.firstName}`);
+      },
+      error: () => this.snackbar.error('Failed to generate setup token'),
+    });
   }
 
   protected toggleUserActive(user: AdminUser): void {
@@ -244,6 +353,54 @@ export class AdminComponent {
       next: () => this.loadUsers(),
       error: () => this.error.set('Failed to update user status'),
     });
+  }
+
+  // ── Scan Identifiers ──
+  private loadScanIdentifiers(userId: number): void {
+    this.scanIdLoading.set(true);
+    this.adminService.getScanIdentifiers(userId).subscribe({
+      next: (ids) => { this.scanIdentifiers.set(ids); this.scanIdLoading.set(false); },
+      error: () => { this.scanIdentifiers.set([]); this.scanIdLoading.set(false); },
+    });
+  }
+
+  protected addScanIdentifier(): void {
+    const user = this.editingUser();
+    const type = this.newScanType.value;
+    const value = this.newScanValue.value?.trim();
+    if (!user || !type || !value) return;
+
+    this.scanIdLoading.set(true);
+    this.adminService.addScanIdentifier(user.id, type, value).subscribe({
+      next: () => {
+        this.newScanValue.reset();
+        this.loadScanIdentifiers(user.id);
+        this.loadUsers();
+        this.snackbar.success('Scan identifier added');
+      },
+      error: () => {
+        this.scanIdLoading.set(false);
+        this.snackbar.error('Failed to add scan identifier');
+      },
+    });
+  }
+
+  protected removeScanIdentifier(id: number): void {
+    const user = this.editingUser();
+    if (!user) return;
+
+    this.adminService.removeScanIdentifier(user.id, id).subscribe({
+      next: () => {
+        this.loadScanIdentifiers(user.id);
+        this.loadUsers();
+        this.snackbar.success('Scan identifier removed');
+      },
+      error: () => this.snackbar.error('Failed to remove scan identifier'),
+    });
+  }
+
+  protected scanTypeLabel(type: string): string {
+    return this.scanTypeOptions.find(o => o.value === type)?.label ?? type;
   }
 
   // ── Track Types ──

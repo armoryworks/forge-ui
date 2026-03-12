@@ -46,6 +46,19 @@
 .toast__title {
   font-weight: 600;
   color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.toast__count {
+  font-size: $font-size-xs;
+  font-weight: 700;
+  color: var(--text-muted);
+  background: var(--bg);
+  padding: 0 $sp-sm;
+  line-height: $badge-size-sm;
+  height: $badge-size-sm;
 }
 
 .toast__message {

@@ -37,13 +37,13 @@
         </ng-template>
         <ng-template appColumnCell="followUpDate" let-lead>
           @if (lead.followUpDate) {
-            <span [class.overdue]="isFollowUpOverdue(lead)">{{ lead.followUpDate | date:'mediumDate' }}</span>
+            <span [class.overdue]="isFollowUpOverdue(lead)">{{ lead.followUpDate | date:'MM/dd/yyyy' }}</span>
           } @else {
             <span class="text-muted">—</span>
           }
         </ng-template>
         <ng-template appColumnCell="createdAt" let-lead>
-          <span class="text-muted">{{ lead.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ lead.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     }
@@ -102,7 +102,7 @@
             <div class="info-item">
               <span class="info-label">Follow-Up</span>
               <span class="info-value" [class.overdue]="isFollowUpOverdue(lead)">
-                {{ lead.followUpDate | date:'mediumDate' }}
+                {{ lead.followUpDate | date:'MM/dd/yyyy' }}
               </span>
             </div>
           }

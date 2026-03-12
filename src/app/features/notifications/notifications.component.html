@@ -36,7 +36,7 @@
     <div class="pref-section">
       <h3 class="pref-section__title">Email Notifications</h3>
 
-      <div class="pref-row" (click)="togglePref('email_critical', emailOnCritical())">
+      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle critical alerts email" (click)="togglePref('email_critical', emailOnCritical())" (keydown.enter)="togglePref('email_critical', emailOnCritical())">
         <div class="pref-row__info">
           <span class="pref-row__label">Critical Alerts</span>
           <span class="pref-row__desc">Receive email for critical system alerts</span>
@@ -47,7 +47,7 @@
         </span>
       </div>
 
-      <div class="pref-row" (click)="togglePref('email_assignment', emailOnAssignment())">
+      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle job assignments email" (click)="togglePref('email_assignment', emailOnAssignment())" (keydown.enter)="togglePref('email_assignment', emailOnAssignment())">
         <div class="pref-row__info">
           <span class="pref-row__label">Job Assignments</span>
           <span class="pref-row__desc">Receive email when assigned to a job</span>
@@ -58,7 +58,7 @@
         </span>
       </div>
 
-      <div class="pref-row" (click)="togglePref('email_mention', emailOnMention())">
+      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle mentions email" (click)="togglePref('email_mention', emailOnMention())" (keydown.enter)="togglePref('email_mention', emailOnMention())">
         <div class="pref-row__info">
           <span class="pref-row__label">Mentions</span>
           <span class="pref-row__desc">Receive email when mentioned in a comment</span>
@@ -71,7 +71,7 @@
 
       <h3 class="pref-section__title">In-App Notifications</h3>
 
-      <div class="pref-row" (click)="togglePref('sound', soundEnabled())">
+      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle notification sound" (click)="togglePref('sound', soundEnabled())" (keydown.enter)="togglePref('sound', soundEnabled())">
         <div class="pref-row__info">
           <span class="pref-row__label">Sound</span>
           <span class="pref-row__desc">Play a sound when a notification arrives</span>

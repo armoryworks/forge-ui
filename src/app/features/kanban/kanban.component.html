@@ -15,27 +15,93 @@
         </button>
       }
     </div>
+
+    <div class="view-toggle">
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" title="Board view">
+        <span class="material-icons-outlined">view_column</span>
+      </button>
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" title="Team view">
+        <span class="material-icons-outlined">people</span>
+      </button>
+    </div>
+
+    @if (viewMode() === 'team') {
+      <app-select label="Team Members" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" placeholder="All assigned users" />
+    }
+
     <button class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
       New Job
     </button>
   </app-page-header>
 
-  <div class="board">
-    @for (col of columns(); track col.stage.id; let i = $index) {
-      <app-board-column
-        [column]="col"
-        [dropListId]="'column-' + i"
-        [allDropListIds]="dropListIds()"
-        [selectedJobIds]="selectedJobIds()"
-        (dropped)="onCardDropped($event)"
-        (cardClicked)="onCardClicked($event)" />
-    }
-  </div>
+  <!-- Board View -->
+  @if (viewMode() === 'board') {
+    <div class="board">
+      @for (col of columns(); track col.stage.id; let i = $index) {
+        <app-board-column
+          [column]="col"
+          [dropListId]="'column-' + i"
+          [allDropListIds]="dropListIds()"
+          [selectedJobIds]="selectedJobIds()"
+          (dropped)="onCardDropped($event)"
+          (cardClicked)="onCardClicked($event)"
+          (jobNumberClicked)="onJobNumberClicked($event)" />
+      }
+    </div>
+  }
+
+  <!-- Team (Swimlane) View -->
+  @if (viewMode() === 'team') {
+    <div class="swimlane" [style.--stage-count]="currentStages().length">
+      <!-- Stage headers -->
+      <div class="swimlane__corner">
+        <span class="swimlane__corner-label">Team</span>
+      </div>
+      @for (stage of currentStages(); track stage.id) {
+        <div class="swimlane__stage-header" [style.border-top-color]="stage.color">
+          <span class="swimlane__stage-name">{{ stage.name }}</span>
+        </div>
+      }
+
+      <!-- User rows -->
+      @for (row of swimlaneRows(); track row.user?.id ?? -1; let ri = $index) {
+        <div class="swimlane__user-label">
+          @if (row.user) {
+            <app-avatar [initials]="row.user.initials" [color]="row.user.color" size="sm" />
+            <span class="swimlane__user-name">{{ row.user.name }}</span>
+          } @else {
+            <span class="material-icons-outlined swimlane__unassigned-icon">person_off</span>
+            <span class="swimlane__user-name">Unassigned</span>
+          }
+        </div>
+        @for (cell of row.cells; track $index; let ci = $index) {
+          <div class="swimlane__cell"
+            cdkDropList
+            [id]="swimlaneCellId(ri, ci)"
+            [cdkDropListData]="cell.jobs"
+            [cdkDropListConnectedTo]="swimlaneDropListIds()"
+            [cdkDropListEnterPredicate]="swimlaneCanEnter"
+            (cdkDropListDropped)="onSwimlaneDropped($event, ri, ci)">
+            @for (job of cell.jobs; track job.id) {
+              <app-job-card
+                [job]="job"
+                [selected]="selectedJobIds().has(job.id)"
+                cdkDrag
+                [cdkDragData]="job"
+                (cardClicked)="onCardClicked($event)"
+                (jobNumberClicked)="onJobNumberClicked($event)" />
+            }
+          </div>
+        }
+      }
+    </div>
+  }
 
   @if (selectedJobId(); as jobId) {
     <app-job-detail-panel
       [jobId]="jobId"
+      [users]="users()"
       (closed)="onPanelClose()"
       (editRequested)="openEditDialog($event)" />
   }

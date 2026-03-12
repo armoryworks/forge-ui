@@ -4,6 +4,7 @@ export interface KanbanJob {
   title: string;
   stageName: string;
   stageColor: string;
+  assigneeId: number | null;
   assigneeInitials: string | null;
   assigneeColor: string | null;
   priorityName: string;

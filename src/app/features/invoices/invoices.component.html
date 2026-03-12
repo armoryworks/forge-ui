@@ -20,7 +20,7 @@
 }
 
 @if (uninvoicedCount() > 0) {
-  <div class="nudge-banner" (click)="openUninvoicedPanel()">
+  <div class="nudge-banner" role="button" tabindex="0" aria-label="Review uninvoiced jobs" (click)="openUninvoicedPanel()" (keydown.enter)="openUninvoicedPanel()">
     <span class="material-icons-outlined nudge-banner__icon">warning_amber</span>
     <span class="nudge-banner__text">
       {{ uninvoicedCount() }} completed {{ uninvoicedCount() === 1 ? 'job has' : 'jobs have' }} not been invoiced.
@@ -52,10 +52,10 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="invoiceDate" let-row>
-          <span class="text-muted">{{ row.invoiceDate | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.invoiceDate | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="dueDate" let-row>
-          <span class="text-muted">{{ row.dueDate | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.dueDate | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
           <span>{{ row.total | currency }}</span>
@@ -70,7 +70,7 @@
           </span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -121,11 +121,11 @@
           }
           <div class="info-item">
             <span class="info-label">Invoice Date</span>
-            <span class="info-value">{{ inv.invoiceDate | date:'mediumDate' }}</span>
+            <span class="info-value">{{ inv.invoiceDate | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Due Date</span>
-            <span class="info-value">{{ inv.dueDate | date:'mediumDate' }}</span>
+            <span class="info-value">{{ inv.dueDate | date:'MM/dd/yyyy' }}</span>
           </div>
           @if (inv.creditTerms) {
             <div class="info-item">
@@ -198,11 +198,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Created</span>
-            <span class="info-value">{{ inv.createdAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ inv.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Updated</span>
-            <span class="info-value">{{ inv.updatedAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ inv.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
 

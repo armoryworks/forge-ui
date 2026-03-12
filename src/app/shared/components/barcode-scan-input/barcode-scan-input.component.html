@@ -1,8 +1,9 @@
 <div class="scan-input" [class.scan-input--focused]="isFocused()">
   <span class="material-icons-outlined scan-input__icon">qr_code_scanner</span>
-  <label class="scan-input__label">{{ label() }}</label>
+  <label class="scan-input__label" for="scan-input-field">{{ label() }}</label>
   <input
     #scanInput
+    id="scan-input-field"
     class="scan-input__field"
     type="text"
     [placeholder]="placeholder()"

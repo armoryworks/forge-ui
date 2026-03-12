@@ -1,8 +1,13 @@
 <div class="setup-container">
   <mat-card class="setup-card">
     <mat-card-header>
-      <mat-card-title>Complete Your Account</mat-card-title>
-      <mat-card-subtitle>Set your password to get started</mat-card-subtitle>
+      @if (tokenInfo(); as info) {
+        <mat-card-title>Welcome, {{ info.firstName }} {{ info.lastName }}</mat-card-title>
+        <mat-card-subtitle>Set your password to complete your account</mat-card-subtitle>
+      } @else {
+        <mat-card-title>Complete Your Account</mat-card-title>
+        <mat-card-subtitle>Set your password to get started</mat-card-subtitle>
+      }
     </mat-card-header>
 
     <mat-card-content>
@@ -13,21 +18,23 @@
         </div>
       }
 
-      <div [formGroup]="form" class="setup-form">
-        <app-input label="First Name (optional)" formControlName="firstName" />
-        <app-input label="Last Name (optional)" formControlName="lastName" />
-        <app-input label="Password" type="password" formControlName="password" />
-        <app-input label="Confirm Password" type="password" formControlName="confirmPassword" />
-      </div>
+      @if (!error()) {
+        <div [formGroup]="form" class="setup-form">
+          <app-input label="Password" type="password" formControlName="password" autocomplete="new-password" />
+          <app-input label="Confirm Password" type="password" formControlName="confirmPassword" autocomplete="new-password" />
+        </div>
+      }
     </mat-card-content>
 
-    <mat-card-actions>
-      <button mat-flat-button color="primary"
-        [appValidationPopover]="violations"
-        [disabled]="form.invalid || loading()"
-        (click)="onSubmit()">
-        Complete Setup
-      </button>
-    </mat-card-actions>
+    @if (!error()) {
+      <mat-card-actions>
+        <button mat-flat-button color="primary"
+          [appValidationPopover]="violations"
+          [disabled]="form.invalid || loading()"
+          (click)="onSubmit()">
+          Complete Setup
+        </button>
+      </mat-card-actions>
+    }
   </mat-card>
 </div>

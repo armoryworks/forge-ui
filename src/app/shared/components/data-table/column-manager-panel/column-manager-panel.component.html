@@ -1,4 +1,4 @@
-<div class="col-manager" (click)="$event.stopPropagation()">
+<div class="col-manager" role="dialog" aria-label="Column manager" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
   <div class="col-manager__header">
     <span class="col-manager__title">Columns</span>
     <button class="col-manager__reset" (click)="onReset()">Reset</button>

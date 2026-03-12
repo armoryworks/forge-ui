@@ -1,5 +1,5 @@
 @if (shortcuts.helpOpen()) {
-  <div class="shortcuts-backdrop" (click)="shortcuts.closeHelp()"></div>
+  <div class="shortcuts-backdrop" role="button" tabindex="0" aria-label="Close" (click)="shortcuts.closeHelp()" (keydown.enter)="shortcuts.closeHelp()"></div>
   <div class="shortcuts-dialog">
     <div class="shortcuts-dialog__header">
       <h2>Keyboard Shortcuts</h2>

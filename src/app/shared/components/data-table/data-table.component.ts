@@ -176,7 +176,7 @@ export class DataTableComponent implements OnInit {
         const valA = a[sort.field];
         const valB = b[sort.field];
 
-        let comparison = 0;
+        let comparison: number;
         if (valA == null && valB == null) comparison = 0;
         else if (valA == null) comparison = -1;
         else if (valB == null) comparison = 1;

@@ -8,4 +8,8 @@ export interface AdminUser {
   isActive: boolean;
   roles: string[];
   createdAt: string;
+  hasPassword: boolean;
+  hasPendingSetupToken: boolean;
+  hasRfidIdentifier: boolean;
+  hasBarcodeIdentifier: boolean;
 }

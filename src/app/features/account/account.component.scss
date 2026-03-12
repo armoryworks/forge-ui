@@ -1,0 +1,143 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.account {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  padding: $sp-xl;
+}
+
+.account__section-title {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-md;
+  font-weight: 700;
+  margin: 0 0 $sp-md;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+}
+
+.account__card {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  padding: $sp-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+}
+
+.account__avatar-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+}
+
+.account__avatar-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.account__email {
+  font-size: $font-size-base;
+  font-weight: 600;
+}
+
+.account__roles {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.account__form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.account__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-lg;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account__color-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.account__color-label {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.account__color-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-md;
+}
+
+.account__color-swatch {
+  width: 32px;
+  height: 32px;
+  border: $border-width solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color $transition-fast, transform $transition-fast;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &--selected {
+    border-color: var(--text);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: white;
+  }
+}
+
+.account__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.account__error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--error-light);
+  color: var(--error);
+  border: $border-width-thin solid var(--error);
+  font-size: $font-size-sm;
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.account__spinner {
+  animation: spin 1s linear infinite;
+}

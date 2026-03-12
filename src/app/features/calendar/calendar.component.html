@@ -36,7 +36,9 @@
           <div class="calendar-cell"
             [class.calendar-cell--other]="!day.isCurrentMonth"
             [class.calendar-cell--today]="day.isToday"
-            (click)="onDayClick(day)">
+            role="button" tabindex="0"
+            [attr.aria-label]="'Select day ' + day.date.getDate()"
+            (click)="onDayClick(day)" (keydown.enter)="onDayClick(day)">
             <div class="cell-date">{{ day.date.getDate() }}</div>
             <div class="cell-jobs">
               @for (job of visibleJobs(day); track job.id) {
@@ -44,7 +46,11 @@
                      [style.border-left-color]="job.stageColor"
                      [style.--job-tint]="getJobTint(job)"
                      [class.job-chip--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
-                     (click)="onJobClick(job); $event.stopPropagation()" [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')">
+                     role="button" tabindex="0"
+                     [attr.aria-label]="job.title + (job.customerName ? ' — ' + job.customerName : '')"
+                     [title]="job.title + (job.customerName ? ' — ' + job.customerName : '')"
+                     (click)="onJobClick(job); $event.stopPropagation()"
+                     (keydown.enter)="onJobClick(job); $event.stopPropagation()">
                   @if (getPriorityIcon(job.priorityName)) {
                     <span class="material-icons-outlined job-chip__priority job-chip__priority--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
                   }
@@ -71,7 +77,9 @@
       <div class="week-header">
         @for (day of weekDays(); track day.date.getTime()) {
           <div class="week-header__cell" [class.week-header__cell--today]="day.isToday"
-               (click)="onDayClick(day)">
+               role="button" tabindex="0"
+               [attr.aria-label]="'Select day ' + day.date.getDate()"
+               (click)="onDayClick(day)" (keydown.enter)="onDayClick(day)">
             <span class="week-header__weekday">{{ weekdays[day.date.getDay()] }}</span>
             <span class="week-header__date" [class.week-header__date--today]="day.isToday">{{ day.date.getDate() }}</span>
           </div>
@@ -85,7 +93,10 @@
                    [style.border-left-color]="job.stageColor"
                    [style.--job-tint]="getJobTint(job)"
                    [class.job-chip--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
-                   (click)="onJobClick(job)" [title]="job.title">
+                   role="button" tabindex="0"
+                   [attr.aria-label]="job.title"
+                   [title]="job.title"
+                   (click)="onJobClick(job)" (keydown.enter)="onJobClick(job)">
                 <div class="job-chip__top-row">
                   @if (getPriorityIcon(job.priorityName)) {
                     <span class="material-icons-outlined job-chip__priority job-chip__priority--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>
@@ -122,7 +133,9 @@
                [style.border-left-color]="job.stageColor"
                [style.--job-tint]="getJobTint(job)"
                [class.day-job--high-priority]="job.priorityName === 'High' || job.priorityName === 'Critical'"
-               (click)="onJobClick(job)">
+               role="button" tabindex="0"
+               [attr.aria-label]="job.title"
+               (click)="onJobClick(job)" (keydown.enter)="onJobClick(job)">
             <div class="day-job__header">
               @if (getPriorityIcon(job.priorityName)) {
                 <span class="material-icons-outlined day-job__priority-icon day-job__priority-icon--{{ job.priorityName === 'Critical' ? 'critical' : 'high' }}">{{ getPriorityIcon(job.priorityName) }}</span>

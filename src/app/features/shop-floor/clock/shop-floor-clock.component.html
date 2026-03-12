@@ -1,3 +1,10 @@
+<!-- Setup Phase (first-time terminal configuration) -->
+@if (kioskPhase() === 'setup') {
+  <app-kiosk-setup (configured)="onTerminalConfigured($event)" />
+}
+
+@if (kioskPhase() !== 'setup') {
+
 @if (error()) {
   <div class="clock-error">
     <span class="material-icons-outlined clock-error__icon">error_outline</span>
@@ -5,140 +12,386 @@
   </div>
 }
 
-<header class="clock-header">
-  <h1 class="clock-header__title">Clock In / Out</h1>
-  <div class="clock-header__time">
-    <span class="clock-header__clock">{{ clockDisplay() }}</span>
-    <span class="clock-header__date">{{ dateDisplay() }}</span>
+<header class="sf-header">
+  <div class="sf-header__team">
+    @if (terminal(); as t) {
+      <span class="sf-header__team-dot" [style.background]="t.teamColor ?? 'var(--primary)'"></span>
+      <span class="sf-header__team-name">{{ t.teamName }}</span>
+    }
+  </div>
+  <app-kiosk-search-bar />
+  <div class="sf-header__time">
+    <span class="sf-header__clock">{{ clockDisplay() }}</span>
+    <span class="sf-header__date">{{ dateDisplay() }}</span>
   </div>
 </header>
 
-<!-- Kiosk Scan Phase -->
-@if (kioskPhase() === 'scan') {
-  <div class="kiosk-scan">
-    <div class="kiosk-scan__prompt">
-      <span class="material-icons-outlined kiosk-scan__icon">qr_code_scanner</span>
-      <h2 class="kiosk-scan__title">Scan Your Badge</h2>
-      <p class="kiosk-scan__subtitle">Scan your employee badge or enter your barcode manually</p>
+<!-- KPI Strip -->
+<div class="sf-kpi-strip">
+  <div class="sf-kpi sf-kpi--success">
+    <span class="sf-kpi__value">{{ workersIn().length }}</span>
+    <span class="sf-kpi__label">Working</span>
+  </div>
+  <div class="sf-kpi sf-kpi--warning">
+    <span class="sf-kpi__value">{{ workersOnBreak().length }}</span>
+    <span class="sf-kpi__label">On Break</span>
+  </div>
+  <div class="sf-kpi">
+    <span class="sf-kpi__value">{{ workersOut().length }}</span>
+    <span class="sf-kpi__label">Off</span>
+  </div>
+  <div class="sf-kpi sf-kpi--info">
+    <span class="sf-kpi__value">{{ activeJobs().length }}</span>
+    <span class="sf-kpi__label">Active Jobs</span>
+  </div>
+  <div class="sf-kpi sf-kpi--success">
+    <span class="sf-kpi__value">{{ completedToday() }}</span>
+    <span class="sf-kpi__label">Done Today</span>
+  </div>
+  @if (overdueJobs() > 0) {
+    <div class="sf-kpi sf-kpi--error">
+      <span class="sf-kpi__value">{{ overdueJobs() }}</span>
+      <span class="sf-kpi__label">Overdue</span>
     </div>
-    <div class="kiosk-scan__input-wrapper">
+  }
+</div>
+
+<!-- Dashboard Phase -->
+@if (kioskPhase() === 'dashboard') {
+  <div class="sf-body">
+    <!-- Team Status -->
+    <section class="sf-section">
+      <h2 class="sf-section__title">
+        <span class="material-icons-outlined">group</span>
+        Team Status
+      </h2>
+      <div class="sf-team-list">
+        @for (worker of workersIn(); track worker.userId) {
+          <div class="sf-team-card sf-team-card--in">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
+            <div class="sf-team-card__info">
+              <span class="sf-team-card__name">{{ worker.name }}</span>
+              @if (worker.currentTask) {
+                <span class="sf-team-card__task">{{ worker.currentJobNumber }} — {{ worker.currentTask }}</span>
+              } @else {
+                <span class="sf-team-card__task sf-team-card__task--idle">Available</span>
+              }
+            </div>
+            <div class="sf-team-card__meta">
+              <span class="sf-team-card__status sf-team-card__status--in">Working</span>
+              <span class="sf-team-card__time">{{ worker.timeOnTask }}</span>
+            </div>
+          </div>
+        }
+        @for (worker of workersOnBreak(); track worker.userId) {
+          <div class="sf-team-card sf-team-card--break">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
+            <div class="sf-team-card__info">
+              <span class="sf-team-card__name">{{ worker.name }}</span>
+              <span class="sf-team-card__task sf-team-card__task--idle">On Break</span>
+            </div>
+            <div class="sf-team-card__meta">
+              <span class="sf-team-card__status sf-team-card__status--break">Break</span>
+              <span class="sf-team-card__time">{{ worker.timeOnTask }}</span>
+            </div>
+          </div>
+        }
+        @for (worker of workersOut(); track worker.userId) {
+          <div class="sf-team-card sf-team-card--out">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
+            <div class="sf-team-card__info">
+              <span class="sf-team-card__name">{{ worker.name }}</span>
+            </div>
+            <div class="sf-team-card__meta">
+              <span class="sf-team-card__status sf-team-card__status--out">Off</span>
+            </div>
+          </div>
+        }
+        @if (workers().length === 0) {
+          <div class="sf-empty">No employees registered</div>
+        }
+      </div>
+    </section>
+
+    <!-- Active Jobs -->
+    <section class="sf-section">
+      <h2 class="sf-section__title">
+        <span class="material-icons-outlined">assignment</span>
+        Active Jobs
+      </h2>
+      <div class="sf-jobs-list">
+        @for (job of activeJobs(); track job.id) {
+          <div class="sf-job" [class.sf-job--overdue]="job.isOverdue">
+            <div class="sf-job__stage-dot" [style.background]="job.stageColor"></div>
+            <div class="sf-job__main">
+              <span class="sf-job__number">{{ job.jobNumber }}</span>
+              <span class="sf-job__title">{{ job.title }}</span>
+            </div>
+            <span class="sf-job__stage">{{ job.stageName }}</span>
+            <span class="sf-job__priority" [class]="priorityClass(job.priorityName)">
+              {{ job.priorityName }}
+            </span>
+            @if (job.assigneeInitials) {
+              <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#94a3b8'" size="sm" />
+            }
+          </div>
+        } @empty {
+          <div class="sf-empty">No active jobs</div>
+        }
+      </div>
+    </section>
+  </div>
+
+  <!-- Clock Action Bar -->
+  <div class="sf-clock-bar">
+    <div class="sf-clock-bar__scan">
       <app-barcode-scan-input
-        label="Employee Badge"
-        placeholder="Scan badge or type barcode..."
+        label=""
+        placeholder="Scan badge, RFID card, job barcode, or tap NFC..."
         [autoFocus]="true"
-        (scanned)="onBarcodeScanned($event)" />
+        (scanned)="onScanDetected($event)" />
     </div>
-  </div>
-}
-
-<!-- Kiosk PIN Phase -->
-@if (kioskPhase() === 'pin') {
-  <div class="kiosk-pin">
-    <div class="kiosk-pin__prompt">
-      <span class="material-icons-outlined kiosk-pin__icon">lock</span>
-      <h2 class="kiosk-pin__title">Enter Your PIN</h2>
-      <p class="kiosk-pin__barcode">Badge: {{ scannedBarcode() }}</p>
-    </div>
-
-    @if (kioskAuthError()) {
-      <div class="kiosk-pin__error">
-        <span class="material-icons-outlined">warning</span>
-        {{ kioskAuthError() }}
-      </div>
+    @if (scanIdentifying()) {
+      <span class="material-icons-outlined sf-clock-bar__spinner">sync</span>
     }
-
-    <div class="kiosk-pin__input-wrapper">
-      <app-input label="PIN" type="password" [formControl]="pinControl"
-        placeholder="Enter PIN..." [maxlength]="8" />
-    </div>
-
-    <div class="kiosk-pin__actions">
-      <button class="action-btn" (click)="cancelPin()" [disabled]="kioskAuthenticating()">
-        <span class="material-icons-outlined">arrow_back</span>
-        Back
-      </button>
-      <button class="action-btn action-btn--primary"
-        [disabled]="kioskAuthenticating() || !pinControl.value"
-        (click)="onPinSubmit()">
-        @if (kioskAuthenticating()) {
-          <span class="material-icons-outlined kiosk-pin__spinner">sync</span>
-          Authenticating...
-        } @else {
-          <span class="material-icons-outlined">login</span>
-          Submit
-        }
-      </button>
-    </div>
-  </div>
-}
-
-<!-- Kiosk Clock Phase (after auth) -->
-@if (kioskPhase() === 'clock') {
-  <div class="clock-body">
-    <!-- Clocked Out — Available to Clock In -->
-    <section class="clock-section">
-      <h2 class="clock-section__title">
-        <span class="material-icons-outlined">logout</span>
-        Not Clocked In ({{ clockedOut().length }})
-      </h2>
-      <div class="clock-grid">
-        @for (worker of clockedOut(); track worker.userId) {
-          <button
-            class="clock-card clock-card--out"
-            [class.clock-card--processing]="processing() === worker.userId"
-            [disabled]="processing() !== null"
-            (click)="toggleClock(worker)">
-            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
-            <span class="clock-card__name">{{ worker.name }}</span>
-            <span class="clock-card__action">
-              @if (processing() === worker.userId) {
-                <span class="material-icons-outlined clock-card__spinner">sync</span>
-              } @else {
-                <span class="material-icons-outlined">login</span> Clock In
-              }
-            </span>
-          </button>
-        } @empty {
-          <div class="clock-empty">Everyone is clocked in</div>
-        }
-      </div>
-    </section>
-
-    <!-- Clocked In — Available to Clock Out -->
-    <section class="clock-section">
-      <h2 class="clock-section__title clock-section__title--active">
-        <span class="material-icons-outlined">login</span>
-        Clocked In ({{ clockedIn().length }})
-      </h2>
-      <div class="clock-grid">
-        @for (worker of clockedIn(); track worker.userId) {
-          <button
-            class="clock-card clock-card--in"
-            [class.clock-card--processing]="processing() === worker.userId"
-            [disabled]="processing() !== null"
-            (click)="toggleClock(worker)">
-            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
-            <span class="clock-card__name">{{ worker.name }}</span>
-            <span class="clock-card__since">Since {{ formatTime(worker.clockedInAt) }}</span>
-            <span class="clock-card__action clock-card__action--out">
-              @if (processing() === worker.userId) {
-                <span class="material-icons-outlined clock-card__spinner">sync</span>
-              } @else {
-                <span class="material-icons-outlined">logout</span> Clock Out
-              }
-            </span>
-          </button>
-        } @empty {
-          <div class="clock-empty">No one is clocked in</div>
-        }
-      </div>
-    </section>
-  </div>
-
-  <div class="kiosk-return">
-    <button class="action-btn" (click)="resetToScan()">
-      <span class="material-icons-outlined">arrow_back</span>
-      Back to Scan
+    <button class="action-btn sf-clock-bar__manual" (click)="showManualLogin()">
+      <span class="material-icons-outlined">person</span>
+      Clock In Manually
     </button>
   </div>
 }
+
+<!-- Identifying Scan Overlay (brief flash while detecting scan type) -->
+@if (kioskPhase() === 'identifying') {
+  <div class="sf-auth-overlay">
+    <div class="sf-auth-card">
+      <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__spinner">sync</span>
+      <h2 class="sf-auth-card__title">Identifying scan...</h2>
+    </div>
+  </div>
+}
+
+<!-- Job Scanned Phase (job barcode scanned first — now prompt for employee badge) -->
+@if (kioskPhase() === 'job-scanned') {
+  <div class="sf-auth-overlay">
+    <div class="sf-auth-card">
+      <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__icon--job">work</span>
+      <h2 class="sf-auth-card__title">Job Scanned</h2>
+
+      @if (scannedJob(); as job) {
+        <div class="sf-job-card">
+          @if (job.stageColor) {
+            <div class="sf-job-card__stage-dot" [style.background]="job.stageColor"></div>
+          }
+          <div class="sf-job-card__info">
+            <span class="sf-job-card__number">{{ job.jobNumber }}</span>
+            <span class="sf-job-card__title">{{ job.jobTitle }}</span>
+          </div>
+          @if (job.stageName) {
+            <span class="sf-job-card__stage">{{ job.stageName }}</span>
+          }
+        </div>
+      }
+
+      <p class="sf-auth-card__subtitle">Now scan your badge or RFID to continue</p>
+
+      <div class="sf-auth-card__scan-prompt">
+        <app-barcode-scan-input
+          label=""
+          placeholder="Scan badge, RFID card, or tap NFC..."
+          [autoFocus]="true"
+          (scanned)="onScanDetected($event)" />
+      </div>
+
+      <div class="sf-auth-card__actions">
+        <button class="action-btn" (click)="cancelJobScanned()">
+          <span class="material-icons-outlined">arrow_back</span>
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- PIN Phase -->
+@if (kioskPhase() === 'pin') {
+  <div class="sf-auth-overlay">
+    <div class="sf-auth-card">
+      <span class="material-icons-outlined sf-auth-card__icon">lock</span>
+      <h2 class="sf-auth-card__title">Enter Your PIN</h2>
+      <p class="sf-auth-card__subtitle">Scan ID: {{ scannedBarcode() }}</p>
+
+      @if (scannedJob(); as job) {
+        <div class="sf-job-card sf-job-card--compact">
+          @if (job.stageColor) {
+            <div class="sf-job-card__stage-dot" [style.background]="job.stageColor"></div>
+          }
+          <span class="sf-job-card__number">{{ job.jobNumber }}</span>
+          <span class="sf-job-card__title">{{ job.jobTitle }}</span>
+        </div>
+      }
+
+      @if (kioskAuthError()) {
+        <div class="sf-auth-card__error">
+          <span class="material-icons-outlined">warning</span>
+          {{ kioskAuthError() }}
+        </div>
+      }
+
+      <div class="sf-auth-card__field">
+        <app-input label="PIN" type="password" [formControl]="pinControl"
+          placeholder="Enter PIN..." [maxlength]="8" />
+      </div>
+
+      <div class="sf-auth-card__actions">
+        <button class="action-btn" (click)="cancelPin()" [disabled]="kioskAuthenticating()">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="action-btn action-btn--primary"
+          [disabled]="kioskAuthenticating() || !pinControl.value"
+          (click)="onPinSubmit()">
+          @if (kioskAuthenticating()) {
+            <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            Authenticating...
+          } @else {
+            <span class="material-icons-outlined">login</span>
+            Submit
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Manual Login Phase -->
+@if (kioskPhase() === 'manual-login') {
+  <div class="sf-auth-overlay">
+    <div class="sf-auth-card">
+      <span class="material-icons-outlined sf-auth-card__icon">person</span>
+      <h2 class="sf-auth-card__title">Clock In Manually</h2>
+      <p class="sf-auth-card__subtitle">Enter your credentials</p>
+
+      @if (manualLoginError()) {
+        <div class="sf-auth-card__error">
+          <span class="material-icons-outlined">warning</span>
+          {{ manualLoginError() }}
+        </div>
+      }
+
+      <div class="sf-auth-card__field">
+        <app-input label="Email" type="email" [formControl]="emailControl"
+          placeholder="you@company.com" />
+      </div>
+      <div class="sf-auth-card__field">
+        <app-input label="Password" type="password" [formControl]="passwordControl"
+          placeholder="Enter password..." />
+      </div>
+
+      <div class="sf-auth-card__actions">
+        <button class="action-btn" (click)="cancelManualLogin()" [disabled]="manualLoggingIn()">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="action-btn action-btn--primary"
+          [disabled]="manualLoggingIn() || !emailControl.value || !passwordControl.value"
+          (click)="onManualLoginSubmit()">
+          @if (manualLoggingIn()) {
+            <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            Signing in...
+          } @else {
+            <span class="material-icons-outlined">login</span>
+            Sign In
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Clock Action Phase (after auth) -->
+@if (kioskPhase() === 'clock') {
+  <div class="sf-auth-overlay">
+    <div class="sf-clock-actions">
+      <h2 class="sf-clock-actions__title">Select Action</h2>
+
+      @if (scannedJob(); as job) {
+        <div class="sf-job-card sf-job-card--banner">
+          <span class="material-icons-outlined">work</span>
+          <span class="sf-job-card__number">{{ job.jobNumber }}</span>
+          <span class="sf-job-card__title">{{ job.jobTitle }}</span>
+        </div>
+      }
+
+      <div class="sf-clock-actions__grid">
+        @for (worker of clockedOut(); track worker.userId) {
+          <button class="sf-action-btn sf-action-btn--clock-in"
+            [disabled]="processing() !== null"
+            (click)="clockAction(worker, 'ClockIn')">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">login</span>
+            }
+            <span class="sf-action-btn__label">Clock In</span>
+            <span class="sf-action-btn__name">{{ worker.name }}</span>
+          </button>
+        }
+        @for (worker of workersIn(); track worker.userId) {
+          <button class="sf-action-btn sf-action-btn--clock-out"
+            [disabled]="processing() !== null"
+            (click)="clockAction(worker, 'ClockOut')">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">logout</span>
+            }
+            <span class="sf-action-btn__label">Clock Out</span>
+            <span class="sf-action-btn__name">{{ worker.name }}</span>
+          </button>
+          <button class="sf-action-btn sf-action-btn--break"
+            [disabled]="processing() !== null"
+            (click)="clockAction(worker, 'BreakStart')">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">free_breakfast</span>
+            }
+            <span class="sf-action-btn__label">Start Break</span>
+            <span class="sf-action-btn__name">{{ worker.name }}</span>
+          </button>
+        }
+        @for (worker of workersOnBreak(); track worker.userId) {
+          <button class="sf-action-btn sf-action-btn--resume"
+            [disabled]="processing() !== null"
+            (click)="clockAction(worker, 'BreakEnd')">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">play_arrow</span>
+            }
+            <span class="sf-action-btn__label">End Break</span>
+            <span class="sf-action-btn__name">{{ worker.name }}</span>
+          </button>
+          <button class="sf-action-btn sf-action-btn--clock-out"
+            [disabled]="processing() !== null"
+            (click)="clockAction(worker, 'ClockOut')">
+            @if (processing() === worker.userId) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">logout</span>
+            }
+            <span class="sf-action-btn__label">Clock Out</span>
+            <span class="sf-action-btn__name">{{ worker.name }}</span>
+          </button>
+        }
+      </div>
+      <button class="action-btn sf-clock-actions__cancel" (click)="resetToDashboard()">
+        <span class="material-icons-outlined">arrow_back</span>
+        Cancel
+      </button>
+    </div>
+  </div>
+}
+
+} <!-- end kioskPhase !== 'setup' -->

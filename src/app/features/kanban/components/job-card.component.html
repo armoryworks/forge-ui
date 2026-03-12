@@ -1,11 +1,14 @@
-<div class="card" [style.border-left-color]="priorityColor()" [class.card--selected]="selected()" (click)="cardClicked.emit({ job: job(), event: $event })">
+<div class="card" [style.border-left-color]="priorityColor()" [class.card--selected]="selected()"
+     role="button" tabindex="0" [attr.aria-label]="'Job ' + job().jobNumber + ': ' + job().title"
+     (click)="cardClicked.emit({ job: job(), event: $event })"
+     (keydown.enter)="cardClicked.emit({ job: job(), event: $event })">
   @if (selected()) {
     <span class="card__check">
       <span class="material-icons-outlined">check</span>
     </span>
   }
   <div class="card__header">
-    <span class="card__job-number">{{ job().jobNumber }}</span>
+    <button class="card__job-number" (click)="jobNumberClicked.emit({ job: job(), event: $event }); $event.stopPropagation()">{{ job().jobNumber }}</button>
     <span class="card__header-indicators">
       @if (job().activeHolds.length > 0) {
         <span class="job-card__hold-indicator"

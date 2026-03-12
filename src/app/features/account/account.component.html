@@ -1,0 +1,107 @@
+<app-page-layout pageTitle="My Account">
+  <ng-container content>
+    <div class="account">
+      <!-- Profile Section -->
+      <section class="account__section">
+        <h2 class="account__section-title">
+          <span class="material-icons-outlined">person</span>
+          Profile
+        </h2>
+
+        <div class="account__card">
+          <div class="account__avatar-row">
+            <app-avatar [initials]="profileForm.get('initials')?.value || '?'"
+              [color]="selectedColor() || '#64748b'" size="lg" />
+            <div class="account__avatar-info">
+              <span class="account__email">{{ user()?.email }}</span>
+              @if (user()?.roles?.length) {
+                <span class="account__roles">{{ user()?.roles?.join(', ') }}</span>
+              }
+            </div>
+          </div>
+
+          <div [formGroup]="profileForm" class="account__form">
+            <div class="account__row">
+              <app-input label="First Name" formControlName="firstName" />
+              <app-input label="Last Name" formControlName="lastName" />
+            </div>
+            <div class="account__row">
+              <app-input label="Initials" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
+            </div>
+
+            <div class="account__color-section">
+              <span class="account__color-label">Avatar Color</span>
+              <div class="account__color-grid">
+                @for (color of avatarColors; track color) {
+                  <button class="account__color-swatch"
+                    [style.background]="color"
+                    [class.account__color-swatch--selected]="selectedColor() === color"
+                    (click)="selectColor(color)"
+                    type="button"
+                    [attr.aria-label]="'Select color ' + color">
+                    @if (selectedColor() === color) {
+                      <span class="material-icons-outlined">check</span>
+                    }
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
+
+          <div class="account__actions">
+            <button class="action-btn action-btn--primary"
+              [disabled]="profileForm.invalid || savingProfile()"
+              (click)="saveProfile()">
+              @if (savingProfile()) {
+                <span class="material-icons-outlined account__spinner">sync</span>
+                Saving...
+              } @else {
+                <span class="material-icons-outlined">check</span>
+                Save Profile
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Password Section -->
+      <section class="account__section">
+        <h2 class="account__section-title">
+          <span class="material-icons-outlined">lock</span>
+          Change Password
+        </h2>
+
+        <div class="account__card">
+          <div [formGroup]="passwordForm" class="account__form">
+            <app-input label="Current Password" type="password" formControlName="currentPassword" />
+            <div class="account__row">
+              <app-input label="New Password" type="password" formControlName="newPassword"
+                placeholder="Minimum 8 characters" />
+              <app-input label="Confirm New Password" type="password" formControlName="confirmPassword" />
+            </div>
+            @if (passwordMismatch()) {
+              <div class="account__error">
+                <span class="material-icons-outlined">warning</span>
+                Passwords do not match
+              </div>
+            }
+          </div>
+
+          <div class="account__actions">
+            <button class="action-btn action-btn--primary"
+              [disabled]="passwordForm.invalid || savingPassword() || passwordMismatch()"
+              (click)="changePassword()">
+              @if (savingPassword()) {
+                <span class="material-icons-outlined account__spinner">sync</span>
+                Changing...
+              } @else {
+                <span class="material-icons-outlined">lock_reset</span>
+                Change Password
+              }
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</app-page-layout>

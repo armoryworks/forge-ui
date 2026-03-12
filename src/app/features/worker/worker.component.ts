@@ -26,7 +26,7 @@ export class WorkerComponent {
   protected readonly tasks = signal<WorkerTask[]>([]);
   protected readonly userName = computed(() => {
     const user = this.authService.user();
-    return user ? `${user.firstName} ${user.lastName}`.trim() : 'Worker';
+    return user ? `${user.lastName}, ${user.firstName}`.trim() : 'Worker';
   });
 
   protected readonly sortedTasks = computed(() => {

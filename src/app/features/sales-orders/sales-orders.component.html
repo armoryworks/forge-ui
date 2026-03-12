@@ -35,10 +35,10 @@
           <span>{{ row.total | currency }}</span>
         </ng-template>
         <ng-template appColumnCell="requestedDeliveryDate" let-row>
-          <span class="text-muted">{{ row.requestedDeliveryDate ? (row.requestedDeliveryDate | date:'mediumDate') : '—' }}</span>
+          <span class="text-muted">{{ row.requestedDeliveryDate ? (row.requestedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -92,16 +92,23 @@
           @if (so.requestedDeliveryDate) {
             <div class="info-item">
               <span class="info-label">Requested Delivery</span>
-              <span class="info-value">{{ so.requestedDeliveryDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ so.requestedDeliveryDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (so.confirmedDate) {
             <div class="info-item">
               <span class="info-label">Confirmed</span>
-              <span class="info-value">{{ so.confirmedDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ so.confirmedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
         </div>
+
+        <app-barcode-info
+          entityType="SalesOrder"
+          [entityId]="so.id"
+          [entityLabel]="so.orderNumber"
+          [naturalIdentifier]="so.orderNumber"
+          [compact]="true" />
 
         <!-- Totals -->
         <div class="info-grid">
@@ -167,11 +174,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Created</span>
-            <span class="info-value">{{ so.createdAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ so.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Updated</span>
-            <span class="info-value">{{ so.updatedAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ so.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
 

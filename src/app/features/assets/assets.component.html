@@ -147,6 +147,13 @@
           </div>
         }
 
+        <app-barcode-info
+          entityType="Asset"
+          [entityId]="asset.id"
+          [entityLabel]="asset.name"
+          [naturalIdentifier]="asset.serialNumber ?? asset.name"
+          [compact]="true" />
+
         <div class="status-actions">
           <span class="info-label">Set Status</span>
           <div class="status-btn-group">

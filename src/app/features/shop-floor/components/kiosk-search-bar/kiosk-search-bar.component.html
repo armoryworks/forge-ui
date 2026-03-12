@@ -1,0 +1,29 @@
+<div class="kiosk-search">
+  <div class="kiosk-search__field">
+    <span class="material-icons-outlined kiosk-search__icon">search</span>
+    <input
+      class="kiosk-search__input"
+      type="text"
+      placeholder="Search jobs, parts..."
+      [formControl]="searchControl"
+      (focus)="onFocus()"
+      (blur)="onBlur()" />
+  </div>
+
+  @if (showResults()) {
+    <div class="kiosk-search__dropdown">
+      @for (result of results(); track result.entityId + result.entityType) {
+        <button class="kiosk-search__result" (mousedown)="navigateTo(result)">
+          <span class="material-icons-outlined kiosk-search__result-icon">{{ result.icon }}</span>
+          <div class="kiosk-search__result-text">
+            <span class="kiosk-search__result-title">{{ result.title }}</span>
+            @if (result.subtitle) {
+              <span class="kiosk-search__result-subtitle">{{ result.subtitle }}</span>
+            }
+          </div>
+          <span class="kiosk-search__result-type">{{ result.entityType }}</span>
+        </button>
+      }
+    </div>
+  }
+</div>

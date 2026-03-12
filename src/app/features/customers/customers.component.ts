@@ -326,7 +326,7 @@ export class CustomersComponent {
       width: '400px',
       data: {
         title: 'Delete Contact?',
-        message: `Remove "${contact.firstName} ${contact.lastName}" from this customer?`,
+        message: `Remove "${contact.lastName}, ${contact.firstName}" from this customer?`,
         confirmLabel: 'Delete',
         severity: 'danger',
       } satisfies ConfirmDialogData,

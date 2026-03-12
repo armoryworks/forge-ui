@@ -1,4 +1,4 @@
-<div class="panel-backdrop" (click)="close()"></div>
+<div class="panel-backdrop" role="button" tabindex="0" aria-label="Close job detail panel" (click)="close()" (keydown.enter)="close()"></div>
 <aside class="panel">
   @if (loading()) {
     <div class="panel__loading">
@@ -33,7 +33,7 @@
             {{ j.priority }}
           </span>
         </div>
-        <div class="meta-row">
+        <div class="meta-row meta-row--clickable" [matMenuTriggerFor]="assignMenu">
           <span class="meta-row__label">Assignee</span>
           <span class="meta-row__value">
             @if (j.assigneeInitials) {
@@ -42,8 +42,21 @@
             } @else {
               <span class="meta-row__empty">Unassigned</span>
             }
+            <span class="material-icons-outlined meta-row__edit-icon">expand_more</span>
           </span>
         </div>
+        <mat-menu #assignMenu="matMenu">
+          <button mat-menu-item (click)="assignJob(null)">
+            <span class="material-icons-outlined">person_off</span>
+            Unassign
+          </button>
+          @for (user of users(); track user.id) {
+            <button mat-menu-item (click)="assignJob(user)">
+              <app-avatar [initials]="user.initials" [color]="user.color" size="sm" />
+              {{ user.name }}
+            </button>
+          }
+        </mat-menu>
         <div class="meta-row">
           <span class="meta-row__label">Customer</span>
           <span class="meta-row__value">{{ j.customerName ?? '—' }}</span>
@@ -113,7 +126,7 @@
             @if (j.dispositionAt) {
               <div class="meta-row">
                 <span class="meta-row__label">Date</span>
-                <span class="meta-row__value">{{ j.dispositionAt | date:'shortDate' }}</span>
+                <span class="meta-row__value">{{ j.dispositionAt | date:'MM/dd/yyyy' }}</span>
               </div>
             }
           </div>
@@ -133,6 +146,16 @@
       <div class="panel__section">
         <h3 class="panel__section-title">Status Tracking</h3>
         <app-status-timeline entityType="Job" [entityId]="j.id" />
+      </div>
+
+      <!-- Barcode -->
+      <div class="panel__section">
+        <app-barcode-info
+          entityType="Job"
+          [entityId]="j.id"
+          [entityLabel]="j.jobNumber"
+          [naturalIdentifier]="j.jobNumber"
+          [compact]="true" />
       </div>
 
       <!-- Sub-Jobs -->

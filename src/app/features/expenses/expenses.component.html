@@ -17,7 +17,7 @@
     <app-data-table tableId="expenses" [columns]="expenseColumns" [data]="expenses()"
       emptyIcon="receipt_long" emptyMessage="No expenses found">
       <ng-template appColumnCell="expenseDate" let-expense>
-        <span class="text-muted">{{ expense.expenseDate | date:'mediumDate' }}</span>
+        <span class="text-muted">{{ expense.expenseDate | date:'MM/dd/yyyy' }}</span>
       </ng-template>
       <ng-template appColumnCell="category" let-expense>
         <span class="chip">{{ expense.category }}</span>

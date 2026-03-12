@@ -1,18 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { BoardColumnComponent } from './components/board-column.component';
 import { JobDetailPanelComponent } from './components/job-detail-panel.component';
 import { JobDialogComponent, DialogMode } from './components/job-dialog.component';
+import { JobCardComponent } from './components/job-card.component';
 import { KanbanService } from './services/kanban.service';
 import { BoardColumn } from './models/board-column.model';
 import { JobDetail } from './models/job-detail.model';
 import { KanbanJob } from './models/kanban-job.model';
+import { SwimlaneRow } from './models/swimlane-row.model';
 import { PRIORITY_OPTIONS } from './models/priority-options.const';
 import { UserRef } from './models/user-ref.model';
 import { Stage } from '../../shared/models/stage.model';
 import { TrackType } from '../../shared/models/track-type.model';
+import { SelectOption } from '../../shared/components/select/select.component';
+import { SelectComponent } from '../../shared/components/select/select.component';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -20,10 +26,18 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
+export type ViewMode = 'board' | 'team';
+
 @Component({
   selector: 'app-kanban',
   standalone: true,
-  imports: [BoardColumnComponent, JobDetailPanelComponent, JobDialogComponent, PageHeaderComponent, MatMenuModule],
+  imports: [
+    ReactiveFormsModule,
+    BoardColumnComponent, JobDetailPanelComponent, JobDialogComponent, JobCardComponent,
+    PageHeaderComponent, MatMenuModule,
+    CdkDropList, CdkDrag,
+    SelectComponent, AvatarComponent,
+  ],
   templateUrl: './kanban.component.html',
   styleUrl: './kanban.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +64,14 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly users = signal<UserRef[]>([]);
   protected readonly priorityOptions = PRIORITY_OPTIONS;
 
+  // ── View Mode ──
+  protected readonly viewMode = signal<ViewMode>('board');
+  protected readonly teamUserIds = new FormControl<number[]>([]);
+
+  protected readonly userOptions = computed<SelectOption[]>(() =>
+    this.users().map(u => ({ value: u.id, label: u.name })),
+  );
+
   protected readonly currentStages = computed(() =>
     this.columns().map(c => c.stage),
   );
@@ -57,6 +79,63 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly dropListIds = computed(
     () => this.columns().map((_, i) => 'column-' + i),
   );
+
+  // ── Swimlane Data ──
+  protected readonly swimlaneRows = computed<SwimlaneRow[]>(() => {
+    const cols = this.columns();
+    const allJobs = cols.flatMap(c => c.jobs);
+    const selectedIds = this.teamUserIds.value ?? [];
+    const allUsers = this.users();
+
+    // Determine which users to show as rows
+    let rowUsers: UserRef[];
+    if (selectedIds.length > 0) {
+      rowUsers = selectedIds
+        .map(id => allUsers.find(u => u.id === id))
+        .filter((u): u is UserRef => !!u);
+    } else {
+      // Auto: show users who have assigned jobs
+      const assignedUserIds = new Set(allJobs.filter(j => j.assigneeId).map(j => j.assigneeId!));
+      rowUsers = allUsers.filter(u => assignedUserIds.has(u.id));
+    }
+
+    const rows: SwimlaneRow[] = rowUsers.map(user => ({
+      user,
+      cells: cols.map(col => ({
+        jobs: col.jobs.filter(j => j.assigneeId === user.id),
+      })),
+    }));
+
+    // Unassigned row
+    const hasUnassigned = allJobs.some(j => !j.assigneeId);
+    const showUnassigned = selectedIds.length === 0 || hasUnassigned;
+    if (showUnassigned) {
+      rows.push({
+        user: null,
+        cells: cols.map(col => ({
+          jobs: col.jobs.filter(j => !j.assigneeId),
+        })),
+      });
+    }
+
+    return rows;
+  });
+
+  protected readonly swimlaneDropListIds = computed<string[]>(() => {
+    const rows = this.swimlaneRows();
+    const stages = this.currentStages();
+    const ids: string[] = [];
+    for (let r = 0; r < rows.length; r++) {
+      for (let c = 0; c < stages.length; c++) {
+        ids.push(`swim-${r}-${c}`);
+      }
+    }
+    return ids;
+  });
+
+  protected swimlaneCellId(rowIdx: number, colIdx: number): string {
+    return `swim-${rowIdx}-${colIdx}`;
+  }
 
   private readonly scanEffect = effect(() => {
     const scan = this.scanner.lastScan();
@@ -95,6 +174,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.boardHub.disconnect();
   }
 
+  protected setViewMode(mode: ViewMode): void {
+    this.viewMode.set(mode);
+  }
+
   protected selectTrackType(trackTypeId: number): void {
     this.selectedTrackTypeId.set(trackTypeId);
     this.error.set(null);
@@ -122,8 +205,13 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.boardHub.onJobPositionChangedEvent(reloadBoard);
   }
 
-  protected onCardClicked(event: { job: KanbanJob; event: MouseEvent }): void {
-    if (event.event.ctrlKey || event.event.metaKey) {
+  protected onJobNumberClicked(event: { job: KanbanJob; event: Event }): void {
+    this.selectedJobId.set(event.job.id);
+  }
+
+  protected onCardClicked(event: { job: KanbanJob; event: Event }): void {
+    const e = event.event as MouseEvent | KeyboardEvent;
+    if (e.ctrlKey || e.metaKey) {
       const current = this.selectedJobIds();
       const next = new Set(current);
       if (next.has(event.job.id)) {
@@ -241,6 +329,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ── Board View Drop ──
   protected onCardDropped(event: CdkDragDrop<KanbanJob[]>): void {
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
@@ -277,4 +366,47 @@ export class KanbanComponent implements OnInit, OnDestroy {
       });
     }
   }
+
+  // ── Swimlane Drop Handler ──
+  protected onSwimlaneDropped(event: CdkDragDrop<KanbanJob[]>, rowIdx: number, colIdx: number): void {
+    const job = event.item.data as KanbanJob;
+    const rows = this.swimlaneRows();
+    const targetRow = rows[rowIdx];
+    const targetStage = this.currentStages()[colIdx];
+
+    if (!targetStage) return;
+
+    const stageChanged = job.stageName !== targetStage.name;
+    const targetUserId = targetRow.user?.id ?? null;
+    const assigneeChanged = job.assigneeId !== targetUserId;
+
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      return;
+    }
+
+    if (targetStage.isIrreversible && stageChanged) return;
+
+    // Optimistic move
+    transferArrayItem(
+      event.previousContainer.data,
+      event.container.data,
+      event.previousIndex,
+      event.currentIndex,
+    );
+
+    if (stageChanged) {
+      this.kanbanService.moveJobStage(job.id, targetStage.id).subscribe({
+        error: () => this.reloadBoard(),
+      });
+    }
+
+    if (assigneeChanged) {
+      this.kanbanService.updateJob(job.id, { assigneeId: targetUserId }).subscribe({
+        error: () => this.reloadBoard(),
+      });
+    }
+  }
+
+  protected swimlaneCanEnter = (): boolean => true;
 }

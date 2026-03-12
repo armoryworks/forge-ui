@@ -1,0 +1,49 @@
+@if (loading()) {
+  <div class="barcode-info barcode-info--loading">
+    <span class="material-icons-outlined spin">sync</span>
+  </div>
+} @else if (barcode(); as bc) {
+  <div class="barcode-info" [class.barcode-info--compact]="compact()">
+    <div class="barcode-info__header">
+      <span class="material-icons-outlined barcode-info__icon">qr_code_2</span>
+      <span class="barcode-info__label">Barcode</span>
+    </div>
+
+    <div class="barcode-info__value-row">
+      <code class="barcode-info__value">{{ bc.value }}</code>
+      <button class="icon-btn" title="Copy barcode" (click)="copyValue()">
+        <span class="material-icons-outlined">content_copy</span>
+      </button>
+    </div>
+
+    @if (!compact()) {
+      <div class="barcode-info__visual">
+        <app-qr-code [value]="bc.value" [size]="96" errorCorrectionLevel="M" />
+      </div>
+    }
+
+    <div class="barcode-info__actions">
+      <button class="action-btn action-btn--sm" (click)="printLabel()">
+        <span class="material-icons-outlined">print</span>
+        Print
+      </button>
+      @if (naturalIdentifier()) {
+        <button class="action-btn action-btn--sm" (click)="regenerate()">
+          <span class="material-icons-outlined">refresh</span>
+          Regenerate
+        </button>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="barcode-info barcode-info--empty">
+    <span class="material-icons-outlined">qr_code_2</span>
+    <span class="barcode-info__no-barcode">No barcode assigned</span>
+    @if (naturalIdentifier()) {
+      <button class="action-btn action-btn--sm" (click)="regenerate()">
+        <span class="material-icons-outlined">add</span>
+        Generate Barcode
+      </button>
+    }
+  </div>
+}

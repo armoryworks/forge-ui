@@ -5,6 +5,7 @@ import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of, 
 
 import { ThemeService } from '../../shared/services/theme.service';
 import { NotificationService } from '../../shared/services/notification.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { SearchService } from '../../shared/services/search.service';
 import { AiService, AiSearchSuggestion } from '../../shared/services/ai.service';
@@ -25,6 +26,7 @@ import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-h
 export class AppHeaderComponent implements OnInit {
   private readonly themeService = inject(ThemeService);
   private readonly notificationService = inject(NotificationService);
+  private readonly authService = inject(AuthService);
   protected readonly layout = inject(LayoutService);
   private readonly searchService = inject(SearchService);
   protected readonly aiService = inject(AiService);
@@ -37,6 +39,17 @@ export class AppHeaderComponent implements OnInit {
   protected readonly unreadCount = this.notificationService.unreadCount;
   protected readonly panelOpen = this.notificationService.panelOpen;
   protected readonly logoUrl = this.themeService.logoUrl;
+  protected readonly currentUser = this.authService.user;
+  protected readonly userMenuOpen = signal(false);
+
+  protected readonly userInitials = computed(() => this.currentUser()?.initials ?? '?');
+  protected readonly userAvatarColor = computed(() => this.currentUser()?.avatarColor ?? 'var(--accent)');
+  protected readonly userFullName = computed(() => {
+    const u = this.currentUser();
+    return u ? `${u.lastName}, ${u.firstName}` : '';
+  });
+  protected readonly userEmail = computed(() => this.currentUser()?.email ?? '');
+  protected readonly userRoles = computed(() => this.currentUser()?.roles.join(', ') ?? '');
 
   protected readonly searchControl = new FormControl('');
   protected readonly searchResults = signal<SearchResult[]>([]);
@@ -189,6 +202,25 @@ export class AppHeaderComponent implements OnInit {
 
   protected toggleNotifications(): void {
     this.notificationService.togglePanel();
+  }
+
+  protected toggleUserMenu(): void {
+    this.userMenuOpen.update(v => !v);
+  }
+
+  protected closeUserMenu(): void {
+    this.userMenuOpen.set(false);
+  }
+
+  protected logout(): void {
+    this.userMenuOpen.set(false);
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  protected goToAccount(): void {
+    this.userMenuOpen.set(false);
+    this.router.navigate(['/account']);
   }
 
 }

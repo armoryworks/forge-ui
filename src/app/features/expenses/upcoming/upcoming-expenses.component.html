@@ -56,7 +56,7 @@
       emptyMessage="No upcoming expenses in the next 90 days">
 
       <ng-template appColumnCell="dueDate" let-row>
-        {{ row.dueDate | date:'MMM d, yyyy' }}
+        {{ row.dueDate | date:'MM/dd/yyyy' }}
       </ng-template>
 
       <ng-template appColumnCell="classification" let-row>
@@ -89,7 +89,7 @@
       </ng-template>
 
       <ng-template appColumnCell="nextOccurrenceDate" let-row>
-        {{ row.nextOccurrenceDate | date:'MMM d, yyyy' }}
+        {{ row.nextOccurrenceDate | date:'MM/dd/yyyy' }}
       </ng-template>
 
       <ng-template appColumnCell="isActive" let-row>

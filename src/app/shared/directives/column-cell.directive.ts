@@ -1,4 +1,4 @@
-import { Directive, input, TemplateRef } from '@angular/core';
+import { Directive, inject, input, TemplateRef } from '@angular/core';
 
 @Directive({
   selector: '[appColumnCell]',
@@ -6,6 +6,5 @@ import { Directive, input, TemplateRef } from '@angular/core';
 })
 export class ColumnCellDirective {
   readonly field = input.required<string>({ alias: 'appColumnCell' });
-
-  constructor(public template: TemplateRef<unknown>) {}
+  readonly template = inject(TemplateRef<unknown>);
 }

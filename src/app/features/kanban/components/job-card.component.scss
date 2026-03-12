@@ -50,8 +50,16 @@
 
 .card__job-number {
   @include uppercase-label($font-size-xxs, 0.5px, 700);
-  color: var(--text-muted);
+  color: var(--primary);
   font-family: $font-family-mono;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
 .card__header-indicators {

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { formatDate } from '../../shared/utils/date.utils';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { ChatHubService } from '../../shared/services/chat-hub.service';
@@ -153,6 +154,6 @@ export class ChatComponent implements OnDestroy {
     if (hours < 24) return `${hours}h`;
     const days = Math.floor(hours / 24);
     if (days < 7) return `${days}d`;
-    return date.toLocaleDateString();
+    return formatDate(date);
   }
 }

@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
+import { formatDate, formatDateTime } from '../../../shared/utils/date.utils';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
@@ -11,9 +12,11 @@ import { ActivityItem } from '../../../shared/models/activity.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { KanbanService } from '../services/kanban.service';
 import { DisposeJobDialogComponent, DisposeJobDialogData } from './dispose-job-dialog.component';
+import { UserRef } from '../models/user-ref.model';
 import { JobDetail } from '../models/job-detail.model';
 import { Subtask } from '../models/subtask.model';
 import { Activity } from '../models/activity.model';
@@ -28,11 +31,12 @@ import { PartSearchResult } from '../models/part-search-result.model';
 import { ChildJob } from '../models/child-job.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
+import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/barcode-info.component';
 
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent, StatusTimelineComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent, StatusTimelineComponent, BarcodeInfoComponent, MatMenuModule],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +47,7 @@ export class JobDetailPanelComponent implements OnInit {
   private readonly matDialog = inject(MatDialog);
 
   readonly jobId = input.required<number>();
+  readonly users = input<UserRef[]>([]);
   readonly closed = output<void>();
   readonly editRequested = output<JobDetail>();
 
@@ -149,13 +154,11 @@ export class JobDetailPanelComponent implements OnInit {
 
   protected formatDate(dateStr: string | null): string {
     if (!dateStr) return '—';
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return formatDate(dateStr);
   }
 
   protected formatActivityDate(dateStr: string): string {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' +
-      d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    return formatDateTime(dateStr);
   }
 
   protected completedCount(): number {
@@ -342,6 +345,25 @@ export class JobDetailPanelComponent implements OnInit {
       HoldForReview: 'Hold for Review',
     };
     return map[disposition] ?? disposition;
+  }
+
+  protected assignJob(user: UserRef | null): void {
+    const j = this.job();
+    if (!j) return;
+
+    this.kanbanService.updateJob(j.id, { assigneeId: user?.id ?? null }).subscribe({
+      next: () => {
+        this.job.set({
+          ...j,
+          assigneeId: user?.id ?? null,
+          assigneeInitials: user?.initials ?? null,
+          assigneeName: user?.name ?? null,
+          assigneeColor: user?.color ?? null,
+        });
+        this.snackbar.success(user ? `Assigned to ${user.name}` : 'Unassigned');
+      },
+      error: () => this.snackbar.error('Failed to update assignee'),
+    });
   }
 
   protected close(): void {

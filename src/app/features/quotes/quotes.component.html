@@ -28,10 +28,10 @@
           <span>{{ row.total | currency }}</span>
         </ng-template>
         <ng-template appColumnCell="expirationDate" let-row>
-          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'mediumDate') : '—' }}</span>
+          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -71,19 +71,19 @@
           @if (quote.expirationDate) {
             <div class="info-item">
               <span class="info-label">Expiration</span>
-              <span class="info-value">{{ quote.expirationDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ quote.expirationDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (quote.sentDate) {
             <div class="info-item">
               <span class="info-label">Sent</span>
-              <span class="info-value">{{ quote.sentDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ quote.sentDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (quote.acceptedDate) {
             <div class="info-item">
               <span class="info-label">Accepted</span>
-              <span class="info-value">{{ quote.acceptedDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ quote.acceptedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (quote.salesOrderId) {
@@ -149,11 +149,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Created</span>
-            <span class="info-value">{{ quote.createdAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ quote.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Updated</span>
-            <span class="info-value">{{ quote.updatedAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ quote.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
 

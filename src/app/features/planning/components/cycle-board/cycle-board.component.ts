@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 
+import { formatDate } from '../../../../shared/utils/date.utils';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
 import { PlanningCycleEntry } from '../../models/planning-cycle-entry.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -45,9 +46,7 @@ export class CycleBoardComponent {
   protected readonly isActive = computed(() => this.cycle().status === 'Active');
 
   protected formatDate(date: string): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric',
-    });
+    return formatDate(date);
   }
 
   protected getPriorityClass(priority: string): string {

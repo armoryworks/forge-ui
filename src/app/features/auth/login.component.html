@@ -21,6 +21,27 @@
       </button>
     </form>
 
+    <div class="auth-card__setup">
+      @if (showSetupCode()) {
+        <div class="setup-code-entry">
+          <app-input label="Setup Code" [formControl]="setupCodeControl" placeholder="XXXX-XXXX" autocomplete="off" />
+          <div class="setup-code-entry__actions">
+            <button mat-stroked-button (click)="showSetupCode.set(false)">Cancel</button>
+            <button mat-flat-button color="primary"
+              [disabled]="!setupCodeControl.value?.trim()"
+              (click)="goToSetup()">
+              Continue
+            </button>
+          </div>
+        </div>
+      } @else {
+        <button mat-button class="auth-card__setup-link" (click)="showSetupCode.set(true)">
+          <span class="material-icons-outlined">vpn_key</span>
+          Have a setup code?
+        </button>
+      }
+    </div>
+
     @if (ssoProviders().length > 0) {
       <div class="auth-card__sso">
         <div class="auth-card__divider">

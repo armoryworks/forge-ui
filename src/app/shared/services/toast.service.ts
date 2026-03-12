@@ -7,6 +7,7 @@ export interface Toast {
   message?: string;
   details?: string;
   autoDismissMs?: number;
+  count: number;
 }
 
 interface ToastOptions {
@@ -33,10 +34,21 @@ export class ToastService {
   readonly toasts = this._toasts.asReadonly();
 
   show(options: ToastOptions): void {
-    const id = nextId++;
     const dismissMs = options.autoDismissMs ?? DEFAULT_DISMISS[options.severity];
 
-    const toast: Toast = { id, ...options };
+    // Deduplicate: if an identical toast (same severity + title + message) already exists, bump its count
+    const existing = this._toasts().find(
+      (t) => t.severity === options.severity && t.title === options.title && t.message === options.message,
+    );
+    if (existing) {
+      this._toasts.update((list) =>
+        list.map((t) => (t.id === existing.id ? { ...t, count: t.count + 1 } : t)),
+      );
+      return;
+    }
+
+    const id = nextId++;
+    const toast: Toast = { id, ...options, count: 1 };
     this._toasts.update((list) => {
       const updated = [toast, ...list];
       return updated.length > MAX_VISIBLE ? updated.slice(0, MAX_VISIBLE) : updated;

@@ -14,7 +14,7 @@
         emptyIcon="fact_check" emptyMessage="No expenses awaiting approval"
         (rowClick)="openReview($any($event))">
         <ng-template appColumnCell="expenseDate" let-row>
-          <span class="text-muted">{{ row.expenseDate | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.expenseDate | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="userName" let-row>
           <span class="approval-queue__submitter">{{ row.userName }}</span>
@@ -54,7 +54,7 @@
       </div>
       <div class="review-detail__row">
         <span class="review-detail__label">Date</span>
-        <span class="review-detail__value">{{ expense.expenseDate | date:'mediumDate' }}</span>
+        <span class="review-detail__value">{{ expense.expenseDate | date:'MM/dd/yyyy' }}</span>
       </div>
       <div class="review-detail__row">
         <span class="review-detail__label">Category</span>

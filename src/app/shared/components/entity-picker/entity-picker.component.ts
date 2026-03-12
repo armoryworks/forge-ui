@@ -78,7 +78,11 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
 
   setDisabledState(disabled: boolean): void {
     this.disabled.set(disabled);
-    disabled ? this.searchControl.disable({ emitEvent: false }) : this.searchControl.enable({ emitEvent: false });
+    if (disabled) {
+      this.searchControl.disable({ emitEvent: false });
+    } else {
+      this.searchControl.enable({ emitEvent: false });
+    }
   }
 
   protected onOptionSelected(event: MatAutocompleteSelectedEvent): void {

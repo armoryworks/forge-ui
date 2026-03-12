@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { formatDate } from '../../../shared/utils/date.utils';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -78,7 +79,7 @@ export class UpcomingExpensesComponent {
     for (const e of this.upcomingExpenses()) {
       const d = new Date(e.dueDate);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const label = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const label = formatDate(d);
       const existing = groups.get(key);
       if (existing) {
         existing.total += e.amount;

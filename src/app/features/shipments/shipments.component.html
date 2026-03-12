@@ -34,10 +34,10 @@
           <span class="sh-number">{{ row.trackingNumber ?? '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="shippedDate" let-row>
-          <span class="text-muted">{{ row.shippedDate ? (row.shippedDate | date:'mediumDate') : '—' }}</span>
+          <span class="text-muted">{{ row.shippedDate ? (row.shippedDate | date:'MM/dd/yyyy') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -93,13 +93,13 @@
           @if (shipment.shippedDate) {
             <div class="info-item">
               <span class="info-label">Shipped</span>
-              <span class="info-value">{{ shipment.shippedDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ shipment.shippedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (shipment.deliveredDate) {
             <div class="info-item">
               <span class="info-label">Delivered</span>
-              <span class="info-value">{{ shipment.deliveredDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ shipment.deliveredDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (shipment.weight) {
@@ -155,11 +155,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Created</span>
-            <span class="info-value">{{ shipment.createdAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ shipment.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Updated</span>
-            <span class="info-value">{{ shipment.updatedAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ shipment.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
 

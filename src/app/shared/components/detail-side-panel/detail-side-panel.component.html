@@ -1,5 +1,5 @@
 @if (open()) {
-  <div class="side-panel-backdrop" (click)="onBackdropClick()"></div>
+  <div class="side-panel-backdrop" role="button" tabindex="0" aria-label="Close" (click)="onBackdropClick()" (keydown.enter)="onBackdropClick()"></div>
   <aside class="side-panel">
     <div class="side-panel__header">
       <span class="side-panel__title">{{ title() }}</span>

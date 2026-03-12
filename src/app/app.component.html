@@ -5,7 +5,7 @@
   <div class="app-body" [attr.inert]="isGlobalLoading() || null">
     @if (layout.sidebarVisible()) {
       @if (layout.isMobile()) {
-        <div class="mobile-sidebar-backdrop" (click)="layout.closeMobileMenu()"></div>
+        <div class="mobile-sidebar-backdrop" role="button" tabindex="0" aria-label="Close navigation menu" (click)="layout.closeMobileMenu()" (keydown.enter)="layout.closeMobileMenu()"></div>
       }
       <app-sidebar />
     }

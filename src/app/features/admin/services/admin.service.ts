@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AdminUser } from '../models/admin-user.model';
-import { CreateUserRequest } from '../models/create-user-request.model';
+import { CreateUserRequest, CreateUserResponse } from '../models/create-user-request.model';
 import { UpdateUserRequest } from '../models/update-user-request.model';
 import { CreateTrackTypeRequest } from '../models/create-track-type-request.model';
 import { UpdateTrackTypeRequest } from '../models/update-track-type-request.model';
@@ -20,6 +20,7 @@ import { AuditLogEntry } from '../models/audit-log-entry.model';
 import { StorageUsage } from '../models/storage-usage.model';
 import { ScheduledTask } from '../models/scheduled-task.model';
 import { CreateScheduledTaskRequest } from '../models/create-scheduled-task-request.model';
+import { ScanIdentifier } from '../models/scan-identifier.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -30,8 +31,8 @@ export class AdminService {
     return this.http.get<AdminUser[]>(`${environment.apiUrl}/admin/users`);
   }
 
-  createUser(request: CreateUserRequest): Observable<AdminUser> {
-    return this.http.post<AdminUser>(`${environment.apiUrl}/admin/users`, request);
+  createUser(request: CreateUserRequest): Observable<CreateUserResponse> {
+    return this.http.post<CreateUserResponse>(`${environment.apiUrl}/admin/users`, request);
   }
 
   updateUser(id: number, request: UpdateUserRequest): Observable<AdminUser> {
@@ -183,5 +184,20 @@ export class AdminService {
 
   reactivateUser(userId: number): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/admin/users/${userId}/reactivate`, {});
+  }
+
+  // Scan Identifiers (RFID, NFC, barcode, biometric)
+  getScanIdentifiers(userId: number): Observable<ScanIdentifier[]> {
+    return this.http.get<ScanIdentifier[]>(`${environment.apiUrl}/admin/users/${userId}/scan-identifiers`);
+  }
+
+  addScanIdentifier(userId: number, identifierType: string, identifierValue: string): Observable<ScanIdentifier> {
+    return this.http.post<ScanIdentifier>(
+      `${environment.apiUrl}/admin/users/${userId}/scan-identifiers`,
+      { identifierType, identifierValue });
+  }
+
+  removeScanIdentifier(userId: number, id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/users/${userId}/scan-identifiers/${id}`);
   }
 }

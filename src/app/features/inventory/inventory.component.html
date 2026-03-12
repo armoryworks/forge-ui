@@ -159,7 +159,8 @@
             @for (loc of locationTree(); track loc.id) {
               <ng-container>
                 <div class="tree-node" [class.tree-node--selected]="selectedLocation()?.id === loc.id"
-                  (click)="selectLocation(loc)">
+                  role="button" tabindex="0" [attr.aria-label]="'Select location ' + loc.name"
+                  (click)="selectLocation(loc)" (keydown.enter)="selectLocation(loc)">
                   @if (loc.children.length > 0) {
                     <button class="tree-toggle" (click)="toggleLocationExpand(loc.id); $event.stopPropagation()">
                       <span class="material-icons-outlined">
@@ -178,7 +179,8 @@
                 @if (isLocationExpanded(loc.id)) {
                   @for (child of loc.children; track child.id) {
                     <div class="tree-node tree-node--l1" [class.tree-node--selected]="selectedLocation()?.id === child.id"
-                      (click)="selectLocation(child)">
+                      role="button" tabindex="0" [attr.aria-label]="'Select location ' + child.name"
+                      (click)="selectLocation(child)" (keydown.enter)="selectLocation(child)">
                       @if (child.children.length > 0) {
                         <button class="tree-toggle" (click)="toggleLocationExpand(child.id); $event.stopPropagation()">
                           <span class="material-icons-outlined">
@@ -197,7 +199,8 @@
                     @if (isLocationExpanded(child.id)) {
                       @for (grandchild of child.children; track grandchild.id) {
                         <div class="tree-node tree-node--l2" [class.tree-node--selected]="selectedLocation()?.id === grandchild.id"
-                          (click)="selectLocation(grandchild)">
+                          role="button" tabindex="0" [attr.aria-label]="'Select location ' + grandchild.name"
+                          (click)="selectLocation(grandchild)" (keydown.enter)="selectLocation(grandchild)">
                           @if (grandchild.children.length > 0) {
                             <button class="tree-toggle" (click)="toggleLocationExpand(grandchild.id); $event.stopPropagation()">
                               <span class="material-icons-outlined">
@@ -216,7 +219,8 @@
                         @if (isLocationExpanded(grandchild.id)) {
                           @for (leaf of grandchild.children; track leaf.id) {
                             <div class="tree-node tree-node--l3" [class.tree-node--selected]="selectedLocation()?.id === leaf.id"
-                              (click)="selectLocation(leaf)">
+                              role="button" tabindex="0" [attr.aria-label]="'Select location ' + leaf.name"
+                              (click)="selectLocation(leaf)" (keydown.enter)="selectLocation(leaf)">
                               <span class="tree-toggle-spacer"></span>
                               <span class="material-icons-outlined tree-icon">{{ getLocationIcon(leaf.locationType) }}</span>
                               <span class="tree-label">{{ leaf.name }}</span>
@@ -258,12 +262,12 @@
                 <span class="meta-label">Type</span>
                 <span class="meta-value">{{ loc.locationType }}</span>
               </div>
-              @if (loc.barcode) {
-                <div class="meta-item">
-                  <span class="meta-label">Barcode</span>
-                  <span class="meta-value mono">{{ loc.barcode }}</span>
-                </div>
-              }
+              <app-barcode-info
+                entityType="StorageLocation"
+                [entityId]="loc.id"
+                [entityLabel]="loc.name"
+                [naturalIdentifier]="loc.name"
+                [compact]="true" />
               @if (loc.description) {
                 <div class="meta-item">
                   <span class="meta-label">Description</span>
@@ -296,7 +300,7 @@
                           </span>
                         </td>
                         <td class="text-muted">{{ item.lotNumber ?? '—' }}</td>
-                        <td class="text-muted">{{ item.placedAt | date:'short' }}</td>
+                        <td class="text-muted">{{ item.placedAt | date:'MM/dd/yyyy hh:mm a' }}</td>
                       </tr>
                     }
                   </tbody>
@@ -333,7 +337,7 @@
             <span class="chip">{{ getReasonLabel($any(row).reason) }}</span>
           </ng-template>
           <ng-template appColumnCell="movedAt" let-row>
-            <span class="text-muted">{{ $any(row).movedAt | date:'short' }}</span>
+            <span class="text-muted">{{ $any(row).movedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
           </ng-template>
         </app-data-table>
       </div>
@@ -361,7 +365,7 @@
             <span class="text-muted">{{ $any(row).lotNumber ?? '—' }}</span>
           </ng-template>
           <ng-template appColumnCell="createdAt" let-row>
-            <span class="text-muted">{{ $any(row).createdAt | date:'short' }}</span>
+            <span class="text-muted">{{ $any(row).createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
           </ng-template>
         </app-data-table>
       </div>
@@ -371,12 +375,12 @@
     @if (activeTab() === 'stockOps') {
       <div class="tab-panel stock-ops-panel">
         <div class="stock-ops-grid">
-          <div class="stock-ops-card" (click)="openTransferDialog()">
+          <div class="stock-ops-card" role="button" tabindex="0" aria-label="Transfer Stock" (click)="openTransferDialog()" (keydown.enter)="openTransferDialog()">
             <span class="material-icons-outlined stock-ops-card__icon">swap_horiz</span>
             <div class="stock-ops-card__title">Transfer Stock</div>
             <div class="stock-ops-card__desc">Move items between bin locations</div>
           </div>
-          <div class="stock-ops-card" (click)="openAdjustDialog()">
+          <div class="stock-ops-card" role="button" tabindex="0" aria-label="Adjust Stock" (click)="openAdjustDialog()" (keydown.enter)="openAdjustDialog()">
             <span class="material-icons-outlined stock-ops-card__icon">tune</span>
             <div class="stock-ops-card__title">Adjust Stock</div>
             <div class="stock-ops-card__desc">Manually adjust quantity for a bin content</div>
@@ -399,7 +403,7 @@
             <span [class]="getCycleCountStatusClass($any(row).status)">{{ $any(row).status }}</span>
           </ng-template>
           <ng-template appColumnCell="countedAt" let-row>
-            <span class="text-muted">{{ $any(row).countedAt | date:'short' }}</span>
+            <span class="text-muted">{{ $any(row).countedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
           </ng-template>
           <ng-template appColumnCell="variance" let-row>
             @if ($any(row).variance > 0) {
@@ -443,7 +447,7 @@
           </ng-template>
 
           <ng-template appColumnCell="createdAt" let-row>
-            <span class="text-muted">{{ $any(row).createdAt | date:'short' }}</span>
+            <span class="text-muted">{{ $any(row).createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
           </ng-template>
 
           <ng-template appColumnCell="actions" let-row>
@@ -595,7 +599,7 @@
       </div>
       <div class="meta-item">
         <span class="meta-label">Date</span>
-        <span class="meta-value">{{ cc.countedAt | date:'short' }}</span>
+        <span class="meta-value">{{ cc.countedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
       </div>
       <div class="meta-item">
         <span class="meta-label">Status</span>

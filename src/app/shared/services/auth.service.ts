@@ -41,8 +41,12 @@ export interface SetupRequest {
 export interface CompleteSetupRequest {
   token: string;
   password: string;
-  firstName?: string;
-  lastName?: string;
+}
+
+export interface SetupTokenInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -94,6 +98,10 @@ export class AuthService {
       );
   }
 
+  validateSetupToken(token: string): Observable<SetupTokenInfo> {
+    return this.http.get<SetupTokenInfo>(`${environment.apiUrl}/auth/validate-token/${encodeURIComponent(token)}`);
+  }
+
   completeSetup(data: CompleteSetupRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/complete-setup`, data)
@@ -114,6 +122,23 @@ export class AuthService {
   kioskLogin(barcode: string, pin: string): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/kiosk-login`, { barcode, pin })
+      .pipe(
+        tap((response) => {
+          this._token.set(response.token);
+          this._user.set(response.user);
+          localStorage.setItem('qbe-token', response.token);
+          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+        }),
+      );
+  }
+
+  /**
+   * Unified scan login — works with any scan type (RFID, NFC, barcode, biometric).
+   * Backend resolves the scan value against UserScanIdentifiers + EmployeeBarcode.
+   */
+  scanLogin(scanValue: string, pin: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/scan-login`, { scanValue, pin })
       .pipe(
         tap((response) => {
           this._token.set(response.token);
@@ -164,6 +189,15 @@ export class AuthService {
     this._user.set(null);
     localStorage.removeItem('qbe-token');
     localStorage.removeItem('qbe-user');
+  }
+
+  /** Update local user state after self-service profile edit. */
+  refreshUser(updated: Partial<AuthUser>): void {
+    const current = this._user();
+    if (!current) return;
+    const merged = { ...current, ...updated };
+    this._user.set(merged);
+    localStorage.setItem('qbe-user', JSON.stringify(merged));
   }
 
   /** Set by BroadcastService to avoid circular dependency. */

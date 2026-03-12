@@ -20,6 +20,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
+import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 
 @Component({
   selector: 'app-sales-orders',
@@ -28,7 +29,7 @@ import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    SoDialogComponent,
+    SoDialogComponent, BarcodeInfoComponent,
   ],
   templateUrl: './sales-orders.component.html',
   styleUrl: './sales-orders.component.scss',

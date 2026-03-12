@@ -36,7 +36,7 @@
           </span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -102,7 +102,7 @@
             }
             <div class="info-item">
               <span class="info-label">Created</span>
-              <span class="info-value">{{ customer.createdAt | date:'mediumDate' }}</span>
+              <span class="info-value">{{ customer.createdAt | date:'MM/dd/yyyy' }}</span>
             </div>
           </div>
 
@@ -155,7 +155,7 @@
                     <app-avatar [initials]="getInitials(contact)" size="sm" />
                     <div>
                       <div class="contact-card__name">
-                        {{ contact.firstName }} {{ contact.lastName }}
+                        {{ contact.lastName }}, {{ contact.firstName }}
                         @if (contact.isPrimary) {
                           <span class="chip chip--primary">Primary</span>
                         }
@@ -202,7 +202,7 @@
                       <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
                     }
                     @if (job.dueDate) {
-                      <span class="job-item__date">{{ job.dueDate | date:'mediumDate' }}</span>
+                      <span class="job-item__date">{{ job.dueDate | date:'MM/dd/yyyy' }}</span>
                     }
                   </div>
                 </div>

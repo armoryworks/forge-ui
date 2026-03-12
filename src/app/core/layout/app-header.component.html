@@ -108,12 +108,45 @@
     <button class="icon-btn" title="Toggle theme" aria-label="Toggle light and dark theme" (click)="toggleTheme()">
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
     </button>
-    <div class="app-header__avatar">DH</div>
+    <div class="app-header__user">
+      <button class="user-trigger" (click)="toggleUserMenu()" aria-label="User menu">
+        <span class="user-trigger__name">{{ userFullName() }}</span>
+        <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'menu' }}</span>
+      </button>
+
+      @if (userMenuOpen()) {
+        <div class="user-menu-backdrop" role="button" tabindex="0" aria-label="Close user menu" (click)="closeUserMenu()" (keydown.enter)="closeUserMenu()"></div>
+        <div class="user-menu">
+          <div class="user-menu__header">
+            <div class="user-menu__avatar" [style.background]="userAvatarColor()">
+              {{ userInitials() }}
+            </div>
+            <div class="user-menu__info">
+              <span class="user-menu__name">{{ userFullName() }}</span>
+              <span class="user-menu__email">{{ userEmail() }}</span>
+              @if (userRoles()) {
+                <span class="user-menu__roles">{{ userRoles() }}</span>
+              }
+            </div>
+          </div>
+          <div class="user-menu__divider"></div>
+          <button class="user-menu__item" (click)="goToAccount()">
+            <span class="material-icons-outlined">manage_accounts</span>
+            Account Settings
+          </button>
+          <div class="user-menu__divider"></div>
+          <button class="user-menu__item user-menu__item--danger" (click)="logout()">
+            <span class="material-icons-outlined">logout</span>
+            Sign Out
+          </button>
+        </div>
+      }
+    </div>
   </div>
 </header>
 
 @if (panelOpen()) {
-  <div class="notification-backdrop" (click)="toggleNotifications()"></div>
+  <div class="notification-backdrop" role="button" tabindex="0" aria-label="Close notifications" (click)="toggleNotifications()" (keydown.enter)="toggleNotifications()"></div>
   <app-notification-panel />
 }
 

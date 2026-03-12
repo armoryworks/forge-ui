@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { AuthService } from '../../shared/services/auth.service';
+import { AuthService, SetupTokenInfo } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
@@ -21,7 +21,7 @@ import { ToastService } from '../../shared/services/toast.service';
   styleUrl: './token-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TokenSetupComponent {
+export class TokenSetupComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -31,10 +31,21 @@ export class TokenSetupComponent {
 
   protected readonly token = this.route.snapshot.paramMap.get('token') ?? '';
   protected readonly error = signal<string | null>(null);
+  protected readonly tokenInfo = signal<SetupTokenInfo | null>(null);
+
+  ngOnInit(): void {
+    if (!this.token) {
+      this.error.set('Invalid setup link. Please contact your administrator.');
+      return;
+    }
+
+    this.authService.validateSetupToken(this.token).subscribe({
+      next: (info) => this.tokenInfo.set(info),
+      error: () => this.error.set('Invalid or expired setup code. Please contact your administrator.'),
+    });
+  }
 
   protected readonly form = new FormGroup({
-    firstName: new FormControl(''),
-    lastName: new FormControl(''),
     password: new FormControl('', [Validators.required, Validators.minLength(8)]),
     confirmPassword: new FormControl('', [Validators.required]),
   });
@@ -49,7 +60,7 @@ export class TokenSetupComponent {
   protected onSubmit(): void {
     if (this.form.invalid) return;
 
-    const { password, confirmPassword, firstName, lastName } = this.form.getRawValue();
+    const { password, confirmPassword } = this.form.getRawValue();
     if (password !== confirmPassword) {
       this.snackbar.error('Passwords do not match.');
       return;
@@ -63,8 +74,6 @@ export class TokenSetupComponent {
     this.loadingService.track('Setting up your account...', this.authService.completeSetup({
       token: this.token,
       password: password!,
-      firstName: firstName || undefined,
-      lastName: lastName || undefined,
     })).subscribe({
       next: () => {
         this.snackbar.success('Account setup complete. Welcome!');

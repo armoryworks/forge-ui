@@ -1,10 +1,14 @@
 <div
   class="upload-zone"
+  role="button"
+  tabindex="0"
+  aria-label="Upload files — drag and drop or click to browse"
   [class.upload-zone--drag-over]="dragOver()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
   (drop)="onDrop($event)"
-  (click)="browse()">
+  (click)="browse()"
+  (keydown.enter)="browse()">
 
   <input
     type="file"

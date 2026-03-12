@@ -11,6 +11,8 @@
   flex-shrink: 0;
   height: 48px;
   gap: $sp-md;
+  position: relative;
+  z-index: $z-sticky + 2;
 
   [data-theme='dark'] & {
     border-bottom-color: var(--primary);

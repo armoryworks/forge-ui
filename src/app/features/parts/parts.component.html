@@ -156,6 +156,13 @@
               }
             </div>
 
+            <app-barcode-info
+              entityType="Part"
+              [entityId]="part.id"
+              [entityLabel]="part.partNumber"
+              [naturalIdentifier]="part.partNumber"
+              [compact]="true" />
+
             <!-- Accounting Linkage -->
             @if (accountingService.isConfigured()) {
               <div class="accounting-link-section">

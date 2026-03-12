@@ -40,13 +40,13 @@
           <span [class.text-warning]="row.unappliedAmount > 0">{{ row.unappliedAmount | currency }}</span>
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
-          <span class="text-muted">{{ row.paymentDate | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.paymentDate | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="referenceNumber" let-row>
           <span class="text-muted">{{ row.referenceNumber ?? '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -83,7 +83,7 @@
           </div>
           <div class="info-item">
             <span class="info-label">Payment Date</span>
-            <span class="info-value">{{ payment.paymentDate | date:'mediumDate' }}</span>
+            <span class="info-value">{{ payment.paymentDate | date:'MM/dd/yyyy' }}</span>
           </div>
           @if (payment.referenceNumber) {
             <div class="info-item">
@@ -138,11 +138,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Created</span>
-            <span class="info-value">{{ payment.createdAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ payment.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Updated</span>
-            <span class="info-value">{{ payment.updatedAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ payment.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
 

@@ -50,7 +50,7 @@
             <app-avatar [initials]="user.initials ?? '??'" [color]="user.avatarColor ?? '#94a3b8'" />
           </ng-template>
           <ng-template appColumnCell="name" let-user>
-            <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <span class="user-name">{{ user.lastName }}, {{ user.firstName }}</span>
           </ng-template>
           <ng-template appColumnCell="email" let-user>
             <span class="text-muted">{{ user.email }}</span>
@@ -61,11 +61,30 @@
             </span>
           </ng-template>
           <ng-template appColumnCell="status" let-user>
-            <span class="status-dot" [class.status-dot--active]="user.isActive" [class.status-dot--inactive]="!user.isActive"></span>
-            {{ user.isActive ? 'Active' : 'Inactive' }}
+            @if (!user.hasPassword) {
+              <span class="chip chip--warning">Pending Setup</span>
+            } @else {
+              <span class="status-dot" [class.status-dot--active]="user.isActive" [class.status-dot--inactive]="!user.isActive"></span>
+              {{ user.isActive ? 'Active' : 'Inactive' }}
+            }
           </ng-template>
           <ng-template appColumnCell="actions" let-user>
             <div class="action-cell">
+              @if (user.hasRfidIdentifier) {
+                <span class="scan-badge scan-badge--rfid" title="RFID/NFC assigned">
+                  <span class="material-icons-outlined">contactless</span>
+                </span>
+              }
+              @if (user.hasBarcodeIdentifier) {
+                <span class="scan-badge scan-badge--barcode" title="Barcode assigned">
+                  <span class="material-icons-outlined">qr_code_scanner</span>
+                </span>
+              }
+              @if (!user.hasPassword) {
+                <button class="icon-btn" title="Get setup code" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
+                  <span class="material-icons-outlined">vpn_key</span>
+                </button>
+              }
               <button class="icon-btn" title="Edit" (click)="openEditUser(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">edit</span>
               </button>
@@ -220,7 +239,7 @@
         <!-- Logo Upload -->
         <div class="settings-item settings-item--logo">
           <div class="settings-item__header">
-            <label class="settings-item__label">Company Logo</label>
+            <label class="settings-item__label" for="logo-upload-input">Company Logo</label>
             <span class="settings-item__description">Upload a logo to replace the default text mark in the header (max 5MB, image files)</span>
           </div>
           <div class="logo-upload">
@@ -237,7 +256,7 @@
             }
             <label class="action-btn action-btn--sm action-btn--primary logo-upload-btn">
               <span class="material-icons-outlined">upload</span> Upload Logo
-              <input type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
+              <input id="logo-upload-input" type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
             </label>
           </div>
         </div>
@@ -246,12 +265,13 @@
           @for (def of settingDefinitions; track def.key) {
             <div class="settings-item">
               <div class="settings-item__header">
-                <label class="settings-item__label">{{ def.label }}</label>
+                <label class="settings-item__label" [for]="'setting-' + def.key">{{ def.label }}</label>
                 <span class="settings-item__description">{{ def.description }}</span>
               </div>
               <div class="settings-item__control">
                 @if (def.type === 'boolean') {
                   <select class="settings-select"
+                    [id]="'setting-' + def.key"
                     [value]="getSettingValue(def.key) || 'false'"
                     (change)="onSettingChange(def.key, $any($event.target).value)">
                     <option value="true">Enabled</option>
@@ -259,6 +279,7 @@
                   </select>
                 } @else {
                   <input class="settings-input"
+                    [id]="'setting-' + def.key"
                     [type]="def.type === 'number' ? 'number' : 'text'"
                     [value]="getSettingValue(def.key)"
                     (input)="onSettingChange(def.key, $any($event.target).value)" />
@@ -348,7 +369,7 @@
 
 <!-- User Dialog -->
 @if (showUserDialog()) {
-  <app-dialog [title]="editingUser() ? 'Edit User' : 'Add User'" width="400px" (closed)="closeUserDialog()">
+  <app-dialog [title]="editingUser() ? 'Edit User' : 'Add User'" width="520px" (closed)="closeUserDialog()">
     <div [formGroup]="userForm">
       <div class="dialog-row">
         <app-input label="First Name" formControlName="firstName" />
@@ -357,39 +378,149 @@
 
       @if (!editingUser()) {
         <app-input label="Email" type="email" formControlName="email" />
-        <app-input label="Password" type="password" formControlName="password" />
       }
 
-      <app-input label="Initials" formControlName="initials" [maxlength]="3" />
+      <div class="dialog-row">
+        <app-input label="Initials" formControlName="initials" [maxlength]="3" />
+        <app-select label="Role" formControlName="role" [options]="roleOptions" />
+      </div>
 
-      <app-select label="Role" formControlName="role" [options]="roleOptions" />
-
-      <div class="color-picker-row">
-        <label class="color-picker-label">Avatar Color</label>
-        <div class="color-picker">
-          @for (color of avatarColors; track color) {
-            <button class="color-option"
-              [style.background]="color"
-              [class.color-option--selected]="avatarColor() === color"
-              (click)="avatarColor.set(color)">
-            </button>
-          }
+      <div class="color-toggle-row">
+        <div class="color-picker-row">
+          <span class="color-picker-label" id="avatar-color-label">Avatar Color</span>
+          <div class="color-picker" role="group" aria-labelledby="avatar-color-label">
+            @for (color of avatarColors; track color) {
+              <button class="color-option"
+                [style.background]="color"
+                [class.color-option--selected]="avatarColor() === color"
+                (click)="avatarColor.set(color)">
+              </button>
+            }
+          </div>
         </div>
+
+        @if (editingUser()) {
+          <app-toggle label="Active" formControlName="isActive" />
+        }
       </div>
 
       @if (editingUser()) {
-        <app-toggle label="Active" formControlName="isActive" />
+
+        <!-- Scan Identifiers (RFID / NFC / Barcode / Biometric) -->
+        <div class="scan-ids">
+          <span class="scan-ids__title">
+            <span class="material-icons-outlined">badge</span>
+            Scan Identifiers
+          </span>
+
+          <div class="scan-ids__list" [appLoadingBlock]="scanIdLoading()">
+            @for (sid of scanIdentifiers(); track sid.id) {
+              <div class="scan-ids__item">
+                <span class="scan-ids__type">{{ scanTypeLabel(sid.identifierType) }}</span>
+                <span class="scan-ids__value">{{ sid.identifierValue }}</span>
+                <button class="icon-btn icon-btn--danger" aria-label="Remove scan identifier"
+                  (click)="removeScanIdentifier(sid.id)">
+                  <span class="material-icons-outlined">close</span>
+                </button>
+              </div>
+            } @empty {
+              <span class="scan-ids__empty">No scan identifiers assigned</span>
+            }
+          </div>
+
+          <!-- RFID Reader -->
+          <div class="rfid-reader">
+            @if (rfid.connected()) {
+              <div class="rfid-reader__status rfid-reader__status--connected">
+                <span class="material-icons-outlined">contactless</span>
+                <span class="rfid-reader__name">{{ rfid.deviceName() }}</span>
+                <span class="rfid-reader__hint">Tap and hold card on reader — it may take a moment to register</span>
+                <button class="icon-btn" title="Disconnect reader" (click)="unpairRfidReader()">
+                  <span class="material-icons-outlined">link_off</span>
+                </button>
+              </div>
+            } @else {
+              <button class="action-btn action-btn--sm" (click)="pairRfidReader()">
+                <span class="material-icons-outlined">contactless</span>
+                Connect RFID Reader
+              </button>
+            }
+            @if (rfid.error()) {
+              <span class="rfid-reader__error">{{ rfid.error() }}</span>
+            }
+          </div>
+
+          <div class="scan-ids__add">
+            <app-select label="Type" [formControl]="newScanType" [options]="scanTypeOptions" />
+            <app-input label="Scan Value" [formControl]="newScanValue" placeholder="Scan or type ID..." />
+            <button class="action-btn action-btn--sm"
+              [disabled]="!newScanValue.value?.trim()"
+              (click)="addScanIdentifier()">
+              <span class="material-icons-outlined">add</span>
+              Add
+            </button>
+          </div>
+        </div>
+
+        <!-- Employee Barcode (from central barcode table) -->
+        @if (editingUser(); as user) {
+          <app-barcode-info
+            entityType="User"
+            [entityId]="user.id"
+            [entityLabel]="user.firstName + ' ' + user.lastName"
+            [naturalIdentifier]="'' + user.id"
+            [compact]="true" />
+        }
       }
     </div>
 
+    @if (setupToken()) {
+      <div class="setup-code-banner">
+        <span class="material-icons-outlined setup-code-banner__icon">vpn_key</span>
+        <div class="setup-code-banner__content">
+          <span class="setup-code-banner__label">Setup Code</span>
+          <span class="setup-code-banner__code">{{ setupToken() }}</span>
+          <span class="setup-code-banner__hint">
+            Give this code to the employee. They enter it at the login screen to set their password &amp; PIN.
+            @if (setupTokenExpiresAt()) {
+              Expires {{ setupTokenExpiresAt() | date:'mediumDate' }}.
+            }
+          </span>
+        </div>
+        <button class="icon-btn" title="Copy code" (click)="copySetupCode()">
+          <span class="material-icons-outlined">content_copy</span>
+        </button>
+      </div>
+    }
+
+    @if (editingUser(); as user) {
+      @if (!user.hasPassword && !setupToken()) {
+        <div class="setup-code-banner setup-code-banner--pending">
+          <span class="material-icons-outlined setup-code-banner__icon">hourglass_top</span>
+          <div class="setup-code-banner__content">
+            <span class="setup-code-banner__label">Account not yet set up</span>
+            <span class="setup-code-banner__hint">This user hasn't completed registration. Generate a setup code for them.</span>
+          </div>
+          <button class="action-btn action-btn--sm action-btn--primary" (click)="regenerateSetupToken(user)">
+            <span class="material-icons-outlined">vpn_key</span>
+            Get Setup Code
+          </button>
+        </div>
+      }
+    }
+
     <div dialog-footer>
-      <button class="action-btn" (click)="closeUserDialog()">Cancel</button>
-      <button class="action-btn action-btn--primary"
-        [appValidationPopover]="userViolations"
-        [disabled]="userForm.invalid || saving()"
-        (click)="saveUser()">
-        {{ editingUser() ? 'Save Changes' : 'Create User' }}
-      </button>
+      @if (setupToken()) {
+        <button class="action-btn action-btn--primary" (click)="closeUserDialog()">Done</button>
+      } @else {
+        <button class="action-btn" (click)="closeUserDialog()">Cancel</button>
+        <button class="action-btn action-btn--primary"
+          [appValidationPopover]="userViolations"
+          [disabled]="userForm.invalid || saving()"
+          (click)="saveUser()">
+          {{ editingUser() ? 'Save Changes' : 'Create User' }}
+        </button>
+      }
     </div>
   </app-dialog>
 }

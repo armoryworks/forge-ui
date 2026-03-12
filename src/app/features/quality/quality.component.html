@@ -37,7 +37,7 @@
       <app-data-table tableId="qc-inspections" [columns]="inspectionColumns" [data]="inspections()"
         emptyIcon="fact_check" emptyMessage="No inspections found">
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="jobNumber" let-row>
           <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
@@ -72,10 +72,10 @@
           <span class="quality__lot-number">{{ row.lotNumber }}</span>
         </ng-template>
         <ng-template appColumnCell="expirationDate" let-row>
-          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'mediumDate') : '—' }}</span>
+          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
         <ng-template appColumnCell="jobNumber" let-row>
           <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
@@ -237,7 +237,7 @@
           @for (insp of traceData()!.inspections; track insp.id) {
             <div class="trace-section__item">
               <span [class]="getStatusClass(insp.status)">{{ getStatusLabel(insp.status) }}</span>
-              <span class="trace-section__item-value">{{ insp.inspectorName }} &middot; {{ insp.createdAt | date:'mediumDate' }}</span>
+              <span class="trace-section__item-value">{{ insp.inspectorName }} &middot; {{ insp.createdAt | date:'MM/dd/yyyy' }}</span>
             </div>
           }
         </div>

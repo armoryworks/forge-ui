@@ -42,6 +42,8 @@ export class LoginComponent implements OnInit {
 
   protected readonly loading = this.loadingService.isLoading;
   protected readonly ssoProviders = signal<SsoProvider[]>([]);
+  protected readonly showSetupCode = signal(false);
+  protected readonly setupCodeControl = new FormControl('');
 
   ngOnInit(): void {
     // Load available SSO providers
@@ -59,6 +61,13 @@ export class LoginComponent implements OnInit {
       case 'google': return 'g_mobiledata';
       case 'microsoft': return 'window';
       default: return 'key';
+    }
+  }
+
+  protected goToSetup(): void {
+    const code = this.setupCodeControl.value?.trim();
+    if (code) {
+      this.router.navigate(['/setup', code]);
     }
   }
 

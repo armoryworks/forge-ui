@@ -1,5 +1,5 @@
 @if (open()) {
-  <div class="ai-help-backdrop" (click)="toggle()"></div>
+  <div class="ai-help-backdrop" role="button" tabindex="0" aria-label="Close" (click)="toggle()" (keydown.enter)="toggle()"></div>
   <div class="ai-help-panel">
     <div class="ai-help-panel__header">
       <span class="material-icons-outlined">smart_toy</span>

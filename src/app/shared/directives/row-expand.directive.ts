@@ -1,9 +1,9 @@
-import { Directive, TemplateRef } from '@angular/core';
+import { Directive, inject, TemplateRef } from '@angular/core';
 
 @Directive({
   selector: '[appRowExpand]',
   standalone: true,
 })
 export class RowExpandDirective {
-  constructor(public template: TemplateRef<unknown>) {}
+  readonly template = inject(TemplateRef<unknown>);
 }

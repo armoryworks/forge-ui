@@ -2,7 +2,12 @@
   <div class="toast toast--{{ toast.severity }}">
     <span class="material-icons-outlined toast__icon">{{ iconFor(toast.severity) }}</span>
     <div class="toast__body">
-      <strong class="toast__title">{{ toast.title }}</strong>
+      <strong class="toast__title">
+        {{ toast.title }}
+        @if (toast.count > 1) {
+          <span class="toast__count">x{{ toast.count }}</span>
+        }
+      </strong>
       @if (toast.message) {
         <p class="toast__message">{{ toast.message }}</p>
       }

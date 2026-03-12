@@ -1,5 +1,5 @@
 @if (panelOpen()) {
-  <div class="chat-backdrop" (click)="toggle()"></div>
+  <div class="chat-backdrop" role="button" tabindex="0" aria-label="Close chat" (click)="toggle()" (keydown.enter)="toggle()"></div>
   <div class="chat-panel">
     <div class="chat-panel__header">
       @if (selectedConversation()) {

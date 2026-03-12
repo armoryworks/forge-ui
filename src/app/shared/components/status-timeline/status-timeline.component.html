@@ -58,9 +58,9 @@
                 }
               </div>
               <div class="timeline-entry__meta">
-                <span>{{ entry.startedAt | date:'short' }}</span>
+                <span>{{ entry.startedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
                 @if (entry.endedAt) {
-                  <span> &rarr; {{ entry.endedAt | date:'short' }}</span>
+                  <span> &rarr; {{ entry.endedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
                 }
                 @if (entry.setByName) {
                   <span> &middot; {{ entry.setByName }}</span>

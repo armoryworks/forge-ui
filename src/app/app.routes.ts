@@ -148,6 +148,11 @@ export const routes: Routes = [
           import('./features/quality/quality.routes').then((m) => m.QUALITY_ROUTES),
       },
       {
+        path: 'account',
+        loadChildren: () =>
+          import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),
+      },
+      {
         path: 'admin',
         canActivate: [roleGuard('Admin')],
         loadChildren: () =>

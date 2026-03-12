@@ -48,7 +48,7 @@ export class TrainingDashboardComponent {
           const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
           return {
             id: u.id,
-            name: `${u.firstName} ${u.lastName}`,
+            name: `${u.lastName}, ${u.firstName}`,
             role: u.roles.length > 0 ? u.roles[0] : 'None',
             toursCompleted: completed,
             totalTours: total,

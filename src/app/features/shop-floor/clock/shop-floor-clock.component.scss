@@ -11,116 +11,344 @@
 }
 
 // ─── Header ───
-.clock-header {
+.sf-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: $sp-xl;
   padding: $sp-lg $sp-xl;
   background: var(--header);
   color: #fff;
   flex-shrink: 0;
+
+  app-kiosk-search-bar {
+    flex: 1;
+  }
 }
 
-.clock-header__title {
-  font-family: $font-family-primary;
-  font-size: $font-size-xl;
+.sf-header__team {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  flex-shrink: 0;
+}
+
+.sf-header__team-dot {
+  width: $dot-size-md;
+  height: $dot-size-md;
+}
+
+.sf-header__team-name {
+  font-size: $font-size-lg;
   font-weight: 700;
-  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.clock-header__time {
+.sf-header__time {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: $sp-xs;
+  flex-shrink: 0;
 }
 
-.clock-header__clock {
+.sf-header__clock {
   font-family: $font-family-mono;
   font-size: $font-size-xl;
   font-weight: 600;
 }
 
-.clock-header__date {
+.sf-header__date {
   font-size: $font-size-sm;
   opacity: 0.8;
 }
 
-// ─── Kiosk Scan Phase ───
-.kiosk-scan {
-  flex: 1;
-  @include flex-center;
-  flex-direction: column;
-  gap: $sp-xl;
-  padding: $sp-3xl;
+// ─── KPI Strip ───
+.sf-kpi-strip {
+  display: flex;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
 }
 
-.kiosk-scan__prompt {
+.sf-kpi {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-lg;
+  border: $border-width-thin solid var(--border);
+}
+
+.sf-kpi__value {
+  font-family: $font-family-mono;
+  font-size: $font-size-kpi;
+  font-weight: 700;
+}
+
+.sf-kpi__label {
+  font-size: $font-size-xs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.sf-kpi--success .sf-kpi__value { color: var(--success); }
+.sf-kpi--warning .sf-kpi__value { color: var(--warning); }
+.sf-kpi--error .sf-kpi__value { color: var(--error); }
+.sf-kpi--info .sf-kpi__value { color: var(--info); }
+
+// ─── Body ───
+.sf-body {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: $sp-lg;
+  flex: 1;
+  padding: $sp-lg;
+  overflow: hidden;
+}
+
+// ─── Sections ───
+.sf-section {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+.sf-section__title {
+  display: flex;
   align-items: center;
   gap: $sp-md;
+  font-size: $font-size-md;
+  font-weight: 700;
+  margin: 0 0 $sp-md;
+  padding-bottom: $sp-md;
+  border-bottom: $border-width solid var(--border);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+}
+
+// ─── Team List ───
+.sf-team-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
+}
+
+.sf-team-card {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+
+  &--in {
+    border-left: 3px solid var(--success);
+  }
+
+  &--break {
+    border-left: 3px solid var(--warning);
+  }
+
+  &--out {
+    opacity: 0.6;
+  }
+}
+
+.sf-team-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-team-card__name {
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.sf-team-card__task {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  @include truncate;
+
+  &--idle {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+.sf-team-card__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $sp-xxs;
+  flex-shrink: 0;
+}
+
+.sf-team-card__status {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &--in { color: var(--success); }
+  &--break { color: var(--warning); }
+  &--out { color: var(--text-muted); }
+}
+
+.sf-team-card__time {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+// ─── Jobs List ───
+.sf-jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
+}
+
+.sf-job {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+
+  &--overdue {
+    border-left: 3px solid var(--error);
+  }
+}
+
+.sf-job__stage-dot {
+  width: $dot-size-md;
+  height: $dot-size-md;
+  flex-shrink: 0;
+}
+
+.sf-job__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-job__number {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.sf-job__title {
+  font-size: $font-size-base;
+  @include truncate;
+}
+
+.sf-job__stage {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  width: 100px;
   text-align: center;
 }
 
-.kiosk-scan__icon {
-  font-size: $icon-size-hero;
-  color: var(--primary);
+.sf-job__priority {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  width: 60px;
+  text-align: center;
+  flex-shrink: 0;
+
+  &--urgent { color: var(--error); }
+  &--high { color: var(--warning); }
 }
 
-.kiosk-scan__title {
-  font-size: $font-size-xl;
-  font-weight: 700;
-  margin: 0;
+// ─── Clock Action Bar (bottom of dashboard) ───
+.sf-clock-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-md $sp-xl;
+  background: var(--surface);
+  border-top: $border-width solid var(--border);
+  flex-shrink: 0;
 }
 
-.kiosk-scan__subtitle {
-  font-size: $font-size-md;
+.sf-clock-bar__scan {
+  flex: 1;
+  max-width: 400px;
+}
+
+.sf-clock-bar__manual {
   color: var(--text-muted);
-  margin: 0;
+  font-size: $font-size-md;
 }
 
-.kiosk-scan__input-wrapper {
+.sf-clock-bar__spinner {
+  font-size: $icon-size-lg;
+  color: var(--primary);
+  animation: spin 1s linear infinite;
+}
+
+// ─── Auth Overlay ───
+.sf-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: $backdrop-color;
+  z-index: $z-dialog;
+  @include flex-center;
+}
+
+.sf-auth-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xl;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
   width: 100%;
   max-width: 400px;
 }
 
-// ─── Kiosk PIN Phase ───
-.kiosk-pin {
-  flex: 1;
-  @include flex-center;
-  flex-direction: column;
-  gap: $sp-xl;
-  padding: $sp-3xl;
-}
-
-.kiosk-pin__prompt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $sp-md;
-  text-align: center;
-}
-
-.kiosk-pin__icon {
+.sf-auth-card__icon {
   font-size: $icon-size-hero;
   color: var(--primary);
 }
 
-.kiosk-pin__title {
+.sf-auth-card__title {
   font-size: $font-size-xl;
   font-weight: 700;
   margin: 0;
 }
 
-.kiosk-pin__barcode {
+.sf-auth-card__subtitle {
   font-family: $font-family-mono;
   font-size: $font-size-sm;
   color: var(--text-muted);
   margin: 0;
 }
 
-.kiosk-pin__error {
+.sf-auth-card__error {
   display: flex;
   align-items: center;
   gap: $sp-md;
@@ -130,100 +358,72 @@
   border: $border-width-thin solid var(--error);
   font-size: $font-size-sm;
   font-weight: 600;
+  width: 100%;
 
   .material-icons-outlined {
     font-size: $icon-size-md;
   }
 }
 
-.kiosk-pin__input-wrapper {
+.sf-auth-card__field {
   width: 100%;
-  max-width: 300px;
 }
 
-.kiosk-pin__actions {
+.sf-auth-card__actions {
   display: flex;
   gap: $sp-md;
 }
 
-.kiosk-pin__spinner {
+.sf-auth-card__spinner {
   animation: spin 1s linear infinite;
 }
 
-// ─── Kiosk Return Button ───
-.kiosk-return {
-  display: flex;
-  justify-content: center;
-  padding: $sp-lg;
-  flex-shrink: 0;
-  border-top: $border-width-thin solid var(--border);
-}
-
-// ─── Body ───
-.clock-body {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $sp-xl;
-  flex: 1;
-  padding: $sp-xl;
-  overflow: hidden;
-}
-
-// ─── Sections ───
-.clock-section {
+// ─── Clock Actions (post-auth) ───
+.sf-clock-actions {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-.clock-section__title {
-  display: flex;
   align-items: center;
-  gap: $sp-md;
-  font-size: $font-size-md;
-  font-weight: 700;
-  margin: 0 0 $sp-lg;
-  padding-bottom: $sp-md;
-  border-bottom: $border-width solid var(--border);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  .material-icons-outlined {
-    font-size: $icon-size-lg;
-    color: var(--text-muted);
-  }
-
-  &--active .material-icons-outlined {
-    color: var(--success);
-  }
+  gap: $sp-xl;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 600px;
 }
 
-// ─── Grid ───
-.clock-grid {
+.sf-clock-actions__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sf-clock-actions__grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: $sp-lg;
-  overflow-y: auto;
-  padding: $sp-sm;
-  @include custom-scrollbar(4px);
+  width: 100%;
 }
 
-// ─── Cards (touch targets) ───
-.clock-card {
+.sf-clock-actions__cancel {
+  color: var(--text-muted);
+}
+
+.sf-action-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: $sp-md;
   padding: $sp-xl $sp-lg;
-  background: var(--surface);
   border: $border-width solid var(--border);
+  background: var(--surface);
   cursor: pointer;
-  transition: border-color $transition-fast, background $transition-fast;
   min-height: 88px;
   font-family: $font-family-primary;
+  transition: border-color $transition-fast, background $transition-fast;
 
   &:hover:not(:disabled) {
     border-color: var(--primary);
+    background: var(--primary-light);
   }
 
   &:disabled {
@@ -231,58 +431,49 @@
     cursor: not-allowed;
   }
 
-  &--in {
-    border-left: 3px solid var(--success);
+  .material-icons-outlined {
+    font-size: $icon-size-xxl;
   }
 
-  &--processing {
-    opacity: 0.7;
+  &--clock-in {
+    border-left: 3px solid var(--success);
+    .material-icons-outlined { color: var(--success); }
+  }
+
+  &--clock-out {
+    border-left: 3px solid var(--error);
+    .material-icons-outlined { color: var(--error); }
+  }
+
+  &--break {
+    border-left: 3px solid var(--warning);
+    .material-icons-outlined { color: var(--warning); }
+  }
+
+  &--resume {
+    border-left: 3px solid var(--info);
+    .material-icons-outlined { color: var(--info); }
   }
 }
 
-.clock-card__name {
+.sf-action-btn__label {
   font-size: $font-size-md;
   font-weight: 600;
-  text-align: center;
 }
 
-.clock-card__since {
+.sf-action-btn__name {
   font-size: $font-size-xs;
   color: var(--text-muted);
-  font-family: $font-family-mono;
 }
 
-.clock-card__action {
-  display: flex;
-  align-items: center;
-  gap: $sp-sm;
-  font-size: $font-size-sm;
-  font-weight: 600;
-  color: var(--success);
-
-  .material-icons-outlined {
-    font-size: $icon-size-sm;
-  }
-
-  &--out {
-    color: var(--error);
-  }
-}
-
-.clock-card__spinner {
-  animation: spin 1s linear infinite;
-}
-
-// ─── Empty ───
-.clock-empty {
-  grid-column: 1 / -1;
+// ─── Shared ───
+.sf-empty {
   font-size: $font-size-md;
   color: var(--text-muted);
   text-align: center;
-  padding: $sp-3xl;
+  padding: $sp-2xl;
 }
 
-// ─── Error (overlaid) ───
 .clock-error {
   position: fixed;
   top: $sp-xl;
@@ -302,4 +493,72 @@
 
 .clock-error__icon {
   font-size: $icon-size-xl;
+}
+
+// ─── Job Scanned Card (dual-scan flow) ───
+.sf-auth-card__icon--job {
+  color: var(--info);
+}
+
+.sf-auth-card__scan-prompt {
+  width: 100%;
+}
+
+.sf-job-card {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  width: 100%;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--info);
+  }
+}
+
+.sf-job-card__stage-dot {
+  width: $dot-size-md;
+  height: $dot-size-md;
+  flex-shrink: 0;
+}
+
+.sf-job-card__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-job-card__number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sf-job-card__title {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  @include truncate;
+}
+
+.sf-job-card__stage {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.sf-job-card--compact {
+  margin-bottom: $sp-sm;
+}
+
+.sf-job-card--banner {
+  margin-bottom: $sp-md;
+  border-left: 3px solid var(--info);
 }

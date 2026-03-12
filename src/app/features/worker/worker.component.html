@@ -17,7 +17,9 @@
 
     <div class="worker__task-list">
       @for (task of sortedTasks(); track task.id) {
-        <div class="task-card" [class.task-card--overdue]="isOverdue(task)" (click)="openJob(task)">
+        <div class="task-card" [class.task-card--overdue]="isOverdue(task)"
+             role="button" tabindex="0" [attr.aria-label]="'Open job ' + task.jobNumber + ': ' + task.title"
+             (click)="openJob(task)" (keydown.enter)="openJob(task)">
           <div class="task-card__header">
             <span class="task-card__number">{{ task.jobNumber }}</span>
             <span [class]="getPriorityClass(task.priority)">{{ task.priority }}</span>
@@ -37,7 +39,7 @@
           @if (task.dueDate) {
             <div class="task-card__due" [class.task-card__due--overdue]="isOverdue(task)">
               <span class="material-icons-outlined task-card__due-icon">{{ isOverdue(task) ? 'warning' : 'schedule' }}</span>
-              {{ isOverdue(task) ? 'OVERDUE' : 'Due' }} {{ task.dueDate | date:'mediumDate' }}
+              {{ isOverdue(task) ? 'OVERDUE' : 'Due' }} {{ task.dueDate | date:'MM/dd/yyyy' }}
             </div>
           }
 

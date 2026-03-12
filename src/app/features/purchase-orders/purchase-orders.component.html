@@ -32,10 +32,10 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="expectedDeliveryDate" let-row>
-          <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'mediumDate') : '—' }}</span>
+          <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -77,28 +77,35 @@
           @if (po.expectedDeliveryDate) {
             <div class="info-item">
               <span class="info-label">Expected Delivery</span>
-              <span class="info-value">{{ po.expectedDeliveryDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ po.expectedDeliveryDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (po.submittedDate) {
             <div class="info-item">
               <span class="info-label">Submitted</span>
-              <span class="info-value">{{ po.submittedDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ po.submittedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (po.acknowledgedDate) {
             <div class="info-item">
               <span class="info-label">Acknowledged</span>
-              <span class="info-value">{{ po.acknowledgedDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ po.acknowledgedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (po.receivedDate) {
             <div class="info-item">
               <span class="info-label">Received</span>
-              <span class="info-value">{{ po.receivedDate | date:'mediumDate' }}</span>
+              <span class="info-value">{{ po.receivedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
         </div>
+
+        <app-barcode-info
+          entityType="PurchaseOrder"
+          [entityId]="po.id"
+          [entityLabel]="po.poNumber"
+          [naturalIdentifier]="po.poNumber"
+          [compact]="true" />
 
         @if (po.notes) {
           <div class="info-section">
@@ -146,11 +153,11 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">Created</span>
-            <span class="info-value">{{ po.createdAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ po.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">Updated</span>
-            <span class="info-value">{{ po.updatedAt | date:'mediumDate' }}</span>
+            <span class="info-value">{{ po.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
 

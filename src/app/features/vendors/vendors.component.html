@@ -36,7 +36,7 @@
           </span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
         </ng-template>
       </app-data-table>
     </div>
@@ -142,11 +142,11 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">Created</span>
-              <span class="info-value">{{ vendor.createdAt | date:'mediumDate' }}</span>
+              <span class="info-value">{{ vendor.createdAt | date:'MM/dd/yyyy' }}</span>
             </div>
             <div class="info-item">
               <span class="info-label">Updated</span>
-              <span class="info-value">{{ vendor.updatedAt | date:'mediumDate' }}</span>
+              <span class="info-value">{{ vendor.updatedAt | date:'MM/dd/yyyy' }}</span>
             </div>
           </div>
 
@@ -180,10 +180,10 @@
                 <span [class]="getPoStatusClass(row.status)">{{ getPoStatusLabel(row.status) }}</span>
               </ng-template>
               <ng-template appColumnCell="expectedDeliveryDate" let-row>
-                <span class="text-muted">{{ row.expectedDeliveryDate | date:'mediumDate' }}</span>
+                <span class="text-muted">{{ row.expectedDeliveryDate | date:'MM/dd/yyyy' }}</span>
               </ng-template>
               <ng-template appColumnCell="createdAt" let-row>
-                <span class="text-muted">{{ row.createdAt | date:'mediumDate' }}</span>
+                <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
               </ng-template>
             </app-data-table>
           }

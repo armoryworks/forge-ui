@@ -66,7 +66,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly offlineQueue = inject(OfflineQueueService);
   private readonly dialog = inject(MatDialog);
 
-  protected readonly showShell = computed(() => this.authService.isAuthenticated());
+  protected readonly showShell = computed(() => this.authService.isAuthenticated() && !this.layout.isDisplayRoute());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
 
   constructor() {

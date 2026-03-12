@@ -78,19 +78,8 @@ export class ScannerService implements OnDestroy {
   private onKeydown(event: KeyboardEvent): void {
     if (!this._enabled()) return;
 
-    // Skip if user is typing in a focused input/textarea/select
     const target = event.target as HTMLElement;
-    if (this.isEditableElement(target)) {
-      // Exception: barcode-scan-input handles its own scanning
-      if (target.closest('app-barcode-scan-input')) return;
-
-      // Allow scanning in regular inputs only if the keystroke timing matches scanner speed
-      const now = Date.now();
-      if (event.key.length === 1 && now - this.lastKeyTime > this.SCAN_THRESHOLD_MS) {
-        // Too slow — this is normal typing, not a scanner
-        return;
-      }
-    }
+    const inEditable = this.isEditableElement(target) && !target.closest('app-barcode-scan-input');
 
     const now = Date.now();
 
@@ -107,12 +96,19 @@ export class ScannerService implements OnDestroy {
     // Only accumulate printable characters
     if (event.key.length !== 1) return;
 
-    if (now - this.lastKeyTime < this.SCAN_THRESHOLD_MS) {
+    const elapsed = now - this.lastKeyTime;
+    this.lastKeyTime = now;
+
+    if (elapsed < this.SCAN_THRESHOLD_MS) {
       this.buffer += event.key;
     } else {
+      // Gap too large — if in an editable element, this is normal typing; don't start a new buffer
+      if (inEditable) {
+        this.clearBuffer();
+        return;
+      }
       this.buffer = event.key;
     }
-    this.lastKeyTime = now;
 
     // Auto-complete scan after brief pause (scanner sends Enter, but as a fallback)
     if (this.completeTimer) clearTimeout(this.completeTimer);

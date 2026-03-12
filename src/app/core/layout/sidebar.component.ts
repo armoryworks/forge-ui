@@ -39,7 +39,7 @@ export class SidebarComponent {
         { icon: 'description', label: 'POs', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'request_quote', label: 'Quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'shopping_cart', label: 'Orders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'package_2', label: 'Shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'outbox', label: 'Shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'receipt', label: 'Invoices', route: '/invoices', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'payments', label: 'Payments', route: '/payments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'people_outline', label: 'Leads', route: '/leads', allowedRoles: ['Admin', 'Manager', 'PM'] },

@@ -20,11 +20,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, BarcodeInfoComponent],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

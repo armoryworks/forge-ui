@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
 
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
 import { ShopFloorService } from './services/shop-floor.service';
 import { ShopFloorOverview } from './models/shop-floor-overview.model';
 
@@ -13,7 +14,7 @@ const REFRESH_INTERVAL_MS = 30_000;
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [AvatarComponent],
+  imports: [AvatarComponent, KioskSearchBarComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -21,6 +21,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 
 @Component({
   selector: 'app-purchase-orders',
@@ -29,7 +30,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
-    PoDialogComponent, ReceiveDialogComponent, LoadingBlockDirective,
+    PoDialogComponent, ReceiveDialogComponent, LoadingBlockDirective, BarcodeInfoComponent,
   ],
   templateUrl: './purchase-orders.component.html',
   styleUrl: './purchase-orders.component.scss',

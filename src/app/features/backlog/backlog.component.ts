@@ -4,6 +4,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, startWith } from 'rxjs';
+import { formatDate } from '../../shared/utils/date.utils';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -163,9 +164,7 @@ export class BacklogComponent implements OnInit {
 
   protected formatDate(date: string | null): string {
     if (!date) return '—';
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric',
-    });
+    return formatDate(date);
   }
 
   protected onRowClicked(job: KanbanJob): void {

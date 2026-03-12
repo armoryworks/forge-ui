@@ -1,4 +1,4 @@
-<div class="lightbox__backdrop" (click)="onBackdropClick($event)">
+<div class="lightbox__backdrop" role="button" tabindex="0" aria-label="Close" (click)="onBackdropClick($event)" (keydown.enter)="close()">
   <div class="lightbox" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
     <!-- Close button -->
     <button class="lightbox__close" (click)="close()" aria-label="Close gallery">

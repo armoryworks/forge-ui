@@ -1,4 +1,4 @@
-<div class="filter-popover" (click)="$event.stopPropagation()">
+<div class="filter-popover" role="dialog" aria-label="Column filter" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
   <div class="filter-popover__header">
     <span class="filter-popover__title">Filter: {{ column().header }}</span>
   </div>
@@ -39,9 +39,10 @@
       }
       @case ('enum') {
         <div class="filter-popover__enum-list">
-          @for (opt of column().filterOptions ?? []; track opt.value) {
-            <label class="filter-popover__enum-item">
+          @for (opt of column().filterOptions ?? []; track opt.value; let i = $index) {
+            <label class="filter-popover__enum-item" [for]="'filter-enum-' + i + '-input'">
               <mat-checkbox
+                [id]="'filter-enum-' + i"
                 [checked]="isEnumSelected(opt.value)"
                 (change)="toggleEnum(opt.value)" />
               <span>{{ opt.label }}</span>

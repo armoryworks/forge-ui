@@ -1,6 +1,6 @@
 @if (open()) {
-  <div class="camera-capture__backdrop" (click)="close()">
-    <div class="camera-capture" (click)="$event.stopPropagation()">
+  <div class="camera-capture__backdrop" role="button" tabindex="0" aria-label="Close" (click)="close()" (keydown.enter)="close()">
+    <div class="camera-capture" role="dialog" aria-modal="true" aria-label="Capture Photo" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
       <div class="camera-capture__header">
         <span class="camera-capture__title">Capture Photo</span>
         <button class="icon-btn" aria-label="Close camera" (click)="close()">

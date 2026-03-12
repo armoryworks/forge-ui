@@ -25,9 +25,13 @@
     } @else {
       @for (n of notifications(); track n.id) {
         <div class="notification-item"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'Notification: ' + n.title"
           [class.notification-item--unread]="!n.isRead"
           [class.notification-item--pinned]="n.isPinned"
-          (click)="onNotificationClick(n)">
+          (click)="onNotificationClick(n)"
+          (keydown.enter)="onNotificationClick(n)">
           <div class="notification-item__icon">
             @if (n.senderInitials) {
               <app-avatar [initials]="n.senderInitials" [color]="n.senderColor ?? '#94a3b8'" size="sm" />
@@ -40,7 +44,7 @@
           <div class="notification-item__content">
             <div class="notification-item__title">{{ n.title }}</div>
             <div class="notification-item__message">{{ n.message }}</div>
-            <div class="notification-item__time">{{ n.createdAt | date:'short' }}</div>
+            <div class="notification-item__time">{{ n.createdAt | date:'MM/dd/yyyy hh:mm a' }}</div>
           </div>
           <div class="notification-item__actions">
             <button class="icon-btn" [title]="n.isPinned ? 'Unpin' : 'Pin'" (click)="togglePin(n, $event)">

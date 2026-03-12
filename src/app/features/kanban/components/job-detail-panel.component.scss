@@ -83,6 +83,8 @@
   &__value { display: flex; align-items: center; gap: $sp-sm; color: var(--text); }
   &__dot { width: $dot-size-sm; height: $dot-size-sm; border-radius: 50%; flex-shrink: 0; }
   &__empty { color: var(--text-muted); font-style: italic; }
+  &__edit-icon { font-size: $icon-size-sm; color: var(--text-muted); margin-left: auto; opacity: 0; transition: opacity $transition-fast; }
+  &--clickable { cursor: pointer; &:hover { background: var(--bg); } &:hover .meta-row__edit-icon { opacity: 1; } }
 }
 
 // ─── Section ───

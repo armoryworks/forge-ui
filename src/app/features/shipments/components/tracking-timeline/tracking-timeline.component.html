@@ -12,7 +12,7 @@
       @if (tracking().estimatedDelivery) {
         <div class="tracking__meta-item">
           <span class="tracking__meta-label">Est. Delivery</span>
-          <span class="tracking__meta-value">{{ tracking().estimatedDelivery | date:'mediumDate' }}</span>
+          <span class="tracking__meta-value">{{ tracking().estimatedDelivery | date:'MM/dd/yyyy' }}</span>
         </div>
       }
     </div>
@@ -31,7 +31,7 @@
           <div class="timeline__content">
             <span class="timeline__description">{{ event.description }}</span>
             <div class="timeline__details">
-              <span class="timeline__time">{{ event.timestamp | date:'medium' }}</span>
+              <span class="timeline__time">{{ event.timestamp | date:'MM/dd/yyyy hh:mm a' }}</span>
               @if (event.location) {
                 <span class="timeline__location">
                   <span class="material-icons-outlined timeline__location-icon">place</span>

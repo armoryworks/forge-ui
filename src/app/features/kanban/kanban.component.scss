@@ -35,6 +35,49 @@
   }
 }
 
+// ─── Compact team filter in header ───
+:host ::ng-deep .page-header app-select mat-form-field {
+  // Match the height of neighboring buttons in the toolbar
+  .mat-mdc-text-field-wrapper {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .mat-mdc-form-field-infix {
+    min-height: $btn-icon-size;
+    padding-top: $sp-xs;
+    padding-bottom: $sp-xs;
+  }
+}
+
+// ─── View Toggle ───
+.view-toggle {
+  display: flex;
+  border: $border-width-thin solid var(--border);
+
+  &__btn {
+    @include flex-center;
+    width: $btn-icon-size + $sp-md;
+    height: $btn-icon-size;
+    border: none;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+
+    &:hover { background: var(--bg); color: var(--text); }
+
+    &--active {
+      background: var(--primary);
+      color: white;
+      &:hover { background: var(--primary-dark); color: white; }
+    }
+
+    & + & { border-left: $border-width-thin solid var(--border); }
+  }
+}
+
 .new-job-btn {
   @include uppercase-label($font-size-xs, 0.5px, 600);
   @include flex-center;
@@ -160,6 +203,99 @@
     font-size: $icon-size-sm;
     margin-right: $sp-sm;
     color: var(--text-muted);
+  }
+}
+
+// ─── Swimlane (Team View) ───
+.swimlane {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 160px repeat(var(--stage-count, 1), minmax(180px, 1fr));
+  grid-auto-rows: min-content;
+  overflow: auto;
+  min-height: 0;
+  position: relative;
+  isolation: isolate;
+  padding: 0 $sp-lg $sp-lg;
+  @include custom-scrollbar;
+
+  &__corner {
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: $z-sticky + 1;
+    display: flex;
+    align-items: center;
+    padding: $sp-sm $sp-md;
+    background: var(--surface);
+    border-bottom: $border-width-thin solid var(--border);
+    border-right: $border-width-thin solid var(--border);
+    border-top: 3px solid var(--header);
+  }
+
+  &__corner-label {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-secondary);
+  }
+
+  &__stage-header {
+    position: sticky;
+    top: 0;
+    z-index: $z-sticky;
+    display: flex;
+    align-items: center;
+    padding: $sp-sm $sp-md;
+    background: var(--surface);
+    border-top: 3px solid;
+    border-bottom: $border-width-thin solid var(--border);
+    border-right: $border-width-thin solid var(--border);
+  }
+
+  &__stage-name {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-secondary);
+  }
+
+  &__user-label {
+    position: sticky;
+    left: 0;
+    z-index: $z-sticky;
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: var(--surface);
+    border-bottom: $border-width-thin solid var(--border);
+    border-right: $border-width-thin solid var(--border);
+  }
+
+  &__user-name {
+    @include uppercase-label($font-size-xs, 0.3px, 600);
+    color: var(--text);
+    white-space: nowrap;
+    @include truncate;
+  }
+
+  &__unassigned-icon {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+  }
+
+  &__cell {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    padding: $sp-xs;
+    background: var(--bg);
+    border-bottom: $border-width-thin solid var(--border);
+    border-right: $border-width-thin solid var(--border);
+    min-height: 24px;
+    overflow: hidden;
+    transition: background $transition-fast;
+
+    &.cdk-drop-list-dragging {
+      background: var(--primary-light);
+    }
   }
 }
 

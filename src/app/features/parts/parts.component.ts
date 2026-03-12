@@ -34,6 +34,7 @@ import { FileUploadZoneComponent } from '../../shared/components/file-upload-zon
 import { FileAttachment } from '../../shared/models/file.model';
 import { PartInventorySummary } from './models/part-inventory-summary.model';
 import { ProcessPlanComponent } from './components/process-plan/process-plan.component';
+import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 
 @Component({
   selector: 'app-parts',
@@ -44,7 +45,7 @@ import { ProcessPlanComponent } from './components/process-plan/process-plan.com
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
     EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
-    ProcessPlanComponent,
+    ProcessPlanComponent, BarcodeInfoComponent,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',

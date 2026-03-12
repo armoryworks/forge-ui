@@ -1,5 +1,5 @@
 @if (label()) {
-  <label class="rich-text-editor__label">{{ label() }}</label>
+  <span class="rich-text-editor__label" id="rich-text-label">{{ label() }}</span>
 }
 <quill-editor
   [formControl]="editorControl"
@@ -7,6 +7,7 @@
   [placeholder]="placeholder()"
   [readOnly]="isDisabled()"
   [styles]="{ height: height() }"
+  [attr.aria-labelledby]="label() ? 'rich-text-label' : null"
   (onContentChanged)="onContentChanged($event)"
   (onBlur)="onBlur()"
   theme="snow" />
