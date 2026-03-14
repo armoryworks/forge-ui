@@ -1,6 +1,6 @@
-<app-page-header title="Leads">
+<app-page-header title="Leads" subtitle="Track and qualify potential sales opportunities">
   <button class="action-btn action-btn--primary" (click)="openCreateLead()">
-    <span class="material-icons-outlined">person_add</span>
+    <span class="material-icons-outlined">add</span>
     New Lead
   </button>
 </app-page-header>
@@ -21,7 +21,7 @@
       </div>
     } @else {
       <app-data-table tableId="leads" [columns]="leadColumns" [data]="leads()"
-        [rowClass]="leadRowClass" emptyIcon="person_search" emptyMessage="No leads found"
+        [rowClass]="leadRowClass" emptyIcon="person_search" emptyMessage="No leads found" emptyHelpText="Leads track potential sales opportunities. Click New Lead to start capturing prospects."
         (rowClick)="selectLead($any($event))">
         <ng-template appColumnCell="companyName" let-lead>
           <span class="company-name">{{ lead.companyName }}</span>
@@ -201,6 +201,7 @@
         [appValidationPopover]="leadViolations"
         [disabled]="leadForm.invalid || saving()"
         (click)="saveLead()">
+        <span class="material-icons-outlined">save</span>
         {{ editingLead() ? 'Save Changes' : 'Create Lead' }}
       </button>
     </div>

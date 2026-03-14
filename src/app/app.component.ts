@@ -6,6 +6,7 @@ import { AppHeaderComponent } from './core/layout/app-header.component';
 import { SidebarComponent } from './core/layout/sidebar.component';
 import { ToastContainerComponent } from './shared/components/toast/toast.component';
 import { ConnectionBannerComponent } from './shared/components/connection-banner/connection-banner.component';
+import { OnboardingBannerComponent } from './shared/components/onboarding-banner/onboarding-banner.component';
 import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
 import { KeyboardShortcutsHelpComponent } from './shared/components/keyboard-shortcuts-help/keyboard-shortcuts-help.component';
@@ -28,6 +29,7 @@ import { BroadcastService } from './shared/services/broadcast.service';
 import { LanguageService } from './shared/services/language.service';
 import { ScannerService } from './shared/services/scanner.service';
 import { OfflineQueueService } from './shared/services/offline-queue.service';
+import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { KANBAN_TOUR } from './shared/tours/kanban-tour';
 import { DASHBOARD_TOUR } from './shared/tours/dashboard-tour';
 import { PARTS_TOUR } from './shared/tours/parts-tour';
@@ -41,7 +43,7 @@ import { PLANNING_TOUR } from './shared/tours/planning-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
+  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,15 +66,24 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly languageService = inject(LanguageService);
   private readonly scanner = inject(ScannerService);
   private readonly offlineQueue = inject(OfflineQueueService);
+  private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly dialog = inject(MatDialog);
 
-  protected readonly showShell = computed(() => this.authService.isAuthenticated() && !this.layout.isDisplayRoute());
+  protected readonly showShell = computed(() => this.authService.isAuthenticated() && !this.layout.isDisplayRoute() && !this.layout.isAuthRoute());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
 
   constructor() {
-    // Disconnect all hubs and stop scanner when user logs out
+    // Reactively connect/disconnect hubs based on auth state
     effect(() => {
-      if (!this.authService.isAuthenticated()) {
+      if (this.authService.isAuthenticated()) {
+        this.notificationHub.connect();
+        this.chatHub.connect();
+        this.notificationService.load();
+        this.userPreferences.load();
+        this.accountingService.load();
+        this.employeeProfile.load();
+        this.scanner.start();
+      } else {
         this.signalr.stopAll();
         this.scanner.stop();
       }
@@ -94,15 +105,6 @@ export class AppComponent implements OnInit, OnDestroy {
     this.themeService.loadBrandSettings();
     this.registerTours();
     this.keyboardShortcuts.initialize();
-
-    if (this.authService.isAuthenticated()) {
-      this.notificationHub.connect();
-      this.chatHub.connect();
-      this.notificationService.load();
-      this.userPreferences.load();
-      this.accountingService.load();
-      this.scanner.start();
-    }
   }
 
   ngOnDestroy(): void {

@@ -1,35 +1,49 @@
-<app-page-header title="Admin Settings" />
+<app-page-header [title]="isAdmin() ? 'Admin Settings' : 'Employee Management'" [subtitle]="isAdmin() ? 'Users, track types, reference data, and system configuration' : 'Compliance, payroll, and employee documents'" helpTourId="admin" />
 
 <div class="admin-content">
   <!-- Tabs -->
   <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'users'" (click)="switchTab('users')">
-      <span class="material-icons-outlined">people</span>
-      Users
-    </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'track-types'" (click)="switchTab('track-types')">
-      <span class="material-icons-outlined">route</span>
-      Track Types
-    </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'reference-data'" (click)="switchTab('reference-data')">
-      <span class="material-icons-outlined">dataset</span>
-      Reference Data
-    </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'terminology'" (click)="switchTab('terminology')">
-      <span class="material-icons-outlined">translate</span>
-      Terminology
-    </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
-      <span class="material-icons-outlined">settings</span>
-      Settings
-    </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'integrations'" (click)="switchTab('integrations')">
-      <span class="material-icons-outlined">hub</span>
-      Integrations
-    </button>
-    <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
-      <span class="material-icons-outlined">school</span>
-      Training
+    @if (isAdmin()) {
+      <button class="tab" [class.tab--active]="activeTab() === 'users'" (click)="switchTab('users')">
+        <span class="material-icons-outlined">people</span>
+        Users
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'track-types'" (click)="switchTab('track-types')">
+        <span class="material-icons-outlined">route</span>
+        Track Types
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'reference-data'" (click)="switchTab('reference-data')">
+        <span class="material-icons-outlined">dataset</span>
+        Reference Data
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'terminology'" (click)="switchTab('terminology')">
+        <span class="material-icons-outlined">translate</span>
+        Terminology
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
+        <span class="material-icons-outlined">settings</span>
+        Settings
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'integrations'" (click)="switchTab('integrations')">
+        <span class="material-icons-outlined">hub</span>
+        Integrations
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
+        <span class="material-icons-outlined">school</span>
+        Training
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'ai-assistants'" (click)="switchTab('ai-assistants')">
+        <span class="material-icons-outlined">smart_toy</span>
+        AI Assistants
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'teams'" (click)="switchTab('teams')">
+        <span class="material-icons-outlined">groups</span>
+        Teams &amp; Kiosks
+      </button>
+    }
+    <button class="tab" [class.tab--active]="activeTab() === 'compliance'" (click)="switchTab('compliance')">
+      <span class="material-icons-outlined">fact_check</span>
+      Compliance
     </button>
   </div>
 
@@ -40,7 +54,7 @@
         <div class="panel-header">
           <span class="panel-header__count">{{ users().length }} users</span>
           <button class="action-btn action-btn--primary" (click)="openCreateUser()">
-            <span class="material-icons-outlined">person_add</span>
+            <span class="material-icons-outlined">add</span>
             Add User
           </button>
         </div>
@@ -59,6 +73,19 @@
             <span class="chip" [class.chip--primary]="user.roles.includes('Admin')">
               {{ user.roles.length ? user.roles[0] : 'None' }}
             </span>
+          </ng-template>
+          <ng-template appColumnCell="compliance" let-user>
+            @if (user.canBeAssignedJobs) {
+              <span class="chip chip--success" title="All required items complete">
+                <span class="material-icons-outlined chip__icon">check_circle</span>
+                {{ user.complianceCompletedItems }}/{{ user.complianceTotalItems }}
+              </span>
+            } @else {
+              <span class="chip chip--error" [title]="'Missing: ' + user.missingComplianceItems.join(', ')">
+                <span class="material-icons-outlined chip__icon">warning</span>
+                {{ user.complianceCompletedItems }}/{{ user.complianceTotalItems }}
+              </span>
+            }
           </ng-template>
           <ng-template appColumnCell="status" let-user>
             @if (!user.hasPassword) {
@@ -228,12 +255,90 @@
     <!-- System Settings Tab -->
     @if (activeTab() === 'settings') {
       <div class="tab-panel">
-        <div class="panel-header">
-          <span class="panel-header__count">{{ settingDefinitions.length }} settings</span>
-          <button class="action-btn action-btn--primary" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
-            <span class="material-icons-outlined">save</span>
-            Save Changes
-          </button>
+
+        <!-- Company Profile -->
+        <div class="settings-section">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">business</span>
+              Company Profile
+            </h3>
+            <button class="action-btn action-btn--primary action-btn--sm"
+              [disabled]="profileSaving() || profileForm.invalid"
+              (click)="saveCompanyProfile()">
+              <span class="material-icons-outlined">save</span>
+              Save Profile
+            </button>
+          </div>
+
+          <div class="profile-form" [formGroup]="profileForm">
+            <app-input label="Company Name" formControlName="name" />
+            <div class="dialog-row">
+              <app-input label="Phone" formControlName="phone" mask="phone" />
+              <app-input label="Email" formControlName="email" type="email" />
+            </div>
+            <div class="dialog-row">
+              <app-input label="EIN / Tax ID" formControlName="ein" placeholder="XX-XXXXXXX" />
+              <app-input label="Website" formControlName="website" placeholder="https://" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Company Locations -->
+        <div class="settings-section">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">location_on</span>
+              Locations
+            </h3>
+            <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateLocation()">
+              <span class="material-icons-outlined">add</span>
+              New Location
+            </button>
+          </div>
+
+          <app-data-table tableId="admin-locations" [columns]="locationColumns" [data]="companyLocations()"
+            emptyIcon="location_on" emptyMessage="No locations configured">
+            <ng-template appColumnCell="address" let-loc>
+              {{ loc.line1 }}{{ loc.line2 ? ', ' + loc.line2 : '' }}, {{ loc.city }}
+            </ng-template>
+            <ng-template appColumnCell="default" let-loc>
+              @if (loc.isDefault) {
+                <span class="chip chip--primary">Default</span>
+              }
+            </ng-template>
+            <ng-template appColumnCell="actions" let-loc>
+              <div class="action-cell">
+                @if (!loc.isDefault) {
+                  <button class="icon-btn" title="Set as default" aria-label="Set as default location" (click)="setDefaultLocation(loc); $event.stopPropagation()">
+                    <span class="material-icons-outlined">star_outline</span>
+                  </button>
+                }
+                <button class="icon-btn" title="Edit" aria-label="Edit location" (click)="openEditLocation(loc); $event.stopPropagation()">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+                @if (!loc.isDefault) {
+                  <button class="icon-btn icon-btn--danger" title="Delete" aria-label="Delete location" (click)="deleteLocation(loc); $event.stopPropagation()">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                }
+              </div>
+            </ng-template>
+          </app-data-table>
+        </div>
+
+        <!-- System Settings -->
+        <div class="settings-section">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">settings</span>
+              System Settings
+            </h3>
+            <button class="action-btn action-btn--primary action-btn--sm" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
+              <span class="material-icons-outlined">save</span>
+              Save Changes
+            </button>
+          </div>
         </div>
 
         <!-- Logo Upload -->
@@ -305,6 +410,39 @@
       </div>
     }
 
+    <!-- AI Assistants Tab -->
+    @if (activeTab() === 'ai-assistants') {
+      <div class="tab-panel">
+        <app-ai-assistants-panel />
+      </div>
+    }
+
+    <!-- Teams & Kiosks Tab -->
+    @if (activeTab() === 'teams') {
+      <div class="tab-panel">
+        <app-teams-panel />
+      </div>
+    }
+
+    <!-- Compliance Tab -->
+    @if (activeTab() === 'compliance') {
+      <div class="tab-panel">
+        <app-compliance-templates-panel />
+
+        <h3 class="compliance-section-divider">Per-User Compliance</h3>
+        <div class="compliance-user-picker">
+          <label class="compliance-user-picker__label" for="compliance-user-select">Select User</label>
+          <select id="compliance-user-select" class="compliance-user-picker__select" (change)="complianceUserId.set(+$any($event.target).value || null)">
+            <option value="">-- Select a user --</option>
+            @for (u of users(); track u.id) {
+              <option [value]="u.id">{{ u.lastName }}, {{ u.firstName }}</option>
+            }
+          </select>
+        </div>
+        <app-user-compliance-panel [userId]="complianceUserId()" />
+      </div>
+    }
+
     <!-- Reference Data Tab -->
     @if (activeTab() === 'reference-data') {
       <div class="tab-panel">
@@ -372,18 +510,22 @@
   <app-dialog [title]="editingUser() ? 'Edit User' : 'Add User'" width="520px" (closed)="closeUserDialog()">
     <div [formGroup]="userForm">
       <div class="dialog-row">
-        <app-input label="First Name" formControlName="firstName" />
-        <app-input label="Last Name" formControlName="lastName" />
+        <app-input label="First Name" formControlName="firstName" [maxlength]="100" [required]="true" />
+        <app-input label="Last Name" formControlName="lastName" [maxlength]="100" [required]="true" />
       </div>
 
       @if (!editingUser()) {
-        <app-input label="Email" type="email" formControlName="email" />
+        <app-input label="Email" type="email" formControlName="email" [maxlength]="256" [required]="true" />
       }
 
       <div class="dialog-row">
         <app-input label="Initials" formControlName="initials" [maxlength]="3" />
-        <app-select label="Role" formControlName="role" [options]="roleOptions" />
+        <app-select label="Role" formControlName="role" [options]="roleOptions" [required]="true" />
       </div>
+
+      @if (editingUser() && locationOptions().length > 1) {
+        <app-select label="Work Location" formControlName="workLocationId" [options]="locationOptions()" />
+      }
 
       <div class="color-toggle-row">
         <div class="color-picker-row">
@@ -518,9 +660,19 @@
           [appValidationPopover]="userViolations"
           [disabled]="userForm.invalid || saving()"
           (click)="saveUser()">
+          <span class="material-icons-outlined">save</span>
           {{ editingUser() ? 'Save Changes' : 'Create User' }}
         </button>
       }
     </div>
   </app-dialog>
+}
+
+<!-- Company Location Dialog -->
+@if (showLocationDialog()) {
+  <app-company-location-dialog
+    [location]="editingLocation()"
+    [saving]="saving()"
+    (closed)="closeLocationDialog()"
+    (saved)="saveLocation($event)" />
 }

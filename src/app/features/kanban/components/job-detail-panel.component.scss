@@ -37,7 +37,7 @@
   @include flex-center;
   flex-direction: column;
   gap: $sp-md;
-  padding: 60px $sp-lg;
+  padding: $sp-4xl $sp-lg;
   color: var(--text-muted);
 }
 

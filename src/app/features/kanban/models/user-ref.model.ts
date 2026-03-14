@@ -3,4 +3,5 @@ export interface UserRef {
   initials: string;
   name: string;
   color: string;
+  canBeAssignedJobs: boolean;
 }

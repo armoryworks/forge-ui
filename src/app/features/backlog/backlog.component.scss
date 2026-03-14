@@ -14,7 +14,7 @@
   @include flex-center;
   gap: $sp-sm;
   height: 2rem;
-  padding: 0 10px;
+  padding: 0 $sp-lg;
   border: $border-width solid var(--primary);
   background: var(--primary);
   color: white;

@@ -1,0 +1,71 @@
+<div class="account-page">
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">lock</span>
+    Security
+  </h1>
+
+  <div class="account-page__card-grid">
+    <!-- Change Password -->
+    <div class="account-page__card">
+      <span class="account-page__section-label">Change Password</span>
+
+      <div [formGroup]="passwordForm" class="account-page__form">
+        <app-input label="Current Password" type="password" formControlName="currentPassword" [required]="true" />
+        <app-input label="New Password" type="password" formControlName="newPassword" placeholder="Minimum 8 characters" [required]="true" />
+        <app-input label="Confirm New Password" type="password" formControlName="confirmPassword" [required]="true" />
+        @if (passwordMismatch()) {
+          <div class="security__error">
+            <span class="material-icons-outlined">warning</span>
+            Passwords do not match
+          </div>
+        }
+      </div>
+
+      <div class="account-page__actions">
+        <button class="action-btn action-btn--primary"
+          [appValidationPopover]="passwordViolations"
+          [disabled]="passwordForm.invalid || savingPassword() || passwordMismatch()"
+          (click)="changePassword()">
+          @if (savingPassword()) {
+            <span class="material-icons-outlined account-page__spinner">sync</span>
+            Changing...
+          } @else {
+            <span class="material-icons-outlined">lock_reset</span>
+            Change Password
+          }
+        </button>
+      </div>
+    </div>
+
+    <!-- Set PIN -->
+    <div class="account-page__card">
+      <span class="account-page__section-label">Kiosk PIN</span>
+      <p class="security__hint">Set a 4-8 digit PIN for kiosk/shop floor authentication.</p>
+
+      <div [formGroup]="pinForm" class="account-page__form">
+        <app-input label="PIN" type="password" formControlName="pin" placeholder="4-8 digits" [maxlength]="8" [required]="true" />
+        <app-input label="Confirm PIN" type="password" formControlName="confirmPin" [maxlength]="8" [required]="true" />
+        @if (pinMismatch()) {
+          <div class="security__error">
+            <span class="material-icons-outlined">warning</span>
+            PINs do not match
+          </div>
+        }
+      </div>
+
+      <div class="account-page__actions">
+        <button class="action-btn action-btn--primary"
+          [disabled]="pinForm.invalid || savingPin() || pinMismatch()"
+          (click)="setPin()">
+          @if (savingPin()) {
+            <span class="material-icons-outlined account-page__spinner">sync</span>
+            Saving...
+          } @else {
+            <span class="material-icons-outlined">pin</span>
+            Set PIN
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

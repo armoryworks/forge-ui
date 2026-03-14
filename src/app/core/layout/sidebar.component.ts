@@ -22,41 +22,53 @@ export class SidebarComponent {
 
   private readonly allNavGroups: NavGroup[] = [
     {
+      label: 'Operations',
       items: [
-        { icon: 'dashboard', label: 'Dashboard', route: '/dashboard' },
-        { icon: 'view_kanban', label: 'Board', route: '/kanban', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
-        { icon: 'inbox', label: 'Backlog', route: '/backlog', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
+        { icon: 'dashboard', label: 'Dashboard', route: '/dashboard', shortcut: 'G' },
+        { icon: 'view_kanban', label: 'Board', route: '/kanban', shortcut: 'K', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
+        { icon: 'inbox', label: 'Backlog', route: '/backlog', shortcut: 'B', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
         { icon: 'event_note', label: 'Planning', route: '/planning', allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'calendar_month', label: 'Calendar', route: '/calendar' },
       ],
     },
     {
+      label: 'Sales',
       items: [
-        { icon: 'precision_manufacturing', label: 'Parts', route: '/parts', allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM'] },
-        { icon: 'inventory_2', label: 'Inventory', route: '/inventory', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         { icon: 'people', label: 'Customers', route: '/customers', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'local_shipping', label: 'Vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'description', label: 'POs', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'people_outline', label: 'Leads', route: '/leads', allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'request_quote', label: 'Quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'shopping_cart', label: 'Orders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'outbox', label: 'Shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'receipt', label: 'Invoices', route: '/invoices', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'payments', label: 'Payments', route: '/payments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'people_outline', label: 'Leads', route: '/leads', allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'receipt_long', label: 'Expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
       ],
     },
     {
+      label: 'Supply',
+      items: [
+        { icon: 'precision_manufacturing', label: 'Parts', route: '/parts', shortcut: 'P', allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM'] },
+        { icon: 'inventory_2', label: 'Inventory', route: '/inventory', shortcut: 'I', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        { icon: 'local_shipping', label: 'Vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'description', label: 'POs', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+      ],
+    },
+    {
+      label: 'Resources',
       items: [
         { icon: 'build', label: 'Assets', route: '/assets', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'schedule', label: 'Time', route: '/time-tracking' },
-        { icon: 'bar_chart', label: 'Reports', route: '/reports', allowedRoles: ['Admin', 'Manager', 'PM'] },
+        { icon: 'schedule', label: 'Time', route: '/time-tracking', shortcut: 'T' },
+        { icon: 'receipt_long', label: 'Expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        { icon: 'bar_chart', label: 'Reports', route: '/reports', shortcut: 'R', allowedRoles: ['Admin', 'Manager', 'PM'] },
+        { icon: 'smart_toy', label: 'AI', route: '/ai' },
       ],
     },
   ];
 
   private readonly allBottomItems: NavGroup = {
-    items: [{ icon: 'settings', label: 'Admin', route: '/admin', allowedRoles: ['Admin'] }],
+    items: [
+      { icon: 'storefront', label: 'Shop Floor', route: '/admin/teams', allowedRoles: ['Admin', 'Manager'] },
+      { icon: 'settings', label: 'Admin', route: '/admin', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+    ],
   };
 
   protected readonly navGroups = computed(() => this.filterGroups(this.allNavGroups));
@@ -80,6 +92,7 @@ export class SidebarComponent {
 
   private filterGroup(group: NavGroup): NavGroup {
     return {
+      label: group.label,
       items: group.items.filter(item => this.isAllowed(item)),
     };
   }

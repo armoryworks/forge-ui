@@ -18,6 +18,8 @@
       (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined spin">sync</span>
+      } @else {
+        <span class="material-icons-outlined">save</span>
       }
       {{ isEditMode() ? 'Update' : 'Create' }}
     </button>

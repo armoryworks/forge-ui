@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -41,6 +41,8 @@ export class LoginComponent implements OnInit {
   });
 
   protected readonly loading = this.loadingService.isLoading;
+  protected readonly isAlreadyLoggedIn = computed(() => this.authService.isAuthenticated());
+  protected readonly currentUser = this.authService.user;
   protected readonly ssoProviders = signal<SsoProvider[]>([]);
   protected readonly showSetupCode = signal(false);
   protected readonly setupCodeControl = new FormControl('');
@@ -64,6 +66,14 @@ export class LoginComponent implements OnInit {
     }
   }
 
+  protected goToDashboard(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+  protected switchAccount(): void {
+    this.authService.logout();
+  }
+
   protected goToSetup(): void {
     const code = this.setupCodeControl.value?.trim();
     if (code) {
@@ -78,7 +88,9 @@ export class LoginComponent implements OnInit {
 
     this.loadingService.track('Signing in...', this.authService.login({ email: email!, password: password! }))
       .subscribe({
-        next: () => this.router.navigate(['/dashboard']),
+        next: (response) => {
+          this.router.navigate([response.user.profileComplete ? '/dashboard' : '/account/profile']);
+        },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
   }

@@ -22,7 +22,7 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
     const e = err as { max: number };
     return `${label} must be at most ${e.max}`;
   },
-  pattern: (label) => `${label} is invalid`,
+  pattern: (label) => `${label} format is invalid`,
 };
 
 export class FormValidationService {

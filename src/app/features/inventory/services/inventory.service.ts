@@ -15,6 +15,7 @@ import { AdjustStockRequest } from '../models/adjust-stock-request.model';
 import { CycleCount } from '../models/cycle-count.model';
 import { Reservation } from '../models/reservation.model';
 import { CreateReservationRequest } from '../models/create-reservation-request.model';
+import { LowStockAlert } from '../models/low-stock-alert.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -54,6 +55,12 @@ export class InventoryService {
     if (entityId) params = params.set('entityId', entityId);
     params = params.set('take', take);
     return this.http.get<BinMovementItem[]>(`${this.base}/movements`, { params });
+  }
+
+  // ── Low Stock Alerts ──
+
+  getLowStockAlerts(): Observable<LowStockAlert[]> {
+    return this.http.get<LowStockAlert[]>(`${this.base}/low-stock`);
   }
 
   // ── Receiving ──

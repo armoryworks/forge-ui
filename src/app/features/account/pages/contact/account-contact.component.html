@@ -1,0 +1,36 @@
+<div class="account-page">
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">home</span>
+    Contact & Address
+  </h1>
+
+  <div [formGroup]="form" class="account-page__card-grid">
+    <div class="account-page__card">
+      <span class="account-page__section-label">Contact</span>
+      <div class="account-page__form">
+        <app-input label="Phone Number" formControlName="phoneNumber" mask="phone" placeholder="(555) 123-4567" />
+        <app-input label="Personal Email" formControlName="personalEmail" type="email" [maxlength]="200" />
+      </div>
+    </div>
+
+    <div class="account-page__card">
+      <span class="account-page__section-label">Mailing Address</span>
+      <app-address-form formControlName="address" [fixedCountry]="'US'" />
+    </div>
+  </div>
+
+  <div class="account-page__actions">
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined account-page__spinner">sync</span>
+        Saving...
+      } @else {
+        <span class="material-icons-outlined">save</span>
+        Save
+      }
+    </button>
+  </div>
+</div>

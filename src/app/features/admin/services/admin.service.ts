@@ -21,10 +21,15 @@ import { StorageUsage } from '../models/storage-usage.model';
 import { ScheduledTask } from '../models/scheduled-task.model';
 import { CreateScheduledTaskRequest } from '../models/create-scheduled-task-request.model';
 import { ScanIdentifier } from '../models/scan-identifier.model';
+import { AiAssistant } from '../models/ai-assistant.model';
+import { AdminTeam, TeamMember, KioskTerminal } from '../models/admin-team.model';
+import { ComplianceFormTemplate, UserComplianceDetail } from '../../account/models/compliance-form.model';
+import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private readonly http = inject(HttpClient);
+  private readonly shopFloorBase = `${environment.apiUrl}/display/shop-floor`;
 
   // Users
   getUsers(): Observable<AdminUser[]> {
@@ -199,5 +204,144 @@ export class AdminService {
 
   removeScanIdentifier(userId: number, id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/admin/users/${userId}/scan-identifiers/${id}`);
+  }
+
+  // AI Assistants
+  getAiAssistants(): Observable<AiAssistant[]> {
+    return this.http.get<AiAssistant[]>(`${environment.apiUrl}/ai-assistants/all`);
+  }
+
+  createAiAssistant(data: Partial<AiAssistant>): Observable<AiAssistant> {
+    return this.http.post<AiAssistant>(`${environment.apiUrl}/ai-assistants`, data);
+  }
+
+  updateAiAssistant(id: number, data: Partial<AiAssistant>): Observable<AiAssistant> {
+    return this.http.put<AiAssistant>(`${environment.apiUrl}/ai-assistants/${id}`, data);
+  }
+
+  deleteAiAssistant(id: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/ai-assistants/${id}`);
+  }
+
+  // Teams & Kiosks
+  getTeams(): Observable<AdminTeam[]> {
+    return this.http.get<AdminTeam[]>(`${this.shopFloorBase}/teams`);
+  }
+
+  createTeam(request: { name: string; color?: string; description?: string }): Observable<AdminTeam> {
+    return this.http.post<AdminTeam>(`${this.shopFloorBase}/teams`, request);
+  }
+
+  updateTeam(id: number, request: { id: number; name: string; color?: string | null; description?: string | null; isActive: boolean }): Observable<AdminTeam> {
+    return this.http.put<AdminTeam>(`${this.shopFloorBase}/teams/${id}`, request);
+  }
+
+  deleteTeam(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.shopFloorBase}/teams/${id}`);
+  }
+
+  getTeamMembers(teamId: number): Observable<TeamMember[]> {
+    return this.http.get<TeamMember[]>(`${this.shopFloorBase}/teams/${teamId}/members`);
+  }
+
+  assignTeamMembers(teamId: number, userIds: number[]): Observable<void> {
+    return this.http.put<void>(`${this.shopFloorBase}/teams/${teamId}/members`, { userIds });
+  }
+
+  getKioskTerminals(): Observable<KioskTerminal[]> {
+    return this.http.get<KioskTerminal[]>(`${this.shopFloorBase}/terminals`);
+  }
+
+  // State Withholding Reference Data
+  getStateWithholdingData(): Observable<ReferenceDataEntry[]> {
+    return this.http.get<ReferenceDataEntry[]>(`${environment.apiUrl}/reference-data/state_withholding`);
+  }
+
+  setCompanyState(stateCode: string): Observable<SystemSetting[]> {
+    return this.http.put<SystemSetting[]>(`${environment.apiUrl}/admin/system-settings`, {
+      settings: [{ key: 'company_state', value: stateCode }],
+    });
+  }
+
+  // Compliance Forms
+  private readonly complianceBase = `${environment.apiUrl}/compliance-forms`;
+
+  getComplianceTemplates(): Observable<ComplianceFormTemplate[]> {
+    return this.http.get<ComplianceFormTemplate[]>(this.complianceBase, {
+      params: { includeInactive: 'true' },
+    });
+  }
+
+  createComplianceTemplate(request: Partial<ComplianceFormTemplate>): Observable<ComplianceFormTemplate> {
+    return this.http.post<ComplianceFormTemplate>(this.complianceBase, request);
+  }
+
+  updateComplianceTemplate(id: number, request: Partial<ComplianceFormTemplate>): Observable<ComplianceFormTemplate> {
+    return this.http.put<ComplianceFormTemplate>(`${this.complianceBase}/${id}`, request);
+  }
+
+  deleteComplianceTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.complianceBase}/${id}`);
+  }
+
+  uploadTemplateDocument(id: number, fileAttachmentId: number): Observable<ComplianceFormTemplate> {
+    return this.http.post<ComplianceFormTemplate>(`${this.complianceBase}/${id}/upload`, { fileAttachmentId });
+  }
+
+  syncComplianceTemplate(id: number): Observable<void> {
+    return this.http.post<void>(`${this.complianceBase}/${id}/sync`, {});
+  }
+
+  syncAllComplianceTemplates(): Observable<void> {
+    return this.http.post<void>(`${this.complianceBase}/sync-all`, {});
+  }
+
+  getUserComplianceDetail(userId: number): Observable<UserComplianceDetail> {
+    return this.http.get<UserComplianceDetail>(`${this.complianceBase}/admin/users/${userId}`);
+  }
+
+  sendComplianceReminder(userId: number): Observable<void> {
+    return this.http.post<void>(`${this.complianceBase}/admin/users/${userId}/remind`, {});
+  }
+
+  verifyIdentityDocument(documentId: number): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/identity-documents/admin/${documentId}/verify`, {});
+  }
+
+  // Company Locations
+  private readonly locationsBase = `${environment.apiUrl}/company-locations`;
+
+  getCompanyLocations(): Observable<CompanyLocation[]> {
+    return this.http.get<CompanyLocation[]>(this.locationsBase);
+  }
+
+  createCompanyLocation(request: Partial<CompanyLocation>): Observable<CompanyLocation> {
+    return this.http.post<CompanyLocation>(this.locationsBase, request);
+  }
+
+  updateCompanyLocation(id: number, request: Partial<CompanyLocation>): Observable<CompanyLocation> {
+    return this.http.put<CompanyLocation>(`${this.locationsBase}/${id}`, request);
+  }
+
+  deleteCompanyLocation(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.locationsBase}/${id}`);
+  }
+
+  setDefaultCompanyLocation(id: number): Observable<void> {
+    return this.http.post<void>(`${this.locationsBase}/${id}/set-default`, {});
+  }
+
+  // Company Profile
+  getCompanyProfile(): Observable<CompanyProfile> {
+    return this.http.get<CompanyProfile>(`${environment.apiUrl}/admin/company-profile`);
+  }
+
+  updateCompanyProfile(data: Partial<CompanyProfile>): Observable<CompanyProfile> {
+    return this.http.patch<CompanyProfile>(`${environment.apiUrl}/admin/company-profile`, data);
+  }
+
+  // User Work Location
+  updateUserWorkLocation(userId: number, workLocationId: number | null): Observable<void> {
+    return this.http.patch<void>(`${environment.apiUrl}/admin/users/${userId}/work-location`, { workLocationId });
   }
 }

@@ -1,0 +1,268 @@
+<div class="user-compliance" [appLoadingBlock]="loading()">
+  @if (detail(); as d) {
+    <div class="user-compliance__header">
+      <div class="user-compliance__user-info">
+        <span class="user-compliance__name">{{ d.userName }}</span>
+        <span class="user-compliance__email">{{ d.userEmail }}</span>
+      </div>
+      <button class="action-btn" [disabled]="sending()" (click)="sendReminder()" aria-label="Send compliance reminder">
+        <span class="material-icons-outlined">notifications_active</span>
+        Send Reminder
+      </button>
+    </div>
+
+    <h4 class="user-compliance__section-title">Form Submissions</h4>
+    @if (d.submissions.length > 0) {
+      <table class="user-compliance__table" aria-label="Compliance form submissions">
+        <thead>
+          <tr>
+            <th scope="col">Form</th>
+            <th scope="col">Status</th>
+            <th scope="col">Signed</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (sub of d.submissions; track sub.id) {
+            <tr>
+              <td>{{ sub.templateName }}</td>
+              <td><span [class]="getStatusClass(sub.status)">{{ sub.status }}</span></td>
+              <td>{{ sub.signedAt ? (sub.signedAt | date:'MM/dd/yyyy') : '—' }}</td>
+              <td>
+                @if (sub.signedPdfFileId) {
+                  <button class="icon-btn" (click)="downloadSignedPdf(sub)" aria-label="Download signed PDF">
+                    <span class="material-icons-outlined">download</span>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <app-empty-state icon="description" message="No form submissions yet" />
+    }
+
+    <h4 class="user-compliance__section-title">Identity Documents</h4>
+    @if (d.identityDocuments.length > 0) {
+      <table class="user-compliance__table" aria-label="Identity documents">
+        <thead>
+          <tr>
+            <th scope="col">Type</th>
+            <th scope="col">File</th>
+            <th scope="col">Uploaded</th>
+            <th scope="col">Verified</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of d.identityDocuments; track doc.id) {
+            <tr>
+              <td>{{ doc.documentType }}</td>
+              <td>{{ doc.fileName }}</td>
+              <td>{{ doc.createdAt | date:'MM/dd/yyyy' }}</td>
+              <td>
+                @if (doc.verifiedAt) {
+                  <span class="chip chip--success">Verified</span>
+                } @else {
+                  <span class="chip chip--warning">Pending</span>
+                }
+              </td>
+              <td>
+                @if (!doc.verifiedAt) {
+                  <button class="icon-btn" (click)="verifyDocument(doc)" aria-label="Verify identity document">
+                    <span class="material-icons-outlined">verified</span>
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <app-empty-state icon="badge" message="No identity documents uploaded" />
+    }
+
+    <!-- Pay Stubs Section -->
+    <h4 class="user-compliance__section-title">
+      <span class="material-icons-outlined">payments</span>
+      Pay Stubs
+    </h4>
+    <div [appLoadingBlock]="payrollLoading()">
+      @if (payStubs().length > 0) {
+        <table class="user-compliance__table" aria-label="Pay stubs">
+          <thead>
+            <tr>
+              <th scope="col">Pay Date</th>
+              <th scope="col">Period</th>
+              <th scope="col">Gross</th>
+              <th scope="col">Net</th>
+              <th scope="col">Source</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (stub of payStubs(); track stub.id) {
+              <tr>
+                <td>{{ stub.payDate | date:'MM/dd/yyyy' }}</td>
+                <td>{{ stub.payPeriodStart | date:'MM/dd' }} – {{ stub.payPeriodEnd | date:'MM/dd/yyyy' }}</td>
+                <td>{{ stub.grossPay | currency }}</td>
+                <td>{{ stub.netPay | currency }}</td>
+                <td>
+                  @if (stub.source === 'Accounting') {
+                    <span class="chip chip--info">Synced</span>
+                  } @else {
+                    <span class="chip chip--muted">Manual</span>
+                  }
+                </td>
+                <td>
+                  <div class="action-cell">
+                    @if (stub.fileAttachmentId) {
+                      <button class="icon-btn" (click)="downloadPayStubPdf(stub.id)" aria-label="Download pay stub PDF">
+                        <span class="material-icons-outlined">download</span>
+                      </button>
+                    }
+                    @if (stub.source === 'Manual') {
+                      <button class="icon-btn icon-btn--danger" (click)="deletePayStub(stub)" aria-label="Delete pay stub">
+                        <span class="material-icons-outlined">delete</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <app-empty-state icon="payments" message="No pay stubs available" />
+      }
+
+      <div class="user-compliance__upload-section">
+        <span class="user-compliance__upload-label">Upload Pay Stub</span>
+        <app-file-upload-zone
+          entityType="pay-stubs"
+          [entityId]="userId() ?? 0"
+          accept=".pdf"
+          [maxSizeMb]="10"
+          [multiple]="false"
+          (uploaded)="onPayStubFileUploaded($event)" />
+        @if (lastPayStubFileId()) {
+          <div class="user-compliance__upload-form">
+            <div class="user-compliance__upload-row">
+              <label for="ps-pay-date">Pay Date</label>
+              <input id="ps-pay-date" type="date" #psPayDate />
+            </div>
+            <div class="user-compliance__upload-row">
+              <label for="ps-period-start">Period Start</label>
+              <input id="ps-period-start" type="date" #psPeriodStart />
+            </div>
+            <div class="user-compliance__upload-row">
+              <label for="ps-period-end">Period End</label>
+              <input id="ps-period-end" type="date" #psPeriodEnd />
+            </div>
+            <div class="user-compliance__upload-row">
+              <label for="ps-gross">Gross Pay</label>
+              <input id="ps-gross" type="number" step="0.01" #psGross />
+            </div>
+            <div class="user-compliance__upload-row">
+              <label for="ps-net">Net Pay</label>
+              <input id="ps-net" type="number" step="0.01" #psNet />
+            </div>
+            <button class="action-btn action-btn--primary action-btn--sm"
+              (click)="savePayStub(psPayDate.value, psPeriodStart.value, psPeriodEnd.value, psGross.value, psNet.value)">
+              <span class="material-icons-outlined">save</span>
+              Save Pay Stub
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Tax Documents Section -->
+    <h4 class="user-compliance__section-title">
+      <span class="material-icons-outlined">receipt_long</span>
+      Tax Documents
+    </h4>
+    @if (taxDocuments().length > 0) {
+      <table class="user-compliance__table" aria-label="Tax documents">
+        <thead>
+          <tr>
+            <th scope="col">Year</th>
+            <th scope="col">Type</th>
+            <th scope="col">Employer</th>
+            <th scope="col">Source</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (doc of taxDocuments(); track doc.id) {
+            <tr>
+              <td>{{ doc.taxYear }}</td>
+              <td>{{ getTypeLabel(doc.documentType) }}</td>
+              <td>{{ doc.employerName ?? '—' }}</td>
+              <td>
+                @if (doc.source === 'Accounting') {
+                  <span class="chip chip--info">Synced</span>
+                } @else {
+                  <span class="chip chip--muted">Manual</span>
+                }
+              </td>
+              <td>
+                <div class="action-cell">
+                  @if (doc.fileAttachmentId) {
+                    <button class="icon-btn" (click)="downloadTaxDocumentPdf(doc.id)" aria-label="Download tax document PDF">
+                      <span class="material-icons-outlined">download</span>
+                    </button>
+                  }
+                  @if (doc.source === 'Manual') {
+                    <button class="icon-btn icon-btn--danger" (click)="deleteTaxDocument(doc)" aria-label="Delete tax document">
+                      <span class="material-icons-outlined">delete</span>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <app-empty-state icon="receipt_long" message="No tax documents available" />
+    }
+
+    <div class="user-compliance__upload-section">
+      <span class="user-compliance__upload-label">Upload Tax Document</span>
+      <app-file-upload-zone
+        entityType="tax-documents"
+        [entityId]="userId() ?? 0"
+        accept=".pdf"
+        [maxSizeMb]="10"
+        [multiple]="false"
+        (uploaded)="onTaxDocFileUploaded($event)" />
+      @if (lastTaxDocFileId()) {
+        <div class="user-compliance__upload-form">
+          <div class="user-compliance__upload-row">
+            <label for="td-type">Document Type</label>
+            <select id="td-type" #tdType>
+              <option value="W2">W-2</option>
+              <option value="W2c">W-2c (Corrected)</option>
+              <option value="Misc1099">1099-MISC</option>
+              <option value="Nec1099">1099-NEC</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="user-compliance__upload-row">
+            <label for="td-year">Tax Year</label>
+            <input id="td-year" type="number" min="2000" max="2099" #tdYear />
+          </div>
+          <button class="action-btn action-btn--primary action-btn--sm"
+            (click)="saveTaxDocument(tdType.value, tdYear.value)">
+            <span class="material-icons-outlined">save</span>
+            Save Tax Document
+          </button>
+        </div>
+      }
+    </div>
+  } @else if (!loading()) {
+    <app-empty-state icon="person_search" message="Select a user to view compliance details" />
+  }
+</div>

@@ -1,10 +1,11 @@
 import {
-  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
+  NgZone,
   OnDestroy,
   OnInit,
   signal,
@@ -24,6 +25,7 @@ import { OpenOrdersWidgetComponent } from './components/open-orders-widget.compo
 import { EodPromptWidgetComponent } from './components/eod-prompt-widget.component';
 import { MarginSummaryWidgetComponent } from './widgets/margin-summary-widget/margin-summary-widget.component';
 import { AmbientModeComponent } from './components/ambient-mode.component';
+import { GettingStartedBannerComponent } from './components/getting-started-banner.component';
 import { DashboardData } from './models/dashboard-data.model';
 import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
 import { DashboardSavedLayout, DashboardWidgetLayout } from './models/dashboard-widget-layout.model';
@@ -34,7 +36,7 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
 
 import type { GridStack, GridStackNode } from 'gridstack';
 
-const LAYOUT_PREF_KEY = 'dashboard:layout';
+const LAYOUT_PREF_KEY = 'dashboard:layout:v5';
 
 @Component({
   selector: 'app-dashboard',
@@ -52,19 +54,22 @@ const LAYOUT_PREF_KEY = 'dashboard:layout';
     EodPromptWidgetComponent,
     MarginSummaryWidgetComponent,
     AmbientModeComponent,
+    GettingStartedBannerComponent,
     PageHeaderComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   private readonly loadingService = inject(LoadingService);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly ngZone = inject(NgZone);
 
   private grid: GridStack | null = null;
   private readonly gridContainer = viewChild<ElementRef<HTMLElement>>('gridContainer');
+  private resizeObserver: ResizeObserver | null = null;
 
   protected readonly data = signal<DashboardData | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -88,6 +93,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   protected readonly showAddMenu = signal(false);
 
+  constructor() {
+    // Init GridStack when the container appears (after data loads and @if renders)
+    effect(() => {
+      const container = this.gridContainer()?.nativeElement;
+      if (container && !this.grid) {
+        this.initGrid(container);
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
       .subscribe({
@@ -96,15 +111,15 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       });
   }
 
-  async ngAfterViewInit(): Promise<void> {
+  private async initGrid(container: HTMLElement): Promise<void> {
     const { GridStack } = await import('gridstack');
-    const container = this.gridContainer()?.nativeElement;
-    if (!container) return;
+
+    const columns = this.getResponsiveColumns(container.clientWidth);
 
     this.grid = GridStack.init({
-      column: 12,
-      cellHeight: 80,
-      margin: 6,
+      column: columns,
+      cellHeight: 60,
+      margin: 4,
       animate: true,
       float: false,
       disableDrag: true,
@@ -119,10 +134,32 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     });
 
+    // Responsive column switching via ResizeObserver
+    this.resizeObserver = new ResizeObserver(entries => {
+      const width = entries[0]?.contentRect.width ?? 0;
+      if (this.grid) {
+        const newCols = this.getResponsiveColumns(width);
+        if (this.grid.getColumn() !== newCols) {
+          this.ngZone.run(() => {
+            this.grid!.column(newCols);
+          });
+        }
+      }
+    });
+    this.resizeObserver.observe(container);
+
     this.gridReady.set(true);
   }
 
+  private getResponsiveColumns(width: number): number {
+    if (width < 768) return 1;
+    if (width < 1024) return 6;
+    return 12;
+  }
+
   ngOnDestroy(): void {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = null;
     if (this.grid) {
       this.grid.destroy(false);
       this.grid = null;
@@ -191,10 +228,11 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       const container = this.gridContainer()?.nativeElement;
       if (!container) return;
 
+      const columns = this.getResponsiveColumns(container.clientWidth);
       this.grid = GridStack.init({
-        column: 12,
-        cellHeight: 80,
-        margin: 6,
+        column: columns,
+        cellHeight: 60,
+        margin: 4,
         animate: true,
         float: false,
         disableDrag: !this.editing(),

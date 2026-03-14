@@ -22,7 +22,7 @@
     [cdkDropListEnterPredicate]="canEnter"
     (cdkDropListDropped)="onDrop($event)">
     @for (job of column().jobs; track job.id) {
-      <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cardClicked)="cardClicked.emit($event)" (jobNumberClicked)="jobNumberClicked.emit($event)" />
+      <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cdkDragStarted)="onDragStarted($event)" (cardClicked)="onCardClicked($event)" (jobNumberClicked)="onJobNumberClicked($event)" />
     }
     @empty {
       <app-empty-state icon="work" message="No jobs" />

@@ -1,6 +1,6 @@
 export interface CreatePurchaseOrderLineRequest {
   partId: number;
-  orderedQuantity: number;
+  quantity: number;
   unitPrice: number;
   notes?: string;
 }

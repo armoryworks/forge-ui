@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { BoardColumnComponent } from './components/board-column.component';
@@ -12,7 +13,7 @@ import { BoardColumn } from './models/board-column.model';
 import { JobDetail } from './models/job-detail.model';
 import { KanbanJob } from './models/kanban-job.model';
 import { SwimlaneRow } from './models/swimlane-row.model';
-import { PRIORITY_OPTIONS } from './models/priority-options.const';
+import { PRIORITIES } from '../../shared/models/priority.const';
 import { UserRef } from './models/user-ref.model';
 import { Stage } from '../../shared/models/stage.model';
 import { TrackType } from '../../shared/models/track-type.model';
@@ -59,18 +60,31 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly dialogMode = signal<DialogMode>('create');
   protected readonly dialogJob = signal<JobDetail | null>(null);
 
+  private swimlaneDragging = false;
   protected readonly selectedJobIds = signal<Set<number>>(new Set());
   protected readonly selectionCount = computed(() => this.selectedJobIds().size);
   protected readonly users = signal<UserRef[]>([]);
-  protected readonly priorityOptions = PRIORITY_OPTIONS;
+  protected readonly priorityOptions = PRIORITIES;
 
   // ── View Mode ──
   protected readonly viewMode = signal<ViewMode>('board');
   protected readonly teamUserIds = new FormControl<number[]>([]);
+  private readonly teamUserIdsSignal = toSignal(this.teamUserIds.valueChanges, { initialValue: [] as number[] });
 
   protected readonly userOptions = computed<SelectOption[]>(() =>
     this.users().map(u => ({ value: u.id, label: u.name })),
   );
+
+  // Columns filtered by selected team members (applies to board view)
+  protected readonly filteredColumns = computed<BoardColumn[]>(() => {
+    const cols = this.columns();
+    const selectedIds = this.teamUserIdsSignal() ?? [];
+    if (selectedIds.length === 0) return cols;
+    return cols.map(col => ({
+      ...col,
+      jobs: col.jobs.filter(j => j.assigneeId != null && selectedIds.includes(j.assigneeId)),
+    }));
+  });
 
   protected readonly currentStages = computed(() =>
     this.columns().map(c => c.stage),
@@ -84,7 +98,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly swimlaneRows = computed<SwimlaneRow[]>(() => {
     const cols = this.columns();
     const allJobs = cols.flatMap(c => c.jobs);
-    const selectedIds = this.teamUserIds.value ?? [];
+    const selectedIds = this.teamUserIdsSignal() ?? [];
     const allUsers = this.users();
 
     // Determine which users to show as rows
@@ -205,11 +219,17 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.boardHub.onJobPositionChangedEvent(reloadBoard);
   }
 
+  protected onSwimlaneDragStarted(_event: CdkDragStart): void {
+    this.swimlaneDragging = true;
+  }
+
   protected onJobNumberClicked(event: { job: KanbanJob; event: Event }): void {
+    if (this.swimlaneDragging) return;
     this.selectedJobId.set(event.job.id);
   }
 
   protected onCardClicked(event: { job: KanbanJob; event: Event }): void {
+    if (this.swimlaneDragging) return;
     const e = event.event as MouseEvent | KeyboardEvent;
     if (e.ctrlKey || e.metaKey) {
       const current = this.selectedJobIds();
@@ -369,6 +389,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   // ── Swimlane Drop Handler ──
   protected onSwimlaneDropped(event: CdkDragDrop<KanbanJob[]>, rowIdx: number, colIdx: number): void {
+    setTimeout(() => { this.swimlaneDragging = false; });
     const job = event.item.data as KanbanJob;
     const rows = this.swimlaneRows();
     const targetRow = rows[rowIdx];

@@ -1,4 +1,4 @@
-<app-page-header title="Assets">
+<app-page-header title="Assets" subtitle="Track equipment, tooling, and company property">
   <app-input label="Search" [formControl]="searchControl" placeholder="Search assets..."  />
   <app-select label="Type" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
   <app-select label="Status" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
@@ -205,6 +205,7 @@
         [appValidationPopover]="assetViolations"
         [disabled]="assetForm.invalid || saving()"
         (click)="saveAsset()">
+        <span class="material-icons-outlined">save</span>
         {{ editingAsset() ? 'Save Changes' : 'Create Asset' }}
       </button>
     </div>

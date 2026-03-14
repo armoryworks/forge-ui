@@ -1,0 +1,88 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+@use '../../shared/account-page';
+
+.tax-forms__intro {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.tax-forms__item {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  padding: $sp-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: var(--bg);
+  }
+
+  &--complete {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 3%, var(--surface));
+
+    &:hover {
+      border-color: var(--success);
+    }
+  }
+}
+
+.tax-forms__item-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+}
+
+.tax-forms__item-icon {
+  font-size: $icon-size-xl;
+  color: var(--text-muted);
+
+  &--complete {
+    color: var(--success);
+  }
+}
+
+.tax-forms__item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.tax-forms__item-label {
+  font-size: $font-size-base;
+  font-weight: 600;
+}
+
+.tax-forms__item-description {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.tax-forms__item-date {
+  font-size: $font-size-xs;
+  color: var(--success);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tax-forms__item-required {
+  font-size: $font-size-xs;
+  color: var(--warning);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tax-forms__item-chevron {
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+}

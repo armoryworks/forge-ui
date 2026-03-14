@@ -9,7 +9,18 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, MAT_DATE_FORMATS } from '@angular/material/core';
+
+/** Custom date formats enforcing MM/dd/yyyy display (project standard) */
+const QBE_DATE_FORMATS = {
+  parse: { dateInput: 'MM/dd/yyyy' },
+  display: {
+    dateInput: { year: 'numeric', month: '2-digit', day: '2-digit' } as Intl.DateTimeFormatOptions,
+    monthYearLabel: { year: 'numeric', month: 'short' } as Intl.DateTimeFormatOptions,
+    dateA11yLabel: { year: 'numeric', month: 'long', day: 'numeric' } as Intl.DateTimeFormatOptions,
+    monthYearA11yLabel: { year: 'numeric', month: 'long' } as Intl.DateTimeFormatOptions,
+  },
+};
 
 @Component({
   selector: 'app-datepicker',
@@ -24,6 +35,7 @@ import { MatNativeDateModule } from '@angular/material/core';
       useExisting: forwardRef(() => DatepickerComponent),
       multi: true,
     },
+    { provide: MAT_DATE_FORMATS, useValue: QBE_DATE_FORMATS },
   ],
 })
 export class DatepickerComponent implements ControlValueAccessor {

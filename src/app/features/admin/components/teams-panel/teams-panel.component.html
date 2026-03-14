@@ -1,0 +1,162 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ teams().length }} teams</span>
+  <div class="panel-header__actions">
+    <button class="action-btn action-btn--sm" (click)="openKioskDisplay()" aria-label="Open shop floor display">
+      <span class="material-icons-outlined">tv</span>
+      Display
+    </button>
+    <button class="action-btn action-btn--sm" (click)="openKiosk()" aria-label="Open kiosk clock">
+      <span class="material-icons-outlined">access_time</span>
+      Kiosk
+    </button>
+    <button class="action-btn action-btn--primary" (click)="openCreateTeam()">
+      <span class="material-icons-outlined">add</span>
+      New Team
+    </button>
+  </div>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="admin-teams"
+    [columns]="columns"
+    [data]="teams()"
+    emptyIcon="groups"
+    emptyMessage="No teams configured"
+    emptyHelpText="Create a team to group workers for kiosk clock-in stations">
+
+    <ng-template appColumnCell="color" let-team>
+      <span class="color-dot" [style.background]="team.color || '#94a3b8'"></span>
+    </ng-template>
+
+    <ng-template appColumnCell="name" let-team>
+      <span class="team-name">{{ team.name }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="description" let-team>
+      <span class="text-muted">{{ team.description || '—' }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="memberCount" let-team>
+      <button class="member-count-btn" (click)="openMembers(team); $event.stopPropagation()" [attr.aria-label]="'Manage members for ' + team.name">
+        <span class="material-icons-outlined">people</span>
+        {{ team.memberCount }}
+      </button>
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-team>
+      <div class="action-cell">
+        <button class="icon-btn" title="Manage members" (click)="openMembers(team); $event.stopPropagation()" aria-label="Manage members">
+          <span class="material-icons-outlined">group_add</span>
+        </button>
+        <button class="icon-btn" title="Edit" (click)="openEditTeam(team); $event.stopPropagation()" aria-label="Edit team">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteTeam(team); $event.stopPropagation()" aria-label="Delete team">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Kiosk Terminals -->
+@if (terminals().length > 0) {
+  <div class="terminals-section">
+    <h3 class="section-title">
+      <span class="material-icons-outlined">devices</span>
+      Active Kiosk Terminals
+    </h3>
+    <app-data-table
+      tableId="admin-terminals"
+      [columns]="terminalColumns"
+      [data]="terminals()"
+      emptyIcon="devices"
+      emptyMessage="No active terminals">
+
+      <ng-template appColumnCell="teamName" let-terminal>
+        <span class="chip chip--primary">{{ terminal.teamName }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="deviceToken" let-terminal>
+        <code class="device-token">{{ terminal.deviceToken }}</code>
+      </ng-template>
+    </app-data-table>
+  </div>
+}
+
+<!-- Team Dialog -->
+@if (showTeamDialog()) {
+  <app-dialog [title]="editingTeam() ? 'Edit Team' : 'New Team'" width="420px" (closed)="closeTeamDialog()">
+    <div [formGroup]="teamForm">
+      <app-input label="Team Name" formControlName="name" [maxlength]="100" [required]="true" />
+      <app-textarea label="Description" formControlName="description" [rows]="2" [maxlength]="500" />
+
+      <div class="color-picker-row">
+        <span class="color-picker-label" id="team-color-label">Team Color</span>
+        <div class="color-picker" role="group" aria-labelledby="team-color-label">
+          @for (color of teamColors; track color) {
+            <button class="color-option"
+              [style.background]="color"
+              [class.color-option--selected]="teamForm.controls.color.value === color"
+              (click)="teamForm.controls.color.setValue(color)"
+              [attr.aria-label]="'Select color ' + color">
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (editingTeam()) {
+        <app-toggle label="Active" formControlName="isActive" />
+      }
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeTeamDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="teamViolations"
+        [disabled]="teamForm.invalid || saving()"
+        (click)="saveTeam()">
+        <span class="material-icons-outlined">save</span>
+        {{ editingTeam() ? 'Save Changes' : 'Create Team' }}
+      </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Member Assignment Dialog -->
+@if (showMemberDialog()) {
+  <app-dialog [title]="'Members — ' + (memberTeam()?.name ?? '')" width="520px" (closed)="closeMemberDialog()">
+    <div [appLoadingBlock]="memberLoading()">
+      <p class="member-hint">Select users to assign to this team. A user can only belong to one team at a time.</p>
+
+      <div class="member-list">
+        @for (user of allUsers(); track user.id) {
+          <button class="member-row" [class.member-row--selected]="isUserSelected(user.id)" (click)="toggleUser(user.id)"
+            [attr.aria-label]="(isUserSelected(user.id) ? 'Remove ' : 'Add ') + user.firstName + ' ' + user.lastName">
+            <app-avatar [initials]="user.initials ?? '??'" [color]="user.avatarColor ?? '#94a3b8'" />
+            <div class="member-info">
+              <span class="member-name">{{ user.lastName }}, {{ user.firstName }}</span>
+              <span class="member-email">{{ user.email }}</span>
+            </div>
+            <span class="material-icons-outlined member-check">
+              {{ isUserSelected(user.id) ? 'check_circle' : 'radio_button_unchecked' }}
+            </span>
+          </button>
+        } @empty {
+          <span class="text-muted">No active users found</span>
+        }
+      </div>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeMemberDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="saving()"
+        (click)="saveMembers()">
+        <span class="material-icons-outlined">save</span>
+        Save Members ({{ selectedUserIds().size }})
+      </button>
+    </div>
+  </app-dialog>
+}

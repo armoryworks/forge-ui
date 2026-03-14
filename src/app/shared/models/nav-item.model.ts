@@ -3,5 +3,6 @@ export interface NavItem {
   label: string;
   route: string;
   badge?: number;
+  shortcut?: string;
   allowedRoles?: string[];
 }

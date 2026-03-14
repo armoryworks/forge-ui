@@ -1,0 +1,25 @@
+@use 'styles/variables' as *;
+
+@use '../../shared/account-page';
+
+.security__error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--error-light);
+  color: var(--error);
+  border: $border-width-thin solid var(--error);
+  font-size: $font-size-sm;
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.security__hint {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+}

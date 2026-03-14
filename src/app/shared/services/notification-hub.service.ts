@@ -8,8 +8,12 @@ import { AppNotification } from '../models/app-notification.model';
 export class NotificationHubService {
   private readonly signalr = inject(SignalrService);
   private readonly notificationService = inject(NotificationService);
+  private connected = false;
 
   async connect(): Promise<void> {
+    if (this.connected) return;
+    this.connected = true;
+
     const connection = this.signalr.getOrCreateConnection('notifications');
 
     connection.on('notificationReceived', (notification: AppNotification) => {
@@ -20,6 +24,7 @@ export class NotificationHubService {
   }
 
   async disconnect(): Promise<void> {
+    this.connected = false;
     await this.signalr.stopConnection('notifications');
   }
 }

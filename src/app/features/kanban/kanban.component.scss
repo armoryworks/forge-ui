@@ -9,6 +9,36 @@
   overflow: hidden;
 }
 
+// ─── Board Hint ───
+.board-hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-lg;
+  background: var(--bg);
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.board-hint__icon {
+  font-size: $icon-size-xs;
+  color: var(--text-muted);
+}
+
+.board-hint__text {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+
+  kbd {
+    font-family: $font-family-mono;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 0 $sp-sm;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+}
+
 .page-header__track-types {
   display: flex;
   gap: $sp-xs;

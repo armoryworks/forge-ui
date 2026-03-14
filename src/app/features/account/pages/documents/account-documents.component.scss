@@ -1,0 +1,9 @@
+@use 'styles/variables' as *;
+
+@use '../../shared/account-page';
+
+.documents__intro {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+}

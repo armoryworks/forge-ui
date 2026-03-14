@@ -1,0 +1,120 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.user-compliance {
+  min-height: 200px;
+}
+
+.user-compliance__header {
+  @include flex-between;
+  padding: $sp-md 0;
+  border-bottom: $border-width-thin solid var(--border);
+  margin-bottom: $sp-lg;
+}
+
+.user-compliance__user-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.user-compliance__name {
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.user-compliance__email {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.user-compliance__section-title {
+  @include uppercase-label($font-size-xs, 0.5px, 700);
+  color: var(--text-muted);
+  margin: $sp-lg 0 $sp-md;
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
+.user-compliance__upload-section {
+  margin-top: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin dashed var(--border);
+}
+
+.user-compliance__upload-label {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: $sp-md;
+}
+
+.user-compliance__upload-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-md;
+  align-items: flex-end;
+  margin-top: $sp-md;
+  padding-top: $sp-md;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.user-compliance__upload-row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  label {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+
+  input, select {
+    height: $input-height;
+    padding: 0 $sp-md;
+    font-size: $font-size-sm;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: $font-family-primary;
+  }
+}
+
+.action-cell {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.user-compliance__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th {
+    text-align: left;
+    padding: $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    color: var(--text);
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}

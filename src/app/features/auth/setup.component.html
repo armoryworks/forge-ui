@@ -1,30 +1,72 @@
 <div class="auth-page">
-  <mat-card appearance="outlined" class="auth-card">
+  <mat-card appearance="outlined" class="auth-card" [class.auth-card--wide]="step() === 2">
     <div class="auth-card__header">
       <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
       <h1 class="auth-card__title">QB Engineer</h1>
-      <p class="auth-card__subtitle">Create Admin Account</p>
+      <p class="auth-card__subtitle">
+        @if (step() === 1) {
+          Step 1 of 2 — Admin Account
+        } @else {
+          Step 2 of 2 — Company Details
+        }
+      </p>
     </div>
 
-    <form class="auth-card__form" [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="auth-card__row">
-        <app-input label="First Name" formControlName="firstName" autocomplete="given-name" />
-        <app-input label="Last Name" formControlName="lastName" autocomplete="family-name" />
-      </div>
+    @if (step() === 1) {
+      <form class="auth-card__form" [formGroup]="accountForm" (ngSubmit)="nextStep()">
+        <div class="auth-card__row">
+          <app-input label="First Name" formControlName="firstName" autocomplete="given-name" [required]="true" />
+          <app-input label="Last Name" formControlName="lastName" autocomplete="family-name" [required]="true" />
+        </div>
 
-      <app-input label="Email" type="email" formControlName="email" autocomplete="email" />
-      <app-input label="Password" type="password" formControlName="password"
-        autocomplete="new-password" info="At least 8 characters with uppercase, lowercase, and a digit" />
+        <app-input label="Email" type="email" formControlName="email" autocomplete="email" [required]="true" />
+        <app-input label="Password" type="password" formControlName="password"
+          autocomplete="new-password" [required]="true"
+          info="At least 8 characters with uppercase, lowercase, and a digit" />
 
-      <button mat-flat-button color="primary" type="submit"
-        [appValidationPopover]="violations"
-        [disabled]="form.invalid || loading()">
-        @if (loading()) {
-          Creating account...
-        } @else {
-          Create Account
-        }
-      </button>
-    </form>
+        <button mat-flat-button color="primary" type="submit"
+          [appValidationPopover]="accountViolations"
+          [disabled]="accountForm.invalid">
+          Next
+        </button>
+      </form>
+    } @else {
+      <form class="auth-card__form" [formGroup]="companyForm" (ngSubmit)="onSubmit()">
+        <app-input label="Company Name" formControlName="companyName" [required]="true" />
+
+        <div class="auth-card__row">
+          <app-input label="Phone" formControlName="companyPhone" mask="phone" />
+          <app-input label="Email" formControlName="companyEmail" type="email" />
+        </div>
+
+        <div class="auth-card__row">
+          <app-input label="EIN / Tax ID" formControlName="companyEin" placeholder="XX-XXXXXXX" />
+          <app-input label="Website" formControlName="companyWebsite" placeholder="https://" />
+        </div>
+
+        <h4 class="auth-card__section-title">Primary Location</h4>
+
+        <app-input label="Location Name" formControlName="locationName" />
+
+        <app-address-form
+          formControlName="address"
+          [showVerify]="false"
+          [fixedCountry]="'US'"
+          [compact]="true" />
+
+        <div class="auth-card__buttons">
+          <button mat-stroked-button type="button" (click)="prevStep()">Back</button>
+          <button mat-flat-button color="primary" type="submit"
+            [appValidationPopover]="companyViolations"
+            [disabled]="companyForm.invalid || loading()">
+            @if (loading()) {
+              Setting up...
+            } @else {
+              Complete Setup
+            }
+          </button>
+        </div>
+      </form>
+    }
   </mat-card>
 </div>

@@ -132,7 +132,7 @@
           } @empty {
             <tr>
               <td [attr.colspan]="totalColSpan()">
-                <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" />
+                <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" [helpText]="emptyHelpText()" />
               </td>
             </tr>
           }
@@ -166,7 +166,7 @@
         (closed)="closeColumnManager()" />
     </ng-template>
   } @else {
-    <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" />
+    <app-empty-state [icon]="emptyIcon()" [message]="emptyMessage()" [helpText]="emptyHelpText()" />
   }
 </div>
 

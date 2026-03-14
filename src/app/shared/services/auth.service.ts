@@ -14,6 +14,7 @@ export interface AuthUser {
   initials: string | null;
   avatarColor: string | null;
   roles: string[];
+  profileComplete: boolean;
 }
 
 export interface LoginRequest {
@@ -36,6 +37,17 @@ export interface SetupRequest {
   password: string;
   firstName: string;
   lastName: string;
+  companyName?: string;
+  companyPhone?: string;
+  companyEmail?: string;
+  companyEin?: string;
+  companyWebsite?: string;
+  locationName?: string;
+  locationLine1?: string;
+  locationLine2?: string;
+  locationCity?: string;
+  locationState?: string;
+  locationPostalCode?: string;
 }
 
 export interface CompleteSetupRequest {

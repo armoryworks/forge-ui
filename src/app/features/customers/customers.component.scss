@@ -75,7 +75,7 @@
   gap: $sp-md;
 }
 
-.info-item { display: flex; flex-direction: column; gap: 2px; }
+.info-item { display: flex; flex-direction: column; gap: $sp-xs; }
 .info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
 .info-value { font-size: $font-size-sm; }
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }

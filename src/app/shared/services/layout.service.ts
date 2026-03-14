@@ -14,14 +14,21 @@ export class LayoutService {
   private readonly _mobileMenuOpen = signal(false);
   private readonly _isMobile = signal(window.innerWidth < MOBILE_BREAKPOINT);
   private readonly _isDisplayRoute = signal(this.checkDisplayRoute(window.location.pathname));
+  private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
+  private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
+  private readonly _breadcrumbLabel = signal(this.routeToLabel(window.location.pathname));
 
   readonly sidebarCollapsed = this._sidebarCollapsed.asReadonly();
   readonly mobileMenuOpen = this._mobileMenuOpen.asReadonly();
   readonly isMobile = this._isMobile.asReadonly();
   readonly isDisplayRoute = this._isDisplayRoute.asReadonly();
+  readonly isAccountRoute = this._isAccountRoute.asReadonly();
+  readonly isAuthRoute = this._isAuthRoute.asReadonly();
+  readonly breadcrumbLabel = this._breadcrumbLabel.asReadonly();
 
   readonly sidebarVisible = computed(() => {
     if (this._isDisplayRoute()) return false;
+    if (this._isAccountRoute()) return false;
     if (this._isMobile()) {
       return this._mobileMenuOpen();
     }
@@ -38,7 +45,12 @@ export class LayoutService {
   constructor() {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-    ).subscribe(e => this._isDisplayRoute.set(this.checkDisplayRoute(e.urlAfterRedirects)));
+    ).subscribe(e => {
+      this._isDisplayRoute.set(this.checkDisplayRoute(e.urlAfterRedirects));
+      this._isAccountRoute.set(this.checkAccountRoute(e.urlAfterRedirects));
+      this._isAuthRoute.set(this.checkAuthRoute(e.urlAfterRedirects));
+      this._breadcrumbLabel.set(this.routeToLabel(e.urlAfterRedirects));
+    });
 
     this.ngZone.runOutsideAngular(() => {
       const onResize = () => {
@@ -78,5 +90,47 @@ export class LayoutService {
 
   private checkDisplayRoute(url: string): boolean {
     return url.startsWith('/display/');
+  }
+
+  private checkAccountRoute(url: string): boolean {
+    return url.startsWith('/account');
+  }
+
+  private checkAuthRoute(url: string): boolean {
+    return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback');
+  }
+
+  private routeToLabel(url: string): string {
+    const labels: Record<string, string> = {
+      dashboard: 'Dashboard',
+      kanban: 'Kanban Board',
+      backlog: 'Backlog',
+      planning: 'Planning',
+      calendar: 'Calendar',
+      parts: 'Parts Catalog',
+      inventory: 'Inventory',
+      customers: 'Customers',
+      vendors: 'Vendors',
+      quotes: 'Quotes',
+      'sales-orders': 'Sales Orders',
+      'purchase-orders': 'Purchase Orders',
+      shipments: 'Shipments',
+      invoices: 'Invoices',
+      payments: 'Payments',
+      leads: 'Leads',
+      expenses: 'Expenses',
+      assets: 'Assets',
+      'time-tracking': 'Time Tracking',
+      quality: 'Quality',
+      reports: 'Reports',
+      admin: 'Admin',
+      account: 'Account',
+      ai: 'AI Assistants',
+      chat: 'Chat',
+      notifications: 'Notifications',
+    };
+    // Extract first path segment: "/parts/42" → "parts"
+    const segment = url.split('/').filter(Boolean)[0] ?? 'dashboard';
+    return labels[segment] ?? segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 }

@@ -72,7 +72,8 @@ function extractMessage(error: HttpErrorResponse): string | null {
   const body = error.error;
   if (!body) return null;
 
-  // Problem Details (RFC 7807)
+  // Problem Details (RFC 7807) — prefer detail (specific) over title (generic)
+  if (typeof body === 'object' && body.detail) return body.detail;
   if (typeof body === 'object' && body.title) return body.title;
   if (typeof body === 'object' && body.message) return body.message;
   if (typeof body === 'string') return body;

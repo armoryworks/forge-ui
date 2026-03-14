@@ -4,7 +4,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
-  <app-page-header title="Backlog">
+  <app-page-header title="Backlog" subtitle="Unscheduled jobs waiting to be planned">
     <app-input label="Search" [formControl]="searchControl" placeholder="Search jobs..." />
     <app-select label="Track" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
     <app-select label="Priority" [formControl]="priorityControl" [options]="priorityOptions" />
@@ -18,7 +18,7 @@
   <div class="page-content page-content--table">
   <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
     [rowClass]="backlogRowClass" [rowStyle]="backlogRowStyle"
-    emptyIcon="search_off" emptyMessage="No jobs match your filters"
+    emptyIcon="search_off" emptyMessage="No jobs match your filters" emptyHelpText="Try adjusting your search or filters. Jobs are added from the Board page."
     (rowClick)="onRowClicked($any($event))">
     <ng-template appColumnCell="jobNumber" let-job>
       <span class="job-number">{{ job.jobNumber }}</span>

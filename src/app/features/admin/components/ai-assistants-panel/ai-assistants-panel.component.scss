@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+
+.assistant-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+  }
+}
+
+.assistant-name-cell {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.assistant-name {
+  font-weight: 500;
+}

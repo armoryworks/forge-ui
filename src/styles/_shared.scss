@@ -44,7 +44,8 @@
   @include flex-center;
   gap: $sp-sm;
   height: 2rem;
-  padding: 0 12px;
+  min-width: 100px;
+  padding: 0 $sp-lg;
   border: $border-width-thin solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -52,7 +53,7 @@
   border-radius: $border-radius;
   font-family: $font-family-primary;
 
-  .material-icons-outlined { font-size: 14px; }
+  .material-icons-outlined { font-size: $icon-size-xs; }
 
   &:hover {
     background: var(--bg);
@@ -62,6 +63,7 @@
     background: var(--primary);
     border-color: var(--primary);
     color: white;
+    min-width: 140px;
 
     &:hover {
       background: var(--primary-dark);
@@ -69,23 +71,33 @@
     }
   }
 
+  &--danger {
+    color: var(--error);
+    border-color: var(--error);
+
+    &:hover {
+      background: var(--error-light);
+    }
+  }
+
   &--sm {
-    padding: 2px 8px;
-    .material-icons-outlined { font-size: 12px; }
+    min-width: auto;
+    padding: $sp-xs $sp-md;
+    .material-icons-outlined { font-size: $font-size-base; }
   }
 }
 
 .icon-btn {
   @include flex-center;
-  width: 24px;
-  height: 24px;
+  width: $btn-icon-size;
+  height: $btn-icon-size;
   border: none;
   background: none;
   color: var(--text-muted);
   cursor: pointer;
   border-radius: $border-radius;
 
-  .material-icons-outlined { font-size: 16px; }
+  .material-icons-outlined { font-size: $icon-size-sm; }
 
   &:hover {
     color: var(--text);
@@ -133,10 +145,14 @@
   flex-direction: column;
   gap: $sp-lg;
 
-  // Apply spacing to projected form containers
+  // Apply spacing to projected form containers (overrides [formGroup] default gap)
   > * {
     display: flex;
     flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  > [formGroup] {
     gap: $sp-lg;
   }
 }
@@ -194,10 +210,10 @@
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-bottom: 2px solid transparent;
+  border-bottom: $border-width solid transparent;
   font-family: $font-family-primary;
 
-  .material-icons-outlined { font-size: 16px; }
+  .material-icons-outlined { font-size: $icon-size-sm; }
   &:hover { color: var(--text); background: var(--bg); }
   &--active { color: var(--primary); border-bottom-color: var(--primary); }
 }
@@ -229,12 +245,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 80px 24px;
+  gap: $sp-lg;
+  padding: $sp-4xl $sp-xl;
   color: var(--text-secondary);
 
   &__icon {
-    font-size: 48px;
+    font-size: $icon-size-hero;
     opacity: 0.5;
   }
 }
@@ -292,6 +308,10 @@
     text-align: center;
   }
 
+  &__icon {
+    font-size: $icon-size-xs;
+  }
+
   &--primary { --chip-color: var(--primary); }
   &--success { --chip-color: var(--success); }
   &--warning { --chip-color: var(--warning); }
@@ -321,8 +341,10 @@
 }
 
 // ─── Form Stack (vertical form layout with consistent spacing) ───
-// Use on any <form> or container holding stacked form fields.
-// Centralizes the gap so individual components never set their own.
+// Any [formGroup] container automatically gets flex-column + gap.
+// This eliminates the need for per-component vertical spacing on form fields.
+// Also available as .form-stack for non-reactive containers.
+[formGroup],
 .form-stack {
   display: flex;
   flex-direction: column;
@@ -363,4 +385,23 @@
 
 .text-center {
   text-align: center;
+}
+
+// ─── Keyboard Shortcut Hint ───
+.kbd-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: $font-family-mono;
+  font-size: 9px;
+  font-weight: 600;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 $sp-sm;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  color: var(--text-muted);
+  line-height: 1;
+  margin-left: $sp-sm;
+  flex-shrink: 0;
 }

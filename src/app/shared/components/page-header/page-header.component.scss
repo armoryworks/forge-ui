@@ -1,5 +1,19 @@
 @use 'styles/variables' as *;
 
+.page-header__title-group {
+  display: flex;
+  align-items: baseline;
+  gap: $sp-md;
+}
+
+.page-header__subtitle {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .page-header__help {
   color: var(--text-muted);
   margin-left: $sp-sm;

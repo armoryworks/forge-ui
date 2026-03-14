@@ -110,7 +110,7 @@ export class PoDialogComponent {
     const f = this.form.getRawValue();
     const lineRequests: CreatePurchaseOrderLineRequest[] = this.lines().map(l => ({
       partId: l.partId,
-      orderedQuantity: l.orderedQuantity,
+      quantity: l.orderedQuantity,
       unitPrice: l.unitPrice,
     }));
 

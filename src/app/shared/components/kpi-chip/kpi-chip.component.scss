@@ -8,7 +8,7 @@
 .kpi-chip {
   background: var(--surface);
   border: $border-width solid var(--border);
-  padding: $sp-md 12px;
+  padding: $sp-md $sp-lg;
   display: flex;
   align-items: center;
   gap: $sp-md;

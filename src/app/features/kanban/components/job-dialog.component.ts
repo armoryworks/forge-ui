@@ -17,6 +17,7 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../../shared/utils/date.utils';
+import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
 
 export type DialogMode = 'create' | 'edit';
 
@@ -50,7 +51,7 @@ export class JobDialogComponent implements OnInit {
   protected readonly users = signal<UserRef[]>([]);
   protected readonly saving = signal(false);
   protected readonly loadingRefs = signal(true);
-  protected readonly priorities = ['Low', 'Normal', 'High', 'Urgent'];
+  protected readonly priorities = PRIORITIES;
 
   protected readonly jobForm = new FormGroup({
     title: new FormControl('', [Validators.required, Validators.maxLength(200)]),
@@ -78,10 +79,13 @@ export class JobDialogComponent implements OnInit {
 
   protected readonly assigneeOptions = computed<SelectOption[]>(() => [
     { value: null, label: '— Unassigned —' },
-    ...this.users().map(u => ({ value: u.id, label: u.name })),
+    ...this.users().map(u => ({
+      value: u.id,
+      label: u.canBeAssignedJobs ? u.name : `⚠ ${u.name} (incomplete profile)`,
+    })),
   ]);
 
-  protected readonly priorityOptions: SelectOption[] = this.priorities.map(p => ({ value: p, label: p }));
+  protected readonly priorityOptions = PRIORITY_OPTIONS;
 
   ngOnInit(): void {
     const j = this.job();

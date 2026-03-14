@@ -16,10 +16,15 @@ export const setupRequiredGuard: CanActivateFn = () => {
   );
 };
 
-/** Redirects to /setup if setup has not been completed yet. */
+/** Redirects to /setup if setup has not been completed yet. Allows authenticated users through so login page can prompt. */
 export const setupCompleteGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  // If already logged in, let the login component handle the prompt
+  if (authService.isAuthenticated()) {
+    return true;
+  }
 
   return authService.checkSetupStatus().pipe(
     map((status) =>

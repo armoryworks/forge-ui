@@ -15,6 +15,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 
 interface LineEntry {
   partId: number | null;
@@ -55,15 +56,7 @@ export class InvoiceDialogComponent {
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
-  protected readonly creditTermsOptions: SelectOption[] = [
-    { value: null, label: '-- None --' },
-    { value: 'DueOnReceipt', label: 'Due on Receipt' },
-    { value: 'Net15', label: 'Net 15' },
-    { value: 'Net30', label: 'Net 30' },
-    { value: 'Net45', label: 'Net 45' },
-    { value: 'Net60', label: 'Net 60' },
-    { value: 'Net90', label: 'Net 90' },
-  ];
+  protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
   protected readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),

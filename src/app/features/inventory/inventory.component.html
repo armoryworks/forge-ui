@@ -1,4 +1,4 @@
-<app-page-header title="Inventory">
+<app-page-header title="Inventory" subtitle="Track stock levels, locations, and movements" helpTourId="inventory">
   @if (activeTab() === 'locations') {
     <button class="action-btn action-btn--primary" (click)="openCreateLocation()">
       <span class="material-icons-outlined">add</span>
@@ -72,6 +72,19 @@
     <!-- Stock Levels Tab -->
     @if (activeTab() === 'stock') {
       <div class="tab-panel">
+        @if (lowStockAlerts().length > 0) {
+          <div class="low-stock-banner" role="alert">
+            <span class="material-icons-outlined low-stock-banner__icon">warning</span>
+            <span class="low-stock-banner__text">
+              {{ lowStockAlerts().length }} {{ lowStockAlerts().length === 1 ? 'part is' : 'parts are' }} below minimum stock level
+            </span>
+            <button class="action-btn action-btn--sm" (click)="createPoForPart()">
+              <span class="material-icons-outlined">add</span>
+              Create PO
+            </button>
+          </div>
+        }
+
         <div class="panel-header">
           <app-input label="Search" [formControl]="searchControl" placeholder="Search parts..." />
           @if (searchControl.value) {
@@ -89,7 +102,7 @@
           [expandable]="true"
           trackByField="partId"
           emptyIcon="inventory_2"
-          emptyMessage="No inventory data"
+          emptyMessage="No inventory data" emptyHelpText="Stock appears here when parts are received into bin locations. Use the Receiving tab to log incoming goods."
           [rowClass]="stockRowClass">
 
           <ng-template appColumnCell="partNumber" let-row>
@@ -646,7 +659,7 @@
 
     @if (cc.status === 'Pending') {
       <div dialog-footer>
-        <button class="action-btn action-btn--sm" style="color: var(--error)" (click)="rejectCycleCount()">Reject</button>
+        <button class="action-btn action-btn--sm action-btn--danger" (click)="rejectCycleCount()">Reject</button>
         <button class="action-btn action-btn--primary"
           [disabled]="saving()"
           (click)="approveCycleCount()">Approve &amp; Adjust Stock</button>

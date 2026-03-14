@@ -1,0 +1,30 @@
+@use 'styles/variables' as *;
+
+.panel-header__actions {
+  display: flex;
+  gap: $sp-md;
+}
+
+.template-icon {
+  font-size: $icon-size-md;
+  color: var(--text-secondary);
+}
+
+.action-cell {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.state-expand-btn {
+  margin-left: $sp-sm;
+  vertical-align: middle;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+  }
+}

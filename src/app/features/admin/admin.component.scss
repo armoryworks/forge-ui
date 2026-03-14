@@ -243,6 +243,42 @@
   p { margin: 0; font-size: $font-size-sm; }
 }
 
+// ─── Settings Sections ───
+.settings-section {
+  padding: 0 $sp-lg $sp-xl;
+  border-bottom: $border-width-thin solid var(--border);
+  margin-bottom: $sp-xl;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-lg;
+    margin-bottom: $sp-lg;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    @include uppercase-label($font-size-xs, 0.5px, 700);
+    color: var(--text-muted);
+    margin: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      color: var(--primary);
+    }
+  }
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  max-width: 600px;
+}
+
 // ─── System Settings ───
 .settings-grid {
   display: flex;
@@ -507,5 +543,43 @@
   &__hint {
     font-size: $font-size-xs;
     color: var(--text-secondary);
+  }
+}
+
+.compliance-section-divider {
+  @include uppercase-label($font-size-xs, 0.5px, 700);
+  color: var(--text-muted);
+  margin: $sp-xl 0 $sp-md;
+  padding-top: $sp-xl;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.compliance-user-picker {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  margin-bottom: $sp-lg;
+
+  &__label {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  &__select {
+    height: $input-height;
+    padding: 0 $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    min-width: 250px;
+    cursor: pointer;
+
+    &:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
   }
 }

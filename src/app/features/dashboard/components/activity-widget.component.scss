@@ -4,14 +4,14 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  padding: 5px 12px;
+  padding: $sp-sm $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
   font-size: $font-size-sm;
 }
 
 .activity-item__icon {
-  width: 22px;
-  height: 22px;
+  width: $btn-icon-size;
+  height: $btn-icon-size;
   display: flex;
   align-items: center;
   justify-content: center;

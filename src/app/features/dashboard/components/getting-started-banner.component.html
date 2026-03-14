@@ -1,0 +1,25 @@
+@if (visible) {
+  <div class="getting-started" role="region" aria-label="Getting started guide">
+    <div class="getting-started__header">
+      <span class="material-icons-outlined getting-started__icon">rocket_launch</span>
+      <div class="getting-started__title-group">
+        <span class="getting-started__title">Getting Started</span>
+        <span class="getting-started__progress">{{ completedCount }} of {{ steps.length }} complete</span>
+      </div>
+      <button class="icon-btn getting-started__dismiss" (click)="dismiss()" aria-label="Dismiss getting started guide">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+    <div class="getting-started__steps">
+      @for (step of steps; track step.label) {
+        <button class="getting-started__step" [class.getting-started__step--done]="step.done" (click)="goTo(step)" [attr.aria-label]="step.label">
+          <span class="material-icons-outlined getting-started__check">{{ step.done ? 'check_circle' : 'radio_button_unchecked' }}</span>
+          <span class="getting-started__step-label">{{ step.label }}</span>
+          @if (!step.done) {
+            <span class="material-icons-outlined getting-started__arrow">arrow_forward</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+}

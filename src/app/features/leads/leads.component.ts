@@ -60,7 +60,7 @@ export class LeadsComponent {
     contactName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
-    source: new FormControl(''),
+    source: new FormControl<string | null>(null),
     notes: new FormControl(''),
     followUpDate: new FormControl<Date | null>(null),
   });
@@ -106,7 +106,7 @@ export class LeadsComponent {
   ];
 
   protected readonly sourceOptions: SelectOption[] = [
-    { value: '', label: 'Select...' },
+    { value: null, label: '-- None --' },
     ...this.leadSources.map(s => ({ value: s, label: s })),
   ];
 

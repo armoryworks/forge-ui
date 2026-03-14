@@ -47,6 +47,10 @@
   letter-spacing: 0.5px;
 }
 
+.breadcrumb__separator {
+  font-size: $icon-size-xs;
+}
+
 .breadcrumb__current {
   font-weight: 600;
 }
@@ -55,19 +59,19 @@
   flex: 1;
   background: var(--bg);
   border: $border-width solid var(--bg);
-  padding: $sp-sm 10px;
+  padding: $sp-sm $sp-md;
   color: var(--text);
   font-size: $font-size-sm;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: $sp-sm;
   position: relative;
 
   &--focused { border-color: var(--primary); }
 
   kbd {
     background: rgba(255, 255, 255, 0.1);
-    padding: 0 5px;
+    padding: 0 $sp-sm;
     font-size: $font-size-xs;
     font-family: $font-family-mono;
     margin-left: auto;
@@ -141,8 +145,8 @@
   color: var(--text); font-size: $font-size-sm; font-family: $font-family-primary;
   cursor: pointer; text-align: left;
   &:hover { background: var(--bg); }
-  &__icon { font-size: 18px; color: var(--text-muted); flex-shrink: 0; }
-  &__content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  &__icon { font-size: $icon-size-md; color: var(--text-muted); flex-shrink: 0; }
+  &__content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: $sp-xxs; }
   &__title { font-weight: 600; @include truncate; }
   &__subtitle { font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
   &__type { @include uppercase-label($font-size-xxs, 0.5px, 600); color: var(--text-muted); flex-shrink: 0; }

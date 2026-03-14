@@ -75,9 +75,9 @@ export class TokenSetupComponent implements OnInit {
       token: this.token,
       password: password!,
     })).subscribe({
-      next: () => {
+      next: (response) => {
         this.snackbar.success('Account setup complete. Welcome!');
-        this.router.navigate(['/dashboard']);
+        this.router.navigate([response.user.profileComplete ? '/dashboard' : '/account/profile']);
       },
       error: (err: HttpErrorResponse) => {
         const detail = err.error?.detail ?? err.error?.title ?? 'Setup failed.';

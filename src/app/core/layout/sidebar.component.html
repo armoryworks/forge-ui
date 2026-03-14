@@ -10,11 +10,14 @@
     @if ($index > 0) {
       <div class="sidebar__divider"></div>
     }
+    @if (group.label && !collapsed()) {
+      <span class="sidebar__section-label">{{ group.label }}</span>
+    }
     @for (item of group.items; track item.route) {
       <a class="nav-item"
          [routerLink]="item.route"
          routerLinkActive="nav-item--active"
-         [title]="item.label"
+         [title]="item.shortcut ? item.label + ' (' + item.shortcut + ')' : item.label"
          (click)="onNavClick()">
         <span class="material-icons-outlined">{{ item.icon }}</span>
         @if (!collapsed()) {
@@ -22,6 +25,8 @@
         }
         @if (item.badge) {
           <span class="nav-item__badge">{{ item.badge }}</span>
+        } @else if (item.shortcut && !collapsed()) {
+          <span class="kbd-hint">{{ item.shortcut }}</span>
         }
       </a>
     }

@@ -6,15 +6,12 @@
       <app-input label="Email" type="email" formControlName="email" />
       <app-input label="Phone" formControlName="phone" />
     </div>
-    <app-input label="Address" formControlName="address" />
-    <div class="dialog-row">
-      <app-input label="City" formControlName="city" />
-      <app-input label="State" formControlName="state" />
-    </div>
-    <div class="dialog-row">
-      <app-input label="Zip Code" formControlName="zipCode" />
-      <app-input label="Country" formControlName="country" />
-    </div>
+    <app-address-form formControlName="address"
+      [requireLine1]="false"
+      [requireCity]="false"
+      [requireState]="false"
+      [requirePostalCode]="false"
+      [showLine2]="false" />
     <app-select label="Payment Terms" formControlName="paymentTerms" [options]="paymentTermsOptions" />
     <app-textarea label="Notes" formControlName="notes" [rows]="3" />
     @if (isEditing) {
@@ -28,6 +25,7 @@
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
+      <span class="material-icons-outlined">save</span>
       {{ isEditing ? 'Save Changes' : 'Create Vendor' }}
     </button>
   </div>

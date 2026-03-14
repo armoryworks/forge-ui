@@ -10,10 +10,10 @@
     <div class="app-header__logo">QB<span>:</span>Eng</div>
   }
   <div class="header-sep hide-mobile"></div>
-  <nav class="breadcrumb hide-mobile">
+  <nav class="breadcrumb hide-mobile" aria-label="Breadcrumb">
     <span>Home</span>
-    <span class="material-icons-outlined" style="font-size: 14px">chevron_right</span>
-    <span class="breadcrumb__current">Dashboard</span>
+    <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
+    <span class="breadcrumb__current">{{ layout.breadcrumbLabel() }}</span>
   </nav>
 
   <div class="app-header__search hide-mobile" [class.app-header__search--focused]="searchFocused()">

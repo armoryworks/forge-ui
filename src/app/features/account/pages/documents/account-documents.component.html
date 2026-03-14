@@ -1,0 +1,16 @@
+<div class="account-page">
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">folder</span>
+    My Documents
+  </h1>
+
+  <div class="account-page__card">
+    <p class="documents__intro">Upload personal documents such as ID copies, certifications, or other records.</p>
+
+    <app-file-upload-zone
+      entityType="employee-docs"
+      [entityId]="userId()"
+      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+      [maxSizeMb]="25" />
+  </div>
+</div>

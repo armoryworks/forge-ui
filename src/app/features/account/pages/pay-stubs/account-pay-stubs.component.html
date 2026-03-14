@@ -1,0 +1,48 @@
+<div class="pay-stubs">
+  <h2 class="pay-stubs__title">Pay Stubs</h2>
+  <p class="pay-stubs__subtitle">View and download your pay stubs</p>
+
+  <app-data-table
+    tableId="account-pay-stubs"
+    [columns]="columns"
+    [data]="payStubs()"
+    emptyIcon="payments"
+    emptyMessage="No pay stubs available">
+
+    <ng-template appColumnCell="payDate" let-row>
+      {{ row.payDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="period" let-row>
+      {{ row.payPeriodStart | date:'MM/dd/yyyy' }} – {{ row.payPeriodEnd | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="grossPay" let-row>
+      {{ row.grossPay | currency }}
+    </ng-template>
+
+    <ng-template appColumnCell="netPay" let-row>
+      {{ row.netPay | currency }}
+    </ng-template>
+
+    <ng-template appColumnCell="totalDeductions" let-row>
+      {{ row.totalDeductions | currency }}
+    </ng-template>
+
+    <ng-template appColumnCell="source" let-row>
+      @if (row.source === 'Accounting') {
+        <span class="chip chip--info">Synced</span>
+      } @else {
+        <span class="chip chip--muted">Manual</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      @if (row.fileAttachmentId) {
+        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" aria-label="Download pay stub PDF">
+          <span class="material-icons-outlined">download</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

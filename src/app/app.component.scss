@@ -20,6 +20,12 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+
+  // Routed components rendered by <router-outlet> must fill available space
+  > *:not(router-outlet) {
+    flex: 1;
+    min-height: 0;
+  }
 }
 
 .mobile-sidebar-backdrop {

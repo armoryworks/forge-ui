@@ -7,16 +7,21 @@ import { SignalrService } from './signalr.service';
 export class ChatHubService {
   private readonly signalr = inject(SignalrService);
   private connection: HubConnection | null = null;
+  private connected = false;
 
   private onMessage: ((event: unknown) => void) | null = null;
 
   async connect(): Promise<void> {
+    if (this.connected) return;
+    this.connected = true;
+
     this.connection = this.signalr.getOrCreateConnection('chat');
     this.registerHandlers();
     await this.signalr.startConnection('chat');
   }
 
   async disconnect(): Promise<void> {
+    this.connected = false;
     await this.signalr.stopConnection('chat');
     this.connection = null;
   }

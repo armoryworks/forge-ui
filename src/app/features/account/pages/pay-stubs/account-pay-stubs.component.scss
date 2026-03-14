@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.pay-stubs {
+  padding: $sp-xl;
+}
+
+.pay-stubs__title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 $sp-sm;
+}
+
+.pay-stubs__subtitle {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0 0 $sp-xl;
+}

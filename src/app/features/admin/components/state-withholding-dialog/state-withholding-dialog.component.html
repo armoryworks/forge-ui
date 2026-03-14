@@ -1,0 +1,110 @@
+<app-dialog [title]="'State Tax Withholding Forms'" width="720px" (closed)="close()">
+  <div [appLoadingBlock]="loading()">
+    <div class="state-summary">
+      <div class="state-summary__stat">
+        <span class="state-summary__number">{{ readyStates().length }}</span>
+        <span class="state-summary__label">Ready</span>
+      </div>
+      <div class="state-summary__stat">
+        <span class="state-summary__number">{{ needsUploadStates().length }}</span>
+        <span class="state-summary__label">Need Upload</span>
+      </div>
+      <div class="state-summary__stat">
+        <span class="state-summary__number">{{ federalStates().length }}</span>
+        <span class="state-summary__label">Use Federal W-4</span>
+      </div>
+      <div class="state-summary__stat">
+        <span class="state-summary__number">{{ noTaxStates().length }}</span>
+        <span class="state-summary__label">No Income Tax</span>
+      </div>
+    </div>
+
+    <!-- States with own form — ready for e-sign -->
+    <h4 class="state-section__title">
+      <span class="material-icons-outlined">verified</span>
+      Ready for E-Signatures ({{ readyStates().length }})
+    </h4>
+    <div class="state-grid">
+      @for (state of readyStates(); track state.code) {
+        <button class="state-card" [class.state-card--active]="state.code === currentState()"
+                [disabled]="saving()" (click)="selectState(state.code)"
+                [attr.aria-label]="'Select ' + state.label">
+          <span class="state-card__code">{{ state.code }}</span>
+          <span class="state-card__name">{{ state.label }}</span>
+          <span class="state-card__form">{{ state.formName }}</span>
+          <span [class]="getStatusClass(state)">
+            <span class="material-icons-outlined chip__icon">{{ getStatusIcon(state) }}</span>
+            {{ getStatusLabel(state) }}
+          </span>
+        </button>
+      }
+    </div>
+
+    <!-- States with own form — needs upload -->
+    <h4 class="state-section__title">
+      <span class="material-icons-outlined">upload_file</span>
+      Needs PDF Upload ({{ needsUploadStates().length }})
+    </h4>
+    <p class="state-section__hint">Upload the state's withholding form via the DocuSeal admin panel, then select the state here.</p>
+    <div class="state-grid">
+      @for (state of needsUploadStates(); track state.code) {
+        <button class="state-card state-card--pending"
+                [class.state-card--active]="state.code === currentState()"
+                [disabled]="saving()" (click)="selectState(state.code)"
+                [attr.aria-label]="'Select ' + state.label + ' (needs upload)'">
+          <span class="state-card__code">{{ state.code }}</span>
+          <span class="state-card__name">{{ state.label }}</span>
+          <span class="state-card__form">{{ state.formName }}</span>
+          <span [class]="getStatusClass(state)">
+            <span class="material-icons-outlined chip__icon">{{ getStatusIcon(state) }}</span>
+            {{ getStatusLabel(state) }}
+          </span>
+        </button>
+      }
+    </div>
+
+    <!-- States using federal W-4 -->
+    <h4 class="state-section__title">
+      <span class="material-icons-outlined">description</span>
+      Accept Federal W-4 ({{ federalStates().length }})
+    </h4>
+    <p class="state-section__hint">These states accept the federal W-4 form — no separate state form needed.</p>
+    <div class="state-grid">
+      @for (state of federalStates(); track state.code) {
+        <button class="state-card state-card--federal"
+                [class.state-card--active]="state.code === currentState()"
+                [disabled]="saving()" (click)="selectState(state.code)"
+                [attr.aria-label]="'Select ' + state.label + ' (uses federal W-4)'">
+          <span class="state-card__code">{{ state.code }}</span>
+          <span class="state-card__name">{{ state.label }}</span>
+          <span [class]="getStatusClass(state)">
+            <span class="material-icons-outlined chip__icon">{{ getStatusIcon(state) }}</span>
+            {{ getStatusLabel(state) }}
+          </span>
+        </button>
+      }
+    </div>
+
+    <!-- No income tax states -->
+    <h4 class="state-section__title">
+      <span class="material-icons-outlined">block</span>
+      No State Income Tax ({{ noTaxStates().length }})
+    </h4>
+    <p class="state-section__hint">State withholding form not required — the compliance requirement will be deactivated.</p>
+    <div class="state-grid">
+      @for (state of noTaxStates(); track state.code) {
+        <button class="state-card state-card--no-tax"
+                [class.state-card--active]="state.code === currentState()"
+                [disabled]="saving()" (click)="selectState(state.code)"
+                [attr.aria-label]="'Select ' + state.label + ' (no income tax)'">
+          <span class="state-card__code">{{ state.code }}</span>
+          <span class="state-card__name">{{ state.label }}</span>
+          <span [class]="getStatusClass(state)">
+            <span class="material-icons-outlined chip__icon">{{ getStatusIcon(state) }}</span>
+            {{ getStatusLabel(state) }}
+          </span>
+        </button>
+      }
+    </div>
+  </div>
+</app-dialog>

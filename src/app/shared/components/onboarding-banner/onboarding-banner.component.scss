@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+.onboarding-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  background: var(--warning-light);
+  border-bottom: $border-width-thin solid var(--warning);
+  min-height: 36px;
+}
+
+.onboarding-banner__icon {
+  font-size: $icon-size-md;
+  color: var(--warning);
+}
+
+.onboarding-banner__text {
+  flex: 1;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.onboarding-banner__action {
+  background: var(--warning) !important; // override default btn bg
+  color: white !important;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.onboarding-banner__dismiss {
+  color: var(--text-secondary);
+
+  &:hover {
+    color: var(--text);
+  }
+}

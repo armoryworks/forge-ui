@@ -1,0 +1,93 @@
+@use 'styles/variables' as *;
+
+.getting-started {
+  background: var(--primary-light);
+  border: $border-width solid var(--primary);
+  padding: $sp-lg;
+  margin: $sp-lg $sp-lg 0;
+}
+
+.getting-started__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  margin-bottom: $sp-md;
+}
+
+.getting-started__icon {
+  font-size: $icon-size-lg;
+  color: var(--primary);
+}
+
+.getting-started__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.getting-started__title {
+  font-size: $font-size-md;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.getting-started__progress {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.getting-started__dismiss {
+  margin-left: auto;
+  color: var(--text-muted);
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.getting-started__steps {
+  display: flex;
+  gap: $sp-md;
+  flex-wrap: wrap;
+}
+
+.getting-started__step {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: $font-size-sm;
+  color: var(--text);
+  transition: border-color $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+  }
+
+  &--done {
+    opacity: 0.6;
+
+    .getting-started__step-label {
+      text-decoration: line-through;
+    }
+  }
+}
+
+.getting-started__check {
+  font-size: $icon-size-sm;
+  color: var(--text-muted);
+
+  .getting-started__step--done & {
+    color: var(--success);
+  }
+}
+
+.getting-started__arrow {
+  font-size: $icon-size-xs;
+  color: var(--primary);
+  margin-left: $sp-xs;
+}

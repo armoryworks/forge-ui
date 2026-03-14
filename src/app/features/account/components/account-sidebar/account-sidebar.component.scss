@@ -1,0 +1,141 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+}
+
+.account-sidebar {
+  width: 240px;
+  min-width: 240px;
+  background: var(--surface);
+  border-right: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: $sp-lg 0;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
+}
+
+.account-sidebar__back {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  margin: 0 $sp-md $sp-md;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: $font-size-sm;
+  font-family: $font-family-primary;
+  cursor: pointer;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
+.account-sidebar__title {
+  padding: $sp-md $sp-xl;
+  font-size: $font-size-xs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+}
+
+.account-sidebar__nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account-sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: $font-size-sm;
+  transition: background $transition-fast, color $transition-fast;
+  height: $sidebar-nav-height;
+
+  &:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  &--active {
+    background: var(--bg);
+    color: var(--primary);
+    font-weight: 600;
+    border-left: $border-width solid var(--primary);
+  }
+}
+
+.account-sidebar__icon {
+  font-size: $sidebar-icon-size;
+}
+
+.account-sidebar__label {
+  flex: 1;
+}
+
+.account-sidebar__link--parent {
+  width: 100%;
+  border: none;
+  background: none;
+  font-family: $font-family-primary;
+  cursor: pointer;
+}
+
+.account-sidebar__link--child {
+  padding-left: $sp-3xl;
+
+  .account-sidebar__icon {
+    font-size: $icon-size-sm;
+  }
+}
+
+.account-sidebar__chevron {
+  font-size: $icon-size-sm;
+  color: var(--text-muted);
+  transition: transform $transition-fast;
+
+  &--expanded {
+    transform: rotate(180deg);
+  }
+}
+
+.account-sidebar__children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.account-sidebar__status {
+  font-size: $icon-size-sm;
+
+  &--complete {
+    color: var(--success);
+  }
+
+  &--incomplete {
+    color: var(--warning);
+  }
+}
+
+@include mobile {
+  .account-sidebar {
+    width: 100%;
+    min-width: 0;
+    border-right: none;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+}

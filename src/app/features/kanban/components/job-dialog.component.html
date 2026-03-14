@@ -34,6 +34,8 @@
       [disabled]="saving() || loadingRefs() || jobForm.invalid">
       @if (saving()) {
         <span class="material-icons-outlined btn-spinner">refresh</span>
+      } @else {
+        <span class="material-icons-outlined">save</span>
       }
       {{ mode() === 'create' ? 'Create Job' : 'Save Changes' }}
     </button>

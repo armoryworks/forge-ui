@@ -11,12 +11,22 @@
 }
 
 .empty-state__icon {
-  font-size: $icon-size-xl;
+  font-size: $icon-size-hero;
+  opacity: 0.4;
 }
 
 .empty-state__message {
-  font-size: $font-size-sm;
+  font-size: $font-size-base;
   color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.empty-state__help {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  max-width: 320px;
+  text-align: center;
+  line-height: 1.5;
 }
 
 .empty-state__action {

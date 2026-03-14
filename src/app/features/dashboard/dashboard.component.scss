@@ -152,7 +152,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: $sp-md;
+  padding: $sp-sm;
   @include custom-scrollbar;
 }
 
@@ -160,8 +160,10 @@
 .dashboard-kpis {
   display: flex;
   gap: $sp-md;
-  margin-bottom: $sp-md;
+  margin-bottom: $sp-sm;
+  padding: 0 $sp-sm;
   flex-shrink: 0;
+  flex-wrap: wrap;
 }
 
 // ─── GridStack Overrides ───
@@ -169,12 +171,10 @@
   // Override gridstack defaults to match design system
   // Sharp corners, proper borders
   .grid-stack-item-content {
-    position: relative;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     border-radius: $border-radius;
-    inset: 0 !important; // override gridstack default margin
   }
 
   // Widget fills grid cell

@@ -17,6 +17,7 @@ import { CycleDialogComponent } from './components/cycle-dialog/cycle-dialog.com
 import { BacklogService } from '../backlog/services/backlog.service';
 import { KanbanJob } from '../kanban/models/kanban-job.model';
 import { PRIORITY_COLORS } from '../kanban/models/priority-colors.const';
+import { PRIORITY_FILTER_OPTIONS } from '../../shared/models/priority.const';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -77,13 +78,7 @@ export class PlanningComponent implements OnInit {
 
   protected readonly cycleControl = new FormControl<number | null>(null);
 
-  protected readonly priorityOptions: SelectOption[] = [
-    { value: null, label: 'All Priorities' },
-    { value: 'Low', label: 'Low' },
-    { value: 'Normal', label: 'Normal' },
-    { value: 'High', label: 'High' },
-    { value: 'Urgent', label: 'Urgent' },
-  ];
+  protected readonly priorityOptions = PRIORITY_FILTER_OPTIONS;
 
   // Committed job IDs for filtering backlog
   protected readonly committedJobIds = computed(() => {

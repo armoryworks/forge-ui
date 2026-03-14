@@ -101,6 +101,84 @@ html {
   }
 }
 
+// ─── Dark Theme — Material tokens for dark mode ───
+html[data-theme='dark'] {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: dark,
+        primary: mat.$cyan-palette,
+        tertiary: mat.$orange-palette,
+      ),
+      typography: 'Space Grotesk',
+      density: -1,
+    )
+  );
+
+  // Re-apply shape overrides (theme() resets tokens)
+  @include mat.button-overrides((
+    filled-container-shape: 0px,
+    outlined-container-shape: 0px,
+    text-container-shape: 0px,
+    protected-container-shape: 0px,
+  ));
+
+  @include mat.card-overrides((
+    elevated-container-shape: 0px,
+    outlined-container-shape: 0px,
+  ));
+
+  @include mat.form-field-overrides((
+    filled-container-shape: 0px,
+    outlined-container-shape: 0px,
+    container-height: 2rem,
+    container-vertical-padding: 0.25rem,
+    filled-with-label-container-padding-top: 0.25rem,
+    filled-with-label-container-padding-bottom: 0.25rem,
+    container-text-size: 0.75rem,
+    subscript-text-size: 0.625rem,
+    outlined-error-outline-color: var(--error),
+    outlined-error-focus-outline-color: var(--error),
+    outlined-error-hover-outline-color: var(--error),
+    outlined-error-label-text-color: var(--error),
+    error-text-color: var(--error),
+  ));
+
+  @include mat.select-overrides((
+    arrow-transform: none,
+  ));
+
+  @include mat.datepicker-overrides((
+    calendar-container-shape: 0px,
+  ));
+
+  @include mat.dialog-overrides((
+    container-shape: 0px,
+  ));
+
+  @include mat.menu-overrides((
+    container-shape: 0px,
+  ));
+
+  @include mat.snack-bar-overrides((
+    container-shape: 0px,
+  ));
+
+  @include mat.autocomplete-overrides((
+    container-shape: 0px,
+  ));
+}
+
+// ─── Form Validation Visual Indicator ───
+// Subtle red outline glow on invalid + touched fields to guide users
+.mat-mdc-form-field.ng-touched.ng-invalid {
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: var(--error) !important; // override Material -- invalid state
+  }
+}
+
 // ─── Driver.js Tour Overrides ───
 .qb-tour-popover {
   font-family: $font-family-primary;

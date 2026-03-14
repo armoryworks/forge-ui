@@ -60,6 +60,7 @@
       [appValidationPopover]="violations"
       [disabled]="form.invalid || !hasStages() || saving()"
       (click)="onSubmit()">
+      <span class="material-icons-outlined">save</span>
       {{ isEdit() ? 'Save Changes' : 'Create' }}
     </button>
   </div>

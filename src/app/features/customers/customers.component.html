@@ -1,6 +1,6 @@
-<app-page-header title="Customers">
+<app-page-header title="Customers" subtitle="Manage customer contacts and addresses">
   <button class="action-btn action-btn--primary" (click)="openCreateCustomer()">
-    <span class="material-icons-outlined">person_add</span>
+    <span class="material-icons-outlined">add</span>
     New Customer
   </button>
 </app-page-header>
@@ -140,7 +140,7 @@
         @if (activeTab() === 'contacts') {
           <div class="contacts-header">
             <button class="action-btn action-btn--sm" (click)="openCreateContact()">
-              <span class="material-icons-outlined">person_add</span>
+              <span class="material-icons-outlined">add</span>
               Add Contact
             </button>
           </div>
@@ -233,6 +233,7 @@
         [appValidationPopover]="customerViolations"
         [disabled]="customerForm.invalid || saving()"
         (click)="saveCustomer()">
+        <span class="material-icons-outlined">save</span>
         {{ editingCustomer() ? 'Save Changes' : 'Create Customer' }}
       </button>
     </div>
@@ -263,6 +264,7 @@
         [appValidationPopover]="contactViolations"
         [disabled]="contactForm.invalid || saving()"
         (click)="saveContact()">
+        <span class="material-icons-outlined">save</span>
         {{ editingContact() ? 'Save Changes' : 'Add Contact' }}
       </button>
     </div>

@@ -1,0 +1,332 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host, .ai-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ai-layout { height: 100%; }
+
+// ─── Left Sidebar ───
+
+.ai-sidebar {
+  width: 260px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  border-right: $border-width solid var(--border);
+  background: var(--bg);
+  overflow-y: auto;
+  @include custom-scrollbar;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+    font-weight: 600;
+    font-size: $font-size-title;
+
+    .material-icons-outlined {
+      font-size: $icon-size-lg;
+      color: var(--primary);
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    padding: $sp-md;
+    gap: $sp-sm;
+  }
+}
+
+.assistant-card {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &--active {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  }
+
+  &__icon {
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  &__description {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    @include truncate;
+  }
+}
+
+// ─── Chat Panel ───
+
+.ai-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__header-icon {
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+    }
+  }
+
+  &__header-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__header-name {
+    font-weight: 600;
+    font-size: $font-size-title;
+  }
+
+  &__header-desc {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: $sp-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+    @include custom-scrollbar;
+  }
+
+  &__welcome {
+    @include flex-center;
+    flex-direction: column;
+    flex: 1;
+    gap: $sp-md;
+    text-align: center;
+    padding: $sp-3xl;
+  }
+
+  &__welcome-icon .material-icons-outlined { font-size: $icon-size-hero; }
+  &__welcome-title { font-size: $font-size-xl; font-weight: 600; margin: 0; }
+  &__welcome-desc { font-size: $font-size-base; color: var(--text-muted); margin: 0; max-width: 400px; }
+
+  &__starters {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    margin-top: $sp-lg;
+    width: 100%;
+    max-width: 500px;
+  }
+
+  &__input {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+    border-top: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__text-input {
+    flex: 1;
+    height: $input-height;
+    padding: 0 $sp-md;
+    border: $border-width solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: $font-size-base;
+    font-family: $font-family-primary;
+    &:focus { outline: none; border-color: var(--primary); }
+    &::placeholder { color: var(--text-muted); }
+  }
+
+  &__send { height: $input-height; min-width: $input-height; padding: 0 $sp-md; }
+  &__empty { flex: 1; @include flex-center; }
+}
+
+// ─── Messages ───
+
+.chat-message {
+  display: flex;
+  gap: $sp-md;
+  max-width: 80%;
+
+  &--user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  &--assistant {
+    align-self: flex-start;
+  }
+
+  &__avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+
+  &__bubble {
+    padding: $sp-md $sp-lg;
+    font-size: $font-size-base;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &--user &__bubble {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  &--assistant &__bubble {
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+  }
+
+  &__bubble--typing {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-md $sp-lg;
+  }
+}
+
+// ─── Starter Buttons ───
+
+.starter-btn {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: $font-size-base;
+  font-family: $font-family-primary;
+  cursor: pointer;
+  text-align: left;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    border-color: var(--primary);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+    color: var(--text-muted);
+  }
+}
+
+// ─── Typing Animation ───
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  background: var(--text-muted);
+  border-radius: 50%;
+  animation: typing-bounce 1.4s infinite;
+
+  &:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.4s;
+  }
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+// ─── Mobile ───
+
+@include mobile {
+  .ai-sidebar {
+    width: 100%;
+    min-width: unset;
+    max-height: 140px;
+    border-right: none;
+    border-bottom: $border-width solid var(--border);
+
+    &__list {
+      flex-direction: row;
+      overflow-x: auto;
+      @include custom-scrollbar(4px);
+    }
+  }
+
+  .assistant-card {
+    min-width: 160px;
+    flex-shrink: 0;
+  }
+
+  .ai-layout {
+    flex-direction: column;
+  }
+
+  .chat-message {
+    max-width: 90%;
+  }
+}

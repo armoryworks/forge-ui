@@ -24,7 +24,9 @@
     "scenario:populate": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --grep \"01|02d\"",
     "scenario:qb-sandbox": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --headed --grep \"01|02e\"",
     "scenario:qb-clean": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --headed --grep \"00\"",
-    "scenario:qb-fresh": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --headed --grep \"00|01|02e\""
+    "scenario:qb-fresh": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --headed --grep \"00|01|02e\"",
+    "screenshots": "playwright test --config=e2e/screenshots/playwright.screenshots.config.ts",
+    "screenshots:headed": "playwright test --config=e2e/screenshots/playwright.screenshots.config.ts --headed"
   },
   "private": true,
   "packageManager": "npm@11.8.0",
@@ -39,7 +41,7 @@
     "@angular/material-date-fns-adapter": "^21.2.1",
     "@angular/platform-browser": "^21.2.0",
     "@angular/router": "^21.2.0",
-    "@angular/service-worker": "^21.2.2",
+    "@angular/service-worker": "^21.2.1",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/space-grotesk": "^5.2.10",
     "@microsoft/signalr": "^10.0.0",

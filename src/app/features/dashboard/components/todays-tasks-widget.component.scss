@@ -26,8 +26,8 @@
 .task-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
   font-size: $font-size-sm;
 

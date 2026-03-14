@@ -1,65 +1,93 @@
 <div class="auth-page">
-  <mat-card appearance="outlined" class="auth-card form-stack">
-    <div class="auth-card__header">
-      <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-      <h1 class="auth-card__title">QB Engineer</h1>
-      <p class="auth-card__subtitle">Manufacturing Operations Platform</p>
-    </div>
+  @if (isAlreadyLoggedIn()) {
+    <mat-card appearance="outlined" class="auth-card form-stack">
+      <div class="auth-card__header">
+        <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
+        <h1 class="auth-card__title">QB Engineer</h1>
+        <p class="auth-card__subtitle">You are already signed in</p>
+      </div>
 
-    <form class="auth-card__form form-stack" [formGroup]="form" (ngSubmit)="onSubmit()">
-      <app-input label="Email" type="email" formControlName="email" autocomplete="email" />
-      <app-input label="Password" type="password" formControlName="password" autocomplete="current-password" />
+      <div class="auth-card__session">
+        <span class="auth-card__session-user">
+          <span class="material-icons-outlined">account_circle</span>
+          {{ currentUser()?.email }}
+        </span>
+      </div>
 
-      <button mat-flat-button color="primary" type="submit"
-        [appValidationPopover]="violations"
-        [disabled]="form.invalid || loading()">
-        @if (loading()) {
-          Signing in...
+      <div class="auth-card__session-actions">
+        <button mat-flat-button color="primary" (click)="goToDashboard()">
+          <span class="material-icons-outlined">dashboard</span>
+          Go to Dashboard
+        </button>
+        <button mat-stroked-button (click)="switchAccount()">
+          <span class="material-icons-outlined">logout</span>
+          Sign Out &amp; Switch Account
+        </button>
+      </div>
+    </mat-card>
+  } @else {
+    <mat-card appearance="outlined" class="auth-card form-stack">
+      <div class="auth-card__header">
+        <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
+        <h1 class="auth-card__title">QB Engineer</h1>
+        <p class="auth-card__subtitle">Manufacturing Operations Platform</p>
+      </div>
+
+      <form class="auth-card__form form-stack" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <app-input label="Email" type="email" formControlName="email" autocomplete="email" [required]="true" />
+        <app-input label="Password" type="password" formControlName="password" autocomplete="current-password" [required]="true" />
+
+        <button mat-flat-button color="primary" type="submit"
+          [appValidationPopover]="violations"
+          [disabled]="form.invalid || loading()">
+          @if (loading()) {
+            Signing in...
+          } @else {
+            Sign In
+          }
+        </button>
+      </form>
+
+      <div class="auth-card__setup">
+        @if (showSetupCode()) {
+          <div class="setup-code-entry">
+            <app-input label="Setup Code" [formControl]="setupCodeControl" placeholder="XXXX-XXXX" autocomplete="off" />
+            <div class="setup-code-entry__actions">
+              <button mat-stroked-button (click)="showSetupCode.set(false)">Cancel</button>
+              <button mat-flat-button color="primary"
+                [disabled]="!setupCodeControl.value?.trim()"
+                (click)="goToSetup()">
+                Continue
+              </button>
+            </div>
+          </div>
         } @else {
-          Sign In
+          <button mat-button class="auth-card__setup-link" (click)="showSetupCode.set(true)">
+            <span class="material-icons-outlined">vpn_key</span>
+            Have a setup code?
+          </button>
         }
-      </button>
-    </form>
+      </div>
 
-    <div class="auth-card__setup">
-      @if (showSetupCode()) {
-        <div class="setup-code-entry">
-          <app-input label="Setup Code" [formControl]="setupCodeControl" placeholder="XXXX-XXXX" autocomplete="off" />
-          <div class="setup-code-entry__actions">
-            <button mat-stroked-button (click)="showSetupCode.set(false)">Cancel</button>
-            <button mat-flat-button color="primary"
-              [disabled]="!setupCodeControl.value?.trim()"
-              (click)="goToSetup()">
-              Continue
-            </button>
+      @if (ssoProviders().length > 0) {
+        <div class="auth-card__sso">
+          <div class="auth-card__divider">
+            <mat-divider />
+            <span class="auth-card__divider-text">or sign in with</span>
+            <mat-divider />
+          </div>
+
+          <div class="auth-card__sso-buttons">
+            @for (provider of ssoProviders(); track provider.id) {
+              <button mat-stroked-button class="auth-card__sso-btn" (click)="ssoLogin(provider)"
+                [disabled]="loading()">
+                <span class="material-icons-outlined">{{ getSsoIcon(provider.id) }}</span>
+                {{ provider.name }}
+              </button>
+            }
           </div>
         </div>
-      } @else {
-        <button mat-button class="auth-card__setup-link" (click)="showSetupCode.set(true)">
-          <span class="material-icons-outlined">vpn_key</span>
-          Have a setup code?
-        </button>
       }
-    </div>
-
-    @if (ssoProviders().length > 0) {
-      <div class="auth-card__sso">
-        <div class="auth-card__divider">
-          <mat-divider />
-          <span class="auth-card__divider-text">or sign in with</span>
-          <mat-divider />
-        </div>
-
-        <div class="auth-card__sso-buttons">
-          @for (provider of ssoProviders(); track provider.id) {
-            <button mat-stroked-button class="auth-card__sso-btn" (click)="ssoLogin(provider)"
-              [disabled]="loading()">
-              <span class="material-icons-outlined">{{ getSsoIcon(provider.id) }}</span>
-              {{ provider.name }}
-            </button>
-          }
-        </div>
-      </div>
-    }
-  </mat-card>
+    </mat-card>
+  }
 </div>

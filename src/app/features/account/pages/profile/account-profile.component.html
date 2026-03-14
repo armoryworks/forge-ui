@@ -1,0 +1,68 @@
+<div class="account-page">
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">person</span>
+    Profile
+  </h1>
+
+  <div class="account-page__card-grid">
+    <div class="account-page__card">
+      <div class="account-page__avatar-row">
+        <app-avatar [initials]="form.get('initials')?.value || '?'"
+          [color]="selectedColor() || '#64748b'" size="lg" />
+        <div class="account-page__avatar-info">
+          <span class="account-page__email">{{ user()?.email }}</span>
+          @if (user()?.roles?.length) {
+            <span class="account-page__roles">{{ user()?.roles?.join(', ') }}</span>
+          }
+        </div>
+      </div>
+
+      <div [formGroup]="form" class="account-page__form">
+        <div class="account-page__row">
+          <app-input label="First Name" formControlName="firstName" [maxlength]="100" [required]="true" />
+          <app-input label="Last Name" formControlName="lastName" [maxlength]="100" [required]="true" />
+        </div>
+        <div class="account-page__row">
+          <app-input label="Initials" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
+          <app-datepicker label="Date of Birth" formControlName="dateOfBirth" />
+        </div>
+        <app-select label="Gender" formControlName="gender" [options]="genderOptions" />
+      </div>
+    </div>
+
+    <div class="account-page__card">
+      <div class="account-page__color-section">
+        <span class="account-page__color-label">Avatar Color</span>
+        <div class="account-page__color-grid">
+          @for (color of avatarColors; track color) {
+            <button class="account-page__color-swatch"
+              [style.background]="color"
+              [class.account-page__color-swatch--selected]="selectedColor() === color"
+              (click)="selectColor(color)"
+              type="button"
+              [attr.aria-label]="'Select color ' + color">
+              @if (selectedColor() === color) {
+                <span class="material-icons-outlined">check</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="account-page__actions">
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined account-page__spinner">sync</span>
+        Saving...
+      } @else {
+        <span class="material-icons-outlined">save</span>
+        Save
+      }
+    </button>
+  </div>
+</div>

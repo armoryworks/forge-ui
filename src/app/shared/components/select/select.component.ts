@@ -34,6 +34,7 @@ export class SelectComponent implements ControlValueAccessor {
   readonly options = input.required<SelectOption[]>();
   readonly multiple = input(false);
   readonly placeholder = input('');
+  readonly required = input(false);
 
   protected readonly value = signal<unknown>(null);
   protected readonly disabled = signal(false);

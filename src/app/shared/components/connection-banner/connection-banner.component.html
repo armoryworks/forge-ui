@@ -2,5 +2,8 @@
   <div class="connection-banner" [class.connection-banner--disconnected]="state() === 'disconnected'">
     <span class="material-icons-outlined connection-banner__icon">wifi_off</span>
     <span class="connection-banner__message">{{ message() }}</span>
+    <button class="connection-banner__dismiss" (click)="dismiss()" aria-label="Dismiss connection banner">
+      <span class="material-icons-outlined">close</span>
+    </button>
   </div>
 }

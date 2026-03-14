@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 .auth-page {
   display: flex;
@@ -12,6 +13,11 @@
   max-width: 360px;
   width: 100%;
   padding: $sp-lg;
+  transition: max-width $transition-normal;
+
+  &--wide {
+    max-width: 480px;
+  }
 
   &__header {
     text-align: center;
@@ -36,6 +42,12 @@
     margin: 0;
   }
 
+  &__section-title {
+    @include uppercase-label($font-size-xs, 0.5px, 700);
+    color: var(--text-muted);
+    margin: $sp-lg 0 $sp-sm;
+  }
+
   &__form {
     display: flex;
     flex-direction: column;
@@ -58,6 +70,17 @@
 
     app-input {
       min-width: 0;
+    }
+  }
+
+  &__buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+    margin-top: $sp-md;
+
+    button {
+      width: 100%;
     }
   }
 

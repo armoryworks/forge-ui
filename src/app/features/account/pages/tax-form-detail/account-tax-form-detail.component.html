@@ -1,0 +1,154 @@
+<div class="account-page">
+  @if (template(); as tmpl) {
+    <div class="form-detail__header">
+      <button class="action-btn action-btn--sm" (click)="goBack()" aria-label="Back to forms list">
+        <span class="material-icons-outlined">arrow_back</span>
+        Back
+      </button>
+      <div class="form-detail__title-row">
+        <span class="material-icons-outlined form-detail__icon"
+          [class.form-detail__icon--complete]="isComplete()">
+          {{ isComplete() ? 'check_circle' : tmpl.icon }}
+        </span>
+        <div>
+          <h1 class="form-detail__title">{{ tmpl.name }}</h1>
+          <p class="form-detail__description">{{ tmpl.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    @if (isComplete()) {
+      <div class="form-detail__status form-detail__status--complete">
+        <span class="material-icons-outlined">check_circle</span>
+        Completed {{ completedDate() | date:'MM/dd/yyyy' }}
+      </div>
+    } @else if (submission(); as sub) {
+      <div class="form-detail__status form-detail__status--pending">
+        <span class="material-icons-outlined">pending</span>
+        {{ sub.status }} — started {{ sub.createdAt | date:'MM/dd/yyyy' }}
+      </div>
+    }
+
+    <!-- DocuSeal Embed -->
+    @if (tmpl.docuSealTemplateId) {
+      <div class="form-detail__card">
+        <h2 class="form-detail__card-title">Digital Signing</h2>
+        @if (!submission()) {
+          <p class="form-detail__card-text">Click below to start the digital signing process.</p>
+          <button class="action-btn action-btn--primary"
+            [disabled]="submitting()"
+            (click)="startForm()">
+            @if (submitting()) {
+              <span class="material-icons-outlined account-page__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">draw</span>
+            }
+            Start Form
+          </button>
+        } @else if (submission(); as sub) {
+          @if (sub.status === 'Pending' && sub.docuSealSubmitUrl) {
+            <iframe
+              class="form-detail__iframe"
+              [src]="sub.docuSealSubmitUrl"
+              title="Document signing"
+              allow="camera; microphone"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+            </iframe>
+          } @else if (sub.status === 'Completed' && sub.signedPdfFileId) {
+            <p class="form-detail__card-text">Your signed document is available for download.</p>
+            <a class="action-btn action-btn--primary action-btn--sm"
+              [href]="'/api/v1/files/' + sub.signedPdfFileId"
+              target="_blank"
+              aria-label="Download signed PDF">
+              <span class="material-icons-outlined">download</span>
+              Download Signed PDF
+            </a>
+          }
+        }
+      </div>
+    }
+
+    <!-- Manual Upload & Acknowledge -->
+    <div class="form-detail__card">
+      <h2 class="form-detail__card-title">Upload Signed Document</h2>
+      <p class="form-detail__card-text">Upload a signed copy of this form. Accepted formats: PDF, JPEG, PNG.</p>
+
+      <app-file-upload-zone
+        entityType="employee-docs"
+        [entityId]="userId()"
+        accept=".pdf,.jpg,.jpeg,.png"
+        [maxSizeMb]="10" />
+
+      @if (!isComplete()) {
+        <button class="action-btn action-btn--primary form-detail__acknowledge-btn"
+          [disabled]="acknowledging()"
+          (click)="acknowledge()">
+          @if (acknowledging()) {
+            <span class="material-icons-outlined account-page__spinner">sync</span>
+          } @else {
+            <span class="material-icons-outlined">check</span>
+          }
+          Acknowledge & Complete
+        </button>
+      }
+    </div>
+
+    <!-- Identity Documents (I-9 only) -->
+    @if (tmpl.requiresIdentityDocs) {
+      <div class="form-detail__card">
+        <h2 class="form-detail__card-title">Identity Documents</h2>
+        <p class="form-detail__card-text">
+          Upload identity documents to verify your eligibility. Examples: birth certificate, driver's license, social security card, passport.
+        </p>
+
+        @if (identityDocuments().length > 0) {
+          <div class="form-detail__doc-list">
+            @for (doc of identityDocuments(); track doc.id) {
+              <div class="form-detail__doc-item">
+                <span class="material-icons-outlined form-detail__doc-icon">
+                  {{ doc.verifiedAt ? 'verified' : 'description' }}
+                </span>
+                <div class="form-detail__doc-info">
+                  <span class="form-detail__doc-name">{{ doc.fileName }}</span>
+                  <span class="form-detail__doc-type">{{ doc.documentType }}</span>
+                </div>
+                @if (doc.verifiedAt) {
+                  <span class="form-detail__doc-verified">
+                    Verified {{ doc.verifiedAt | date:'MM/dd/yyyy' }}
+                  </span>
+                } @else {
+                  <span class="form-detail__doc-pending">Pending verification</span>
+                }
+                <button class="icon-btn icon-btn--danger"
+                  aria-label="Remove document"
+                  (click)="deleteIdentityDoc(doc)">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="form-detail__upload-section">
+          @for (docType of identityDocTypes; track docType.value) {
+            <div class="form-detail__doc-upload">
+              <span class="form-detail__doc-upload-label">{{ docType.label }}</span>
+              <app-file-upload-zone
+                entityType="identity-docs"
+                [entityId]="userId()"
+                accept=".pdf,.jpg,.jpeg,.png"
+                [maxSizeMb]="10"
+                (uploaded)="onIdentityDocUploaded($event, docType.value)" />
+            </div>
+          }
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="page-loading">
+      <span class="material-icons-outlined account-page__spinner">sync</span>
+      Loading...
+    </div>
+  }
+</div>

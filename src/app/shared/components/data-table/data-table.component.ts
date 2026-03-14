@@ -64,6 +64,7 @@ export class DataTableComponent implements OnInit {
   readonly trackByField = input('id');
   readonly emptyIcon = input('search_off');
   readonly emptyMessage = input('No data found');
+  readonly emptyHelpText = input<string>();
   readonly expandable = input(false);
   readonly loading = input(false);
   readonly stickyFirstColumn = input(false);

@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  padding: 5px 12px;
+  padding: $sp-sm $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
 }
 

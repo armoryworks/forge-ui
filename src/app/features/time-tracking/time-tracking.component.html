@@ -1,4 +1,4 @@
-<app-page-header title="Time Tracking">
+<app-page-header title="Time Tracking" subtitle="Track hours with live timers or manual entries" helpTourId="time-tracking">
   @if (activeTimer()) {
     <button class="action-btn action-btn--warn" (click)="openStopTimer()">
       <span class="material-icons-outlined">stop_circle</span>
@@ -107,7 +107,9 @@
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="entryViolations"
         [disabled]="entryForm.invalid || saving()"
-        (click)="saveEntry()">Log Entry</button>
+        (click)="saveEntry()">
+        <span class="material-icons-outlined">save</span> Log Entry
+      </button>
     </div>
   </app-dialog>
 }

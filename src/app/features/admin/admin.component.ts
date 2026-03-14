@@ -36,6 +36,13 @@ import { IntegrationsPanelComponent } from './components/integrations-panel/inte
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { WebHidRfidService } from '../../shared/services/web-hid-rfid.service';
+import { AiAssistantsPanelComponent } from './components/ai-assistants-panel/ai-assistants-panel.component';
+import { TeamsPanelComponent } from './components/teams-panel/teams-panel.component';
+import { ComplianceTemplatesPanelComponent } from './components/compliance-templates-panel/compliance-templates-panel.component';
+import { UserCompliancePanelComponent } from './components/user-compliance-panel/user-compliance-panel.component';
+import { CompanyLocationDialogComponent } from './components/company-location-dialog/company-location-dialog.component';
+import { AuthService } from '../../shared/services/auth.service';
+import { CompanyLocation, CompanyProfile } from './models/company-location.model';
 
 @Component({
   selector: 'app-admin',
@@ -44,7 +51,7 @@ import { WebHidRfidService } from '../../shared/services/web-hid-rfid.service';
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, BarcodeInfoComponent, DatePipe,
+    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, BarcodeInfoComponent, DatePipe,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -58,19 +65,25 @@ export class AdminComponent {
   private readonly themeService = inject(ThemeService);
   private readonly scanner = inject(ScannerService);
   protected readonly rfid = inject(WebHidRfidService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
-  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training']);
+  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams']);
+
+  protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(
       map(params => {
-        const tab = params.get('tab') ?? 'users';
-        return AdminComponent.VALID_TABS.has(tab) ? tab : 'users';
+        const tab = params.get('tab') ?? (this.authService.hasRole('Admin') ? 'users' : 'compliance');
+        if (!AdminComponent.VALID_TABS.has(tab)) return this.authService.hasRole('Admin') ? 'users' : 'compliance';
+        if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !this.authService.hasRole('Admin')) return 'compliance';
+        return tab;
       }),
     ),
-    { initialValue: 'users' },
+    { initialValue: this.authService.hasRole('Admin') ? 'users' : 'compliance' },
   );
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -82,11 +95,12 @@ export class AdminComponent {
   protected readonly editingUser = signal<AdminUser | null>(null);
 
   protected readonly userForm = new FormGroup({
-    firstName: new FormControl('', [Validators.required]),
-    lastName: new FormControl('', [Validators.required]),
-    email: new FormControl('', [Validators.required, Validators.email]),
+    firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+    lastName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
+    email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(256)]),
     initials: new FormControl('', [Validators.maxLength(3)]),
     role: new FormControl('Engineer', [Validators.required]),
+    workLocationId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
   });
   protected readonly userViolations = FormValidationService.getViolations(this.userForm, {
@@ -112,6 +126,9 @@ export class AdminComponent {
     { value: 'biometric', label: 'Biometric' },
   ];
 
+  // Compliance — selected user for per-user detail panel
+  protected readonly complianceUserId = signal<number | null>(null);
+
   // Track Types
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly expandedTrackType = signal<number | null>(null);
@@ -129,6 +146,34 @@ export class AdminComponent {
   // System Settings
   protected readonly systemSettings = signal<SystemSetting[]>([]);
   protected readonly settingsEdits = signal<Map<string, string>>(new Map());
+
+  // Company Profile
+  protected readonly companyProfile = signal<CompanyProfile | null>(null);
+  protected readonly profileForm = new FormGroup({
+    name: new FormControl(''),
+    phone: new FormControl(''),
+    email: new FormControl('', [Validators.email]),
+    ein: new FormControl(''),
+    website: new FormControl(''),
+  });
+  protected readonly profileSaving = signal(false);
+
+  // Company Locations
+  protected readonly companyLocations = signal<CompanyLocation[]>([]);
+  protected readonly showLocationDialog = signal(false);
+  protected readonly editingLocation = signal<CompanyLocation | null>(null);
+  protected readonly locationColumns: ColumnDef[] = [
+    { field: 'name', header: 'Name', sortable: true },
+    { field: 'address', header: 'Address', sortable: true },
+    { field: 'state', header: 'State', sortable: true, width: '80px' },
+    { field: 'phone', header: 'Phone', width: '140px' },
+    { field: 'default', header: 'Default', width: '80px', align: 'center' },
+    { field: 'actions', header: 'Actions', width: '120px', align: 'right' },
+  ];
+  protected readonly locationOptions = computed<SelectOption[]>(() => [
+    { value: null, label: '-- Default --' },
+    ...this.companyLocations().filter(l => l.isActive).map(l => ({ value: l.id, label: l.name })),
+  ]);
 
   // Logo
   protected readonly logoPreviewUrl = computed(() => this.themeService.logoUrl());
@@ -153,6 +198,7 @@ export class AdminComponent {
     { field: 'role', header: 'Role', sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Admin', label: 'Admin' }, { value: 'Engineer', label: 'Engineer' }, { value: 'Viewer', label: 'Viewer' },
     ]},
+    { field: 'compliance', header: 'Compliance', sortable: true, width: '130px' },
     { field: 'status', header: 'Status', sortable: true },
     { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
   ];
@@ -171,10 +217,14 @@ export class AdminComponent {
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'users' && this.users().length === 0) this.loadUsers();
+      if (tab === 'users' && this.companyLocations().length === 0) this.loadCompanyLocations();
       if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
       if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
       if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
       if (tab === 'settings' && this.systemSettings().length === 0) this.loadSystemSettings();
+      if (tab === 'settings' && !this.companyProfile()) this.loadCompanyProfile();
+      if (tab === 'settings' && this.companyLocations().length === 0) this.loadCompanyLocations();
+      if (tab === 'compliance' && this.users().length === 0) this.loadUsers();
     });
 
     // When editing a user and a keyboard-wedge scan is detected, populate the scan value field
@@ -239,6 +289,7 @@ export class AdminComponent {
       email: user.email,
       initials: user.initials ?? '',
       role: user.roles[0] ?? 'Engineer',
+      workLocationId: user.workLocationId ?? null,
       isActive: user.isActive,
     });
     this.userForm.controls.email.disable();
@@ -271,7 +322,18 @@ export class AdminComponent {
         isActive: form.isActive!,
         role: form.role!,
       }).subscribe({
-        next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
+        next: () => {
+          // Update work location if changed
+          const newLocId = form.workLocationId ?? null;
+          if (newLocId !== editing.workLocationId) {
+            this.adminService.updateUserWorkLocation(editing.id, newLocId).subscribe({
+              next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
+              error: () => { this.saving.set(false); this.snackbar.error('User saved but failed to update work location'); this.closeUserDialog(); this.loadUsers(); },
+            });
+          } else {
+            this.saving.set(false); this.closeUserDialog(); this.loadUsers();
+          }
+        },
         error: (err) => { this.saving.set(false); this.error.set('Failed to update user'); },
       });
     } else {
@@ -302,6 +364,12 @@ export class AdminComponent {
             hasPendingSetupToken: true,
             hasRfidIdentifier: false,
             hasBarcodeIdentifier: false,
+            canBeAssignedJobs: false,
+            complianceCompletedItems: 0,
+            complianceTotalItems: 8,
+            missingComplianceItems: [],
+            workLocationId: null,
+            workLocationName: null,
           };
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);
@@ -609,6 +677,112 @@ export class AdminComponent {
         );
       },
       error: () => { this.saving.set(false); this.snackbar.error('Failed to save settings'); },
+    });
+  }
+
+  // ── Company Profile ──
+
+  private loadCompanyProfile(): void {
+    this.adminService.getCompanyProfile().subscribe({
+      next: (profile) => {
+        this.companyProfile.set(profile);
+        this.profileForm.patchValue(profile, { emitEvent: false });
+      },
+      error: () => this.snackbar.error('Failed to load company profile'),
+    });
+  }
+
+  protected saveCompanyProfile(): void {
+    this.profileSaving.set(true);
+    const v = this.profileForm.getRawValue();
+    this.adminService.updateCompanyProfile({
+      name: v.name ?? '',
+      phone: v.phone ?? '',
+      email: v.email ?? '',
+      ein: v.ein ?? '',
+      website: v.website ?? '',
+    }).subscribe({
+      next: (profile) => {
+        this.companyProfile.set(profile);
+        this.profileSaving.set(false);
+        this.snackbar.success('Company profile saved');
+      },
+      error: () => { this.profileSaving.set(false); this.snackbar.error('Failed to save company profile'); },
+    });
+  }
+
+  // ── Company Locations ──
+
+  private loadCompanyLocations(): void {
+    this.adminService.getCompanyLocations().subscribe({
+      next: (locations) => this.companyLocations.set(locations),
+      error: () => this.snackbar.error('Failed to load company locations'),
+    });
+  }
+
+  protected openCreateLocation(): void {
+    this.editingLocation.set(null);
+    this.showLocationDialog.set(true);
+  }
+
+  protected openEditLocation(location: CompanyLocation): void {
+    this.editingLocation.set(location);
+    this.showLocationDialog.set(true);
+  }
+
+  protected closeLocationDialog(): void {
+    this.showLocationDialog.set(false);
+  }
+
+  protected saveLocation(data: Partial<CompanyLocation>): void {
+    this.saving.set(true);
+    const editing = this.editingLocation();
+
+    if (editing) {
+      this.adminService.updateCompanyLocation(editing.id, data).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.closeLocationDialog();
+          this.loadCompanyLocations();
+          this.snackbar.success('Location updated');
+        },
+        error: () => { this.saving.set(false); this.snackbar.error('Failed to update location'); },
+      });
+    } else {
+      this.adminService.createCompanyLocation(data).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.closeLocationDialog();
+          this.loadCompanyLocations();
+          this.snackbar.success('Location created');
+        },
+        error: () => { this.saving.set(false); this.snackbar.error('Failed to create location'); },
+      });
+    }
+  }
+
+  protected deleteLocation(location: CompanyLocation): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Delete Location?',
+        message: `This will deactivate "${location.name}". Users assigned here will fall back to the default location.`,
+        confirmLabel: 'Delete',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.adminService.deleteCompanyLocation(location.id).subscribe({
+        next: () => { this.loadCompanyLocations(); this.snackbar.success('Location deleted'); },
+        error: () => this.snackbar.error('Failed to delete location'),
+      });
+    });
+  }
+
+  protected setDefaultLocation(location: CompanyLocation): void {
+    this.adminService.setDefaultCompanyLocation(location.id).subscribe({
+      next: () => { this.loadCompanyLocations(); this.snackbar.success(`${location.name} set as default`); },
+      error: () => this.snackbar.error('Failed to set default location'),
     });
   }
 

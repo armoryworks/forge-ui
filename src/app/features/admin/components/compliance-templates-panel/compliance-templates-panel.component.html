@@ -1,0 +1,80 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ templates().length }} compliance templates</span>
+  <div class="panel-header__actions">
+    <button class="action-btn" [disabled]="syncing()" (click)="syncAll()" aria-label="Sync all auto-sync templates">
+      <span class="material-icons-outlined">sync</span>
+      Sync All
+    </button>
+    <button class="action-btn action-btn--primary" (click)="openCreateDialog()" aria-label="Create new compliance template">
+      <span class="material-icons-outlined">add</span>
+      New Template
+    </button>
+  </div>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="admin-compliance-templates"
+    [columns]="columns"
+    [data]="templates()"
+    emptyIcon="description"
+    emptyMessage="No compliance templates configured"
+    (rowClick)="onRowClick($any($event))">
+
+    <ng-template appColumnCell="icon" let-row>
+      <span class="material-icons-outlined template-icon">{{ row.icon }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="name" let-row>
+      {{ row.name }}
+    </ng-template>
+
+    <ng-template appColumnCell="isAutoSync" let-row>
+      @if (row.isAutoSync) {
+        <span class="chip chip--info">Auto</span>
+      } @else {
+        <span class="chip chip--muted">Manual</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="lastSyncedAt" let-row>
+      @if (row.lastSyncedAt) {
+        {{ row.lastSyncedAt | date:'MM/dd/yyyy' }}
+      } @else {
+        <span class="text-muted">Never</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="isActive" let-row>
+      @if (row.isActive) {
+        <span class="chip chip--success">Active</span>
+      } @else {
+        <span class="chip chip--muted">Inactive</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="action-cell">
+        @if (row.formType === 'StateWithholding') {
+          <button class="icon-btn" (click)="openStateWithholdingDialog(); $event.stopPropagation()" aria-label="View state withholding details">
+            <span class="material-icons-outlined">open_in_new</span>
+          </button>
+        }
+        @if (row.isAutoSync && row.sourceUrl) {
+          <button class="icon-btn" (click)="syncTemplate(row); $event.stopPropagation()" aria-label="Sync template">
+            <span class="material-icons-outlined">sync</span>
+          </button>
+        }
+        <button class="icon-btn" (click)="openEditDialog(row); $event.stopPropagation()"
+                [attr.aria-label]="isSystemTemplate(row) ? 'Upload document' : 'Edit template'">
+          <span class="material-icons-outlined">{{ isSystemTemplate(row) ? 'upload_file' : 'edit' }}</span>
+        </button>
+        @if (!isSystemTemplate(row)) {
+          <button class="icon-btn icon-btn--danger" (click)="deleteTemplate(row); $event.stopPropagation()" aria-label="Delete template">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>

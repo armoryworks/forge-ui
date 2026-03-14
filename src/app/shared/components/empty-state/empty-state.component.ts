@@ -10,6 +10,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 export class EmptyStateComponent {
   readonly icon = input<string>('search_off');
   readonly message = input<string>('No data found');
+  readonly helpText = input<string>();
   readonly actionLabel = input<string | null>(null);
 
   readonly action = output<void>();

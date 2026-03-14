@@ -1,0 +1,36 @@
+<div class="tax-documents">
+  <h2 class="tax-documents__title">Tax Documents</h2>
+  <p class="tax-documents__subtitle">View and download your W-2s, 1099s, and other tax documents</p>
+
+  <app-data-table
+    tableId="account-tax-documents"
+    [columns]="columns"
+    [data]="taxDocuments()"
+    emptyIcon="receipt_long"
+    emptyMessage="No tax documents available">
+
+    <ng-template appColumnCell="documentType" let-row>
+      {{ getTypeLabel(row.documentType) }}
+    </ng-template>
+
+    <ng-template appColumnCell="employerName" let-row>
+      {{ row.employerName ?? '—' }}
+    </ng-template>
+
+    <ng-template appColumnCell="source" let-row>
+      @if (row.source === 'Accounting') {
+        <span class="chip chip--info">Synced</span>
+      } @else {
+        <span class="chip chip--muted">Manual</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      @if (row.fileAttachmentId) {
+        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" aria-label="Download tax document PDF">
+          <span class="material-icons-outlined">download</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

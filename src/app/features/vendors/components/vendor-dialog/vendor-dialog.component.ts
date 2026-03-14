@@ -5,9 +5,13 @@ import { VendorService } from '../../services/vendor.service';
 import { VendorDetail } from '../../models/vendor-detail.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
+import { Address } from '../../../../shared/models/address.model';
+import { PAYMENT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address.utils';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -18,7 +22,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
-    ValidationPopoverDirective,
+    AddressFormComponent, ValidationPopoverDirective,
   ],
   templateUrl: './vendor-dialog.component.html',
   styleUrl: './vendor-dialog.component.scss',
@@ -39,11 +43,7 @@ export class VendorDialogComponent {
     contactName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
-    address: new FormControl(''),
-    city: new FormControl(''),
-    state: new FormControl(''),
-    zipCode: new FormControl(''),
-    country: new FormControl(''),
+    address: new FormControl<Address | null>(null),
     paymentTerms: new FormControl(''),
     notes: new FormControl(''),
     isActive: new FormControl(true),
@@ -54,25 +54,12 @@ export class VendorDialogComponent {
     contactName: 'Contact Name',
     email: 'Email',
     phone: 'Phone',
-    address: 'Address',
-    city: 'City',
-    state: 'State',
-    zipCode: 'Zip Code',
-    country: 'Country',
     paymentTerms: 'Payment Terms',
     notes: 'Notes',
     isActive: 'Active',
   });
 
-  protected readonly paymentTermsOptions: SelectOption[] = [
-    { value: '', label: '-- None --' },
-    { value: 'Net 15', label: 'Net 15' },
-    { value: 'Net 30', label: 'Net 30' },
-    { value: 'Net 45', label: 'Net 45' },
-    { value: 'Net 60', label: 'Net 60' },
-    { value: 'Due on Receipt', label: 'Due on Receipt' },
-    { value: 'COD', label: 'COD' },
-  ];
+  protected readonly paymentTermsOptions = PAYMENT_TERMS_OPTIONS;
 
   constructor() {
     const v = this.vendor();
@@ -82,11 +69,7 @@ export class VendorDialogComponent {
         contactName: v.contactName ?? '',
         email: v.email ?? '',
         phone: v.phone ?? '',
-        address: v.address ?? '',
-        city: v.city ?? '',
-        state: v.state ?? '',
-        zipCode: v.zipCode ?? '',
-        country: v.country ?? '',
+        address: toAddress({ address: v.address, city: v.city, state: v.state, zipCode: v.zipCode, country: v.country }),
         paymentTerms: v.paymentTerms ?? '',
         notes: v.notes ?? '',
         isActive: v.isActive,
@@ -106,21 +89,22 @@ export class VendorDialogComponent {
     if (this.form.invalid) return;
     this.saving.set(true);
     const f = this.form.getRawValue();
+    const addr = f.address;
     const v = this.vendor();
+
+    const payload = {
+      companyName: f.companyName || undefined,
+      contactName: f.contactName || undefined,
+      email: f.email || undefined,
+      phone: f.phone || undefined,
+      ...fromAddressToVendor(addr),
+      paymentTerms: f.paymentTerms || undefined,
+      notes: f.notes || undefined,
+    };
 
     if (v) {
       this.vendorService.updateVendor(v.id, {
-        companyName: f.companyName || undefined,
-        contactName: f.contactName || undefined,
-        email: f.email || undefined,
-        phone: f.phone || undefined,
-        address: f.address || undefined,
-        city: f.city || undefined,
-        state: f.state || undefined,
-        zipCode: f.zipCode || undefined,
-        country: f.country || undefined,
-        paymentTerms: f.paymentTerms || undefined,
-        notes: f.notes || undefined,
+        ...payload,
         isActive: f.isActive ?? true,
       }).subscribe({
         next: () => {
@@ -132,17 +116,8 @@ export class VendorDialogComponent {
       });
     } else {
       this.vendorService.createVendor({
+        ...payload,
         companyName: f.companyName!,
-        contactName: f.contactName || undefined,
-        email: f.email || undefined,
-        phone: f.phone || undefined,
-        address: f.address || undefined,
-        city: f.city || undefined,
-        state: f.state || undefined,
-        zipCode: f.zipCode || undefined,
-        country: f.country || undefined,
-        paymentTerms: f.paymentTerms || undefined,
-        notes: f.notes || undefined,
       }).subscribe({
         next: () => {
           this.saving.set(false);

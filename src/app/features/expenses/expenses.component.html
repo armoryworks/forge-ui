@@ -1,4 +1,4 @@
-<app-page-header title="Expenses">
+<app-page-header title="Expenses" subtitle="Log expenses, attach receipts, and track approvals" helpTourId="expenses">
   <button class="action-btn action-btn--primary" (click)="openCreateExpense()">
     <span class="material-icons-outlined">add</span>
     New Expense
@@ -15,7 +15,7 @@
 
   <div [appLoadingBlock]="loading()">
     <app-data-table tableId="expenses" [columns]="expenseColumns" [data]="expenses()"
-      emptyIcon="receipt_long" emptyMessage="No expenses found">
+      emptyIcon="receipt_long" emptyMessage="No expenses found" emptyHelpText="Log business expenses here. Attach receipts and link to jobs for accurate cost tracking.">
       <ng-template appColumnCell="expenseDate" let-expense>
         <span class="text-muted">{{ expense.expenseDate | date:'MM/dd/yyyy' }}</span>
       </ng-template>
@@ -66,7 +66,9 @@
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="expenseViolations"
         [disabled]="expenseForm.invalid || saving()"
-        (click)="saveExpense()">Submit Expense</button>
+        (click)="saveExpense()">
+        <span class="material-icons-outlined">save</span> Submit Expense
+      </button>
     </div>
   </app-dialog>
 }

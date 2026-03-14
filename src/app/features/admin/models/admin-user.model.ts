@@ -12,4 +12,10 @@ export interface AdminUser {
   hasPendingSetupToken: boolean;
   hasRfidIdentifier: boolean;
   hasBarcodeIdentifier: boolean;
+  canBeAssignedJobs: boolean;
+  complianceCompletedItems: number;
+  complianceTotalItems: number;
+  missingComplianceItems: string[];
+  workLocationId: number | null;
+  workLocationName: string | null;
 }

@@ -35,6 +35,8 @@ export class InputComponent implements ControlValueAccessor {
   readonly isReadonly = input<boolean>(false);
   readonly maxlength = input<number | null>(null);
   readonly autocomplete = input<string>('off');
+  readonly mask = input<'phone' | 'zip' | null>(null);
+  readonly required = input<boolean>(false);
 
   protected readonly value = signal<string | number>('');
   protected readonly disabled = signal(false);
@@ -43,7 +45,8 @@ export class InputComponent implements ControlValueAccessor {
   private onTouched: () => void = () => {};
 
   writeValue(value: string | number | null): void {
-    this.value.set(value ?? '');
+    const masked = this.applyMask(String(value ?? ''));
+    this.value.set(masked);
   }
 
   registerOnChange(fn: (value: string | number) => void): void {
@@ -59,7 +62,14 @@ export class InputComponent implements ControlValueAccessor {
   }
 
   protected onInput(event: Event): void {
-    const val = (event.target as HTMLInputElement).value;
+    const el = event.target as HTMLInputElement;
+    let val = el.value;
+
+    if (this.mask()) {
+      val = this.applyMask(val);
+      el.value = val;
+    }
+
     const emitValue = this.type() === 'number' ? +val : val;
     this.value.set(emitValue);
     this.onChange(emitValue);
@@ -67,5 +77,27 @@ export class InputComponent implements ControlValueAccessor {
 
   protected markTouched(): void {
     this.onTouched();
+  }
+
+  private applyMask(raw: string): string {
+    switch (this.mask()) {
+      case 'phone': return this.formatPhone(raw);
+      case 'zip': return this.formatZip(raw);
+      default: return raw;
+    }
+  }
+
+  private formatPhone(raw: string): string {
+    const digits = raw.replace(/\D/g, '').slice(0, 10);
+    if (digits.length === 0) return '';
+    if (digits.length <= 3) return `(${digits}`;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  }
+
+  private formatZip(raw: string): string {
+    const digits = raw.replace(/\D/g, '').slice(0, 9);
+    if (digits.length <= 5) return digits;
+    return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   }
 }

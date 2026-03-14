@@ -4,7 +4,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else if (data(); as d) {
-  <app-page-header title="Dashboard">
+  <app-page-header title="Dashboard" subtitle="Key metrics and upcoming work at a glance" helpTourId="dashboard">
     <span class="page-header__ctx">Production</span>
     <div class="page-header__actions">
       <button class="btn" (click)="ambientMode.set(true)" title="Ambient display mode">
@@ -57,6 +57,8 @@
       </div>
     </div>
   }
+
+  <app-getting-started-banner [data]="d" />
 
   <div class="dashboard-content">
     <div class="dashboard-kpis">

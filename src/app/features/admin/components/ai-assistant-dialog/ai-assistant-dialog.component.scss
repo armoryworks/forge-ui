@@ -1,0 +1,96 @@
+@use 'styles/variables' as *;
+
+.icon-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  min-width: 40px;
+  height: $input-height;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+  }
+}
+
+.starter-questions {
+  margin-bottom: $sp-lg;
+
+  &__label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: $sp-sm;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    margin-bottom: $sp-md;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__text {
+    flex: 1;
+    font-size: $font-size-base;
+  }
+
+  &__add {
+    display: flex;
+    align-items: flex-end;
+    gap: $sp-md;
+
+    app-input {
+      flex: 1;
+    }
+  }
+}
+
+.advanced-toggle {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: $font-size-sm;
+  cursor: pointer;
+  padding: $sp-sm 0;
+  margin-bottom: $sp-md;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
+.color-input {
+  width: 40px;
+  min-width: 40px;
+  height: $input-height;
+  padding: $sp-xxs;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.advanced-section {
+  padding: $sp-md 0;
+}

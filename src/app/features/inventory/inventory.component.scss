@@ -15,6 +15,37 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+
+  // Loading block wrapper must participate in flex layout
+  > [apploadingblock] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+}
+
+// ─── Low Stock Alert Banner ───
+.low-stock-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-lg;
+  background: var(--warning-light);
+  border-left: 3px solid var(--warning);
+  flex-shrink: 0;
+}
+
+.low-stock-banner__icon {
+  font-size: $icon-size-md;
+  color: var(--warning);
+}
+
+.low-stock-banner__text {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
 }
 
 // ─── Panel Header ───

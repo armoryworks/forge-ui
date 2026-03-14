@@ -1,4 +1,4 @@
-<app-page-header title="Parts Catalog">
+<app-page-header title="Parts Catalog" subtitle="Manage parts, BOMs, and specifications" helpTourId="parts">
   <button class="action-btn action-btn--primary" (click)="openCreatePart()">
     <span class="material-icons-outlined">add</span>
     New Part
@@ -18,7 +18,7 @@
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
-        [rowClass]="partRowClass" emptyIcon="inventory_2" emptyMessage="No parts found"
+        [rowClass]="partRowClass" emptyIcon="inventory_2" emptyMessage="No parts found" emptyHelpText="Create your first part to start building your catalog. Parts can include BOMs, process steps, and file attachments."
         (rowClick)="selectPart($any($event))">
         <ng-template appColumnCell="partNumber" let-part>
           <span class="part-number">{{ part.partNumber }}</span>
@@ -297,7 +297,7 @@
                       <td class="text-muted">{{ entry.referenceDesignator ?? '—' }}</td>
                       <td class="col-actions">
                         <button class="icon-btn icon-btn--danger" title="Remove" (click)="deleteBomEntry(entry)">
-                          <span class="material-icons-outlined">delete_outline</span>
+                          <span class="material-icons-outlined">delete</span>
                         </button>
                       </td>
                     </tr>
@@ -410,6 +410,7 @@
         [appValidationPopover]="partViolations"
         [disabled]="partForm.invalid"
         (click)="savePart()">
+        <span class="material-icons-outlined">save</span>
         {{ editingPart() ? 'Save Changes' : 'Create Part' }}
       </button>
     </div>

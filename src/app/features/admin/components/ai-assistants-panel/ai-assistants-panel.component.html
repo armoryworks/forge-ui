@@ -1,0 +1,63 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ assistants().length }} assistants</span>
+  <button class="action-btn action-btn--primary" (click)="openCreate()">
+    <span class="material-icons-outlined">add</span>
+    New Assistant
+  </button>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="admin-ai-assistants"
+    [columns]="columns"
+    [data]="assistants()"
+    emptyIcon="smart_toy"
+    emptyMessage="No AI assistants configured"
+    (rowClick)="openEdit($any($event))">
+
+    <ng-template appColumnCell="icon" let-row>
+      <span class="assistant-icon" [style.color]="row.color">
+        <span class="material-icons-outlined">{{ row.icon }}</span>
+      </span>
+    </ng-template>
+
+    <ng-template appColumnCell="name" let-row>
+      <div class="assistant-name-cell">
+        <span class="assistant-name">{{ row.name }}</span>
+        @if (row.isBuiltIn) {
+          <span class="chip chip--muted">Built-in</span>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template appColumnCell="category" let-row>
+      <span class="chip chip--primary">{{ row.category }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="entityTypes" let-row>
+      @if (row.allowedEntityTypes.length > 0) {
+        <span class="text-muted">{{ row.allowedEntityTypes.length }} types</span>
+      } @else {
+        <span class="text-muted">All</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="status-dot" [class.status-dot--active]="row.isActive" [class.status-dot--inactive]="!row.isActive"></span>
+      {{ row.isActive ? 'Active' : 'Inactive' }}
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="action-cell">
+        <button class="icon-btn" aria-label="Edit assistant" title="Edit" (click)="openEdit(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        @if (!row.isBuiltIn) {
+          <button class="icon-btn icon-btn--danger" aria-label="Delete assistant" title="Delete" (click)="deleteAssistant(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>

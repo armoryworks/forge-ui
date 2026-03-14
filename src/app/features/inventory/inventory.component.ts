@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
 import { InventoryService } from './services/inventory.service';
 import { StorageLocation } from './models/storage-location.model';
 import { InventoryPartSummary } from './models/inventory-part-summary.model';
+import { LowStockAlert } from './models/low-stock-alert.model';
 import { BinContentItem } from './models/bin-content-item.model';
 import { BinMovementItem } from './models/bin-movement-item.model';
 import { ReceivingRecord } from './models/receiving-record.model';
@@ -45,6 +47,7 @@ export class InventoryComponent {
   private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
+  private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -52,6 +55,7 @@ export class InventoryComponent {
 
   // Stock tab
   protected readonly partSummaries = signal<InventoryPartSummary[]>([]);
+  protected readonly lowStockAlerts = signal<LowStockAlert[]>([]);
   protected readonly searchControl = new FormControl('');
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
@@ -238,6 +242,7 @@ export class InventoryComponent {
   constructor() {
     this.scanner.setContext('inventory');
     this.loadStock();
+    this.loadLowStockAlerts();
     this.loadBinLocations();
 
     effect(() => {
@@ -268,6 +273,7 @@ export class InventoryComponent {
           [{ value: null, label: '-- None --' }, ...data.map(l => ({ value: l.id, label: l.locationPath }))]
         );
       },
+      error: () => { /* bin locations are optional — dialogs will show empty dropdown */ },
     });
   }
 
@@ -280,6 +286,17 @@ export class InventoryComponent {
       next: (data) => { this.partSummaries.set(data); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
+  }
+
+  private loadLowStockAlerts(): void {
+    this.inventoryService.getLowStockAlerts().subscribe({
+      next: (data) => this.lowStockAlerts.set(data),
+      error: () => { /* low stock alerts are optional */ },
+    });
+  }
+
+  protected createPoForPart(): void {
+    this.router.navigate(['/purchase-orders']);
   }
 
   protected applySearch(): void {

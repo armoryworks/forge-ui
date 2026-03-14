@@ -3,8 +3,8 @@
 .bar-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: $sp-sm 12px;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-lg;
 }
 
 .bar-row__label {

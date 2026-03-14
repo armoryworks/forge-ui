@@ -13,6 +13,7 @@ export class PageHeaderComponent {
   private readonly helpTourService = inject(HelpTourService);
 
   readonly title = input.required<string>();
+  readonly subtitle = input<string>();
   readonly helpTourId = input<string>();
 
   protected startTour(): void {

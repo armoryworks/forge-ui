@@ -101,4 +101,13 @@ export class AiService {
   indexDocument(entityType: string, entityId: number): Observable<number> {
     return this.http.post<number>(`${this.base}/index`, { entityType, entityId });
   }
+
+  getAssistants(): Observable<{ id: number; name: string; description: string; icon: string; color: string; category: string; starterQuestions: string[]; isActive: boolean }[]> {
+    return this.http.get<{ id: number; name: string; description: string; icon: string; color: string; category: string; starterQuestions: string[]; isActive: boolean }[]>(
+      `${environment.apiUrl}/ai-assistants`);
+  }
+
+  assistantChat(assistantId: number, question: string, history?: AiHelpMessage[]): Observable<AiHelpResponse> {
+    return this.http.post<AiHelpResponse>(`${this.base}/assistants/${assistantId}/chat`, { question, history });
+  }
 }

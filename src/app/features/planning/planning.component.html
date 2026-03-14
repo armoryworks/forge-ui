@@ -1,5 +1,5 @@
 <div [appLoadingBlock]="loading()">
-  <app-page-header title="Planning" helpTourId="planning">
+  <app-page-header title="Planning" subtitle="Organize work into focused planning cycles" helpTourId="planning">
     <app-select label="Cycle" [formControl]="cycleControl" [options]="cycleOptions()" />
     <button class="action-btn action-btn--primary" (click)="openCreateCycleDialog()">
       <span class="material-icons-outlined">add</span>
@@ -39,7 +39,7 @@
             </div>
             @if (hasCycle()) {
               <button class="icon-btn backlog-job__add" title="Commit to cycle" (click)="commitJob(job)">
-                <span class="material-icons-outlined">add_circle_outline</span>
+                <span class="material-icons-outlined">add</span>
               </button>
             }
           </div>

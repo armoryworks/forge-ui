@@ -12,6 +12,7 @@ import { KanbanJob } from '../kanban/models/kanban-job.model';
 import { UserRef } from '../kanban/models/user-ref.model';
 import { JobDetail } from '../kanban/models/job-detail.model';
 import { PRIORITY_COLORS } from '../kanban/models/priority-colors.const';
+import { PRIORITIES } from '../../shared/models/priority.const';
 import { TrackType } from '../../shared/models/track-type.model';
 import { JobDetailPanelComponent } from '../kanban/components/job-detail-panel.component';
 import { JobDialogComponent, DialogMode } from '../kanban/components/job-dialog.component';
@@ -62,7 +63,7 @@ export class BacklogComponent implements OnInit {
   protected readonly dialogMode = signal<DialogMode>('create');
   protected readonly dialogJob = signal<JobDetail | null>(null);
 
-  protected readonly priorities = ['Low', 'Normal', 'High', 'Urgent'];
+  protected readonly priorities = PRIORITIES;
 
   protected readonly backlogColumns = computed<ColumnDef[]>(() => {
     const stageOptions = [...new Set(this.jobs().map(j => j.stageName))].sort()

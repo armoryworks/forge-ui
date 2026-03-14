@@ -8,6 +8,8 @@
   <div class="eod-form">
     <p class="eod-form__prompt">What are your top 3 priorities for tomorrow?</p>
     <app-textarea label="Tomorrow's priorities" [formControl]="topThreeControl" [rows]="4" />
-    <button class="action-btn action-btn--primary action-btn--sm" (click)="save()">Save</button>
+    <button class="action-btn action-btn--primary action-btn--sm" (click)="save()">
+      <span class="material-icons-outlined">save</span> Save
+    </button>
   </div>
 }

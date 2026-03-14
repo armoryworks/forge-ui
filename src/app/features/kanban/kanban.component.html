@@ -4,7 +4,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
-  <app-page-header title="Board">
+  <app-page-header title="Board" subtitle="Drag jobs through production stages" helpTourId="kanban-board">
     <div class="page-header__track-types">
       @for (tt of trackTypes(); track tt.id) {
         <button
@@ -25,9 +25,7 @@
       </button>
     </div>
 
-    @if (viewMode() === 'team') {
-      <app-select label="Team Members" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" placeholder="All assigned users" />
-    }
+    <app-select label="Team Members" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" placeholder="All assigned users" />
 
     <button class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
@@ -35,10 +33,17 @@
     </button>
   </app-page-header>
 
+  @if (selectionCount() === 0) {
+    <div class="board-hint" aria-hidden="true">
+      <span class="material-icons-outlined board-hint__icon">info_outline</span>
+      <span class="board-hint__text">Drag cards between columns to move jobs. <kbd>Ctrl</kbd>+Click to multi-select for bulk actions.</span>
+    </div>
+  }
+
   <!-- Board View -->
   @if (viewMode() === 'board') {
     <div class="board">
-      @for (col of columns(); track col.stage.id; let i = $index) {
+      @for (col of filteredColumns(); track col.stage.id; let i = $index) {
         <app-board-column
           [column]="col"
           [dropListId]="'column-' + i"
@@ -89,6 +94,7 @@
                 [selected]="selectedJobIds().has(job.id)"
                 cdkDrag
                 [cdkDragData]="job"
+                (cdkDragStarted)="onSwimlaneDragStarted($event)"
                 (cardClicked)="onCardClicked($event)"
                 (jobNumberClicked)="onJobNumberClicked($event)" />
             }

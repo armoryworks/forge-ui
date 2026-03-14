@@ -11,10 +11,11 @@ export class SignalrService {
   private readonly connections = new Map<string, HubConnection>();
   private readonly startPromises = new Map<string, Promise<void>>();
   private readonly _connectionState = signal<ConnectionState>('disconnected');
-  private hasConnected = false;
+  private readonly _hasEverConnected = signal(false);
   private retryTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
   readonly connectionState = this._connectionState.asReadonly();
+  readonly hasEverConnected = this._hasEverConnected.asReadonly();
 
   getOrCreateConnection(hubPath: string): HubConnection {
     const existing = this.connections.get(hubPath);
@@ -30,11 +31,15 @@ export class SignalrService {
 
     connection.onreconnecting(() => this.updateGlobalState());
 
-    connection.onreconnected(() => this._connectionState.set('connected'));
+    connection.onreconnected(() => {
+      this._connectionState.set('connected');
+    });
 
     connection.onclose(() => {
-      if (this.hasConnected) {
+      if (this._hasEverConnected()) {
         this.updateGlobalState();
+        // withAutomaticReconnect exhausted its retries — manually retry
+        this.scheduleManualReconnect(hubPath);
       }
     });
 
@@ -76,7 +81,6 @@ export class SignalrService {
   async stopAll(): Promise<void> {
     const paths = Array.from(this.connections.keys());
     await Promise.all(paths.map(path => this.stopConnection(path)));
-    this.hasConnected = false;
     this._connectionState.set('disconnected');
   }
 
@@ -95,13 +99,40 @@ export class SignalrService {
     }
   }
 
+  /**
+   * After withAutomaticReconnect gives up (onclose fires), recreate the
+   * connection and retry indefinitely with exponential backoff.
+   */
+  private scheduleManualReconnect(hubPath: string): void {
+    // Don't reconnect if we explicitly stopped
+    if (!this.connections.has(hubPath)) return;
+
+    const delay = 10_000; // 10s before first manual retry
+    const timer = setTimeout(async () => {
+      this.retryTimers.delete(hubPath);
+      if (!this.connections.has(hubPath)) return;
+
+      // Destroy the dead connection and create a fresh one
+      this.connections.delete(hubPath);
+      this.startPromises.delete(hubPath);
+
+      try {
+        await this.startConnection(hubPath);
+      } catch {
+        // startWithRetry handles its own retry loop
+      }
+    }, delay);
+
+    this.retryTimers.set(hubPath, timer);
+  }
+
   private async startWithRetry(hubPath: string): Promise<void> {
     const connection = this.getOrCreateConnection(hubPath);
 
     while (connection.state === HubConnectionState.Disconnected) {
       try {
         await connection.start();
-        this.hasConnected = true;
+        this._hasEverConnected.set(true);
         this._connectionState.set('connected');
         return;
       } catch {

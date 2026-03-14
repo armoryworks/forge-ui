@@ -1,0 +1,79 @@
+<app-dialog [title]="isEdit() ? 'Edit AI Assistant' : 'Create AI Assistant'" width="720px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input label="Name" formControlName="name" [maxlength]="100" [required]="true" />
+      <app-select label="Category" formControlName="category" [options]="categoryOptions" [required]="true" />
+    </div>
+
+    <app-textarea label="Description" formControlName="description" [rows]="2" [maxlength]="500" />
+
+    <div class="dialog-row">
+      <app-input label="Icon" formControlName="icon" [maxlength]="50" [required]="true" />
+      <div class="icon-preview">
+        <span class="material-icons-outlined" [style.color]="form.controls.color.value">
+          {{ form.controls.icon.value }}
+        </span>
+      </div>
+      <input type="color" class="color-input" [formControl]="form.controls.color" aria-label="Assistant color" />
+    </div>
+
+    <app-textarea label="System Prompt" formControlName="systemPrompt" [rows]="10" [maxlength]="50000" [required]="true" />
+
+    <app-select label="Entity Type Filters" formControlName="allowedEntityTypes" [options]="entityTypeOptions" [multiple]="true" placeholder="All entity types (no filter)" />
+
+    <!-- Starter Questions -->
+    <div class="starter-questions">
+      <span class="starter-questions__label">Starter Questions</span>
+      <div class="starter-questions__list">
+        @for (q of starterQuestions(); track $index) {
+          <div class="starter-questions__item">
+            <span class="starter-questions__text">{{ q }}</span>
+            <button class="icon-btn icon-btn--danger" aria-label="Remove question" (click)="removeQuestion($index)">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        } @empty {
+          <span class="text-muted">No starter questions</span>
+        }
+      </div>
+      <div class="starter-questions__add">
+        <app-input label="New Question" [formControl]="newQuestion" placeholder="Type a starter question..." />
+        <button class="action-btn action-btn--sm" [disabled]="!newQuestion.value?.trim()" (click)="addQuestion()">
+          <span class="material-icons-outlined">add</span>
+          Add
+        </button>
+      </div>
+    </div>
+
+    <div class="dialog-row">
+      <app-toggle label="Active" formControlName="isActive" />
+      <app-input label="Sort Order" type="number" formControlName="sortOrder" />
+    </div>
+
+    <!-- Advanced Settings -->
+    <button class="advanced-toggle" (click)="toggleAdvanced()" type="button">
+      <span class="material-icons-outlined">{{ showAdvanced() ? 'expand_less' : 'expand_more' }}</span>
+      Advanced Settings
+    </button>
+
+    @if (showAdvanced()) {
+      <div class="advanced-section">
+        <div class="dialog-row">
+          <app-input label="Temperature (0–1)" type="number" formControlName="temperature" />
+          <app-input label="Max Context Chunks (1–20)" type="number" formControlName="maxContextChunks" />
+        </div>
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      <span class="material-icons-outlined">save</span>
+      {{ isEdit() ? 'Save Changes' : 'Create Assistant' }}
+    </button>
+  </div>
+</app-dialog>
