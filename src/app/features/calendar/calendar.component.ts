@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CalendarService } from './services/calendar.service';
 import { CalendarJob } from './models/calendar-job.model';
 import { CalendarDay } from './models/calendar-day.model';
@@ -13,7 +15,7 @@ export type CalendarView = 'month' | 'week' | 'day';
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, SelectComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, PageHeaderComponent, SelectComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +24,7 @@ export class CalendarComponent {
   private readonly service = inject(CalendarService);
   private readonly kanbanService = inject(KanbanService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly allJobs = signal<CalendarJob[]>([]);
@@ -33,7 +36,9 @@ export class CalendarComponent {
   protected readonly MAX_VISIBLE_JOBS = 3;
   protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
 
-  protected readonly weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  protected readonly weekdayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+
+  protected readonly weekdayLabels = computed(() => this.weekdayKeys.map(k => this.translate.instant('calendar.' + k)));
 
   protected readonly jobs = computed(() => {
     const ttId = this.trackTypeControl.value;
@@ -73,7 +78,7 @@ export class CalendarComponent {
     this.loadJobs();
     this.kanbanService.getTrackTypes().subscribe(types => {
       this.trackTypeOptions.set([
-        { value: null, label: 'All Track Types' },
+        { value: null, label: this.translate.instant('calendar.allTrackTypes') },
         ...types.map(t => ({ value: t.id, label: t.name })),
       ]);
     });

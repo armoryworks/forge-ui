@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, ou
 import { formatDate, formatDateTime } from '../../../shared/utils/date.utils';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { ActivityTimelineComponent } from '../../../shared/components/activity-timeline/activity-timeline.component';
@@ -13,6 +14,7 @@ import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { KanbanService } from '../services/kanban.service';
 import { DisposeJobDialogComponent, DisposeJobDialogData } from './dispose-job-dialog.component';
@@ -36,7 +38,7 @@ import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/ba
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent, StatusTimelineComponent, BarcodeInfoComponent, MatMenuModule],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, ActivityTimelineComponent, StatusTimelineComponent, BarcodeInfoComponent, MatMenuModule, MatTooltipModule],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,6 +47,7 @@ export class JobDetailPanelComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   readonly jobId = input.required<number>();
   readonly users = input<UserRef[]>([]);
@@ -179,7 +182,7 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.addSubtask(this.jobId(), text).subscribe(st => {
       this.subtasks.update(list => [...list, st]);
       this.newSubtaskControl.reset();
-      this.snackbar.success('Subtask added.');
+      this.snackbar.success(this.translate.instant('kanban.subtaskAdded'));
     });
   }
 
@@ -199,14 +202,14 @@ export class JobDetailPanelComponent implements OnInit {
       this.selectedLinkTarget.set(null);
       this.linkSearchControl.reset();
       this.linkTypeControl.setValue('RelatedTo');
-      this.snackbar.success('Link added.');
+      this.snackbar.success(this.translate.instant('kanban.linkAdded'));
     });
   }
 
   protected deleteLink(link: JobLink): void {
     this.kanbanService.deleteJobLink(this.jobId(), link.id).subscribe(() => {
       this.links.update(list => list.filter(l => l.id !== link.id));
-      this.snackbar.success('Link removed.');
+      this.snackbar.success(this.translate.instant('kanban.linkRemoved'));
     });
   }
 
@@ -221,21 +224,21 @@ export class JobDetailPanelComponent implements OnInit {
     this.kanbanService.addComment(this.jobId(), text).subscribe(entry => {
       this.activity.update(list => [entry, ...list]);
       this.commentControl.reset();
-      this.snackbar.success('Comment posted.');
+      this.snackbar.success(this.translate.instant('kanban.commentPosted'));
     });
   }
 
   protected onFileUploaded(file: UploadedFile): void {
     this.kanbanService.getJobFiles(this.jobId()).subscribe(f => {
       this.files.set(f);
-      this.snackbar.success('File uploaded.');
+      this.snackbar.success(this.translate.instant('kanban.fileUploaded'));
     });
   }
 
   protected deleteFile(file: FileAttachment): void {
     this.kanbanService.deleteJobFile(file.id).subscribe(() => {
       this.files.update(list => list.filter(f => f.id !== file.id));
-      this.snackbar.success('File deleted.');
+      this.snackbar.success(this.translate.instant('kanban.fileDeleted'));
     });
   }
 
@@ -277,14 +280,14 @@ export class JobDetailPanelComponent implements OnInit {
       this.jobParts.update(list => [...list, jp]);
       this.selectedPart.set(null);
       this.partSearchControl.reset();
-      this.snackbar.success('Part added.');
+      this.snackbar.success(this.translate.instant('kanban.partAdded'));
     });
   }
 
   protected removePart(jp: JobPart): void {
     this.kanbanService.removeJobPart(this.jobId(), jp.id).subscribe(() => {
       this.jobParts.update(list => list.filter(p => p.id !== jp.id));
-      this.snackbar.success('Part removed.');
+      this.snackbar.success(this.translate.instant('kanban.partRemoved'));
     });
   }
 
@@ -298,9 +301,9 @@ export class JobDetailPanelComponent implements OnInit {
     this.matDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Explode BOM?',
-        message: `This will create sub-jobs for all "Make" items in the BOM of part ${j.partNumber}. This action cannot be undone.`,
-        confirmLabel: 'Explode BOM',
+        title: this.translate.instant('kanban.explodeBomConfirmTitle'),
+        message: this.translate.instant('kanban.explodeBomConfirmMessage', { partNumber: j.partNumber }),
+        confirmLabel: this.translate.instant('kanban.explodeBom'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -309,11 +312,11 @@ export class JobDetailPanelComponent implements OnInit {
         const jobCount = result.createdJobs.length;
         const buyCount = result.buyItems.length;
         const stockCount = result.stockItems.length;
-        const parts: string[] = [];
-        if (jobCount > 0) parts.push(`${jobCount} sub-job${jobCount > 1 ? 's' : ''} created`);
-        if (buyCount > 0) parts.push(`${buyCount} buy item${buyCount > 1 ? 's' : ''}`);
-        if (stockCount > 0) parts.push(`${stockCount} stock item${stockCount > 1 ? 's' : ''}`);
-        this.snackbar.success(`BOM exploded: ${parts.join(', ')}.`);
+        const msgParts: string[] = [];
+        if (jobCount > 0) msgParts.push(this.translate.instant('kanban.bomSubJobsCreated', { count: jobCount }));
+        if (buyCount > 0) msgParts.push(this.translate.instant('kanban.bomBuyItems', { count: buyCount }));
+        if (stockCount > 0) msgParts.push(this.translate.instant('kanban.bomStockItems', { count: stockCount }));
+        this.snackbar.success(`${this.translate.instant('kanban.bomExploded')}: ${msgParts.join(', ')}.`);
         // Reload job detail and child jobs
         this.kanbanService.getJobDetail(j.id).subscribe(detail => {
           this.job.set(detail);
@@ -337,14 +340,15 @@ export class JobDetailPanelComponent implements OnInit {
   }
 
   protected formatDisposition(disposition: string): string {
-    const map: Record<string, string> = {
-      ShipToCustomer: 'Ship to Customer',
-      AddToInventory: 'Add to Inventory',
-      CapitalizeAsAsset: 'Capitalize as Asset',
-      Scrap: 'Scrap',
-      HoldForReview: 'Hold for Review',
+    const keyMap: Record<string, string> = {
+      ShipToCustomer: 'kanban.dispositionShipToCustomer',
+      AddToInventory: 'kanban.dispositionAddToInventory',
+      CapitalizeAsAsset: 'kanban.dispositionCapitalizeAsAsset',
+      Scrap: 'kanban.dispositionScrap',
+      HoldForReview: 'kanban.dispositionHoldForReview',
     };
-    return map[disposition] ?? disposition;
+    const key = keyMap[disposition];
+    return key ? this.translate.instant(key) : disposition;
   }
 
   protected assignJob(user: UserRef | null): void {
@@ -360,9 +364,9 @@ export class JobDetailPanelComponent implements OnInit {
           assigneeName: user?.name ?? null,
           assigneeColor: user?.color ?? null,
         });
-        this.snackbar.success(user ? `Assigned to ${user.name}` : 'Unassigned');
+        this.snackbar.success(user ? this.translate.instant('kanban.assignedTo', { name: user.name }) : this.translate.instant('kanban.unassignedSuccess'));
       },
-      error: () => this.snackbar.error('Failed to update assignee'),
+      error: () => this.snackbar.error(this.translate.instant('kanban.assignFailed')),
     });
   }
 

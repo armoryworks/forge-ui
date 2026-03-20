@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../services/admin.service';
 import { AiAssistant } from '../../models/ai-assistant.model';
@@ -21,8 +24,8 @@ export interface AiAssistantDialogData {
   selector: 'app-ai-assistant-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DialogComponent, InputComponent, SelectComponent,
-    TextareaComponent, ToggleComponent, ValidationPopoverDirective,
+    ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent,
+    TextareaComponent, ToggleComponent, ValidationPopoverDirective, MatTooltipModule,
   ],
   templateUrl: './ai-assistant-dialog.component.html',
   styleUrl: './ai-assistant-dialog.component.scss',
@@ -33,6 +36,7 @@ export class AiAssistantDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<AiAssistantDialogComponent>);
   private readonly data: AiAssistantDialogData = inject(MAT_DIALOG_DATA);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
   protected readonly isEdit = signal(false);
@@ -60,34 +64,34 @@ export class AiAssistantDialogComponent implements OnInit {
   });
 
   protected readonly categoryOptions: SelectOption[] = [
-    { value: 'General', label: 'General' },
-    { value: 'HR', label: 'HR' },
-    { value: 'Procurement', label: 'Procurement' },
-    { value: 'Sales', label: 'Sales' },
-    { value: 'Custom', label: 'Custom' },
+    { value: 'General', label: this.translate.instant('aiAssistants.categoryGeneral') },
+    { value: 'HR', label: this.translate.instant('aiAssistants.categoryHR') },
+    { value: 'Procurement', label: this.translate.instant('aiAssistants.categoryProcurement') },
+    { value: 'Sales', label: this.translate.instant('aiAssistants.categorySales') },
+    { value: 'Custom', label: this.translate.instant('aiAssistants.categoryCustom') },
   ];
 
   protected readonly entityTypeOptions: SelectOption[] = [
-    { value: 'Job', label: 'Job' },
-    { value: 'Part', label: 'Part' },
-    { value: 'Customer', label: 'Customer' },
-    { value: 'Vendor', label: 'Vendor' },
-    { value: 'Lead', label: 'Lead' },
-    { value: 'Quote', label: 'Quote' },
-    { value: 'SalesOrder', label: 'Sales Order' },
-    { value: 'PurchaseOrder', label: 'Purchase Order' },
-    { value: 'Invoice', label: 'Invoice' },
-    { value: 'Expense', label: 'Expense' },
-    { value: 'Asset', label: 'Asset' },
-    { value: 'EmployeeProfile', label: 'Employee Profile' },
-    { value: 'TimeEntry', label: 'Time Entry' },
-    { value: 'ClockEvent', label: 'Clock Event' },
-    { value: 'FileAttachment', label: 'File Attachment' },
-    { value: 'BOMEntry', label: 'BOM Entry' },
-    { value: 'StorageLocation', label: 'Storage Location' },
-    { value: 'BinContent', label: 'Bin Content' },
-    { value: 'PriceList', label: 'Price List' },
-    { value: 'Shipment', label: 'Shipment' },
+    { value: 'Job', label: this.translate.instant('aiAssistants.entityJob') },
+    { value: 'Part', label: this.translate.instant('aiAssistants.entityPart') },
+    { value: 'Customer', label: this.translate.instant('aiAssistants.entityCustomer') },
+    { value: 'Vendor', label: this.translate.instant('aiAssistants.entityVendor') },
+    { value: 'Lead', label: this.translate.instant('aiAssistants.entityLead') },
+    { value: 'Quote', label: this.translate.instant('aiAssistants.entityQuote') },
+    { value: 'SalesOrder', label: this.translate.instant('aiAssistants.entitySalesOrder') },
+    { value: 'PurchaseOrder', label: this.translate.instant('aiAssistants.entityPurchaseOrder') },
+    { value: 'Invoice', label: this.translate.instant('aiAssistants.entityInvoice') },
+    { value: 'Expense', label: this.translate.instant('aiAssistants.entityExpense') },
+    { value: 'Asset', label: this.translate.instant('aiAssistants.entityAsset') },
+    { value: 'EmployeeProfile', label: this.translate.instant('aiAssistants.entityEmployeeProfile') },
+    { value: 'TimeEntry', label: this.translate.instant('aiAssistants.entityTimeEntry') },
+    { value: 'ClockEvent', label: this.translate.instant('aiAssistants.entityClockEvent') },
+    { value: 'FileAttachment', label: this.translate.instant('aiAssistants.entityFileAttachment') },
+    { value: 'BOMEntry', label: this.translate.instant('aiAssistants.entityBOMEntry') },
+    { value: 'StorageLocation', label: this.translate.instant('aiAssistants.entityStorageLocation') },
+    { value: 'BinContent', label: this.translate.instant('aiAssistants.entityBinContent') },
+    { value: 'PriceList', label: this.translate.instant('aiAssistants.entityPriceList') },
+    { value: 'Shipment', label: this.translate.instant('aiAssistants.entityShipment') },
   ];
 
   protected readonly newQuestion = new FormControl('');
@@ -159,12 +163,12 @@ export class AiAssistantDialogComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success(this.isEdit() ? 'Assistant updated' : 'Assistant created');
+        this.snackbar.success(this.isEdit() ? this.translate.instant('aiAssistants.assistantUpdated') : this.translate.instant('aiAssistants.assistantCreated'));
         this.dialogRef.close(true);
       },
       error: () => {
         this.saving.set(false);
-        this.snackbar.error(this.isEdit() ? 'Failed to update assistant' : 'Failed to create assistant');
+        this.snackbar.error(this.isEdit() ? this.translate.instant('aiAssistants.assistantUpdateFailed') : this.translate.instant('aiAssistants.assistantCreateFailed'));
       },
     });
   }

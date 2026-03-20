@@ -17,6 +17,7 @@ export class LayoutService {
   private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
   private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
   private readonly _breadcrumbLabel = signal(this.routeToLabel(window.location.pathname));
+  private readonly _breadcrumbRoute = signal(this.routeToPath(window.location.pathname));
 
   readonly sidebarCollapsed = this._sidebarCollapsed.asReadonly();
   readonly mobileMenuOpen = this._mobileMenuOpen.asReadonly();
@@ -25,6 +26,7 @@ export class LayoutService {
   readonly isAccountRoute = this._isAccountRoute.asReadonly();
   readonly isAuthRoute = this._isAuthRoute.asReadonly();
   readonly breadcrumbLabel = this._breadcrumbLabel.asReadonly();
+  readonly breadcrumbRoute = this._breadcrumbRoute.asReadonly();
 
   readonly sidebarVisible = computed(() => {
     if (this._isDisplayRoute()) return false;
@@ -50,6 +52,7 @@ export class LayoutService {
       this._isAccountRoute.set(this.checkAccountRoute(e.urlAfterRedirects));
       this._isAuthRoute.set(this.checkAuthRoute(e.urlAfterRedirects));
       this._breadcrumbLabel.set(this.routeToLabel(e.urlAfterRedirects));
+      this._breadcrumbRoute.set(this.routeToPath(e.urlAfterRedirects));
     });
 
     this.ngZone.runOutsideAngular(() => {
@@ -89,7 +92,7 @@ export class LayoutService {
   }
 
   private checkDisplayRoute(url: string): boolean {
-    return url.startsWith('/display/');
+    return url.startsWith('/display/') || url.startsWith('/__render-form');
   }
 
   private checkAccountRoute(url: string): boolean {
@@ -98,6 +101,11 @@ export class LayoutService {
 
   private checkAuthRoute(url: string): boolean {
     return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback');
+  }
+
+  private routeToPath(url: string): string {
+    const segment = url.split('/').filter(Boolean)[0] ?? 'dashboard';
+    return `/${segment}`;
   }
 
   private routeToLabel(url: string): string {

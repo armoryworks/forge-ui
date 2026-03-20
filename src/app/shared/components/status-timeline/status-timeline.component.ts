@@ -3,6 +3,9 @@ import { DatePipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { LoadingBlockDirective } from '../../directives/loading-block.directive';
 import { SnackbarService } from '../../services/snackbar.service';
 import { StatusTrackingService } from '../../services/status-tracking.service';
@@ -17,7 +20,7 @@ import { AddHoldDialogComponent, AddHoldDialogData } from '../add-hold-dialog/ad
 @Component({
   selector: 'app-status-timeline',
   standalone: true,
-  imports: [DatePipe, LoadingBlockDirective],
+  imports: [DatePipe, MatTooltipModule, LoadingBlockDirective, TranslatePipe],
   templateUrl: './status-timeline.component.html',
   styleUrl: './status-timeline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +30,7 @@ export class StatusTimelineComponent {
   private readonly adminService = inject(AdminService);
   private readonly matDialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly entityType = input.required<string>();
   readonly entityId = input.required<number>();
@@ -102,7 +106,7 @@ export class StatusTimelineComponent {
     }).afterClosed().subscribe(result => {
       if (result) {
         this.loadData(this.entityType(), this.entityId());
-        this.snackbar.success('Status updated.');
+        this.snackbar.success(this.translate.instant('shared.statusUpdated'));
       }
     });
   }
@@ -118,7 +122,7 @@ export class StatusTimelineComponent {
     }).afterClosed().subscribe(result => {
       if (result) {
         this.loadData(this.entityType(), this.entityId());
-        this.snackbar.success('Hold added.');
+        this.snackbar.success(this.translate.instant('shared.holdAdded'));
       }
     });
   }
@@ -127,16 +131,16 @@ export class StatusTimelineComponent {
     this.matDialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Release Hold?',
-        message: `Release the "${entry.statusLabel}" hold?`,
-        confirmLabel: 'Release',
+        title: this.translate.instant('shared.releaseHoldTitle'),
+        message: this.translate.instant('shared.releaseHoldMessage', { label: entry.statusLabel }),
+        confirmLabel: this.translate.instant('shared.release'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.statusTrackingService.releaseHold(entry.id).subscribe(() => {
         this.loadData(this.entityType(), this.entityId());
-        this.snackbar.success('Hold released.');
+        this.snackbar.success(this.translate.instant('shared.holdReleased'));
       });
     });
   }

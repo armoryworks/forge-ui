@@ -2,14 +2,14 @@
   <div class="eod-saved">
     <span class="material-icons-outlined eod-saved__icon">check_circle</span>
     <p class="eod-saved__text">{{ savedResponse() }}</p>
-    <button class="action-btn action-btn--sm" (click)="edit()">Edit</button>
+    <button class="action-btn action-btn--sm" (click)="edit()">{{ 'common.edit' | translate }}</button>
   </div>
 } @else {
   <div class="eod-form">
-    <p class="eod-form__prompt">What are your top 3 priorities for tomorrow?</p>
-    <app-textarea label="Tomorrow's priorities" [formControl]="topThreeControl" [rows]="4" />
+    <p class="eod-form__prompt">{{ 'dashboard.eodPrompt' | translate }}</p>
+    <app-textarea [label]="'dashboard.tomorrowPriorities' | translate" [formControl]="topThreeControl" [rows]="4" />
     <button class="action-btn action-btn--primary action-btn--sm" (click)="save()">
-      <span class="material-icons-outlined">save</span> Save
+      <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
     </button>
   </div>
 }

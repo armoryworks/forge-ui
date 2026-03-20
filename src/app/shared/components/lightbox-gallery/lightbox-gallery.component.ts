@@ -10,11 +10,15 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { GalleryItem } from '../../models/gallery-item.model';
 
 @Component({
   selector: 'app-lightbox-gallery',
   standalone: true,
+  imports: [MatTooltipModule, TranslatePipe],
   templateUrl: './lightbox-gallery.component.html',
   styleUrl: './lightbox-gallery.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

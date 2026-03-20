@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { UninvoicedJob } from '../../models/uninvoiced-job.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -7,7 +8,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 @Component({
   selector: 'app-uninvoiced-jobs-panel',
   standalone: true,
-  imports: [DatePipe, DialogComponent],
+  imports: [DatePipe, TranslatePipe, DialogComponent],
   templateUrl: './uninvoiced-jobs-panel.component.html',
   styleUrl: './uninvoiced-jobs-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

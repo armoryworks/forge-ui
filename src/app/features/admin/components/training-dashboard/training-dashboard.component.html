@@ -1,6 +1,6 @@
 <div class="training-header">
-  <span class="training-header__count">{{ users().length }} users</span>
-  <span class="training-header__note">Tour completion is tracked per-device via browser storage</span>
+  <span class="training-header__count">{{ users().length }} {{ 'training.users' | translate }}</span>
+  <span class="training-header__note">{{ 'training.trackingNote' | translate }}</span>
 </div>
 
 <app-data-table
@@ -9,7 +9,7 @@
   [data]="users()"
   [loading]="loading()"
   emptyIcon="school"
-  emptyMessage="No users found">
+  [emptyMessage]="'training.noUsers' | translate">
 
   <ng-template appColumnCell="name" let-row>
     <span class="user-name">{{ row.name }}</span>

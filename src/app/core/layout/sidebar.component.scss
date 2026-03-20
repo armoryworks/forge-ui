@@ -112,7 +112,20 @@
 
 .kbd-hint {
   margin-left: auto;
-  opacity: 0.6;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 16px;
+  padding: 0 $sp-sm;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  font-family: $font-family-mono;
+  font-size: $font-size-xxs;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1;
+  opacity: 0.5;
 
   .nav-item:hover & {
     opacity: 1;

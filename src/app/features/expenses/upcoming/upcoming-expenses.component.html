@@ -1,6 +1,6 @@
-<app-page-header title="Expense Ledger">
+<app-page-header [title]="'expenses.ledgerTitle' | translate">
   <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
-    <span class="material-icons-outlined">add</span> New Recurring
+    <span class="material-icons-outlined">add</span> {{ 'expenses.newRecurring' | translate }}
   </button>
 </app-page-header>
 
@@ -8,11 +8,11 @@
 <div class="tab-bar">
   <button class="tab" [class.tab--active]="activeTab() === 'upcoming'" (click)="switchTab('upcoming')">
     <span class="material-icons-outlined tab__icon">calendar_month</span>
-    Upcoming (90 Days)
+    {{ 'expenses.upcomingTab' | translate }}
   </button>
   <button class="tab" [class.tab--active]="activeTab() === 'recurring'" (click)="switchTab('recurring')">
     <span class="material-icons-outlined tab__icon">repeat</span>
-    Recurring Templates
+    {{ 'expenses.recurringTab' | translate }}
   </button>
 </div>
 
@@ -20,14 +20,14 @@
 @if (activeTab() === 'upcoming') {
   <div class="ledger-toolbar">
     <app-select
-      label="Highlight Classification"
+      [label]="'expenses.highlightClassification' | translate"
       [formControl]="classificationFilter"
       [options]="classificationOptions"
       (ngModelChange)="applyClassificationFilter()" />
     <span class="ledger-toolbar__spacer"></span>
     <div class="ledger-summary">
       <div class="ledger-summary__item">
-        <span class="ledger-summary__label">90-Day Total</span>
+        <span class="ledger-summary__label">{{ 'expenses.ninetyDayTotal' | translate }}</span>
         <span class="ledger-summary__value">{{ upcomingTotal() | currency }}</span>
       </div>
     </div>
@@ -40,7 +40,7 @@
         <div class="month-chip">
           <span class="month-chip__label">{{ month.month }}</span>
           <span class="month-chip__value">{{ month.total | currency }}</span>
-          <span class="month-chip__count">{{ month.count }} items</span>
+          <span class="month-chip__count">{{ month.count }} {{ 'expenses.itemsCount' | translate }}</span>
         </div>
       }
     </div>
@@ -53,7 +53,7 @@
       [data]="upcomingExpenses()"
       [rowClass]="getRowClass"
       emptyIcon="event_upcoming"
-      emptyMessage="No upcoming expenses in the next 90 days">
+      [emptyMessage]="'expenses.noUpcomingExpenses' | translate">
 
       <ng-template appColumnCell="dueDate" let-row>
         {{ row.dueDate | date:'MM/dd/yyyy' }}
@@ -78,7 +78,7 @@
       [columns]="recurringColumns"
       [data]="recurringExpenses()"
       emptyIcon="repeat"
-      emptyMessage="No recurring expenses set up">
+      [emptyMessage]="'expenses.noRecurringExpenses' | translate">
 
       <ng-template appColumnCell="classification" let-row>
         <span [class]="getClassificationChipClass(row.classification)">{{ row.classification }}</span>
@@ -94,18 +94,18 @@
 
       <ng-template appColumnCell="isActive" let-row>
         @if (row.isActive) {
-          <span class="chip chip--success">Active</span>
+          <span class="chip chip--success">{{ 'expenses.active' | translate }}</span>
         } @else {
-          <span class="chip chip--muted">Paused</span>
+          <span class="chip chip--muted">{{ 'expenses.paused' | translate }}</span>
         }
       </ng-template>
 
       <ng-template appColumnCell="actions" let-row>
         <div class="row-actions">
-          <button class="icon-btn" title="Toggle active" (click)="toggleActive(row); $event.stopPropagation()">
+          <button class="icon-btn" [matTooltip]="'expenses.toggleActive' | translate" matTooltipPosition="above" (click)="toggleActive(row); $event.stopPropagation()">
             <span class="material-icons-outlined">{{ row.isActive ? 'pause' : 'play_arrow' }}</span>
           </button>
-          <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteRecurring(row); $event.stopPropagation()">
+          <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteRecurring(row); $event.stopPropagation()">
             <span class="material-icons-outlined">delete</span>
           </button>
         </div>
@@ -116,31 +116,31 @@
 
 <!-- Create Recurring Expense Dialog -->
 @if (showDialog()) {
-  <app-dialog title="New Recurring Expense" width="520px" (closed)="closeDialog()">
+  <app-dialog [title]="'expenses.newRecurringTitle' | translate" width="520px" (closed)="closeDialog()">
     <div [formGroup]="form">
       <div class="dialog-row">
-        <app-input label="Amount" type="number" formControlName="amount" prefix="$" />
-        <app-select label="Frequency" formControlName="frequency" [options]="frequencyOptions" />
+        <app-input [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />
+        <app-select [label]="'expenses.frequency' | translate" formControlName="frequency" [options]="frequencyOptions" />
       </div>
       <div class="dialog-row">
-        <app-select label="Category" formControlName="category" [options]="categoryOptions" />
-        <app-select label="Classification" formControlName="classification" [options]="classificationOptions.slice(1)" />
+        <app-select [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" />
+        <app-select [label]="'expenses.classification' | translate" formControlName="classification" [options]="classificationOptions.slice(1)" />
       </div>
-      <app-input label="Description" formControlName="description" />
-      <app-input label="Vendor" formControlName="vendor" placeholder="e.g., Adobe, AWS, Verizon" />
+      <app-input [label]="'common.description' | translate" formControlName="description" />
+      <app-input [label]="'expenses.vendor' | translate" formControlName="vendor" [placeholder]="'expenses.vendorPlaceholder' | translate" />
       <div class="dialog-row">
-        <app-datepicker label="Start Date" formControlName="startDate" />
-        <app-datepicker label="End Date (Optional)" formControlName="endDate" />
+        <app-datepicker [label]="'expenses.startDate' | translate" formControlName="startDate" />
+        <app-datepicker [label]="'expenses.endDateOptional' | translate" formControlName="endDate" />
       </div>
-      <app-toggle label="Auto-approve generated expenses" formControlName="autoApprove" />
+      <app-toggle [label]="'expenses.autoApprove' | translate" formControlName="autoApprove" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
-        (click)="save()">Create</button>
+        (click)="save()">{{ 'common.create' | translate }}</button>
     </div>
   </app-dialog>
 }

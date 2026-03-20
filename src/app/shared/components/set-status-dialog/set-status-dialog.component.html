@@ -1,14 +1,14 @@
-<app-dialog title="Change Status" width="420px" (closed)="dialogRef.close()">
+<app-dialog [title]="'setStatusDialog.title' | translate" width="420px" (closed)="dialogRef.close()">
   <div [formGroup]="form">
-    <app-select label="Status" formControlName="statusCode" [options]="data.statusOptions" />
-    <app-textarea label="Notes" formControlName="notes" [rows]="3" [maxlength]="2000" />
+    <app-select [label]="'common.status' | translate" formControlName="statusCode" [options]="data.statusOptions" />
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" />
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="dialogRef.close()">Cancel</button>
+    <button class="action-btn" (click)="dialogRef.close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
-      (click)="save()">Update</button>
+      (click)="save()">{{ 'setStatusDialog.update' | translate }}</button>
   </div>
 </app-dialog>

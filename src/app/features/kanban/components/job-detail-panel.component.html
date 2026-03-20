@@ -1,9 +1,9 @@
-<div class="panel-backdrop" role="button" tabindex="0" aria-label="Close job detail panel" (click)="close()" (keydown.enter)="close()"></div>
+<div class="panel-backdrop" role="button" tabindex="0" [attr.aria-label]="'kanban.closeDetailPanel' | translate" (click)="close()" (keydown.enter)="close()"></div>
 <aside class="panel">
   @if (loading()) {
     <div class="panel__loading">
       <span class="material-icons-outlined panel__loading-icon">hourglass_empty</span>
-      <p>Loading...</p>
+      <p>{{ 'common.loading' | translate }}</p>
     </div>
   } @else if (job(); as j) {
     <!-- Header -->
@@ -12,10 +12,10 @@
         <span class="panel__job-number">{{ j.jobNumber }}</span>
         <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
       </div>
-      <button class="panel__edit" (click)="editRequested.emit(job()!)" title="Edit Job" aria-label="Edit job">
+      <button class="panel__edit" (click)="editRequested.emit(job()!)" [matTooltip]="'kanban.editJob' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.editJobAria' | translate">
         <span class="material-icons-outlined">edit</span>
       </button>
-      <button class="panel__close" (click)="close()" title="Close" aria-label="Close detail panel">
+      <button class="panel__close" (click)="close()" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.closeDetailPanel' | translate">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -27,20 +27,20 @@
       <!-- Metadata Grid -->
       <div class="panel__meta">
         <div class="meta-row">
-          <span class="meta-row__label">Priority</span>
+          <span class="meta-row__label">{{ 'kanban.priority' | translate }}</span>
           <span class="meta-row__value">
             <span class="meta-row__dot" [style.background]="priorityColor(j.priority)"></span>
             {{ j.priority }}
           </span>
         </div>
         <div class="meta-row meta-row--clickable" [matMenuTriggerFor]="assignMenu">
-          <span class="meta-row__label">Assignee</span>
+          <span class="meta-row__label">{{ 'kanban.assignee' | translate }}</span>
           <span class="meta-row__value">
             @if (j.assigneeInitials) {
               <app-avatar [initials]="j.assigneeInitials" [color]="j.assigneeColor ?? '#0d9488'" size="sm" />
               {{ j.assigneeName ?? j.assigneeInitials }}
             } @else {
-              <span class="meta-row__empty">Unassigned</span>
+              <span class="meta-row__empty">{{ 'kanban.unassigned' | translate }}</span>
             }
             <span class="material-icons-outlined meta-row__edit-icon">expand_more</span>
           </span>
@@ -48,7 +48,7 @@
         <mat-menu #assignMenu="matMenu">
           <button mat-menu-item (click)="assignJob(null)">
             <span class="material-icons-outlined">person_off</span>
-            Unassign
+            {{ 'kanban.unassign' | translate }}
           </button>
           @for (user of users(); track user.id) {
             <button mat-menu-item (click)="assignJob(user)">
@@ -58,30 +58,30 @@
           }
         </mat-menu>
         <div class="meta-row">
-          <span class="meta-row__label">Customer</span>
+          <span class="meta-row__label">{{ 'kanban.customer' | translate }}</span>
           <span class="meta-row__value">{{ j.customerName ?? '—' }}</span>
         </div>
         <div class="meta-row">
-          <span class="meta-row__label">Due Date</span>
+          <span class="meta-row__label">{{ 'kanban.dueDate' | translate }}</span>
           <span class="meta-row__value">{{ formatDate(j.dueDate) }}</span>
         </div>
         <div class="meta-row">
-          <span class="meta-row__label">Start Date</span>
+          <span class="meta-row__label">{{ 'jobs.startDate' | translate }}</span>
           <span class="meta-row__value">{{ formatDate(j.startDate) }}</span>
         </div>
         <div class="meta-row">
-          <span class="meta-row__label">Track</span>
+          <span class="meta-row__label">{{ 'jobs.track' | translate }}</span>
           <span class="meta-row__value">{{ j.trackTypeName }}</span>
         </div>
         @if (j.partNumber) {
           <div class="meta-row">
-            <span class="meta-row__label">Part</span>
+            <span class="meta-row__label">{{ 'kanban.part' | translate }}</span>
             <span class="meta-row__value">{{ j.partNumber }}</span>
           </div>
         }
         @if (j.parentJobNumber) {
           <div class="meta-row">
-            <span class="meta-row__label">Parent Job</span>
+            <span class="meta-row__label">{{ 'jobs.parentJob' | translate }}</span>
             <span class="meta-row__value">{{ j.parentJobNumber }}</span>
           </div>
         }
@@ -90,7 +90,7 @@
       <!-- Description -->
       @if (j.description) {
         <div class="panel__section">
-          <h3 class="panel__section-title">Description</h3>
+          <h3 class="panel__section-title">{{ 'common.description' | translate }}</h3>
           <p class="panel__description">{{ j.description }}</p>
         </div>
       }
@@ -99,7 +99,7 @@
       @if (j.iterationCount > 0 || j.trackTypeName === 'R&D/Tooling') {
         <div class="panel__section">
           <div class="panel__section-header">
-            <h3 class="panel__section-title">R&D Iteration</h3>
+            <h3 class="panel__section-title">{{ 'kanban.rdIteration' | translate }}</h3>
             <span class="panel__section-count">v{{ j.iterationCount }}</span>
           </div>
           @if (j.iterationNotes) {
@@ -111,21 +111,21 @@
       <!-- Disposition -->
       @if (j.disposition) {
         <div class="panel__section">
-          <h3 class="panel__section-title">Disposition</h3>
+          <h3 class="panel__section-title">{{ 'jobs.disposition' | translate }}</h3>
           <div class="panel__meta">
             <div class="meta-row">
-              <span class="meta-row__label">Type</span>
+              <span class="meta-row__label">{{ 'common.type' | translate }}</span>
               <span class="meta-row__value">{{ formatDisposition(j.disposition) }}</span>
             </div>
             @if (j.dispositionNotes) {
               <div class="meta-row">
-                <span class="meta-row__label">Notes</span>
+                <span class="meta-row__label">{{ 'common.notes' | translate }}</span>
                 <span class="meta-row__value">{{ j.dispositionNotes }}</span>
               </div>
             }
             @if (j.dispositionAt) {
               <div class="meta-row">
-                <span class="meta-row__label">Date</span>
+                <span class="meta-row__label">{{ 'common.date' | translate }}</span>
                 <span class="meta-row__value">{{ j.dispositionAt | date:'MM/dd/yyyy' }}</span>
               </div>
             }
@@ -137,14 +137,14 @@
       @if (!j.disposition) {
         <div class="panel__section">
           <button class="action-btn" (click)="openDispose()">
-            <span class="material-icons-outlined">assignment_turned_in</span> Dispose
+            <span class="material-icons-outlined">assignment_turned_in</span> {{ 'kanban.dispose' | translate }}
           </button>
         </div>
       }
 
       <!-- Status Lifecycle -->
       <div class="panel__section">
-        <h3 class="panel__section-title">Status Tracking</h3>
+        <h3 class="panel__section-title">{{ 'kanban.statusTracking' | translate }}</h3>
         <app-status-timeline entityType="Job" [entityId]="j.id" />
       </div>
 
@@ -162,7 +162,7 @@
       @if (childJobs().length > 0) {
         <div class="panel__section">
           <div class="panel__section-header">
-            <h3 class="panel__section-title">Sub-Jobs</h3>
+            <h3 class="panel__section-title">{{ 'kanban.subJobs' | translate }}</h3>
             <span class="panel__section-count">{{ childJobs().length }}</span>
           </div>
           <div class="sub-jobs-list">
@@ -181,7 +181,7 @@
       @if (j.partId && j.childJobCount === 0) {
         <div class="panel__section">
           <button class="action-btn" (click)="explodeBom()">
-            <span class="material-icons-outlined">account_tree</span> Explode BOM
+            <span class="material-icons-outlined">account_tree</span> {{ 'kanban.explodeBom' | translate }}
           </button>
         </div>
       }
@@ -189,7 +189,7 @@
       <!-- Subtasks -->
       <div class="panel__section">
         <div class="panel__section-header">
-          <h3 class="panel__section-title">Subtasks</h3>
+          <h3 class="panel__section-title">{{ 'jobs.subtasks' | translate }}</h3>
           @if (subtasks().length) {
             <span class="panel__section-count">{{ completedCount() }}/{{ subtasks().length }}</span>
           }
@@ -211,8 +211,8 @@
         }
 
         <div class="subtask-add">
-          <app-input label="" placeholder="Add a subtask..." [formControl]="newSubtaskControl" (keydown.enter)="addSubtask()" />
-          <button class="subtask-add__btn" (click)="addSubtask()" [disabled]="!newSubtaskControl.value?.trim()" aria-label="Add subtask">
+          <app-input label="" [placeholder]="'kanban.addSubtaskPlaceholder' | translate" [formControl]="newSubtaskControl" (keydown.enter)="addSubtask()" />
+          <button class="subtask-add__btn" (click)="addSubtask()" [disabled]="!newSubtaskControl.value?.trim()" [attr.aria-label]="'kanban.addSubtask' | translate" [matTooltip]="'kanban.addSubtask' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
@@ -221,7 +221,7 @@
       <!-- Linked Cards -->
       <div class="panel__section">
         <div class="panel__section-header">
-          <h3 class="panel__section-title">Linked Cards</h3>
+          <h3 class="panel__section-title">{{ 'kanban.linkedCards' | translate }}</h3>
           @if (links().length) {
             <span class="panel__section-count">{{ links().length }}</span>
           }
@@ -238,7 +238,7 @@
                   <span class="link-item__title">{{ lk.linkedJobTitle }}</span>
                 </span>
                 <span class="chip chip--sm" [style.--chip-color]="lk.linkedJobStageColor">{{ lk.linkedJobStageName }}</span>
-                <button class="link-item__delete" (click)="deleteLink(lk)" title="Remove link" aria-label="Remove link">
+                <button class="link-item__delete" (click)="deleteLink(lk)" [matTooltip]="'kanban.removeLink' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.removeLink' | translate">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
@@ -248,7 +248,7 @@
 
         <div class="link-add">
           <div class="link-add__search-wrap">
-            <app-input label="" placeholder="Search jobs..." [formControl]="linkSearchControl" (blur)="dismissLinkResults()" />
+            <app-input label="" [placeholder]="'kanban.searchJobsPlaceholder' | translate" [formControl]="linkSearchControl" (blur)="dismissLinkResults()" />
             @if (showLinkResults() && linkSearchResults().length) {
               <div class="link-add__results">
                 @for (r of linkSearchResults(); track r.id) {
@@ -261,7 +261,7 @@
             }
           </div>
           <app-select label="" [options]="linkTypeOptions" [formControl]="linkTypeControl" />
-          <button class="link-add__btn" (click)="addLink()" [disabled]="!selectedLinkTarget()" aria-label="Add link">
+          <button class="link-add__btn" (click)="addLink()" [disabled]="!selectedLinkTarget()" [attr.aria-label]="'kanban.addLink' | translate" [matTooltip]="'kanban.addLink' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
@@ -270,7 +270,7 @@
       <!-- Parts -->
       <div class="panel__section">
         <div class="panel__section-header">
-          <h3 class="panel__section-title">Parts</h3>
+          <h3 class="panel__section-title">{{ 'kanban.parts' | translate }}</h3>
           @if (jobParts().length) {
             <span class="panel__section-count">{{ jobParts().length }}</span>
           }
@@ -286,7 +286,7 @@
                   <span class="part-item__description">{{ jp.partDescription }}</span>
                 </div>
                 <span class="part-item__qty">x{{ jp.quantity }}</span>
-                <button class="part-item__delete" (click)="removePart(jp)" title="Remove part" aria-label="Remove part">
+                <button class="part-item__delete" (click)="removePart(jp)" [matTooltip]="'kanban.removePart' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.removePart' | translate">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
@@ -296,7 +296,7 @@
 
         <div class="part-add">
           <div class="part-add__search-wrap">
-            <app-input label="" placeholder="Search parts..." [formControl]="partSearchControl" (blur)="dismissPartResults()" />
+            <app-input label="" [placeholder]="'kanban.searchPartsPlaceholder' | translate" [formControl]="partSearchControl" (blur)="dismissPartResults()" />
             @if (showPartResults() && partSearchResults().length) {
               <div class="part-add__results">
                 @for (p of partSearchResults(); track p.id) {
@@ -308,7 +308,7 @@
               </div>
             }
           </div>
-          <button class="part-add__btn" (click)="addPart()" [disabled]="!selectedPart()" aria-label="Add part">
+          <button class="part-add__btn" (click)="addPart()" [disabled]="!selectedPart()" [attr.aria-label]="'kanban.addPart' | translate" [matTooltip]="'kanban.addPart' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">add</span>
           </button>
         </div>
@@ -317,7 +317,7 @@
       <!-- Files -->
       <div class="panel__section">
         <div class="panel__section-header">
-          <h3 class="panel__section-title">Files</h3>
+          <h3 class="panel__section-title">{{ 'jobs.files' | translate }}</h3>
           @if (files().length) {
             <span class="panel__section-count">{{ files().length }}</span>
           }
@@ -337,10 +337,10 @@
                   <span class="file-item__name">{{ f.fileName }}</span>
                   <span class="file-item__meta">{{ formatFileSize(f.size) }} · {{ formatActivityDate(f.createdAt) }}</span>
                 </div>
-                <button class="icon-btn" title="Download" aria-label="Download file" (click)="downloadFile(f)">
+                <button class="icon-btn" [matTooltip]="'common.download' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.downloadFile' | translate" (click)="downloadFile(f)">
                   <span class="material-icons-outlined">download</span>
                 </button>
-                <button class="icon-btn icon-btn--danger" title="Delete" aria-label="Delete file" (click)="deleteFile(f)">
+                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.deleteFile' | translate" (click)="deleteFile(f)">
                   <span class="material-icons-outlined">delete</span>
                 </button>
               </div>
@@ -352,7 +352,7 @@
       <!-- Time Entries -->
       <div class="panel__section">
         <div class="panel__section-header">
-          <h3 class="panel__section-title">Time</h3>
+          <h3 class="panel__section-title">{{ 'kanban.time' | translate }}</h3>
           @if (timeEntries().length) {
             <span class="panel__section-count">{{ formattedTotalTime() }}</span>
           }
@@ -372,17 +372,17 @@
             }
           </div>
         } @else {
-          <p class="panel__empty-hint">No time logged</p>
+          <p class="panel__empty-hint">{{ 'kanban.noTimeLogged' | translate }}</p>
         }
       </div>
 
       <!-- Activity -->
       <div class="panel__section">
-        <h3 class="panel__section-title">Activity</h3>
+        <h3 class="panel__section-title">{{ 'jobs.activity' | translate }}</h3>
 
         <div class="comment-add">
-          <app-input label="" placeholder="Add a comment..." [formControl]="commentControl" (keydown.enter)="postComment()" />
-          <button class="comment-add__btn" (click)="postComment()" [disabled]="!commentControl.value?.trim()" aria-label="Post comment">
+          <app-input label="" [placeholder]="'kanban.addCommentPlaceholder' | translate" [formControl]="commentControl" (keydown.enter)="postComment()" />
+          <button class="comment-add__btn" (click)="postComment()" [disabled]="!commentControl.value?.trim()" [attr.aria-label]="'kanban.postComment' | translate" [matTooltip]="'kanban.postComment' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">send</span>
           </button>
         </div>

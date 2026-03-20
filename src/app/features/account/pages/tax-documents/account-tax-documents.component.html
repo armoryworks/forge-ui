@@ -1,13 +1,13 @@
 <div class="tax-documents">
-  <h2 class="tax-documents__title">Tax Documents</h2>
-  <p class="tax-documents__subtitle">View and download your W-2s, 1099s, and other tax documents</p>
+  <h2 class="tax-documents__title">{{ 'account.taxDocuments' | translate }}</h2>
+  <p class="tax-documents__subtitle">{{ 'account.taxDocumentsSubtitle' | translate }}</p>
 
   <app-data-table
     tableId="account-tax-documents"
     [columns]="columns"
     [data]="taxDocuments()"
     emptyIcon="receipt_long"
-    emptyMessage="No tax documents available">
+    [emptyMessage]="'account.noTaxDocuments' | translate">
 
     <ng-template appColumnCell="documentType" let-row>
       {{ getTypeLabel(row.documentType) }}
@@ -19,15 +19,15 @@
 
     <ng-template appColumnCell="source" let-row>
       @if (row.source === 'Accounting') {
-        <span class="chip chip--info">Synced</span>
+        <span class="chip chip--info">{{ 'account.synced' | translate }}</span>
       } @else {
-        <span class="chip chip--muted">Manual</span>
+        <span class="chip chip--muted">{{ 'account.manual' | translate }}</span>
       }
     </ng-template>
 
     <ng-template appColumnCell="actions" let-row>
       @if (row.fileAttachmentId) {
-        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" aria-label="Download tax document PDF">
+        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" [attr.aria-label]="'account.downloadTaxDocPdf' | translate" [matTooltip]="'account.downloadTaxDocPdf' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">download</span>
         </button>
       }

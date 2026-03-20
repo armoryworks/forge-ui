@@ -1,11 +1,11 @@
 @if (priorityTasks().length === 0) {
-  <app-empty-state icon="task_alt" message="No tasks assigned for today" />
+  <app-empty-state icon="task_alt" [message]="'dashboard.noTasksToday' | translate" />
 } @else {
   <!-- Overdue Alert -->
   @if (overdueTasks().length > 0) {
     <div class="overdue-banner">
       <span class="material-icons-outlined overdue-banner__icon">warning</span>
-      <span class="overdue-banner__text">{{ overdueTasks().length }} overdue</span>
+      <span class="overdue-banner__text">{{ 'dashboard.overdueCount' | translate:{ count: overdueTasks().length } }}</span>
     </div>
   }
 
@@ -18,7 +18,7 @@
       <app-avatar [initials]="task.assignee.initials" [color]="task.assignee.color" size="sm" />
       <app-status-badge [status]="task.status" [statusColor]="task.statusColor" />
       <div class="task-item__actions">
-        <button class="icon-btn" title="View Job" (click)="viewJob(task); $event.stopPropagation()" aria-label="View Job">
+        <button class="icon-btn" [matTooltip]="'dashboard.viewJob' | translate" matTooltipPosition="above" (click)="viewJob(task); $event.stopPropagation()" [attr.aria-label]="'dashboard.viewJob' | translate">
           <span class="material-icons-outlined">open_in_new</span>
         </button>
       </div>
@@ -30,7 +30,7 @@
     <div class="tomorrow-section">
       <span class="tomorrow-section__label">
         <span class="material-icons-outlined">upcoming</span>
-        Top 3 for Tomorrow
+        {{ 'dashboard.top3Tomorrow' | translate }}
       </span>
       @for (item of top3Tomorrow(); track item) {
         <div class="tomorrow-item">

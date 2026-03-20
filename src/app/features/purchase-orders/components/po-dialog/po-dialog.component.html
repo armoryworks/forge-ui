@@ -1,27 +1,27 @@
-<app-dialog title="New Purchase Order" width="800px" (closed)="close()">
+<app-dialog [title]="'purchaseOrders.newPoTitle' | translate" width="800px" (closed)="close()">
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-select label="Vendor" formControlName="vendorId" [options]="vendorOptions()" />
-      <app-input label="Job ID" type="number" formControlName="jobId" placeholder="Optional" />
+      <app-select [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" />
+      <app-input [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
     </div>
-    <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
   </div>
 
   <!-- Line Items -->
   <div class="lines-section">
     <div class="lines-header">
-      <span class="lines-title">Line Items</span>
+      <span class="lines-title">{{ 'purchaseOrders.lineItems' | translate }}</span>
     </div>
 
     @if (lines().length > 0) {
       <table class="lines-table">
         <thead>
           <tr>
-            <th>Part #</th>
-            <th>Description</th>
-            <th class="lines-table__right">Qty</th>
-            <th class="lines-table__right">Unit Price</th>
-            <th class="lines-table__right">Total</th>
+            <th>{{ 'purchaseOrders.partNumber' | translate }}</th>
+            <th>{{ 'common.description' | translate }}</th>
+            <th class="lines-table__right">{{ 'purchaseOrders.qty' | translate }}</th>
+            <th class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
+            <th class="lines-table__right">{{ 'common.total' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -34,7 +34,7 @@
               <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
               <td class="lines-table__right">{{ line.orderedQuantity * line.unitPrice | currency }}</td>
               <td>
-                <button class="icon-btn icon-btn--danger" title="Remove" (click)="removeLine($index)">
+                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </td>
@@ -43,7 +43,7 @@
         </tbody>
         <tfoot>
           <tr>
-            <td colspan="4" class="lines-table__right lines-table__bold">Total</td>
+            <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
             <td class="lines-table__right lines-table__bold">{{ lineTotal() | currency }}</td>
             <td></td>
           </tr>
@@ -53,25 +53,25 @@
 
     <!-- Add Line Form -->
     <div class="add-line" [formGroup]="lineForm">
-      <app-input label="Part ID" type="number" formControlName="partId" />
-      <app-input label="Part #" formControlName="partNumber" />
-      <app-input label="Description" formControlName="description" />
-      <app-input label="Qty" type="number" formControlName="orderedQuantity" />
-      <app-input label="Price" type="number" formControlName="unitPrice" />
+      <app-input [label]="'purchaseOrders.partId' | translate" type="number" formControlName="partId" />
+      <app-input [label]="'purchaseOrders.partNumber' | translate" formControlName="partNumber" />
+      <app-input [label]="'common.description' | translate" formControlName="description" />
+      <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" />
+      <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" />
       <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid">
         <span class="material-icons-outlined">add</span>
-        Add
+        {{ 'common.add' | translate }}
       </button>
     </div>
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || lines().length === 0 || saving()"
       (click)="save()">
-      <span class="material-icons-outlined">save</span> Create PO
+      <span class="material-icons-outlined">save</span> {{ 'purchaseOrders.createPo' | translate }}
     </button>
   </div>
 </app-dialog>

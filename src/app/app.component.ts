@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AppHeaderComponent } from './core/layout/app-header.component';
 import { SidebarComponent } from './core/layout/sidebar.component';
@@ -43,13 +44,14 @@ import { PLANNING_TOUR } from './shared/tours/planning-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
+  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   protected readonly layout = inject(LayoutService);
   private readonly signalr = inject(SignalrService);
   private readonly notificationHub = inject(NotificationHubService);
@@ -86,6 +88,12 @@ export class AppComponent implements OnInit, OnDestroy {
       } else {
         this.signalr.stopAll();
         this.scanner.stop();
+        // Redirect to login when auth is lost (expired token, logout, etc.)
+        // Use setTimeout to break out of the reactive context — router.navigate
+        // triggers signal changes that conflict with effect execution.
+        if (!this.layout.isAuthRoute() && !this.layout.isDisplayRoute()) {
+          setTimeout(() => this.router.navigate(['/login']));
+        }
       }
     });
 

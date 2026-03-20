@@ -17,6 +17,8 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -25,7 +27,7 @@ import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barco
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, BarcodeInfoComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, BarcodeInfoComponent, MatTooltipModule],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +36,7 @@ export class AssetsComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -73,34 +76,44 @@ export class AssetsComponent {
 
   protected readonly assetColumns: ColumnDef[] = [
     { field: 'icon', header: '', width: '32px' },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'assetType', header: 'Type', sortable: true, filterable: true, type: 'enum', filterOptions: [
-      { value: 'Machine', label: 'Machine' }, { value: 'Tooling', label: 'Tooling' },
-      { value: 'Facility', label: 'Facility' }, { value: 'Vehicle', label: 'Vehicle' }, { value: 'Other', label: 'Other' },
+    { field: 'name', header: this.translate.instant('assets.colName'), sortable: true },
+    { field: 'assetType', header: this.translate.instant('assets.colType'), sortable: true, filterable: true, type: 'enum', filterOptions: [
+      { value: 'Machine', label: this.translate.instant('assets.typeMachine') }, { value: 'Tooling', label: this.translate.instant('assets.typeTooling') },
+      { value: 'Facility', label: this.translate.instant('assets.typeFacility') }, { value: 'Vehicle', label: this.translate.instant('assets.typeVehicle') }, { value: 'Other', label: this.translate.instant('assets.typeOther') },
     ]},
-    { field: 'location', header: 'Location', sortable: true },
-    { field: 'manufacturer', header: 'Manufacturer', sortable: true },
-    { field: 'status', header: 'Status', sortable: true },
-    { field: 'currentHours', header: 'Hours', align: 'right', sortable: true },
+    { field: 'location', header: this.translate.instant('assets.colLocation'), sortable: true },
+    { field: 'manufacturer', header: this.translate.instant('assets.colManufacturer'), sortable: true },
+    { field: 'status', header: this.translate.instant('assets.colStatus'), sortable: true },
+    { field: 'currentHours', header: this.translate.instant('assets.colHours'), align: 'right', sortable: true },
   ];
 
   protected readonly assetTypes: AssetType[] = ['Machine', 'Tooling', 'Facility', 'Vehicle', 'Other'];
   protected readonly assetStatuses: AssetStatus[] = ['Active', 'Maintenance', 'Retired', 'OutOfService'];
 
   protected readonly typeFilterOptions: SelectOption[] = [
-    { value: null, label: 'All Types' },
-    ...['Machine', 'Tooling', 'Facility', 'Vehicle', 'Other'].map(t => ({ value: t, label: t })),
+    { value: null, label: this.translate.instant('assets.allTypes') },
+    { value: 'Machine', label: this.translate.instant('assets.typeMachine') },
+    { value: 'Tooling', label: this.translate.instant('assets.typeTooling') },
+    { value: 'Facility', label: this.translate.instant('assets.typeFacility') },
+    { value: 'Vehicle', label: this.translate.instant('assets.typeVehicle') },
+    { value: 'Other', label: this.translate.instant('assets.typeOther') },
   ];
 
   protected readonly statusFilterOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Maintenance', label: 'Maintenance' },
-    { value: 'Retired', label: 'Retired' },
-    { value: 'OutOfService', label: 'Out of Service' },
+    { value: null, label: this.translate.instant('assets.allStatuses') },
+    { value: 'Active', label: this.translate.instant('assets.statusActive') },
+    { value: 'Maintenance', label: this.translate.instant('assets.statusMaintenance') },
+    { value: 'Retired', label: this.translate.instant('assets.statusRetired') },
+    { value: 'OutOfService', label: this.translate.instant('assets.statusOutOfService') },
   ];
 
-  protected readonly assetTypeOptions: SelectOption[] = this.assetTypes.map(t => ({ value: t, label: t }));
+  protected readonly assetTypeOptions: SelectOption[] = [
+    { value: 'Machine', label: this.translate.instant('assets.typeMachine') },
+    { value: 'Tooling', label: this.translate.instant('assets.typeTooling') },
+    { value: 'Facility', label: this.translate.instant('assets.typeFacility') },
+    { value: 'Vehicle', label: this.translate.instant('assets.typeVehicle') },
+    { value: 'Other', label: this.translate.instant('assets.typeOther') },
+  ];
 
   constructor() {
     this.loadAssets();
@@ -179,7 +192,7 @@ export class AssetsComponent {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
-        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success('Asset updated.'); },
+        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success(this.translate.instant('assets.assetUpdated')); },
         error: () => this.saving.set(false),
       });
     } else {
@@ -195,7 +208,7 @@ export class AssetsComponent {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
-        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success('Asset created.'); },
+        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success(this.translate.instant('assets.assetCreated')); },
         error: () => this.saving.set(false),
       });
     }
@@ -248,7 +261,7 @@ export class AssetsComponent {
         next: () => {
           this.selectedAsset.set(null);
           this.loadAssets();
-          this.snackbar.success('Asset deleted.');
+          this.snackbar.success(this.translate.instant('assets.assetDeleted'));
         },
       });
     });

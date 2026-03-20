@@ -1,25 +1,25 @@
-<div class="filter-popover" role="dialog" aria-label="Column filter" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+<div class="filter-popover" role="dialog" [attr.aria-label]="'shared.columnFilter' | translate" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
   <div class="filter-popover__header">
-    <span class="filter-popover__title">Filter: {{ column().header }}</span>
+    <span class="filter-popover__title">{{ 'common.filter' | translate }}: {{ column().header }}</span>
   </div>
 
   <div class="filter-popover__body">
     @switch (column().type ?? 'text') {
       @case ('text') {
         <app-input
-          label="Contains"
+          [label]="'shared.contains' | translate"
           [ngModel]="textValue()"
           (ngModelChange)="textValue.set($event)" />
       }
       @case ('number') {
         <div class="filter-popover__range">
           <app-input
-            label="Min"
+            [label]="'shared.min' | translate"
             type="number"
             [ngModel]="numberMin()"
             (ngModelChange)="numberMin.set($event)" />
           <app-input
-            label="Max"
+            [label]="'shared.max' | translate"
             type="number"
             [ngModel]="numberMax()"
             (ngModelChange)="numberMax.set($event)" />
@@ -28,11 +28,11 @@
       @case ('date') {
         <div class="filter-popover__range">
           <app-datepicker
-            label="From"
+            [label]="'common.from' | translate"
             [ngModel]="dateFrom()"
             (ngModelChange)="dateFrom.set($event)" />
           <app-datepicker
-            label="To"
+            [label]="'common.to' | translate"
             [ngModel]="dateTo()"
             (ngModelChange)="dateTo.set($event)" />
         </div>
@@ -54,7 +54,7 @@
   </div>
 
   <div class="filter-popover__actions">
-    <button class="filter-popover__btn filter-popover__btn--clear" (click)="onClear()">Clear</button>
-    <button class="filter-popover__btn filter-popover__btn--apply" (click)="onApply()">Apply</button>
+    <button class="filter-popover__btn filter-popover__btn--clear" (click)="onClear()">{{ 'shared.clear' | translate }}</button>
+    <button class="filter-popover__btn filter-popover__btn--apply" (click)="onApply()">{{ 'shared.apply' | translate }}</button>
   </div>
 </div>

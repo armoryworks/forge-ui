@@ -15,6 +15,7 @@ import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-vendor-dialog',
@@ -22,7 +23,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
-    AddressFormComponent, ValidationPopoverDirective,
+    AddressFormComponent, ValidationPopoverDirective, TranslatePipe,
   ],
   templateUrl: './vendor-dialog.component.html',
   styleUrl: './vendor-dialog.component.scss',
@@ -31,6 +32,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 export class VendorDialogComponent {
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly vendor = input<VendorDetail | null>(null);
   readonly closed = output<void>();
@@ -109,7 +111,7 @@ export class VendorDialogComponent {
       }).subscribe({
         next: () => {
           this.saving.set(false);
-          this.snackbar.success('Vendor updated.');
+          this.snackbar.success(this.translate.instant('vendors.vendorUpdated'));
           this.saved.emit();
         },
         error: () => this.saving.set(false),
@@ -121,7 +123,7 @@ export class VendorDialogComponent {
       }).subscribe({
         next: () => {
           this.saving.set(false);
-          this.snackbar.success('Vendor created.');
+          this.snackbar.success(this.translate.instant('vendors.vendorCreated'));
           this.saved.emit();
         },
         error: () => this.saving.set(false),

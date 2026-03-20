@@ -1,9 +1,9 @@
 @if (shortcuts.helpOpen()) {
-  <div class="shortcuts-backdrop" role="button" tabindex="0" aria-label="Close" (click)="shortcuts.closeHelp()" (keydown.enter)="shortcuts.closeHelp()"></div>
+  <div class="shortcuts-backdrop" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="shortcuts.closeHelp()" (keydown.enter)="shortcuts.closeHelp()"></div>
   <div class="shortcuts-dialog">
     <div class="shortcuts-dialog__header">
-      <h2>Keyboard Shortcuts</h2>
-      <button class="icon-btn" aria-label="Close" (click)="shortcuts.closeHelp()">
+      <h2>{{ 'shared.keyboardShortcuts' | translate }}</h2>
+      <button class="icon-btn" [attr.aria-label]="'common.close' | translate" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="shortcuts.closeHelp()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -14,7 +14,15 @@
           @for (shortcut of group.shortcuts; track shortcut.key) {
             <div class="shortcuts-group__item">
               <span class="shortcuts-group__description">{{ shortcut.description }}</span>
-              <kbd class="shortcuts-group__key">{{ formatKey(shortcut) }}</kbd>
+              @let fmt = formatKeys(shortcut);
+              <span class="shortcuts-group__keys">
+                @for (k of fmt.keys; track $index; let last = $last) {
+                  <kbd class="shortcuts-group__key">{{ k }}</kbd>
+                  @if (!last) {
+                    <span class="shortcuts-group__sep">{{ fmt.separator }}</span>
+                  }
+                }
+              </span>
             </div>
           }
         </div>

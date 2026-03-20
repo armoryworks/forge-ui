@@ -1,0 +1,83 @@
+@use 'styles/variables' as *;
+
+.qb-signature {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+}
+
+.qb-signature__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: color-mix(in srgb, var(--primary) 6%, var(--bg));
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.qb-signature__icon {
+  font-size: $icon-size-lg;
+  color: var(--primary);
+}
+
+.qb-signature__label {
+  font-size: $font-size-xs;
+  font-weight: 700;
+  display: block;
+}
+
+.qb-signature__hint {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  display: block;
+}
+
+.qb-signature__body {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+
+  .mat-mdc-form-field {
+    margin: 0;
+  }
+}
+
+.qb-signature__preview {
+  font-family: 'Segoe Script', 'Dancing Script', 'Brush Script MT', cursive;
+  font-size: 28px;
+  color: var(--text);
+  min-height: 48px;
+  display: flex;
+  align-items: flex-end;
+  padding: $sp-md 0;
+
+  &--empty {
+    font-family: $font-family-primary;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+.qb-signature__line {
+  border-top: $border-width solid var(--text);
+  margin-bottom: $sp-sm;
+}
+
+.qb-signature__x {
+  font-size: $font-size-xs;
+  font-weight: 700;
+  color: var(--text-secondary);
+  position: relative;
+  top: -$sp-lg;
+}
+
+.qb-signature__disclaimer {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  line-height: 1.4;
+}

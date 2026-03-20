@@ -2,17 +2,17 @@
   <div class="onboarding-banner" role="alert" aria-live="polite">
     <span class="material-icons-outlined onboarding-banner__icon">warning</span>
     <span class="onboarding-banner__text">
-      Complete your employee profile &mdash;
+      {{ 'onboarding.completeProfile' | translate }} &mdash;
       @if (incompleteCount() > 0) {
-        {{ incompleteCount() }} {{ incompleteCount() === 1 ? 'item' : 'items' }} remaining
+        {{ incompleteCount() }} {{ incompleteCount() === 1 ? ('onboarding.itemRemaining' | translate) : ('onboarding.itemsRemaining' | translate) }}
       } @else {
-        action required
+        {{ 'onboarding.actionRequired' | translate }}
       }
     </span>
     <button class="action-btn action-btn--sm onboarding-banner__action" (click)="goToIncomplete()">
-      Complete Now
+      {{ 'onboarding.completeNow' | translate }}
     </button>
-    <button class="icon-btn onboarding-banner__dismiss" (click)="dismiss()" aria-label="Dismiss onboarding banner">
+    <button class="icon-btn onboarding-banner__dismiss" (click)="dismiss()" aria-label="Dismiss onboarding banner" matTooltip="Dismiss" matTooltipPosition="above">
       <span class="material-icons-outlined">close</span>
     </button>
   </div>

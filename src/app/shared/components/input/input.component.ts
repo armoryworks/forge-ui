@@ -35,7 +35,7 @@ export class InputComponent implements ControlValueAccessor {
   readonly isReadonly = input<boolean>(false);
   readonly maxlength = input<number | null>(null);
   readonly autocomplete = input<string>('off');
-  readonly mask = input<'phone' | 'zip' | null>(null);
+  readonly mask = input<'phone' | 'zip' | 'ssn' | 'date' | null>(null);
   readonly required = input<boolean>(false);
 
   protected readonly value = signal<string | number>('');
@@ -83,6 +83,8 @@ export class InputComponent implements ControlValueAccessor {
     switch (this.mask()) {
       case 'phone': return this.formatPhone(raw);
       case 'zip': return this.formatZip(raw);
+      case 'ssn': return this.formatSsn(raw);
+      case 'date': return this.formatDate(raw);
       default: return raw;
     }
   }
@@ -99,5 +101,21 @@ export class InputComponent implements ControlValueAccessor {
     const digits = raw.replace(/\D/g, '').slice(0, 9);
     if (digits.length <= 5) return digits;
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+  }
+
+  private formatSsn(raw: string): string {
+    const digits = raw.replace(/\D/g, '').slice(0, 9);
+    if (digits.length === 0) return '';
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+    return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+  }
+
+  private formatDate(raw: string): string {
+    const digits = raw.replace(/\D/g, '').slice(0, 8);
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) return digits;
+    if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
   }
 }

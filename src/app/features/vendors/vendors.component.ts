@@ -19,6 +19,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-vendors',
@@ -28,6 +30,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
     VendorDialogComponent, EmptyStateComponent, LoadingBlockDirective,
+    TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './vendors.component.html',
   styleUrl: './vendors.component.scss',
@@ -37,6 +40,7 @@ export class VendorsComponent {
   private readonly vendorService = inject(VendorService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly vendors = signal<VendorListItem[]>([]);
@@ -54,21 +58,21 @@ export class VendorsComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly activeOptions: SelectOption[] = [
-    { value: null, label: 'All' },
-    { value: true, label: 'Active' },
-    { value: false, label: 'Inactive' },
+    { value: null, label: this.translate.instant('vendors.allFilter') },
+    { value: true, label: this.translate.instant('vendors.activeFilter') },
+    { value: false, label: this.translate.instant('vendors.inactiveFilter') },
   ];
 
   protected readonly vendorColumns: ColumnDef[] = [
-    { field: 'companyName', header: 'Company Name', sortable: true },
-    { field: 'contactName', header: 'Contact', sortable: true },
-    { field: 'email', header: 'Email', sortable: true },
-    { field: 'phone', header: 'Phone', sortable: true },
-    { field: 'isActive', header: 'Active', sortable: true, type: 'enum', filterable: true, filterOptions: [
-      { value: true, label: 'Active' }, { value: false, label: 'Inactive' },
+    { field: 'companyName', header: this.translate.instant('vendors.companyName'), sortable: true },
+    { field: 'contactName', header: this.translate.instant('vendors.contact'), sortable: true },
+    { field: 'email', header: this.translate.instant('common.email'), sortable: true },
+    { field: 'phone', header: this.translate.instant('common.phone'), sortable: true },
+    { field: 'isActive', header: this.translate.instant('common.active'), sortable: true, type: 'enum', filterable: true, filterOptions: [
+      { value: true, label: this.translate.instant('common.active') }, { value: false, label: this.translate.instant('common.inactive') },
     ], width: '80px' },
-    { field: 'poCount', header: 'POs', sortable: true, width: '70px', align: 'center' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'poCount', header: this.translate.instant('vendors.pos'), sortable: true, width: '70px', align: 'center' },
+    { field: 'createdAt', header: this.translate.instant('common.createdAt'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly vendorRowClass = (row: unknown) => {
@@ -77,11 +81,11 @@ export class VendorsComponent {
   };
 
   protected readonly poColumns: ColumnDef[] = [
-    { field: 'poNumber', header: 'PO #', sortable: true, width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, width: '140px' },
-    { field: 'lineCount', header: 'Lines', sortable: true, width: '70px', align: 'center' },
-    { field: 'expectedDeliveryDate', header: 'Expected', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'poNumber', header: this.translate.instant('vendors.poNumber'), sortable: true, width: '120px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, width: '140px' },
+    { field: 'lineCount', header: this.translate.instant('vendors.lines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'expectedDeliveryDate', header: this.translate.instant('vendors.expected'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('common.createdAt'), sortable: true, type: 'date', width: '110px' },
   ];
 
   constructor() {
@@ -139,7 +143,7 @@ export class VendorsComponent {
       next: () => {
         this.vendorService.getVendorById(v.id).subscribe(d => this.selectedVendor.set(d));
         this.loadVendors();
-        this.snackbar.success(v.isActive ? 'Vendor deactivated.' : 'Vendor activated.');
+        this.snackbar.success(this.translate.instant(v.isActive ? 'vendors.vendorDeactivated' : 'vendors.vendorActivated'));
       },
     });
   }
@@ -150,9 +154,9 @@ export class VendorsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Vendor?',
-        message: `This will remove "${v.companyName}" from the system. This action cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('vendors.deleteVendorTitle'),
+        message: this.translate.instant('vendors.deleteVendorMessage', { name: v.companyName }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -161,7 +165,7 @@ export class VendorsComponent {
         next: () => {
           this.selectedVendor.set(null);
           this.loadVendors();
-          this.snackbar.success('Vendor deleted.');
+          this.snackbar.success(this.translate.instant('vendors.vendorDeleted'));
         },
       });
     });
@@ -181,6 +185,6 @@ export class VendorsComponent {
   }
 
   protected getPoStatusLabel(status: string): string {
-    return status === 'PartiallyReceived' ? 'Partial' : status;
+    return status === 'PartiallyReceived' ? this.translate.instant('vendors.poStatusPartial') : status;
   }
 }

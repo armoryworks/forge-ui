@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CurrencyPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { environment } from '../../../../../environments/environment';
 
@@ -15,7 +16,7 @@ interface MarginSummary {
 @Component({
   selector: 'app-margin-summary-widget',
   standalone: true,
-  imports: [CurrencyPipe],
+  imports: [CurrencyPipe, TranslatePipe],
   templateUrl: './margin-summary-widget.component.html',
   styleUrl: './margin-summary-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,10 +1,10 @@
-<app-page-header title="Assets" subtitle="Track equipment, tooling, and company property">
-  <app-input label="Search" [formControl]="searchControl" placeholder="Search assets..."  />
-  <app-select label="Type" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
-  <app-select label="Status" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
+<app-page-header [title]="'assets.title' | translate" [subtitle]="'assets.subtitle' | translate">
+  <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'assets.searchPlaceholder' | translate"  />
+  <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
+  <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
   <button class="action-btn action-btn--primary" (click)="openCreateAsset()">
     <span class="material-icons-outlined">add</span>
-    Add Asset
+    {{ 'assets.addAsset' | translate }}
   </button>
 </app-page-header>
 
@@ -14,11 +14,11 @@
     @if (loading()) {
       <div class="page-loading">
         <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-        <span>Loading...</span>
+        <span>{{ 'common.loading' | translate }}</span>
       </div>
     } @else {
       <app-data-table tableId="assets" [columns]="assetColumns" [data]="assets()"
-        [rowClass]="assetRowClass" emptyIcon="precision_manufacturing" emptyMessage="No assets found"
+        [rowClass]="assetRowClass" emptyIcon="precision_manufacturing" [emptyMessage]="'assets.noAssetsFound' | translate"
         (rowClick)="selectAsset($any($event))">
         <ng-template appColumnCell="icon" let-asset>
           <span class="material-icons-outlined type-icon">{{ getTypeIcon(asset.assetType) }}</span>
@@ -57,10 +57,10 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Edit" (click)="openEditAsset()">
+          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditAsset()">
             <span class="material-icons-outlined">edit</span>
           </button>
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -69,70 +69,70 @@
       <div class="detail-body">
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">
               <span [class]="getStatusClass(asset.status)">{{ getStatusLabel(asset.status) }}</span>
             </span>
           </div>
           @if (asset.location) {
             <div class="info-item">
-              <span class="info-label">Location</span>
+              <span class="info-label">{{ 'assets.location' | translate }}</span>
               <span class="info-value">{{ asset.location }}</span>
             </div>
           }
           @if (asset.manufacturer) {
             <div class="info-item">
-              <span class="info-label">Manufacturer</span>
+              <span class="info-label">{{ 'assets.manufacturer' | translate }}</span>
               <span class="info-value">{{ asset.manufacturer }}</span>
             </div>
           }
           @if (asset.model) {
             <div class="info-item">
-              <span class="info-label">Model</span>
+              <span class="info-label">{{ 'assets.model' | translate }}</span>
               <span class="info-value">{{ asset.model }}</span>
             </div>
           }
           @if (asset.serialNumber) {
             <div class="info-item">
-              <span class="info-label">Serial Number</span>
+              <span class="info-label">{{ 'assets.serialNumber' | translate }}</span>
               <span class="info-value mono">{{ asset.serialNumber }}</span>
             </div>
           }
           <div class="info-item">
-            <span class="info-label">Hours</span>
+            <span class="info-label">{{ 'assets.hours' | translate }}</span>
             <span class="info-value">{{ asset.currentHours }}</span>
           </div>
         </div>
 
         @if (asset.assetType === 'Tooling') {
           <div class="info-section">
-            <h4 class="info-section__title">Tooling Details</h4>
+            <h4 class="info-section__title">{{ 'assets.toolingDetails' | translate }}</h4>
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Customer Owned</span>
-                <span class="info-value">{{ asset.isCustomerOwned ? 'Yes' : 'No' }}</span>
+                <span class="info-label">{{ 'assets.customerOwned' | translate }}</span>
+                <span class="info-value">{{ asset.isCustomerOwned ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
               </div>
               @if (asset.cavityCount) {
                 <div class="info-item">
-                  <span class="info-label">Cavity Count</span>
+                  <span class="info-label">{{ 'assets.cavityCount' | translate }}</span>
                   <span class="info-value">{{ asset.cavityCount }}</span>
                 </div>
               }
               @if (asset.toolLifeExpectancy) {
                 <div class="info-item">
-                  <span class="info-label">Tool Life</span>
+                  <span class="info-label">{{ 'assets.toolLife' | translate }}</span>
                   <span class="info-value">{{ asset.currentShotCount }} / {{ asset.toolLifeExpectancy }}</span>
                 </div>
               }
               @if (asset.sourceJobNumber) {
                 <div class="info-item">
-                  <span class="info-label">Source Job</span>
+                  <span class="info-label">{{ 'assets.sourceJob' | translate }}</span>
                   <span class="info-value">{{ asset.sourceJobNumber }}</span>
                 </div>
               }
               @if (asset.sourcePartNumber) {
                 <div class="info-item">
-                  <span class="info-label">Source Part</span>
+                  <span class="info-label">{{ 'assets.sourcePart' | translate }}</span>
                   <span class="info-value">{{ asset.sourcePartNumber }}</span>
                 </div>
               }
@@ -142,7 +142,7 @@
 
         @if (asset.notes) {
           <div class="notes-section">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'common.notes' | translate }}</span>
             <p class="notes-text">{{ asset.notes }}</p>
           </div>
         }
@@ -155,7 +155,7 @@
           [compact]="true" />
 
         <div class="status-actions">
-          <span class="info-label">Set Status</span>
+          <span class="info-label">{{ 'assets.setStatus' | translate }}</span>
           <div class="status-btn-group">
             @for (s of assetStatuses; track s) {
               <button class="status-btn" [class.status-btn--active]="asset.status === s"
@@ -172,41 +172,41 @@
 
 <!-- Asset Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="editingAsset() ? 'Edit Asset' : 'Add Asset'" (closed)="closeDialog()">
+  <app-dialog [title]="editingAsset() ? ('assets.editAsset' | translate) : ('assets.addAsset' | translate)" (closed)="closeDialog()">
     <div [formGroup]="assetForm">
-      <app-input label="Name" formControlName="name" />
+      <app-input [label]="'assets.name' | translate" formControlName="name" />
 
       <div class="dialog-row">
-        <app-select label="Type" formControlName="assetType" [options]="assetTypeOptions" />
-        <app-input label="Location" formControlName="location" />
+        <app-select [label]="'common.type' | translate" formControlName="assetType" [options]="assetTypeOptions" />
+        <app-input [label]="'assets.location' | translate" formControlName="location" />
       </div>
 
       <div class="dialog-row">
-        <app-input label="Manufacturer" formControlName="manufacturer" />
-        <app-input label="Model" formControlName="model" />
+        <app-input [label]="'assets.manufacturer' | translate" formControlName="manufacturer" />
+        <app-input [label]="'assets.model' | translate" formControlName="model" />
       </div>
 
-      <app-input label="Serial Number" formControlName="serialNumber" />
+      <app-input [label]="'assets.serialNumber' | translate" formControlName="serialNumber" />
 
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
 
       @if (assetForm.get('assetType')?.value === 'Tooling') {
-        <app-toggle label="Customer Owned" formControlName="isCustomerOwned" />
+        <app-toggle [label]="'assets.customerOwned' | translate" formControlName="isCustomerOwned" />
         <div class="dialog-row">
-          <app-input label="Cavity Count" type="number" formControlName="cavityCount" />
-          <app-input label="Tool Life Expectancy" type="number" formControlName="toolLifeExpectancy" />
+          <app-input [label]="'assets.cavityCount' | translate" type="number" formControlName="cavityCount" />
+          <app-input [label]="'assets.toolLifeExpectancy' | translate" type="number" formControlName="toolLifeExpectancy" />
         </div>
       }
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="assetViolations"
         [disabled]="assetForm.invalid || saving()"
         (click)="saveAsset()">
         <span class="material-icons-outlined">save</span>
-        {{ editingAsset() ? 'Save Changes' : 'Create Asset' }}
+        {{ editingAsset() ? ('assets.saveChanges' | translate) : ('assets.createAsset' | translate) }}
       </button>
     </div>
   </app-dialog>

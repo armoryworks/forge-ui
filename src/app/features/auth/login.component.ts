@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { HttpErrorResponse } from '@angular/common/http';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -18,7 +19,7 @@ import { SsoProvider } from '../../shared/models/sso-provider.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, MatDividerModule, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, MatDividerModule, TranslatePipe, InputComponent, ValidationPopoverDirective],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -29,6 +30,7 @@ export class LoginComponent implements OnInit {
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly form = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email]),
@@ -86,7 +88,7 @@ export class LoginComponent implements OnInit {
 
     const { email, password } = this.form.getRawValue();
 
-    this.loadingService.track('Signing in...', this.authService.login({ email: email!, password: password! }))
+    this.loadingService.track(this.translate.instant('auth.signingIn'), this.authService.login({ email: email!, password: password! }))
       .subscribe({
         next: (response) => {
           this.router.navigate([response.user.profileComplete ? '/dashboard' : '/account/profile']);
@@ -97,12 +99,12 @@ export class LoginComponent implements OnInit {
 
   private handleError(err: HttpErrorResponse): void {
     if (err.status === 401) {
-      this.snackbar.error('Invalid email or password.');
+      this.snackbar.error(this.translate.instant('auth.loginFailed'));
     } else if (err.status >= 500 || err.error?.stackTrace || err.error?.traceId) {
       this.toast.show({
         severity: 'error',
-        title: 'Login failed',
-        message: err.error?.detail ?? 'An unexpected server error occurred.',
+        title: this.translate.instant('auth.loginFailed'),
+        message: err.error?.detail ?? this.translate.instant('errors.serverError'),
         details: err.error?.stackTrace ?? `Status ${err.status}: ${err.statusText}`,
       });
     } else {

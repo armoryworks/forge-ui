@@ -40,11 +40,12 @@ import { MyCycleSummaryItem } from './models/my-cycle-summary-item.model';
 import { LeadSalesItem } from './models/lead-sales-item.model';
 import { RdReportItem } from './models/rd-report-item.model';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent, TranslatePipe],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,36 +53,37 @@ import { CurrencyPipe, DecimalPipe } from '@angular/common';
 export class ReportsComponent {
   private readonly reportService = inject(ReportService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly reports: ReportDef[] = [
-    { id: 'jobs-by-stage', label: 'Jobs by Stage', icon: 'view_kanban', needsDateRange: false },
-    { id: 'overdue-jobs', label: 'Overdue Jobs', icon: 'warning', needsDateRange: false },
-    { id: 'time-by-user', label: 'Time by User', icon: 'schedule', needsDateRange: true },
-    { id: 'expense-summary', label: 'Expense Summary', icon: 'receipt_long', needsDateRange: true },
-    { id: 'lead-pipeline', label: 'Lead Pipeline', icon: 'filter_alt', needsDateRange: false },
-    { id: 'job-completion-trend', label: 'Completion Trend', icon: 'trending_up', needsDateRange: false },
-    { id: 'on-time-delivery', label: 'On-Time Delivery', icon: 'verified', needsDateRange: true },
-    { id: 'average-lead-time', label: 'Avg Lead Time', icon: 'hourglass_top', needsDateRange: false },
-    { id: 'team-workload', label: 'Team Workload', icon: 'groups', needsDateRange: false },
-    { id: 'customer-activity', label: 'Customer Activity', icon: 'business', needsDateRange: false },
-    { id: 'my-work-history', label: 'My Work History', icon: 'assignment_ind', needsDateRange: false },
-    { id: 'my-time-log', label: 'My Time Log', icon: 'timer', needsDateRange: true },
-    { id: 'ar-aging', label: 'AR Aging', icon: 'account_balance', needsDateRange: false },
-    { id: 'revenue', label: 'Revenue', icon: 'attach_money', needsDateRange: true },
-    { id: 'simple-pnl', label: 'Profit & Loss', icon: 'balance', needsDateRange: true },
-    { id: 'my-expense-history', label: 'My Expenses', icon: 'receipt', needsDateRange: true },
-    { id: 'quote-to-close', label: 'Quote-to-Close', icon: 'handshake', needsDateRange: true },
-    { id: 'shipping-summary', label: 'Shipping Summary', icon: 'local_shipping', needsDateRange: true },
-    { id: 'time-in-stage', label: 'Time in Stage', icon: 'hourglass_bottom', needsDateRange: false },
-    { id: 'employee-productivity', label: 'Employee Productivity', icon: 'person_search', needsDateRange: true },
-    { id: 'inventory-levels', label: 'Inventory Levels', icon: 'inventory_2', needsDateRange: false },
-    { id: 'maintenance', label: 'Maintenance', icon: 'build', needsDateRange: true },
-    { id: 'quality-scrap', label: 'Quality / Scrap Rate', icon: 'verified', needsDateRange: true },
-    { id: 'cycle-review', label: 'Cycle Review', icon: 'event_repeat', needsDateRange: false },
-    { id: 'job-margin', label: 'Job Margin', icon: 'trending_up', needsDateRange: true },
-    { id: 'my-cycle-summary', label: 'My Cycle Summary', icon: 'event_repeat', needsDateRange: false },
-    { id: 'lead-sales', label: 'Lead & Sales', icon: 'leaderboard', needsDateRange: true },
-    { id: 'rd', label: 'R&D Report', icon: 'science', needsDateRange: true },
+    { id: 'jobs-by-stage', label: this.translate.instant('reports.navJobsByStage'), icon: 'view_kanban', needsDateRange: false },
+    { id: 'overdue-jobs', label: this.translate.instant('reports.navOverdueJobs'), icon: 'warning', needsDateRange: false },
+    { id: 'time-by-user', label: this.translate.instant('reports.navTimeByUser'), icon: 'schedule', needsDateRange: true },
+    { id: 'expense-summary', label: this.translate.instant('reports.navExpenseSummary'), icon: 'receipt_long', needsDateRange: true },
+    { id: 'lead-pipeline', label: this.translate.instant('reports.navLeadPipeline'), icon: 'filter_alt', needsDateRange: false },
+    { id: 'job-completion-trend', label: this.translate.instant('reports.navCompletionTrend'), icon: 'trending_up', needsDateRange: false },
+    { id: 'on-time-delivery', label: this.translate.instant('reports.navOnTimeDelivery'), icon: 'verified', needsDateRange: true },
+    { id: 'average-lead-time', label: this.translate.instant('reports.navAvgLeadTime'), icon: 'hourglass_top', needsDateRange: false },
+    { id: 'team-workload', label: this.translate.instant('reports.navTeamWorkload'), icon: 'groups', needsDateRange: false },
+    { id: 'customer-activity', label: this.translate.instant('reports.navCustomerActivity'), icon: 'business', needsDateRange: false },
+    { id: 'my-work-history', label: this.translate.instant('reports.navMyWorkHistory'), icon: 'assignment_ind', needsDateRange: false },
+    { id: 'my-time-log', label: this.translate.instant('reports.navMyTimeLog'), icon: 'timer', needsDateRange: true },
+    { id: 'ar-aging', label: this.translate.instant('reports.navArAging'), icon: 'account_balance', needsDateRange: false },
+    { id: 'revenue', label: this.translate.instant('reports.navRevenue'), icon: 'attach_money', needsDateRange: true },
+    { id: 'simple-pnl', label: this.translate.instant('reports.navProfitLoss'), icon: 'balance', needsDateRange: true },
+    { id: 'my-expense-history', label: this.translate.instant('reports.navMyExpenses'), icon: 'receipt', needsDateRange: true },
+    { id: 'quote-to-close', label: this.translate.instant('reports.navQuoteToClose'), icon: 'handshake', needsDateRange: true },
+    { id: 'shipping-summary', label: this.translate.instant('reports.navShippingSummary'), icon: 'local_shipping', needsDateRange: true },
+    { id: 'time-in-stage', label: this.translate.instant('reports.navTimeInStage'), icon: 'hourglass_bottom', needsDateRange: false },
+    { id: 'employee-productivity', label: this.translate.instant('reports.navEmployeeProductivity'), icon: 'person_search', needsDateRange: true },
+    { id: 'inventory-levels', label: this.translate.instant('reports.navInventoryLevels'), icon: 'inventory_2', needsDateRange: false },
+    { id: 'maintenance', label: this.translate.instant('reports.navMaintenance'), icon: 'build', needsDateRange: true },
+    { id: 'quality-scrap', label: this.translate.instant('reports.navQualityScrap'), icon: 'verified', needsDateRange: true },
+    { id: 'cycle-review', label: this.translate.instant('reports.navCycleReview'), icon: 'event_repeat', needsDateRange: false },
+    { id: 'job-margin', label: this.translate.instant('reports.navJobMargin'), icon: 'trending_up', needsDateRange: true },
+    { id: 'my-cycle-summary', label: this.translate.instant('reports.navMyCycleSummary'), icon: 'event_repeat', needsDateRange: false },
+    { id: 'lead-sales', label: this.translate.instant('reports.navLeadSales'), icon: 'leaderboard', needsDateRange: true },
+    { id: 'rd', label: this.translate.instant('reports.navRdReport'), icon: 'science', needsDateRange: true },
   ];
 
   protected readonly activeReport = signal<ReportType>('jobs-by-stage');
@@ -382,32 +384,32 @@ export class ReportsComponent {
 
   // Table columns
   protected readonly stageColumns: ColumnDef[] = [
-    { field: 'stageName', header: 'Stage', sortable: true },
-    { field: 'count', header: 'Count', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'stageName', header: this.translate.instant('reports.colStage'), sortable: true },
+    { field: 'count', header: this.translate.instant('reports.colCount'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   protected readonly overdueColumns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '120px' },
-    { field: 'daysOverdue', header: 'Days Overdue', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'assigneeName', header: 'Assignee', sortable: true, width: '140px' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJobNumber'), sortable: true, width: '100px' },
+    { field: 'title', header: this.translate.instant('reports.colTitle'), sortable: true },
+    { field: 'dueDate', header: this.translate.instant('reports.colDueDate'), sortable: true, type: 'date', width: '120px' },
+    { field: 'daysOverdue', header: this.translate.instant('reports.colDaysOverdue'), sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'assigneeName', header: this.translate.instant('reports.colAssignee'), sortable: true, width: '140px' },
   ];
 
   protected readonly timeColumns: ColumnDef[] = [
-    { field: 'userName', header: 'User', sortable: true },
-    { field: 'totalHours', header: 'Hours', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'userName', header: this.translate.instant('reports.colUser'), sortable: true },
+    { field: 'totalHours', header: this.translate.instant('reports.colHours'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   protected readonly expenseColumns: ColumnDef[] = [
-    { field: 'category', header: 'Category', sortable: true },
-    { field: 'totalAmount', header: 'Total Amount', sortable: true, type: 'number', width: '140px', align: 'right' },
-    { field: 'count', header: 'Count', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'category', header: this.translate.instant('reports.colCategory'), sortable: true },
+    { field: 'totalAmount', header: this.translate.instant('reports.colTotalAmount'), sortable: true, type: 'number', width: '140px', align: 'right' },
+    { field: 'count', header: this.translate.instant('reports.colCount'), sortable: true, type: 'number', width: '80px', align: 'right' },
   ];
 
   protected readonly leadColumns: ColumnDef[] = [
-    { field: 'status', header: 'Status', sortable: true },
-    { field: 'count', header: 'Count', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true },
+    { field: 'count', header: this.translate.instant('reports.colCount'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   protected readonly stackedBarOptions: ChartOptions<'bar'> = {
@@ -418,190 +420,190 @@ export class ReportsComponent {
   };
 
   protected readonly leadTimeColumns: ColumnDef[] = [
-    { field: 'stageName', header: 'Stage', sortable: true },
-    { field: 'averageDays', header: 'Avg Days', sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'stageName', header: this.translate.instant('reports.colStage'), sortable: true },
+    { field: 'averageDays', header: this.translate.instant('reports.colAvgDays'), sortable: true, type: 'number', width: '120px', align: 'right' },
   ];
 
   protected readonly workloadColumns: ColumnDef[] = [
-    { field: 'userName', header: 'Team Member', sortable: true },
-    { field: 'activeJobs', header: 'Active', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'overdueJobs', header: 'Overdue', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'hoursThisWeek', header: 'Hours (Week)', sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'userName', header: this.translate.instant('reports.colTeamMember'), sortable: true },
+    { field: 'activeJobs', header: this.translate.instant('reports.colActive'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'overdueJobs', header: this.translate.instant('reports.colOverdue'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'hoursThisWeek', header: this.translate.instant('reports.colHoursWeek'), sortable: true, type: 'number', width: '120px', align: 'right' },
   ];
 
   protected readonly customerColumns: ColumnDef[] = [
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'activeJobs', header: 'Active', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'completedJobs', header: 'Completed', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalJobs', header: 'Total', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'lastJobDate', header: 'Last Job', sortable: true, type: 'date', width: '120px' },
+    { field: 'customerName', header: this.translate.instant('reports.colCustomer'), sortable: true },
+    { field: 'activeJobs', header: this.translate.instant('reports.colActive'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completedJobs', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalJobs', header: this.translate.instant('reports.colTotal'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'lastJobDate', header: this.translate.instant('reports.colLastJob'), sortable: true, type: 'date', width: '120px' },
   ];
 
   protected readonly trendColumns: ColumnDef[] = [
-    { field: 'month', header: 'Month', sortable: true },
-    { field: 'created', header: 'Created', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'completed', header: 'Completed', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'month', header: this.translate.instant('reports.colMonth'), sortable: true },
+    { field: 'created', header: this.translate.instant('reports.colCreated'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'completed', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   protected readonly workHistoryColumns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'stageName', header: 'Stage', sortable: true, width: '140px' },
-    { field: 'customerName', header: 'Customer', sortable: true, width: '140px' },
-    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '100px' },
-    { field: 'completedAt', header: 'Completed', sortable: true, type: 'date', width: '100px' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJobNumber'), sortable: true, width: '100px' },
+    { field: 'title', header: this.translate.instant('reports.colTitle'), sortable: true },
+    { field: 'stageName', header: this.translate.instant('reports.colStage'), sortable: true, width: '140px' },
+    { field: 'customerName', header: this.translate.instant('reports.colCustomer'), sortable: true, width: '140px' },
+    { field: 'dueDate', header: this.translate.instant('reports.colDueDate'), sortable: true, type: 'date', width: '100px' },
+    { field: 'completedAt', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'date', width: '100px' },
   ];
 
   protected readonly timeLogColumns: ColumnDef[] = [
-    { field: 'date', header: 'Date', sortable: true, type: 'date', width: '100px' },
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'jobTitle', header: 'Job', sortable: true },
-    { field: 'category', header: 'Category', sortable: true, width: '120px' },
-    { field: 'durationMinutes', header: 'Minutes', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'notes', header: 'Notes', sortable: false },
+    { field: 'date', header: this.translate.instant('reports.colDate'), sortable: true, type: 'date', width: '100px' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJobNumber'), sortable: true, width: '100px' },
+    { field: 'jobTitle', header: this.translate.instant('reports.colJob'), sortable: true },
+    { field: 'category', header: this.translate.instant('reports.colCategory'), sortable: true, width: '120px' },
+    { field: 'durationMinutes', header: this.translate.instant('reports.colMinutes'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'notes', header: this.translate.instant('reports.colNotes'), sortable: false },
   ];
 
   protected readonly arAgingColumns: ColumnDef[] = [
-    { field: 'invoiceNumber', header: 'Invoice #', sortable: true, width: '110px' },
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'dueDate', header: 'Due Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'total', header: 'Total', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'amountPaid', header: 'Paid', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'balanceDue', header: 'Balance', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'daysOverdue', header: 'Days Overdue', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'agingBucket', header: 'Bucket', sortable: true, filterable: true, type: 'enum', width: '110px', filterOptions: [
-      { value: 'Current', label: 'Current' },
-      { value: '1-30 Days', label: '1-30 Days' },
-      { value: '31-60 Days', label: '31-60 Days' },
-      { value: '61-90 Days', label: '61-90 Days' },
-      { value: '90+ Days', label: '90+ Days' },
+    { field: 'invoiceNumber', header: this.translate.instant('reports.colInvoiceNumber'), sortable: true, width: '110px' },
+    { field: 'customerName', header: this.translate.instant('reports.colCustomer'), sortable: true },
+    { field: 'dueDate', header: this.translate.instant('reports.colDueDate'), sortable: true, type: 'date', width: '110px' },
+    { field: 'total', header: this.translate.instant('reports.colTotal'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'amountPaid', header: this.translate.instant('reports.colPaid'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'balanceDue', header: this.translate.instant('reports.colBalance'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'daysOverdue', header: this.translate.instant('reports.colDaysOverdue'), sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'agingBucket', header: this.translate.instant('reports.colBucket'), sortable: true, filterable: true, type: 'enum', width: '110px', filterOptions: [
+      { value: 'Current', label: this.translate.instant('reports.bucketCurrent') },
+      { value: '1-30 Days', label: this.translate.instant('reports.bucket1to30') },
+      { value: '31-60 Days', label: this.translate.instant('reports.bucket31to60') },
+      { value: '61-90 Days', label: this.translate.instant('reports.bucket61to90') },
+      { value: '90+ Days', label: this.translate.instant('reports.bucket90plus') },
     ]},
   ];
 
   protected readonly revenueColumns: ColumnDef[] = [
-    { field: 'period', header: 'Period', sortable: true },
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'invoiceCount', header: 'Invoices', sortable: true, type: 'number', width: '90px', align: 'right' },
-    { field: 'subtotal', header: 'Subtotal', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'taxAmount', header: 'Tax', sortable: true, type: 'number', width: '90px', align: 'right' },
-    { field: 'total', header: 'Total', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'amountPaid', header: 'Paid', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'period', header: this.translate.instant('reports.colPeriod'), sortable: true },
+    { field: 'customerName', header: this.translate.instant('reports.colCustomer'), sortable: true },
+    { field: 'invoiceCount', header: this.translate.instant('reports.colInvoices'), sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'subtotal', header: this.translate.instant('reports.colSubtotal'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'taxAmount', header: this.translate.instant('reports.colTax'), sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'total', header: this.translate.instant('reports.colTotal'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'amountPaid', header: this.translate.instant('reports.colPaid'), sortable: true, type: 'number', width: '110px', align: 'right' },
   ];
 
   protected readonly pnlColumns: ColumnDef[] = [
-    { field: 'category', header: 'Category', sortable: true },
-    { field: 'type', header: 'Type', sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
-      { value: 'Revenue', label: 'Revenue' },
-      { value: 'Expense', label: 'Expense' },
+    { field: 'category', header: this.translate.instant('reports.colCategory'), sortable: true },
+    { field: 'type', header: this.translate.instant('reports.colType'), sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
+      { value: 'Revenue', label: this.translate.instant('reports.filterRevenue') },
+      { value: 'Expense', label: this.translate.instant('reports.filterExpense') },
     ]},
-    { field: 'amount', header: 'Amount', sortable: true, type: 'number', width: '130px', align: 'right' },
+    { field: 'amount', header: this.translate.instant('reports.colAmount'), sortable: true, type: 'number', width: '130px', align: 'right' },
   ];
 
   protected readonly myExpenseColumns: ColumnDef[] = [
-    { field: 'expenseDate', header: 'Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'category', header: 'Category', sortable: true, width: '140px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'amount', header: 'Amount', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'status', header: 'Status', sortable: true, width: '100px' },
-    { field: 'vendor', header: 'Vendor', sortable: true, width: '140px' },
+    { field: 'expenseDate', header: this.translate.instant('reports.colDate'), sortable: true, type: 'date', width: '110px' },
+    { field: 'category', header: this.translate.instant('reports.colCategory'), sortable: true, width: '140px' },
+    { field: 'description', header: this.translate.instant('reports.colDescription'), sortable: true },
+    { field: 'amount', header: this.translate.instant('reports.colAmount'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true, width: '100px' },
+    { field: 'vendor', header: this.translate.instant('reports.colVendor'), sortable: true, width: '140px' },
   ];
 
   protected readonly quoteToCloseColumns: ColumnDef[] = [
-    { field: 'status', header: 'Status', sortable: true },
-    { field: 'count', header: 'Count', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalValue', header: 'Total Value', sortable: true, type: 'number', width: '130px', align: 'right' },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true },
+    { field: 'count', header: this.translate.instant('reports.colCount'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalValue', header: this.translate.instant('reports.colTotalValue'), sortable: true, type: 'number', width: '130px', align: 'right' },
   ];
 
   protected readonly shippingSummaryColumns: ColumnDef[] = [
-    { field: 'status', header: 'Status', sortable: true },
-    { field: 'count', header: 'Shipments', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalItems', header: 'Total Items', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'onTimeCount', header: 'On Time', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'lateCount', header: 'Late', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'status', header: this.translate.instant('reports.colStatus'), sortable: true },
+    { field: 'count', header: this.translate.instant('reports.colShipments'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalItems', header: this.translate.instant('reports.colTotalItems'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'onTimeCount', header: this.translate.instant('reports.colOnTime'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'lateCount', header: this.translate.instant('reports.colLate'), sortable: true, type: 'number', width: '80px', align: 'right' },
   ];
 
   protected readonly timeInStageColumns: ColumnDef[] = [
-    { field: 'stageName', header: 'Stage', sortable: true },
-    { field: 'averageDays', header: 'Avg Days', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'jobCount', header: 'Jobs', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'isBottleneck', header: 'Bottleneck', sortable: false, width: '100px' },
+    { field: 'stageName', header: this.translate.instant('reports.colStage'), sortable: true },
+    { field: 'averageDays', header: this.translate.instant('reports.colAvgDays'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'jobCount', header: this.translate.instant('reports.colJobs'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'isBottleneck', header: this.translate.instant('reports.colBottleneck'), sortable: false, width: '100px' },
   ];
 
   protected readonly employeeProductivityColumns: ColumnDef[] = [
-    { field: 'userName', header: 'Employee', sortable: true },
-    { field: 'totalHours', header: 'Total Hours', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'jobsCompleted', header: 'Jobs Done', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'avgHoursPerJob', header: 'Avg Hrs/Job', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'onTimePercentage', header: 'On-Time %', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'userName', header: this.translate.instant('reports.colEmployee'), sortable: true },
+    { field: 'totalHours', header: this.translate.instant('reports.colTotalHours'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'jobsCompleted', header: this.translate.instant('reports.colJobsDone'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'avgHoursPerJob', header: this.translate.instant('reports.colAvgHrsJob'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'onTimePercentage', header: this.translate.instant('reports.colOnTimePercent'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   protected readonly inventoryLevelsColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'currentStock', header: 'Stock', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'minStockThreshold', header: 'Min Threshold', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'reorderPoint', header: 'Reorder Pt', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'isLowStock', header: 'Low Stock', sortable: true, width: '100px' },
+    { field: 'partNumber', header: this.translate.instant('reports.colPartNumber'), sortable: true, width: '120px' },
+    { field: 'description', header: this.translate.instant('reports.colDescription'), sortable: true },
+    { field: 'currentStock', header: this.translate.instant('reports.colStock'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'minStockThreshold', header: this.translate.instant('reports.colMinThreshold'), sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'reorderPoint', header: this.translate.instant('reports.colReorderPt'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'isLowStock', header: this.translate.instant('reports.colLowStock'), sortable: true, width: '100px' },
   ];
 
   protected readonly maintenanceColumns: ColumnDef[] = [
-    { field: 'assetName', header: 'Asset', sortable: true },
-    { field: 'scheduledCount', header: 'Scheduled', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'completedCount', header: 'Completed', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'overdueCount', header: 'Overdue', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalCost', header: 'Total Cost', sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'assetName', header: this.translate.instant('reports.colAsset'), sortable: true },
+    { field: 'scheduledCount', header: this.translate.instant('reports.colScheduled'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'completedCount', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'overdueCount', header: this.translate.instant('reports.colOverdue'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalCost', header: this.translate.instant('reports.colTotalCost'), sortable: true, type: 'number', width: '120px', align: 'right' },
   ];
 
   protected readonly qualityScrapColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'totalProduced', header: 'Produced', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalScrapped', header: 'Scrapped', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'scrapRate', header: 'Scrap %', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'yieldRate', header: 'Yield %', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'partNumber', header: this.translate.instant('reports.colPartNumber'), sortable: true, width: '120px' },
+    { field: 'totalProduced', header: this.translate.instant('reports.colProduced'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalScrapped', header: this.translate.instant('reports.colScrapped'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'scrapRate', header: this.translate.instant('reports.colScrapPercent'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'yieldRate', header: this.translate.instant('reports.colYieldPercent'), sortable: true, type: 'number', width: '100px', align: 'right' },
   ];
 
   protected readonly cycleReviewColumns: ColumnDef[] = [
-    { field: 'cycleName', header: 'Cycle', sortable: true },
-    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '110px' },
-    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '110px' },
-    { field: 'totalEntries', header: 'Total', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'completedEntries', header: 'Done', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'completionRate', header: 'Rate %', sortable: true, type: 'number', width: '90px', align: 'right' },
-    { field: 'rolledOverCount', header: 'Rolled Over', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'cycleName', header: this.translate.instant('reports.colCycle'), sortable: true },
+    { field: 'startDate', header: this.translate.instant('reports.colStart'), sortable: true, type: 'date', width: '110px' },
+    { field: 'endDate', header: this.translate.instant('reports.colEnd'), sortable: true, type: 'date', width: '110px' },
+    { field: 'totalEntries', header: this.translate.instant('reports.colTotal'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completedEntries', header: this.translate.instant('reports.colDone'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completionRate', header: this.translate.instant('reports.colRatePercent'), sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'rolledOverCount', header: this.translate.instant('reports.colRolledOver'), sortable: true, type: 'number', width: '110px', align: 'right' },
   ];
 
   protected readonly jobMarginColumns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'customerName', header: 'Customer', sortable: true, width: '140px' },
-    { field: 'revenue', header: 'Revenue', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'laborCost', header: 'Labor', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'materialCost', header: 'Material', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'expenseCost', header: 'Expenses', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalCost', header: 'Total Cost', sortable: true, type: 'number', width: '110px', align: 'right' },
-    { field: 'margin', header: 'Margin', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'marginPercentage', header: 'Margin %', sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJobNumber'), sortable: true, width: '100px' },
+    { field: 'title', header: this.translate.instant('reports.colTitle'), sortable: true },
+    { field: 'customerName', header: this.translate.instant('reports.colCustomer'), sortable: true, width: '140px' },
+    { field: 'revenue', header: this.translate.instant('reports.colRevenue'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'laborCost', header: this.translate.instant('reports.colLabor'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'materialCost', header: this.translate.instant('reports.colMaterial'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'expenseCost', header: this.translate.instant('reports.colExpenses'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalCost', header: this.translate.instant('reports.colTotalCost'), sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'margin', header: this.translate.instant('reports.colMargin'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'marginPercentage', header: this.translate.instant('reports.colMarginPercent'), sortable: true, type: 'number', width: '90px', align: 'right' },
   ];
 
   protected readonly myCycleSummaryColumns: ColumnDef[] = [
-    { field: 'cycleName', header: 'Cycle', sortable: true },
-    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '110px' },
-    { field: 'endDate', header: 'End', sortable: true, type: 'date', width: '110px' },
-    { field: 'totalEntries', header: 'Total', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'completedEntries', header: 'Done', sortable: true, type: 'number', width: '80px', align: 'right' },
-    { field: 'completionRate', header: 'Rate %', sortable: true, type: 'number', width: '90px', align: 'right' },
-    { field: 'rolledOverCount', header: 'Rolled Over', sortable: true, type: 'number', width: '110px', align: 'right' },
+    { field: 'cycleName', header: this.translate.instant('reports.colCycle'), sortable: true },
+    { field: 'startDate', header: this.translate.instant('reports.colStart'), sortable: true, type: 'date', width: '110px' },
+    { field: 'endDate', header: this.translate.instant('reports.colEnd'), sortable: true, type: 'date', width: '110px' },
+    { field: 'totalEntries', header: this.translate.instant('reports.colTotal'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completedEntries', header: this.translate.instant('reports.colDone'), sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'completionRate', header: this.translate.instant('reports.colRatePercent'), sortable: true, type: 'number', width: '90px', align: 'right' },
+    { field: 'rolledOverCount', header: this.translate.instant('reports.colRolledOver'), sortable: true, type: 'number', width: '110px', align: 'right' },
   ];
 
   protected readonly rdReportColumns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'iterationCount', header: 'Iterations', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'totalHours', header: 'Hours', sortable: true, type: 'number', width: '100px', align: 'right' },
-    { field: 'currentStage', header: 'Stage', sortable: true, width: '140px' },
-    { field: 'assigneeName', header: 'Assignee', sortable: true, width: '140px' },
-    { field: 'startDate', header: 'Start', sortable: true, type: 'date', width: '100px' },
-    { field: 'completedDate', header: 'Completed', sortable: true, type: 'date', width: '100px' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJobNumber'), sortable: true, width: '100px' },
+    { field: 'title', header: this.translate.instant('reports.colTitle'), sortable: true },
+    { field: 'iterationCount', header: this.translate.instant('reports.colIterations'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'totalHours', header: this.translate.instant('reports.colHours'), sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'currentStage', header: this.translate.instant('reports.colStageName'), sortable: true, width: '140px' },
+    { field: 'assigneeName', header: this.translate.instant('reports.colAssignee'), sortable: true, width: '140px' },
+    { field: 'startDate', header: this.translate.instant('reports.colStart'), sortable: true, type: 'date', width: '100px' },
+    { field: 'completedDate', header: this.translate.instant('reports.colCompleted'), sortable: true, type: 'date', width: '100px' },
   ];
 
   constructor() {
@@ -616,91 +618,92 @@ export class ReportsComponent {
   protected loadReport(reportId?: ReportType): void {
     const id = reportId ?? this.activeReport();
     this.loading.set(true);
+    const done = () => this.loading.set(false);
 
     switch (id) {
       case 'jobs-by-stage':
-        this.reportService.getJobsByStage().subscribe(d => { this.jobsByStageData.set(d); this.loading.set(false); });
+        this.reportService.getJobsByStage().subscribe({ next: d => { this.jobsByStageData.set(d); done(); }, error: done });
         break;
       case 'overdue-jobs':
-        this.reportService.getOverdueJobs().subscribe(d => { this.overdueJobsData.set(d); this.loading.set(false); });
+        this.reportService.getOverdueJobs().subscribe({ next: d => { this.overdueJobsData.set(d); done(); }, error: done });
         break;
       case 'time-by-user':
-        this.reportService.getTimeByUser(this.startValue(), this.endValue()).subscribe(d => { this.timeByUserData.set(d); this.loading.set(false); });
+        this.reportService.getTimeByUser(this.startValue(), this.endValue()).subscribe({ next: d => { this.timeByUserData.set(d); done(); }, error: done });
         break;
       case 'expense-summary':
-        this.reportService.getExpenseSummary(this.startValue(), this.endValue()).subscribe(d => { this.expenseSummaryData.set(d); this.loading.set(false); });
+        this.reportService.getExpenseSummary(this.startValue(), this.endValue()).subscribe({ next: d => { this.expenseSummaryData.set(d); done(); }, error: done });
         break;
       case 'lead-pipeline':
-        this.reportService.getLeadPipeline().subscribe(d => { this.leadPipelineData.set(d); this.loading.set(false); });
+        this.reportService.getLeadPipeline().subscribe({ next: d => { this.leadPipelineData.set(d); done(); }, error: done });
         break;
       case 'job-completion-trend':
-        this.reportService.getJobCompletionTrend().subscribe(d => { this.completionTrendData.set(d); this.loading.set(false); });
+        this.reportService.getJobCompletionTrend().subscribe({ next: d => { this.completionTrendData.set(d); done(); }, error: done });
         break;
       case 'on-time-delivery':
-        this.reportService.getOnTimeDelivery(this.startValue(), this.endValue()).subscribe(d => { this.onTimeDeliveryData.set(d); this.loading.set(false); });
+        this.reportService.getOnTimeDelivery(this.startValue(), this.endValue()).subscribe({ next: d => { this.onTimeDeliveryData.set(d); done(); }, error: done });
         break;
       case 'average-lead-time':
-        this.reportService.getAverageLeadTime().subscribe(d => { this.averageLeadTimeData.set(d); this.loading.set(false); });
+        this.reportService.getAverageLeadTime().subscribe({ next: d => { this.averageLeadTimeData.set(d); done(); }, error: done });
         break;
       case 'team-workload':
-        this.reportService.getTeamWorkload().subscribe(d => { this.teamWorkloadData.set(d); this.loading.set(false); });
+        this.reportService.getTeamWorkload().subscribe({ next: d => { this.teamWorkloadData.set(d); done(); }, error: done });
         break;
       case 'customer-activity':
-        this.reportService.getCustomerActivity().subscribe(d => { this.customerActivityData.set(d); this.loading.set(false); });
+        this.reportService.getCustomerActivity().subscribe({ next: d => { this.customerActivityData.set(d); done(); }, error: done });
         break;
       case 'my-work-history':
-        this.reportService.getMyWorkHistory().subscribe(d => { this.myWorkHistoryData.set(d); this.loading.set(false); });
+        this.reportService.getMyWorkHistory().subscribe({ next: d => { this.myWorkHistoryData.set(d); done(); }, error: done });
         break;
       case 'my-time-log':
-        this.reportService.getMyTimeLog(this.startValue(), this.endValue()).subscribe(d => { this.myTimeLogData.set(d); this.loading.set(false); });
+        this.reportService.getMyTimeLog(this.startValue(), this.endValue()).subscribe({ next: d => { this.myTimeLogData.set(d); done(); }, error: done });
         break;
       case 'ar-aging':
-        this.reportService.getArAging().subscribe(d => { this.arAgingData.set(d); this.loading.set(false); });
+        this.reportService.getArAging().subscribe({ next: d => { this.arAgingData.set(d); done(); }, error: done });
         break;
       case 'revenue':
-        this.reportService.getRevenue(this.startValue(), this.endValue()).subscribe(d => { this.revenueData.set(d); this.loading.set(false); });
+        this.reportService.getRevenue(this.startValue(), this.endValue()).subscribe({ next: d => { this.revenueData.set(d); done(); }, error: done });
         break;
       case 'simple-pnl':
-        this.reportService.getSimplePnl(this.startValue(), this.endValue()).subscribe(d => { this.simplePnlData.set(d); this.loading.set(false); });
+        this.reportService.getSimplePnl(this.startValue(), this.endValue()).subscribe({ next: d => { this.simplePnlData.set(d); done(); }, error: done });
         break;
       case 'my-expense-history':
-        this.reportService.getMyExpenseHistory(this.startValue(), this.endValue()).subscribe(d => { this.myExpenseHistoryData.set(d); this.loading.set(false); });
+        this.reportService.getMyExpenseHistory(this.startValue(), this.endValue()).subscribe({ next: d => { this.myExpenseHistoryData.set(d); done(); }, error: done });
         break;
       case 'quote-to-close':
-        this.reportService.getQuoteToClose(this.startValue(), this.endValue()).subscribe(d => { this.quoteToCloseData.set(d); this.loading.set(false); });
+        this.reportService.getQuoteToClose(this.startValue(), this.endValue()).subscribe({ next: d => { this.quoteToCloseData.set(d); done(); }, error: done });
         break;
       case 'shipping-summary':
-        this.reportService.getShippingSummary(this.startValue(), this.endValue()).subscribe(d => { this.shippingSummaryData.set(d); this.loading.set(false); });
+        this.reportService.getShippingSummary(this.startValue(), this.endValue()).subscribe({ next: d => { this.shippingSummaryData.set(d); done(); }, error: done });
         break;
       case 'time-in-stage':
-        this.reportService.getTimeInStage().subscribe(d => { this.timeInStageData.set(d); this.loading.set(false); });
+        this.reportService.getTimeInStage().subscribe({ next: d => { this.timeInStageData.set(d); done(); }, error: done });
         break;
       case 'employee-productivity':
-        this.reportService.getEmployeeProductivity(this.startValue(), this.endValue()).subscribe(d => { this.employeeProductivityData.set(d); this.loading.set(false); });
+        this.reportService.getEmployeeProductivity(this.startValue(), this.endValue()).subscribe({ next: d => { this.employeeProductivityData.set(d); done(); }, error: done });
         break;
       case 'inventory-levels':
-        this.reportService.getInventoryLevels().subscribe(d => { this.inventoryLevelsData.set(d); this.loading.set(false); });
+        this.reportService.getInventoryLevels().subscribe({ next: d => { this.inventoryLevelsData.set(d); done(); }, error: done });
         break;
       case 'maintenance':
-        this.reportService.getMaintenance(this.startValue(), this.endValue()).subscribe(d => { this.maintenanceData.set(d); this.loading.set(false); });
+        this.reportService.getMaintenance(this.startValue(), this.endValue()).subscribe({ next: d => { this.maintenanceData.set(d); done(); }, error: done });
         break;
       case 'quality-scrap':
-        this.reportService.getQualityScrap(this.startValue(), this.endValue()).subscribe(d => { this.qualityScrapData.set(d); this.loading.set(false); });
+        this.reportService.getQualityScrap(this.startValue(), this.endValue()).subscribe({ next: d => { this.qualityScrapData.set(d); done(); }, error: done });
         break;
       case 'cycle-review':
-        this.reportService.getCycleReview().subscribe(d => { this.cycleReviewData.set(d); this.loading.set(false); });
+        this.reportService.getCycleReview().subscribe({ next: d => { this.cycleReviewData.set(d); done(); }, error: done });
         break;
       case 'job-margin':
-        this.reportService.getJobMargin(this.startValue(), this.endValue()).subscribe(d => { this.jobMarginData.set(d); this.loading.set(false); });
+        this.reportService.getJobMargin(this.startValue(), this.endValue()).subscribe({ next: d => { this.jobMarginData.set(d); done(); }, error: done });
         break;
       case 'my-cycle-summary':
-        this.reportService.getMyCycleSummary().subscribe(d => { this.myCycleSummaryData.set(d); this.loading.set(false); });
+        this.reportService.getMyCycleSummary().subscribe({ next: d => { this.myCycleSummaryData.set(d); done(); }, error: done });
         break;
       case 'lead-sales':
-        this.reportService.getLeadSales(this.startValue(), this.endValue()).subscribe(d => { this.leadSalesData.set(d); this.loading.set(false); });
+        this.reportService.getLeadSales(this.startValue(), this.endValue()).subscribe({ next: d => { this.leadSalesData.set(d); done(); }, error: done });
         break;
       case 'rd':
-        this.reportService.getRdReport(this.startValue(), this.endValue()).subscribe(d => { this.rdReportData.set(d); this.loading.set(false); });
+        this.reportService.getRdReport(this.startValue(), this.endValue()).subscribe({ next: d => { this.rdReportData.set(d); done(); }, error: done });
         break;
     }
   }
@@ -731,10 +734,17 @@ export class ReportsComponent {
 
   protected readonly arAgingBuckets = computed(() => {
     const data = this.arAgingData();
-    const buckets = ['Current', '1-30 Days', '31-60 Days', '61-90 Days', '90+ Days'];
-    return buckets.map(bucket => ({
-      bucket,
-      total: data.filter(d => d.agingBucket === bucket).reduce((sum, d) => sum + d.balanceDue, 0),
+    const buckets: { key: string; label: string }[] = [
+      { key: 'Current', label: this.translate.instant('reports.bucketCurrent') },
+      { key: '1-30 Days', label: this.translate.instant('reports.bucket1to30') },
+      { key: '31-60 Days', label: this.translate.instant('reports.bucket31to60') },
+      { key: '61-90 Days', label: this.translate.instant('reports.bucket61to90') },
+      { key: '90+ Days', label: this.translate.instant('reports.bucket90plus') },
+    ];
+    return buckets.map(b => ({
+      bucket: b.key,
+      label: b.label,
+      total: data.filter(d => d.agingBucket === b.key).reduce((sum, d) => sum + d.balanceDue, 0),
     }));
   });
 }

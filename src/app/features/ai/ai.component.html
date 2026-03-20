@@ -3,10 +3,10 @@
   <aside class="ai-sidebar" [appLoadingBlock]="loadingAssistants()">
     <div class="ai-sidebar__header">
       <span class="material-icons-outlined">smart_toy</span>
-      <span class="ai-sidebar__title">AI Assistants</span>
+      <span class="ai-sidebar__title">{{ 'ai.title' | translate }}</span>
     </div>
 
-    <nav class="ai-sidebar__list" role="list" aria-label="AI assistants">
+    <nav class="ai-sidebar__list" role="list" [attr.aria-label]="'ai.title' | translate">
       @for (assistant of assistants(); track assistant.id) {
         <button class="assistant-card"
           [class.assistant-card--active]="activeAssistant()?.id === assistant.id"
@@ -22,7 +22,7 @@
           </div>
         </button>
       } @empty {
-        <app-empty-state icon="smart_toy" message="No assistants available" />
+        <app-empty-state icon="smart_toy" [message]="'ai.noAssistants' | translate" />
       }
     </nav>
   </aside>
@@ -41,7 +41,7 @@
         </div>
         <span class="chip chip--primary">{{ assistant.category }}</span>
         @if (hasMessages()) {
-          <button class="icon-btn" aria-label="Clear chat" title="Clear chat" (click)="clearChat()">
+          <button class="icon-btn" [attr.aria-label]="'ai.clearChat' | translate" [matTooltip]="'ai.clearChat' | translate" matTooltipPosition="above" (click)="clearChat()">
             <span class="material-icons-outlined">delete_sweep</span>
           </button>
         }
@@ -102,19 +102,20 @@
       <footer class="ai-chat__input">
         <input class="ai-chat__text-input"
           [formControl]="messageInput"
-          placeholder="Ask {{ assistant.name }} a question..."
-          [attr.aria-label]="'Message ' + assistant.name"
+          [placeholder]="'ai.askPlaceholder' | translate:{ name: assistant.name }"
+          [attr.aria-label]="'ai.messagePlaceholder' | translate:{ name: assistant.name }"
           (keydown)="onKeydown($event)" />
         <button class="action-btn action-btn--primary ai-chat__send"
           [disabled]="!messageInput.value?.trim() || sending()"
-          aria-label="Send message"
+          [attr.aria-label]="'ai.sendMessage' | translate"
+          [matTooltip]="'ai.sendMessage' | translate" matTooltipPosition="above"
           (click)="sendMessage()">
           <span class="material-icons-outlined">send</span>
         </button>
       </footer>
     } @else {
       <div class="ai-chat__empty">
-        <app-empty-state icon="smart_toy" message="Select an assistant to start chatting" />
+        <app-empty-state icon="smart_toy" [message]="'ai.selectAssistant' | translate" />
       </div>
     }
   </main>

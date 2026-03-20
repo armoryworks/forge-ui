@@ -1,34 +1,34 @@
-<app-dialog [title]="'State Tax Withholding Forms'" width="720px" (closed)="close()">
+<app-dialog [title]="'stateWithholdingDialog.title' | translate" width="720px" (closed)="close()">
   <div [appLoadingBlock]="loading()">
     <div class="state-summary">
       <div class="state-summary__stat">
         <span class="state-summary__number">{{ readyStates().length }}</span>
-        <span class="state-summary__label">Ready</span>
+        <span class="state-summary__label">{{ 'stateWithholdingDialog.ready' | translate }}</span>
       </div>
       <div class="state-summary__stat">
         <span class="state-summary__number">{{ needsUploadStates().length }}</span>
-        <span class="state-summary__label">Need Upload</span>
+        <span class="state-summary__label">{{ 'stateWithholdingDialog.needUpload' | translate }}</span>
       </div>
       <div class="state-summary__stat">
         <span class="state-summary__number">{{ federalStates().length }}</span>
-        <span class="state-summary__label">Use Federal W-4</span>
+        <span class="state-summary__label">{{ 'stateWithholdingDialog.useFederalW4' | translate }}</span>
       </div>
       <div class="state-summary__stat">
         <span class="state-summary__number">{{ noTaxStates().length }}</span>
-        <span class="state-summary__label">No Income Tax</span>
+        <span class="state-summary__label">{{ 'stateWithholdingDialog.noIncomeTax' | translate }}</span>
       </div>
     </div>
 
     <!-- States with own form — ready for e-sign -->
     <h4 class="state-section__title">
       <span class="material-icons-outlined">verified</span>
-      Ready for E-Signatures ({{ readyStates().length }})
+      {{ 'stateWithholdingDialog.readyForESign' | translate }} ({{ readyStates().length }})
     </h4>
     <div class="state-grid">
       @for (state of readyStates(); track state.code) {
         <button class="state-card" [class.state-card--active]="state.code === currentState()"
                 [disabled]="saving()" (click)="selectState(state.code)"
-                [attr.aria-label]="'Select ' + state.label">
+                [attr.aria-label]="('stateWithholdingDialog.selectState' | translate) + ' ' + state.label">
           <span class="state-card__code">{{ state.code }}</span>
           <span class="state-card__name">{{ state.label }}</span>
           <span class="state-card__form">{{ state.formName }}</span>
@@ -43,15 +43,15 @@
     <!-- States with own form — needs upload -->
     <h4 class="state-section__title">
       <span class="material-icons-outlined">upload_file</span>
-      Needs PDF Upload ({{ needsUploadStates().length }})
+      {{ 'stateWithholdingDialog.needsPdfUpload' | translate }} ({{ needsUploadStates().length }})
     </h4>
-    <p class="state-section__hint">Upload the state's withholding form via the DocuSeal admin panel, then select the state here.</p>
+    <p class="state-section__hint">{{ 'stateWithholdingDialog.needsPdfUploadHint' | translate }}</p>
     <div class="state-grid">
       @for (state of needsUploadStates(); track state.code) {
         <button class="state-card state-card--pending"
                 [class.state-card--active]="state.code === currentState()"
                 [disabled]="saving()" (click)="selectState(state.code)"
-                [attr.aria-label]="'Select ' + state.label + ' (needs upload)'">
+                [attr.aria-label]="('stateWithholdingDialog.selectState' | translate) + ' ' + state.label + ' ' + ('stateWithholdingDialog.needsUploadSuffix' | translate)">
           <span class="state-card__code">{{ state.code }}</span>
           <span class="state-card__name">{{ state.label }}</span>
           <span class="state-card__form">{{ state.formName }}</span>
@@ -66,15 +66,15 @@
     <!-- States using federal W-4 -->
     <h4 class="state-section__title">
       <span class="material-icons-outlined">description</span>
-      Accept Federal W-4 ({{ federalStates().length }})
+      {{ 'stateWithholdingDialog.acceptFederalW4' | translate }} ({{ federalStates().length }})
     </h4>
-    <p class="state-section__hint">These states accept the federal W-4 form — no separate state form needed.</p>
+    <p class="state-section__hint">{{ 'stateWithholdingDialog.acceptFederalW4Hint' | translate }}</p>
     <div class="state-grid">
       @for (state of federalStates(); track state.code) {
         <button class="state-card state-card--federal"
                 [class.state-card--active]="state.code === currentState()"
                 [disabled]="saving()" (click)="selectState(state.code)"
-                [attr.aria-label]="'Select ' + state.label + ' (uses federal W-4)'">
+                [attr.aria-label]="('stateWithholdingDialog.selectState' | translate) + ' ' + state.label + ' ' + ('stateWithholdingDialog.usesFederalSuffix' | translate)">
           <span class="state-card__code">{{ state.code }}</span>
           <span class="state-card__name">{{ state.label }}</span>
           <span [class]="getStatusClass(state)">
@@ -88,15 +88,15 @@
     <!-- No income tax states -->
     <h4 class="state-section__title">
       <span class="material-icons-outlined">block</span>
-      No State Income Tax ({{ noTaxStates().length }})
+      {{ 'stateWithholdingDialog.noStateTax' | translate }} ({{ noTaxStates().length }})
     </h4>
-    <p class="state-section__hint">State withholding form not required — the compliance requirement will be deactivated.</p>
+    <p class="state-section__hint">{{ 'stateWithholdingDialog.noStateTaxHint' | translate }}</p>
     <div class="state-grid">
       @for (state of noTaxStates(); track state.code) {
         <button class="state-card state-card--no-tax"
                 [class.state-card--active]="state.code === currentState()"
                 [disabled]="saving()" (click)="selectState(state.code)"
-                [attr.aria-label]="'Select ' + state.label + ' (no income tax)'">
+                [attr.aria-label]="('stateWithholdingDialog.selectState' | translate) + ' ' + state.label + ' ' + ('stateWithholdingDialog.noIncomeTaxSuffix' | translate)">
           <span class="state-card__code">{{ state.code }}</span>
           <span class="state-card__name">{{ state.label }}</span>
           <span [class]="getStatusClass(state)">

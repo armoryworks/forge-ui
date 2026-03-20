@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy, Component, inject, OnInit, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
@@ -14,7 +15,7 @@ type SetupPhase = 'admin-login' | 'configure';
 @Component({
   selector: 'app-kiosk-setup',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, SelectComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent],
   templateUrl: './kiosk-setup.component.html',
   styleUrl: './kiosk-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,7 @@ type SetupPhase = 'admin-login' | 'configure';
 export class KioskSetupComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly shopFloorService = inject(ShopFloorService);
+  private readonly translate = inject(TranslateService);
 
   readonly configured = output<KioskTerminal>();
 
@@ -53,7 +55,7 @@ export class KioskSetupComponent implements OnInit {
     const email = this.emailControl.value?.trim();
     const password = this.passwordControl.value;
     if (!email || !password) {
-      this.loginError.set('Email and password are required.');
+      this.loginError.set(this.translate.instant('shopFloor.emailPasswordRequired'));
       return;
     }
 
@@ -68,7 +70,7 @@ export class KioskSetupComponent implements OnInit {
       },
       error: () => {
         this.loggingIn.set(false);
-        this.loginError.set('Invalid credentials. Admin access required.');
+        this.loginError.set(this.translate.instant('shopFloor.invalidAdminCredentials'));
       },
     });
   }
@@ -80,7 +82,7 @@ export class KioskSetupComponent implements OnInit {
   protected onSave(): void {
     const name = this.terminalNameControl.value?.trim();
     if (!name) {
-      this.configError.set('Terminal name is required.');
+      this.configError.set(this.translate.instant('shopFloor.terminalNameRequired'));
       return;
     }
 
@@ -89,7 +91,7 @@ export class KioskSetupComponent implements OnInit {
     } else {
       const teamId = this.teamControl.value;
       if (!teamId) {
-        this.configError.set('Select a team or create a new one.');
+        this.configError.set(this.translate.instant('shopFloor.selectOrCreateTeam'));
         return;
       }
       this.saveTerminal(name, teamId);
@@ -99,7 +101,7 @@ export class KioskSetupComponent implements OnInit {
   private createTeamThenSave(terminalName: string): void {
     const teamName = this.newTeamNameControl.value?.trim();
     if (!teamName) {
-      this.configError.set('Team name is required.');
+      this.configError.set(this.translate.instant('shopFloor.teamNameRequired'));
       return;
     }
 
@@ -112,7 +114,7 @@ export class KioskSetupComponent implements OnInit {
       },
       error: () => {
         this.saving.set(false);
-        this.configError.set('Failed to create team.');
+        this.configError.set(this.translate.instant('shopFloor.createTeamFailed'));
       },
     });
   }
@@ -133,7 +135,7 @@ export class KioskSetupComponent implements OnInit {
       },
       error: () => {
         this.saving.set(false);
-        this.configError.set('Failed to save terminal configuration.');
+        this.configError.set(this.translate.instant('shopFloor.saveTerminalFailed'));
       },
     });
   }

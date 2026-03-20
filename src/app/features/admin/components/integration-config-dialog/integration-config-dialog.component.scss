@@ -1,0 +1,30 @@
+@use 'styles/variables' as *;
+
+.test-result {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+  font-weight: 500;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+
+  &--success {
+    background: var(--success-light);
+    color: var(--success);
+    border: $border-width-thin solid var(--success);
+  }
+
+  &--error {
+    background: var(--error-light);
+    color: var(--error);
+    border: $border-width-thin solid var(--error);
+  }
+}
+
+.footer-spacer {
+  flex: 1;
+}

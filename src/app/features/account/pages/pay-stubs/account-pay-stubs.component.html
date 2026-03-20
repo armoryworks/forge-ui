@@ -1,13 +1,13 @@
 <div class="pay-stubs">
-  <h2 class="pay-stubs__title">Pay Stubs</h2>
-  <p class="pay-stubs__subtitle">View and download your pay stubs</p>
+  <h2 class="pay-stubs__title">{{ 'account.payStubs' | translate }}</h2>
+  <p class="pay-stubs__subtitle">{{ 'account.payStubsSubtitle' | translate }}</p>
 
   <app-data-table
     tableId="account-pay-stubs"
     [columns]="columns"
     [data]="payStubs()"
     emptyIcon="payments"
-    emptyMessage="No pay stubs available">
+    [emptyMessage]="'account.noPayStubs' | translate">
 
     <ng-template appColumnCell="payDate" let-row>
       {{ row.payDate | date:'MM/dd/yyyy' }}
@@ -31,15 +31,15 @@
 
     <ng-template appColumnCell="source" let-row>
       @if (row.source === 'Accounting') {
-        <span class="chip chip--info">Synced</span>
+        <span class="chip chip--info">{{ 'account.synced' | translate }}</span>
       } @else {
-        <span class="chip chip--muted">Manual</span>
+        <span class="chip chip--muted">{{ 'account.manual' | translate }}</span>
       }
     </ng-template>
 
     <ng-template appColumnCell="actions" let-row>
       @if (row.fileAttachmentId) {
-        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" aria-label="Download pay stub PDF">
+        <button class="icon-btn" (click)="downloadPdf(row.id); $event.stopPropagation()" [attr.aria-label]="'account.downloadPayStubPdf' | translate" [matTooltip]="'account.downloadPayStubPdf' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">download</span>
         </button>
       }

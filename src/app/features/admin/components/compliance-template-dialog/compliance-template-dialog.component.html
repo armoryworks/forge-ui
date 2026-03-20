@@ -1,43 +1,43 @@
 @if (isSystem) {
-  <app-dialog [title]="template?.name ?? 'Template'" width="520px" (closed)="close()">
+  <app-dialog [title]="template?.name ?? ('common.name' | translate)" width="520px" (closed)="close()">
     <div class="system-info">
       <div class="system-info__row">
-        <span class="system-info__label">Type</span>
+        <span class="system-info__label">{{ 'complianceTemplateDialog.systemType' | translate }}</span>
         <span class="system-info__value">{{ template?.formType }}</span>
       </div>
       <div class="system-info__row">
-        <span class="system-info__label">Description</span>
-        <span class="system-info__value">{{ template?.description || 'No description' }}</span>
+        <span class="system-info__label">{{ 'complianceTemplateDialog.systemDescription' | translate }}</span>
+        <span class="system-info__value">{{ template?.description || ('complianceTemplateDialog.noDescription' | translate) }}</span>
       </div>
       <div class="system-info__row">
-        <span class="system-info__label">DocuSeal Template</span>
+        <span class="system-info__label">{{ 'complianceTemplateDialog.docuSealTemplate' | translate }}</span>
         <span class="system-info__value">
           @if (template?.docuSealTemplateId) {
             #{{ template!.docuSealTemplateId }}
           } @else {
-            <span class="text-muted">Not linked</span>
+            <span class="text-muted">{{ 'complianceTemplateDialog.notLinked' | translate }}</span>
           }
         </span>
       </div>
       <div class="system-info__row">
-        <span class="system-info__label">Status</span>
+        <span class="system-info__label">{{ 'common.status' | translate }}</span>
         <span class="system-info__value">
           @if (template?.isActive) {
-            <span class="chip chip--success">Active</span>
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
           } @else {
-            <span class="chip chip--muted">Inactive</span>
+            <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
           }
         </span>
       </div>
     </div>
 
-    <h4 class="upload-title">Manual Document Override</h4>
-    <p class="upload-hint">Upload a PDF to override the auto-synced or linked document for this template.</p>
+    <h4 class="upload-title">{{ 'complianceTemplateDialog.manualDocOverride' | translate }}</h4>
+    <p class="upload-hint">{{ 'complianceTemplateDialog.uploadHint' | translate }}</p>
 
     @if (template?.manualOverrideFileId) {
       <div class="current-file">
         <span class="material-icons-outlined">description</span>
-        <span>Current override: File #{{ template!.manualOverrideFileId }}</span>
+        <span>{{ 'complianceTemplateDialog.currentOverride' | translate }}{{ template!.manualOverrideFileId }}</span>
       </div>
     }
 
@@ -49,45 +49,45 @@
       (uploaded)="onFileUploaded($event)" />
 
     <div dialog-footer>
-      <button class="action-btn" (click)="close()">Close</button>
+      <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 } @else {
-  <app-dialog [title]="isEdit ? 'Edit Template' : 'New Compliance Template'" width="520px" (closed)="close()">
+  <app-dialog [title]="isEdit ? ('complianceTemplateDialog.editTemplate' | translate) : ('complianceTemplateDialog.newTemplate' | translate)" width="520px" (closed)="close()">
     <div [formGroup]="form">
       <div class="dialog-row">
-        <app-input label="Name" formControlName="name" [required]="true" />
-        <app-select label="Form Type" formControlName="formType" [options]="formTypeOptions" [required]="true" />
+        <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" />
+        <app-select [label]="'complianceTemplateDialog.formType' | translate" formControlName="formType" [options]="formTypeOptions" [required]="true" />
       </div>
 
-      <app-textarea label="Description" formControlName="description" [rows]="2" />
+      <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="2" />
 
       <div class="dialog-row">
-        <app-input label="Icon" formControlName="icon" [required]="true" placeholder="Material icon name" />
-        <app-input label="Profile Key" formControlName="profileCompletionKey" [required]="true" placeholder="e.g. w4, i9" />
+        <app-input [label]="'complianceTemplateDialog.icon' | translate" formControlName="icon" [required]="true" [placeholder]="'complianceTemplateDialog.iconPlaceholder' | translate" />
+        <app-input [label]="'complianceTemplateDialog.profileKey' | translate" formControlName="profileCompletionKey" [required]="true" [placeholder]="'complianceTemplateDialog.profileKeyPlaceholder' | translate" />
       </div>
 
-      <app-input label="Source URL" formControlName="sourceUrl" placeholder="PDF URL for auto-sync (optional)" />
+      <app-input [label]="'complianceTemplateDialog.sourceUrl' | translate" formControlName="sourceUrl" [placeholder]="'complianceTemplateDialog.sourceUrlPlaceholder' | translate" />
 
       <div class="dialog-row">
-        <app-input label="Sort Order" formControlName="sortOrder" type="number" />
+        <app-input [label]="'complianceTemplateDialog.sortOrder' | translate" formControlName="sortOrder" type="number" />
       </div>
 
       <div class="toggle-group">
-        <app-toggle label="Auto-Sync from Source" formControlName="isAutoSync" />
-        <app-toggle label="Active" formControlName="isActive" />
-        <app-toggle label="Requires Identity Docs" formControlName="requiresIdentityDocs" />
-        <app-toggle label="Blocks Job Assignment" formControlName="blocksJobAssignment" />
+        <app-toggle [label]="'complianceTemplateDialog.autoSyncFromSource' | translate" formControlName="isAutoSync" />
+        <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
+        <app-toggle [label]="'complianceTemplateDialog.requiresIdentityDocs' | translate" formControlName="requiresIdentityDocs" />
+        <app-toggle [label]="'complianceTemplateDialog.blocksJobAssignment' | translate" formControlName="blocksJobAssignment" />
       </div>
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="close()">Cancel</button>
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">
-        {{ isEdit ? 'Update' : 'Create' }}
+        {{ isEdit ? ('complianceTemplateDialog.update' | translate) : ('common.create' | translate) }}
       </button>
     </div>
   </app-dialog>

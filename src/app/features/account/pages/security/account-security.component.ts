@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
@@ -11,7 +13,7 @@ import { AccountService } from '../../services/account.service';
 @Component({
   selector: 'app-account-security',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, ValidationPopoverDirective],
   templateUrl: './account-security.component.html',
   styleUrl: './account-security.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +22,7 @@ export class AccountSecurityComponent {
   private readonly authService = inject(AuthService);
   private readonly accountService = inject(AccountService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly user = this.authService.user;
   protected readonly savingPassword = signal(false);
@@ -66,7 +69,7 @@ export class AccountSecurityComponent {
       next: () => {
         this.savingPassword.set(false);
         this.passwordForm.reset();
-        this.snackbar.success('Password changed');
+        this.snackbar.success(this.translate.instant('account.passwordChanged'));
       },
       error: () => this.savingPassword.set(false),
     });
@@ -81,7 +84,7 @@ export class AccountSecurityComponent {
       next: () => {
         this.savingPin.set(false);
         this.pinForm.reset();
-        this.snackbar.success('PIN updated');
+        this.snackbar.success(this.translate.instant('account.pinUpdated'));
       },
       error: () => this.savingPin.set(false),
     });

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
@@ -22,7 +23,7 @@ interface AccountNavChild {
 @Component({
   selector: 'app-account-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, TranslatePipe],
   templateUrl: './account-sidebar.component.html',
   styleUrl: './account-sidebar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +32,7 @@ export class AccountSidebarComponent {
   private readonly router = inject(Router);
   private readonly profileService = inject(EmployeeProfileService);
   private readonly complianceService = inject(ComplianceFormService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly taxFormsExpanded = signal(false);
   protected readonly completeness = this.profileService.completeness;
@@ -47,13 +49,13 @@ export class AccountSidebarComponent {
   });
 
   protected readonly navItems: AccountNavItem[] = [
-    { path: 'profile', label: 'Profile', icon: 'person' },
-    { path: 'contact', label: 'Contact & Address', icon: 'home', completionKeys: ['address'] },
-    { path: 'emergency', label: 'Emergency Contact', icon: 'emergency', completionKeys: ['emergency_contact'] },
-    { path: 'documents', label: 'Documents', icon: 'folder' },
-    { path: 'pay-stubs', label: 'Pay Stubs', icon: 'payments' },
-    { path: 'tax-documents', label: 'Tax Documents', icon: 'receipt_long' },
-    { path: 'security', label: 'Security', icon: 'lock' },
+    { path: 'profile', label: this.translate.instant('account.profile'), icon: 'person' },
+    { path: 'contact', label: this.translate.instant('account.contact'), icon: 'home', completionKeys: ['address'] },
+    { path: 'emergency', label: this.translate.instant('account.emergency'), icon: 'emergency', completionKeys: ['emergency_contact'] },
+    { path: 'documents', label: this.translate.instant('account.documents'), icon: 'folder' },
+    { path: 'pay-stubs', label: this.translate.instant('account.payStubs'), icon: 'payments' },
+    { path: 'tax-documents', label: this.translate.instant('account.taxDocuments'), icon: 'receipt_long' },
+    { path: 'security', label: this.translate.instant('account.security'), icon: 'lock' },
   ];
 
   protected readonly taxFormsComplete = computed(() => {

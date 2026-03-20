@@ -6,6 +6,8 @@ import {
   ReactiveFormsModule, Validators,
 } from '@angular/forms';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { InputComponent } from '../input/input.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
 import { AddressService } from '../../services/address.service';
@@ -32,7 +34,7 @@ const COUNTRY_OPTIONS: SelectOption[] = [
 @Component({
   selector: 'app-address-form',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, SelectComponent],
+  imports: [ReactiveFormsModule, InputComponent, SelectComponent, TranslatePipe],
   templateUrl: './address-form.component.html',
   styleUrl: './address-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, SetupTokenInfo } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
@@ -16,7 +17,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-token-setup',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, TranslatePipe, InputComponent, ValidationPopoverDirective],
   templateUrl: './token-setup.component.html',
   styleUrl: './token-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +29,7 @@ export class TokenSetupComponent implements OnInit {
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly token = this.route.snapshot.paramMap.get('token') ?? '';
   protected readonly error = signal<string | null>(null);
@@ -35,13 +37,13 @@ export class TokenSetupComponent implements OnInit {
 
   ngOnInit(): void {
     if (!this.token) {
-      this.error.set('Invalid setup link. Please contact your administrator.');
+      this.error.set(this.translate.instant('auth.invalidSetupLink'));
       return;
     }
 
     this.authService.validateSetupToken(this.token).subscribe({
       next: (info) => this.tokenInfo.set(info),
-      error: () => this.error.set('Invalid or expired setup code. Please contact your administrator.'),
+      error: () => this.error.set(this.translate.instant('auth.expiredSetupCode')),
     });
   }
 
@@ -62,21 +64,21 @@ export class TokenSetupComponent implements OnInit {
 
     const { password, confirmPassword } = this.form.getRawValue();
     if (password !== confirmPassword) {
-      this.snackbar.error('Passwords do not match.');
+      this.snackbar.error(this.translate.instant('account.passwordsDoNotMatch'));
       return;
     }
 
     if (!this.token) {
-      this.error.set('Invalid setup link. Please contact your administrator.');
+      this.error.set(this.translate.instant('auth.invalidSetupLink'));
       return;
     }
 
-    this.loadingService.track('Setting up your account...', this.authService.completeSetup({
+    this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.completeSetup({
       token: this.token,
       password: password!,
     })).subscribe({
       next: (response) => {
-        this.snackbar.success('Account setup complete. Welcome!');
+        this.snackbar.success(this.translate.instant('auth.setupComplete'));
         this.router.navigate([response.user.profileComplete ? '/dashboard' : '/account/profile']);
       },
       error: (err: HttpErrorResponse) => {

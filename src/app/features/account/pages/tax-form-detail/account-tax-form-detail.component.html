@@ -1,154 +1,293 @@
 <div class="account-page">
   @if (template(); as tmpl) {
-    <div class="form-detail__header">
-      <button class="action-btn action-btn--sm" (click)="goBack()" aria-label="Back to forms list">
-        <span class="material-icons-outlined">arrow_back</span>
-        Back
-      </button>
-      <div class="form-detail__title-row">
-        <span class="material-icons-outlined form-detail__icon"
-          [class.form-detail__icon--complete]="isComplete()">
-          {{ isComplete() ? 'check_circle' : tmpl.icon }}
-        </span>
-        <div>
-          <h1 class="form-detail__title">{{ tmpl.name }}</h1>
-          <p class="form-detail__description">{{ tmpl.description }}</p>
+    @if (!formDefinition() || (isComplete() && !resubmitting())) {
+      <div class="form-detail__header">
+        <button class="action-btn action-btn--sm" (click)="goBack()" [attr.aria-label]="'account.backToForms' | translate">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'common.back' | translate }}
+        </button>
+        <div class="form-detail__title-row">
+          <span class="material-icons-outlined form-detail__icon"
+            [class.form-detail__icon--complete]="isComplete()">
+            {{ isComplete() ? 'check_circle' : tmpl.icon }}
+          </span>
+          <div>
+            <h1 class="form-detail__title">{{ tmpl.name }}</h1>
+            <p class="form-detail__description">{{ tmpl.description }}</p>
+          </div>
         </div>
       </div>
-    </div>
+    }
 
     <!-- Status -->
-    @if (isComplete()) {
+    @if (isComplete() && !resubmitting()) {
       <div class="form-detail__status form-detail__status--complete">
         <span class="material-icons-outlined">check_circle</span>
-        Completed {{ completedDate() | date:'MM/dd/yyyy' }}
+        {{ 'account.completed' | translate }} {{ completedDate() | date:'MM/dd/yyyy' }}
       </div>
-    } @else if (submission(); as sub) {
-      <div class="form-detail__status form-detail__status--pending">
-        <span class="material-icons-outlined">pending</span>
-        {{ sub.status }} — started {{ sub.createdAt | date:'MM/dd/yyyy' }}
-      </div>
-    }
 
-    <!-- DocuSeal Embed -->
-    @if (tmpl.docuSealTemplateId) {
+      <!-- Completed confirmation card with resubmit option -->
       <div class="form-detail__card">
-        <h2 class="form-detail__card-title">Digital Signing</h2>
-        @if (!submission()) {
-          <p class="form-detail__card-text">Click below to start the digital signing process.</p>
-          <button class="action-btn action-btn--primary"
-            [disabled]="submitting()"
-            (click)="startForm()">
-            @if (submitting()) {
-              <span class="material-icons-outlined account-page__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">draw</span>
-            }
-            Start Form
-          </button>
-        } @else if (submission(); as sub) {
-          @if (sub.status === 'Pending' && sub.docuSealSubmitUrl) {
-            <iframe
-              class="form-detail__iframe"
-              [src]="sub.docuSealSubmitUrl"
-              title="Document signing"
-              allow="camera; microphone"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
-            </iframe>
-          } @else if (sub.status === 'Completed' && sub.signedPdfFileId) {
-            <p class="form-detail__card-text">Your signed document is available for download.</p>
-            <a class="action-btn action-btn--primary action-btn--sm"
-              [href]="'/api/v1/files/' + sub.signedPdfFileId"
-              target="_blank"
-              aria-label="Download signed PDF">
-              <span class="material-icons-outlined">download</span>
-              Download Signed PDF
-            </a>
-          }
-        }
-      </div>
-    }
-
-    <!-- Manual Upload & Acknowledge -->
-    <div class="form-detail__card">
-      <h2 class="form-detail__card-title">Upload Signed Document</h2>
-      <p class="form-detail__card-text">Upload a signed copy of this form. Accepted formats: PDF, JPEG, PNG.</p>
-
-      <app-file-upload-zone
-        entityType="employee-docs"
-        [entityId]="userId()"
-        accept=".pdf,.jpg,.jpeg,.png"
-        [maxSizeMb]="10" />
-
-      @if (!isComplete()) {
-        <button class="action-btn action-btn--primary form-detail__acknowledge-btn"
-          [disabled]="acknowledging()"
-          (click)="acknowledge()">
-          @if (acknowledging()) {
-            <span class="material-icons-outlined account-page__spinner">sync</span>
-          } @else {
-            <span class="material-icons-outlined">check</span>
-          }
-          Acknowledge & Complete
-        </button>
-      }
-    </div>
-
-    <!-- Identity Documents (I-9 only) -->
-    @if (tmpl.requiresIdentityDocs) {
-      <div class="form-detail__card">
-        <h2 class="form-detail__card-title">Identity Documents</h2>
-        <p class="form-detail__card-text">
-          Upload identity documents to verify your eligibility. Examples: birth certificate, driver's license, social security card, passport.
-        </p>
-
-        @if (identityDocuments().length > 0) {
-          <div class="form-detail__doc-list">
-            @for (doc of identityDocuments(); track doc.id) {
-              <div class="form-detail__doc-item">
-                <span class="material-icons-outlined form-detail__doc-icon">
-                  {{ doc.verifiedAt ? 'verified' : 'description' }}
-                </span>
-                <div class="form-detail__doc-info">
-                  <span class="form-detail__doc-name">{{ doc.fileName }}</span>
-                  <span class="form-detail__doc-type">{{ doc.documentType }}</span>
-                </div>
-                @if (doc.verifiedAt) {
-                  <span class="form-detail__doc-verified">
-                    Verified {{ doc.verifiedAt | date:'MM/dd/yyyy' }}
-                  </span>
-                } @else {
-                  <span class="form-detail__doc-pending">Pending verification</span>
-                }
-                <button class="icon-btn icon-btn--danger"
-                  aria-label="Remove document"
-                  (click)="deleteIdentityDoc(doc)">
-                  <span class="material-icons-outlined">delete</span>
-                </button>
-              </div>
-            }
+        <div class="form-detail__completed-summary">
+          <span class="material-icons-outlined form-detail__completed-icon">verified</span>
+          <div>
+            <h2 class="form-detail__card-title">{{ 'account.formAlreadySubmitted' | translate }}</h2>
+            <p class="form-detail__card-text">
+              @if (isSensitive()) {
+                {{ 'account.formSensitiveNote' | translate }}
+              } @else {
+                {{ 'account.formCompletedNote' | translate }}
+              }
+            </p>
           </div>
-        }
-
-        <div class="form-detail__upload-section">
-          @for (docType of identityDocTypes; track docType.value) {
-            <div class="form-detail__doc-upload">
-              <span class="form-detail__doc-upload-label">{{ docType.label }}</span>
-              <app-file-upload-zone
-                entityType="identity-docs"
-                [entityId]="userId()"
-                accept=".pdf,.jpg,.jpeg,.png"
-                [maxSizeMb]="10"
-                (uploaded)="onIdentityDocUploaded($event, docType.value)" />
-            </div>
-          }
+        </div>
+        <div class="form-detail__completed-actions">
+          <button class="action-btn action-btn--primary" (click)="startResubmit()">
+            <span class="material-icons-outlined">refresh</span>
+            {{ 'account.resubmitForm' | translate }}
+          </button>
         </div>
       </div>
+    } @else if (!isComplete() && submission(); as sub) {
+      @if (sub.status !== 'Completed') {
+        <div class="form-detail__status form-detail__status--pending">
+          <span class="material-icons-outlined">pending</span>
+          {{ sub.status }} — {{ 'account.started' | translate }} {{ sub.createdAt | date:'MM/dd/yyyy' }}
+        </div>
+      }
+    }
+
+    <!-- Electronic Form — metadata-driven renderer for all form types -->
+    @if (formDefinition(); as formDef) {
+      @if (showForm()) {
+        <app-compliance-form-renderer
+          class="form-detail__renderer"
+          [definition]="formDef"
+          [initialData]="savedFormData()"
+          [readonly]="false"
+          [saving]="savingDraft()"
+          [submitting]="submitting()"
+          [extraValidation]="extraValidation"
+          (save)="onSaveFormData($event)"
+          (submitForm)="onSubmitFormData($event)"
+          (back)="resubmitting() ? cancelResubmit() : goBack()">
+          @if (tmpl.requiresIdentityDocs) {
+            <div renderer-body-extra class="form-detail__docs-row">
+              <button class="action-btn" (click)="showDocsDialog.set(true)"
+                [attr.aria-label]="'account.supportingIdentityDocs' | translate">
+                <span class="material-icons-outlined">folder_open</span>
+                {{ 'account.supportingIdentityDocs' | translate }}
+                @if (identityDocuments().length > 0) {
+                  <span class="form-detail__docs-count">{{ identityDocuments().length }}</span>
+                }
+              </button>
+            </div>
+          }
+        </app-compliance-form-renderer>
+      }
+    } @else {
+      <!-- Pending Setup Banner — shown when form should have electronic definition but admin hasn't extracted it yet -->
+      @if (needsFormDefinition()) {
+        <div class="form-detail__pending-setup">
+          <span class="material-icons-outlined form-detail__pending-setup-icon">hourglass_empty</span>
+          <div>
+            <h3 class="form-detail__pending-setup-title">{{ 'account.formPendingSetupTitle' | translate }}</h3>
+            <p class="form-detail__pending-setup-text">{{ 'account.formPendingSetup' | translate }}</p>
+          </div>
+        </div>
+      }
+
+      <!-- Fallback: Embedded PDF Viewer — admin-uploaded files only -->
+      @if (pdfUrl(); as url) {
+        <div class="form-detail__card">
+          <div class="form-detail__card-header">
+            <h2 class="form-detail__card-title">{{ 'account.formDocument' | translate }}</h2>
+            @if (pdfDownloadUrl(); as downloadUrl) {
+              <a class="action-btn action-btn--sm"
+                [href]="downloadUrl"
+                target="_blank"
+                [attr.aria-label]="'account.downloadFormPdf' | translate">
+                <span class="material-icons-outlined">download</span>
+                {{ 'common.download' | translate }}
+              </a>
+            }
+          </div>
+          <iframe
+            class="form-detail__pdf-viewer"
+            [src]="url"
+            [title]="'account.formDocument' | translate"
+            [attr.aria-label]="'account.embeddedPdfViewer' | translate">
+          </iframe>
+        </div>
+      } @else if (pdfDownloadUrl(); as downloadUrl) {
+        <!-- External source URL (e.g., IRS) — download only, can't embed -->
+        <div class="form-detail__card">
+          <div class="form-detail__card-header">
+            <h2 class="form-detail__card-title">{{ 'account.formDocument' | translate }}</h2>
+          </div>
+          <p class="form-detail__card-text">
+            {{ 'account.downloadFormInstruction' | translate }}
+          </p>
+          <a class="action-btn action-btn--primary"
+            [href]="downloadUrl"
+            target="_blank"
+            [attr.aria-label]="'account.downloadFormPdf' | translate">
+            <span class="material-icons-outlined">download</span>
+            {{ 'account.downloadForm' | translate }}
+          </a>
+        </div>
+      }
+
+      <!-- DocuSeal E-Sign -->
+      @if (tmpl.docuSealTemplateId) {
+        <div class="form-detail__card">
+          <h2 class="form-detail__card-title">{{ 'account.digitalSigning' | translate }}</h2>
+          @if (!submission()) {
+            <p class="form-detail__card-text">{{ 'account.digitalSigningStart' | translate }}</p>
+            <button class="action-btn action-btn--primary"
+              [disabled]="submitting()"
+              (click)="startForm()">
+              @if (submitting()) {
+                <span class="material-icons-outlined account-page__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">draw</span>
+              }
+              {{ 'account.startESign' | translate }}
+            </button>
+          } @else if (submission(); as sub) {
+            @if (sub.status === 'Pending' && sub.docuSealSubmitUrl) {
+              <iframe
+                class="form-detail__iframe"
+                [src]="sub.docuSealSubmitUrl"
+                [title]="'account.documentSigning' | translate"
+                allow="camera; microphone"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+              </iframe>
+            } @else if (sub.status === 'Completed' && sub.signedPdfFileId) {
+              <p class="form-detail__card-text">{{ 'account.signedDocAvailable' | translate }}</p>
+              <a class="action-btn action-btn--primary action-btn--sm"
+                [href]="'/api/v1/files/' + sub.signedPdfFileId"
+                target="_blank"
+                [attr.aria-label]="'account.downloadSignedPdfLabel' | translate">
+                <span class="material-icons-outlined">download</span>
+                {{ 'account.downloadSignedPdf' | translate }}
+              </a>
+            }
+          }
+        </div>
+      }
+
+      <!-- Acknowledge (for forms without DocuSeal, form definition, and NOT pending setup) -->
+      @if (!isComplete() && !tmpl.docuSealTemplateId && !needsFormDefinition()) {
+        <div class="form-detail__card">
+          <h2 class="form-detail__card-title">{{ 'account.acknowledgment' | translate }}</h2>
+          <p class="form-detail__card-text">
+            {{ 'account.acknowledgmentInstruction' | translate }}
+          </p>
+          <button class="action-btn action-btn--primary form-detail__acknowledge-btn"
+            [disabled]="acknowledging()"
+            (click)="acknowledge()">
+            @if (acknowledging()) {
+              <span class="material-icons-outlined account-page__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">check</span>
+            }
+            {{ 'account.acknowledgeComplete' | translate }}
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Identity Documents dialog (I-9 only) -->
+    @if (tmpl.requiresIdentityDocs) {
+      @if (showDocsDialog()) {
+        <app-dialog
+          [title]="'account.supportingIdentityDocs' | translate"
+          width="640px"
+          (closed)="showDocsDialog.set(false)">
+
+          <!-- Uploaded documents -->
+          @if (identityDocuments().length > 0) {
+            <div class="form-detail__doc-list">
+              @for (doc of identityDocuments(); track doc.id) {
+                <div class="form-detail__doc-item">
+                  <span class="material-icons-outlined form-detail__doc-icon">
+                    {{ doc.verifiedAt ? 'verified' : 'description' }}
+                  </span>
+                  <div class="form-detail__doc-info">
+                    <span class="form-detail__doc-name">{{ doc.fileName }}</span>
+                    <span class="form-detail__doc-type">{{ doc.documentType }}</span>
+                  </div>
+                  @if (doc.verifiedAt) {
+                    <span class="form-detail__doc-verified">
+                      {{ 'account.verified' | translate }} {{ doc.verifiedAt | date:'MM/dd/yyyy' }}
+                    </span>
+                  } @else {
+                    <span class="form-detail__doc-pending">{{ 'account.pendingVerification' | translate }}</span>
+                  }
+                  <button class="icon-btn icon-btn--danger"
+                    [attr.aria-label]="'account.removeDocument' | translate"
+                    [matTooltip]="'account.removeDocument' | translate" matTooltipPosition="above"
+                    (click)="deleteIdentityDoc(doc)">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- List A -->
+          <div class="form-detail__doc-list-section">
+            <div class="form-detail__doc-list-header">
+              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--a">List A</span>
+              <span class="form-detail__doc-list-title">{{ 'account.docListATitle' | translate }}</span>
+            </div>
+            <p class="form-detail__doc-list-desc">{{ 'account.docListADesc' | translate }}</p>
+            <app-file-upload-zone entityType="identity-docs" [entityId]="userId()"
+              accept=".pdf,.jpg,.jpeg,.png" [maxSizeMb]="10"
+              (uploaded)="onIdentityDocUploaded($event, 'ListA')" />
+          </div>
+
+          <div class="form-detail__doc-or">{{ 'common.or' | translate | uppercase }}</div>
+
+          <!-- List B + C -->
+          <div class="form-detail__doc-list-section">
+            <div class="form-detail__doc-list-header">
+              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--b">List B</span>
+              <span class="form-detail__doc-list-title">{{ 'account.docListBTitle' | translate }}</span>
+            </div>
+            <p class="form-detail__doc-list-desc">{{ 'account.docListBDesc' | translate }}</p>
+            <app-file-upload-zone entityType="identity-docs" [entityId]="userId()"
+              accept=".pdf,.jpg,.jpeg,.png" [maxSizeMb]="10"
+              (uploaded)="onIdentityDocUploaded($event, 'ListB')" />
+          </div>
+
+          <div class="form-detail__doc-and">{{ 'common.and' | translate | uppercase }}</div>
+
+          <div class="form-detail__doc-list-section">
+            <div class="form-detail__doc-list-header">
+              <span class="form-detail__doc-list-badge form-detail__doc-list-badge--c">List C</span>
+              <span class="form-detail__doc-list-title">{{ 'account.docListCTitle' | translate }}</span>
+            </div>
+            <p class="form-detail__doc-list-desc">{{ 'account.docListCDesc' | translate }}</p>
+            <app-file-upload-zone entityType="identity-docs" [entityId]="userId()"
+              accept=".pdf,.jpg,.jpeg,.png" [maxSizeMb]="10"
+              (uploaded)="onIdentityDocUploaded($event, 'ListC')" />
+          </div>
+
+          <div dialog-footer>
+            <button class="action-btn action-btn--primary" (click)="showDocsDialog.set(false)">
+              <span class="material-icons-outlined">close</span>
+              Done
+            </button>
+          </div>
+        </app-dialog>
+      }
     }
   } @else {
     <div class="page-loading">
       <span class="material-icons-outlined account-page__spinner">sync</span>
-      Loading...
+      {{ 'common.loading' | translate }}
     </div>
   }
 </div>

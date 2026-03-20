@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
 import { ProcessStep } from '../../models/process-step.model';
@@ -26,6 +27,7 @@ export interface ProcessStepDialogData {
     ReactiveFormsModule,
     DialogComponent, InputComponent, TextareaComponent, EntityPickerComponent, ToggleComponent,
     ValidationPopoverDirective,
+    TranslatePipe,
   ],
   templateUrl: './process-step-dialog.component.html',
   styleUrl: './process-step-dialog.component.scss',
@@ -33,6 +35,7 @@ export interface ProcessStepDialogData {
 })
 export class ProcessStepDialogComponent {
   private readonly partsService = inject(PartsService);
+  private readonly translate = inject(TranslateService);
   protected readonly dialogRef = inject(MatDialogRef<ProcessStepDialogComponent>);
   protected readonly data = inject<ProcessStepDialogData>(MAT_DIALOG_DATA);
 
@@ -49,9 +52,9 @@ export class ProcessStepDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    stepNumber: 'Step #',
-    title: 'Title',
-    estimatedMinutes: 'Est. Minutes',
+    stepNumber: this.translate.instant('parts.stepNumber'),
+    title: this.translate.instant('common.title'),
+    estimatedMinutes: this.translate.instant('parts.estMinutes'),
   });
 
   protected save(): void {

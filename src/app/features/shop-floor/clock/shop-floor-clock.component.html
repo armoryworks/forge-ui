@@ -30,28 +30,28 @@
 <div class="sf-kpi-strip">
   <div class="sf-kpi sf-kpi--success">
     <span class="sf-kpi__value">{{ workersIn().length }}</span>
-    <span class="sf-kpi__label">Working</span>
+    <span class="sf-kpi__label">{{ 'shopFloor.working' | translate }}</span>
   </div>
   <div class="sf-kpi sf-kpi--warning">
     <span class="sf-kpi__value">{{ workersOnBreak().length }}</span>
-    <span class="sf-kpi__label">On Break</span>
+    <span class="sf-kpi__label">{{ 'shopFloor.onBreak' | translate }}</span>
   </div>
   <div class="sf-kpi">
     <span class="sf-kpi__value">{{ workersOut().length }}</span>
-    <span class="sf-kpi__label">Off</span>
+    <span class="sf-kpi__label">{{ 'shopFloor.off' | translate }}</span>
   </div>
   <div class="sf-kpi sf-kpi--info">
     <span class="sf-kpi__value">{{ activeJobs().length }}</span>
-    <span class="sf-kpi__label">Active Jobs</span>
+    <span class="sf-kpi__label">{{ 'shopFloor.activeJobs' | translate }}</span>
   </div>
   <div class="sf-kpi sf-kpi--success">
     <span class="sf-kpi__value">{{ completedToday() }}</span>
-    <span class="sf-kpi__label">Done Today</span>
+    <span class="sf-kpi__label">{{ 'shopFloor.doneToday' | translate }}</span>
   </div>
   @if (overdueJobs() > 0) {
     <div class="sf-kpi sf-kpi--error">
       <span class="sf-kpi__value">{{ overdueJobs() }}</span>
-      <span class="sf-kpi__label">Overdue</span>
+      <span class="sf-kpi__label">{{ 'shopFloor.overdue' | translate }}</span>
     </div>
   }
 </div>
@@ -63,7 +63,7 @@
     <section class="sf-section">
       <h2 class="sf-section__title">
         <span class="material-icons-outlined">group</span>
-        Team Status
+        {{ 'shopFloor.teamStatus' | translate }}
       </h2>
       <div class="sf-team-list">
         @for (worker of workersIn(); track worker.userId) {
@@ -74,11 +74,11 @@
               @if (worker.currentTask) {
                 <span class="sf-team-card__task">{{ worker.currentJobNumber }} — {{ worker.currentTask }}</span>
               } @else {
-                <span class="sf-team-card__task sf-team-card__task--idle">Available</span>
+                <span class="sf-team-card__task sf-team-card__task--idle">{{ 'shopFloor.available' | translate }}</span>
               }
             </div>
             <div class="sf-team-card__meta">
-              <span class="sf-team-card__status sf-team-card__status--in">Working</span>
+              <span class="sf-team-card__status sf-team-card__status--in">{{ 'shopFloor.working' | translate }}</span>
               <span class="sf-team-card__time">{{ worker.timeOnTask }}</span>
             </div>
           </div>
@@ -88,10 +88,10 @@
             <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
             <div class="sf-team-card__info">
               <span class="sf-team-card__name">{{ worker.name }}</span>
-              <span class="sf-team-card__task sf-team-card__task--idle">On Break</span>
+              <span class="sf-team-card__task sf-team-card__task--idle">{{ 'shopFloor.onBreak' | translate }}</span>
             </div>
             <div class="sf-team-card__meta">
-              <span class="sf-team-card__status sf-team-card__status--break">Break</span>
+              <span class="sf-team-card__status sf-team-card__status--break">{{ 'shopFloor.break' | translate }}</span>
               <span class="sf-team-card__time">{{ worker.timeOnTask }}</span>
             </div>
           </div>
@@ -103,12 +103,12 @@
               <span class="sf-team-card__name">{{ worker.name }}</span>
             </div>
             <div class="sf-team-card__meta">
-              <span class="sf-team-card__status sf-team-card__status--out">Off</span>
+              <span class="sf-team-card__status sf-team-card__status--out">{{ 'shopFloor.off' | translate }}</span>
             </div>
           </div>
         }
         @if (workers().length === 0) {
-          <div class="sf-empty">No employees registered</div>
+          <div class="sf-empty">{{ 'shopFloor.noEmployees' | translate }}</div>
         }
       </div>
     </section>
@@ -117,7 +117,7 @@
     <section class="sf-section">
       <h2 class="sf-section__title">
         <span class="material-icons-outlined">assignment</span>
-        Active Jobs
+        {{ 'shopFloor.activeJobs' | translate }}
       </h2>
       <div class="sf-jobs-list">
         @for (job of activeJobs(); track job.id) {
@@ -136,7 +136,7 @@
             }
           </div>
         } @empty {
-          <div class="sf-empty">No active jobs</div>
+          <div class="sf-empty">{{ 'shopFloor.noActiveJobs' | translate }}</div>
         }
       </div>
     </section>
@@ -147,7 +147,7 @@
     <div class="sf-clock-bar__scan">
       <app-barcode-scan-input
         label=""
-        placeholder="Scan badge, RFID card, job barcode, or tap NFC..."
+        [placeholder]="'shopFloor.scanBadgePlaceholder' | translate"
         [autoFocus]="true"
         (scanned)="onScanDetected($event)" />
     </div>
@@ -156,7 +156,7 @@
     }
     <button class="action-btn sf-clock-bar__manual" (click)="showManualLogin()">
       <span class="material-icons-outlined">person</span>
-      Clock In Manually
+      {{ 'shopFloor.clockInManually' | translate }}
     </button>
   </div>
 }
@@ -166,7 +166,7 @@
   <div class="sf-auth-overlay">
     <div class="sf-auth-card">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__spinner">sync</span>
-      <h2 class="sf-auth-card__title">Identifying scan...</h2>
+      <h2 class="sf-auth-card__title">{{ 'shopFloor.identifyingScan' | translate }}</h2>
     </div>
   </div>
 }
@@ -176,7 +176,7 @@
   <div class="sf-auth-overlay">
     <div class="sf-auth-card">
       <span class="material-icons-outlined sf-auth-card__icon sf-auth-card__icon--job">work</span>
-      <h2 class="sf-auth-card__title">Job Scanned</h2>
+      <h2 class="sf-auth-card__title">{{ 'shopFloor.jobScanned' | translate }}</h2>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card">
@@ -193,12 +193,12 @@
         </div>
       }
 
-      <p class="sf-auth-card__subtitle">Now scan your badge or RFID to continue</p>
+      <p class="sf-auth-card__subtitle">{{ 'shopFloor.scanBadgeToContinue' | translate }}</p>
 
       <div class="sf-auth-card__scan-prompt">
         <app-barcode-scan-input
           label=""
-          placeholder="Scan badge, RFID card, or tap NFC..."
+          [placeholder]="'shopFloor.scanBadgeShortPlaceholder' | translate"
           [autoFocus]="true"
           (scanned)="onScanDetected($event)" />
       </div>
@@ -206,7 +206,7 @@
       <div class="sf-auth-card__actions">
         <button class="action-btn" (click)="cancelJobScanned()">
           <span class="material-icons-outlined">arrow_back</span>
-          Cancel
+          {{ 'common.cancel' | translate }}
         </button>
       </div>
     </div>
@@ -218,8 +218,8 @@
   <div class="sf-auth-overlay">
     <div class="sf-auth-card">
       <span class="material-icons-outlined sf-auth-card__icon">lock</span>
-      <h2 class="sf-auth-card__title">Enter Your PIN</h2>
-      <p class="sf-auth-card__subtitle">Scan ID: {{ scannedBarcode() }}</p>
+      <h2 class="sf-auth-card__title">{{ 'shopFloor.enterPin' | translate }}</h2>
+      <p class="sf-auth-card__subtitle">{{ 'shopFloor.scanId' | translate }}: {{ scannedBarcode() }}</p>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--compact">
@@ -239,24 +239,24 @@
       }
 
       <div class="sf-auth-card__field">
-        <app-input label="PIN" type="password" [formControl]="pinControl"
-          placeholder="Enter PIN..." [maxlength]="8" />
+        <app-input [label]="'shopFloor.pin' | translate" type="password" [formControl]="pinControl"
+          [placeholder]="'shopFloor.enterPinPlaceholder' | translate" [maxlength]="8" />
       </div>
 
       <div class="sf-auth-card__actions">
         <button class="action-btn" (click)="cancelPin()" [disabled]="kioskAuthenticating()">
           <span class="material-icons-outlined">arrow_back</span>
-          Back
+          {{ 'common.back' | translate }}
         </button>
         <button class="action-btn action-btn--primary"
           [disabled]="kioskAuthenticating() || !pinControl.value"
           (click)="onPinSubmit()">
           @if (kioskAuthenticating()) {
             <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            Authenticating...
+            {{ 'shopFloor.authenticating' | translate }}
           } @else {
             <span class="material-icons-outlined">login</span>
-            Submit
+            {{ 'shopFloor.submit' | translate }}
           }
         </button>
       </div>
@@ -269,8 +269,8 @@
   <div class="sf-auth-overlay">
     <div class="sf-auth-card">
       <span class="material-icons-outlined sf-auth-card__icon">person</span>
-      <h2 class="sf-auth-card__title">Clock In Manually</h2>
-      <p class="sf-auth-card__subtitle">Enter your credentials</p>
+      <h2 class="sf-auth-card__title">{{ 'shopFloor.clockInManually' | translate }}</h2>
+      <p class="sf-auth-card__subtitle">{{ 'shopFloor.enterCredentials' | translate }}</p>
 
       @if (manualLoginError()) {
         <div class="sf-auth-card__error">
@@ -280,28 +280,28 @@
       }
 
       <div class="sf-auth-card__field">
-        <app-input label="Email" type="email" [formControl]="emailControl"
+        <app-input [label]="'common.email' | translate" type="email" [formControl]="emailControl"
           placeholder="you@company.com" />
       </div>
       <div class="sf-auth-card__field">
-        <app-input label="Password" type="password" [formControl]="passwordControl"
-          placeholder="Enter password..." />
+        <app-input [label]="'auth.password' | translate" type="password" [formControl]="passwordControl"
+          [placeholder]="'shopFloor.enterPasswordPlaceholder' | translate" />
       </div>
 
       <div class="sf-auth-card__actions">
         <button class="action-btn" (click)="cancelManualLogin()" [disabled]="manualLoggingIn()">
           <span class="material-icons-outlined">arrow_back</span>
-          Back
+          {{ 'common.back' | translate }}
         </button>
         <button class="action-btn action-btn--primary"
           [disabled]="manualLoggingIn() || !emailControl.value || !passwordControl.value"
           (click)="onManualLoginSubmit()">
           @if (manualLoggingIn()) {
             <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            Signing in...
+            {{ 'shopFloor.signingIn' | translate }}
           } @else {
             <span class="material-icons-outlined">login</span>
-            Sign In
+            {{ 'shopFloor.signIn' | translate }}
           }
         </button>
       </div>
@@ -313,7 +313,7 @@
 @if (kioskPhase() === 'clock') {
   <div class="sf-auth-overlay">
     <div class="sf-clock-actions">
-      <h2 class="sf-clock-actions__title">Select Action</h2>
+      <h2 class="sf-clock-actions__title">{{ 'shopFloor.selectAction' | translate }}</h2>
 
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--banner">
@@ -333,7 +333,7 @@
             } @else {
               <span class="material-icons-outlined">login</span>
             }
-            <span class="sf-action-btn__label">Clock In</span>
+            <span class="sf-action-btn__label">{{ 'shopFloor.clockIn' | translate }}</span>
             <span class="sf-action-btn__name">{{ worker.name }}</span>
           </button>
         }
@@ -346,7 +346,7 @@
             } @else {
               <span class="material-icons-outlined">logout</span>
             }
-            <span class="sf-action-btn__label">Clock Out</span>
+            <span class="sf-action-btn__label">{{ 'shopFloor.clockOut' | translate }}</span>
             <span class="sf-action-btn__name">{{ worker.name }}</span>
           </button>
           <button class="sf-action-btn sf-action-btn--break"
@@ -357,7 +357,7 @@
             } @else {
               <span class="material-icons-outlined">free_breakfast</span>
             }
-            <span class="sf-action-btn__label">Start Break</span>
+            <span class="sf-action-btn__label">{{ 'shopFloor.startBreak' | translate }}</span>
             <span class="sf-action-btn__name">{{ worker.name }}</span>
           </button>
         }
@@ -370,7 +370,7 @@
             } @else {
               <span class="material-icons-outlined">play_arrow</span>
             }
-            <span class="sf-action-btn__label">End Break</span>
+            <span class="sf-action-btn__label">{{ 'shopFloor.endBreak' | translate }}</span>
             <span class="sf-action-btn__name">{{ worker.name }}</span>
           </button>
           <button class="sf-action-btn sf-action-btn--clock-out"
@@ -381,14 +381,14 @@
             } @else {
               <span class="material-icons-outlined">logout</span>
             }
-            <span class="sf-action-btn__label">Clock Out</span>
+            <span class="sf-action-btn__label">{{ 'shopFloor.clockOut' | translate }}</span>
             <span class="sf-action-btn__name">{{ worker.name }}</span>
           </button>
         }
       </div>
       <button class="action-btn sf-clock-actions__cancel" (click)="resetToDashboard()">
         <span class="material-icons-outlined">arrow_back</span>
-        Cancel
+        {{ 'common.cancel' | translate }}
       </button>
     </div>
   </div>

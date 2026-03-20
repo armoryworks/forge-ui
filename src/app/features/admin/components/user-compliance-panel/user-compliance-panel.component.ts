@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal, effect } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -15,7 +17,7 @@ import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
 @Component({
   selector: 'app-user-compliance-panel',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, ConfirmDialogComponent],
+  imports: [DatePipe, CurrencyPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, ConfirmDialogComponent, MatTooltipModule],
   templateUrl: './user-compliance-panel.component.html',
   styleUrl: './user-compliance-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,7 @@ export class UserCompliancePanelComponent {
   private readonly payrollService = inject(PayrollService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   readonly userId = input<number | null>(null);
   protected readonly detail = signal<UserComplianceDetail | null>(null);
@@ -93,7 +96,7 @@ export class UserCompliancePanelComponent {
   protected verifyDocument(doc: IdentityDocument): void {
     this.adminService.verifyIdentityDocument(doc.id).subscribe({
       next: () => {
-        this.snackbar.success('Document verified');
+        this.snackbar.success(this.translate.instant('admin.documentVerified'));
         const id = this.userId();
         if (id) this.loadDetail(id);
       },
@@ -107,7 +110,7 @@ export class UserCompliancePanelComponent {
     this.adminService.sendComplianceReminder(id).subscribe({
       next: () => {
         this.sending.set(false);
-        this.snackbar.success('Reminder sent');
+        this.snackbar.success(this.translate.instant('admin.reminderSent'));
       },
       error: () => this.sending.set(false),
     });
@@ -130,19 +133,19 @@ export class UserCompliancePanelComponent {
 
   protected onPayStubFileUploaded(event: UploadedFile): void {
     this.lastPayStubFileId.set(+event.id);
-    this.snackbar.success('File uploaded — fill in pay stub details to save');
+    this.snackbar.success(this.translate.instant('admin.fileUploadedPayStub'));
   }
 
   protected onTaxDocFileUploaded(event: UploadedFile): void {
     this.lastTaxDocFileId.set(+event.id);
-    this.snackbar.success('File uploaded — fill in tax document details to save');
+    this.snackbar.success(this.translate.instant('admin.fileUploadedTaxDoc'));
   }
 
   protected savePayStub(payDate: string, periodStart: string, periodEnd: string, grossPay: string, netPay: string): void {
     const id = this.userId();
     const fileId = this.lastPayStubFileId();
     if (!id || !fileId || !payDate || !periodStart || !periodEnd || !grossPay || !netPay) {
-      this.snackbar.error('Please upload a file and fill in all fields');
+      this.snackbar.error(this.translate.instant('admin.uploadAndFillFields'));
       return;
     }
     this.payrollService.uploadPayStub(id, {
@@ -154,7 +157,7 @@ export class UserCompliancePanelComponent {
       fileAttachmentId: fileId,
     }).subscribe({
       next: () => {
-        this.snackbar.success('Pay stub uploaded');
+        this.snackbar.success(this.translate.instant('admin.payStubUploaded'));
         this.lastPayStubFileId.set(null);
         this.loadPayroll(id);
       },
@@ -165,7 +168,7 @@ export class UserCompliancePanelComponent {
     const id = this.userId();
     const fileId = this.lastTaxDocFileId();
     if (!id || !fileId || !documentType || !taxYear) {
-      this.snackbar.error('Please upload a file and fill in all fields');
+      this.snackbar.error(this.translate.instant('admin.uploadAndFillFields'));
       return;
     }
     this.payrollService.uploadTaxDocument(id, {
@@ -174,7 +177,7 @@ export class UserCompliancePanelComponent {
       fileAttachmentId: fileId,
     }).subscribe({
       next: () => {
-        this.snackbar.success('Tax document uploaded');
+        this.snackbar.success(this.translate.instant('admin.taxDocUploaded'));
         this.lastTaxDocFileId.set(null);
         this.loadPayroll(id);
       },
@@ -195,7 +198,7 @@ export class UserCompliancePanelComponent {
       if (!confirmed) return;
       this.payrollService.deletePayStub(stub.id).subscribe({
         next: () => {
-          this.snackbar.success('Pay stub deleted');
+          this.snackbar.success(this.translate.instant('admin.payStubDeleted'));
           const id = this.userId();
           if (id) this.loadPayroll(id);
         },
@@ -217,7 +220,7 @@ export class UserCompliancePanelComponent {
       if (!confirmed) return;
       this.payrollService.deleteTaxDocument(doc.id).subscribe({
         next: () => {
-          this.snackbar.success('Tax document deleted');
+          this.snackbar.success(this.translate.instant('admin.taxDocDeleted'));
           const id = this.userId();
           if (id) this.loadPayroll(id);
         },

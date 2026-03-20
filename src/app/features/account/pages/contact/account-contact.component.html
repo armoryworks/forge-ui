@@ -1,20 +1,20 @@
 <div class="account-page">
   <h1 class="account-page__title">
     <span class="material-icons-outlined">home</span>
-    Contact & Address
+    {{ 'account.contact' | translate }}
   </h1>
 
   <div [formGroup]="form" class="account-page__card-grid">
     <div class="account-page__card">
-      <span class="account-page__section-label">Contact</span>
+      <span class="account-page__section-label">{{ 'account.contactLabel' | translate }}</span>
       <div class="account-page__form">
-        <app-input label="Phone Number" formControlName="phoneNumber" mask="phone" placeholder="(555) 123-4567" />
-        <app-input label="Personal Email" formControlName="personalEmail" type="email" [maxlength]="200" />
+        <app-input [label]="'account.phoneNumber' | translate" formControlName="phoneNumber" mask="phone" placeholder="(555) 123-4567" />
+        <app-input [label]="'account.personalEmail' | translate" formControlName="personalEmail" type="email" [maxlength]="200" />
       </div>
     </div>
 
     <div class="account-page__card">
-      <span class="account-page__section-label">Mailing Address</span>
+      <span class="account-page__section-label">{{ 'account.mailingAddress' | translate }}</span>
       <app-address-form formControlName="address" [fixedCountry]="'US'" />
     </div>
   </div>
@@ -26,10 +26,10 @@
       (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined account-page__spinner">sync</span>
-        Saving...
+        {{ 'account.saving' | translate }}
       } @else {
         <span class="material-icons-outlined">save</span>
-        Save
+        {{ 'common.save' | translate }}
       }
     </button>
   </div>

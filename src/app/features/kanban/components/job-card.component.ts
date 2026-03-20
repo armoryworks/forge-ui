@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { formatDate } from '../../../shared/utils/date.utils';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { KanbanJob } from '../models/kanban-job.model';
@@ -9,7 +11,7 @@ import { PRIORITY_COLORS } from '../models/priority-colors.const';
 @Component({
   selector: 'app-job-card',
   standalone: true,
-  imports: [AvatarComponent, MatTooltipModule],
+  imports: [AvatarComponent, MatTooltipModule, TranslatePipe],
   templateUrl: './job-card.component.html',
   styleUrl: './job-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

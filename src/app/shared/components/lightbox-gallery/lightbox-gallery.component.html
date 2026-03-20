@@ -1,7 +1,7 @@
-<div class="lightbox__backdrop" role="button" tabindex="0" aria-label="Close" (click)="onBackdropClick($event)" (keydown.enter)="close()">
+<div class="lightbox__backdrop" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="onBackdropClick($event)" (keydown.enter)="close()">
   <div class="lightbox" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
     <!-- Close button -->
-    <button class="lightbox__close" (click)="close()" aria-label="Close gallery">
+    <button class="lightbox__close" (click)="close()" [attr.aria-label]="'shared.closeGallery' | translate" [matTooltip]="'shared.closeGallery' | translate" matTooltipPosition="above">
       <span class="material-icons-outlined">close</span>
     </button>
 
@@ -12,7 +12,7 @@
     <div class="lightbox__stage">
       <!-- Previous arrow -->
       @if (hasPrev()) {
-        <button class="lightbox__nav lightbox__nav--prev" (click)="prev()" aria-label="Previous image">
+        <button class="lightbox__nav lightbox__nav--prev" (click)="prev()" [attr.aria-label]="'shared.previousImage' | translate" [matTooltip]="'shared.previousImage' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">chevron_left</span>
         </button>
       }
@@ -24,7 +24,7 @@
             <img
               class="lightbox__image"
               [src]="item.url"
-              [alt]="item.title ?? 'Gallery image'"
+              [alt]="item.title ?? ('shared.galleryImage' | translate)"
               draggable="false" />
           } @else {
             <div class="lightbox__placeholder">
@@ -32,11 +32,11 @@
                 {{ getFileIcon(item.type) }}
               </span>
               <span class="lightbox__placeholder-label">
-                {{ item.type === 'pdf' ? 'PDF Document' : 'File' }}
+                {{ item.type === 'pdf' ? ('shared.pdfDocument' | translate) : ('shared.file' | translate) }}
               </span>
               <a class="lightbox__download" [href]="item.url" target="_blank" rel="noopener">
                 <span class="material-icons-outlined">download</span>
-                Download
+                {{ 'common.download' | translate }}
               </a>
             </div>
           }
@@ -45,7 +45,7 @@
 
       <!-- Next arrow -->
       @if (hasNext()) {
-        <button class="lightbox__nav lightbox__nav--next" (click)="next()" aria-label="Next image">
+        <button class="lightbox__nav lightbox__nav--next" (click)="next()" [attr.aria-label]="'shared.nextImage' | translate" [matTooltip]="'shared.nextImage' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">chevron_right</span>
         </button>
       }
@@ -64,12 +64,12 @@
             class="lightbox__thumb"
             [class.lightbox__thumb--active]="i === currentIndex()"
             (click)="goTo(i)"
-            [attr.aria-label]="'Go to image ' + (i + 1)">
+            [attr.aria-label]="('shared.goToImage' | translate) + ' ' + (i + 1)">
             @if (item.type === 'image') {
               <img
                 class="lightbox__thumb-img"
                 [src]="item.thumbnailUrl ?? item.url"
-                [alt]="item.title ?? 'Thumbnail'" />
+                [alt]="item.title ?? ('shared.thumbnail' | translate)" />
             } @else {
               <span class="material-icons-outlined lightbox__thumb-icon">
                 {{ getFileIcon(item.type) }}

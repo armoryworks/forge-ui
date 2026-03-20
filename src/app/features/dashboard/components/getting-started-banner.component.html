@@ -1,12 +1,12 @@
 @if (visible) {
-  <div class="getting-started" role="region" aria-label="Getting started guide">
+  <div class="getting-started" role="region" [attr.aria-label]="'dashboard.gettingStarted' | translate">
     <div class="getting-started__header">
       <span class="material-icons-outlined getting-started__icon">rocket_launch</span>
       <div class="getting-started__title-group">
-        <span class="getting-started__title">Getting Started</span>
-        <span class="getting-started__progress">{{ completedCount }} of {{ steps.length }} complete</span>
+        <span class="getting-started__title">{{ 'dashboard.gettingStarted' | translate }}</span>
+        <span class="getting-started__progress">{{ 'dashboard.ofComplete' | translate:{ completed: completedCount, total: steps.length } }}</span>
       </div>
-      <button class="icon-btn getting-started__dismiss" (click)="dismiss()" aria-label="Dismiss getting started guide">
+      <button class="icon-btn getting-started__dismiss" (click)="dismiss()" [attr.aria-label]="'dashboard.dismissGuide' | translate" [matTooltip]="'dashboard.dismissGuide' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>

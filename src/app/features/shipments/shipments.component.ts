@@ -22,6 +22,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-dialog.component';
 import { ShippingRatesDialogComponent } from './components/shipping-rates-dialog/shipping-rates-dialog.component';
 import { TrackingTimelineComponent } from './components/tracking-timeline/tracking-timeline.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-shipments',
@@ -31,6 +33,7 @@ import { TrackingTimelineComponent } from './components/tracking-timeline/tracki
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     ShipmentDialogComponent, ShippingRatesDialogComponent, TrackingTimelineComponent,
+    TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './shipments.component.html',
   styleUrl: './shipments.component.scss',
@@ -40,6 +43,7 @@ export class ShipmentsComponent {
   private readonly shipmentService = inject(ShipmentService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly showRatesDialog = signal(false);
@@ -56,31 +60,31 @@ export class ShipmentsComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
-    { value: 'Pending', label: 'Pending' },
-    { value: 'Packed', label: 'Packed' },
-    { value: 'Shipped', label: 'Shipped' },
-    { value: 'InTransit', label: 'In Transit' },
-    { value: 'Delivered', label: 'Delivered' },
-    { value: 'Cancelled', label: 'Cancelled' },
+    { value: null, label: this.translate.instant('shipments.allStatuses') },
+    { value: 'Pending', label: this.translate.instant('shipments.statusPending') },
+    { value: 'Packed', label: this.translate.instant('shipments.statusPacked') },
+    { value: 'Shipped', label: this.translate.instant('shipments.statusShipped') },
+    { value: 'InTransit', label: this.translate.instant('shipments.statusInTransit') },
+    { value: 'Delivered', label: this.translate.instant('shipments.statusDelivered') },
+    { value: 'Cancelled', label: this.translate.instant('shipments.statusCancelled') },
   ];
 
   protected readonly shipmentColumns: ColumnDef[] = [
-    { field: 'shipmentNumber', header: 'Shipment #', sortable: true, width: '120px' },
-    { field: 'salesOrderNumber', header: 'SO #', sortable: true, width: '120px' },
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '120px', filterOptions: [
-      { value: 'Pending', label: 'Pending' },
-      { value: 'Packed', label: 'Packed' },
-      { value: 'Shipped', label: 'Shipped' },
-      { value: 'InTransit', label: 'In Transit' },
-      { value: 'Delivered', label: 'Delivered' },
-      { value: 'Cancelled', label: 'Cancelled' },
+    { field: 'shipmentNumber', header: this.translate.instant('shipments.shipmentNumber'), sortable: true, width: '120px' },
+    { field: 'salesOrderNumber', header: this.translate.instant('shipments.soNumber'), sortable: true, width: '120px' },
+    { field: 'customerName', header: this.translate.instant('shipments.customer'), sortable: true },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '120px', filterOptions: [
+      { value: 'Pending', label: this.translate.instant('shipments.statusPending') },
+      { value: 'Packed', label: this.translate.instant('shipments.statusPacked') },
+      { value: 'Shipped', label: this.translate.instant('shipments.statusShipped') },
+      { value: 'InTransit', label: this.translate.instant('shipments.statusInTransit') },
+      { value: 'Delivered', label: this.translate.instant('shipments.statusDelivered') },
+      { value: 'Cancelled', label: this.translate.instant('shipments.statusCancelled') },
     ]},
-    { field: 'carrier', header: 'Carrier', sortable: true, width: '100px' },
-    { field: 'trackingNumber', header: 'Tracking #', sortable: true, width: '140px' },
-    { field: 'shippedDate', header: 'Shipped', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'carrier', header: this.translate.instant('shipments.carrier'), sortable: true, width: '100px' },
+    { field: 'trackingNumber', header: this.translate.instant('shipments.trackingNumber'), sortable: true, width: '140px' },
+    { field: 'shippedDate', header: this.translate.instant('shipments.shippedDate'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('common.createdAt'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly shipmentRowClass = (row: unknown) => {
@@ -145,7 +149,7 @@ export class ShipmentsComponent {
       },
       error: () => {
         this.trackingLoading.set(false);
-        this.snackbar.error('Failed to load tracking info.');
+        this.snackbar.error(this.translate.instant('shipments.failedTracking'));
       },
     });
   }
@@ -159,9 +163,9 @@ export class ShipmentsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Mark as Shipped?',
-        message: `Mark "${shipment.shipmentNumber}" as shipped? This will record the current date as the shipped date.`,
-        confirmLabel: 'Mark Shipped',
+        title: this.translate.instant('shipments.markShippedTitle'),
+        message: this.translate.instant('shipments.markShippedMessage', { number: shipment.shipmentNumber }),
+        confirmLabel: this.translate.instant('shipments.markShipped'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -170,7 +174,7 @@ export class ShipmentsComponent {
         next: () => {
           this.refreshDetail(shipment.id);
           this.loadShipments();
-          this.snackbar.success('Shipment marked as shipped.');
+          this.snackbar.success(this.translate.instant('shipments.shipmentShipped'));
         },
       });
     });
@@ -182,9 +186,9 @@ export class ShipmentsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Mark as Delivered?',
-        message: `Mark "${shipment.shipmentNumber}" as delivered?`,
-        confirmLabel: 'Mark Delivered',
+        title: this.translate.instant('shipments.markDeliveredTitle'),
+        message: this.translate.instant('shipments.markDeliveredMessage', { number: shipment.shipmentNumber }),
+        confirmLabel: this.translate.instant('shipments.markDelivered'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -193,7 +197,7 @@ export class ShipmentsComponent {
         next: () => {
           this.refreshDetail(shipment.id);
           this.loadShipments();
-          this.snackbar.success('Shipment marked as delivered.');
+          this.snackbar.success(this.translate.instant('shipments.shipmentDelivered'));
         },
       });
     });
@@ -213,7 +217,8 @@ export class ShipmentsComponent {
   }
 
   protected getStatusLabel(status: string): string {
-    return status === 'InTransit' ? 'In Transit' : status;
+    const key = 'shipments.status' + status;
+    return this.translate.instant(key);
   }
 
   protected canShip(status: string): boolean {

@@ -8,6 +8,8 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { ColumnDef } from '../../../models/column-def.model';
 import { InputComponent } from '../../input/input.component';
 import { DatepickerComponent } from '../../datepicker/datepicker.component';
@@ -20,7 +22,7 @@ export interface ColumnFilterState {
 @Component({
   selector: 'app-column-filter-popover',
   standalone: true,
-  imports: [FormsModule, MatCheckboxModule, InputComponent, DatepickerComponent],
+  imports: [FormsModule, MatCheckboxModule, InputComponent, DatepickerComponent, TranslatePipe],
   templateUrl: './column-filter-popover.component.html',
   styleUrl: './column-filter-popover.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

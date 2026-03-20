@@ -3,6 +3,7 @@ import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ExpensesService } from '../services/expenses.service';
 import { ExpenseItem } from '../models/expense-item.model';
@@ -17,6 +18,7 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { SpacerDirective } from '../../../shared/directives/spacer.directive';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-expense-approval-queue',
@@ -25,7 +27,7 @@ import { SpacerDirective } from '../../../shared/directives/spacer.directive';
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageLayoutComponent, DataTableComponent, ColumnCellDirective,
     InputComponent, AvatarComponent, TextareaComponent, DialogComponent,
-    LoadingBlockDirective, SpacerDirective,
+    LoadingBlockDirective, SpacerDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './expense-approval-queue.component.html',
   styleUrl: './expense-approval-queue.component.scss',
@@ -34,6 +36,7 @@ import { SpacerDirective } from '../../../shared/directives/spacer.directive';
 export class ExpenseApprovalQueueComponent {
   private readonly expensesService = inject(ExpensesService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly pendingExpenses = signal<ExpenseItem[]>([]);
@@ -45,12 +48,12 @@ export class ExpenseApprovalQueueComponent {
   protected readonly processing = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'expenseDate', header: 'Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'userName', header: 'Submitted By', sortable: true, width: '160px' },
-    { field: 'category', header: 'Category', sortable: true, width: '120px' },
-    { field: 'description', header: 'Description' },
-    { field: 'jobNumber', header: 'Job', width: '100px' },
-    { field: 'amount', header: 'Amount', sortable: true, align: 'right', width: '100px' },
+    { field: 'expenseDate', header: this.translate.instant('expenses.colDate'), sortable: true, type: 'date', width: '110px' },
+    { field: 'userName', header: this.translate.instant('expenses.colSubmittedBy'), sortable: true, width: '160px' },
+    { field: 'category', header: this.translate.instant('expenses.colCategory'), sortable: true, width: '120px' },
+    { field: 'description', header: this.translate.instant('expenses.colDescription') },
+    { field: 'jobNumber', header: this.translate.instant('expenses.colJob'), width: '100px' },
+    { field: 'amount', header: this.translate.instant('expenses.colAmount'), sortable: true, align: 'right', width: '100px' },
     { field: 'actions', header: '', width: '100px', align: 'right' },
   ];
 
@@ -89,7 +92,7 @@ export class ExpenseApprovalQueueComponent {
         this.processing.set(false);
         this.closeReview();
         this.loadPending();
-        this.snackbar.success('Expense approved.');
+        this.snackbar.success(this.translate.instant('expenses.expenseApproved'));
       },
       error: () => this.processing.set(false),
     });
@@ -108,7 +111,7 @@ export class ExpenseApprovalQueueComponent {
         this.processing.set(false);
         this.closeReview();
         this.loadPending();
-        this.snackbar.success('Expense rejected.');
+        this.snackbar.success(this.translate.instant('expenses.expenseRejected'));
       },
       error: () => this.processing.set(false),
     });

@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AdminService } from '../../services/admin.service';
 import { AdminTeam, TeamMember, KioskTerminal } from '../../models/admin-team.model';
@@ -28,7 +30,7 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
   imports: [
     ReactiveFormsModule, DataTableComponent, ColumnCellDirective, EmptyStateComponent,
     LoadingBlockDirective, DialogComponent, InputComponent, SelectComponent,
-    TextareaComponent, ToggleComponent, AvatarComponent, ValidationPopoverDirective,
+    TextareaComponent, ToggleComponent, AvatarComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './teams-panel.component.html',
   styleUrl: './teams-panel.component.scss',
@@ -38,6 +40,7 @@ export class TeamsPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly teams = signal<AdminTeam[]>([]);
   protected readonly terminals = signal<KioskTerminal[]>([]);
@@ -92,7 +95,7 @@ export class TeamsPanelComponent implements OnInit {
     this.loading.set(true);
     this.adminService.getTeams().subscribe({
       next: (teams) => { this.teams.set(teams); this.loading.set(false); },
-      error: () => { this.loading.set(false); this.snackbar.error('Failed to load teams'); },
+      error: () => { this.loading.set(false); this.snackbar.error(this.translate.instant('teamsPanel.loadFailed')); },
     });
     this.adminService.getKioskTerminals().subscribe({
       next: (terminals) => this.terminals.set(terminals),
@@ -140,9 +143,9 @@ export class TeamsPanelComponent implements OnInit {
           this.saving.set(false);
           this.closeTeamDialog();
           this.load();
-          this.snackbar.success('Team updated');
+          this.snackbar.success(this.translate.instant('teamsPanel.teamUpdated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error('Failed to update team'); },
+        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('teamsPanel.updateFailed')); },
       });
     } else {
       this.adminService.createTeam({
@@ -154,9 +157,9 @@ export class TeamsPanelComponent implements OnInit {
           this.saving.set(false);
           this.closeTeamDialog();
           this.load();
-          this.snackbar.success('Team created');
+          this.snackbar.success(this.translate.instant('teamsPanel.teamCreated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error('Failed to create team'); },
+        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('teamsPanel.createFailed')); },
       });
     }
   }
@@ -173,8 +176,8 @@ export class TeamsPanelComponent implements OnInit {
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.adminService.deleteTeam(team.id).subscribe({
-        next: () => { this.load(); this.snackbar.success('Team deleted'); },
-        error: () => this.snackbar.error('Failed to delete team — check for active terminals'),
+        next: () => { this.load(); this.snackbar.success(this.translate.instant('teamsPanel.teamDeleted')); },
+        error: () => this.snackbar.error(this.translate.instant('teamsPanel.deleteFailed')),
       });
     });
   }
@@ -192,7 +195,7 @@ export class TeamsPanelComponent implements OnInit {
         this.teamMembers.set(members);
         this.selectedUserIds.set(new Set(members.map(m => m.id)));
       },
-      error: () => this.snackbar.error('Failed to load team members'),
+      error: () => this.snackbar.error(this.translate.instant('teamsPanel.loadMembersFailed')),
     });
 
     this.adminService.getUsers().subscribe({
@@ -234,9 +237,9 @@ export class TeamsPanelComponent implements OnInit {
         this.saving.set(false);
         this.closeMemberDialog();
         this.load();
-        this.snackbar.success(`Members updated for ${team.name}`);
+        this.snackbar.success(this.translate.instant('teamsPanel.membersUpdated', { name: team.name }));
       },
-      error: () => { this.saving.set(false); this.snackbar.error('Failed to assign members'); },
+      error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('teamsPanel.assignFailed')); },
     });
   }
 

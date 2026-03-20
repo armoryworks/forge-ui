@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
 import { Address } from '../../../../shared/models/address.model';
@@ -14,7 +16,7 @@ import { EmployeeProfileService } from '../../services/employee-profile.service'
 @Component({
   selector: 'app-account-contact',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, AddressFormComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, AddressFormComponent, ValidationPopoverDirective],
   templateUrl: './account-contact.component.html',
   styleUrl: './account-contact.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +24,7 @@ import { EmployeeProfileService } from '../../services/employee-profile.service'
 export class AccountContactComponent implements OnInit {
   private readonly profileService = inject(EmployeeProfileService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
 
@@ -66,7 +69,7 @@ export class AccountContactComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Contact info updated');
+        this.snackbar.success(this.translate.instant('account.contactInfoUpdated'));
       },
       error: () => this.saving.set(false),
     });

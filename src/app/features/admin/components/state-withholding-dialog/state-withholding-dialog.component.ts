@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -18,7 +19,7 @@ interface StateEntry {
 @Component({
   selector: 'app-state-withholding-dialog',
   standalone: true,
-  imports: [DialogComponent, LoadingBlockDirective],
+  imports: [TranslatePipe, DialogComponent, LoadingBlockDirective],
   templateUrl: './state-withholding-dialog.component.html',
   styleUrl: './state-withholding-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +28,7 @@ export class StateWithholdingDialogComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly dialogRef = inject(MatDialogRef<StateWithholdingDialogComponent>);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -65,7 +67,7 @@ export class StateWithholdingDialogComponent implements OnInit {
         this.currentState.set(stateCode);
         this.saving.set(false);
         const state = this.states().find(s => s.code === stateCode);
-        this.snackbar.success(`Company state set to ${state?.label ?? stateCode}`);
+        this.snackbar.success(`${this.translate.instant('stateWithholdingDialog.companyStateSet')} ${state?.label ?? stateCode}`);
         this.dialogRef.close(true);
       },
       error: () => this.saving.set(false),
@@ -93,11 +95,11 @@ export class StateWithholdingDialogComponent implements OnInit {
   }
 
   protected getStatusLabel(state: StateEntry): string {
-    if (state.code === this.currentState()) return 'Active';
-    if (state.category === 'no_tax') return 'No Tax';
-    if (state.category === 'federal') return 'Uses W-4';
-    if (state.docuSealTemplateId) return 'Ready';
-    return 'Needs Upload';
+    if (state.code === this.currentState()) return this.translate.instant('stateWithholdingDialog.statusActive');
+    if (state.category === 'no_tax') return this.translate.instant('stateWithholdingDialog.statusNoTax');
+    if (state.category === 'federal') return this.translate.instant('stateWithholdingDialog.statusUsesW4');
+    if (state.docuSealTemplateId) return this.translate.instant('stateWithholdingDialog.statusReady');
+    return this.translate.instant('stateWithholdingDialog.statusNeedsUpload');
   }
 
   private parseEntry(entry: ReferenceDataEntry): StateEntry {

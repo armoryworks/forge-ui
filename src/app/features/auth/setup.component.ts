@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../shared/components/address-form/address-form.component';
@@ -17,7 +18,7 @@ import { ToastService } from '../../shared/services/toast.service';
   selector: 'app-setup',
   standalone: true,
   imports: [
-    ReactiveFormsModule, MatCardModule, MatButtonModule,
+    ReactiveFormsModule, MatCardModule, MatButtonModule, TranslatePipe,
     InputComponent, AddressFormComponent, ValidationPopoverDirective,
   ],
   templateUrl: './setup.component.html',
@@ -30,6 +31,7 @@ export class SetupComponent {
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly step = signal(1);
   protected readonly loading = this.loadingService.isLoading;
@@ -81,7 +83,7 @@ export class SetupComponent {
     const company = this.companyForm.getRawValue();
     const address = company.address as Record<string, string> | null;
 
-    this.loadingService.track('Setting up...', this.authService.setup({
+    this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.setup({
       email: account.email!,
       password: account.password!,
       firstName: account.firstName!,

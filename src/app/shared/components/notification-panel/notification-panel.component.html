@@ -10,7 +10,7 @@
       }
     </div>
     @if (unreadCount() > 0) {
-      <button class="icon-btn notification-panel__action" title="Mark all read" (click)="markAllRead()">
+      <button class="icon-btn notification-panel__action" [attr.aria-label]="'notifications.markAllRead' | translate" [matTooltip]="'notifications.markAllRead' | translate" matTooltipPosition="above" (click)="markAllRead()">
         <span class="material-icons-outlined">done_all</span>
       </button>
     }
@@ -20,14 +20,14 @@
     @if (isEmpty()) {
       <div class="notification-panel__empty">
         <span class="material-icons-outlined notification-panel__empty-icon">notifications_none</span>
-        <span>No notifications</span>
+        <span>{{ 'notifications.noNotifications' | translate }}</span>
       </div>
     } @else {
       @for (n of notifications(); track n.id) {
         <div class="notification-item"
           role="button"
           tabindex="0"
-          [attr.aria-label]="'Notification: ' + n.title"
+          [attr.aria-label]="('notifications.notification' | translate) + ': ' + n.title"
           [class.notification-item--unread]="!n.isRead"
           [class.notification-item--pinned]="n.isPinned"
           (click)="onNotificationClick(n)"
@@ -47,10 +47,10 @@
             <div class="notification-item__time">{{ n.createdAt | date:'MM/dd/yyyy hh:mm a' }}</div>
           </div>
           <div class="notification-item__actions">
-            <button class="icon-btn" [title]="n.isPinned ? 'Unpin' : 'Pin'" (click)="togglePin(n, $event)">
+            <button class="icon-btn" [attr.aria-label]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" [matTooltip]="n.isPinned ? ('notifications.unpin' | translate) : ('notifications.pin' | translate)" matTooltipPosition="above" (click)="togglePin(n, $event)">
               <span class="material-icons-outlined">{{ n.isPinned ? 'push_pin' : 'push_pin' }}</span>
             </button>
-            <button class="icon-btn" title="Dismiss" (click)="dismiss(n, $event)">
+            <button class="icon-btn" [attr.aria-label]="'notifications.dismiss' | translate" [matTooltip]="'notifications.dismiss' | translate" matTooltipPosition="above" (click)="dismiss(n, $event)">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -60,6 +60,6 @@
   </div>
 
   <div class="notification-panel__footer">
-    <button class="notification-panel__dismiss-all" (click)="dismissAll()">Dismiss All</button>
+    <button class="notification-panel__dismiss-all" (click)="dismissAll()">{{ 'notifications.dismissAll' | translate }}</button>
   </div>
 </div>

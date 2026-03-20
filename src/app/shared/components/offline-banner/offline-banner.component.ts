@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 
+import { TranslateService } from '@ngx-translate/core';
+
 import { OfflineQueueService } from '../../services/offline-queue.service';
 
 type BannerState = 'hidden' | 'offline' | 'syncing' | 'synced';
@@ -13,6 +15,7 @@ type BannerState = 'hidden' | 'offline' | 'syncing' | 'synced';
 })
 export class OfflineBannerComponent implements OnDestroy {
   private readonly offlineQueue = inject(OfflineQueueService);
+  private readonly translate = inject(TranslateService);
   private autoDismissTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly isOffline = signal(!navigator.onLine);
@@ -41,16 +44,16 @@ export class OfflineBannerComponent implements OnDestroy {
       case 'offline': {
         const count = this.pendingCount();
         if (count > 0) {
-          return `You're offline. ${count} pending change${count === 1 ? '' : 's'} will sync when reconnected.`;
+          return this.translate.instant('shared.offlineWithPending', { count });
         }
-        return "You're offline. Changes will sync when reconnected.";
+        return this.translate.instant('shared.offlineNoChanges');
       }
       case 'syncing': {
         const count = this.pendingCount();
-        return `Syncing ${count} change${count === 1 ? '' : 's'}...`;
+        return this.translate.instant('shared.syncing', { count });
       }
       case 'synced':
-        return 'All changes synced.';
+        return this.translate.instant('shared.allChangesSynced');
       default:
         return '';
     }

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
 import { ProcessStep } from '../../models/process-step.model';
@@ -13,7 +15,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 @Component({
   selector: 'app-process-plan',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule],
   templateUrl: './process-plan.component.html',
   styleUrl: './process-plan.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +24,7 @@ export class ProcessPlanComponent {
   private readonly partsService = inject(PartsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly partId = input.required<number>();
 
@@ -59,7 +62,7 @@ export class ProcessPlanComponent {
     }).afterClosed().subscribe((result: ProcessStep | undefined) => {
       if (result) {
         this.steps.update(list => [...list, result].sort((a, b) => a.stepNumber - b.stepNumber));
-        this.snackbar.success('Process step added.');
+        this.snackbar.success(this.translate.instant('parts.stepAdded'));
       }
     });
   }
@@ -76,7 +79,7 @@ export class ProcessPlanComponent {
         this.steps.update(list =>
           list.map(s => s.id === result.id ? result : s).sort((a, b) => a.stepNumber - b.stepNumber),
         );
-        this.snackbar.success('Process step updated.');
+        this.snackbar.success(this.translate.instant('parts.stepUpdated'));
       }
     });
   }
@@ -85,16 +88,16 @@ export class ProcessPlanComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Process Step?',
-        message: `This will remove step ${step.stepNumber}: "${step.title}" from the process plan.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('parts.deleteProcessStep'),
+        message: this.translate.instant('parts.deleteStepMessage', { stepNumber: step.stepNumber, title: step.title }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.partsService.deleteProcessStep(this.partId(), step.id).subscribe(() => {
         this.steps.update(list => list.filter(s => s.id !== step.id));
-        this.snackbar.success('Process step deleted.');
+        this.snackbar.success(this.translate.instant('parts.stepDeleted'));
       });
     });
   }

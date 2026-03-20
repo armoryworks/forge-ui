@@ -19,9 +19,11 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CdkOverlayOrigin, OverlayModule } from '@angular/cdk/overlay';
 
 import { unparse } from 'papaparse';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ColumnDef } from '../../models/column-def.model';
 import { SortState } from '../../models/sort-state.model';
@@ -43,11 +45,13 @@ import { UserPreferencesService } from '../../services/user-preferences.service'
     MatDividerModule,
     MatMenuModule,
     MatPaginatorModule,
+    MatTooltipModule,
     OverlayModule,
     LoadingBlockDirective,
     EmptyStateComponent,
     ColumnFilterPopoverComponent,
     ColumnManagerPanelComponent,
+    TranslatePipe,
   ],
   templateUrl: './data-table.component.html',
   styleUrl: './data-table.component.scss',

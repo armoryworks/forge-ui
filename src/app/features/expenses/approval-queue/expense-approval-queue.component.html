@@ -1,17 +1,17 @@
-<app-page-layout pageTitle="Expense Approval Queue">
+<app-page-layout [pageTitle]="'expenses.approvalQueue' | translate">
   <ng-container toolbar>
-    <app-input label="Search" [formControl]="searchControl" placeholder="Search by name, category..."
+    <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'expenses.searchApprovalPlaceholder' | translate"
       (keyup.enter)="loadPending()" />
     <span appSpacer></span>
     <span class="approval-queue__summary">
-      {{ pendingExpenses().length }} pending &middot; {{ getPendingTotal() | currency }}
+      {{ pendingExpenses().length }} {{ 'expenses.pending' | translate }} &middot; {{ getPendingTotal() | currency }}
     </span>
   </ng-container>
 
   <ng-container content>
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="expense-approval" [columns]="columns" [data]="pendingExpenses()"
-        emptyIcon="fact_check" emptyMessage="No expenses awaiting approval"
+        emptyIcon="fact_check" [emptyMessage]="'expenses.noExpensesAwaiting' | translate"
         (rowClick)="openReview($any($event))">
         <ng-template appColumnCell="expenseDate" let-row>
           <span class="text-muted">{{ row.expenseDate | date:'MM/dd/yyyy' }}</span>
@@ -30,11 +30,11 @@
         </ng-template>
         <ng-template appColumnCell="actions" let-row>
           <div class="approval-queue__actions">
-            <button class="icon-btn icon-btn--success" title="Approve"
+            <button class="icon-btn icon-btn--success" [matTooltip]="'expenses.approve' | translate" matTooltipPosition="above"
               (click)="openReview(row); $event.stopPropagation()">
               <span class="material-icons-outlined">check</span>
             </button>
-            <button class="icon-btn icon-btn--danger" title="Reject"
+            <button class="icon-btn icon-btn--danger" [matTooltip]="'expenses.reject' | translate" matTooltipPosition="above"
               (click)="openReview(row); $event.stopPropagation()">
               <span class="material-icons-outlined">close</span>
             </button>
@@ -46,47 +46,47 @@
 </app-page-layout>
 
 @if (reviewExpense(); as expense) {
-  <app-dialog title="Review Expense" (closed)="closeReview()">
+  <app-dialog [title]="'expenses.reviewExpense' | translate" (closed)="closeReview()">
     <div class="review-detail">
       <div class="review-detail__row">
-        <span class="review-detail__label">Submitted By</span>
+        <span class="review-detail__label">{{ 'expenses.submittedBy' | translate }}</span>
         <span class="review-detail__value">{{ expense.userName }}</span>
       </div>
       <div class="review-detail__row">
-        <span class="review-detail__label">Date</span>
+        <span class="review-detail__label">{{ 'expenses.date' | translate }}</span>
         <span class="review-detail__value">{{ expense.expenseDate | date:'MM/dd/yyyy' }}</span>
       </div>
       <div class="review-detail__row">
-        <span class="review-detail__label">Category</span>
+        <span class="review-detail__label">{{ 'expenses.category' | translate }}</span>
         <span class="review-detail__value">{{ expense.category }}</span>
       </div>
       <div class="review-detail__row">
-        <span class="review-detail__label">Amount</span>
+        <span class="review-detail__label">{{ 'expenses.amount' | translate }}</span>
         <span class="review-detail__value review-detail__value--amount">{{ expense.amount | currency }}</span>
       </div>
       @if (expense.description) {
         <div class="review-detail__row">
-          <span class="review-detail__label">Description</span>
+          <span class="review-detail__label">{{ 'common.description' | translate }}</span>
           <span class="review-detail__value">{{ expense.description }}</span>
         </div>
       }
       @if (expense.jobNumber) {
         <div class="review-detail__row">
-          <span class="review-detail__label">Job</span>
+          <span class="review-detail__label">{{ 'expenses.job' | translate }}</span>
           <span class="review-detail__value">{{ expense.jobNumber }}</span>
         </div>
       }
 
-      <app-textarea label="Approval Notes (optional)" [formControl]="notesControl" [rows]="3" />
+      <app-textarea [label]="'expenses.approvalNotesOptional' | translate" [formControl]="notesControl" [rows]="3" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn action-btn--danger"
         [disabled]="processing()"
-        (click)="reject()">Reject</button>
+        (click)="reject()">{{ 'expenses.reject' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [disabled]="processing()"
-        (click)="approve()">Approve</button>
+        (click)="approve()">{{ 'expenses.approve' | translate }}</button>
     </div>
   </app-dialog>
 }

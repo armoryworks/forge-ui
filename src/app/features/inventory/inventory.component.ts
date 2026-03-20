@@ -5,6 +5,9 @@ import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { InventoryService } from './services/inventory.service';
 import { StorageLocation } from './models/storage-location.model';
 import { InventoryPartSummary } from './models/inventory-part-summary.model';
@@ -38,7 +41,7 @@ type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOp
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationPopoverDirective, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent],
+  imports: [ReactiveFormsModule, DatePipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationPopoverDirective, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +51,7 @@ export class InventoryComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -60,12 +64,12 @@ export class InventoryComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly stockColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'material', header: 'Material', sortable: true, width: '140px' },
-    { field: 'onHand', header: 'On Hand', sortable: true, align: 'right', width: '90px' },
-    { field: 'reserved', header: 'Reserved', sortable: true, align: 'right', width: '90px' },
-    { field: 'available', header: 'Available', sortable: true, align: 'right', width: '90px' },
+    { field: 'partNumber', header: this.translate.instant('inventory.columns.partNumber'), sortable: true, width: '120px' },
+    { field: 'description', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'material', header: this.translate.instant('inventory.columns.material'), sortable: true, width: '140px' },
+    { field: 'onHand', header: this.translate.instant('inventory.onHand'), sortable: true, align: 'right', width: '90px' },
+    { field: 'reserved', header: this.translate.instant('inventory.columns.reserved'), sortable: true, align: 'right', width: '90px' },
+    { field: 'available', header: this.translate.instant('inventory.available'), sortable: true, align: 'right', width: '90px' },
   ];
 
   protected readonly stockRowClass = (row: unknown) => {
@@ -85,13 +89,13 @@ export class InventoryComponent {
   protected readonly movements = signal<BinMovementItem[]>([]);
 
   protected readonly movementColumns: ColumnDef[] = [
-    { field: 'entityName', header: 'Item', sortable: true },
-    { field: 'quantity', header: 'Qty', sortable: true, width: '70px', align: 'right' },
-    { field: 'fromLocationName', header: 'From', sortable: true },
-    { field: 'toLocationName', header: 'To', sortable: true },
-    { field: 'reason', header: 'Reason', sortable: true, width: '120px' },
-    { field: 'movedByName', header: 'By', sortable: true },
-    { field: 'movedAt', header: 'When', sortable: true, type: 'date', width: '120px' },
+    { field: 'entityName', header: this.translate.instant('inventory.columns.item'), sortable: true },
+    { field: 'quantity', header: this.translate.instant('inventory.columns.qty'), sortable: true, width: '70px', align: 'right' },
+    { field: 'fromLocationName', header: this.translate.instant('inventory.columns.from'), sortable: true },
+    { field: 'toLocationName', header: this.translate.instant('inventory.columns.to'), sortable: true },
+    { field: 'reason', header: this.translate.instant('inventory.columns.reason'), sortable: true, width: '120px' },
+    { field: 'movedByName', header: this.translate.instant('inventory.columns.by'), sortable: true },
+    { field: 'movedAt', header: this.translate.instant('inventory.columns.when'), sortable: true, type: 'date', width: '120px' },
   ];
 
   // Receiving tab
@@ -377,7 +381,7 @@ export class InventoryComponent {
       barcode: form.barcode || undefined,
       description: form.description || undefined,
     }).subscribe({
-      next: () => { this.saving.set(false); this.closeLocationDialog(); this.loadLocations(); this.snackbar.success('Location created'); },
+      next: () => { this.saving.set(false); this.closeLocationDialog(); this.loadLocations(); this.snackbar.success(this.translate.instant('inventory.snackbar.locationCreated')); },
       error: () => this.saving.set(false),
     });
   }
@@ -452,7 +456,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.closeReceiveDialog();
         this.loadReceivingHistory();
-        this.snackbar.success('Goods received');
+        this.snackbar.success(this.translate.instant('inventory.snackbar.goodsReceived'));
       },
       error: () => this.saving.set(false),
     });
@@ -489,7 +493,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.closeTransferDialog();
         this.loadStock();
-        this.snackbar.success('Stock transferred');
+        this.snackbar.success(this.translate.instant('inventory.snackbar.stockTransferred'));
       },
       error: () => this.saving.set(false),
     });
@@ -524,7 +528,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.closeAdjustDialog();
         this.loadStock();
-        this.snackbar.success('Stock adjusted');
+        this.snackbar.success(this.translate.instant('inventory.snackbar.stockAdjusted'));
       },
       error: () => this.saving.set(false),
     });
@@ -565,7 +569,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.closeCreateCycleCountDialog();
         this.loadCycleCounts();
-        this.snackbar.success('Cycle count created');
+        this.snackbar.success(this.translate.instant('inventory.snackbar.cycleCountCreated'));
         this.openCycleCountDetail(cc);
       },
       error: () => this.saving.set(false),
@@ -608,7 +612,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.closeCycleCountDialog();
         this.loadCycleCounts();
-        this.snackbar.success('Cycle count approved — stock adjusted');
+        this.snackbar.success(this.translate.instant('inventory.snackbar.cycleCountApproved'));
       },
       error: () => this.saving.set(false),
     });
@@ -623,7 +627,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.closeCycleCountDialog();
         this.loadCycleCounts();
-        this.snackbar.info('Cycle count rejected');
+        this.snackbar.info(this.translate.instant('inventory.snackbar.cycleCountRejected'));
       },
       error: () => this.saving.set(false),
     });
@@ -679,7 +683,7 @@ export class InventoryComponent {
         this.closeReservationDialog();
         this.loadReservations();
         this.loadStock();
-        this.snackbar.success('Reservation created');
+        this.snackbar.success(this.translate.instant('inventory.snackbar.reservationCreated'));
       },
       error: () => this.saving.set(false),
     });
@@ -692,7 +696,7 @@ export class InventoryComponent {
         this.saving.set(false);
         this.loadReservations();
         this.loadStock();
-        this.snackbar.info('Reservation released');
+        this.snackbar.info(this.translate.instant('inventory.snackbar.reservationReleased'));
       },
       error: () => this.saving.set(false),
     });

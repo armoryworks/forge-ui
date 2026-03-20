@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PartsService } from './services/parts.service';
 import { PartListItem } from './models/part-list-item.model';
 import { PartDetail } from './models/part-detail.model';
@@ -25,6 +26,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
@@ -40,12 +42,12 @@ import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barco
   selector: 'app-parts',
   standalone: true,
   imports: [
-    DecimalPipe, ReactiveFormsModule,
+    DecimalPipe, ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
     EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
-    ProcessPlanComponent, BarcodeInfoComponent,
+    ProcessPlanComponent, BarcodeInfoComponent, MatTooltipModule,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
@@ -57,6 +59,7 @@ export class PartsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
@@ -73,36 +76,36 @@ export class PartsComponent {
   private readonly typeFilter = toSignal(this.typeFilterControl.valueChanges.pipe(startWith('' as PartType | '')), { initialValue: '' as PartType | '' });
 
   protected readonly statusFilterOptions: SelectOption[] = [
-    { value: '', label: 'All Statuses' },
-    { value: 'Active', label: 'Active' },
-    { value: 'Draft', label: 'Draft' },
-    { value: 'Prototype', label: 'Prototype' },
-    { value: 'Obsolete', label: 'Obsolete' },
+    { value: '', label: this.translate.instant('parts.allStatuses') },
+    { value: 'Active', label: this.translate.instant('parts.statusActive') },
+    { value: 'Draft', label: this.translate.instant('parts.statusDraft') },
+    { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') },
+    { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
   ];
 
   protected readonly typeFilterOptions: SelectOption[] = [
-    { value: '', label: 'All Types' },
-    { value: 'Part', label: 'Part' },
-    { value: 'Assembly', label: 'Assembly' },
-    { value: 'RawMaterial', label: 'Raw Material' },
-    { value: 'Consumable', label: 'Consumable' },
-    { value: 'Tooling', label: 'Tooling' },
-    { value: 'Fastener', label: 'Fastener' },
-    { value: 'Electronic', label: 'Electronic' },
-    { value: 'Packaging', label: 'Packaging' },
+    { value: '', label: this.translate.instant('parts.allTypes') },
+    { value: 'Part', label: this.translate.instant('parts.typePart') },
+    { value: 'Assembly', label: this.translate.instant('parts.typeAssembly') },
+    { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
+    { value: 'Consumable', label: this.translate.instant('parts.typeConsumable') },
+    { value: 'Tooling', label: this.translate.instant('parts.typeTooling') },
+    { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
+    { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
+    { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
   ];
 
   protected readonly partColumns: ColumnDef[] = [
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'externalPartNumber', header: 'Ext. Part #', sortable: true, width: '120px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'revision', header: 'Rev', width: '60px', align: 'center' },
-    { field: 'partType', header: 'Type', sortable: true },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: [
-      { value: 'Active', label: 'Active' }, { value: 'Draft', label: 'Draft' }, { value: 'Prototype', label: 'Prototype' }, { value: 'Obsolete', label: 'Obsolete' },
+    { field: 'partNumber', header: this.translate.instant('parts.partNumber'), sortable: true, width: '120px' },
+    { field: 'externalPartNumber', header: this.translate.instant('parts.extPartNumber'), sortable: true, width: '120px' },
+    { field: 'description', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
+    { field: 'partType', header: this.translate.instant('common.type'), sortable: true },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
+      { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},
-    { field: 'material', header: 'Material' },
-    { field: 'bomEntryCount', header: 'BOM', width: '60px', align: 'center' },
+    { field: 'material', header: this.translate.instant('parts.material') },
+    { field: 'bomEntryCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
   ];
 
   protected readonly partRowClass = (row: unknown) => {
@@ -129,14 +132,14 @@ export class PartsComponent {
   });
 
   protected readonly partTypeOptions: SelectOption[] = [
-    { value: 'Part', label: 'Part' },
-    { value: 'Assembly', label: 'Assembly' },
-    { value: 'RawMaterial', label: 'Raw Material' },
-    { value: 'Consumable', label: 'Consumable' },
-    { value: 'Tooling', label: 'Tooling' },
-    { value: 'Fastener', label: 'Fastener' },
-    { value: 'Electronic', label: 'Electronic' },
-    { value: 'Packaging', label: 'Packaging' },
+    { value: 'Part', label: this.translate.instant('parts.typePart') },
+    { value: 'Assembly', label: this.translate.instant('parts.typeAssembly') },
+    { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
+    { value: 'Consumable', label: this.translate.instant('parts.typeConsumable') },
+    { value: 'Tooling', label: this.translate.instant('parts.typeTooling') },
+    { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
+    { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
+    { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
   ];
 
   // ── BOM Dialog ──
@@ -156,9 +159,9 @@ export class PartsComponent {
   });
 
   protected readonly sourceTypeOptions: SelectOption[] = [
-    { value: 'Make', label: 'Make' },
-    { value: 'Buy', label: 'Buy' },
-    { value: 'Stock', label: 'Stock' },
+    { value: 'Make', label: this.translate.instant('parts.sourceMake') },
+    { value: 'Buy', label: this.translate.instant('parts.sourceBuy') },
+    { value: 'Stock', label: this.translate.instant('parts.sourceStock') },
   ];
 
   // Detail tab
@@ -304,7 +307,7 @@ export class PartsComponent {
           this.selectedPart.set(detail);
           this.closePartDialog();
           this.loadParts();
-          this.snackbar.success('Part updated.');
+          this.snackbar.success(this.translate.instant('parts.partUpdated'));
         },
       });
     } else {
@@ -321,7 +324,7 @@ export class PartsComponent {
           this.selectedPart.set(detail);
           this.closePartDialog();
           this.loadParts();
-          this.snackbar.success('Part created.');
+          this.snackbar.success(this.translate.instant('parts.partCreated'));
         },
       });
     }
@@ -370,7 +373,7 @@ export class PartsComponent {
         this.selectedPart.set(detail);
         this.closeBomDialog();
         this.loadParts();
-        this.snackbar.success('BOM entry added.');
+        this.snackbar.success(this.translate.instant('parts.bomEntryAdded'));
       },
     });
   }
@@ -381,9 +384,9 @@ export class PartsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete BOM Entry?',
-        message: 'This will permanently remove this BOM entry from the part.',
-        confirmLabel: 'Delete',
+        title: this.translate.instant('parts.deleteBomEntry'),
+        message: this.translate.instant('parts.deleteBomMessage'),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -392,7 +395,7 @@ export class PartsComponent {
         next: (detail) => {
           this.selectedPart.set(detail);
           this.loadParts();
-          this.snackbar.success('BOM entry deleted.');
+          this.snackbar.success(this.translate.instant('parts.bomEntryDeleted'));
         },
       });
     });
@@ -404,9 +407,9 @@ export class PartsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Part?',
-        message: `This will permanently delete "${part.partNumber}".`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('parts.deletePart'),
+        message: this.translate.instant('parts.deletePartMessage', { partNumber: part.partNumber }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -415,7 +418,7 @@ export class PartsComponent {
         next: () => {
           this.selectedPart.set(null);
           this.loadParts();
-          this.snackbar.success('Part deleted.');
+          this.snackbar.success(this.translate.instant('parts.partDeleted'));
         },
       });
     });
@@ -445,7 +448,7 @@ export class PartsComponent {
         this.linkSaving.set(false);
         this.closeLinkDialog();
         this.selectPart({ id: part.id } as PartListItem);
-        this.snackbar.success(`Linked to ${item.name}.`);
+        this.snackbar.success(this.translate.instant('parts.link') + ` ${item.name}`);
       },
       error: () => this.linkSaving.set(false),
     });
@@ -457,9 +460,9 @@ export class PartsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Unlink Accounting Item?',
-        message: `This will remove the link between "${part.partNumber}" and its accounting item.`,
-        confirmLabel: 'Unlink',
+        title: this.translate.instant('parts.unlinkAccountingItem'),
+        message: this.translate.instant('parts.unlinkMessage', { partNumber: part.partNumber }),
+        confirmLabel: this.translate.instant('parts.unlink'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -467,7 +470,7 @@ export class PartsComponent {
       this.partsService.unlinkAccountingItem(part.id).subscribe({
         next: () => {
           this.selectPart({ id: part.id } as PartListItem);
-          this.snackbar.success('Accounting item unlinked.');
+          this.snackbar.success(this.translate.instant('parts.accountingUnlinked'));
         },
       });
     });

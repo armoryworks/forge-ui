@@ -2,23 +2,23 @@
   <div class="worker__header">
     <span class="material-icons-outlined worker__header-icon">engineering</span>
     <div class="worker__header-text">
-      <h1 class="worker__title">My Tasks</h1>
+      <h1 class="worker__title">{{ 'worker.title' | translate }}</h1>
       <span class="worker__subtitle">{{ userName() }}</span>
     </div>
-    <button class="icon-btn worker__refresh" title="Refresh" (click)="loadTasks()">
+    <button class="icon-btn worker__refresh" [matTooltip]="'worker.refresh' | translate" matTooltipPosition="above" (click)="loadTasks()" [attr.aria-label]="'worker.refresh' | translate">
       <span class="material-icons-outlined">refresh</span>
     </button>
   </div>
 
   <div class="worker__content" [appLoadingBlock]="loading()">
     @if (sortedTasks().length === 0 && !loading()) {
-      <app-empty-state icon="check_circle" message="No tasks assigned to you" />
+      <app-empty-state icon="check_circle" [message]="'worker.noTasksAssigned' | translate" />
     }
 
     <div class="worker__task-list">
       @for (task of sortedTasks(); track task.id) {
         <div class="task-card" [class.task-card--overdue]="isOverdue(task)"
-             role="button" tabindex="0" [attr.aria-label]="'Open job ' + task.jobNumber + ': ' + task.title"
+             role="button" tabindex="0" [attr.aria-label]="'worker.openJobAria' | translate:{ jobNumber: task.jobNumber, title: task.title }"
              (click)="openJob(task)" (keydown.enter)="openJob(task)">
           <div class="task-card__header">
             <span class="task-card__number">{{ task.jobNumber }}</span>
@@ -39,7 +39,7 @@
           @if (task.dueDate) {
             <div class="task-card__due" [class.task-card__due--overdue]="isOverdue(task)">
               <span class="material-icons-outlined task-card__due-icon">{{ isOverdue(task) ? 'warning' : 'schedule' }}</span>
-              {{ isOverdue(task) ? 'OVERDUE' : 'Due' }} {{ task.dueDate | date:'MM/dd/yyyy' }}
+              {{ isOverdue(task) ? ('worker.overdue' | translate) : ('worker.due' | translate) }} {{ task.dueDate | date:'MM/dd/yyyy' }}
             </div>
           }
 
@@ -49,7 +49,7 @@
                 <div class="task-card__progress-fill" [style.width.%]="getProgressPercent(task)"></div>
               </div>
               <span class="task-card__progress-label">
-                {{ task.subtasksCompleted }}/{{ task.subtaskCount }} subtasks
+                {{ task.subtasksCompleted }}/{{ task.subtaskCount }} {{ 'worker.subtasks' | translate }}
               </span>
             </div>
           }

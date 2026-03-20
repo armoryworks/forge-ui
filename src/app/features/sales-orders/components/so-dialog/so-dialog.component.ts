@@ -16,6 +16,8 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface LineEntry {
   partId: number | null;
@@ -31,7 +33,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    ValidationPopoverDirective,
+    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',
@@ -41,6 +43,7 @@ export class SoDialogComponent {
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -50,7 +53,7 @@ export class SoDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'Select customer...' },
+    { value: null, label: this.translate.instant('salesOrders.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
@@ -137,7 +140,7 @@ export class SoDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Sales order created.');
+        this.snackbar.success(this.translate.instant('salesOrders.soCreated'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

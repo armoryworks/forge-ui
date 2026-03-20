@@ -2,6 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 import { Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { NotificationService } from '../../services/notification.service';
 import { AvatarComponent } from '../avatar/avatar.component';
 import { AppNotification } from '../../models/app-notification.model';
@@ -10,7 +13,7 @@ import { NotificationTab } from '../../models/notification-tab.type';
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, AvatarComponent],
+  imports: [DatePipe, MatTooltipModule, AvatarComponent, TranslatePipe],
   templateUrl: './notification-panel.component.html',
   styleUrl: './notification-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,6 +21,7 @@ import { NotificationTab } from '../../models/notification-tab.type';
 export class NotificationPanelComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly notifications = this.notificationService.filteredNotifications;
   protected readonly filter = this.notificationService.filter;
@@ -25,9 +29,9 @@ export class NotificationPanelComponent {
   protected readonly isEmpty = computed(() => this.notifications().length === 0);
 
   protected readonly tabs: { key: NotificationTab; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'messages', label: 'Messages' },
-    { key: 'alerts', label: 'Alerts' },
+    { key: 'all', label: this.translate.instant('notifications.all') },
+    { key: 'messages', label: this.translate.instant('notifications.messages') },
+    { key: 'alerts', label: this.translate.instant('notifications.alerts') },
   ];
 
   protected setTab(tab: NotificationTab): void {

@@ -14,16 +14,17 @@ export class LabelPrintService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- lazy-loaded third-party
   private bwipJs: any = null;
 
-  async generateBarcodeDataUrl(value: string, bcid = 'code128', scale = 3): Promise<string> {
+  async generateBarcodeDataUrl(value: string, bcid = 'code128', scale = 4): Promise<string> {
     const bwip = await this.loadBwipJs();
     const canvas = document.createElement('canvas');
-    (bwip as any).toCanvas(canvas, {
+    bwip.toCanvas(canvas, {
       bcid,
       text: value,
       scale,
-      height: 10,
+      height: 12,
       includetext: true,
       textxalign: 'center',
+      backgroundcolor: 'ffffff',
     });
     return canvas.toDataURL('image/png');
   }
@@ -31,12 +32,13 @@ export class LabelPrintService {
   async generateQrDataUrl(value: string, scale = 4): Promise<string> {
     const bwip = await this.loadBwipJs();
     const canvas = document.createElement('canvas');
-    (bwip as any).toCanvas(canvas, {
+    bwip.toCanvas(canvas, {
       bcid: 'qrcode',
       text: value,
       scale,
       height: 30,
       width: 30,
+      backgroundcolor: 'ffffff',
     });
     return canvas.toDataURL('image/png');
   }
@@ -62,21 +64,30 @@ export class LabelPrintService {
     @page { margin: 8mm; }
     body { margin: 0; font-family: 'IBM Plex Mono', monospace; }
     .label { display: inline-block; text-align: center; padding: 4mm; page-break-inside: avoid; border: 1px dashed #ccc; margin: 2mm; }
-    .label img { display: block; margin: 0 auto 2mm; }
-    .label-text { font-size: 10px; font-weight: 600; }
-    .label-subtext { font-size: 8px; color: #666; }
+    .label img { display: block; margin: 0 auto 2mm; max-width: 100%; height: auto; image-rendering: pixelated; }
+    .label-text { font-size: 10pt; font-weight: 600; }
+    .label-subtext { font-size: 8pt; color: #666; }
     @media print { .label { border: none; } }
   </style>
 </head>
 <body>
   ${resolved.map(l => `
-    <div class="label" style="width:${l.width ?? 50}mm; height:${l.height ?? 30}mm;">
+    <div class="label" style="width:${l.width ?? 50}mm;">
       <img src="${l.dataUrl}" alt="${l.value}" />
       ${l.label ? `<div class="label-text">${l.label}</div>` : ''}
       ${l.sublabel ? `<div class="label-subtext">${l.sublabel}</div>` : ''}
     </div>
   `).join('')}
-  <script>window.onload = function() { window.print(); }</script>
+  <script>
+    var imgs = document.querySelectorAll('img');
+    var loaded = 0;
+    function checkPrint() { if (++loaded >= imgs.length) setTimeout(function() { window.print(); }, 100); }
+    imgs.forEach(function(img) {
+      if (img.complete) checkPrint();
+      else img.onload = checkPrint;
+    });
+    if (imgs.length === 0) window.print();
+  </script>
 </body>
 </html>`;
 

@@ -5,21 +5,43 @@
         <span class="user-compliance__name">{{ d.userName }}</span>
         <span class="user-compliance__email">{{ d.userEmail }}</span>
       </div>
-      <button class="action-btn" [disabled]="sending()" (click)="sendReminder()" aria-label="Send compliance reminder">
+      <button class="action-btn" [disabled]="sending()" (click)="sendReminder()" [attr.aria-label]="'userCompliance.sendReminder' | translate">
         <span class="material-icons-outlined">notifications_active</span>
-        Send Reminder
+        {{ 'userCompliance.sendReminder' | translate }}
       </button>
     </div>
 
-    <h4 class="user-compliance__section-title">Form Submissions</h4>
+    <!-- State Withholding Info Banner -->
+    @if (d.stateWithholdingInfo; as swi) {
+      <div class="state-withholding-banner" [class.state-withholding-banner--no-tax]="swi.category === 'no_tax'">
+        <span class="material-icons-outlined state-withholding-banner__icon">
+          {{ swi.category === 'no_tax' ? 'block' : swi.category === 'federal' ? 'description' : 'verified' }}
+        </span>
+        <div class="state-withholding-banner__content">
+          <span class="state-withholding-banner__state">{{ swi.stateName }} ({{ swi.stateCode }})</span>
+          <span class="state-withholding-banner__detail">
+            @if (swi.category === 'no_tax') {
+              {{ 'userCompliance.noStateTax' | translate }}
+            } @else if (swi.category === 'federal') {
+              {{ 'userCompliance.usesFederalW4' | translate }}
+            } @else {
+              {{ 'userCompliance.stateForm' | translate }}: {{ swi.formName ?? 'Unknown' }}
+            }
+          </span>
+          <span class="state-withholding-banner__source">{{ 'userCompliance.via' | translate }} {{ swi.source }}</span>
+        </div>
+      </div>
+    }
+
+    <h4 class="user-compliance__section-title">{{ 'userCompliance.formSubmissions' | translate }}</h4>
     @if (d.submissions.length > 0) {
-      <table class="user-compliance__table" aria-label="Compliance form submissions">
+      <table class="user-compliance__table" [attr.aria-label]="'userCompliance.formSubmissions' | translate">
         <thead>
           <tr>
-            <th scope="col">Form</th>
-            <th scope="col">Status</th>
-            <th scope="col">Signed</th>
-            <th scope="col">Actions</th>
+            <th scope="col">{{ 'userCompliance.form' | translate }}</th>
+            <th scope="col">{{ 'common.status' | translate }}</th>
+            <th scope="col">{{ 'userCompliance.signed' | translate }}</th>
+            <th scope="col">{{ 'common.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -30,7 +52,7 @@
               <td>{{ sub.signedAt ? (sub.signedAt | date:'MM/dd/yyyy') : '—' }}</td>
               <td>
                 @if (sub.signedPdfFileId) {
-                  <button class="icon-btn" (click)="downloadSignedPdf(sub)" aria-label="Download signed PDF">
+                  <button class="icon-btn" (click)="downloadSignedPdf(sub)" [attr.aria-label]="'common.download' | translate" [matTooltip]="'common.download' | translate" matTooltipPosition="above">
                     <span class="material-icons-outlined">download</span>
                   </button>
                 }
@@ -40,19 +62,19 @@
         </tbody>
       </table>
     } @else {
-      <app-empty-state icon="description" message="No form submissions yet" />
+      <app-empty-state icon="description" [message]="'userCompliance.noSubmissions' | translate" />
     }
 
-    <h4 class="user-compliance__section-title">Identity Documents</h4>
+    <h4 class="user-compliance__section-title">{{ 'userCompliance.identityDocuments' | translate }}</h4>
     @if (d.identityDocuments.length > 0) {
-      <table class="user-compliance__table" aria-label="Identity documents">
+      <table class="user-compliance__table" [attr.aria-label]="'userCompliance.identityDocuments' | translate">
         <thead>
           <tr>
-            <th scope="col">Type</th>
-            <th scope="col">File</th>
-            <th scope="col">Uploaded</th>
-            <th scope="col">Verified</th>
-            <th scope="col">Actions</th>
+            <th scope="col">{{ 'common.type' | translate }}</th>
+            <th scope="col">{{ 'userCompliance.file' | translate }}</th>
+            <th scope="col">{{ 'userCompliance.uploaded' | translate }}</th>
+            <th scope="col">{{ 'userCompliance.verified' | translate }}</th>
+            <th scope="col">{{ 'common.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -63,14 +85,14 @@
               <td>{{ doc.createdAt | date:'MM/dd/yyyy' }}</td>
               <td>
                 @if (doc.verifiedAt) {
-                  <span class="chip chip--success">Verified</span>
+                  <span class="chip chip--success">{{ 'userCompliance.verified' | translate }}</span>
                 } @else {
-                  <span class="chip chip--warning">Pending</span>
+                  <span class="chip chip--warning">{{ 'common.pending' | translate }}</span>
                 }
               </td>
               <td>
                 @if (!doc.verifiedAt) {
-                  <button class="icon-btn" (click)="verifyDocument(doc)" aria-label="Verify identity document">
+                  <button class="icon-btn" (click)="verifyDocument(doc)" [attr.aria-label]="'userCompliance.verified' | translate" [matTooltip]="'userCompliance.verified' | translate" matTooltipPosition="above">
                     <span class="material-icons-outlined">verified</span>
                   </button>
                 }
@@ -80,25 +102,25 @@
         </tbody>
       </table>
     } @else {
-      <app-empty-state icon="badge" message="No identity documents uploaded" />
+      <app-empty-state icon="badge" [message]="'userCompliance.noIdentityDocs' | translate" />
     }
 
     <!-- Pay Stubs Section -->
     <h4 class="user-compliance__section-title">
       <span class="material-icons-outlined">payments</span>
-      Pay Stubs
+      {{ 'userCompliance.payStubs' | translate }}
     </h4>
     <div [appLoadingBlock]="payrollLoading()">
       @if (payStubs().length > 0) {
-        <table class="user-compliance__table" aria-label="Pay stubs">
+        <table class="user-compliance__table" [attr.aria-label]="'userCompliance.payStubs' | translate">
           <thead>
             <tr>
-              <th scope="col">Pay Date</th>
-              <th scope="col">Period</th>
-              <th scope="col">Gross</th>
-              <th scope="col">Net</th>
-              <th scope="col">Source</th>
-              <th scope="col">Actions</th>
+              <th scope="col">{{ 'userCompliance.payDate' | translate }}</th>
+              <th scope="col">{{ 'userCompliance.period' | translate }}</th>
+              <th scope="col">{{ 'userCompliance.gross' | translate }}</th>
+              <th scope="col">{{ 'userCompliance.net' | translate }}</th>
+              <th scope="col">{{ 'userCompliance.source' | translate }}</th>
+              <th scope="col">{{ 'common.actions' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -110,20 +132,20 @@
                 <td>{{ stub.netPay | currency }}</td>
                 <td>
                   @if (stub.source === 'Accounting') {
-                    <span class="chip chip--info">Synced</span>
+                    <span class="chip chip--info">{{ 'userCompliance.synced' | translate }}</span>
                   } @else {
-                    <span class="chip chip--muted">Manual</span>
+                    <span class="chip chip--muted">{{ 'userCompliance.manual' | translate }}</span>
                   }
                 </td>
                 <td>
                   <div class="action-cell">
                     @if (stub.fileAttachmentId) {
-                      <button class="icon-btn" (click)="downloadPayStubPdf(stub.id)" aria-label="Download pay stub PDF">
+                      <button class="icon-btn" (click)="downloadPayStubPdf(stub.id)" [attr.aria-label]="'common.download' | translate" [matTooltip]="'common.download' | translate" matTooltipPosition="above">
                         <span class="material-icons-outlined">download</span>
                       </button>
                     }
                     @if (stub.source === 'Manual') {
-                      <button class="icon-btn icon-btn--danger" (click)="deletePayStub(stub)" aria-label="Delete pay stub">
+                      <button class="icon-btn icon-btn--danger" (click)="deletePayStub(stub)" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
                         <span class="material-icons-outlined">delete</span>
                       </button>
                     }
@@ -134,11 +156,11 @@
           </tbody>
         </table>
       } @else {
-        <app-empty-state icon="payments" message="No pay stubs available" />
+        <app-empty-state icon="payments" [message]="'userCompliance.noPayStubs' | translate" />
       }
 
       <div class="user-compliance__upload-section">
-        <span class="user-compliance__upload-label">Upload Pay Stub</span>
+        <span class="user-compliance__upload-label">{{ 'userCompliance.uploadPayStub' | translate }}</span>
         <app-file-upload-zone
           entityType="pay-stubs"
           [entityId]="userId() ?? 0"
@@ -149,29 +171,29 @@
         @if (lastPayStubFileId()) {
           <div class="user-compliance__upload-form">
             <div class="user-compliance__upload-row">
-              <label for="ps-pay-date">Pay Date</label>
+              <label for="ps-pay-date">{{ 'userCompliance.payDate' | translate }}</label>
               <input id="ps-pay-date" type="date" #psPayDate />
             </div>
             <div class="user-compliance__upload-row">
-              <label for="ps-period-start">Period Start</label>
+              <label for="ps-period-start">{{ 'userCompliance.periodStart' | translate }}</label>
               <input id="ps-period-start" type="date" #psPeriodStart />
             </div>
             <div class="user-compliance__upload-row">
-              <label for="ps-period-end">Period End</label>
+              <label for="ps-period-end">{{ 'userCompliance.periodEnd' | translate }}</label>
               <input id="ps-period-end" type="date" #psPeriodEnd />
             </div>
             <div class="user-compliance__upload-row">
-              <label for="ps-gross">Gross Pay</label>
+              <label for="ps-gross">{{ 'userCompliance.grossPay' | translate }}</label>
               <input id="ps-gross" type="number" step="0.01" #psGross />
             </div>
             <div class="user-compliance__upload-row">
-              <label for="ps-net">Net Pay</label>
+              <label for="ps-net">{{ 'userCompliance.netPay' | translate }}</label>
               <input id="ps-net" type="number" step="0.01" #psNet />
             </div>
             <button class="action-btn action-btn--primary action-btn--sm"
               (click)="savePayStub(psPayDate.value, psPeriodStart.value, psPeriodEnd.value, psGross.value, psNet.value)">
               <span class="material-icons-outlined">save</span>
-              Save Pay Stub
+              {{ 'userCompliance.savePayStub' | translate }}
             </button>
           </div>
         }
@@ -181,17 +203,17 @@
     <!-- Tax Documents Section -->
     <h4 class="user-compliance__section-title">
       <span class="material-icons-outlined">receipt_long</span>
-      Tax Documents
+      {{ 'userCompliance.taxDocuments' | translate }}
     </h4>
     @if (taxDocuments().length > 0) {
-      <table class="user-compliance__table" aria-label="Tax documents">
+      <table class="user-compliance__table" [attr.aria-label]="'userCompliance.taxDocuments' | translate">
         <thead>
           <tr>
-            <th scope="col">Year</th>
-            <th scope="col">Type</th>
-            <th scope="col">Employer</th>
-            <th scope="col">Source</th>
-            <th scope="col">Actions</th>
+            <th scope="col">{{ 'userCompliance.year' | translate }}</th>
+            <th scope="col">{{ 'common.type' | translate }}</th>
+            <th scope="col">{{ 'userCompliance.employer' | translate }}</th>
+            <th scope="col">{{ 'userCompliance.source' | translate }}</th>
+            <th scope="col">{{ 'common.actions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -202,20 +224,20 @@
               <td>{{ doc.employerName ?? '—' }}</td>
               <td>
                 @if (doc.source === 'Accounting') {
-                  <span class="chip chip--info">Synced</span>
+                  <span class="chip chip--info">{{ 'userCompliance.synced' | translate }}</span>
                 } @else {
-                  <span class="chip chip--muted">Manual</span>
+                  <span class="chip chip--muted">{{ 'userCompliance.manual' | translate }}</span>
                 }
               </td>
               <td>
                 <div class="action-cell">
                   @if (doc.fileAttachmentId) {
-                    <button class="icon-btn" (click)="downloadTaxDocumentPdf(doc.id)" aria-label="Download tax document PDF">
+                    <button class="icon-btn" (click)="downloadTaxDocumentPdf(doc.id)" [attr.aria-label]="'common.download' | translate" [matTooltip]="'common.download' | translate" matTooltipPosition="above">
                       <span class="material-icons-outlined">download</span>
                     </button>
                   }
                   @if (doc.source === 'Manual') {
-                    <button class="icon-btn icon-btn--danger" (click)="deleteTaxDocument(doc)" aria-label="Delete tax document">
+                    <button class="icon-btn icon-btn--danger" (click)="deleteTaxDocument(doc)" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
                       <span class="material-icons-outlined">delete</span>
                     </button>
                   }
@@ -226,11 +248,11 @@
         </tbody>
       </table>
     } @else {
-      <app-empty-state icon="receipt_long" message="No tax documents available" />
+      <app-empty-state icon="receipt_long" [message]="'userCompliance.noTaxDocs' | translate" />
     }
 
     <div class="user-compliance__upload-section">
-      <span class="user-compliance__upload-label">Upload Tax Document</span>
+      <span class="user-compliance__upload-label">{{ 'userCompliance.uploadTaxDocument' | translate }}</span>
       <app-file-upload-zone
         entityType="tax-documents"
         [entityId]="userId() ?? 0"
@@ -241,7 +263,7 @@
       @if (lastTaxDocFileId()) {
         <div class="user-compliance__upload-form">
           <div class="user-compliance__upload-row">
-            <label for="td-type">Document Type</label>
+            <label for="td-type">{{ 'userCompliance.documentType' | translate }}</label>
             <select id="td-type" #tdType>
               <option value="W2">W-2</option>
               <option value="W2c">W-2c (Corrected)</option>
@@ -251,18 +273,18 @@
             </select>
           </div>
           <div class="user-compliance__upload-row">
-            <label for="td-year">Tax Year</label>
+            <label for="td-year">{{ 'userCompliance.taxYear' | translate }}</label>
             <input id="td-year" type="number" min="2000" max="2099" #tdYear />
           </div>
           <button class="action-btn action-btn--primary action-btn--sm"
             (click)="saveTaxDocument(tdType.value, tdYear.value)">
             <span class="material-icons-outlined">save</span>
-            Save Tax Document
+            {{ 'userCompliance.saveTaxDocument' | translate }}
           </button>
         </div>
       }
     </div>
   } @else if (!loading()) {
-    <app-empty-state icon="person_search" message="Select a user to view compliance details" />
+    <app-empty-state icon="person_search" [message]="'userCompliance.selectUserHint' | translate" />
   }
 </div>

@@ -2,7 +2,7 @@
   class="upload-zone"
   role="button"
   tabindex="0"
-  aria-label="Upload files — drag and drop or click to browse"
+  [attr.aria-label]="'fileUpload.dragAndDrop' | translate"
   [class.upload-zone--drag-over]="dragOver()"
   (dragover)="onDragOver($event)"
   (dragleave)="onDragLeave($event)"
@@ -19,8 +19,8 @@
     (change)="onFileSelected($event)" />
 
   <span class="material-icons-outlined upload-zone__icon">cloud_upload</span>
-  <span class="upload-zone__text">Drag files here or click to browse</span>
-  <span class="upload-zone__hint">Max {{ maxSizeMb() }}MB per file</span>
+  <span class="upload-zone__text">{{ 'fileUpload.dragHere' | translate }}</span>
+  <span class="upload-zone__hint">{{ 'fileUpload.maxSize' | translate:{ size: maxSizeMb() } }}</span>
 </div>
 
 @if (uploads().length) {

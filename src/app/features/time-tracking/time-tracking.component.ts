@@ -18,6 +18,8 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 
@@ -35,6 +37,8 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
     DataTableComponent,
     ColumnCellDirective,
     ValidationPopoverDirective,
+    TranslatePipe,
+    MatTooltipModule,
   ],
   templateUrl: './time-tracking.component.html',
   styleUrl: './time-tracking.component.scss',
@@ -45,6 +49,7 @@ export class TimeTrackingComponent implements OnDestroy {
   private readonly timerHub = inject(TimerHubService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
@@ -85,27 +90,27 @@ export class TimeTrackingComponent implements OnDestroy {
   protected readonly stopNotesControl = new FormControl('');
 
   protected readonly categoryOptions: SelectOption[] = [
-    { value: '', label: 'None' },
-    { value: 'Production', label: 'Production' },
-    { value: 'Setup', label: 'Setup' },
-    { value: 'Inspection', label: 'Inspection' },
-    { value: 'Maintenance', label: 'Maintenance' },
-    { value: 'Training', label: 'Training' },
-    { value: 'Meeting', label: 'Meeting' },
-    { value: 'Admin', label: 'Admin' },
-    { value: 'Cleanup', label: 'Cleanup' },
-    { value: 'Other', label: 'Other' },
+    { value: '', label: this.translate.instant('timeTracking.categoryNone') },
+    { value: 'Production', label: this.translate.instant('timeTracking.categoryProduction') },
+    { value: 'Setup', label: this.translate.instant('timeTracking.categorySetup') },
+    { value: 'Inspection', label: this.translate.instant('timeTracking.categoryInspection') },
+    { value: 'Maintenance', label: this.translate.instant('timeTracking.categoryMaintenance') },
+    { value: 'Training', label: this.translate.instant('timeTracking.categoryTraining') },
+    { value: 'Meeting', label: this.translate.instant('timeTracking.categoryMeeting') },
+    { value: 'Admin', label: this.translate.instant('timeTracking.categoryAdmin') },
+    { value: 'Cleanup', label: this.translate.instant('timeTracking.categoryCleanup') },
+    { value: 'Other', label: this.translate.instant('timeTracking.categoryOther') },
   ];
 
   protected readonly timeColumns: ColumnDef[] = [
     { field: 'icon', header: '', width: '32px' },
-    { field: 'date', header: 'Date', sortable: true, type: 'date' },
-    { field: 'userName', header: 'User', sortable: true },
-    { field: 'jobNumber', header: 'Job' },
-    { field: 'category', header: 'Category', sortable: true },
-    { field: 'durationMinutes', header: 'Duration', sortable: true },
-    { field: 'notes', header: 'Notes' },
-    { field: 'type', header: 'Type', width: '80px' },
+    { field: 'date', header: this.translate.instant('timeTracking.colDate'), sortable: true, type: 'date' },
+    { field: 'userName', header: this.translate.instant('timeTracking.colUser'), sortable: true },
+    { field: 'jobNumber', header: this.translate.instant('timeTracking.colJob') },
+    { field: 'category', header: this.translate.instant('timeTracking.colCategory'), sortable: true },
+    { field: 'durationMinutes', header: this.translate.instant('timeTracking.colDuration'), sortable: true },
+    { field: 'notes', header: this.translate.instant('timeTracking.colNotes') },
+    { field: 'type', header: this.translate.instant('timeTracking.colType'), width: '80px' },
     { field: 'actions', header: '', width: '64px', align: 'right' },
   ];
 
@@ -183,7 +188,7 @@ export class TimeTrackingComponent implements OnDestroy {
         this.saving.set(false);
         this.closeDialog();
         this.loadEntries();
-        this.snackbar.success('Time entry added.');
+        this.snackbar.success(this.translate.instant('timeTracking.entryAdded'));
       },
       error: () => this.saving.set(false),
     });
@@ -203,7 +208,7 @@ export class TimeTrackingComponent implements OnDestroy {
       category: form.category || undefined,
       notes: form.notes || undefined,
     }).subscribe({
-      next: () => { this.closeTimerDialog(); this.loadEntries(); this.snackbar.success('Timer started.'); },
+      next: () => { this.closeTimerDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStarted')); },
     });
   }
 
@@ -218,7 +223,7 @@ export class TimeTrackingComponent implements OnDestroy {
     this.service.stopTimer({
       notes: this.stopNotesControl.value || undefined,
     }).subscribe({
-      next: () => { this.closeStopDialog(); this.loadEntries(); this.snackbar.success('Timer stopped.'); },
+      next: () => { this.closeStopDialog(); this.loadEntries(); this.snackbar.success(this.translate.instant('timeTracking.timerStopped')); },
     });
   }
 
@@ -244,9 +249,9 @@ export class TimeTrackingComponent implements OnDestroy {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Time Entry?',
-        message: 'This will permanently delete this time entry.',
-        confirmLabel: 'Delete',
+        title: this.translate.instant('timeTracking.deleteTitle'),
+        message: this.translate.instant('timeTracking.deleteMessage'),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -254,7 +259,7 @@ export class TimeTrackingComponent implements OnDestroy {
       this.service.deleteTimeEntry(entry.id).subscribe({
         next: () => {
           this.loadEntries();
-          this.snackbar.success('Time entry deleted.');
+          this.snackbar.success(this.translate.instant('timeTracking.entryDeleted'));
         },
       });
     });

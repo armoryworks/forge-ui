@@ -4,7 +4,7 @@
     <input
       class="kiosk-search__input"
       type="text"
-      placeholder="Search jobs, parts..."
+      [placeholder]="'shopFloor.searchPlaceholder' | translate"
       [formControl]="searchControl"
       (focus)="onFocus()"
       (blur)="onBlur()" />

@@ -17,6 +17,9 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { AccountingService } from '../../shared/services/accounting.service';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 
@@ -24,10 +27,10 @@ import { PaymentDialogComponent } from './components/payment-dialog/payment-dial
   selector: 'app-payments',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe,
+    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    PaymentDialogComponent,
+    PaymentDialogComponent, MatTooltipModule,
   ],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.scss',
@@ -39,6 +42,7 @@ export class PaymentsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly accountingService = inject(AccountingService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly isStandalone = this.accountingService.isStandalone;
   protected readonly providerName = this.accountingService.providerName;
@@ -55,32 +59,32 @@ export class PaymentsComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly methodOptions: SelectOption[] = [
-    { value: null, label: 'All Methods' },
-    { value: 'Cash', label: 'Cash' },
-    { value: 'Check', label: 'Check' },
-    { value: 'CreditCard', label: 'Credit Card' },
-    { value: 'BankTransfer', label: 'Bank Transfer' },
-    { value: 'Wire', label: 'Wire' },
-    { value: 'Other', label: 'Other' },
+    { value: null, label: this.translate.instant('payments.allMethods') },
+    { value: 'Cash', label: this.translate.instant('payments.methodCash') },
+    { value: 'Check', label: this.translate.instant('payments.methodCheck') },
+    { value: 'CreditCard', label: this.translate.instant('payments.methodCreditCard') },
+    { value: 'BankTransfer', label: this.translate.instant('payments.methodBankTransfer') },
+    { value: 'Wire', label: this.translate.instant('payments.methodWire') },
+    { value: 'Other', label: this.translate.instant('payments.methodOther') },
   ];
 
   protected readonly paymentColumns: ColumnDef[] = [
-    { field: 'paymentNumber', header: 'Payment #', sortable: true, width: '120px' },
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'method', header: 'Method', sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
-      { value: 'Cash', label: 'Cash' },
-      { value: 'Check', label: 'Check' },
-      { value: 'CreditCard', label: 'Credit Card' },
-      { value: 'BankTransfer', label: 'Bank Transfer' },
-      { value: 'Wire', label: 'Wire' },
-      { value: 'Other', label: 'Other' },
+    { field: 'paymentNumber', header: this.translate.instant('payments.paymentNumber'), sortable: true, width: '120px' },
+    { field: 'customerName', header: this.translate.instant('payments.customer'), sortable: true },
+    { field: 'method', header: this.translate.instant('payments.method'), sortable: true, filterable: true, type: 'enum', width: '100px', filterOptions: [
+      { value: 'Cash', label: this.translate.instant('payments.methodCash') },
+      { value: 'Check', label: this.translate.instant('payments.methodCheck') },
+      { value: 'CreditCard', label: this.translate.instant('payments.methodCreditCard') },
+      { value: 'BankTransfer', label: this.translate.instant('payments.methodBankTransfer') },
+      { value: 'Wire', label: this.translate.instant('payments.methodWire') },
+      { value: 'Other', label: this.translate.instant('payments.methodOther') },
     ]},
-    { field: 'amount', header: 'Amount', sortable: true, width: '100px', align: 'right' },
-    { field: 'appliedAmount', header: 'Applied', sortable: true, width: '100px', align: 'right' },
-    { field: 'unappliedAmount', header: 'Unapplied', sortable: true, width: '100px', align: 'right' },
-    { field: 'paymentDate', header: 'Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'referenceNumber', header: 'Reference #', sortable: true, width: '120px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'amount', header: this.translate.instant('payments.amount'), sortable: true, width: '100px', align: 'right' },
+    { field: 'appliedAmount', header: this.translate.instant('payments.applied'), sortable: true, width: '100px', align: 'right' },
+    { field: 'unappliedAmount', header: this.translate.instant('payments.unapplied'), sortable: true, width: '100px', align: 'right' },
+    { field: 'paymentDate', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '110px' },
+    { field: 'referenceNumber', header: this.translate.instant('payments.referenceNumber'), sortable: true, width: '120px' },
+    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly paymentRowClass = (row: unknown) => {
@@ -134,11 +138,9 @@ export class PaymentsComponent {
   }
 
   protected getMethodLabel(method: string): string {
-    const map: Record<string, string> = {
-      CreditCard: 'Credit Card',
-      BankTransfer: 'Bank Transfer',
-    };
-    return map[method] ?? method;
+    const key = 'payments.method' + method;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : method;
   }
 
   protected deletePayment(): void {
@@ -147,9 +149,9 @@ export class PaymentsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Payment?',
-        message: `Delete payment "${payment.paymentNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('payments.deletePaymentTitle'),
+        message: this.translate.instant('payments.deletePaymentMessage', { number: payment.paymentNumber }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -158,7 +160,7 @@ export class PaymentsComponent {
         next: () => {
           this.selectedPayment.set(null);
           this.loadPayments();
-          this.snackbar.success('Payment deleted.');
+          this.snackbar.success(this.translate.instant('payments.paymentDeleted'));
         },
       });
     });

@@ -5,10 +5,12 @@ import {
   input,
   output,
 } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-detail-side-panel',
   standalone: true,
+  imports: [MatTooltipModule],
   templateUrl: './detail-side-panel.component.html',
   styleUrl: './detail-side-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

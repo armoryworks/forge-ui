@@ -1,4 +1,4 @@
-<app-page-header title="Reports" subtitle="Explore operational data with built-in report templates" helpTourId="reports" />
+<app-page-header [title]="'reports.title' | translate" [subtitle]="'reports.subtitleExplore' | translate" helpTourId="reports" />
 
 <div class="reports-layout">
   <!-- Sidebar -->
@@ -16,7 +16,7 @@
 
     <button class="report-nav-item" (click)="openReportBuilder()">
       <span class="material-icons-outlined report-nav-item__icon">build</span>
-      <span class="report-nav-item__label">Report Builder</span>
+      <span class="report-nav-item__label">{{ 'reports.reportBuilder' | translate }}</span>
     </button>
   </aside>
 
@@ -27,9 +27,9 @@
 
       @if (activeReportDef().needsDateRange) {
         <div class="report-header__filters">
-          <app-datepicker label="From" [formControl]="startControl" />
-          <app-datepicker label="To" [formControl]="endControl" />
-          <button class="action-btn action-btn--primary action-btn--sm" (click)="loadReport()">Apply</button>
+          <app-datepicker [label]="'reports.from' | translate" [formControl]="startControl" />
+          <app-datepicker [label]="'reports.to' | translate" [formControl]="endControl" />
+          <button class="action-btn action-btn--primary action-btn--sm" (click)="loadReport()">{{ 'reports.apply' | translate }}</button>
         </div>
       }
     </div>
@@ -37,7 +37,7 @@
     @if (loading()) {
       <div class="page-loading">
         <span class="material-icons-outlined spin">sync</span>
-        Loading report...
+        {{ 'reports.loadingReport' | translate }}
       </div>
     } @else {
       <!-- Jobs by Stage -->
@@ -49,13 +49,13 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-jobs-by-stage" [columns]="stageColumns" [data]="jobsByStageData()"
-                        emptyIcon="view_kanban" emptyMessage="No jobs found" />
+                        emptyIcon="view_kanban" [emptyMessage]="'reports.emptyNoJobsFound' | translate" />
       }
 
       <!-- Overdue Jobs -->
       @if (activeReport() === 'overdue-jobs') {
         <app-data-table tableId="report-overdue-jobs" [columns]="overdueColumns" [data]="overdueJobsData()"
-                        emptyIcon="check_circle" emptyMessage="No overdue jobs" />
+                        emptyIcon="check_circle" [emptyMessage]="'reports.emptyNoOverdueJobs' | translate" />
       }
 
       <!-- Time by User -->
@@ -67,7 +67,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-time-by-user" [columns]="timeColumns" [data]="timeByUserData()"
-                        emptyIcon="schedule" emptyMessage="No time entries found" />
+                        emptyIcon="schedule" [emptyMessage]="'reports.emptyNoTimeEntries' | translate" />
       }
 
       <!-- Expense Summary -->
@@ -79,7 +79,7 @@
                   [options]="pieOptions"></canvas>
         </div>
         <app-data-table tableId="report-expense-summary" [columns]="expenseColumns" [data]="expenseSummaryData()"
-                        emptyIcon="receipt_long" emptyMessage="No expenses found" />
+                        emptyIcon="receipt_long" [emptyMessage]="'reports.emptyNoExpenses' | translate" />
       }
 
       <!-- Lead Pipeline -->
@@ -91,7 +91,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-lead-pipeline" [columns]="leadColumns" [data]="leadPipelineData()"
-                        emptyIcon="filter_alt" emptyMessage="No leads found" />
+                        emptyIcon="filter_alt" [emptyMessage]="'reports.emptyNoLeads' | translate" />
       }
 
       <!-- Job Completion Trend -->
@@ -103,7 +103,7 @@
                   [options]="lineOptions"></canvas>
         </div>
         <app-data-table tableId="report-completion-trend" [columns]="trendColumns" [data]="completionTrendData()"
-                        emptyIcon="trending_up" emptyMessage="No data" />
+                        emptyIcon="trending_up" [emptyMessage]="'reports.emptyNoData' | translate" />
       }
 
       <!-- On-Time Delivery -->
@@ -112,19 +112,19 @@
           <div class="kpi-row">
             <div class="kpi-card">
               <span class="kpi-card__value">{{ otd.totalCompleted }}</span>
-              <span class="kpi-card__label">Total Completed</span>
+              <span class="kpi-card__label">{{ 'reports.totalCompleted' | translate }}</span>
             </div>
             <div class="kpi-card kpi-card--success">
               <span class="kpi-card__value">{{ otd.onTime }}</span>
-              <span class="kpi-card__label">On Time</span>
+              <span class="kpi-card__label">{{ 'reports.onTime' | translate }}</span>
             </div>
             <div class="kpi-card kpi-card--error">
               <span class="kpi-card__value">{{ otd.late }}</span>
-              <span class="kpi-card__label">Late</span>
+              <span class="kpi-card__label">{{ 'reports.late' | translate }}</span>
             </div>
             <div class="kpi-card">
               <span class="kpi-card__value">{{ otd.onTimePercent }}%</span>
-              <span class="kpi-card__label">On-Time Rate</span>
+              <span class="kpi-card__label">{{ 'reports.onTimeRate' | translate }}</span>
             </div>
           </div>
           <div class="chart-container chart-container--pie">
@@ -134,7 +134,7 @@
                     [options]="pieOptions"></canvas>
           </div>
         } @else {
-          <div class="page-loading">No delivery data available</div>
+          <div class="page-loading">{{ 'reports.noDeliveryData' | translate }}</div>
         }
       }
 
@@ -147,7 +147,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-lead-time" [columns]="leadTimeColumns" [data]="averageLeadTimeData()"
-                        emptyIcon="hourglass_top" emptyMessage="No lead time data" />
+                        emptyIcon="hourglass_top" [emptyMessage]="'reports.emptyNoLeadTimeData' | translate" />
       }
 
       <!-- Team Workload -->
@@ -159,7 +159,7 @@
                   [options]="stackedBarOptions"></canvas>
         </div>
         <app-data-table tableId="report-workload" [columns]="workloadColumns" [data]="teamWorkloadData()"
-                        emptyIcon="groups" emptyMessage="No workload data" />
+                        emptyIcon="groups" [emptyMessage]="'reports.emptyNoWorkloadData' | translate" />
       }
 
       <!-- Customer Activity -->
@@ -171,19 +171,19 @@
                   [options]="stackedBarOptions"></canvas>
         </div>
         <app-data-table tableId="report-customer-activity" [columns]="customerColumns" [data]="customerActivityData()"
-                        emptyIcon="business" emptyMessage="No customer data" />
+                        emptyIcon="business" [emptyMessage]="'reports.emptyNoCustomerData' | translate" />
       }
 
       <!-- My Work History -->
       @if (activeReport() === 'my-work-history') {
         <app-data-table tableId="report-my-work" [columns]="workHistoryColumns" [data]="myWorkHistoryData()"
-                        emptyIcon="assignment_ind" emptyMessage="No jobs assigned to you" />
+                        emptyIcon="assignment_ind" [emptyMessage]="'reports.emptyNoJobsAssigned' | translate" />
       }
 
       <!-- My Time Log -->
       @if (activeReport() === 'my-time-log') {
         <app-data-table tableId="report-my-time" [columns]="timeLogColumns" [data]="myTimeLogData()"
-                        emptyIcon="timer" emptyMessage="No time entries found" />
+                        emptyIcon="timer" [emptyMessage]="'reports.emptyNoTimeEntries' | translate" />
       }
 
       <!-- AR Aging -->
@@ -192,12 +192,12 @@
           @for (b of arAgingBuckets(); track b.bucket) {
             <div class="kpi-card" [class.kpi-card--error]="b.bucket === '90+ Days'" [class.kpi-card--warning]="b.bucket === '61-90 Days'">
               <span class="kpi-card__value">{{ b.total | currency }}</span>
-              <span class="kpi-card__label">{{ b.bucket }}</span>
+              <span class="kpi-card__label">{{ b.label }}</span>
             </div>
           }
         </div>
         <app-data-table tableId="report-ar-aging" [columns]="arAgingColumns" [data]="arAgingData()"
-                        emptyIcon="account_balance" emptyMessage="No outstanding invoices" />
+                        emptyIcon="account_balance" [emptyMessage]="'reports.emptyNoOutstandingInvoices' | translate" />
       }
 
       <!-- Revenue -->
@@ -209,7 +209,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-revenue" [columns]="revenueColumns" [data]="revenueData()"
-                        emptyIcon="attach_money" emptyMessage="No revenue data" />
+                        emptyIcon="attach_money" [emptyMessage]="'reports.emptyNoRevenueData' | translate" />
       }
 
       <!-- Simple P&L -->
@@ -217,25 +217,25 @@
         <div class="kpi-row">
           <div class="kpi-card kpi-card--success">
             <span class="kpi-card__value">{{ pnlTotals().revenue | currency }}</span>
-            <span class="kpi-card__label">Total Revenue</span>
+            <span class="kpi-card__label">{{ 'reports.totalRevenue' | translate }}</span>
           </div>
           <div class="kpi-card kpi-card--error">
             <span class="kpi-card__value">{{ pnlTotals().expenses | currency }}</span>
-            <span class="kpi-card__label">Total Expenses</span>
+            <span class="kpi-card__label">{{ 'reports.totalExpenses' | translate }}</span>
           </div>
           <div class="kpi-card" [class.kpi-card--success]="pnlTotals().net >= 0" [class.kpi-card--error]="pnlTotals().net < 0">
             <span class="kpi-card__value">{{ pnlTotals().net | currency }}</span>
-            <span class="kpi-card__label">Net Income</span>
+            <span class="kpi-card__label">{{ 'reports.netIncome' | translate }}</span>
           </div>
         </div>
         <app-data-table tableId="report-pnl" [columns]="pnlColumns" [data]="simplePnlData()"
-                        emptyIcon="balance" emptyMessage="No financial data" />
+                        emptyIcon="balance" [emptyMessage]="'reports.emptyNoFinancialData' | translate" />
       }
 
       <!-- My Expense History -->
       @if (activeReport() === 'my-expense-history') {
         <app-data-table tableId="report-my-expenses" [columns]="myExpenseColumns" [data]="myExpenseHistoryData()"
-                        emptyIcon="receipt" emptyMessage="No expenses found" />
+                        emptyIcon="receipt" [emptyMessage]="'reports.emptyNoExpenses' | translate" />
       }
 
       <!-- Quote-to-Close -->
@@ -247,13 +247,13 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-quote-to-close" [columns]="quoteToCloseColumns" [data]="quoteToCloseData()"
-                        emptyIcon="handshake" emptyMessage="No quote data" />
+                        emptyIcon="handshake" [emptyMessage]="'reports.emptyNoQuoteData' | translate" />
       }
 
       <!-- Shipping Summary -->
       @if (activeReport() === 'shipping-summary') {
         <app-data-table tableId="report-shipping-summary" [columns]="shippingSummaryColumns" [data]="shippingSummaryData()"
-                        emptyIcon="local_shipping" emptyMessage="No shipping data" />
+                        emptyIcon="local_shipping" [emptyMessage]="'reports.emptyNoShippingData' | translate" />
       }
 
       <!-- Time in Stage -->
@@ -265,7 +265,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-time-in-stage" [columns]="timeInStageColumns" [data]="timeInStageData()"
-                        emptyIcon="hourglass_bottom" emptyMessage="No stage data" />
+                        emptyIcon="hourglass_bottom" [emptyMessage]="'reports.emptyNoStageData' | translate" />
       }
       <!-- Employee Productivity -->
       @if (activeReport() === 'employee-productivity') {
@@ -276,7 +276,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-employee-productivity" [columns]="employeeProductivityColumns" [data]="employeeProductivityData()"
-                        emptyIcon="person_search" emptyMessage="No productivity data" />
+                        emptyIcon="person_search" [emptyMessage]="'reports.emptyNoProductivityData' | translate" />
       }
 
       <!-- Inventory Levels -->
@@ -288,7 +288,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-inventory-levels" [columns]="inventoryLevelsColumns" [data]="inventoryLevelsData()"
-                        emptyIcon="inventory_2" emptyMessage="No inventory data" />
+                        emptyIcon="inventory_2" [emptyMessage]="'reports.emptyNoInventoryData' | translate" />
       }
 
       <!-- Maintenance -->
@@ -300,7 +300,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-maintenance" [columns]="maintenanceColumns" [data]="maintenanceData()"
-                        emptyIcon="build" emptyMessage="No maintenance data" />
+                        emptyIcon="build" [emptyMessage]="'reports.emptyNoMaintenanceData' | translate" />
       }
 
       <!-- Quality / Scrap Rate -->
@@ -312,7 +312,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-quality-scrap" [columns]="qualityScrapColumns" [data]="qualityScrapData()"
-                        emptyIcon="verified" emptyMessage="No production data" />
+                        emptyIcon="verified" [emptyMessage]="'reports.emptyNoProductionData' | translate" />
       }
 
       <!-- Cycle Review -->
@@ -324,13 +324,13 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-cycle-review" [columns]="cycleReviewColumns" [data]="cycleReviewData()"
-                        emptyIcon="event_repeat" emptyMessage="No cycle data" />
+                        emptyIcon="event_repeat" [emptyMessage]="'reports.emptyNoCycleData' | translate" />
       }
 
       <!-- My Cycle Summary -->
       @if (activeReport() === 'my-cycle-summary') {
         <app-data-table tableId="report-my-cycle-summary" [columns]="myCycleSummaryColumns" [data]="myCycleSummaryData()"
-                        emptyIcon="event_repeat" emptyMessage="No cycle entries assigned to you" />
+                        emptyIcon="event_repeat" [emptyMessage]="'reports.emptyNoCycleEntries' | translate" />
       }
 
       <!-- Lead & Sales -->
@@ -339,38 +339,38 @@
           <div class="kpi-row">
             <div class="kpi-card">
               <span class="kpi-card__value">{{ ls.newLeads }}</span>
-              <span class="kpi-card__label">New Leads</span>
+              <span class="kpi-card__label">{{ 'reports.newLeads' | translate }}</span>
             </div>
             <div class="kpi-card kpi-card--success">
               <span class="kpi-card__value">{{ ls.convertedLeads }}</span>
-              <span class="kpi-card__label">Converted</span>
+              <span class="kpi-card__label">{{ 'reports.converted' | translate }}</span>
             </div>
             <div class="kpi-card">
               <span class="kpi-card__value">{{ ls.conversionRate | number:'1.1-1' }}%</span>
-              <span class="kpi-card__label">Conversion Rate</span>
+              <span class="kpi-card__label">{{ 'reports.conversionRate' | translate }}</span>
             </div>
             <div class="kpi-card">
               <span class="kpi-card__value">{{ ls.totalQuotes }}</span>
-              <span class="kpi-card__label">Total Quotes</span>
+              <span class="kpi-card__label">{{ 'reports.totalQuotes' | translate }}</span>
             </div>
             <div class="kpi-card">
               <span class="kpi-card__value">{{ ls.totalSalesOrders }}</span>
-              <span class="kpi-card__label">Total SOs</span>
+              <span class="kpi-card__label">{{ 'reports.totalSOs' | translate }}</span>
             </div>
             <div class="kpi-card kpi-card--success">
               <span class="kpi-card__value">{{ ls.totalSalesOrderValue | currency }}</span>
-              <span class="kpi-card__label">SO Value</span>
+              <span class="kpi-card__label">{{ 'reports.soValue' | translate }}</span>
             </div>
           </div>
         } @else {
-          <div class="page-loading">No lead & sales data available</div>
+          <div class="page-loading">{{ 'reports.noLeadSalesData' | translate }}</div>
         }
       }
 
       <!-- R&D Report -->
       @if (activeReport() === 'rd') {
         <app-data-table tableId="report-rd" [columns]="rdReportColumns" [data]="rdReportData()"
-                        emptyIcon="science" emptyMessage="No R&D jobs found" />
+                        emptyIcon="science" [emptyMessage]="'reports.emptyNoRdJobs' | translate" />
       }
 
       <!-- Job Margin -->
@@ -378,19 +378,19 @@
         <div class="kpi-row">
           <div class="kpi-card kpi-card--success">
             <span class="kpi-card__value">{{ jobMarginTotals().totalRevenue | currency }}</span>
-            <span class="kpi-card__label">Total Revenue</span>
+            <span class="kpi-card__label">{{ 'reports.totalRevenue' | translate }}</span>
           </div>
           <div class="kpi-card kpi-card--error">
             <span class="kpi-card__value">{{ jobMarginTotals().totalCost | currency }}</span>
-            <span class="kpi-card__label">Total Cost</span>
+            <span class="kpi-card__label">{{ 'reports.totalCost' | translate }}</span>
           </div>
           <div class="kpi-card" [class.kpi-card--success]="jobMarginTotals().totalMargin >= 0" [class.kpi-card--error]="jobMarginTotals().totalMargin < 0">
             <span class="kpi-card__value">{{ jobMarginTotals().totalMargin | currency }}</span>
-            <span class="kpi-card__label">Total Margin</span>
+            <span class="kpi-card__label">{{ 'reports.totalMargin' | translate }}</span>
           </div>
           <div class="kpi-card">
             <span class="kpi-card__value">{{ jobMarginTotals().avgMarginPct }}%</span>
-            <span class="kpi-card__label">Avg Margin</span>
+            <span class="kpi-card__label">{{ 'reports.avgMargin' | translate }}</span>
           </div>
         </div>
         <div class="chart-container">
@@ -400,7 +400,7 @@
                   [options]="barOptions"></canvas>
         </div>
         <app-data-table tableId="report-job-margin" [columns]="jobMarginColumns" [data]="jobMarginData()"
-                        emptyIcon="trending_up" emptyMessage="No job margin data" />
+                        emptyIcon="trending_up" [emptyMessage]="'reports.emptyNoJobMarginData' | translate" />
       }
     }
   </main>

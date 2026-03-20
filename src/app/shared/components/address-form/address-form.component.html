@@ -1,28 +1,28 @@
 <fieldset class="address-form" [class.address-form--compact]="compact()">
   <div [formGroup]="form" class="address-form__fields">
-    <app-input label="Street Address" formControlName="line1" [maxlength]="200" [required]="requireLine1()" />
+    <app-input [label]="'addressForm.streetAddress' | translate" formControlName="line1" [maxlength]="200" [required]="requireLine1()" />
 
     @if (showLine2()) {
-      <app-input label="Street Address 2" formControlName="line2" placeholder="Apt, Suite, Unit" [maxlength]="200" [required]="requireLine2()" />
+      <app-input [label]="'addressForm.streetAddress2' | translate" formControlName="line2" [placeholder]="'addressForm.aptSuiteUnit' | translate" [maxlength]="200" [required]="requireLine2()" />
     }
 
     <div class="address-form__row">
-      <app-input label="City" formControlName="city" [maxlength]="100" [required]="requireCity()" />
+      <app-input [label]="'addressForm.city' | translate" formControlName="city" [maxlength]="100" [required]="requireCity()" />
 
       @if (stateDropdown()) {
-        <app-select label="State" formControlName="state" [options]="stateOptions" [required]="requireState()" />
+        <app-select [label]="'addressForm.state' | translate" formControlName="state" [options]="stateOptions" [required]="requireState()" />
       } @else {
-        <app-input label="State / Province" formControlName="state" [maxlength]="50" [required]="requireState()" />
+        <app-input [label]="'addressForm.stateProvince' | translate" formControlName="state" [maxlength]="50" [required]="requireState()" />
       }
     </div>
 
     <div class="address-form__row">
-      <app-input label="ZIP / Postal Code" formControlName="postalCode" mask="zip" [maxlength]="20" [required]="requirePostalCode()" />
+      <app-input [label]="'addressForm.zipPostalCode' | translate" formControlName="postalCode" mask="zip" [maxlength]="20" [required]="requirePostalCode()" />
 
       @if (fixedCountry()) {
-        <app-input label="Country" formControlName="country" [isReadonly]="true" />
+        <app-input [label]="'addressForm.country' | translate" formControlName="country" [isReadonly]="true" />
       } @else {
-        <app-select label="Country" formControlName="country" [options]="countryOptions" [required]="requireCountry()" />
+        <app-select [label]="'addressForm.country' | translate" formControlName="country" [options]="countryOptions" [required]="requireCountry()" />
       }
     </div>
   </div>
@@ -32,28 +32,37 @@
       <button class="action-btn action-btn--sm"
         type="button"
         [disabled]="verifying() || !form.controls.line1.value || !form.controls.city.value"
-        aria-label="Verify address"
+        [attr.aria-label]="'addressForm.verifyAddress' | translate"
         (click)="verify()">
         @if (verifying()) {
           <span class="material-icons-outlined address-form__spinner">sync</span>
-          Verifying...
-        } @else if (verified()) {
+          {{ 'addressForm.verifying' | translate }}
+        } @else if (verified() && verifyResult()?.messages?.length === 0) {
           <span class="material-icons-outlined address-form__verified-icon">check_circle</span>
-          Verified
+          {{ 'addressForm.verified' | translate }}
+        } @else if (verified()) {
+          <span class="material-icons-outlined address-form__format-ok-icon">check</span>
+          {{ 'addressForm.formatOk' | translate }}
         } @else {
           <span class="material-icons-outlined">location_searching</span>
-          Verify Address
+          {{ 'addressForm.verifyAddress' | translate }}
         }
       </button>
 
       @if (verifyResult(); as result) {
-        <div class="address-form__verify-result" [class.address-form__verify-result--valid]="result.isValid" [class.address-form__verify-result--invalid]="!result.isValid">
-          @if (result.isValid) {
+        <div class="address-form__verify-result"
+          [class.address-form__verify-result--valid]="result.isValid"
+          [class.address-form__verify-result--warn]="result.isValid && result.messages.length > 0"
+          [class.address-form__verify-result--invalid]="!result.isValid">
+          @if (result.isValid && result.messages.length === 0) {
             <span class="material-icons-outlined">check_circle</span>
-            <span>Address verified</span>
+            <span>{{ 'addressForm.addressVerified' | translate }}</span>
+          } @else if (result.isValid) {
+            <span class="material-icons-outlined">info</span>
+            <span>{{ result.messages[0] }}</span>
           } @else {
             <span class="material-icons-outlined">warning</span>
-            <span>{{ result.messages[0] ?? 'Could not verify address' }}</span>
+            <span>{{ result.messages[0] ?? ('addressForm.couldNotVerify' | translate) }}</span>
           }
         </div>
       }

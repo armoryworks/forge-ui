@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -17,6 +19,7 @@ import { UpdatePlanningCycleRequest } from '../../models/update-planning-cycle-r
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    TranslatePipe,
     DialogComponent, InputComponent, DatepickerComponent, TextareaComponent,
     ValidationPopoverDirective,
   ],
@@ -31,8 +34,10 @@ export class CycleDialogComponent implements OnInit {
   readonly saved = output<CreatePlanningCycleRequest | UpdatePlanningCycleRequest>();
   readonly cancelled = output<void>();
 
+  private readonly translate = inject(TranslateService);
+
   protected readonly isEditMode = computed(() => this.cycle() !== null);
-  protected readonly dialogTitle = computed(() => this.isEditMode() ? 'Edit Cycle' : 'New Planning Cycle');
+  protected readonly dialogTitle = computed(() => this.isEditMode() ? this.translate.instant('planning.editCycle') : this.translate.instant('planning.newPlanningCycle'));
 
   protected readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),

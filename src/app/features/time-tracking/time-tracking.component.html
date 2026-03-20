@@ -1,18 +1,18 @@
-<app-page-header title="Time Tracking" subtitle="Track hours with live timers or manual entries" helpTourId="time-tracking">
+<app-page-header [title]="'timeTracking.title' | translate" [subtitle]="'timeTracking.subtitle' | translate" helpTourId="time-tracking">
   @if (activeTimer()) {
     <button class="action-btn action-btn--warn" (click)="openStopTimer()">
       <span class="material-icons-outlined">stop_circle</span>
-      Stop Timer ({{ getTimerElapsed() }})
+      {{ 'timeTracking.stopTimer' | translate }} ({{ getTimerElapsed() }})
     </button>
   } @else {
     <button class="action-btn action-btn--primary" (click)="openStartTimer()">
       <span class="material-icons-outlined">play_circle</span>
-      Start Timer
+      {{ 'timeTracking.startTimer' | translate }}
     </button>
   }
   <button class="action-btn" (click)="openManualEntry()">
     <span class="material-icons-outlined">edit_note</span>
-    Manual Entry
+    {{ 'timeTracking.manualEntry' | translate }}
   </button>
 </app-page-header>
 
@@ -20,24 +20,24 @@
   <!-- Filters -->
   <div class="filters-bar">
     <div class="filter-group">
-      <app-datepicker label="From" [formControl]="dateFromControl" />
+      <app-datepicker [label]="'common.from' | translate" [formControl]="dateFromControl" />
     </div>
     <div class="filter-group">
-      <app-datepicker label="To" [formControl]="dateToControl" />
+      <app-datepicker [label]="'common.to' | translate" [formControl]="dateToControl" />
     </div>
     <div class="filter-summary">
-      Total: <strong>{{ getTotalHours() }}h</strong> across <strong>{{ entries().length }}</strong> entries
+      {{ 'timeTracking.totalSummary' | translate:{ hours: getTotalHours(), count: entries().length } }}
     </div>
   </div>
 
   @if (loading()) {
     <div class="page-loading">
       <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-      <span>Loading...</span>
+      <span>{{ 'common.loading' | translate }}</span>
     </div>
   } @else {
       <app-data-table tableId="time-tracking" [columns]="timeColumns" [data]="entries()"
-        [rowClass]="timeRowClass" emptyIcon="schedule" emptyMessage="No time entries found">
+        [rowClass]="timeRowClass" emptyIcon="schedule" [emptyMessage]="'emptyState.noTimeEntries' | translate">
         <ng-template appColumnCell="icon" let-entry>
           @if (entry.timerStart && !entry.timerStop) {
             <span class="material-icons-outlined type-icon type-icon--running">timer</span>
@@ -59,7 +59,7 @@
         </ng-template>
         <ng-template appColumnCell="durationMinutes" let-entry>
           @if (entry.timerStart && !entry.timerStop) {
-            <span class="running-badge">Running</span>
+            <span class="running-badge">{{ 'timeTracking.running' | translate }}</span>
           } @else {
             {{ formatDuration(entry.durationMinutes) }}
           }
@@ -69,14 +69,14 @@
         </ng-template>
         <ng-template appColumnCell="type" let-entry>
           <span class="entry-type" [class]="entry.isManual ? 'entry-type--manual' : 'entry-type--timer'">
-            {{ entry.isManual ? 'Manual' : 'Timer' }}
+            {{ entry.isManual ? ('timeTracking.manual' | translate) : ('timeTracking.timer' | translate) }}
           </span>
         </ng-template>
         <ng-template appColumnCell="actions" let-entry>
           @if (!isEditable(entry)) {
-            <span class="material-icons-outlined lock-icon" title="Locked — past day or manually locked">lock</span>
+            <span class="material-icons-outlined lock-icon" [title]="'timeTracking.lockedTitle' | translate">lock</span>
           } @else {
-            <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteTimeEntry(entry); $event.stopPropagation()">
+            <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteTimeEntry(entry); $event.stopPropagation()">
               <span class="material-icons-outlined">delete</span>
             </button>
           }
@@ -87,28 +87,28 @@
 
 <!-- Manual Entry Dialog -->
 @if (showDialog()) {
-  <app-dialog title="Log Time Entry" (closed)="closeDialog()">
+  <app-dialog [title]="'timeTracking.logTimeEntry' | translate" (closed)="closeDialog()">
     <div [formGroup]="entryForm">
       <div class="dialog-row">
-        <app-datepicker label="Date" formControlName="date" />
-        <app-select label="Category" formControlName="category" [options]="categoryOptions" />
+        <app-datepicker [label]="'common.date' | translate" formControlName="date" />
+        <app-select [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
       </div>
 
       <div class="dialog-row">
-        <app-input label="Hours" type="number" formControlName="hours" />
-        <app-input label="Minutes" type="number" formControlName="minutes" />
+        <app-input [label]="'common.hours' | translate" type="number" formControlName="hours" />
+        <app-input [label]="'common.minutes' | translate" type="number" formControlName="minutes" />
       </div>
 
-      <app-textarea label="Notes" formControlName="notes" [rows]="3" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="entryViolations"
         [disabled]="entryForm.invalid || saving()"
         (click)="saveEntry()">
-        <span class="material-icons-outlined">save</span> Log Entry
+        <span class="material-icons-outlined">save</span> {{ 'timeTracking.logEntry' | translate }}
       </button>
     </div>
   </app-dialog>
@@ -116,17 +116,17 @@
 
 <!-- Start Timer Dialog -->
 @if (showTimerDialog()) {
-  <app-dialog title="Start Timer" (closed)="closeTimerDialog()">
+  <app-dialog [title]="'timeTracking.startTimer' | translate" (closed)="closeTimerDialog()">
     <div [formGroup]="timerForm">
-      <app-select label="Category" formControlName="category" [options]="categoryOptions" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-select [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeTimerDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeTimerDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary" (click)="startTimer()">
         <span class="material-icons-outlined">play_circle</span>
-        Start
+        {{ 'timeTracking.start' | translate }}
       </button>
     </div>
   </app-dialog>
@@ -134,21 +134,21 @@
 
 <!-- Stop Timer Dialog -->
 @if (showStopDialog()) {
-  <app-dialog title="Stop Timer" (closed)="closeStopDialog()">
+  <app-dialog [title]="'timeTracking.stopTimer' | translate" (closed)="closeStopDialog()">
     <p class="timer-info">
-      Timer running for <strong>{{ getTimerElapsed() }}</strong>
+      {{ 'timeTracking.timerRunningFor' | translate }} <strong>{{ getTimerElapsed() }}</strong>
       @if (activeTimer()?.category) {
         — {{ activeTimer()?.category }}
       }
     </p>
 
-    <app-textarea label="Notes (optional)" [formControl]="stopNotesControl" [rows]="2" />
+    <app-textarea [label]="'timeTracking.notesOptional' | translate" [formControl]="stopNotesControl" [rows]="2" />
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeStopDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeStopDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--warn" (click)="stopTimer()">
         <span class="material-icons-outlined">stop_circle</span>
-        Stop Timer
+        {{ 'timeTracking.stopTimer' | translate }}
       </button>
     </div>
   </app-dialog>

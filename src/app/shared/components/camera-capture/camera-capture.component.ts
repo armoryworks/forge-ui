@@ -12,6 +12,9 @@ import {
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { CameraCaptureResult } from '../../models/camera-capture-result.model';
 
 type CameraState = 'initializing' | 'streaming' | 'captured' | 'denied' | 'unavailable';
@@ -19,6 +22,7 @@ type CameraState = 'initializing' | 'streaming' | 'captured' | 'denied' | 'unava
 @Component({
   selector: 'app-camera-capture',
   standalone: true,
+  imports: [MatTooltipModule, TranslatePipe],
   templateUrl: './camera-capture.component.html',
   styleUrl: './camera-capture.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

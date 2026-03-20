@@ -8,11 +8,12 @@ import { ShippingLabel } from '../../models/shipping-label.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-shipping-rates-dialog',
   standalone: true,
-  imports: [CurrencyPipe, DialogComponent, LoadingBlockDirective],
+  imports: [CurrencyPipe, DialogComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './shipping-rates-dialog.component.html',
   styleUrl: './shipping-rates-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,6 +21,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 export class ShippingRatesDialogComponent implements OnInit {
   private readonly shipmentService = inject(ShipmentService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly shipmentId = input.required<number>();
   readonly closed = output<void>();
@@ -39,7 +41,7 @@ export class ShippingRatesDialogComponent implements OnInit {
     this.loadingRates.set(true);
     this.shipmentService.getRates(this.shipmentId()).pipe(
       catchError(() => {
-        this.snackbar.error('Failed to load shipping rates.');
+        this.snackbar.error(this.translate.instant('shipments.failedRates'));
         return of([]);
       }),
     ).subscribe(rates => {
@@ -58,7 +60,7 @@ export class ShippingRatesDialogComponent implements OnInit {
     this.creatingLabel.set(true);
     this.shipmentService.createLabel(this.shipmentId(), rate.carrierId, rate.serviceName).pipe(
       catchError(() => {
-        this.snackbar.error('Failed to create shipping label.');
+        this.snackbar.error(this.translate.instant('shipments.failedLabel'));
         this.creatingLabel.set(false);
         return of(null);
       }),
@@ -66,7 +68,7 @@ export class ShippingRatesDialogComponent implements OnInit {
       if (!label) return;
       this.createdLabel.set(label);
       this.creatingLabel.set(false);
-      this.snackbar.success('Shipping label created.');
+      this.snackbar.success(this.translate.instant('shipments.labelCreatedSuccess'));
       this.labelCreated.emit(label);
     });
   }

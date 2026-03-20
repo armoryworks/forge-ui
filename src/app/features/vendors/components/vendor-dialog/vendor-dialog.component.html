@@ -1,10 +1,10 @@
-<app-dialog [title]="isEditing ? 'Edit Vendor' : 'New Vendor'" width="520px" (closed)="close()">
+<app-dialog [title]="isEditing ? ('vendors.editVendor' | translate) : ('vendors.newVendor' | translate)" width="520px" (closed)="close()">
   <div [formGroup]="form">
-    <app-input label="Company Name" formControlName="companyName" />
-    <app-input label="Contact Name" formControlName="contactName" />
+    <app-input [label]="'vendors.companyName' | translate" formControlName="companyName" />
+    <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" />
     <div class="dialog-row">
-      <app-input label="Email" type="email" formControlName="email" />
-      <app-input label="Phone" formControlName="phone" />
+      <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
+      <app-input [label]="'common.phone' | translate" formControlName="phone" />
     </div>
     <app-address-form formControlName="address"
       [requireLine1]="false"
@@ -12,21 +12,21 @@
       [requireState]="false"
       [requirePostalCode]="false"
       [showLine2]="false" />
-    <app-select label="Payment Terms" formControlName="paymentTerms" [options]="paymentTermsOptions" />
-    <app-textarea label="Notes" formControlName="notes" [rows]="3" />
+    <app-select [label]="'vendors.paymentTerms' | translate" formControlName="paymentTerms" [options]="paymentTermsOptions" />
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
     @if (isEditing) {
-      <app-toggle label="Active" formControlName="isActive" />
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
     }
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>
-      {{ isEditing ? 'Save Changes' : 'Create Vendor' }}
+      {{ isEditing ? ('common.saveChanges' | translate) : ('vendors.createVendor' | translate) }}
     </button>
   </div>
 </app-dialog>

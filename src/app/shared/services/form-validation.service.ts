@@ -1,6 +1,5 @@
 import { FormGroup, AbstractControl } from '@angular/forms';
-import { Signal, computed } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Signal, signal } from '@angular/core';
 import { startWith } from 'rxjs';
 
 const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> = {
@@ -26,36 +25,44 @@ const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> 
 };
 
 export class FormValidationService {
+  /**
+   * Returns a signal of violation messages for the given form.
+   * Safe to call from any context (constructor, effect, computed, etc.)
+   * because it uses a plain subscription instead of toSignal().
+   */
   static getViolations(
     form: FormGroup,
     labels: Record<string, string>,
   ): Signal<string[]> {
-    const status = toSignal(form.statusChanges.pipe(startWith(form.status)));
+    const violations = signal<string[]>([]);
 
-    return computed(() => {
-      // Read status signal to trigger recomputation
-      status();
+    form.statusChanges.pipe(startWith(form.status)).subscribe(() => {
+      violations.set(FormValidationService.collectViolations(form, labels));
+    });
 
-      const violations: string[] = [];
+    return violations.asReadonly();
+  }
 
-      for (const [key, control] of Object.entries(form.controls)) {
-        const errors = (control as AbstractControl).errors;
-        if (!errors) continue;
+  static collectViolations(form: FormGroup, labels: Record<string, string>): string[] {
+    const violations: string[] = [];
 
-        const label = labels[key] ?? key;
+    for (const [key, control] of Object.entries(form.controls)) {
+      const errors = (control as AbstractControl).errors;
+      if (!errors) continue;
 
-        for (const [errorKey, errorValue] of Object.entries(errors)) {
-          if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
-            violations.push(errorValue.message as string);
-          } else if (ERROR_MESSAGES[errorKey]) {
-            violations.push(ERROR_MESSAGES[errorKey](label, errorValue));
-          } else {
-            violations.push(`${label} is invalid`);
-          }
+      const label = labels[key] ?? key;
+
+      for (const [errorKey, errorValue] of Object.entries(errors)) {
+        if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
+          violations.push(errorValue.message as string);
+        } else if (ERROR_MESSAGES[errorKey]) {
+          violations.push(ERROR_MESSAGES[errorKey](label, errorValue));
+        } else {
+          violations.push(`${label} is invalid`);
         }
       }
+    }
 
-      return violations;
-    });
+    return violations;
   }
 }

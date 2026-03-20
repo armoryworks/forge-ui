@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -22,7 +24,7 @@ const SYSTEM_FORM_TYPES: Set<ComplianceFormType> = new Set([
   selector: 'app-compliance-template-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DialogComponent, InputComponent, SelectComponent,
+    ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent,
     ToggleComponent, TextareaComponent, FileUploadZoneComponent, ValidationPopoverDirective,
   ],
   templateUrl: './compliance-template-dialog.component.html',
@@ -34,6 +36,7 @@ export class ComplianceTemplateDialogComponent {
   private readonly data = inject<ComplianceFormTemplate | null>(MAT_DIALOG_DATA);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
   protected readonly isEdit = !!this.data;
@@ -41,12 +44,12 @@ export class ComplianceTemplateDialogComponent {
   protected readonly template = this.data;
 
   protected readonly formTypeOptions: SelectOption[] = [
-    { value: 'W4', label: 'W-4 Federal Tax' },
-    { value: 'I9', label: 'I-9 Employment Eligibility' },
-    { value: 'StateWithholding', label: 'State Tax Withholding' },
-    { value: 'DirectDeposit', label: 'Direct Deposit' },
-    { value: 'WorkersComp', label: 'Workers Comp' },
-    { value: 'Handbook', label: 'Employee Handbook' },
+    { value: 'W4', label: this.translate.instant('complianceTemplateDialog.formTypeW4') },
+    { value: 'I9', label: this.translate.instant('complianceTemplateDialog.formTypeI9') },
+    { value: 'StateWithholding', label: this.translate.instant('complianceTemplateDialog.formTypeState') },
+    { value: 'DirectDeposit', label: this.translate.instant('complianceTemplateDialog.formTypeDirectDeposit') },
+    { value: 'WorkersComp', label: this.translate.instant('complianceTemplateDialog.formTypeWorkersComp') },
+    { value: 'Handbook', label: this.translate.instant('complianceTemplateDialog.formTypeHandbook') },
   ];
 
   protected readonly form = new FormGroup({
@@ -80,7 +83,7 @@ export class ComplianceTemplateDialogComponent {
     this.adminService.uploadTemplateDocument(this.data.id, parseInt(file.id, 10)).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Document uploaded');
+        this.snackbar.success(this.translate.instant('complianceTemplateDialog.documentUploaded'));
         this.dialogRef.close(true);
       },
       error: () => this.saving.set(false),
@@ -113,7 +116,7 @@ export class ComplianceTemplateDialogComponent {
     op.subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success(this.isEdit ? 'Template updated' : 'Template created');
+        this.snackbar.success(this.isEdit ? this.translate.instant('complianceTemplateDialog.templateUpdated') : this.translate.instant('complianceTemplateDialog.templateCreated'));
         this.dialogRef.close(true);
       },
       error: () => this.saving.set(false),

@@ -1,7 +1,7 @@
-<app-page-header title="Leads" subtitle="Track and qualify potential sales opportunities">
+<app-page-header [title]="'leads.title' | translate" [subtitle]="'leads.subtitle' | translate">
   <button class="action-btn action-btn--primary" (click)="openCreateLead()">
     <span class="material-icons-outlined">add</span>
-    New Lead
+    {{ 'leads.createLead' | translate }}
   </button>
 </app-page-header>
 
@@ -9,19 +9,19 @@
   <!-- Left: Leads List -->
   <div class="leads-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search leads..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'leads.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     @if (loading()) {
       <div class="page-loading">
         <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-        <span>Loading...</span>
+        <span>{{ 'common.loading' | translate }}</span>
       </div>
     } @else {
       <app-data-table tableId="leads" [columns]="leadColumns" [data]="leads()"
-        [rowClass]="leadRowClass" emptyIcon="person_search" emptyMessage="No leads found" emptyHelpText="Leads track potential sales opportunities. Click New Lead to start capturing prospects."
+        [rowClass]="leadRowClass" emptyIcon="person_search" [emptyMessage]="'leads.noLeadsFound' | translate" [emptyHelpText]="'leads.noLeadsHelp' | translate"
         (rowClick)="selectLead($any($event))">
         <ng-template appColumnCell="companyName" let-lead>
           <span class="company-name">{{ lead.companyName }}</span>
@@ -63,10 +63,10 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Edit" (click)="openEditLead()">
+          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditLead()">
             <span class="material-icons-outlined">edit</span>
           </button>
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -75,32 +75,32 @@
       <div class="detail-body">
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">
               <span [class]="getStatusClass(lead.status)">{{ lead.status }}</span>
             </span>
           </div>
           @if (lead.email) {
             <div class="info-item">
-              <span class="info-label">Email</span>
+              <span class="info-label">{{ 'common.email' | translate }}</span>
               <span class="info-value">{{ lead.email }}</span>
             </div>
           }
           @if (lead.phone) {
             <div class="info-item">
-              <span class="info-label">Phone</span>
+              <span class="info-label">{{ 'common.phone' | translate }}</span>
               <span class="info-value">{{ lead.phone }}</span>
             </div>
           }
           @if (lead.source) {
             <div class="info-item">
-              <span class="info-label">Source</span>
+              <span class="info-label">{{ 'leads.source' | translate }}</span>
               <span class="info-value">{{ lead.source }}</span>
             </div>
           }
           @if (lead.followUpDate) {
             <div class="info-item">
-              <span class="info-label">Follow-Up</span>
+              <span class="info-label">{{ 'leads.followUp' | translate }}</span>
               <span class="info-value" [class.overdue]="isFollowUpOverdue(lead)">
                 {{ lead.followUpDate | date:'MM/dd/yyyy' }}
               </span>
@@ -108,7 +108,7 @@
           }
           @if (lead.lostReason) {
             <div class="info-item">
-              <span class="info-label">Lost Reason</span>
+              <span class="info-label">{{ 'leads.lostReason' | translate }}</span>
               <span class="info-value">{{ lead.lostReason }}</span>
             </div>
           }
@@ -116,14 +116,14 @@
 
         @if (lead.notes) {
           <div class="notes-section">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'common.notes' | translate }}</span>
             <p class="notes-text">{{ lead.notes }}</p>
           </div>
         }
 
         @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
           <div class="status-actions">
-            <span class="info-label">Update Status</span>
+            <span class="info-label">{{ 'leads.updateStatus' | translate }}</span>
             <div class="status-btn-group">
               @for (s of statuses; track s) {
                 @if (s !== 'Converted') {
@@ -140,15 +140,15 @@
 
         @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
           <div class="convert-actions">
-            <span class="info-label">Convert</span>
+            <span class="info-label">{{ 'leads.convert' | translate }}</span>
             <div class="convert-btn-group">
               <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
                 <span class="material-icons-outlined">person</span>
-                Convert to Customer
+                {{ 'leads.convertToCustomer' | translate }}
               </button>
               <button class="action-btn" [disabled]="saving()" (click)="convertLeadWithJob()">
                 <span class="material-icons-outlined">work</span>
-                Convert &amp; Create Job
+                {{ 'leads.convertAndCreateJob' | translate }}
               </button>
             </div>
           </div>
@@ -157,7 +157,7 @@
         @if (lead.status === 'Converted') {
           <div class="converted-info">
             <span class="material-icons-outlined converted-icon">check_circle</span>
-            <span>This lead has been converted to a customer.</span>
+            <span>{{ 'leads.convertedInfo' | translate }}</span>
           </div>
         }
 
@@ -165,7 +165,7 @@
           <div class="status-actions">
             <button class="action-btn" (click)="updateStatus('New')">
               <span class="material-icons-outlined">replay</span>
-              Reopen Lead
+              {{ 'leads.reopenLead' | translate }}
             </button>
           </div>
         }
@@ -176,33 +176,33 @@
 
 <!-- Lead Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="editingLead() ? 'Edit Lead' : 'New Lead'" (closed)="closeDialog()">
+  <app-dialog [title]="editingLead() ? ('leads.editLead' | translate) : ('leads.createLead' | translate)" (closed)="closeDialog()">
     <div [formGroup]="leadForm">
-      <app-input label="Company Name" formControlName="companyName" />
+      <app-input [label]="'leads.companyName' | translate" formControlName="companyName" />
 
-      <app-input label="Contact Name" formControlName="contactName" />
+      <app-input [label]="'leads.contactName' | translate" formControlName="contactName" />
 
       <div class="dialog-row">
-        <app-input label="Email" type="email" formControlName="email" />
-        <app-input label="Phone" formControlName="phone" />
+        <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
+        <app-input [label]="'common.phone' | translate" formControlName="phone" />
       </div>
 
       <div class="dialog-row">
-        <app-select label="Source" formControlName="source" [options]="sourceOptions" />
-        <app-datepicker label="Follow-Up Date" formControlName="followUpDate" />
+        <app-select [label]="'leads.source' | translate" formControlName="source" [options]="sourceOptions" />
+        <app-datepicker [label]="'leads.followUpDate' | translate" formControlName="followUpDate" />
       </div>
 
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="leadViolations"
         [disabled]="leadForm.invalid || saving()"
         (click)="saveLead()">
         <span class="material-icons-outlined">save</span>
-        {{ editingLead() ? 'Save Changes' : 'Create Lead' }}
+        {{ editingLead() ? ('common.saveChanges' | translate) : ('leads.createLead' | translate) }}
       </button>
     </div>
   </app-dialog>
@@ -210,12 +210,12 @@
 
 <!-- Lost Reason Dialog -->
 @if (showLostDialog()) {
-  <app-dialog title="Mark as Lost" width="360px" (closed)="showLostDialog.set(false)">
-    <app-textarea label="Reason" [formControl]="lostReasonControl" />
+  <app-dialog [title]="'leads.markAsLost' | translate" width="360px" (closed)="showLostDialog.set(false)">
+    <app-textarea [label]="'leads.reason' | translate" [formControl]="lostReasonControl" />
 
     <div dialog-footer>
-      <button class="action-btn" (click)="showLostDialog.set(false)">Cancel</button>
-      <button class="action-btn action-btn--primary" (click)="confirmLost()">Confirm Lost</button>
+      <button class="action-btn" (click)="showLostDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" (click)="confirmLost()">{{ 'leads.confirmLost' | translate }}</button>
     </div>
   </app-dialog>
 }

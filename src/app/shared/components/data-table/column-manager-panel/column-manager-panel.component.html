@@ -1,7 +1,7 @@
-<div class="col-manager" role="dialog" aria-label="Column manager" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+<div class="col-manager" role="dialog" [attr.aria-label]="'shared.columnManager' | translate" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
   <div class="col-manager__header">
-    <span class="col-manager__title">Columns</span>
-    <button class="col-manager__reset" (click)="onReset()">Reset</button>
+    <span class="col-manager__title">{{ 'shared.columns' | translate }}</span>
+    <button class="col-manager__reset" (click)="onReset()">{{ 'shared.resetColumns' | translate }}</button>
   </div>
 
   <div class="col-manager__list" cdkDropList (cdkDropListDropped)="onDrop($event)">

@@ -25,6 +25,7 @@ import { AiAssistant } from '../models/ai-assistant.model';
 import { AdminTeam, TeamMember, KioskTerminal } from '../models/admin-team.model';
 import { ComplianceFormTemplate, UserComplianceDetail } from '../../account/models/compliance-form.model';
 import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
+import { IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -292,6 +293,10 @@ export class AdminService {
     return this.http.post<void>(`${this.complianceBase}/${id}/sync`, {});
   }
 
+  extractFormDefinition(id: number): Observable<unknown> {
+    return this.http.post(`${this.complianceBase}/${id}/extract-definition`, {});
+  }
+
   syncAllComplianceTemplates(): Observable<void> {
     return this.http.post<void>(`${this.complianceBase}/sync-all`, {});
   }
@@ -343,5 +348,18 @@ export class AdminService {
   // User Work Location
   updateUserWorkLocation(userId: number, workLocationId: number | null): Observable<void> {
     return this.http.patch<void>(`${environment.apiUrl}/admin/users/${userId}/work-location`, { workLocationId });
+  }
+
+  // Integrations
+  getIntegrations(): Observable<IntegrationStatus[]> {
+    return this.http.get<IntegrationStatus[]>(`${environment.apiUrl}/admin/integrations`);
+  }
+
+  updateIntegration(provider: string, settings: Record<string, string>): Observable<IntegrationStatus> {
+    return this.http.put<IntegrationStatus>(`${environment.apiUrl}/admin/integrations/${provider}`, { settings });
+  }
+
+  testIntegration(provider: string): Observable<TestIntegrationResult> {
+    return this.http.post<TestIntegrationResult>(`${environment.apiUrl}/admin/integrations/${provider}/test`, {});
   }
 }

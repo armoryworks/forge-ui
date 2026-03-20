@@ -1,11 +1,11 @@
-<app-page-layout pageTitle="My Account">
+<app-page-layout [pageTitle]="'account.myAccount' | translate">
   <ng-container content>
     <div class="account">
       <!-- Profile Section -->
       <section class="account__section">
         <h2 class="account__section-title">
           <span class="material-icons-outlined">person</span>
-          Profile
+          {{ 'account.profile' | translate }}
         </h2>
 
         <div class="account__card">
@@ -22,15 +22,15 @@
 
           <div [formGroup]="profileForm" class="account__form">
             <div class="account__row">
-              <app-input label="First Name" formControlName="firstName" />
-              <app-input label="Last Name" formControlName="lastName" />
+              <app-input [label]="'account.firstName' | translate" formControlName="firstName" />
+              <app-input [label]="'account.lastName' | translate" formControlName="lastName" />
             </div>
             <div class="account__row">
-              <app-input label="Initials" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
+              <app-input [label]="'account.initials' | translate" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
             </div>
 
             <div class="account__color-section">
-              <span class="account__color-label">Avatar Color</span>
+              <span class="account__color-label">{{ 'account.avatarColor' | translate }}</span>
               <div class="account__color-grid">
                 @for (color of avatarColors; track color) {
                   <button class="account__color-swatch"
@@ -54,10 +54,10 @@
               (click)="saveProfile()">
               @if (savingProfile()) {
                 <span class="material-icons-outlined account__spinner">sync</span>
-                Saving...
+                {{ 'account.saving' | translate }}
               } @else {
                 <span class="material-icons-outlined">check</span>
-                Save Profile
+                {{ 'account.saveProfile' | translate }}
               }
             </button>
           </div>
@@ -68,21 +68,21 @@
       <section class="account__section">
         <h2 class="account__section-title">
           <span class="material-icons-outlined">lock</span>
-          Change Password
+          {{ 'account.changePassword' | translate }}
         </h2>
 
         <div class="account__card">
           <div [formGroup]="passwordForm" class="account__form">
-            <app-input label="Current Password" type="password" formControlName="currentPassword" />
+            <app-input [label]="'account.currentPassword' | translate" type="password" formControlName="currentPassword" />
             <div class="account__row">
-              <app-input label="New Password" type="password" formControlName="newPassword"
-                placeholder="Minimum 8 characters" />
-              <app-input label="Confirm New Password" type="password" formControlName="confirmPassword" />
+              <app-input [label]="'account.newPassword' | translate" type="password" formControlName="newPassword"
+                [placeholder]="'account.minPasswordHint' | translate" />
+              <app-input [label]="'account.confirmNewPassword' | translate" type="password" formControlName="confirmPassword" />
             </div>
             @if (passwordMismatch()) {
               <div class="account__error">
                 <span class="material-icons-outlined">warning</span>
-                Passwords do not match
+                {{ 'account.passwordsDoNotMatch' | translate }}
               </div>
             }
           </div>
@@ -93,10 +93,10 @@
               (click)="changePassword()">
               @if (savingPassword()) {
                 <span class="material-icons-outlined account__spinner">sync</span>
-                Changing...
+                {{ 'account.changing' | translate }}
               } @else {
                 <span class="material-icons-outlined">lock_reset</span>
-                Change Password
+                {{ 'account.changePassword' | translate }}
               }
             </button>
           </div>

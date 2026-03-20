@@ -1,14 +1,14 @@
-<app-page-layout pageTitle="Report Builder">
+<app-page-layout [pageTitle]="'reports.builderTitle' | translate">
   <ng-container toolbar>
-    <app-select label="Saved Reports" [options]="savedReportOptions()" [formControl]="savedReportControl" />
+    <app-select [label]="'reports.savedReports' | translate" [options]="savedReportOptions()" [formControl]="savedReportControl" />
     @if (editingReport()) {
-      <button class="icon-btn icon-btn--danger" (click)="deleteSelectedReport()" aria-label="Delete saved report">
+      <button class="icon-btn icon-btn--danger" (click)="deleteSelectedReport()" [attr.aria-label]="'reports.deleteReport' | translate" [matTooltip]="'reports.deleteReport' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">delete</span>
       </button>
     }
     <span appSpacer></span>
     <button class="action-btn" (click)="newReport()">
-      <span class="material-icons-outlined">add</span> New Report
+      <span class="material-icons-outlined">add</span> {{ 'reports.newReport' | translate }}
     </button>
   </ng-container>
 
@@ -17,14 +17,14 @@
       <div class="builder__config">
         <!-- Step 1: Entity source -->
         <div class="builder__section">
-          <h3 class="builder__section-title">Data Source</h3>
-          <app-select label="Entity" [options]="entityOptions()" [formControl]="entityControl" />
+          <h3 class="builder__section-title">{{ 'reports.dataSource' | translate }}</h3>
+          <app-select [label]="'reports.entity' | translate" [options]="entityOptions()" [formControl]="entityControl" />
         </div>
 
         <!-- Step 2: Columns (multi-select checkboxes) -->
         @if (availableFields().length > 0) {
           <div class="builder__section">
-            <h3 class="builder__section-title">Columns</h3>
+            <h3 class="builder__section-title">{{ 'reports.columns' | translate }}</h3>
             <div class="builder__column-list">
               @for (field of availableFields(); track field.field) {
                 <label class="builder__column-check">
@@ -37,40 +37,40 @@
 
           <!-- Step 3: Filters -->
           <div class="builder__section">
-            <h3 class="builder__section-title">Filters</h3>
+            <h3 class="builder__section-title">{{ 'reports.filters' | translate }}</h3>
             @for (filter of filters(); track $index) {
               <div class="builder__filter-row">
-                <app-select label="Field" [options]="filterableFieldOptions()" [formControl]="filter.fieldControl" />
-                <app-select label="Operator" [options]="operatorOptions" [formControl]="filter.operatorControl" />
-                <app-input label="Value" [formControl]="filter.valueControl" />
-                <button class="icon-btn icon-btn--danger" (click)="removeFilter($index)" aria-label="Remove filter">
+                <app-select [label]="'reports.field' | translate" [options]="filterableFieldOptions()" [formControl]="filter.fieldControl" />
+                <app-select [label]="'reports.operator' | translate" [options]="operatorOptions" [formControl]="filter.operatorControl" />
+                <app-input [label]="'reports.value' | translate" [formControl]="filter.valueControl" />
+                <button class="icon-btn icon-btn--danger" (click)="removeFilter($index)" [attr.aria-label]="'common.remove' | translate" [matTooltip]="'common.remove' | translate" matTooltipPosition="above">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
             }
             <button class="action-btn action-btn--sm" (click)="addFilter()">
-              <span class="material-icons-outlined">add</span> Add Filter
+              <span class="material-icons-outlined">add</span> {{ 'reports.addFilter' | translate }}
             </button>
           </div>
 
           <!-- Step 4: Group By + Sort -->
           <div class="builder__section">
-            <h3 class="builder__section-title">Group &amp; Sort</h3>
-            <app-select label="Group By" [options]="groupableFieldOptions()" [formControl]="groupByControl" />
+            <h3 class="builder__section-title">{{ 'reports.groupSort' | translate }}</h3>
+            <app-select [label]="'reports.groupBy' | translate" [options]="groupableFieldOptions()" [formControl]="groupByControl" />
             <div class="builder__sort-row">
-              <app-select label="Sort By" [options]="sortableFieldOptions()" [formControl]="sortControl" />
-              <app-select label="Direction" [options]="directionOptions" [formControl]="directionControl" />
+              <app-select [label]="'reports.sortBy' | translate" [options]="sortableFieldOptions()" [formControl]="sortControl" />
+              <app-select [label]="'reports.direction' | translate" [options]="directionOptions" [formControl]="directionControl" />
             </div>
           </div>
 
           <!-- Step 5: Chart type -->
           <div class="builder__section">
-            <h3 class="builder__section-title">Visualization</h3>
-            <app-select label="Chart Type" [options]="chartTypeOptions" [formControl]="chartTypeControl" />
+            <h3 class="builder__section-title">{{ 'reports.visualization' | translate }}</h3>
+            <app-select [label]="'reports.chartType' | translate" [options]="chartTypeOptions" [formControl]="chartTypeControl" />
             @if (chartTypeControl.value && chartTypeControl.value !== 'table') {
               <div class="builder__sort-row">
-                <app-select label="Label Field" [options]="fieldOptions()" [formControl]="chartLabelControl" />
-                <app-select label="Value Field" [options]="numericFieldOptions()" [formControl]="chartValueControl" />
+                <app-select [label]="'reports.labelField' | translate" [options]="fieldOptions()" [formControl]="chartLabelControl" />
+                <app-select [label]="'reports.valueField' | translate" [options]="numericFieldOptions()" [formControl]="chartValueControl" />
               </div>
             }
           </div>
@@ -81,16 +81,16 @@
           <button class="action-btn action-btn--primary"
                   [disabled]="!canRun()"
                   (click)="runReport()">
-            <span class="material-icons-outlined">play_arrow</span> Run Report
+            <span class="material-icons-outlined">play_arrow</span> {{ 'reports.runReport' | translate }}
           </button>
           <button class="action-btn"
                   [disabled]="!canRun()"
                   (click)="openSaveDialog()">
-            <span class="material-icons-outlined">save</span> Save
+            <span class="material-icons-outlined">save</span> {{ 'common.save' | translate }}
           </button>
           @if (reportResults()) {
             <button class="action-btn" (click)="exportCsv()">
-              <span class="material-icons-outlined">download</span> CSV
+              <span class="material-icons-outlined">download</span> {{ 'reports.csv' | translate }}
             </button>
           }
         </div>
@@ -115,13 +115,13 @@
             [columns]="resultColumns()"
             [data]="reportResults()!.rows"
             emptyIcon="assessment"
-            emptyMessage="No data matches your criteria" />
+            [emptyMessage]="'reports.noDataMatches' | translate" />
 
           <div class="builder__result-meta">
-            {{ reportResults()!.totalCount }} record(s) found
+            {{ reportResults()!.totalCount }} {{ 'reports.recordsFound' | translate }}
           </div>
         } @else {
-          <app-empty-state icon="analytics" message="Configure your report and click Run" />
+          <app-empty-state icon="analytics" [message]="'reports.configureReport' | translate" />
         }
       </div>
     </div>

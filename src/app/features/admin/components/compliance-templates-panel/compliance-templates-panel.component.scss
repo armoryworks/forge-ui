@@ -10,6 +10,18 @@
   color: var(--text-secondary);
 }
 
+.template-name-cell {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.chip--sm {
+  font-size: $font-size-xxs;
+  padding: 0 $sp-sm;
+  white-space: nowrap;
+}
+
 .action-cell {
   display: flex;
   gap: $sp-sm;

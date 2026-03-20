@@ -1,24 +1,26 @@
 <header class="app-header">
   @if (layout.isMobile()) {
-    <button class="icon-btn hamburger-btn" title="Menu" aria-label="Toggle navigation menu" (click)="layout.toggleSidebar()">
+    <button class="icon-btn hamburger-btn" [matTooltip]="'header.menu' | translate" matTooltipPosition="above" [attr.aria-label]="'header.toggleNav' | translate" (click)="layout.toggleSidebar()">
       <span class="material-icons-outlined">{{ layout.mobileMenuOpen() ? 'close' : 'menu' }}</span>
     </button>
   }
-  @if (logoUrl()) {
-    <img class="app-header__brand-logo" [src]="logoUrl()" alt="Logo" />
-  } @else {
-    <div class="app-header__logo">QB<span>:</span>Eng</div>
-  }
+  <a routerLink="/dashboard" class="app-header__logo-link" [attr.aria-label]="'header.goToDashboard' | translate">
+    @if (logoUrl()) {
+      <img class="app-header__brand-logo" [src]="logoUrl()" alt="Logo" />
+    } @else {
+      <div class="app-header__logo">QB<span>:</span>Eng</div>
+    }
+  </a>
   <div class="header-sep hide-mobile"></div>
   <nav class="breadcrumb hide-mobile" aria-label="Breadcrumb">
-    <span>Home</span>
+    <a routerLink="/dashboard" class="breadcrumb__link">{{ 'header.home' | translate }}</a>
     <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
-    <span class="breadcrumb__current">{{ layout.breadcrumbLabel() }}</span>
+    <a [routerLink]="layout.breadcrumbRoute()" class="breadcrumb__link breadcrumb__current">{{ layout.breadcrumbLabel() }}</a>
   </nav>
 
   <div class="app-header__search hide-mobile" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
-    <input class="search-input" type="text" placeholder="Search jobs, parts, people..."
+    <input class="search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
            [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" />
     <kbd>Ctrl+K</kbd>
 
@@ -27,7 +29,7 @@
         <div class="search-results__col">
           <div class="search-results__col-header">
             <span class="material-icons-outlined">search</span>
-            Results
+            {{ 'header.results' | translate }}
           </div>
           @for (result of searchResults(); track result.entityId + result.entityType) {
             <button class="search-result" (mousedown)="navigateToResult(result)">
@@ -42,19 +44,19 @@
             </button>
           }
           @if (searchResults().length === 0) {
-            <div class="search-results__empty">No matches</div>
+            <div class="search-results__empty">{{ 'header.noMatches' | translate }}</div>
           }
         </div>
         @if (aiService.available()) {
           <div class="search-results__col search-results__col--ai">
             <div class="search-results__col-header search-results__col-header--ai">
               <span class="material-icons-outlined">auto_awesome</span>
-              AI Results
+              {{ 'header.aiResults' | translate }}
             </div>
             @if (aiLoading()) {
               <div class="search-results__thinking">
                 <span class="material-icons-outlined spin">auto_awesome</span>
-                Thinking...
+                {{ 'header.thinking' | translate }}
               </div>
             }
             @if (ragAnswer()) {
@@ -79,7 +81,7 @@
               </button>
             }
             @if (!aiLoading() && ragResults().length === 0 && !ragAnswer()) {
-              <div class="search-results__empty">Type to get AI suggestions</div>
+              <div class="search-results__empty">{{ 'header.typeForAi' | translate }}</div>
             }
           </div>
         }
@@ -88,34 +90,34 @@
   </div>
 
   <div class="app-header__actions">
-    <button class="icon-btn" title="Chat" aria-label="Open chat" (click)="chatPanel.toggle()">
+    <button class="icon-btn" [matTooltip]="'header.chat' | translate" matTooltipPosition="above" [attr.aria-label]="'header.chat' | translate" (click)="chatPanel.toggle()">
       <span class="material-icons-outlined">chat_bubble_outline</span>
       @if (chatPanel.totalUnread() > 0) {
         <span class="badge">{{ chatPanel.totalUnread() }}</span>
       }
     </button>
     @if (aiService.available()) {
-      <button class="icon-btn" title="AI Assistant" aria-label="Open AI assistant" (click)="aiHelpPanel.toggle()">
+      <button class="icon-btn" [matTooltip]="'header.aiAssistant' | translate" matTooltipPosition="above" [attr.aria-label]="'header.aiAssistant' | translate" (click)="aiHelpPanel.toggle()">
         <span class="material-icons-outlined">smart_toy</span>
       </button>
     }
-    <button class="icon-btn" title="Notifications" aria-label="Toggle notifications" (click)="toggleNotifications()">
+    <button class="icon-btn" [matTooltip]="'header.notifications' | translate" matTooltipPosition="above" [attr.aria-label]="'header.notifications' | translate" (click)="toggleNotifications()">
       <span class="material-icons-outlined">notifications_none</span>
       @if (unreadCount() > 0) {
         <span class="badge">{{ unreadCount() }}</span>
       }
     </button>
-    <button class="icon-btn" title="Toggle theme" aria-label="Toggle light and dark theme" (click)="toggleTheme()">
+    <button class="icon-btn" [matTooltip]="'header.toggleTheme' | translate" matTooltipPosition="above" [attr.aria-label]="'header.toggleTheme' | translate" (click)="toggleTheme()">
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
     </button>
     <div class="app-header__user">
-      <button class="user-trigger" (click)="toggleUserMenu()" aria-label="User menu">
+      <button class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
         <span class="user-trigger__name">{{ userFullName() }}</span>
         <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'menu' }}</span>
       </button>
 
       @if (userMenuOpen()) {
-        <div class="user-menu-backdrop" role="button" tabindex="0" aria-label="Close user menu" (click)="closeUserMenu()" (keydown.enter)="closeUserMenu()"></div>
+        <div class="user-menu-backdrop" role="button" tabindex="0" [attr.aria-label]="'header.closeUserMenu' | translate" (click)="closeUserMenu()" (keydown.enter)="closeUserMenu()"></div>
         <div class="user-menu">
           <div class="user-menu__header">
             <div class="user-menu__avatar" [style.background]="userAvatarColor()">
@@ -132,12 +134,28 @@
           <div class="user-menu__divider"></div>
           <button class="user-menu__item" (click)="goToAccount()">
             <span class="material-icons-outlined">manage_accounts</span>
-            Account Settings
+            {{ 'header.accountSettings' | translate }}
           </button>
+          <div class="user-menu__divider"></div>
+          <div class="user-menu__lang">
+            <span class="user-menu__lang-label">
+              <span class="material-icons-outlined">translate</span>
+              {{ 'header.language' | translate }}
+            </span>
+            <div class="user-menu__lang-options">
+              @for (lang of availableLanguages; track lang.code) {
+                <button class="user-menu__lang-btn"
+                        [class.user-menu__lang-btn--active]="currentLanguage() === lang.code"
+                        (click)="switchLanguage(lang.code)">
+                  {{ lang.label }}
+                </button>
+              }
+            </div>
+          </div>
           <div class="user-menu__divider"></div>
           <button class="user-menu__item user-menu__item--danger" (click)="logout()">
             <span class="material-icons-outlined">logout</span>
-            Sign Out
+            {{ 'header.signOut' | translate }}
           </button>
         </div>
       }
@@ -146,7 +164,7 @@
 </header>
 
 @if (panelOpen()) {
-  <div class="notification-backdrop" role="button" tabindex="0" aria-label="Close notifications" (click)="toggleNotifications()" (keydown.enter)="toggleNotifications()"></div>
+  <div class="notification-backdrop" role="button" tabindex="0" [attr.aria-label]="'header.closeNotifications' | translate" (click)="toggleNotifications()" (keydown.enter)="toggleNotifications()"></div>
   <app-notification-panel />
 }
 

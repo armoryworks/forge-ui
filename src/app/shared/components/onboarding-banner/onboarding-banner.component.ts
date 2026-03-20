@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from '../../services/auth.service';
 import { LayoutService } from '../../services/layout.service';
@@ -8,7 +10,7 @@ import { EmployeeProfileService } from '../../../features/account/services/emplo
 @Component({
   selector: 'app-onboarding-banner',
   standalone: true,
-  imports: [],
+  imports: [MatTooltipModule, TranslatePipe],
   templateUrl: './onboarding-banner.component.html',
   styleUrl: './onboarding-banner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

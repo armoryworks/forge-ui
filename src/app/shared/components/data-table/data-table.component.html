@@ -39,7 +39,8 @@
                     class="data-table__filter-btn"
                     [class.data-table__filter-btn--active]="hasFilter(col.field)"
                     (click)="openFilter(col.field, $event)"
-                    [attr.aria-label]="'Filter ' + col.header"
+                    [attr.aria-label]="('shared.filterColumn' | translate:{ column: col.header })"
+                    [matTooltip]="('shared.filterColumn' | translate:{ column: col.header })" matTooltipPosition="above"
                     cdkOverlayOrigin
                     #filterOrigin="cdkOverlayOrigin">
                     <span class="material-icons-outlined">filter_list</span>
@@ -69,13 +70,15 @@
             <th class="data-table__th data-table__th--gear">
               <button
                 class="data-table__gear-btn"
-                aria-label="Export CSV"
+                [attr.aria-label]="'shared.exportCsv' | translate"
+                [matTooltip]="'shared.exportCsv' | translate" matTooltipPosition="above"
                 (click)="exportCsv()">
                 <span class="material-icons-outlined">download</span>
               </button>
               <button
                 class="data-table__gear-btn"
-                aria-label="Manage columns"
+                [attr.aria-label]="'shared.manageColumns' | translate"
+                [matTooltip]="'shared.manageColumns' | translate" matTooltipPosition="above"
                 (click)="toggleColumnManager($event)"
                 cdkOverlayOrigin
                 #colManagerOrigin="cdkOverlayOrigin">
@@ -182,16 +185,16 @@
     @if (col.sortable) {
       <button mat-menu-item (click)="contextSortAsc()">
         <span class="material-icons-outlined">arrow_upward</span>
-        <span>Sort Ascending</span>
+        <span>{{ 'shared.sortAscending' | translate }}</span>
       </button>
       <button mat-menu-item (click)="contextSortDesc()">
         <span class="material-icons-outlined">arrow_downward</span>
-        <span>Sort Descending</span>
+        <span>{{ 'shared.sortDescending' | translate }}</span>
       </button>
       @if (getSortState(col.field)) {
         <button mat-menu-item (click)="contextClearSort()">
           <span class="material-icons-outlined">sort</span>
-          <span>Clear Sort</span>
+          <span>{{ 'shared.clearSort' | translate }}</span>
         </button>
       }
       <mat-divider />
@@ -199,30 +202,30 @@
     @if (col.filterable) {
       <button mat-menu-item (click)="contextFilter()">
         <span class="material-icons-outlined">filter_list</span>
-        <span>Filter...</span>
+        <span>{{ 'shared.filterEllipsis' | translate }}</span>
       </button>
       @if (hasFilter(col.field)) {
         <button mat-menu-item (click)="contextClearFilter()">
           <span class="material-icons-outlined">filter_list_off</span>
-          <span>Clear Filter</span>
+          <span>{{ 'shared.clearFilter' | translate }}</span>
         </button>
       }
       @if (activeFilterCount() > 0) {
         <button mat-menu-item (click)="contextClearAllFilters()">
           <span class="material-icons-outlined">clear_all</span>
-          <span>Clear All Filters</span>
+          <span>{{ 'shared.clearAllFilters' | translate }}</span>
         </button>
       }
       <mat-divider />
     }
     <button mat-menu-item (click)="contextHideColumn()">
       <span class="material-icons-outlined">visibility_off</span>
-      <span>Hide Column</span>
+      <span>{{ 'shared.hideColumn' | translate }}</span>
     </button>
     @if (columnWidths()[col.field]) {
       <button mat-menu-item (click)="contextResetWidth()">
         <span class="material-icons-outlined">width_normal</span>
-        <span>Reset Width</span>
+        <span>{{ 'shared.resetWidth' | translate }}</span>
       </button>
     }
   }

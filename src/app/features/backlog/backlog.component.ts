@@ -4,6 +4,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, startWith } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { formatDate } from '../../shared/utils/date.utils';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
@@ -28,7 +29,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
   selector: 'app-backlog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, JobDetailPanelComponent, JobDialogComponent, AvatarComponent,
+    ReactiveFormsModule, TranslatePipe, JobDetailPanelComponent, JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
   ],
@@ -40,6 +41,7 @@ export class BacklogComponent implements OnInit {
   private readonly backlogService = inject(BacklogService);
   private readonly kanbanService = inject(KanbanService);
   private readonly loadingService = inject(LoadingService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly jobs = signal<KanbanJob[]>([]);
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -74,14 +76,14 @@ export class BacklogComponent implements OnInit {
       .map(u => ({ value: u.initials, label: u.name }));
 
     return [
-      { field: 'jobNumber', header: 'Job #', sortable: true, filterable: true, width: '80px' },
-      { field: 'title', header: 'Title', sortable: true, filterable: true },
-      { field: 'stageName', header: 'Stage', sortable: true, filterable: true, type: 'enum', filterOptions: stageOptions, width: '100px' },
-      { field: 'priorityName', header: 'Priority', sortable: true, filterable: true, type: 'enum',
+      { field: 'jobNumber', header: this.translate.instant('jobs.jobNumber'), sortable: true, filterable: true, width: '80px' },
+      { field: 'title', header: this.translate.instant('common.title'), sortable: true, filterable: true },
+      { field: 'stageName', header: this.translate.instant('jobs.stage'), sortable: true, filterable: true, type: 'enum', filterOptions: stageOptions, width: '100px' },
+      { field: 'priorityName', header: this.translate.instant('common.priority'), sortable: true, filterable: true, type: 'enum',
         filterOptions: this.priorities.map(p => ({ value: p, label: p })), width: '90px' },
-      { field: 'assignee', header: 'Assignee', filterable: true, type: 'enum', filterOptions: assigneeOptions, width: '60px', align: 'center' as const },
-      { field: 'customerName', header: 'Customer', sortable: true, filterable: true, type: 'enum', filterOptions: customerOptions, width: '120px' },
-      { field: 'dueDate', header: 'Due Date', sortable: true, filterable: true, type: 'date', width: '100px' },
+      { field: 'assignee', header: this.translate.instant('common.assignee'), filterable: true, type: 'enum', filterOptions: assigneeOptions, width: '60px', align: 'center' as const },
+      { field: 'customerName', header: this.translate.instant('jobs.customer'), sortable: true, filterable: true, type: 'enum', filterOptions: customerOptions, width: '120px' },
+      { field: 'dueDate', header: this.translate.instant('common.dueDate'), sortable: true, filterable: true, type: 'date', width: '100px' },
     ];
   });
 
@@ -155,7 +157,7 @@ export class BacklogComponent implements OnInit {
         this.trackTypes.set(trackTypes);
         this.users.set(users);
       },
-      error: () => this.error.set('Failed to load backlog'),
+      error: () => this.error.set(this.translate.instant('backlog.loadFailed')),
     });
   }
 

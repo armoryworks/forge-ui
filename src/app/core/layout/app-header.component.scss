@@ -13,6 +13,14 @@
   z-index: $z-sticky;
 }
 
+.app-header__logo-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
 .app-header__logo {
   font-size: $font-size-title;
   font-weight: 700;
@@ -51,8 +59,20 @@
   font-size: $icon-size-xs;
 }
 
+.breadcrumb__link {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity $transition-fast;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .breadcrumb__current {
   font-weight: 600;
+  opacity: 1;
 }
 
 .app-header__search {
@@ -380,6 +400,56 @@
 
     &:hover {
       background: var(--error-light);
+    }
+  }
+}
+
+.user-menu__lang {
+  padding: $sp-md $sp-lg;
+}
+
+.user-menu__lang-label {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin-bottom: $sp-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.user-menu__lang-options {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.user-menu__lang-btn {
+  flex: 1;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font-size: $font-size-xs;
+  font-family: $font-family-primary;
+  cursor: pointer;
+  text-align: center;
+  transition: $transition-fast;
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &--active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+
+    &:hover {
+      background: var(--primary-dark);
     }
   }
 }

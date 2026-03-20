@@ -1,0 +1,11 @@
+@if (definition(); as def) {
+  <div class="headless-render__container">
+    <app-compliance-form-renderer
+      [definition]="def"
+      [readonly]="true" />
+  </div>
+} @else {
+  <div class="headless-render__waiting">
+    Waiting for form definition...
+  </div>
+}

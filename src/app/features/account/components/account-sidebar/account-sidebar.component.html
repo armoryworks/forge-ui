@@ -1,10 +1,10 @@
-<nav class="account-sidebar" aria-label="Account settings navigation">
-  <button class="account-sidebar__back" (click)="goBack()" aria-label="Back to dashboard">
+<nav class="account-sidebar" [attr.aria-label]="'account.settingsNav' | translate">
+  <button class="account-sidebar__back" (click)="goBack()" [attr.aria-label]="'account.backToDashboard' | translate">
     <span class="material-icons-outlined">arrow_back</span>
-    <span>Back</span>
+    <span>{{ 'common.back' | translate }}</span>
   </button>
 
-  <div class="account-sidebar__title">Account Settings</div>
+  <div class="account-sidebar__title">{{ 'account.accountSettings' | translate }}</div>
 
   <ul class="account-sidebar__nav" role="list">
     <!-- Profile, Contact, Emergency -->
@@ -17,9 +17,9 @@
           <span class="material-icons-outlined account-sidebar__icon">{{ item.icon }}</span>
           <span class="account-sidebar__label">{{ item.label }}</span>
           @if (isItemComplete(item) === true) {
-            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" aria-label="Complete">check_circle</span>
+            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" [attr.aria-label]="'account.complete' | translate">check_circle</span>
           } @else if (isItemComplete(item) === false) {
-            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" aria-label="Incomplete">warning</span>
+            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" [attr.aria-label]="'account.incomplete' | translate">warning</span>
           }
         </a>
       </li>
@@ -30,13 +30,13 @@
       <button class="account-sidebar__link account-sidebar__link--parent"
         (click)="toggleTaxForms()"
         [attr.aria-expanded]="taxFormsExpanded()"
-        aria-label="Tax & Compliance">
+        [attr.aria-label]="'account.taxCompliance' | translate">
         <span class="material-icons-outlined account-sidebar__icon">description</span>
-        <span class="account-sidebar__label">Tax & Compliance</span>
+        <span class="account-sidebar__label">{{ 'account.taxCompliance' | translate }}</span>
         @if (taxFormsComplete() === true) {
-          <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" aria-label="Complete">check_circle</span>
+          <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" [attr.aria-label]="'account.complete' | translate">check_circle</span>
         } @else if (taxFormsComplete() === false) {
-          <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" aria-label="Incomplete">warning</span>
+          <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" [attr.aria-label]="'account.incomplete' | translate">warning</span>
         }
         <span class="material-icons-outlined account-sidebar__chevron"
           [class.account-sidebar__chevron--expanded]="taxFormsExpanded()">
@@ -51,9 +51,9 @@
               routerLink="tax-forms"
               routerLinkActive="account-sidebar__link--active"
               [routerLinkActiveOptions]="{ exact: true }"
-              aria-label="All Forms">
+              [attr.aria-label]="'account.allForms' | translate">
               <span class="material-icons-outlined account-sidebar__icon">list</span>
-              <span class="account-sidebar__label">All Forms</span>
+              <span class="account-sidebar__label">{{ 'account.allForms' | translate }}</span>
             </a>
           </li>
           @for (child of taxFormChildren(); track child.path) {
@@ -65,9 +65,9 @@
                 <span class="material-icons-outlined account-sidebar__icon">{{ child.icon }}</span>
                 <span class="account-sidebar__label">{{ child.label }}</span>
                 @if (isChildComplete(child) === true) {
-                  <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" aria-label="Complete">check_circle</span>
+                  <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" [attr.aria-label]="'account.complete' | translate">check_circle</span>
                 } @else if (isChildComplete(child) === false) {
-                  <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" aria-label="Incomplete">warning</span>
+                  <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" [attr.aria-label]="'account.incomplete' | translate">warning</span>
                 }
               </a>
             </li>
@@ -86,9 +86,9 @@
           <span class="material-icons-outlined account-sidebar__icon">{{ item.icon }}</span>
           <span class="account-sidebar__label">{{ item.label }}</span>
           @if (isItemComplete(item) === true) {
-            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" aria-label="Complete">check_circle</span>
+            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" [attr.aria-label]="'account.complete' | translate">check_circle</span>
           } @else if (isItemComplete(item) === false) {
-            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" aria-label="Incomplete">warning</span>
+            <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" [attr.aria-label]="'account.incomplete' | translate">warning</span>
           }
         </a>
       </li>

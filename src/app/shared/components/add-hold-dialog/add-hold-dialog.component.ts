@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { DialogComponent } from '../dialog/dialog.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
 import { TextareaComponent } from '../textarea/textarea.component';
@@ -19,7 +21,7 @@ export interface AddHoldDialogData {
 @Component({
   selector: 'app-add-hold-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationPopoverDirective, TranslatePipe],
   templateUrl: './add-hold-dialog.component.html',
   styleUrl: './add-hold-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

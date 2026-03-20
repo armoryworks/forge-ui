@@ -1,11 +1,11 @@
 <div class="account-page">
   <h1 class="account-page__title">
     <span class="material-icons-outlined">folder</span>
-    My Documents
+    {{ 'account.myDocuments' | translate }}
   </h1>
 
   <div class="account-page__card">
-    <p class="documents__intro">Upload personal documents such as ID copies, certifications, or other records.</p>
+    <p class="documents__intro">{{ 'account.documentsIntro' | translate }}</p>
 
     <app-file-upload-zone
       entityType="employee-docs"

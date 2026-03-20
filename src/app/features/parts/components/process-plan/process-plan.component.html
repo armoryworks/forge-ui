@@ -1,13 +1,13 @@
 <div class="process-plan" [appLoadingBlock]="loading()">
   <div class="process-plan__header">
-    <h4>Process Plan</h4>
+    <h4>{{ 'parts.processPlan' | translate }}</h4>
     <button class="action-btn action-btn--sm" (click)="openAddStep()">
-      <span class="material-icons-outlined">add</span> Add Step
+      <span class="material-icons-outlined">add</span> {{ 'parts.addStep' | translate }}
     </button>
   </div>
 
   @if (steps().length === 0) {
-    <app-empty-state icon="route" message="No process steps defined" />
+    <app-empty-state icon="route" [message]="'parts.noProcessSteps' | translate" />
   } @else {
     <div class="process-plan__steps">
       @for (step of steps(); track step.id) {
@@ -39,10 +39,10 @@
             </div>
           </div>
           <div class="step-card__actions">
-            <button class="icon-btn" (click)="openEditStep(step)" title="Edit" aria-label="Edit step">
+            <button class="icon-btn" (click)="openEditStep(step)" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.editStepAria' | translate">
               <span class="material-icons-outlined">edit</span>
             </button>
-            <button class="icon-btn icon-btn--danger" (click)="deleteStep(step)" title="Delete" aria-label="Delete step">
+            <button class="icon-btn icon-btn--danger" (click)="deleteStep(step)" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.deleteStepAria' | translate">
               <span class="material-icons-outlined">delete</span>
             </button>
           </div>

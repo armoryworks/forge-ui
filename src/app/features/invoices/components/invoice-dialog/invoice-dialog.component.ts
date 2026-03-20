@@ -11,11 +11,14 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface LineEntry {
   partId: number | null;
@@ -31,9 +34,9 @@ interface LineEntry {
   selector: 'app-invoice-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe,
+    ReactiveFormsModule, CurrencyPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationPopoverDirective, MatTooltipModule,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrl: './invoice-dialog.component.scss',
@@ -43,6 +46,7 @@ export class InvoiceDialogComponent {
   private readonly invoiceService = inject(InvoiceService);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -52,7 +56,7 @@ export class InvoiceDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'Select customer...' },
+    { value: null, label: this.translate.instant('invoices.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
@@ -70,14 +74,14 @@ export class InvoiceDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    customerId: 'Customer',
-    salesOrderId: 'Sales Order ID',
-    shipmentId: 'Shipment ID',
-    invoiceDate: 'Invoice Date',
-    dueDate: 'Due Date',
-    creditTerms: 'Credit Terms',
-    taxRate: 'Tax Rate',
-    notes: 'Notes',
+    customerId: this.translate.instant('invoices.customer'),
+    salesOrderId: this.translate.instant('invoices.salesOrderId'),
+    shipmentId: this.translate.instant('invoices.shipmentId'),
+    invoiceDate: this.translate.instant('invoices.invoiceDate'),
+    dueDate: this.translate.instant('invoices.dueDate'),
+    creditTerms: this.translate.instant('invoices.creditTerms'),
+    taxRate: this.translate.instant('invoices.taxRate'),
+    notes: this.translate.instant('common.notes'),
   });
 
   // Line item form
@@ -145,7 +149,7 @@ export class InvoiceDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Invoice created.');
+        this.snackbar.success(this.translate.instant('invoices.invoiceCreated'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

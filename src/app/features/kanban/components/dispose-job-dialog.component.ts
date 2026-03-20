@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
@@ -21,7 +22,7 @@ export interface DisposeJobDialogData {
 @Component({
   selector: 'app-dispose-job-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationPopoverDirective, TranslatePipe],
   templateUrl: './dispose-job-dialog.component.html',
   styleUrl: './dispose-job-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +32,7 @@ export class DisposeJobDialogComponent {
   readonly data = inject<DisposeJobDialogData>(MAT_DIALOG_DATA);
   private readonly kanbanService = inject(KanbanService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
 
@@ -40,16 +42,16 @@ export class DisposeJobDialogComponent {
   });
 
   readonly violations = FormValidationService.getViolations(this.form, {
-    disposition: 'Disposition',
-    notes: 'Notes',
+    disposition: this.translate.instant('jobs.disposition'),
+    notes: this.translate.instant('common.notes'),
   });
 
   readonly dispositionOptions: SelectOption[] = [
-    { value: 'ShipToCustomer', label: 'Ship to Customer' },
-    { value: 'AddToInventory', label: 'Add to Inventory' },
-    { value: 'CapitalizeAsAsset', label: 'Capitalize as Asset' },
-    { value: 'Scrap', label: 'Scrap' },
-    { value: 'HoldForReview', label: 'Hold for Review' },
+    { value: 'ShipToCustomer', label: this.translate.instant('kanban.dispositionShipToCustomer') },
+    { value: 'AddToInventory', label: this.translate.instant('kanban.dispositionAddToInventory') },
+    { value: 'CapitalizeAsAsset', label: this.translate.instant('kanban.dispositionCapitalizeAsAsset') },
+    { value: 'Scrap', label: this.translate.instant('kanban.dispositionScrap') },
+    { value: 'HoldForReview', label: this.translate.instant('kanban.dispositionHoldForReview') },
   ];
 
   save(): void {
@@ -63,7 +65,7 @@ export class DisposeJobDialogComponent {
     }).subscribe({
       next: (result: JobDetail) => {
         this.saving.set(false);
-        this.snackbar.success('Job disposed.');
+        this.snackbar.success(this.translate.instant('kanban.jobDisposed'));
         this.dialogRef.close(result);
       },
       error: () => this.saving.set(false),

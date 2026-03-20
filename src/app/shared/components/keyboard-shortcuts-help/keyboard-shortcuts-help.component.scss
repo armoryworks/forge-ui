@@ -66,6 +66,13 @@
   color: var(--text);
 }
 
+.shortcuts-group__keys {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  flex-shrink: 0;
+}
+
 .shortcuts-group__key {
   background: var(--bg);
   border: $border-width-thin solid var(--border);
@@ -73,5 +80,11 @@
   font-family: $font-family-mono;
   font-size: $font-size-sm;
   color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.shortcuts-group__sep {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
   white-space: nowrap;
 }

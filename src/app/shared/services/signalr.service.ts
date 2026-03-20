@@ -104,8 +104,9 @@ export class SignalrService {
    * connection and retry indefinitely with exponential backoff.
    */
   private scheduleManualReconnect(hubPath: string): void {
-    // Don't reconnect if we explicitly stopped
+    // Don't reconnect if we explicitly stopped or user logged out
     if (!this.connections.has(hubPath)) return;
+    if (!this.authService.isAuthenticated()) return;
 
     const delay = 10_000; // 10s before first manual retry
     const timer = setTimeout(async () => {
@@ -130,16 +131,38 @@ export class SignalrService {
     const connection = this.getOrCreateConnection(hubPath);
 
     while (connection.state === HubConnectionState.Disconnected) {
+      // Don't attempt connection if user is no longer authenticated
+      if (!this.authService.isAuthenticated()) return;
+
       try {
         await connection.start();
         this._hasEverConnected.set(true);
         this._connectionState.set('connected');
         return;
-      } catch {
+      } catch (err: unknown) {
+        // If the negotiate request returned 401, the token is expired/invalid.
+        // Clear auth and stop retrying — the auth effect will handle navigation.
+        if (this.isAuthError(err)) {
+          this.authService.clearAuth();
+          return;
+        }
         await new Promise<void>(resolve => {
           this.retryTimers.set(hubPath, setTimeout(resolve, 5000));
         });
       }
     }
+  }
+
+  /**
+   * Detects 401/403 errors from SignalR negotiate failures.
+   * SignalR wraps HTTP errors differently depending on transport.
+   */
+  private isAuthError(err: unknown): boolean {
+    if (err instanceof Error) {
+      const msg = err.message;
+      return msg.includes('401') || msg.includes('Unauthorized')
+        || msg.includes('403') || msg.includes('Forbidden');
+    }
+    return false;
   }
 }

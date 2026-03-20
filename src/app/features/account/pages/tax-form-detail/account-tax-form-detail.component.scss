@@ -2,6 +2,19 @@
 @use 'styles/mixins' as *;
 @use '../../shared/account-page';
 
+// When renderer is active, account-page fills available height with no padding
+:host:has(.form-detail__renderer) .account-page {
+  padding: 0;
+  gap: 0;
+  max-width: none;
+  height: 100%;
+}
+
+.form-detail__renderer {
+  flex: 1;
+  min-height: 0;
+}
+
 .form-detail__header {
   display: flex;
   flex-direction: column;
@@ -58,6 +71,35 @@
   }
 }
 
+.form-detail__pending-setup {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-lg;
+  padding: $sp-xl;
+  background: var(--info-light);
+  border: $border-width-thin solid var(--info);
+}
+
+.form-detail__pending-setup-icon {
+  font-size: $icon-size-xxl;
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+.form-detail__pending-setup-title {
+  font-size: $font-size-title;
+  font-weight: 600;
+  margin: 0 0 $sp-sm;
+  color: var(--text);
+}
+
+.form-detail__pending-setup-text {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
 .form-detail__card {
   background: var(--surface);
   border: $border-width-thin solid var(--border);
@@ -65,6 +107,10 @@
   display: flex;
   flex-direction: column;
   gap: $sp-lg;
+}
+
+.form-detail__card-header {
+  @include flex-between;
 }
 
 .form-detail__card-title {
@@ -79,6 +125,13 @@
   margin: 0;
 }
 
+.form-detail__pdf-viewer {
+  width: 100%;
+  min-height: 700px;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+}
+
 .form-detail__iframe {
   width: 100%;
   min-height: 600px;
@@ -88,6 +141,23 @@
 .form-detail__acknowledge-btn {
   align-self: flex-start;
   margin-top: $sp-md;
+}
+
+.form-detail__completed-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-lg;
+}
+
+.form-detail__completed-icon {
+  font-size: $icon-size-xxl;
+  color: var(--success);
+  flex-shrink: 0;
+}
+
+.form-detail__completed-actions {
+  display: flex;
+  gap: $sp-md;
 }
 
 .form-detail__doc-list {
@@ -156,4 +226,83 @@
 .form-detail__doc-upload-label {
   font-size: $font-size-sm;
   font-weight: 600;
+}
+
+.form-detail__doc-list-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.form-detail__doc-list-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.form-detail__doc-list-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  padding: $sp-xs $sp-sm;
+  flex-shrink: 0;
+
+  &--a { background: var(--primary-light); color: var(--primary); }
+  &--b { background: var(--info-light); color: var(--info); }
+  &--c { background: var(--success-light); color: var(--success); }
+}
+
+.form-detail__doc-list-title {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.form-detail__doc-list-desc {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0 0 $sp-md;
+  line-height: 1.5;
+}
+
+.form-detail__doc-or,
+.form-detail__doc-and {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-xs;
+  font-weight: 700;
+  color: var(--text-muted);
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: $border-width-thin;
+    background: var(--border);
+  }
+}
+
+.form-detail__doc-or { color: var(--warning); }
+.form-detail__doc-and { color: var(--info); }
+
+.form-detail__docs-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.form-detail__docs-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-xs;
+  background: var(--primary);
+  color: #fff;
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  border-radius: 999px;
+  line-height: 1;
 }

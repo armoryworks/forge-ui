@@ -14,16 +14,18 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { QuoteDialogComponent } from './components/quote-dialog/quote-dialog.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-quotes',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe,
+    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
-    DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    DataTableComponent, ColumnCellDirective, LoadingBlockDirective, MatTooltipModule,
     QuoteDialogComponent,
   ],
   templateUrl: './quotes.component.html',
@@ -34,6 +36,7 @@ export class QuotesComponent {
   private readonly quoteService = inject(QuoteService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -45,30 +48,23 @@ export class QuotesComponent {
   protected readonly statusFilterControl = new FormControl<string | null>(null);
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
-    { value: 'Draft', label: 'Draft' },
-    { value: 'Sent', label: 'Sent' },
-    { value: 'Accepted', label: 'Accepted' },
-    { value: 'Rejected', label: 'Rejected' },
-    { value: 'Expired', label: 'Expired' },
-    { value: 'ConvertedToOrder', label: 'Converted to Order' },
+    { value: null, label: this.translate.instant('common.allStatuses') },
+    { value: 'Draft', label: this.translate.instant('status.draft') },
+    { value: 'Sent', label: this.translate.instant('quotes.statusSent') },
+    { value: 'Accepted', label: this.translate.instant('quotes.statusAccepted') },
+    { value: 'Rejected', label: this.translate.instant('quotes.statusRejected') },
+    { value: 'Expired', label: this.translate.instant('quotes.statusExpired') },
+    { value: 'ConvertedToOrder', label: this.translate.instant('quotes.statusConvertedToOrder') },
   ];
 
   protected readonly quoteColumns: ColumnDef[] = [
-    { field: 'quoteNumber', header: 'Quote #', sortable: true, width: '120px' },
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: [
-      { value: 'Draft', label: 'Draft' },
-      { value: 'Sent', label: 'Sent' },
-      { value: 'Accepted', label: 'Accepted' },
-      { value: 'Rejected', label: 'Rejected' },
-      { value: 'Expired', label: 'Expired' },
-      { value: 'ConvertedToOrder', label: 'Converted to Order' },
-    ]},
-    { field: 'lineCount', header: 'Lines', sortable: true, width: '70px', align: 'center' },
-    { field: 'total', header: 'Total', sortable: true, width: '100px', align: 'right' },
-    { field: 'expirationDate', header: 'Expires', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'quoteNumber', header: this.translate.instant('quotes.quoteNumber'), sortable: true, width: '120px' },
+    { field: 'customerName', header: this.translate.instant('quotes.customer'), sortable: true },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
+    { field: 'lineCount', header: this.translate.instant('quotes.lines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'total', header: this.translate.instant('common.total'), sortable: true, width: '100px', align: 'right' },
+    { field: 'expirationDate', header: this.translate.instant('quotes.expires'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly quoteRowClass = (row: unknown) => {
@@ -115,7 +111,7 @@ export class QuotesComponent {
       next: () => {
         this.refreshDetail(quote.id);
         this.loadQuotes();
-        this.snackbar.success('Quote sent.');
+        this.snackbar.success(this.translate.instant('quotes.quoteSent'));
       },
     });
   }
@@ -127,7 +123,7 @@ export class QuotesComponent {
       next: () => {
         this.refreshDetail(quote.id);
         this.loadQuotes();
-        this.snackbar.success('Quote accepted.');
+        this.snackbar.success(this.translate.instant('quotes.quoteAccepted'));
       },
     });
   }
@@ -138,9 +134,9 @@ export class QuotesComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Reject Quote?',
-        message: `Reject "${quote.quoteNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Reject',
+        title: this.translate.instant('quotes.rejectQuoteTitle'),
+        message: this.translate.instant('quotes.rejectQuoteMessage', { number: quote.quoteNumber }),
+        confirmLabel: this.translate.instant('quotes.reject'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -149,7 +145,7 @@ export class QuotesComponent {
         next: () => {
           this.refreshDetail(quote.id);
           this.loadQuotes();
-          this.snackbar.success('Quote rejected.');
+          this.snackbar.success(this.translate.instant('quotes.quoteRejected'));
         },
       });
     });
@@ -162,7 +158,7 @@ export class QuotesComponent {
       next: (order) => {
         this.refreshDetail(quote.id);
         this.loadQuotes();
-        this.snackbar.success(`Quote converted to order ${order.salesOrderNumber ?? ''}.`);
+        this.snackbar.success(this.translate.instant('quotes.quoteConverted', { number: order.salesOrderNumber ?? '' }));
       },
     });
   }
@@ -173,9 +169,9 @@ export class QuotesComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Quote?',
-        message: `Delete draft "${quote.quoteNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('quotes.deleteQuoteTitle'),
+        message: this.translate.instant('quotes.deleteQuoteMessage', { number: quote.quoteNumber }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -184,7 +180,7 @@ export class QuotesComponent {
         next: () => {
           this.selectedQuote.set(null);
           this.loadQuotes();
-          this.snackbar.success('Quote deleted.');
+          this.snackbar.success(this.translate.instant('quotes.quoteDeleted'));
         },
       });
     });
@@ -204,7 +200,9 @@ export class QuotesComponent {
   }
 
   protected getStatusLabel(status: string): string {
-    return status === 'ConvertedToOrder' ? 'Converted to Order' : status;
+    const key = 'quotes.status' + status;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : status;
   }
 
   protected canSend(status: string): boolean { return status === 'Draft'; }

@@ -4,7 +4,7 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
-  <app-page-header title="Board" subtitle="Drag jobs through production stages" helpTourId="kanban-board">
+  <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board">
     <div class="page-header__track-types">
       @for (tt of trackTypes(); track tt.id) {
         <button
@@ -17,26 +17,26 @@
     </div>
 
     <div class="view-toggle">
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" title="Board view">
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'board'" (click)="setViewMode('board')" [matTooltip]="'kanban.boardView' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">view_column</span>
       </button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" title="Team view">
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="viewMode() === 'team'" (click)="setViewMode('team')" [matTooltip]="'kanban.teamView' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">people</span>
       </button>
     </div>
 
-    <app-select label="Team Members" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" placeholder="All assigned users" />
+    <app-select [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
 
     <button class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
-      New Job
+      {{ 'jobs.createJob' | translate }}
     </button>
   </app-page-header>
 
   @if (selectionCount() === 0) {
     <div class="board-hint" aria-hidden="true">
       <span class="material-icons-outlined board-hint__icon">info_outline</span>
-      <span class="board-hint__text">Drag cards between columns to move jobs. <kbd>Ctrl</kbd>+Click to multi-select for bulk actions.</span>
+      <span class="board-hint__text">{{ 'kanban.dragHint' | translate }} <kbd>Ctrl</kbd>{{ 'kanban.multiSelectHint' | translate }}</span>
     </div>
   }
 
@@ -61,7 +61,7 @@
     <div class="swimlane" [style.--stage-count]="currentStages().length">
       <!-- Stage headers -->
       <div class="swimlane__corner">
-        <span class="swimlane__corner-label">Team</span>
+        <span class="swimlane__corner-label">{{ 'kanban.team' | translate }}</span>
       </div>
       @for (stage of currentStages(); track stage.id) {
         <div class="swimlane__stage-header" [style.border-top-color]="stage.color">
@@ -77,7 +77,7 @@
             <span class="swimlane__user-name">{{ row.user.name }}</span>
           } @else {
             <span class="material-icons-outlined swimlane__unassigned-icon">person_off</span>
-            <span class="swimlane__user-name">Unassigned</span>
+            <span class="swimlane__user-name">{{ 'kanban.unassigned' | translate }}</span>
           }
         </div>
         @for (cell of row.cells; track $index; let ci = $index) {
@@ -123,11 +123,11 @@
 
   @if (selectionCount() > 0) {
     <div class="bulk-bar">
-      <span class="bulk-bar__count">{{ selectionCount() }} selected</span>
+      <span class="bulk-bar__count">{{ selectionCount() }} {{ 'common.selected' | translate }}</span>
 
       <button class="bulk-bar__btn" [matMenuTriggerFor]="moveMenu">
         <span class="material-icons-outlined">drive_file_move</span>
-        Move
+        {{ 'kanban.move' | translate }}
       </button>
       <mat-menu #moveMenu="matMenu">
         @for (stage of currentStages(); track stage.id) {
@@ -140,12 +140,12 @@
 
       <button class="bulk-bar__btn" [matMenuTriggerFor]="assignMenu">
         <span class="material-icons-outlined">person</span>
-        Assign
+        {{ 'kanban.assign' | translate }}
       </button>
       <mat-menu #assignMenu="matMenu">
         <button mat-menu-item (click)="bulkAssign(null)">
           <span class="material-icons-outlined bulk-bar__menu-icon">person_off</span>
-          Unassign
+          {{ 'kanban.unassign' | translate }}
         </button>
         @for (user of users(); track user.id) {
           <button mat-menu-item (click)="bulkAssign(user)">
@@ -157,7 +157,7 @@
 
       <button class="bulk-bar__btn" [matMenuTriggerFor]="priorityMenu">
         <span class="material-icons-outlined">flag</span>
-        Priority
+        {{ 'common.priority' | translate }}
       </button>
       <mat-menu #priorityMenu="matMenu">
         @for (p of priorityOptions; track p) {
@@ -167,10 +167,10 @@
 
       <button class="bulk-bar__btn bulk-bar__btn--danger" (click)="bulkArchive()">
         <span class="material-icons-outlined">archive</span>
-        Archive
+        {{ 'common.archive' | translate }}
       </button>
 
-      <button class="bulk-bar__close" (click)="clearSelection()" title="Clear selection">
+      <button class="bulk-bar__close" (click)="clearSelection()" [matTooltip]="'kanban.clearSelection' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.clearSelection' | translate">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>

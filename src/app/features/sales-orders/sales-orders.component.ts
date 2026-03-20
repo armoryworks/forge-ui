@@ -18,18 +18,20 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-sales-orders',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe,
+    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    SoDialogComponent, BarcodeInfoComponent,
+    SoDialogComponent, BarcodeInfoComponent, MatTooltipModule,
   ],
   templateUrl: './sales-orders.component.html',
   styleUrl: './sales-orders.component.scss',
@@ -40,6 +42,7 @@ export class SalesOrdersComponent {
   private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -55,38 +58,30 @@ export class SalesOrdersComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'All Customers' },
+    { value: null, label: this.translate.instant('salesOrders.allCustomers') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
-    { value: 'Draft', label: 'Draft' },
-    { value: 'Confirmed', label: 'Confirmed' },
-    { value: 'InProduction', label: 'In Production' },
-    { value: 'PartiallyShipped', label: 'Partially Shipped' },
-    { value: 'Shipped', label: 'Shipped' },
-    { value: 'Completed', label: 'Completed' },
-    { value: 'Cancelled', label: 'Cancelled' },
+    { value: null, label: this.translate.instant('common.allStatuses') },
+    { value: 'Draft', label: this.translate.instant('status.draft') },
+    { value: 'Confirmed', label: this.translate.instant('salesOrders.statusConfirmed') },
+    { value: 'InProduction', label: this.translate.instant('salesOrders.statusInProduction') },
+    { value: 'PartiallyShipped', label: this.translate.instant('salesOrders.statusPartiallyShipped') },
+    { value: 'Shipped', label: this.translate.instant('salesOrders.statusShipped') },
+    { value: 'Completed', label: this.translate.instant('status.completed') },
+    { value: 'Cancelled', label: this.translate.instant('status.cancelled') },
   ];
 
   protected readonly soColumns: ColumnDef[] = [
-    { field: 'orderNumber', header: 'Order #', sortable: true, width: '120px' },
-    { field: 'customerName', header: 'Customer', sortable: true },
-    { field: 'customerPO', header: 'Cust PO', sortable: true, width: '100px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: [
-      { value: 'Draft', label: 'Draft' },
-      { value: 'Confirmed', label: 'Confirmed' },
-      { value: 'InProduction', label: 'In Production' },
-      { value: 'PartiallyShipped', label: 'Partially Shipped' },
-      { value: 'Shipped', label: 'Shipped' },
-      { value: 'Completed', label: 'Completed' },
-      { value: 'Cancelled', label: 'Cancelled' },
-    ]},
-    { field: 'lineCount', header: 'Lines', sortable: true, width: '70px', align: 'center' },
-    { field: 'total', header: 'Total', sortable: true, width: '100px', align: 'right' },
-    { field: 'requestedDeliveryDate', header: 'Delivery', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'orderNumber', header: this.translate.instant('salesOrders.orderNumber'), sortable: true, width: '120px' },
+    { field: 'customerName', header: this.translate.instant('salesOrders.customer'), sortable: true },
+    { field: 'customerPO', header: this.translate.instant('salesOrders.custPo'), sortable: true, width: '100px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
+    { field: 'lineCount', header: this.translate.instant('salesOrders.lines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'total', header: this.translate.instant('common.total'), sortable: true, width: '100px', align: 'right' },
+    { field: 'requestedDeliveryDate', header: this.translate.instant('salesOrders.delivery'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly soRowClass = (row: unknown) => {
@@ -138,7 +133,7 @@ export class SalesOrdersComponent {
       next: () => {
         this.refreshDetail(so.id);
         this.loadSalesOrders();
-        this.snackbar.success('Sales order confirmed.');
+        this.snackbar.success(this.translate.instant('salesOrders.soConfirmed'));
       },
     });
   }
@@ -149,9 +144,9 @@ export class SalesOrdersComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Cancel Sales Order?',
-        message: `Cancel "${so.orderNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Cancel Order',
+        title: this.translate.instant('salesOrders.cancelSoTitle'),
+        message: this.translate.instant('salesOrders.cancelSoMessage', { number: so.orderNumber }),
+        confirmLabel: this.translate.instant('salesOrders.cancelOrder'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -160,7 +155,7 @@ export class SalesOrdersComponent {
         next: () => {
           this.refreshDetail(so.id);
           this.loadSalesOrders();
-          this.snackbar.success('Sales order cancelled.');
+          this.snackbar.success(this.translate.instant('salesOrders.soCancelled'));
         },
       });
     });
@@ -172,9 +167,9 @@ export class SalesOrdersComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Sales Order?',
-        message: `Delete draft "${so.orderNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('salesOrders.deleteSoTitle'),
+        message: this.translate.instant('salesOrders.deleteSoMessage', { number: so.orderNumber }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -183,7 +178,7 @@ export class SalesOrdersComponent {
         next: () => {
           this.selectedSo.set(null);
           this.loadSalesOrders();
-          this.snackbar.success('Sales order deleted.');
+          this.snackbar.success(this.translate.instant('salesOrders.soDeleted'));
         },
       });
     });
@@ -204,11 +199,9 @@ export class SalesOrdersComponent {
   }
 
   protected getStatusLabel(status: string): string {
-    const map: Record<string, string> = {
-      InProduction: 'In Production',
-      PartiallyShipped: 'Partially Shipped',
-    };
-    return map[status] ?? status;
+    const key = 'salesOrders.status' + status;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : status;
   }
 
   protected canConfirm(status: string): boolean { return status === 'Draft'; }

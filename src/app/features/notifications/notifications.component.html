@@ -1,26 +1,26 @@
-<app-page-header title="Notifications" subtitle="View and manage all your alerts and messages" />
+<app-page-header [title]="'notifications.title' | translate" [subtitle]="'notifications.subtitle' | translate" />
 
 <div class="notifications-layout">
   <div class="tab-bar">
     <button class="tab" [class.tab--active]="activeTab() === 'all'" (click)="setTab('all')">
-      All Notifications
+      {{ 'notifications.allNotifications' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'preferences'" (click)="setTab('preferences')">
-      Preferences
+      {{ 'notifications.preferences' | translate }}
     </button>
   </div>
 
   @if (activeTab() === 'all') {
     <app-toolbar>
-      <app-input label="Search" [formControl]="searchControl" />
-      <app-select label="Severity" [formControl]="severityControl" [options]="severityOptions" />
-      <app-select label="Source" [formControl]="sourceControl" [options]="sourceOptions" />
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" />
+      <app-select [label]="'notifications.severity' | translate" [formControl]="severityControl" [options]="severityOptions" />
+      <app-select [label]="'notifications.source' | translate" [formControl]="sourceControl" [options]="sourceOptions" />
       <span appSpacer></span>
       <button class="action-btn" (click)="markAllRead()">
-        <span class="material-icons-outlined">done_all</span> Mark All Read
+        <span class="material-icons-outlined">done_all</span> {{ 'notifications.markAllRead' | translate }}
       </button>
       <button class="action-btn" (click)="dismissAll()">
-        <span class="material-icons-outlined">clear_all</span> Dismiss All
+        <span class="material-icons-outlined">clear_all</span> {{ 'notifications.dismissAll' | translate }}
       </button>
     </app-toolbar>
 
@@ -29,17 +29,17 @@
       [columns]="notificationColumns"
       [data]="filteredNotifications()"
       emptyIcon="notifications_none"
-      emptyMessage="No notifications" />
+      [emptyMessage]="'notifications.noNotifications' | translate" />
   }
 
   @if (activeTab() === 'preferences') {
     <div class="pref-section">
-      <h3 class="pref-section__title">Email Notifications</h3>
+      <h3 class="pref-section__title">{{ 'notifications.emailNotifications' | translate }}</h3>
 
-      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle critical alerts email" (click)="togglePref('email_critical', emailOnCritical())" (keydown.enter)="togglePref('email_critical', emailOnCritical())">
+      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleCriticalAlerts' | translate" (click)="togglePref('email_critical', emailOnCritical())" (keydown.enter)="togglePref('email_critical', emailOnCritical())">
         <div class="pref-row__info">
-          <span class="pref-row__label">Critical Alerts</span>
-          <span class="pref-row__desc">Receive email for critical system alerts</span>
+          <span class="pref-row__label">{{ 'notifications.criticalAlerts' | translate }}</span>
+          <span class="pref-row__desc">{{ 'notifications.criticalAlertsDesc' | translate }}</span>
         </div>
         <span class="material-icons-outlined pref-row__toggle"
               [class.pref-row__toggle--on]="emailOnCritical()">
@@ -47,10 +47,10 @@
         </span>
       </div>
 
-      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle job assignments email" (click)="togglePref('email_assignment', emailOnAssignment())" (keydown.enter)="togglePref('email_assignment', emailOnAssignment())">
+      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleJobAssignments' | translate" (click)="togglePref('email_assignment', emailOnAssignment())" (keydown.enter)="togglePref('email_assignment', emailOnAssignment())">
         <div class="pref-row__info">
-          <span class="pref-row__label">Job Assignments</span>
-          <span class="pref-row__desc">Receive email when assigned to a job</span>
+          <span class="pref-row__label">{{ 'notifications.jobAssignments' | translate }}</span>
+          <span class="pref-row__desc">{{ 'notifications.jobAssignmentsDesc' | translate }}</span>
         </div>
         <span class="material-icons-outlined pref-row__toggle"
               [class.pref-row__toggle--on]="emailOnAssignment()">
@@ -58,10 +58,10 @@
         </span>
       </div>
 
-      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle mentions email" (click)="togglePref('email_mention', emailOnMention())" (keydown.enter)="togglePref('email_mention', emailOnMention())">
+      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleMentions' | translate" (click)="togglePref('email_mention', emailOnMention())" (keydown.enter)="togglePref('email_mention', emailOnMention())">
         <div class="pref-row__info">
-          <span class="pref-row__label">Mentions</span>
-          <span class="pref-row__desc">Receive email when mentioned in a comment</span>
+          <span class="pref-row__label">{{ 'notifications.mentions' | translate }}</span>
+          <span class="pref-row__desc">{{ 'notifications.mentionsDesc' | translate }}</span>
         </div>
         <span class="material-icons-outlined pref-row__toggle"
               [class.pref-row__toggle--on]="emailOnMention()">
@@ -69,12 +69,12 @@
         </span>
       </div>
 
-      <h3 class="pref-section__title">In-App Notifications</h3>
+      <h3 class="pref-section__title">{{ 'notifications.inAppNotifications' | translate }}</h3>
 
-      <div class="pref-row" role="button" tabindex="0" aria-label="Toggle notification sound" (click)="togglePref('sound', soundEnabled())" (keydown.enter)="togglePref('sound', soundEnabled())">
+      <div class="pref-row" role="button" tabindex="0" [attr.aria-label]="'notifications.toggleSound' | translate" (click)="togglePref('sound', soundEnabled())" (keydown.enter)="togglePref('sound', soundEnabled())">
         <div class="pref-row__info">
-          <span class="pref-row__label">Sound</span>
-          <span class="pref-row__desc">Play a sound when a notification arrives</span>
+          <span class="pref-row__label">{{ 'notifications.sound' | translate }}</span>
+          <span class="pref-row__desc">{{ 'notifications.soundDesc' | translate }}</span>
         </div>
         <span class="material-icons-outlined pref-row__toggle"
               [class.pref-row__toggle--on]="soundEnabled()">

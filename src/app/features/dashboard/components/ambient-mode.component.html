@@ -8,21 +8,21 @@
     <div class="ambient__kpis">
       <div class="ambient__kpi">
         <span class="ambient__kpi-value">{{ d.kpis.activeCount }}</span>
-        <span class="ambient__kpi-label">Active Jobs</span>
+        <span class="ambient__kpi-label">{{ 'dashboard.activeJobs' | translate }}</span>
       </div>
       <div class="ambient__kpi ambient__kpi--warning">
         <span class="ambient__kpi-value">{{ d.kpis.overdueCount }}</span>
-        <span class="ambient__kpi-label">Overdue</span>
+        <span class="ambient__kpi-label">{{ 'dashboard.overdue' | translate }}</span>
       </div>
       <div class="ambient__kpi">
         <span class="ambient__kpi-value">{{ d.kpis.totalHours }}h</span>
-        <span class="ambient__kpi-label">Hours Today</span>
+        <span class="ambient__kpi-label">{{ 'dashboard.hoursToday' | translate }}</span>
       </div>
     </div>
 
     @if (d.deadlines.length > 0) {
       <div class="ambient__deadlines">
-        <span class="ambient__section-label">Upcoming Deadlines</span>
+        <span class="ambient__section-label">{{ 'dashboard.upcomingDeadlines' | translate }}</span>
         @for (dl of d.deadlines.slice(0, 5); track dl.jobNumber) {
           <div class="ambient__deadline" [class.ambient__deadline--overdue]="dl.isOverdue">
             <span class="ambient__deadline-job">{{ dl.jobNumber }}</span>
@@ -34,5 +34,5 @@
     }
   }
 
-  <div class="ambient__hint">Press Escape or click to exit</div>
+  <div class="ambient__hint">{{ 'dashboard.pressEscapeHint' | translate }}</div>
 </div>

@@ -6,7 +6,7 @@
         {{ formatDate(cycle().startDate) }} – {{ formatDate(cycle().endDate) }}
       </span>
       @if (isActive()) {
-        <span class="cycle-board__days-left">{{ daysRemaining() }}d left</span>
+        <span class="cycle-board__days-left">{{ daysRemaining() }} {{ 'planning.daysLeft' | translate }}</span>
       }
     </div>
     <div class="cycle-board__stats">
@@ -28,7 +28,7 @@
 
   @if (cycle().goals) {
     <div class="cycle-board__goals">
-      <span class="cycle-board__goals-label">Goals</span>
+      <span class="cycle-board__goals-label">{{ 'planning.goals' | translate }}</span>
       <p class="cycle-board__goals-text">{{ cycle().goals }}</p>
     </div>
   }
@@ -55,7 +55,7 @@
               <span class="entry__assignee">{{ entry.assigneeName }}</span>
             }
             @if (entry.isRolledOver) {
-              <span class="entry__rolled-over-badge" title="Rolled over from previous cycle">
+              <span class="entry__rolled-over-badge" [title]="'planning.rolledOver' | translate">
                 <span class="material-icons-outlined">replay</span>
               </span>
             }
@@ -64,19 +64,19 @@
 
         <div class="entry__actions">
           @if (!entry.completedAt) {
-            <button class="icon-btn" title="Mark complete" (click)="onComplete(entry, $event)">
+            <button class="icon-btn" [matTooltip]="'planning.markComplete' | translate" matTooltipPosition="above" (click)="onComplete(entry, $event)" [attr.aria-label]="'planning.markComplete' | translate">
               <span class="material-icons-outlined">check_circle_outline</span>
             </button>
           } @else {
             <span class="material-icons-outlined entry__check">check_circle</span>
           }
-          <button class="icon-btn icon-btn--danger" title="Remove from cycle" (click)="onRemove(entry, $event)">
+          <button class="icon-btn icon-btn--danger" [matTooltip]="'planning.removeFromCycle' | translate" matTooltipPosition="above" (click)="onRemove(entry, $event)" [attr.aria-label]="'planning.removeFromCycle' | translate">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
       </div>
     } @empty {
-      <app-empty-state icon="assignment" message="No jobs committed to this cycle" />
+      <app-empty-state icon="assignment" [message]="'planning.noJobsCommitted' | translate" />
     }
   </div>
 </div>

@@ -8,7 +8,7 @@
       </span>
     }
     @if (column().stage.isIrreversible) {
-      <span class="column__lock" title="Irreversible — jobs cannot be moved backward from this stage">
+      <span class="column__lock" [title]="'kanban.irreversibleTooltip' | translate">
         <span class="material-icons-outlined column__lock-icon">lock</span>
       </span>
     }
@@ -25,7 +25,7 @@
       <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cdkDragStarted)="onDragStarted($event)" (cardClicked)="onCardClicked($event)" (jobNumberClicked)="onJobNumberClicked($event)" />
     }
     @empty {
-      <app-empty-state icon="work" message="No jobs" />
+      <app-empty-state icon="work" [message]="'kanban.noJobs' | translate" />
     }
   </div>
 </div>

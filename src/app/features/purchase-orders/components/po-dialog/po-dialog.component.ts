@@ -13,6 +13,8 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface LineEntry {
   partId: number;
@@ -28,7 +30,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './po-dialog.component.html',
   styleUrl: './po-dialog.component.scss',
@@ -38,6 +40,7 @@ export class PoDialogComponent {
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -47,7 +50,7 @@ export class PoDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly vendorOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'Select vendor...' },
+    { value: null, label: this.translate.instant('purchaseOrders.selectVendor') },
     ...this.vendors().map(v => ({ value: v.id, label: v.companyName })),
   ]);
 
@@ -122,7 +125,7 @@ export class PoDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Purchase order created.');
+        this.snackbar.success(this.translate.instant('purchaseOrders.poCreated'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

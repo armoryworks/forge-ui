@@ -4,7 +4,7 @@
     <div class="status-timeline__current">
       @if (activeStatus()!.workflowStatus; as ws) {
         <div class="status-timeline__workflow">
-          <span class="info-label">Current Status</span>
+          <span class="info-label">{{ 'statusTimeline.currentStatus' | translate }}</span>
           <span class="chip chip--primary">{{ ws.statusLabel }}</span>
           @if (ws.notes) {
             <span class="status-timeline__notes">{{ ws.notes }}</span>
@@ -14,12 +14,12 @@
 
       @if (activeStatus()!.activeHolds.length > 0) {
         <div class="status-timeline__holds">
-          <span class="info-label">Active Holds</span>
+          <span class="info-label">{{ 'statusTimeline.activeHolds' | translate }}</span>
           <div class="status-timeline__hold-chips">
             @for (hold of activeStatus()!.activeHolds; track hold.id) {
               <div class="hold-chip">
                 <span class="chip chip--error">{{ hold.statusLabel }}</span>
-                <button class="icon-btn icon-btn--sm" title="Release hold" aria-label="Release hold" (click)="releaseHold(hold)">
+                <button class="icon-btn icon-btn--sm" [matTooltip]="'statusTimeline.releaseHold' | translate" matTooltipPosition="above" [attr.aria-label]="'statusTimeline.releaseHold' | translate" (click)="releaseHold(hold)">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
@@ -31,10 +31,10 @@
 
     <div class="status-timeline__actions">
       <button class="action-btn action-btn--sm" (click)="openSetStatus()">
-        <span class="material-icons-outlined">swap_horiz</span> Change Status
+        <span class="material-icons-outlined">swap_horiz</span> {{ 'statusTimeline.changeStatus' | translate }}
       </button>
       <button class="action-btn action-btn--sm" (click)="openAddHold()">
-        <span class="material-icons-outlined">pause_circle</span> Add Hold
+        <span class="material-icons-outlined">pause_circle</span> {{ 'statusTimeline.addHold' | translate }}
       </button>
     </div>
   }
@@ -42,7 +42,7 @@
   <!-- History Section -->
   @if (history().length > 0) {
     <div class="status-timeline__history">
-      <span class="info-label">Status History</span>
+      <span class="info-label">{{ 'statusTimeline.statusHistory' | translate }}</span>
       <div class="status-timeline__entries">
         @for (entry of history(); track entry.id) {
           <div class="timeline-entry" [class.timeline-entry--active]="!entry.endedAt" [class.timeline-entry--hold]="entry.category === 'hold'">
@@ -51,10 +51,10 @@
               <div class="timeline-entry__header">
                 <span class="timeline-entry__label">{{ entry.statusLabel }}</span>
                 @if (entry.category === 'hold') {
-                  <span class="chip chip--error chip--sm">Hold</span>
+                  <span class="chip chip--error chip--sm">{{ 'statusTimeline.hold' | translate }}</span>
                 }
                 @if (!entry.endedAt) {
-                  <span class="chip chip--success chip--sm">Active</span>
+                  <span class="chip chip--success chip--sm">{{ 'statusTimeline.active' | translate }}</span>
                 }
               </div>
               <div class="timeline-entry__meta">

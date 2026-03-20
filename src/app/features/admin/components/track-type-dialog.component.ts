@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
@@ -17,12 +20,13 @@ const STAGE_COLORS = [
 @Component({
   selector: 'app-track-type-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, InputComponent, ToggleComponent, ValidationPopoverDirective, EmptyStateComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ToggleComponent, ValidationPopoverDirective, EmptyStateComponent, MatTooltipModule],
   templateUrl: './track-type-dialog.component.html',
   styleUrl: './track-type-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrackTypeDialogComponent {
+  private readonly translate = inject(TranslateService);
   readonly trackType = input<TrackType | null>(null);
   readonly saving = input(false);
   readonly closed = output<void>();
@@ -39,7 +43,7 @@ export class TrackTypeDialogComponent {
 
   protected readonly stages = signal<StageRequest[]>([]);
   protected readonly isEdit = computed(() => this.trackType() !== null);
-  protected readonly title = computed(() => this.isEdit() ? 'Edit Track Type' : 'Create Track Type');
+  protected readonly title = computed(() => this.isEdit() ? this.translate.instant('trackTypeDialog.editTrackType') : this.translate.instant('trackTypeDialog.createTrackType'));
   protected readonly hasStages = computed(() => this.stages().length > 0);
 
   constructor() {

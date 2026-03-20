@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -12,7 +15,7 @@ const TOP3_PREF_KEY = 'dashboard:top3-tomorrow';
 @Component({
   selector: 'app-todays-tasks-widget',
   standalone: true,
-  imports: [AvatarComponent, StatusBadgeComponent, EmptyStateComponent],
+  imports: [TranslatePipe, MatTooltipModule, AvatarComponent, StatusBadgeComponent, EmptyStateComponent],
   templateUrl: './todays-tasks-widget.component.html',
   styleUrl: './todays-tasks-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,31 +1,31 @@
-<app-page-header title="Invoices" subtitle="Generate invoices and track billing status">
+<app-page-header [title]="'invoices.title' | translate" [subtitle]="'invoices.subtitle' | translate">
   <button class="action-btn" (click)="openUninvoicedPanel()">
     <span class="material-icons-outlined">pending_actions</span>
-    Uninvoiced Jobs
+    {{ 'invoices.uninvoicedJobs' | translate }}
     @if (uninvoicedCount() > 0) {
       <span class="nudge-badge">{{ uninvoicedCount() }}</span>
     }
   </button>
   <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
-    New Invoice
+    {{ 'invoices.newInvoice' | translate }}
   </button>
 </app-page-header>
 
 @if (!isStandalone()) {
   <div class="accounting-managed-banner">
     <span class="material-icons-outlined">cloud_sync</span>
-    Invoices are managed by {{ providerName() ?? 'your accounting provider' }}. Changes here are read-only.
+    {{ providerName() ? ('invoices.accountingManaged' | translate:{ provider: providerName() }) : ('invoices.accountingManagedDefault' | translate) }}
   </div>
 }
 
 @if (uninvoicedCount() > 0) {
-  <div class="nudge-banner" role="button" tabindex="0" aria-label="Review uninvoiced jobs" (click)="openUninvoicedPanel()" (keydown.enter)="openUninvoicedPanel()">
+  <div class="nudge-banner" role="button" tabindex="0" [attr.aria-label]="'invoices.reviewUninvoiced' | translate" (click)="openUninvoicedPanel()" (keydown.enter)="openUninvoicedPanel()">
     <span class="material-icons-outlined nudge-banner__icon">warning_amber</span>
     <span class="nudge-banner__text">
-      {{ uninvoicedCount() }} completed {{ uninvoicedCount() === 1 ? 'job has' : 'jobs have' }} not been invoiced.
+      {{ (uninvoicedCount() === 1 ? 'invoices.uninvoicedBanner' : 'invoices.uninvoicedBannerPlural') | translate:{ count: uninvoicedCount() } }}
     </span>
-    <span class="nudge-banner__action">Review</span>
+    <span class="nudge-banner__action">{{ 'invoices.review' | translate }}</span>
   </div>
 }
 
@@ -33,14 +33,14 @@
   <!-- Left: Invoice List -->
   <div class="inv-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search invoices..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'invoices.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="invoices" [columns]="invoiceColumns" [data]="invoices()"
-        [rowClass]="invoiceRowClass" emptyIcon="receipt_long" emptyMessage="No invoices found"
+        [rowClass]="invoiceRowClass" emptyIcon="receipt_long" [emptyMessage]="'invoices.noInvoicesFound' | translate"
         (rowClick)="selectInvoice($any($event))">
         <ng-template appColumnCell="invoiceNumber" let-row>
           <span class="inv-number">{{ row.invoiceNumber }}</span>
@@ -88,7 +88,7 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -98,38 +98,38 @@
         <!-- Status & Info -->
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">
               <span [class]="getStatusClass(inv.status)">{{ getStatusLabel(inv.status) }}</span>
             </span>
           </div>
           <div class="info-item">
-            <span class="info-label">Customer</span>
+            <span class="info-label">{{ 'invoices.customer' | translate }}</span>
             <span class="info-value">{{ inv.customerName }}</span>
           </div>
           @if (inv.salesOrderNumber) {
             <div class="info-item">
-              <span class="info-label">Sales Order</span>
+              <span class="info-label">{{ 'invoices.salesOrder' | translate }}</span>
               <span class="info-value">{{ inv.salesOrderNumber }}</span>
             </div>
           }
           @if (inv.shipmentNumber) {
             <div class="info-item">
-              <span class="info-label">Shipment</span>
+              <span class="info-label">{{ 'invoices.shipment' | translate }}</span>
               <span class="info-value">{{ inv.shipmentNumber }}</span>
             </div>
           }
           <div class="info-item">
-            <span class="info-label">Invoice Date</span>
+            <span class="info-label">{{ 'invoices.invoiceDate' | translate }}</span>
             <span class="info-value">{{ inv.invoiceDate | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Due Date</span>
+            <span class="info-label">{{ 'invoices.dueDate' | translate }}</span>
             <span class="info-value">{{ inv.dueDate | date:'MM/dd/yyyy' }}</span>
           </div>
           @if (inv.creditTerms) {
             <div class="info-item">
-              <span class="info-label">Credit Terms</span>
+              <span class="info-label">{{ 'invoices.creditTerms' | translate }}</span>
               <span class="info-value">{{ inv.creditTerms }}</span>
             </div>
           }
@@ -137,23 +137,23 @@
 
         @if (inv.notes) {
           <div class="info-section">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'common.notes' | translate }}</span>
             <div class="info-notes">{{ inv.notes }}</div>
           </div>
         }
 
         <!-- Line Items -->
         <div class="lines-section">
-          <span class="info-label">Line Items ({{ inv.lines.length }})</span>
+          <span class="info-label">{{ 'invoices.lineItems' | translate }} ({{ inv.lines.length }})</span>
           @if (inv.lines.length > 0) {
             <table class="lines-table">
               <thead>
                 <tr>
-                  <th>Part #</th>
-                  <th>Description</th>
-                  <th class="lines-table__right">Qty</th>
-                  <th class="lines-table__right">Unit Price</th>
-                  <th class="lines-table__right">Total</th>
+                  <th>{{ 'invoices.partNumber' | translate }}</th>
+                  <th>{{ 'common.description' | translate }}</th>
+                  <th class="lines-table__right">{{ 'invoices.qty' | translate }}</th>
+                  <th class="lines-table__right">{{ 'invoices.unitPrice' | translate }}</th>
+                  <th class="lines-table__right">{{ 'common.total' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -174,34 +174,34 @@
         <!-- Totals -->
         <div class="totals-section">
           <div class="totals-row">
-            <span class="totals-label">Subtotal</span>
+            <span class="totals-label">{{ 'invoices.subtotal' | translate }}</span>
             <span class="totals-value">{{ inv.subtotal | currency }}</span>
           </div>
           <div class="totals-row">
-            <span class="totals-label">Tax ({{ inv.taxRate }}%)</span>
+            <span class="totals-label">{{ 'invoices.tax' | translate }} ({{ inv.taxRate }}%)</span>
             <span class="totals-value">{{ inv.taxAmount | currency }}</span>
           </div>
           <div class="totals-row totals-row--total">
-            <span class="totals-label">Total</span>
+            <span class="totals-label">{{ 'common.total' | translate }}</span>
             <span class="totals-value">{{ inv.total | currency }}</span>
           </div>
           <div class="totals-row">
-            <span class="totals-label">Amount Paid</span>
+            <span class="totals-label">{{ 'invoices.amountPaid' | translate }}</span>
             <span class="totals-value">{{ inv.amountPaid | currency }}</span>
           </div>
           <div class="totals-row totals-row--balance">
-            <span class="totals-label">Balance Due</span>
+            <span class="totals-label">{{ 'invoices.balanceDue' | translate }}</span>
             <span class="totals-value">{{ inv.balanceDue | currency }}</span>
           </div>
         </div>
 
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Created</span>
+            <span class="info-label">{{ 'common.created' | translate }}</span>
             <span class="info-value">{{ inv.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Updated</span>
+            <span class="info-label">{{ 'common.updated' | translate }}</span>
             <span class="info-value">{{ inv.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
@@ -211,19 +211,19 @@
           @if (canSend(inv.status)) {
             <button class="action-btn action-btn--primary" (click)="sendInvoice()">
               <span class="material-icons-outlined">send</span>
-              Send
+              {{ 'invoices.send' | translate }}
             </button>
           }
           @if (canVoid(inv.status)) {
             <button class="action-btn" (click)="voidInvoice()">
               <span class="material-icons-outlined">block</span>
-              Void
+              {{ 'invoices.void' | translate }}
             </button>
           }
           @if (canDelete(inv.status)) {
             <button class="action-btn action-btn--danger" (click)="deleteInvoice()">
               <span class="material-icons-outlined">delete</span>
-              Delete
+              {{ 'common.delete' | translate }}
             </button>
           }
         </div>

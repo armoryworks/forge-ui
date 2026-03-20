@@ -1,51 +1,51 @@
 <app-dialog [title]="title()" width="680px" (closed)="closed.emit()">
   <div [formGroup]="form">
-    <app-input label="Name" formControlName="name" />
+    <app-input [label]="'common.name' | translate" formControlName="name" />
     <div class="dialog-row">
-      <app-input label="Code" formControlName="code" placeholder="e.g. CUSTOM_TRACK" />
+      <app-input [label]="'admin.code' | translate" formControlName="code" [placeholder]="'trackTypeDialog.codePlaceholder' | translate" />
       <div></div>
     </div>
-    <app-input label="Description" formControlName="description" />
+    <app-input [label]="'common.description' | translate" formControlName="description" />
   </div>
 
   <div class="stages-section">
     <div class="stages-header">
-      <span class="stages-title">Stages</span>
+      <span class="stages-title">{{ 'trackTypeDialog.stages' | translate }}</span>
       <button class="action-btn action-btn--sm" (click)="addStage()">
         <span class="material-icons-outlined">add</span>
-        Add Stage
+        {{ 'trackTypeDialog.addStage' | translate }}
       </button>
     </div>
 
     @if (!hasStages()) {
-      <app-empty-state icon="layers" message="No stages defined. Add at least one stage." />
+      <app-empty-state icon="layers" [message]="'trackTypeDialog.noStages' | translate" />
     } @else {
       <div class="stages-list">
         @for (stage of stages(); track $index; let i = $index; let first = $first; let last = $last) {
           <div class="stage-row">
             <div class="stage-row__order">
-              <button class="icon-btn" [disabled]="first" (click)="moveStageUp(i)" title="Move up">
+              <button class="icon-btn" [disabled]="first" (click)="moveStageUp(i)" [matTooltip]="'trackTypeDialog.moveUp' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">arrow_upward</span>
               </button>
-              <button class="icon-btn" [disabled]="last" (click)="moveStageDown(i)" title="Move down">
+              <button class="icon-btn" [disabled]="last" (click)="moveStageDown(i)" [matTooltip]="'trackTypeDialog.moveDown' | translate" matTooltipPosition="above">
                 <span class="material-icons-outlined">arrow_downward</span>
               </button>
             </div>
             <div class="stage-row__color">
               <input type="color" [value]="stage.color" (input)="updateStage(i, 'color', $any($event.target).value)" />
             </div>
-            <input class="stage-row__input stage-row__input--name" placeholder="Stage name" [value]="stage.name"
+            <input class="stage-row__input stage-row__input--name" [placeholder]="'trackTypeDialog.stageNamePlaceholder' | translate" [value]="stage.name"
               (input)="updateStage(i, 'name', $any($event.target).value)" />
-            <input class="stage-row__input stage-row__input--code" placeholder="Code" [value]="stage.code"
+            <input class="stage-row__input stage-row__input--code" [placeholder]="'trackTypeDialog.codeStagePlaceholder' | translate" [value]="stage.code"
               (input)="updateStage(i, 'code', $any($event.target).value)" />
-            <input class="stage-row__input stage-row__input--wip" type="number" placeholder="WIP" [value]="stage.wipLimit"
+            <input class="stage-row__input stage-row__input--wip" type="number" [placeholder]="'trackTypeDialog.wipPlaceholder' | translate" [value]="stage.wipLimit"
               (input)="updateStage(i, 'wipLimit', $any($event.target).value ? +$any($event.target).value : null)" />
-            <label class="stage-row__irreversible" title="Irreversible (cannot move jobs backward from this stage)">
+            <label class="stage-row__irreversible" [title]="'trackTypeDialog.irreversibleTitle' | translate">
               <input type="checkbox" [checked]="stage.isIrreversible"
                 (change)="updateStage(i, 'isIrreversible', $any($event.target).checked)" />
               <span class="material-icons-outlined">lock</span>
             </label>
-            <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" title="Remove stage">
+            <button class="icon-btn icon-btn--danger" (click)="removeStage(i)" [matTooltip]="'trackTypeDialog.removeStage' | translate" matTooltipPosition="above">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -55,13 +55,13 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="closed.emit()">Cancel</button>
+    <button class="action-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || !hasStages() || saving()"
       (click)="onSubmit()">
       <span class="material-icons-outlined">save</span>
-      {{ isEdit() ? 'Save Changes' : 'Create' }}
+      {{ isEdit() ? ('common.saveChanges' | translate) : ('common.create' | translate) }}
     </button>
   </div>
 </app-dialog>

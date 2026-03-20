@@ -1,0 +1,42 @@
+<app-dialog [title]="('integrationConfigDialog.configure' | translate) + ' ' + data.integration.name" width="520px" (closed)="close()">
+  <div [formGroup]="form">
+    @for (field of fields; track field.key) {
+      @if (field.inputType === 'toggle') {
+        <app-toggle [label]="field.label" [formControlName]="field.key" />
+      } @else {
+        <app-input
+          [label]="field.label"
+          [type]="getInputType(field)"
+          [formControlName]="field.key"
+          [required]="field.isRequired"
+          [placeholder]="field.isSensitive ? ('integrationConfigDialog.enterNewValue' | translate) : ''" />
+      }
+    }
+
+    @if (testResult(); as result) {
+      <div class="test-result" [class.test-result--success]="result.success" [class.test-result--error]="!result.success">
+        <span class="material-icons-outlined">{{ result.success ? 'check_circle' : 'error' }}</span>
+        <span>{{ result.message }}</span>
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="test()" [disabled]="testing() || saving()" [attr.aria-label]="'integrationConfigDialog.testConnection' | translate">
+      @if (testing()) {
+        <span class="material-icons-outlined spin">sync</span>
+      } @else {
+        <span class="material-icons-outlined">cable</span>
+      }
+      {{ 'integrationConfigDialog.test' | translate }}
+    </button>
+    <span class="footer-spacer"></span>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined spin">sync</span>
+      }
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</app-dialog>

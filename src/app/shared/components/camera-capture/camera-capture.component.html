@@ -1,9 +1,9 @@
 @if (open()) {
   <div class="camera-capture__backdrop" role="button" tabindex="0" aria-label="Close" (click)="close()" (keydown.enter)="close()">
-    <div class="camera-capture" role="dialog" aria-modal="true" aria-label="Capture Photo" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+    <div class="camera-capture" role="dialog" aria-modal="true" [attr.aria-label]="'camera.capturePhoto' | translate" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
       <div class="camera-capture__header">
-        <span class="camera-capture__title">Capture Photo</span>
-        <button class="icon-btn" aria-label="Close camera" (click)="close()">
+        <span class="camera-capture__title">{{ 'camera.capturePhoto' | translate }}</span>
+        <button class="icon-btn" [attr.aria-label]="'camera.closeCamera' | translate" [matTooltip]="'camera.closeCamera' | translate" matTooltipPosition="above" (click)="close()">
           <span class="material-icons-outlined">close</span>
         </button>
       </div>
@@ -12,7 +12,7 @@
         @if (state() === 'initializing') {
           <div class="camera-capture__status">
             <span class="material-icons-outlined camera-capture__status-icon">photo_camera</span>
-            <span class="camera-capture__status-text">Starting camera...</span>
+            <span class="camera-capture__status-text">{{ 'camera.startingCamera' | translate }}</span>
           </div>
         }
 
@@ -30,20 +30,18 @@
           <img
             class="camera-capture__preview"
             [src]="previewUrl()"
-            alt="Captured photo preview"
+            [alt]="'camera.capturedPreview' | translate"
           />
         }
 
         @if (state() === 'denied') {
           <div class="camera-capture__status">
             <span class="material-icons-outlined camera-capture__status-icon camera-capture__status-icon--error">no_photography</span>
-            <span class="camera-capture__status-text">Camera access denied</span>
-            <span class="camera-capture__status-hint">
-              Allow camera access in your browser settings, then try again.
-            </span>
+            <span class="camera-capture__status-text">{{ 'camera.accessDenied' | translate }}</span>
+            <span class="camera-capture__status-hint">{{ 'camera.accessDeniedHint' | translate }}</span>
             <button class="action-btn action-btn--sm" (click)="openFilePicker()">
               <span class="material-icons-outlined">upload_file</span>
-              Upload from device
+              {{ 'camera.uploadFromDevice' | translate }}
             </button>
           </div>
         }
@@ -51,13 +49,11 @@
         @if (state() === 'unavailable') {
           <div class="camera-capture__status">
             <span class="material-icons-outlined camera-capture__status-icon camera-capture__status-icon--error">videocam_off</span>
-            <span class="camera-capture__status-text">No camera available</span>
-            <span class="camera-capture__status-hint">
-              Your device does not have a camera, or it is in use by another application.
-            </span>
+            <span class="camera-capture__status-text">{{ 'camera.noCameraAvailable' | translate }}</span>
+            <span class="camera-capture__status-hint">{{ 'camera.noCameraHint' | translate }}</span>
             <button class="action-btn action-btn--sm" (click)="openFilePicker()">
               <span class="material-icons-outlined">upload_file</span>
-              Upload from device
+              {{ 'camera.uploadFromDevice' | translate }}
             </button>
           </div>
         }
@@ -67,7 +63,8 @@
         @if (state() === 'streaming') {
           <button
             class="camera-capture__shutter"
-            aria-label="Capture photo"
+            [attr.aria-label]="'camera.capturePhoto' | translate"
+            [matTooltip]="'camera.capturePhoto' | translate" matTooltipPosition="above"
             (click)="capture()"
           >
             <span class="camera-capture__shutter-ring"></span>
@@ -77,11 +74,11 @@
         @if (state() === 'captured') {
           <button class="action-btn" (click)="retake()">
             <span class="material-icons-outlined">replay</span>
-            Retake
+            {{ 'camera.retake' | translate }}
           </button>
           <button class="action-btn action-btn--primary" (click)="useCapture()">
             <span class="material-icons-outlined">check</span>
-            Use Photo
+            {{ 'camera.usePhoto' | translate }}
           </button>
         }
       </div>

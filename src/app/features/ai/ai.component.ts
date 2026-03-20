@@ -4,10 +4,13 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { AiService, AiHelpMessage, AiHelpResponse } from '../../shared/services/ai.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { InputComponent } from '../../shared/components/input/input.component';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 export interface AiAssistantListItem {
   id: number;
@@ -29,7 +32,7 @@ export interface ChatMessage {
 @Component({
   selector: 'app-ai',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule, LoadingBlockDirective, EmptyStateComponent, InputComponent],
+  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule, MatTooltipModule, LoadingBlockDirective, EmptyStateComponent, InputComponent, TranslatePipe],
   templateUrl: './ai.component.html',
   styleUrl: './ai.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +41,7 @@ export class AiComponent {
   private readonly aiService = inject(AiService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly assistants = signal<AiAssistantListItem[]>([]);
   protected readonly loadingAssistants = signal(false);
@@ -118,7 +122,7 @@ export class AiComponent {
         this.sending.set(false);
       },
       error: () => {
-        this.addMessage(assistant.id, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', timestamp: new Date() });
+        this.addMessage(assistant.id, { role: 'assistant', content: this.translate.instant('ai.errorMessage'), timestamp: new Date() });
         this.sending.set(false);
       },
     });

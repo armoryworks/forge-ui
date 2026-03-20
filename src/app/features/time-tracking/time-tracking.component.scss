@@ -9,7 +9,7 @@
   display: flex; align-items: center; gap: $sp-lg;
   padding: $sp-md $sp-lg; border-bottom: $border-width-thin solid var(--border); flex-shrink: 0;
 }
-.filter-group { display: flex; align-items: center; gap: $sp-sm; width: 180px; }
+.filter-group { display: flex; align-items: center; gap: $sp-sm; min-width: 160px; max-width: 200px; }
 .filter-summary { margin-left: auto; font-size: $font-size-sm; color: var(--text-muted); }
 
 .row--active { background: var(--success-light); }

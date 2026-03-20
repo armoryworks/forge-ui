@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -13,6 +14,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 import { SpacerDirective } from '../../../../shared/directives/spacer.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ReportBuilderService } from '../../services/report-builder.service';
 import {
@@ -45,6 +47,8 @@ interface FilterRow {
     EmptyStateComponent,
     SpacerDirective,
     LoadingBlockDirective,
+    TranslatePipe,
+    MatTooltipModule,
   ],
   templateUrl: './report-builder.component.html',
   styleUrl: './report-builder.component.scss',
@@ -55,6 +59,7 @@ export class ReportBuilderComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   // Form controls
   protected readonly entityControl = new FormControl<string>('', { nonNullable: true });
@@ -80,7 +85,7 @@ export class ReportBuilderComponent {
   // Computed: entity options for the select dropdown
   protected readonly entityOptions = computed<SelectOption[]>(() => {
     return [
-      { value: '', label: '-- Select Entity --' },
+      { value: '', label: this.translate.instant('reports.selectEntity') },
       ...this.entities().map(e => ({ value: e.entitySource, label: e.label })),
     ];
   });
@@ -88,7 +93,7 @@ export class ReportBuilderComponent {
   // Computed: saved report options
   protected readonly savedReportOptions = computed<SelectOption[]>(() => {
     return [
-      { value: null, label: '-- None --' },
+      { value: null, label: this.translate.instant('common.none') },
       ...this.savedReports().map(r => ({ value: r.id, label: r.name })),
     ];
   });
@@ -115,7 +120,7 @@ export class ReportBuilderComponent {
   // Computed: groupable field options
   protected readonly groupableFieldOptions = computed<SelectOption[]>(() => {
     return [
-      { value: '', label: '-- None --' },
+      { value: '', label: this.translate.instant('common.none') },
       ...this.availableFields()
         .filter(f => f.isGroupable)
         .map(f => ({ value: f.field, label: f.label })),
@@ -125,7 +130,7 @@ export class ReportBuilderComponent {
   // Computed: sortable field options
   protected readonly sortableFieldOptions = computed<SelectOption[]>(() => {
     return [
-      { value: '', label: '-- None --' },
+      { value: '', label: this.translate.instant('common.none') },
       ...this.availableFields()
         .filter(f => f.isSortable)
         .map(f => ({ value: f.field, label: f.label })),
@@ -212,32 +217,32 @@ export class ReportBuilderComponent {
 
   // Static options
   protected readonly operatorOptions: SelectOption[] = [
-    { value: 'Equals', label: 'Equals' },
-    { value: 'NotEquals', label: 'Not Equals' },
-    { value: 'Contains', label: 'Contains' },
-    { value: 'StartsWith', label: 'Starts With' },
-    { value: 'GreaterThan', label: 'Greater Than' },
-    { value: 'LessThan', label: 'Less Than' },
-    { value: 'GreaterThanOrEqual', label: '>=' },
-    { value: 'LessThanOrEqual', label: '<=' },
-    { value: 'Between', label: 'Between' },
-    { value: 'IsNull', label: 'Is Null' },
-    { value: 'IsNotNull', label: 'Is Not Null' },
-    { value: 'In', label: 'In' },
+    { value: 'Equals', label: this.translate.instant('reports.operatorEquals') },
+    { value: 'NotEquals', label: this.translate.instant('reports.operatorNotEquals') },
+    { value: 'Contains', label: this.translate.instant('reports.operatorContains') },
+    { value: 'StartsWith', label: this.translate.instant('reports.operatorStartsWith') },
+    { value: 'GreaterThan', label: this.translate.instant('reports.operatorGreaterThan') },
+    { value: 'LessThan', label: this.translate.instant('reports.operatorLessThan') },
+    { value: 'GreaterThanOrEqual', label: this.translate.instant('reports.operatorGreaterOrEqual') },
+    { value: 'LessThanOrEqual', label: this.translate.instant('reports.operatorLessOrEqual') },
+    { value: 'Between', label: this.translate.instant('reports.operatorBetween') },
+    { value: 'IsNull', label: this.translate.instant('reports.operatorIsNull') },
+    { value: 'IsNotNull', label: this.translate.instant('reports.operatorIsNotNull') },
+    { value: 'In', label: this.translate.instant('reports.operatorIn') },
   ];
 
   protected readonly directionOptions: SelectOption[] = [
-    { value: 'asc', label: 'Ascending' },
-    { value: 'desc', label: 'Descending' },
+    { value: 'asc', label: this.translate.instant('reports.directionAscending') },
+    { value: 'desc', label: this.translate.instant('reports.directionDescending') },
   ];
 
   protected readonly chartTypeOptions: SelectOption[] = [
-    { value: '', label: '-- None --' },
-    { value: 'table', label: 'Table Only' },
-    { value: 'bar', label: 'Bar Chart' },
-    { value: 'line', label: 'Line Chart' },
-    { value: 'pie', label: 'Pie Chart' },
-    { value: 'doughnut', label: 'Doughnut Chart' },
+    { value: '', label: this.translate.instant('common.none') },
+    { value: 'table', label: this.translate.instant('reports.chartTableOnly') },
+    { value: 'bar', label: this.translate.instant('reports.chartBar') },
+    { value: 'line', label: this.translate.instant('reports.chartLine') },
+    { value: 'pie', label: this.translate.instant('reports.chartPie') },
+    { value: 'doughnut', label: this.translate.instant('reports.chartDoughnut') },
   ];
 
   protected readonly chartOptions: ChartOptions = {
@@ -361,7 +366,7 @@ export class ReportBuilderComponent {
     if (!editing) return;
     this.builderService.deleteReport(editing.id).subscribe({
       next: () => {
-        this.snackbar.success('Report deleted.');
+        this.snackbar.success(this.translate.instant('reports.reportDeleted'));
         this.newReport();
       },
     });
@@ -442,13 +447,13 @@ export class ReportBuilderComponent {
     const existing = this.editingReport();
     if (existing) {
       this.builderService.updateReport(existing.id, request).subscribe({
-        next: () => this.snackbar.success('Report updated.'),
+        next: () => this.snackbar.success(this.translate.instant('reports.reportUpdated')),
       });
     } else {
       this.builderService.createReport(request).subscribe({
         next: (saved) => {
           this.editingReport.set(saved);
-          this.snackbar.success('Report saved.');
+          this.snackbar.success(this.translate.instant('reports.reportSaved'));
         },
       });
     }

@@ -1,15 +1,15 @@
 <div [appLoadingBlock]="loading()">
   @if (!cycle()) {
-    <app-empty-state icon="event_note" message="No active cycle"
-      actionLabel="Start Planning" (action)="navigatePlanning()" />
+    <app-empty-state icon="event_note" [message]="'dashboard.noActiveCycle' | translate"
+      [actionLabel]="'dashboard.startPlanning' | translate" (action)="navigatePlanning()" />
   } @else {
     <div class="cycle-header">
       <a routerLink="/planning" class="cycle-name">{{ cycle()!.name }}</a>
       <span class="cycle-status" [class.cycle-status--overdue]="isOverdue()">
         @if (isOverdue()) {
-          Overdue
+          {{ 'dashboard.overdue' | translate }}
         } @else {
-          {{ daysRemaining() }}d left
+          {{ 'dashboard.daysLeft' | translate:{ count: daysRemaining() } }}
         }
       </span>
     </div>
@@ -39,7 +39,7 @@
           </div>
         }
         @if (cycle()!.entries.length > 5) {
-          <a routerLink="/planning" class="cycle-more">+{{ cycle()!.entries.length - 5 }} more</a>
+          <a routerLink="/planning" class="cycle-more">{{ 'dashboard.moreEntries' | translate:{ count: cycle()!.entries.length - 5 } }}</a>
         }
       </div>
     }

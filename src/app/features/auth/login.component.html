@@ -3,8 +3,8 @@
     <mat-card appearance="outlined" class="auth-card form-stack">
       <div class="auth-card__header">
         <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-        <h1 class="auth-card__title">QB Engineer</h1>
-        <p class="auth-card__subtitle">You are already signed in</p>
+        <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
+        <p class="auth-card__subtitle">{{ 'auth.alreadySignedIn' | translate }}</p>
       </div>
 
       <div class="auth-card__session">
@@ -17,11 +17,11 @@
       <div class="auth-card__session-actions">
         <button mat-flat-button color="primary" (click)="goToDashboard()">
           <span class="material-icons-outlined">dashboard</span>
-          Go to Dashboard
+          {{ 'auth.goToDashboard' | translate }}
         </button>
         <button mat-stroked-button (click)="switchAccount()">
           <span class="material-icons-outlined">logout</span>
-          Sign Out &amp; Switch Account
+          {{ 'auth.signOutSwitch' | translate }}
         </button>
       </div>
     </mat-card>
@@ -29,21 +29,21 @@
     <mat-card appearance="outlined" class="auth-card form-stack">
       <div class="auth-card__header">
         <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-        <h1 class="auth-card__title">QB Engineer</h1>
-        <p class="auth-card__subtitle">Manufacturing Operations Platform</p>
+        <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
+        <p class="auth-card__subtitle">{{ 'auth.tagline' | translate }}</p>
       </div>
 
       <form class="auth-card__form form-stack" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <app-input label="Email" type="email" formControlName="email" autocomplete="email" [required]="true" />
-        <app-input label="Password" type="password" formControlName="password" autocomplete="current-password" [required]="true" />
+        <app-input [label]="'auth.email' | translate" type="email" formControlName="email" autocomplete="email" [required]="true" />
+        <app-input [label]="'auth.password' | translate" type="password" formControlName="password" autocomplete="current-password" [required]="true" />
 
         <button mat-flat-button color="primary" type="submit"
           [appValidationPopover]="violations"
           [disabled]="form.invalid || loading()">
           @if (loading()) {
-            Signing in...
+            {{ 'auth.signingIn' | translate }}
           } @else {
-            Sign In
+            {{ 'auth.signIn' | translate }}
           }
         </button>
       </form>
@@ -51,20 +51,20 @@
       <div class="auth-card__setup">
         @if (showSetupCode()) {
           <div class="setup-code-entry">
-            <app-input label="Setup Code" [formControl]="setupCodeControl" placeholder="XXXX-XXXX" autocomplete="off" />
+            <app-input [label]="'auth.setupCode' | translate" [formControl]="setupCodeControl" [placeholder]="'auth.setupCodePlaceholder' | translate" autocomplete="off" />
             <div class="setup-code-entry__actions">
-              <button mat-stroked-button (click)="showSetupCode.set(false)">Cancel</button>
+              <button mat-stroked-button (click)="showSetupCode.set(false)">{{ 'common.cancel' | translate }}</button>
               <button mat-flat-button color="primary"
                 [disabled]="!setupCodeControl.value?.trim()"
                 (click)="goToSetup()">
-                Continue
+                {{ 'auth.continue' | translate }}
               </button>
             </div>
           </div>
         } @else {
           <button mat-button class="auth-card__setup-link" (click)="showSetupCode.set(true)">
             <span class="material-icons-outlined">vpn_key</span>
-            Have a setup code?
+            {{ 'auth.haveSetupCode' | translate }}
           </button>
         }
       </div>
@@ -73,7 +73,7 @@
         <div class="auth-card__sso">
           <div class="auth-card__divider">
             <mat-divider />
-            <span class="auth-card__divider-text">or sign in with</span>
+            <span class="auth-card__divider-text">{{ 'auth.orSignInWith' | translate }}</span>
             <mat-divider />
           </div>
 

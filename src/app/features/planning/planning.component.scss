@@ -53,6 +53,12 @@
     app-input,
     app-select {
       flex: 1;
+      min-width: 0;
+
+      mat-form-field {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
     }
   }
 

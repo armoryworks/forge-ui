@@ -1,13 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { UserPreferencesService } from '../../../shared/services/user-preferences.service';
 
 @Component({
   selector: 'app-eod-prompt-widget',
   standalone: true,
-  imports: [ReactiveFormsModule, TextareaComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, TextareaComponent],
   templateUrl: './eod-prompt-widget.component.html',
   styleUrl: './eod-prompt-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

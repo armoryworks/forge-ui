@@ -1,34 +1,34 @@
-<app-page-header title="Calendar" subtitle="Visualize job deadlines and milestones">
+<app-page-header [title]="'calendar.title' | translate" [subtitle]="'calendar.subtitle' | translate">
   <div class="calendar-nav">
-    <app-select label="Track Type" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
+    <app-select [label]="'calendar.trackType' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
     <div class="view-toggle">
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'month'" (click)="setView('month')">Month</button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'week'" (click)="setView('week')">Week</button>
-      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'day'" (click)="setView('day')">Day</button>
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'month'" (click)="setView('month')">{{ 'calendar.month' | translate }}</button>
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'week'" (click)="setView('week')">{{ 'calendar.week' | translate }}</button>
+      <button class="view-toggle__btn" [class.view-toggle__btn--active]="view() === 'day'" (click)="setView('day')">{{ 'calendar.day' | translate }}</button>
     </div>
-    <button class="icon-btn" (click)="prev()">
+    <button class="icon-btn" (click)="prev()" [attr.aria-label]="'calendar.previousPeriod' | translate" [matTooltip]="'calendar.previousPeriod' | translate" matTooltipPosition="above">
       <span class="material-icons-outlined">chevron_left</span>
     </button>
     <span class="month-label">{{ headerLabel() }}</span>
-    <button class="icon-btn" (click)="next()">
+    <button class="icon-btn" (click)="next()" [attr.aria-label]="'calendar.nextPeriod' | translate" [matTooltip]="'calendar.nextPeriod' | translate" matTooltipPosition="above">
       <span class="material-icons-outlined">chevron_right</span>
     </button>
-    <button class="action-btn action-btn--sm" (click)="today()">Today</button>
+    <button class="action-btn action-btn--sm" (click)="today()">{{ 'calendar.today' | translate }}</button>
   </div>
 </app-page-header>
 
 @if (loading()) {
   <div class="page-loading">
     <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
-    <span>Loading...</span>
+    <span>{{ 'common.loading' | translate }}</span>
   </div>
 } @else {
   <!-- Month View -->
   @if (view() === 'month') {
     <div class="calendar-grid">
       <div class="calendar-header">
-        @for (day of weekdays; track day) {
-          <div class="weekday-label">{{ day }}</div>
+        @for (day of weekdayKeys; track day) {
+          <div class="weekday-label">{{ 'calendar.' + day | translate }}</div>
         }
       </div>
       <div class="calendar-body">
@@ -37,7 +37,7 @@
             [class.calendar-cell--other]="!day.isCurrentMonth"
             [class.calendar-cell--today]="day.isToday"
             role="button" tabindex="0"
-            [attr.aria-label]="'Select day ' + day.date.getDate()"
+            [attr.aria-label]="('calendar.selectDay' | translate) + ' ' + day.date.getDate()"
             (click)="onDayClick(day)" (keydown.enter)="onDayClick(day)">
             <div class="cell-date">{{ day.date.getDate() }}</div>
             <div class="cell-jobs">
@@ -62,7 +62,7 @@
                 </div>
               }
               @if (overflowCount(day) > 0) {
-                <div class="job-overflow">+{{ overflowCount(day) }} more</div>
+                <div class="job-overflow">{{ 'calendar.more' | translate: { count: overflowCount(day) } }}</div>
               }
             </div>
           </div>
@@ -78,9 +78,9 @@
         @for (day of weekDays(); track day.date.getTime()) {
           <div class="week-header__cell" [class.week-header__cell--today]="day.isToday"
                role="button" tabindex="0"
-               [attr.aria-label]="'Select day ' + day.date.getDate()"
+               [attr.aria-label]="('calendar.selectDay' | translate) + ' ' + day.date.getDate()"
                (click)="onDayClick(day)" (keydown.enter)="onDayClick(day)">
-            <span class="week-header__weekday">{{ weekdays[day.date.getDay()] }}</span>
+            <span class="week-header__weekday">{{ weekdayLabels()[day.date.getDay()] }}</span>
             <span class="week-header__date" [class.week-header__date--today]="day.isToday">{{ day.date.getDate() }}</span>
           </div>
         }
@@ -113,7 +113,7 @@
               </div>
             }
             @if (day.jobs.length === 0) {
-              <span class="week-column__empty">No jobs</span>
+              <span class="week-column__empty">{{ 'calendar.noJobs' | translate }}</span>
             }
           </div>
         }
@@ -125,7 +125,7 @@
   @if (view() === 'day') {
     <div class="day-view">
       <div class="day-view__header">
-        <span class="day-view__count">{{ dayJobs().length }} job{{ dayJobs().length !== 1 ? 's' : '' }} due</span>
+        <span class="day-view__count">{{ (dayJobs().length === 1 ? 'calendar.jobDue' : 'calendar.jobsDue') | translate: { count: dayJobs().length } }}</span>
       </div>
       <div class="day-view__list">
         @for (job of dayJobs(); track job.id) {
@@ -169,7 +169,7 @@
         @if (dayJobs().length === 0) {
           <div class="day-view__empty">
             <span class="material-icons-outlined">event_available</span>
-            <span>No jobs due on this day</span>
+            <span>{{ 'calendar.noJobsDueOnDay' | translate }}</span>
           </div>
         }
       </div>

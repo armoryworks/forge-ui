@@ -1,7 +1,7 @@
-<app-page-header title="Purchase Orders" subtitle="Order materials and track vendor deliveries">
+<app-page-header [title]="'purchaseOrders.title' | translate" [subtitle]="'purchaseOrders.subtitle' | translate">
   <button class="action-btn action-btn--primary" (click)="openCreatePo()">
     <span class="material-icons-outlined">add</span>
-    New PO
+    {{ 'purchaseOrders.newPo' | translate }}
   </button>
 </app-page-header>
 
@@ -9,15 +9,15 @@
   <!-- Left: PO List -->
   <div class="po-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search POs..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'purchaseOrders.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Vendor" [formControl]="vendorFilterControl" [options]="vendorOptions()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+      <app-select [label]="'purchaseOrders.vendor' | translate" [formControl]="vendorFilterControl" [options]="vendorOptions()" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
-        [rowClass]="poRowClass" emptyIcon="description" emptyMessage="No purchase orders found"
+        [rowClass]="poRowClass" emptyIcon="description" [emptyMessage]="'purchaseOrders.noPosFound' | translate"
         (rowClick)="selectPo($any($event))">
         <ng-template appColumnCell="poNumber" let-row>
           <span class="po-number">{{ row.poNumber }}</span>
@@ -53,7 +53,7 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -63,38 +63,38 @@
         <!-- Status & Dates -->
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">
               <span [class]="getStatusClass(po.status)">{{ getStatusLabel(po.status) }}</span>
             </span>
           </div>
           @if (po.jobNumber) {
             <div class="info-item">
-              <span class="info-label">Job</span>
+              <span class="info-label">{{ 'purchaseOrders.job' | translate }}</span>
               <span class="info-value">{{ po.jobNumber }}</span>
             </div>
           }
           @if (po.expectedDeliveryDate) {
             <div class="info-item">
-              <span class="info-label">Expected Delivery</span>
+              <span class="info-label">{{ 'purchaseOrders.expectedDelivery' | translate }}</span>
               <span class="info-value">{{ po.expectedDeliveryDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (po.submittedDate) {
             <div class="info-item">
-              <span class="info-label">Submitted</span>
+              <span class="info-label">{{ 'purchaseOrders.submitted' | translate }}</span>
               <span class="info-value">{{ po.submittedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (po.acknowledgedDate) {
             <div class="info-item">
-              <span class="info-label">Acknowledged</span>
+              <span class="info-label">{{ 'purchaseOrders.acknowledged' | translate }}</span>
               <span class="info-value">{{ po.acknowledgedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (po.receivedDate) {
             <div class="info-item">
-              <span class="info-label">Received</span>
+              <span class="info-label">{{ 'purchaseOrders.received' | translate }}</span>
               <span class="info-value">{{ po.receivedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
@@ -109,24 +109,24 @@
 
         @if (po.notes) {
           <div class="info-section">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'common.notes' | translate }}</span>
             <div class="info-notes">{{ po.notes }}</div>
           </div>
         }
 
         <!-- Line Items -->
         <div class="lines-section">
-          <span class="info-label">Line Items ({{ po.lines.length }})</span>
+          <span class="info-label">{{ 'purchaseOrders.lineItems' | translate }} ({{ po.lines.length }})</span>
           @if (po.lines.length > 0) {
             <table class="lines-table">
               <thead>
                 <tr>
-                  <th>Part #</th>
-                  <th>Description</th>
-                  <th class="lines-table__right">Ordered</th>
-                  <th class="lines-table__right">Received</th>
-                  <th class="lines-table__right">Unit Price</th>
-                  <th class="lines-table__right">Total</th>
+                  <th>{{ 'purchaseOrders.partNumber' | translate }}</th>
+                  <th>{{ 'common.description' | translate }}</th>
+                  <th class="lines-table__right">{{ 'purchaseOrders.ordered' | translate }}</th>
+                  <th class="lines-table__right">{{ 'purchaseOrders.received' | translate }}</th>
+                  <th class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
+                  <th class="lines-table__right">{{ 'common.total' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -152,11 +152,11 @@
 
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Created</span>
+            <span class="info-label">{{ 'common.created' | translate }}</span>
             <span class="info-value">{{ po.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Updated</span>
+            <span class="info-label">{{ 'common.updated' | translate }}</span>
             <span class="info-value">{{ po.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
@@ -166,37 +166,37 @@
           @if (canSubmit(po.status)) {
             <button class="action-btn action-btn--primary" (click)="submitPo()">
               <span class="material-icons-outlined">send</span>
-              Submit
+              {{ 'purchaseOrders.submit' | translate }}
             </button>
           }
           @if (canAcknowledge(po.status)) {
             <button class="action-btn action-btn--primary" (click)="acknowledgePo()">
               <span class="material-icons-outlined">thumb_up</span>
-              Acknowledge
+              {{ 'purchaseOrders.acknowledge' | translate }}
             </button>
           }
           @if (canReceive(po.status)) {
             <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
               <span class="material-icons-outlined">inventory</span>
-              Receive Items
+              {{ 'purchaseOrders.receiveItems' | translate }}
             </button>
           }
           @if (canClose(po.status)) {
             <button class="action-btn" (click)="closePo()">
               <span class="material-icons-outlined">check_circle</span>
-              Close
+              {{ 'common.close' | translate }}
             </button>
           }
           @if (canCancel(po.status)) {
             <button class="action-btn" (click)="cancelPo()">
               <span class="material-icons-outlined">block</span>
-              Cancel
+              {{ 'common.cancel' | translate }}
             </button>
           }
           @if (canDelete(po.status)) {
             <button class="action-btn action-btn--danger" (click)="deletePo()">
               <span class="material-icons-outlined">delete</span>
-              Delete
+              {{ 'common.delete' | translate }}
             </button>
           }
         </div>

@@ -8,13 +8,14 @@ import { ReceiveLineRequest } from '../../models/receive-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-receive-dialog',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    DialogComponent, EmptyStateComponent,
+    DialogComponent, EmptyStateComponent, TranslatePipe,
   ],
   templateUrl: './receive-dialog.component.html',
   styleUrl: './receive-dialog.component.scss',
@@ -23,6 +24,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 export class ReceiveDialogComponent implements OnInit {
   private readonly poService = inject(PurchaseOrderService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly purchaseOrder = input.required<PurchaseOrderDetail>();
   readonly closed = output<void>();
@@ -76,7 +78,7 @@ export class ReceiveDialogComponent implements OnInit {
     this.poService.receiveItems(this.purchaseOrder().id, { lines: receiveLines }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Items received.');
+        this.snackbar.success(this.translate.instant('purchaseOrders.itemsReceived'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

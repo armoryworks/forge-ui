@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { BarcodeInfo, BarcodeService } from '../../services/barcode.service';
 import { LabelPrintService } from '../../services/label-print.service';
 import { SnackbarService } from '../../services/snackbar.service';
@@ -8,7 +11,7 @@ import { QrCodeComponent } from '../qr-code/qr-code.component';
 @Component({
   selector: 'app-barcode-info',
   standalone: true,
-  imports: [QrCodeComponent],
+  imports: [MatTooltipModule, QrCodeComponent, TranslatePipe],
   templateUrl: './barcode-info.component.html',
   styleUrl: './barcode-info.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,6 +20,7 @@ export class BarcodeInfoComponent {
   private readonly barcodeService = inject(BarcodeService);
   private readonly labelPrint = inject(LabelPrintService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly entityType = input.required<string>();
   readonly entityId = input.required<number>();
@@ -56,7 +60,7 @@ export class BarcodeInfoComponent {
     const value = this.barcode()?.value;
     if (value) {
       navigator.clipboard.writeText(value);
-      this.snackbar.success('Barcode copied');
+      this.snackbar.success(this.translate.instant('shared.barcodeCopied'));
     }
   }
 
@@ -83,11 +87,11 @@ export class BarcodeInfoComponent {
       next: (newBarcode) => {
         this.barcode.set(newBarcode);
         this.loading.set(false);
-        this.snackbar.success('Barcode regenerated');
+        this.snackbar.success(this.translate.instant('shared.barcodeRegenerated'));
       },
       error: () => {
         this.loading.set(false);
-        this.snackbar.error('Failed to regenerate barcode');
+        this.snackbar.error(this.translate.instant('shared.barcodeRegenerateFailed'));
       },
     });
   }

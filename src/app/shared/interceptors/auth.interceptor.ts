@@ -16,8 +16,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401) {
-        authService.clearAuth();
-        router.navigate(['/login']);
+        // Only clear + navigate if still authenticated (prevents race from concurrent 401s)
+        if (authService.isAuthenticated()) {
+          authService.clearAuth();
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     }),

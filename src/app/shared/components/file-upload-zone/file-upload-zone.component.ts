@@ -10,6 +10,8 @@ import {
 } from '@angular/core';
 import { HttpClient, HttpEventType } from '@angular/common/http';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 export interface UploadedFile {
   id: string;
   fileName: string;
@@ -35,6 +37,7 @@ interface ChunkedUploadResponse {
 @Component({
   selector: 'app-file-upload-zone',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './file-upload-zone.component.html',
   styleUrl: './file-upload-zone.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

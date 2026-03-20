@@ -9,6 +9,8 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface LineEntry {
   salesOrderLineId: number;
@@ -22,7 +24,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './shipment-dialog.component.html',
   styleUrl: './shipment-dialog.component.scss',
@@ -31,6 +33,7 @@ interface LineEntry {
 export class ShipmentDialogComponent {
   private readonly shipmentService = inject(ShipmentService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -103,7 +106,7 @@ export class ShipmentDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Shipment created.');
+        this.snackbar.success(this.translate.instant('shipments.shipmentCreated'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

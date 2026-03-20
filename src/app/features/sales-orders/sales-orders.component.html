@@ -1,7 +1,7 @@
-<app-page-header title="Sales Orders" subtitle="Track confirmed customer orders through fulfillment">
+<app-page-header [title]="'salesOrders.title' | translate" [subtitle]="'salesOrders.subtitle' | translate">
   <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
-    New Order
+    {{ 'salesOrders.newOrder' | translate }}
   </button>
 </app-page-header>
 
@@ -9,15 +9,15 @@
   <!-- Left: SO List -->
   <div class="so-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search orders..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'salesOrders.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Customer" [formControl]="customerFilterControl" [options]="customerOptions()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+      <app-select [label]="'salesOrders.customer' | translate" [formControl]="customerFilterControl" [options]="customerOptions()" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="sales-orders" [columns]="soColumns" [data]="salesOrders()"
-        [rowClass]="soRowClass" emptyIcon="receipt_long" emptyMessage="No sales orders found"
+        [rowClass]="soRowClass" emptyIcon="receipt_long" [emptyMessage]="'salesOrders.noOrdersFound' | translate"
         (rowClick)="selectSo($any($event))">
         <ng-template appColumnCell="orderNumber" let-row>
           <span class="so-number">{{ row.orderNumber }}</span>
@@ -56,7 +56,7 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -66,38 +66,38 @@
         <!-- Status & Info -->
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">
               <span [class]="getStatusClass(so.status)">{{ getStatusLabel(so.status) }}</span>
             </span>
           </div>
           @if (so.customerPO) {
             <div class="info-item">
-              <span class="info-label">Customer PO</span>
+              <span class="info-label">{{ 'salesOrders.customerPo' | translate }}</span>
               <span class="info-value">{{ so.customerPO }}</span>
             </div>
           }
           @if (so.quoteNumber) {
             <div class="info-item">
-              <span class="info-label">Quote</span>
+              <span class="info-label">{{ 'salesOrders.quote' | translate }}</span>
               <span class="info-value">{{ so.quoteNumber }}</span>
             </div>
           }
           @if (so.creditTerms) {
             <div class="info-item">
-              <span class="info-label">Credit Terms</span>
+              <span class="info-label">{{ 'salesOrders.creditTerms' | translate }}</span>
               <span class="info-value">{{ so.creditTerms }}</span>
             </div>
           }
           @if (so.requestedDeliveryDate) {
             <div class="info-item">
-              <span class="info-label">Requested Delivery</span>
+              <span class="info-label">{{ 'salesOrders.requestedDelivery' | translate }}</span>
               <span class="info-value">{{ so.requestedDeliveryDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (so.confirmedDate) {
             <div class="info-item">
-              <span class="info-label">Confirmed</span>
+              <span class="info-label">{{ 'salesOrders.confirmed' | translate }}</span>
               <span class="info-value">{{ so.confirmedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
@@ -113,40 +113,40 @@
         <!-- Totals -->
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Subtotal</span>
+            <span class="info-label">{{ 'salesOrders.subtotal' | translate }}</span>
             <span class="info-value">{{ so.subtotal | currency }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Tax ({{ so.taxRate }}%)</span>
+            <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ so.taxRate }}%)</span>
             <span class="info-value">{{ so.taxAmount | currency }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Total</span>
+            <span class="info-label">{{ 'common.total' | translate }}</span>
             <span class="info-value info-value--bold">{{ so.total | currency }}</span>
           </div>
         </div>
 
         @if (so.notes) {
           <div class="info-section">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'common.notes' | translate }}</span>
             <div class="info-notes">{{ so.notes }}</div>
           </div>
         }
 
         <!-- Line Items -->
         <div class="lines-section">
-          <span class="info-label">Line Items ({{ so.lines.length }})</span>
+          <span class="info-label">{{ 'salesOrders.lineItems' | translate }} ({{ so.lines.length }})</span>
           @if (so.lines.length > 0) {
             <table class="lines-table">
               <thead>
                 <tr>
-                  <th>Part #</th>
-                  <th>Description</th>
-                  <th class="lines-table__right">Qty</th>
-                  <th class="lines-table__right">Shipped</th>
-                  <th class="lines-table__right">Remaining</th>
-                  <th class="lines-table__right">Unit Price</th>
-                  <th class="lines-table__right">Total</th>
+                  <th>{{ 'salesOrders.partNumber' | translate }}</th>
+                  <th>{{ 'common.description' | translate }}</th>
+                  <th class="lines-table__right">{{ 'salesOrders.qty' | translate }}</th>
+                  <th class="lines-table__right">{{ 'salesOrders.shipped' | translate }}</th>
+                  <th class="lines-table__right">{{ 'salesOrders.remaining' | translate }}</th>
+                  <th class="lines-table__right">{{ 'salesOrders.unitPrice' | translate }}</th>
+                  <th class="lines-table__right">{{ 'common.total' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -173,11 +173,11 @@
 
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Created</span>
+            <span class="info-label">{{ 'common.created' | translate }}</span>
             <span class="info-value">{{ so.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Updated</span>
+            <span class="info-label">{{ 'common.updated' | translate }}</span>
             <span class="info-value">{{ so.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
@@ -187,19 +187,19 @@
           @if (canConfirm(so.status)) {
             <button class="action-btn action-btn--primary" (click)="confirmSo()">
               <span class="material-icons-outlined">check_circle</span>
-              Confirm
+              {{ 'salesOrders.confirm' | translate }}
             </button>
           }
           @if (canCancel(so.status)) {
             <button class="action-btn" (click)="cancelSo()">
               <span class="material-icons-outlined">block</span>
-              Cancel
+              {{ 'common.cancel' | translate }}
             </button>
           }
           @if (canDelete(so.status)) {
             <button class="action-btn action-btn--danger" (click)="deleteSo()">
               <span class="material-icons-outlined">delete</span>
-              Delete
+              {{ 'common.delete' | translate }}
             </button>
           }
         </div>

@@ -1,7 +1,7 @@
-<app-dialog [title]="isEdit() ? 'Edit Location' : 'New Location'" width="520px" (closed)="closed.emit()">
+<app-dialog [title]="isEdit() ? ('companyLocationDialog.editLocation' | translate) : ('companyLocationDialog.newLocation' | translate)" width="520px" (closed)="closed.emit()">
   <div [formGroup]="form">
-    <app-input label="Location Name" formControlName="name" [required]="true" [maxlength]="100" />
-    <app-input label="Phone" formControlName="phone" mask="phone" />
+    <app-input [label]="'companyLocationDialog.locationName' | translate" formControlName="name" [required]="true" [maxlength]="100" />
+    <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" />
 
     <app-address-form
       formControlName="address"
@@ -10,18 +10,18 @@
       [compact]="true" />
 
     @if (isEdit()) {
-      <app-toggle label="Active" formControlName="isActive" />
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
     }
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="closed.emit()">Cancel</button>
+    <button class="action-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>
-      {{ isEdit() ? 'Save Changes' : 'Create Location' }}
+      {{ isEdit() ? ('common.saveChanges' | translate) : ('companyLocationDialog.createLocation' | translate) }}
     </button>
   </div>
 </app-dialog>

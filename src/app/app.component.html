@@ -1,4 +1,4 @@
-<a class="skip-link" href="#main-content">Skip to main content</a>
+<a class="skip-link" href="#main-content">{{ 'shared.skipToContent' | translate }}</a>
 @if (showShell()) {
   <app-header />
   <app-connection-banner />
@@ -6,7 +6,7 @@
   <div class="app-body" [attr.inert]="isGlobalLoading() || null">
     @if (layout.sidebarVisible()) {
       @if (layout.isMobile()) {
-        <div class="mobile-sidebar-backdrop" role="button" tabindex="0" aria-label="Close navigation menu" (click)="layout.closeMobileMenu()" (keydown.enter)="layout.closeMobileMenu()"></div>
+        <div class="mobile-sidebar-backdrop" role="button" tabindex="0" [attr.aria-label]="'shared.closeNavMenu' | translate" (click)="layout.closeMobileMenu()" (keydown.enter)="layout.closeMobileMenu()"></div>
       }
       <app-sidebar />
     }

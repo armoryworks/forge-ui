@@ -1,8 +1,8 @@
 <div class="panel-header">
-  <span class="panel-header__count">{{ assistants().length }} assistants</span>
+  <span class="panel-header__count">{{ assistants().length }} {{ 'aiAssistants.assistants' | translate }}</span>
   <button class="action-btn action-btn--primary" (click)="openCreate()">
     <span class="material-icons-outlined">add</span>
-    New Assistant
+    {{ 'aiAssistants.newAssistant' | translate }}
   </button>
 </div>
 
@@ -12,7 +12,7 @@
     [columns]="columns"
     [data]="assistants()"
     emptyIcon="smart_toy"
-    emptyMessage="No AI assistants configured"
+    [emptyMessage]="'aiAssistants.noAssistants' | translate"
     (rowClick)="openEdit($any($event))">
 
     <ng-template appColumnCell="icon" let-row>
@@ -25,7 +25,7 @@
       <div class="assistant-name-cell">
         <span class="assistant-name">{{ row.name }}</span>
         @if (row.isBuiltIn) {
-          <span class="chip chip--muted">Built-in</span>
+          <span class="chip chip--muted">{{ 'aiAssistants.builtIn' | translate }}</span>
         }
       </div>
     </ng-template>
@@ -36,24 +36,24 @@
 
     <ng-template appColumnCell="entityTypes" let-row>
       @if (row.allowedEntityTypes.length > 0) {
-        <span class="text-muted">{{ row.allowedEntityTypes.length }} types</span>
+        <span class="text-muted">{{ row.allowedEntityTypes.length }} {{ 'aiAssistants.types' | translate }}</span>
       } @else {
-        <span class="text-muted">All</span>
+        <span class="text-muted">{{ 'common.all' | translate }}</span>
       }
     </ng-template>
 
     <ng-template appColumnCell="status" let-row>
       <span class="status-dot" [class.status-dot--active]="row.isActive" [class.status-dot--inactive]="!row.isActive"></span>
-      {{ row.isActive ? 'Active' : 'Inactive' }}
+      {{ row.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
     </ng-template>
 
     <ng-template appColumnCell="actions" let-row>
       <div class="action-cell">
-        <button class="icon-btn" aria-label="Edit assistant" title="Edit" (click)="openEdit(row); $event.stopPropagation()">
+        <button class="icon-btn" [attr.aria-label]="'common.edit' | translate" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEdit(row); $event.stopPropagation()">
           <span class="material-icons-outlined">edit</span>
         </button>
         @if (!row.isBuiltIn) {
-          <button class="icon-btn icon-btn--danger" aria-label="Delete assistant" title="Delete" (click)="deleteAssistant(row); $event.stopPropagation()">
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteAssistant(row); $event.stopPropagation()">
             <span class="material-icons-outlined">delete</span>
           </button>
         }

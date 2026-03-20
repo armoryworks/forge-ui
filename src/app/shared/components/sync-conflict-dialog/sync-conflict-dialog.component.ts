@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { SyncConflict, SyncConflictResolution } from '../../models/sync-conflict.model';
 
 export interface SyncConflictDialogData {
@@ -10,6 +12,7 @@ export interface SyncConflictDialogData {
 @Component({
   selector: 'app-sync-conflict-dialog',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './sync-conflict-dialog.component.html',
   styleUrl: './sync-conflict-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

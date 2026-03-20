@@ -3,8 +3,8 @@
   <div class="setup">
     <div class="setup__card">
       <span class="material-icons-outlined setup__icon">settings</span>
-      <h1 class="setup__title">Terminal Setup</h1>
-      <p class="setup__subtitle">An administrator must configure this kiosk before use</p>
+      <h1 class="setup__title">{{ 'shopFloor.terminalSetup' | translate }}</h1>
+      <p class="setup__subtitle">{{ 'shopFloor.adminMustConfigure' | translate }}</p>
 
       @if (loginError()) {
         <div class="setup__error">
@@ -14,12 +14,12 @@
       }
 
       <div class="setup__field">
-        <app-input label="Admin Email" type="email" [formControl]="emailControl"
+        <app-input [label]="'shopFloor.adminEmail' | translate" type="email" [formControl]="emailControl"
           placeholder="admin@company.com" />
       </div>
       <div class="setup__field">
-        <app-input label="Password" type="password" [formControl]="passwordControl"
-          placeholder="Enter password..." />
+        <app-input [label]="'auth.password' | translate" type="password" [formControl]="passwordControl"
+          [placeholder]="'shopFloor.enterPasswordPlaceholder' | translate" />
       </div>
 
       <button class="action-btn action-btn--primary setup__submit"
@@ -27,10 +27,10 @@
         (click)="onLoginSubmit()">
         @if (loggingIn()) {
           <span class="material-icons-outlined setup__spinner">sync</span>
-          Signing in...
+          {{ 'shopFloor.signingIn' | translate }}
         } @else {
           <span class="material-icons-outlined">login</span>
-          Sign In as Admin
+          {{ 'shopFloor.signInAsAdmin' | translate }}
         }
       </button>
     </div>
@@ -42,8 +42,8 @@
   <div class="setup">
     <div class="setup__card setup__card--wide">
       <span class="material-icons-outlined setup__icon">dns</span>
-      <h1 class="setup__title">Configure Terminal</h1>
-      <p class="setup__subtitle">Name this terminal and assign it to a team</p>
+      <h1 class="setup__title">{{ 'shopFloor.configureTerminal' | translate }}</h1>
+      <p class="setup__subtitle">{{ 'shopFloor.nameAndAssignTeam' | translate }}</p>
 
       @if (configError()) {
         <div class="setup__error">
@@ -53,27 +53,27 @@
       }
 
       <div class="setup__field">
-        <app-input label="Terminal Name" [formControl]="terminalNameControl"
-          placeholder="e.g. Shop Floor East, Assembly Bay 2..." />
+        <app-input [label]="'shopFloor.terminalName' | translate" [formControl]="terminalNameControl"
+          [placeholder]="'shopFloor.terminalNamePlaceholder' | translate" />
       </div>
 
       @if (!showNewTeam()) {
         <div class="setup__field">
-          <app-select label="Team" [formControl]="teamControl"
-            [options]="teamOptions()" placeholder="Select a team..." />
+          <app-select [label]="'shopFloor.team' | translate" [formControl]="teamControl"
+            [options]="teamOptions()" [placeholder]="'shopFloor.selectTeamPlaceholder' | translate" />
         </div>
         <button class="action-btn setup__toggle" (click)="toggleNewTeam()">
           <span class="material-icons-outlined">add</span>
-          Create New Team
+          {{ 'shopFloor.createNewTeam' | translate }}
         </button>
       } @else {
         <div class="setup__field">
-          <app-input label="New Team Name" [formControl]="newTeamNameControl"
-            placeholder="e.g. Assembly, CNC, Welding..." />
+          <app-input [label]="'shopFloor.newTeamName' | translate" [formControl]="newTeamNameControl"
+            [placeholder]="'shopFloor.newTeamNamePlaceholder' | translate" />
         </div>
         <button class="action-btn setup__toggle" (click)="toggleNewTeam()">
           <span class="material-icons-outlined">list</span>
-          Select Existing Team
+          {{ 'shopFloor.selectExistingTeam' | translate }}
         </button>
       }
 
@@ -82,10 +82,10 @@
         (click)="onSave()">
         @if (saving()) {
           <span class="material-icons-outlined setup__spinner">sync</span>
-          Saving...
+          {{ 'shopFloor.saving' | translate }}
         } @else {
           <span class="material-icons-outlined">check</span>
-          Activate Terminal
+          {{ 'shopFloor.activateTerminal' | translate }}
         }
       </button>
     </div>

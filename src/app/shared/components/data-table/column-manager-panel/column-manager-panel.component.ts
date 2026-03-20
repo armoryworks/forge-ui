@@ -8,6 +8,8 @@ import {
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { ColumnDef } from '../../../models/column-def.model';
 
 export interface ColumnManagerState {
@@ -18,7 +20,7 @@ export interface ColumnManagerState {
 @Component({
   selector: 'app-column-manager-panel',
   standalone: true,
-  imports: [DragDropModule, MatCheckboxModule],
+  imports: [DragDropModule, MatCheckboxModule, TranslatePipe],
   templateUrl: './column-manager-panel.component.html',
   styleUrl: './column-manager-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

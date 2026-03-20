@@ -1,4 +1,4 @@
-<app-page-header [title]="isAdmin() ? 'Admin Settings' : 'Employee Management'" [subtitle]="isAdmin() ? 'Users, track types, reference data, and system configuration' : 'Compliance, payroll, and employee documents'" helpTourId="admin" />
+<app-page-header [title]="pageTitle()" [subtitle]="pageSubtitle()" helpTourId="admin" />
 
 <div class="admin-content">
   <!-- Tabs -->
@@ -6,44 +6,44 @@
     @if (isAdmin()) {
       <button class="tab" [class.tab--active]="activeTab() === 'users'" (click)="switchTab('users')">
         <span class="material-icons-outlined">people</span>
-        Users
+        {{ 'admin.tabs.users' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'track-types'" (click)="switchTab('track-types')">
         <span class="material-icons-outlined">route</span>
-        Track Types
+        {{ 'admin.tabs.trackTypes' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'reference-data'" (click)="switchTab('reference-data')">
         <span class="material-icons-outlined">dataset</span>
-        Reference Data
+        {{ 'admin.tabs.referenceData' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'terminology'" (click)="switchTab('terminology')">
         <span class="material-icons-outlined">translate</span>
-        Terminology
+        {{ 'admin.tabs.terminology' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
         <span class="material-icons-outlined">settings</span>
-        Settings
+        {{ 'admin.tabs.settings' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'integrations'" (click)="switchTab('integrations')">
         <span class="material-icons-outlined">hub</span>
-        Integrations
+        {{ 'admin.tabs.integrations' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
         <span class="material-icons-outlined">school</span>
-        Training
+        {{ 'admin.tabs.training' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'ai-assistants'" (click)="switchTab('ai-assistants')">
         <span class="material-icons-outlined">smart_toy</span>
-        AI Assistants
+        {{ 'admin.tabs.aiAssistants' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'teams'" (click)="switchTab('teams')">
         <span class="material-icons-outlined">groups</span>
-        Teams &amp; Kiosks
+        {{ 'admin.tabs.teams' | translate }}
       </button>
     }
     <button class="tab" [class.tab--active]="activeTab() === 'compliance'" (click)="switchTab('compliance')">
       <span class="material-icons-outlined">fact_check</span>
-      Compliance
+      {{ 'admin.tabs.compliance' | translate }}
     </button>
   </div>
 
@@ -52,14 +52,14 @@
     @if (activeTab() === 'users') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-header__count">{{ users().length }} users</span>
+          <span class="panel-header__count">{{ users().length }} {{ 'admin.users' | translate | lowercase }}</span>
           <button class="action-btn action-btn--primary" (click)="openCreateUser()">
             <span class="material-icons-outlined">add</span>
-            Add User
+            {{ 'admin.addUser' | translate }}
           </button>
         </div>
 
-        <app-data-table tableId="admin-users" [columns]="userColumns" [data]="users()" emptyIcon="people" emptyMessage="No users found">
+        <app-data-table tableId="admin-users" [columns]="userColumns" [data]="users()" emptyIcon="people" [emptyMessage]="'admin.noUsersFound' | translate">
           <ng-template appColumnCell="avatar" let-user>
             <app-avatar [initials]="user.initials ?? '??'" [color]="user.avatarColor ?? '#94a3b8'" />
           </ng-template>
@@ -89,33 +89,33 @@
           </ng-template>
           <ng-template appColumnCell="status" let-user>
             @if (!user.hasPassword) {
-              <span class="chip chip--warning">Pending Setup</span>
+              <span class="chip chip--warning">{{ 'admin.pendingSetup' | translate }}</span>
             } @else {
               <span class="status-dot" [class.status-dot--active]="user.isActive" [class.status-dot--inactive]="!user.isActive"></span>
-              {{ user.isActive ? 'Active' : 'Inactive' }}
+              {{ user.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
             }
           </ng-template>
           <ng-template appColumnCell="actions" let-user>
             <div class="action-cell">
               @if (user.hasRfidIdentifier) {
-                <span class="scan-badge scan-badge--rfid" title="RFID/NFC assigned">
+                <span class="scan-badge scan-badge--rfid" [title]="'admin.rfidAssigned' | translate">
                   <span class="material-icons-outlined">contactless</span>
                 </span>
               }
               @if (user.hasBarcodeIdentifier) {
-                <span class="scan-badge scan-badge--barcode" title="Barcode assigned">
+                <span class="scan-badge scan-badge--barcode" [title]="'admin.barcodeAssigned' | translate">
                   <span class="material-icons-outlined">qr_code_scanner</span>
                 </span>
               }
               @if (!user.hasPassword) {
-                <button class="icon-btn" title="Get setup code" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
+                <button class="icon-btn" [matTooltip]="'admin.getSetupCode' | translate" matTooltipPosition="above" (click)="regenerateSetupToken(user); openEditUser(user); $event.stopPropagation()">
                   <span class="material-icons-outlined">vpn_key</span>
                 </button>
               }
-              <button class="icon-btn" title="Edit" (click)="openEditUser(user); $event.stopPropagation()">
+              <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditUser(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">edit</span>
               </button>
-              <button class="icon-btn" [title]="user.isActive ? 'Deactivate' : 'Activate'" (click)="toggleUserActive(user); $event.stopPropagation()">
+              <button class="icon-btn" [matTooltip]="user.isActive ? ('admin.deactivate' | translate) : ('admin.activate' | translate)" matTooltipPosition="above" (click)="toggleUserActive(user); $event.stopPropagation()">
                 <span class="material-icons-outlined">{{ user.isActive ? 'person_off' : 'person' }}</span>
               </button>
             </div>
@@ -128,10 +128,10 @@
     @if (activeTab() === 'track-types') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-header__count">{{ trackTypes().length }} track types</span>
+          <span class="panel-header__count">{{ trackTypes().length }} {{ 'admin.trackTypes' | translate | lowercase }}</span>
           <button class="action-btn action-btn--primary" (click)="openCreateTrackType()">
             <span class="material-icons-outlined">add</span>
-            New Track Type
+            {{ 'admin.newTrackType' | translate }}
           </button>
         </div>
 
@@ -145,15 +145,15 @@
                 <span class="accordion-title">{{ track.name }}</span>
                 <span class="accordion-code">{{ track.code }}</span>
                 @if (track.isDefault) {
-                  <span class="default-badge">Default</span>
+                  <span class="default-badge">{{ 'common.default' | translate }}</span>
                 }
-                <span class="stage-count">{{ track.stages.length }} stages</span>
+                <span class="stage-count">{{ track.stages.length }} {{ 'admin.stages' | translate }}</span>
                 <span class="accordion-actions">
-                  <button class="icon-btn" title="Edit" (click)="openEditTrackType(track); $event.stopPropagation()">
+                  <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditTrackType(track); $event.stopPropagation()">
                     <span class="material-icons-outlined">edit</span>
                   </button>
                   @if (!track.isDefault) {
-                    <button class="icon-btn icon-btn--danger" title="Delete" (click)="deleteTrackType(track); $event.stopPropagation()">
+                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" (click)="deleteTrackType(track); $event.stopPropagation()">
                       <span class="material-icons-outlined">delete</span>
                     </button>
                   }
@@ -168,13 +168,13 @@
                   <table class="admin-table admin-table--nested">
                     <thead>
                       <tr>
-                        <th>Order</th>
-                        <th>Stage</th>
-                        <th>Code</th>
-                        <th>Color</th>
-                        <th>WIP Limit</th>
-                        <th>Document Type</th>
-                        <th>Irreversible</th>
+                        <th>{{ 'admin.order' | translate }}</th>
+                        <th>{{ 'admin.stage' | translate }}</th>
+                        <th>{{ 'admin.code' | translate }}</th>
+                        <th>{{ 'admin.color' | translate }}</th>
+                        <th>{{ 'admin.wipLimit' | translate }}</th>
+                        <th>{{ 'admin.documentType' | translate }}</th>
+                        <th>{{ 'admin.irreversible' | translate }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -216,22 +216,22 @@
     @if (activeTab() === 'terminology') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-header__count">{{ terminologyEntries().length }} entries</span>
+          <span class="panel-header__count">{{ terminologyEntries().length }} {{ 'admin.entries' | translate }}</span>
           <button class="action-btn action-btn--primary" [disabled]="saving() || !hasTerminologyChanges()" (click)="saveTerminology()">
             <span class="material-icons-outlined">save</span>
-            Save Changes
+            {{ 'common.saveChanges' | translate }}
           </button>
         </div>
 
         @if (terminologyEntries().length === 0) {
-          <app-empty-state icon="translate" message="No terminology entries configured yet" />
+          <app-empty-state icon="translate" [message]="'admin.noTerminology' | translate" />
         } @else {
           <table class="admin-table">
             <thead>
               <tr>
-                <th>Key</th>
-                <th>Default</th>
-                <th>Custom Label</th>
+                <th>{{ 'admin.key' | translate }}</th>
+                <th>{{ 'admin.defaultLabel' | translate }}</th>
+                <th>{{ 'admin.customLabel' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -261,25 +261,25 @@
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">business</span>
-              Company Profile
+              {{ 'admin.companyProfile' | translate }}
             </h3>
             <button class="action-btn action-btn--primary action-btn--sm"
               [disabled]="profileSaving() || profileForm.invalid"
               (click)="saveCompanyProfile()">
               <span class="material-icons-outlined">save</span>
-              Save Profile
+              {{ 'admin.saveProfile' | translate }}
             </button>
           </div>
 
           <div class="profile-form" [formGroup]="profileForm">
-            <app-input label="Company Name" formControlName="name" />
+            <app-input [label]="'admin.companyName' | translate" formControlName="name" />
             <div class="dialog-row">
-              <app-input label="Phone" formControlName="phone" mask="phone" />
-              <app-input label="Email" formControlName="email" type="email" />
+              <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" />
+              <app-input [label]="'common.email' | translate" formControlName="email" type="email" />
             </div>
             <div class="dialog-row">
-              <app-input label="EIN / Tax ID" formControlName="ein" placeholder="XX-XXXXXXX" />
-              <app-input label="Website" formControlName="website" placeholder="https://" />
+              <app-input [label]="'admin.ein' | translate" formControlName="ein" placeholder="XX-XXXXXXX" />
+              <app-input [label]="'admin.website' | translate" formControlName="website" placeholder="https://" />
             </div>
           </div>
         </div>
@@ -289,36 +289,36 @@
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">location_on</span>
-              Locations
+              {{ 'admin.locations' | translate }}
             </h3>
             <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateLocation()">
               <span class="material-icons-outlined">add</span>
-              New Location
+              {{ 'admin.newLocation' | translate }}
             </button>
           </div>
 
           <app-data-table tableId="admin-locations" [columns]="locationColumns" [data]="companyLocations()"
-            emptyIcon="location_on" emptyMessage="No locations configured">
+            emptyIcon="location_on" [emptyMessage]="'admin.noLocations' | translate">
             <ng-template appColumnCell="address" let-loc>
               {{ loc.line1 }}{{ loc.line2 ? ', ' + loc.line2 : '' }}, {{ loc.city }}
             </ng-template>
             <ng-template appColumnCell="default" let-loc>
               @if (loc.isDefault) {
-                <span class="chip chip--primary">Default</span>
+                <span class="chip chip--primary">{{ 'common.default' | translate }}</span>
               }
             </ng-template>
             <ng-template appColumnCell="actions" let-loc>
               <div class="action-cell">
                 @if (!loc.isDefault) {
-                  <button class="icon-btn" title="Set as default" aria-label="Set as default location" (click)="setDefaultLocation(loc); $event.stopPropagation()">
+                  <button class="icon-btn" [matTooltip]="'admin.setAsDefault' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.setAsDefault' | translate" (click)="setDefaultLocation(loc); $event.stopPropagation()">
                     <span class="material-icons-outlined">star_outline</span>
                   </button>
                 }
-                <button class="icon-btn" title="Edit" aria-label="Edit location" (click)="openEditLocation(loc); $event.stopPropagation()">
+                <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.editLocation' | translate" (click)="openEditLocation(loc); $event.stopPropagation()">
                   <span class="material-icons-outlined">edit</span>
                 </button>
                 @if (!loc.isDefault) {
-                  <button class="icon-btn icon-btn--danger" title="Delete" aria-label="Delete location" (click)="deleteLocation(loc); $event.stopPropagation()">
+                  <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'admin.deleteLocationLabel' | translate" (click)="deleteLocation(loc); $event.stopPropagation()">
                     <span class="material-icons-outlined">delete</span>
                   </button>
                 }
@@ -332,11 +332,11 @@
           <div class="settings-section__header">
             <h3 class="settings-section__title">
               <span class="material-icons-outlined">settings</span>
-              System Settings
+              {{ 'admin.systemSettings' | translate }}
             </h3>
             <button class="action-btn action-btn--primary action-btn--sm" [disabled]="saving() || !hasSettingsChanges()" (click)="saveSettings()">
               <span class="material-icons-outlined">save</span>
-              Save Changes
+              {{ 'common.saveChanges' | translate }}
             </button>
           </div>
         </div>
@@ -344,23 +344,23 @@
         <!-- Logo Upload -->
         <div class="settings-item settings-item--logo">
           <div class="settings-item__header">
-            <label class="settings-item__label" for="logo-upload-input">Company Logo</label>
-            <span class="settings-item__description">Upload a logo to replace the default text mark in the header (max 5MB, image files)</span>
+            <label class="settings-item__label" for="logo-upload-input">{{ 'admin.companyLogo' | translate }}</label>
+            <span class="settings-item__description">{{ 'admin.logoDescription' | translate }}</span>
           </div>
           <div class="logo-upload">
             @if (logoPreviewUrl()) {
               <img class="logo-preview" [src]="logoPreviewUrl()" alt="Current logo" />
               <button class="action-btn action-btn--sm" (click)="removeLogo()">
-                <span class="material-icons-outlined">delete</span> Remove
+                <span class="material-icons-outlined">delete</span> {{ 'common.remove' | translate }}
               </button>
             } @else {
               <div class="logo-placeholder">
                 <span class="material-icons-outlined">image</span>
-                <span>No logo uploaded</span>
+                <span>{{ 'admin.noLogo' | translate }}</span>
               </div>
             }
             <label class="action-btn action-btn--sm action-btn--primary logo-upload-btn">
-              <span class="material-icons-outlined">upload</span> Upload Logo
+              <span class="material-icons-outlined">upload</span> {{ 'admin.uploadLogo' | translate }}
               <input id="logo-upload-input" type="file" accept="image/*" hidden (change)="onLogoFileSelected($event)" />
             </label>
           </div>
@@ -379,8 +379,8 @@
                     [id]="'setting-' + def.key"
                     [value]="getSettingValue(def.key) || 'false'"
                     (change)="onSettingChange(def.key, $any($event.target).value)">
-                    <option value="true">Enabled</option>
-                    <option value="false">Disabled</option>
+                    <option value="true">{{ 'common.enabled' | translate }}</option>
+                    <option value="false">{{ 'common.disabled' | translate }}</option>
                   </select>
                 } @else {
                   <input class="settings-input"
@@ -429,11 +429,11 @@
       <div class="tab-panel">
         <app-compliance-templates-panel />
 
-        <h3 class="compliance-section-divider">Per-User Compliance</h3>
+        <h3 class="compliance-section-divider">{{ 'admin.perUserCompliance' | translate }}</h3>
         <div class="compliance-user-picker">
-          <label class="compliance-user-picker__label" for="compliance-user-select">Select User</label>
+          <label class="compliance-user-picker__label" for="compliance-user-select">{{ 'admin.selectUser' | translate }}</label>
           <select id="compliance-user-select" class="compliance-user-picker__select" (change)="complianceUserId.set(+$any($event.target).value || null)">
-            <option value="">-- Select a user --</option>
+            <option value="">{{ 'admin.selectUserPlaceholder' | translate }}</option>
             @for (u of users(); track u.id) {
               <option [value]="u.id">{{ u.lastName }}, {{ u.firstName }}</option>
             }
@@ -447,7 +447,7 @@
     @if (activeTab() === 'reference-data') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-header__count">{{ referenceDataGroups().length }} groups</span>
+          <span class="panel-header__count">{{ referenceDataGroups().length }} {{ 'admin.groups' | translate }}</span>
         </div>
 
         <div class="accordion-list">
@@ -458,7 +458,7 @@
                   {{ expandedGroup() === group.groupCode ? 'expand_more' : 'chevron_right' }}
                 </span>
                 <span class="accordion-title">{{ formatGroupCode(group.groupCode) }}</span>
-                <span class="stage-count">{{ group.values.length }} entries</span>
+                <span class="stage-count">{{ group.values.length }} {{ 'admin.entries' | translate }}</span>
               </button>
 
               @if (expandedGroup() === group.groupCode) {
@@ -466,10 +466,10 @@
                   <table class="admin-table admin-table--nested">
                     <thead>
                       <tr>
-                        <th>Order</th>
-                        <th>Code</th>
-                        <th>Label</th>
-                        <th>Status</th>
+                        <th>{{ 'admin.order' | translate }}</th>
+                        <th>{{ 'admin.code' | translate }}</th>
+                        <th>{{ 'admin.label' | translate }}</th>
+                        <th>{{ 'common.status' | translate }}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -480,7 +480,7 @@
                           <td>{{ entry.label }}</td>
                           <td>
                             <span class="status-dot" [class.status-dot--active]="entry.isActive" [class.status-dot--inactive]="!entry.isActive"></span>
-                            {{ entry.isActive ? 'Active' : 'Inactive' }}
+                            {{ entry.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
                           </td>
                         </tr>
                       }
@@ -507,29 +507,29 @@
 
 <!-- User Dialog -->
 @if (showUserDialog()) {
-  <app-dialog [title]="editingUser() ? 'Edit User' : 'Add User'" width="520px" (closed)="closeUserDialog()">
+  <app-dialog [title]="editingUser() ? ('admin.editUser' | translate) : ('admin.addUser' | translate)" width="520px" (closed)="closeUserDialog()">
     <div [formGroup]="userForm">
       <div class="dialog-row">
-        <app-input label="First Name" formControlName="firstName" [maxlength]="100" [required]="true" />
-        <app-input label="Last Name" formControlName="lastName" [maxlength]="100" [required]="true" />
+        <app-input [label]="'admin.firstName' | translate" formControlName="firstName" [maxlength]="100" [required]="true" />
+        <app-input [label]="'admin.lastName' | translate" formControlName="lastName" [maxlength]="100" [required]="true" />
       </div>
 
       @if (!editingUser()) {
-        <app-input label="Email" type="email" formControlName="email" [maxlength]="256" [required]="true" />
+        <app-input [label]="'common.email' | translate" type="email" formControlName="email" [maxlength]="256" [required]="true" />
       }
 
       <div class="dialog-row">
-        <app-input label="Initials" formControlName="initials" [maxlength]="3" />
-        <app-select label="Role" formControlName="role" [options]="roleOptions" [required]="true" />
+        <app-input [label]="'admin.initials' | translate" formControlName="initials" [maxlength]="3" />
+        <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions" [required]="true" />
       </div>
 
       @if (editingUser() && locationOptions().length > 1) {
-        <app-select label="Work Location" formControlName="workLocationId" [options]="locationOptions()" />
+        <app-select [label]="'admin.workLocation' | translate" formControlName="workLocationId" [options]="locationOptions()" />
       }
 
       <div class="color-toggle-row">
         <div class="color-picker-row">
-          <span class="color-picker-label" id="avatar-color-label">Avatar Color</span>
+          <span class="color-picker-label" id="avatar-color-label">{{ 'admin.avatarColor' | translate }}</span>
           <div class="color-picker" role="group" aria-labelledby="avatar-color-label">
             @for (color of avatarColors; track color) {
               <button class="color-option"
@@ -542,7 +542,7 @@
         </div>
 
         @if (editingUser()) {
-          <app-toggle label="Active" formControlName="isActive" />
+          <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
         }
       </div>
 
@@ -552,7 +552,7 @@
         <div class="scan-ids">
           <span class="scan-ids__title">
             <span class="material-icons-outlined">badge</span>
-            Scan Identifiers
+            {{ 'admin.scanIdentifiers' | translate }}
           </span>
 
           <div class="scan-ids__list" [appLoadingBlock]="scanIdLoading()">
@@ -560,13 +560,14 @@
               <div class="scan-ids__item">
                 <span class="scan-ids__type">{{ scanTypeLabel(sid.identifierType) }}</span>
                 <span class="scan-ids__value">{{ sid.identifierValue }}</span>
-                <button class="icon-btn icon-btn--danger" aria-label="Remove scan identifier"
+                <button class="icon-btn icon-btn--danger" [attr.aria-label]="'admin.removeScanId' | translate"
+                  [matTooltip]="'admin.removeScanId' | translate" matTooltipPosition="above"
                   (click)="removeScanIdentifier(sid.id)">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </div>
             } @empty {
-              <span class="scan-ids__empty">No scan identifiers assigned</span>
+              <span class="scan-ids__empty">{{ 'admin.noScanIds' | translate }}</span>
             }
           </div>
 
@@ -576,15 +577,15 @@
               <div class="rfid-reader__status rfid-reader__status--connected">
                 <span class="material-icons-outlined">contactless</span>
                 <span class="rfid-reader__name">{{ rfid.deviceName() }}</span>
-                <span class="rfid-reader__hint">Tap and hold card on reader — it may take a moment to register</span>
-                <button class="icon-btn" title="Disconnect reader" (click)="unpairRfidReader()">
+                <span class="rfid-reader__hint">{{ 'admin.rfidHint' | translate }}</span>
+                <button class="icon-btn" [matTooltip]="'admin.disconnectReader' | translate" matTooltipPosition="above" (click)="unpairRfidReader()">
                   <span class="material-icons-outlined">link_off</span>
                 </button>
               </div>
             } @else {
               <button class="action-btn action-btn--sm" (click)="pairRfidReader()">
                 <span class="material-icons-outlined">contactless</span>
-                Connect RFID Reader
+                {{ 'admin.connectRfid' | translate }}
               </button>
             }
             @if (rfid.error()) {
@@ -593,8 +594,8 @@
           </div>
 
           <div class="scan-ids__add">
-            <app-select label="Type" [formControl]="newScanType" [options]="scanTypeOptions" />
-            <app-input label="Scan Value" [formControl]="newScanValue" placeholder="Scan or type ID..." />
+            <app-select [label]="'common.type' | translate" [formControl]="newScanType" [options]="scanTypeOptions" />
+            <app-input [label]="'admin.scanValue' | translate" [formControl]="newScanValue" [placeholder]="'admin.scanPlaceholder' | translate" />
             <button class="action-btn action-btn--sm"
               [disabled]="!newScanValue.value?.trim()"
               (click)="addScanIdentifier()">
@@ -620,16 +621,16 @@
       <div class="setup-code-banner">
         <span class="material-icons-outlined setup-code-banner__icon">vpn_key</span>
         <div class="setup-code-banner__content">
-          <span class="setup-code-banner__label">Setup Code</span>
+          <span class="setup-code-banner__label">{{ 'admin.setupCode' | translate }}</span>
           <span class="setup-code-banner__code">{{ setupToken() }}</span>
           <span class="setup-code-banner__hint">
-            Give this code to the employee. They enter it at the login screen to set their password &amp; PIN.
+            {{ 'admin.setupCodeHint' | translate }}
             @if (setupTokenExpiresAt()) {
-              Expires {{ setupTokenExpiresAt() | date:'mediumDate' }}.
+              {{ 'admin.setupCodeExpires' | translate }} {{ setupTokenExpiresAt() | date:'mediumDate' }}.
             }
           </span>
         </div>
-        <button class="icon-btn" title="Copy code" (click)="copySetupCode()">
+        <button class="icon-btn" [matTooltip]="'admin.copyCode' | translate" matTooltipPosition="above" (click)="copySetupCode()">
           <span class="material-icons-outlined">content_copy</span>
         </button>
       </div>
@@ -640,12 +641,12 @@
         <div class="setup-code-banner setup-code-banner--pending">
           <span class="material-icons-outlined setup-code-banner__icon">hourglass_top</span>
           <div class="setup-code-banner__content">
-            <span class="setup-code-banner__label">Account not yet set up</span>
-            <span class="setup-code-banner__hint">This user hasn't completed registration. Generate a setup code for them.</span>
+            <span class="setup-code-banner__label">{{ 'admin.accountNotSetUp' | translate }}</span>
+            <span class="setup-code-banner__hint">{{ 'admin.accountNotSetUpHint' | translate }}</span>
           </div>
           <button class="action-btn action-btn--sm action-btn--primary" (click)="regenerateSetupToken(user)">
             <span class="material-icons-outlined">vpn_key</span>
-            Get Setup Code
+            {{ 'admin.getSetupCode' | translate }}
           </button>
         </div>
       }
@@ -653,15 +654,15 @@
 
     <div dialog-footer>
       @if (setupToken()) {
-        <button class="action-btn action-btn--primary" (click)="closeUserDialog()">Done</button>
+        <button class="action-btn action-btn--primary" (click)="closeUserDialog()">{{ 'common.done' | translate }}</button>
       } @else {
-        <button class="action-btn" (click)="closeUserDialog()">Cancel</button>
+        <button class="action-btn" (click)="closeUserDialog()">{{ 'common.cancel' | translate }}</button>
         <button class="action-btn action-btn--primary"
           [appValidationPopover]="userViolations"
           [disabled]="userForm.invalid || saving()"
           (click)="saveUser()">
           <span class="material-icons-outlined">save</span>
-          {{ editingUser() ? 'Save Changes' : 'Create User' }}
+          {{ editingUser() ? ('common.saveChanges' | translate) : ('admin.createUser' | translate) }}
         </button>
       }
     </div>

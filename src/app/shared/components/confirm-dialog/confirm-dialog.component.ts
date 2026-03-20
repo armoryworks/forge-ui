@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface ConfirmDialogData {
   title: string;
@@ -12,6 +14,7 @@ export interface ConfirmDialogData {
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
+  imports: [MatTooltipModule],
   templateUrl: './confirm-dialog.component.html',
   styleUrl: './confirm-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,13 +22,14 @@ export interface ConfirmDialogData {
 export class ConfirmDialogComponent {
   readonly dialogRef = inject(MatDialogRef<ConfirmDialogComponent>);
   readonly data: ConfirmDialogData = inject(MAT_DIALOG_DATA);
+  private readonly translate = inject(TranslateService);
 
   get confirmLabel(): string {
-    return this.data.confirmLabel ?? 'Confirm';
+    return this.data.confirmLabel ?? this.translate.instant('confirmDialog.confirm');
   }
 
   get cancelLabel(): string {
-    return this.data.cancelLabel ?? 'Cancel';
+    return this.data.cancelLabel ?? this.translate.instant('common.cancel');
   }
 
   get severity(): string {

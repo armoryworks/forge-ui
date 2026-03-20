@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BoardColumnComponent } from './components/board-column.component';
 import { JobDetailPanelComponent } from './components/job-detail-panel.component';
 import { JobDialogComponent, DialogMode } from './components/job-dialog.component';
@@ -26,6 +27,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 export type ViewMode = 'board' | 'team';
 
@@ -35,9 +37,10 @@ export type ViewMode = 'board' | 'team';
   imports: [
     ReactiveFormsModule,
     BoardColumnComponent, JobDetailPanelComponent, JobDialogComponent, JobCardComponent,
-    PageHeaderComponent, MatMenuModule,
+    PageHeaderComponent, MatMenuModule, MatTooltipModule,
     CdkDropList, CdkDrag,
     SelectComponent, AvatarComponent,
+    TranslatePipe,
   ],
   templateUrl: './kanban.component.html',
   styleUrl: './kanban.component.scss',
@@ -50,6 +53,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly selectedTrackTypeId = signal<number | null>(null);
@@ -160,9 +164,9 @@ export class KanbanComponent implements OnInit, OnDestroy {
       .find(j => j.jobNumber.toLowerCase() === scan.value.toLowerCase());
     if (job) {
       this.selectedJobId.set(job.id);
-      this.snackbar.success(`Found job ${job.jobNumber}`);
+      this.snackbar.success(this.translate.instant('kanban.foundJob', { number: job.jobNumber }));
     } else {
-      this.snackbar.error(`Job "${scan.value}" not found on board`);
+      this.snackbar.error(this.translate.instant('kanban.jobNotFound', { value: scan.value }));
     }
   });
 
@@ -177,7 +181,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
             this.selectTrackType(defaultType.id);
           }
         },
-        error: () => this.error.set('Failed to load track types'),
+        error: () => this.error.set(this.translate.instant('kanban.loadTrackTypesFailed')),
       });
 
     this.initBoardHub();
@@ -201,7 +205,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId))
       .subscribe({
         next: (columns) => this.columns.set(columns),
-        error: () => this.error.set('Failed to load board data'),
+        error: () => this.error.set(this.translate.instant('kanban.loadBoardFailed')),
       });
   }
 
@@ -285,11 +289,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const ids = [...this.selectedJobIds()];
     this.kanbanService.bulkMoveStage(ids, stage.id).subscribe({
       next: (r) => {
-        this.snackbar.success(`Moved ${r.successCount} job(s) to ${stage.name}`);
+        this.snackbar.success(this.translate.instant('kanban.jobsMoved', { count: r.successCount, stage: stage.name }));
         this.clearSelection();
         this.reloadBoard();
       },
-      error: () => this.snackbar.error('Failed to move jobs'),
+      error: () => this.snackbar.error(this.translate.instant('kanban.moveJobsFailed')),
     });
   }
 
@@ -298,11 +302,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.kanbanService.bulkAssign(ids, user?.id ?? null).subscribe({
       next: (r) => {
         const label = user ? user.name : 'Unassigned';
-        this.snackbar.success(`Assigned ${r.successCount} job(s) to ${label}`);
+        this.snackbar.success(this.translate.instant('kanban.jobsAssigned', { count: r.successCount, label: label }));
         this.clearSelection();
         this.reloadBoard();
       },
-      error: () => this.snackbar.error('Failed to assign jobs'),
+      error: () => this.snackbar.error(this.translate.instant('kanban.assignJobsFailed')),
     });
   }
 
@@ -310,11 +314,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
     const ids = [...this.selectedJobIds()];
     this.kanbanService.bulkSetPriority(ids, priority).subscribe({
       next: (r) => {
-        this.snackbar.success(`Set priority to ${priority} on ${r.successCount} job(s)`);
+        this.snackbar.success(this.translate.instant('kanban.prioritySet', { priority: priority, count: r.successCount }));
         this.clearSelection();
         this.reloadBoard();
       },
-      error: () => this.snackbar.error('Failed to set priority'),
+      error: () => this.snackbar.error(this.translate.instant('kanban.setPriorityFailed')),
     });
   }
 
@@ -322,9 +326,9 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Archive Jobs?',
-        message: `This will archive ${this.selectionCount()} selected job(s). You can restore them later.`,
-        confirmLabel: 'Archive',
+        title: this.translate.instant('kanban.archiveJobsTitle'),
+        message: this.translate.instant('kanban.archiveJobsMessage', { count: this.selectionCount() }),
+        confirmLabel: this.translate.instant('kanban.archive'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -332,11 +336,11 @@ export class KanbanComponent implements OnInit, OnDestroy {
       const ids = [...this.selectedJobIds()];
       this.kanbanService.bulkArchive(ids).subscribe({
         next: (r) => {
-          this.snackbar.success(`Archived ${r.successCount} job(s)`);
+          this.snackbar.success(this.translate.instant('kanban.jobsArchived', { count: r.successCount }));
           this.clearSelection();
           this.reloadBoard();
         },
-        error: () => this.snackbar.error('Failed to archive jobs'),
+        error: () => this.snackbar.error(this.translate.instant('kanban.archiveJobsFailed')),
       });
     });
   }

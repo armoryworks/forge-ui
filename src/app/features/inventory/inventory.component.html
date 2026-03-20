@@ -1,36 +1,36 @@
-<app-page-header title="Inventory" subtitle="Track stock levels, locations, and movements" helpTourId="inventory">
+<app-page-header [title]="'inventory.title' | translate" [subtitle]="'inventory.subtitle' | translate" helpTourId="inventory">
   @if (activeTab() === 'locations') {
     <button class="action-btn action-btn--primary" (click)="openCreateLocation()">
       <span class="material-icons-outlined">add</span>
-      Add Location
+      {{ 'inventory.addLocation' | translate }}
     </button>
   }
   @if (activeTab() === 'reservations') {
     <button class="action-btn action-btn--primary" (click)="openReservationDialog()">
       <span class="material-icons-outlined">add</span>
-      Reserve Stock
+      {{ 'inventory.reserveStock' | translate }}
     </button>
   }
   @if (activeTab() === 'receiving') {
     <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
       <span class="material-icons-outlined">add</span>
-      Receive Goods
+      {{ 'inventory.receiveGoods' | translate }}
     </button>
   }
   @if (activeTab() === 'stockOps') {
     <button class="action-btn" (click)="openTransferDialog()">
       <span class="material-icons-outlined">swap_horiz</span>
-      Transfer
+      {{ 'inventory.transfer' | translate }}
     </button>
     <button class="action-btn" (click)="openAdjustDialog()">
       <span class="material-icons-outlined">tune</span>
-      Adjust
+      {{ 'inventory.adjust' | translate }}
     </button>
   }
   @if (activeTab() === 'cycleCounts') {
     <button class="action-btn action-btn--primary" (click)="openCreateCycleCountDialog()">
       <span class="material-icons-outlined">add</span>
-      New Count
+      {{ 'inventory.newCount' | translate }}
     </button>
   }
 </app-page-header>
@@ -40,31 +40,31 @@
   <div class="tab-bar">
     <button class="tab" [class.tab--active]="activeTab() === 'stock'" (click)="switchTab('stock')">
       <span class="material-icons-outlined">inventory</span>
-      Stock Levels
+      {{ 'inventory.tabs.stockLevels' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'locations'" (click)="switchTab('locations')">
       <span class="material-icons-outlined">warehouse</span>
-      Locations
+      {{ 'inventory.tabs.locations' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'movements'" (click)="switchTab('movements')">
       <span class="material-icons-outlined">swap_horiz</span>
-      Movements
+      {{ 'inventory.tabs.movements' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'receiving'" (click)="switchTab('receiving')">
       <span class="material-icons-outlined">local_shipping</span>
-      Receiving
+      {{ 'inventory.tabs.receiving' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'stockOps'" (click)="switchTab('stockOps')">
       <span class="material-icons-outlined">tune</span>
-      Stock Ops
+      {{ 'inventory.tabs.stockOps' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'cycleCounts'" (click)="switchTab('cycleCounts')">
       <span class="material-icons-outlined">fact_check</span>
-      Cycle Counts
+      {{ 'inventory.tabs.cycleCounts' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeTab() === 'reservations'" (click)="switchTab('reservations')">
       <span class="material-icons-outlined">lock</span>
-      Reservations
+      {{ 'inventory.tabs.reservations' | translate }}
     </button>
   </div>
 
@@ -76,23 +76,23 @@
           <div class="low-stock-banner" role="alert">
             <span class="material-icons-outlined low-stock-banner__icon">warning</span>
             <span class="low-stock-banner__text">
-              {{ lowStockAlerts().length }} {{ lowStockAlerts().length === 1 ? 'part is' : 'parts are' }} below minimum stock level
+              {{ lowStockAlerts().length }} {{ lowStockAlerts().length === 1 ? ('inventory.lowStockBannerSingular' | translate) : ('inventory.lowStockBannerPlural' | translate) }}
             </span>
             <button class="action-btn action-btn--sm" (click)="createPoForPart()">
               <span class="material-icons-outlined">add</span>
-              Create PO
+              {{ 'inventory.createPo' | translate }}
             </button>
           </div>
         }
 
         <div class="panel-header">
-          <app-input label="Search" [formControl]="searchControl" placeholder="Search parts..." />
+          <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'inventory.searchPlaceholder' | translate" />
           @if (searchControl.value) {
-            <button class="icon-btn" (click)="clearSearch()">
+            <button class="icon-btn" matTooltip="Clear search" matTooltipPosition="above" (click)="clearSearch()">
               <span class="material-icons-outlined">close</span>
             </button>
           }
-          <span class="panel-count">{{ partSummaries().length }} parts with stock</span>
+          <span class="panel-count">{{ partSummaries().length }} {{ 'inventory.partsWithStock' | translate }}</span>
         </div>
 
         <app-data-table
@@ -102,7 +102,7 @@
           [expandable]="true"
           trackByField="partId"
           emptyIcon="inventory_2"
-          emptyMessage="No inventory data" emptyHelpText="Stock appears here when parts are received into bin locations. Use the Receiving tab to log incoming goods."
+          [emptyMessage]="'inventory.noInventoryData' | translate" [emptyHelpText]="'inventory.noInventoryDataHelp' | translate"
           [rowClass]="stockRowClass">
 
           <ng-template appColumnCell="partNumber" let-row>
@@ -125,12 +125,12 @@
             <table class="bin-detail-table">
               <thead>
                 <tr>
-                  <th>Bin Location</th>
-                  <th class="align-right">On Hand</th>
-                  <th class="align-right">Reserved</th>
-                  <th class="align-right">Available</th>
-                  <th>Status</th>
-                  <th>Lot #</th>
+                  <th>{{ 'inventory.binDetailHeaders.binLocation' | translate }}</th>
+                  <th class="align-right">{{ 'inventory.binDetailHeaders.onHand' | translate }}</th>
+                  <th class="align-right">{{ 'inventory.binDetailHeaders.reserved' | translate }}</th>
+                  <th class="align-right">{{ 'inventory.binDetailHeaders.available' | translate }}</th>
+                  <th>{{ 'inventory.binDetailHeaders.status' | translate }}</th>
+                  <th>{{ 'inventory.binDetailHeaders.lotNumber' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,7 +166,7 @@
       <div class="tab-panel locations-layout">
         <div class="locations-tree">
           <div class="panel-header">
-            <span class="panel-count">Storage Hierarchy</span>
+            <span class="panel-count">{{ 'inventory.storageHierarchy' | translate }}</span>
           </div>
           <div class="tree-content">
             @for (loc of locationTree(); track loc.id) {
@@ -249,7 +249,7 @@
                 }
               </ng-container>
             } @empty {
-              <app-empty-state icon="warehouse" message="No locations configured" />
+              <app-empty-state icon="warehouse" [message]="'inventory.noLocationsConfigured' | translate" />
             }
           </div>
         </div>
@@ -266,13 +266,13 @@
               <button class="action-btn action-btn--primary action-btn--sm detail-header__add-child"
                 (click)="openCreateLocation(loc.id)">
                 <span class="material-icons-outlined">add</span>
-                Add Child
+                {{ 'inventory.addChild' | translate }}
               </button>
             </div>
 
             <div class="detail-meta">
               <div class="meta-item">
-                <span class="meta-label">Type</span>
+                <span class="meta-label">{{ 'common.type' | translate }}</span>
                 <span class="meta-value">{{ loc.locationType }}</span>
               </div>
               <app-barcode-info
@@ -283,7 +283,7 @@
                 [compact]="true" />
               @if (loc.description) {
                 <div class="meta-item">
-                  <span class="meta-label">Description</span>
+                  <span class="meta-label">{{ 'common.description' | translate }}</span>
                   <span class="meta-value">{{ loc.description }}</span>
                 </div>
               }
@@ -291,15 +291,15 @@
 
             @if (loc.locationType === 'Bin' && binContents().length > 0) {
               <div class="contents-section">
-                <span class="section-title">Contents ({{ binContents().length }})</span>
+                <span class="section-title">{{ 'inventory.contents' | translate }} ({{ binContents().length }})</span>
                 <table class="bin-detail-table">
                   <thead>
                     <tr>
-                      <th>Item</th>
-                      <th>Qty</th>
-                      <th>Status</th>
-                      <th>Lot #</th>
-                      <th>Placed</th>
+                      <th>{{ 'inventory.binContentHeaders.item' | translate }}</th>
+                      <th>{{ 'inventory.binContentHeaders.qty' | translate }}</th>
+                      <th>{{ 'inventory.binContentHeaders.status' | translate }}</th>
+                      <th>{{ 'inventory.binContentHeaders.lotNumber' | translate }}</th>
+                      <th>{{ 'inventory.binContentHeaders.placed' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -322,10 +322,10 @@
             }
 
             @if (loc.locationType === 'Bin' && binContents().length === 0) {
-              <app-empty-state icon="inventory_2" message="Bin is empty" />
+              <app-empty-state icon="inventory_2" [message]="'inventory.binIsEmpty' | translate" />
             }
           } @else {
-            <app-empty-state icon="touch_app" message="Select a location to view details" />
+            <app-empty-state icon="touch_app" [message]="'inventory.selectLocationToView' | translate" />
           }
         </div>
       </div>
@@ -335,11 +335,11 @@
     @if (activeTab() === 'movements') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-count">{{ movements().length }} recent movements</span>
+          <span class="panel-count">{{ movements().length }} {{ 'inventory.recentMovements' | translate }}</span>
         </div>
 
         <app-data-table tableId="inventory-movements" [columns]="movementColumns" [data]="movements()"
-          emptyIcon="swap_horiz" emptyMessage="No movement history">
+          emptyIcon="swap_horiz" [emptyMessage]="'inventory.noMovementHistory' | translate">
           <ng-template appColumnCell="fromLocationName" let-row>
             <span class="text-muted">{{ $any(row).fromLocationName ?? '—' }}</span>
           </ng-template>
@@ -360,11 +360,11 @@
     @if (activeTab() === 'receiving') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-count">{{ receivingHistory().length }} records</span>
+          <span class="panel-count">{{ receivingHistory().length }} {{ 'inventory.records' | translate }}</span>
         </div>
 
         <app-data-table tableId="inventory-receiving" [columns]="receivingColumns" [data]="receivingHistory()"
-          emptyIcon="local_shipping" emptyMessage="No receiving records">
+          emptyIcon="local_shipping" [emptyMessage]="'inventory.noReceivingRecords' | translate">
           <ng-template appColumnCell="purchaseOrderNumber" let-row>
             <span class="part-number">{{ $any(row).purchaseOrderNumber ?? '—' }}</span>
           </ng-template>
@@ -388,15 +388,15 @@
     @if (activeTab() === 'stockOps') {
       <div class="tab-panel stock-ops-panel">
         <div class="stock-ops-grid">
-          <div class="stock-ops-card" role="button" tabindex="0" aria-label="Transfer Stock" (click)="openTransferDialog()" (keydown.enter)="openTransferDialog()">
+          <div class="stock-ops-card" role="button" tabindex="0" [attr.aria-label]="'inventory.transferStock' | translate" (click)="openTransferDialog()" (keydown.enter)="openTransferDialog()">
             <span class="material-icons-outlined stock-ops-card__icon">swap_horiz</span>
-            <div class="stock-ops-card__title">Transfer Stock</div>
-            <div class="stock-ops-card__desc">Move items between bin locations</div>
+            <div class="stock-ops-card__title">{{ 'inventory.transferStock' | translate }}</div>
+            <div class="stock-ops-card__desc">{{ 'inventory.transferStockDesc' | translate }}</div>
           </div>
-          <div class="stock-ops-card" role="button" tabindex="0" aria-label="Adjust Stock" (click)="openAdjustDialog()" (keydown.enter)="openAdjustDialog()">
+          <div class="stock-ops-card" role="button" tabindex="0" [attr.aria-label]="'inventory.adjustStock' | translate" (click)="openAdjustDialog()" (keydown.enter)="openAdjustDialog()">
             <span class="material-icons-outlined stock-ops-card__icon">tune</span>
-            <div class="stock-ops-card__title">Adjust Stock</div>
-            <div class="stock-ops-card__desc">Manually adjust quantity for a bin content</div>
+            <div class="stock-ops-card__title">{{ 'inventory.adjustStock' | translate }}</div>
+            <div class="stock-ops-card__desc">{{ 'inventory.adjustStockDesc' | translate }}</div>
           </div>
         </div>
       </div>
@@ -406,11 +406,11 @@
     @if (activeTab() === 'cycleCounts') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-count">{{ cycleCounts().length }} cycle counts</span>
+          <span class="panel-count">{{ cycleCounts().length }} {{ 'inventory.cycleCounts' | translate }}</span>
         </div>
 
         <app-data-table tableId="inventory-cycle-counts" [columns]="cycleCountColumns" [data]="cycleCounts()"
-          emptyIcon="fact_check" emptyMessage="No cycle counts"
+          emptyIcon="fact_check" [emptyMessage]="'inventory.noCycleCounts' | translate"
           (rowClick)="openCycleCountDetail($any($event))">
           <ng-template appColumnCell="status" let-row>
             <span [class]="getCycleCountStatusClass($any(row).status)">{{ $any(row).status }}</span>
@@ -433,7 +433,7 @@
     @if (activeTab() === 'reservations') {
       <div class="tab-panel">
         <div class="panel-header">
-          <span class="panel-count">{{ reservations().length }} active reservations</span>
+          <span class="panel-count">{{ reservations().length }} {{ 'inventory.activeReservations' | translate }}</span>
         </div>
 
         <app-data-table
@@ -441,7 +441,7 @@
           [columns]="reservationColumns"
           [data]="reservations()"
           emptyIcon="lock"
-          emptyMessage="No active reservations">
+          [emptyMessage]="'inventory.noActiveReservations' | translate">
 
           <ng-template appColumnCell="partNumber" let-row>
             <span class="part-number">{{ $any(row).partNumber }}</span>
@@ -467,7 +467,8 @@
             <button class="icon-btn icon-btn--danger"
               [disabled]="saving()"
               (click)="releaseReservation($any(row).id); $event.stopPropagation()"
-              aria-label="Release reservation">
+              [attr.aria-label]="'inventory.releaseReservation' | translate"
+              [matTooltip]="'inventory.releaseReservation' | translate" matTooltipPosition="above">
               <span class="material-icons-outlined">lock_open</span>
             </button>
           </ng-template>
@@ -479,143 +480,143 @@
 
 <!-- Reserve Stock Dialog -->
 @if (showReservationDialog()) {
-  <app-dialog title="Reserve Stock" width="520px" (closed)="closeReservationDialog()">
+  <app-dialog [title]="'inventory.dialogs.reserveStockTitle' | translate" width="520px" (closed)="closeReservationDialog()">
     <div [formGroup]="reservationForm">
-      <app-input label="Part ID" formControlName="partId" type="number" />
-      <app-input label="Bin Content ID" formControlName="binContentId" type="number" />
-      <app-input label="Job ID (optional)" formControlName="jobId" type="number" />
-      <app-input label="Quantity" formControlName="quantity" type="number" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-input [label]="'inventory.dialogs.partId' | translate" formControlName="partId" type="number" />
+      <app-input [label]="'inventory.dialogs.binContentId' | translate" formControlName="binContentId" type="number" />
+      <app-input [label]="'inventory.dialogs.jobIdOptional' | translate" formControlName="jobId" type="number" />
+      <app-input [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeReservationDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeReservationDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="reservationViolations"
         [disabled]="reservationForm.invalid || saving()"
-        (click)="submitReservation()">Reserve</button>
+        (click)="submitReservation()">{{ 'inventory.dialogs.reserve' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Location Dialog -->
 @if (showLocationDialog()) {
-  <app-dialog title="Add Location" (closed)="closeLocationDialog()">
+  <app-dialog [title]="'inventory.dialogs.addLocationTitle' | translate" (closed)="closeLocationDialog()">
     <div [formGroup]="locationForm">
-      <app-input label="Name" formControlName="name" />
+      <app-input [label]="'common.name' | translate" formControlName="name" />
 
-      <app-select label="Type" formControlName="locationType" [options]="locationTypeOptions" />
+      <app-select [label]="'common.type' | translate" formControlName="locationType" [options]="locationTypeOptions" />
 
       @if (locationForm.controls.locationType.value === 'Bin') {
-        <app-input label="Barcode" formControlName="barcode" />
+        <app-input [label]="'inventory.dialogs.barcode' | translate" formControlName="barcode" />
       }
 
-      <app-input label="Description" formControlName="description" />
+      <app-input [label]="'common.description' | translate" formControlName="description" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeLocationDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeLocationDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="locationViolations"
         [disabled]="locationForm.invalid || saving()"
-        (click)="saveLocation()">Create Location</button>
+        (click)="saveLocation()">{{ 'inventory.dialogs.createLocation' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Receive Dialog -->
 @if (showReceiveDialog()) {
-  <app-dialog title="Receive Goods" width="520px" (closed)="closeReceiveDialog()">
+  <app-dialog [title]="'inventory.dialogs.receiveGoodsTitle' | translate" width="520px" (closed)="closeReceiveDialog()">
     <div [formGroup]="receiveForm">
-      <app-input label="PO Line ID" formControlName="purchaseOrderLineId" type="number" />
-      <app-input label="Quantity Received" formControlName="quantityReceived" type="number" />
-      <app-select label="Bin Location" formControlName="locationId" [options]="binLocationOptions()" />
-      <app-input label="Lot Number" formControlName="lotNumber" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-input [label]="'inventory.dialogs.poLineId' | translate" formControlName="purchaseOrderLineId" type="number" />
+      <app-input [label]="'inventory.dialogs.quantityReceived' | translate" formControlName="quantityReceived" type="number" />
+      <app-select [label]="'inventory.dialogs.binLocation' | translate" formControlName="locationId" [options]="binLocationOptions()" />
+      <app-input [label]="'inventory.dialogs.lotNumber' | translate" formControlName="lotNumber" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeReceiveDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeReceiveDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="receiveViolations"
         [disabled]="receiveForm.invalid || saving()"
-        (click)="submitReceive()">Receive</button>
+        (click)="submitReceive()">{{ 'inventory.dialogs.receive' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Transfer Dialog -->
 @if (showTransferDialog()) {
-  <app-dialog title="Transfer Stock" width="520px" (closed)="closeTransferDialog()">
+  <app-dialog [title]="'inventory.dialogs.transferStockTitle' | translate" width="520px" (closed)="closeTransferDialog()">
     <div [formGroup]="transferForm">
-      <app-input label="Source Bin Content ID" formControlName="sourceBinContentId" type="number" />
-      <app-select label="Destination Location" formControlName="destinationLocationId" [options]="binLocationOptions()" />
-      <app-input label="Quantity" formControlName="quantity" type="number" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-input [label]="'inventory.dialogs.sourceBinContentId' | translate" formControlName="sourceBinContentId" type="number" />
+      <app-select [label]="'inventory.dialogs.destinationLocation' | translate" formControlName="destinationLocationId" [options]="binLocationOptions()" />
+      <app-input [label]="'common.quantity' | translate" formControlName="quantity" type="number" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeTransferDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeTransferDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="transferViolations"
         [disabled]="transferForm.invalid || saving()"
-        (click)="submitTransfer()">Transfer</button>
+        (click)="submitTransfer()">{{ 'inventory.transfer' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Adjust Dialog -->
 @if (showAdjustDialog()) {
-  <app-dialog title="Adjust Stock" width="520px" (closed)="closeAdjustDialog()">
+  <app-dialog [title]="'inventory.dialogs.adjustStockTitle' | translate" width="520px" (closed)="closeAdjustDialog()">
     <div [formGroup]="adjustForm">
-      <app-input label="Bin Content ID" formControlName="binContentId" type="number" />
-      <app-input label="New Quantity" formControlName="newQuantity" type="number" />
-      <app-input label="Reason" formControlName="reason" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-input [label]="'inventory.dialogs.binContentId' | translate" formControlName="binContentId" type="number" />
+      <app-input [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="number" />
+      <app-input [label]="'inventory.dialogs.reason' | translate" formControlName="reason" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeAdjustDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeAdjustDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="adjustViolations"
         [disabled]="adjustForm.invalid || saving()"
-        (click)="submitAdjust()">Adjust</button>
+        (click)="submitAdjust()">{{ 'inventory.adjust' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Create Cycle Count Dialog -->
 @if (showCreateCycleCountDialog()) {
-  <app-dialog title="New Cycle Count" width="420px" (closed)="closeCreateCycleCountDialog()">
+  <app-dialog [title]="'inventory.dialogs.newCycleCountTitle' | translate" width="420px" (closed)="closeCreateCycleCountDialog()">
     <div [formGroup]="createCycleCountForm">
-      <app-select label="Location" formControlName="locationId" [options]="binLocationOptions()" />
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-select [label]="'inventory.location' | translate" formControlName="locationId" [options]="binLocationOptions()" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeCreateCycleCountDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeCreateCycleCountDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="createCycleCountViolations"
         [disabled]="createCycleCountForm.invalid || saving()"
-        (click)="submitCreateCycleCount()">Create</button>
+        (click)="submitCreateCycleCount()">{{ 'common.create' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- Cycle Count Detail Dialog -->
 @if (showCycleCountDialog() && selectedCycleCount(); as cc) {
-  <app-dialog [title]="'Cycle Count — ' + cc.locationName" width="800px" (closed)="closeCycleCountDialog()">
+  <app-dialog [title]="('inventory.dialogs.cycleCountTitle' | translate) + ' — ' + cc.locationName" width="800px" (closed)="closeCycleCountDialog()">
     <div class="cycle-count-info">
       <div class="meta-item">
-        <span class="meta-label">Counted By</span>
+        <span class="meta-label">{{ 'inventory.dialogs.countedBy' | translate }}</span>
         <span class="meta-value">{{ cc.countedByName }}</span>
       </div>
       <div class="meta-item">
-        <span class="meta-label">Date</span>
+        <span class="meta-label">{{ 'common.date' | translate }}</span>
         <span class="meta-value">{{ cc.countedAt | date:'MM/dd/yyyy hh:mm a' }}</span>
       </div>
       <div class="meta-item">
-        <span class="meta-label">Status</span>
+        <span class="meta-label">{{ 'common.status' | translate }}</span>
         <span [class]="getCycleCountStatusClass(cc.status)">{{ cc.status }}</span>
       </div>
     </div>
@@ -623,11 +624,11 @@
     <table class="bin-detail-table">
       <thead>
         <tr>
-          <th>Item</th>
-          <th>Expected</th>
-          <th>Actual</th>
-          <th>Variance</th>
-          <th>Notes</th>
+          <th>{{ 'inventory.binContentHeaders.item' | translate }}</th>
+          <th>{{ 'inventory.columns.expected' | translate }}</th>
+          <th>{{ 'inventory.columns.actual' | translate }}</th>
+          <th>{{ 'inventory.columns.variance' | translate }}</th>
+          <th>{{ 'common.notes' | translate }}</th>
         </tr>
       </thead>
       <tbody>
@@ -652,17 +653,17 @@
             <td class="text-muted">{{ line.notes ?? '—' }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="5" class="text-muted text-center">No items at this location</td></tr>
+          <tr><td colspan="5" class="text-muted text-center">{{ 'inventory.dialogs.noItemsAtLocation' | translate }}</td></tr>
         }
       </tbody>
     </table>
 
     @if (cc.status === 'Pending') {
       <div dialog-footer>
-        <button class="action-btn action-btn--sm action-btn--danger" (click)="rejectCycleCount()">Reject</button>
+        <button class="action-btn action-btn--sm action-btn--danger" (click)="rejectCycleCount()">{{ 'inventory.dialogs.reject' | translate }}</button>
         <button class="action-btn action-btn--primary"
           [disabled]="saving()"
-          (click)="approveCycleCount()">Approve &amp; Adjust Stock</button>
+          (click)="approveCycleCount()">{{ 'inventory.dialogs.approveAndAdjust' | translate }}</button>
       </div>
     }
   </app-dialog>

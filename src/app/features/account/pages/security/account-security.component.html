@@ -1,22 +1,22 @@
 <div class="account-page">
   <h1 class="account-page__title">
     <span class="material-icons-outlined">lock</span>
-    Security
+    {{ 'account.security' | translate }}
   </h1>
 
   <div class="account-page__card-grid">
     <!-- Change Password -->
     <div class="account-page__card">
-      <span class="account-page__section-label">Change Password</span>
+      <span class="account-page__section-label">{{ 'account.changePassword' | translate }}</span>
 
       <div [formGroup]="passwordForm" class="account-page__form">
-        <app-input label="Current Password" type="password" formControlName="currentPassword" [required]="true" />
-        <app-input label="New Password" type="password" formControlName="newPassword" placeholder="Minimum 8 characters" [required]="true" />
-        <app-input label="Confirm New Password" type="password" formControlName="confirmPassword" [required]="true" />
+        <app-input [label]="'account.currentPassword' | translate" type="password" formControlName="currentPassword" [required]="true" />
+        <app-input [label]="'account.newPassword' | translate" type="password" formControlName="newPassword" [placeholder]="'account.minPasswordHint' | translate" [required]="true" />
+        <app-input [label]="'account.confirmNewPassword' | translate" type="password" formControlName="confirmPassword" [required]="true" />
         @if (passwordMismatch()) {
           <div class="security__error">
             <span class="material-icons-outlined">warning</span>
-            Passwords do not match
+            {{ 'account.passwordsDoNotMatch' | translate }}
           </div>
         }
       </div>
@@ -28,10 +28,10 @@
           (click)="changePassword()">
           @if (savingPassword()) {
             <span class="material-icons-outlined account-page__spinner">sync</span>
-            Changing...
+            {{ 'account.changing' | translate }}
           } @else {
             <span class="material-icons-outlined">lock_reset</span>
-            Change Password
+            {{ 'account.changePassword' | translate }}
           }
         </button>
       </div>
@@ -39,16 +39,16 @@
 
     <!-- Set PIN -->
     <div class="account-page__card">
-      <span class="account-page__section-label">Kiosk PIN</span>
-      <p class="security__hint">Set a 4-8 digit PIN for kiosk/shop floor authentication.</p>
+      <span class="account-page__section-label">{{ 'account.kioskPin' | translate }}</span>
+      <p class="security__hint">{{ 'account.kioskPinHint' | translate }}</p>
 
       <div [formGroup]="pinForm" class="account-page__form">
-        <app-input label="PIN" type="password" formControlName="pin" placeholder="4-8 digits" [maxlength]="8" [required]="true" />
-        <app-input label="Confirm PIN" type="password" formControlName="confirmPin" [maxlength]="8" [required]="true" />
+        <app-input [label]="'account.pin' | translate" type="password" formControlName="pin" [placeholder]="'account.pinPlaceholder' | translate" [maxlength]="8" [required]="true" />
+        <app-input [label]="'account.confirmPin' | translate" type="password" formControlName="confirmPin" [maxlength]="8" [required]="true" />
         @if (pinMismatch()) {
           <div class="security__error">
             <span class="material-icons-outlined">warning</span>
-            PINs do not match
+            {{ 'account.pinsDoNotMatch' | translate }}
           </div>
         }
       </div>
@@ -59,10 +59,10 @@
           (click)="setPin()">
           @if (savingPin()) {
             <span class="material-icons-outlined account-page__spinner">sync</span>
-            Saving...
+            {{ 'account.saving' | translate }}
           } @else {
             <span class="material-icons-outlined">pin</span>
-            Set PIN
+            {{ 'account.setPin' | translate }}
           }
         </button>
       </div>

@@ -1,29 +1,29 @@
-<app-dialog title="New Payment" width="800px" (closed)="close()">
+<app-dialog [title]="'payments.newPaymentTitle' | translate" width="800px" (closed)="close()">
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-select label="Customer" formControlName="customerId" [options]="customerOptions()" />
-      <app-select label="Payment Method" formControlName="method" [options]="methodOptions" />
+      <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" />
+      <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" />
     </div>
     <div class="dialog-row">
-      <app-input label="Amount" type="number" formControlName="amount" placeholder="0.00" />
-      <app-datepicker label="Payment Date" formControlName="paymentDate" />
+      <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" />
+      <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" />
     </div>
-    <app-input label="Reference #" formControlName="referenceNumber" placeholder="Optional" />
-    <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    <app-input [label]="'payments.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'payments.optional' | translate" />
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
   </div>
 
   <!-- Invoice Applications -->
   <div class="lines-section">
     <div class="lines-header">
-      <span class="lines-title">Invoice Applications</span>
+      <span class="lines-title">{{ 'payments.invoiceApplications' | translate }}</span>
     </div>
 
     @if (applications().length > 0) {
       <table class="lines-table">
         <thead>
           <tr>
-            <th>Invoice #</th>
-            <th class="lines-table__right">Amount</th>
+            <th>{{ 'payments.invoiceNumber' | translate }}</th>
+            <th class="lines-table__right">{{ 'payments.amount' | translate }}</th>
             <th></th>
           </tr>
         </thead>
@@ -33,7 +33,7 @@
               <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
               <td class="lines-table__right">{{ app.amount | currency }}</td>
               <td>
-                <button class="icon-btn icon-btn--danger" title="Remove" (click)="removeApplication($index)">
+                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
                   <span class="material-icons-outlined">close</span>
                 </button>
               </td>
@@ -42,7 +42,7 @@
         </tbody>
         <tfoot>
           <tr>
-            <td class="lines-table__right lines-table__bold">Total Applied</td>
+            <td class="lines-table__right lines-table__bold">{{ 'payments.totalApplied' | translate }}</td>
             <td class="lines-table__right lines-table__bold">{{ totalApplied() | currency }}</td>
             <td></td>
           </tr>
@@ -52,23 +52,23 @@
 
     <!-- Add Application Form -->
     <div class="add-line" [formGroup]="appForm">
-      <app-input label="Invoice ID" type="number" formControlName="invoiceId" />
-      <app-input label="Invoice #" formControlName="invoiceNumber" />
-      <app-input label="Amount" type="number" formControlName="amount" placeholder="0.00" />
+      <app-input [label]="'payments.invoiceId' | translate" type="number" formControlName="invoiceId" />
+      <app-input [label]="'payments.invoiceNumber' | translate" formControlName="invoiceNumber" />
+      <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" />
       <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="appForm.invalid">
         <span class="material-icons-outlined">add</span>
-        Add
+        {{ 'common.add' | translate }}
       </button>
     </div>
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
-      <span class="material-icons-outlined">save</span> Create Payment
+      <span class="material-icons-outlined">save</span> {{ 'payments.createPayment' | translate }}
     </button>
   </div>
 </app-dialog>

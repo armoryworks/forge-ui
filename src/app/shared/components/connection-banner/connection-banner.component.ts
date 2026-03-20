@@ -2,6 +2,8 @@ import {
   ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal,
 } from '@angular/core';
 
+import { TranslateService } from '@ngx-translate/core';
+
 import { SignalrService } from '../../services/signalr.service';
 
 const STARTUP_GRACE_MS = 8_000;
@@ -15,6 +17,7 @@ const STARTUP_GRACE_MS = 8_000;
 })
 export class ConnectionBannerComponent implements OnInit {
   private readonly signalr = inject(SignalrService);
+  private readonly translate = inject(TranslateService);
   private readonly startupReady = signal(false);
   private readonly dismissed = signal(false);
 
@@ -22,8 +25,8 @@ export class ConnectionBannerComponent implements OnInit {
 
   protected readonly message = computed(() => {
     switch (this.state()) {
-      case 'reconnecting': return 'Reconnecting...';
-      case 'disconnected': return 'Connection lost. Retrying...';
+      case 'reconnecting': return this.translate.instant('shared.reconnecting');
+      case 'disconnected': return this.translate.instant('shared.connectionLost');
       default: return '';
     }
   });

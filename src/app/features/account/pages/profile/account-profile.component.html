@@ -1,7 +1,7 @@
 <div class="account-page">
   <h1 class="account-page__title">
     <span class="material-icons-outlined">person</span>
-    Profile
+    {{ 'account.profile' | translate }}
   </h1>
 
   <div class="account-page__card-grid">
@@ -19,14 +19,14 @@
 
       <div [formGroup]="form" class="account-page__form">
         <div class="account-page__row">
-          <app-input label="First Name" formControlName="firstName" [maxlength]="100" [required]="true" />
-          <app-input label="Last Name" formControlName="lastName" [maxlength]="100" [required]="true" />
+          <app-input [label]="'account.firstName' | translate" formControlName="firstName" [maxlength]="100" [required]="true" />
+          <app-input [label]="'account.lastName' | translate" formControlName="lastName" [maxlength]="100" [required]="true" />
         </div>
         <div class="account-page__row">
-          <app-input label="Initials" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
-          <app-datepicker label="Date of Birth" formControlName="dateOfBirth" />
+          <app-input [label]="'account.initials' | translate" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
+          <app-datepicker [label]="'account.dateOfBirth' | translate" formControlName="dateOfBirth" />
         </div>
-        <app-select label="Gender" formControlName="gender" [options]="genderOptions" />
+        <app-select [label]="'account.gender' | translate" formControlName="gender" [options]="genderOptions" />
       </div>
     </div>
 

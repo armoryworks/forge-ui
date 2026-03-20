@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-kanban-column-header',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './kanban-column-header.component.html',
   styleUrl: './kanban-column-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

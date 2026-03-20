@@ -1,15 +1,15 @@
 @if (open()) {
-  <div class="ai-help-backdrop" role="button" tabindex="0" aria-label="Close" (click)="toggle()" (keydown.enter)="toggle()"></div>
+  <div class="ai-help-backdrop" role="button" tabindex="0" [attr.aria-label]="'common.close' | translate" (click)="toggle()" (keydown.enter)="toggle()"></div>
   <div class="ai-help-panel">
     <div class="ai-help-panel__header">
       <span class="material-icons-outlined">smart_toy</span>
-      <span>QB Engineer Assistant</span>
+      <span>{{ 'aiHelp.title' | translate }}</span>
       @if (messages().length > 0) {
-        <button class="icon-btn" (click)="clearChat()" aria-label="Clear chat" title="New conversation">
+        <button class="icon-btn" (click)="clearChat()" [attr.aria-label]="'aiHelp.clearChat' | translate" [matTooltip]="'aiHelp.newConversation' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">restart_alt</span>
         </button>
       }
-      <button class="icon-btn" (click)="toggle()" aria-label="Close assistant">
+      <button class="icon-btn" (click)="toggle()" [attr.aria-label]="'aiHelp.closeAssistant' | translate" [matTooltip]="'aiHelp.closeAssistant' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -17,13 +17,13 @@
       @if (messages().length === 0) {
         <div class="ai-help-panel__welcome">
           <span class="material-icons-outlined ai-help-panel__welcome-icon">school</span>
-          <p class="ai-help-panel__welcome-title">How can I help?</p>
-          <p class="ai-help-panel__welcome-text">Ask me anything about QB Engineer — features, workflows, how to do things.</p>
+          <p class="ai-help-panel__welcome-title">{{ 'aiHelp.howCanIHelp' | translate }}</p>
+          <p class="ai-help-panel__welcome-text">{{ 'aiHelp.welcomeText' | translate }}</p>
           <div class="ai-help-panel__starters">
-            <button class="ai-help-panel__starter" (click)="askStarter('How do I create a new job?')">How do I create a new job?</button>
-            <button class="ai-help-panel__starter" (click)="askStarter('How does the quote to order workflow work?')">Quote to order workflow</button>
-            <button class="ai-help-panel__starter" (click)="askStarter('How do I track inventory?')">How do I track inventory?</button>
-            <button class="ai-help-panel__starter" (click)="askStarter('What keyboard shortcuts are available?')">Keyboard shortcuts</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('How do I create a new job?')">{{ 'aiHelp.starterCreateJob' | translate }}</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('How does the quote to order workflow work?')">{{ 'aiHelp.starterQuoteWorkflow' | translate }}</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('How do I track inventory?')">{{ 'aiHelp.starterInventory' | translate }}</button>
+            <button class="ai-help-panel__starter" (click)="askStarter('What keyboard shortcuts are available?')">{{ 'aiHelp.starterShortcuts' | translate }}</button>
           </div>
         </div>
       }
@@ -45,10 +45,10 @@
       }
     </div>
     <div class="ai-help-panel__footer">
-      <input class="ai-help-panel__input" type="text" placeholder="Ask a question..."
+      <input class="ai-help-panel__input" type="text" [placeholder]="'aiHelp.askPlaceholder' | translate"
              [formControl]="inputControl"
              (keydown.enter)="send()" />
-      <button class="icon-btn ai-help-panel__send" [disabled]="loading() || !inputControl.value?.trim()" (click)="send()" aria-label="Send">
+      <button class="icon-btn ai-help-panel__send" [disabled]="loading() || !inputControl.value?.trim()" (click)="send()" [attr.aria-label]="'common.send' | translate" [matTooltip]="'common.send' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">send</span>
       </button>
     </div>

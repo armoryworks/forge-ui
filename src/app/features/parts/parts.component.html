@@ -1,7 +1,7 @@
-<app-page-header title="Parts Catalog" subtitle="Manage parts, BOMs, and specifications" helpTourId="parts">
+<app-page-header [title]="'parts.title' | translate" [subtitle]="'parts.subtitle' | translate" helpTourId="parts">
   <button class="action-btn action-btn--primary" (click)="openCreatePart()">
     <span class="material-icons-outlined">add</span>
-    New Part
+    {{ 'parts.createPart' | translate }}
   </button>
 </app-page-header>
 
@@ -10,15 +10,15 @@
   <div class="parts-list-panel">
     <!-- Filters -->
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search parts..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'parts.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
-      <app-select label="Type" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
+      <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
-        [rowClass]="partRowClass" emptyIcon="inventory_2" emptyMessage="No parts found" emptyHelpText="Create your first part to start building your catalog. Parts can include BOMs, process steps, and file attachments."
+        [rowClass]="partRowClass" emptyIcon="inventory_2" [emptyMessage]="'parts.noPartsFound' | translate" [emptyHelpText]="'parts.noPartsHelp' | translate"
         (rowClick)="selectPart($any($event))">
         <ng-template appColumnCell="partNumber" let-part>
           <span class="part-number">{{ part.partNumber }}</span>
@@ -61,10 +61,10 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Edit" (click)="openEditPart()">
+          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditPart()">
             <span class="material-icons-outlined">edit</span>
           </button>
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -73,28 +73,28 @@
       <!-- Detail Tabs -->
       <div class="detail-tabs">
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'info'"
-          (click)="detailTab.set('info')">Info</button>
+          (click)="detailTab.set('info')">{{ 'parts.info' | translate }}</button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'bom'"
           (click)="detailTab.set('bom')">
-          BOM
+          {{ 'parts.bom' | translate }}
           @if (part.bomEntries.length > 0) {
             <span class="tab-badge">{{ part.bomEntries.length }}</span>
           }
         </button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'usage'"
           (click)="detailTab.set('usage')">
-          Used In
+          {{ 'parts.usedIn' | translate }}
           @if (part.usedIn.length > 0) {
             <span class="tab-badge">{{ part.usedIn.length }}</span>
           }
         </button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'process'"
           (click)="detailTab.set('process')">
-          Process
+          {{ 'parts.process' | translate }}
         </button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'files'"
           (click)="detailTab.set('files')">
-          Files
+          {{ 'parts.files' | translate }}
           @if (partFiles().length > 0) {
             <span class="tab-badge">{{ partFiles().length }}</span>
           }
@@ -103,7 +103,7 @@
           <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'viewer'"
             (click)="detailTab.set('viewer')">
             <span class="material-icons-outlined detail-tab__icon">view_in_ar</span>
-            3D View
+            {{ 'parts.viewer3d' | translate }}
           </button>
         }
       </div>
@@ -113,44 +113,44 @@
           @if (detailTab() === 'info') {
             <div class="info-grid">
               <div class="info-item">
-                <span class="info-label">Revision</span>
+                <span class="info-label">{{ 'parts.revision' | translate }}</span>
                 <span class="info-value">{{ part.revision }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Type</span>
+                <span class="info-label">{{ 'common.type' | translate }}</span>
                 <span class="info-value">{{ part.partType }}</span>
               </div>
               <div class="info-item">
-                <span class="info-label">Status</span>
+                <span class="info-label">{{ 'common.status' | translate }}</span>
                 <span class="info-value">
                   <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
                 </span>
               </div>
               <div class="info-item">
-                <span class="info-label">Material</span>
+                <span class="info-label">{{ 'parts.material' | translate }}</span>
                 <span class="info-value">{{ part.material ?? '—' }}</span>
               </div>
               @if (part.externalPartNumber) {
                 <div class="info-item">
-                  <span class="info-label">External Part #</span>
+                  <span class="info-label">{{ 'parts.externalPartNumber' | translate }}</span>
                   <span class="info-value">{{ part.externalPartNumber }}</span>
                 </div>
               }
               @if (part.moldToolRef) {
                 <div class="info-item">
-                  <span class="info-label">Mold / Tool Ref</span>
+                  <span class="info-label">{{ 'parts.moldToolRef' | translate }}</span>
                   <span class="info-value">{{ part.moldToolRef }}</span>
                 </div>
               }
               @if (part.preferredVendorName) {
                 <div class="info-item">
-                  <span class="info-label">Preferred Vendor</span>
+                  <span class="info-label">{{ 'parts.preferredVendor' | translate }}</span>
                   <span class="info-value">{{ part.preferredVendorName }}</span>
                 </div>
               }
               @if (part.toolingAssetName) {
                 <div class="info-item">
-                  <span class="info-label">Tooling Asset</span>
+                  <span class="info-label">{{ 'parts.toolingAsset' | translate }}</span>
                   <span class="info-value">{{ part.toolingAssetName }}</span>
                 </div>
               }
@@ -167,15 +167,15 @@
             @if (accountingService.isConfigured()) {
               <div class="accounting-link-section">
                 <div class="accounting-link-section__header">
-                  <span class="info-label">Accounting Item</span>
+                  <span class="info-label">{{ 'parts.accountingItem' | translate }}</span>
                   @if (isLinked()) {
-                    <button class="icon-btn icon-btn--danger" title="Unlink" (click)="unlinkAccountingItem()">
+                    <button class="icon-btn icon-btn--danger" [matTooltip]="'parts.unlink' | translate" matTooltipPosition="above" (click)="unlinkAccountingItem()">
                       <span class="material-icons-outlined">link_off</span>
                     </button>
                   } @else {
                     <button class="action-btn action-btn--sm" (click)="openLinkDialog()">
                       <span class="material-icons-outlined">link</span>
-                      Link
+                      {{ 'parts.link' | translate }}
                     </button>
                   }
                 </div>
@@ -188,7 +188,7 @@
                     </div>
                   </div>
                 } @else {
-                  <span class="text-muted">Not linked to any accounting item</span>
+                  <span class="text-muted">{{ 'parts.notLinked' | translate }}</span>
                 }
               </div>
             }
@@ -196,25 +196,25 @@
             <!-- Inventory Summary -->
             @if (inventorySummary(); as inv) {
               <div class="inventory-summary">
-                <span class="info-label">Inventory</span>
+                <span class="info-label">{{ 'parts.inventory' | translate }}</span>
                 <div class="inventory-summary__qty" [class.inventory-summary__qty--low]="isLowStock()">
                   <span class="inventory-summary__value">{{ inv.totalQuantity }}</span>
-                  <span class="inventory-summary__label">Total Qty</span>
+                  <span class="inventory-summary__label">{{ 'parts.totalQty' | translate }}</span>
                   @if (isLowStock()) {
                     <span class="material-icons-outlined inventory-summary__warn">warning</span>
-                    <span class="inventory-summary__warn-text">Low Stock</span>
+                    <span class="inventory-summary__warn-text">{{ 'parts.lowStock' | translate }}</span>
                   }
                 </div>
                 <div class="info-grid">
                   @if (part.minStockThreshold !== null) {
                     <div class="info-item">
-                      <span class="info-label">Min Stock</span>
+                      <span class="info-label">{{ 'parts.minStock' | translate }}</span>
                       <span class="info-value">{{ part.minStockThreshold }}</span>
                     </div>
                   }
                   @if (part.reorderPoint !== null) {
                     <div class="info-item">
-                      <span class="info-label">Reorder Point</span>
+                      <span class="info-label">{{ 'parts.reorderPoint' | translate }}</span>
                       <span class="info-value">{{ part.reorderPoint }}</span>
                     </div>
                   }
@@ -222,17 +222,17 @@
               </div>
             } @else if (part.minStockThreshold !== null || part.reorderPoint !== null) {
               <div class="inventory-thresholds">
-                <span class="info-label">Inventory Thresholds</span>
+                <span class="info-label">{{ 'parts.inventoryThresholds' | translate }}</span>
                 <div class="info-grid">
                   @if (part.minStockThreshold !== null) {
                     <div class="info-item">
-                      <span class="info-label">Min Stock</span>
+                      <span class="info-label">{{ 'parts.minStock' | translate }}</span>
                       <span class="info-value">{{ part.minStockThreshold }}</span>
                     </div>
                   }
                   @if (part.reorderPoint !== null) {
                     <div class="info-item">
-                      <span class="info-label">Reorder Point</span>
+                      <span class="info-label">{{ 'parts.reorderPoint' | translate }}</span>
                       <span class="info-value">{{ part.reorderPoint }}</span>
                     </div>
                   }
@@ -241,7 +241,7 @@
             }
 
             <div class="status-actions">
-              <span class="info-label">Set Status</span>
+              <span class="info-label">{{ 'parts.setStatus' | translate }}</span>
               <div class="status-btn-group">
                 @for (s of partStatuses; track s) {
                   <button class="status-btn" [class.status-btn--active]="part.status === s"
@@ -257,10 +257,10 @@
           <!-- BOM Tab -->
           @if (detailTab() === 'bom') {
             <div class="bom-header">
-              <span class="bom-count-label">{{ part.bomEntries.length }} components</span>
+              <span class="bom-count-label">{{ part.bomEntries.length }} {{ 'parts.bomComponents' | translate }}</span>
               <button class="action-btn action-btn--primary action-btn--sm" (click)="openAddBom()">
                 <span class="material-icons-outlined">add</span>
-                Add
+                {{ 'common.add' | translate }}
               </button>
             </div>
 
@@ -269,11 +269,11 @@
                 <thead>
                   <tr>
                     <th>#</th>
-                    <th>Part</th>
-                    <th>Qty</th>
-                    <th>Source</th>
-                    <th>Lead Time</th>
-                    <th>Ref Des</th>
+                    <th>{{ 'parts.bomPart' | translate }}</th>
+                    <th>{{ 'parts.bomQty' | translate }}</th>
+                    <th>{{ 'parts.bomSource' | translate }}</th>
+                    <th>{{ 'parts.bomLeadTime' | translate }}</th>
+                    <th>{{ 'parts.bomRefDes' | translate }}</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -296,7 +296,7 @@
                       <td class="text-muted">{{ entry.leadTimeDays !== null ? entry.leadTimeDays + 'd' : '—' }}</td>
                       <td class="text-muted">{{ entry.referenceDesignator ?? '—' }}</td>
                       <td class="col-actions">
-                        <button class="icon-btn icon-btn--danger" title="Remove" (click)="deleteBomEntry(entry)">
+                        <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomEntry(entry)">
                           <span class="material-icons-outlined">delete</span>
                         </button>
                       </td>
@@ -305,7 +305,7 @@
                 </tbody>
               </table>
             } @else {
-              <app-empty-state icon="inventory_2" message="No BOM entries" />
+              <app-empty-state icon="inventory_2" [message]="'parts.noBomEntries' | translate" />
             }
           }
 
@@ -315,9 +315,9 @@
               <table class="bom-table">
                 <thead>
                   <tr>
-                    <th>Parent Part</th>
-                    <th>Description</th>
-                    <th>Qty</th>
+                    <th>{{ 'parts.parentPart' | translate }}</th>
+                    <th>{{ 'common.description' | translate }}</th>
+                    <th>{{ 'parts.bomQty' | translate }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -331,7 +331,7 @@
                 </tbody>
               </table>
             } @else {
-              <app-empty-state icon="link_off" message="Not used in any assemblies" />
+              <app-empty-state icon="link_off" [message]="'parts.notUsedInAssemblies' | translate" />
             }
           }
 
@@ -362,7 +362,7 @@
                 }
               </div>
             } @else {
-              <app-empty-state icon="attach_file" message="No files attached" />
+              <app-empty-state icon="attach_file" [message]="'parts.noFilesAttached' | translate" />
             }
           }
 
@@ -377,27 +377,27 @@
 
 <!-- Part Dialog -->
 @if (showPartDialog()) {
-  <app-dialog [title]="editingPart() ? editingPart()!.partNumber : 'Create Part'" (closed)="closePartDialog()">
+  <app-dialog [title]="editingPart() ? editingPart()!.partNumber : ('parts.createPart' | translate)" (closed)="closePartDialog()">
     <div [formGroup]="partForm">
       @if (editingPart()) {
         <div class="auto-part-number">
-          <span class="info-label">Part Number</span>
+          <span class="info-label">{{ 'parts.partNumberLabel' | translate }}</span>
           <span class="info-value">{{ editingPart()!.partNumber }}</span>
         </div>
       }
-      <app-select label="Type" formControlName="partType" [options]="partTypeOptions" />
-      <app-input label="Description" formControlName="description" />
+      <app-select [label]="'common.type' | translate" formControlName="partType" [options]="partTypeOptions" />
+      <app-input [label]="'common.description' | translate" formControlName="description" />
       <div class="dialog-row">
-        <app-input label="Revision" formControlName="revision" [maxlength]="5" />
-        <app-input label="External Part #" formControlName="externalPartNumber" placeholder="Vendor/supplier part number" />
+        <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" />
+        <app-input [label]="'parts.externalPartNumber' | translate" formControlName="externalPartNumber" [placeholder]="'parts.externalPartNumberPlaceholder' | translate" />
       </div>
       <div class="dialog-row">
-        <app-input label="Material" formControlName="material" />
-        <app-input label="Mold/Tool Ref" formControlName="moldToolRef" />
+        <app-input [label]="'parts.material' | translate" formControlName="material" />
+        <app-input [label]="'parts.moldToolRef' | translate" formControlName="moldToolRef" />
       </div>
 
       <app-entity-picker
-        label="Tooling Asset"
+        [label]="'parts.toolingAsset' | translate"
         entityType="assets"
         displayField="name"
         [filters]="{ assetType: 'Tooling' }"
@@ -405,13 +405,13 @@
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closePartDialog()">Cancel</button>
+      <button class="action-btn" (click)="closePartDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="partViolations"
         [disabled]="partForm.invalid"
         (click)="savePart()">
         <span class="material-icons-outlined">save</span>
-        {{ editingPart() ? 'Save Changes' : 'Create Part' }}
+        {{ editingPart() ? ('parts.saveChanges' | translate) : ('parts.createPart' | translate) }}
       </button>
     </div>
   </app-dialog>
@@ -419,14 +419,14 @@
 
 <!-- Link Accounting Item Dialog -->
 @if (showLinkDialog()) {
-  <app-dialog title="Link Accounting Item" width="520px" (closed)="closeLinkDialog()">
+  <app-dialog [title]="'parts.linkAccountingItem' | translate" width="520px" (closed)="closeLinkDialog()">
     <div class="accounting-items-list" [appLoadingBlock]="accountingItemsLoading()">
       @for (item of accountingService.items(); track item.externalId) {
         <button class="accounting-item-row" [disabled]="linkSaving()" (click)="linkToAccountingItem(item)">
           <div class="accounting-item-row__info">
             <span class="accounting-item-row__name">{{ item.name }}</span>
             @if (item.sku) {
-              <span class="accounting-item-row__sku">SKU: {{ item.sku }}</span>
+              <span class="accounting-item-row__sku">{{ 'parts.sku' | translate }}: {{ item.sku }}</span>
             }
             @if (item.description) {
               <span class="accounting-item-row__desc">{{ item.description }}</span>
@@ -437,41 +437,41 @@
           }
         </button>
       } @empty {
-        <app-empty-state icon="receipt_long" message="No accounting items found" />
+        <app-empty-state icon="receipt_long" [message]="'parts.noAccountingItems' | translate" />
       }
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeLinkDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeLinkDialog()">{{ 'common.cancel' | translate }}</button>
     </div>
   </app-dialog>
 }
 
 <!-- BOM Entry Dialog -->
 @if (showBomDialog()) {
-  <app-dialog title="Add BOM Entry" (closed)="closeBomDialog()">
+  <app-dialog [title]="'parts.addBomEntry' | translate" (closed)="closeBomDialog()">
     <div [formGroup]="bomForm">
-      <app-entity-picker label="Child Part" entityType="parts" displayField="partNumber" formControlName="childPartId" />
+      <app-entity-picker [label]="'parts.childPart' | translate" entityType="parts" displayField="partNumber" formControlName="childPartId" />
 
       <div class="dialog-row">
-        <app-input label="Quantity" type="number" formControlName="quantity" />
-        <app-select label="Source" formControlName="sourceType" [options]="sourceTypeOptions" />
+        <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity" />
+        <app-select [label]="'parts.sourceType' | translate" formControlName="sourceType" [options]="sourceTypeOptions" />
       </div>
 
       <div class="dialog-row">
-        <app-input label="Reference Designator" formControlName="referenceDesignator" />
-        <app-input label="Lead Time (days)" type="number" formControlName="leadTimeDays" />
+        <app-input [label]="'parts.referenceDesignator' | translate" formControlName="referenceDesignator" />
+        <app-input [label]="'parts.leadTimeDays' | translate" type="number" formControlName="leadTimeDays" />
       </div>
 
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeBomDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeBomDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="bomViolations"
         [disabled]="bomForm.invalid"
-        (click)="saveBomEntry()">Add Entry</button>
+        (click)="saveBomEntry()">{{ 'parts.addEntry' | translate }}</button>
     </div>
   </app-dialog>
 }

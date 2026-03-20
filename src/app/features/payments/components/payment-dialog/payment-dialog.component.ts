@@ -15,6 +15,8 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface ApplicationEntry {
   invoiceId: number;
@@ -29,7 +31,7 @@ interface ApplicationEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    ValidationPopoverDirective,
+    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './payment-dialog.component.html',
   styleUrl: './payment-dialog.component.scss',
@@ -39,6 +41,7 @@ export class PaymentDialogComponent {
   private readonly paymentService = inject(PaymentService);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -48,18 +51,18 @@ export class PaymentDialogComponent {
   protected readonly applications = signal<ApplicationEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'Select customer...' },
+    { value: null, label: this.translate.instant('payments.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
   protected readonly methodOptions: SelectOption[] = [
-    { value: null, label: 'Select method...' },
-    { value: 'Cash', label: 'Cash' },
-    { value: 'Check', label: 'Check' },
-    { value: 'CreditCard', label: 'Credit Card' },
-    { value: 'BankTransfer', label: 'Bank Transfer' },
-    { value: 'Wire', label: 'Wire' },
-    { value: 'Other', label: 'Other' },
+    { value: null, label: this.translate.instant('payments.selectMethod') },
+    { value: 'Cash', label: this.translate.instant('payments.methodCash') },
+    { value: 'Check', label: this.translate.instant('payments.methodCheck') },
+    { value: 'CreditCard', label: this.translate.instant('payments.methodCreditCard') },
+    { value: 'BankTransfer', label: this.translate.instant('payments.methodBankTransfer') },
+    { value: 'Wire', label: this.translate.instant('payments.methodWire') },
+    { value: 'Other', label: this.translate.instant('payments.methodOther') },
   ];
 
   protected readonly form = new FormGroup({
@@ -137,7 +140,7 @@ export class PaymentDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Payment created.');
+        this.snackbar.success(this.translate.instant('payments.paymentCreated'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

@@ -1,11 +1,11 @@
 <div class="account-page">
   <h1 class="account-page__title">
     <span class="material-icons-outlined">description</span>
-    Tax & Compliance Forms
+    {{ 'account.taxComplianceForms' | translate }}
   </h1>
 
   <p class="tax-forms__intro">
-    Complete the following forms to finish your onboarding. Click any form to view details, sign digitally, or upload a signed copy.
+    {{ 'account.taxFormsIntro' | translate }}
   </p>
 
   @for (tmpl of templates(); track tmpl.id) {
@@ -24,10 +24,10 @@
         </div>
         @if (isComplete(tmpl.profileCompletionKey)) {
           <span class="tax-forms__item-date">
-            Completed {{ getCompletedDate(tmpl.profileCompletionKey) | date:'MM/dd/yyyy' }}
+            {{ 'account.completed' | translate }} {{ getCompletedDate(tmpl.profileCompletionKey) | date:'MM/dd/yyyy' }}
           </span>
         } @else if (tmpl.blocksJobAssignment) {
-          <span class="tax-forms__item-required">Required</span>
+          <span class="tax-forms__item-required">{{ 'common.required' | translate }}</span>
         }
         <span class="material-icons-outlined tax-forms__item-chevron">chevron_right</span>
       </div>

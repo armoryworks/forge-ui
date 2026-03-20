@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy, OnInit, output, signal } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { DashboardService } from '../services/dashboard.service';
 import { DashboardData } from '../models/dashboard-data.model';
 
 @Component({
   selector: 'app-ambient-mode',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './ambient-mode.component.html',
   styleUrl: './ambient-mode.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,9 +1,12 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { formatDate } from '../../shared/utils/date.utils';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../shared/services/auth.service';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { ChatHubService } from '../../shared/services/chat-hub.service';
 import { ChatService } from './services/chat.service';
 import { ChatConversation } from './models/chat-conversation.model';
@@ -13,7 +16,7 @@ import { ChatMessageEvent } from './models/chat-message-event.model';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent],
+  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +25,7 @@ export class ChatComponent implements OnDestroy {
   private readonly chatService = inject(ChatService);
   private readonly chatHub = inject(ChatHubService);
   private readonly authService = inject(AuthService);
+  private readonly translate = inject(TranslateService);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
@@ -148,7 +152,7 @@ export class ChatComponent implements OnDestroy {
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);
 
-    if (minutes < 1) return 'Just now';
+    if (minutes < 1) return this.translate.instant('chat.justNow');
     if (minutes < 60) return `${minutes}m`;
     const hours = Math.floor(minutes / 60);
     if (hours < 24) return `${hours}h`;

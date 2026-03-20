@@ -4,6 +4,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, interval } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
@@ -25,7 +26,7 @@ type KioskPhase = 'setup' | 'dashboard' | 'identifying' | 'pin' | 'job-scanned' 
 @Component({
   selector: 'app-shop-floor-clock',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, AvatarComponent, InputComponent, BarcodeScanInputComponent, KioskSearchBarComponent, KioskSetupComponent],
   templateUrl: './shop-floor-clock.component.html',
   styleUrl: './shop-floor-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +35,7 @@ export class ShopFloorClockComponent implements OnInit {
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   // Terminal config
   protected readonly terminal = signal<KioskTerminal | null>(null);
@@ -184,7 +186,7 @@ export class ShopFloorClockComponent implements OnInit {
       case 'unknown':
       default:
         // Unrecognized — show error on dashboard
-        this.error.set(`Scan not recognized: "${scanValue}". Try your badge or a job barcode.`);
+        this.error.set(this.translate.instant('shopFloor.scanNotRecognized', { value: scanValue }));
         break;
     }
   }
@@ -193,7 +195,7 @@ export class ShopFloorClockComponent implements OnInit {
     const scanValue = this.scannedBarcode();
     const pin = this.pinControl.value?.trim();
     if (!scanValue || !pin || pin.length < 4) {
-      this.kioskAuthError.set('PIN must be at least 4 digits.');
+      this.kioskAuthError.set(this.translate.instant('shopFloor.pinMinDigits'));
       return;
     }
 
@@ -207,7 +209,7 @@ export class ShopFloorClockComponent implements OnInit {
       },
       error: () => {
         this.kioskAuthenticating.set(false);
-        this.kioskAuthError.set('Badge not recognized or invalid PIN. Please try again.');
+        this.kioskAuthError.set(this.translate.instant('shopFloor.badgeOrPinInvalid'));
       },
     });
   }
@@ -232,7 +234,7 @@ export class ShopFloorClockComponent implements OnInit {
     const email = this.emailControl.value?.trim();
     const password = this.passwordControl.value;
     if (!email || !password) {
-      this.manualLoginError.set('Email and password are required.');
+      this.manualLoginError.set(this.translate.instant('shopFloor.emailPasswordRequired'));
       return;
     }
 
@@ -246,7 +248,7 @@ export class ShopFloorClockComponent implements OnInit {
       },
       error: () => {
         this.manualLoggingIn.set(false);
-        this.manualLoginError.set('Invalid email or password. Please try again.');
+        this.manualLoginError.set(this.translate.instant('shopFloor.invalidCredentials'));
       },
     });
   }
@@ -343,7 +345,7 @@ export class ShopFloorClockComponent implements OnInit {
         this.overview.set(overview);
         this.error.set(null);
       },
-      error: () => this.error.set('Failed to load shop floor data'),
+      error: () => this.error.set(this.translate.instant('shopFloor.loadFailed')),
     });
   }
 

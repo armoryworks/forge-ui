@@ -1,15 +1,15 @@
 <div class="account-page">
   <h1 class="account-page__title">
     <span class="material-icons-outlined">emergency</span>
-    Emergency Contact
+    {{ 'account.emergency' | translate }}
   </h1>
 
   <div class="account-page__card">
     <div [formGroup]="form" class="account-page__form">
       <div class="account-page__row account-page__row--3col">
-        <app-input label="Contact Name" formControlName="emergencyContactName" [maxlength]="200" [required]="true" />
-        <app-input label="Contact Phone" formControlName="emergencyContactPhone" mask="phone" placeholder="(555) 123-4567" [required]="true" />
-        <app-select label="Relationship" formControlName="emergencyContactRelationship" [options]="relationshipOptions" />
+        <app-input [label]="'account.emergencyName' | translate" formControlName="emergencyContactName" [maxlength]="200" [required]="true" />
+        <app-input [label]="'account.emergencyPhone' | translate" formControlName="emergencyContactPhone" mask="phone" placeholder="(555) 123-4567" [required]="true" />
+        <app-select [label]="'account.relationship' | translate" formControlName="emergencyContactRelationship" [options]="relationshipOptions" />
       </div>
     </div>
 
@@ -20,10 +20,10 @@
         (click)="save()">
         @if (saving()) {
           <span class="material-icons-outlined account-page__spinner">sync</span>
-          Saving...
+          {{ 'account.saving' | translate }}
         } @else {
           <span class="material-icons-outlined">save</span>
-          Save
+          {{ 'common.save' | translate }}
         }
       </button>
     </div>

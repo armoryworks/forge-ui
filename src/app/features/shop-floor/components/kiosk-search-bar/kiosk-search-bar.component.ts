@@ -3,6 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of } from 'rxjs';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { environment } from '../../../../../environments/environment';
 import { SearchResult } from '../../../../shared/models/search.model';
@@ -10,7 +11,7 @@ import { SearchResult } from '../../../../shared/models/search.model';
 @Component({
   selector: 'app-kiosk-search-bar',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, TranslatePipe],
   templateUrl: './kiosk-search-bar.component.html',
   styleUrl: './kiosk-search-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

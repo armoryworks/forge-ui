@@ -1,13 +1,13 @@
 <div class="panel-header">
-  <span class="panel-header__count">{{ templates().length }} compliance templates</span>
+  <span class="panel-header__count">{{ templates().length }} {{ 'complianceTemplates.templates' | translate }}</span>
   <div class="panel-header__actions">
-    <button class="action-btn" [disabled]="syncing()" (click)="syncAll()" aria-label="Sync all auto-sync templates">
+    <button class="action-btn" [disabled]="syncing()" (click)="syncAll()" [attr.aria-label]="'complianceTemplates.syncAll' | translate">
       <span class="material-icons-outlined">sync</span>
-      Sync All
+      {{ 'complianceTemplates.syncAll' | translate }}
     </button>
-    <button class="action-btn action-btn--primary" (click)="openCreateDialog()" aria-label="Create new compliance template">
+    <button class="action-btn action-btn--primary" (click)="openCreateDialog()" [attr.aria-label]="'complianceTemplates.newTemplate' | translate">
       <span class="material-icons-outlined">add</span>
-      New Template
+      {{ 'complianceTemplates.newTemplate' | translate }}
     </button>
   </div>
 </div>
@@ -18,7 +18,7 @@
     [columns]="columns"
     [data]="templates()"
     emptyIcon="description"
-    emptyMessage="No compliance templates configured"
+    [emptyMessage]="'complianceTemplates.noTemplates' | translate"
     (rowClick)="onRowClick($any($event))">
 
     <ng-template appColumnCell="icon" let-row>
@@ -26,14 +26,19 @@
     </ng-template>
 
     <ng-template appColumnCell="name" let-row>
-      {{ row.name }}
+      <div class="template-name-cell">
+        {{ row.name }}
+        @if (!row.currentFormDefinitionVersionId && (row.sourceUrl || isExtractableType(row))) {
+          <span class="chip chip--warning chip--sm">{{ 'complianceTemplates.noFormDefinition' | translate }}</span>
+        }
+      </div>
     </ng-template>
 
     <ng-template appColumnCell="isAutoSync" let-row>
       @if (row.isAutoSync) {
-        <span class="chip chip--info">Auto</span>
+        <span class="chip chip--info">{{ 'complianceTemplates.auto' | translate }}</span>
       } @else {
-        <span class="chip chip--muted">Manual</span>
+        <span class="chip chip--muted">{{ 'complianceTemplates.manual' | translate }}</span>
       }
     </ng-template>
 
@@ -41,36 +46,45 @@
       @if (row.lastSyncedAt) {
         {{ row.lastSyncedAt | date:'MM/dd/yyyy' }}
       } @else {
-        <span class="text-muted">Never</span>
+        <span class="text-muted">{{ 'complianceTemplates.never' | translate }}</span>
       }
     </ng-template>
 
     <ng-template appColumnCell="isActive" let-row>
       @if (row.isActive) {
-        <span class="chip chip--success">Active</span>
+        <span class="chip chip--success">{{ 'common.active' | translate }}</span>
       } @else {
-        <span class="chip chip--muted">Inactive</span>
+        <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
       }
     </ng-template>
 
     <ng-template appColumnCell="actions" let-row>
       <div class="action-cell">
         @if (row.formType === 'StateWithholding') {
-          <button class="icon-btn" (click)="openStateWithholdingDialog(); $event.stopPropagation()" aria-label="View state withholding details">
+          <button class="icon-btn" (click)="openStateWithholdingDialog(); $event.stopPropagation()" aria-label="View state withholding details" matTooltip="View state withholding details" matTooltipPosition="above">
             <span class="material-icons-outlined">open_in_new</span>
           </button>
         }
+        @if (!row.currentFormDefinitionVersionId && (row.sourceUrl || row.manualOverrideFileId)) {
+          <button class="icon-btn" (click)="extractDefinition(row); $event.stopPropagation()"
+                  [disabled]="extracting()"
+                  [attr.aria-label]="'complianceTemplates.extractDefinition' | translate"
+                  [matTooltip]="'complianceTemplates.extractDefinition' | translate" matTooltipPosition="above">
+            <span class="material-icons-outlined">auto_fix_high</span>
+          </button>
+        }
         @if (row.isAutoSync && row.sourceUrl) {
-          <button class="icon-btn" (click)="syncTemplate(row); $event.stopPropagation()" aria-label="Sync template">
+          <button class="icon-btn" (click)="syncTemplate(row); $event.stopPropagation()" aria-label="Sync template" matTooltip="Sync template" matTooltipPosition="above">
             <span class="material-icons-outlined">sync</span>
           </button>
         }
         <button class="icon-btn" (click)="openEditDialog(row); $event.stopPropagation()"
-                [attr.aria-label]="isSystemTemplate(row) ? 'Upload document' : 'Edit template'">
+                [attr.aria-label]="isSystemTemplate(row) ? ('common.upload' | translate) : ('common.edit' | translate)"
+                [matTooltip]="isSystemTemplate(row) ? ('common.upload' | translate) : ('common.edit' | translate)" matTooltipPosition="above">
           <span class="material-icons-outlined">{{ isSystemTemplate(row) ? 'upload_file' : 'edit' }}</span>
         </button>
         @if (!isSystemTemplate(row)) {
-          <button class="icon-btn icon-btn--danger" (click)="deleteTemplate(row); $event.stopPropagation()" aria-label="Delete template">
+          <button class="icon-btn icon-btn--danger" (click)="deleteTemplate(row); $event.stopPropagation()" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
             <span class="material-icons-outlined">delete</span>
           </button>
         }

@@ -5,21 +5,21 @@
   </div>
 } @else {
   <header class="sf-header">
-    <h1 class="sf-header__title">Shop Floor</h1>
+    <h1 class="sf-header__title">{{ 'shopFloor.title' | translate }}</h1>
     <app-kiosk-search-bar />
     <div class="sf-header__stats">
       <div class="sf-stat">
         <span class="sf-stat__value">{{ activeJobs().length }}</span>
-        <span class="sf-stat__label">Active Jobs</span>
+        <span class="sf-stat__label">{{ 'shopFloor.activeJobs' | translate }}</span>
       </div>
       <div class="sf-stat sf-stat--success">
         <span class="sf-stat__value">{{ completedToday() }}</span>
-        <span class="sf-stat__label">Completed Today</span>
+        <span class="sf-stat__label">{{ 'shopFloor.completedToday' | translate }}</span>
       </div>
       @if (maintenanceAlerts() > 0) {
         <div class="sf-stat sf-stat--warning">
           <span class="sf-stat__value">{{ maintenanceAlerts() }}</span>
-          <span class="sf-stat__label">Maintenance Alerts</span>
+          <span class="sf-stat__label">{{ 'shopFloor.maintenanceAlerts' | translate }}</span>
         </div>
       }
     </div>
@@ -31,7 +31,7 @@
     <section class="sf-section sf-section--workers">
       <h2 class="sf-section__title">
         <span class="material-icons-outlined">group</span>
-        Who's Here ({{ workers().length }})
+        {{ 'shopFloor.whosHere' | translate }} ({{ workers().length }})
       </h2>
       <div class="sf-workers">
         @for (worker of workers(); track worker.userId) {
@@ -42,13 +42,13 @@
               @if (worker.currentTask) {
                 <span class="sf-worker__task">{{ worker.currentJobNumber }} — {{ worker.currentTask }}</span>
               } @else {
-                <span class="sf-worker__task sf-worker__task--idle">Available</span>
+                <span class="sf-worker__task sf-worker__task--idle">{{ 'shopFloor.available' | translate }}</span>
               }
             </div>
             <span class="sf-worker__time">{{ worker.timeOnTask }}</span>
           </div>
         } @empty {
-          <div class="sf-empty">No workers clocked in</div>
+          <div class="sf-empty">{{ 'shopFloor.noWorkersClockedIn' | translate }}</div>
         }
       </div>
     </section>
@@ -57,7 +57,7 @@
     <section class="sf-section sf-section--jobs">
       <h2 class="sf-section__title">
         <span class="material-icons-outlined">assignment</span>
-        Active Jobs
+        {{ 'shopFloor.activeJobs' | translate }}
       </h2>
       <div class="sf-jobs">
         @for (job of activeJobs(); track job.id) {
@@ -76,7 +76,7 @@
             }
           </div>
         } @empty {
-          <div class="sf-empty">No active jobs</div>
+          <div class="sf-empty">{{ 'shopFloor.noActiveJobs' | translate }}</div>
         }
       </div>
     </section>

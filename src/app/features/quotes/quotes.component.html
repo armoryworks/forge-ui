@@ -1,7 +1,7 @@
-<app-page-header title="Quotes" subtitle="Create and manage customer price quotes">
+<app-page-header [title]="'quotes.title' | translate" [subtitle]="'quotes.subtitle' | translate">
   <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
-    New Quote
+    {{ 'quotes.newQuote' | translate }}
   </button>
 </app-page-header>
 
@@ -9,14 +9,14 @@
   <!-- Left: Quote List -->
   <div class="qt-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search quotes..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'quotes.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="quotes()"
-        [rowClass]="quoteRowClass" emptyIcon="request_quote" emptyMessage="No quotes found"
+        [rowClass]="quoteRowClass" emptyIcon="request_quote" [emptyMessage]="'quotes.noQuotesFound' | translate"
         (rowClick)="selectQuote($any($event))">
         <ng-template appColumnCell="quoteNumber" let-row>
           <span class="qt-number">{{ row.quoteNumber }}</span>
@@ -49,7 +49,7 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -59,36 +59,36 @@
         <!-- Status & Dates -->
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'common.status' | translate }}</span>
             <span class="info-value">
               <span [class]="getStatusClass(quote.status)">{{ getStatusLabel(quote.status) }}</span>
             </span>
           </div>
           <div class="info-item">
-            <span class="info-label">Customer</span>
+            <span class="info-label">{{ 'quotes.customer' | translate }}</span>
             <span class="info-value">{{ quote.customerName }}</span>
           </div>
           @if (quote.expirationDate) {
             <div class="info-item">
-              <span class="info-label">Expiration</span>
+              <span class="info-label">{{ 'quotes.expiration' | translate }}</span>
               <span class="info-value">{{ quote.expirationDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (quote.sentDate) {
             <div class="info-item">
-              <span class="info-label">Sent</span>
+              <span class="info-label">{{ 'quotes.sent' | translate }}</span>
               <span class="info-value">{{ quote.sentDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (quote.acceptedDate) {
             <div class="info-item">
-              <span class="info-label">Accepted</span>
+              <span class="info-label">{{ 'quotes.accepted' | translate }}</span>
               <span class="info-value">{{ quote.acceptedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (quote.salesOrderId) {
             <div class="info-item">
-              <span class="info-label">Linked Order</span>
+              <span class="info-label">{{ 'quotes.linkedOrder' | translate }}</span>
               <span class="info-value">{{ quote.salesOrderNumber }}</span>
             </div>
           }
@@ -96,23 +96,23 @@
 
         @if (quote.notes) {
           <div class="info-section">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'common.notes' | translate }}</span>
             <div class="info-notes">{{ quote.notes }}</div>
           </div>
         }
 
         <!-- Line Items -->
         <div class="lines-section">
-          <span class="info-label">Line Items ({{ quote.lines.length }})</span>
+          <span class="info-label">{{ 'quotes.lineItems' | translate }} ({{ quote.lines.length }})</span>
           @if (quote.lines.length > 0) {
             <table class="lines-table">
               <thead>
                 <tr>
-                  <th>Part #</th>
-                  <th>Description</th>
-                  <th class="lines-table__right">Qty</th>
-                  <th class="lines-table__right">Unit Price</th>
-                  <th class="lines-table__right">Total</th>
+                  <th>{{ 'quotes.partNumber' | translate }}</th>
+                  <th>{{ 'common.description' | translate }}</th>
+                  <th class="lines-table__right">{{ 'quotes.qty' | translate }}</th>
+                  <th class="lines-table__right">{{ 'quotes.unitPrice' | translate }}</th>
+                  <th class="lines-table__right">{{ 'common.total' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -133,26 +133,26 @@
         <!-- Totals -->
         <div class="totals-section">
           <div class="totals-row">
-            <span class="info-label">Subtotal</span>
+            <span class="info-label">{{ 'quotes.subtotal' | translate }}</span>
             <span class="totals-value">{{ quote.subtotal | currency }}</span>
           </div>
           <div class="totals-row">
-            <span class="info-label">Tax ({{ quote.taxRate }}%)</span>
+            <span class="info-label">{{ 'quotes.tax' | translate }} ({{ quote.taxRate }}%)</span>
             <span class="totals-value">{{ quote.taxAmount | currency }}</span>
           </div>
           <div class="totals-row totals-row--total">
-            <span class="info-label">Total</span>
+            <span class="info-label">{{ 'common.total' | translate }}</span>
             <span class="totals-value">{{ quote.total | currency }}</span>
           </div>
         </div>
 
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Created</span>
+            <span class="info-label">{{ 'common.created' | translate }}</span>
             <span class="info-value">{{ quote.createdAt | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Updated</span>
+            <span class="info-label">{{ 'common.updated' | translate }}</span>
             <span class="info-value">{{ quote.updatedAt | date:'MM/dd/yyyy' }}</span>
           </div>
         </div>
@@ -162,31 +162,31 @@
           @if (canSend(quote.status)) {
             <button class="action-btn action-btn--primary" (click)="sendQuote()">
               <span class="material-icons-outlined">send</span>
-              Send
+              {{ 'quotes.send' | translate }}
             </button>
           }
           @if (canAccept(quote.status)) {
             <button class="action-btn action-btn--primary" (click)="acceptQuote()">
               <span class="material-icons-outlined">thumb_up</span>
-              Accept
+              {{ 'quotes.accept' | translate }}
             </button>
           }
           @if (canReject(quote.status)) {
             <button class="action-btn" (click)="rejectQuote()">
               <span class="material-icons-outlined">thumb_down</span>
-              Reject
+              {{ 'quotes.reject' | translate }}
             </button>
           }
           @if (canConvert(quote.status)) {
             <button class="action-btn action-btn--primary" (click)="convertToOrder()">
               <span class="material-icons-outlined">shopping_cart</span>
-              Convert to Order
+              {{ 'quotes.convertToOrder' | translate }}
             </button>
           }
           @if (canDelete(quote.status)) {
             <button class="action-btn action-btn--danger" (click)="deleteQuote()">
               <span class="material-icons-outlined">delete</span>
-              Delete
+              {{ 'common.delete' | translate }}
             </button>
           }
         </div>

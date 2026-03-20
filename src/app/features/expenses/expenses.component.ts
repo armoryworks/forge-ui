@@ -19,9 +19,11 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-expenses',
@@ -31,6 +33,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective,
+    TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -40,6 +43,7 @@ export class ExpensesComponent {
   private readonly expensesService = inject(ExpensesService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -69,17 +73,17 @@ export class ExpensesComponent {
   });
 
   protected readonly expenseColumns: ColumnDef[] = [
-    { field: 'expenseDate', header: 'Date', sortable: true, type: 'date' },
-    { field: 'category', header: 'Category', sortable: true },
-    { field: 'description', header: 'Description' },
-    { field: 'jobNumber', header: 'Job' },
-    { field: 'userName', header: 'Submitted By', sortable: true },
-    { field: 'amount', header: 'Amount', sortable: true, align: 'right' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: [
-      { value: 'Pending', label: 'Pending' }, { value: 'Approved', label: 'Approved' },
-      { value: 'Rejected', label: 'Rejected' }, { value: 'SelfApproved', label: 'Self-Approved' },
+    { field: 'expenseDate', header: this.translate.instant('expenses.colDate'), sortable: true, type: 'date' },
+    { field: 'category', header: this.translate.instant('expenses.colCategory'), sortable: true },
+    { field: 'description', header: this.translate.instant('expenses.colDescription') },
+    { field: 'jobNumber', header: this.translate.instant('expenses.colJob') },
+    { field: 'userName', header: this.translate.instant('expenses.colSubmittedBy'), sortable: true },
+    { field: 'amount', header: this.translate.instant('expenses.colAmount'), sortable: true, align: 'right' },
+    { field: 'status', header: this.translate.instant('expenses.colStatus'), sortable: true, filterable: true, type: 'enum', filterOptions: [
+      { value: 'Pending', label: this.translate.instant('common.pending') }, { value: 'Approved', label: this.translate.instant('expenses.approved') },
+      { value: 'Rejected', label: this.translate.instant('expenses.rejected') }, { value: 'SelfApproved', label: this.translate.instant('expenses.selfApproved') },
     ]},
-    { field: 'actions', header: 'Actions', width: '80px', align: 'right' },
+    { field: 'actions', header: this.translate.instant('expenses.colActions'), width: '80px', align: 'right' },
   ];
 
   protected readonly statuses: ExpenseStatus[] = ['Pending', 'Approved', 'Rejected', 'SelfApproved'];
@@ -88,12 +92,28 @@ export class ExpensesComponent {
     'Shipping', 'Office Supplies', 'Equipment', 'Maintenance', 'Other',
   ];
 
+  private readonly categoryKeyMap: Record<string, string> = {
+    Materials: 'expenses.categoryMaterials',
+    Tools: 'expenses.categoryTools',
+    Travel: 'expenses.categoryTravel',
+    Fuel: 'expenses.categoryFuel',
+    Meals: 'expenses.categoryMeals',
+    Shipping: 'expenses.categoryShipping',
+    'Office Supplies': 'expenses.categoryOfficeSupplies',
+    Equipment: 'expenses.categoryEquipment',
+    Maintenance: 'expenses.categoryMaintenance',
+    Other: 'expenses.categoryOther',
+  };
+
   protected readonly statusOptions: SelectOption[] = [
-    { value: '', label: 'All Statuses' },
-    ...this.statuses.map(s => ({ value: s, label: s === 'SelfApproved' ? 'Self-Approved' : s })),
+    { value: '', label: this.translate.instant('expenses.allStatuses') },
+    ...this.statuses.map(s => ({ value: s, label: s === 'SelfApproved' ? this.translate.instant('expenses.selfApproved') : this.translate.instant(`expenses.${s.toLowerCase()}`) })),
   ];
 
-  protected readonly categoryOptions: SelectOption[] = this.categories.map(c => ({ value: c, label: c }));
+  protected readonly categoryOptions: SelectOption[] = this.categories.map(c => ({
+    value: c,
+    label: this.translate.instant(this.categoryKeyMap[c] ?? c),
+  }));
 
   constructor() {
     this.loadExpenses();
@@ -135,20 +155,20 @@ export class ExpensesComponent {
       description: form.description ?? '',
       expenseDate: toIsoDate(form.expenseDate) ?? new Date().toISOString().split('T')[0],
     }).subscribe({
-      next: () => { this.saving.set(false); this.closeDialog(); this.loadExpenses(); this.snackbar.success('Expense submitted.'); },
+      next: () => { this.saving.set(false); this.closeDialog(); this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseSubmitted')); },
       error: () => this.saving.set(false),
     });
   }
 
   protected approveExpense(expense: ExpenseItem): void {
     this.expensesService.updateExpenseStatus(expense.id, { status: 'Approved' }).subscribe({
-      next: () => { this.loadExpenses(); this.snackbar.success('Expense approved.'); },
+      next: () => { this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseApproved')); },
     });
   }
 
   protected rejectExpense(expense: ExpenseItem): void {
     this.expensesService.updateExpenseStatus(expense.id, { status: 'Rejected' }).subscribe({
-      next: () => { this.loadExpenses(); this.snackbar.success('Expense rejected.'); },
+      next: () => { this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseRejected')); },
     });
   }
 
@@ -161,7 +181,9 @@ export class ExpensesComponent {
   }
 
   protected getStatusLabel(status: string): string {
-    return status === 'SelfApproved' ? 'Self-Approved' : status;
+    if (status === 'SelfApproved') return this.translate.instant('expenses.selfApproved');
+    const key = `expenses.${status.toLowerCase()}`;
+    return this.translate.instant(key);
   }
 
   protected getTotalAmount(): number {
@@ -172,9 +194,9 @@ export class ExpensesComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Expense?',
-        message: 'This will permanently delete this expense record.',
-        confirmLabel: 'Delete',
+        title: this.translate.instant('expenses.deleteTitle'),
+        message: this.translate.instant('expenses.deleteMessage'),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -182,7 +204,7 @@ export class ExpensesComponent {
       this.expensesService.deleteExpense(expense.id).subscribe({
         next: () => {
           this.loadExpenses();
-          this.snackbar.success('Expense deleted.');
+          this.snackbar.success(this.translate.instant('expenses.expenseDeleted'));
         },
       });
     });

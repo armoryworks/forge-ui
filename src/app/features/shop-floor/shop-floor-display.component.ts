@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
@@ -14,7 +15,7 @@ const REFRESH_INTERVAL_MS = 30_000;
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [AvatarComponent, KioskSearchBarComponent],
+  imports: [TranslatePipe, AvatarComponent, KioskSearchBarComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,7 @@ const REFRESH_INTERVAL_MS = 30_000;
 export class ShopFloorDisplayComponent implements OnInit {
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly data = signal<ShopFloorOverview | null>(null);
   protected readonly error = signal<string | null>(null);
@@ -53,7 +55,7 @@ export class ShopFloorDisplayComponent implements OnInit {
         this.lastUpdated.set(new Date());
         this.error.set(null);
       },
-      error: () => this.error.set('Failed to load shop floor data'),
+      error: () => this.error.set(this.translate.instant('shopFloor.loadFailed')),
     });
   }
 

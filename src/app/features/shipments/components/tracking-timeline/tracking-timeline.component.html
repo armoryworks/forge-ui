@@ -6,12 +6,12 @@
     </div>
     <div class="tracking__meta">
       <div class="tracking__meta-item">
-        <span class="tracking__meta-label">Tracking #</span>
+        <span class="tracking__meta-label">{{ 'shipments.trackingNumber' | translate }}</span>
         <span class="tracking__meta-value">{{ tracking().trackingNumber }}</span>
       </div>
       @if (tracking().estimatedDelivery) {
         <div class="tracking__meta-item">
-          <span class="tracking__meta-label">Est. Delivery</span>
+          <span class="tracking__meta-label">{{ 'shipments.estDelivery' | translate }}</span>
           <span class="tracking__meta-value">{{ tracking().estimatedDelivery | date:'MM/dd/yyyy' }}</span>
         </div>
       }
@@ -46,7 +46,7 @@
   } @else {
     <div class="tracking__empty">
       <span class="material-icons-outlined tracking__empty-icon">schedule</span>
-      <span class="tracking__empty-text">No tracking events yet.</span>
+      <span class="tracking__empty-text">{{ 'shipments.noTrackingEvents' | translate }}</span>
     </div>
   }
 </div>

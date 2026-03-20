@@ -5,6 +5,8 @@ import { forkJoin, startWith } from 'rxjs';
 
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PlanningService } from './services/planning.service';
 import { PlanningCycleListItem } from './models/planning-cycle-list-item.model';
@@ -32,6 +34,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent, AvatarComponent,
     CycleBoardComponent, CycleDialogComponent,
     EmptyStateComponent, LoadingBlockDirective,
@@ -45,6 +48,7 @@ export class PlanningComponent implements OnInit {
   private readonly backlogService = inject(BacklogService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   // State
   protected readonly loading = signal(true);
@@ -176,7 +180,7 @@ export class PlanningComponent implements OnInit {
     this.planningService.commitJob(cycle.id, job.id).subscribe({
       next: () => {
         this.reloadCycle();
-        this.snackbar.success(job.jobNumber + ' committed to cycle.');
+        this.snackbar.success(this.translate.instant('planning.committedToCycle', { number: job.jobNumber }));
       },
     });
   }
@@ -194,7 +198,7 @@ export class PlanningComponent implements OnInit {
     this.planningService.completeEntry(cycle.id, entry.jobId).subscribe({
       next: () => {
         this.reloadCycle();
-        this.snackbar.success(entry.jobNumber + ' marked complete.');
+        this.snackbar.success(this.translate.instant('planning.markedComplete', { number: entry.jobNumber }));
       },
     });
   }
@@ -206,9 +210,9 @@ export class PlanningComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove from Cycle?',
-        message: 'Remove ' + entry.jobNumber + ' from this planning cycle? It will return to the backlog.',
-        confirmLabel: 'Remove',
+        title: this.translate.instant('planning.removeFromCycleTitle'),
+        message: this.translate.instant('planning.removeFromCycleMessage', { number: entry.jobNumber }),
+        confirmLabel: this.translate.instant('common.remove'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -216,7 +220,7 @@ export class PlanningComponent implements OnInit {
       this.planningService.removeEntry(cycle.id, entry.jobId).subscribe({
         next: () => {
           this.reloadCycle();
-          this.snackbar.success(entry.jobNumber + ' removed from cycle.');
+          this.snackbar.success(this.translate.instant('planning.removedFromCycle', { number: entry.jobNumber }));
         },
       });
     });
@@ -257,7 +261,7 @@ export class PlanningComponent implements OnInit {
           this.saving.set(false);
           this.showCycleDialog.set(false);
           this.reloadAll();
-          this.snackbar.success('Cycle updated.');
+          this.snackbar.success(this.translate.instant('planning.cycleUpdated'));
         },
         error: () => this.saving.set(false),
       });
@@ -271,7 +275,7 @@ export class PlanningComponent implements OnInit {
             this.selectedCycle.set(created);
             this.cycleControl.setValue(created.id, { emitEvent: false });
           });
-          this.snackbar.success('Planning cycle created.');
+          this.snackbar.success(this.translate.instant('planning.cycleCreated'));
         },
         error: () => this.saving.set(false),
       });
@@ -289,7 +293,7 @@ export class PlanningComponent implements OnInit {
     this.planningService.activateCycle(cycle.id).subscribe({
       next: () => {
         this.reloadAll();
-        this.snackbar.success('Cycle activated.');
+        this.snackbar.success(this.translate.instant('planning.cycleActivated'));
       },
     });
   }
@@ -301,9 +305,9 @@ export class PlanningComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Complete Cycle?',
-        message: 'Incomplete jobs can be rolled over to a new cycle. Continue?',
-        confirmLabel: 'Complete & Roll Over',
+        title: this.translate.instant('planning.completeCycleTitle'),
+        message: this.translate.instant('planning.completeCycleRollMessage'),
+        confirmLabel: this.translate.instant('planning.completeAndRollOver'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -316,7 +320,7 @@ export class PlanningComponent implements OnInit {
             this.cycleControl.setValue(result.newCycleId, { emitEvent: false });
           }
           this.planningService.getCycles().subscribe(cycles => this.cycles.set(cycles));
-          this.snackbar.success('Cycle completed. Incomplete jobs rolled over.');
+          this.snackbar.success(this.translate.instant('planning.cycleCompletedRolled'));
         },
       });
     });
@@ -329,9 +333,9 @@ export class PlanningComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Complete Cycle?',
-        message: 'Incomplete jobs will return to the backlog. No rollover. Continue?',
-        confirmLabel: 'Complete',
+        title: this.translate.instant('planning.completeCycleTitle'),
+        message: this.translate.instant('planning.completeCycleNoRollMessage'),
+        confirmLabel: this.translate.instant('planning.completeBtn'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -340,7 +344,7 @@ export class PlanningComponent implements OnInit {
       this.planningService.completeCycle(cycle.id, false).subscribe({
         next: () => {
           this.reloadAll();
-          this.snackbar.success('Cycle completed.');
+          this.snackbar.success(this.translate.instant('planning.cycleCompleted'));
         },
       });
     });

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { CdkDropList, CdkDrag, CdkDragDrop, CdkDragStart } from '@angular/cdk/drag-drop';
+import { TranslatePipe } from '@ngx-translate/core';
 import { JobCardComponent } from './job-card.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { BoardColumn } from '../models/board-column.model';
@@ -8,7 +9,7 @@ import { KanbanJob } from '../models/kanban-job.model';
 @Component({
   selector: 'app-board-column',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, JobCardComponent, EmptyStateComponent],
+  imports: [CdkDropList, CdkDrag, JobCardComponent, EmptyStateComponent, TranslatePipe],
   templateUrl: './board-column.component.html',
   styleUrl: './board-column.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

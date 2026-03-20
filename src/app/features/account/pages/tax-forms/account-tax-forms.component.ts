@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
@@ -8,7 +9,7 @@ import { ComplianceFormService } from '../../services/compliance-form.service';
 @Component({
   selector: 'app-account-tax-forms',
   standalone: true,
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, RouterLink, TranslatePipe],
   templateUrl: './account-tax-forms.component.html',
   styleUrl: './account-tax-forms.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

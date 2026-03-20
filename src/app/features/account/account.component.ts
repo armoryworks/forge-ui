@@ -3,6 +3,8 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { InputComponent } from '../../shared/components/input/input.component';
 import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -19,7 +21,7 @@ const AVATAR_COLORS = [
 @Component({
   selector: 'app-account',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, PageLayoutComponent, AvatarComponent],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, PageLayoutComponent, AvatarComponent],
   templateUrl: './account.component.html',
   styleUrl: './account.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,6 +30,7 @@ export class AccountComponent {
   private readonly authService = inject(AuthService);
   private readonly accountService = inject(AccountService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly user = this.authService.user;
   protected readonly avatarColors = AVATAR_COLORS;
@@ -95,7 +98,7 @@ export class AccountComponent {
           initials: val.initials || null,
           avatarColor: val.avatarColor || null,
         });
-        this.snackbar.success('Profile updated');
+        this.snackbar.success(this.translate.instant('account.profileUpdated'));
       },
       error: () => {
         this.savingProfile.set(false);
@@ -116,7 +119,7 @@ export class AccountComponent {
       next: () => {
         this.savingPassword.set(false);
         this.passwordForm.reset();
-        this.snackbar.success('Password changed');
+        this.snackbar.success(this.translate.instant('account.passwordChanged'));
       },
       error: () => {
         this.savingPassword.set(false);

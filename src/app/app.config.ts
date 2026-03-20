@@ -25,10 +25,10 @@ export const appConfig: ApplicationConfig = {
       registrationStrategy: 'registerWhenStable:30000',
     }),
     provideTranslateService({
-      fallbackLang: 'en',
+      defaultLanguage: 'en',
     }),
     provideTranslateHttpLoader({
-      prefix: './assets/i18n/',
+      prefix: '/assets/i18n/',
       suffix: '.json',
     }),
   ]

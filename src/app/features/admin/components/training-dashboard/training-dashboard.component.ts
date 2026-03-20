@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -12,24 +14,25 @@ const AVAILABLE_TOURS = ['kanban', 'dashboard', 'parts', 'inventory', 'expenses'
 @Component({
   selector: 'app-training-dashboard',
   standalone: true,
-  imports: [DataTableComponent, ColumnCellDirective, EmptyStateComponent],
+  imports: [TranslatePipe, DataTableComponent, ColumnCellDirective, EmptyStateComponent],
   templateUrl: './training-dashboard.component.html',
   styleUrl: './training-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainingDashboardComponent {
   private readonly adminService = inject(AdminService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly users = signal<TrainingUserRow[]>([]);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'User', sortable: true },
-    { field: 'role', header: 'Role', sortable: true, width: '100px' },
-    { field: 'toursCompleted', header: 'Completed', sortable: true, width: '100px', align: 'center' },
-    { field: 'totalTours', header: 'Total', width: '80px', align: 'center' },
-    { field: 'lastTour', header: 'Last Tour', sortable: true, width: '140px' },
-    { field: 'completionPct', header: 'Completion %', sortable: true, width: '120px', align: 'right' },
+    { field: 'name', header: this.translate.instant('training.colUser'), sortable: true },
+    { field: 'role', header: this.translate.instant('training.colRole'), sortable: true, width: '100px' },
+    { field: 'toursCompleted', header: this.translate.instant('training.colCompleted'), sortable: true, width: '100px', align: 'center' },
+    { field: 'totalTours', header: this.translate.instant('training.colTotal'), width: '80px', align: 'center' },
+    { field: 'lastTour', header: this.translate.instant('training.colLastTour'), sortable: true, width: '140px' },
+    { field: 'completionPct', header: this.translate.instant('training.colCompletion'), sortable: true, width: '120px', align: 'right' },
   ];
 
   constructor() {

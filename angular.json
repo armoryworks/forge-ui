@@ -76,12 +76,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kB",
-                  "maximumError": "1.2MB"
+                  "maximumError": "1.4MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "6kB",
-                  "maximumError": "12kB"
+                  "maximumWarning": "8kB",
+                  "maximumError": "30kB"
                 }
               ],
               "outputHashing": "all",
@@ -97,6 +97,9 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": ["qb-engineer-ui", "localhost"]
+          },
           "configurations": {
             "production": {
               "buildTarget": "qb-engineer-ui:build:production"

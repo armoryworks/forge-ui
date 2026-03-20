@@ -4,24 +4,24 @@
     <p>{{ error() }}</p>
   </div>
 } @else if (data(); as d) {
-  <app-page-header title="Dashboard" subtitle="Key metrics and upcoming work at a glance" helpTourId="dashboard">
-    <span class="page-header__ctx">Production</span>
+  <app-page-header [title]="'dashboard.title' | translate" [subtitle]="'dashboard.subtitle' | translate" helpTourId="dashboard">
+    <span class="page-header__ctx">{{ 'dashboard.production' | translate }}</span>
     <div class="page-header__actions">
-      <button class="btn" (click)="ambientMode.set(true)" title="Ambient display mode">
-        <span class="material-icons-outlined btn__icon">nightlight</span> Ambient
+      <button class="btn" (click)="ambientMode.set(true)" [title]="'dashboard.ambientDisplayMode' | translate">
+        <span class="material-icons-outlined btn__icon">nightlight</span> {{ 'dashboard.ambient' | translate }}
       </button>
       <button class="btn" (click)="exportDashboard()">
-        <span class="material-icons-outlined btn__icon">download</span> Export
+        <span class="material-icons-outlined btn__icon">download</span> {{ 'common.export' | translate }}
       </button>
       <button
         class="btn"
         [class.btn--primary]="editing()"
         (click)="toggleEditing()"
-        [title]="editing() ? 'Done editing' : 'Customize layout'">
+        [title]="editing() ? ('dashboard.doneEditing' | translate) : ('dashboard.customizeLayout' | translate)">
         <span class="material-icons-outlined btn__icon">
           {{ editing() ? 'check' : 'edit' }}
         </span>
-        {{ editing() ? 'Done' : 'Customize' }}
+        {{ editing() ? ('dashboard.doneEditing' | translate) : ('dashboard.customize' | translate) }}
       </button>
     </div>
   </app-page-header>
@@ -30,7 +30,7 @@
     <div class="dashboard-edit-bar">
       <div class="dashboard-edit-bar__left">
         <span class="material-icons-outlined dashboard-edit-bar__icon">drag_indicator</span>
-        <span class="dashboard-edit-bar__label">Drag widgets to rearrange. Resize from edges.</span>
+        <span class="dashboard-edit-bar__label">{{ 'dashboard.dragHint' | translate }}</span>
       </div>
       <div class="dashboard-edit-bar__actions">
         <div class="dashboard-edit-bar__add-wrapper">
@@ -38,7 +38,7 @@
             class="btn"
             (click)="toggleAddMenu()"
             [disabled]="availableWidgets().length === 0">
-            <span class="material-icons-outlined btn__icon">add</span> Add Widget
+            <span class="material-icons-outlined btn__icon">add</span> {{ 'dashboard.addWidget' | translate }}
           </button>
           @if (showAddMenu()) {
             <div class="widget-add-menu">
@@ -52,7 +52,7 @@
           }
         </div>
         <button class="btn" (click)="resetLayout()">
-          <span class="material-icons-outlined btn__icon">restart_alt</span> Reset
+          <span class="material-icons-outlined btn__icon">restart_alt</span> {{ 'dashboard.reset' | translate }}
         </button>
       </div>
     </div>
@@ -64,18 +64,18 @@
     <div class="dashboard-kpis">
       <app-kpi-chip
         [value]="'' + d.kpis.activeCount"
-        label="Active"
+        [label]="'dashboard.active' | translate"
         [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
         changeDirection="up" />
       <app-kpi-chip
         [value]="'' + d.kpis.overdueCount"
         valueColor="warn"
-        label="Overdue"
+        [label]="'dashboard.overdue' | translate"
         [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
         changeDirection="down" />
       <app-kpi-chip
         [value]="d.kpis.totalHours"
-        label="Hours"
+        [label]="'dashboard.hours' | translate"
         [change]="d.kpis.hoursStatus"
         changeDirection="up" />
     </div>
@@ -95,8 +95,8 @@
               <button
                 class="widget-remove-btn"
                 (click)="removeWidget(widget.id)"
-                title="Remove widget"
-                aria-label="Remove widget">
+                [matTooltip]="'dashboard.removeWidget' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'dashboard.removeWidget' | translate">
                 <span class="material-icons-outlined">close</span>
               </button>
             }

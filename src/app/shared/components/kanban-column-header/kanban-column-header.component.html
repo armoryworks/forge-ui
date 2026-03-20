@@ -1,5 +1,5 @@
 <div class="col-header" [class.col-header--over-wip]="isOverWip()" [style.border-top-color]="color()">
-  <button class="col-header__collapse" (click)="collapseToggled.emit()" title="Toggle column">
+  <button class="col-header__collapse" (click)="collapseToggled.emit()" [title]="'shared.toggleColumn' | translate">
     <span class="material-icons-outlined">
       {{ collapsed() ? 'chevron_right' : 'expand_more' }}
     </span>
@@ -12,7 +12,7 @@
     </span>
   }
   @if (isIrreversible()) {
-    <span class="col-header__lock" title="Irreversible — jobs cannot be moved backward">
+    <span class="col-header__lock" [title]="'shared.irreversibleHint' | translate">
       <span class="material-icons-outlined col-header__lock-icon">lock</span>
     </span>
   }

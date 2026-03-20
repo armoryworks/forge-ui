@@ -2,18 +2,22 @@ import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signa
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { AiService, AiHelpMessage } from '../../services/ai.service';
 
 @Component({
   selector: 'app-ai-help-panel',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe],
   templateUrl: './ai-help-panel.component.html',
   styleUrl: './ai-help-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiHelpPanelComponent {
   private readonly aiService = inject(AiService);
+  private readonly translate = inject(TranslateService);
 
   readonly messages = signal<AiHelpMessage[]>([]);
   readonly loading = signal(false);
@@ -56,7 +60,7 @@ export class AiHelpPanelComponent {
     const history = this.conversationHistory().slice(0, -1);
 
     this.aiService.ragHelpChat(question, history.length > 0 ? history : undefined).pipe(
-      catchError(() => of('Sorry, I was unable to process your question. Please try again.')),
+      catchError(() => of(this.translate.instant('aiHelp.errorMessage'))),
     ).subscribe(answer => {
       const assistantMessage: AiHelpMessage = { role: 'assistant', content: answer };
       this.messages.update(msgs => [...msgs, assistantMessage]);

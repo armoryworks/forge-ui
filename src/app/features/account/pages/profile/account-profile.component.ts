@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
@@ -29,7 +31,7 @@ const GENDER_OPTIONS = [
 @Component({
   selector: 'app-account-profile',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, SelectComponent, DatepickerComponent, AvatarComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, DatepickerComponent, AvatarComponent, ValidationPopoverDirective],
   templateUrl: './account-profile.component.html',
   styleUrl: './account-profile.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +41,7 @@ export class AccountProfileComponent {
   private readonly accountService = inject(AccountService);
   private readonly profileService = inject(EmployeeProfileService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly user = this.authService.user;
   protected readonly profile = this.profileService.profile;
@@ -128,7 +131,7 @@ export class AccountProfileComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Profile updated');
+        this.snackbar.success(this.translate.instant('account.profileUpdated'));
       },
       error: () => this.saving.set(false),
     });

@@ -20,6 +20,8 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { TranslateService, TranslatePipe } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 type QualityTab = 'inspections' | 'lots';
 
@@ -32,6 +34,7 @@ type QualityTab = 'inspections' | 'lots';
     InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, ColumnCellDirective,
     ValidationPopoverDirective, LoadingBlockDirective,
+    TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './quality.component.html',
   styleUrl: './quality.component.scss',
@@ -41,6 +44,7 @@ export class QualityComponent {
   private readonly qualityService = inject(QualityService);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly activeTab = signal<QualityTab>('inspections');
   protected readonly loading = signal(false);
@@ -55,29 +59,29 @@ export class QualityComponent {
   protected readonly inspectionSearchControl = new FormControl('');
 
   protected readonly inspectionColumns: ColumnDef[] = [
-    { field: 'createdAt', header: 'Date', sortable: true, type: 'date', width: '120px' },
-    { field: 'jobNumber', header: 'Job', sortable: true, width: '100px' },
-    { field: 'templateName', header: 'Template', sortable: true },
-    { field: 'inspectorName', header: 'Inspector', sortable: true },
-    { field: 'lotNumber', header: 'Lot #', sortable: true, width: '140px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'createdAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '120px' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJob'), sortable: true, width: '100px' },
+    { field: 'templateName', header: this.translate.instant('quality.template'), sortable: true },
+    { field: 'inspectorName', header: this.translate.instant('quality.inspector'), sortable: true },
+    { field: 'lotNumber', header: this.translate.instant('quality.lotNumber'), sortable: true, width: '140px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
-        { value: 'InProgress', label: 'In Progress' },
-        { value: 'Passed', label: 'Passed' },
-        { value: 'Failed', label: 'Failed' },
+        { value: 'InProgress', label: this.translate.instant('quality.statusInProgress') },
+        { value: 'Passed', label: this.translate.instant('quality.statusPassed') },
+        { value: 'Failed', label: this.translate.instant('quality.statusFailed') },
       ]},
-    { field: 'resultsSummary', header: 'Results', width: '100px', align: 'center' },
+    { field: 'resultsSummary', header: this.translate.instant('quality.resultsSummary'), width: '100px', align: 'center' },
   ];
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: '', label: 'All Statuses' },
-    { value: 'InProgress', label: 'In Progress' },
-    { value: 'Passed', label: 'Passed' },
-    { value: 'Failed', label: 'Failed' },
+    { value: '', label: this.translate.instant('common.allStatuses') },
+    { value: 'InProgress', label: this.translate.instant('quality.statusInProgress') },
+    { value: 'Passed', label: this.translate.instant('quality.statusPassed') },
+    { value: 'Failed', label: this.translate.instant('quality.statusFailed') },
   ];
 
   protected readonly templateOptions = computed<SelectOption[]>(() => [
-    { value: null, label: '-- None --' },
+    { value: null, label: this.translate.instant('common.none') },
     ...this.templates().map(t => ({ value: t.id, label: t.name })),
   ]);
 
@@ -103,14 +107,14 @@ export class QualityComponent {
   protected readonly traceData = signal<LotTraceability | null>(null);
 
   protected readonly lotColumns: ColumnDef[] = [
-    { field: 'lotNumber', header: 'Lot #', sortable: true, width: '160px' },
-    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'partDescription', header: 'Description', sortable: true },
-    { field: 'quantity', header: 'Qty', sortable: true, width: '80px', align: 'right' },
-    { field: 'jobNumber', header: 'Job', sortable: true, width: '100px' },
-    { field: 'supplierLotNumber', header: 'Supplier Lot', sortable: true, width: '140px' },
-    { field: 'expirationDate', header: 'Expires', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'lotNumber', header: this.translate.instant('quality.lotNumber'), sortable: true, width: '160px' },
+    { field: 'partNumber', header: this.translate.instant('reports.colPartNumber'), sortable: true, width: '120px' },
+    { field: 'partDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'quantity', header: this.translate.instant('common.quantity'), sortable: true, width: '80px', align: 'right' },
+    { field: 'jobNumber', header: this.translate.instant('reports.colJob'), sortable: true, width: '100px' },
+    { field: 'supplierLotNumber', header: this.translate.instant('quality.supplierLotNumber'), sortable: true, width: '140px' },
+    { field: 'expirationDate', header: this.translate.instant('quality.expires'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
     { field: 'actions', header: '', width: '50px', align: 'center' },
   ];
 
@@ -198,7 +202,7 @@ export class QualityComponent {
         this.saving.set(false);
         this.closeInspectionDialog();
         this.loadInspections();
-        this.snackbar.success('Inspection created.');
+        this.snackbar.success(this.translate.instant('quality.inspectionCreated'));
       },
       error: () => this.saving.set(false),
     });
@@ -263,7 +267,7 @@ export class QualityComponent {
         this.saving.set(false);
         this.closeLotDialog();
         this.loadLots();
-        this.snackbar.success('Lot record created.');
+        this.snackbar.success(this.translate.instant('quality.lotCreated'));
       },
       error: () => this.saving.set(false),
     });

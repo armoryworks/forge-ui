@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { PlanningService } from '../../planning/services/planning.service';
 import { PlanningCycleDetail } from '../../planning/models/planning-cycle-detail.model';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
@@ -9,7 +11,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
 @Component({
   selector: 'app-cycle-progress-widget',
   standalone: true,
-  imports: [RouterLink, EmptyStateComponent, LoadingBlockDirective],
+  imports: [RouterLink, TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
   templateUrl: './cycle-progress-widget.component.html',
   styleUrl: './cycle-progress-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

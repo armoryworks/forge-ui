@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { formatDate } from '../../../shared/utils/date.utils';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -24,6 +27,7 @@ import { ValidationPopoverDirective } from '../../../shared/directives/validatio
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { toIsoDate } from '../../../shared/utils/date.utils';
 
@@ -33,10 +37,10 @@ type LedgerTab = 'upcoming' | 'recurring';
   selector: 'app-upcoming-expenses',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe, DatePipe,
+    ReactiveFormsModule, CurrencyPipe, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent, ToggleComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective,
+    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective, MatTooltipModule,
   ],
   templateUrl: './upcoming-expenses.component.html',
   styleUrl: './upcoming-expenses.component.scss',
@@ -46,6 +50,7 @@ export class UpcomingExpensesComponent {
   private readonly expensesService = inject(ExpensesService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   protected readonly activeTab = signal<LedgerTab>('upcoming');
   protected readonly loading = signal(false);
@@ -246,7 +251,7 @@ export class UpcomingExpensesComponent {
         this.closeDialog();
         this.loadRecurring();
         this.loadUpcoming();
-        this.snackbar.success('Recurring expense created.');
+        this.snackbar.success(this.translate.instant('expenses.recurringCreated'));
       },
       error: () => this.saving.set(false),
     });
@@ -259,7 +264,7 @@ export class UpcomingExpensesComponent {
       next: () => {
         this.loadRecurring();
         this.loadUpcoming();
-        this.snackbar.success(expense.isActive ? 'Recurring expense paused.' : 'Recurring expense activated.');
+        this.snackbar.success(expense.isActive ? this.translate.instant('expenses.recurringPaused') : this.translate.instant('expenses.recurringActivated'));
       },
     });
   }
@@ -279,7 +284,7 @@ export class UpcomingExpensesComponent {
         next: () => {
           this.loadRecurring();
           this.loadUpcoming();
-          this.snackbar.success('Recurring expense deleted.');
+          this.snackbar.success(this.translate.instant('expenses.recurringDeleted'));
         },
       });
     });

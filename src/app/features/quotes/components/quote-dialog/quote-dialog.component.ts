@@ -14,7 +14,9 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface LineEntry {
   partId: number | null;
@@ -30,7 +32,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',
@@ -40,6 +42,7 @@ export class QuoteDialogComponent {
   private readonly quoteService = inject(QuoteService);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -49,7 +52,7 @@ export class QuoteDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'Select customer...' },
+    { value: null, label: this.translate.instant('quotes.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
@@ -128,7 +131,7 @@ export class QuoteDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Quote created.');
+        this.snackbar.success(this.translate.instant('quotes.quoteCreated'));
         this.saved.emit();
       },
       error: () => this.saving.set(false),

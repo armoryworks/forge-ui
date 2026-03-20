@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
@@ -9,20 +11,12 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 
-const RELATIONSHIP_OPTIONS = [
-  { value: null, label: '-- Select --' },
-  { value: 'Spouse', label: 'Spouse' },
-  { value: 'Parent', label: 'Parent' },
-  { value: 'Sibling', label: 'Sibling' },
-  { value: 'Child', label: 'Child' },
-  { value: 'Friend', label: 'Friend' },
-  { value: 'Other', label: 'Other' },
-];
+// Relationship options are initialized in constructor to support i18n
 
 @Component({
   selector: 'app-account-emergency',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, SelectComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, ValidationPopoverDirective],
   templateUrl: './account-emergency.component.html',
   styleUrl: './account-emergency.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,9 +24,18 @@ const RELATIONSHIP_OPTIONS = [
 export class AccountEmergencyComponent implements OnInit {
   private readonly profileService = inject(EmployeeProfileService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
-  protected readonly relationshipOptions = RELATIONSHIP_OPTIONS;
+  protected readonly relationshipOptions = [
+    { value: null, label: this.translate.instant('account.relationshipSelect') },
+    { value: 'Spouse', label: this.translate.instant('account.relationshipSpouse') },
+    { value: 'Parent', label: this.translate.instant('account.relationshipParent') },
+    { value: 'Sibling', label: this.translate.instant('account.relationshipSibling') },
+    { value: 'Child', label: this.translate.instant('account.relationshipChild') },
+    { value: 'Friend', label: this.translate.instant('account.relationshipFriend') },
+    { value: 'Other', label: this.translate.instant('account.relationshipOther') },
+  ];
 
   protected readonly form = new FormGroup({
     emergencyContactName: new FormControl<string | null>(null, [Validators.required, Validators.maxLength(200)]),
@@ -79,7 +82,7 @@ export class AccountEmergencyComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Emergency contact updated');
+        this.snackbar.success(this.translate.instant('account.emergencyContactUpdated'));
       },
       error: () => this.saving.set(false),
     });

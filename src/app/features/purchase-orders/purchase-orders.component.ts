@@ -22,15 +22,17 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/componen
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe,
+    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
-    PoDialogComponent, ReceiveDialogComponent, LoadingBlockDirective, BarcodeInfoComponent,
+    PoDialogComponent, ReceiveDialogComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule,
   ],
   templateUrl: './purchase-orders.component.html',
   styleUrl: './purchase-orders.component.scss',
@@ -41,6 +43,7 @@ export class PurchaseOrdersComponent {
   private readonly vendorService = inject(VendorService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly purchaseOrders = signal<PurchaseOrderListItem[]>([]);
@@ -59,39 +62,31 @@ export class PurchaseOrdersComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly vendorOptions = computed<SelectOption[]>(() => [
-    { value: null, label: 'All Vendors' },
+    { value: null, label: this.translate.instant('purchaseOrders.allVendors') },
     ...this.vendors().map(v => ({ value: v.id, label: v.companyName })),
   ]);
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
-    { value: 'Draft', label: 'Draft' },
-    { value: 'Submitted', label: 'Submitted' },
-    { value: 'Acknowledged', label: 'Acknowledged' },
-    { value: 'PartiallyReceived', label: 'Partially Received' },
-    { value: 'Received', label: 'Received' },
-    { value: 'Closed', label: 'Closed' },
-    { value: 'Cancelled', label: 'Cancelled' },
+    { value: null, label: this.translate.instant('common.allStatuses') },
+    { value: 'Draft', label: this.translate.instant('status.draft') },
+    { value: 'Submitted', label: this.translate.instant('purchaseOrders.statusSubmitted') },
+    { value: 'Acknowledged', label: this.translate.instant('purchaseOrders.statusAcknowledged') },
+    { value: 'PartiallyReceived', label: this.translate.instant('purchaseOrders.statusPartiallyReceived') },
+    { value: 'Received', label: this.translate.instant('purchaseOrders.statusReceived') },
+    { value: 'Closed', label: this.translate.instant('status.closed') },
+    { value: 'Cancelled', label: this.translate.instant('status.cancelled') },
   ];
 
   protected readonly poColumns: ColumnDef[] = [
-    { field: 'poNumber', header: 'PO #', sortable: true, width: '120px' },
-    { field: 'vendorName', header: 'Vendor', sortable: true },
-    { field: 'jobNumber', header: 'Job', sortable: true, width: '100px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: [
-      { value: 'Draft', label: 'Draft' },
-      { value: 'Submitted', label: 'Submitted' },
-      { value: 'Acknowledged', label: 'Acknowledged' },
-      { value: 'PartiallyReceived', label: 'Partially Received' },
-      { value: 'Received', label: 'Received' },
-      { value: 'Closed', label: 'Closed' },
-      { value: 'Cancelled', label: 'Cancelled' },
-    ]},
-    { field: 'lineCount', header: 'Lines', sortable: true, width: '70px', align: 'center' },
-    { field: 'totalOrdered', header: 'Ordered', sortable: true, width: '90px', align: 'center' },
-    { field: 'totalReceived', header: 'Received', sortable: true, width: '90px', align: 'center' },
-    { field: 'expectedDeliveryDate', header: 'Expected', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'poNumber', header: this.translate.instant('purchaseOrders.poNumber'), sortable: true, width: '120px' },
+    { field: 'vendorName', header: this.translate.instant('purchaseOrders.vendor'), sortable: true },
+    { field: 'jobNumber', header: this.translate.instant('purchaseOrders.job'), sortable: true, width: '100px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', width: '140px', filterOptions: this.statusOptions.slice(1) },
+    { field: 'lineCount', header: this.translate.instant('purchaseOrders.lines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'totalOrdered', header: this.translate.instant('purchaseOrders.ordered'), sortable: true, width: '90px', align: 'center' },
+    { field: 'totalReceived', header: this.translate.instant('purchaseOrders.received'), sortable: true, width: '90px', align: 'center' },
+    { field: 'expectedDeliveryDate', header: this.translate.instant('purchaseOrders.expected'), sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly poRowClass = (row: unknown) => {
@@ -157,7 +152,7 @@ export class PurchaseOrdersComponent {
       next: () => {
         this.refreshDetail(po.id);
         this.loadPurchaseOrders();
-        this.snackbar.success('Purchase order submitted.');
+        this.snackbar.success(this.translate.instant('purchaseOrders.poSubmitted'));
       },
     });
   }
@@ -169,7 +164,7 @@ export class PurchaseOrdersComponent {
       next: () => {
         this.refreshDetail(po.id);
         this.loadPurchaseOrders();
-        this.snackbar.success('Purchase order acknowledged.');
+        this.snackbar.success(this.translate.instant('purchaseOrders.poAcknowledged'));
       },
     });
   }
@@ -180,9 +175,9 @@ export class PurchaseOrdersComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Cancel Purchase Order?',
-        message: `Cancel "${po.poNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Cancel PO',
+        title: this.translate.instant('purchaseOrders.cancelPoTitle'),
+        message: this.translate.instant('purchaseOrders.cancelPoMessage', { number: po.poNumber }),
+        confirmLabel: this.translate.instant('purchaseOrders.cancelPo'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -191,7 +186,7 @@ export class PurchaseOrdersComponent {
         next: () => {
           this.refreshDetail(po.id);
           this.loadPurchaseOrders();
-          this.snackbar.success('Purchase order cancelled.');
+          this.snackbar.success(this.translate.instant('purchaseOrders.poCancelled'));
         },
       });
     });
@@ -204,7 +199,7 @@ export class PurchaseOrdersComponent {
       next: () => {
         this.refreshDetail(po.id);
         this.loadPurchaseOrders();
-        this.snackbar.success('Purchase order closed.');
+        this.snackbar.success(this.translate.instant('purchaseOrders.poClosed'));
       },
     });
   }
@@ -215,9 +210,9 @@ export class PurchaseOrdersComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Purchase Order?',
-        message: `Delete draft "${po.poNumber}"? This action cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('purchaseOrders.deletePoTitle'),
+        message: this.translate.instant('purchaseOrders.deletePoMessage', { number: po.poNumber }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -226,7 +221,7 @@ export class PurchaseOrdersComponent {
         next: () => {
           this.selectedPo.set(null);
           this.loadPurchaseOrders();
-          this.snackbar.success('Purchase order deleted.');
+          this.snackbar.success(this.translate.instant('purchaseOrders.poDeleted'));
         },
       });
     });
@@ -247,7 +242,9 @@ export class PurchaseOrdersComponent {
   }
 
   protected getStatusLabel(status: string): string {
-    return status === 'PartiallyReceived' ? 'Partially Received' : status;
+    const key = 'purchaseOrders.status' + status;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : status;
   }
 
   protected canSubmit(status: string): boolean { return status === 'Draft'; }

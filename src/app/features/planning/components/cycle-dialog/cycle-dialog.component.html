@@ -1,17 +1,17 @@
 <app-dialog [title]="dialogTitle()" width="520px" (closed)="close()">
   <div [formGroup]="form">
-    <app-input label="Cycle Name" formControlName="name" placeholder="e.g. Sprint 12" />
+    <app-input [label]="'planning.cycleName' | translate" formControlName="name" [placeholder]="'planning.cycleNamePlaceholder' | translate" />
 
     <div class="dialog-row">
-      <app-datepicker label="Start Date" formControlName="startDate" />
-      <app-datepicker label="End Date" formControlName="endDate" />
+      <app-datepicker [label]="'common.startDate' | translate" formControlName="startDate" />
+      <app-datepicker [label]="'common.endDate' | translate" formControlName="endDate" />
     </div>
 
-    <app-textarea label="Goals" formControlName="goals" [rows]="3" placeholder="What should this cycle accomplish?" />
+    <app-textarea [label]="'planning.goals' | translate" formControlName="goals" [rows]="3" />
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
@@ -21,7 +21,7 @@
       } @else {
         <span class="material-icons-outlined">save</span>
       }
-      {{ isEditMode() ? 'Update' : 'Create' }}
+      {{ isEditMode() ? ('planning.update' | translate) : ('common.create' | translate) }}
     </button>
   </div>
 </app-dialog>

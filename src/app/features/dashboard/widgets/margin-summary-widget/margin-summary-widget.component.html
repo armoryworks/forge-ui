@@ -5,26 +5,26 @@
             [class.margin-stat__value--negative]="s.averageMarginPercentage < 0">
         {{ s.averageMarginPercentage }}%
       </span>
-      <span class="margin-stat__label">Avg Margin</span>
+      <span class="margin-stat__label">{{ 'dashboard.avgMargin' | translate }}</span>
     </div>
     <div class="margin-breakdown">
       <div class="margin-breakdown__row">
-        <span class="margin-breakdown__label">Revenue</span>
+        <span class="margin-breakdown__label">{{ 'dashboard.revenue' | translate }}</span>
         <span class="margin-breakdown__count">{{ s.totalRevenue | currency }}</span>
       </div>
       <div class="margin-breakdown__row">
-        <span class="margin-breakdown__label">Cost</span>
+        <span class="margin-breakdown__label">{{ 'common.cost' | translate }}</span>
         <span class="margin-breakdown__count">{{ s.totalCost | currency }}</span>
       </div>
       <div class="margin-breakdown__row">
-        <span class="margin-breakdown__label">Margin</span>
+        <span class="margin-breakdown__label">{{ 'dashboard.margin' | translate }}</span>
         <span class="margin-breakdown__count" [class.margin-breakdown__count--positive]="s.totalMargin >= 0"
               [class.margin-breakdown__count--negative]="s.totalMargin < 0">
           {{ s.totalMargin | currency }}
         </span>
       </div>
       <div class="margin-breakdown__row">
-        <span class="margin-breakdown__label">Jobs (30d)</span>
+        <span class="margin-breakdown__label">{{ 'dashboard.jobs30d' | translate }}</span>
         <span class="margin-breakdown__count">{{ s.jobCount }}</span>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
@@ -25,6 +26,7 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
     InputComponent,
     ToolbarComponent,
     SpacerDirective,
+    TranslatePipe,
   ],
   templateUrl: './notifications.component.html',
   styleUrl: './notifications.component.scss',
@@ -33,6 +35,7 @@ import { UserPreferencesService } from '../../shared/services/user-preferences.s
 export class NotificationsComponent {
   private readonly notificationService = inject(NotificationService);
   private readonly prefs = inject(UserPreferencesService);
+  private readonly translate = inject(TranslateService);
 
   readonly searchControl = new FormControl('');
   readonly severityControl = new FormControl<string | null>(null);
@@ -67,30 +70,30 @@ export class NotificationsComponent {
   });
 
   readonly notificationColumns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'message', header: 'Message', sortable: true },
-    { field: 'severity', header: 'Severity', sortable: true, filterable: true, type: 'enum',
+    { field: 'title', header: this.translate.instant('common.title'), sortable: true },
+    { field: 'message', header: this.translate.instant('notifications.message'), sortable: true },
+    { field: 'severity', header: this.translate.instant('notifications.severity'), sortable: true, filterable: true, type: 'enum',
       filterOptions: [
-        { value: 'info', label: 'Info' },
-        { value: 'warning', label: 'Warning' },
-        { value: 'critical', label: 'Critical' },
+        { value: 'info', label: this.translate.instant('notifications.severityInfo') },
+        { value: 'warning', label: this.translate.instant('notifications.severityWarning') },
+        { value: 'critical', label: this.translate.instant('notifications.severityCritical') },
       ] },
-    { field: 'source', header: 'Source', sortable: true },
-    { field: 'createdAt', header: 'Date', sortable: true, type: 'date', width: '150px' },
+    { field: 'source', header: this.translate.instant('notifications.source'), sortable: true },
+    { field: 'createdAt', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '150px' },
   ];
 
   readonly severityOptions: SelectOption[] = [
-    { value: null, label: '-- All --' },
-    { value: 'info', label: 'Info' },
-    { value: 'warning', label: 'Warning' },
-    { value: 'critical', label: 'Critical' },
+    { value: null, label: this.translate.instant('notifications.allFilter') },
+    { value: 'info', label: this.translate.instant('notifications.severityInfo') },
+    { value: 'warning', label: this.translate.instant('notifications.severityWarning') },
+    { value: 'critical', label: this.translate.instant('notifications.severityCritical') },
   ];
 
   readonly sourceOptions: SelectOption[] = [
-    { value: null, label: '-- All --' },
-    { value: 'system', label: 'System' },
-    { value: 'board', label: 'Board' },
-    { value: 'timer', label: 'Timer' },
+    { value: null, label: this.translate.instant('notifications.allFilter') },
+    { value: 'system', label: this.translate.instant('notifications.sourceSystem') },
+    { value: 'board', label: this.translate.instant('notifications.sourceBoard') },
+    { value: 'timer', label: this.translate.instant('notifications.sourceTimer') },
   ];
 
   // Notification preference toggles

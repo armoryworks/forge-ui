@@ -8,6 +8,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { TranslatePipe } from '@ngx-translate/core';
 
 export interface SaveReportDialogData {
   name: string;
@@ -31,6 +32,7 @@ export interface SaveReportDialogResult {
     TextareaComponent,
     ToggleComponent,
     ValidationPopoverDirective,
+    TranslatePipe,
   ],
   templateUrl: './save-report-dialog.component.html',
   styleUrl: './save-report-dialog.component.scss',

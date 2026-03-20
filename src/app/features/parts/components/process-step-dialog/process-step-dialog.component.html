@@ -1,23 +1,23 @@
-<app-dialog [title]="data.step ? 'Edit Step' : 'Add Process Step'" width="520px" (closed)="dialogRef.close()">
+<app-dialog [title]="data.step ? ('parts.editStep' | translate) : ('parts.addProcessStep' | translate)" width="520px" (closed)="dialogRef.close()">
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-input label="Step #" type="number" formControlName="stepNumber" />
-      <app-input label="Est. Minutes" type="number" formControlName="estimatedMinutes" />
+      <app-input [label]="'parts.stepNumber' | translate" type="number" formControlName="stepNumber" />
+      <app-input [label]="'parts.estMinutes' | translate" type="number" formControlName="estimatedMinutes" />
     </div>
-    <app-input label="Title" formControlName="title" />
-    <app-textarea label="Instructions" formControlName="instructions" [rows]="4" [maxlength]="4000" />
-    <app-entity-picker label="Work Center" entityType="assets" displayField="name" formControlName="workCenterId" />
-    <app-toggle label="QC Checkpoint" formControlName="isQcCheckpoint" />
+    <app-input [label]="'common.title' | translate" formControlName="title" />
+    <app-textarea [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="4" [maxlength]="4000" />
+    <app-entity-picker [label]="'parts.workCenter' | translate" entityType="assets" displayField="name" formControlName="workCenterId" />
+    <app-toggle [label]="'parts.qcCheckpoint' | translate" formControlName="isQcCheckpoint" />
     @if (form.get('isQcCheckpoint')?.value) {
-      <app-textarea label="QC Pass/Fail Criteria" formControlName="qcCriteria" [rows]="2" [maxlength]="1000" />
+      <app-textarea [label]="'parts.qcCriteria' | translate" formControlName="qcCriteria" [rows]="2" [maxlength]="1000" />
     }
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="dialogRef.close()">Cancel</button>
+    <button class="action-btn" (click)="dialogRef.close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
-      (click)="save()">{{ data.step ? 'Update' : 'Add' }}</button>
+      (click)="save()">{{ data.step ? ('parts.update' | translate) : ('common.add' | translate) }}</button>
   </div>
 </app-dialog>

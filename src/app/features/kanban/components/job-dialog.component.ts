@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { KanbanService } from '../services/kanban.service';
 import { JobDetail } from '../models/job-detail.model';
 import { CustomerRef } from '../models/customer-ref.model';
@@ -32,6 +33,7 @@ export type DialogMode = 'create' | 'edit';
     TextareaComponent,
     DatepickerComponent,
     ValidationPopoverDirective,
+    TranslatePipe,
   ],
   templateUrl: './job-dialog.component.html',
   styleUrl: './job-dialog.component.scss',
@@ -39,6 +41,7 @@ export type DialogMode = 'create' | 'edit';
 })
 export class JobDialogComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
+  private readonly translate = inject(TranslateService);
 
   readonly mode = input.required<DialogMode>();
   readonly job = input<JobDetail | null>(null);
@@ -73,15 +76,15 @@ export class JobDialogComponent implements OnInit {
   );
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
-    { value: null, label: '— None —' },
+    { value: null, label: this.translate.instant('kanban.noneOption') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
 
   protected readonly assigneeOptions = computed<SelectOption[]>(() => [
-    { value: null, label: '— Unassigned —' },
+    { value: null, label: this.translate.instant('kanban.unassignedOption') },
     ...this.users().map(u => ({
       value: u.id,
-      label: u.canBeAssignedJobs ? u.name : `⚠ ${u.name} (incomplete profile)`,
+      label: u.canBeAssignedJobs ? u.name : `⚠ ${u.name} (${this.translate.instant('kanban.incompleteProfile')})`,
     })),
   ]);
 

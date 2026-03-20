@@ -2,22 +2,22 @@
   <div class="orders-summary">
     <div class="orders-stat">
       <span class="orders-stat__value">{{ s.totalOrders }}</span>
-      <span class="orders-stat__label">Open Orders</span>
+      <span class="orders-stat__label">{{ 'dashboard.openOrders' | translate }}</span>
     </div>
     <div class="orders-breakdown">
       <div class="orders-breakdown__row">
-        <span class="orders-breakdown__label">Confirmed</span>
+        <span class="orders-breakdown__label">{{ 'dashboard.confirmed' | translate }}</span>
         <span class="orders-breakdown__count">{{ s.confirmedCount }}</span>
       </div>
       <div class="orders-breakdown__row">
-        <span class="orders-breakdown__label">In Production</span>
+        <span class="orders-breakdown__label">{{ 'dashboard.inProduction' | translate }}</span>
         <span class="orders-breakdown__count">{{ s.inProductionCount }}</span>
       </div>
       <div class="orders-breakdown__row">
-        <span class="orders-breakdown__label">Partially Shipped</span>
+        <span class="orders-breakdown__label">{{ 'dashboard.partiallyShipped' | translate }}</span>
         <span class="orders-breakdown__count">{{ s.partiallyShippedCount }}</span>
       </div>
     </div>
-    <a routerLink="/sales-orders" class="orders-link">View All Orders →</a>
+    <a routerLink="/sales-orders" class="orders-link">{{ 'dashboard.viewAllOrders' | translate }}</a>
   </div>
 }

@@ -1,9 +1,9 @@
 <div [appLoadingBlock]="loading()">
-  <app-page-header title="Planning" subtitle="Organize work into focused planning cycles" helpTourId="planning">
-    <app-select label="Cycle" [formControl]="cycleControl" [options]="cycleOptions()" />
+  <app-page-header [title]="'planning.title' | translate" [subtitle]="'planning.subtitle' | translate" helpTourId="planning">
+    <app-select [label]="'planning.cycle' | translate" [formControl]="cycleControl" [options]="cycleOptions()" />
     <button class="action-btn action-btn--primary" (click)="openCreateCycleDialog()">
       <span class="material-icons-outlined">add</span>
-      New Cycle
+      {{ 'planning.newCycle' | translate }}
     </button>
   </app-page-header>
 
@@ -11,13 +11,13 @@
     <!-- Left: Backlog Panel -->
     <div class="backlog-panel">
       <div class="backlog-panel__header">
-        <h3 class="backlog-panel__title">Backlog</h3>
-        <span class="backlog-panel__count">{{ filteredBacklog().length }} jobs</span>
+        <h3 class="backlog-panel__title">{{ 'planning.backlog' | translate }}</h3>
+        <span class="backlog-panel__count">{{ filteredBacklog().length }} {{ 'planning.jobs' | translate }}</span>
       </div>
 
       <div class="backlog-panel__filters">
-        <app-input label="Search" [formControl]="searchControl" placeholder="Search jobs..." />
-        <app-select label="Priority" [formControl]="priorityControl" [options]="priorityOptions" />
+        <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'planning.searchPlaceholder' | translate" />
+        <app-select [label]="'common.priority' | translate" [formControl]="priorityControl" [options]="priorityOptions" />
       </div>
 
       <div class="backlog-panel__list">
@@ -38,13 +38,13 @@
               </div>
             </div>
             @if (hasCycle()) {
-              <button class="icon-btn backlog-job__add" title="Commit to cycle" (click)="commitJob(job)">
+              <button class="icon-btn backlog-job__add" [matTooltip]="'planning.commitToCycle' | translate" matTooltipPosition="above" (click)="commitJob(job)" [attr.aria-label]="'planning.commitToCycle' | translate">
                 <span class="material-icons-outlined">add</span>
               </button>
             }
           </div>
         } @empty {
-          <app-empty-state icon="inbox" message="No available jobs" />
+          <app-empty-state icon="inbox" [message]="'planning.noAvailableJobs' | translate" />
         }
       </div>
     </div>
@@ -53,23 +53,23 @@
     <div class="cycle-panel">
       @if (selectedCycle(); as cycle) {
         <div class="cycle-panel__actions">
-          <button class="icon-btn" title="Edit cycle" (click)="openEditCycleDialog()">
+          <button class="icon-btn" [matTooltip]="'planning.editCycleBtn' | translate" matTooltipPosition="above" (click)="openEditCycleDialog()" [attr.aria-label]="'planning.editCycleBtn' | translate">
             <span class="material-icons-outlined">edit</span>
           </button>
           @if (isDraftCycle()) {
             <button class="action-btn action-btn--sm" (click)="activateCycle()">
               <span class="material-icons-outlined">play_arrow</span>
-              Activate
+              {{ 'planning.activateBtn' | translate }}
             </button>
           }
           @if (isActiveCycle()) {
             <button class="action-btn action-btn--sm" (click)="completeCycle()">
               <span class="material-icons-outlined">check</span>
-              Complete & Roll Over
+              {{ 'planning.completeRollOver' | translate }}
             </button>
             <button class="action-btn action-btn--sm" (click)="completeWithoutRollover()">
               <span class="material-icons-outlined">stop</span>
-              Complete
+              {{ 'planning.completeBtn' | translate }}
             </button>
           }
         </div>
@@ -80,8 +80,8 @@
           (entryRemoved)="onEntryRemoved($event)"
           (entryReordered)="onEntryReordered($event)" />
       } @else {
-        <app-empty-state icon="event_note" message="No planning cycle selected"
-          actionLabel="Create First Cycle" (action)="openCreateCycleDialog()" />
+        <app-empty-state icon="event_note" [message]="'planning.noCycleSelected' | translate"
+          [actionLabel]="'planning.createFirstCycle' | translate" (action)="openCreateCycleDialog()" />
       }
     </div>
   </div>

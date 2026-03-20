@@ -12,6 +12,9 @@ import {
   viewChild,
 } from '@angular/core';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { DashboardWidgetComponent } from '../../shared/components/dashboard-widget/dashboard-widget.component';
 import { KpiChipComponent } from '../../shared/components/kpi-chip/kpi-chip.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -56,6 +59,8 @@ const LAYOUT_PREF_KEY = 'dashboard:layout:v5';
     AmbientModeComponent,
     GettingStartedBannerComponent,
     PageHeaderComponent,
+    MatTooltipModule,
+    TranslatePipe,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -66,6 +71,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly loadingService = inject(LoadingService);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly ngZone = inject(NgZone);
+  private readonly translate = inject(TranslateService);
 
   private grid: GridStack | null = null;
   private readonly gridContainer = viewChild<ElementRef<HTMLElement>>('gridContainer');
@@ -107,7 +113,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
       .subscribe({
         next: (data) => this.data.set(data),
-        error: () => this.error.set('Failed to load dashboard data'),
+        error: () => this.error.set(this.translate.instant('dashboard.loadFailed')),
       });
   }
 

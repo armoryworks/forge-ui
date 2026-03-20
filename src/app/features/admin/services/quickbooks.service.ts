@@ -1,6 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { TranslateService } from '@ngx-translate/core';
+
 import { environment } from '../../../../environments/environment';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { QuickBooksConnectionStatus } from '../models/quickbooks-connection-status.model';
@@ -9,6 +11,7 @@ import { QuickBooksConnectionStatus } from '../models/quickbooks-connection-stat
 export class QuickBooksService {
   private readonly http = inject(HttpClient);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly status = signal<QuickBooksConnectionStatus | null>(null);
   readonly loading = signal(false);
@@ -56,10 +59,10 @@ export class QuickBooksService {
           lastSyncAt: null,
         });
         this.loading.set(false);
-        this.snackbar.success('QuickBooks disconnected');
+        this.snackbar.success(this.translate.instant('admin.qbDisconnected'));
       },
       error: (err) => {
-        this.error.set(err.message ?? 'Failed to disconnect QuickBooks');
+        this.error.set(err.message ?? this.translate.instant('admin.qbDisconnectFailed'));
         this.loading.set(false);
       },
     });
@@ -73,13 +76,13 @@ export class QuickBooksService {
       next: (result) => {
         this.loading.set(false);
         if (result.success) {
-          this.snackbar.success(`Connection verified — ${result.companyName ?? 'QuickBooks'}`);
+          this.snackbar.success(this.translate.instant('admin.qbConnectionVerified', { name: result.companyName ?? 'QuickBooks' }));
         } else {
-          this.snackbar.error(result.message ?? 'Connection test failed');
+          this.snackbar.error(result.message ?? this.translate.instant('admin.qbConnectionFailed'));
         }
       },
       error: (err) => {
-        this.error.set(err.message ?? 'Connection test failed');
+        this.error.set(err.message ?? this.translate.instant('admin.qbConnectionFailed'));
         this.loading.set(false);
       },
     });

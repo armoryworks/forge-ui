@@ -38,6 +38,11 @@
     font-size: $icon-size-sm;
   }
 
+  &__format-ok-icon {
+    color: var(--info);
+    font-size: $icon-size-sm;
+  }
+
   &__verify-result {
     display: flex;
     align-items: center;
@@ -52,6 +57,11 @@
     &--valid {
       color: var(--success);
       background: var(--success-light);
+    }
+
+    &--warn {
+      color: var(--info);
+      background: var(--info-light);
     }
 
     &--invalid {

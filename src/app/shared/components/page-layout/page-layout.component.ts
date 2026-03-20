@@ -1,10 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { HelpTourService } from '../../services/help-tour.service';
 
 @Component({
   selector: 'app-page-layout',
   standalone: true,
+  imports: [MatTooltipModule, TranslatePipe],
   templateUrl: './page-layout.component.html',
   styleUrl: './page-layout.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

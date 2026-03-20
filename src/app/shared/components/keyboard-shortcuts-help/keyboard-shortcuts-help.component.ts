@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { KeyboardShortcutsService, KeyboardShortcut } from '../../services/keyboard-shortcuts.service';
 
 interface ShortcutGroup {
@@ -10,7 +13,7 @@ interface ShortcutGroup {
 @Component({
   selector: 'app-keyboard-shortcuts-help',
   standalone: true,
-  imports: [],
+  imports: [MatTooltipModule, TranslatePipe],
   templateUrl: './keyboard-shortcuts-help.component.html',
   styleUrl: './keyboard-shortcuts-help.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -35,7 +38,11 @@ export class KeyboardShortcutsHelpComponent {
     return Array.from(map.entries()).map(([context, shortcuts]) => ({ context, shortcuts }));
   });
 
-  protected formatKey(shortcut: KeyboardShortcut): string {
+  protected formatKeys(shortcut: KeyboardShortcut): { keys: string[]; separator: '+' | 'then' } {
+    if (shortcut.chord) {
+      return { keys: [shortcut.chord.toUpperCase(), shortcut.key.toUpperCase()], separator: 'then' };
+    }
+
     const parts: string[] = [];
     if (shortcut.modifiers?.includes('ctrl') || shortcut.modifiers?.includes('meta')) parts.push('Ctrl');
     if (shortcut.modifiers?.includes('alt')) parts.push('Alt');
@@ -44,6 +51,6 @@ export class KeyboardShortcutsHelpComponent {
     const key = shortcut.key.length === 1 ? shortcut.key.toUpperCase() : shortcut.key;
     parts.push(key);
 
-    return parts.join(' + ');
+    return { keys: parts, separator: '+' };
   }
 }

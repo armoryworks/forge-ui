@@ -1,0 +1,23 @@
+:host {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.headless-render__container {
+  width: 100%;
+  max-width: 850px;
+  margin: 0 auto;
+  background: #fff;
+  color: #000;
+}
+
+.headless-render__waiting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  font-family: sans-serif;
+  color: #999;
+}

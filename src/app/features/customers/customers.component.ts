@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CustomerService } from './services/customer.service';
 import { CustomerListItem } from './models/customer-list-item.model';
@@ -21,6 +22,7 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
@@ -29,11 +31,11 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
   selector: 'app-customers',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent,
     DataTableComponent, ColumnCellDirective, ValidationPopoverDirective,
-    AvatarComponent, EmptyStateComponent, LoadingBlockDirective,
+    AvatarComponent, EmptyStateComponent, LoadingBlockDirective, MatTooltipModule,
   ],
   templateUrl: './customers.component.html',
   styleUrl: './customers.component.scss',
@@ -43,6 +45,7 @@ export class CustomersComponent {
   private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -57,9 +60,9 @@ export class CustomersComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly activeOptions: SelectOption[] = [
-    { value: null, label: 'All' },
-    { value: true, label: 'Active' },
-    { value: false, label: 'Inactive' },
+    { value: null, label: this.translate.instant('common.all') },
+    { value: true, label: this.translate.instant('common.active') },
+    { value: false, label: this.translate.instant('common.inactive') },
   ];
 
   // Customer Dialog
@@ -73,10 +76,10 @@ export class CustomersComponent {
   });
 
   protected readonly customerViolations = FormValidationService.getViolations(this.customerForm, {
-    name: 'Name',
-    companyName: 'Company Name',
-    email: 'Email',
-    phone: 'Phone',
+    name: this.translate.instant('common.name'),
+    companyName: this.translate.instant('customers.companyName'),
+    email: this.translate.instant('common.email'),
+    phone: this.translate.instant('common.phone'),
   });
 
   // Contact Dialog
@@ -92,35 +95,35 @@ export class CustomersComponent {
   });
 
   protected readonly contactViolations = FormValidationService.getViolations(this.contactForm, {
-    firstName: 'First Name',
-    lastName: 'Last Name',
-    email: 'Email',
-    phone: 'Phone',
-    role: 'Role',
+    firstName: this.translate.instant('customers.firstName'),
+    lastName: this.translate.instant('customers.lastName'),
+    email: this.translate.instant('common.email'),
+    phone: this.translate.instant('common.phone'),
+    role: this.translate.instant('customers.role'),
   });
 
   protected readonly roleOptions: SelectOption[] = [
-    { value: '', label: '-- None --' },
-    { value: 'Owner', label: 'Owner' },
-    { value: 'Manager', label: 'Manager' },
-    { value: 'Engineer', label: 'Engineer' },
-    { value: 'Procurement', label: 'Procurement' },
-    { value: 'Billing', label: 'Billing' },
-    { value: 'Shipping', label: 'Shipping' },
+    { value: '', label: this.translate.instant('customers.roleOptions.none') },
+    { value: 'Owner', label: this.translate.instant('customers.roleOptions.owner') },
+    { value: 'Manager', label: this.translate.instant('customers.roleOptions.manager') },
+    { value: 'Engineer', label: this.translate.instant('customers.roleOptions.engineer') },
+    { value: 'Procurement', label: this.translate.instant('customers.roleOptions.procurement') },
+    { value: 'Billing', label: this.translate.instant('customers.roleOptions.billing') },
+    { value: 'Shipping', label: this.translate.instant('customers.roleOptions.shipping') },
   ];
 
   // Table
   protected readonly customerColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'companyName', header: 'Company', sortable: true },
-    { field: 'email', header: 'Email', sortable: true },
-    { field: 'phone', header: 'Phone', sortable: true },
-    { field: 'isActive', header: 'Active', sortable: true, type: 'enum', filterable: true, filterOptions: [
-      { value: true, label: 'Active' }, { value: false, label: 'Inactive' },
+    { field: 'name', header: this.translate.instant('customers.colName'), sortable: true },
+    { field: 'companyName', header: this.translate.instant('customers.colCompany'), sortable: true },
+    { field: 'email', header: this.translate.instant('customers.colEmail'), sortable: true },
+    { field: 'phone', header: this.translate.instant('customers.colPhone'), sortable: true },
+    { field: 'isActive', header: this.translate.instant('customers.colActive'), sortable: true, type: 'enum', filterable: true, filterOptions: [
+      { value: true, label: this.translate.instant('common.active') }, { value: false, label: this.translate.instant('common.inactive') },
     ], width: '80px' },
-    { field: 'contactCount', header: 'Contacts', sortable: true, width: '90px', align: 'center' },
-    { field: 'jobCount', header: 'Jobs', sortable: true, width: '70px', align: 'center' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '110px' },
+    { field: 'contactCount', header: this.translate.instant('customers.colContacts'), sortable: true, width: '90px', align: 'center' },
+    { field: 'jobCount', header: this.translate.instant('customers.colJobs'), sortable: true, width: '70px', align: 'center' },
+    { field: 'createdAt', header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '110px' },
   ];
 
   protected readonly customerRowClass = (row: unknown) => {
@@ -192,7 +195,7 @@ export class CustomersComponent {
           this.closeDialog();
           this.loadCustomers();
           this.customerService.getCustomerById(editing.id).subscribe(d => this.selectedCustomer.set(d));
-          this.snackbar.success('Customer updated.');
+          this.snackbar.success(this.translate.instant('customers.customerUpdated'));
         },
         error: () => this.saving.set(false),
       });
@@ -208,7 +211,7 @@ export class CustomersComponent {
           this.closeDialog();
           this.loadCustomers();
           this.selectCustomer(created);
-          this.snackbar.success('Customer created.');
+          this.snackbar.success(this.translate.instant('customers.customerCreated'));
         },
         error: () => this.saving.set(false),
       });
@@ -222,7 +225,7 @@ export class CustomersComponent {
       next: () => {
         this.customerService.getCustomerById(c.id).subscribe(d => this.selectedCustomer.set(d));
         this.loadCustomers();
-        this.snackbar.success(c.isActive ? 'Customer deactivated.' : 'Customer activated.');
+        this.snackbar.success(c.isActive ? this.translate.instant('customers.customerDeactivated') : this.translate.instant('customers.customerActivated'));
       },
     });
   }
@@ -233,9 +236,9 @@ export class CustomersComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Customer?',
-        message: `This will remove "${c.name}" from the system. This action cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('customers.deleteCustomerTitle'),
+        message: this.translate.instant('customers.deleteCustomerMessage', { name: c.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -244,7 +247,7 @@ export class CustomersComponent {
         next: () => {
           this.selectedCustomer.set(null);
           this.loadCustomers();
-          this.snackbar.success('Customer deleted.');
+          this.snackbar.success(this.translate.instant('customers.customerDeleted'));
         },
       });
     });
@@ -294,7 +297,7 @@ export class CustomersComponent {
           this.saving.set(false);
           this.closeContactDialog();
           this.refreshDetail(c.id);
-          this.snackbar.success('Contact updated.');
+          this.snackbar.success(this.translate.instant('customers.contactUpdated'));
         },
         error: () => this.saving.set(false),
       });
@@ -312,7 +315,7 @@ export class CustomersComponent {
           this.closeContactDialog();
           this.refreshDetail(c.id);
           this.loadCustomers();
-          this.snackbar.success('Contact created.');
+          this.snackbar.success(this.translate.instant('customers.contactCreated'));
         },
         error: () => this.saving.set(false),
       });
@@ -325,9 +328,9 @@ export class CustomersComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Contact?',
-        message: `Remove "${contact.lastName}, ${contact.firstName}" from this customer?`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('customers.deleteContactTitle'),
+        message: this.translate.instant('customers.deleteContactMessage', { name: `${contact.lastName}, ${contact.firstName}` }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -336,7 +339,7 @@ export class CustomersComponent {
         next: () => {
           this.refreshDetail(c.id);
           this.loadCustomers();
-          this.snackbar.success('Contact removed.');
+          this.snackbar.success(this.translate.instant('customers.contactRemoved'));
         },
       });
     });

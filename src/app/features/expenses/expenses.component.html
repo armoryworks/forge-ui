@@ -1,21 +1,21 @@
-<app-page-header title="Expenses" subtitle="Log expenses, attach receipts, and track approvals" helpTourId="expenses">
+<app-page-header [title]="'expenses.title' | translate" [subtitle]="'expenses.subtitle' | translate" helpTourId="expenses">
   <button class="action-btn action-btn--primary" (click)="openCreateExpense()">
     <span class="material-icons-outlined">add</span>
-    New Expense
+    {{ 'expenses.createExpense' | translate }}
   </button>
 </app-page-header>
 
 <div class="expenses-content">
   <div class="filters-bar">
-    <app-input label="Search" [formControl]="searchControl" placeholder="Search expenses..."
+    <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'expenses.searchPlaceholder' | translate"
       (keyup.enter)="applyFilters()" />
-    <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
-    <span class="total-amount">Total: {{ getTotalAmount() | currency }}</span>
+    <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
+    <span class="total-amount">{{ 'expenses.totalLabel' | translate }} {{ getTotalAmount() | currency }}</span>
   </div>
 
   <div [appLoadingBlock]="loading()">
     <app-data-table tableId="expenses" [columns]="expenseColumns" [data]="expenses()"
-      emptyIcon="receipt_long" emptyMessage="No expenses found" emptyHelpText="Log business expenses here. Attach receipts and link to jobs for accurate cost tracking.">
+      emptyIcon="receipt_long" [emptyMessage]="'expenses.noExpensesFound' | translate" [emptyHelpText]="'expenses.noExpensesHelp' | translate">
       <ng-template appColumnCell="expenseDate" let-expense>
         <span class="text-muted">{{ expense.expenseDate | date:'MM/dd/yyyy' }}</span>
       </ng-template>
@@ -34,10 +34,10 @@
       <ng-template appColumnCell="actions" let-expense>
         @if (expense.status === 'Pending') {
           <div class="action-cell">
-            <button class="icon-btn icon-btn--success" title="Approve" (click)="approveExpense(expense); $event.stopPropagation()">
+            <button class="icon-btn icon-btn--success" [matTooltip]="'expenses.approve' | translate" matTooltipPosition="above" (click)="approveExpense(expense); $event.stopPropagation()">
               <span class="material-icons-outlined">check</span>
             </button>
-            <button class="icon-btn icon-btn--danger" title="Reject" (click)="rejectExpense(expense); $event.stopPropagation()">
+            <button class="icon-btn icon-btn--danger" [matTooltip]="'expenses.reject' | translate" matTooltipPosition="above" (click)="rejectExpense(expense); $event.stopPropagation()">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
@@ -49,25 +49,25 @@
 
 <!-- Expense Dialog -->
 @if (showDialog()) {
-  <app-dialog title="New Expense" (closed)="closeDialog()">
+  <app-dialog [title]="'expenses.newExpenseTitle' | translate" (closed)="closeDialog()">
     <div [formGroup]="expenseForm">
       <div class="dialog-row">
-        <app-input label="Amount" type="number" formControlName="amount" prefix="$" />
-        <app-datepicker label="Date" formControlName="expenseDate" />
+        <app-input [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />
+        <app-datepicker [label]="'expenses.date' | translate" formControlName="expenseDate" />
       </div>
 
-      <app-select label="Category" formControlName="category" [options]="categoryOptions" />
+      <app-select [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" />
 
-      <app-textarea label="Description" formControlName="description" />
+      <app-textarea [label]="'common.description' | translate" formControlName="description" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="expenseViolations"
         [disabled]="expenseForm.invalid || saving()"
         (click)="saveExpense()">
-        <span class="material-icons-outlined">save</span> Submit Expense
+        <span class="material-icons-outlined">save</span> {{ 'expenses.submitExpense' | translate }}
       </button>
     </div>
   </app-dialog>

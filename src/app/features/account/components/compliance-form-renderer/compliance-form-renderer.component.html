@@ -1,0 +1,658 @@
+<div class="compliance-form" [formGroup]="form()">
+  <!-- ─── Standard Header (non-government forms only) ─── -->
+  @if (!isGovernmentLayout()) {
+    <div class="compliance-form__header">
+      <button class="action-btn action-btn--sm compliance-form__back-btn" (click)="onBack()" aria-label="Back to forms list">
+        <span class="material-icons-outlined">arrow_back</span>
+      </button>
+      <div class="compliance-form__header-text">
+        <h2 class="compliance-form__title">{{ definition().title }}</h2>
+        <p class="compliance-form__subtitle">
+          Form {{ definition().formNumber }} (Rev. {{ definition().revision }}) — {{ definition().agency }}
+        </p>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Tab Bar ─── -->
+  @if (hasMultiplePages()) {
+    <div class="compliance-form__tabs" role="tablist" aria-label="Form pages"
+      [class.gov-form__tabs]="isGovernmentLayout()">
+      @for (page of pages(); track page.id; let i = $index) {
+        <button class="compliance-form__tab"
+          [class.compliance-form__tab--active]="i === activePageIndex()"
+          [class.compliance-form__tab--readonly]="page.readonly"
+          role="tab"
+          [attr.aria-selected]="i === activePageIndex()"
+          [attr.aria-controls]="'page-panel-' + page.id"
+          (click)="switchPage(i)">
+          @if (page.readonly) {
+            <span class="material-icons-outlined compliance-form__tab-icon">menu_book</span>
+          }
+          {{ page.title }}
+        </button>
+      }
+    </div>
+  }
+
+  <!-- ─── Body ─── -->
+  <div class="compliance-form__body"
+    [class.gov-form__body]="isGovernmentLayout()"
+    [class.gov-form__body--instructions]="isGovernmentLayout() && activePage().readonly"
+    [ngStyle]="formStyleVars()"
+    [style.max-width]="formMaxWidth()"
+    [style.margin]="formMaxWidth() ? '0 auto' : null"
+    role="tabpanel"
+    [attr.id]="'page-panel-' + activePage().id"
+    [attr.aria-label]="activePage().title">
+
+    @for (section of activePage().sections; track section.id) {
+      <!-- Skip empty step sections (no fields, no instructions) -->
+      @if (isEmptySection(section)) {
+        <!-- hidden: empty step section -->
+      }
+      <!-- ═══════════════════════════════════════ -->
+      <!-- GOVERNMENT FORM SECTIONS                -->
+      <!-- ═══════════════════════════════════════ -->
+      @else if (isGovernmentLayout() && isGovSection(section)) {
+
+        <!-- Form Header (3-column + optional full-width banner) -->
+        @if (section.layout === 'form-header') {
+          <div class="gov-form__form-header">
+            @for (field of section.fields; track field.id) {
+              @if (field.gridColumn === 'left') {
+                <div class="gov-form__form-header-left" [innerHTML]="field.html"></div>
+              } @else if (field.gridColumn === 'center') {
+                <div class="gov-form__form-header-center" [innerHTML]="field.html"></div>
+              } @else if (field.gridColumn === 'right') {
+                <div class="gov-form__form-header-right" [innerHTML]="field.html"></div>
+              }
+            }
+          </div>
+          @for (field of section.fields; track field.id) {
+            @if (field.gridColumn === 'full') {
+              <div class="gov-form__form-header-banner" [innerHTML]="field.html"></div>
+            }
+          }
+        }
+
+        <!-- Step Section (with label column) -->
+        @else if (section.layout === 'step' || section.layout === 'step-amounts' || section.layout === 'sign') {
+          <div class="gov-form__step"
+            [class.gov-form__step--shaded]="section.shaded"
+            [class.gov-form__step--sign]="section.heavyBorder"
+            [class.gov-form__step--section-header]="section.stepNumber && section.stepNumber.startsWith('Section') && section.fields.length === 0"
+            [ngStyle]="section.style ?? {}">
+            <div class="gov-form__step-label">
+              <span class="gov-form__step-number">{{ section.stepNumber }}</span>
+              @for (line of getStepNameLines(section); track $index) {
+                @if ($index === 0) {
+                  <span class="gov-form__step-name">{{ line }}</span>
+                } @else {
+                  <br><span class="gov-form__step-name">{{ line }}</span>
+                }
+              }
+            </div>
+            <div class="gov-form__step-content"
+              [class.gov-form__step-content--amounts]="section.layout === 'step-amounts'"
+              [class.gov-form__step-content--has-inner]="!!section.innerColumnWidth"
+              [style.--amount-col-width]="section.amountColumnWidth"
+              [style.--inner-col-width]="section.innerColumnWidth">
+
+              <!-- Section instructions (contextual text for step) -->
+              @if (section.instructions) {
+                <div class="gov-form__inst-block">
+                  @for (para of section.instructions.split('\n\n'); track $index) {
+                    <p class="gov-form__inst-text">{{ para }}</p>
+                  }
+                </div>
+              }
+
+              <!-- Grid fields (Step 1 CSS grid) -->
+              @if (section.gridColumns) {
+                <div class="gov-form__step-grid" [style.grid-template-columns]="section.gridColumns">
+                  @for (field of section.fields; track field.id) {
+                    @if (field.fieldLayout === 'grid-cell') {
+                      <div class="gov-form__grid-cell"
+                        [class]="field.cssClass ?? ''"
+                        [style.grid-column]="field.gridColumn"
+                        [style.grid-row]="field.gridRow">
+                        @if (field.type === 'html') {
+                          <span [innerHTML]="field.html"></span>
+                        } @else if (field.type === 'ssn') {
+                          @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
+                          <input class="gov-form__input" [formControlName]="field.id"
+                            (input)="formatSsn($event, field.id)"
+                            maxlength="11"
+                            [placeholder]="field.placeholder ?? ''"
+                            [attr.autocomplete]="field.autocomplete ?? null"
+                            aria-label="Social security number">
+                        } @else if (field.type === 'textarea') {
+                          @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
+                          <textarea class="gov-form__textarea" [formControlName]="field.id"
+                            [rows]="field.rows ?? 4"
+                            [attr.aria-label]="field.label"></textarea>
+                        } @else if (field.type === 'checkbox') {
+                          <label class="gov-form__checkbox gov-form__checkbox--cell">
+                            <input type="checkbox" [formControlName]="field.id">
+                            <span class="gov-form__checkbox-box"></span>
+                            <span class="gov-form__checkbox-text">{{ field.label }}</span>
+                          </label>
+                        } @else {
+                          @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
+                          <input class="gov-form__input" [formControlName]="field.id"
+                            [attr.autocomplete]="field.autocomplete ?? null"
+                            [attr.aria-label]="field.label">
+                        }
+                      </div>
+                    }
+                  }
+                </div>
+              }
+
+              <!-- Non-grid fields -->
+              @for (field of section.fields; track field.id) {
+                @if (shouldShowField(field)) {
+                  <!-- Skip grid cells already rendered above -->
+                  @if (field.fieldLayout !== 'grid-cell' || !section.gridColumns) {
+                    <!-- Filing status radio group -->
+                    @if (field.fieldLayout === 'filing-status') {
+                      <div class="gov-form__filing-status">
+                        <span class="gov-form__field-label">{{ field.label }}</span>
+                        <div class="gov-form__radio-group" role="radiogroup" [attr.aria-label]="field.label">
+                          @for (opt of field.options; track opt.value) {
+                            <label class="gov-form__radio">
+                              <input type="radio" [formControlName]="field.id" [name]="field.id" [value]="opt.value">
+                              <span class="gov-form__radio-box" [class.gov-form__radio-box--square]="field.checkboxStyle === 'square'"></span>
+                              <span>
+                                <strong>{{ opt.label }}</strong>
+                                @if (opt.hint) {
+                                  <span class="gov-form__radio-hint">{{ opt.hint }}</span>
+                                }
+                              </span>
+                            </label>
+                          }
+                        </div>
+                      </div>
+                    }
+                    <!-- Amount lines -->
+                    @else if (field.fieldLayout === 'amount-line' || field.fieldLayout === 'amount-line-inner' || field.fieldLayout === 'amount-line-total') {
+                      <div class="gov-form__amount-line"
+                        [class.gov-form__amount-line--inner]="field.fieldLayout === 'amount-line-inner'"
+                        [class.gov-form__amount-line--total]="field.fieldLayout === 'amount-line-total'">
+                        <span class="gov-form__amount-desc" [innerHTML]="field.displayText"></span>
+                        @if (field.fieldLayout === 'amount-line' || field.fieldLayout === 'amount-line-total') {
+                          <span class="gov-form__amount-dots"></span>
+                        }
+                        <span class="gov-form__amount-field"
+                          [class.gov-form__amount-field--inner]="field.fieldLayout === 'amount-line-inner'">
+                          <span class="gov-form__amount-label">{{ field.amountLabel }}</span>
+                          @if (field.prefix) {
+                            <span class="gov-form__amount-prefix">{{ field.prefix }}</span>
+                          }
+                          <input class="gov-form__amount-input" type="number" [formControlName]="field.id"
+                            [attr.aria-label]="field.amountLabel ?? field.label">
+                        </span>
+                      </div>
+                    }
+                    <!-- Checkbox with dotted leader -->
+                    @else if (field.fieldLayout === 'checkbox-dots') {
+                      <div class="gov-form__checkbox-line" [class]="field.cssClass ?? ''">
+                        @if (field.displayText || field.label) {
+                          <span class="gov-form__checkbox-label" [innerHTML]="field.displayText || field.label"></span>
+                        }
+                        <span class="gov-form__checkbox-dots"></span>
+                        <label class="gov-form__checkbox">
+                          <input type="checkbox" [formControlName]="field.id">
+                          <span class="gov-form__checkbox-box gov-form__checkbox-box--blue"></span>
+                        </label>
+                      </div>
+                    }
+                    <!-- Signature row (field + date rendered together) -->
+                    @else if (field.fieldLayout === 'signature-field') {
+                      <div class="gov-form__signature-row">
+                        <div class="gov-form__signature-field">
+                          <input class="gov-form__input gov-form__input--signature" [formControlName]="field.id"
+                            placeholder="Type your full legal name"
+                            [attr.autocomplete]="field.autocomplete ?? null"
+                            [attr.aria-label]="field.label">
+                          <label class="gov-form__field-label"><strong>{{ field.label }}</strong> ({{ field.hint }})</label>
+                        </div>
+                        <!-- Find the signature-date field from the same section -->
+                        @for (dateField of section.fields; track dateField.id) {
+                          @if (dateField.fieldLayout === 'signature-date') {
+                            <div class="gov-form__signature-date">
+                              <input class="gov-form__input" type="date" [formControlName]="dateField.id"
+                                [attr.aria-label]="dateField.label">
+                              <label class="gov-form__field-label"><strong>{{ dateField.label }}</strong></label>
+                            </div>
+                          }
+                        }
+                      </div>
+                    }
+                    <!-- Skip signature-date since it's rendered with signature-field above -->
+                    @else if (field.fieldLayout === 'signature-date') {
+                      <!-- rendered with signature-field -->
+                    }
+                    <!-- Worksheet line -->
+                    @else if (field.fieldLayout === 'worksheet-line') {
+                      <div class="gov-form__ws-line">
+                        <span class="gov-form__ws-num">{{ field.worksheetLineNumber }}</span>
+                        <span class="gov-form__ws-desc" [innerHTML]="field.displayText"></span>
+                        <span class="gov-form__amount-dots"></span>
+                        <span class="gov-form__ws-field-label">{{ field.worksheetLineNumber }}</span>
+                        @if (field.prefix) {
+                          <span class="gov-form__amount-prefix">{{ field.prefix }}</span>
+                        }
+                        <input class="gov-form__amount-input" type="number" [formControlName]="field.id"
+                          [attr.aria-label]="'Line ' + field.worksheetLineNumber">
+                      </div>
+                    }
+                    <!-- HTML display block -->
+                    @else if (field.type === 'html') {
+                      <p class="gov-form__text" [class]="field.cssClass ?? ''" [innerHTML]="field.html"></p>
+                    }
+                    <!-- Plain checkbox (no dots) -->
+                    @else if (field.type === 'checkbox' && !field.fieldLayout) {
+                      <div class="gov-form__checkbox-inline">
+                        <label class="gov-form__checkbox">
+                          <input type="checkbox" [formControlName]="field.id">
+                          <span class="gov-form__checkbox-box"></span>
+                        </label>
+                        @if (field.label) {
+                          <span class="gov-form__checkbox-text">{{ field.label }}</span>
+                        }
+                      </div>
+                    }
+                    <!-- Generic text/date/ssn input (fallback for non-grid, non-amount fields) -->
+                    @else if (field.type === 'text' || field.type === 'date' || field.type === 'ssn') {
+                      <div class="gov-form__field-row">
+                        <label class="gov-form__field-label">{{ field.label }}</label>
+                        @if (field.type === 'ssn') {
+                          <input class="gov-form__input" [formControlName]="field.id"
+                            (input)="formatSsn($event, field.id)"
+                            maxlength="11"
+                            [placeholder]="field.placeholder ?? ''"
+                            aria-label="Social security number">
+                        } @else {
+                          <input class="gov-form__input" [formControlName]="field.id"
+                            [attr.type]="field.type === 'date' ? 'date' : 'text'"
+                            [attr.autocomplete]="field.autocomplete ?? null"
+                            [attr.aria-label]="field.label">
+                        }
+                      </div>
+                    }
+                  }
+                }
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Plain section (no step sidebar — used by state forms like Idaho) -->
+        @else if (section.layout === 'section') {
+          <div class="gov-form__plain-section"
+            [class.gov-form__plain-section--shaded]="section.shaded"
+            [style.--amount-col-width]="section.amountColumnWidth">
+            @if (section.title) {
+              <h3 class="gov-form__section-heading" style="margin:0 0 4px 0">{{ section.title }}</h3>
+            }
+            @if (section.instructions) {
+              <div class="gov-form__inst-block">
+                @for (para of section.instructions.split('\n\n'); track $index) {
+                  <p class="gov-form__inst-text">{{ para }}</p>
+                }
+              </div>
+            }
+
+            <!-- Grid fields -->
+            @if (section.gridColumns) {
+              <div class="gov-form__step-grid" [style.grid-template-columns]="section.gridColumns">
+                @for (field of section.fields; track field.id) {
+                  @if (field.fieldLayout === 'grid-cell') {
+                    <div class="gov-form__grid-cell"
+                      [class]="field.cssClass ?? ''"
+                      [style.grid-column]="field.gridColumn"
+                      [style.grid-row]="field.gridRow">
+                      @if (field.type === 'html') {
+                        <span [innerHTML]="field.html"></span>
+                      } @else if (field.type === 'ssn') {
+                        @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
+                        <input class="gov-form__input" [formControlName]="field.id"
+                          (input)="formatSsn($event, field.id)"
+                          maxlength="11"
+                          [placeholder]="field.placeholder ?? ''"
+                          [attr.autocomplete]="field.autocomplete ?? null"
+                          aria-label="Social security number">
+                      } @else if (field.type === 'textarea') {
+                        @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
+                        <textarea class="gov-form__textarea" [formControlName]="field.id"
+                          [rows]="field.rows ?? 4"
+                          [attr.aria-label]="field.label"></textarea>
+                      } @else if (field.type === 'checkbox') {
+                        <label class="gov-form__checkbox gov-form__checkbox--cell">
+                          <input type="checkbox" [formControlName]="field.id">
+                          <span class="gov-form__checkbox-box"></span>
+                          <span class="gov-form__checkbox-text">{{ field.label }}</span>
+                        </label>
+                      } @else {
+                        @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
+                        <input class="gov-form__input" [formControlName]="field.id"
+                          [attr.autocomplete]="field.autocomplete ?? null"
+                          [attr.aria-label]="field.label">
+                      }
+                    </div>
+                  }
+                }
+              </div>
+            }
+
+            <!-- Non-grid fields -->
+            @for (field of section.fields; track field.id) {
+              @if (shouldShowField(field)) {
+                @if (field.fieldLayout !== 'grid-cell' || !section.gridColumns) {
+                  @if (field.fieldLayout === 'filing-status') {
+                    <div class="gov-form__filing-status">
+                      <div class="gov-form__radio-group" [class.gov-form__radio-group--inline]="true"
+                        role="radiogroup" [attr.aria-label]="field.label">
+                        @for (opt of field.options; track opt.value) {
+                          <label class="gov-form__radio">
+                            <input type="radio" [formControlName]="field.id" [name]="field.id" [value]="opt.value">
+                            <span class="gov-form__radio-box" [class.gov-form__radio-box--square]="field.checkboxStyle === 'square'"></span>
+                            <span>{{ opt.label }}</span>
+                          </label>
+                        }
+                      </div>
+                    </div>
+                  }
+                  @else if (field.fieldLayout === 'amount-line' || field.fieldLayout === 'amount-line-inner' || field.fieldLayout === 'amount-line-total') {
+                    <div class="gov-form__amount-line"
+                      [class.gov-form__amount-line--inner]="field.fieldLayout === 'amount-line-inner'"
+                      [class.gov-form__amount-line--total]="field.fieldLayout === 'amount-line-total'">
+                      <span class="gov-form__amount-desc" [innerHTML]="field.displayText"></span>
+                      <span class="gov-form__amount-dots"></span>
+                      <span class="gov-form__amount-field">
+                        <span class="gov-form__amount-label">{{ field.amountLabel }}</span>
+                        @if (field.prefix) {
+                          <span class="gov-form__amount-prefix">{{ field.prefix }}</span>
+                        }
+                        <input class="gov-form__amount-input" type="number" [formControlName]="field.id"
+                          [attr.aria-label]="field.amountLabel ?? field.label">
+                      </span>
+                    </div>
+                  }
+                  @else if (field.fieldLayout === 'signature-field') {
+                    <div class="gov-form__signature-row">
+                      <div class="gov-form__signature-field">
+                        <label class="gov-form__field-label"><strong>{{ field.label }}</strong></label>
+                        <input class="gov-form__input gov-form__input--signature" [formControlName]="field.id"
+                          placeholder="Type your full legal name"
+                          [attr.aria-label]="field.label">
+                      </div>
+                      @for (dateField of section.fields; track dateField.id) {
+                        @if (dateField.fieldLayout === 'signature-date') {
+                          <div class="gov-form__signature-date">
+                            <label class="gov-form__field-label"><strong>{{ dateField.label }}</strong></label>
+                            <input class="gov-form__input" type="date" [formControlName]="dateField.id"
+                              [attr.aria-label]="dateField.label">
+                          </div>
+                        }
+                      }
+                    </div>
+                  }
+                  @else if (field.fieldLayout === 'signature-date') {
+                    <!-- rendered with signature-field -->
+                  }
+                  @else if (field.type === 'html') {
+                    <span [innerHTML]="field.html"></span>
+                  }
+                  @else if (field.type === 'ssn') {
+                    <div class="gov-form__field-row">
+                      <input class="gov-form__input" [formControlName]="field.id"
+                        (input)="formatSsn($event, field.id)"
+                        maxlength="11"
+                        [placeholder]="field.placeholder ?? ''"
+                        aria-label="Social security number">
+                    </div>
+                  }
+                  @else if (field.type === 'text' || field.type === 'date') {
+                    <div class="gov-form__field-row">
+                      <label class="gov-form__field-label">{{ field.label }}</label>
+                      <input class="gov-form__input" [formControlName]="field.id"
+                        [attr.type]="field.type === 'date' ? 'date' : 'text'"
+                        [attr.autocomplete]="field.autocomplete ?? null"
+                        [attr.aria-label]="field.label">
+                    </div>
+                  }
+                }
+              }
+            }
+          </div>
+        }
+
+        <!-- TIP block -->
+        @else if (section.layout === 'tip') {
+          <div class="gov-form__tip">
+            @for (field of section.fields; track field.id) {
+              <p [class]="field.cssClass ?? ''" [innerHTML]="field.html"></p>
+            }
+          </div>
+        }
+
+        <!-- Exempt section -->
+        @else if (section.layout === 'exempt') {
+          <div class="gov-form__exempt" [class.gov-form__exempt--full]="!section.title">
+            @if (section.title) {
+              <div class="gov-form__exempt-label" [innerHTML]="nlToBr(section.title)"></div>
+            }
+            <div class="gov-form__exempt-content">
+              @for (field of section.fields; track field.id) {
+                @if (field.type === 'html') {
+                  <p [innerHTML]="field.html"></p>
+                } @else if (field.type === 'checkbox' && field.fieldLayout === 'checkbox-dots') {
+                  <div class="gov-form__checkbox-line">
+                    @if (field.displayText || field.label) {
+                      <span class="gov-form__checkbox-label" [innerHTML]="field.displayText || field.label"></span>
+                    }
+                    <span class="gov-form__checkbox-dots"></span>
+                    <label class="gov-form__checkbox">
+                      <input type="checkbox" [formControlName]="field.id">
+                      <span class="gov-form__checkbox-box"></span>
+                    </label>
+                  </div>
+                } @else if (field.type === 'checkbox') {
+                  <label class="gov-form__checkbox">
+                    <input type="checkbox" [formControlName]="field.id">
+                    <span class="gov-form__checkbox-box"></span>
+                    @if (field.label) {
+                      <span class="gov-form__checkbox-text">{{ field.label }}</span>
+                    }
+                  </label>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Employers Only -->
+        @else if (section.layout === 'employers-only') {
+          <div class="gov-form__employers">
+            <div class="gov-form__employers-label"><strong>Employers<br>Only</strong></div>
+            <div class="gov-form__employers-content">
+              <div class="gov-form__employers-row">
+                @for (field of section.fields; track field.id) {
+                  @if (field.type === 'html') {
+                    <div [class]="field.cssClass ?? 'gov-form__emp-field'" [innerHTML]="field.html"></div>
+                  } @else {
+                    <div class="gov-form__emp-field">
+                      <label class="gov-form__field-label gov-form__field-label--muted">{{ field.label }}</label>
+                      <input class="gov-form__input gov-form__input--readonly" [formControlName]="field.id"
+                        [attr.aria-label]="field.label" readonly>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Form Footer -->
+        @else if (section.layout === 'form-footer') {
+          <div class="gov-form__form-footer">
+            @for (field of section.fields; track field.id) {
+              <span [innerHTML]="field.html"></span>
+            }
+          </div>
+        }
+
+        <!-- Worksheet -->
+        @else if (section.layout === 'worksheet') {
+          <div class="gov-form__worksheet">
+            @if (section.title) {
+              <h3 class="gov-form__worksheet-title">{{ section.title }}</h3>
+            }
+            @if (section.instructions) {
+              <p class="gov-form__inst-text">{{ section.instructions }}</p>
+            }
+            @for (field of section.fields; track field.id) {
+              @if (shouldShowField(field)) {
+                @if (field.fieldLayout === 'worksheet-line') {
+                  <div class="gov-form__ws-line">
+                    <span class="gov-form__ws-num">{{ field.worksheetLineNumber }}</span>
+                    <span class="gov-form__ws-desc" [innerHTML]="field.displayText"></span>
+                    <span class="gov-form__amount-dots"></span>
+                    <span class="gov-form__ws-field-label">{{ field.worksheetLineNumber }}</span>
+                    @if (field.prefix) {
+                      <span class="gov-form__amount-prefix">{{ field.prefix }}</span>
+                    }
+                    <input class="gov-form__amount-input" type="number" [formControlName]="field.id"
+                      [attr.aria-label]="'Line ' + field.worksheetLineNumber">
+                  </div>
+                }
+              }
+            }
+          </div>
+        }
+
+        <!-- Instructions section (read-only pages) -->
+        @else if (section.layout === 'instructions') {
+          @if (section.title) {
+            <h3 class="gov-form__section-heading">{{ section.title }}</h3>
+          }
+          @for (field of section.fields; track field.id) {
+            @if (field.type === 'heading') {
+              <h4 class="gov-form__subsection-heading">{{ field.label }}</h4>
+            } @else if (field.type === 'paragraph') {
+              @for (para of field.label.split('\n\n'); track $index) {
+                <p class="gov-form__inst-text">{{ para }}</p>
+              }
+            }
+          }
+        }
+
+      } @else {
+        <!-- ═══════════════════════════════════════ -->
+        <!-- STANDARD (Material) SECTION RENDERING   -->
+        <!-- ═══════════════════════════════════════ -->
+        <div class="compliance-form__section"
+          [class.compliance-form__section--readonly]="activePage().readonly">
+          @if (section.title) {
+            <div class="compliance-form__section-header">
+              <h3 class="compliance-form__section-title">{{ section.title }}</h3>
+              @if (section.subtitle) {
+                <span class="compliance-form__section-subtitle">{{ section.subtitle }}</span>
+              }
+            </div>
+          }
+
+          @if (section.instructions) {
+            <div class="compliance-form__instructions">
+              @for (paragraph of section.instructions.split('\n\n'); track $index) {
+                <p>{{ paragraph }}</p>
+              }
+            </div>
+          }
+
+          <div class="compliance-form__fields">
+            @for (field of section.fields; track field.id) {
+              @if (shouldShowField(field)) {
+                <div class="compliance-form__field"
+                  [class.compliance-form__field--full]="field.width === 'full' || !field.width"
+                  [class.compliance-form__field--half]="field.width === 'half'"
+                  [class.compliance-form__field--third]="field.width === 'third'"
+                  [class.compliance-form__field--quarter]="field.width === 'quarter'">
+                  @if (getModelForPage(field.id, activePage().id); as model) {
+                    <dynamic-qb-form-control
+                      [group]="form()"
+                      [model]="model" />
+                  }
+                </div>
+              }
+            }
+          </div>
+        </div>
+      }
+    }
+
+    <ng-content select="[renderer-body-extra]"></ng-content>
+  </div>
+
+  <!-- ─── Footer ─── -->
+  <div class="compliance-form__footer"
+    [class.gov-form__footer]="isGovernmentLayout()">
+    @if (isGovernmentLayout()) {
+      <div class="compliance-form__nav">
+        <button class="action-btn action-btn--sm" (click)="onBack()" aria-label="Back to forms list">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+      </div>
+    } @else if (hasMultiplePages()) {
+      <div class="compliance-form__nav">
+        <button class="action-btn action-btn--sm"
+          [disabled]="isFirstPage()"
+          (click)="prevPage()"
+          aria-label="Previous page">
+          <span class="material-icons-outlined">chevron_left</span>
+          Prev
+        </button>
+        <span class="compliance-form__page-indicator">
+          {{ activePageIndex() + 1 }} / {{ pages().length }}
+        </span>
+        <button class="action-btn action-btn--sm"
+          [disabled]="isLastPage()"
+          (click)="nextPage()"
+          aria-label="Next page">
+          Next
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </div>
+    }
+
+    @if (!readonly() && !currentPageIsReadonly()) {
+      <div class="compliance-form__actions">
+        <button class="action-btn"
+          [disabled]="saving()"
+          (click)="onSave()">
+          @if (saving()) {
+            <span class="material-icons-outlined account-page__spinner">sync</span>
+          } @else {
+            <span class="material-icons-outlined">save</span>
+          }
+          Save Draft
+        </button>
+        <button class="action-btn action-btn--primary"
+          [appValidationPopover]="violations"
+          [disabled]="submitDisabled()"
+          (click)="onSubmit()">
+          @if (submitting()) {
+            <span class="material-icons-outlined account-page__spinner">sync</span>
+          } @else {
+            <span class="material-icons-outlined">check</span>
+          }
+          Submit Form
+        </button>
+      </div>
+    }
+  </div>
+</div>

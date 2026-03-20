@@ -1,9 +1,9 @@
 @if (panelOpen()) {
-  <div class="chat-backdrop" role="button" tabindex="0" aria-label="Close chat" (click)="toggle()" (keydown.enter)="toggle()"></div>
+  <div class="chat-backdrop" role="button" tabindex="0" [attr.aria-label]="'chat.closeChat' | translate" (click)="toggle()" (keydown.enter)="toggle()"></div>
   <div class="chat-panel">
     <div class="chat-panel__header">
       @if (selectedConversation()) {
-        <button class="icon-btn chat-panel__back" (click)="backToList()" aria-label="Back to conversations">
+        <button class="icon-btn chat-panel__back" (click)="backToList()" [attr.aria-label]="'chat.backToConversations' | translate" [matTooltip]="'chat.backToConversations' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">arrow_back</span>
         </button>
         <app-avatar
@@ -12,10 +12,10 @@
           size="sm" />
         <span class="chat-panel__header-name">{{ selectedConversation()!.userName }}</span>
       } @else {
-        <span class="chat-panel__header-title">Chat</span>
+        <span class="chat-panel__header-title">{{ 'chat.title' | translate }}</span>
       }
       <span class="chat-panel__spacer"></span>
-      <button class="icon-btn" (click)="toggle()" aria-label="Close chat">
+      <button class="icon-btn" (click)="toggle()" [attr.aria-label]="'chat.closeChat' | translate" [matTooltip]="'chat.closeChat' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
@@ -25,7 +25,7 @@
         @if (conversations().length === 0) {
           <div class="chat-panel__empty">
             <span class="material-icons-outlined chat-panel__empty-icon">chat_bubble_outline</span>
-            <span class="chat-panel__empty-text">No conversations yet</span>
+            <span class="chat-panel__empty-text">{{ 'chat.noConversations' | translate }}</span>
           </div>
         }
         @for (conv of conversations(); track conv.userId) {
@@ -66,14 +66,15 @@
         <input
           class="chat-panel__input-field"
           type="text"
-          placeholder="Type a message..."
+          [placeholder]="'chat.typeMessage' | translate"
           [formControl]="messageControl"
           (keydown)="onKeydown($event)" />
         <button
           class="icon-btn chat-panel__send"
           [disabled]="!messageControl.value?.trim()"
           (click)="sendMessage()"
-          aria-label="Send message">
+          [attr.aria-label]="'chat.sendMessage' | translate"
+          [matTooltip]="'chat.sendMessage' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">send</span>
         </button>
       </div>

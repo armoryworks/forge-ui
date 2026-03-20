@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { environment } from '../../../../environments/environment';
 
 interface OpenOrderSummary {
@@ -15,7 +17,7 @@ interface OpenOrderSummary {
 @Component({
   selector: 'app-open-orders-widget',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   templateUrl: './open-orders-widget.component.html',
   styleUrl: './open-orders-widget.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

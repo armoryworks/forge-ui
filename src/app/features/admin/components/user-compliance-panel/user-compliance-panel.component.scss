@@ -87,6 +87,54 @@
   }
 }
 
+// ── State Withholding Banner ──
+.state-withholding-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--info-light);
+  border: $border-width-thin solid var(--info);
+  margin-bottom: $sp-lg;
+
+  &--no-tax {
+    background: var(--bg);
+    border-color: var(--text-muted);
+  }
+
+  &__icon {
+    font-size: $icon-size-xl;
+    color: var(--info);
+    flex-shrink: 0;
+  }
+
+  &--no-tax &__icon {
+    color: var(--text-muted);
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__state {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  &__detail {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__source {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+}
+
 .action-cell {
   display: flex;
   gap: $sp-sm;

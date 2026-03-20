@@ -1,7 +1,7 @@
-<app-page-header title="Vendors" subtitle="Manage suppliers and vendor relationships">
+<app-page-header [title]="'vendors.title' | translate" [subtitle]="'vendors.subtitle' | translate">
   <button class="action-btn action-btn--primary" (click)="openCreateVendor()">
     <span class="material-icons-outlined">add</span>
-    New Vendor
+    {{ 'vendors.newVendor' | translate }}
   </button>
 </app-page-header>
 
@@ -9,14 +9,14 @@
   <!-- Left: Vendor List -->
   <div class="vendors-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search vendors..."
+      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'vendors.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Status" [formControl]="activeFilterControl" [options]="activeOptions" />
+      <app-select [label]="'common.status' | translate" [formControl]="activeFilterControl" [options]="activeOptions" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="vendors" [columns]="vendorColumns" [data]="vendors()"
-        [rowClass]="vendorRowClass" emptyIcon="store" emptyMessage="No vendors found"
+        [rowClass]="vendorRowClass" emptyIcon="store" [emptyMessage]="'vendors.noVendorsFound' | translate"
         (rowClick)="selectVendor($any($event))">
         <ng-template appColumnCell="companyName" let-row>
           <span class="vendor-name">{{ row.companyName }}</span>
@@ -32,7 +32,7 @@
         </ng-template>
         <ng-template appColumnCell="isActive" let-row>
           <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
-            {{ row.isActive ? 'Active' : 'Inactive' }}
+            {{ row.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
           </span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
@@ -56,10 +56,10 @@
           </div>
         </div>
         <div class="detail-header__actions">
-          <button class="icon-btn" title="Edit" (click)="openEditVendor()">
+          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditVendor()">
             <span class="material-icons-outlined">edit</span>
           </button>
-          <button class="icon-btn" title="Close" (click)="closeDetail()">
+          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
@@ -67,9 +67,9 @@
 
       <!-- Tabs -->
       <div class="tab-bar">
-        <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">Info</button>
+        <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">{{ 'vendors.info' | translate }}</button>
         <button class="tab" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
-          Purchase Orders ({{ vendor.purchaseOrders.length }})
+          {{ 'vendors.purchaseOrders' | translate }} ({{ vendor.purchaseOrders.length }})
         </button>
       </div>
 
@@ -78,28 +78,28 @@
         @if (activeTab() === 'info') {
           <div class="info-grid">
             <div class="info-item">
-              <span class="info-label">Status</span>
+              <span class="info-label">{{ 'common.status' | translate }}</span>
               <span class="info-value">
                 <span [class]="vendor.isActive ? 'chip chip--success' : 'chip chip--muted'">
-                  {{ vendor.isActive ? 'Active' : 'Inactive' }}
+                  {{ vendor.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
                 </span>
               </span>
             </div>
             @if (vendor.email) {
               <div class="info-item">
-                <span class="info-label">Email</span>
+                <span class="info-label">{{ 'common.email' | translate }}</span>
                 <span class="info-value">{{ vendor.email }}</span>
               </div>
             }
             @if (vendor.phone) {
               <div class="info-item">
-                <span class="info-label">Phone</span>
+                <span class="info-label">{{ 'common.phone' | translate }}</span>
                 <span class="info-value">{{ vendor.phone }}</span>
               </div>
             }
             @if (vendor.paymentTerms) {
               <div class="info-item">
-                <span class="info-label">Payment Terms</span>
+                <span class="info-label">{{ 'vendors.paymentTerms' | translate }}</span>
                 <span class="info-value">{{ vendor.paymentTerms }}</span>
               </div>
             }
@@ -107,7 +107,7 @@
 
           @if (vendor.address || vendor.city || vendor.state || vendor.zipCode || vendor.country) {
             <div class="info-section">
-              <span class="info-label">Address</span>
+              <span class="info-label">{{ 'common.address' | translate }}</span>
               <div class="info-address">
                 @if (vendor.address) { <div>{{ vendor.address }}</div> }
                 @if (vendor.city || vendor.state || vendor.zipCode) {
@@ -122,17 +122,17 @@
 
           @if (vendor.notes) {
             <div class="info-section">
-              <span class="info-label">Notes</span>
+              <span class="info-label">{{ 'common.notes' | translate }}</span>
               <div class="info-notes">{{ vendor.notes }}</div>
             </div>
           }
 
           @if (vendor.externalId) {
             <div class="info-section">
-              <span class="info-label">Accounting</span>
+              <span class="info-label">{{ 'vendors.accounting' | translate }}</span>
               <div class="info-grid">
                 <div class="info-item">
-                  <span class="info-label">External ID</span>
+                  <span class="info-label">{{ 'vendors.externalId' | translate }}</span>
                   <span class="info-value">{{ vendor.externalId }}</span>
                 </div>
               </div>
@@ -141,11 +141,11 @@
 
           <div class="info-grid">
             <div class="info-item">
-              <span class="info-label">Created</span>
+              <span class="info-label">{{ 'common.createdAt' | translate }}</span>
               <span class="info-value">{{ vendor.createdAt | date:'MM/dd/yyyy' }}</span>
             </div>
             <div class="info-item">
-              <span class="info-label">Updated</span>
+              <span class="info-label">{{ 'common.updatedAt' | translate }}</span>
               <span class="info-value">{{ vendor.updatedAt | date:'MM/dd/yyyy' }}</span>
             </div>
           </div>
@@ -153,11 +153,11 @@
           <div class="detail-actions">
             <button class="action-btn" (click)="toggleActive()">
               <span class="material-icons-outlined">{{ vendor.isActive ? 'block' : 'check_circle' }}</span>
-              {{ vendor.isActive ? 'Deactivate' : 'Activate' }}
+              {{ vendor.isActive ? ('vendors.deactivate' | translate) : ('vendors.activate' | translate) }}
             </button>
             <button class="action-btn action-btn--danger" (click)="deleteVendor()">
               <span class="material-icons-outlined">delete</span>
-              Delete
+              {{ 'common.delete' | translate }}
             </button>
           </div>
         }
@@ -165,14 +165,14 @@
         <!-- Purchase Orders Tab -->
         @if (activeTab() === 'purchase-orders') {
           @if (vendor.purchaseOrders.length === 0) {
-            <app-empty-state icon="receipt_long" message="No purchase orders for this vendor" />
+            <app-empty-state icon="receipt_long" [message]="'vendors.noPurchaseOrders' | translate" />
           } @else {
             <app-data-table
               tableId="vendor-pos"
               [columns]="poColumns"
               [data]="vendor.purchaseOrders"
               emptyIcon="receipt_long"
-              emptyMessage="No purchase orders">
+              [emptyMessage]="'vendors.noPurchaseOrders' | translate">
               <ng-template appColumnCell="poNumber" let-row>
                 <span class="po-number">{{ row.poNumber }}</span>
               </ng-template>

@@ -1,14 +1,14 @@
-<app-dialog title="Add Hold" width="420px" (closed)="dialogRef.close()">
+<app-dialog [title]="'addHoldDialog.title' | translate" width="420px" (closed)="dialogRef.close()">
   <div [formGroup]="form">
-    <app-select label="Hold Type" formControlName="statusCode" [options]="data.holdOptions" />
-    <app-textarea label="Reason" formControlName="notes" [rows]="3" [maxlength]="2000" />
+    <app-select [label]="'addHoldDialog.holdType' | translate" formControlName="statusCode" [options]="data.holdOptions" />
+    <app-textarea [label]="'addHoldDialog.reason' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" />
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="dialogRef.close()">Cancel</button>
+    <button class="action-btn" (click)="dialogRef.close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
-      (click)="save()">Add Hold</button>
+      (click)="save()">{{ 'addHoldDialog.addHold' | translate }}</button>
   </div>
 </app-dialog>

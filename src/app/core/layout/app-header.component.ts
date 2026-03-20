@@ -1,7 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, HostListener, OnInit } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of, EMPTY } from 'rxjs';
+
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { ThemeService } from '../../shared/services/theme.service';
 import { NotificationService } from '../../shared/services/notification.service';
@@ -9,6 +12,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { SearchService } from '../../shared/services/search.service';
 import { AiService, AiSearchSuggestion } from '../../shared/services/ai.service';
+import { LanguageService, SupportedLanguage } from '../../shared/services/language.service';
 import { SearchResult } from '../../shared/models/search.model';
 import { RagSearchResult } from '../../shared/models/rag-search-result.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
@@ -18,7 +22,7 @@ import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-h
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [ReactiveFormsModule, NotificationPanelComponent, ChatComponent, AiHelpPanelComponent],
+  imports: [ReactiveFormsModule, RouterLink, MatTooltipModule, TranslatePipe, NotificationPanelComponent, ChatComponent, AiHelpPanelComponent],
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +34,7 @@ export class AppHeaderComponent implements OnInit {
   protected readonly layout = inject(LayoutService);
   private readonly searchService = inject(SearchService);
   protected readonly aiService = inject(AiService);
+  protected readonly languageService = inject(LanguageService);
   private readonly router = inject(Router);
 
   protected readonly themeIcon = computed(() =>
@@ -41,6 +46,8 @@ export class AppHeaderComponent implements OnInit {
   protected readonly logoUrl = this.themeService.logoUrl;
   protected readonly currentUser = this.authService.user;
   protected readonly userMenuOpen = signal(false);
+  protected readonly currentLanguage = this.languageService.currentLanguage;
+  protected readonly availableLanguages = this.languageService.availableLanguages;
 
   protected readonly userInitials = computed(() => this.currentUser()?.initials ?? '?');
   protected readonly userAvatarColor = computed(() => this.currentUser()?.avatarColor ?? 'var(--accent)');
@@ -210,6 +217,10 @@ export class AppHeaderComponent implements OnInit {
 
   protected closeUserMenu(): void {
     this.userMenuOpen.set(false);
+  }
+
+  protected switchLanguage(lang: SupportedLanguage): void {
+    this.languageService.setLanguage(lang);
   }
 
   protected logout(): void {

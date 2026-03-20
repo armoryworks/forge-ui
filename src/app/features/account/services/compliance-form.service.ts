@@ -10,6 +10,7 @@ import {
   ComplianceFormType,
   IdentityDocument,
   IdentityDocumentType,
+  StateFormDefinitionResult,
 } from '../models/compliance-form.model';
 
 @Injectable({ providedIn: 'root' })
@@ -42,6 +43,28 @@ export class ComplianceFormService {
     return this.http.post<ComplianceFormSubmission>(`${this.base}/${templateId}/submit`, {}).pipe(
       tap(() => this.loadMySubmissions()),
     );
+  }
+
+  saveFormData(templateId: number, formDataJson: string, formDefinitionVersionId?: number | null): Observable<ComplianceFormSubmission> {
+    return this.http.put<ComplianceFormSubmission>(
+      `${this.base}/${templateId}/form-data`,
+      { formDataJson, formDefinitionVersionId },
+    ).pipe(
+      tap(() => this.loadMySubmissions()),
+    );
+  }
+
+  submitFormData(templateId: number, formDataJson: string, formDefinitionVersionId?: number | null): Observable<ComplianceFormSubmission> {
+    return this.http.post<ComplianceFormSubmission>(
+      `${this.base}/${templateId}/submit-form`,
+      { formDataJson, formDefinitionVersionId },
+    ).pipe(
+      tap(() => this.loadMySubmissions()),
+    );
+  }
+
+  getMyStateDefinition(): Observable<StateFormDefinitionResult> {
+    return this.http.get<StateFormDefinitionResult>(`${this.base}/my-state-definition`);
   }
 
   loadMyIdentityDocuments(): void {

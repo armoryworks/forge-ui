@@ -1,5 +1,5 @@
 <div class="card" [style.border-left-color]="priorityColor()" [class.card--selected]="selected()"
-     role="button" tabindex="0" [attr.aria-label]="'Job ' + job().jobNumber + ': ' + job().title"
+     role="button" tabindex="0" [attr.aria-label]="'kanban.jobAria' | translate:{ jobNumber: job().jobNumber, title: job().title }"
      (click)="cardClicked.emit({ job: job(), event: $event })"
      (keydown.enter)="cardClicked.emit({ job: job(), event: $event })">
   @if (selected()) {
@@ -12,13 +12,13 @@
     <span class="card__header-indicators">
       @if (job().activeHolds.length > 0) {
         <span class="job-card__hold-indicator"
-              [matTooltip]="holdTooltip()"
+              [matTooltip]="holdTooltip()" matTooltipPosition="above"
               matTooltipClass="job-card__hold-tooltip">
           <span class="material-icons-outlined">pause_circle</span>
         </span>
       }
       @if (job().isOverdue) {
-        <span class="card__overdue" title="Overdue">
+        <span class="card__overdue" [title]="'kanban.overdue' | translate">
           <span class="material-icons-outlined card__overdue-icon">warning</span>
         </span>
       }
@@ -41,7 +41,7 @@
       </span>
     }
     @if (job().externalRef) {
-      <span class="card__accounting" [title]="(job().accountingDocumentType ?? 'Document') + ' — ' + job().externalRef">
+      <span class="card__accounting" [title]="(job().accountingDocumentType ?? ('kanban.document' | translate)) + ' — ' + job().externalRef">
         <span class="material-icons-outlined card__accounting-icon">receipt_long</span>
         <span class="card__accounting-ref">{{ job().externalRef }}</span>
       </span>
@@ -52,7 +52,7 @@
       </span>
     }
     @if (job().childJobCount > 0) {
-      <span class="card__sub-jobs" title="Has sub-jobs">
+      <span class="card__sub-jobs" [title]="'kanban.hasSubJobs' | translate">
         <span class="material-icons-outlined">account_tree</span>
         <span class="card__sub-jobs-count">{{ job().childJobCount }}</span>
       </span>

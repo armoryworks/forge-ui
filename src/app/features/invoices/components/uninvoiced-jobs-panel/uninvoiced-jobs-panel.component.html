@@ -1,8 +1,8 @@
-<app-dialog [title]="'Uninvoiced Jobs (' + jobs().length + ')'" width="620px" (closed)="close()">
+<app-dialog [title]="('invoices.uninvoicedTitle' | translate:{ count: jobs().length })" width="620px" (closed)="close()">
   @if (jobs().length === 0) {
     <div class="empty-state">
       <span class="material-icons-outlined empty-state__icon">check_circle</span>
-      <span class="empty-state__text">All completed jobs have been invoiced.</span>
+      <span class="empty-state__text">{{ 'invoices.allInvoiced' | translate }}</span>
     </div>
   } @else {
     <div class="uninvoiced-list">
@@ -18,15 +18,15 @@
                 <span class="uninvoiced-item__customer">{{ job.customerName }}</span>
                 <span class="uninvoiced-item__sep">&middot;</span>
               }
-              <span class="uninvoiced-item__date">Completed {{ job.completedDate | date:'MM/dd/yyyy' }}</span>
+              <span class="uninvoiced-item__date">{{ 'invoices.completedDate' | translate }} {{ job.completedDate | date:'MM/dd/yyyy' }}</span>
             </div>
           </div>
           <button class="action-btn action-btn--sm action-btn--primary"
             [disabled]="!job.customerId"
-            [title]="job.customerId ? 'Create invoice for this job' : 'No customer assigned'"
+            [title]="job.customerId ? ('invoices.createInvoiceForJob' | translate) : ('invoices.noCustomerAssigned' | translate)"
             (click)="onCreateInvoice(job.jobId)">
             <span class="material-icons-outlined">receipt_long</span>
-            Invoice
+            {{ 'invoices.invoice' | translate }}
           </button>
         </div>
       }
@@ -34,6 +34,6 @@
   }
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Close</button>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
   </div>
 </app-dialog>

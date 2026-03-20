@@ -175,4 +175,9 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/dev-tools/dev-tools.routes').then((m) => m.DEV_TOOLS_ROUTES),
   },
+  {
+    path: '__render-form',
+    loadChildren: () =>
+      import('./features/render/render.routes').then((m) => m.RENDER_ROUTES),
+  },
 ];

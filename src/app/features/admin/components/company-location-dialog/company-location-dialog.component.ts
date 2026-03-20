@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
@@ -13,7 +15,7 @@ import { Address } from '../../../../shared/models/address.model';
   selector: 'app-company-location-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DialogComponent, InputComponent, ToggleComponent,
+    ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ToggleComponent,
     AddressFormComponent, ValidationPopoverDirective,
   ],
   templateUrl: './company-location-dialog.component.html',

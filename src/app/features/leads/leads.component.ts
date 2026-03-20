@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LeadsService } from './services/leads.service';
 import { LeadItem } from './models/lead-item.model';
 import { LeadStatus } from './models/lead-status.type';
@@ -21,15 +22,16 @@ import { toIsoDate } from '../../shared/utils/date.utils';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-leads',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective,
+    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, MatTooltipModule,
   ],
   templateUrl: './leads.component.html',
   styleUrl: './leads.component.scss',
@@ -39,6 +41,7 @@ export class LeadsComponent {
   private readonly leadsService = inject(LeadsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -80,16 +83,18 @@ export class LeadsComponent {
   protected readonly lostReasonControl = new FormControl('');
 
   protected readonly leadColumns: ColumnDef[] = [
-    { field: 'companyName', header: 'Company', sortable: true },
-    { field: 'contactName', header: 'Contact', sortable: true },
-    { field: 'source', header: 'Source', sortable: true },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: [
-      { value: 'New', label: 'New' }, { value: 'Contacted', label: 'Contacted' },
-      { value: 'Quoting', label: 'Quoting' }, { value: 'Converted', label: 'Converted' },
-      { value: 'Lost', label: 'Lost' },
+    { field: 'companyName', header: this.translate.instant('leads.colCompany'), sortable: true },
+    { field: 'contactName', header: this.translate.instant('leads.colContact'), sortable: true },
+    { field: 'source', header: this.translate.instant('leads.colSource'), sortable: true },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
+      { value: 'New', label: this.translate.instant('leads.statusNew') },
+      { value: 'Contacted', label: this.translate.instant('leads.statusContacted') },
+      { value: 'Quoting', label: this.translate.instant('leads.statusQuoting') },
+      { value: 'Converted', label: this.translate.instant('leads.statusConverted') },
+      { value: 'Lost', label: this.translate.instant('leads.statusLost') },
     ]},
-    { field: 'followUpDate', header: 'Follow-Up', sortable: true, type: 'date' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date' },
+    { field: 'followUpDate', header: this.translate.instant('leads.colFollowUp'), sortable: true, type: 'date' },
+    { field: 'createdAt', header: this.translate.instant('leads.colCreated'), sortable: true, type: 'date' },
   ];
 
   protected readonly leadRowClass = (row: unknown) => {
@@ -101,12 +106,12 @@ export class LeadsComponent {
   protected readonly leadSources = ['Referral', 'Website', 'Trade Show', 'Cold Call', 'Email', 'Social Media', 'Other'];
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
+    { value: null, label: this.translate.instant('leads.allStatuses') },
     ...this.statuses.map(s => ({ value: s, label: s })),
   ];
 
   protected readonly sourceOptions: SelectOption[] = [
-    { value: null, label: '-- None --' },
+    { value: null, label: this.translate.instant('common.none') },
     ...this.leadSources.map(s => ({ value: s, label: s })),
   ];
 
@@ -247,9 +252,9 @@ export class LeadsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Convert to Customer',
-        message: `Convert "${lead.companyName}" to a customer? You can also create a job for the new customer.`,
-        confirmLabel: 'Convert Only',
+        title: this.translate.instant('leads.convertTitle'),
+        message: this.translate.instant('leads.convertMessage', { name: lead.companyName }),
+        confirmLabel: this.translate.instant('leads.convertOnly'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -270,15 +275,15 @@ export class LeadsComponent {
       next: (result) => {
         this.saving.set(false);
         const msg = createJob
-          ? `Lead converted to customer and job created.`
-          : `Lead converted to customer.`;
+          ? this.translate.instant('leads.convertedWithJob')
+          : this.translate.instant('leads.convertedOnly');
         this.snackbar.success(msg);
         this.selectedLead.set(null);
         this.loadLeads();
       },
       error: () => {
         this.saving.set(false);
-        this.snackbar.error('Failed to convert lead.');
+        this.snackbar.error(this.translate.instant('leads.convertFailed'));
       },
     });
   }
@@ -289,9 +294,9 @@ export class LeadsComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Lead?',
-        message: `This will permanently delete "${lead.companyName}".`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('leads.deleteTitle'),
+        message: this.translate.instant('leads.deleteMessage', { name: lead.companyName }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -300,7 +305,7 @@ export class LeadsComponent {
         next: () => {
           this.selectedLead.set(null);
           this.loadLeads();
-          this.snackbar.success('Lead deleted.');
+          this.snackbar.success(this.translate.instant('leads.deleted'));
         },
       });
     });

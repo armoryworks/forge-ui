@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { formatDate } from '../../../../shared/utils/date.utils';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
@@ -10,7 +12,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 @Component({
   selector: 'app-cycle-board',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, EmptyStateComponent],
+  imports: [CdkDropList, CdkDrag, MatTooltipModule, TranslatePipe, EmptyStateComponent],
   templateUrl: './cycle-board.component.html',
   styleUrl: './cycle-board.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

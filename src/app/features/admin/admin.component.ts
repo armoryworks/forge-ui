@@ -1,9 +1,10 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, LowerCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from './services/admin.service';
 import { AdminUser } from './models/admin-user.model';
 import { ScanIdentifier } from './models/scan-identifier.model';
@@ -15,6 +16,7 @@ import { TrackType } from '../../shared/models/track-type.model';
 import { TrackTypeDialogComponent } from './components/track-type-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TerminologyService } from '../../shared/services/terminology.service';
 import { ThemeService } from '../../shared/services/theme.service';
@@ -51,7 +53,7 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, BarcodeInfoComponent, DatePipe,
+    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -68,11 +70,14 @@ export class AdminComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly translate = inject(TranslateService);
 
   private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance']);
   private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
+  protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
+  protected readonly pageSubtitle = computed(() => this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee'));
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(
@@ -144,10 +149,12 @@ export class AdminComponent {
   protected readonly terminologyEdits = signal<Map<string, string>>(new Map());
 
   // System Settings
+  private readonly settingsLoaded = signal(false);
   protected readonly systemSettings = signal<SystemSetting[]>([]);
   protected readonly settingsEdits = signal<Map<string, string>>(new Map());
 
   // Company Profile
+  private readonly profileLoaded = signal(false);
   protected readonly companyProfile = signal<CompanyProfile | null>(null);
   protected readonly profileForm = new FormGroup({
     name: new FormControl(''),
@@ -159,16 +166,17 @@ export class AdminComponent {
   protected readonly profileSaving = signal(false);
 
   // Company Locations
+  private readonly locationsLoaded = signal(false);
   protected readonly companyLocations = signal<CompanyLocation[]>([]);
   protected readonly showLocationDialog = signal(false);
   protected readonly editingLocation = signal<CompanyLocation | null>(null);
   protected readonly locationColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'address', header: 'Address', sortable: true },
-    { field: 'state', header: 'State', sortable: true, width: '80px' },
-    { field: 'phone', header: 'Phone', width: '140px' },
-    { field: 'default', header: 'Default', width: '80px', align: 'center' },
-    { field: 'actions', header: 'Actions', width: '120px', align: 'right' },
+    { field: 'name', header: this.translate.instant('admin.colName'), sortable: true },
+    { field: 'address', header: this.translate.instant('admin.colAddress'), sortable: true },
+    { field: 'state', header: this.translate.instant('admin.colState'), sortable: true, width: '80px' },
+    { field: 'phone', header: this.translate.instant('admin.colPhone'), width: '140px' },
+    { field: 'default', header: this.translate.instant('admin.colDefault'), width: '80px', align: 'center' },
+    { field: 'actions', header: this.translate.instant('admin.colActions'), width: '120px', align: 'right' },
   ];
   protected readonly locationOptions = computed<SelectOption[]>(() => [
     { value: null, label: '-- Default --' },
@@ -193,14 +201,15 @@ export class AdminComponent {
 
   protected readonly userColumns: ColumnDef[] = [
     { field: 'avatar', header: '', width: '36px' },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'email', header: 'Email', sortable: true },
-    { field: 'role', header: 'Role', sortable: true, filterable: true, type: 'enum', filterOptions: [
+    { field: 'name', header: this.translate.instant('admin.colName'), sortable: true },
+    { field: 'email', header: this.translate.instant('admin.colEmail'), sortable: true },
+    { field: 'role', header: this.translate.instant('admin.colRole'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Admin', label: 'Admin' }, { value: 'Engineer', label: 'Engineer' }, { value: 'Viewer', label: 'Viewer' },
     ]},
-    { field: 'compliance', header: 'Compliance', sortable: true, width: '130px' },
-    { field: 'status', header: 'Status', sortable: true },
-    { field: 'actions', header: 'Actions', width: '140px', align: 'right' },
+    { field: 'workLocationName', header: this.translate.instant('admin.colLocation'), sortable: true, filterable: true, type: 'text', width: '150px' },
+    { field: 'compliance', header: this.translate.instant('admin.colCompliance'), sortable: true, width: '130px' },
+    { field: 'status', header: this.translate.instant('admin.colStatus'), sortable: true },
+    { field: 'actions', header: this.translate.instant('admin.colActions'), width: '140px', align: 'right' },
   ];
 
   protected readonly roleOptions: SelectOption[] = [
@@ -217,13 +226,13 @@ export class AdminComponent {
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'users' && this.users().length === 0) this.loadUsers();
-      if (tab === 'users' && this.companyLocations().length === 0) this.loadCompanyLocations();
+      if (tab === 'users' && !this.locationsLoaded()) this.loadCompanyLocations();
       if (tab === 'track-types' && this.trackTypes().length === 0) this.loadTrackTypes();
       if (tab === 'reference-data' && this.referenceDataGroups().length === 0) this.loadReferenceData();
       if (tab === 'terminology' && this.terminologyEntries().length === 0) this.loadTerminology();
-      if (tab === 'settings' && this.systemSettings().length === 0) this.loadSystemSettings();
-      if (tab === 'settings' && !this.companyProfile()) this.loadCompanyProfile();
-      if (tab === 'settings' && this.companyLocations().length === 0) this.loadCompanyLocations();
+      if (tab === 'settings' && !this.settingsLoaded()) this.loadSystemSettings();
+      if (tab === 'settings' && !this.profileLoaded()) this.loadCompanyProfile();
+      if (tab === 'settings' && !this.locationsLoaded()) this.loadCompanyLocations();
       if (tab === 'compliance' && this.users().length === 0) this.loadUsers();
     });
 
@@ -233,7 +242,7 @@ export class AdminComponent {
       if (!scan || !this.editingUser()) return;
       this.scanner.clearLastScan();
       this.newScanValue.setValue(scan.value);
-      this.snackbar.success(`Scanned: ${scan.value}`);
+      this.snackbar.success(this.translate.instant('admin.scanned', { value: scan.value }));
     });
 
     // When editing a user and an RFID card is tapped via WebHID, auto-add as scan identifier
@@ -262,7 +271,7 @@ export class AdminComponent {
     this.loading.set(true);
     this.adminService.getUsers().subscribe({
       next: (users) => { this.users.set(users); this.loading.set(false); },
-      error: (err) => { this.error.set('Failed to load users'); this.loading.set(false); },
+      error: (err) => { this.error.set(this.translate.instant('admin.loadUsersFailed')); this.loading.set(false); },
     });
   }
 
@@ -328,13 +337,13 @@ export class AdminComponent {
           if (newLocId !== editing.workLocationId) {
             this.adminService.updateUserWorkLocation(editing.id, newLocId).subscribe({
               next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
-              error: () => { this.saving.set(false); this.snackbar.error('User saved but failed to update work location'); this.closeUserDialog(); this.loadUsers(); },
+              error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.userSavedLocationFailed')); this.closeUserDialog(); this.loadUsers(); },
             });
           } else {
             this.saving.set(false); this.closeUserDialog(); this.loadUsers();
           }
         },
-        error: (err) => { this.saving.set(false); this.error.set('Failed to update user'); },
+        error: (err) => { this.saving.set(false); this.error.set(this.translate.instant('admin.updateUserFailed')); },
       });
     } else {
       this.adminService.createUser({
@@ -376,9 +385,9 @@ export class AdminComponent {
           this.setupTokenExpiresAt.set(result.setupTokenExpiresAt);
           this.userForm.controls.email.disable();
           this.loadScanIdentifiers(result.id);
-          this.snackbar.success(`User created — share the setup code with ${form.firstName}`);
+          this.snackbar.success(this.translate.instant('admin.userCreated', { name: form.firstName }));
         },
-        error: () => { this.saving.set(false); this.error.set('Failed to create user'); },
+        error: () => { this.saving.set(false); this.error.set(this.translate.instant('admin.createUserFailed')); },
       });
     }
   }
@@ -387,7 +396,7 @@ export class AdminComponent {
     this.rfid.clearError();
     const success = await this.rfid.requestDevice();
     if (success) {
-      this.snackbar.success(`RFID reader connected: ${this.rfid.deviceName()}`);
+      this.snackbar.success(this.translate.instant('admin.rfidConnected', { device: this.rfid.deviceName() }));
     } else if (this.rfid.error()) {
       this.snackbar.error(this.rfid.error()!);
     }
@@ -395,14 +404,14 @@ export class AdminComponent {
 
   protected async unpairRfidReader(): Promise<void> {
     await this.rfid.disconnect();
-    this.snackbar.info('RFID reader disconnected');
+    this.snackbar.info(this.translate.instant('admin.rfidDisconnected'));
   }
 
   protected copySetupCode(): void {
     const code = this.setupToken();
     if (!code) return;
     navigator.clipboard.writeText(code);
-    this.snackbar.success('Setup code copied to clipboard');
+    this.snackbar.success(this.translate.instant('admin.setupCodeCopied'));
   }
 
   protected regenerateSetupToken(user: AdminUser): void {
@@ -410,16 +419,16 @@ export class AdminComponent {
       next: (result) => {
         this.setupToken.set(result.token);
         this.setupTokenExpiresAt.set(result.expiresAt);
-        this.snackbar.success(`Setup link generated for ${user.firstName}`);
+        this.snackbar.success(this.translate.instant('admin.setupTokenGenerated', { name: user.firstName }));
       },
-      error: () => this.snackbar.error('Failed to generate setup token'),
+      error: () => this.snackbar.error(this.translate.instant('admin.setupTokenFailed')),
     });
   }
 
   protected toggleUserActive(user: AdminUser): void {
     this.adminService.updateUser(user.id, { isActive: !user.isActive }).subscribe({
       next: () => this.loadUsers(),
-      error: () => this.error.set('Failed to update user status'),
+      error: () => this.error.set(this.translate.instant('admin.updateUserStatusFailed')),
     });
   }
 
@@ -444,11 +453,11 @@ export class AdminComponent {
         this.newScanValue.reset();
         this.loadScanIdentifiers(user.id);
         this.loadUsers();
-        this.snackbar.success('Scan identifier added');
+        this.snackbar.success(this.translate.instant('admin.scanIdAdded'));
       },
       error: () => {
         this.scanIdLoading.set(false);
-        this.snackbar.error('Failed to add scan identifier');
+        this.snackbar.error(this.translate.instant('admin.scanIdAddFailed'));
       },
     });
   }
@@ -461,9 +470,9 @@ export class AdminComponent {
       next: () => {
         this.loadScanIdentifiers(user.id);
         this.loadUsers();
-        this.snackbar.success('Scan identifier removed');
+        this.snackbar.success(this.translate.instant('admin.scanIdRemoved'));
       },
-      error: () => this.snackbar.error('Failed to remove scan identifier'),
+      error: () => this.snackbar.error(this.translate.instant('admin.scanIdRemoveFailed')),
     });
   }
 
@@ -477,7 +486,7 @@ export class AdminComponent {
     this.loading.set(true);
     this.adminService.getTrackTypes().subscribe({
       next: (types) => { this.trackTypes.set(types); this.loading.set(false); },
-      error: () => { this.error.set('Failed to load track types'); this.loading.set(false); },
+      error: () => { this.error.set(this.translate.instant('admin.loadTrackTypesFailed')); this.loading.set(false); },
     });
   }
 
@@ -509,9 +518,9 @@ export class AdminComponent {
           this.saving.set(false);
           this.closeTrackTypeDialog();
           this.loadTrackTypes();
-          this.snackbar.success('Track type updated');
+          this.snackbar.success(this.translate.instant('admin.trackTypeUpdated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error('Failed to update track type'); },
+        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.trackTypeUpdateFailed')); },
       });
     } else {
       this.adminService.createTrackType(data).subscribe({
@@ -519,9 +528,9 @@ export class AdminComponent {
           this.saving.set(false);
           this.closeTrackTypeDialog();
           this.loadTrackTypes();
-          this.snackbar.success('Track type created');
+          this.snackbar.success(this.translate.instant('admin.trackTypeCreated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error('Failed to create track type'); },
+        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.trackTypeCreateFailed')); },
       });
     }
   }
@@ -530,9 +539,9 @@ export class AdminComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Track Type?',
-        message: `This will deactivate "${tt.name}" and all its stages. Existing jobs will remain.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('admin.deleteTrackTypeTitle'),
+        message: this.translate.instant('admin.deleteTrackTypeMessage', { name: tt.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -540,9 +549,9 @@ export class AdminComponent {
       this.adminService.deleteTrackType(tt.id).subscribe({
         next: () => {
           this.loadTrackTypes();
-          this.snackbar.success('Track type deleted');
+          this.snackbar.success(this.translate.instant('admin.trackTypeDeleted'));
         },
-        error: () => this.snackbar.error('Failed to delete track type'),
+        error: () => this.snackbar.error(this.translate.instant('admin.trackTypeDeleteFailed')),
       });
     });
   }
@@ -553,7 +562,7 @@ export class AdminComponent {
     this.loading.set(true);
     this.adminService.getReferenceData().subscribe({
       next: (groups) => { this.referenceDataGroups.set(groups); this.loading.set(false); },
-      error: () => { this.error.set('Failed to load reference data'); this.loading.set(false); },
+      error: () => { this.error.set(this.translate.instant('admin.loadRefDataFailed')); this.loading.set(false); },
     });
   }
 
@@ -575,7 +584,7 @@ export class AdminComponent {
         this.terminologyEdits.set(new Map(entries.map(e => [e.key, e.label])));
         this.loading.set(false);
       },
-      error: () => { this.error.set('Failed to load terminology'); this.loading.set(false); },
+      error: () => { this.error.set(this.translate.instant('admin.loadTerminologyFailed')); this.loading.set(false); },
     });
   }
 
@@ -601,9 +610,9 @@ export class AdminComponent {
         this.terminologyEntries.set(updated);
         this.terminologyEdits.set(new Map(updated.map(e => [e.key, e.label])));
         this.saving.set(false);
-        this.snackbar.success('Terminology saved');
+        this.snackbar.success(this.translate.instant('admin.terminologySaved'));
       },
-      error: () => { this.saving.set(false); this.snackbar.error('Failed to save terminology'); },
+      error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.terminologySaveFailed')); },
     });
   }
 
@@ -617,6 +626,7 @@ export class AdminComponent {
   // ── System Settings ──
 
   private loadSystemSettings(): void {
+    this.settingsLoaded.set(true);
     this.loading.set(true);
     this.adminService.getSystemSettings().subscribe({
       next: (settings) => {
@@ -624,7 +634,7 @@ export class AdminComponent {
         this.settingsEdits.set(new Map(settings.map(s => [s.key, s.value])));
         this.loading.set(false);
       },
-      error: () => { this.error.set('Failed to load system settings'); this.loading.set(false); },
+      error: () => { this.error.set(this.translate.instant('admin.loadSettingsFailed')); this.loading.set(false); },
     });
   }
 
@@ -668,7 +678,7 @@ export class AdminComponent {
         this.systemSettings.set(updated);
         this.settingsEdits.set(new Map(updated.map(s => [s.key, s.value])));
         this.saving.set(false);
-        this.snackbar.success('Settings saved');
+        this.snackbar.success(this.translate.instant('admin.settingsSaved'));
 
         const lookup = new Map(updated.map(s => [s.key, s.value]));
         this.themeService.setBrandColors(
@@ -676,19 +686,20 @@ export class AdminComponent {
           lookup.get('theme.accent_color') || undefined,
         );
       },
-      error: () => { this.saving.set(false); this.snackbar.error('Failed to save settings'); },
+      error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.settingsSaveFailed')); },
     });
   }
 
   // ── Company Profile ──
 
   private loadCompanyProfile(): void {
+    this.profileLoaded.set(true);
     this.adminService.getCompanyProfile().subscribe({
       next: (profile) => {
         this.companyProfile.set(profile);
         this.profileForm.patchValue(profile, { emitEvent: false });
       },
-      error: () => this.snackbar.error('Failed to load company profile'),
+      error: () => this.snackbar.error(this.translate.instant('admin.companyProfileLoadFailed')),
     });
   }
 
@@ -705,18 +716,19 @@ export class AdminComponent {
       next: (profile) => {
         this.companyProfile.set(profile);
         this.profileSaving.set(false);
-        this.snackbar.success('Company profile saved');
+        this.snackbar.success(this.translate.instant('admin.companyProfileSaved'));
       },
-      error: () => { this.profileSaving.set(false); this.snackbar.error('Failed to save company profile'); },
+      error: () => { this.profileSaving.set(false); this.snackbar.error(this.translate.instant('admin.companyProfileSaveFailed')); },
     });
   }
 
   // ── Company Locations ──
 
   private loadCompanyLocations(): void {
+    this.locationsLoaded.set(true);
     this.adminService.getCompanyLocations().subscribe({
       next: (locations) => this.companyLocations.set(locations),
-      error: () => this.snackbar.error('Failed to load company locations'),
+      error: () => this.snackbar.error(this.translate.instant('admin.locationsLoadFailed')),
     });
   }
 
@@ -744,9 +756,9 @@ export class AdminComponent {
           this.saving.set(false);
           this.closeLocationDialog();
           this.loadCompanyLocations();
-          this.snackbar.success('Location updated');
+          this.snackbar.success(this.translate.instant('admin.locationUpdated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error('Failed to update location'); },
+        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.locationUpdateFailed')); },
       });
     } else {
       this.adminService.createCompanyLocation(data).subscribe({
@@ -754,9 +766,9 @@ export class AdminComponent {
           this.saving.set(false);
           this.closeLocationDialog();
           this.loadCompanyLocations();
-          this.snackbar.success('Location created');
+          this.snackbar.success(this.translate.instant('admin.locationCreated'));
         },
-        error: () => { this.saving.set(false); this.snackbar.error('Failed to create location'); },
+        error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.locationCreateFailed')); },
       });
     }
   }
@@ -765,24 +777,24 @@ export class AdminComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Location?',
-        message: `This will deactivate "${location.name}". Users assigned here will fall back to the default location.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('admin.deleteLocationTitle'),
+        message: this.translate.instant('admin.deleteLocationMessage', { name: location.name }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
       this.adminService.deleteCompanyLocation(location.id).subscribe({
-        next: () => { this.loadCompanyLocations(); this.snackbar.success('Location deleted'); },
-        error: () => this.snackbar.error('Failed to delete location'),
+        next: () => { this.loadCompanyLocations(); this.snackbar.success(this.translate.instant('admin.locationDeleted')); },
+        error: () => this.snackbar.error(this.translate.instant('admin.locationDeleteFailed')),
       });
     });
   }
 
   protected setDefaultLocation(location: CompanyLocation): void {
     this.adminService.setDefaultCompanyLocation(location.id).subscribe({
-      next: () => { this.loadCompanyLocations(); this.snackbar.success(`${location.name} set as default`); },
-      error: () => this.snackbar.error('Failed to set default location'),
+      next: () => { this.loadCompanyLocations(); this.snackbar.success(this.translate.instant('admin.locationSetDefault', { name: location.name })); },
+      error: () => this.snackbar.error(this.translate.instant('admin.locationSetDefaultFailed')),
     });
   }
 
@@ -798,12 +810,12 @@ export class AdminComponent {
     this.adminService.uploadLogo(file).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Logo uploaded');
+        this.snackbar.success(this.translate.instant('admin.logoUploaded'));
         this.themeService.loadBrandSettings();
       },
       error: () => {
         this.saving.set(false);
-        this.snackbar.error('Failed to upload logo');
+        this.snackbar.error(this.translate.instant('admin.logoUploadFailed'));
       },
     });
   }
@@ -813,12 +825,12 @@ export class AdminComponent {
     this.adminService.deleteLogo().subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('Logo removed');
+        this.snackbar.success(this.translate.instant('admin.logoRemoved'));
         this.themeService.loadBrandSettings();
       },
       error: () => {
         this.saving.set(false);
-        this.snackbar.error('Failed to remove logo');
+        this.snackbar.error(this.translate.instant('admin.logoRemoveFailed'));
       },
     });
   }

@@ -1,21 +1,23 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+
+import { MatDialog } from '@angular/material/dialog';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AccountingService } from '../../../../shared/services/accounting.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { QuickBooksService } from '../../services/quickbooks.service';
-
-export interface IntegrationConfig {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  status: 'connected' | 'disconnected' | 'not_configured';
-  category: 'accounting' | 'shipping' | 'storage' | 'ai' | 'email';
-}
+import { AdminService } from '../../services/admin.service';
+import { IntegrationStatus } from '../../models/integration-status.model';
+import {
+  IntegrationConfigDialogComponent,
+  IntegrationConfigDialogData,
+} from '../integration-config-dialog/integration-config-dialog.component';
 
 @Component({
   selector: 'app-integrations-panel',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './integrations-panel.component.html',
   styleUrl: './integrations-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +25,10 @@ export interface IntegrationConfig {
 export class IntegrationsPanelComponent implements OnInit {
   protected readonly accountingService = inject(AccountingService);
   private readonly qbService = inject(QuickBooksService);
+  private readonly adminService = inject(AdminService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly providers = this.accountingService.providers;
   readonly activeProviderId = this.accountingService.providerId;
@@ -41,45 +47,20 @@ export class IntegrationsPanelComponent implements OnInit {
 
   readonly qbCompanyName = computed(() => this.qbStatus()?.companyName ?? null);
 
-  readonly staticIntegrations: IntegrationConfig[] = [
-    {
-      id: 'minio',
-      name: 'MinIO Storage',
-      description: 'S3-compatible file storage',
-      icon: 'cloud_upload',
-      status: 'connected',
-      category: 'storage',
-    },
-    {
-      id: 'smtp',
-      name: 'SMTP Email',
-      description: 'Outbound email notifications and invoices',
-      icon: 'email',
-      status: 'connected',
-      category: 'email',
-    },
-    {
-      id: 'shipping',
-      name: 'Shipping Carrier',
-      description: 'Rate shopping and label generation (UPS, FedEx, etc.)',
-      icon: 'local_shipping',
-      status: 'not_configured',
-      category: 'shipping',
-    },
-    {
-      id: 'ollama',
-      name: 'AI Assistant (Ollama)',
-      description: 'Self-hosted AI for smart search and drafting',
-      icon: 'psychology',
-      status: 'not_configured',
-      category: 'ai',
-    },
-  ];
+  readonly integrations = signal<IntegrationStatus[]>([]);
+  readonly testingProvider = signal<string | null>(null);
 
   ngOnInit(): void {
     this.accountingService.loadProviders();
     this.accountingService.loadSyncStatus();
     this.qbService.loadStatus();
+    this.loadIntegrations();
+  }
+
+  loadIntegrations(): void {
+    this.adminService.getIntegrations().subscribe({
+      next: (data) => this.integrations.set(data),
+    });
   }
 
   connectQuickBooks(): void {
@@ -98,5 +79,35 @@ export class IntegrationsPanelComponent implements OnInit {
     if (providerId === 'quickbooks') {
       this.qbService.connect();
     }
+  }
+
+  configureIntegration(integration: IntegrationStatus): void {
+    this.dialog
+      .open(IntegrationConfigDialogComponent, {
+        width: '520px',
+        data: { integration } satisfies IntegrationConfigDialogData,
+      })
+      .afterClosed()
+      .subscribe((saved: boolean) => {
+        if (saved) this.loadIntegrations();
+      });
+  }
+
+  testIntegration(integration: IntegrationStatus): void {
+    this.testingProvider.set(integration.provider);
+    this.adminService.testIntegration(integration.provider).subscribe({
+      next: (result) => {
+        this.testingProvider.set(null);
+        if (result.success) {
+          this.snackbar.success(result.message);
+        } else {
+          this.snackbar.error(result.message);
+        }
+      },
+      error: () => {
+        this.testingProvider.set(null);
+        this.snackbar.error(this.translate.instant('integrations.connectionTestFailed'));
+      },
+    });
   }
 }
