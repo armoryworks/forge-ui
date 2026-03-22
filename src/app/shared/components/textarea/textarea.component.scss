@@ -1,3 +1,18 @@
+@use 'styles/variables' as *;
+
 mat-form-field {
   width: 100%;
+
+  // Override Material's default font to match site design tokens
+  ::ng-deep {
+    .mdc-floating-label {
+      font-family: $font-family-primary;
+      font-size: $font-size-base;
+    }
+
+    .mat-mdc-form-field-input-control {
+      font-family: $font-family-primary;
+      font-size: $font-size-sm;
+    }
+  }
 }

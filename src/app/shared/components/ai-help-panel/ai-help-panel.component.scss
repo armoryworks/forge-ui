@@ -159,6 +159,88 @@
     gap: $sp-sm;
     padding: $sp-lg;
   }
+
+  &--markdown {
+    padding: $sp-md $sp-lg;
+
+    ::ng-deep {
+      p {
+        margin: 0 0 $sp-md;
+        font-size: $font-size-sm;
+        line-height: 1.6;
+        color: var(--text);
+
+        &:last-child { margin-bottom: 0; }
+      }
+
+      h1, h2, h3, h4 {
+        font-size: $font-size-base;
+        font-weight: 700;
+        color: var(--text);
+        margin: $sp-lg 0 $sp-sm;
+
+        &:first-child { margin-top: 0; }
+      }
+
+      ul, ol {
+        margin: $sp-sm 0 $sp-md $sp-lg;
+        padding: 0;
+        font-size: $font-size-sm;
+        line-height: 1.6;
+
+        &:last-child { margin-bottom: 0; }
+      }
+
+      li {
+        margin-bottom: $sp-xs;
+        color: var(--text);
+
+        &::marker { color: var(--primary); }
+      }
+
+      strong {
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      a {
+        color: var(--primary);
+        text-decoration: none;
+
+        &:hover { text-decoration: underline; }
+      }
+
+      code {
+        font-family: $font-family-mono;
+        font-size: $font-size-xs;
+        background: color-mix(in srgb, var(--primary) 8%, var(--bg));
+        color: var(--primary);
+        padding: 1px $sp-sm;
+        border-radius: 2px;
+      }
+
+      pre {
+        background: var(--bg);
+        border: $border-width-thin solid var(--border);
+        padding: $sp-md;
+        margin: $sp-md 0;
+        overflow-x: auto;
+        @include custom-scrollbar(4px);
+
+        code {
+          background: none;
+          padding: 0;
+          color: var(--text);
+        }
+      }
+
+      hr {
+        border: none;
+        border-top: $border-width-thin solid var(--border);
+        margin: $sp-md 0;
+      }
+    }
+  }
 }
 
 .ai-help-msg__dot {

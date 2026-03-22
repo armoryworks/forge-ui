@@ -149,7 +149,9 @@
     "done": "Listo",
     "default": "Predeterminado",
     "allStatuses": "Todos los Estados",
-    "send": "Enviar"
+    "send": "Enviar",
+    "customer": "Cliente",
+    "part": "Parte"
   },
   "dashboard": {
     "title": "Panel",
@@ -1046,6 +1048,9 @@
     "profileLoadFailed": "Error al cargar perfil de la empresa",
     "profileSaved": "Perfil de empresa guardado",
     "profileSaveFailed": "Error al guardar perfil de empresa",
+    "companyProfileLoadFailed": "Error al cargar perfil de la empresa",
+    "companyProfileSaved": "Perfil de empresa guardado",
+    "companyProfileSaveFailed": "Error al guardar perfil de empresa",
     "locationsLoadFailed": "Error al cargar ubicaciones",
     "locationUpdated": "Ubicación actualizada",
     "locationUpdateFailed": "Error al actualizar ubicación",
@@ -1824,6 +1829,7 @@
     "noInvoicesFound": "No se encontraron facturas",
     "invoiceNumber": "Factura #",
     "customer": "Cliente",
+    "dueDate": "Fecha de Vencimiento",
     "invoiceDate": "Fecha de Factura",
     "salesOrder": "Orden de Venta",
     "shipment": "Envío",

@@ -1,23 +1,28 @@
-import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MarkdownComponent } from 'ngx-markdown';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { AiService, AiHelpMessage } from '../../services/ai.service';
+import { AiHelpMessage, AiService } from '../../services/ai.service';
+import { AuthService } from '../../services/auth.service';
+
+const MAX_STORED_MESSAGES = 50;
 
 @Component({
   selector: 'app-ai-help-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, MarkdownComponent, TranslatePipe],
   templateUrl: './ai-help-panel.component.html',
   styleUrl: './ai-help-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AiHelpPanelComponent {
+export class AiHelpPanelComponent implements OnInit, OnDestroy {
   private readonly aiService = inject(AiService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
 
   readonly messages = signal<AiHelpMessage[]>([]);
   readonly loading = signal(false);
@@ -25,11 +30,29 @@ export class AiHelpPanelComponent {
 
   protected readonly inputControl = new FormControl('');
 
-  protected readonly conversationHistory = computed(() =>
-    this.messages().map(m => `${m.role}: ${m.content}`),
-  );
-
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLDivElement>;
+
+  private storageKey = '';
+  private readonly onStorageEvent = (e: StorageEvent) => {
+    if (e.key === this.storageKey && e.newValue !== null) {
+      try {
+        this.messages.set(JSON.parse(e.newValue));
+      } catch {
+        // malformed — ignore
+      }
+    }
+  };
+
+  ngOnInit(): void {
+    const userId = this.auth.user()?.id;
+    this.storageKey = `ai-help:${userId ?? 'anon'}`;
+    this.messages.set(this.loadFromStorage());
+    window.addEventListener('storage', this.onStorageEvent);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('storage', this.onStorageEvent);
+  }
 
   toggle(): void {
     this.open.update(v => !v);
@@ -37,6 +60,7 @@ export class AiHelpPanelComponent {
 
   protected clearChat(): void {
     this.messages.set([]);
+    localStorage.removeItem(this.storageKey);
   }
 
   protected askStarter(question: string): void {
@@ -57,16 +81,37 @@ export class AiHelpPanelComponent {
     this.loading.set(true);
     this.scrollToBottom();
 
-    const history = this.conversationHistory().slice(0, -1);
+    const history = this.messages().slice(0, -1);
 
-    this.aiService.ragHelpChat(question, history.length > 0 ? history : undefined).pipe(
-      catchError(() => of(this.translate.instant('aiHelp.errorMessage'))),
-    ).subscribe(answer => {
-      const assistantMessage: AiHelpMessage = { role: 'assistant', content: answer };
-      this.messages.update(msgs => [...msgs, assistantMessage]);
+    this.aiService.helpChat(question, history.length > 0 ? history : undefined).pipe(
+      catchError(() => of({ answer: this.translate.instant('aiHelp.errorMessage') })),
+    ).subscribe(response => {
+      const assistantMessage: AiHelpMessage = { role: 'assistant', content: response.answer };
+      this.messages.update(msgs => {
+        const updated = [...msgs, assistantMessage].slice(-MAX_STORED_MESSAGES);
+        this.saveToStorage(updated);
+        return updated;
+      });
       this.loading.set(false);
       this.scrollToBottom();
     });
+  }
+
+  private loadFromStorage(): AiHelpMessage[] {
+    try {
+      const raw = localStorage.getItem(this.storageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private saveToStorage(messages: AiHelpMessage[]): void {
+    try {
+      localStorage.setItem(this.storageKey, JSON.stringify(messages));
+    } catch {
+      // storage full — skip silently
+    }
   }
 
   private scrollToBottom(): void {

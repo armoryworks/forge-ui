@@ -149,7 +149,9 @@
     "done": "Done",
     "default": "Default",
     "allStatuses": "All Statuses",
-    "send": "Send"
+    "send": "Send",
+    "customer": "Customer",
+    "part": "Part"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1046,6 +1048,9 @@
     "profileLoadFailed": "Failed to load company profile",
     "profileSaved": "Company profile saved",
     "profileSaveFailed": "Failed to save company profile",
+    "companyProfileLoadFailed": "Failed to load company profile",
+    "companyProfileSaved": "Company profile saved",
+    "companyProfileSaveFailed": "Failed to save company profile",
     "locationsLoadFailed": "Failed to load company locations",
     "locationUpdated": "Location updated",
     "locationUpdateFailed": "Failed to update location",
@@ -1824,6 +1829,7 @@
     "noInvoicesFound": "No invoices found",
     "invoiceNumber": "Invoice #",
     "customer": "Customer",
+    "dueDate": "Due Date",
     "invoiceDate": "Invoice Date",
     "salesOrder": "Sales Order",
     "shipment": "Shipment",

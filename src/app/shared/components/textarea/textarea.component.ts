@@ -25,7 +25,7 @@ import { MatInputModule } from '@angular/material/input';
   ],
 })
 export class TextareaComponent implements ControlValueAccessor {
-  readonly label = input.required<string>();
+  readonly label = input('');
   readonly rows = input(3);
   readonly maxlength = input<number | null>(null);
   readonly hint = input('');

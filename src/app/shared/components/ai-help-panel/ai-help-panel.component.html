@@ -32,7 +32,13 @@
           @if (msg.role === 'assistant') {
             <span class="material-icons-outlined ai-help-msg__avatar">smart_toy</span>
           }
-          <div class="ai-help-msg__bubble">{{ msg.content }}</div>
+          @if (msg.role === 'assistant') {
+            <div class="ai-help-msg__bubble ai-help-msg__bubble--markdown">
+              <markdown [data]="msg.content" />
+            </div>
+          } @else {
+            <div class="ai-help-msg__bubble">{{ msg.content }}</div>
+          }
         </div>
       }
       @if (loading()) {
