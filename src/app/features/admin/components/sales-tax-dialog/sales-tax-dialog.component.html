@@ -1,0 +1,49 @@
+<app-dialog
+  [title]="isEditing ? ('salesTax.editRate' | translate) : ('salesTax.addRate' | translate)"
+  width="480px"
+  (closed)="close()">
+
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input label="Name" formControlName="name" [required]="true"
+        [attr.aria-label]="'salesTax.fieldName' | translate" />
+      <app-input label="Code" formControlName="code" [required]="true"
+        placeholder="e.g. CA-SALES"
+        [attr.aria-label]="'salesTax.fieldCode' | translate" />
+    </div>
+
+    <app-input
+      label="Rate (%)"
+      type="number"
+      formControlName="ratePercent"
+      [required]="true"
+      placeholder="e.g. 8.25"
+      [attr.aria-label]="'salesTax.fieldRate' | translate" />
+
+    <app-textarea
+      label="Description (optional)"
+      formControlName="description"
+      [rows]="2"
+      [attr.aria-label]="'salesTax.fieldDescription' | translate" />
+
+    <app-toggle
+      label="Set as default rate"
+      formControlName="isDefault"
+      [attr.aria-label]="'salesTax.fieldDefault' | translate" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined account-page__spinner">sync</span>
+      } @else {
+        <span class="material-icons-outlined">save</span>
+      }
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</app-dialog>

@@ -1,0 +1,55 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ rates().length }} {{ 'salesTax.rates' | translate }}</span>
+  <button class="action-btn action-btn--primary" (click)="openCreate()">
+    <span class="material-icons-outlined">add</span>
+    {{ 'salesTax.addRate' | translate }}
+  </button>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="admin-sales-tax"
+    [columns]="columns"
+    [data]="rates()"
+    emptyIcon="percent"
+    [emptyMessage]="'salesTax.noRates' | translate">
+
+    <ng-template appColumnCell="isDefault" let-row>
+      @if (row.isDefault) {
+        <span class="chip chip--primary" [attr.aria-label]="'salesTax.default' | translate">
+          {{ 'salesTax.default' | translate }}
+        </span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="isActive" let-row>
+      <span class="chip" [class.chip--success]="row.isActive" [class.chip--muted]="!row.isActive">
+        {{ (row.isActive ? 'common.active' : 'common.inactive') | translate }}
+      </span>
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="table-actions">
+        <button class="icon-btn"
+          (click)="openEdit(row)"
+          [attr.aria-label]="'common.edit' | translate"
+          [matTooltip]="'common.edit' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger"
+          (click)="deleteRate(row)"
+          [attr.aria-label]="'common.delete' | translate"
+          [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showDialog()) {
+  <app-sales-tax-dialog
+    [rate]="editingRate()"
+    (closed)="closeDialog()"
+    (saved)="onSaved()" />
+}

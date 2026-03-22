@@ -40,6 +40,11 @@
         <span class="material-icons-outlined">groups</span>
         {{ 'admin.tabs.teams' | translate }}
       </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'sales-tax'" (click)="switchTab('sales-tax')"
+        [attr.aria-label]="'admin.tabs.salesTax' | translate">
+        <span class="material-icons-outlined">percent</span>
+        {{ 'admin.tabs.salesTax' | translate }}
+      </button>
     }
     <button class="tab" [class.tab--active]="activeTab() === 'compliance'" (click)="switchTab('compliance')">
       <span class="material-icons-outlined">fact_check</span>
@@ -421,6 +426,13 @@
     @if (activeTab() === 'teams') {
       <div class="tab-panel">
         <app-teams-panel />
+      </div>
+    }
+
+    <!-- Sales Tax Tab -->
+    @if (activeTab() === 'sales-tax') {
+      <div class="tab-panel">
+        <app-sales-tax-panel />
       </div>
     }
 
