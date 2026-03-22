@@ -49,6 +49,7 @@ export class AccountTaxFormDetailComponent {
   protected readonly acknowledging = signal(false);
   protected readonly savingDraft = signal(false);
   protected readonly resubmitting = signal(false);
+  protected readonly downloadingPdf = signal(false);
   protected readonly showDocsDialog = signal(false);
   protected readonly stateDefinitionLoaded = signal(false);
   private readonly stateFormDef = signal<ComplianceFormDefinition | null>(null);
@@ -251,6 +252,24 @@ export class AccountTaxFormDetailComponent {
     if (hasC && !hasB) return [this.translate.instant('account.identityDocNeedListB')];
     return [this.translate.instant('account.identityDocRequired')];
   };
+
+  protected downloadPdf(): void {
+    const sub = this.submission();
+    if (!sub) return;
+    this.downloadingPdf.set(true);
+    this.complianceService.downloadSubmissionPdf(sub.id).subscribe({
+      next: (blob) => {
+        this.downloadingPdf.set(false);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${this.template()?.name ?? 'form'}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.downloadingPdf.set(false),
+    });
+  }
 
   protected startResubmit(): void {
     this.resubmitting.set(true);

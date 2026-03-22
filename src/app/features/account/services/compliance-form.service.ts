@@ -89,4 +89,8 @@ export class ComplianceFormService {
       tap(() => this.loadMyIdentityDocuments()),
     );
   }
+
+  downloadSubmissionPdf(submissionId: number): Observable<Blob> {
+    return this.http.get(`${this.base}/submissions/${submissionId}/pdf`, { responseType: 'blob' });
+  }
 }

@@ -42,6 +42,19 @@
           </div>
         </div>
         <div class="form-detail__completed-actions">
+          @if (submission(); as sub) {
+            <button class="action-btn"
+              [disabled]="downloadingPdf()"
+              (click)="downloadPdf()"
+              [attr.aria-label]="'account.downloadFormCopy' | translate">
+              @if (downloadingPdf()) {
+                <span class="material-icons-outlined account-page__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">download</span>
+              }
+              {{ 'account.downloadFormCopy' | translate }}
+            </button>
+          }
           <button class="action-btn action-btn--primary" (click)="startResubmit()">
             <span class="material-icons-outlined">refresh</span>
             {{ 'account.resubmitForm' | translate }}
