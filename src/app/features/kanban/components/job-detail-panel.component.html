@@ -12,9 +12,31 @@
         <span class="panel__job-number">{{ j.jobNumber }}</span>
         <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
       </div>
-      <button class="panel__edit" (click)="editRequested.emit(job()!)" [matTooltip]="'kanban.editJob' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.editJobAria' | translate">
-        <span class="material-icons-outlined">edit</span>
-      </button>
+      <div class="panel__header-actions">
+        @if (hasActiveTimer()) {
+          <button class="panel__timer-btn panel__timer-btn--active" [disabled]="isTimerLoading()"
+                  (click)="stopTimerForJob()"
+                  [matTooltip]="'kanban.stopTimer' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'kanban.stopTimer' | translate">
+            <span class="material-icons-outlined">stop_circle</span>
+          </button>
+        } @else {
+          <button class="panel__timer-btn" [disabled]="isTimerLoading()"
+                  (click)="startTimerForJob()"
+                  [matTooltip]="'kanban.startTimer' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'kanban.startTimer' | translate">
+            <span class="material-icons-outlined">play_circle</span>
+          </button>
+        }
+        <button class="panel__cover-btn" (click)="openCoverPhotoDialog()"
+                [matTooltip]="'kanban.setCoverPhoto' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'kanban.setCoverPhoto' | translate">
+          <span class="material-icons-outlined">add_photo_alternate</span>
+        </button>
+        <button class="panel__edit" (click)="editRequested.emit(job()!)" [matTooltip]="'kanban.editJob' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.editJobAria' | translate">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+      </div>
       <button class="panel__close" (click)="close()" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'kanban.closeDetailPanel' | translate">
         <span class="material-icons-outlined">close</span>
       </button>

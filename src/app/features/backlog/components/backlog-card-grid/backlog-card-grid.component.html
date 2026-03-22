@@ -1,0 +1,70 @@
+@if (jobs().length === 0) {
+  <div class="backlog-card-grid__empty">
+    <span class="material-icons-outlined backlog-card-grid__empty-icon">search_off</span>
+    <span>No jobs match your filters</span>
+  </div>
+} @else {
+  <div class="backlog-card-grid" role="list">
+    @for (job of jobs(); track job.id) {
+      <div
+        class="backlog-card"
+        [class.backlog-card--overdue]="job.isOverdue"
+        [class.backlog-card--selected]="job.id === selectedJobId()"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="job.jobNumber + ' - ' + job.title"
+        (click)="jobClick.emit(job)"
+        (keydown.enter)="jobClick.emit(job)"
+        (keydown.space)="$event.preventDefault(); jobClick.emit(job)">
+
+        <div class="backlog-card__header">
+          <span class="backlog-card__number">{{ job.jobNumber }}</span>
+          @if (job.activeHolds.length > 0) {
+            <span class="chip chip--warning backlog-card__hold-badge">On Hold</span>
+          }
+        </div>
+
+        <div class="backlog-card__title">{{ job.title }}</div>
+
+        <div class="backlog-card__stage">
+          <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
+        </div>
+
+        <div class="backlog-card__meta">
+          <span class="backlog-card__priority">
+            <span
+              class="backlog-card__priority-dot"
+              [style.background]="priorityDotColor(job.priorityName)">
+            </span>
+            {{ job.priorityName }}
+          </span>
+
+          @if (job.assigneeInitials) {
+            <app-avatar
+              [initials]="job.assigneeInitials"
+              [color]="job.assigneeColor ?? '#0d9488'"
+              size="sm" />
+          }
+        </div>
+
+        @if (job.customerName) {
+          <div class="backlog-card__customer">
+            <span class="material-icons-outlined backlog-card__customer-icon">business</span>
+            <span class="backlog-card__customer-name">{{ job.customerName }}</span>
+          </div>
+        }
+
+        <div class="backlog-card__footer">
+          @if (job.dueDate) {
+            <span class="backlog-card__date" [class.backlog-card__date--overdue]="job.isOverdue">
+              <span class="material-icons-outlined backlog-card__date-icon">event</span>
+              {{ formatDate(job.dueDate) }}
+            </span>
+          } @else {
+            <span class="backlog-card__date backlog-card__date--none">No date</span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

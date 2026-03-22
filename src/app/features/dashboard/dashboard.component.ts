@@ -12,9 +12,11 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
+import { map } from 'rxjs/operators';
 
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -31,6 +33,7 @@ import { OpenOrdersWidgetComponent } from './components/open-orders-widget.compo
 import { EodPromptWidgetComponent } from './components/eod-prompt-widget.component';
 import { MarginSummaryWidgetComponent } from './widgets/margin-summary-widget/margin-summary-widget.component';
 import { AmbientModeComponent } from './components/ambient-mode.component';
+import { FocusModeComponent } from './components/focus-mode.component';
 import { GettingStartedBannerComponent } from './components/getting-started-banner.component';
 import { DashboardData } from './models/dashboard-data.model';
 import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
@@ -60,6 +63,7 @@ const LAYOUT_PREF_KEY = 'dashboard:layout:v5';
     EodPromptWidgetComponent,
     MarginSummaryWidgetComponent,
     AmbientModeComponent,
+    FocusModeComponent,
     GettingStartedBannerComponent,
     PageHeaderComponent,
     MatTooltipModule,
@@ -76,6 +80,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   private static readonly POLL_INTERVAL_MS = 5 * 60 * 1000;
 
@@ -87,6 +93,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly error = signal<string | null>(null);
   protected readonly ambientMode = signal(false);
   protected readonly editing = signal(false);
+
+  protected readonly focusMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => p.get('focus') === 'true')),
+    { initialValue: this.userPreferences.get<boolean>('dashboard:focusMode') ?? false },
+  );
   protected readonly gridReady = signal(false);
 
   protected readonly activeWidgetIds = signal<string[]>(
@@ -189,6 +200,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.grid) {
       this.grid.destroy(false);
       this.grid = null;
+    }
+  }
+
+  protected toggleFocusMode(): void {
+    const next = !this.focusMode();
+    this.router.navigate([], {
+      queryParams: { focus: next ? 'true' : null },
+      queryParamsHandling: 'merge',
+    });
+    this.userPreferences.set('dashboard:focusMode', next);
+    // Mutually exclusive with ambient mode
+    if (next && this.ambientMode()) {
+      this.ambientMode.set(false);
     }
   }
 

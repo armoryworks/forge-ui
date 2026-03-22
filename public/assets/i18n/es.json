@@ -209,7 +209,10 @@
     "revenue": "Ingresos",
     "margin": "Margen",
     "jobs30d": "Trabajos (30d)",
-    "loadFailed": "Error al cargar datos del panel"
+    "loadFailed": "Error al cargar datos del panel",
+    "focusMode": "Modo de Enfoque",
+    "exitFocusMode": "Salir del Modo de Enfoque",
+    "enterFocusMode": "Entrar al Modo de Enfoque"
   },
   "kanban": {
     "title": "Tablero",
@@ -309,7 +312,22 @@
     "jobsArchived": "{{count}} trabajo(s) archivado(s)",
     "archiveJobsFailed": "Error al archivar trabajos",
     "loadTrackTypesFailed": "Error al cargar tipos de seguimiento",
-    "loadBoardFailed": "Error al cargar datos del tablero"
+    "loadBoardFailed": "Error al cargar datos del tablero",
+    "myWork": "Mi Trabajo",
+    "allJobs": "Todos los Trabajos",
+    "startTimer": "Iniciar Temporizador",
+    "stopTimer": "Detener Temporizador",
+    "timerStarted": "Temporizador iniciado",
+    "timerStopped": "Temporizador detenido",
+    "coverPhoto": "Foto de Portada",
+    "setCoverPhoto": "Establecer Foto de Portada",
+    "removeCoverPhoto": "Eliminar Foto de Portada",
+    "selectCoverPhoto": "Seleccionar Foto de Portada",
+    "coverPhotoSet": "Foto de portada actualizada",
+    "coverPhotoRemoved": "Foto de portada eliminada",
+    "uploadNewImage": "Subir una nueva imagen",
+    "selectFromExisting": "O seleccionar de archivos existentes",
+    "selectImageAria": "Seleccionar como foto de portada:"
   },
   "backlog": {
     "title": "Pendientes",
@@ -317,7 +335,11 @@
     "searchPlaceholder": "Buscar trabajos...",
     "noJobsMatch": "Ningún trabajo coincide con sus filtros",
     "noJobsHelp": "Intente ajustar su búsqueda o filtros. Los trabajos se agregan desde la página del Tablero.",
-    "loadFailed": "Error al cargar pendientes"
+    "loadFailed": "Error al cargar pendientes",
+    "cardView": "Vista de Tarjetas",
+    "tableView": "Vista de Tabla",
+    "viewMode": "Modo de vista",
+    "noDate": "Sin fecha"
   },
   "jobs": {
     "title": "Trabajos",
@@ -457,7 +479,16 @@
     "sourceMake": "Fabricar",
     "sourceBuy": "Comprar",
     "sourceStock": "Stock",
-    "sku": "SKU"
+    "sku": "SKU",
+    "viewTable": "Tabla",
+    "viewCards": "Tarjetas",
+    "viewBomList": "Lista",
+    "viewBomTree": "Árbol",
+    "viewProcessList": "Lista",
+    "viewProcessFlow": "Flujo",
+    "viewModeLabel": "Modo de vista",
+    "noThumbnail": "Sin imagen",
+    "step": "Paso"
   },
   "inventory": {
     "title": "Inventario",
@@ -1622,7 +1653,12 @@
     "wed": "Mié",
     "thu": "Jue",
     "fri": "Vie",
-    "sat": "Sáb"
+    "sat": "Sáb",
+    "poDeliveries": "Entregas de OC",
+    "showPoDeliveries": "Mostrar entregas de OC",
+    "hidePoDeliveries": "Ocultar entregas de OC",
+    "poDeliveriesCount": "{{count}} entregas de OC esperadas",
+    "poLines": "{{count}} líneas"
   },
   "shared": {
     "closeDialog": "Cerrar diálogo",

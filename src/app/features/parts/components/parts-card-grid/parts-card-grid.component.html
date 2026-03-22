@@ -1,0 +1,32 @@
+<div class="parts-card-grid" [appLoadingBlock]="isLoading()">
+  @if (parts().length === 0) {
+    <app-empty-state icon="inventory_2" [message]="'parts.noPartsFound' | translate" />
+  } @else {
+    @for (part of parts(); track part.id) {
+      <div
+        class="parts-card-grid__card"
+        [class.parts-card-grid__card--selected]="part.id === selectedPartId()"
+        (click)="onCardClick(part)"
+        role="button"
+        [attr.aria-label]="part.partNumber + ' ' + part.description"
+        tabindex="0"
+        (keydown.enter)="onCardClick(part)"
+        (keydown.space)="onCardClick(part)">
+
+        <div class="parts-card-grid__thumbnail">
+          @if (thumbnailMap()[part.id]; as url) {
+            <img [src]="url" [alt]="part.partNumber" loading="lazy" />
+          } @else {
+            <span class="material-icons-outlined" aria-hidden="true">inventory_2</span>
+          }
+        </div>
+
+        <div class="parts-card-grid__info">
+          <span class="parts-card-grid__part-number">{{ part.partNumber }}</span>
+          <span class="parts-card-grid__description" [title]="part.description">{{ part.description }}</span>
+          <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
+        </div>
+      </div>
+    }
+  }
+</div>

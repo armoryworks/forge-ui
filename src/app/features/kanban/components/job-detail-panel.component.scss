@@ -55,14 +55,30 @@
 .panel__header-left { display: flex; align-items: center; gap: $sp-md; }
 .panel__job-number { @include uppercase-label($font-size-sm, 1px, 700); color: var(--text); }
 
+.panel__header-actions {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  margin-left: auto;
+}
+
 .panel__edit,
-.panel__close {
+.panel__close,
+.panel__timer-btn,
+.panel__cover-btn {
   @include flex-center;
   width: $avatar-size-md; height: $avatar-size-md;
   border: $border-width-thin solid var(--border);
   background: var(--surface); color: var(--text-secondary); cursor: pointer;
   .material-icons-outlined { font-size: $icon-size-sm; }
-  &:hover { background: var(--bg); color: var(--text); }
+  &:hover:not(:disabled) { background: var(--bg); color: var(--text); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.panel__timer-btn--active {
+  color: var(--error);
+  border-color: var(--error);
+  &:hover:not(:disabled) { background: var(--error-light); color: var(--error); }
 }
 
 // ─── Body ───

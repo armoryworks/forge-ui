@@ -14,38 +14,61 @@
         (keyup.enter)="applyFilters()" />
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
       <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
+      <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
+        <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'table'"
+                (click)="setViewMode('table')"
+                [matTooltip]="'parts.viewTable' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'parts.viewTable' | translate"
+                [attr.aria-pressed]="viewMode() === 'table'">
+          <span class="material-icons-outlined">table_rows</span>
+        </button>
+        <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'cards'"
+                (click)="setViewMode('cards')"
+                [matTooltip]="'parts.viewCards' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'parts.viewCards' | translate"
+                [attr.aria-pressed]="viewMode() === 'cards'">
+          <span class="material-icons-outlined">grid_view</span>
+        </button>
+      </div>
     </div>
 
-    <div [appLoadingBlock]="loading()">
-      <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
-        [rowClass]="partRowClass" emptyIcon="inventory_2" [emptyMessage]="'parts.noPartsFound' | translate" [emptyHelpText]="'parts.noPartsHelp' | translate"
-        (rowClick)="selectPart($any($event))">
-        <ng-template appColumnCell="partNumber" let-part>
-          <span class="part-number">{{ part.partNumber }}</span>
-        </ng-template>
-        <ng-template appColumnCell="description" let-part>
-          <span class="part-desc">{{ part.description }}</span>
-        </ng-template>
-        <ng-template appColumnCell="partType" let-part>
-          <span class="type-chip">
-            <span class="material-icons-outlined type-icon">{{ getTypeIcon(part.partType) }}</span>
-            {{ part.partType }}
-          </span>
-        </ng-template>
-        <ng-template appColumnCell="status" let-part>
-          <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
-        </ng-template>
-        <ng-template appColumnCell="material" let-part>
-          <span class="text-muted">{{ part.material ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="bomEntryCount" let-part>
-          @if (part.bomEntryCount > 0) {
-            <span class="bom-count">{{ part.bomEntryCount }}</span>
-          } @else {
-            <span class="text-muted">—</span>
-          }
-        </ng-template>
-      </app-data-table>
+    <div [appLoadingBlock]="loading()" class="parts-list-content">
+      @if (viewMode() === 'cards') {
+        <app-parts-card-grid
+          [parts]="parts()"
+          [selectedPartId]="selectedPart()?.id ?? null"
+          (partClick)="selectPart($event)" />
+      } @else {
+        <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
+          [rowClass]="partRowClass" emptyIcon="inventory_2" [emptyMessage]="'parts.noPartsFound' | translate" [emptyHelpText]="'parts.noPartsHelp' | translate"
+          (rowClick)="selectPart($any($event))">
+          <ng-template appColumnCell="partNumber" let-part>
+            <span class="part-number">{{ part.partNumber }}</span>
+          </ng-template>
+          <ng-template appColumnCell="description" let-part>
+            <span class="part-desc">{{ part.description }}</span>
+          </ng-template>
+          <ng-template appColumnCell="partType" let-part>
+            <span class="type-chip">
+              <span class="material-icons-outlined type-icon">{{ getTypeIcon(part.partType) }}</span>
+              {{ part.partType }}
+            </span>
+          </ng-template>
+          <ng-template appColumnCell="status" let-part>
+            <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
+          </ng-template>
+          <ng-template appColumnCell="material" let-part>
+            <span class="text-muted">{{ part.material ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="bomEntryCount" let-part>
+            @if (part.bomEntryCount > 0) {
+              <span class="bom-count">{{ part.bomEntryCount }}</span>
+            } @else {
+              <span class="text-muted">—</span>
+            }
+          </ng-template>
+        </app-data-table>
+      }
     </div>
   </div>
 
@@ -258,54 +281,76 @@
           @if (detailTab() === 'bom') {
             <div class="bom-header">
               <span class="bom-count-label">{{ part.bomEntries.length }} {{ 'parts.bomComponents' | translate }}</span>
-              <button class="action-btn action-btn--primary action-btn--sm" (click)="openAddBom()">
-                <span class="material-icons-outlined">add</span>
-                {{ 'common.add' | translate }}
-              </button>
+              <div class="bom-header__actions">
+                <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
+                  <button class="icon-btn" [class.icon-btn--active]="bomViewMode() === 'table'"
+                          (click)="bomViewMode.set('table')"
+                          [matTooltip]="'parts.viewBomList' | translate" matTooltipPosition="above"
+                          [attr.aria-label]="'parts.viewBomList' | translate"
+                          [attr.aria-pressed]="bomViewMode() === 'table'">
+                    <span class="material-icons-outlined">table_rows</span>
+                  </button>
+                  <button class="icon-btn" [class.icon-btn--active]="bomViewMode() === 'tree'"
+                          (click)="bomViewMode.set('tree')"
+                          [matTooltip]="'parts.viewBomTree' | translate" matTooltipPosition="above"
+                          [attr.aria-label]="'parts.viewBomTree' | translate"
+                          [attr.aria-pressed]="bomViewMode() === 'tree'">
+                    <span class="material-icons-outlined">account_tree</span>
+                  </button>
+                </div>
+                <button class="action-btn action-btn--primary action-btn--sm" (click)="openAddBom()">
+                  <span class="material-icons-outlined">add</span>
+                  {{ 'common.add' | translate }}
+                </button>
+              </div>
             </div>
 
-            @if (part.bomEntries.length > 0) {
-              <table class="bom-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>{{ 'parts.bomPart' | translate }}</th>
-                    <th>{{ 'parts.bomQty' | translate }}</th>
-                    <th>{{ 'parts.bomSource' | translate }}</th>
-                    <th>{{ 'parts.bomLeadTime' | translate }}</th>
-                    <th>{{ 'parts.bomRefDes' | translate }}</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (entry of part.bomEntries; track entry.id) {
-                    <tr class="bom-row">
-                      <td class="text-muted">{{ entry.sortOrder }}</td>
-                      <td>
-                        <div class="bom-part-info">
-                          <span class="bom-part-number">{{ entry.childPartNumber }}</span>
-                          <span class="bom-part-desc">{{ entry.childDescription }}</span>
-                        </div>
-                      </td>
-                      <td class="text-center">{{ entry.quantity }}</td>
-                      <td>
-                        <span class="source-chip" [class.source-chip--make]="entry.sourceType === 'Make'" [class.source-chip--stock]="entry.sourceType === 'Stock'">
-                          {{ entry.sourceType }}
-                        </span>
-                      </td>
-                      <td class="text-muted">{{ entry.leadTimeDays !== null ? entry.leadTimeDays + 'd' : '—' }}</td>
-                      <td class="text-muted">{{ entry.referenceDesignator ?? '—' }}</td>
-                      <td class="col-actions">
-                        <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomEntry(entry)">
-                          <span class="material-icons-outlined">delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
+            @if (bomViewMode() === 'tree') {
+              <app-bom-tree [entries]="part.bomEntries" (entryDelete)="deleteBomEntry($event)" />
             } @else {
-              <app-empty-state icon="inventory_2" [message]="'parts.noBomEntries' | translate" />
+              @if (part.bomEntries.length > 0) {
+                <table class="bom-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">#</th>
+                      <th scope="col">{{ 'parts.bomPart' | translate }}</th>
+                      <th scope="col">{{ 'parts.bomQty' | translate }}</th>
+                      <th scope="col">{{ 'parts.bomSource' | translate }}</th>
+                      <th scope="col">{{ 'parts.bomLeadTime' | translate }}</th>
+                      <th scope="col">{{ 'parts.bomRefDes' | translate }}</th>
+                      <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (entry of part.bomEntries; track entry.id) {
+                      <tr class="bom-row">
+                        <td class="text-muted">{{ entry.sortOrder }}</td>
+                        <td>
+                          <div class="bom-part-info">
+                            <span class="bom-part-number">{{ entry.childPartNumber }}</span>
+                            <span class="bom-part-desc">{{ entry.childDescription }}</span>
+                          </div>
+                        </td>
+                        <td class="text-center">{{ entry.quantity }}</td>
+                        <td>
+                          <span class="source-chip" [class.source-chip--make]="entry.sourceType === 'Make'" [class.source-chip--stock]="entry.sourceType === 'Stock'">
+                            {{ entry.sourceType }}
+                          </span>
+                        </td>
+                        <td class="text-muted">{{ entry.leadTimeDays !== null ? entry.leadTimeDays + 'd' : '—' }}</td>
+                        <td class="text-muted">{{ entry.referenceDesignator ?? '—' }}</td>
+                        <td class="col-actions">
+                          <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomEntry(entry)" [attr.aria-label]="'common.remove' | translate">
+                            <span class="material-icons-outlined">delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              } @else {
+                <app-empty-state icon="inventory_2" [message]="'parts.noBomEntries' | translate" />
+              }
             }
           }
 

@@ -200,6 +200,10 @@ export class KanbanService {
     return this.http.get<{ id: number; code: string; label: string }[]>(`${environment.apiUrl}/jobs/internal-project-types`);
   }
 
+  setCoverPhoto(jobId: number, fileAttachmentId: number | null): Observable<void> {
+    return this.http.patch<void>(`${environment.apiUrl}/jobs/${jobId}/cover-photo`, { fileAttachmentId });
+  }
+
   private buildBoard(trackType: TrackType, jobs: KanbanJob[]): BoardColumn[] {
     const jobsByStage = new Map<string, KanbanJob[]>();
     for (const job of jobs) {

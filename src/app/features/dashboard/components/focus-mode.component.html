@@ -1,0 +1,29 @@
+<div class="focus-mode">
+  <div class="focus-mode__header">
+    <span class="material-icons-outlined focus-mode__icon">center_focus_strong</span>
+    <h2 class="focus-mode__title">{{ 'dashboard.focusMode' | translate }}</h2>
+    <button
+      class="icon-btn"
+      (click)="exitFocus.emit()"
+      [attr.aria-label]="'dashboard.exitFocusMode' | translate">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="focus-mode__content">
+    <section class="focus-mode__section">
+      <h3 class="focus-mode__section-title">{{ 'dashboard.myTasks' | translate }}</h3>
+      <app-todays-tasks-widget [tasks]="tasks()" />
+    </section>
+
+    <section class="focus-mode__section">
+      <h3 class="focus-mode__section-title">{{ 'dashboard.openOrders' | translate }}</h3>
+      <app-open-orders-widget />
+    </section>
+
+    <section class="focus-mode__section">
+      <h3 class="focus-mode__section-title">{{ 'dashboard.eodPrompt' | translate }}</h3>
+      <app-eod-prompt-widget />
+    </section>
+  </div>
+</div>

@@ -1,0 +1,48 @@
+<app-dialog [title]="'kanban.selectCoverPhoto' | translate" width="520px" (closed)="close()">
+  <!-- Remove cover photo option -->
+  @if (data.currentCoverPhotoUrl) {
+    <div class="cover-photo-remove">
+      <button class="action-btn action-btn--danger"
+              [disabled]="saving()"
+              (click)="removeCoverPhoto()"
+              aria-label="Remove cover photo">
+        <span class="material-icons-outlined">hide_image</span>
+        {{ 'kanban.removeCoverPhoto' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Upload new image -->
+  <div class="cover-photo-upload">
+    <p class="cover-photo-upload__label">{{ 'kanban.uploadNewImage' | translate }}</p>
+    <app-file-upload-zone
+      entityType="jobs"
+      [entityId]="data.jobId"
+      accept="image/*"
+      [maxSizeMb]="10"
+      (uploaded)="onFileUploaded($event)" />
+  </div>
+
+  <!-- Existing image files -->
+  @if (imageFiles().length > 0) {
+    <div class="cover-photo-gallery">
+      <p class="cover-photo-gallery__label">{{ 'kanban.selectFromExisting' | translate }}</p>
+      <div class="cover-photo-gallery__grid">
+        @for (f of imageFiles(); track f.id) {
+          <button class="cover-photo-gallery__item"
+                  [disabled]="saving()"
+                  (click)="selectFile(f)"
+                  [matTooltip]="f.fileName"
+                  matTooltipPosition="above"
+                  [attr.aria-label]="('kanban.selectImageAria' | translate) + ' ' + f.fileName">
+            <img [src]="f.url" [alt]="f.fileName" />
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+  </div>
+</app-dialog>

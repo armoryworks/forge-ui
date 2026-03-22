@@ -1,0 +1,67 @@
+@if (flattenedNodes().length === 0) {
+  <app-empty-state icon="inventory_2" [message]="'parts.noBomEntries' | translate" />
+} @else {
+  <div class="bom-tree" role="tree" [attr.aria-label]="'parts.bom' | translate">
+    @for (node of flattenedNodes(); track node.entry.id) {
+      <div
+        class="bom-tree__row"
+        role="treeitem"
+        [attr.aria-expanded]="node.hasChildren ? node.isExpanded : null"
+        [attr.aria-level]="node.level + 1">
+
+        <!-- Indent spacer -->
+        @if (node.level > 0) {
+          <span
+            class="bom-tree__indent"
+            [style.width.px]="node.level * 24"
+            aria-hidden="true">
+          </span>
+        }
+
+        <!-- Expand/collapse toggle -->
+        <span class="bom-tree__toggle" aria-hidden="true">
+          @if (node.hasChildren) {
+            <button
+              class="bom-tree__toggle-btn"
+              [attr.aria-label]="node.isExpanded ? ('nav.collapse' | translate) : ('nav.expand' | translate)"
+              (click)="toggleExpand(node.entry.id)">
+              <span class="material-icons-outlined">
+                {{ node.isExpanded ? 'expand_less' : 'expand_more' }}
+              </span>
+            </button>
+          } @else {
+            <span class="bom-tree__toggle-spacer"></span>
+          }
+        </span>
+
+        <!-- Sort order -->
+        <span class="bom-tree__sort-order">{{ node.entry.sortOrder }}</span>
+
+        <!-- Part info -->
+        <span class="bom-tree__part-number">{{ node.entry.childPartNumber }}</span>
+        <span class="bom-tree__description" [title]="node.entry.childDescription">{{ node.entry.childDescription }}</span>
+
+        <!-- Source chip -->
+        <span class="source-chip" [class]="getSourceClass(node.entry.sourceType)">
+          {{ node.entry.sourceType }}
+        </span>
+
+        <!-- Quantity -->
+        <span class="bom-tree__quantity">{{ node.entry.quantity }}</span>
+
+        <!-- Lead time -->
+        <span class="bom-tree__lead-time">
+          {{ node.entry.leadTimeDays !== null ? node.entry.leadTimeDays + 'd' : '—' }}
+        </span>
+
+        <!-- Delete action -->
+        <button
+          class="icon-btn icon-btn--danger bom-tree__delete"
+          [attr.aria-label]="'common.remove' | translate"
+          (click)="onDelete(node.entry)">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+    }
+  </div>
+}

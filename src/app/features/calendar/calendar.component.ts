@@ -1,14 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { CalendarService } from './services/calendar.service';
 import { CalendarJob } from './models/calendar-job.model';
 import { CalendarDay } from './models/calendar-day.model';
+import { PoCalendarEvent } from './models/po-calendar-event.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { KanbanService } from '../kanban/services/kanban.service';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 
 export type CalendarView = 'month' | 'week' | 'day';
 
@@ -25,6 +28,7 @@ export class CalendarComponent {
   private readonly kanbanService = inject(KanbanService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly userPreferences = inject(UserPreferencesService);
 
   protected readonly loading = signal(false);
   protected readonly allJobs = signal<CalendarJob[]>([]);
@@ -32,6 +36,12 @@ export class CalendarComponent {
   protected readonly trackTypeOptions = signal<SelectOption[]>([]);
   protected readonly trackTypeControl = new FormControl<number | null>(null);
   protected readonly view = signal<CalendarView>('month');
+
+  protected readonly showPoDeliveries = signal(
+    this.userPreferences.get<boolean>('calendar:showPo') ?? false
+  );
+  protected readonly poEvents = signal<PoCalendarEvent[]>([]);
+  protected readonly isLoadingPo = signal(false);
 
   protected readonly MAX_VISIBLE_JOBS = 3;
   protected readonly HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -74,6 +84,25 @@ export class CalendarComponent {
     return this.jobs().filter(j => j.dueDate?.split('T')[0] === dateStr);
   });
 
+  protected readonly currentDateKey = computed(() => this.toDateStr(this.currentDate()));
+
+  protected readonly dayPoEvents = computed(() => {
+    const dateStr = this.currentDateKey();
+    return this.poEvents().filter(po => po.expectedDeliveryDate === dateStr);
+  });
+
+  /** Map of YYYY-MM-DD → PoCalendarEvent[] for O(1) template lookups */
+  protected readonly poEventsByDate = computed(() => {
+    const map = new Map<string, PoCalendarEvent[]>();
+    for (const po of this.poEvents()) {
+      const key = po.expectedDeliveryDate; // already YYYY-MM-DD from DateOnly serialization
+      const list = map.get(key) ?? [];
+      list.push(po);
+      map.set(key, list);
+    }
+    return map;
+  });
+
   constructor() {
     this.loadJobs();
     this.kanbanService.getTrackTypes().subscribe(types => {
@@ -86,6 +115,16 @@ export class CalendarComponent {
     this.trackTypeControl.valueChanges.subscribe(() => {
       this.allJobs.update(j => [...j]);
     });
+
+    // Reload PO events whenever the current date changes (month navigation).
+    // Use untracked for showPoDeliveries to avoid double-load when toggling —
+    // togglePoDeliveries() already calls loadPoEvents() directly on enable.
+    effect(() => {
+      this.currentDate(); // track dependency only
+      if (untracked(() => this.showPoDeliveries())) {
+        this.loadPoEvents();
+      }
+    });
   }
 
   protected loadJobs(): void {
@@ -93,6 +132,47 @@ export class CalendarComponent {
     this.service.getJobs().subscribe({
       next: (jobs) => { this.allJobs.set(jobs); this.loading.set(false); },
       error: () => this.loading.set(false),
+    });
+  }
+
+  protected togglePoDeliveries(): void {
+    const next = !this.showPoDeliveries();
+    this.showPoDeliveries.set(next);
+    this.userPreferences.set('calendar:showPo', next);
+    if (next) {
+      this.loadPoEvents();
+    } else {
+      this.poEvents.set([]);
+    }
+  }
+
+  private loadPoEvents(): void {
+    const d = this.currentDate();
+    const year = d.getFullYear();
+    const month = d.getMonth();
+
+    // Cover full calendar grid: first day of first week through last day of last week
+    const firstOfMonth = new Date(year, month, 1);
+    const lastOfMonth = new Date(year, month + 1, 0);
+
+    const startOffset = firstOfMonth.getDay();
+    const gridStart = new Date(year, month - 1, new Date(year, month, 0).getDate() - startOffset + 1);
+    const gridEnd = new Date(lastOfMonth);
+    const remaining = 7 - ((startOffset + lastOfMonth.getDate()) % 7);
+    if (remaining < 7) {
+      gridEnd.setDate(gridEnd.getDate() + remaining);
+    }
+
+    const from = this.toDateStr(gridStart);
+    const to = this.toDateStr(gridEnd);
+
+    this.isLoadingPo.set(true);
+    this.service.getPoEvents(from, to).subscribe({
+      next: events => {
+        this.poEvents.set(events);
+        this.isLoadingPo.set(false);
+      },
+      error: () => this.isLoadingPo.set(false),
     });
   }
 
@@ -167,12 +247,16 @@ export class CalendarComponent {
     const todayStr = this.toDateStr(new Date());
     const jobsByDate = this.buildJobsByDate(jobs);
 
-    return weekDates.map(date => ({
-      date,
-      isCurrentMonth: date.getMonth() === current.getMonth(),
-      isToday: this.toDateStr(date) === todayStr,
-      jobs: jobsByDate.get(this.toDateStr(date)) ?? [],
-    }));
+    return weekDates.map(date => {
+      const dateKey = this.toDateStr(date);
+      return {
+        date,
+        dateKey,
+        isCurrentMonth: date.getMonth() === current.getMonth(),
+        isToday: dateKey === todayStr,
+        jobs: jobsByDate.get(dateKey) ?? [],
+      };
+    });
   }
 
   private buildCalendar(current: Date, jobs: CalendarJob[]): CalendarDay[] {
@@ -193,24 +277,26 @@ export class CalendarComponent {
     const prevMonth = new Date(year, month, 0);
     for (let i = startOffset - 1; i >= 0; i--) {
       const date = new Date(year, month - 1, prevMonth.getDate() - i);
-      const dateStr = this.toDateStr(date);
+      const dateKey = this.toDateStr(date);
       days.push({
         date,
+        dateKey,
         isCurrentMonth: false,
-        isToday: dateStr === todayStr,
-        jobs: jobsByDate.get(dateStr) ?? [],
+        isToday: dateKey === todayStr,
+        jobs: jobsByDate.get(dateKey) ?? [],
       });
     }
 
     // Current month
     for (let d = 1; d <= totalDays; d++) {
       const date = new Date(year, month, d);
-      const dateStr = this.toDateStr(date);
+      const dateKey = this.toDateStr(date);
       days.push({
         date,
+        dateKey,
         isCurrentMonth: true,
-        isToday: dateStr === todayStr,
-        jobs: jobsByDate.get(dateStr) ?? [],
+        isToday: dateKey === todayStr,
+        jobs: jobsByDate.get(dateKey) ?? [],
       });
     }
 
@@ -219,12 +305,13 @@ export class CalendarComponent {
     if (remaining < 7) {
       for (let d = 1; d <= remaining; d++) {
         const date = new Date(year, month + 1, d);
-        const dateStr = this.toDateStr(date);
+        const dateKey = this.toDateStr(date);
         days.push({
           date,
+          dateKey,
           isCurrentMonth: false,
-          isToday: dateStr === todayStr,
-          jobs: jobsByDate.get(dateStr) ?? [],
+          isToday: dateKey === todayStr,
+          jobs: jobsByDate.get(dateKey) ?? [],
         });
       }
     }

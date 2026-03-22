@@ -209,7 +209,10 @@
     "revenue": "Revenue",
     "margin": "Margin",
     "jobs30d": "Jobs (30d)",
-    "loadFailed": "Failed to load dashboard data"
+    "loadFailed": "Failed to load dashboard data",
+    "focusMode": "Focus Mode",
+    "exitFocusMode": "Exit Focus Mode",
+    "enterFocusMode": "Enter Focus Mode"
   },
   "kanban": {
     "title": "Board",
@@ -309,7 +312,22 @@
     "jobsArchived": "Archived {{count}} job(s)",
     "archiveJobsFailed": "Failed to archive jobs",
     "loadTrackTypesFailed": "Failed to load track types",
-    "loadBoardFailed": "Failed to load board data"
+    "loadBoardFailed": "Failed to load board data",
+    "myWork": "My Work",
+    "allJobs": "All Jobs",
+    "startTimer": "Start Timer",
+    "stopTimer": "Stop Timer",
+    "timerStarted": "Timer started",
+    "timerStopped": "Timer stopped",
+    "coverPhoto": "Cover Photo",
+    "setCoverPhoto": "Set Cover Photo",
+    "removeCoverPhoto": "Remove Cover Photo",
+    "selectCoverPhoto": "Select Cover Photo",
+    "coverPhotoSet": "Cover photo updated",
+    "coverPhotoRemoved": "Cover photo removed",
+    "uploadNewImage": "Upload a new image",
+    "selectFromExisting": "Or select from existing files",
+    "selectImageAria": "Select as cover photo:"
   },
   "backlog": {
     "title": "Backlog",
@@ -317,7 +335,11 @@
     "searchPlaceholder": "Search jobs...",
     "noJobsMatch": "No jobs match your filters",
     "noJobsHelp": "Try adjusting your search or filters. Jobs are added from the Board page.",
-    "loadFailed": "Failed to load backlog"
+    "loadFailed": "Failed to load backlog",
+    "cardView": "Card View",
+    "tableView": "Table View",
+    "viewMode": "View mode",
+    "noDate": "No date"
   },
   "jobs": {
     "title": "Jobs",
@@ -457,7 +479,16 @@
     "sourceMake": "Make",
     "sourceBuy": "Buy",
     "sourceStock": "Stock",
-    "sku": "SKU"
+    "sku": "SKU",
+    "viewTable": "Table",
+    "viewCards": "Cards",
+    "viewBomList": "List",
+    "viewBomTree": "Tree",
+    "viewProcessList": "List",
+    "viewProcessFlow": "Flow",
+    "viewModeLabel": "View mode",
+    "noThumbnail": "No image",
+    "step": "Step"
   },
   "inventory": {
     "title": "Inventory",
@@ -1638,7 +1669,12 @@
     "wed": "Wed",
     "thu": "Thu",
     "fri": "Fri",
-    "sat": "Sat"
+    "sat": "Sat",
+    "poDeliveries": "PO Deliveries",
+    "showPoDeliveries": "Show PO Deliveries",
+    "hidePoDeliveries": "Hide PO Deliveries",
+    "poDeliveriesCount": "{{count}} PO deliveries expected",
+    "poLines": "{{count}} lines"
   },
   "shared": {
     "closeDialog": "Close dialog",

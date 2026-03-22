@@ -107,6 +107,11 @@
   &--danger:hover {
     color: var(--error);
   }
+
+  &--active {
+    color: var(--primary);
+    background: var(--primary-light);
+  }
 }
 
 // ─── Dialog ───

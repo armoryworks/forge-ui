@@ -108,6 +108,32 @@
   }
 }
 
+.my-work-btn {
+  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include flex-center;
+  gap: $sp-sm;
+  padding: $sp-xxs $sp-md;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: $border-radius;
+
+  .material-icons-outlined { font-size: $icon-size-xs; }
+
+  &:hover {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--primary);
+  }
+
+  &--active {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: var(--primary);
+  }
+}
+
 .new-job-btn {
   @include uppercase-label($font-size-xs, 0.5px, 600);
   @include flex-center;

@@ -1,0 +1,54 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.focus-mode {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: $sp-xl;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__icon {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+
+  &__title {
+    flex: 1;
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xl;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    border: $border-width solid var(--border);
+    padding: $sp-lg;
+    background: var(--surface);
+  }
+
+  &__section-title {
+    font-size: $font-size-title;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}

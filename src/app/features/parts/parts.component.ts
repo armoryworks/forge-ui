@@ -1,9 +1,11 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PartsService } from './services/parts.service';
 import { PartListItem } from './models/part-list-item.model';
 import { PartDetail } from './models/part-detail.model';
@@ -13,6 +15,7 @@ import { PartType } from './models/part-type.type';
 import { BOMSourceType } from './models/bom-source-type.type';
 import { AccountingService } from '../../shared/services/accounting.service';
 import { ScannerService } from '../../shared/services/scanner.service';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AccountingItem } from '../admin/models/accounting-item.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
@@ -37,6 +40,11 @@ import { FileAttachment } from '../../shared/models/file.model';
 import { PartInventorySummary } from './models/part-inventory-summary.model';
 import { ProcessPlanComponent } from './components/process-plan/process-plan.component';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
+import { BomTreeComponent } from './components/bom-tree/bom-tree.component';
+
+type ViewMode = 'table' | 'cards';
+type BomViewMode = 'table' | 'tree';
 
 @Component({
   selector: 'app-parts',
@@ -48,6 +56,7 @@ import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barco
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
     EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
     ProcessPlanComponent, BarcodeInfoComponent, MatTooltipModule,
+    PartsCardGridComponent, BomTreeComponent,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
@@ -60,11 +69,25 @@ export class PartsComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly userPreferences = inject(UserPreferencesService);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly selectedPart = signal<PartDetail | null>(null);
   protected readonly detailLoading = signal(false);
+
+  // ── View Mode (table / cards) — URL param + persisted preference ──
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(
+      map(p => (p.get('view') as ViewMode) ?? (this.userPreferences.get<ViewMode>('parts:viewMode') ?? 'table')),
+    ),
+    { initialValue: (this.userPreferences.get<ViewMode>('parts:viewMode') ?? 'table') as ViewMode },
+  );
+
+  // ── BOM view mode (table / tree) — session-only ──
+  protected readonly bomViewMode = signal<BomViewMode>('table');
 
   // ── Page Filters ──
   protected readonly searchControl = new FormControl('');
@@ -496,5 +519,13 @@ export class PartsComponent {
 
   protected getTypeIcon(type: string): string {
     return type === 'Assembly' ? 'account_tree' : 'settings';
+  }
+
+  protected setViewMode(mode: ViewMode): void {
+    this.router.navigate([], {
+      queryParams: { view: mode === 'table' ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+    this.userPreferences.set('parts:viewMode', mode);
   }
 }

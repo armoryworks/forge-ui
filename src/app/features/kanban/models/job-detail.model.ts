@@ -35,4 +35,5 @@ export interface JobDetail {
   childJobCount: number;
   createdAt: string;
   updatedAt: string;
+  coverPhotoUrl: string | null;
 }

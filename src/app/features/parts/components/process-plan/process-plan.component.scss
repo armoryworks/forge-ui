@@ -14,6 +14,12 @@
     }
   }
 
+  &__header-actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
   &__steps {
     display: flex;
     flex-direction: column;
@@ -86,4 +92,9 @@
     gap: $sp-xs;
     flex-shrink: 0;
   }
+}
+
+.view-toggle {
+  display: flex;
+  gap: $sp-xs;
 }

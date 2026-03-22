@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { PartListItem } from '../models/part-list-item.model';
 import { PartDetail } from '../models/part-detail.model';
@@ -104,6 +104,15 @@ export class PartsService {
   }
 
   getFileDownloadUrl(fileId: number): string {
-    return `${environment.apiUrl}/files/${fileId}`;
+    return `${environment.apiUrl}/files/${fileId}/download`;
+  }
+
+  getPartThumbnails(partIds: number[]): Observable<{ partId: number; thumbnailUrl: string | null }[]> {
+    if (partIds.length === 0) return of([]);
+    let params = new HttpParams();
+    for (const id of partIds) {
+      params = params.append('partIds', String(id));
+    }
+    return this.http.get<{ partId: number; thumbnailUrl: string | null }[]>(`${this.base}/thumbnails`, { params });
   }
 }

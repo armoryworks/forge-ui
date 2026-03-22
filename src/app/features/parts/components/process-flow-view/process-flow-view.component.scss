@@ -1,0 +1,83 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+  overflow-x: auto;
+  @include custom-scrollbar(4px);
+}
+
+.process-flow {
+  display: flex;
+  flex-direction: row;
+  padding: $sp-lg $sp-md;
+  gap: 0;
+  align-items: flex-start;
+  min-width: max-content;
+
+  &__step {
+    flex-shrink: 0;
+    width: 160px;
+    background: var(--surface);
+    border: $border-width solid var(--border);
+    padding: $sp-md;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    &--first {
+      border-left-color: var(--primary);
+      border-left-width: $border-width;
+    }
+  }
+
+  &__step-number {
+    @include uppercase-label($font-size-xxs, 0.05em, 700);
+    color: var(--text-muted);
+  }
+
+  &__step-name {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text);
+    @include truncate;
+  }
+
+  &__step-desc {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__step-meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+  }
+
+  &__step-qc {
+    margin-top: $sp-xs;
+  }
+
+  &__arrow {
+    flex-shrink: 0;
+    width: $sp-xl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    align-self: center;
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+  }
+}

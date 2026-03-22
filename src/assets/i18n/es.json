@@ -315,7 +315,11 @@
     "searchPlaceholder": "Buscar trabajos...",
     "noJobsMatch": "Ningún trabajo coincide con sus filtros",
     "noJobsHelp": "Intente ajustar su búsqueda o filtros. Los trabajos se agregan desde la página del Tablero.",
-    "loadFailed": "Error al cargar pendientes"
+    "loadFailed": "Error al cargar pendientes",
+    "cardView": "Vista de Tarjetas",
+    "tableView": "Vista de Tabla",
+    "viewMode": "Modo de vista",
+    "noDate": "Sin fecha"
   },
   "jobs": {
     "title": "Trabajos",
@@ -455,7 +459,16 @@
     "sourceMake": "Fabricar",
     "sourceBuy": "Comprar",
     "sourceStock": "Stock",
-    "sku": "SKU"
+    "sku": "SKU",
+    "viewTable": "Tabla",
+    "viewCards": "Tarjetas",
+    "viewBomList": "Lista",
+    "viewBomTree": "Árbol",
+    "viewProcessList": "Lista",
+    "viewProcessFlow": "Flujo",
+    "viewModeLabel": "Modo de vista",
+    "noThumbnail": "Sin imagen",
+    "step": "Paso"
   },
   "inventory": {
     "title": "Inventario",

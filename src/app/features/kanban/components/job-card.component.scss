@@ -27,6 +27,22 @@
   }
 }
 
+.card__cover {
+  width: 100%;
+  height: 80px;
+  overflow: hidden;
+  border-bottom: $border-width-thin solid var(--border);
+  margin: -$sp-md -$sp-md $sp-md;
+  width: calc(100% + 2 * $sp-md);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
 .card__check {
   position: absolute;
   top: $sp-sm;

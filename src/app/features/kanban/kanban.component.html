@@ -27,6 +27,15 @@
 
     <app-select [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
 
+    <button class="my-work-btn" [class.my-work-btn--active]="myWorkOnly()"
+            (click)="toggleMyWork()"
+            [matTooltip]="myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate)"
+            matTooltipPosition="above"
+            aria-label="Show only my assigned jobs">
+      <span class="material-icons-outlined">person</span>
+      {{ myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate) }}
+    </button>
+
     <button class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'jobs.createJob' | translate }}

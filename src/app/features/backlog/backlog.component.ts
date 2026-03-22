@@ -2,10 +2,15 @@ import {
   ChangeDetectionStrategy, Component, computed, inject, OnInit, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { forkJoin, startWith } from 'rxjs';
+import { forkJoin, map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { formatDate } from '../../shared/utils/date.utils';
+import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -24,14 +29,19 @@ import { SelectComponent, SelectOption } from '../../shared/components/select/se
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
+import { BacklogCardGridComponent } from './components/backlog-card-grid/backlog-card-grid.component';
+
+type ViewMode = 'table' | 'card';
 
 @Component({
   selector: 'app-backlog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe, JobDetailPanelComponent, JobDialogComponent, AvatarComponent,
+    ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    JobDetailPanelComponent, JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
-    DataTableComponent, ColumnCellDirective,
+    DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    BacklogCardGridComponent,
   ],
   templateUrl: './backlog.component.html',
   styleUrl: './backlog.component.scss',
@@ -42,11 +52,21 @@ export class BacklogComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
   private readonly loadingService = inject(LoadingService);
   private readonly translate = inject(TranslateService);
+  private readonly userPreferences = inject(UserPreferencesService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
   protected readonly jobs = signal<KanbanJob[]>([]);
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly users = signal<UserRef[]>([]);
   protected readonly error = signal<string | null>(null);
+  protected readonly isLoading = signal(false);
+
+  // View mode — URL is source of truth, persisted to user preferences
+  protected readonly viewMode = toSignal(
+    this.route.queryParamMap.pipe(map(p => (p.get('view') as ViewMode) ?? 'table')),
+    { initialValue: 'table' as ViewMode },
+  );
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -146,7 +166,20 @@ export class BacklogComponent implements OnInit {
     return jobs;
   });
 
+  constructor() {
+    // Restore saved view mode preference on first load (URL takes precedence on explicit navigation)
+    const savedView = this.userPreferences.get<string>('backlog:viewMode') as ViewMode | null;
+    if (savedView === 'card' && !this.route.snapshot.queryParams['view']) {
+      this.router.navigate([], {
+        queryParams: { view: 'card' },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    }
+  }
+
   ngOnInit(): void {
+    this.isLoading.set(true);
     this.loadingService.track('Loading backlog...', forkJoin({
       jobs: this.backlogService.getJobs(),
       trackTypes: this.kanbanService.getTrackTypes(),
@@ -156,9 +189,21 @@ export class BacklogComponent implements OnInit {
         this.jobs.set(jobs);
         this.trackTypes.set(trackTypes);
         this.users.set(users);
+        this.isLoading.set(false);
       },
-      error: () => this.error.set(this.translate.instant('backlog.loadFailed')),
+      error: () => {
+        this.error.set(this.translate.instant('backlog.loadFailed'));
+        this.isLoading.set(false);
+      },
     });
+  }
+
+  protected setViewMode(mode: ViewMode): void {
+    this.router.navigate([], {
+      queryParams: { view: mode === 'table' ? null : mode },
+      queryParamsHandling: 'merge',
+    });
+    this.userPreferences.set('backlog:viewMode', mode);
   }
 
   protected priorityColor(priority: string): string {

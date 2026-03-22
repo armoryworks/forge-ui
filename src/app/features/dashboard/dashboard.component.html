@@ -7,6 +7,15 @@
   <app-page-header [title]="'dashboard.title' | translate" [subtitle]="'dashboard.subtitle' | translate" helpTourId="dashboard">
     <span class="page-header__ctx">{{ 'dashboard.production' | translate }}</span>
     <div class="page-header__actions">
+      <button
+        class="btn"
+        [class.btn--primary]="focusMode()"
+        (click)="toggleFocusMode()"
+        [title]="focusMode() ? ('dashboard.exitFocusMode' | translate) : ('dashboard.enterFocusMode' | translate)"
+        [attr.aria-label]="focusMode() ? ('dashboard.exitFocusMode' | translate) : ('dashboard.enterFocusMode' | translate)">
+        <span class="material-icons-outlined btn__icon">center_focus_strong</span>
+        {{ 'dashboard.focusMode' | translate }}
+      </button>
       <button class="btn" (click)="ambientMode.set(true)" [title]="'dashboard.ambientDisplayMode' | translate">
         <span class="material-icons-outlined btn__icon">nightlight</span> {{ 'dashboard.ambient' | translate }}
       </button>
@@ -58,85 +67,91 @@
     </div>
   }
 
-  <app-getting-started-banner [data]="d" />
-
-  <div class="dashboard-content">
-    <div class="dashboard-kpis">
-      <app-kpi-chip
-        [value]="'' + d.kpis.activeCount"
-        [label]="'dashboard.active' | translate"
-        [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
-        changeDirection="up" />
-      <app-kpi-chip
-        [value]="'' + d.kpis.overdueCount"
-        valueColor="warn"
-        [label]="'dashboard.overdue' | translate"
-        [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
-        changeDirection="down" />
-      <app-kpi-chip
-        [value]="d.kpis.totalHours"
-        [label]="'dashboard.hours' | translate"
-        [change]="d.kpis.hoursStatus"
-        changeDirection="up" />
+  @if (focusMode()) {
+    <div class="dashboard-content">
+      <app-focus-mode [tasks]="d.tasks" (exitFocus)="toggleFocusMode()" />
     </div>
+  } @else {
+    <app-getting-started-banner [data]="d" />
 
-    <div class="grid-stack" #gridContainer>
-      @for (widget of activeWidgets(); track widget.id) {
-        <div class="grid-stack-item"
-          [attr.gs-id]="widget.id"
-          [attr.gs-x]="widget.defaultX"
-          [attr.gs-y]="widget.defaultY"
-          [attr.gs-w]="widget.defaultW"
-          [attr.gs-h]="widget.defaultH"
-          [attr.gs-min-w]="widget.minW"
-          [attr.gs-min-h]="widget.minH">
-          <div class="grid-stack-item-content">
-            @if (editing()) {
-              <button
-                class="widget-remove-btn"
-                (click)="removeWidget(widget.id)"
-                [matTooltip]="'dashboard.removeWidget' | translate" matTooltipPosition="above"
-                [attr.aria-label]="'dashboard.removeWidget' | translate">
-                <span class="material-icons-outlined">close</span>
-              </button>
-            }
+    <div class="dashboard-content">
+      <div class="dashboard-kpis">
+        <app-kpi-chip
+          [value]="'' + d.kpis.activeCount"
+          [label]="'dashboard.active' | translate"
+          [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
+          changeDirection="up" />
+        <app-kpi-chip
+          [value]="'' + d.kpis.overdueCount"
+          valueColor="warn"
+          [label]="'dashboard.overdue' | translate"
+          [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
+          changeDirection="down" />
+        <app-kpi-chip
+          [value]="d.kpis.totalHours"
+          [label]="'dashboard.hours' | translate"
+          [change]="d.kpis.hoursStatus"
+          changeDirection="up" />
+      </div>
 
-            <app-dashboard-widget [title]="widget.title" [icon]="widget.icon" [widgetKey]="widget.id">
-              @switch (widget.component) {
-                @case ('todays-tasks') {
-                  <app-todays-tasks-widget [tasks]="d.tasks" />
-                }
-                @case ('jobs-by-stage') {
-                  <app-jobs-by-stage-widget [stages]="d.stages" />
-                }
-                @case ('team-load') {
-                  <app-team-load-widget [team]="d.team" />
-                }
-                @case ('activity') {
-                  <app-activity-widget [entries]="d.activity" />
-                }
-                @case ('deadlines') {
-                  <app-deadlines-widget [deadlines]="d.deadlines" />
-                }
-                @case ('cycle-progress') {
-                  <app-cycle-progress-widget />
-                }
-                @case ('open-orders') {
-                  <app-open-orders-widget />
-                }
-                @case ('eod-prompt') {
-                  <app-eod-prompt-widget />
-                }
-                @case ('margin-summary') {
-                  <app-margin-summary-widget />
-                }
+      <div class="grid-stack" #gridContainer>
+        @for (widget of activeWidgets(); track widget.id) {
+          <div class="grid-stack-item"
+            [attr.gs-id]="widget.id"
+            [attr.gs-x]="widget.defaultX"
+            [attr.gs-y]="widget.defaultY"
+            [attr.gs-w]="widget.defaultW"
+            [attr.gs-h]="widget.defaultH"
+            [attr.gs-min-w]="widget.minW"
+            [attr.gs-min-h]="widget.minH">
+            <div class="grid-stack-item-content">
+              @if (editing()) {
+                <button
+                  class="widget-remove-btn"
+                  (click)="removeWidget(widget.id)"
+                  [matTooltip]="'dashboard.removeWidget' | translate" matTooltipPosition="above"
+                  [attr.aria-label]="'dashboard.removeWidget' | translate">
+                  <span class="material-icons-outlined">close</span>
+                </button>
               }
-            </app-dashboard-widget>
+
+              <app-dashboard-widget [title]="widget.title" [icon]="widget.icon" [widgetKey]="widget.id">
+                @switch (widget.component) {
+                  @case ('todays-tasks') {
+                    <app-todays-tasks-widget [tasks]="d.tasks" />
+                  }
+                  @case ('jobs-by-stage') {
+                    <app-jobs-by-stage-widget [stages]="d.stages" />
+                  }
+                  @case ('team-load') {
+                    <app-team-load-widget [team]="d.team" />
+                  }
+                  @case ('activity') {
+                    <app-activity-widget [entries]="d.activity" />
+                  }
+                  @case ('deadlines') {
+                    <app-deadlines-widget [deadlines]="d.deadlines" />
+                  }
+                  @case ('cycle-progress') {
+                    <app-cycle-progress-widget />
+                  }
+                  @case ('open-orders') {
+                    <app-open-orders-widget />
+                  }
+                  @case ('eod-prompt') {
+                    <app-eod-prompt-widget />
+                  }
+                  @case ('margin-summary') {
+                    <app-margin-summary-widget />
+                  }
+                }
+              </app-dashboard-widget>
+            </div>
           </div>
-        </div>
-      }
+        }
+      </div>
     </div>
-  </div>
+  }
 
   @if (ambientMode()) {
     <app-ambient-mode (exit)="ambientMode.set(false)" />

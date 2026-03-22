@@ -17,4 +17,5 @@ export interface KanbanJob {
   disposition: string | null;
   childJobCount: number;
   activeHolds: string[];
+  coverPhotoUrl: string | null;
 }

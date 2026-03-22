@@ -1,0 +1,95 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  @include custom-scrollbar;
+}
+
+.parts-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: $sp-lg;
+  padding: $sp-lg;
+  align-content: start;
+
+  &__card {
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    cursor: pointer;
+    transition: box-shadow $transition-normal;
+    outline: none;
+
+    &:hover { box-shadow: $shadow-dropdown; }
+
+    &:focus-visible {
+      outline: $border-width solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    &--selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+  }
+
+  &__thumbnail {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .material-icons-outlined {
+      font-size: $icon-size-hero;
+      color: var(--text-muted);
+    }
+  }
+
+  &__info {
+    padding: $sp-md;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__part-number {
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--text);
+    @include truncate;
+  }
+
+  &__description {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    @include truncate;
+  }
+}
+
+// Status badge styles (mirrored from parts.component.scss)
+.status-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: $sp-xs $sp-sm;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  background: var(--bg);
+  align-self: flex-start;
+
+  &--active { background: var(--success-light); border-color: var(--success); color: var(--success); }
+  &--draft { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  &--prototype { background: var(--info-light); border-color: var(--info); color: var(--info); }
+  &--obsolete { background: var(--error-light); border-color: var(--error); color: var(--error); }
+}

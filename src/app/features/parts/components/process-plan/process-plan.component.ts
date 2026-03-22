@@ -7,15 +7,18 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PartsService } from '../../services/parts.service';
 import { ProcessStep } from '../../models/process-step.model';
 import { ProcessStepDialogComponent, ProcessStepDialogData } from '../process-step-dialog/process-step-dialog.component';
+import { ProcessFlowViewComponent } from '../process-flow-view/process-flow-view.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
+type ProcessViewMode = 'list' | 'flow';
+
 @Component({
   selector: 'app-process-plan',
   standalone: true,
-  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule],
+  imports: [EmptyStateComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule, ProcessFlowViewComponent],
   templateUrl: './process-plan.component.html',
   styleUrl: './process-plan.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +33,7 @@ export class ProcessPlanComponent {
 
   protected readonly steps = signal<ProcessStep[]>([]);
   protected readonly loading = signal(false);
+  protected readonly processViewMode = signal<ProcessViewMode>('list');
 
   constructor() {
     effect(() => {

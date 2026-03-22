@@ -1,0 +1,59 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.cover-photo-remove {
+  margin-bottom: $sp-lg;
+}
+
+.cover-photo-upload {
+  margin-bottom: $sp-lg;
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: $sp-md;
+  }
+}
+
+.cover-photo-gallery {
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: $sp-md;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: $sp-md;
+  }
+
+  &__item {
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    padding: 0;
+    cursor: pointer;
+    overflow: hidden;
+    aspect-ratio: 1;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    &:hover:not(:disabled) {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 $border-width var(--primary);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}

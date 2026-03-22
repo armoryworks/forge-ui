@@ -62,6 +62,27 @@
   font-weight: 600;
 }
 
+// ─── View Toggle ───
+.view-toggle {
+  display: flex;
+  gap: $sp-xs;
+  border: $border-width-thin solid var(--border);
+  padding: $sp-xs;
+  margin-left: $sp-sm;
+}
+
+.icon-btn--active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+// ─── Card View Content ───
+.page-content--cards {
+  flex: 1;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
 // ─── Error State ───
 .page-error {
   display: flex;

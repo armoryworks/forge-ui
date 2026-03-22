@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { map } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
@@ -26,6 +28,8 @@ import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
+import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -54,6 +58,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly scanner = inject(ScannerService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
+  private readonly userPreferences = inject(UserPreferencesService);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly selectedTrackTypeId = signal<number | null>(null);
@@ -70,6 +78,21 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly users = signal<UserRef[]>([]);
   protected readonly priorityOptions = PRIORITIES;
 
+  // ── My Work Filter ──
+  protected readonly myWorkOnly = toSignal(
+    this.route.queryParamMap.pipe(map(p => p.get('myWork') === 'true')),
+    { initialValue: this.userPreferences.get<boolean>('kanban:myWorkOnly') ?? false },
+  );
+
+  protected toggleMyWork(): void {
+    const next = !this.myWorkOnly();
+    this.router.navigate([], {
+      queryParams: { myWork: next ? 'true' : null },
+      queryParamsHandling: 'merge',
+    });
+    this.userPreferences.set('kanban:myWorkOnly', next);
+  }
+
   // ── View Mode ──
   protected readonly viewMode = signal<ViewMode>('board');
   protected readonly teamUserIds = new FormControl<number[]>([]);
@@ -79,14 +102,22 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.users().map(u => ({ value: u.id, label: u.name })),
   );
 
-  // Columns filtered by selected team members (applies to board view)
+  // Columns filtered by selected team members and/or My Work toggle (applies to board view)
   protected readonly filteredColumns = computed<BoardColumn[]>(() => {
     const cols = this.columns();
     const selectedIds = this.teamUserIdsSignal() ?? [];
-    if (selectedIds.length === 0) return cols;
+    const myWork = this.myWorkOnly();
+    const currentUserId = this.authService.user()?.id;
+
+    if (selectedIds.length === 0 && !myWork) return cols;
+
     return cols.map(col => ({
       ...col,
-      jobs: col.jobs.filter(j => j.assigneeId != null && selectedIds.includes(j.assigneeId)),
+      jobs: col.jobs.filter(j => {
+        const matchesTeam = selectedIds.length === 0 || (j.assigneeId != null && selectedIds.includes(j.assigneeId));
+        const matchesMyWork = !myWork || (currentUserId != null && j.assigneeId === currentUserId);
+        return matchesTeam && matchesMyWork;
+      }),
     }));
   });
 

@@ -1,0 +1,110 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.bom-tree {
+  display: flex;
+  flex-direction: column;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-xs $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    font-size: $font-size-sm;
+    min-height: 32px;
+
+    &:hover { background: var(--bg); }
+  }
+
+  &__indent { flex-shrink: 0; }
+
+  &__toggle {
+    flex-shrink: 0;
+    width: $icon-size-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__toggle-btn {
+    width: $icon-size-md;
+    height: $icon-size-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    padding: 0;
+
+    .material-icons-outlined { font-size: $icon-size-md; }
+    &:hover { color: var(--text); }
+  }
+
+  &__toggle-spacer {
+    width: $icon-size-md;
+    display: inline-block;
+  }
+
+  &__sort-order {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    min-width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  &__part-number {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: var(--primary);
+    min-width: 100px;
+    flex-shrink: 0;
+    @include truncate;
+    max-width: 120px;
+  }
+
+  &__description {
+    flex: 1;
+    color: var(--text);
+    @include truncate;
+    font-size: $font-size-sm;
+  }
+
+  &__quantity {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    min-width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  &__lead-time {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    min-width: 32px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  &__delete {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+}
+
+// Source chip styles (matching parts.component.scss)
+.source-chip {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  padding: $sp-xxs $sp-sm;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  background: var(--bg);
+  flex-shrink: 0;
+
+  &--make { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
+  &--stock { background: var(--info-light); border-color: var(--info); color: var(--info); }
+}

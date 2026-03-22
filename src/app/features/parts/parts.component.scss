@@ -35,6 +35,28 @@
   flex-shrink: 0;
 }
 
+.view-toggle {
+  display: flex;
+  gap: $sp-xs;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.parts-list-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// ─── BOM Header ───
+.bom-header__actions {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
 // ─── Cell Styles ───
 .row--selected { background: var(--primary-light); }
 .part-number { font-weight: 700; font-family: $font-family-mono; font-size: $font-size-xs; }

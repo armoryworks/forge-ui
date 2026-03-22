@@ -4,6 +4,7 @@ import { formatDate, formatDateTime } from '../../../shared/utils/date.utils';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TimeTrackingService } from '../../time-tracking/services/time-tracking.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { ActivityTimelineComponent } from '../../../shared/components/activity-timeline/activity-timeline.component';
@@ -34,6 +35,7 @@ import { ChildJob } from '../models/child-job.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
 import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/barcode-info.component';
+import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-photo-upload-dialog.component';
 
 @Component({
   selector: 'app-job-detail-panel',
@@ -45,6 +47,7 @@ import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/ba
 })
 export class JobDetailPanelComponent implements OnInit {
   private readonly kanbanService = inject(KanbanService);
+  private readonly timeTrackingService = inject(TimeTrackingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly matDialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -83,6 +86,12 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly partSearchResults = signal<PartSearchResult[]>([]);
   protected readonly selectedPart = signal<PartSearchResult | null>(null);
   protected readonly showPartResults = signal(false);
+
+  protected readonly isTimerLoading = signal(false);
+
+  protected readonly hasActiveTimer = computed(() =>
+    this.timeEntries().some(e => e.timerStart !== null && e.timerStop === null),
+  );
 
   protected readonly totalTimeMinutes = computed(() =>
     this.timeEntries().reduce((sum, e) => sum + e.durationMinutes, 0),
@@ -367,6 +376,48 @@ export class JobDetailPanelComponent implements OnInit {
         this.snackbar.success(user ? this.translate.instant('kanban.assignedTo', { name: user.name }) : this.translate.instant('kanban.unassignedSuccess'));
       },
       error: () => this.snackbar.error(this.translate.instant('kanban.assignFailed')),
+    });
+  }
+
+  protected startTimerForJob(): void {
+    const jobId = this.job()?.id;
+    if (!jobId) return;
+    this.isTimerLoading.set(true);
+    this.timeTrackingService.startTimer({ jobId, category: 'Production' }).subscribe({
+      next: () => {
+        this.snackbar.success(this.translate.instant('kanban.timerStarted'));
+        this.kanbanService.getJobTimeEntries(jobId).subscribe(t => this.timeEntries.set(t));
+        this.isTimerLoading.set(false);
+      },
+      error: () => this.isTimerLoading.set(false),
+    });
+  }
+
+  protected stopTimerForJob(): void {
+    const active = this.timeEntries().find(e => e.timerStart !== null && e.timerStop === null);
+    if (!active) return;
+    this.isTimerLoading.set(true);
+    this.timeTrackingService.stopTimer({ notes: undefined }).subscribe({
+      next: () => {
+        this.snackbar.success(this.translate.instant('kanban.timerStopped'));
+        const jobId = this.job()?.id;
+        if (jobId) this.kanbanService.getJobTimeEntries(jobId).subscribe(t => this.timeEntries.set(t));
+        this.isTimerLoading.set(false);
+      },
+      error: () => this.isTimerLoading.set(false),
+    });
+  }
+
+  protected openCoverPhotoDialog(): void {
+    const j = this.job();
+    if (!j) return;
+    this.matDialog.open(CoverPhotoUploadDialogComponent, {
+      width: '520px',
+      data: { jobId: j.id, currentCoverPhotoUrl: j.coverPhotoUrl ?? null } satisfies CoverPhotoDialogData,
+    }).afterClosed().subscribe(result => {
+      if (result !== undefined) {
+        this.job.update(current => current ? { ...current, coverPhotoUrl: result?.coverPhotoUrl ?? null } : current);
+      }
     });
   }
 

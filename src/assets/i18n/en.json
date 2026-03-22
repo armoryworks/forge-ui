@@ -315,7 +315,11 @@
     "searchPlaceholder": "Search jobs...",
     "noJobsMatch": "No jobs match your filters",
     "noJobsHelp": "Try adjusting your search or filters. Jobs are added from the Board page.",
-    "loadFailed": "Failed to load backlog"
+    "loadFailed": "Failed to load backlog",
+    "cardView": "Card View",
+    "tableView": "Table View",
+    "viewMode": "View mode",
+    "noDate": "No date"
   },
   "jobs": {
     "title": "Jobs",
@@ -455,7 +459,16 @@
     "sourceMake": "Make",
     "sourceBuy": "Buy",
     "sourceStock": "Stock",
-    "sku": "SKU"
+    "sku": "SKU",
+    "viewTable": "Table",
+    "viewCards": "Cards",
+    "viewBomList": "List",
+    "viewBomTree": "Tree",
+    "viewProcessList": "List",
+    "viewProcessFlow": "Flow",
+    "viewModeLabel": "View mode",
+    "noThumbnail": "No image",
+    "step": "Step"
   },
   "inventory": {
     "title": "Inventory",

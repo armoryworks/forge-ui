@@ -9,45 +9,70 @@
     <app-select [label]="'jobs.track' | translate" [formControl]="trackTypeControl" [options]="trackTypeOptions()" />
     <app-select [label]="'common.priority' | translate" [formControl]="priorityControl" [options]="priorityOptions" />
     <app-select [label]="'common.assignee' | translate" [formControl]="assigneeControl" [options]="assigneeOptions()" />
+    <div class="view-toggle" role="group" [attr.aria-label]="'backlog.viewMode' | translate">
+      <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'table'"
+        [matTooltip]="'backlog.tableView' | translate"
+        matTooltipPosition="below"
+        aria-label="Table view"
+        (click)="setViewMode('table')">
+        <span class="material-icons-outlined">view_list</span>
+      </button>
+      <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'card'"
+        [matTooltip]="'backlog.cardView' | translate"
+        matTooltipPosition="below"
+        aria-label="Card view"
+        (click)="setViewMode('card')">
+        <span class="material-icons-outlined">view_module</span>
+      </button>
+    </div>
     <button class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'jobs.createJob' | translate }}
     </button>
   </app-page-header>
 
-  <div class="page-content page-content--table">
-  <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
-    [rowClass]="backlogRowClass" [rowStyle]="backlogRowStyle"
-    emptyIcon="search_off" [emptyMessage]="'backlog.noJobsMatch' | translate" [emptyHelpText]="'backlog.noJobsHelp' | translate"
-    (rowClick)="onRowClicked($any($event))">
-    <ng-template appColumnCell="jobNumber" let-job>
-      <span class="job-number">{{ job.jobNumber }}</span>
-    </ng-template>
-    <ng-template appColumnCell="title" let-job>
-      <span class="job-title">{{ job.title }}</span>
-    </ng-template>
-    <ng-template appColumnCell="stageName" let-job>
-      <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
-    </ng-template>
-    <ng-template appColumnCell="priorityName" let-job>
-      <span class="priority-dot" [style.background]="priorityColor(job.priorityName)"></span>
-      {{ job.priorityName }}
-    </ng-template>
-    <ng-template appColumnCell="assignee" let-job>
-      @if (job.assigneeInitials) {
-        <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#0d9488'" size="sm" />
-      } @else {
-        <span class="unassigned">—</span>
-      }
-    </ng-template>
-    <ng-template appColumnCell="customerName" let-job>
-      {{ job.customerName ?? '—' }}
-    </ng-template>
-    <ng-template appColumnCell="dueDate" let-job>
-      <span [class.overdue-text]="job.isOverdue">{{ formatDate(job.dueDate) }}</span>
-    </ng-template>
-  </app-data-table>
-  </div>
+  @if (viewMode() === 'table') {
+    <div class="page-content page-content--table">
+    <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
+      [rowClass]="backlogRowClass" [rowStyle]="backlogRowStyle"
+      emptyIcon="search_off" [emptyMessage]="'backlog.noJobsMatch' | translate" [emptyHelpText]="'backlog.noJobsHelp' | translate"
+      (rowClick)="onRowClicked($any($event))">
+      <ng-template appColumnCell="jobNumber" let-job>
+        <span class="job-number">{{ job.jobNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="title" let-job>
+        <span class="job-title">{{ job.title }}</span>
+      </ng-template>
+      <ng-template appColumnCell="stageName" let-job>
+        <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
+      </ng-template>
+      <ng-template appColumnCell="priorityName" let-job>
+        <span class="priority-dot" [style.background]="priorityColor(job.priorityName)"></span>
+        {{ job.priorityName }}
+      </ng-template>
+      <ng-template appColumnCell="assignee" let-job>
+        @if (job.assigneeInitials) {
+          <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#0d9488'" size="sm" />
+        } @else {
+          <span class="unassigned">—</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="customerName" let-job>
+        {{ job.customerName ?? '—' }}
+      </ng-template>
+      <ng-template appColumnCell="dueDate" let-job>
+        <span [class.overdue-text]="job.isOverdue">{{ formatDate(job.dueDate) }}</span>
+      </ng-template>
+    </app-data-table>
+    </div>
+  } @else {
+    <div class="page-content page-content--cards" [appLoadingBlock]="isLoading()">
+      <app-backlog-card-grid
+        [jobs]="filteredJobs()"
+        [selectedJobId]="selectedJobId()"
+        (jobClick)="onRowClicked($event)" />
+    </div>
+  }
 
   @if (selectedJobId(); as jobId) {
     <app-job-detail-panel

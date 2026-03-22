@@ -14,6 +14,15 @@
       <span class="material-icons-outlined">chevron_right</span>
     </button>
     <button class="action-btn action-btn--sm" (click)="today()">{{ 'calendar.today' | translate }}</button>
+    <button class="action-btn action-btn--sm"
+            [class.action-btn--primary]="showPoDeliveries()"
+            (click)="togglePoDeliveries()"
+            [attr.aria-label]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
+            [matTooltip]="(showPoDeliveries() ? 'calendar.hidePoDeliveries' : 'calendar.showPoDeliveries') | translate"
+            matTooltipPosition="above">
+      <span class="material-icons-outlined">local_shipping</span>
+      {{ 'calendar.poDeliveries' | translate }}
+    </button>
   </div>
 </app-page-header>
 
@@ -64,6 +73,16 @@
               @if (overflowCount(day) > 0) {
                 <div class="job-overflow">{{ 'calendar.more' | translate: { count: overflowCount(day) } }}</div>
               }
+              @if (showPoDeliveries()) {
+                @for (po of (poEventsByDate().get(day.dateKey) ?? []); track po.id) {
+                  <div class="po-event"
+                       [title]="po.poNumber + ' — ' + po.vendorName + ' (' + po.lineCount + ' lines)'"
+                       (click)="$event.stopPropagation()">
+                    <span class="material-icons-outlined po-event__icon">local_shipping</span>
+                    <span class="po-event__label">{{ po.poNumber }}</span>
+                  </div>
+                }
+              }
             </div>
           </div>
         }
@@ -112,7 +131,19 @@
                 }
               </div>
             }
-            @if (day.jobs.length === 0) {
+            @if (showPoDeliveries()) {
+              @for (po of (poEventsByDate().get(day.dateKey) ?? []); track po.id) {
+                <div class="po-event po-event--week"
+                     [title]="po.poNumber + ' — ' + po.vendorName + ' (' + po.lineCount + ' lines)'">
+                  <span class="material-icons-outlined po-event__icon">local_shipping</span>
+                  <div class="po-event__week-body">
+                    <span class="po-event__label">{{ po.poNumber }}</span>
+                    <span class="po-event__vendor">{{ po.vendorName }}</span>
+                  </div>
+                </div>
+              }
+            }
+            @if (day.jobs.length === 0 && (poEventsByDate().get(day.dateKey) ?? []).length === 0) {
               <span class="week-column__empty">{{ 'calendar.noJobs' | translate }}</span>
             }
           </div>
@@ -126,6 +157,12 @@
     <div class="day-view">
       <div class="day-view__header">
         <span class="day-view__count">{{ (dayJobs().length === 1 ? 'calendar.jobDue' : 'calendar.jobsDue') | translate: { count: dayJobs().length } }}</span>
+        @if (showPoDeliveries() && dayPoEvents().length > 0) {
+          <span class="day-view__po-count">
+            <span class="material-icons-outlined">local_shipping</span>
+            {{ 'calendar.poDeliveriesCount' | translate: { count: dayPoEvents().length } }}
+          </span>
+        }
       </div>
       <div class="day-view__list">
         @for (job of dayJobs(); track job.id) {
@@ -166,7 +203,22 @@
             </div>
           </div>
         }
-        @if (dayJobs().length === 0) {
+        @if (showPoDeliveries()) {
+          @for (po of dayPoEvents(); track po.id) {
+            <div class="day-po">
+              <div class="day-po__header">
+                <span class="material-icons-outlined day-po__icon">local_shipping</span>
+                <span class="day-po__number">{{ po.poNumber }}</span>
+                <span class="day-po__vendor">{{ po.vendorName }}</span>
+                <span class="chip chip--warning day-po__status">{{ po.status }}</span>
+              </div>
+              <div class="day-po__meta">
+                <span class="day-po__lines">{{ 'calendar.poLines' | translate: { count: po.lineCount } }}</span>
+              </div>
+            </div>
+          }
+        }
+        @if (dayJobs().length === 0 && (!showPoDeliveries() || dayPoEvents().length === 0)) {
           <div class="day-view__empty">
             <span class="material-icons-outlined">event_available</span>
             <span>{{ 'calendar.noJobsDueOnDay' | translate }}</span>
