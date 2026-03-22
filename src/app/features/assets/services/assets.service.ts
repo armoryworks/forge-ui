@@ -9,6 +9,7 @@ import { AssetType } from '../models/asset-type.type';
 import { AssetStatus } from '../models/asset-status.type';
 import { DowntimeLog } from '../models/downtime-log.model';
 import { CreateDowntimeRequest } from '../models/create-downtime-request.model';
+import { MaintenanceLogListItem } from '../models/maintenance-log-list-item.model';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -48,6 +49,10 @@ export class AssetsService {
 
   createDowntimeLog(assetId: number, request: CreateDowntimeRequest): Observable<DowntimeLog> {
     return this.http.post<DowntimeLog>(`${this.base}/${assetId}/downtime`, request);
+  }
+
+  getMaintenanceLogs(assetId: number): Observable<MaintenanceLogListItem[]> {
+    return this.http.get<MaintenanceLogListItem[]>(`${this.base}/${assetId}/maintenance/logs`);
   }
 
   createMaintenanceJob(scheduleId: number): Observable<{ jobId: number }> {

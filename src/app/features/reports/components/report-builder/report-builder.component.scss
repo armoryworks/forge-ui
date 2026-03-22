@@ -96,3 +96,20 @@
   color: var(--text-muted);
   padding: $sp-md 0;
 }
+
+.builder__drill-filter {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+}

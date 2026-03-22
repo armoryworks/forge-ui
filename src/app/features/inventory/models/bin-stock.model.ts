@@ -9,4 +9,7 @@ export interface BinStock {
   availableQuantity: number;
   status: BinContentStatus;
   lotNumber: string | null;
+  lotId: number | null;
+  lotExpirationDate: string | null;
+  supplierLotNumber: string | null;
 }

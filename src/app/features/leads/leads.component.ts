@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview } from '@angular/cdk/drag-drop';
+
 import { LeadsService } from './services/leads.service';
 import { LeadItem } from './models/lead-item.model';
 import { LeadStatus } from './models/lead-status.type';
@@ -23,6 +25,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+
+type ViewMode = 'table' | 'pipeline';
+
+const VIEW_MODE_KEY = 'leads-view-mode';
 
 @Component({
   selector: 'app-leads',
@@ -32,6 +39,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, MatTooltipModule,
+    CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview,
+    AvatarComponent,
   ],
   templateUrl: './leads.component.html',
   styleUrl: './leads.component.scss',
@@ -47,6 +56,11 @@ export class LeadsComponent {
   protected readonly saving = signal(false);
   protected readonly leads = signal<LeadItem[]>([]);
   protected readonly selectedLead = signal<LeadItem | null>(null);
+
+  // View mode — persisted to localStorage
+  protected readonly viewMode = signal<ViewMode>(
+    (localStorage.getItem(VIEW_MODE_KEY) as ViewMode) ?? 'table'
+  );
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -115,8 +129,39 @@ export class LeadsComponent {
     ...this.leadSources.map(s => ({ value: s, label: s })),
   ];
 
+  // Filtered leads for pipeline grouping (client-side filter over loaded leads)
+  private readonly filteredLeads = computed(() => {
+    const term = (this.searchTerm() ?? '').toLowerCase().trim();
+    const statusF = this.statusFilter();
+    return this.leads().filter(lead => {
+      const matchesSearch = !term ||
+        lead.companyName.toLowerCase().includes(term) ||
+        (lead.contactName ?? '').toLowerCase().includes(term);
+      const matchesStatus = !statusF || lead.status === statusF;
+      return matchesSearch && matchesStatus;
+    });
+  });
+
+  // Grouped leads for pipeline view — Map from status → LeadItem[]
+  // Using a mutable array per column so CDK drag-drop can splice in-place.
+  // We keep it as a computed signal returning a plain object so the template can access each bucket.
+  protected readonly groupedLeads = computed<Record<LeadStatus, LeadItem[]>>(() => {
+    const map: Record<LeadStatus, LeadItem[]> = {
+      New: [], Contacted: [], Quoting: [], Converted: [], Lost: [],
+    };
+    for (const lead of this.filteredLeads()) {
+      map[lead.status].push(lead);
+    }
+    return map;
+  });
+
   constructor() {
     this.loadLeads();
+  }
+
+  protected setViewMode(mode: ViewMode): void {
+    this.viewMode.set(mode);
+    localStorage.setItem(VIEW_MODE_KEY, mode);
   }
 
   protected loadLeads(): void {
@@ -272,7 +317,7 @@ export class LeadsComponent {
   private executeConversion(leadId: number, createJob: boolean): void {
     this.saving.set(true);
     this.leadsService.convertLead(leadId, createJob).subscribe({
-      next: (result) => {
+      next: () => {
         this.saving.set(false);
         const msg = createJob
           ? this.translate.instant('leads.convertedWithJob')
@@ -308,6 +353,66 @@ export class LeadsComponent {
           this.snackbar.success(this.translate.instant('leads.deleted'));
         },
       });
+    });
+  }
+
+  // ─── Pipeline drag-and-drop ───────────────────────────────────────────────
+
+  /** Returns initials from a contact name (e.g. "Jane Smith" → "JS") */
+  protected getInitials(name: string | null): string {
+    if (!name) return '?';
+    return name
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(w => w[0].toUpperCase())
+      .join('');
+  }
+
+  /** Formats estimated value — placeholder since LeadItem has no estimatedValue field yet */
+  protected formatValue(lead: LeadItem): string | null {
+    // LeadItem does not currently carry estimatedValue — extend when API adds it
+    return null;
+  }
+
+  /** All column ids as a string array — needed for CdkDropList [connectedTo] */
+  protected readonly pipelineColumnIds = this.statuses.map(s => `pipeline-col-${s}`);
+
+  protected onCardDrop(
+    event: CdkDragDrop<LeadItem[]>,
+    targetStatus: LeadStatus,
+  ): void {
+    if (event.previousContainer === event.container) {
+      // Reorder within same column — no API call needed
+      return;
+    }
+
+    const lead: LeadItem = event.item.data;
+    if (lead.status === targetStatus) return;
+
+    // Optimistically move the card in the local leads array
+    this.leads.update(all =>
+      all.map(l => l.id === lead.id ? { ...l, status: targetStatus } : l)
+    );
+
+    // If dropping into Lost, show the lost reason dialog (same UX as button)
+    if (targetStatus === 'Lost') {
+      this.selectedLead.set({ ...lead, status: targetStatus });
+      this.showLostDialog.set(true);
+      return;
+    }
+
+    this.leadsService.updateLead(lead.id, { status: targetStatus }).subscribe({
+      next: (updated) => {
+        // Sync the authoritative response back into the leads array
+        this.leads.update(all => all.map(l => l.id === updated.id ? updated : l));
+      },
+      error: () => {
+        // Roll back optimistic update on failure
+        this.leads.update(all =>
+          all.map(l => l.id === lead.id ? { ...l, status: lead.status } : l)
+        );
+      },
     });
   }
 }

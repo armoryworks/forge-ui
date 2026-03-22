@@ -44,9 +44,16 @@
       @if (loading()) {
         <div class="ai-help-msg ai-help-msg--assistant">
           <span class="material-icons-outlined ai-help-msg__avatar">smart_toy</span>
-          <div class="ai-help-msg__bubble ai-help-msg__bubble--loading">
-            <span class="ai-help-msg__dot"></span><span class="ai-help-msg__dot"></span><span class="ai-help-msg__dot"></span>
-          </div>
+          @if (streamingContent()) {
+            <div class="ai-help-msg__bubble ai-help-msg__bubble--markdown ai-help-msg__bubble--streaming">
+              <markdown [data]="streamingContent()" />
+              <span class="ai-help-msg__cursor" aria-hidden="true"></span>
+            </div>
+          } @else {
+            <div class="ai-help-msg__bubble ai-help-msg__bubble--loading">
+              <span class="ai-help-msg__dot"></span><span class="ai-help-msg__dot"></span><span class="ai-help-msg__dot"></span>
+            </div>
+          }
         </div>
       }
     </div>

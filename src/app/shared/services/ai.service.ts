@@ -86,6 +86,69 @@ export class AiService {
     return this.http.post<AiHelpResponse>(`${this.base}/help`, { question, history });
   }
 
+  streamHelpChat(question: string, history?: AiHelpMessage[]): Observable<string> {
+    const url = `${this.base}/help/stream`;
+    const body = JSON.stringify({ question, history });
+    const token = localStorage.getItem('qbe-token');
+
+    return new Observable<string>(subscriber => {
+      const controller = new AbortController();
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body,
+        signal: controller.signal,
+      }).then(response => {
+        if (!response.ok || !response.body) {
+          subscriber.error(new Error(`Stream request failed: ${response.status}`));
+          return;
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        const pump = (): Promise<void> =>
+          reader.read().then(({ done, value }) => {
+            if (done) {
+              subscriber.complete();
+              return;
+            }
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const payload = line.slice(6);
+              if (payload === '[DONE]') {
+                subscriber.complete();
+                return;
+              }
+              // Unescape newlines that were escaped server-side
+              const token = payload.replace(/\\n/g, '\n').replace(/\\r/g, '\r');
+              subscriber.next(token);
+            }
+
+            return pump();
+          });
+
+        pump().catch(err => {
+          if (err?.name !== 'AbortError') subscriber.error(err);
+        });
+      }).catch(err => {
+        if (err?.name !== 'AbortError') subscriber.error(err);
+      });
+
+      return () => controller.abort();
+    });
+  }
+
   ragSearch(query: string, entityTypeFilter?: string, includeAnswer = false): Observable<RagSearchResponse> {
     return this.http.post<RagSearchResponse>(`${this.base}/search`, {
       query,

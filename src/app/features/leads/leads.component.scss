@@ -9,6 +9,20 @@
   overflow: hidden;
 }
 
+// ─── View Toggle ───────────────────────────────────────────────────────────
+.view-toggle {
+  display: flex;
+  gap: $sp-xs;
+  align-items: center;
+  margin-right: $sp-md;
+}
+
+.icon-btn--active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+// ─── TABLE VIEW ────────────────────────────────────────────────────────────
 .leads-layout {
   flex: 1;
   display: flex;
@@ -16,7 +30,6 @@
   overflow: hidden;
 }
 
-// ─── List Panel ───
 .leads-list-panel {
   flex: 1;
   display: flex;
@@ -127,4 +140,210 @@
 
 .converted-icon {
   font-size: $icon-size-lg;
+}
+
+// ─── PIPELINE VIEW ─────────────────────────────────────────────────────────
+
+.pipeline-toolbar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.pipeline-board {
+  flex: 1;
+  display: flex;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+  @include custom-scrollbar($width: 6px);
+}
+
+// ─── Pipeline Column ───
+.pipeline-col {
+  min-width: 200px;
+  flex: 1;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+
+  &--muted {
+    opacity: 0.75;
+
+    .pipeline-col__header {
+      background: var(--bg);
+    }
+  }
+}
+
+.pipeline-col__header {
+  @include flex-between;
+  padding: $sp-sm $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.pipeline-col__name {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-secondary);
+}
+
+.pipeline-col__count {
+  font-size: $font-size-xxs;
+  min-width: $badge-size-md;
+  text-align: center;
+}
+
+.pipeline-col__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-sm;
+  overflow-y: auto;
+  min-height: 120px;
+  @include custom-scrollbar($width: 4px);
+
+  // Highlight drop zone on hover during drag
+  &.cdk-drop-list-dragging {
+    background: var(--primary-light);
+  }
+}
+
+.pipeline-col__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xl $sp-md;
+  color: var(--text-muted);
+  font-size: $font-size-xs;
+  text-align: center;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    opacity: 0.4;
+  }
+}
+
+// ─── Pipeline Card ───
+.pipeline-card {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  padding: $sp-md;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  transition: box-shadow $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &--selected {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  // Slight opacity + tilt while being dragged
+  &.cdk-drag-animating {
+    transition: transform $transition-fast;
+  }
+}
+
+// Card being dragged in flight
+.cdk-drag-preview.pipeline-card {
+  border: $border-width-thin solid var(--primary);
+  box-shadow: $shadow-dropdown;
+  opacity: 0.9;
+  transform: rotate(1.5deg);
+}
+
+// Slot placeholder left behind
+.pipeline-card__placeholder {
+  height: 60px;
+  border: $border-width-thin dashed var(--border);
+  background: var(--bg);
+}
+
+// Compact preview shown under the cursor while dragging
+.pipeline-card__preview {
+  background: var(--surface);
+  border: $border-width-thin solid var(--primary);
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  box-shadow: $shadow-dropdown;
+  max-width: 220px;
+  @include truncate;
+}
+
+.pipeline-card__company {
+  font-weight: 600;
+  font-size: $font-size-sm;
+  color: var(--text);
+  @include truncate;
+}
+
+.pipeline-card__contact {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.pipeline-card__contact-name {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  @include truncate;
+}
+
+.pipeline-card__meta {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+
+  &--overdue {
+    color: var(--error);
+    font-weight: 600;
+  }
+}
+
+.pipeline-card__meta-icon {
+  font-size: $icon-size-xs;
+  flex-shrink: 0;
+}
+
+// ─── Pipeline Detail Overlay ────────────────────────────────────────────────
+.pipeline-detail-backdrop {
+  position: fixed;
+  inset: 0;
+  background: $backdrop-color;
+  z-index: $z-dropdown;
+}
+
+.pipeline-detail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  background: var(--surface);
+  border-left: $border-width-thin solid var(--border);
+  z-index: calc(#{$z-dropdown} + 1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: $shadow-panel;
 }

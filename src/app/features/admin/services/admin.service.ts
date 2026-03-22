@@ -104,6 +104,13 @@ export class AdminService {
     return this.http.put<SystemSetting[]>(`${environment.apiUrl}/admin/system-settings`, { settings });
   }
 
+  // Pay Period Locking
+  lockPayPeriod(lockThrough: Date): Observable<{ lockedCount: number }> {
+    return this.http.post<{ lockedCount: number }>(`${environment.apiUrl}/time-tracking/lock-period`, {
+      lockThrough: lockThrough.toISOString(),
+    });
+  }
+
   // Logo
   uploadLogo(file: File): Observable<void> {
     const formData = new FormData();

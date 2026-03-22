@@ -705,4 +705,14 @@ export class InventoryComponent {
   protected getReservedClass(reserved: number): string {
     return reserved > 0 ? 'qty-reserved' : '';
   }
+
+  protected getLotExpirationClass(expirationDate: string | null): string {
+    if (!expirationDate) return '';
+    const expiry = new Date(expirationDate);
+    const now = new Date();
+    const daysUntilExpiry = Math.floor((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysUntilExpiry < 0) return 'lot-expired';
+    if (daysUntilExpiry <= 30) return 'lot-expiring-soon';
+    return '';
+  }
 }

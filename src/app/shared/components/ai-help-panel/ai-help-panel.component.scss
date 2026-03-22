@@ -274,6 +274,25 @@
   }
 }
 
+.ai-help-msg__bubble--streaming {
+  position: relative;
+}
+
+.ai-help-msg__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--primary);
+  vertical-align: text-bottom;
+  margin-left: 1px;
+  animation: ai-cursor-blink 0.8s step-end infinite;
+}
+
+@keyframes ai-cursor-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 .ai-help-panel__footer {
   display: flex;
   align-items: center;

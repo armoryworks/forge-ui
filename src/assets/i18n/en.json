@@ -724,7 +724,9 @@
     "sourceColdCall": "Cold Call",
     "sourceEmail": "Email",
     "sourceSocialMedia": "Social Media",
-    "sourceOther": "Other"
+    "sourceOther": "Other",
+    "tableView": "Table view",
+    "pipelineView": "Pipeline view"
   },
   "expenses": {
     "title": "Expenses",
@@ -2281,6 +2283,9 @@
     "noDataMatches": "No data matches your criteria",
     "configureReport": "Configure your report and click Run",
     "recordsFound": "record(s) found",
+    "filteredBy": "Filtered by",
+    "clearDrillFilter": "Clear filter",
+    "ofTotal": "of",
     "selectEntity": "-- Select Entity --",
     "noneOption": "-- None --",
     "operatorEquals": "Equals",

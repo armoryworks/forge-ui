@@ -1,9 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { AssetsService } from './services/assets.service';
 import { AssetItem } from './models/asset-item.model';
+import { MaintenanceLogListItem } from './models/maintenance-log-list-item.model';
 import { AssetType } from './models/asset-type.type';
 import { AssetStatus } from './models/asset-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -27,7 +29,7 @@ import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barco
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, BarcodeInfoComponent, MatTooltipModule],
+  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, BarcodeInfoComponent, MatTooltipModule],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +44,8 @@ export class AssetsComponent {
   protected readonly saving = signal(false);
   protected readonly assets = signal<AssetItem[]>([]);
   protected readonly selectedAsset = signal<AssetItem | null>(null);
+  protected readonly maintenanceLogs = signal<MaintenanceLogListItem[]>([]);
+  protected readonly maintenanceLogsLoading = signal(false);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -117,6 +121,19 @@ export class AssetsComponent {
 
   constructor() {
     this.loadAssets();
+
+    effect(() => {
+      const asset = this.selectedAsset();
+      if (!asset) {
+        this.maintenanceLogs.set([]);
+        return;
+      }
+      this.maintenanceLogsLoading.set(true);
+      this.assetsService.getMaintenanceLogs(asset.id).subscribe({
+        next: (logs) => { this.maintenanceLogs.set(logs); this.maintenanceLogsLoading.set(false); },
+        error: () => this.maintenanceLogsLoading.set(false),
+      });
+    });
   }
 
   protected loadAssets(): void {

@@ -26,6 +26,7 @@ import { DialogComponent } from '../../shared/components/dialog/dialog.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
+import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
@@ -43,6 +44,7 @@ import { TeamsPanelComponent } from './components/teams-panel/teams-panel.compon
 import { ComplianceTemplatesPanelComponent } from './components/compliance-templates-panel/compliance-templates-panel.component';
 import { UserCompliancePanelComponent } from './components/user-compliance-panel/user-compliance-panel.component';
 import { SalesTaxPanelComponent } from './components/sales-tax-panel/sales-tax-panel.component';
+import { AuditLogPanelComponent } from './components/audit-log-panel/audit-log-panel.component';
 import { CompanyLocationDialogComponent } from './components/company-location-dialog/company-location-dialog.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
@@ -52,9 +54,9 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
   standalone: true,
   imports: [
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
-    InputComponent, SelectComponent, ToggleComponent, DataTableComponent,
+    InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
+    EmptyStateComponent, LoadingBlockDirective, TrainingDashboardComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -73,8 +75,8 @@ export class AdminComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
-  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance', 'sales-tax']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'sales-tax']);
+  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance', 'sales-tax', 'audit-log']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'sales-tax', 'audit-log']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
   protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
@@ -183,6 +185,10 @@ export class AdminComponent {
     { value: null, label: '-- Default --' },
     ...this.companyLocations().filter(l => l.isActive).map(l => ({ value: l.id, label: l.name })),
   ]);
+
+  // Pay Period Locking
+  protected readonly lockThroughControl = new FormControl<Date | null>(null);
+  protected readonly lockingPeriod = signal(false);
 
   // Logo
   protected readonly logoPreviewUrl = computed(() => this.themeService.logoUrl());
@@ -796,6 +802,39 @@ export class AdminComponent {
     this.adminService.setDefaultCompanyLocation(location.id).subscribe({
       next: () => { this.loadCompanyLocations(); this.snackbar.success(this.translate.instant('admin.locationSetDefault', { name: location.name })); },
       error: () => this.snackbar.error(this.translate.instant('admin.locationSetDefaultFailed')),
+    });
+  }
+
+  // ── Pay Period Locking ──
+
+  protected confirmLockPayPeriod(): void {
+    const date = this.lockThroughControl.value;
+    if (!date) return;
+
+    const formatted = date.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: 'Lock Pay Period?',
+        message: `This will lock all unlocked time entries through ${formatted}. Locked entries cannot be edited or deleted. This action cannot be undone.`,
+        confirmLabel: 'Lock Period',
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.lockingPeriod.set(true);
+      this.adminService.lockPayPeriod(date).subscribe({
+        next: (result) => {
+          this.lockingPeriod.set(false);
+          this.lockThroughControl.reset();
+          this.snackbar.success(`${result.lockedCount} time ${result.lockedCount === 1 ? 'entry' : 'entries'} locked successfully.`);
+        },
+        error: () => {
+          this.lockingPeriod.set(false);
+          this.snackbar.error(this.translate.instant('admin.lockPeriodFailed'));
+        },
+      });
     });
   }
 

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@a
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartData, ChartOptions } from 'chart.js';
+import { ChartData, ChartEvent, ChartOptions } from 'chart.js';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -33,6 +33,14 @@ interface FilterRow {
   operatorControl: FormControl<ReportFilterOperator>;
   valueControl: FormControl<string>;
 }
+
+/** Colors for bar/line chart datasets — indexed cyclically */
+const CHART_COLORS = [
+  '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
+  '#06b6d4', '#f97316', '#ec4899', '#14b8a6', '#6366f1',
+];
+const CHART_COLOR_PRIMARY = CHART_COLORS[0];
+const CHART_COLOR_DIM = 'rgba(59, 130, 246, 0.2)';
 
 @Component({
   selector: 'app-report-builder',
@@ -77,6 +85,9 @@ export class ReportBuilderComponent {
   protected readonly reportResults = signal<RunReportResponse | null>(null);
   protected readonly isRunning = signal(false);
   protected readonly editingReport = signal<SavedReport | null>(null);
+
+  /** Currently active drill-down filter value (label clicked in chart). Null = no filter. */
+  protected readonly drillFilter = signal<string | null>(null);
 
   // Derived from service
   protected readonly entities = this.builderService.entities;
@@ -174,7 +185,26 @@ export class ReportBuilderComponent {
     });
   });
 
-  // Computed: chart data from results
+  /**
+   * The field used to group the chart (chartLabelControl) is also the field
+   * used to filter rows when the user drills into a bar/slice.
+   */
+  private readonly chartGroupByField = computed<string>(() => this.chartLabelControl.value);
+
+  /**
+   * Rows filtered by the active drill selection.
+   * When drillFilter is null, all rows are shown.
+   */
+  protected readonly filteredRows = computed<Record<string, unknown>[]>(() => {
+    const results = this.reportResults();
+    if (!results) return [];
+    const filter = this.drillFilter();
+    const field = this.chartGroupByField();
+    if (!filter || !field) return results.rows;
+    return results.rows.filter(row => String(row[field] ?? '') === filter);
+  });
+
+  // Computed: chart data from results — highlights the active drill bar
   protected readonly chartData = computed<ChartData | null>(() => {
     const results = this.reportResults();
     const chartType = this.chartTypeControl.value;
@@ -187,27 +217,37 @@ export class ReportBuilderComponent {
 
     const labels = results.rows.map(r => String(r[labelField] ?? ''));
     const data = results.rows.map(r => Number(r[valueField] ?? 0));
-    const colors = [
-      '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
-      '#06b6d4', '#f97316', '#ec4899', '#14b8a6', '#6366f1',
-    ];
+    const activeFilter = this.drillFilter();
 
     if (chartType === 'pie' || chartType === 'doughnut') {
+      const bgColors = labels.map((label, i) => {
+        const base = CHART_COLORS[i % CHART_COLORS.length];
+        if (!activeFilter) return base;
+        return label === activeFilter ? base : base + '33'; // 20% opacity via hex alpha
+      });
       return {
         labels,
         datasets: [{
           data,
-          backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+          backgroundColor: bgColors,
         }],
       };
     }
+
+    // Bar / line: dim non-active bars
+    const bgColors = labels.map(label => {
+      if (!activeFilter) return 'rgba(59, 130, 246, 0.7)';
+      return label === activeFilter ? CHART_COLOR_PRIMARY : CHART_COLOR_DIM;
+    });
 
     return {
       labels,
       datasets: [{
         data,
-        backgroundColor: 'rgba(59, 130, 246, 0.7)',
-        borderColor: '#3b82f6',
+        backgroundColor: bgColors,
+        borderColor: labels.map(label =>
+          !activeFilter || label === activeFilter ? CHART_COLOR_PRIMARY : CHART_COLOR_DIM,
+        ),
         label: this.availableFields().find(f => f.field === valueField)?.label ?? valueField,
         tension: chartType === 'line' ? 0.3 : undefined,
         fill: chartType === 'line' ? true : undefined,
@@ -249,6 +289,12 @@ export class ReportBuilderComponent {
     responsive: true,
     maintainAspectRatio: false,
     plugins: { legend: { position: 'top' } },
+    // Pointer cursor so the user knows the chart is clickable
+    onHover: (event, elements) => {
+      if (event.native?.target instanceof HTMLElement) {
+        event.native.target.style.cursor = elements.length > 0 ? 'pointer' : 'default';
+      }
+    },
   };
 
   constructor() {
@@ -265,6 +311,7 @@ export class ReportBuilderComponent {
       this.chartLabelControl.setValue('');
       this.chartValueControl.setValue('');
       this.reportResults.set(null);
+      this.drillFilter.set(null);
     });
 
     // Load saved report when selected
@@ -306,6 +353,7 @@ export class ReportBuilderComponent {
   protected runReport(): void {
     if (!this.canRun()) return;
     this.isRunning.set(true);
+    this.drillFilter.set(null);
 
     const filterValues: ReportFilter[] = this.filters().map(f => ({
       field: f.fieldControl.value,
@@ -327,6 +375,32 @@ export class ReportBuilderComponent {
       },
       error: () => this.isRunning.set(false),
     });
+  }
+
+  /**
+   * Handle chart bar/slice click from ng2-charts (chartClick) output.
+   * Toggles drillFilter: clicking the same bar clears the filter.
+   */
+  protected onChartClick(event: { event?: ChartEvent; active?: object[] }): void {
+    const active = event.active;
+    if (!active || active.length === 0) {
+      this.drillFilter.set(null);
+      return;
+    }
+
+    const clickedIndex = (active[0] as { index?: number }).index;
+    if (clickedIndex === undefined) return;
+
+    const data = this.chartData();
+    const label = data?.labels?.[clickedIndex];
+    const labelStr = label !== undefined ? String(label) : null;
+
+    // Toggle: clicking the already-active bar clears the drill filter
+    this.drillFilter.update(current => (current === labelStr ? null : labelStr));
+  }
+
+  protected clearDrillFilter(): void {
+    this.drillFilter.set(null);
   }
 
   protected openSaveDialog(): void {
@@ -359,6 +433,7 @@ export class ReportBuilderComponent {
     this.chartLabelControl.setValue('');
     this.chartValueControl.setValue('');
     this.reportResults.set(null);
+    this.drillFilter.set(null);
   }
 
   protected deleteSelectedReport(): void {
@@ -373,11 +448,12 @@ export class ReportBuilderComponent {
   }
 
   protected exportCsv(): void {
+    const rows = this.filteredRows();
     const results = this.reportResults();
-    if (!results || results.rows.length === 0) return;
+    if (!results || rows.length === 0) return;
 
     const headers = results.columns.join(',');
-    const rows = results.rows.map(row =>
+    const csvRows = rows.map(row =>
       results.columns.map(col => {
         const val = row[col];
         const str = val == null ? '' : String(val);
@@ -385,7 +461,7 @@ export class ReportBuilderComponent {
       }).join(','),
     );
 
-    const csv = [headers, ...rows].join('\n');
+    const csv = [headers, ...csvRows].join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -417,6 +493,7 @@ export class ReportBuilderComponent {
             valueControl: new FormControl<string>(f.value ?? '', { nonNullable: true }),
           }));
           this.filters.set(filterRows);
+          this.drillFilter.set(null);
         });
       },
     });

@@ -294,6 +294,23 @@
   text-align: center;
 }
 
+// ─── Lot Expiry ───
+.lot-chip { font-family: $font-family-mono; font-size: $font-size-xs; }
+
+.lot-expiry {
+  font-size: $font-size-xs; font-variant-numeric: tabular-nums;
+
+  &.lot-expiring-soon {
+    color: var(--warning);
+    font-weight: 600;
+  }
+
+  &.lot-expired {
+    color: var(--error);
+    font-weight: 600;
+  }
+}
+
 // ─── Mobile ───
 @include mobile {
   .locations-layout {

@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   ElementRef,
   inject,
@@ -11,6 +12,8 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval } from 'rxjs';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -72,6 +75,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly ngZone = inject(NgZone);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private static readonly POLL_INTERVAL_MS = 5 * 60 * 1000;
 
   private grid: GridStack | null = null;
   private readonly gridContainer = viewChild<ElementRef<HTMLElement>>('gridContainer');
@@ -110,11 +116,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
-      .subscribe({
+    this.loadData(true);
+
+    interval(DashboardComponent.POLL_INTERVAL_MS)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.loadData(false));
+  }
+
+  private loadData(showOverlay: boolean): void {
+    if (showOverlay) {
+      this.loadingService.track('Loading dashboard...', this.dashboardService.getDashboard())
+        .subscribe({
+          next: (data) => this.data.set(data),
+          error: () => this.error.set(this.translate.instant('dashboard.loadFailed')),
+        });
+    } else {
+      this.dashboardService.getDashboard().subscribe({
         next: (data) => this.data.set(data),
-        error: () => this.error.set(this.translate.instant('dashboard.loadFailed')),
       });
+    }
   }
 
   private async initGrid(container: HTMLElement): Promise<void> {

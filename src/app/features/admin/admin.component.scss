@@ -583,3 +583,15 @@
     }
   }
 }
+
+// ─── Pay Period Locking ───
+.pay-period-lock-row {
+  display: flex; align-items: flex-end; gap: $sp-lg;
+  max-width: 480px;
+}
+
+.settings-hint {
+  margin: $sp-xs 0 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

@@ -1,0 +1,35 @@
+<div class="audit-log-panel">
+  <div class="audit-log-panel__filters">
+    <app-select
+      label="Entity Type"
+      [formControl]="entityTypeControl"
+      [options]="entityTypeOptions" />
+    <app-input
+      label="Action"
+      [formControl]="actionControl"
+      placeholder="e.g. Created, Updated" />
+    <app-datepicker
+      label="From Date"
+      [formControl]="fromDateControl" />
+    <app-datepicker
+      label="To Date"
+      [formControl]="toDateControl" />
+  </div>
+
+  <div [appLoadingBlock]="isLoading()">
+    <app-data-table
+      tableId="admin-audit-log"
+      [columns]="columns"
+      [data]="entries()"
+      emptyIcon="manage_search"
+      emptyMessage="No audit log entries found" />
+  </div>
+
+  <mat-paginator
+    [length]="totalCount()"
+    [pageSize]="pageSize()"
+    [pageIndex]="page() - 1"
+    [pageSizeOptions]="[25, 50, 100]"
+    (page)="onPageChange($event)"
+    aria-label="Audit log pagination" />
+</div>

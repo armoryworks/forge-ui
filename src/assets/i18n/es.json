@@ -724,7 +724,9 @@
     "sourceColdCall": "Llamada en Frío",
     "sourceEmail": "Correo",
     "sourceSocialMedia": "Redes Sociales",
-    "sourceOther": "Otro"
+    "sourceOther": "Otro",
+    "tableView": "Vista de tabla",
+    "pipelineView": "Vista de pipeline"
   },
   "expenses": {
     "title": "Gastos",
@@ -2281,6 +2283,9 @@
     "noDataMatches": "Ningún dato coincide con sus criterios",
     "configureReport": "Configure su reporte y haga clic en Ejecutar",
     "recordsFound": "registro(s) encontrado(s)",
+    "filteredBy": "Filtrado por",
+    "clearDrillFilter": "Limpiar filtro",
+    "ofTotal": "de",
     "selectEntity": "-- Seleccionar Entidad --",
     "noneOption": "-- Ninguno --",
     "operatorEquals": "Igual a",

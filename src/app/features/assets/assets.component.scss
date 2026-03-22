@@ -55,3 +55,25 @@
   &--active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
 }
 
+.maintenance-empty {
+  display: flex; align-items: center; gap: $sp-md; color: var(--text-muted);
+  font-size: $font-size-sm; padding: $sp-md 0;
+}
+
+.maintenance-log-list { display: flex; flex-direction: column; gap: $sp-sm; }
+
+.maintenance-log-item {
+  display: flex; flex-direction: column; gap: $sp-xs;
+  padding: $sp-md; border: $border-width-thin solid var(--border); background: var(--bg);
+
+  &__header { @include flex-between; gap: $sp-md; }
+  &__name { font-size: $font-size-sm; font-weight: 600; }
+  &__date { font-size: $font-size-xs; }
+  &__meta { display: flex; gap: $sp-xs; font-size: $font-size-xs; }
+  &__notes { margin: 0; font-size: $font-size-xs; line-height: 1.4; }
+}
+
+.page-loading--sm { padding: $sp-md 0; }
+
+.text-muted { color: var(--text-muted); }
+

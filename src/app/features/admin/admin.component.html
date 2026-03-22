@@ -45,6 +45,11 @@
         <span class="material-icons-outlined">percent</span>
         {{ 'admin.tabs.salesTax' | translate }}
       </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'audit-log'" (click)="switchTab('audit-log')"
+        aria-label="Audit Log">
+        <span class="material-icons-outlined">manage_search</span>
+        Audit Log
+      </button>
     }
     <button class="tab" [class.tab--active]="activeTab() === 'compliance'" (click)="switchTab('compliance')">
       <span class="material-icons-outlined">fact_check</span>
@@ -332,6 +337,27 @@
           </app-data-table>
         </div>
 
+        <!-- Pay Period Locking -->
+        <div class="settings-section">
+          <div class="settings-section__header">
+            <h3 class="settings-section__title">
+              <span class="material-icons-outlined">lock_clock</span>
+              {{ 'admin.payPeriod' | translate }}
+            </h3>
+          </div>
+          <div class="pay-period-lock-row">
+            <app-datepicker label="Lock entries through" [formControl]="lockThroughControl" />
+            <button class="action-btn action-btn--sm"
+              [disabled]="!lockThroughControl.value || lockingPeriod()"
+              (click)="confirmLockPayPeriod()"
+              aria-label="Lock pay period through selected date">
+              <span class="material-icons-outlined">lock</span>
+              {{ 'admin.lockPeriod' | translate }}
+            </button>
+          </div>
+          <p class="settings-hint">{{ 'admin.lockPeriodHint' | translate }}</p>
+        </div>
+
         <!-- System Settings -->
         <div class="settings-section">
           <div class="settings-section__header">
@@ -433,6 +459,13 @@
     @if (activeTab() === 'sales-tax') {
       <div class="tab-panel">
         <app-sales-tax-panel />
+      </div>
+    }
+
+    <!-- Audit Log Tab -->
+    @if (activeTab() === 'audit-log') {
+      <div class="tab-panel">
+        <app-audit-log-panel />
       </div>
     }
 

@@ -165,6 +165,45 @@
             }
           </div>
         </div>
+
+        <!-- Maintenance History -->
+        <div class="info-section">
+          <h4 class="info-section__title">{{ 'assets.maintenanceHistory' | translate }}</h4>
+          @if (maintenanceLogsLoading()) {
+            <div class="page-loading page-loading--sm">
+              <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+              <span>{{ 'common.loading' | translate }}</span>
+            </div>
+          } @else if (maintenanceLogs().length === 0) {
+            <div class="maintenance-empty">
+              <span class="material-icons-outlined text-muted">build_circle</span>
+              <span class="text-muted">{{ 'assets.noMaintenanceLogs' | translate }}</span>
+            </div>
+          } @else {
+            <div class="maintenance-log-list">
+              @for (log of maintenanceLogs(); track log.id) {
+                <div class="maintenance-log-item">
+                  <div class="maintenance-log-item__header">
+                    <span class="maintenance-log-item__name">{{ log.scheduleName }}</span>
+                    <span class="maintenance-log-item__date text-muted">{{ log.performedAt | date:'MM/dd/yyyy' }}</span>
+                  </div>
+                  <div class="maintenance-log-item__meta">
+                    <span class="text-muted">{{ log.performedByName }}</span>
+                    @if (log.hoursSpent) {
+                      <span class="text-muted">· {{ log.hoursSpent }}h</span>
+                    }
+                    @if (log.cost) {
+                      <span class="text-muted">· ${{ log.cost | number:'1.2-2' }}</span>
+                    }
+                  </div>
+                  @if (log.notes) {
+                    <p class="maintenance-log-item__notes text-muted">{{ log.notes }}</p>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
       </div>
     </div>
   }

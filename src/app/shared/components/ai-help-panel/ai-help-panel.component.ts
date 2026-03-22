@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { catchError, of } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -27,12 +27,15 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
   readonly messages = signal<AiHelpMessage[]>([]);
   readonly loading = signal(false);
   readonly open = signal(false);
+  readonly streamingContent = signal<string>('');
 
   protected readonly inputControl = new FormControl('');
 
   @ViewChild('messageContainer') private messageContainer?: ElementRef<HTMLDivElement>;
 
   private storageKey = '';
+  private streamSubscription?: Subscription;
+
   private readonly onStorageEvent = (e: StorageEvent) => {
     if (e.key === this.storageKey && e.newValue !== null) {
       try {
@@ -52,6 +55,7 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('storage', this.onStorageEvent);
+    this.streamSubscription?.unsubscribe();
   }
 
   toggle(): void {
@@ -79,22 +83,47 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
     const userMessage: AiHelpMessage = { role: 'user', content: question };
     this.messages.update(msgs => [...msgs, userMessage]);
     this.loading.set(true);
+    this.streamingContent.set('');
     this.scrollToBottom();
 
     const history = this.messages().slice(0, -1);
 
-    this.aiService.helpChat(question, history.length > 0 ? history : undefined).pipe(
-      catchError(() => of({ answer: this.translate.instant('aiHelp.errorMessage') })),
-    ).subscribe(response => {
-      const assistantMessage: AiHelpMessage = { role: 'assistant', content: response.answer };
-      this.messages.update(msgs => {
-        const updated = [...msgs, assistantMessage].slice(-MAX_STORED_MESSAGES);
-        this.saveToStorage(updated);
-        return updated;
+    this.streamSubscription = this.aiService
+      .streamHelpChat(question, history.length > 0 ? history : undefined)
+      .subscribe({
+        next: (token) => {
+          this.streamingContent.update(current => current + token);
+          this.scrollToBottom();
+        },
+        error: () => {
+          // Fallback: if streaming fails, push whatever we accumulated (or error message)
+          const accumulated = this.streamingContent();
+          const content = accumulated || this.translate.instant('aiHelp.errorMessage');
+          const assistantMessage: AiHelpMessage = { role: 'assistant', content };
+          this.messages.update(msgs => {
+            const updated = [...msgs, assistantMessage].slice(-MAX_STORED_MESSAGES);
+            this.saveToStorage(updated);
+            return updated;
+          });
+          this.streamingContent.set('');
+          this.loading.set(false);
+          this.scrollToBottom();
+        },
+        complete: () => {
+          const accumulated = this.streamingContent();
+          if (accumulated) {
+            const assistantMessage: AiHelpMessage = { role: 'assistant', content: accumulated };
+            this.messages.update(msgs => {
+              const updated = [...msgs, assistantMessage].slice(-MAX_STORED_MESSAGES);
+              this.saveToStorage(updated);
+              return updated;
+            });
+          }
+          this.streamingContent.set('');
+          this.loading.set(false);
+          this.scrollToBottom();
+        },
       });
-      this.loading.set(false);
-      this.scrollToBottom();
-    });
   }
 
   private loadFromStorage(): AiHelpMessage[] {

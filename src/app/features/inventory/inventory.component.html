@@ -131,6 +131,7 @@
                   <th class="align-right">{{ 'inventory.binDetailHeaders.available' | translate }}</th>
                   <th>{{ 'inventory.binDetailHeaders.status' | translate }}</th>
                   <th>{{ 'inventory.binDetailHeaders.lotNumber' | translate }}</th>
+                  <th>{{ 'inventory.binDetailHeaders.expiration' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -151,7 +152,22 @@
                         {{ getStatusLabel(bin.status) }}
                       </span>
                     </td>
-                    <td class="text-muted">{{ bin.lotNumber ?? '—' }}</td>
+                    <td>
+                      @if (bin.lotNumber) {
+                        <span class="chip chip--muted lot-chip">{{ bin.lotNumber }}</span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
+                    <td>
+                      @if (bin.lotExpirationDate) {
+                        <span class="lot-expiry" [class]="getLotExpirationClass(bin.lotExpirationDate)">
+                          {{ bin.lotExpirationDate | date:'MM/dd/yyyy' }}
+                        </span>
+                      } @else {
+                        <span class="text-muted">—</span>
+                      }
+                    </td>
                   </tr>
                 }
               </tbody>

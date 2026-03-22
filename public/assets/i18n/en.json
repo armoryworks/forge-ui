@@ -519,7 +519,8 @@
       "reserved": "Reserved",
       "available": "Available",
       "status": "Status",
-      "lotNumber": "Lot #"
+      "lotNumber": "Lot #",
+      "expiration": "Expiration"
     },
     "binContentHeaders": {
       "item": "Item",
@@ -726,7 +727,9 @@
     "sourceColdCall": "Cold Call",
     "sourceEmail": "Email",
     "sourceSocialMedia": "Social Media",
-    "sourceOther": "Other"
+    "sourceOther": "Other",
+    "tableView": "Table view",
+    "pipelineView": "Pipeline view"
   },
   "expenses": {
     "title": "Expenses",
@@ -908,6 +911,8 @@
     "sourceJob": "Source Job",
     "sourcePart": "Source Part",
     "setStatus": "Set Status",
+    "maintenanceHistory": "Maintenance History",
+    "noMaintenanceLogs": "No maintenance logs recorded",
     "toolingDetails": "Tooling Details",
     "saveChanges": "Save Changes",
     "statusActive": "Active",
@@ -1062,6 +1067,10 @@
     "locationDeleted": "Location deleted",
     "locationDeleteFailed": "Failed to delete location",
     "setDefaultFailed": "Failed to set default location",
+    "payPeriod": "Pay Period",
+    "lockPeriod": "Lock Period",
+    "lockPeriodHint": "Locks all unlocked time entries on or before the selected date. This cannot be undone.",
+    "lockPeriodFailed": "Failed to lock pay period",
     "logoUploaded": "Logo uploaded",
     "logoUploadFailed": "Failed to upload logo",
     "logoRemoved": "Logo removed",
@@ -2301,6 +2310,9 @@
     "noDataMatches": "No data matches your criteria",
     "configureReport": "Configure your report and click Run",
     "recordsFound": "record(s) found",
+    "filteredBy": "Filtered by",
+    "clearDrillFilter": "Clear filter",
+    "ofTotal": "of",
     "selectEntity": "-- Select Entity --",
     "noneOption": "-- None --",
     "operatorEquals": "Equals",

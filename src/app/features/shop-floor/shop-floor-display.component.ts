@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal,
+  ChangeDetectionStrategy, Component, computed, DestroyRef, HostBinding, inject, OnInit, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { interval } from 'rxjs';
@@ -21,6 +21,9 @@ const REFRESH_INTERVAL_MS = 30_000;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShopFloorDisplayComponent implements OnInit {
+  // Force light theme on kiosk display regardless of user's dark mode preference
+  @HostBinding('attr.data-theme') readonly dataTheme = 'light';
+
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);

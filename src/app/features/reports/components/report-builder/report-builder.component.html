@@ -104,21 +104,39 @@
               <canvas baseChart
                 [type]="$any(chartTypeControl.value)"
                 [data]="chartData()!"
-                [options]="chartOptions">
+                [options]="chartOptions"
+                (chartClick)="onChartClick($event)">
               </canvas>
             </div>
           }
 
-          <!-- Data table -->
+          <!-- Drill-down filter chip -->
+          @if (drillFilter()) {
+            <div class="builder__drill-filter">
+              <span class="chip chip--info">
+                <span class="material-icons-outlined">filter_alt</span>
+                {{ 'reports.filteredBy' | translate }}: <strong>{{ drillFilter() }}</strong>
+              </span>
+              <button class="icon-btn" (click)="clearDrillFilter()" [attr.aria-label]="'reports.clearDrillFilter' | translate" [matTooltip]="'reports.clearDrillFilter' | translate" matTooltipPosition="above">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+          }
+
+          <!-- Data table — uses filteredRows() for drill-down support -->
           <app-data-table
             tableId="report-builder-results"
             [columns]="resultColumns()"
-            [data]="reportResults()!.rows"
+            [data]="filteredRows()"
             emptyIcon="assessment"
             [emptyMessage]="'reports.noDataMatches' | translate" />
 
           <div class="builder__result-meta">
-            {{ reportResults()!.totalCount }} {{ 'reports.recordsFound' | translate }}
+            {{ filteredRows().length }}
+            @if (drillFilter()) {
+              {{ 'reports.ofTotal' | translate }} {{ reportResults()!.totalCount }}
+            }
+            {{ 'reports.recordsFound' | translate }}
           </div>
         } @else {
           <app-empty-state icon="analytics" [message]="'reports.configureReport' | translate" />
