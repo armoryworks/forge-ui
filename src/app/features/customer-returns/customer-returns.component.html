@@ -1,0 +1,157 @@
+<app-page-header
+  [title]="'customerReturns.title' | translate"
+  [subtitle]="'customerReturns.subtitle' | translate" />
+
+<div class="page-header">
+  <app-input
+    label="Search"
+    [formControl]="searchControl"
+    [attr.aria-label]="'common.search' | translate" />
+  <app-select
+    label="Status"
+    [formControl]="statusFilterControl"
+    [options]="statusOptions"
+    [attr.aria-label]="'common.status' | translate" />
+  <button class="action-btn" (click)="applyFilters()">
+    <span class="material-icons-outlined">search</span>
+    {{ 'common.filter' | translate }}
+  </button>
+  <span style="flex:1"></span>
+  <button class="action-btn action-btn--primary" (click)="openCreate()"
+    [attr.aria-label]="'customerReturns.newReturn' | translate">
+    <span class="material-icons-outlined">add</span>
+    {{ 'customerReturns.newReturn' | translate }}
+  </button>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="customer-returns"
+    [columns]="columns"
+    [data]="returns()"
+    [rowClass]="rowClass"
+    emptyIcon="assignment_return"
+    [emptyMessage]="'customerReturns.noReturns' | translate"
+    (rowClick)="selectReturn($event)">
+
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Detail Panel -->
+<app-detail-side-panel
+  [open]="!!selected()"
+  [title]="selected()?.returnNumber ?? ''"
+  (closed)="closeDetail()">
+
+  @if (selected(); as r) {
+    <div class="detail-grid">
+      <div class="detail-item">
+        <span class="detail-label">{{ 'common.status' | translate }}</span>
+        <span [class]="getStatusClass(r.status)">{{ getStatusLabel(r.status) }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'common.customer' | translate }}</span>
+        <span class="detail-value">{{ r.customerName }}</span>
+      </div>
+      <div class="detail-item">
+        <span class="detail-label">{{ 'customerReturns.originalJob' | translate }}</span>
+        <span class="detail-value">{{ r.originalJobNumber }}</span>
+      </div>
+      @if (r.reworkJobNumber) {
+        <div class="detail-item">
+          <span class="detail-label">{{ 'customerReturns.reworkJob' | translate }}</span>
+          <span class="detail-value">{{ r.reworkJobNumber }}</span>
+        </div>
+      }
+      <div class="detail-item">
+        <span class="detail-label">{{ 'customerReturns.returnDate' | translate }}</span>
+        <span class="detail-value">{{ r.returnDate | date:'MM/dd/yyyy' }}</span>
+      </div>
+      <div class="detail-item detail-item--full">
+        <span class="detail-label">{{ 'customerReturns.reason' | translate }}</span>
+        <span class="detail-value">{{ r.reason }}</span>
+      </div>
+      @if (r.notes) {
+        <div class="detail-item detail-item--full">
+          <span class="detail-label">{{ 'common.notes' | translate }}</span>
+          <span class="detail-value">{{ r.notes }}</span>
+        </div>
+      }
+      @if (r.inspectionNotes) {
+        <div class="detail-item detail-item--full">
+          <span class="detail-label">{{ 'customerReturns.inspectionNotes' | translate }}</span>
+          <span class="detail-value">{{ r.inspectionNotes }}</span>
+        </div>
+      }
+      @if (r.inspectedByName) {
+        <div class="detail-item">
+          <span class="detail-label">{{ 'customerReturns.inspectedBy' | translate }}</span>
+          <span class="detail-value">{{ r.inspectedByName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ 'customerReturns.inspectedAt' | translate }}</span>
+          <span class="detail-value">{{ r.inspectedAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      }
+    </div>
+
+    <div panel-actions>
+      @if (r.status === 'Received' || r.status === 'ReworkOrdered' || r.status === 'InInspection') {
+        <button class="action-btn action-btn--primary" (click)="openResolve()"
+          [attr.aria-label]="'customerReturns.resolve' | translate">
+          <span class="material-icons-outlined">check_circle</span>
+          {{ 'customerReturns.resolve' | translate }}
+        </button>
+      }
+      @if (r.status === 'Resolved') {
+        <button class="action-btn" (click)="close(r)"
+          [attr.aria-label]="'customerReturns.close' | translate">
+          <span class="material-icons-outlined">lock</span>
+          {{ 'customerReturns.close' | translate }}
+        </button>
+      }
+    </div>
+  }
+</app-detail-side-panel>
+
+<!-- Create Dialog -->
+@if (showCreateDialog()) {
+  <app-customer-return-dialog
+    [returnDetail]="null"
+    (closed)="closeCreate()"
+    (saved)="onCreated()" />
+}
+
+<!-- Resolve Dialog -->
+@if (showResolveDialog()) {
+  <app-dialog
+    [title]="'customerReturns.resolveTitle' | translate"
+    width="480px"
+    (closed)="closeResolveDialog()">
+
+    <div [formGroup]="resolveForm">
+      <app-textarea
+        label="Inspection Notes (optional)"
+        formControlName="inspectionNotes"
+        [rows]="4"
+        [attr.aria-label]="'customerReturns.inspectionNotes' | translate" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeResolveDialog()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="resolveSaving()"
+        (click)="resolve()">
+        @if (resolveSaving()) {
+          <span class="material-icons-outlined account-page__spinner">sync</span>
+        } @else {
+          <span class="material-icons-outlined">check_circle</span>
+        }
+        {{ 'customerReturns.resolveConfirm' | translate }}
+      </button>
+    </div>
+  </app-dialog>
+}

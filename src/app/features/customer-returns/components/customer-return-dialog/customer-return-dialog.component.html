@@ -1,0 +1,57 @@
+<app-dialog
+  [title]="isEditing ? ('customerReturns.editReturn' | translate) : ('customerReturns.newReturn' | translate)"
+  width="560px"
+  (closed)="close()">
+
+  <div [formGroup]="form">
+    @if (!isEditing) {
+      <app-entity-picker
+        label="Customer"
+        entityType="customers"
+        displayField="name"
+        formControlName="customerId"
+        [required]="true"
+        [attr.aria-label]="'customerReturns.fieldCustomer' | translate" />
+
+      <app-entity-picker
+        label="Original Job"
+        entityType="jobs"
+        displayField="jobNumber"
+        formControlName="originalJobId"
+        [required]="true"
+        [attr.aria-label]="'customerReturns.fieldOriginalJob' | translate" />
+    }
+
+    <app-input
+      label="Reason"
+      formControlName="reason"
+      [required]="true"
+      [attr.aria-label]="'customerReturns.fieldReason' | translate" />
+
+    <app-datepicker
+      label="Return Date"
+      formControlName="returnDate"
+      [attr.aria-label]="'customerReturns.fieldReturnDate' | translate" />
+
+    <app-textarea
+      label="Notes (optional)"
+      formControlName="notes"
+      [rows]="3"
+      [attr.aria-label]="'customerReturns.fieldNotes' | translate" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined account-page__spinner">sync</span>
+      } @else {
+        <span class="material-icons-outlined">save</span>
+      }
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</app-dialog>

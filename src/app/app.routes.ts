@@ -148,6 +148,18 @@ export const routes: Routes = [
           import('./features/quality/quality.routes').then((m) => m.QUALITY_ROUTES),
       },
       {
+        path: 'customer-returns',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/customer-returns/customer-returns.routes').then((m) => m.CUSTOMER_RETURNS_ROUTES),
+      },
+      {
+        path: 'lots',
+        canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
+        loadChildren: () =>
+          import('./features/lots/lots.routes').then((m) => m.LOTS_ROUTES),
+      },
+      {
         path: 'account',
         loadChildren: () =>
           import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),

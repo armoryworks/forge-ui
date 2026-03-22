@@ -1,0 +1,65 @@
+<app-dialog
+  [title]="'lots.newLot' | translate"
+  width="520px"
+  (closed)="close()">
+
+  <div [formGroup]="form">
+    <app-entity-picker
+      label="Part"
+      entityType="parts"
+      displayField="partNumber"
+      formControlName="partId"
+      [required]="true"
+      [attr.aria-label]="'lots.fieldPart' | translate" />
+
+    <div class="dialog-row">
+      <app-input
+        label="Quantity"
+        type="number"
+        formControlName="quantity"
+        [required]="true"
+        [attr.aria-label]="'lots.fieldQuantity' | translate" />
+
+      <app-input
+        label="Supplier Lot #"
+        formControlName="supplierLotNumber"
+        placeholder="Optional"
+        [attr.aria-label]="'lots.fieldSupplierLot' | translate" />
+    </div>
+
+    <div class="dialog-row">
+      <app-entity-picker
+        label="Linked Job (optional)"
+        entityType="jobs"
+        displayField="jobNumber"
+        formControlName="jobId"
+        [attr.aria-label]="'lots.fieldJob' | translate" />
+
+      <app-datepicker
+        label="Expiration Date (optional)"
+        formControlName="expirationDate"
+        [attr.aria-label]="'lots.fieldExpiration' | translate" />
+    </div>
+
+    <app-textarea
+      label="Notes (optional)"
+      formControlName="notes"
+      [rows]="2"
+      [attr.aria-label]="'lots.fieldNotes' | translate" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined account-page__spinner">sync</span>
+      } @else {
+        <span class="material-icons-outlined">save</span>
+      }
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</app-dialog>

@@ -1,0 +1,113 @@
+<app-page-header
+  [title]="'lots.title' | translate"
+  [subtitle]="'lots.subtitle' | translate" />
+
+<div class="page-header">
+  <app-input
+    label="Search lot number or part"
+    [formControl]="searchControl"
+    [attr.aria-label]="'common.search' | translate" />
+  <button class="action-btn" (click)="applySearch()"
+    [attr.aria-label]="'common.search' | translate">
+    <span class="material-icons-outlined">search</span>
+    {{ 'common.search' | translate }}
+  </button>
+  <span style="flex:1"></span>
+  <button class="action-btn action-btn--primary" (click)="openCreate()"
+    [attr.aria-label]="'lots.newLot' | translate">
+    <span class="material-icons-outlined">add</span>
+    {{ 'lots.newLot' | translate }}
+  </button>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="lots"
+    [columns]="columns"
+    [data]="lots()"
+    [rowClass]="rowClass"
+    emptyIcon="inventory_2"
+    [emptyMessage]="'lots.noLots' | translate"
+    (rowClick)="selectLot($event)">
+
+    <ng-template appColumnCell="lotNumber" let-row>
+      <span class="lot-number">{{ row.lotNumber }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="jobNumber" let-row>
+      @if (row.jobNumber) {
+        <span>{{ row.jobNumber }}</span>
+      } @else {
+        <span class="text-muted">—</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="supplierLotNumber" let-row>
+      @if (row.supplierLotNumber) {
+        <span>{{ row.supplierLotNumber }}</span>
+      } @else {
+        <span class="text-muted">—</span>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Traceability Detail Panel -->
+<app-detail-side-panel
+  [open]="!!selectedLot()"
+  [title]="selectedLot()?.lotNumber ?? ''"
+  (closed)="closeDetail()">
+
+  <div [appLoadingBlock]="traceLoading()">
+    @if (trace(); as t) {
+      <div class="trace-header">
+        <div class="trace-meta">
+          <span class="trace-label">{{ 'lots.partNumber' | translate }}</span>
+          <span class="trace-value">{{ t.partNumber }}</span>
+        </div>
+        <div class="trace-meta">
+          <span class="trace-label">{{ 'lots.quantity' | translate }}</span>
+          <span class="trace-value">{{ t.quantity }}</span>
+        </div>
+        @if (t.supplierLotNumber) {
+          <div class="trace-meta">
+            <span class="trace-label">{{ 'lots.supplierLot' | translate }}</span>
+            <span class="trace-value">{{ t.supplierLotNumber }}</span>
+          </div>
+        }
+        @if (t.expirationDate) {
+          <div class="trace-meta">
+            <span class="trace-label">{{ 'lots.expires' | translate }}</span>
+            <span class="trace-value">{{ t.expirationDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="trace-timeline">
+        <h4 class="trace-timeline__title">{{ 'lots.traceHistory' | translate }}</h4>
+        @if (t.events.length === 0) {
+          <p class="trace-empty">{{ 'lots.noTraceEvents' | translate }}</p>
+        }
+        @for (event of t.events; track event.date + event.type) {
+          <div class="trace-event">
+            <div class="trace-event__icon">
+              <span class="material-icons-outlined">{{ getTraceEventIcon(event.type) }}</span>
+            </div>
+            <div class="trace-event__body">
+              <span class="trace-event__ref">{{ event.referenceNumber }}</span>
+              <span class="trace-event__desc">{{ event.description }}</span>
+              <span class="trace-event__date">{{ event.date | date:'MM/dd/yyyy' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</app-detail-side-panel>
+
+<!-- Create Dialog -->
+@if (showCreateDialog()) {
+  <app-lot-dialog
+    (closed)="closeCreate()"
+    (saved)="onCreated()" />
+}
