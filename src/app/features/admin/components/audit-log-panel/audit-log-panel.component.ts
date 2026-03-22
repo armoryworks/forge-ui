@@ -25,6 +25,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     MatPaginatorModule,
   ],
   templateUrl: './audit-log-panel.component.html',
+  styleUrl: './audit-log-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuditLogPanelComponent {

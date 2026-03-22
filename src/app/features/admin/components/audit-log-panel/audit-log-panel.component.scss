@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.audit-log-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__filters {
+    display: flex;
+    gap: $sp-md;
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    app-select { flex: 1 1 180px; }
+    app-input  { flex: 1 1 160px; }
+    app-datepicker { flex: 1 1 140px; }
+  }
+}
