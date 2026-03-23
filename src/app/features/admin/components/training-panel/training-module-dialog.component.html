@@ -1,0 +1,42 @@
+<app-dialog [title]="isEditing ? 'Edit Module' : 'New Training Module'" width="800px" (closed)="cancel()">
+  <div [formGroup]="form">
+    <app-input label="Title" formControlName="title" [required]="true" [maxlength]="200" />
+
+    <app-input label="Slug" formControlName="slug" [maxlength]="200"
+      placeholder="auto-generated-from-title" />
+
+    <app-textarea label="Summary" formControlName="summary" [rows]="2" [required]="true" [maxlength]="500" />
+
+    <div class="dialog-row">
+      <app-select label="Content Type" formControlName="contentType"
+        [options]="contentTypeOptions" [required]="true" />
+      <app-input label="Estimated Minutes" formControlName="estimatedMinutes"
+        type="number" [required]="true" />
+    </div>
+
+    <app-input label="App Routes" formControlName="appRoutes"
+      placeholder="/kanban, /backlog" />
+
+    <app-input label="Tags" formControlName="tags"
+      placeholder="onboarding, kanban" />
+
+    <app-toggle label="Published" formControlName="isPublished" />
+
+    <app-textarea [label]="contentJsonLabel()" formControlName="contentJson" [rows]="12" />
+
+    <p class="training-module-dialog__json-hint">
+      Edit the content JSON directly. See training docs for format by type.
+    </p>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      <span class="material-icons-outlined">save</span>
+      {{ isEditing ? 'Save Changes' : 'Create Module' }}
+    </button>
+  </div>
+</app-dialog>

@@ -245,6 +245,11 @@
     background: rgba(255, 255, 255, 0.08);
   }
 
+  &--active {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--accent-light);
+  }
+
   .material-icons-outlined {
     font-size: 18px;
   }

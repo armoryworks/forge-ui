@@ -1,0 +1,182 @@
+<div class="module-viewer">
+  <div class="module-viewer__back">
+    <button class="module-viewer__back-btn" (click)="goBack()" aria-label="Back to Training Library">
+      <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+      Training Library
+    </button>
+  </div>
+
+  <div [appLoadingBlock]="isLoading()">
+    @if (module(); as mod) {
+      <div class="module-viewer__header">
+        <div class="module-viewer__meta">
+          <span class="chip chip--info">{{ mod.contentType }}</span>
+          <span class="module-viewer__time">
+            <span class="material-icons-outlined" aria-hidden="true">schedule</span>
+            ~{{ mod.estimatedMinutes }} min
+          </span>
+          @if (completed()) {
+            <span class="chip chip--success">
+              <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+              Completed
+            </span>
+          }
+        </div>
+        <h1 class="module-viewer__title">{{ mod.title }}</h1>
+        @if (mod.summary) {
+          <p class="module-viewer__summary">{{ mod.summary }}</p>
+        }
+      </div>
+
+      <div class="module-viewer__content">
+        @switch (mod.contentType) {
+          @case ('Article') {
+            @if (articleContent(); as article) {
+              <div class="article-body" aria-label="Article content">
+                <div class="article-body__text">{{ article.body }}</div>
+                @for (section of article.sections; track $index) {
+                  @if (section.type === 'text' && section.content) {
+                    <div class="article-section article-section--text">{{ section.content }}</div>
+                  }
+                  @if (section.type === 'image' && section.url) {
+                    <figure class="article-section article-section--image">
+                      <img [src]="section.url" [alt]="section.alt ?? ''" class="article-section__img" />
+                      @if (section.caption) {
+                        <figcaption class="article-section__caption">{{ section.caption }}</figcaption>
+                      }
+                    </figure>
+                  }
+                  @if (section.type === 'callout' && section.content) {
+                    <div class="article-section article-section--callout"
+                         [class.article-section--callout-info]="section.level === 'info'"
+                         [class.article-section--callout-warning]="section.level === 'warning'"
+                         [class.article-section--callout-tip]="section.level === 'tip'"
+                         role="note">
+                      {{ section.content }}
+                    </div>
+                  }
+                }
+              </div>
+            }
+          }
+
+          @case ('Video') {
+            @if (videoContent(); as video) {
+              <div class="video-viewer">
+                <div class="video-viewer__embed-wrap">
+                  <iframe
+                    class="video-viewer__embed"
+                    [src]="videoEmbedUrl()"
+                    title="{{ mod.title }}"
+                    allowfullscreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                  </iframe>
+                </div>
+                @if (video.chaptersJson.length > 0) {
+                  <div class="video-viewer__chapters">
+                    <h3 class="video-viewer__chapters-title">Chapters</h3>
+                    <ul class="video-viewer__chapter-list">
+                      @for (chapter of video.chaptersJson; track chapter.timeSeconds) {
+                        <li class="video-viewer__chapter">
+                          <span class="video-viewer__chapter-time">{{ formatSeconds(chapter.timeSeconds) }}</span>
+                          <span class="video-viewer__chapter-label">{{ chapter.label }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+                @if (video.transcript) {
+                  <details class="video-viewer__transcript">
+                    <summary class="video-viewer__transcript-toggle">Show Transcript</summary>
+                    <div class="video-viewer__transcript-body">{{ video.transcript }}</div>
+                  </details>
+                }
+              </div>
+            }
+          }
+
+          @case ('Walkthrough') {
+            @if (walkthroughContent(); as walkthrough) {
+              <div class="walkthrough-viewer">
+                <div class="walkthrough-viewer__info" role="note">
+                  <span class="material-icons-outlined walkthrough-viewer__icon" aria-hidden="true">route</span>
+                  <div class="walkthrough-viewer__text">
+                    <p class="walkthrough-viewer__desc">
+                      This is an interactive guided tour. Click the button below to start, and the tour will walk you through the interface step by step.
+                    </p>
+                    <p class="walkthrough-viewer__steps-count">{{ walkthrough.steps.length }} steps</p>
+                  </div>
+                </div>
+                <button class="action-btn action-btn--primary" (click)="startWalkthrough()"
+                        aria-label="Take the interactive tour">
+                  <span class="material-icons-outlined" aria-hidden="true">route</span>
+                  Take the Tour
+                </button>
+              </div>
+            }
+          }
+
+          @case ('QuickRef') {
+            @if (quickRefContent(); as quickRef) {
+              <div class="quickref-viewer">
+                <h2 class="quickref-viewer__title">{{ quickRef.title }}</h2>
+                <div class="quickref-viewer__groups">
+                  @for (group of quickRef.groups; track group.heading) {
+                    <section class="quickref-group" aria-labelledby="qr-{{ group.heading }}">
+                      <h3 class="quickref-group__heading" [id]="'qr-' + group.heading">{{ group.heading }}</h3>
+                      <dl class="quickref-group__list">
+                        @for (item of group.items; track item.label) {
+                          <dt class="quickref-item__label">{{ item.label }}</dt>
+                          <dd class="quickref-item__value">{{ item.value }}</dd>
+                        }
+                      </dl>
+                    </section>
+                  }
+                </div>
+              </div>
+            }
+          }
+
+          @case ('Quiz') {
+            @if (quizContent(); as quiz) {
+              <app-training-module-quiz
+                [content]="quiz"
+                [moduleId]="mod.id"
+                (completed)="onQuizComplete($event)" />
+            }
+          }
+        }
+      </div>
+
+      @if (mod.contentType !== 'Quiz') {
+        <div class="module-viewer__actions">
+          @if (!completed()) {
+            <button class="action-btn action-btn--primary"
+                    [disabled]="isCompleting()"
+                    (click)="markComplete()"
+                    aria-label="Mark this module as complete">
+              @if (isCompleting()) {
+                <span class="material-icons-outlined" aria-hidden="true" style="animation: spin 1s linear infinite">sync</span>
+                Saving...
+              } @else {
+                <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+                Mark as Complete
+              }
+            </button>
+          } @else {
+            <span class="module-viewer__completed-badge">
+              <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+              Completed
+            </span>
+          }
+        </div>
+      }
+    } @else if (!isLoading()) {
+      <div class="module-viewer__not-found">
+        <span class="material-icons-outlined" aria-hidden="true">school</span>
+        <p>Module not found.</p>
+        <button class="action-btn" (click)="goBack()">Back to Library</button>
+      </div>
+    }
+  </div>
+</div>

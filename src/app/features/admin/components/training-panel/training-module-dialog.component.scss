@@ -1,0 +1,9 @@
+@use 'styles/variables' as *;
+
+.training-module-dialog {
+  &__json-hint {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    margin-top: $sp-xs;
+  }
+}

@@ -1,0 +1,85 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.training-panel {
+  display: flex;
+  flex-direction: column;
+
+  &__tabs {
+    display: flex;
+    gap: $sp-xs;
+    margin-bottom: $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__published-icon {
+    font-size: $icon-size-md;
+
+    &--yes {
+      color: var(--success);
+    }
+
+    &--no {
+      color: var(--text-muted);
+    }
+  }
+
+  &__progress-cell {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__progress-bar {
+    flex: 1;
+    height: $progress-bar-height;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    transition: width $transition-normal;
+
+    &--full {
+      background: var(--success);
+    }
+
+    &--half {
+      background: var(--primary);
+    }
+
+    &--low {
+      background: var(--warning);
+    }
+  }
+
+  &__progress-pct {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    min-width: 32px;
+    text-align: right;
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-sm $sp-lg;
+  height: 48px;
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+}
+
+.action-cell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-xs;
+}

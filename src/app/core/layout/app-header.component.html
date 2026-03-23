@@ -101,6 +101,15 @@
         <span class="material-icons-outlined">smart_toy</span>
       </button>
     }
+    <button class="icon-btn"
+            [class.icon-btn--active]="showTrainingPanel()"
+            [matTooltip]="'header.trainingHelp' | translate"
+            matTooltipPosition="above"
+            [attr.aria-label]="'header.trainingHelp' | translate"
+            [attr.aria-expanded]="showTrainingPanel()"
+            (click)="toggleTrainingPanel()">
+      <span class="material-icons-outlined">school</span>
+    </button>
     <button class="icon-btn" [matTooltip]="'header.notifications' | translate" matTooltipPosition="above" [attr.aria-label]="'header.notifications' | translate" (click)="toggleNotifications()">
       <span class="material-icons-outlined">notifications_none</span>
       @if (unreadCount() > 0) {
@@ -169,4 +178,8 @@
 }
 
 <app-chat #chatPanel />
-<app-ai-help-panel #aiHelpPanel />
+<app-ai-help-panel #aiHelpPanel [appRoute]="currentRoute()" />
+<app-training-context-panel
+  [currentRoute]="currentRoute()"
+  [open]="showTrainingPanel()"
+  (closed)="showTrainingPanel.set(false)" />

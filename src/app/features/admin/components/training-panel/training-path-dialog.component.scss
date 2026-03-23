@@ -1,0 +1,8 @@
+@use 'styles/variables' as *;
+
+.toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  margin-top: $sp-md;
+}

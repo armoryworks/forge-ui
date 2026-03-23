@@ -1,0 +1,250 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+// ── Tab bar inside page-layout toolbar ──────────────────────────────────────
+
+.training-tabs {
+  display: flex;
+  gap: $sp-xs;
+}
+
+// ── Library filters ──────────────────────────────────────────────────────────
+
+.training__filters {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  background: var(--bg);
+}
+
+// ── Module grid ──────────────────────────────────────────────────────────────
+
+.training-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $sp-lg;
+  padding: $sp-lg;
+}
+
+// ── Training card ────────────────────────────────────────────────────────────
+
+.training-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  transition: box-shadow $transition-fast, border-color $transition-fast;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary);
+    box-shadow: $shadow-dropdown;
+  }
+
+  &__type-bar {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: var(--bg);
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__type-icon {
+    font-size: $icon-size-md;
+    color: var(--text-muted);
+  }
+
+  &__type-label {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+    @include uppercase-label($font-size-xs, 0.04em, 600);
+    flex: 1;
+  }
+
+  &__status-chip {
+    font-size: $font-size-xs;
+  }
+
+  &__body {
+    flex: 1;
+    padding: $sp-md $sp-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__title {
+    font-size: $font-size-title;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  &__summary {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    flex-wrap: wrap;
+    padding: $sp-sm $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__time {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+  }
+
+  &__tag {
+    font-size: $font-size-xxs;
+  }
+}
+
+// ── My Learning enrollments ──────────────────────────────────────────────────
+
+.training-enrollments {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+}
+
+.enrollment-card {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  transition: border-color $transition-fast;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+  }
+
+  &__icon {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    font-size: $font-size-title;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__progress-bar {
+    height: $progress-bar-height;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width $transition-normal;
+  }
+}
+
+// ── Learning paths ───────────────────────────────────────────────────────────
+
+.training-paths-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+}
+
+.path-card {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  transition: border-color $transition-fast;
+  outline: none;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary);
+  }
+
+  &__icon {
+    font-size: $icon-size-xxl;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  &__info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    font-size: $font-size-title;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__count {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__badge {
+    flex-shrink: 0;
+  }
+}

@@ -1,6 +1,8 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, input, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -8,13 +10,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AiHelpMessage, AiService } from '../../services/ai.service';
 import { AuthService } from '../../services/auth.service';
+import { TrainingContextCard } from '../training-context-panel/training-context-panel.component';
 
 const MAX_STORED_MESSAGES = 50;
 
 @Component({
   selector: 'app-ai-help-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, MarkdownComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, RouterLink, MatTooltipModule, MarkdownComponent, TranslatePipe],
   templateUrl: './ai-help-panel.component.html',
   styleUrl: './ai-help-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,11 +26,15 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
   private readonly aiService = inject(AiService);
   private readonly translate = inject(TranslateService);
   private readonly auth = inject(AuthService);
+  private readonly http = inject(HttpClient);
+
+  readonly appRoute = input<string>('');
 
   readonly messages = signal<AiHelpMessage[]>([]);
   readonly loading = signal(false);
   readonly open = signal(false);
   readonly streamingContent = signal<string>('');
+  protected readonly suggestedModules = signal<TrainingContextCard[]>([]);
 
   protected readonly inputControl = new FormControl('');
 
@@ -122,8 +129,30 @@ export class AiHelpPanelComponent implements OnInit, OnDestroy {
           this.streamingContent.set('');
           this.loading.set(false);
           this.scrollToBottom();
+          if (this.appRoute()) {
+            this.loadSuggestedModules();
+          }
         },
       });
+  }
+
+  private loadSuggestedModules(): void {
+    const route = this.appRoute();
+    if (!route) return;
+    const params = new HttpParams().set('route', route);
+    this.http.get<TrainingContextCard[]>('/api/v1/training/modules/by-route', { params })
+      .subscribe({ next: modules => this.suggestedModules.set(modules.slice(0, 3)) });
+  }
+
+  protected contentTypeIcon(type: string): string {
+    const icons: Record<string, string> = {
+      Article: 'article',
+      Video: 'play_circle',
+      Walkthrough: 'route',
+      QuickRef: 'quick_reference_all',
+      Quiz: 'quiz',
+    };
+    return icons[type] ?? 'school';
   }
 
   private loadFromStorage(): AiHelpMessage[] {

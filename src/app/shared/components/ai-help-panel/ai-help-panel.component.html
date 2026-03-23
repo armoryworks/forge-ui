@@ -56,6 +56,18 @@
           }
         </div>
       }
+      @if (suggestedModules().length > 0) {
+        <div class="ai-help-panel__suggested-modules">
+          <p class="ai-help-panel__suggested-label">Related training:</p>
+          @for (module of suggestedModules(); track module.id) {
+            <a class="ai-help-panel__module-link"
+               [routerLink]="['/training/module', module.id]">
+              <span class="material-icons-outlined">{{ contentTypeIcon(module.contentType) }}</span>
+              {{ module.title }}
+            </a>
+          }
+        </div>
+      }
     </div>
     <div class="ai-help-panel__footer">
       <input class="ai-help-panel__input" type="text" [placeholder]="'aiHelp.askPlaceholder' | translate"

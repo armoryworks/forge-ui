@@ -1,0 +1,43 @@
+@if (open()) {
+  <div class="training-context-panel" role="complementary" aria-label="Training help for this page">
+    <div class="training-context-panel__header">
+      <span class="material-icons-outlined training-context-panel__icon">school</span>
+      <span class="training-context-panel__title">Help for this page</span>
+      <button class="icon-btn training-context-panel__close"
+              (click)="closed.emit()"
+              aria-label="Close training help panel">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="training-context-panel__body">
+      @if (isLoading()) {
+        <div class="training-context-panel__loading">
+          <span class="material-icons-outlined spin">sync</span>
+        </div>
+      } @else if (modules().length === 0) {
+        <div class="training-context-panel__empty">
+          <span class="material-icons-outlined">menu_book</span>
+          <p>No training modules for this page yet</p>
+        </div>
+      } @else {
+        <div class="training-context-panel__list">
+          @for (module of modules(); track module.id) {
+            <a class="training-context-card"
+               [routerLink]="['/training/module', module.id]"
+               (click)="closed.emit()">
+              <span class="material-icons-outlined training-context-card__icon">{{ contentTypeIcon(module.contentType) }}</span>
+              <div class="training-context-card__info">
+                <span class="training-context-card__title">{{ module.title }}</span>
+                <span class="training-context-card__meta">~{{ module.estimatedMinutes }} min</span>
+              </div>
+              @if (module.myStatus === 'Completed') {
+                <span class="material-icons-outlined training-context-card__done">check_circle</span>
+              }
+            </a>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

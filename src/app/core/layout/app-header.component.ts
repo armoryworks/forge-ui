@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, HostListener, OnInit } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { debounceTime, distinctUntilChanged, filter, switchMap, catchError, of, EMPTY } from 'rxjs';
+import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { debounceTime, distinctUntilChanged, filter, map, switchMap, catchError, of, EMPTY } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -18,11 +19,12 @@ import { RagSearchResult } from '../../shared/models/rag-search-result.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
 import { ChatComponent } from '../../features/chat/chat.component';
 import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-help-panel.component';
+import { TrainingContextPanelComponent } from '../../shared/components/training-context-panel/training-context-panel.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatTooltipModule, TranslatePipe, NotificationPanelComponent, ChatComponent, AiHelpPanelComponent],
+  imports: [ReactiveFormsModule, RouterLink, MatTooltipModule, TranslatePipe, NotificationPanelComponent, ChatComponent, AiHelpPanelComponent, TrainingContextPanelComponent],
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,6 +48,14 @@ export class AppHeaderComponent implements OnInit {
   protected readonly logoUrl = this.themeService.logoUrl;
   protected readonly currentUser = this.authService.user;
   protected readonly userMenuOpen = signal(false);
+  protected readonly showTrainingPanel = signal(false);
+  protected readonly currentRoute = toSignal(
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      map(() => this.router.url.split('?')[0]),
+    ),
+    { initialValue: this.router.url.split('?')[0] },
+  );
   protected readonly currentLanguage = this.languageService.currentLanguage;
   protected readonly availableLanguages = this.languageService.availableLanguages;
 
@@ -209,6 +219,10 @@ export class AppHeaderComponent implements OnInit {
 
   protected toggleNotifications(): void {
     this.notificationService.togglePanel();
+  }
+
+  protected toggleTrainingPanel(): void {
+    this.showTrainingPanel.update(v => !v);
   }
 
   protected toggleUserMenu(): void {

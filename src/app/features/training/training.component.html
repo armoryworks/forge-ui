@@ -1,0 +1,128 @@
+<app-page-layout pageTitle="Training Library">
+  <ng-container toolbar>
+    <div class="training-tabs" role="tablist" aria-label="Training sections">
+      <button class="tab" [class.tab--active]="activeTab() === 'library'"
+              role="tab" [attr.aria-selected]="activeTab() === 'library'"
+              (click)="switchTab('library')">
+        <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
+        Library
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'my-learning'"
+              role="tab" [attr.aria-selected]="activeTab() === 'my-learning'"
+              (click)="switchTab('my-learning')">
+        <span class="material-icons-outlined" aria-hidden="true">school</span>
+        My Learning
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'paths'"
+              role="tab" [attr.aria-selected]="activeTab() === 'paths'"
+              (click)="switchTab('paths')">
+        <span class="material-icons-outlined" aria-hidden="true">route</span>
+        Learning Paths
+      </button>
+    </div>
+  </ng-container>
+
+  <ng-container content>
+    @if (activeTab() === 'library') {
+      <div class="training__filters">
+        <app-input label="Search modules" [formControl]="searchControl" prefix="search" />
+        <app-select label="Type" [formControl]="contentTypeControl" [options]="contentTypeOptions" />
+      </div>
+      <div [appLoadingBlock]="isLoading()">
+        @if (modules().length === 0 && !isLoading()) {
+          <app-empty-state icon="school" message="No training modules found" />
+        } @else {
+          <div class="training-grid">
+            @for (module of modules(); track module.id) {
+              <div class="training-card"
+                   (click)="openModule(module)"
+                   role="button"
+                   tabindex="0"
+                   [attr.aria-label]="'Open ' + module.title"
+                   (keydown.enter)="openModule(module)"
+                   (keydown.space)="openModule(module)">
+                <div class="training-card__type-bar">
+                  <span class="material-icons-outlined training-card__type-icon" aria-hidden="true">{{ contentTypeIcon(module.contentType) }}</span>
+                  <span class="training-card__type-label">{{ module.contentType }}</span>
+                  @if (module.myStatus === 'Completed') {
+                    <span class="chip chip--success training-card__status-chip">Completed</span>
+                  } @else if (module.myStatus === 'InProgress') {
+                    <span class="chip chip--info training-card__status-chip">In Progress</span>
+                  }
+                </div>
+                <div class="training-card__body">
+                  <h3 class="training-card__title">{{ module.title }}</h3>
+                  <p class="training-card__summary">{{ module.summary }}</p>
+                </div>
+                <div class="training-card__footer">
+                  <span class="training-card__time">
+                    <span class="material-icons-outlined" aria-hidden="true">schedule</span>
+                    ~{{ module.estimatedMinutes }} min
+                  </span>
+                  @for (tag of module.tags.slice(0, 3); track tag) {
+                    <span class="chip chip--muted training-card__tag">{{ tag }}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (activeTab() === 'my-learning') {
+      @if (enrollments().length === 0) {
+        <app-empty-state icon="school" message="No training paths assigned yet" />
+      } @else {
+        <div class="training-enrollments">
+          @for (enrollment of enrollments(); track enrollment.id) {
+            <div class="enrollment-card" [routerLink]="['/training/path', enrollment.pathId]"
+                 role="link" tabindex="0"
+                 [attr.aria-label]="enrollment.pathTitle">
+              <div class="enrollment-card__header">
+                <span class="material-icons-outlined enrollment-card__icon" aria-hidden="true">{{ enrollment.pathIcon }}</span>
+                <div class="enrollment-card__info">
+                  <h3 class="enrollment-card__title">{{ enrollment.pathTitle }}</h3>
+                  <span class="enrollment-card__count">{{ enrollment.completedModules }} / {{ enrollment.totalModules }} modules</span>
+                </div>
+                @if (enrollment.completedAt) {
+                  <span class="chip chip--success">Completed</span>
+                }
+              </div>
+              <div class="enrollment-card__progress-bar" role="progressbar"
+                   [attr.aria-valuenow]="enrollmentProgress(enrollment)"
+                   aria-valuemin="0" aria-valuemax="100">
+                <div class="enrollment-card__progress-fill"
+                     [style.width.%]="enrollmentProgress(enrollment)"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @if (activeTab() === 'paths') {
+      @if (paths().length === 0) {
+        <app-empty-state icon="route" message="No learning paths available" />
+      } @else {
+        <div class="training-paths-list">
+          @for (path of paths(); track path.id) {
+            <div class="path-card" [routerLink]="['/training/path', path.id]"
+                 role="link" tabindex="0"
+                 [attr.aria-label]="path.title">
+              <span class="material-icons-outlined path-card__icon" aria-hidden="true">{{ path.icon }}</span>
+              <div class="path-card__info">
+                <h3 class="path-card__title">{{ path.title }}</h3>
+                <p class="path-card__desc">{{ path.description }}</p>
+                <span class="path-card__count">{{ path.modules.length }} modules</span>
+              </div>
+              @if (path.isAutoAssigned) {
+                <span class="chip chip--primary path-card__badge">Auto-assigned</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    }
+  </ng-container>
+</app-page-layout>

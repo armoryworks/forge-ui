@@ -1,0 +1,81 @@
+<div class="path-detail">
+  <div class="path-detail__back">
+    <button class="path-detail__back-btn" (click)="goBack()" aria-label="Back to Learning Paths">
+      <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+      Learning Paths
+    </button>
+  </div>
+
+  <div [appLoadingBlock]="isLoading()">
+    @if (path(); as p) {
+      <div class="path-detail__header">
+        <span class="material-icons-outlined path-detail__icon" aria-hidden="true">{{ p.icon }}</span>
+        <div class="path-detail__info">
+          <h1 class="path-detail__title">{{ p.title }}</h1>
+          @if (p.description) {
+            <p class="path-detail__desc">{{ p.description }}</p>
+          }
+          <div class="path-detail__progress-meta">
+            <span>{{ completedCount() }} / {{ p.modules.length }} modules completed</span>
+            @if (p.isAutoAssigned) {
+              <span class="chip chip--primary">Auto-assigned</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="path-detail__progress-bar" role="progressbar"
+           [attr.aria-valuenow]="progressPercent()"
+           aria-valuemin="0" aria-valuemax="100"
+           [attr.aria-label]="progressPercent() + '% complete'">
+        <div class="path-detail__progress-fill" [style.width.%]="progressPercent()"></div>
+      </div>
+
+      <div class="path-detail__modules">
+        @if (p.modules.length === 0) {
+          <app-empty-state icon="school" message="No modules in this path yet" />
+        } @else {
+          @for (module of p.modules; track module.moduleId; let i = $index) {
+            <div class="path-module">
+              <div class="path-module__position" aria-hidden="true">
+                @if (module.myStatus === 'Completed') {
+                  <span class="material-icons-outlined path-module__check">check_circle</span>
+                } @else {
+                  <span class="path-module__num">{{ i + 1 }}</span>
+                }
+              </div>
+              <div class="path-module__body">
+                <div class="path-module__type">
+                  <span class="material-icons-outlined path-module__type-icon" aria-hidden="true">{{ contentTypeIcon(module.contentType) }}</span>
+                  <span class="path-module__type-label">{{ module.contentType }}</span>
+                  @if (module.isRequired) {
+                    <span class="chip chip--warning path-module__required">Required</span>
+                  }
+                </div>
+                <h3 class="path-module__title">{{ module.title }}</h3>
+                <div class="path-module__meta">
+                  <span class="path-module__time">
+                    <span class="material-icons-outlined" aria-hidden="true">schedule</span>
+                    ~{{ module.estimatedMinutes }} min
+                  </span>
+                  @if (module.myStatus) {
+                    <span [class]="moduleStatusClass(module.myStatus)">{{ module.myStatus }}</span>
+                  }
+                </div>
+              </div>
+              <div class="path-module__action">
+                <a class="action-btn action-btn--primary"
+                   [routerLink]="['/training/module', module.moduleId]"
+                   [attr.aria-label]="moduleActionLabel(module.myStatus) + ' ' + module.title">
+                  {{ moduleActionLabel(module.myStatus) }}
+                </a>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    } @else if (!isLoading()) {
+      <app-empty-state icon="route" message="Learning path not found" />
+    }
+  </div>
+</div>

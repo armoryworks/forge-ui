@@ -69,6 +69,7 @@ export class SidebarComponent {
         { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai' },
+        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
       ],
     },
   ];

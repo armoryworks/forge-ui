@@ -1,0 +1,164 @@
+<div class="training-panel">
+  <!-- Sub-tab bar -->
+  <div class="training-panel__tabs">
+    <button class="tab" [class.tab--active]="activeSubTab() === 'content'"
+      (click)="switchSubTab('content')">
+      <span class="material-icons-outlined">library_books</span>
+      Content
+    </button>
+    <button class="tab" [class.tab--active]="activeSubTab() === 'paths'"
+      (click)="switchSubTab('paths')">
+      <span class="material-icons-outlined">route</span>
+      Paths
+    </button>
+    <button class="tab" [class.tab--active]="activeSubTab() === 'progress'"
+      (click)="switchSubTab('progress')">
+      <span class="material-icons-outlined">insights</span>
+      User Progress
+    </button>
+  </div>
+
+  <!-- Content Tab -->
+  @if (activeSubTab() === 'content') {
+    <div class="tab-panel" [appLoadingBlock]="isLoading()">
+      <div class="panel-header">
+        <span class="panel-header__count">{{ modules().length }} modules</span>
+        <div class="panel-header__actions">
+          <app-input label="Search" [formControl]="moduleSearchControl" />
+          <button class="action-btn action-btn--primary" (click)="openCreateModuleDialog()"
+            aria-label="New Training Module">
+            <span class="material-icons-outlined">add</span>
+            New Module
+          </button>
+        </div>
+      </div>
+
+      <app-data-table
+        tableId="admin-training-modules"
+        [columns]="moduleColumns"
+        [data]="modules()"
+        emptyIcon="library_books"
+        emptyMessage="No training modules found">
+
+        <ng-template appColumnCell="contentType" let-row>
+          <span class="chip" [class]="contentTypeClass(row.contentType)">
+            <span class="material-icons-outlined chip__icon">{{ contentTypeIcon(row.contentType) }}</span>
+            {{ row.contentType }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="isPublished" let-row>
+          @if (row.isPublished) {
+            <span class="material-icons-outlined training-panel__published-icon training-panel__published-icon--yes"
+              title="Published">check_circle</span>
+          } @else {
+            <span class="material-icons-outlined training-panel__published-icon training-panel__published-icon--no"
+              title="Draft">unpublished</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <div class="action-cell">
+            <button class="icon-btn" title="Edit module" aria-label="Edit module"
+              (click)="openEditModuleDialog(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" title="Delete module" aria-label="Delete module"
+              (click)="deleteModule(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  <!-- Paths Tab -->
+  @if (activeSubTab() === 'paths') {
+    <div class="tab-panel" [appLoadingBlock]="isLoading()">
+      <div class="panel-header">
+        <span class="panel-header__count">{{ paths().length }} paths</span>
+        <button class="action-btn action-btn--primary" (click)="openCreatePathDialog()"
+          aria-label="New Training Path">
+          <span class="material-icons-outlined">add</span>
+          New Path
+        </button>
+      </div>
+
+      <app-data-table
+        tableId="admin-training-paths"
+        [columns]="pathColumns"
+        [data]="paths()"
+        emptyIcon="route"
+        emptyMessage="No training paths defined">
+
+        <ng-template appColumnCell="isAutoAssigned" let-row>
+          @if (row.isAutoAssigned) {
+            <span class="chip chip--success">Auto</span>
+          } @else {
+            <span class="chip chip--muted">Manual</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">Active</span>
+          } @else {
+            <span class="chip chip--muted">Inactive</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <div class="action-cell">
+            <button class="icon-btn" title="Edit path" aria-label="Edit path"
+              (click)="$event.stopPropagation()">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  <!-- Progress Tab -->
+  @if (activeSubTab() === 'progress') {
+    <div class="tab-panel" [appLoadingBlock]="isLoading()">
+      <div class="panel-header">
+        <span class="panel-header__count">{{ userProgress().length }} users</span>
+      </div>
+
+      <app-data-table
+        tableId="admin-training-progress"
+        [columns]="progressColumns"
+        [data]="userProgress()"
+        emptyIcon="insights"
+        emptyMessage="No user progress data available">
+
+        <ng-template appColumnCell="role" let-row>
+          <span class="chip" [class.chip--primary]="row.role === 'Admin'">{{ row.role }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="overallCompletionPct" let-row>
+          <div class="training-panel__progress-cell">
+            <div class="training-panel__progress-bar">
+              <div class="training-panel__progress-fill"
+                [class.training-panel__progress-fill--full]="row.overallCompletionPct >= 100"
+                [class.training-panel__progress-fill--half]="row.overallCompletionPct >= 50 && row.overallCompletionPct < 100"
+                [class.training-panel__progress-fill--low]="row.overallCompletionPct < 50"
+                [style.width.%]="row.overallCompletionPct"></div>
+            </div>
+            <span class="training-panel__progress-pct">{{ row.overallCompletionPct }}%</span>
+          </div>
+        </ng-template>
+
+        <ng-template appColumnCell="lastActivityAt" let-row>
+          @if (row.lastActivityAt) {
+            <span class="text-muted">{{ row.lastActivityAt | date:'MM/dd/yyyy' }}</span>
+          } @else {
+            <span class="text-muted">--</span>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>

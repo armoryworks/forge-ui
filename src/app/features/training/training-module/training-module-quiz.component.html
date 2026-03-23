@@ -1,0 +1,102 @@
+<div class="quiz">
+  @if (!submitted()) {
+    <div class="quiz__questions">
+      @for (question of content().questions; track question.id; let i = $index) {
+        <div class="quiz-question">
+          <p class="quiz-question__text">
+            <span class="quiz-question__num">{{ i + 1 }}.</span> {{ question.text }}
+          </p>
+          <div class="quiz-question__options" role="radiogroup" [attr.aria-label]="'Question ' + (i + 1)">
+            @for (option of question.options; track option.id) {
+              <button class="quiz-option"
+                      [class.quiz-option--selected]="isSelected(question.id, option.id)"
+                      role="radio"
+                      [attr.aria-checked]="isSelected(question.id, option.id)"
+                      (click)="selectOption(question.id, option.id)">
+                <span class="quiz-option__indicator" aria-hidden="true">
+                  @if (isSelected(question.id, option.id)) {
+                    <span class="material-icons-outlined">radio_button_checked</span>
+                  } @else {
+                    <span class="material-icons-outlined">radio_button_unchecked</span>
+                  }
+                </span>
+                <span class="quiz-option__text">{{ option.text }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="quiz__actions">
+      <button class="action-btn action-btn--primary"
+              [disabled]="!allAnswered() || isSubmitting()"
+              (click)="submit()"
+              aria-label="Submit quiz answers">
+        @if (isSubmitting()) {
+          <span class="material-icons-outlined" aria-hidden="true" style="animation: spin 1s linear infinite">sync</span>
+          Submitting...
+        } @else {
+          <span class="material-icons-outlined" aria-hidden="true">save</span>
+          Submit Answers
+        }
+      </button>
+    </div>
+  } @else {
+    <div class="quiz__result" [class.quiz__result--passed]="result()?.passed" [class.quiz__result--failed]="!result()?.passed">
+      <span class="material-icons-outlined quiz__result-icon" aria-hidden="true">
+        {{ result()?.passed ? 'check_circle' : 'cancel' }}
+      </span>
+      <p class="quiz__result-label">{{ scoreLabel() }}</p>
+    </div>
+
+    <div class="quiz__review">
+      @for (question of content().questions; track question.id; let i = $index) {
+        @let qResult = getQuestionResult(question.id);
+        <div class="quiz-question quiz-question--reviewed"
+             [class.quiz-question--correct]="qResult?.isCorrect"
+             [class.quiz-question--incorrect]="qResult && !qResult.isCorrect">
+          <p class="quiz-question__text">
+            <span class="quiz-question__num">{{ i + 1 }}.</span> {{ question.text }}
+            @if (qResult) {
+              <span class="material-icons-outlined quiz-question__result-icon" aria-hidden="true">
+                {{ qResult.isCorrect ? 'check_circle' : 'cancel' }}
+              </span>
+            }
+          </p>
+          <div class="quiz-question__options">
+            @for (option of question.options; track option.id) {
+              <div class="quiz-option quiz-option--readonly"
+                   [class.quiz-option--selected]="isSelected(question.id, option.id)"
+                   [class.quiz-option--correct]="qResult?.correctOptionId === option.id"
+                   [class.quiz-option--wrong]="isSelected(question.id, option.id) && !qResult?.isCorrect && qResult?.correctOptionId !== option.id">
+                <span class="quiz-option__indicator" aria-hidden="true">
+                  @if (qResult?.correctOptionId === option.id) {
+                    <span class="material-icons-outlined">check_circle</span>
+                  } @else if (isSelected(question.id, option.id)) {
+                    <span class="material-icons-outlined">cancel</span>
+                  } @else {
+                    <span class="material-icons-outlined">radio_button_unchecked</span>
+                  }
+                </span>
+                <span class="quiz-option__text">{{ option.text }}</span>
+              </div>
+            }
+          </div>
+          @if (content().showExplanationsAfterSubmit && qResult?.explanation) {
+            <p class="quiz-question__explanation">{{ qResult!.explanation }}</p>
+          }
+        </div>
+      }
+    </div>
+
+    @if (!result()?.passed) {
+      <div class="quiz__actions">
+        <button class="action-btn action-btn--primary" (click)="retry()" aria-label="Retry quiz">
+          <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+          Try Again
+        </button>
+      </div>
+    }
+  }
+</div>
