@@ -1,6 +1,14 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 // ── Tab bar inside page-layout toolbar ──────────────────────────────────────
 
 .training-tabs {
@@ -13,10 +21,14 @@
 .training__filters {
   display: flex;
   align-items: flex-start;
+  flex-wrap: wrap;
   gap: $sp-md;
   padding: $sp-md $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
   background: var(--bg);
+
+  app-input { flex: 2; min-width: 160px; }
+  app-select { flex: 1; min-width: 140px; }
 }
 
 // ── Module grid ──────────────────────────────────────────────────────────────
@@ -30,19 +42,57 @@
 
 // ── Training card ────────────────────────────────────────────────────────────
 
+// Per-type accent colors used in the type-bar
+$type-colors: (
+  'Article':     var(--info),
+  'Video':       #8b5cf6,
+  'Walkthrough': var(--primary),
+  'QuickRef':    var(--accent),
+  'Quiz':        var(--warning),
+);
+
 .training-card {
   display: flex;
   flex-direction: column;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
   cursor: pointer;
-  transition: box-shadow $transition-fast, border-color $transition-fast;
+  transition: box-shadow $transition-fast, border-color $transition-fast, transform $transition-fast;
   outline: none;
+  position: relative;
 
   &:hover,
   &:focus-visible {
     border-color: var(--primary);
     box-shadow: $shadow-dropdown;
+    transform: translateY(-1px);
+  }
+
+  &--in-progress {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+
+    .training-card__type-bar {
+      // Blue glow on the top of the card for in-progress state
+      border-top: 2px solid var(--primary);
+    }
+  }
+
+  &--completed {
+    border-color: color-mix(in srgb, var(--success) 40%, var(--border));
+    background: color-mix(in srgb, var(--success) 3%, var(--surface));
+
+    // Checkmark stamp in top-right corner
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 0 28px 28px 0;
+      border-color: transparent var(--success) transparent transparent;
+    }
   }
 
   &__type-bar {
@@ -52,22 +102,34 @@
     padding: $sp-sm $sp-md;
     background: var(--bg);
     border-bottom: $border-width-thin solid var(--border);
+    // Colored left accent per content type
+    border-left: 3px solid var(--type-accent, var(--border));
   }
+
+  // Apply type-specific accent via data attribute
+  &__type-bar[data-type='Article']     { --type-accent: var(--info); }
+  &__type-bar[data-type='Video']       { --type-accent: #8b5cf6; }
+  &__type-bar[data-type='Walkthrough'] { --type-accent: var(--primary); }
+  &__type-bar[data-type='QuickRef']    { --type-accent: var(--accent); }
+  &__type-bar[data-type='Quiz']        { --type-accent: var(--warning); }
 
   &__type-icon {
     font-size: $icon-size-md;
-    color: var(--text-muted);
+    color: var(--type-accent, var(--text-muted));
   }
 
   &__type-label {
     font-size: $font-size-xs;
-    color: var(--text-secondary);
+    color: var(--type-accent, var(--text-secondary));
     @include uppercase-label($font-size-xs, 0.04em, 600);
     flex: 1;
   }
 
   &__status-chip {
     font-size: $font-size-xs;
+    display: flex;
+    align-items: center;
+    gap: 2px;
   }
 
   &__body {
@@ -121,6 +183,23 @@
   &__tag {
     font-size: $font-size-xxs;
   }
+
+  &__style-hint {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: $sp-xs $sp-md;
+    border-top: $border-width-thin solid var(--border);
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    background: var(--bg);
+    @include truncate;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+      flex-shrink: 0;
+    }
+  }
 }
 
 // ── My Learning enrollments ──────────────────────────────────────────────────
@@ -170,9 +249,42 @@
     margin: 0;
   }
 
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+    @include truncate;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
   &__count {
     font-size: $font-size-sm;
     color: var(--text-muted);
+  }
+
+  &__pct {
+    font-size: $font-size-xs;
+    font-family: $font-family-mono;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  &__cta {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: var(--primary);
+    flex-shrink: 0;
+    @include uppercase-label($font-size-xs, 0.04em, 600);
+
+    .material-icons-outlined { font-size: $icon-size-sm; }
   }
 
   &__progress-bar {
@@ -193,8 +305,13 @@
 .training-paths-list {
   display: flex;
   flex-direction: column;
-  gap: $sp-md;
+  gap: 0;         // No gap — progress bar is glued to the card bottom
   padding: $sp-lg;
+  padding-bottom: 0;
+
+  > * + * {
+    margin-top: $sp-md;
+  }
 }
 
 .path-card {
@@ -204,6 +321,7 @@
   padding: $sp-lg;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
+  border-bottom: none;      // Progress bar provides the bottom border
   cursor: pointer;
   transition: border-color $transition-fast;
   outline: none;
@@ -239,12 +357,45 @@
     margin: 0;
   }
 
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
   &__count {
     font-size: $font-size-xs;
     color: var(--text-muted);
   }
 
+  &__progress-label {
+    font-size: $font-size-xs;
+    color: var(--primary);
+    font-weight: 600;
+    font-family: $font-family-mono;
+  }
+
+  &__right {
+    flex-shrink: 0;
+  }
+
   &__badge {
     flex-shrink: 0;
+  }
+
+  // Progress bar sits flush under the card
+  &__progress-bar {
+    height: 4px;
+    background: var(--border);
+    border: $border-width-thin solid var(--border);
+    border-top: none;
+    margin-bottom: $sp-md;
+    overflow: hidden;
+  }
+
+  &__progress-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width $transition-normal;
   }
 }

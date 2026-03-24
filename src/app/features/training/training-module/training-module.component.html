@@ -1,4 +1,6 @@
 <div class="module-viewer">
+
+  <!-- Static: back navigation -->
   <div class="module-viewer__back">
     <button class="module-viewer__back-btn" (click)="goBack()" aria-label="Back to Training Library">
       <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
@@ -6,8 +8,11 @@
     </button>
   </div>
 
-  <div [appLoadingBlock]="isLoading()">
+  <!-- Main area: loading overlay covers header + body + footer together -->
+  <div class="module-viewer__main" [appLoadingBlock]="isLoading()">
     @if (module(); as mod) {
+
+      <!-- Static: module title / meta -->
       <div class="module-viewer__header">
         <div class="module-viewer__meta">
           <span class="chip chip--info">{{ mod.contentType }}</span>
@@ -15,8 +20,14 @@
             <span class="material-icons-outlined" aria-hidden="true">schedule</span>
             ~{{ mod.estimatedMinutes }} min
           </span>
+          @if (learningStyleHint()) {
+            <span class="module-viewer__style-hint">
+              <span class="material-icons-outlined" aria-hidden="true">person</span>
+              {{ learningStyleHint() }}
+            </span>
+          }
           @if (completed()) {
-            <span class="chip chip--success">
+            <span class="module-viewer__completed-chip" aria-label="Completed">
               <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
               Completed
             </span>
@@ -28,15 +39,32 @@
         }
       </div>
 
-      <div class="module-viewer__content">
+      <!-- Scrollable: content body -->
+      <div class="module-viewer__body">
         @switch (mod.contentType) {
+
           @case ('Article') {
             @if (articleContent(); as article) {
               <div class="article-body" aria-label="Article content">
-                <div class="article-body__text">{{ article.body }}</div>
+                @if (articleHeadings().length > 1) {
+                  <nav class="article-outline" aria-label="Article contents">
+                    <div class="article-outline__header">
+                      <span class="material-icons-outlined" aria-hidden="true">toc</span>
+                      In this article
+                    </div>
+                    <ol class="article-outline__list">
+                      @for (heading of articleHeadings(); track $index) {
+                        <li class="article-outline__item">{{ heading }}</li>
+                      }
+                    </ol>
+                  </nav>
+                }
+                @if (article.body) {
+                  <markdown class="article-body__text" [data]="article.body" />
+                }
                 @for (section of article.sections; track $index) {
                   @if (section.type === 'text' && section.content) {
-                    <div class="article-section article-section--text">{{ section.content }}</div>
+                    <markdown class="article-section article-section--text" [data]="section.content" />
                   }
                   @if (section.type === 'image' && section.url) {
                     <figure class="article-section article-section--image">
@@ -52,7 +80,12 @@
                          [class.article-section--callout-warning]="section.level === 'warning'"
                          [class.article-section--callout-tip]="section.level === 'tip'"
                          role="note">
-                      {{ section.content }}
+                      <span class="material-icons-outlined callout-icon" aria-hidden="true">
+                        @if (section.level === 'warning') { warning }
+                        @else if (section.level === 'tip') { lightbulb }
+                        @else { info }
+                      </span>
+                      <div class="callout-body">{{ section.content }}</div>
                     </div>
                   }
                 }
@@ -98,19 +131,55 @@
           @case ('Walkthrough') {
             @if (walkthroughContent(); as walkthrough) {
               <div class="walkthrough-viewer">
-                <div class="walkthrough-viewer__info" role="note">
-                  <span class="material-icons-outlined walkthrough-viewer__icon" aria-hidden="true">route</span>
-                  <div class="walkthrough-viewer__text">
-                    <p class="walkthrough-viewer__desc">
-                      This is an interactive guided tour. Click the button below to start, and the tour will walk you through the interface step by step.
+                <div class="walkthrough-viewer__hero">
+                  <span class="material-icons-outlined walkthrough-viewer__hero-icon" aria-hidden="true">route</span>
+                  <div class="walkthrough-viewer__hero-text">
+                    <h2 class="walkthrough-viewer__hero-title">Interactive Guided Tour</h2>
+                    <p class="walkthrough-viewer__hero-desc">
+                      This tour will guide you through the interface step by step. Click "Take the Tour" and follow along — each step highlights a specific part of the page with an explanation.
                     </p>
-                    <p class="walkthrough-viewer__steps-count">{{ walkthrough.steps.length }} steps</p>
                   </div>
                 </div>
-                <button class="action-btn action-btn--primary" (click)="startWalkthrough()"
+
+                <div class="walkthrough-viewer__meta">
+                  <span class="walkthrough-viewer__meta-item">
+                    <span class="material-icons-outlined" aria-hidden="true">list_alt</span>
+                    {{ walkthrough.steps.length }} steps
+                  </span>
+                  <span class="walkthrough-viewer__meta-item">
+                    <span class="material-icons-outlined" aria-hidden="true">touch_app</span>
+                    Interactive
+                  </span>
+                  <span class="walkthrough-viewer__meta-item">
+                    <span class="material-icons-outlined" aria-hidden="true">move_selection_up</span>
+                    Drag the popover to reposition it
+                  </span>
+                </div>
+
+                @if (walkthrough.steps.length > 0) {
+                  <div class="walkthrough-viewer__steps-preview">
+                    <h3 class="walkthrough-viewer__steps-title">What you'll learn</h3>
+                    <ol class="walkthrough-viewer__step-list">
+                      @for (step of walkthrough.steps; track $index) {
+                        <li class="walkthrough-viewer__step-item">
+                          <span class="walkthrough-viewer__step-num" aria-hidden="true">{{ $index + 1 }}</span>
+                          <span class="walkthrough-viewer__step-title">{{ step.popover.title }}</span>
+                        </li>
+                      }
+                    </ol>
+                  </div>
+                }
+
+                <button class="walkthrough-viewer__start-btn" (click)="startWalkthrough()"
+                        [disabled]="completed()"
                         aria-label="Take the interactive tour">
-                  <span class="material-icons-outlined" aria-hidden="true">route</span>
-                  Take the Tour
+                  @if (completed()) {
+                    <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+                    Tour Complete
+                  } @else {
+                    <span class="material-icons-outlined" aria-hidden="true">play_circle</span>
+                    {{ walkthrough.startButtonLabel || 'Take the Tour' }}
+                  }
                 </button>
               </div>
             }
@@ -119,7 +188,13 @@
           @case ('QuickRef') {
             @if (quickRefContent(); as quickRef) {
               <div class="quickref-viewer">
-                <h2 class="quickref-viewer__title">{{ quickRef.title }}</h2>
+                <div class="quickref-viewer__toolbar">
+                  <h2 class="quickref-viewer__title">{{ quickRef.title }}</h2>
+                  <button class="action-btn quickref-viewer__print-btn" (click)="printQuickRef()" aria-label="Print quick reference card">
+                    <span class="material-icons-outlined" aria-hidden="true">print</span>
+                    Print
+                  </button>
+                </div>
                 <div class="quickref-viewer__groups">
                   @for (group of quickRef.groups; track group.heading) {
                     <section class="quickref-group" aria-labelledby="qr-{{ group.heading }}">
@@ -145,32 +220,69 @@
                 (completed)="onQuizComplete($event)" />
             }
           }
+
         }
       </div>
 
+      <!-- Static: footer with reading timer + action -->
       @if (mod.contentType !== 'Quiz') {
-        <div class="module-viewer__actions">
+        <div class="module-viewer__footer">
           @if (!completed()) {
-            <button class="action-btn action-btn--primary"
-                    [disabled]="isCompleting()"
-                    (click)="markComplete()"
-                    aria-label="Mark this module as complete">
-              @if (isCompleting()) {
-                <span class="material-icons-outlined" aria-hidden="true" style="animation: spin 1s linear infinite">sync</span>
-                Saving...
-              } @else {
-                <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
-                Mark as Complete
-              }
-            </button>
-          } @else {
-            <span class="module-viewer__completed-badge">
-              <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
-              Completed
-            </span>
+            @if (mod.contentType !== 'Walkthrough') {
+              <div class="reading-timer" [class.reading-timer--done]="timerComplete()">
+                <div class="reading-timer__track" role="progressbar"
+                     [attr.aria-valuenow]="timerProgress()"
+                     aria-valuemin="0" aria-valuemax="100"
+                     [attr.aria-label]="timerComplete() ? 'Ready to complete' : 'Reading progress'">
+                  <div class="reading-timer__fill" [style.width.%]="timerProgress()"></div>
+                </div>
+                <div class="reading-timer__label">
+                  @if (timerComplete()) {
+                    <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+                    Ready to mark complete
+                  } @else {
+                    <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
+                    {{ timerVerb() }}&hellip; {{ timerRemaining() }} remaining
+                  }
+                </div>
+              </div>
+            }
           }
+          <div class="module-viewer__actions">
+            @if (!completed()) {
+              @if (mod.contentType === 'Walkthrough') {
+                <span class="module-viewer__walkthrough-hint">
+                  <span class="material-icons-outlined" aria-hidden="true">info</span>
+                  Click "Tour the Board" above to begin — completing the tour marks this module done automatically.
+                </span>
+              } @else {
+                <button class="action-btn action-btn--primary"
+                        [disabled]="isCompleting() || !canComplete()"
+                        (click)="markComplete()"
+                        aria-label="Mark this module as complete">
+                  @if (isCompleting()) {
+                    <span class="material-icons-outlined" aria-hidden="true" style="animation: spin 1s linear infinite">sync</span>
+                    Saving...
+                  } @else {
+                    <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+                    Mark as Complete
+                  }
+                </button>
+              }
+            } @else {
+              <button class="action-btn" (click)="goBack()" aria-label="Return to Training Library">
+                <span class="material-icons-outlined" aria-hidden="true">chevron_left</span>
+                Training Library
+              </button>
+              <span class="module-viewer__completed-badge">
+                <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+                Completed
+              </span>
+            }
+          </div>
         </div>
       }
+
     } @else if (!isLoading()) {
       <div class="module-viewer__not-found">
         <span class="material-icons-outlined" aria-hidden="true">school</span>
@@ -179,4 +291,5 @@
       </div>
     }
   </div>
+
 </div>

@@ -27,6 +27,7 @@
       <div class="training__filters">
         <app-input label="Search modules" [formControl]="searchControl" prefix="search" />
         <app-select label="Type" [formControl]="contentTypeControl" [options]="contentTypeOptions" />
+        <app-select label="Learning Style" [formControl]="learningStyleControl" [options]="learningStyleOptions" />
       </div>
       <div [appLoadingBlock]="isLoading()">
         @if (modules().length === 0 && !isLoading()) {
@@ -35,17 +36,23 @@
           <div class="training-grid">
             @for (module of modules(); track module.id) {
               <div class="training-card"
+                   [class.training-card--completed]="module.myStatus === 'Completed'"
+                   [class.training-card--in-progress]="module.myStatus === 'InProgress'"
+                   [attr.data-content-type]="module.contentType"
                    (click)="openModule(module)"
                    role="button"
                    tabindex="0"
                    [attr.aria-label]="'Open ' + module.title"
                    (keydown.enter)="openModule(module)"
                    (keydown.space)="openModule(module)">
-                <div class="training-card__type-bar">
+                <div class="training-card__type-bar" [attr.data-type]="module.contentType">
                   <span class="material-icons-outlined training-card__type-icon" aria-hidden="true">{{ contentTypeIcon(module.contentType) }}</span>
-                  <span class="training-card__type-label">{{ module.contentType }}</span>
+                  <span class="training-card__type-label">{{ contentTypeLabel(module.contentType) }}</span>
                   @if (module.myStatus === 'Completed') {
-                    <span class="chip chip--success training-card__status-chip">Completed</span>
+                    <span class="chip chip--success training-card__status-chip" aria-label="Completed">
+                      <span class="material-icons-outlined" aria-hidden="true" style="font-size:12px">check_circle</span>
+                      Completed
+                    </span>
                   } @else if (module.myStatus === 'InProgress') {
                     <span class="chip chip--info training-card__status-chip">In Progress</span>
                   }
@@ -62,6 +69,10 @@
                   @for (tag of module.tags.slice(0, 3); track tag) {
                     <span class="chip chip--muted training-card__tag">{{ tag }}</span>
                   }
+                </div>
+                <div class="training-card__style-hint" [title]="learningStyleHint(module.contentType)">
+                  <span class="material-icons-outlined" aria-hidden="true">person</span>
+                  {{ learningStyleHint(module.contentType) }}
                 </div>
               </div>
             }
@@ -83,15 +94,28 @@
                 <span class="material-icons-outlined enrollment-card__icon" aria-hidden="true">{{ enrollment.pathIcon }}</span>
                 <div class="enrollment-card__info">
                   <h3 class="enrollment-card__title">{{ enrollment.pathTitle }}</h3>
-                  <span class="enrollment-card__count">{{ enrollment.completedModules }} / {{ enrollment.totalModules }} modules</span>
+                  @let pathDesc = pathDescriptionFor(enrollment.pathId);
+                  @if (pathDesc) {
+                    <p class="enrollment-card__desc">{{ pathDesc }}</p>
+                  }
+                  <div class="enrollment-card__meta">
+                    <span class="enrollment-card__count">{{ enrollment.completedModules }} / {{ enrollment.totalModules }} modules</span>
+                    <span class="enrollment-card__pct">{{ enrollmentProgress(enrollment) }}%</span>
+                  </div>
                 </div>
                 @if (enrollment.completedAt) {
                   <span class="chip chip--success">Completed</span>
+                } @else {
+                  <span class="enrollment-card__cta">
+                    <span class="material-icons-outlined" aria-hidden="true">chevron_right</span>
+                    Continue
+                  </span>
                 }
               </div>
               <div class="enrollment-card__progress-bar" role="progressbar"
                    [attr.aria-valuenow]="enrollmentProgress(enrollment)"
-                   aria-valuemin="0" aria-valuemax="100">
+                   aria-valuemin="0" aria-valuemax="100"
+                   [attr.aria-label]="enrollment.pathTitle + ' — ' + enrollmentProgress(enrollment) + '% complete'">
                 <div class="enrollment-card__progress-fill"
                      [style.width.%]="enrollmentProgress(enrollment)"></div>
               </div>
@@ -107,6 +131,7 @@
       } @else {
         <div class="training-paths-list">
           @for (path of paths(); track path.id) {
+            @let enrollment = enrollmentForPath(path.id);
             <div class="path-card" [routerLink]="['/training/path', path.id]"
                  role="link" tabindex="0"
                  [attr.aria-label]="path.title">
@@ -114,12 +139,31 @@
               <div class="path-card__info">
                 <h3 class="path-card__title">{{ path.title }}</h3>
                 <p class="path-card__desc">{{ path.description }}</p>
-                <span class="path-card__count">{{ path.modules.length }} modules</span>
+                <div class="path-card__meta">
+                  <span class="path-card__count">{{ path.modules.length }} modules</span>
+                  @if (enrollment) {
+                    <span class="path-card__progress-label">
+                      {{ enrollment.completedModules }}/{{ enrollment.totalModules }} complete
+                    </span>
+                  }
+                </div>
               </div>
-              @if (path.isAutoAssigned) {
-                <span class="chip chip--primary path-card__badge">Auto-assigned</span>
-              }
+              <div class="path-card__right">
+                @if (enrollment?.completedAt) {
+                  <span class="chip chip--success">Completed</span>
+                } @else if (path.isAutoAssigned) {
+                  <span class="chip chip--primary path-card__badge">Auto-assigned</span>
+                }
+              </div>
             </div>
+            @if (enrollment) {
+              <div class="path-card__progress-bar" role="progressbar"
+                   [attr.aria-valuenow]="enrollmentProgress(enrollment)"
+                   aria-valuemin="0" aria-valuemax="100"
+                   [attr.aria-label]="path.title + ' progress: ' + enrollmentProgress(enrollment) + '%'">
+                <div class="path-card__progress-fill" [style.width.%]="enrollmentProgress(enrollment)"></div>
+              </div>
+            }
           }
         </div>
       }

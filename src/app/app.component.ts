@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, NgZone, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter } from 'rxjs';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AppHeaderComponent } from './core/layout/app-header.component';
@@ -31,6 +32,10 @@ import { LanguageService } from './shared/services/language.service';
 import { ScannerService } from './shared/services/scanner.service';
 import { OfflineQueueService } from './shared/services/offline-queue.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
+import { TrainingService } from './features/training/services/training.service';
+import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
+import { DriverStep } from './shared/services/help-tour.service';
+import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRefresh, setupPopoverDraggable } from './shared/utils/tour-connector.utils';
 import { KANBAN_TOUR } from './shared/tours/kanban-tour';
 import { DASHBOARD_TOUR } from './shared/tours/dashboard-tour';
 import { PARTS_TOUR } from './shared/tours/parts-tour';
@@ -69,7 +74,12 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly scanner = inject(ScannerService);
   private readonly offlineQueue = inject(OfflineQueueService);
   private readonly employeeProfile = inject(EmployeeProfileService);
+  private readonly trainingService = inject(TrainingService);
+  private readonly ngZone = inject(NgZone);
   private readonly dialog = inject(MatDialog);
+
+  /** Prevents double-launching an inline tour on direct ?walkthrough= navigation. */
+  private walkthroughRunning = false;
 
   protected readonly showShell = computed(() => this.authService.isAuthenticated() && !this.layout.isDisplayRoute() && !this.layout.isAuthRoute());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
@@ -113,6 +123,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.themeService.loadBrandSettings();
     this.registerTours();
     this.keyboardShortcuts.initialize();
+    this.watchWalkthroughUrl();
   }
 
   ngOnDestroy(): void {
@@ -142,6 +153,130 @@ export class AppComponent implements OnInit, OnDestroy {
           break;
       }
     });
+  }
+
+  /**
+   * Resumes tours on page reload / direct URL entry.
+   *
+   * `?tutorial=<id>` — HelpTourService (contextual help tours from the header AI panel)
+   * `?walkthrough=<moduleId>` — inline driver.js (training module walkthroughs).
+   *   Training-module.component handles the normal start flow; this method handles
+   *   direct navigation to `<targetPage>?walkthrough=<id>` without going through the
+   *   training UI first.
+   */
+  private watchWalkthroughUrl(): void {
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe((e: NavigationEnd) => {
+        const url = this.router.parseUrl((e as NavigationEnd).urlAfterRedirects ?? (e as NavigationEnd).url);
+        if (!this.authService.isAuthenticated()) return;
+
+        // ── ?tutorial= — contextual help tours ──────────────────────────────
+        const tutorialParam = url.queryParams['tutorial'];
+        if (tutorialParam) {
+          const moduleId = Number(tutorialParam);
+          if (!isNaN(moduleId) && !this.helpTours.isRunning) {
+            setTimeout(() => {
+              if (this.helpTours.isRunning) return;
+              this.trainingService.getModule(moduleId).subscribe({
+                next: module => {
+                  if (module.contentType !== 'Walkthrough') return;
+                  try {
+                    const content = JSON.parse(module.contentJson) as WalkthroughContent;
+                    this.helpTours.startSteps(content.steps, tutorialParam);
+                  } catch { /* malformed JSON — ignore */ }
+                },
+              });
+            }, 800);
+          }
+        }
+
+        // ── ?walkthrough= — training module walkthroughs ────────────────────
+        const walkthroughParam = url.queryParams['walkthrough'];
+        if (walkthroughParam) {
+          const moduleId = Number(walkthroughParam);
+          if (!isNaN(moduleId)) {
+            setTimeout(() => {
+              // Skip if training-module.component already launched its own tour
+              if (document.querySelector('.driver-popover') || this.walkthroughRunning) return;
+              this.trainingService.getModule(moduleId).subscribe({
+                next: module => {
+                  if (module.contentType !== 'Walkthrough') return;
+                  try {
+                    const content = JSON.parse(module.contentJson) as WalkthroughContent;
+                    this.startInlineWalkthrough(content.steps, moduleId);
+                  } catch { /* malformed JSON — ignore */ }
+                },
+              });
+            }, 800);
+          }
+        }
+      });
+  }
+
+  /**
+   * Starts an inline driver.js walkthrough tour without navigating.
+   * Used when resuming a training walkthrough from a direct URL or page reload.
+   */
+  private startInlineWalkthrough(steps: DriverStep[], moduleId: number): void {
+    this.walkthroughRunning = true;
+    const svg = createTourSvg();
+    document.body.appendChild(svg);
+    const removeScrollRefresh = attachScrollRefresh(svg);
+    const router = this.router;
+    const trainingService = this.trainingService;
+    const ngZone = this.ngZone;
+
+    let cleanedUp = false;
+    const cleanup = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      this.walkthroughRunning = false;
+      removeScrollRefresh();
+      svg.remove();
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    import('driver.js').then(({ driver }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const d = (driver as any)({
+        animate: true,
+        overlayOpacity: 0,
+        popoverOffset: 20,
+        allowClose: true,
+        popoverClass: 'qb-tour-popover',
+        doneBtnText: '<span class="material-icons-outlined" aria-hidden="true">check</span>Done',
+        onHighlighted: () => {
+          requestAnimationFrame(() => {
+            updateTourConnector(svg, { center: true });
+            setupPopoverDraggable();
+          });
+        },
+        onDeselected: () => {
+          clearTourConnector(svg);
+        },
+        onNextClick: () => {
+          if (d.hasNextStep()) {
+            d.moveNext();
+          } else {
+            cleanup();
+            ngZone.run(() => {
+              trainingService.completeModule(moduleId).subscribe({
+                error: () => { /* swallow — navigation proceeds regardless */ },
+              });
+              router.navigateByUrl(`/training/module/${moduleId}`);
+            });
+            setTimeout(() => d.destroy(), 0);
+          }
+        },
+        onDestroyed: () => {
+          cleanup();
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      d.setSteps(steps as any);
+      d.drive();
+    }).catch(() => { /* driver.js not available */ });
   }
 
   private registerTours(): void {

@@ -1,15 +1,28 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+// ── Outer shell ───────────────────────────────────────────────────────────────
+
 .module-viewer {
   display: flex;
   flex-direction: column;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: $sp-lg;
+  flex: 1;
+  min-height: 0;
 
+  // Static back nav
   &__back {
-    margin-bottom: $sp-lg;
+    flex-shrink: 0;
+    padding: $sp-sm $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+    background: var(--bg);
   }
 
   &__back-btn {
@@ -24,22 +37,33 @@
     padding: $sp-xs $sp-sm;
     transition: color $transition-fast;
 
-    &:hover {
-      color: var(--primary);
-    }
+    &:hover { color: var(--primary); }
 
-    .material-icons-outlined {
-      font-size: $icon-size-sm;
-    }
+    .material-icons-outlined { font-size: $icon-size-sm; }
   }
 
+  // Loading block covers header + body + footer
+  &__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    align-self: stretch;
+    // Override centering so it fills the width for the progress bar
+    position: relative;
+  }
+
+  // Static: title / meta area
   &__header {
+    flex-shrink: 0;
     display: flex;
     flex-direction: column;
     gap: $sp-sm;
-    padding-bottom: $sp-lg;
+    padding: $sp-xl $sp-xl $sp-lg;
     border-bottom: $border-width-thin solid var(--border);
-    margin-bottom: $sp-xl;
   }
 
   &__meta {
@@ -56,9 +80,19 @@
     font-size: $font-size-xs;
     color: var(--text-muted);
 
-    .material-icons-outlined {
-      font-size: $icon-size-xs;
-    }
+    .material-icons-outlined { font-size: $icon-size-xs; }
+  }
+
+  &__style-hint {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    border-left: $border-width-thin solid var(--border);
+    padding-left: $sp-md;
+
+    .material-icons-outlined { font-size: $icon-size-xs; }
   }
 
   &__title {
@@ -72,17 +106,29 @@
     font-size: $font-size-base;
     color: var(--text-secondary);
     margin: 0;
+    line-height: 1.5;
   }
 
-  &__content {
-    margin-bottom: $sp-xl;
+  // Scrollable content
+  &__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: $sp-xl;
+    @include custom-scrollbar(6px);
+  }
+
+  // Static footer: timer + button
+  &__footer {
+    flex-shrink: 0;
+    border-top: $border-width-thin solid var(--border);
+    background: var(--surface);
   }
 
   &__actions {
     display: flex;
     justify-content: flex-end;
-    padding-top: $sp-lg;
-    border-top: $border-width-thin solid var(--border);
+    padding: $sp-md $sp-xl;
   }
 
   &__completed-badge {
@@ -93,8 +139,37 @@
     color: var(--success);
     font-weight: 600;
 
+    .material-icons-outlined { font-size: $icon-size-md; }
+  }
+
+  &__walkthrough-hint {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    font-style: italic;
+    flex: 1;
+
+    .material-icons-outlined { font-size: $icon-size-sm; }
+  }
+
+  // Completed badge shown in the header meta row
+  &__completed-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: 2px $sp-md 2px $sp-sm;
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    border: $border-width-thin solid var(--success);
+    color: var(--success);
+    font-size: $font-size-xs;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
     .material-icons-outlined {
-      font-size: $icon-size-md;
+      font-size: $icon-size-sm;
     }
   }
 
@@ -106,33 +181,263 @@
     padding: $sp-4xl;
     color: var(--text-muted);
 
-    .material-icons-outlined {
-      font-size: $icon-size-hero;
-    }
+    .material-icons-outlined { font-size: $icon-size-hero; }
   }
 }
 
-// ── Article ──────────────────────────────────────────────────────────────────
+// ── Reading timer ─────────────────────────────────────────────────────────────
+
+.reading-timer {
+  &__track {
+    height: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width 1s linear;
+  }
+
+  &--done &__fill {
+    background: var(--success);
+  }
+
+  &__label {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: $sp-xs $sp-xl;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    border-bottom: $border-width-thin solid var(--border);
+
+    .material-icons-outlined { font-size: $icon-size-xs; }
+  }
+
+  &--done &__label {
+    color: var(--success);
+  }
+}
+
+// ── Article prose ─────────────────────────────────────────────────────────────
 
 .article-body {
   display: flex;
   flex-direction: column;
-  gap: $sp-lg;
+  gap: $sp-xl;
+}
 
-  &__text {
-    font-size: $font-size-base;
-    color: var(--text);
-    line-height: 1.7;
-    white-space: pre-wrap;
+// ── Article outline (visual learner spatial overview) ─────────────────────────
+
+.article-outline {
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  border-left: 3px solid var(--info);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: var(--text-secondary);
+    @include uppercase-label($font-size-xs, 0.04em, 600);
+    border-bottom: $border-width-thin solid var(--border);
+
+    .material-icons-outlined { font-size: $icon-size-sm; color: var(--info); }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 0;
+    padding: $sp-sm 0;
+    list-style: none;
+    counter-reset: outline-counter;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-xs $sp-md;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    counter-increment: outline-counter;
+    transition: color $transition-fast, background $transition-fast;
+    cursor: default;
+
+    &:hover {
+      background: color-mix(in srgb, var(--info) 5%, transparent);
+      color: var(--text);
+    }
+
+    &::before {
+      content: counter(outline-counter);
+      flex-shrink: 0;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--info) 15%, transparent);
+      color: var(--info);
+      font-size: $font-size-xs;
+      font-family: $font-family-mono;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
   }
 }
 
+// Shared prose styles applied to both the body text and text sections
+.article-body__text,
+.article-section--text {
+  font-size: $font-size-base;
+  color: var(--text);
+  line-height: 1.7;
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text);
+    font-weight: 600;
+    margin: $sp-xl 0 $sp-sm;
+    line-height: 1.3;
+
+    &:first-child { margin-top: 0; }
+  }
+
+  h1 { font-size: $font-size-xl; }
+  h2 { font-size: $font-size-lg; border-bottom: $border-width-thin solid var(--border); padding-bottom: $sp-sm; }
+  h3 { font-size: $font-size-md; }
+
+  p { margin: 0 0 $sp-md; }
+  p:last-child { margin-bottom: 0; }
+
+  // Unordered lists — standard bullets
+  ul {
+    list-style: disc;
+    margin: 0 0 $sp-md $sp-xl;
+    padding: 0;
+
+    li {
+      margin-bottom: $sp-xs;
+      line-height: 1.6;
+      padding-left: $sp-xs;
+    }
+  }
+
+  // Ordered lists — styled as visual step indicators
+  ol {
+    list-style: none;
+    counter-reset: step-counter;
+    margin: 0 0 $sp-lg 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+
+    li {
+      counter-increment: step-counter;
+      display: flex;
+      gap: $sp-md;
+      align-items: flex-start;
+      line-height: 1.6;
+
+      &::before {
+        content: counter(step-counter);
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $font-size-xs;
+        font-weight: 700;
+        font-family: $font-family-mono;
+        margin-top: 1px;
+      }
+    }
+  }
+
+  strong { font-weight: 700; color: var(--text); }
+  em { font-style: italic; }
+
+  code {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    padding: 1px $sp-xs;
+  }
+
+  pre {
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+    overflow-x: auto;
+    margin-bottom: $sp-md;
+
+    code { background: none; border: none; padding: 0; }
+  }
+
+  hr {
+    border: none;
+    border-top: $border-width-thin solid var(--border);
+    margin: $sp-xl 0;
+  }
+
+  blockquote {
+    margin: 0 0 $sp-md;
+    padding: $sp-sm $sp-lg;
+    border-left: $border-width solid var(--primary);
+    background: var(--bg);
+    color: var(--text-secondary);
+    font-style: italic;
+  }
+}
+
+// ── Callout sections ──────────────────────────────────────────────────────────
+
 .article-section {
-  &--text {
+  &--callout {
+    display: flex;
+    gap: $sp-md;
+    align-items: flex-start;
+    padding: $sp-md $sp-lg;
+    border-left: $border-width solid var(--info);
+    background: var(--info-light);
     font-size: $font-size-base;
     color: var(--text);
-    line-height: 1.7;
-    white-space: pre-wrap;
+
+    .callout-icon {
+      font-size: $icon-size-md;
+      color: var(--info);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .callout-body { flex: 1; line-height: 1.6; }
+  }
+
+  &--callout-warning {
+    border-left-color: var(--warning);
+    background: var(--warning-light);
+
+    .callout-icon { color: var(--warning); }
+  }
+
+  &--callout-tip {
+    border-left-color: var(--success);
+    background: var(--success-light);
+
+    .callout-icon { color: var(--success); }
   }
 
   &--image {
@@ -142,6 +447,7 @@
       max-width: 100%;
       height: auto;
       border: $border-width-thin solid var(--border);
+      display: block;
     }
 
     .article-section__caption {
@@ -151,27 +457,9 @@
       font-style: italic;
     }
   }
-
-  &--callout {
-    padding: $sp-md $sp-lg;
-    border-left: $border-width solid var(--info);
-    background: var(--info-light);
-    font-size: $font-size-base;
-    color: var(--text);
-  }
-
-  &--callout-warning {
-    border-left-color: var(--warning);
-    background: var(--warning-light);
-  }
-
-  &--callout-tip {
-    border-left-color: var(--success);
-    background: var(--success-light);
-  }
 }
 
-// ── Video ────────────────────────────────────────────────────────────────────
+// ── Video ─────────────────────────────────────────────────────────────────────
 
 .video-viewer {
   display: flex;
@@ -180,7 +468,7 @@
 
   &__embed-wrap {
     position: relative;
-    padding-bottom: 56.25%; // 16:9
+    padding-bottom: 56.25%;
     height: 0;
     overflow: hidden;
     background: #000;
@@ -188,27 +476,31 @@
 
   &__embed {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     border: none;
   }
 
+  &__chapters {
+    border: $border-width-thin solid var(--border);
+  }
+
   &__chapters-title {
-    font-size: $font-size-title;
+    font-size: $font-size-xs;
     font-weight: 600;
-    color: var(--text);
-    margin: 0 0 $sp-md;
+    color: var(--text-secondary);
+    margin: 0;
+    padding: $sp-sm $sp-md;
+    background: var(--bg);
+    border-bottom: $border-width-thin solid var(--border);
+    @include uppercase-label($font-size-xs, 0.04em, 600);
   }
 
   &__chapter-list {
     list-style: none;
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     display: flex;
     flex-direction: column;
-    gap: $sp-xs;
   }
 
   &__chapter {
@@ -216,18 +508,28 @@
     align-items: center;
     gap: $sp-md;
     font-size: $font-size-sm;
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+
+    &:last-child { border-bottom: none; }
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+    }
   }
 
   &__chapter-time {
     font-family: $font-family-mono;
     font-size: $font-size-xs;
-    color: var(--text-muted);
-    min-width: 40px;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    padding: 1px $sp-sm;
+    min-width: 44px;
+    text-align: center;
+    flex-shrink: 0;
   }
 
-  &__chapter-label {
-    color: var(--text);
-  }
+  &__chapter-label { color: var(--text); flex: 1; }
 
   &__transcript {
     border: $border-width-thin solid var(--border);
@@ -252,61 +554,166 @@
   }
 }
 
-// ── Walkthrough ──────────────────────────────────────────────────────────────
+// ── Walkthrough ───────────────────────────────────────────────────────────────
 
 .walkthrough-viewer {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: $sp-xl;
+  max-width: 700px;
 
-  &__info {
+  // ── Hero banner ──────────────────────────────────────────────────────────
+  &__hero {
     display: flex;
     gap: $sp-lg;
-    padding: $sp-lg;
-    background: var(--surface);
-    border: $border-width-thin solid var(--border);
-    width: 100%;
+    align-items: flex-start;
+    padding: $sp-xl;
+    background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    border: $border-width-thin solid color-mix(in srgb, var(--primary) 25%, var(--border));
   }
 
-  &__icon {
+  &__hero-icon {
     font-size: $icon-size-xxl;
     color: var(--primary);
     flex-shrink: 0;
+    margin-top: 2px;
   }
 
-  &__text {
-    display: flex;
-    flex-direction: column;
-    gap: $sp-sm;
-  }
+  &__hero-text { display: flex; flex-direction: column; gap: $sp-sm; }
 
-  &__desc {
-    font-size: $font-size-base;
+  &__hero-title {
+    font-size: $font-size-md;
+    font-weight: 700;
     color: var(--text);
+    margin: 0;
+  }
+
+  &__hero-desc {
+    font-size: $font-size-base;
+    color: var(--text-secondary);
     margin: 0;
     line-height: 1.6;
   }
 
-  &__steps-count {
+  // ── Meta row ─────────────────────────────────────────────────────────────
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-xl;
+    flex-wrap: wrap;
+  }
+
+  &__meta-item {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
     font-size: $font-size-sm;
-    color: var(--text-muted);
+    color: var(--text-secondary);
+
+    .material-icons-outlined { font-size: $icon-size-sm; color: var(--text-muted); }
+  }
+
+  // ── Steps preview ─────────────────────────────────────────────────────────
+  &__steps-preview {
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__steps-title {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-secondary);
+    @include uppercase-label($font-size-sm, 0.04em, 600);
+    padding: $sp-sm $sp-lg;
+    background: var(--bg);
+    border-bottom: $border-width-thin solid var(--border);
     margin: 0;
+  }
+
+  &__step-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__step-item {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+
+    &:last-child { border-bottom: none; }
+  }
+
+  &__step-num {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xs;
+    font-weight: 700;
+    font-family: $font-family-mono;
+  }
+
+  &__step-title {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  // ── Start button ──────────────────────────────────────────────────────────
+  &__start-btn {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    height: 2.5rem;
+    padding: 0 $sp-xl;
+    background: var(--primary);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-base;
+    font-weight: 600;
+    font-family: $font-family-primary;
+    transition: background $transition-fast;
+    align-self: flex-start;
+
+    &:hover:not(:disabled) { background: var(--primary-dark); }
+
+    &:disabled {
+      background: var(--success);
+      cursor: default;
+    }
+
+    .material-icons-outlined { font-size: $icon-size-md; }
   }
 }
 
-// ── Quick Reference ──────────────────────────────────────────────────────────
+// ── Quick Reference ───────────────────────────────────────────────────────────
 
 .quickref-viewer {
   display: flex;
   flex-direction: column;
   gap: $sp-xl;
 
-  &__title {
-    font-size: $font-size-xl;
-    font-weight: 700;
-    color: var(--text);
-    margin: 0;
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+  }
+
+  &__title { font-size: $font-size-xl; font-weight: 700; color: var(--text); margin: 0; }
+
+  &__print-btn {
+    flex-shrink: 0;
+
+    @media print { display: none; }
   }
 
   &__groups {
@@ -334,8 +741,7 @@
   &__list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
   }
 }
 

@@ -1,5 +1,5 @@
 <div class="column" [class.column--over-wip]="isOverWip()" [style.--col-tint]="column().stage.color">
-  <div class="column__header" [style.border-top-color]="column().stage.color">
+  <div class="column__header" data-tour="wip-limit" data-tour-group="board-columns wip-limit" [style.border-top-color]="column().stage.color">
     <span class="column__name">{{ column().stage.name }}</span>
     <span class="column__count">{{ jobCount() }}</span>
     @if (wipLimit() !== null) {
@@ -21,8 +21,8 @@
     [cdkDropListConnectedTo]="allDropListIds()"
     [cdkDropListEnterPredicate]="canEnter"
     (cdkDropListDropped)="onDrop($event)">
-    @for (job of column().jobs; track job.id) {
-      <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cdkDragStarted)="onDragStarted($event)" (cardClicked)="onCardClicked($event)" (jobNumberClicked)="onJobNumberClicked($event)" />
+    @for (job of column().jobs; track job.id; let first = $first) {
+      <app-job-card [job]="job" [selected]="selectedJobIds().has(job.id)" cdkDrag [cdkDragData]="job" (cdkDragStarted)="onDragStarted($event)" (cardClicked)="onCardClicked($event)" (jobNumberClicked)="onJobNumberClicked($event)" [attr.data-tour]="first ? 'job-card' : null" data-tour-group="job-card" />
     }
     @empty {
       <app-empty-state icon="work" [message]="'kanban.noJobs' | translate" />

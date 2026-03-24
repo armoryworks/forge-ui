@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
 
 import { TrainingService } from '../services/training.service';
 import { QuizAnswer, QuizContent, QuizSubmissionResult } from '../models/quiz-content.model';
@@ -13,6 +13,7 @@ import { QuizAnswer, QuizContent, QuizSubmissionResult } from '../models/quiz-co
 })
 export class TrainingModuleQuizComponent {
   private readonly trainingService = inject(TrainingService);
+  private readonly el = inject(ElementRef);
 
   readonly content = input.required<QuizContent>();
   readonly moduleId = input.required<number>();
@@ -26,6 +27,14 @@ export class TrainingModuleQuizComponent {
 
   protected readonly allAnswered = computed(() =>
     this.content().questions.every(q => this.answers().has(q.id)),
+  );
+
+  protected readonly answeredCount = computed(() =>
+    this.content().questions.filter(q => this.answers().has(q.id)).length,
+  );
+
+  protected readonly correctCount = computed(() =>
+    this.result()?.questions.filter(q => q.isCorrect).length ?? 0,
   );
 
   protected selectOption(questionId: string, optionId: string): void {
@@ -56,6 +65,10 @@ export class TrainingModuleQuizComponent {
         this.submitted.set(true);
         this.isSubmitting.set(false);
         this.completed.emit(result.passed);
+        // Scroll score card into view so the user sees their result immediately
+        requestAnimationFrame(() => {
+          this.el.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
       },
       error: () => this.isSubmitting.set(false),
     });

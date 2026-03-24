@@ -16,6 +16,7 @@ export interface QuizContent {
   shuffleQuestions: boolean;
   shuffleOptions: boolean;
   showExplanationsAfterSubmit: boolean;
+  timeLimit?: number; // minutes, optional
   questions: QuizQuestion[];
 }
 

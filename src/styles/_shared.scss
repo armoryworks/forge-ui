@@ -59,6 +59,13 @@
     background: var(--bg);
   }
 
+  &:disabled,
+  &[disabled] {
+    opacity: 0.38;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
   &--primary {
     background: var(--primary);
     border-color: var(--primary);
@@ -68,6 +75,14 @@
     &:hover {
       background: var(--primary-dark);
       border-color: var(--primary-dark);
+    }
+
+    &:disabled,
+    &[disabled] {
+      background: var(--text-muted);
+      border-color: var(--text-muted);
+      color: white;
+      opacity: 0.5;
     }
   }
 

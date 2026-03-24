@@ -5,7 +5,7 @@
   </div>
 } @else {
   <app-page-header [title]="'kanban.title' | translate" [subtitle]="'kanban.subtitle' | translate" helpTourId="kanban-board">
-    <div class="page-header__track-types">
+    <div class="page-header__track-types" data-tour="track-type-switcher">
       @for (tt of trackTypes(); track tt.id) {
         <button
           class="track-type-btn"
@@ -25,7 +25,7 @@
       </button>
     </div>
 
-    <app-select [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
+    <app-select data-tour="board-filters" [label]="'kanban.teamMembers' | translate" [formControl]="teamUserIds" [options]="userOptions()" [multiple]="true" [placeholder]="'kanban.allAssignedUsers' | translate" />
 
     <button class="my-work-btn" [class.my-work-btn--active]="myWorkOnly()"
             (click)="toggleMyWork()"
@@ -43,7 +43,7 @@
   </app-page-header>
 
   @if (selectionCount() === 0) {
-    <div class="board-hint" aria-hidden="true">
+    <div class="board-hint" data-tour="board-columns" aria-hidden="true">
       <span class="material-icons-outlined board-hint__icon">info_outline</span>
       <span class="board-hint__text">{{ 'kanban.dragHint' | translate }} <kbd>Ctrl</kbd>{{ 'kanban.multiSelectHint' | translate }}</span>
     </div>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -45,30 +45,59 @@ export class TrainingComponent implements OnInit {
   );
 
   protected readonly isLoading = signal(false);
-  protected readonly modules = signal<TrainingModuleListItem[]>([]);
+  private readonly allModules = signal<TrainingModuleListItem[]>([]);
   protected readonly enrollments = signal<TrainingEnrollment[]>([]);
   protected readonly paths = signal<TrainingPath[]>([]);
-  protected readonly totalCount = signal(0);
 
   protected readonly searchControl = new FormControl('');
   protected readonly contentTypeControl = new FormControl<string>('');
+  protected readonly learningStyleControl = new FormControl<string>('');
 
   protected readonly contentTypeOptions: SelectOption[] = [
     { value: '', label: 'All Types' },
     { value: 'Article', label: 'Article' },
     { value: 'Video', label: 'Video' },
-    { value: 'Walkthrough', label: 'Walkthrough' },
+    { value: 'Walkthrough', label: 'Interactive Tour' },
     { value: 'QuickRef', label: 'Quick Reference' },
     { value: 'Quiz', label: 'Quiz / Assessment' },
   ];
+
+  protected readonly learningStyleOptions: SelectOption[] = [
+    { value: '', label: 'All Learning Styles' },
+    { value: 'visual', label: 'Visual' },
+    { value: 'auditory', label: 'Auditory' },
+    { value: 'reading', label: 'Reading / Writing' },
+    { value: 'kinesthetic', label: 'Hands-on / Kinesthetic' },
+  ];
+
+  private readonly searchValue = toSignal(this.searchControl.valueChanges, { initialValue: '' });
+  private readonly contentTypeValue = toSignal(this.contentTypeControl.valueChanges, { initialValue: '' });
+  private readonly learningStyleValue = toSignal(this.learningStyleControl.valueChanges, { initialValue: '' });
+
+  private readonly styleTypeMap: Record<string, string[]> = {
+    visual:       ['Video', 'Walkthrough', 'QuickRef'],
+    auditory:     ['Video'],
+    reading:      ['Article', 'QuickRef'],
+    kinesthetic:  ['Walkthrough', 'Quiz'],
+  };
+
+  protected readonly modules = computed(() => {
+    const search = (this.searchValue() ?? '').toLowerCase();
+    const type   = this.contentTypeValue() ?? '';
+    const style  = this.learningStyleValue() ?? '';
+
+    return this.allModules().filter(m => {
+      if (search && !m.title.toLowerCase().includes(search) && !(m.summary ?? '').toLowerCase().includes(search)) return false;
+      if (type && m.contentType !== type) return false;
+      if (style && !this.styleTypeMap[style]?.includes(m.contentType)) return false;
+      return true;
+    });
+  });
 
   ngOnInit(): void {
     this.loadModules();
     this.loadEnrollments();
     this.loadPaths();
-
-    this.searchControl.valueChanges.subscribe(() => this.loadModules());
-    this.contentTypeControl.valueChanges.subscribe(() => this.loadModules());
   }
 
   protected switchTab(tab: TrainingTab): void {
@@ -77,14 +106,9 @@ export class TrainingComponent implements OnInit {
 
   private loadModules(): void {
     this.isLoading.set(true);
-    this.trainingService.getModules({
-      search: this.searchControl.value ?? undefined,
-      contentType: this.contentTypeControl.value ?? undefined,
-      pageSize: 50,
-    }).subscribe({
+    this.trainingService.getModules({ pageSize: 200 }).subscribe({
       next: result => {
-        this.modules.set(result.data);
-        this.totalCount.set(result.totalCount);
+        this.allModules.set(result.data);
         this.isLoading.set(false);
       },
       error: () => this.isLoading.set(false),
@@ -118,8 +142,38 @@ export class TrainingComponent implements OnInit {
     return icons[type] ?? 'school';
   }
 
+  protected contentTypeLabel(type: TrainingContentType): string {
+    const labels: Record<TrainingContentType, string> = {
+      Article: 'Article',
+      Video: 'Video',
+      Walkthrough: 'Interactive Tour',
+      QuickRef: 'Quick Reference',
+      Quiz: 'Quiz / Assessment',
+    };
+    return labels[type] ?? type;
+  }
+
+  protected learningStyleHint(type: TrainingContentType): string {
+    const hints: Record<TrainingContentType, string> = {
+      Article:     'Best for: Reading / Writing learners',
+      Video:       'Best for: Visual / Auditory learners',
+      Walkthrough: 'Best for: Visual / Kinesthetic learners',
+      QuickRef:    'Best for: Visual / Reading learners',
+      Quiz:        'Best for: Kinesthetic learners — learn by doing',
+    };
+    return hints[type] ?? '';
+  }
+
   protected enrollmentProgress(e: TrainingEnrollment): number {
     if (e.totalModules === 0) return 0;
     return Math.round((e.completedModules / e.totalModules) * 100);
+  }
+
+  protected enrollmentForPath(pathId: number): TrainingEnrollment | null {
+    return this.enrollments().find(e => e.pathId === pathId) ?? null;
+  }
+
+  protected pathDescriptionFor(pathId: number): string | null {
+    return this.paths().find(p => p.id === pathId)?.description ?? null;
   }
 }

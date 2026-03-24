@@ -1,8 +1,44 @@
 <div class="quiz">
   @if (!submitted()) {
+    <div class="quiz__info-bar">
+      <span class="quiz__question-count">
+        <span class="material-icons-outlined" aria-hidden="true">quiz</span>
+        {{ content().questions.length }} questions
+        @if (content().passingScore) {
+          <span class="quiz__passing">· {{ content().passingScore }}% to pass</span>
+        }
+      </span>
+      @if (content().timeLimit) {
+        <span class="quiz__time-limit">
+          <span class="material-icons-outlined" aria-hidden="true">timer</span>
+          {{ content().timeLimit }} min limit
+        </span>
+      }
+    </div>
+
+    <!-- Progress header -->
+    <div class="quiz__progress-bar-wrap" role="progressbar"
+         [attr.aria-valuenow]="answeredCount()"
+         [attr.aria-valuemax]="content().questions.length"
+         [attr.aria-label]="answeredCount() + ' of ' + content().questions.length + ' answered'">
+      <div class="quiz__progress-bar-fill"
+           [style.width.%]="(answeredCount() / content().questions.length) * 100"></div>
+    </div>
+    <div class="quiz__progress-label">
+      <span class="quiz__progress-text">
+        {{ answeredCount() }} of {{ content().questions.length }} answered
+      </span>
+      @if (allAnswered()) {
+        <span class="quiz__progress-ready">
+          <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+          Ready to submit
+        </span>
+      }
+    </div>
+
     <div class="quiz__questions">
       @for (question of content().questions; track question.id; let i = $index) {
-        <div class="quiz-question">
+        <div class="quiz-question" [class.quiz-question--answered]="answers().has(question.id)">
           <p class="quiz-question__text">
             <span class="quiz-question__num">{{ i + 1 }}.</span> {{ question.text }}
           </p>
@@ -43,11 +79,35 @@
       </button>
     </div>
   } @else {
-    <div class="quiz__result" [class.quiz__result--passed]="result()?.passed" [class.quiz__result--failed]="!result()?.passed">
-      <span class="material-icons-outlined quiz__result-icon" aria-hidden="true">
-        {{ result()?.passed ? 'check_circle' : 'cancel' }}
-      </span>
-      <p class="quiz__result-label">{{ scoreLabel() }}</p>
+    <!-- Score card -->
+    <div class="quiz__score-card"
+         [class.quiz__score-card--passed]="result()?.passed"
+         [class.quiz__score-card--failed]="!result()?.passed"
+         role="status"
+         [attr.aria-label]="scoreLabel()">
+      <div class="quiz__score-circle" aria-hidden="true">
+        <span class="quiz__score-pct">{{ result()?.score }}%</span>
+        <span class="quiz__score-label">{{ result()?.passed ? 'PASSED' : 'FAILED' }}</span>
+      </div>
+      <div class="quiz__score-detail">
+        <p class="quiz__score-msg">{{ scoreLabel() }}</p>
+        <p class="quiz__score-sub">
+          {{ correctCount() }} of {{ content().questions.length }} correct
+          &nbsp;·&nbsp; {{ content().passingScore }}% required to pass
+        </p>
+        @if (!result()?.passed) {
+          <button class="action-btn action-btn--primary quiz__retry-btn" (click)="retry()" aria-label="Retry quiz">
+            <span class="material-icons-outlined" aria-hidden="true">refresh</span>
+            Try Again
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Question review -->
+    <div class="quiz__review-header">
+      <span class="material-icons-outlined" aria-hidden="true">rate_review</span>
+      Answer Review
     </div>
 
     <div class="quiz__review">
@@ -89,14 +149,5 @@
         </div>
       }
     </div>
-
-    @if (!result()?.passed) {
-      <div class="quiz__actions">
-        <button class="action-btn action-btn--primary" (click)="retry()" aria-label="Retry quiz">
-          <span class="material-icons-outlined" aria-hidden="true">refresh</span>
-          Try Again
-        </button>
-      </div>
-    }
   }
 </div>

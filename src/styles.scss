@@ -180,18 +180,131 @@ html[data-theme='dark'] {
 }
 
 // ─── Driver.js Tour Overrides ───
-.qb-tour-popover {
-  font-family: $font-family-primary;
-  border-radius: $border-radius;
+// ── Driver.js walkthrough tour ────────────────────────────────────────────────
+// No dark overlay, no centered dialog — contextual popover near the element.
+// Custom SVG connector draws a line + arrow to the highlighted control.
+
+// Fade-in after driver.js finishes animating the element highlight (~400ms).
+// The popover DOM is recreated fresh each step, so the animation resets automatically.
+@keyframes qb-tour-fadein {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// Kill the built-in overlay entirely (overlayOpacity: 0 set in code too)
+#driver-dummy-element,
+.driver-overlay { display: none !important; }
+
+// Hide the default built-in arrow — we draw our own connector
+.driver-popover-arrow { display: none !important; }
+
+// Hide the default element highlight ring — our SVG rect handles it
+.driver-active-element {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.qb-tour-popover.driver-popover {
+  animation: qb-tour-fadein 150ms ease 300ms both;
+  font-family: $font-family-primary !important;
+  border-radius: $border-radius !important;
+  background: var(--surface) !important;
+  border: $border-width solid var(--primary) !important;
+  box-shadow: $shadow-dropdown !important;
+  color: var(--text) !important;
+  max-width: 300px !important;
+  padding: $sp-lg !important;
 
   .driver-popover-title {
-    font-size: $font-size-md;
-    font-weight: 600;
-    font-family: $font-family-primary;
+    font-size: $font-size-title !important;
+    font-weight: 700 !important;
+    font-family: $font-family-primary !important;
+    color: var(--text) !important;
+    margin-bottom: $sp-sm !important;
+    border-bottom: $border-width-thin solid var(--border) !important;
+    padding-bottom: $sp-sm !important;
   }
 
   .driver-popover-description {
-    font-size: $font-size-base;
-    font-family: $font-family-primary;
+    font-size: $font-size-base !important;
+    font-family: $font-family-primary !important;
+    color: var(--text-secondary) !important;
+    line-height: 1.6 !important;
+    margin-bottom: $sp-md !important;
+  }
+
+  .driver-popover-footer {
+    display: flex !important;
+    align-items: center !important;
+    gap: $sp-sm !important;
+    border-top: $border-width-thin solid var(--border) !important;
+    padding-top: $sp-sm !important;
+    margin-top: 0 !important;
+  }
+
+  .driver-popover-progress-text {
+    font-size: $font-size-xs !important;
+    color: var(--text-muted) !important;
+    flex: 1 !important;
+    font-family: $font-family-mono !important;
+  }
+
+  .driver-popover-prev-btn,
+  .driver-popover-next-btn {
+    font-size: $font-size-xs !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    height: 2rem !important;
+    padding: 0 $sp-md !important;
+    border: $border-width-thin solid var(--border) !important;
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    cursor: pointer !important;
+    border-radius: 0 !important;
+    font-family: $font-family-primary !important;
+    text-shadow: none !important;
+    min-width: 60px !important;
+
+    &:hover { background: var(--bg) !important; }
+  }
+
+  .driver-popover-next-btn {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: white !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+
+    &:hover { background: var(--primary-dark) !important; border-color: var(--primary-dark) !important; }
+
+    // Allow Material Icons inside the button to use the icon font
+    .material-icons-outlined {
+      font-family: 'Material Icons Outlined' !important;
+      font-size: 14px !important;
+      line-height: 1 !important;
+    }
+  }
+
+  .driver-popover-close-btn {
+    all: unset !important;
+    position: absolute !important;
+    top: $sp-md !important;
+    right: $sp-md !important;
+    width: 20px !important;
+    height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    color: var(--text-muted) !important;
+    font-size: $icon-size-sm !important;
+    border: none !important;
+    outline: none !important;
+    background: none !important;
+    box-shadow: none !important;
+
+    &:hover { color: var(--text) !important; }
   }
 }
