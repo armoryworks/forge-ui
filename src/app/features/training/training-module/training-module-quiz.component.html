@@ -4,6 +4,9 @@
       <span class="quiz__question-count">
         <span class="material-icons-outlined" aria-hidden="true">quiz</span>
         {{ content().questions.length }} questions
+        @if (content().poolSize && content().poolSize! > content().questions.length) {
+          <span class="quiz__pool-hint">randomly selected from {{ content().poolSize }}</span>
+        }
         @if (content().passingScore) {
           <span class="quiz__passing">· {{ content().passingScore }}% to pass</span>
         }

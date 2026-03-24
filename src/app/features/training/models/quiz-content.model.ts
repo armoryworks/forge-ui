@@ -17,6 +17,8 @@ export interface QuizContent {
   shuffleOptions: boolean;
   showExplanationsAfterSubmit: boolean;
   timeLimit?: number; // minutes, optional
+  questionsPerQuiz?: number; // how many to select from pool per attempt
+  poolSize?: number; // total questions in pool (server injects this for display)
   questions: QuizQuestion[];
 }
 
