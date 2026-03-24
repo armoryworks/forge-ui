@@ -16,7 +16,7 @@ import { TrainingEnrollment } from './models/training-progress.model';
 import { TrainingPath } from './models/training-path.model';
 import { TrainingContentType } from './models/training-content-type.enum';
 
-type TrainingTab = 'library' | 'my-learning' | 'paths';
+type TrainingTab = 'my-learning' | 'paths' | 'all-modules';
 
 @Component({
   selector: 'app-training',
@@ -40,8 +40,8 @@ export class TrainingComponent implements OnInit {
   private readonly router = inject(Router);
 
   protected readonly activeTab = toSignal(
-    this.route.paramMap.pipe(map(p => (p.get('tab') as TrainingTab) ?? 'library')),
-    { initialValue: 'library' as TrainingTab },
+    this.route.paramMap.pipe(map(p => (p.get('tab') as TrainingTab) ?? 'my-learning')),
+    { initialValue: 'my-learning' as TrainingTab },
   );
 
   protected readonly isLoading = signal(false);
@@ -57,7 +57,7 @@ export class TrainingComponent implements OnInit {
     { value: '', label: 'All Types' },
     { value: 'Article', label: 'Article' },
     { value: 'Video', label: 'Video' },
-    { value: 'Walkthrough', label: 'Interactive Tour' },
+    { value: 'Walkthrough', label: 'Walkthrough' },
     { value: 'QuickRef', label: 'Quick Reference' },
     { value: 'Quiz', label: 'Quiz / Assessment' },
   ];

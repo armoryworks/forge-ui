@@ -1,7 +1,8 @@
 import { Routes } from '@angular/router';
 
 export const TRAINING_ROUTES: Routes = [
-  { path: '', redirectTo: 'library', pathMatch: 'full' },
+  { path: '', redirectTo: 'my-learning', pathMatch: 'full' },
+  { path: 'library', redirectTo: 'all-modules', pathMatch: 'full' },
   {
     path: 'module/:id',
     loadComponent: () => import('./training-module/training-module.component').then(m => m.TrainingModuleComponent),

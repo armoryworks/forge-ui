@@ -3,10 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { TrainingModuleListItem, TrainingModuleDetail } from '../models/training-module.model';
+import { TrainingModuleListItem, TrainingModuleDetail, VideoStatusResponse } from '../models/training-module.model';
 import { TrainingPath } from '../models/training-path.model';
 import { TrainingProgress, TrainingEnrollment } from '../models/training-progress.model';
 import { QuizAnswer, QuizSubmissionResult } from '../models/quiz-content.model';
+import { UserTrainingDetail } from '../models/user-training-detail.model';
 import { GenerateWalkthroughResponse, WalkthroughStep } from '../../admin/models/walkthrough-step.model';
 
 export interface PaginatedResult<T> {
@@ -115,5 +116,18 @@ export class TrainingService {
       `${this.base}/modules/${moduleId}/walkthrough-steps`,
       { steps }
     );
+  }
+
+  getUserTrainingDetail(userId: number): Observable<UserTrainingDetail> {
+    return this.http.get<UserTrainingDetail>(`${this.base}/admin/users/${userId}/detail`);
+  }
+
+  // AI video generation
+  generateVideo(moduleId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/modules/${moduleId}/generate-video`, {});
+  }
+
+  getVideoStatus(moduleId: number): Observable<VideoStatusResponse> {
+    return this.http.get<VideoStatusResponse>(`${this.base}/modules/${moduleId}/video-status`);
   }
 }

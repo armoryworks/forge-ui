@@ -76,18 +76,24 @@ export class AdminComponent {
   private readonly translate = inject(TranslateService);
 
   private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance', 'sales-tax', 'audit-log']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'sales-tax', 'audit-log']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'sales-tax', 'audit-log']);
+  private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
+  protected readonly isManagerOrAdmin = computed(() => this.authService.hasRole('Admin') || this.authService.hasRole('Manager'));
   protected readonly pageTitle = computed(() => this.isAdmin() ? this.translate.instant('admin.title') : this.translate.instant('admin.titleEmployee'));
   protected readonly pageSubtitle = computed(() => this.isAdmin() ? this.translate.instant('admin.subtitle') : this.translate.instant('admin.subtitleEmployee'));
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(
       map(params => {
-        const tab = params.get('tab') ?? (this.authService.hasRole('Admin') ? 'users' : 'compliance');
-        if (!AdminComponent.VALID_TABS.has(tab)) return this.authService.hasRole('Admin') ? 'users' : 'compliance';
-        if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !this.authService.hasRole('Admin')) return 'compliance';
+        const isAdmin = this.authService.hasRole('Admin');
+        const isManager = this.authService.hasRole('Manager');
+        const defaultTab = isAdmin ? 'users' : 'compliance';
+        const tab = params.get('tab') ?? defaultTab;
+        if (!AdminComponent.VALID_TABS.has(tab)) return defaultTab;
+        if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !isAdmin) return 'compliance';
+        if (AdminComponent.MANAGER_AND_ADMIN_TABS.has(tab) && !isAdmin && !isManager) return 'compliance';
         return tab;
       }),
     ),

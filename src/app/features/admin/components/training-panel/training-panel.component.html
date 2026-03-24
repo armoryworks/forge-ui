@@ -68,6 +68,16 @@
                   {{ generatingModuleId() === row.id ? 'sync' : 'auto_awesome' }}
                 </span>
               </button>
+              <button class="icon-btn"
+                [title]="row.videoGenerationStatus === 'Done' ? 'Regenerate video' : 'Generate AI video'"
+                [attr.aria-label]="row.videoGenerationStatus === 'Done' ? 'Regenerate AI tutorial video' : 'Generate AI tutorial video'"
+                [disabled]="generatingVideoModuleId() !== null || row.videoGenerationStatus === 'Pending' || row.videoGenerationStatus === 'Processing'"
+                (click)="generateVideo(row); $event.stopPropagation()">
+                <span class="material-icons-outlined"
+                  [class.spin]="generatingVideoModuleId() === row.id || row.videoGenerationStatus === 'Pending' || row.videoGenerationStatus === 'Processing'">
+                  {{ (generatingVideoModuleId() === row.id || row.videoGenerationStatus === 'Pending' || row.videoGenerationStatus === 'Processing') ? 'sync' : videoStatusIcon(row.videoGenerationStatus) }}
+                </span>
+              </button>
             }
             <button class="icon-btn" title="Edit module" aria-label="Edit module"
               (click)="openEditModuleDialog(row); $event.stopPropagation()">
@@ -168,7 +178,23 @@
             <span class="text-muted">--</span>
           }
         </ng-template>
+
+        <ng-template appColumnCell="detail" let-row>
+          <button class="icon-btn" title="View module detail" aria-label="View training detail for this user"
+            (click)="viewDetail(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">open_in_new</span>
+          </button>
+        </ng-template>
       </app-data-table>
     </div>
   }
 </div>
+
+<app-detail-side-panel
+  [open]="!!selectedUser()"
+  [title]="selectedUser()?.displayName ?? 'Training Detail'"
+  (closed)="closeDetail()">
+  @if (selectedUser(); as user) {
+    <app-user-training-detail-panel [userId]="user.userId" />
+  }
+</app-detail-side-panel>

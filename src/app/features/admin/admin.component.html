@@ -28,10 +28,6 @@
         <span class="material-icons-outlined">hub</span>
         {{ 'admin.tabs.integrations' | translate }}
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
-        <span class="material-icons-outlined">school</span>
-        {{ 'admin.tabs.training' | translate }}
-      </button>
       <button class="tab" [class.tab--active]="activeTab() === 'ai-assistants'" (click)="switchTab('ai-assistants')">
         <span class="material-icons-outlined">smart_toy</span>
         {{ 'admin.tabs.aiAssistants' | translate }}
@@ -49,6 +45,12 @@
         aria-label="Audit Log">
         <span class="material-icons-outlined">manage_search</span>
         Audit Log
+      </button>
+    }
+    @if (isManagerOrAdmin()) {
+      <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
+        <span class="material-icons-outlined">school</span>
+        {{ 'admin.tabs.training' | translate }}
       </button>
     }
     <button class="tab" [class.tab--active]="activeTab() === 'compliance'" (click)="switchTab('compliance')">

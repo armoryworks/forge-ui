@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, NgZone, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval } from 'rxjs';
+import { filter, interval, switchMap } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { MarkdownComponent } from 'ngx-markdown';
@@ -9,8 +9,10 @@ import { MarkdownComponent } from 'ngx-markdown';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRefresh, setupPopoverDraggable } from '../../../shared/utils/tour-connector.utils';
 
+import { AuthService } from '../../../shared/services/auth.service';
 import { TrainingService } from '../services/training.service';
-import { TrainingModuleDetail } from '../models/training-module.model';
+import { TrainingModuleDetail, VideoGenerationStatus } from '../models/training-module.model';
+import { SafeUrl } from '@angular/platform-browser';
 import { ArticleContent } from '../models/article-content.model';
 import { VideoContent } from '../models/video-content.model';
 import { WalkthroughContent } from '../models/walkthrough-content.model';
@@ -28,6 +30,7 @@ import { TrainingModuleQuizComponent } from './training-module-quiz.component';
 })
 export class TrainingModuleComponent implements OnInit {
   private readonly trainingService = inject(TrainingService);
+  private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -38,6 +41,24 @@ export class TrainingModuleComponent implements OnInit {
   protected readonly module = signal<TrainingModuleDetail | null>(null);
   protected readonly isCompleting = signal(false);
   protected readonly completed = signal(false);
+  protected readonly generatedVideoUrl = signal<SafeUrl | null>(null);
+  protected readonly videoGenStatus = signal<VideoGenerationStatus>('None');
+  protected readonly isGenerating = signal(false);
+
+  protected readonly isAdmin = computed(() => this.authService.hasAnyRole(['Admin', 'Manager']));
+
+  // Video player state for parallel chapter panel
+  @ViewChild('videoEl') private videoEl?: ElementRef<HTMLVideoElement>;
+  protected readonly currentVideoTime = signal(0);
+  protected readonly activeChapterIndex = computed(() => {
+    const t = this.currentVideoTime();
+    const chapters = this.videoContent()?.chaptersJson ?? [];
+    let active = 0;
+    for (let i = 0; i < chapters.length; i++) {
+      if (chapters[i].timeSeconds <= t) active = i;
+    }
+    return active;
+  });
 
   // Reading timer — counts seconds spent on the page (pauses when tab is hidden)
   protected readonly elapsedSeconds = signal(0);
@@ -134,6 +155,13 @@ export class TrainingModuleComponent implements OnInit {
         this.isLoading.set(false);
         this.trainingService.recordStart(id).subscribe();
         this.completed.set(module.myStatus === 'Completed');
+        this.videoGenStatus.set(module.videoGenerationStatus);
+
+        if (module.videoGenerationStatus === 'Done') {
+          this.fetchGeneratedVideo(id);
+        } else if (module.videoGenerationStatus === 'Processing' || module.videoGenerationStatus === 'Pending') {
+          this.startPolling(id);
+        }
       },
       error: () => this.isLoading.set(false),
     });
@@ -256,12 +284,76 @@ export class TrainingModuleComponent implements OnInit {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         d.setSteps(content.steps as any);
         d.drive();
+
+        // Destroy tour if the user navigates away (back button, sidebar, etc.)
+        // before completing it — prevents orphaned overlays on unrelated pages.
+        const navSub = router.events
+          .pipe(filter(e => e instanceof NavigationStart))
+          .subscribe(() => {
+            navSub.unsubscribe();
+            cleanup();
+            setTimeout(() => { try { d.destroy(); } catch { /* already destroyed */ } }, 0);
+          });
       }).catch(() => {
         // driver.js not available
       });
     });
   }
 
+
+  protected generateVideo(): void {
+    const id = this.module()?.id;
+    if (!id) return;
+    this.isGenerating.set(true);
+    this.videoGenStatus.set('Pending');
+    this.trainingService.generateVideo(id).subscribe({
+      next: () => {
+        this.isGenerating.set(false);
+        this.startPolling(id);
+      },
+      error: () => {
+        this.isGenerating.set(false);
+        this.videoGenStatus.set('Failed');
+      },
+    });
+  }
+
+  private fetchGeneratedVideo(id: number): void {
+    this.trainingService.getVideoStatus(id).subscribe({
+      next: status => {
+        this.videoGenStatus.set(status.status);
+        if (status.presignedUrl) {
+          this.generatedVideoUrl.set(this.sanitizer.bypassSecurityTrustUrl(status.presignedUrl));
+        }
+      },
+    });
+  }
+
+  private startPolling(id: number): void {
+    interval(5_000)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        switchMap(() => this.trainingService.getVideoStatus(id)),
+        filter(s => s.status === 'Done' || s.status === 'Failed'),
+      )
+      .subscribe(status => {
+        this.videoGenStatus.set(status.status);
+        if (status.status === 'Done' && status.presignedUrl) {
+          this.generatedVideoUrl.set(this.sanitizer.bypassSecurityTrustUrl(status.presignedUrl));
+        }
+      });
+  }
+
+  protected onVideoTimeUpdate(event: Event): void {
+    this.currentVideoTime.set((event.target as HTMLVideoElement).currentTime);
+  }
+
+  protected seekToChapter(timeSeconds: number): void {
+    if (this.videoEl?.nativeElement) {
+      this.videoEl.nativeElement.currentTime = timeSeconds;
+      this.videoEl.nativeElement.play();
+    }
+  }
 
   protected goBack(): void {
     this.router.navigate(['/training/library']);

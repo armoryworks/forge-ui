@@ -10,9 +10,11 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { DetailSidePanelComponent } from '../../../../shared/components/detail-side-panel/detail-side-panel.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { TrainingService } from '../../../training/services/training.service';
+import { UserTrainingDetailPanelComponent } from './user-training-detail-panel.component';
 
 export interface TrainingModuleRow {
   id: number;
@@ -22,6 +24,8 @@ export interface TrainingModuleRow {
   isPublished: boolean;
   appRoutes: string[];
   tags: string[];
+  videoGenerationStatus: string;
+  videoMinioKey: string | null;
 }
 
 export interface TrainingPathRow {
@@ -55,6 +59,8 @@ export type PanelSubTab = 'content' | 'paths' | 'progress';
     ColumnCellDirective,
     LoadingBlockDirective,
     InputComponent,
+    DetailSidePanelComponent,
+    UserTrainingDetailPanelComponent,
   ],
   templateUrl: './training-panel.component.html',
   styleUrl: './training-panel.component.scss',
@@ -70,10 +76,13 @@ export class TrainingPanelComponent implements OnInit {
   protected readonly activeSubTab = signal<PanelSubTab>('content');
   protected readonly isLoading = signal(false);
   protected readonly generatingModuleId = signal<number | null>(null);
+  protected readonly generatingVideoModuleId = signal<number | null>(null);
+  protected readonly videoPollingIntervals = new Map<number, ReturnType<typeof setInterval>>();
 
   protected readonly modules = signal<TrainingModuleRow[]>([]);
   protected readonly paths = signal<TrainingPathRow[]>([]);
   protected readonly userProgress = signal<UserProgressRow[]>([]);
+  protected readonly selectedUser = signal<UserProgressRow | null>(null);
 
   protected readonly moduleSearchControl = new FormControl('');
 
@@ -100,6 +109,7 @@ export class TrainingPanelComponent implements OnInit {
     { field: 'totalCompleted', header: 'Completed', sortable: true, width: '100px', align: 'right' },
     { field: 'overallCompletionPct', header: 'Progress', sortable: true, width: '100px', align: 'right' },
     { field: 'lastActivityAt', header: 'Last Activity', sortable: true, type: 'date', width: '130px' },
+    { field: 'detail', header: '', width: '60px', align: 'right' },
   ];
 
   ngOnInit(): void {
@@ -182,6 +192,14 @@ export class TrainingPanelComponent implements OnInit {
     });
   }
 
+  protected viewDetail(user: UserProgressRow): void {
+    this.selectedUser.set(user);
+  }
+
+  protected closeDetail(): void {
+    this.selectedUser.set(null);
+  }
+
   protected generateWalkthrough(module: TrainingModuleRow): void {
     if (this.generatingModuleId() !== null) return;
     this.generatingModuleId.set(module.id);
@@ -206,6 +224,63 @@ export class TrainingPanelComponent implements OnInit {
         this.snackbar.error('Failed to generate walkthrough steps');
       },
     });
+  }
+
+  protected generateVideo(module: TrainingModuleRow): void {
+    if (this.generatingVideoModuleId() !== null) return;
+    this.generatingVideoModuleId.set(module.id);
+    this.trainingService.generateVideo(module.id).subscribe({
+      next: () => {
+        this.snackbar.success('Video generation queued — this may take a few minutes');
+        this.pollVideoStatus(module.id);
+      },
+      error: () => {
+        this.generatingVideoModuleId.set(null);
+        this.snackbar.error('Failed to queue video generation');
+      },
+    });
+  }
+
+  private pollVideoStatus(moduleId: number): void {
+    const interval = setInterval(() => {
+      this.trainingService.getVideoStatus(moduleId).subscribe({
+        next: status => {
+          if (status.status === 'Done' || status.status === 'Failed') {
+            clearInterval(interval);
+            this.videoPollingIntervals.delete(moduleId);
+            this.generatingVideoModuleId.set(null);
+            this.loadModules();
+            if (status.status === 'Done') {
+              this.snackbar.success('Video generated successfully');
+            } else {
+              this.snackbar.error(`Video generation failed: ${status.errorMessage ?? 'unknown error'}`);
+            }
+          }
+        },
+      });
+    }, 5_000);
+    this.videoPollingIntervals.set(moduleId, interval);
+  }
+
+  protected videoStatusIcon(status: string): string {
+    const icons: Record<string, string> = {
+      None: 'video_settings',
+      Pending: 'sync',
+      Processing: 'sync',
+      Done: 'play_circle',
+      Failed: 'error',
+    };
+    return icons[status] ?? 'video_settings';
+  }
+
+  protected videoStatusClass(status: string): string {
+    const classes: Record<string, string> = {
+      Done: 'chip--success',
+      Failed: 'chip--error',
+      Pending: 'chip--info',
+      Processing: 'chip--info',
+    };
+    return classes[status] ?? '';
   }
 
   protected contentTypeIcon(type: string): string {

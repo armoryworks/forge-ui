@@ -1,12 +1,6 @@
-<app-page-layout pageTitle="Training Library">
+<app-page-layout pageTitle="Training">
   <ng-container toolbar>
     <div class="training-tabs" role="tablist" aria-label="Training sections">
-      <button class="tab" [class.tab--active]="activeTab() === 'library'"
-              role="tab" [attr.aria-selected]="activeTab() === 'library'"
-              (click)="switchTab('library')">
-        <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
-        Library
-      </button>
       <button class="tab" [class.tab--active]="activeTab() === 'my-learning'"
               role="tab" [attr.aria-selected]="activeTab() === 'my-learning'"
               (click)="switchTab('my-learning')">
@@ -19,11 +13,17 @@
         <span class="material-icons-outlined" aria-hidden="true">route</span>
         Learning Paths
       </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'all-modules'"
+              role="tab" [attr.aria-selected]="activeTab() === 'all-modules'"
+              (click)="switchTab('all-modules')">
+        <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
+        All Modules
+      </button>
     </div>
   </ng-container>
 
   <ng-container content>
-    @if (activeTab() === 'library') {
+    @if (activeTab() === 'all-modules') {
       <div class="training__filters">
         <app-input label="Search modules" [formControl]="searchControl" prefix="search" />
         <app-select label="Type" [formControl]="contentTypeControl" [options]="contentTypeOptions" />
