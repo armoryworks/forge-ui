@@ -1,0 +1,141 @@
+@use '../../../../../styles/variables' as *;
+
+.walkthrough-preview {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__count {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-3xl $sp-lg;
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-hero;
+      opacity: 0.4;
+    }
+
+    p {
+      font-size: $font-size-sm;
+      margin: 0;
+    }
+  }
+
+  &__step {
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+
+    &:hover {
+      border-color: var(--primary);
+    }
+  }
+
+  &__step-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $sp-sm $sp-md;
+    background: var(--bg);
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__step-num {
+    font-size: $font-size-xs;
+    font-family: $font-family-mono;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__step-actions {
+    display: flex;
+    gap: $sp-xs;
+  }
+
+  &__step-body {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-md;
+  }
+
+  &__row {
+    display: flex;
+    gap: $sp-md;
+    align-items: flex-start;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    &--full {
+      width: 100%;
+    }
+
+    &--grow {
+      flex: 1;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  &__label-hint {
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--text-muted);
+  }
+
+  &__input,
+  &__select,
+  &__textarea {
+    height: 2rem;
+    padding: 0 $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: $font-size-base;
+    outline: none;
+
+    &:focus {
+      border-color: var(--primary);
+    }
+  }
+
+  &__textarea {
+    height: auto;
+    padding: $sp-sm $sp-md;
+    resize: vertical;
+    min-height: 60px;
+  }
+
+  &__select {
+    cursor: pointer;
+  }
+}

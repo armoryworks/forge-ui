@@ -59,6 +59,16 @@
 
         <ng-template appColumnCell="actions" let-row>
           <div class="action-cell">
+            @if (row.contentType === 'Walkthrough') {
+              <button class="icon-btn" title="Regenerate walkthrough steps" aria-label="Regenerate walkthrough steps"
+                [disabled]="generatingModuleId() !== null"
+                (click)="generateWalkthrough(row); $event.stopPropagation()">
+                <span class="material-icons-outlined"
+                  [class.spin]="generatingModuleId() === row.id">
+                  {{ generatingModuleId() === row.id ? 'sync' : 'auto_awesome' }}
+                </span>
+              </button>
+            }
             <button class="icon-btn" title="Edit module" aria-label="Edit module"
               (click)="openEditModuleDialog(row); $event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>

@@ -12,6 +12,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { TrainingService } from '../../../training/services/training.service';
 
 export interface TrainingModuleRow {
   id: number;
@@ -63,10 +64,12 @@ export class TrainingPanelComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
+  private readonly trainingService = inject(TrainingService);
 
   private readonly base = `${environment.apiUrl}/training`;
   protected readonly activeSubTab = signal<PanelSubTab>('content');
   protected readonly isLoading = signal(false);
+  protected readonly generatingModuleId = signal<number | null>(null);
 
   protected readonly modules = signal<TrainingModuleRow[]>([]);
   protected readonly paths = signal<TrainingPathRow[]>([]);
@@ -79,7 +82,7 @@ export class TrainingPanelComponent implements OnInit {
     { field: 'contentType', header: 'Type', sortable: true, width: '120px' },
     { field: 'estimatedMinutes', header: 'Time (min)', sortable: true, width: '100px', align: 'right' },
     { field: 'isPublished', header: 'Published', sortable: true, width: '100px', align: 'center' },
-    { field: 'actions', header: '', width: '80px', align: 'right' },
+    { field: 'actions', header: '', width: '120px', align: 'right' },
   ];
 
   protected readonly pathColumns: ColumnDef[] = [
@@ -176,6 +179,32 @@ export class TrainingPanelComponent implements OnInit {
           this.snackbar.success('Training path created');
         }
       });
+    });
+  }
+
+  protected generateWalkthrough(module: TrainingModuleRow): void {
+    if (this.generatingModuleId() !== null) return;
+    this.generatingModuleId.set(module.id);
+    this.trainingService.generateWalkthrough(module.id).subscribe({
+      next: result => {
+        this.generatingModuleId.set(null);
+        import('./walkthrough-preview-dialog.component').then(({ WalkthroughPreviewDialogComponent }) => {
+          this.dialog.open(WalkthroughPreviewDialogComponent, {
+            width: '720px',
+            data: {
+              moduleId: module.id,
+              moduleTitle: module.title,
+              steps: result.steps,
+            },
+          }).afterClosed().subscribe(saved => {
+            if (saved) this.loadModules();
+          });
+        });
+      },
+      error: () => {
+        this.generatingModuleId.set(null);
+        this.snackbar.error('Failed to generate walkthrough steps');
+      },
     });
   }
 

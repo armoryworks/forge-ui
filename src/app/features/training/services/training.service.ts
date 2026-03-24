@@ -7,6 +7,7 @@ import { TrainingModuleListItem, TrainingModuleDetail } from '../models/training
 import { TrainingPath } from '../models/training-path.model';
 import { TrainingProgress, TrainingEnrollment } from '../models/training-progress.model';
 import { QuizAnswer, QuizSubmissionResult } from '../models/quiz-content.model';
+import { GenerateWalkthroughResponse, WalkthroughStep } from '../../admin/models/walkthrough-step.model';
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -100,5 +101,19 @@ export class TrainingService {
 
   updatePath(id: number, data: Partial<TrainingPath>): Observable<TrainingPath> {
     return this.http.put<TrainingPath>(`${this.base}/paths/${id}`, data);
+  }
+
+  // Walkthrough AI generation
+  generateWalkthrough(moduleId: number): Observable<GenerateWalkthroughResponse> {
+    return this.http.post<GenerateWalkthroughResponse>(
+      `${this.base}/modules/${moduleId}/generate-walkthrough`, {}
+    );
+  }
+
+  saveWalkthroughSteps(moduleId: number, steps: WalkthroughStep[]): Observable<TrainingModuleDetail> {
+    return this.http.patch<TrainingModuleDetail>(
+      `${this.base}/modules/${moduleId}/walkthrough-steps`,
+      { steps }
+    );
   }
 }

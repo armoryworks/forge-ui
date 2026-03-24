@@ -1,0 +1,102 @@
+<app-dialog [title]="'Walkthrough Steps — ' + moduleTitle" width="720px" (closed)="close()">
+  <div class="walkthrough-preview">
+    <div class="walkthrough-preview__toolbar">
+      <span class="walkthrough-preview__count">{{ steps().length }} step{{ steps().length === 1 ? '' : 's' }}</span>
+      <button class="action-btn action-btn--sm" (click)="addStep()" aria-label="Add step">
+        <span class="material-icons-outlined">add</span>
+        Add Step
+      </button>
+    </div>
+
+    @if (steps().length === 0) {
+      <div class="walkthrough-preview__empty">
+        <span class="material-icons-outlined">route</span>
+        <p>No steps defined. Click "Add Step" to create the first step.</p>
+      </div>
+    }
+
+    @for (step of steps(); track $index; let i = $index) {
+      <div class="walkthrough-preview__step">
+        <div class="walkthrough-preview__step-header">
+          <span class="walkthrough-preview__step-num">Step {{ i + 1 }}</span>
+          <div class="walkthrough-preview__step-actions">
+            <button class="icon-btn" [disabled]="i === 0" title="Move up" aria-label="Move step up"
+              (click)="moveUp(i)">
+              <span class="material-icons-outlined">arrow_upward</span>
+            </button>
+            <button class="icon-btn" [disabled]="i === steps().length - 1" title="Move down" aria-label="Move step down"
+              (click)="moveDown(i)">
+              <span class="material-icons-outlined">arrow_downward</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" title="Delete step" aria-label="Delete step"
+              (click)="deleteStep(i)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="walkthrough-preview__step-body">
+          <div class="walkthrough-preview__field walkthrough-preview__field--full">
+            <label class="walkthrough-preview__label">CSS Selector <span class="walkthrough-preview__label-hint">(null = center overlay)</span></label>
+            <input class="walkthrough-preview__input" type="text"
+              [value]="step.element ?? ''"
+              (change)="updateElement(i, $any($event.target).value)"
+              placeholder="e.g. app-page-header, .action-btn--primary" />
+          </div>
+
+          <div class="walkthrough-preview__row">
+            <div class="walkthrough-preview__field walkthrough-preview__field--grow">
+              <label class="walkthrough-preview__label">Title</label>
+              <input class="walkthrough-preview__input" type="text"
+                [value]="step.popover.title"
+                (input)="updatePopover(i, { title: $any($event.target).value })"
+                placeholder="Step title" />
+            </div>
+
+            <div class="walkthrough-preview__field">
+              <label class="walkthrough-preview__label">Side</label>
+              <select class="walkthrough-preview__select"
+                [value]="step.popover.side"
+                (change)="updatePopover(i, { side: $any($event.target).value })">
+                @for (opt of sideOptions; track opt) {
+                  <option [value]="opt">{{ opt }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="walkthrough-preview__field">
+              <label class="walkthrough-preview__label">Align</label>
+              <select class="walkthrough-preview__select"
+                [value]="step.popover.align"
+                (change)="updatePopover(i, { align: $any($event.target).value })">
+                <option value="start">start</option>
+                <option value="center">center</option>
+                <option value="end">end</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="walkthrough-preview__field walkthrough-preview__field--full">
+            <label class="walkthrough-preview__label">Description</label>
+            <textarea class="walkthrough-preview__textarea" rows="3"
+              [value]="step.popover.description"
+              (input)="updatePopover(i, { description: $any($event.target).value })"
+              placeholder="Explain what this step covers..."></textarea>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()" [disabled]="saving()">Cancel</button>
+    <button class="action-btn action-btn--primary" (click)="save()" [disabled]="saving() || steps().length === 0">
+      @if (saving()) {
+        <span class="material-icons-outlined spin">sync</span>
+      } @else {
+        <span class="material-icons-outlined">save</span>
+      }
+      Save Steps
+    </button>
+  </div>
+</app-dialog>
