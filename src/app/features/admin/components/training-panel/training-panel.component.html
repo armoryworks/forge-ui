@@ -68,16 +68,6 @@
                   {{ generatingModuleId() === row.id ? 'sync' : 'auto_awesome' }}
                 </span>
               </button>
-              <button class="icon-btn"
-                [title]="row.videoGenerationStatus === 'Done' ? 'Regenerate video' : 'Generate AI video'"
-                [attr.aria-label]="row.videoGenerationStatus === 'Done' ? 'Regenerate AI tutorial video' : 'Generate AI tutorial video'"
-                [disabled]="generatingVideoModuleId() !== null || row.videoGenerationStatus === 'Pending' || row.videoGenerationStatus === 'Processing'"
-                (click)="generateVideo(row); $event.stopPropagation()">
-                <span class="material-icons-outlined"
-                  [class.spin]="generatingVideoModuleId() === row.id || row.videoGenerationStatus === 'Pending' || row.videoGenerationStatus === 'Processing'">
-                  {{ (generatingVideoModuleId() === row.id || row.videoGenerationStatus === 'Pending' || row.videoGenerationStatus === 'Processing') ? 'sync' : videoStatusIcon(row.videoGenerationStatus) }}
-                </span>
-              </button>
             }
             <button class="icon-btn" title="Edit module" aria-label="Edit module"
               (click)="openEditModuleDialog(row); $event.stopPropagation()">

@@ -24,8 +24,6 @@ export interface TrainingModuleRow {
   isPublished: boolean;
   appRoutes: string[];
   tags: string[];
-  videoGenerationStatus: string;
-  videoMinioKey: string | null;
 }
 
 export interface TrainingPathRow {
@@ -76,8 +74,6 @@ export class TrainingPanelComponent implements OnInit {
   protected readonly activeSubTab = signal<PanelSubTab>('content');
   protected readonly isLoading = signal(false);
   protected readonly generatingModuleId = signal<number | null>(null);
-  protected readonly generatingVideoModuleId = signal<number | null>(null);
-  protected readonly videoPollingIntervals = new Map<number, ReturnType<typeof setInterval>>();
 
   protected readonly modules = signal<TrainingModuleRow[]>([]);
   protected readonly paths = signal<TrainingPathRow[]>([]);
@@ -226,67 +222,9 @@ export class TrainingPanelComponent implements OnInit {
     });
   }
 
-  protected generateVideo(module: TrainingModuleRow): void {
-    if (this.generatingVideoModuleId() !== null) return;
-    this.generatingVideoModuleId.set(module.id);
-    this.trainingService.generateVideo(module.id).subscribe({
-      next: () => {
-        this.snackbar.success('Video generation queued — this may take a few minutes');
-        this.pollVideoStatus(module.id);
-      },
-      error: () => {
-        this.generatingVideoModuleId.set(null);
-        this.snackbar.error('Failed to queue video generation');
-      },
-    });
-  }
-
-  private pollVideoStatus(moduleId: number): void {
-    const interval = setInterval(() => {
-      this.trainingService.getVideoStatus(moduleId).subscribe({
-        next: status => {
-          if (status.status === 'Done' || status.status === 'Failed') {
-            clearInterval(interval);
-            this.videoPollingIntervals.delete(moduleId);
-            this.generatingVideoModuleId.set(null);
-            this.loadModules();
-            if (status.status === 'Done') {
-              this.snackbar.success('Video generated successfully');
-            } else {
-              this.snackbar.error(`Video generation failed: ${status.errorMessage ?? 'unknown error'}`);
-            }
-          }
-        },
-      });
-    }, 5_000);
-    this.videoPollingIntervals.set(moduleId, interval);
-  }
-
-  protected videoStatusIcon(status: string): string {
-    const icons: Record<string, string> = {
-      None: 'video_settings',
-      Pending: 'sync',
-      Processing: 'sync',
-      Done: 'play_circle',
-      Failed: 'error',
-    };
-    return icons[status] ?? 'video_settings';
-  }
-
-  protected videoStatusClass(status: string): string {
-    const classes: Record<string, string> = {
-      Done: 'chip--success',
-      Failed: 'chip--error',
-      Pending: 'chip--info',
-      Processing: 'chip--info',
-    };
-    return classes[status] ?? '';
-  }
-
   protected contentTypeIcon(type: string): string {
     const icons: Record<string, string> = {
       Article: 'article',
-      Video: 'play_circle',
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',
@@ -297,7 +235,6 @@ export class TrainingPanelComponent implements OnInit {
   protected contentTypeClass(type: string): string {
     const classes: Record<string, string> = {
       Article: 'chip--info',
-      Video: 'chip--primary',
       Walkthrough: 'chip--success',
       QuickRef: 'chip--muted',
       Quiz: 'chip--warning',
