@@ -56,7 +56,6 @@ export class TrainingComponent implements OnInit {
   protected readonly contentTypeOptions: SelectOption[] = [
     { value: '', label: 'All Types' },
     { value: 'Article', label: 'Article' },
-    { value: 'Video', label: 'Video' },
     { value: 'Walkthrough', label: 'Walkthrough' },
     { value: 'QuickRef', label: 'Quick Reference' },
     { value: 'Quiz', label: 'Quiz / Assessment' },
@@ -65,7 +64,6 @@ export class TrainingComponent implements OnInit {
   protected readonly learningStyleOptions: SelectOption[] = [
     { value: '', label: 'All Learning Styles' },
     { value: 'visual', label: 'Visual' },
-    { value: 'auditory', label: 'Auditory' },
     { value: 'reading', label: 'Reading / Writing' },
     { value: 'kinesthetic', label: 'Hands-on / Kinesthetic' },
   ];
@@ -75,8 +73,8 @@ export class TrainingComponent implements OnInit {
   private readonly learningStyleValue = toSignal(this.learningStyleControl.valueChanges, { initialValue: '' });
 
   private readonly styleTypeMap: Record<string, string[]> = {
-    visual:       ['Video', 'Walkthrough', 'QuickRef'],
-    auditory:     ['Video'],
+    visual:       ['Walkthrough', 'QuickRef'],
+    auditory:     [],
     reading:      ['Article', 'QuickRef'],
     kinesthetic:  ['Walkthrough', 'Quiz'],
   };
@@ -134,7 +132,6 @@ export class TrainingComponent implements OnInit {
   protected contentTypeIcon(type: TrainingContentType): string {
     const icons: Record<TrainingContentType, string> = {
       Article: 'article',
-      Video: 'play_circle',
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',
@@ -145,7 +142,6 @@ export class TrainingComponent implements OnInit {
   protected contentTypeLabel(type: TrainingContentType): string {
     const labels: Record<TrainingContentType, string> = {
       Article: 'Article',
-      Video: 'Video',
       Walkthrough: 'Interactive Tour',
       QuickRef: 'Quick Reference',
       Quiz: 'Quiz / Assessment',
@@ -156,7 +152,6 @@ export class TrainingComponent implements OnInit {
   protected learningStyleHint(type: TrainingContentType): string {
     const hints: Record<TrainingContentType, string> = {
       Article:     'Best for: Reading / Writing learners',
-      Video:       'Best for: Visual / Auditory learners',
       Walkthrough: 'Best for: Visual / Kinesthetic learners',
       QuickRef:    'Best for: Visual / Reading learners',
       Quiz:        'Best for: Kinesthetic learners — learn by doing',

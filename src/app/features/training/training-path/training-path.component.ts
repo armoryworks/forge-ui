@@ -43,7 +43,6 @@ export class TrainingPathComponent implements OnInit {
   protected contentTypeIcon(type: TrainingContentType): string {
     const icons: Record<TrainingContentType, string> = {
       Article: 'article',
-      Video: 'play_circle',
       Walkthrough: 'route',
       QuickRef: 'quick_reference_all',
       Quiz: 'quiz',

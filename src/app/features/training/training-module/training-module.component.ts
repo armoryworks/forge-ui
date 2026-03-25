@@ -1,8 +1,7 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, NgZone, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter, interval, switchMap } from 'rxjs';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { filter, interval } from 'rxjs';
 
 import { MarkdownComponent } from 'ngx-markdown';
 
@@ -11,10 +10,8 @@ import { createTourSvg, clearTourConnector, updateTourConnector, attachScrollRef
 
 import { AuthService } from '../../../shared/services/auth.service';
 import { TrainingService } from '../services/training.service';
-import { TrainingModuleDetail, VideoGenerationStatus } from '../models/training-module.model';
-import { SafeUrl } from '@angular/platform-browser';
+import { TrainingModuleDetail } from '../models/training-module.model';
 import { ArticleContent } from '../models/article-content.model';
-import { VideoContent } from '../models/video-content.model';
 import { WalkthroughContent } from '../models/walkthrough-content.model';
 import { QuickRefContent } from '../models/quickref-content.model';
 import { QuizContent } from '../models/quiz-content.model';
@@ -34,31 +31,14 @@ export class TrainingModuleComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly ngZone = inject(NgZone);
 
   protected readonly isLoading = signal(true);
   protected readonly module = signal<TrainingModuleDetail | null>(null);
   protected readonly isCompleting = signal(false);
   protected readonly completed = signal(false);
-  protected readonly generatedVideoUrl = signal<SafeUrl | null>(null);
-  protected readonly videoGenStatus = signal<VideoGenerationStatus>('None');
-  protected readonly isGenerating = signal(false);
 
   protected readonly isAdmin = computed(() => this.authService.hasAnyRole(['Admin', 'Manager']));
-
-  // Video player state for parallel chapter panel
-  @ViewChild('videoEl') private videoEl?: ElementRef<HTMLVideoElement>;
-  protected readonly currentVideoTime = signal(0);
-  protected readonly activeChapterIndex = computed(() => {
-    const t = this.currentVideoTime();
-    const chapters = this.videoContent()?.chaptersJson ?? [];
-    let active = 0;
-    for (let i = 0; i < chapters.length; i++) {
-      if (chapters[i].timeSeconds <= t) active = i;
-    }
-    return active;
-  });
 
   // Reading timer — counts seconds spent on the page (pauses when tab is hidden)
   protected readonly elapsedSeconds = signal(0);
@@ -70,7 +50,7 @@ export class TrainingModuleComponent implements OnInit {
     if (m.contentType === 'Walkthrough') return 0;
     // QuickRef is a reference card — glance-and-done, very short minimum
     if (m.contentType === 'QuickRef') return Math.min(30, m.estimatedMinutes * 15);
-    // Article/Video: actual reading/viewing time, minimum 20 seconds
+    // Article: actual reading time, minimum 20 seconds
     return Math.max(20, m.estimatedMinutes * 60);
   });
 
@@ -88,7 +68,6 @@ export class TrainingModuleComponent implements OnInit {
 
   protected readonly timerVerb = computed((): string => {
     const type = this.module()?.contentType;
-    if (type === 'Video')    return 'Watching';
     if (type === 'QuickRef') return 'Reviewing';
     return 'Reading';
   });
@@ -105,12 +84,6 @@ export class TrainingModuleComponent implements OnInit {
     const m = this.module();
     if (!m || m.contentType !== 'Article') return null;
     try { return JSON.parse(m.contentJson) as ArticleContent; } catch { return null; }
-  });
-
-  protected readonly videoContent = computed<VideoContent | null>(() => {
-    const m = this.module();
-    if (!m || m.contentType !== 'Video') return null;
-    try { return JSON.parse(m.contentJson) as VideoContent; } catch { return null; }
   });
 
   protected readonly walkthroughContent = computed<WalkthroughContent | null>(() => {
@@ -141,12 +114,6 @@ export class TrainingModuleComponent implements OnInit {
       .filter(Boolean);
   });
 
-  protected readonly videoEmbedUrl = computed<SafeResourceUrl | null>(() => {
-    const v = this.videoContent();
-    if (!v) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(v.embedUrl);
-  });
-
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.trainingService.getModule(id).subscribe({
@@ -155,13 +122,6 @@ export class TrainingModuleComponent implements OnInit {
         this.isLoading.set(false);
         this.trainingService.recordStart(id).subscribe();
         this.completed.set(module.myStatus === 'Completed');
-        this.videoGenStatus.set(module.videoGenerationStatus);
-
-        if (module.videoGenerationStatus === 'Done') {
-          this.fetchGeneratedVideo(id);
-        } else if (module.videoGenerationStatus === 'Processing' || module.videoGenerationStatus === 'Pending') {
-          this.startPolling(id);
-        }
       },
       error: () => this.isLoading.set(false),
     });
@@ -301,60 +261,6 @@ export class TrainingModuleComponent implements OnInit {
   }
 
 
-  protected generateVideo(): void {
-    const id = this.module()?.id;
-    if (!id) return;
-    this.isGenerating.set(true);
-    this.videoGenStatus.set('Pending');
-    this.trainingService.generateVideo(id).subscribe({
-      next: () => {
-        this.isGenerating.set(false);
-        this.startPolling(id);
-      },
-      error: () => {
-        this.isGenerating.set(false);
-        this.videoGenStatus.set('Failed');
-      },
-    });
-  }
-
-  private fetchGeneratedVideo(id: number): void {
-    this.trainingService.getVideoStatus(id).subscribe({
-      next: status => {
-        this.videoGenStatus.set(status.status);
-        if (status.presignedUrl) {
-          this.generatedVideoUrl.set(this.sanitizer.bypassSecurityTrustUrl(status.presignedUrl));
-        }
-      },
-    });
-  }
-
-  private startPolling(id: number): void {
-    interval(5_000)
-      .pipe(
-        takeUntilDestroyed(this.destroyRef),
-        switchMap(() => this.trainingService.getVideoStatus(id)),
-        filter(s => s.status === 'Done' || s.status === 'Failed'),
-      )
-      .subscribe(status => {
-        this.videoGenStatus.set(status.status);
-        if (status.status === 'Done' && status.presignedUrl) {
-          this.generatedVideoUrl.set(this.sanitizer.bypassSecurityTrustUrl(status.presignedUrl));
-        }
-      });
-  }
-
-  protected onVideoTimeUpdate(event: Event): void {
-    this.currentVideoTime.set((event.target as HTMLVideoElement).currentTime);
-  }
-
-  protected seekToChapter(timeSeconds: number): void {
-    if (this.videoEl?.nativeElement) {
-      this.videoEl.nativeElement.currentTime = timeSeconds;
-      this.videoEl.nativeElement.play();
-    }
-  }
-
   protected goBack(): void {
     this.router.navigate(['/training/library']);
   }
@@ -378,7 +284,6 @@ export class TrainingModuleComponent implements OnInit {
     if (!type) return '';
     const hints: Record<string, string> = {
       Article:     'Reading / Writing',
-      Video:       'Visual / Auditory',
       Walkthrough: 'Visual / Kinesthetic',
       QuickRef:    'Visual / Reference',
       Quiz:        'Kinesthetic',
