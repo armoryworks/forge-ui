@@ -147,20 +147,7 @@
                   }
                 </button>
 
-                @if (mod.videoGenerationStatus === 'Done' && generatedVideoUrl()) {
-                  <div class="walkthrough-viewer__video-section" aria-label="AI-generated video tutorial">
-                    <div class="walkthrough-viewer__video-divider">
-                      <span>or watch the AI-generated video tutorial</span>
-                    </div>
-                    <video class="walkthrough-viewer__video"
-                           [src]="generatedVideoUrl()"
-                           controls
-                           preload="metadata"
-                           [attr.aria-label]="mod.title + ' — AI video tutorial'">
-                      Your browser does not support video playback.
-                    </video>
-                  </div>
-                }
+
               </div>
             }
           }
