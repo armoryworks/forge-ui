@@ -2,6 +2,26 @@ mat-form-field {
   width: 100%;
 }
 
+.input__password-toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+    width: $icon-size-md;
+    height: $icon-size-md;
+  }
+}
+
 .info-icon {
   font-size: 16px;
   width: 16px;

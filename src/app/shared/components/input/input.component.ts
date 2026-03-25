@@ -40,6 +40,16 @@ export class InputComponent implements ControlValueAccessor {
 
   protected readonly value = signal<string | number>('');
   protected readonly disabled = signal(false);
+  protected readonly showPassword = signal(false);
+
+  protected get effectiveType(): string {
+    if (this.type() === 'password') return this.showPassword() ? 'text' : 'password';
+    return this.type();
+  }
+
+  protected toggleShowPassword(): void {
+    this.showPassword.update(v => !v);
+  }
 
   private onChange: (value: string | number) => void = () => {};
   private onTouched: () => void = () => {};

@@ -4,7 +4,7 @@
     <span matPrefix class="material-icons-outlined">{{ prefix() }}</span>
   }
   <input matInput
-    [type]="type()"
+    [type]="effectiveType"
     [placeholder]="placeholder()"
     [readonly]="isReadonly()"
     [required]="required()"
@@ -14,6 +14,14 @@
     [value]="value()"
     (input)="onInput($event)"
     (blur)="markTouched()" />
+  @if (type() === 'password') {
+    <button matSuffix type="button" class="input__password-toggle"
+      (mousedown)="toggleShowPassword()" (mouseup)="toggleShowPassword()"
+      (mouseleave)="showPassword.set(false)"
+      [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'">
+      <span class="material-icons-outlined">{{ showPassword() ? 'visibility_off' : 'visibility' }}</span>
+    </button>
+  }
   @if (suffix()) {
     <span matSuffix>&nbsp;{{ suffix() }}</span>
   }
