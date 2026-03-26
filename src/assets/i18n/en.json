@@ -1508,7 +1508,17 @@
     "formTypeState": "State Tax Withholding",
     "formTypeDirectDeposit": "Direct Deposit",
     "formTypeWorkersComp": "Workers Comp",
-    "formTypeHandbook": "Employee Handbook"
+    "formTypeHandbook": "Employee Handbook",
+    "pdfFillConfig": "PDF Fill Configuration",
+    "pdfFillConfigHint": "Upload the blank government PDF and configure the AcroField map to enable automatic PDF fill before DocuSeal signing.",
+    "blankPdfUploaded": "Blank PDF template set",
+    "blankPdfLinked": "Blank PDF linked: File",
+    "noBlankPdf": "No blank PDF configured",
+    "acroFieldMap": "AcroField Map JSON",
+    "acroFieldMapHint": "JSON object mapping dynamic form field IDs to PDF AcroForm field names. Example: {\"firstName\": \"topmostSubform[0].Page1[0].f1_01[0]\"}",
+    "acroFieldMapPlaceholder": "{ \"fieldId\": \"AcroFormFieldName\", ... }",
+    "saveAcroMap": "Save Map",
+    "acroMapSaved": "AcroField map saved"
   },
   "companyLocationDialog": {
     "editLocation": "Edit Location",

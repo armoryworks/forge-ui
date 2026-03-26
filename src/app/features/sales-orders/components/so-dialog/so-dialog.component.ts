@@ -1,26 +1,29 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { SalesOrderService } from '../../services/sales-order.service';
 import { CustomerService } from '../../../customers/services/customer.service';
+import { PartsService } from '../../../parts/services/parts.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
+import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateSalesOrderLineRequest } from '../../models/create-sales-order-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface LineEntry {
-  partId: number | null;
+  partId: number;
   partNumber: string;
   description: string;
   quantity: number;
@@ -33,7 +36,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',
@@ -42,6 +45,7 @@ interface LineEntry {
 export class SoDialogComponent {
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
+  private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -50,12 +54,16 @@ export class SoDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly customers = signal<CustomerListItem[]>([]);
+  protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('salesOrders.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
+
+  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
+    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
@@ -68,7 +76,7 @@ export class SoDialogComponent {
     notes: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  private readonly formViolations = FormValidationService.getViolations(this.form, {
     customerId: 'Customer',
     customerPO: 'Customer PO',
     creditTerms: 'Credit Terms',
@@ -77,11 +85,13 @@ export class SoDialogComponent {
     notes: 'Notes',
   });
 
-  // Line item form
+  protected readonly violations: Signal<string[]> = computed(() => [
+    ...this.formViolations(),
+    ...(this.lines().length === 0 ? ['At least one line item is required'] : []),
+  ]);
+
   protected readonly lineForm = new FormGroup({
-    partId: new FormControl<number | null>(null),
-    partNumber: new FormControl(''),
-    description: new FormControl('', [Validators.required]),
+    partId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
@@ -94,6 +104,9 @@ export class SoDialogComponent {
     this.customerService.getCustomers().subscribe({
       next: (list) => this.customers.set(list),
     });
+    this.partsService.getParts('Active').subscribe({
+      next: (list) => this.parts.set(list),
+    });
   }
 
   protected close(): void {
@@ -103,14 +116,16 @@ export class SoDialogComponent {
   protected addLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
+    const part = this.parts().find(p => p.id === f.partId);
+    if (!part) return;
     this.lines.update(prev => [...prev, {
-      partId: f.partId ?? null,
-      partNumber: f.partNumber ?? '',
-      description: f.description ?? '',
+      partId: part.id,
+      partNumber: part.partNumber,
+      description: part.description,
       quantity: f.quantity!,
       unitPrice: f.unitPrice!,
     }]);
-    this.lineForm.reset({ partId: null, partNumber: '', description: '', quantity: 1, unitPrice: 0 });
+    this.lineForm.reset({ partId: null, quantity: 1, unitPrice: 0 });
   }
 
   protected removeLine(index: number): void {
@@ -123,7 +138,7 @@ export class SoDialogComponent {
 
     const f = this.form.getRawValue();
     const lineRequests: CreateSalesOrderLineRequest[] = this.lines().map(l => ({
-      partId: l.partId ?? undefined,
+      partId: l.partId,
       description: l.description,
       quantity: l.quantity,
       unitPrice: l.unitPrice,

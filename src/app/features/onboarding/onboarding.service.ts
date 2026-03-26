@@ -34,7 +34,7 @@ export interface OnboardingSubmitRequest {
   stateAllowances?: number;
   stateAdditionalWithholding?: number;
   stateExempt?: boolean;
-  // Step 5: I-9
+  // Step 5: I-9 citizenship
   i9CitizenshipStatus: string;
   i9AlienRegNumber?: string;
   i9I94Number?: string;
@@ -48,6 +48,23 @@ export interface OnboardingSubmitRequest {
   i9PreparerCity?: string;
   i9PreparerState?: string;
   i9PreparerZip?: string;
+  // I-9 document verification (optional pre-upload; physical docs required on day 1)
+  i9DocumentChoice?: string;
+  i9ListAType?: string;
+  i9ListADocNumber?: string;
+  i9ListAAuthority?: string;
+  i9ListAExpiry?: string;
+  i9ListAFileAttachmentId?: number;
+  i9ListBType?: string;
+  i9ListBDocNumber?: string;
+  i9ListBAuthority?: string;
+  i9ListBExpiry?: string;
+  i9ListBFileAttachmentId?: number;
+  i9ListCType?: string;
+  i9ListCDocNumber?: string;
+  i9ListCAuthority?: string;
+  i9ListCExpiry?: string;
+  i9ListCFileAttachmentId?: number;
   // Step 6: Direct deposit
   bankName: string;
   routingNumber: string;
@@ -82,6 +99,11 @@ export interface OnboardingStatus {
   canBeAssigned: boolean;
 }
 
+export interface UploadI9DocumentResult {
+  fileAttachmentId: number;
+  fileName: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OnboardingService {
   private readonly http = inject(HttpClient);
@@ -98,5 +120,12 @@ export class OnboardingService {
     return this.http.post<OnboardingSubmitResult>(`${this.base}/submit`, request).pipe(
       tap(() => this.loadStatus()),
     );
+  }
+
+  uploadI9Document(file: File, documentList: string): Observable<UploadI9DocumentResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('documentList', documentList);
+    return this.http.post<UploadI9DocumentResult>(`${this.base}/i9-document`, formData);
   }
 }

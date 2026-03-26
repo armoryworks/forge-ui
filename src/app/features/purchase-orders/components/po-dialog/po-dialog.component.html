@@ -1,7 +1,7 @@
 <app-dialog [title]="'purchaseOrders.newPoTitle' | translate" width="800px" (closed)="close()">
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-select [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" />
+      <app-select [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
       <app-input [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
     </div>
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
@@ -14,15 +14,15 @@
     </div>
 
     @if (lines().length > 0) {
-      <table class="lines-table">
+      <table class="lines-table" aria-label="Line items">
         <thead>
           <tr>
-            <th>{{ 'purchaseOrders.partNumber' | translate }}</th>
-            <th>{{ 'common.description' | translate }}</th>
-            <th class="lines-table__right">{{ 'purchaseOrders.qty' | translate }}</th>
-            <th class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
-            <th class="lines-table__right">{{ 'common.total' | translate }}</th>
-            <th></th>
+            <th scope="col">{{ 'purchaseOrders.partNumber' | translate }}</th>
+            <th scope="col">{{ 'common.description' | translate }}</th>
+            <th scope="col" class="lines-table__right">{{ 'purchaseOrders.qty' | translate }}</th>
+            <th scope="col" class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
+            <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+            <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -53,12 +53,10 @@
 
     <!-- Add Line Form -->
     <div class="add-line" [formGroup]="lineForm">
-      <app-input [label]="'purchaseOrders.partId' | translate" type="number" formControlName="partId" />
-      <app-input [label]="'purchaseOrders.partNumber' | translate" formControlName="partNumber" />
-      <app-input [label]="'common.description' | translate" formControlName="description" />
-      <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" />
-      <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" />
-      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid">
+      <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" />
+      <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
+      <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
         <span class="material-icons-outlined">add</span>
         {{ 'common.add' | translate }}
       </button>

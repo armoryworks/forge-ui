@@ -71,7 +71,9 @@
     </div>
   } @else {
     <!-- ── Wizard steps ───────────────────────────────────────────────────── -->
-    <mat-stepper linear class="onboarding__stepper" orientation="horizontal">
+    <mat-stepper class="onboarding__stepper" orientation="horizontal" [selectedIndex]="currentStepIndex()">
+      <!-- Override the default "create" (pencil) edit icon with step numbers -->
+      <ng-template matStepperIcon="edit" let-index="index">{{ index + 1 }}</ng-template>
 
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 1: Personal Information                                        -->
@@ -113,14 +115,6 @@
             tax form submission. They are never stored in plain text.
           </p>
         </div>
-        <div class="step-actions">
-          <button class="action-btn action-btn--primary"
-            [appValidationPopover]="personalViolations()"
-            [disabled]="personalForm.invalid"
-            matStepperNext>
-            Continue <span class="material-icons-outlined">arrow_forward</span>
-          </button>
-        </div>
       </mat-step>
 
       <!-- ─────────────────────────────────────────────────────────────────── -->
@@ -147,17 +141,6 @@
               mask="zip" [required]="true" placeholder="00000" />
           </div>
         </div>
-        <div class="step-actions">
-          <button class="action-btn" matStepperPrevious>
-            <span class="material-icons-outlined">arrow_back</span> Back
-          </button>
-          <button class="action-btn action-btn--primary"
-            [appValidationPopover]="addressViolations()"
-            [disabled]="addressForm.invalid"
-            matStepperNext>
-            Continue <span class="material-icons-outlined">arrow_forward</span>
-          </button>
-        </div>
       </mat-step>
 
       <!-- ─────────────────────────────────────────────────────────────────── -->
@@ -179,8 +162,9 @@
               hold more than one job simultaneously. This prevents under-withholding.
             </p>
             <p>
-              <strong>Dependents (Step 3):</strong> Multiply qualifying children under 17
-              by $2,000 and other dependents by $500. Most employees leave this at $0.
+              <strong>Dependents (Step 3):</strong> Enter the number of qualifying children
+              under 17 (line 3a, worth $2,000 each) and other dependents (line 3b, worth $500
+              each). Most employees leave both at 0.
             </p>
             <p>
               <strong>Other Adjustments (Step 4 — Optional):</strong> Use these fields to
@@ -201,16 +185,46 @@
           <app-toggle label="Multiple jobs or spouse also works (Step 2)"
             formControlName="multipleJobs" />
 
-          <div class="step-row">
-            <app-input label="Dependents credit — Step 3 ($)"
-              formControlName="claimDependentsAmount" type="number" />
-            <app-input label="Other income — Step 4a ($)"
-              formControlName="otherIncome" type="number" />
+          <!-- Step 3: Claim Dependents -->
+          <div class="step-content__subsection">
+            <div class="step-content__subsection-title">Step 3 — Claim Dependents</div>
+
+            <div class="step-content__calc-grid">
+              <div class="step-content__calc-row">
+                <app-input label="Qualifying children under age 17 (3a)"
+                  formControlName="qualifyingChildren" type="number" />
+                <div class="step-content__calc-display">
+                  <span class="step-content__calc-op">× $2,000 =</span>
+                  <span class="step-content__calc-result">{{ w4Step3a() | currency:'USD':'symbol':'1.0-0' }}</span>
+                </div>
+              </div>
+
+              <div class="step-content__calc-row">
+                <app-input label="Other dependents (3b)"
+                  formControlName="otherDependents" type="number" />
+                <div class="step-content__calc-display">
+                  <span class="step-content__calc-op">× $500 =</span>
+                  <span class="step-content__calc-result">{{ w4Step3b() | currency:'USD':'symbol':'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="step-content__calc-total">
+              <span>Total credit amount (line 3)</span>
+              <strong>{{ w4Step3Total() | currency:'USD':'symbol':'1.0-0' }}</strong>
+            </div>
           </div>
-          <div class="step-row">
-            <app-input label="Deductions — Step 4b ($)"
-              formControlName="deductions" type="number" />
-            <app-input label="Extra withholding per period — 4c ($)"
+
+          <!-- Step 4: Other Adjustments (optional) -->
+          <div class="step-content__subsection">
+            <div class="step-content__subsection-title">Step 4 — Other Adjustments (Optional)</div>
+            <div class="step-row">
+              <app-input label="Other income not from jobs — 4a ($)"
+                formControlName="otherIncome" type="number" />
+              <app-input label="Deductions — 4b ($)"
+                formControlName="deductions" type="number" />
+            </div>
+            <app-input label="Extra withholding per pay period — 4c ($)"
               formControlName="extraWithholding" type="number" />
           </div>
 
@@ -222,17 +236,6 @@
             For the most accurate withholding, use the IRS Withholding Estimator
             at <strong>irs.gov/W4App</strong> before completing this step.
           </p>
-        </div>
-        <div class="step-actions">
-          <button class="action-btn" matStepperPrevious>
-            <span class="material-icons-outlined">arrow_back</span> Back
-          </button>
-          <button class="action-btn action-btn--primary"
-            [appValidationPopover]="w4Violations()"
-            [disabled]="w4Form.invalid"
-            matStepperNext>
-            Continue <span class="material-icons-outlined">arrow_forward</span>
-          </button>
         </div>
       </mat-step>
 
@@ -285,14 +288,6 @@
             <app-toggle label="Claim exempt from state withholding"
               formControlName="stateExempt" />
           }
-        </div>
-        <div class="step-actions">
-          <button class="action-btn" matStepperPrevious>
-            <span class="material-icons-outlined">arrow_back</span> Back
-          </button>
-          <button class="action-btn action-btn--primary" matStepperNext>
-            Continue <span class="material-icons-outlined">arrow_forward</span>
-          </button>
         </div>
       </mat-step>
 
@@ -371,6 +366,148 @@
               formControlName="workAuthExpiry" />
           }
 
+          <!-- Document Verification -->
+          <div class="step-section">
+            <p class="step-content__desc" style="margin:0">
+              Pre-upload copies of your identity documents. Physical originals must be
+              presented to your employer on or before your first day of employment.
+            </p>
+
+            <div class="doc-choice">
+              <button type="button" class="doc-choice__btn"
+                [class.doc-choice__btn--active]="i9DocumentChoice() === 'A'"
+                (click)="setDocumentChoice('A')"
+                aria-label="Select one List A document">
+                <span class="material-icons-outlined">badge</span>
+                <div class="doc-choice__text">
+                  <strong>List A</strong>
+                  <span>One document — U.S. Passport, Permanent Resident Card, or Employment Authorization</span>
+                </div>
+              </button>
+              <div class="doc-choice__or">OR</div>
+              <button type="button" class="doc-choice__btn"
+                [class.doc-choice__btn--active]="i9DocumentChoice() === 'BC'"
+                (click)="setDocumentChoice('BC')"
+                aria-label="Select List B and List C documents">
+                <span class="material-icons-outlined">perm_identity</span>
+                <div class="doc-choice__text">
+                  <strong>List B + List C</strong>
+                  <span>Two documents — Identity (e.g., Driver's license) + Employment auth (e.g., SSN card)</span>
+                </div>
+              </button>
+            </div>
+
+            @if (i9DocumentChoice() === 'A') {
+              <div class="step-content__subsection">
+                <div class="step-content__subsection-title">List A — Identity &amp; Work Authorization</div>
+                <app-select label="Document Type" formControlName="listAType"
+                  [options]="listATypeOptions" />
+                <div class="step-row">
+                  <app-input label="Document Number" formControlName="listADocNumber" />
+                  <app-input label="Issuing Authority" formControlName="listAAuthority" />
+                </div>
+                <app-datepicker label="Expiration Date (leave blank if N/A)"
+                  formControlName="listAExpiry" />
+                @if (listAAttachment()) {
+                  <div class="doc-upload__chip">
+                    <span class="material-icons-outlined">attach_file</span>
+                    {{ listAAttachment()!.name }}
+                    <button type="button" class="icon-btn" (click)="clearList('A')"
+                      aria-label="Remove uploaded file">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </div>
+                } @else {
+                  <label class="doc-upload__zone"
+                    [class.doc-upload__zone--loading]="uploadingListA()">
+                    @if (uploadingListA()) {
+                      <span class="material-icons-outlined spin">sync</span>
+                      Uploading...
+                    } @else {
+                      <span class="material-icons-outlined">cloud_upload</span>
+                      Click to upload List A document (PDF or image)
+                    }
+                    <input type="file" accept="image/*,.pdf"
+                      (change)="onFileSelected($event, 'A')" />
+                  </label>
+                }
+              </div>
+            }
+
+            @if (i9DocumentChoice() === 'BC') {
+              <div class="step-content__subsection">
+                <div class="step-content__subsection-title">List B — Identity Document</div>
+                <app-select label="Document Type" formControlName="listBType"
+                  [options]="listBTypeOptions" />
+                <div class="step-row">
+                  <app-input label="Document Number" formControlName="listBDocNumber" />
+                  <app-input label="Issuing Authority" formControlName="listBAuthority" />
+                </div>
+                <app-datepicker label="Expiration Date"
+                  formControlName="listBExpiry" />
+                @if (listBAttachment()) {
+                  <div class="doc-upload__chip">
+                    <span class="material-icons-outlined">attach_file</span>
+                    {{ listBAttachment()!.name }}
+                    <button type="button" class="icon-btn" (click)="clearList('B')"
+                      aria-label="Remove uploaded file">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </div>
+                } @else {
+                  <label class="doc-upload__zone"
+                    [class.doc-upload__zone--loading]="uploadingListB()">
+                    @if (uploadingListB()) {
+                      <span class="material-icons-outlined spin">sync</span>
+                      Uploading...
+                    } @else {
+                      <span class="material-icons-outlined">cloud_upload</span>
+                      Click to upload List B document (PDF or image)
+                    }
+                    <input type="file" accept="image/*,.pdf"
+                      (change)="onFileSelected($event, 'B')" />
+                  </label>
+                }
+              </div>
+
+              <div class="step-content__subsection">
+                <div class="step-content__subsection-title">List C — Employment Authorization</div>
+                <app-select label="Document Type" formControlName="listCType"
+                  [options]="listCTypeOptions" />
+                <div class="step-row">
+                  <app-input label="Document Number" formControlName="listCDocNumber" />
+                  <app-input label="Issuing Authority" formControlName="listCAuthority" />
+                </div>
+                <app-datepicker label="Expiration Date (leave blank if N/A)"
+                  formControlName="listCExpiry" />
+                @if (listCAttachment()) {
+                  <div class="doc-upload__chip">
+                    <span class="material-icons-outlined">attach_file</span>
+                    {{ listCAttachment()!.name }}
+                    <button type="button" class="icon-btn" (click)="clearList('C')"
+                      aria-label="Remove uploaded file">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </div>
+                } @else {
+                  <label class="doc-upload__zone"
+                    [class.doc-upload__zone--loading]="uploadingListC()">
+                    @if (uploadingListC()) {
+                      <span class="material-icons-outlined spin">sync</span>
+                      Uploading...
+                    } @else {
+                      <span class="material-icons-outlined">cloud_upload</span>
+                      Click to upload List C document (PDF or image)
+                    }
+                    <input type="file" accept="image/*,.pdf"
+                      (change)="onFileSelected($event, 'C')" />
+                  </label>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Preparer / Translator -->
           <div class="step-section">
             <app-toggle label="A preparer or translator helped me complete this form"
               formControlName="preparedByPreparer" />
@@ -394,17 +531,6 @@
               </div>
             }
           </div>
-        </div>
-        <div class="step-actions">
-          <button class="action-btn" matStepperPrevious>
-            <span class="material-icons-outlined">arrow_back</span> Back
-          </button>
-          <button class="action-btn action-btn--primary"
-            [appValidationPopover]="i9Violations()"
-            [disabled]="i9Form.invalid"
-            matStepperNext>
-            Continue <span class="material-icons-outlined">arrow_forward</span>
-          </button>
         </div>
       </mat-step>
 
@@ -447,17 +573,6 @@
             formControlName="accountType"
             [options]="accountTypeOptions"
             [required]="true" />
-        </div>
-        <div class="step-actions">
-          <button class="action-btn" matStepperPrevious>
-            <span class="material-icons-outlined">arrow_back</span> Back
-          </button>
-          <button class="action-btn action-btn--primary"
-            [appValidationPopover]="depositViolations()"
-            [disabled]="depositForm.invalid"
-            matStepperNext>
-            Continue <span class="material-icons-outlined">arrow_forward</span>
-          </button>
         </div>
       </mat-step>
 
@@ -509,25 +624,38 @@
             your W-4, state withholding form, and I-9 via DocuSign.
           </p>
         </div>
-        <div class="step-actions">
-          <button class="action-btn" matStepperPrevious>
-            <span class="material-icons-outlined">arrow_back</span> Back
-          </button>
-          <button class="action-btn action-btn--primary"
-            [appValidationPopover]="ackViolations()"
-            [disabled]="ackForm.invalid || submitting()"
-            (click)="submit()">
-            @if (submitting()) {
-              <span class="material-icons-outlined spin">sync</span>
-              Preparing Documents...
-            } @else {
-              <span class="material-icons-outlined">send</span>
-              Submit &amp; Sign Documents
-            }
-          </button>
-        </div>
       </mat-step>
 
     </mat-stepper>
+
+    <!-- Fixed footer — always at the bottom of the card regardless of step content length -->
+    <div class="onboarding__actions">
+      @if (currentStepIndex() > 0) {
+        <button class="action-btn" (click)="prevStep()">
+          <span class="material-icons-outlined">arrow_back</span> Back
+        </button>
+      }
+      @if (currentStepIndex() < 6) {
+        <button class="action-btn action-btn--primary"
+          [appValidationPopover]="currentViolations"
+          [disabled]="currentFormInvalid()"
+          (click)="nextStep()">
+          Continue <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      } @else {
+        <button class="action-btn action-btn--primary"
+          [appValidationPopover]="ackViolations"
+          [disabled]="ackForm.invalid || submitting()"
+          (click)="submit()">
+          @if (submitting()) {
+            <span class="material-icons-outlined spin">sync</span>
+            Preparing Documents...
+          } @else {
+            <span class="material-icons-outlined">send</span>
+            Submit &amp; Sign Documents
+          }
+        </button>
+      }
+    </div>
   }
 </div>

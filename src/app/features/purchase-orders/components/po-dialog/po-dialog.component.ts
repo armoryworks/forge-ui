@@ -1,20 +1,23 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { VendorService } from '../../../vendors/services/vendor.service';
+import { PartsService } from '../../../parts/services/parts.service';
 import { VendorResponse } from '../../../vendors/models/vendor-response.model';
+import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreatePurchaseOrderLineRequest } from '../../models/create-purchase-order-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface LineEntry {
   partId: number;
@@ -30,7 +33,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './po-dialog.component.html',
   styleUrl: './po-dialog.component.scss',
@@ -39,6 +42,7 @@ interface LineEntry {
 export class PoDialogComponent {
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
+  private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -47,6 +51,7 @@ export class PoDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly vendors = signal<VendorResponse[]>([]);
+  protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly vendorOptions = computed<SelectOption[]>(() => [
@@ -54,23 +59,28 @@ export class PoDialogComponent {
     ...this.vendors().map(v => ({ value: v.id, label: v.companyName })),
   ]);
 
+  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
+    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
+
   protected readonly form = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
     jobId: new FormControl<number | null>(null),
     notes: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  private readonly formViolations = FormValidationService.getViolations(this.form, {
     vendorId: 'Vendor',
     jobId: 'Job',
     notes: 'Notes',
   });
 
-  // Line item form
+  protected readonly violations: Signal<string[]> = computed(() => [
+    ...this.formViolations(),
+    ...(this.lines().length === 0 ? ['At least one line item is required'] : []),
+  ]);
+
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
-    partNumber: new FormControl('', [Validators.required]),
-    description: new FormControl(''),
     orderedQuantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
@@ -83,6 +93,9 @@ export class PoDialogComponent {
     this.vendorService.getVendorDropdown().subscribe({
       next: (list) => this.vendors.set(list),
     });
+    this.partsService.getParts().subscribe({
+      next: (list) => this.parts.set(list),
+    });
   }
 
   protected close(): void {
@@ -92,14 +105,16 @@ export class PoDialogComponent {
   protected addLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
+    const part = this.parts().find(p => p.id === f.partId);
+    if (!part) return;
     this.lines.update(prev => [...prev, {
-      partId: f.partId!,
-      partNumber: f.partNumber!,
-      description: f.description ?? '',
+      partId: part.id,
+      partNumber: part.partNumber,
+      description: part.description,
       orderedQuantity: f.orderedQuantity!,
       unitPrice: f.unitPrice!,
     }]);
-    this.lineForm.reset({ partId: null, partNumber: '', description: '', orderedQuantity: 1, unitPrice: 0 });
+    this.lineForm.reset({ partId: null, orderedQuantity: 1, unitPrice: 0 });
   }
 
   protected removeLine(index: number): void {

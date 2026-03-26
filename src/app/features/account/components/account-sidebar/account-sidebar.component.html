@@ -41,7 +41,8 @@
       </a>
     </li>
 
-    <!-- Tax & Compliance (collapsible) -->
+    <!-- Tax & Compliance (collapsible) — only visible after onboarding is complete -->
+    @if (onboardingComplete()) {
     <li>
       <button class="account-sidebar__link account-sidebar__link--parent"
         (click)="toggleTaxForms()"
@@ -91,6 +92,7 @@
         </ul>
       }
     </li>
+    } <!-- end @if onboardingComplete -->
 
     <!-- Documents, Security -->
     @for (item of navItems.slice(3); track item.path) {

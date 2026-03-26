@@ -5,6 +5,11 @@
   display: block;
 }
 
+// 3-col row: customer (flexible) | expiration date | tax rate (narrow)
+.dialog-row--3col {
+  grid-template-columns: 1fr 1fr 90px;
+}
+
 .lines-section {
   margin-top: $sp-lg;
   display: flex;
@@ -54,7 +59,7 @@
 
 .add-line {
   display: grid;
-  grid-template-columns: 80px 120px 1fr 70px 90px auto;
+  grid-template-columns: 1fr 100px 120px auto;
   gap: $sp-sm;
   align-items: end;
 }

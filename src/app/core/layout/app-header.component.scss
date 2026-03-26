@@ -225,6 +225,7 @@
   display: flex;
   gap: $sp-xs;
   align-items: center;
+  margin-left: auto; // always push to far right even when search bar is hidden
 }
 
 .icon-btn {

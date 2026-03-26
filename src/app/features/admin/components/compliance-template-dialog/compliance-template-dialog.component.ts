@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -39,9 +39,15 @@ export class ComplianceTemplateDialogComponent {
   private readonly translate = inject(TranslateService);
 
   protected readonly saving = signal(false);
+  protected readonly uploadingBlankPdf = signal(false);
   protected readonly isEdit = !!this.data;
   protected readonly isSystem = !!this.data && SYSTEM_FORM_TYPES.has(this.data.formType);
   protected readonly template = this.data;
+
+  // For system forms: editable acro map JSON (separate from main form)
+  protected readonly acroMapJson = signal(this.data?.acroFieldMapJson ?? '');
+  protected readonly savingAcroMap = signal(false);
+  protected readonly hasBlankPdf = computed(() => !!this.data?.filledPdfTemplateId);
 
   protected readonly formTypeOptions: SelectOption[] = [
     { value: 'W4', label: this.translate.instant('complianceTemplateDialog.formTypeW4') },
@@ -64,6 +70,7 @@ export class ComplianceTemplateDialogComponent {
     requiresIdentityDocs: new FormControl(this.data?.requiresIdentityDocs ?? false),
     blocksJobAssignment: new FormControl(this.data?.blocksJobAssignment ?? false),
     profileCompletionKey: new FormControl(this.data?.profileCompletionKey ?? '', [Validators.required, Validators.maxLength(50)]),
+    acroFieldMapJson: new FormControl(this.data?.acroFieldMapJson ?? ''),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -90,6 +97,45 @@ export class ComplianceTemplateDialogComponent {
     });
   }
 
+  protected onBlankPdfUploaded(file: { id: string }): void {
+    if (!this.data) return;
+    this.uploadingBlankPdf.set(true);
+    this.adminService.setBlankPdfTemplate(this.data.id, parseInt(file.id, 10)).subscribe({
+      next: () => {
+        this.uploadingBlankPdf.set(false);
+        this.snackbar.success(this.translate.instant('complianceTemplateDialog.blankPdfUploaded'));
+      },
+      error: () => this.uploadingBlankPdf.set(false),
+    });
+  }
+
+  protected saveAcroMap(): void {
+    if (!this.data) return;
+    this.savingAcroMap.set(true);
+    const existing = this.data;
+    this.adminService.updateComplianceTemplate(existing.id, {
+      name: existing.name,
+      formType: existing.formType,
+      description: existing.description ?? '',
+      icon: existing.icon,
+      sourceUrl: existing.sourceUrl,
+      isAutoSync: existing.isAutoSync,
+      isActive: existing.isActive,
+      sortOrder: existing.sortOrder,
+      requiresIdentityDocs: existing.requiresIdentityDocs,
+      blocksJobAssignment: existing.blocksJobAssignment,
+      profileCompletionKey: existing.profileCompletionKey,
+      docuSealTemplateId: existing.docuSealTemplateId,
+      acroFieldMapJson: this.acroMapJson() || null,
+    }).subscribe({
+      next: () => {
+        this.savingAcroMap.set(false);
+        this.snackbar.success(this.translate.instant('complianceTemplateDialog.acroMapSaved'));
+      },
+      error: () => this.savingAcroMap.set(false),
+    });
+  }
+
   protected save(): void {
     if (this.form.invalid) return;
     this.saving.set(true);
@@ -107,6 +153,7 @@ export class ComplianceTemplateDialogComponent {
       requiresIdentityDocs: value.requiresIdentityDocs!,
       blocksJobAssignment: value.blocksJobAssignment!,
       profileCompletionKey: value.profileCompletionKey!,
+      acroFieldMapJson: value.acroFieldMapJson || null,
     };
 
     const op = this.isEdit

@@ -1,5 +1,5 @@
 @if (isSystem) {
-  <app-dialog [title]="template?.name ?? ('common.name' | translate)" width="520px" (closed)="close()">
+  <app-dialog [title]="template?.name ?? ('common.name' | translate)" width="640px" (closed)="close()">
     <div class="system-info">
       <div class="system-info__row">
         <span class="system-info__label">{{ 'complianceTemplateDialog.systemType' | translate }}</span>
@@ -48,12 +48,56 @@
       [maxSizeMb]="25"
       (uploaded)="onFileUploaded($event)" />
 
+    <div class="section-divider"></div>
+
+    <h4 class="upload-title">{{ 'complianceTemplateDialog.pdfFillConfig' | translate }}</h4>
+    <p class="upload-hint">{{ 'complianceTemplateDialog.pdfFillConfigHint' | translate }}</p>
+
+    <div class="blank-pdf-upload">
+      <div class="blank-pdf-upload__status">
+        @if (template?.filledPdfTemplateId) {
+          <span class="chip chip--success">
+            <span class="material-icons-outlined">check_circle</span>
+            {{ 'complianceTemplateDialog.blankPdfLinked' | translate }} #{{ template!.filledPdfTemplateId }}
+          </span>
+        } @else {
+          <span class="chip chip--muted">{{ 'complianceTemplateDialog.noBlankPdf' | translate }}</span>
+        }
+      </div>
+      <app-file-upload-zone
+        entityType="compliance-templates"
+        [entityId]="template?.id ?? 0"
+        accept=".pdf"
+        [maxSizeMb]="25"
+        (uploaded)="onBlankPdfUploaded($event)" />
+    </div>
+
+    <div class="acro-map-section">
+      <label class="acro-map-section__label">{{ 'complianceTemplateDialog.acroFieldMap' | translate }}</label>
+      <p class="upload-hint">{{ 'complianceTemplateDialog.acroFieldMapHint' | translate }}</p>
+      <textarea
+        class="acro-map-section__textarea"
+        [value]="acroMapJson()"
+        (input)="acroMapJson.set($any($event.target).value)"
+        [placeholder]="'complianceTemplateDialog.acroFieldMapPlaceholder' | translate"
+        rows="8"
+        aria-label="AcroField JSON map"></textarea>
+      <div class="acro-map-section__actions">
+        <button class="action-btn action-btn--primary action-btn--sm"
+          [disabled]="savingAcroMap()"
+          (click)="saveAcroMap()">
+          <span class="material-icons-outlined">save</span>
+          {{ 'complianceTemplateDialog.saveAcroMap' | translate }}
+        </button>
+      </div>
+    </div>
+
     <div dialog-footer>
       <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
     </div>
   </app-dialog>
 } @else {
-  <app-dialog [title]="isEdit ? ('complianceTemplateDialog.editTemplate' | translate) : ('complianceTemplateDialog.newTemplate' | translate)" width="520px" (closed)="close()">
+  <app-dialog [title]="isEdit ? ('complianceTemplateDialog.editTemplate' | translate) : ('complianceTemplateDialog.newTemplate' | translate)" width="640px" (closed)="close()">
     <div [formGroup]="form">
       <div class="dialog-row">
         <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" />
@@ -79,6 +123,16 @@
         <app-toggle [label]="'complianceTemplateDialog.requiresIdentityDocs' | translate" formControlName="requiresIdentityDocs" />
         <app-toggle [label]="'complianceTemplateDialog.blocksJobAssignment' | translate" formControlName="blocksJobAssignment" />
       </div>
+
+      @if (isEdit) {
+        <div class="section-divider"></div>
+        <app-textarea
+          [label]="'complianceTemplateDialog.acroFieldMap' | translate"
+          formControlName="acroFieldMapJson"
+          [rows]="6"
+          [placeholder]="'complianceTemplateDialog.acroFieldMapPlaceholder' | translate" />
+        <p class="field-hint">{{ 'complianceTemplateDialog.acroFieldMapHint' | translate }}</p>
+      }
     </div>
 
     <div dialog-footer>

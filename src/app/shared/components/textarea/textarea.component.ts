@@ -29,6 +29,7 @@ export class TextareaComponent implements ControlValueAccessor {
   readonly rows = input(3);
   readonly maxlength = input<number | null>(null);
   readonly hint = input('');
+  readonly placeholder = input('');
 
   protected readonly value = signal('');
   protected readonly disabled = signal(false);

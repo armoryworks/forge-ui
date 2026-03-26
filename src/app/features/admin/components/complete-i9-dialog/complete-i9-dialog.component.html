@@ -1,0 +1,75 @@
+<app-dialog title="Complete I-9 Section 2" width="600px" (closed)="close()">
+  <div [formGroup]="form">
+
+    <div class="dialog-row">
+      <app-select
+        label="Document List Type"
+        formControlName="documentListType"
+        [options]="documentListOptions"
+        [required]="true" />
+      <app-datepicker
+        label="First Day of Employment"
+        formControlName="startDate"
+        [required]="true" />
+    </div>
+
+    @if (form.get('documentListType')?.value === 'A') {
+      <h4 class="i9-section-heading">List A Document</h4>
+      <div class="dialog-row">
+        <app-input label="Document Type" formControlName="listA_doc_type" />
+        <app-input label="Document Number" formControlName="listA_doc_number" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Issuing Authority" formControlName="listA_doc_issuer" />
+        <app-datepicker label="Expiration Date" formControlName="listA_doc_expiration" />
+      </div>
+    }
+
+    @if (form.get('documentListType')?.value === 'B+C') {
+      <h4 class="i9-section-heading">List B Document (Identity)</h4>
+      <div class="dialog-row">
+        <app-input label="Document Type" formControlName="listB_doc_type" />
+        <app-input label="Document Number" formControlName="listB_doc_number" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Issuing Authority" formControlName="listB_doc_issuer" />
+        <app-datepicker label="Expiration Date" formControlName="listB_doc_expiration" />
+      </div>
+
+      <h4 class="i9-section-heading">List C Document (Employment Authorization)</h4>
+      <div class="dialog-row">
+        <app-input label="Document Type" formControlName="listC_doc_type" />
+        <app-input label="Document Number" formControlName="listC_doc_number" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Issuing Authority" formControlName="listC_doc_issuer" />
+        <app-datepicker label="Expiration Date" formControlName="listC_doc_expiration" />
+      </div>
+    }
+
+    <h4 class="i9-section-heading">Reverification (Optional)</h4>
+    <app-datepicker
+      label="Work Authorization Expiration Date"
+      formControlName="reverificationDueAt" />
+    <p class="i9-reverification-note">
+      Leave blank for US citizens, permanent residents, and documents with no expiration.
+      When set, a reminder will be sent 90 days before expiration.
+    </p>
+
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      @if (saving()) {
+        <span class="material-icons-outlined" style="animation: spin 1s linear infinite">sync</span>
+      } @else {
+        <span class="material-icons-outlined">how_to_reg</span>
+      }
+      Complete Section 2
+    </button>
+  </div>
+</app-dialog>

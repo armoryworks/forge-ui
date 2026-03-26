@@ -1,7 +1,7 @@
 @use 'styles/variables' as *;
 
-mat-form-field {
-  width: 100%;
+:host {
+  display: grid;
 }
 
 .entity-picker__icon {

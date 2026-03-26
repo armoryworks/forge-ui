@@ -11,6 +11,7 @@ import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/compon
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { AdminService } from '../../services/admin.service';
 import { UserComplianceDetail, ComplianceFormSubmission, IdentityDocument } from '../../../account/models/compliance-form.model';
+import { CompleteI9DialogComponent, CompleteI9DialogData } from '../complete-i9-dialog/complete-i9-dialog.component';
 import { PayrollService } from '../../../account/services/payroll.service';
 import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
 
@@ -121,6 +122,18 @@ export class UserCompliancePanelComponent {
     window.open(`/api/v1/files/${sub.signedPdfFileId}`, '_blank');
   }
 
+  protected openCompleteI9Dialog(sub: ComplianceFormSubmission): void {
+    this.dialog.open(CompleteI9DialogComponent, {
+      width: '640px',
+      data: { submission: sub } satisfies CompleteI9DialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        const id = this.userId();
+        if (id) this.loadDetail(id);
+      }
+    });
+  }
+
   // ── Payroll ──
 
   protected downloadPayStubPdf(id: number): void {
@@ -226,6 +239,24 @@ export class UserCompliancePanelComponent {
         },
       });
     });
+  }
+
+  protected getI9StatusClass(sub: ComplianceFormSubmission): string {
+    if (sub.formType !== 'I9') return '';
+    if (!sub.i9Section1SignedAt) return 'chip chip--warning';
+    if (sub.i9Section2OverdueAt && new Date(sub.i9Section2OverdueAt) <= new Date() && !sub.i9Section2SignedAt)
+      return 'chip chip--error';
+    if (!sub.i9Section2SignedAt) return 'chip chip--info';
+    return 'chip chip--success';
+  }
+
+  protected getI9StatusLabel(sub: ComplianceFormSubmission): string {
+    if (sub.formType !== 'I9') return '';
+    if (!sub.i9Section1SignedAt) return 'Sec 1 Pending';
+    if (sub.i9Section2OverdueAt && new Date(sub.i9Section2OverdueAt) <= new Date() && !sub.i9Section2SignedAt)
+      return 'Sec 2 Overdue';
+    if (!sub.i9Section2SignedAt) return 'Awaiting Sec 2';
+    return 'I-9 Complete';
   }
 
   protected getTypeLabel(type: string): string {

@@ -18,4 +18,15 @@ export interface AdminUser {
   missingComplianceItems: string[];
   workLocationId: number | null;
   workLocationName: string | null;
+  i9Status: I9ComplianceStatus | null;
 }
+
+export type I9ComplianceStatus =
+  | 'NotStarted'
+  | 'Section1InProgress'
+  | 'Section1Complete'
+  | 'Section2InProgress'
+  | 'Complete'
+  | 'Section2Overdue'
+  | 'ReverificationDue'
+  | 'ReverificationOverdue';

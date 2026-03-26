@@ -169,6 +169,18 @@ html[data-theme='dark'] {
   ));
 }
 
+// ─── Form Field Width — Fill Container ───
+// Material sets .mat-mdc-form-field-infix { width: 180px } via CSS custom property,
+// and mat-form-field uses display:inline-flex (intrinsic sizing). Both prevent form
+// fields from shrinking to fit narrow grid columns. These overrides remove that floor.
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field-infix {
+  width: auto; // Override Material's fixed 180px — let container control width
+}
+
 // ─── Form Validation Visual Indicator ───
 // Subtle red outline glow on invalid + touched fields to guide users
 .mat-mdc-form-field.ng-touched.ng-invalid {

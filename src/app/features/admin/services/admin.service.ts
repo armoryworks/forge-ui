@@ -23,7 +23,7 @@ import { CreateScheduledTaskRequest } from '../models/create-scheduled-task-requ
 import { ScanIdentifier } from '../models/scan-identifier.model';
 import { AiAssistant } from '../models/ai-assistant.model';
 import { AdminTeam, TeamMember, KioskTerminal } from '../models/admin-team.model';
-import { ComplianceFormTemplate, UserComplianceDetail } from '../../account/models/compliance-form.model';
+import { ComplianceFormTemplate, ComplianceFormSubmission, UserComplianceDetail } from '../../account/models/compliance-form.model';
 import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
 import { IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
 
@@ -296,6 +296,10 @@ export class AdminService {
     return this.http.post<ComplianceFormTemplate>(`${this.complianceBase}/${id}/upload`, { fileAttachmentId });
   }
 
+  setBlankPdfTemplate(id: number, fileAttachmentId: number): Observable<ComplianceFormTemplate> {
+    return this.http.post<ComplianceFormTemplate>(`${this.complianceBase}/${id}/blank-pdf-template`, { fileAttachmentId });
+  }
+
   syncComplianceTemplate(id: number): Observable<void> {
     return this.http.post<void>(`${this.complianceBase}/${id}/sync`, {});
   }
@@ -318,6 +322,17 @@ export class AdminService {
 
   verifyIdentityDocument(documentId: number): Observable<void> {
     return this.http.post<void>(`${environment.apiUrl}/identity-documents/admin/${documentId}/verify`, {});
+  }
+
+  completeI9Section2(submissionId: number, request: CompleteI9Section2Request): Observable<ComplianceFormSubmission> {
+    return this.http.post<ComplianceFormSubmission>(
+      `${this.complianceBase}/submissions/${submissionId}/complete-i9-section2`,
+      request,
+    );
+  }
+
+  getI9Pending(): Observable<I9PendingItem[]> {
+    return this.http.get<I9PendingItem[]>(`${this.complianceBase}/admin/i9-pending`);
   }
 
   // Company Locations
@@ -369,4 +384,22 @@ export class AdminService {
   testIntegration(provider: string): Observable<TestIntegrationResult> {
     return this.http.post<TestIntegrationResult>(`${environment.apiUrl}/admin/integrations/${provider}/test`, {});
   }
+}
+
+export interface CompleteI9Section2Request {
+  documentListType: string;
+  documentDataJson: string;
+  startDate: string;
+  reverificationDueAt: string | null;
+}
+
+export interface I9PendingItem {
+  submissionId: number;
+  userId: number;
+  userName: string;
+  userEmail: string;
+  section1SignedAt: string | null;
+  section2OverdueAt: string | null;
+  isOverdue: boolean;
+  docuSealSubmitUrl: string | null;
 }

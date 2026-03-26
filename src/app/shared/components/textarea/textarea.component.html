@@ -5,6 +5,7 @@
   <textarea matInput
     [rows]="rows()"
     [attr.maxlength]="maxlength()"
+    [attr.placeholder]="placeholder() || null"
     [disabled]="disabled()"
     [value]="value()"
     (input)="onInput($event)"

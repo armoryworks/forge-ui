@@ -48,12 +48,26 @@
           @for (sub of d.submissions; track sub.id) {
             <tr>
               <td>{{ sub.templateName }}</td>
-              <td><span [class]="getStatusClass(sub.status)">{{ sub.status }}</span></td>
+              <td>
+                <span [class]="getStatusClass(sub.status)">{{ sub.status }}</span>
+                @if (sub.formType === 'I9') {
+                  <span [class]="getI9StatusClass(sub)" class="user-compliance__i9-chip">
+                    {{ getI9StatusLabel(sub) }}
+                  </span>
+                }
+              </td>
               <td>{{ sub.signedAt ? (sub.signedAt | date:'MM/dd/yyyy') : '—' }}</td>
               <td>
                 @if (sub.signedPdfFileId) {
                   <button class="icon-btn" (click)="downloadSignedPdf(sub)" [attr.aria-label]="'common.download' | translate" [matTooltip]="'common.download' | translate" matTooltipPosition="above">
                     <span class="material-icons-outlined">download</span>
+                  </button>
+                }
+                @if (sub.formType === 'I9' && sub.i9Section1SignedAt && !sub.i9Section2SignedAt) {
+                  <button class="icon-btn" (click)="openCompleteI9Dialog(sub)"
+                    [attr.aria-label]="'admin.completeI9Section2' | translate"
+                    [matTooltip]="'admin.completeI9Section2' | translate" matTooltipPosition="above">
+                    <span class="material-icons-outlined">how_to_reg</span>
                   </button>
                 }
               </td>

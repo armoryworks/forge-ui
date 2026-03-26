@@ -1508,7 +1508,17 @@
     "formTypeState": "Retención de Impuestos Estatales",
     "formTypeDirectDeposit": "Depósito Directo",
     "formTypeWorkersComp": "Compensación Laboral",
-    "formTypeHandbook": "Manual del Empleado"
+    "formTypeHandbook": "Manual del Empleado",
+    "pdfFillConfig": "Configuración de Llenado de PDF",
+    "pdfFillConfigHint": "Suba el PDF gubernamental en blanco y configure el mapa AcroField para habilitar el llenado automático antes de la firma en DocuSeal.",
+    "blankPdfUploaded": "Plantilla PDF en blanco establecida",
+    "blankPdfLinked": "PDF en blanco vinculado: Archivo",
+    "noBlankPdf": "Sin PDF en blanco configurado",
+    "acroFieldMap": "JSON Mapa AcroField",
+    "acroFieldMapHint": "Objeto JSON que mapea los IDs de campos del formulario dinámico a los nombres de campos AcroForm del PDF.",
+    "acroFieldMapPlaceholder": "{ \"campoId\": \"NombreCampoAcroForm\", ... }",
+    "saveAcroMap": "Guardar Mapa",
+    "acroMapSaved": "Mapa AcroField guardado"
   },
   "companyLocationDialog": {
     "editLocation": "Editar Ubicación",

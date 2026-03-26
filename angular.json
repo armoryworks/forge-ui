@@ -98,7 +98,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["qb-engineer-ui", "localhost"]
+            "allowedHosts": ["qb-engineer-ui", "localhost"],
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {

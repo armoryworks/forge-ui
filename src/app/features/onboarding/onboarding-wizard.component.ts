@@ -6,8 +6,10 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { map } from 'rxjs';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -32,6 +34,8 @@ import {
   OnboardingSigningUrl,
   OnboardingSubmitRequest,
 } from './onboarding.service';
+
+const DRAFT_KEY = 'qbe-onboarding-draft';
 
 const US_STATES = [
   { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' },
@@ -89,10 +93,42 @@ const STATE_FILING_OPTIONS = [
   { value: 'HH', label: 'Head of household' },
 ];
 
+const LIST_A_TYPE_OPTIONS = [
+  { value: 'U.S. Passport', label: 'U.S. Passport' },
+  { value: 'U.S. Passport Card', label: 'U.S. Passport Card' },
+  { value: 'Permanent Resident Card (I-551)', label: 'Permanent Resident Card (Form I-551)' },
+  { value: 'Employment Authorization Document (I-766)', label: 'Employment Authorization Document (Form I-766)' },
+  { value: 'Foreign Passport with I-94', label: 'Foreign Passport with I-94 Admission Number' },
+  { value: 'Foreign Passport with I-551 Stamp', label: 'Foreign Passport with I-551 Stamp' },
+];
+
+const LIST_B_TYPE_OPTIONS = [
+  { value: "Driver's License", label: "Driver's License" },
+  { value: 'State ID Card', label: 'State-Issued ID Card' },
+  { value: 'School ID with Photo', label: 'School ID Card with Photograph' },
+  { value: 'Voter Registration Card', label: 'Voter Registration Card' },
+  { value: 'Military ID', label: 'U.S. Military ID Card or Draft Record' },
+  { value: 'Native American Tribal Document', label: 'Native American Tribal Document' },
+];
+
+const LIST_C_TYPE_OPTIONS = [
+  { value: 'Social Security Card', label: 'U.S. Social Security Card (unrestricted)' },
+  { value: 'Birth Certificate', label: 'Certified U.S. Birth Certificate' },
+  { value: 'U.S. Citizen ID Card (I-197)', label: 'U.S. Citizen ID Card (Form I-197)' },
+  { value: 'Native American Tribal Document', label: 'Native American Tribal Document' },
+  { value: 'Employment Authorization (I-9)', label: 'Employment Authorization Document (DHS-issued)' },
+];
+
+interface I9Attachment {
+  id: number;
+  name: string;
+}
+
 @Component({
   selector: 'app-onboarding-wizard',
   standalone: true,
   imports: [
+    CurrencyPipe,
     ReactiveFormsModule,
     MatStepperModule,
     MatIconModule,
@@ -114,9 +150,55 @@ export class OnboardingWizardComponent {
   private readonly service = inject(OnboardingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(EmployeeProfileService);
+
+  // ── Step tracking — URL is source of truth (?step=0..6) ──────────────────
+  protected readonly currentStepIndex = toSignal(
+    this.route.queryParamMap.pipe(map(p => {
+      const n = parseInt(p.get('step') ?? '0', 10);
+      return isNaN(n) || n < 0 || n > 6 ? 0 : n;
+    })),
+    { initialValue: 0 },
+  );
+
+  protected readonly currentViolations = computed<string[]>(() => {
+    switch (this.currentStepIndex()) {
+      case 0: return this.personalViolations();
+      case 1: return this.addressViolations();
+      case 2: return this.w4Violations();
+      case 3: return [] as string[];
+      case 4: return this.i9Violations();
+      case 5: return this.depositViolations();
+      case 6: return this.ackViolations();
+      default: return [] as string[];
+    }
+  });
+
+  protected readonly currentFormInvalid = computed(() => {
+    switch (this.currentStepIndex()) {
+      case 0: return this.personalForm.invalid;
+      case 1: return this.addressForm.invalid;
+      case 2: return this.w4Form.invalid;
+      case 3: return false;
+      case 4: return this.i9Form.invalid;
+      case 5: return this.depositForm.invalid;
+      case 6: return this.ackForm.invalid || this.submitting();
+      default: return false;
+    }
+  });
+
+  protected nextStep(): void {
+    const next = Math.min((this.currentStepIndex() ?? 0) + 1, 6);
+    this.router.navigate([], { relativeTo: this.route, queryParams: { step: next }, queryParamsHandling: 'merge' });
+  }
+
+  protected prevStep(): void {
+    const prev = Math.max((this.currentStepIndex() ?? 0) - 1, 0);
+    this.router.navigate([], { relativeTo: this.route, queryParams: { step: prev }, queryParamsHandling: 'merge' });
+  }
 
   // ── State ────────────────────────────────────────────────────────────────
   protected readonly submitting = signal(false);
@@ -136,12 +218,23 @@ export class OnboardingWizardComponent {
     return this.sanitizer.bypassSecurityTrustResourceUrl(item.signingUrl);
   });
 
+  // ── I-9 Document Upload State ─────────────────────────────────────────────
+  protected readonly listAAttachment = signal<I9Attachment | null>(null);
+  protected readonly listBAttachment = signal<I9Attachment | null>(null);
+  protected readonly listCAttachment = signal<I9Attachment | null>(null);
+  protected readonly uploadingListA = signal(false);
+  protected readonly uploadingListB = signal(false);
+  protected readonly uploadingListC = signal(false);
+
   // ── Options ──────────────────────────────────────────────────────────────
   protected readonly filingStatusOptions = FILING_STATUS_OPTIONS;
   protected readonly accountTypeOptions = ACCOUNT_TYPE_OPTIONS;
   protected readonly citizenshipOptions = CITIZENSHIP_OPTIONS;
   protected readonly stateFilingOptions = STATE_FILING_OPTIONS;
   protected readonly usStateOptions = US_STATES;
+  protected readonly listATypeOptions = LIST_A_TYPE_OPTIONS;
+  protected readonly listBTypeOptions = LIST_B_TYPE_OPTIONS;
+  protected readonly listCTypeOptions = LIST_C_TYPE_OPTIONS;
 
   // ── Step 1: Personal Information ─────────────────────────────────────────
   protected readonly personalForm = new FormGroup({
@@ -155,16 +248,14 @@ export class OnboardingWizardComponent {
     phone: new FormControl('', [Validators.required]),
   });
 
-  protected readonly personalViolations = computed(() =>
-    FormValidationService.getViolations(this.personalForm, {
-      firstName: 'First Name',
-      lastName: 'Last Name',
-      dateOfBirth: 'Date of Birth',
-      ssn: 'Social Security Number',
-      email: 'Email',
-      phone: 'Phone',
-    })
-  );
+  protected readonly personalViolations = FormValidationService.getViolations(this.personalForm, {
+    firstName: 'First Name',
+    lastName: 'Last Name',
+    dateOfBirth: 'Date of Birth',
+    ssn: 'Social Security Number',
+    email: 'Email',
+    phone: 'Phone',
+  });
 
   // ── Step 2: Address ───────────────────────────────────────────────────────
   protected readonly addressForm = new FormGroup({
@@ -191,31 +282,46 @@ export class OnboardingWizardComponent {
     return !!code && NO_INCOME_TAX_STATES.has(code);
   });
 
-  protected readonly addressViolations = computed(() =>
-    FormValidationService.getViolations(this.addressForm, {
-      street1: 'Street Address',
-      city: 'City',
-      state: 'State',
-      zipCode: 'ZIP Code',
-    })
-  );
+  protected readonly addressViolations = FormValidationService.getViolations(this.addressForm, {
+    street1: 'Street Address',
+    city: 'City',
+    state: 'State',
+    zipCode: 'ZIP Code',
+  });
 
   // ── Step 3: W-4 Federal Withholding ──────────────────────────────────────
   protected readonly w4Form = new FormGroup({
-    filingStatus: new FormControl('Single', [Validators.required]),
+    filingStatus: new FormControl(null, [Validators.required]),
     multipleJobs: new FormControl(false),
-    claimDependentsAmount: new FormControl(0),
+    // Step 3: Claim Dependents — 3a (qualifying children) and 3b (other dependents)
+    qualifyingChildren: new FormControl<number>(0),
+    otherDependents: new FormControl<number>(0),
+    // Step 4: Other Adjustments (optional)
     otherIncome: new FormControl(0),
     deductions: new FormControl(0),
     extraWithholding: new FormControl(0),
     exemptFromWithholding: new FormControl(false),
   });
 
-  protected readonly w4Violations = computed(() =>
-    FormValidationService.getViolations(this.w4Form, {
-      filingStatus: 'Filing Status',
-    })
+  // W-4 Step 3 computed dollar amounts (must be after w4Form)
+  private readonly w4FormValue = toSignal(
+    this.w4Form.valueChanges,
+    { initialValue: this.w4Form.value },
   );
+
+  protected readonly w4Step3a = computed(() =>
+    (this.w4FormValue().qualifyingChildren ?? 0) * 2000
+  );
+  protected readonly w4Step3b = computed(() =>
+    (this.w4FormValue().otherDependents ?? 0) * 500
+  );
+  protected readonly w4Step3Total = computed(() =>
+    this.w4Step3a() + this.w4Step3b()
+  );
+
+  protected readonly w4Violations = FormValidationService.getViolations(this.w4Form, {
+    filingStatus: 'Filing Status',
+  });
 
   // ── Step 4: State Withholding ─────────────────────────────────────────────
   protected readonly stateForm = new FormGroup({
@@ -240,13 +346,25 @@ export class OnboardingWizardComponent {
     preparerCity: new FormControl(''),
     preparerState: new FormControl(''),
     preparerZip: new FormControl(''),
+    // Document verification
+    documentChoice: new FormControl<'A' | 'BC' | null>(null),
+    listAType: new FormControl(''),
+    listADocNumber: new FormControl(''),
+    listAAuthority: new FormControl(''),
+    listAExpiry: new FormControl<Date | null>(null),
+    listBType: new FormControl(''),
+    listBDocNumber: new FormControl(''),
+    listBAuthority: new FormControl(''),
+    listBExpiry: new FormControl<Date | null>(null),
+    listCType: new FormControl(''),
+    listCDocNumber: new FormControl(''),
+    listCAuthority: new FormControl(''),
+    listCExpiry: new FormControl<Date | null>(null),
   });
 
-  protected readonly i9Violations = computed(() =>
-    FormValidationService.getViolations(this.i9Form, {
-      citizenshipStatus: 'Citizenship Status',
-    })
-  );
+  protected readonly i9Violations = FormValidationService.getViolations(this.i9Form, {
+    citizenshipStatus: 'Citizenship Status',
+  });
 
   protected readonly i9CitizenshipStatus = toSignal(
     this.i9Form.controls.citizenshipStatus.valueChanges,
@@ -263,6 +381,11 @@ export class OnboardingWizardComponent {
     { initialValue: false }
   );
 
+  protected readonly i9DocumentChoice = toSignal(
+    this.i9Form.controls.documentChoice.valueChanges,
+    { initialValue: this.i9Form.controls.documentChoice.value }
+  );
+
   // ── Step 6: Direct Deposit ────────────────────────────────────────────────
   protected readonly depositForm = new FormGroup({
     bankName: new FormControl('', [Validators.required]),
@@ -271,14 +394,12 @@ export class OnboardingWizardComponent {
     accountType: new FormControl('Checking', [Validators.required]),
   });
 
-  protected readonly depositViolations = computed(() =>
-    FormValidationService.getViolations(this.depositForm, {
-      bankName: 'Bank Name',
-      routingNumber: 'Routing Number (9 digits)',
-      accountNumber: 'Account Number',
-      accountType: 'Account Type',
-    })
-  );
+  protected readonly depositViolations = FormValidationService.getViolations(this.depositForm, {
+    bankName: 'Bank Name',
+    routingNumber: 'Routing Number (9 digits)',
+    accountNumber: 'Account Number',
+    accountType: 'Account Type',
+  });
 
   // ── Step 7: Acknowledgments ───────────────────────────────────────────────
   protected readonly ackForm = new FormGroup({
@@ -286,44 +407,106 @@ export class OnboardingWizardComponent {
     handbook: new FormControl(false, [Validators.requiredTrue]),
   });
 
-  protected readonly ackViolations = computed(() =>
-    FormValidationService.getViolations(this.ackForm, {
-      workersComp: "Workers' Compensation Acknowledgment",
-      handbook: 'Employee Handbook Acknowledgment',
-    })
-  );
+  protected readonly ackViolations = FormValidationService.getViolations(this.ackForm, {
+    workersComp: "Workers' Compensation Acknowledgment",
+    handbook: 'Employee Handbook Acknowledgment',
+  });
 
-  // ── Prefill from existing HR/auth data ───────────────────────────────────
+  // ── Auto-save signals (all forms, must be after form declarations) ────────
+  private readonly _personalVal = toSignal(this.personalForm.valueChanges, { initialValue: this.personalForm.value });
+  private readonly _addressVal  = toSignal(this.addressForm.valueChanges,  { initialValue: this.addressForm.value });
+  private readonly _w4Val       = toSignal(this.w4Form.valueChanges,       { initialValue: this.w4Form.value });
+  private readonly _stateVal    = toSignal(this.stateForm.valueChanges,    { initialValue: this.stateForm.value });
+  private readonly _i9Val       = toSignal(this.i9Form.valueChanges,       { initialValue: this.i9Form.value });
+  private readonly _depositVal  = toSignal(this.depositForm.valueChanges,  { initialValue: this.depositForm.value });
+  private readonly _ackVal      = toSignal(this.ackForm.valueChanges,      { initialValue: this.ackForm.value });
+
+  // ── Constructor: restore draft, prefill, auto-save ───────────────────────
   constructor() {
-    // Prefill from auth user — always available
-    const user = this.authService.user();
-    if (user) {
-      this.personalForm.patchValue({
-        firstName: user.firstName ?? '',
-        lastName: user.lastName ?? '',
-        email: user.email ?? '',
+    // Restore saved draft first — takes priority over admin prefill
+    const draftRestored = this.restoreDraft();
+
+    // Prefill from auth user only when no draft exists
+    if (!draftRestored) {
+      const user = this.authService.user();
+      if (user) {
+        this.personalForm.patchValue({
+          firstName: user.firstName ?? '',
+          lastName: user.lastName ?? '',
+          email: user.email ?? '',
+        });
+      }
+
+      // Load employee profile and prefill whatever the admin already entered
+      this.profileService.load();
+      effect(() => {
+        const profile = this.profileService.profile();
+        if (!profile) return;
+        this.personalForm.patchValue({
+          ...(profile.phoneNumber ? { phone: profile.phoneNumber } : {}),
+          ...(profile.dateOfBirth ? { dateOfBirth: new Date(profile.dateOfBirth) } : {}),
+        });
+        this.addressForm.patchValue({
+          ...(profile.street1   ? { street1: profile.street1   } : {}),
+          ...(profile.street2   ? { street2: profile.street2   } : {}),
+          ...(profile.city      ? { city: profile.city         } : {}),
+          ...(profile.state     ? { state: profile.state       } : {}),
+          ...(profile.zipCode   ? { zipCode: profile.zipCode   } : {}),
+        });
       });
     }
 
-    // Load employee profile then prefill whatever the admin already entered
-    this.profileService.load();
+    // Auto-save to localStorage whenever any form value changes
     effect(() => {
-      const profile = this.profileService.profile();
-      if (!profile) return;
-      this.personalForm.patchValue({
-        ...(profile.phoneNumber ? { phone: profile.phoneNumber } : {}),
-        ...(profile.dateOfBirth
-          ? { dateOfBirth: new Date(profile.dateOfBirth) }
-          : {}),
-      });
-      this.addressForm.patchValue({
-        ...(profile.street1 ? { street1: profile.street1 } : {}),
-        ...(profile.street2 ? { street2: profile.street2 } : {}),
-        ...(profile.city ? { city: profile.city } : {}),
-        ...(profile.state ? { state: profile.state } : {}),
-        ...(profile.zipCode ? { zipCode: profile.zipCode } : {}),
-      });
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        personal: this._personalVal(),
+        address:  this._addressVal(),
+        w4:       this._w4Val(),
+        state:    this._stateVal(),
+        i9:       this._i9Val(),
+        deposit:  this._depositVal(),
+        ack:      this._ackVal(),
+      }));
     });
+  }
+
+  // ── I-9 Document Methods ──────────────────────────────────────────────────
+  protected setDocumentChoice(choice: 'A' | 'BC'): void {
+    this.i9Form.controls.documentChoice.setValue(choice);
+    if (choice === 'A') {
+      this.listBAttachment.set(null);
+      this.listCAttachment.set(null);
+    } else {
+      this.listAAttachment.set(null);
+    }
+  }
+
+  protected onFileSelected(event: Event, list: 'A' | 'B' | 'C'): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+
+    const uploading = list === 'A' ? this.uploadingListA : list === 'B' ? this.uploadingListB : this.uploadingListC;
+    uploading.set(true);
+
+    this.service.uploadI9Document(file, `List${list}`).subscribe({
+      next: result => {
+        uploading.set(false);
+        const attach = list === 'A' ? this.listAAttachment : list === 'B' ? this.listBAttachment : this.listCAttachment;
+        attach.set({ id: result.fileAttachmentId, name: result.fileName });
+      },
+      error: () => {
+        uploading.set(false);
+        this.snackbar.error(`Failed to upload document. Please try again.`);
+      },
+    });
+  }
+
+  protected clearList(list: 'A' | 'B' | 'C'): void {
+    if (list === 'A') this.listAAttachment.set(null);
+    else if (list === 'B') this.listBAttachment.set(null);
+    else this.listCAttachment.set(null);
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────
@@ -354,10 +537,10 @@ export class OnboardingWizardComponent {
       city: a.city!,
       addressState: a.state as string,
       zipCode: a.zipCode!,
-      // W-4
+      // W-4 — 3a + 3b combined into total dependents credit amount
       w4FilingStatus: w.filingStatus!,
       w4MultipleJobs: w.multipleJobs ?? false,
-      w4ClaimDependentsAmount: Number(w.claimDependentsAmount ?? 0),
+      w4ClaimDependentsAmount: this.w4Step3Total(),
       w4OtherIncome: Number(w.otherIncome ?? 0),
       w4Deductions: Number(w.deductions ?? 0),
       w4ExtraWithholding: Number(w.extraWithholding ?? 0),
@@ -367,7 +550,7 @@ export class OnboardingWizardComponent {
       stateAllowances: s.stateAllowances ?? undefined,
       stateAdditionalWithholding: s.stateAdditionalWithholding ?? undefined,
       stateExempt: s.stateExempt ?? undefined,
-      // I-9
+      // I-9 citizenship
       i9CitizenshipStatus: i.citizenshipStatus!,
       i9AlienRegNumber: i.alienRegNumber || undefined,
       i9I94Number: i.i94Number || undefined,
@@ -381,6 +564,23 @@ export class OnboardingWizardComponent {
       i9PreparerCity: i.preparerCity || undefined,
       i9PreparerState: i.preparerState || undefined,
       i9PreparerZip: i.preparerZip || undefined,
+      // I-9 document verification
+      i9DocumentChoice: i.documentChoice || undefined,
+      i9ListAType: i.listAType || undefined,
+      i9ListADocNumber: i.listADocNumber || undefined,
+      i9ListAAuthority: i.listAAuthority || undefined,
+      i9ListAExpiry: i.listAExpiry ? toIsoDate(i.listAExpiry) ?? undefined : undefined,
+      i9ListAFileAttachmentId: this.listAAttachment()?.id,
+      i9ListBType: i.listBType || undefined,
+      i9ListBDocNumber: i.listBDocNumber || undefined,
+      i9ListBAuthority: i.listBAuthority || undefined,
+      i9ListBExpiry: i.listBExpiry ? toIsoDate(i.listBExpiry) ?? undefined : undefined,
+      i9ListBFileAttachmentId: this.listBAttachment()?.id,
+      i9ListCType: i.listCType || undefined,
+      i9ListCDocNumber: i.listCDocNumber || undefined,
+      i9ListCAuthority: i.listCAuthority || undefined,
+      i9ListCExpiry: i.listCExpiry ? toIsoDate(i.listCExpiry) ?? undefined : undefined,
+      i9ListCFileAttachmentId: this.listCAttachment()?.id,
       // Direct deposit
       bankName: d.bankName!,
       routingNumber: d.routingNumber!,
@@ -395,6 +595,7 @@ export class OnboardingWizardComponent {
     this.service.submit(request).subscribe({
       next: result => {
         this.submitting.set(false);
+        localStorage.removeItem(DRAFT_KEY);
         if (result.requiresSigning && result.signingUrls.length > 0) {
           this.signingUrls.set(result.signingUrls);
           this.currentSigningIndex.set(0);
@@ -420,5 +621,24 @@ export class OnboardingWizardComponent {
 
   protected goToDashboard(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  // ── Draft persistence ─────────────────────────────────────────────────────
+  private restoreDraft(): boolean {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw) as Record<string, unknown>;
+      if (draft['personal']) this.personalForm.patchValue(draft['personal'] as never);
+      if (draft['address'])  this.addressForm.patchValue(draft['address'] as never);
+      if (draft['w4'])       this.w4Form.patchValue(draft['w4'] as never);
+      if (draft['state'])    this.stateForm.patchValue(draft['state'] as never);
+      if (draft['i9'])       this.i9Form.patchValue(draft['i9'] as never);
+      if (draft['deposit'])  this.depositForm.patchValue(draft['deposit'] as never);
+      if (draft['ack'])      this.ackForm.patchValue(draft['ack'] as never);
+      return true;
+    } catch {
+      return false;
+    }
   }
 }

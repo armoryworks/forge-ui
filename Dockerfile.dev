@@ -7,4 +7,4 @@ RUN npm ci
 # Serve on port 80 to match production compose port mapping (4200:80)
 EXPOSE 80
 ENV NODE_OPTIONS="--max-old-space-size=4096"
-CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "80", "--poll", "2000"]
+CMD ["npx", "ng", "serve", "--host", "0.0.0.0", "--port", "80", "--poll", "2000", "--proxy-config", "proxy.conf.json"]

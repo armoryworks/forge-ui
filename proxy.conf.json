@@ -1,0 +1,21 @@
+{
+  "/api": {
+    "target": "http://qb-engineer-api:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  },
+  "/hubs": {
+    "target": "http://qb-engineer-api:8080",
+    "secure": false,
+    "changeOrigin": true,
+    "ws": true,
+    "logLevel": "warn"
+  },
+  "/docuseal": {
+    "target": "http://qb-engineer-signing:3000",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "warn"
+  }
+}

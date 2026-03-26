@@ -1,5 +1,5 @@
 export interface CreateShipmentLineRequest {
-  salesOrderLineId: number;
+  partId: number;
   quantity: number;
   notes?: string;
 }

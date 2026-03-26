@@ -392,6 +392,7 @@ export class AdminComponent {
             missingComplianceItems: [],
             workLocationId: null,
             workLocationName: null,
+            i9Status: null,
           };
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);

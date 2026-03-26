@@ -1,25 +1,28 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { QuoteService } from '../../services/quote.service';
 import { CustomerService } from '../../../customers/services/customer.service';
+import { PartsService } from '../../../parts/services/parts.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
+import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateQuoteLineRequest } from '../../models/create-quote-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 interface LineEntry {
-  partId: number | null;
+  partId: number;
   partNumber: string;
   description: string;
   quantity: number;
@@ -32,7 +35,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',
@@ -41,6 +44,7 @@ interface LineEntry {
 export class QuoteDialogComponent {
   private readonly quoteService = inject(QuoteService);
   private readonly customerService = inject(CustomerService);
+  private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -49,12 +53,16 @@ export class QuoteDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly customers = signal<CustomerListItem[]>([]);
+  protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('quotes.selectCustomer') },
     ...this.customers().map(c => ({ value: c.id, label: c.name })),
   ]);
+
+  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
+    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
 
   protected readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
@@ -63,18 +71,20 @@ export class QuoteDialogComponent {
     notes: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  private readonly formViolations = FormValidationService.getViolations(this.form, {
     customerId: 'Customer',
     expirationDate: 'Expiration Date',
     taxRate: 'Tax Rate',
     notes: 'Notes',
   });
 
-  // Line item form
+  protected readonly violations: Signal<string[]> = computed(() => [
+    ...this.formViolations(),
+    ...(this.lines().length === 0 ? ['At least one line item is required'] : []),
+  ]);
+
   protected readonly lineForm = new FormGroup({
-    partId: new FormControl<number | null>(null),
-    partNumber: new FormControl(''),
-    description: new FormControl('', [Validators.required]),
+    partId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
@@ -87,6 +97,9 @@ export class QuoteDialogComponent {
     this.customerService.getCustomers(undefined, true).subscribe({
       next: (list) => this.customers.set(list),
     });
+    this.partsService.getParts('Active').subscribe({
+      next: (list) => this.parts.set(list),
+    });
   }
 
   protected close(): void {
@@ -96,14 +109,16 @@ export class QuoteDialogComponent {
   protected addLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
+    const part = this.parts().find(p => p.id === f.partId);
+    if (!part) return;
     this.lines.update(prev => [...prev, {
-      partId: f.partId ?? null,
-      partNumber: f.partNumber ?? '',
-      description: f.description ?? '',
+      partId: part.id,
+      partNumber: part.partNumber,
+      description: part.description,
       quantity: f.quantity!,
       unitPrice: f.unitPrice!,
     }]);
-    this.lineForm.reset({ partId: null, partNumber: '', description: '', quantity: 1, unitPrice: 0 });
+    this.lineForm.reset({ partId: null, quantity: 1, unitPrice: 0 });
   }
 
   protected removeLine(index: number): void {
@@ -116,7 +131,7 @@ export class QuoteDialogComponent {
 
     const f = this.form.getRawValue();
     const lineRequests: CreateQuoteLineRequest[] = this.lines().map(l => ({
-      partId: l.partId ?? undefined,
+      partId: l.partId,
       description: l.description,
       quantity: l.quantity,
       unitPrice: l.unitPrice,

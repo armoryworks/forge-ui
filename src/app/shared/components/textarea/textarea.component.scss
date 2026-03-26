@@ -1,8 +1,10 @@
 @use 'styles/variables' as *;
 
-mat-form-field {
-  width: 100%;
+:host {
+  display: grid;
+}
 
+mat-form-field {
   // Override Material's default font to match site design tokens
   ::ng-deep {
     .mdc-floating-label {

@@ -50,7 +50,7 @@
 
 .add-line {
   display: grid;
-  grid-template-columns: 80px 1fr 70px auto;
+  grid-template-columns: 1fr 100px auto;
   gap: $sp-sm;
   align-items: end;
 }

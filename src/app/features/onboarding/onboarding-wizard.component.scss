@@ -1,49 +1,106 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+// ── Host: centered canvas ────────────────────────────────────────────────
+:host {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  height: 100%;
+  padding: $sp-sm $sp-md;
+  background: var(--bg);
+  overflow: hidden;
+}
+
 .onboarding {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   max-width: 860px;
-  margin: 0 auto;
-  padding: $sp-xl $sp-lg;
+  height: 100%; // fixed height = fills the padded host
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden; // card clips; internal areas scroll
 
   &__header {
     display: flex;
     align-items: center;
-    gap: $sp-lg;
-    margin-bottom: $sp-2xl;
-    padding-bottom: $sp-lg;
+    gap: $sp-md;
+    flex-shrink: 0;
+    padding: 0 $sp-lg;
+    height: 36px;
     border-bottom: $border-width solid var(--border);
+    background: var(--surface);
   }
 
   &__logo {
-    font-size: 40px;
+    font-size: $icon-size-xl;
     color: var(--primary);
     flex-shrink: 0;
   }
 
   &__title {
-    font-size: $font-size-xl;
+    font-size: $font-size-title;
     font-weight: 700;
-    margin: 0 0 $sp-xs;
+    margin: 0;
     color: var(--text);
   }
 
+  // subtitle hidden — space is at a premium
   &__subtitle {
-    font-size: $font-size-base;
-    color: var(--text-secondary);
-    margin: 0;
+    display: none;
   }
 
   &__stepper {
-    background: transparent;
+    flex: 1;
+    min-height: 0;
+    // Relative container so the stepper can fill it absolutely,
+    // avoiding any fight with Material's own flex/block display rules.
+    position: relative;
+    overflow: hidden;
 
     ::ng-deep {
+      // Absolute fill gives the stepper a defined size; we can then apply
+      // our own flex layout inside without needing !important to beat Material.
       .mat-stepper-horizontal {
+        position: absolute;
+        inset: 0;
+        display: flex !important;
+        flex-direction: column;
+        overflow: hidden;
         background: transparent;
+        margin: 0;
+        padding: 0;
+      }
+
+      // Angular Material 17+ wraps header+content in this div.
+      // mat-stepper is display:block (not flex) so flex:1 doesn't work here.
+      // Use absolute fill instead — mat-stepper has position:relative.
+      .mat-horizontal-stepper-wrapper {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .mat-horizontal-stepper-header-container {
+        flex: 0 0 auto;
+        background: var(--surface);
+        border-bottom: $border-width solid var(--border);
+        padding: 0 $sp-md;
       }
 
       .mat-step-header {
-        padding: $sp-md $sp-md;
+        padding: $sp-xxs $sp-sm;
+        height: 40px;
+        min-height: 0;
+      }
+
+      .mat-step-icon {
+        width: 18px;
+        height: 18px;
+        font-size: $font-size-xs;
       }
 
       .mat-step-label {
@@ -51,15 +108,47 @@
         font-family: $font-family-primary;
       }
 
+      // Content area scrolls; actions bar is outside the stepper.
       .mat-horizontal-content-container {
-        padding: $sp-xl 0 0;
-        overflow: visible;
+        flex: 1;
+        min-height: 0; // required for flex child to shrink and allow overflow scroll
+        overflow-y: auto !important; // Material sets overflow:hidden by default
+        padding: $sp-sm $sp-lg $sp-md;
+        @include custom-scrollbar(6px);
+
+        // Material's inner step wrappers must not block overflow
+        .mat-stepper-content,
+        .cdk-step-content,
+        .mat-step-body {
+          height: 100%;
+          overflow: visible;
+        }
       }
 
       .mat-stepper-horizontal-line {
         border-top-color: var(--border);
       }
     }
+  }
+
+  // Fixed footer — static at the bottom of the card
+  &__actions {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-lg;
+    border-top: $border-width solid var(--border);
+    background: var(--surface);
+  }
+
+  // Signing + completion views scroll within the card
+  &__signing,
+  &__complete {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    @include custom-scrollbar(6px);
   }
 
   // ── Completion ────────────────────────────────────────────────────────────
@@ -93,6 +182,7 @@
     display: flex;
     flex-direction: column;
     gap: $sp-lg;
+    padding: $sp-xl;
   }
 
   &__signing-header {
@@ -167,6 +257,9 @@
   display: flex;
   flex-direction: column;
   gap: $sp-md;
+  background: var(--surface);
+  padding: 0;
+  max-width: 820px;
 
   &__title {
     font-size: $font-size-lg;
@@ -337,6 +430,95 @@
     }
   }
 
+  &__subsection {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+    border-left: 2px solid var(--border);
+    background: color-mix(in srgb, var(--primary) 3%, transparent);
+  }
+
+  &__subsection-title {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  &__calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__calc-row {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+
+    app-input {
+      flex: 0 0 160px;
+    }
+
+    @include mobile {
+      flex-direction: column;
+      align-items: flex-start;
+
+      app-input {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+    }
+  }
+
+  &__calc-display {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding-top: $sp-lg; // align with input label offset
+    flex-shrink: 0;
+  }
+
+  &__calc-op {
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  &__calc-result {
+    font-family: $font-family-mono;
+    font-size: $font-size-title;
+    font-weight: 700;
+    color: var(--primary);
+    min-width: 80px;
+  }
+
+  &__calc-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $sp-sm $sp-md;
+    border-top: $border-width-thin solid var(--border);
+    margin-top: $sp-xs;
+
+    span {
+      font-size: $font-size-base;
+      color: var(--text-secondary);
+    }
+
+    strong {
+      font-family: $font-family-mono;
+      font-size: $font-size-md;
+      color: var(--text);
+    }
+  }
+
   &__note {
     display: flex;
     align-items: flex-start;
@@ -414,13 +596,145 @@
   margin-top: $sp-sm;
 }
 
-.step-actions {
+// ── I-9 Document Choice ───────────────────────────────────────────────────
+
+.doc-choice {
   display: flex;
-  justify-content: flex-end;
-  gap: $sp-sm;
-  padding-top: $sp-lg;
-  border-top: $border-width-thin solid var(--border);
-  margin-top: $sp-md;
+  align-items: stretch;
+  gap: $sp-md;
+
+  @include mobile {
+    flex-direction: column;
+  }
+
+  &__btn {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-md;
+    padding: $sp-lg;
+    border: $border-width solid var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    &:hover {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 4%, transparent);
+    }
+
+    &--active {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+
+      .material-icons-outlined {
+        color: var(--primary);
+      }
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    strong {
+      font-size: $font-size-title;
+      color: var(--text);
+    }
+
+    span {
+      font-size: $font-size-sm;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+  }
+
+  &__or {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: $sp-md 0;
+    flex-shrink: 0;
+  }
+}
+
+// ── Document Upload Zone ──────────────────────────────────────────────────
+
+.doc-upload {
+  &__zone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-sm;
+    width: 100%;
+    padding: $sp-lg $sp-xl;
+    border: $border-width-thin dashed var(--border);
+    background: var(--bg);
+    cursor: pointer;
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+    transition: border-color $transition-fast, background $transition-fast;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+      color: var(--text-muted);
+    }
+
+    input[type='file'] {
+      display: none;
+    }
+
+    &:hover {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 4%, transparent);
+      color: var(--primary);
+
+      .material-icons-outlined {
+        color: var(--primary);
+      }
+    }
+
+    &--loading {
+      pointer-events: none;
+      color: var(--text-muted);
+
+      .material-icons-outlined {
+        color: var(--text-muted);
+      }
+    }
+  }
+
+  &__chip {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--success) 8%, transparent);
+    border: $border-width-thin solid color-mix(in srgb, var(--success) 30%, transparent);
+    font-size: $font-size-base;
+    color: var(--text);
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--success);
+    }
+
+    .icon-btn {
+      margin-left: auto;
+    }
+  }
 }
 
 // ── Acknowledgment cards ──────────────────────────────────────────────────

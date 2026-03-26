@@ -64,3 +64,67 @@
 .text-muted {
   color: var(--text-muted);
 }
+
+.section-divider {
+  height: $border-width-thin;
+  background: var(--border);
+  margin: $sp-xl 0 $sp-md;
+}
+
+.blank-pdf-upload {
+  &__status {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin-bottom: $sp-md;
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: $sp-xs;
+
+      .material-icons-outlined {
+        font-size: $icon-size-xs;
+      }
+    }
+  }
+}
+
+.acro-map-section {
+  &__label {
+    @include uppercase-label($font-size-xs, 0.5px, 700);
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: $sp-xs;
+  }
+
+  &__textarea {
+    width: 100%;
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    line-height: 1.5;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    resize: vertical;
+    box-sizing: border-box;
+
+    &:focus {
+      outline: $border-width solid var(--primary);
+      outline-offset: -$border-width;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: $sp-md;
+  }
+}
+
+.field-hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  margin: $sp-xs 0 0;
+}

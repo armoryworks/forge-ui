@@ -5,6 +5,10 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
+import { OnboardingService } from '../../../onboarding/onboarding.service';
+
+/** Form types handled by the unified onboarding wizard — link to /onboarding instead. */
+const WIZARD_FORM_TYPES = new Set(['W4', 'I9', 'StateWithholding', 'DirectDeposit', 'WorkersComp', 'Handbook']);
 
 @Component({
   selector: 'app-account-tax-forms',
@@ -17,13 +21,29 @@ import { ComplianceFormService } from '../../services/compliance-form.service';
 export class AccountTaxFormsComponent {
   private readonly profileService = inject(EmployeeProfileService);
   private readonly complianceService = inject(ComplianceFormService);
+  private readonly onboardingService = inject(OnboardingService);
 
   protected readonly templates = this.complianceService.templates;
   protected readonly completeness = this.profileService.completeness;
   protected readonly profile = this.profileService.profile;
+  protected readonly onboardingStatus = this.onboardingService.status;
 
   constructor() {
     this.complianceService.loadTemplates();
+    this.onboardingService.loadStatus();
+  }
+
+  /** Returns true when this form type is handled by the onboarding wizard. */
+  protected isWizardForm(formType: string): boolean {
+    return WIZARD_FORM_TYPES.has(formType);
+  }
+
+  /** Resolves the router link for a given template. */
+  protected getLinkForTemplate(formType: string, profileKey: string): string[] {
+    if (WIZARD_FORM_TYPES.has(formType)) {
+      return ['/onboarding'];
+    }
+    return [profileKey];
   }
 
   protected isComplete(profileKey: string): boolean {

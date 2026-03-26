@@ -165,6 +165,11 @@ export const routes: Routes = [
           import('./features/account/account.routes').then((m) => m.ACCOUNT_ROUTES),
       },
       {
+        path: 'onboarding',
+        loadChildren: () =>
+          import('./features/onboarding/onboarding.routes').then((m) => m.ONBOARDING_ROUTES),
+      },
+      {
         path: 'training',
         loadChildren: () =>
           import('./features/training/training.routes').then((m) => m.TRAINING_ROUTES),

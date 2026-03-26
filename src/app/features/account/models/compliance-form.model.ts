@@ -34,6 +34,8 @@ export interface ComplianceFormTemplate {
   currentFormDefinitionVersionId: number | null;
   formDefinitionJson: string | null;
   formDefinitionRevision: string | null;
+  acroFieldMapJson: string | null;
+  filledPdfTemplateId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -50,6 +52,15 @@ export interface ComplianceFormSubmission {
   formDataJson: string | null;
   formDefinitionVersionId: number | null;
   createdAt: string;
+  // PDF fill & I-9 fields
+  filledPdfFileId: number | null;
+  i9Section1SignedAt: string | null;
+  i9Section2SignedAt: string | null;
+  i9EmployerUserId: number | null;
+  i9DocumentListType: string | null;
+  i9DocumentDataJson: string | null;
+  i9Section2OverdueAt: string | null;
+  i9ReverificationDueAt: string | null;
 }
 
 export interface IdentityDocument {

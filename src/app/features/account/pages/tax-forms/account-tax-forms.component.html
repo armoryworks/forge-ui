@@ -8,10 +8,22 @@
     {{ 'account.taxFormsIntro' | translate }}
   </p>
 
+  @if (!onboardingStatus()?.allComplete) {
+    <a class="tax-forms__wizard-banner" routerLink="/onboarding"
+      aria-label="Start onboarding wizard">
+      <span class="material-icons-outlined">assignment_ind</span>
+      <div>
+        <strong>Complete your onboarding</strong>
+        <span>Click here to fill out your tax withholding, employment eligibility, direct deposit, and policy acknowledgments in one guided workflow.</span>
+      </div>
+      <span class="material-icons-outlined">arrow_forward</span>
+    </a>
+  }
+
   @for (tmpl of templates(); track tmpl.id) {
     <a class="tax-forms__item"
       [class.tax-forms__item--complete]="isComplete(tmpl.profileCompletionKey)"
-      [routerLink]="tmpl.profileCompletionKey"
+      [routerLink]="getLinkForTemplate(tmpl.formType, tmpl.profileCompletionKey)"
       [attr.aria-label]="tmpl.name">
       <div class="tax-forms__item-header">
         <span class="material-icons-outlined tax-forms__item-icon"
@@ -21,6 +33,9 @@
         <div class="tax-forms__item-info">
           <span class="tax-forms__item-label">{{ tmpl.name }}</span>
           <span class="tax-forms__item-description">{{ tmpl.description }}</span>
+          @if (isWizardForm(tmpl.formType) && !isComplete(tmpl.profileCompletionKey)) {
+            <span class="tax-forms__item-badge">Completed in onboarding wizard</span>
+          }
         </div>
         @if (isComplete(tmpl.profileCompletionKey)) {
           <span class="tax-forms__item-date">

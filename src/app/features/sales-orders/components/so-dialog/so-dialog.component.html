@@ -1,14 +1,14 @@
 <app-dialog [title]="'salesOrders.newOrderTitle' | translate" width="800px" (closed)="close()">
   <div [formGroup]="form">
     <div class="dialog-row">
-      <app-select [label]="'salesOrders.customer' | translate" formControlName="customerId" [options]="customerOptions()" />
+      <app-select [label]="'salesOrders.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" />
       <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" />
     </div>
     <div class="dialog-row">
       <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" />
       <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" />
     </div>
-    <app-input [label]="'salesOrders.taxRate' | translate" type="number" formControlName="taxRate" />
+    <app-input [label]="'salesOrders.taxRate' | translate" type="number" formControlName="taxRate" [required]="true" />
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
   </div>
 
@@ -19,15 +19,15 @@
     </div>
 
     @if (lines().length > 0) {
-      <table class="lines-table">
+      <table class="lines-table" aria-label="Line items">
         <thead>
           <tr>
-            <th>{{ 'salesOrders.partNumber' | translate }}</th>
-            <th>{{ 'common.description' | translate }}</th>
-            <th class="lines-table__right">{{ 'salesOrders.qty' | translate }}</th>
-            <th class="lines-table__right">{{ 'salesOrders.unitPrice' | translate }}</th>
-            <th class="lines-table__right">{{ 'common.total' | translate }}</th>
-            <th></th>
+            <th scope="col">{{ 'salesOrders.partNumber' | translate }}</th>
+            <th scope="col">{{ 'common.description' | translate }}</th>
+            <th scope="col" class="lines-table__right">{{ 'salesOrders.qty' | translate }}</th>
+            <th scope="col" class="lines-table__right">{{ 'salesOrders.unitPrice' | translate }}</th>
+            <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+            <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
           </tr>
         </thead>
         <tbody>
@@ -58,12 +58,10 @@
 
     <!-- Add Line Form -->
     <div class="add-line" [formGroup]="lineForm">
-      <app-input [label]="'salesOrders.partId' | translate" type="number" formControlName="partId" />
-      <app-input [label]="'salesOrders.partNumber' | translate" formControlName="partNumber" />
-      <app-input [label]="'common.description' | translate" formControlName="description" />
-      <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" />
-      <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" />
-      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid">
+      <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" />
+      <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" />
+      <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
         <span class="material-icons-outlined">add</span>
         {{ 'common.add' | translate }}
       </button>
