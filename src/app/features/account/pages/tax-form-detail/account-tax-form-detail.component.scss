@@ -149,6 +149,13 @@
   gap: $sp-lg;
 }
 
+.form-detail__completed-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
 .form-detail__completed-icon {
   font-size: $icon-size-xxl;
   color: var(--success);
@@ -158,6 +165,59 @@
 .form-detail__completed-actions {
   display: flex;
   gap: $sp-md;
+}
+
+// ── Wizard form summary grid ───────────────────────────────────────────────
+
+.form-detail__summary-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: $sp-xs $sp-xl;
+  margin: 0;
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+
+  dt {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-muted);
+    @include uppercase-label($font-size-xs, 0.04em, 600);
+    align-self: center;
+  }
+
+  dd {
+    font-size: $font-size-base;
+    color: var(--text);
+    margin: 0;
+    align-self: center;
+  }
+}
+
+.form-detail__summary-mono {
+  font-family: $font-family-mono;
+  letter-spacing: 0.05em;
+}
+
+.form-detail__summary-note {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.5;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--info);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  &--warn .material-icons-outlined {
+    color: var(--warning);
+  }
 }
 
 .form-detail__doc-list {

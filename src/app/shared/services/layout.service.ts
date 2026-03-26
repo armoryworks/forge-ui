@@ -16,6 +16,7 @@ export class LayoutService {
   private readonly _isDisplayRoute = signal(this.checkDisplayRoute(window.location.pathname));
   private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
   private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
+  private readonly _isOnboardingRoute = signal(this.checkOnboardingRoute(window.location.pathname));
   private readonly _breadcrumbLabel = signal(this.routeToLabel(window.location.pathname));
   private readonly _breadcrumbRoute = signal(this.routeToPath(window.location.pathname));
 
@@ -25,12 +26,14 @@ export class LayoutService {
   readonly isDisplayRoute = this._isDisplayRoute.asReadonly();
   readonly isAccountRoute = this._isAccountRoute.asReadonly();
   readonly isAuthRoute = this._isAuthRoute.asReadonly();
+  readonly isOnboardingRoute = this._isOnboardingRoute.asReadonly();
   readonly breadcrumbLabel = this._breadcrumbLabel.asReadonly();
   readonly breadcrumbRoute = this._breadcrumbRoute.asReadonly();
 
   readonly sidebarVisible = computed(() => {
     if (this._isDisplayRoute()) return false;
     if (this._isAccountRoute()) return false;
+    if (this._isOnboardingRoute()) return false;
     if (this._isMobile()) {
       return this._mobileMenuOpen();
     }
@@ -51,6 +54,7 @@ export class LayoutService {
       this._isDisplayRoute.set(this.checkDisplayRoute(e.urlAfterRedirects));
       this._isAccountRoute.set(this.checkAccountRoute(e.urlAfterRedirects));
       this._isAuthRoute.set(this.checkAuthRoute(e.urlAfterRedirects));
+      this._isOnboardingRoute.set(this.checkOnboardingRoute(e.urlAfterRedirects));
       this._breadcrumbLabel.set(this.routeToLabel(e.urlAfterRedirects));
       this._breadcrumbRoute.set(this.routeToPath(e.urlAfterRedirects));
     });
@@ -101,6 +105,10 @@ export class LayoutService {
 
   private checkAuthRoute(url: string): boolean {
     return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback');
+  }
+
+  private checkOnboardingRoute(url: string): boolean {
+    return url.startsWith('/onboarding');
   }
 
   private routeToPath(url: string): string {

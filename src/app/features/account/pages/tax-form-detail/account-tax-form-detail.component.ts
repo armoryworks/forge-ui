@@ -84,9 +84,29 @@ export class AccountTaxFormDetailComponent {
     return ft === 'W4' || ft === 'I9' || ft === 'StateWithholding';
   });
 
+  /**
+   * True when the template uses the fill-and-sign flow
+   * (has AcroFieldMapJson + FilledPdfTemplateId configured).
+   */
+  protected readonly isFillAndSign = computed(() => {
+    const tmpl = this.template();
+    return !!(tmpl?.acroFieldMapJson && tmpl?.filledPdfTemplateId);
+  });
+
+  /**
+   * True when the submission is awaiting employee DocuSeal signing
+   * (fill-and-sign flow returned a docuSealSubmitUrl).
+   */
+  protected readonly pendingSigning = computed(() => {
+    const sub = this.submission();
+    if (!sub?.docuSealSubmitUrl) return false;
+    return sub.status === 'Pending' || sub.status === 'Opened';
+  });
+
   /** Whether to show the form in edit mode (not complete, or user chose to resubmit) */
   protected readonly showForm = computed(() => {
     if (this.resubmitting()) return true;
+    if (this.pendingSigning()) return false;
     return !this.isComplete();
   });
 
@@ -142,6 +162,13 @@ export class AccountTaxFormDetailComponent {
     }
   });
 
+  /** Sanitized DocuSeal signing embed URL for the signing iframe. */
+  protected readonly docuSealEmbedUrl = computed(() => {
+    const url = this.submission()?.docuSealSubmitUrl;
+    if (!url) return null;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  });
+
   // Embedded PDF — only for admin-uploaded files (external URLs like IRS block iframes)
   protected readonly pdfUrl = computed(() => {
     const tmpl = this.template();
@@ -159,13 +186,82 @@ export class AccountTaxFormDetailComponent {
   });
 
 
+  private static readonly WIZARD_PROFILE_KEYS = new Set([
+    'w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook',
+  ]);
+
+  protected readonly isWizardManaged = computed(() => {
+    const ft = this.formType();
+    return !!ft && AccountTaxFormDetailComponent.WIZARD_PROFILE_KEYS.has(ft);
+  });
+
+  /** I-9 must not be changed after completion per legal/regulatory requirements */
+  protected readonly canResubmit = computed(() => this.formType() !== 'i9');
+
+  /** Non-sensitive summary fields to display for completed wizard forms */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected readonly wizardFormSummary = computed<Record<string, any> | null>(() => {
+    const ft = this.formType();
+    const sub = this.submission();
+    if (!ft || !sub?.formDataJson) return null;
+    try {
+      const d = JSON.parse(sub.formDataJson) as Record<string, unknown>;
+      switch (ft) {
+        case 'w4': return {
+          filingStatus: String(d['w4FilingStatus'] ?? ''),
+          multipleJobs: d['w4MultipleJobs'] ? 'Yes' : 'No',
+          exempt: d['w4ExemptFromWithholding'] ? 'Yes — exempt from withholding' : 'No',
+        };
+        case 'i9': return {
+          citizenshipStatus: this.getCitizenshipLabel(String(d['i9CitizenshipStatus'] ?? '')),
+        };
+        case 'state_withholding': return {
+          filingStatus: String(d['stateFilingStatus'] ?? '—'),
+          allowances: String(d['stateAllowances'] ?? '0'),
+          additionalWithholding: String(d['stateAdditionalWithholding'] ?? '0'),
+          exempt: d['stateExempt'] ? 'Yes' : 'No',
+        };
+        case 'direct_deposit': return {
+          bankName: String(d['bankName'] ?? ''),
+          accountType: String(d['accountType'] ?? ''),
+          routingLast4: String(d['routingNumber'] ?? '').slice(-4).padStart(4, '•'),
+          accountLast4: String(d['accountNumber'] ?? '').slice(-4).padStart(4, '•'),
+        };
+        default: return null;
+      }
+    } catch { return null; }
+  });
+
+  private getCitizenshipLabel(status: string): string {
+    const labels: Record<string, string> = {
+      '1': 'U.S. Citizen',
+      '2': 'Noncitizen National of the United States',
+      '3': 'Lawful Permanent Resident',
+      '4': 'Alien Authorized to Work',
+    };
+    return labels[status] ?? status;
+  }
+
   constructor() {
-    // Load templates + submissions when form type changes
+    // Redirect wizard-managed forms to the onboarding wizard ONLY when not yet complete.
+    // Guard on completeness being loaded (null = still loading) to avoid premature redirects.
+    effect(() => {
+      const ft = this.formType();
+      const completeness = this.profileService.completeness();
+      if (!ft || !completeness || !AccountTaxFormDetailComponent.WIZARD_PROFILE_KEYS.has(ft)) return;
+      const item = completeness.items.find(i => i.key === ft);
+      if (!item?.isComplete) {
+        this.router.navigate(['/onboarding']);
+      }
+    });
+
+    // Load templates, submissions, and profile completeness when form type changes
     effect(() => {
       const ft = this.formType();
       if (ft) {
         this.complianceService.loadTemplates();
         this.complianceService.loadMySubmissions();
+        this.profileService.load();
       }
     });
 
@@ -230,11 +326,18 @@ export class AccountTaxFormDetailComponent {
     if (!tmpl) return;
     this.submitting.set(true);
     this.complianceService.submitFormData(tmpl.id, JSON.stringify(data), this.activeVersionId()).subscribe({
-      next: () => {
+      next: (updatedSubmission) => {
         this.submitting.set(false);
         this.resubmitting.set(false);
-        this.snackbar.success(this.translate.instant('account.formSubmitted'));
-        this.profileService.load();
+        if (updatedSubmission.docuSealSubmitUrl && updatedSubmission.status === 'Pending') {
+          // Fill-and-sign: PDF filled, DocuSeal signing ceremony ready
+          this.snackbar.success(this.translate.instant('account.formReadyToSign'));
+        } else {
+          this.snackbar.success(this.translate.instant('account.formSubmitted'));
+          this.profileService.load();
+        }
+        // Refresh submissions so submission() signal reflects the new docuSealSubmitUrl
+        this.complianceService.loadMySubmissions();
       },
       error: () => this.submitting.set(false),
     });

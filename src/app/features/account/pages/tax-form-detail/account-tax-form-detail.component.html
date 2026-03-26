@@ -26,46 +26,166 @@
         {{ 'account.completed' | translate }} {{ completedDate() | date:'MM/dd/yyyy' }}
       </div>
 
-      <!-- Completed confirmation card with resubmit option -->
-      <div class="form-detail__card">
-        <div class="form-detail__completed-summary">
-          <span class="material-icons-outlined form-detail__completed-icon">verified</span>
-          <div>
-            <h2 class="form-detail__card-title">{{ 'account.formAlreadySubmitted' | translate }}</h2>
-            <p class="form-detail__card-text">
-              @if (isSensitive()) {
-                {{ 'account.formSensitiveNote' | translate }}
+      <!-- Wizard form: show per-form summary card -->
+      @if (isWizardManaged()) {
+        <div class="form-detail__card">
+          <div class="form-detail__completed-summary">
+            <span class="material-icons-outlined form-detail__completed-icon">verified</span>
+            <div class="form-detail__completed-body">
+              <h2 class="form-detail__card-title">{{ template()?.name }} — Completed</h2>
+
+              @if (wizardFormSummary(); as summary) {
+                <!-- W-4 summary -->
+                @if (formType() === 'w4') {
+                  <dl class="form-detail__summary-grid">
+                    <dt>Filing Status</dt><dd>{{ summary['filingStatus'] }}</dd>
+                    <dt>Multiple Jobs</dt><dd>{{ summary['multipleJobs'] }}</dd>
+                    <dt>Exempt</dt><dd>{{ summary['exempt'] }}</dd>
+                  </dl>
+                  <p class="form-detail__summary-note">
+                    <span class="material-icons-outlined">info</span>
+                    You may update your W-4 at any time if your tax situation changes.
+                  </p>
+                }
+
+                <!-- I-9 summary -->
+                @if (formType() === 'i9') {
+                  <dl class="form-detail__summary-grid">
+                    <dt>Citizenship Status</dt><dd>{{ summary['citizenshipStatus'] }}</dd>
+                    <dt>Documents Verified</dt>
+                    <dd>{{ identityDocuments().length > 0 ? identityDocuments().length + ' document(s) on file' : 'Verified on file' }}</dd>
+                  </dl>
+                  <p class="form-detail__summary-note form-detail__summary-note--warn">
+                    <span class="material-icons-outlined">lock</span>
+                    I-9 forms cannot be changed after submission. Contact HR for corrections.
+                  </p>
+                }
+
+                <!-- State withholding summary -->
+                @if (formType() === 'state_withholding') {
+                  <dl class="form-detail__summary-grid">
+                    <dt>Filing Status</dt><dd>{{ summary['filingStatus'] }}</dd>
+                    <dt>Allowances</dt><dd>{{ summary['allowances'] }}</dd>
+                    <dt>Additional Withholding</dt><dd>${{ summary['additionalWithholding'] }}</dd>
+                    <dt>Exempt</dt><dd>{{ summary['exempt'] }}</dd>
+                  </dl>
+                  <p class="form-detail__summary-note">
+                    <span class="material-icons-outlined">info</span>
+                    You may update your state withholding if your tax situation changes.
+                  </p>
+                }
+
+                <!-- Direct deposit summary -->
+                @if (formType() === 'direct_deposit') {
+                  <dl class="form-detail__summary-grid">
+                    <dt>Bank</dt><dd>{{ summary['bankName'] }}</dd>
+                    <dt>Account Type</dt><dd>{{ summary['accountType'] }}</dd>
+                    <dt>Routing (last 4)</dt><dd class="form-detail__summary-mono">••••{{ summary['routingLast4'] }}</dd>
+                    <dt>Account (last 4)</dt><dd class="form-detail__summary-mono">••••{{ summary['accountLast4'] }}</dd>
+                  </dl>
+                  <p class="form-detail__summary-note">
+                    <span class="material-icons-outlined">info</span>
+                    Contact payroll if you need to update your direct deposit information.
+                  </p>
+                }
+
+                <!-- Workers' comp / handbook summary -->
+                @if (formType() === 'workers_comp' || formType() === 'handbook') {
+                  <p class="form-detail__card-text">
+                    Acknowledged on {{ completedDate() | date:'MM/dd/yyyy' }}.
+                  </p>
+                }
               } @else {
-                {{ 'account.formCompletedNote' | translate }}
+                <p class="form-detail__card-text">{{ 'account.formCompletedNote' | translate }}</p>
               }
-            </p>
+            </div>
+          </div>
+
+          <div class="form-detail__completed-actions">
+            @if (submission()) {
+              <button class="action-btn"
+                [disabled]="downloadingPdf()"
+                (click)="downloadPdf()"
+                [attr.aria-label]="'account.downloadFormCopy' | translate">
+                @if (downloadingPdf()) {
+                  <span class="material-icons-outlined account-page__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">download</span>
+                }
+                {{ 'account.downloadFormCopy' | translate }}
+              </button>
+            }
+            @if (canResubmit()) {
+              <button class="action-btn action-btn--primary" (click)="startResubmit()">
+                <span class="material-icons-outlined">edit</span>
+                Update
+              </button>
+            }
           </div>
         </div>
-        <div class="form-detail__completed-actions">
-          @if (submission(); as sub) {
-            <button class="action-btn"
-              [disabled]="downloadingPdf()"
-              (click)="downloadPdf()"
-              [attr.aria-label]="'account.downloadFormCopy' | translate">
-              @if (downloadingPdf()) {
-                <span class="material-icons-outlined account-page__spinner">sync</span>
-              } @else {
-                <span class="material-icons-outlined">download</span>
-              }
-              {{ 'account.downloadFormCopy' | translate }}
-            </button>
-          }
-          <button class="action-btn action-btn--primary" (click)="startResubmit()">
-            <span class="material-icons-outlined">refresh</span>
-            {{ 'account.resubmitForm' | translate }}
-          </button>
+      } @else {
+        <!-- Non-wizard completed form: generic card -->
+        <div class="form-detail__card">
+          <div class="form-detail__completed-summary">
+            <span class="material-icons-outlined form-detail__completed-icon">verified</span>
+            <div>
+              <h2 class="form-detail__card-title">{{ 'account.formAlreadySubmitted' | translate }}</h2>
+              <p class="form-detail__card-text">
+                @if (isSensitive()) {
+                  {{ 'account.formSensitiveNote' | translate }}
+                } @else {
+                  {{ 'account.formCompletedNote' | translate }}
+                }
+              </p>
+            </div>
+          </div>
+          <div class="form-detail__completed-actions">
+            @if (submission()) {
+              <button class="action-btn"
+                [disabled]="downloadingPdf()"
+                (click)="downloadPdf()"
+                [attr.aria-label]="'account.downloadFormCopy' | translate">
+                @if (downloadingPdf()) {
+                  <span class="material-icons-outlined account-page__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">download</span>
+                }
+                {{ 'account.downloadFormCopy' | translate }}
+              </button>
+            }
+            @if (canResubmit()) {
+              <button class="action-btn action-btn--primary" (click)="startResubmit()">
+                <span class="material-icons-outlined">refresh</span>
+                {{ 'account.resubmitForm' | translate }}
+              </button>
+            }
+          </div>
         </div>
-      </div>
+      }
     } @else if (!isComplete() && submission(); as sub) {
       @if (sub.status !== 'Completed') {
         <div class="form-detail__status form-detail__status--pending">
           <span class="material-icons-outlined">pending</span>
           {{ sub.status }} — {{ 'account.started' | translate }} {{ sub.createdAt | date:'MM/dd/yyyy' }}
+        </div>
+      }
+    }
+
+    <!-- DocuSeal Signing Ceremony — shown after fill-and-sign PDF was prepared -->
+    @if (pendingSigning()) {
+      @if (submission(); as sub) {
+        <div class="form-detail__card">
+          <h2 class="form-detail__card-title">{{ 'account.digitalSigning' | translate }}</h2>
+          <p class="form-detail__card-text">{{ 'account.fillAndSignReady' | translate }}</p>
+          @if (docuSealEmbedUrl(); as embedUrl) {
+            <iframe
+              class="form-detail__iframe"
+              [src]="embedUrl"
+              [title]="'account.documentSigning' | translate"
+              allow="camera; microphone"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+            </iframe>
+          }
         </div>
       }
     }
@@ -168,10 +288,10 @@
               {{ 'account.startESign' | translate }}
             </button>
           } @else if (submission(); as sub) {
-            @if (sub.status === 'Pending' && sub.docuSealSubmitUrl) {
+            @if (sub.status === 'Pending' && sub.docuSealSubmitUrl && docuSealEmbedUrl(); as embedUrl) {
               <iframe
                 class="form-detail__iframe"
-                [src]="sub.docuSealSubmitUrl"
+                [src]="embedUrl"
                 [title]="'account.documentSigning' | translate"
                 allow="camera; microphone"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups">

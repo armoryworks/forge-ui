@@ -1,0 +1,453 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.onboarding {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: $sp-xl $sp-lg;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-lg;
+    margin-bottom: $sp-2xl;
+    padding-bottom: $sp-lg;
+    border-bottom: $border-width solid var(--border);
+  }
+
+  &__logo {
+    font-size: 40px;
+    color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    margin: 0 0 $sp-xs;
+    color: var(--text);
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__stepper {
+    background: transparent;
+
+    ::ng-deep {
+      .mat-stepper-horizontal {
+        background: transparent;
+      }
+
+      .mat-step-header {
+        padding: $sp-md $sp-md;
+      }
+
+      .mat-step-label {
+        font-size: $font-size-sm;
+        font-family: $font-family-primary;
+      }
+
+      .mat-horizontal-content-container {
+        padding: $sp-xl 0 0;
+        overflow: visible;
+      }
+
+      .mat-stepper-horizontal-line {
+        border-top-color: var(--border);
+      }
+    }
+  }
+
+  // ── Completion ────────────────────────────────────────────────────────────
+
+  &__complete {
+    text-align: center;
+    padding: $sp-3xl $sp-lg;
+
+    h2 {
+      font-size: $font-size-xl;
+      margin: $sp-lg 0 $sp-md;
+    }
+
+    p {
+      font-size: $font-size-base;
+      color: var(--text-secondary);
+      max-width: 480px;
+      margin: 0 auto $sp-xl;
+      line-height: 1.6;
+    }
+  }
+
+  &__complete-icon {
+    font-size: 64px;
+    color: var(--success);
+  }
+
+  // ── Signing ───────────────────────────────────────────────────────────────
+
+  &__signing {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__signing-header {
+    h2 {
+      font-size: $font-size-xl;
+      margin: 0 0 $sp-xs;
+    }
+
+    p {
+      font-size: $font-size-base;
+      color: var(--text-secondary);
+      margin: 0 0 $sp-md;
+    }
+  }
+
+  &__signing-progress {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-md;
+  }
+
+  &__signing-step {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-base;
+    color: var(--text-muted);
+
+    &--active {
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    &--done {
+      color: var(--success);
+    }
+  }
+
+  &__signing-frame {
+    width: 100%;
+    height: 680px;
+    border: $border-width solid var(--border);
+    background: var(--surface);
+  }
+
+  &__signing-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-lg;
+    padding: $sp-md 0;
+  }
+
+  &__signing-note {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--info);
+    }
+  }
+}
+
+// ── Step content ────────────────────────────────────────────────────────────
+
+.step-content {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    margin: 0 0 $sp-xs;
+    color: var(--text);
+  }
+
+  &__desc {
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+    margin: 0 0 $sp-sm;
+    line-height: 1.5;
+  }
+
+  &__state-badge {
+    font-size: $font-size-md;
+    font-weight: 400;
+    color: var(--text-secondary);
+  }
+
+  &__skip-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-md;
+    background: color-mix(in srgb, var(--success) 8%, transparent);
+    border: $border-width-thin solid color-mix(in srgb, var(--success) 30%, transparent);
+    padding: $sp-md $sp-lg;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+      color: var(--success);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    strong {
+      font-size: $font-size-title;
+      color: var(--text);
+      display: block;
+      margin-bottom: $sp-xs;
+    }
+
+    p {
+      font-size: $font-size-base;
+      color: var(--text-secondary);
+      margin: 0;
+    }
+  }
+
+  &__doc-list {
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    padding: $sp-md;
+    margin-bottom: $sp-xs;
+  }
+
+  &__doc-list-header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: $sp-md;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      color: var(--primary);
+    }
+  }
+
+  &__doc-columns {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: $sp-md;
+    align-items: start;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__doc-or {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: $sp-xl 0;
+  }
+
+  &__doc-col {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__doc-col-title {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: $sp-xs;
+  }
+
+  &__doc-col ul {
+    margin: 0;
+    padding-left: $sp-lg;
+    list-style: disc;
+
+    li {
+      font-size: $font-size-sm;
+      color: var(--text-secondary);
+      line-height: 1.7;
+
+      em {
+        font-style: normal;
+        font-weight: 600;
+        color: var(--text);
+      }
+    }
+  }
+
+  &__check-hint {
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+    margin-bottom: $sp-xs;
+  }
+
+  &__check-diagram {
+    display: flex;
+    gap: $sp-lg;
+    flex-wrap: wrap;
+  }
+
+  &__instructions {
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md $sp-lg;
+    margin-bottom: $sp-sm;
+
+    h3 {
+      font-size: $font-size-base;
+      font-weight: 700;
+      margin: 0 0 $sp-sm;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    p {
+      font-size: $font-size-base;
+      color: var(--text-secondary);
+      margin: 0 0 $sp-sm;
+      line-height: 1.5;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      strong {
+        color: var(--text);
+      }
+    }
+  }
+
+  &__note {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    background: color-mix(in srgb, var(--info) 8%, transparent);
+    border: $border-width-thin solid color-mix(in srgb, var(--info) 30%, transparent);
+    padding: $sp-sm $sp-md;
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--info);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+  }
+}
+
+.step-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $sp-md;
+
+  &--3 {
+    grid-template-columns: 1fr 1fr 1fr;
+
+    @include mobile {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.check-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  flex: 1;
+  min-width: 200px;
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+    border: $border-width-thin solid color-mix(in srgb, var(--primary) 20%, transparent);
+    padding: $sp-xs $sp-sm;
+    letter-spacing: 0.05em;
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+}
+
+.step-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md 0;
+  border-top: $border-width-thin solid var(--border);
+  margin-top: $sp-sm;
+}
+
+.step-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-sm;
+  padding-top: $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  margin-top: $sp-md;
+}
+
+// ── Acknowledgment cards ──────────────────────────────────────────────────
+
+.ack-card {
+  border: $border-width solid var(--border);
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-title;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      color: var(--primary);
+    }
+  }
+
+  &__body {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+}

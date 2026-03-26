@@ -26,6 +26,7 @@ export class OnboardingBannerComponent {
   protected readonly visible = computed(() => {
     if (this.dismissed()) return false;
     if (this.layout.isAccountRoute()) return false;
+    if (this.layout.isOnboardingRoute()) return false;
     if (!this.authService.isAuthenticated()) return false;
     const user = this.authService.user();
     if (!user) return false;

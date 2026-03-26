@@ -18,6 +18,7 @@
     <a [routerLink]="layout.breadcrumbRoute()" class="breadcrumb__link breadcrumb__current">{{ layout.breadcrumbLabel() }}</a>
   </nav>
 
+  @if (!layout.isOnboardingRoute()) {
   <div class="app-header__search hide-mobile" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
@@ -88,34 +89,37 @@
       </div>
     }
   </div>
+  }
 
   <div class="app-header__actions">
-    <button class="icon-btn" [matTooltip]="'header.chat' | translate" matTooltipPosition="above" [attr.aria-label]="'header.chat' | translate" (click)="chatPanel.toggle()">
-      <span class="material-icons-outlined">chat_bubble_outline</span>
-      @if (chatPanel.totalUnread() > 0) {
-        <span class="badge">{{ chatPanel.totalUnread() }}</span>
+    @if (!layout.isOnboardingRoute()) {
+      <button class="icon-btn" [matTooltip]="'header.chat' | translate" matTooltipPosition="above" [attr.aria-label]="'header.chat' | translate" (click)="chatPanel.toggle()">
+        <span class="material-icons-outlined">chat_bubble_outline</span>
+        @if (chatPanel.totalUnread() > 0) {
+          <span class="badge">{{ chatPanel.totalUnread() }}</span>
+        }
+      </button>
+      @if (aiService.available()) {
+        <button class="icon-btn" [matTooltip]="'header.aiAssistant' | translate" matTooltipPosition="above" [attr.aria-label]="'header.aiAssistant' | translate" (click)="aiHelpPanel.toggle()">
+          <span class="material-icons-outlined">smart_toy</span>
+        </button>
       }
-    </button>
-    @if (aiService.available()) {
-      <button class="icon-btn" [matTooltip]="'header.aiAssistant' | translate" matTooltipPosition="above" [attr.aria-label]="'header.aiAssistant' | translate" (click)="aiHelpPanel.toggle()">
-        <span class="material-icons-outlined">smart_toy</span>
+      <button class="icon-btn"
+              [class.icon-btn--active]="showTrainingPanel()"
+              [matTooltip]="'header.trainingHelp' | translate"
+              matTooltipPosition="above"
+              [attr.aria-label]="'header.trainingHelp' | translate"
+              [attr.aria-expanded]="showTrainingPanel()"
+              (click)="toggleTrainingPanel()">
+        <span class="material-icons-outlined">school</span>
+      </button>
+      <button class="icon-btn" [matTooltip]="'header.notifications' | translate" matTooltipPosition="above" [attr.aria-label]="'header.notifications' | translate" (click)="toggleNotifications()">
+        <span class="material-icons-outlined">notifications_none</span>
+        @if (unreadCount() > 0) {
+          <span class="badge">{{ unreadCount() }}</span>
+        }
       </button>
     }
-    <button class="icon-btn"
-            [class.icon-btn--active]="showTrainingPanel()"
-            [matTooltip]="'header.trainingHelp' | translate"
-            matTooltipPosition="above"
-            [attr.aria-label]="'header.trainingHelp' | translate"
-            [attr.aria-expanded]="showTrainingPanel()"
-            (click)="toggleTrainingPanel()">
-      <span class="material-icons-outlined">school</span>
-    </button>
-    <button class="icon-btn" [matTooltip]="'header.notifications' | translate" matTooltipPosition="above" [attr.aria-label]="'header.notifications' | translate" (click)="toggleNotifications()">
-      <span class="material-icons-outlined">notifications_none</span>
-      @if (unreadCount() > 0) {
-        <span class="badge">{{ unreadCount() }}</span>
-      }
-    </button>
     <button class="icon-btn" [matTooltip]="'header.toggleTheme' | translate" matTooltipPosition="above" [attr.aria-label]="'header.toggleTheme' | translate" (click)="toggleTheme()">
       <span class="material-icons-outlined">{{ themeIcon() }}</span>
     </button>

@@ -25,6 +25,22 @@
       </li>
     }
 
+    <!-- Employee Onboarding -->
+    <li>
+      <a class="account-sidebar__link"
+        routerLink="/onboarding"
+        routerLinkActive="account-sidebar__link--active"
+        [attr.aria-label]="'account.employeeOnboarding' | translate">
+        <span class="material-icons-outlined account-sidebar__icon">assignment_ind</span>
+        <span class="account-sidebar__label">{{ 'account.employeeOnboarding' | translate }}</span>
+        @if (onboardingComplete() === true) {
+          <span class="material-icons-outlined account-sidebar__status account-sidebar__status--complete" [attr.aria-label]="'account.complete' | translate">check_circle</span>
+        } @else if (onboardingComplete() === false) {
+          <span class="material-icons-outlined account-sidebar__status account-sidebar__status--incomplete" [attr.aria-label]="'account.incomplete' | translate">warning</span>
+        }
+      </a>
+    </li>
+
     <!-- Tax & Compliance (collapsible) -->
     <li>
       <button class="account-sidebar__link account-sidebar__link--parent"

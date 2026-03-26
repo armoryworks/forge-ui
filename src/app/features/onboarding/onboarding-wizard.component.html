@@ -1,0 +1,533 @@
+<div class="onboarding">
+  <div class="onboarding__header">
+    <span class="material-icons-outlined onboarding__logo">assignment_ind</span>
+    <div>
+      <h1 class="onboarding__title">New Employee Onboarding</h1>
+      <p class="onboarding__subtitle">Complete all steps to finish your onboarding paperwork.</p>
+    </div>
+  </div>
+
+  @if (signingComplete()) {
+    <!-- ── Completion screen ──────────────────────────────────────────────── -->
+    <div class="onboarding__complete">
+      <span class="material-icons-outlined onboarding__complete-icon">check_circle</span>
+      <h2>Onboarding Complete</h2>
+      <p>
+        Your forms have been submitted and sent for signing. Your employer will
+        review your I-9 identity documents within 3 business days of your start date.
+        You'll receive email confirmations as each document is processed.
+      </p>
+      <button class="action-btn action-btn--primary" (click)="goToDashboard()">
+        <span class="material-icons-outlined">dashboard</span>
+        Go to Dashboard
+      </button>
+    </div>
+  } @else if (signingUrls().length > 0) {
+    <!-- ── Signing step ───────────────────────────────────────────────────── -->
+    <div class="onboarding__signing">
+      <div class="onboarding__signing-header">
+        <h2>Sign Your Documents</h2>
+        <p>
+          Review and sign each document in the frame below. Once you've signed,
+          click the button to proceed to the next document.
+        </p>
+        <div class="onboarding__signing-progress">
+          @for (item of signingUrls(); track item.submissionId; let i = $index) {
+            <span class="onboarding__signing-step"
+              [class.onboarding__signing-step--active]="i === currentSigningIndex()"
+              [class.onboarding__signing-step--done]="i < currentSigningIndex()">
+              <span class="material-icons-outlined">
+                {{ i < currentSigningIndex() ? 'check_circle' : (i === currentSigningIndex() ? 'radio_button_checked' : 'radio_button_unchecked') }}
+              </span>
+              {{ item.formName }}
+            </span>
+          }
+        </div>
+      </div>
+
+      @if (currentSigningUrl()) {
+        <iframe
+          class="onboarding__signing-frame"
+          [src]="currentSigningUrl()"
+          title="Sign {{ currentSigningItem()?.formName }}"
+          allowfullscreen>
+        </iframe>
+      }
+
+      <div class="onboarding__signing-actions">
+        <p class="onboarding__signing-note">
+          <span class="material-icons-outlined">info</span>
+          Complete your signature in the frame above, then click the button to continue.
+        </p>
+        <button class="action-btn action-btn--primary" (click)="advanceSigning()">
+          @if (currentSigningIndex() < signingUrls().length - 1) {
+            Next Document
+          } @else {
+            Finish Signing
+          }
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <!-- ── Wizard steps ───────────────────────────────────────────────────── -->
+    <mat-stepper linear class="onboarding__stepper" orientation="horizontal">
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 1: Personal Information                                        -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step [stepControl]="personalForm" label="Personal Info"
+        aria-label="Personal Information">
+        <div class="step-content" [formGroup]="personalForm">
+          <h2 class="step-content__title">Personal Information</h2>
+          <p class="step-content__desc">
+            This information is used to pre-fill your W-4, I-9, and state withholding forms.
+            Enter it once here — you won't need to re-enter it on each form.
+          </p>
+
+          <div class="step-row step-row--3">
+            <app-input label="First Name" formControlName="firstName" [required]="true" />
+            <app-input label="Middle Name" formControlName="middleName" />
+            <app-input label="Last Name" formControlName="lastName" [required]="true" />
+          </div>
+
+          <app-input label="Other Last Names Used (since age 16)" formControlName="otherLastNames"
+            placeholder="Maiden name, prior last name, etc." />
+
+          <div class="step-row">
+            <app-datepicker label="Date of Birth" formControlName="dateOfBirth" [required]="true" />
+            <app-input label="Social Security Number" formControlName="ssn"
+              mask="ssn" [required]="true" placeholder="XXX-XX-XXXX" />
+          </div>
+
+          <div class="step-row">
+            <app-input label="Email Address" formControlName="email"
+              type="email" [required]="true" />
+            <app-input label="Phone Number" formControlName="phone"
+              mask="phone" [required]="true" />
+          </div>
+
+          <p class="step-content__note">
+            <span class="material-icons-outlined">lock</span>
+            Your SSN and date of birth are encrypted and used only for official
+            tax form submission. They are never stored in plain text.
+          </p>
+        </div>
+        <div class="step-actions">
+          <button class="action-btn action-btn--primary"
+            [appValidationPopover]="personalViolations()"
+            [disabled]="personalForm.invalid"
+            matStepperNext>
+            Continue <span class="material-icons-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 2: Home Address                                                -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step [stepControl]="addressForm" label="Address"
+        aria-label="Home Address">
+        <div class="step-content" [formGroup]="addressForm">
+          <h2 class="step-content__title">Home Address</h2>
+          <p class="step-content__desc">
+            Your residential address is required for W-4, I-9, and state withholding.
+            The state you select also determines which state withholding form applies to you.
+          </p>
+
+          <app-input label="Street Address" formControlName="street1" [required]="true" />
+          <app-input label="Apartment / Suite / Unit" formControlName="street2" />
+
+          <div class="step-row">
+            <app-input label="City" formControlName="city" [required]="true" />
+            <app-select label="State" formControlName="state"
+              [options]="usStateOptions" [required]="true"
+              placeholder="Select state" />
+            <app-input label="ZIP Code" formControlName="zipCode"
+              mask="zip" [required]="true" placeholder="00000" />
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="action-btn" matStepperPrevious>
+            <span class="material-icons-outlined">arrow_back</span> Back
+          </button>
+          <button class="action-btn action-btn--primary"
+            [appValidationPopover]="addressViolations()"
+            [disabled]="addressForm.invalid"
+            matStepperNext>
+            Continue <span class="material-icons-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 3: Federal Tax Withholding (W-4)                              -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step [stepControl]="w4Form" label="Federal Tax"
+        aria-label="W-4 Federal Tax Withholding">
+        <div class="step-content" [formGroup]="w4Form">
+          <h2 class="step-content__title">W-4: Federal Tax Withholding</h2>
+
+          <div class="step-content__instructions">
+            <h3>How to complete this form</h3>
+            <p>
+              <strong>Filing Status (Step 1c):</strong> Choose the status that best describes
+              your situation. This is the most important field and affects every paycheck.
+            </p>
+            <p>
+              <strong>Multiple Jobs (Step 2):</strong> Check this if you (or your spouse)
+              hold more than one job simultaneously. This prevents under-withholding.
+            </p>
+            <p>
+              <strong>Dependents (Step 3):</strong> Multiply qualifying children under 17
+              by $2,000 and other dependents by $500. Most employees leave this at $0.
+            </p>
+            <p>
+              <strong>Other Adjustments (Step 4 — Optional):</strong> Use these fields to
+              fine-tune withholding for investment income, itemized deductions, or extra
+              withholding per paycheck.
+            </p>
+            <p>
+              <strong>Exempt:</strong> Only claim exempt if you owed $0 in federal tax
+              last year and expect to owe $0 this year. Most employees do not qualify.
+            </p>
+          </div>
+
+          <app-select label="Filing Status (Step 1c)"
+            formControlName="filingStatus"
+            [options]="filingStatusOptions"
+            [required]="true" />
+
+          <app-toggle label="Multiple jobs or spouse also works (Step 2)"
+            formControlName="multipleJobs" />
+
+          <div class="step-row">
+            <app-input label="Dependents credit — Step 3 ($)"
+              formControlName="claimDependentsAmount" type="number" />
+            <app-input label="Other income — Step 4a ($)"
+              formControlName="otherIncome" type="number" />
+          </div>
+          <div class="step-row">
+            <app-input label="Deductions — Step 4b ($)"
+              formControlName="deductions" type="number" />
+            <app-input label="Extra withholding per period — 4c ($)"
+              formControlName="extraWithholding" type="number" />
+          </div>
+
+          <app-toggle label="Claim exempt from federal withholding"
+            formControlName="exemptFromWithholding" />
+
+          <p class="step-content__note">
+            <span class="material-icons-outlined">calculate</span>
+            For the most accurate withholding, use the IRS Withholding Estimator
+            at <strong>irs.gov/W4App</strong> before completing this step.
+          </p>
+        </div>
+        <div class="step-actions">
+          <button class="action-btn" matStepperPrevious>
+            <span class="material-icons-outlined">arrow_back</span> Back
+          </button>
+          <button class="action-btn action-btn--primary"
+            [appValidationPopover]="w4Violations()"
+            [disabled]="w4Form.invalid"
+            matStepperNext>
+            Continue <span class="material-icons-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 4: State Withholding                                           -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step label="State Tax" aria-label="State Tax Withholding">
+        <div class="step-content" [formGroup]="stateForm">
+          <h2 class="step-content__title">State Tax Withholding
+            @if (selectedStateName()) {
+              <span class="step-content__state-badge">— {{ selectedStateName() }}</span>
+            }
+          </h2>
+
+          @if (hasNoIncomeTax()) {
+            <div class="step-content__skip-notice">
+              <span class="material-icons-outlined">check_circle</span>
+              <div>
+                <strong>{{ selectedStateName() }} has no state income tax.</strong>
+                <p>No state withholding certificate is required. Click Continue to proceed.</p>
+              </div>
+            </div>
+          } @else {
+            <div class="step-content__instructions">
+              <h3>Instructions</h3>
+              <p>
+                State withholding varies by state. Enter your filing status and allowances
+                as shown on your state's withholding certificate.
+              </p>
+              <p>
+                <strong>Allowances:</strong> Each allowance reduces the amount withheld
+                per paycheck. Claiming more allowances = less withheld; fewer = more withheld.
+                Enter 0 if unsure — your state will apply the default.
+              </p>
+              <p>
+                <strong>Exempt:</strong> Only claim exempt if you owed no state income
+                tax last year and expect none this year.
+              </p>
+            </div>
+
+            <div class="step-row">
+              <app-select label="State Filing Status"
+                formControlName="stateFilingStatus"
+                [options]="stateFilingOptions" />
+              <app-input label="Allowances"
+                formControlName="stateAllowances" type="number" placeholder="0" />
+            </div>
+            <app-input label="Additional withholding per pay period ($)"
+              formControlName="stateAdditionalWithholding" type="number" />
+            <app-toggle label="Claim exempt from state withholding"
+              formControlName="stateExempt" />
+          }
+        </div>
+        <div class="step-actions">
+          <button class="action-btn" matStepperPrevious>
+            <span class="material-icons-outlined">arrow_back</span> Back
+          </button>
+          <button class="action-btn action-btn--primary" matStepperNext>
+            Continue <span class="material-icons-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 5: I-9 Employment Eligibility                                 -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step [stepControl]="i9Form" label="I-9"
+        aria-label="I-9 Employment Eligibility">
+        <div class="step-content" [formGroup]="i9Form">
+          <h2 class="step-content__title">I-9: Employment Eligibility Verification</h2>
+
+          <div class="step-content__instructions">
+            <h3>Section 1 — Employee (Complete by your first day)</h3>
+            <p>
+              Federal law requires you to verify your identity and authorization to work
+              in the U.S. You complete Section 1 now; your employer completes Section 2
+              within <strong>3 business days</strong> of your first day of employment.
+            </p>
+            <p>
+              <strong>Lawful Permanent Residents:</strong> Enter your Alien Registration
+              Number (A-Number, starts with "A") in the field provided.
+            </p>
+            <p>
+              <strong>Aliens Authorized to Work:</strong> Provide your A-Number, Form I-94
+              Admission Number, or foreign passport details as applicable.
+            </p>
+          </div>
+
+          <div class="step-content__doc-list">
+            <div class="step-content__doc-list-header">
+              <span class="material-icons-outlined">badge</span>
+              Documents you must present to your employer on your first day
+            </div>
+            <div class="step-content__doc-columns">
+              <div class="step-content__doc-col">
+                <div class="step-content__doc-col-title">List A (any one)</div>
+                <ul>
+                  <li>U.S. Passport or Passport Card</li>
+                  <li>Permanent Resident Card (Form I-551)</li>
+                  <li>Employment Authorization Document (Form I-766)</li>
+                  <li>Foreign Passport with I-94 or I-551 stamp</li>
+                </ul>
+              </div>
+              <div class="step-content__doc-or">OR</div>
+              <div class="step-content__doc-col">
+                <div class="step-content__doc-col-title">List B + List C (one each)</div>
+                <ul>
+                  <li><em>B:</em> Driver's license / State ID card</li>
+                  <li><em>B:</em> School ID with photograph</li>
+                  <li><em>C:</em> U.S. Social Security card</li>
+                  <li><em>C:</em> Birth certificate (certified copy)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <app-select label="I am (citizenship / immigration status)"
+            formControlName="citizenshipStatus"
+            [options]="citizenshipOptions"
+            [required]="true" />
+
+          @if (i9NeedsAlienInfo()) {
+            <div class="step-row">
+              <app-input label="Alien Registration Number (A-Number)"
+                formControlName="alienRegNumber" placeholder="A000000000" />
+              <app-input label="Form I-94 Admission Number"
+                formControlName="i94Number" />
+            </div>
+            <div class="step-row">
+              <app-input label="Foreign Passport Number"
+                formControlName="foreignPassportNumber" />
+              <app-input label="Country of Issuance"
+                formControlName="foreignPassportCountry" />
+            </div>
+            <app-datepicker label="Work Authorization Expiration Date"
+              formControlName="workAuthExpiry" />
+          }
+
+          <div class="step-section">
+            <app-toggle label="A preparer or translator helped me complete this form"
+              formControlName="preparedByPreparer" />
+
+            @if (i9PreparedByPreparer()) {
+              <div class="step-row">
+                <app-input label="Preparer First Name"
+                  formControlName="preparerFirstName" />
+                <app-input label="Preparer Last Name"
+                  formControlName="preparerLastName" />
+              </div>
+              <app-input label="Preparer Street Address"
+                formControlName="preparerAddress" />
+              <div class="step-row">
+                <app-input label="City"
+                  formControlName="preparerCity" />
+                <app-select label="State" formControlName="preparerState"
+                  [options]="usStateOptions" />
+                <app-input label="ZIP Code" formControlName="preparerZip"
+                  mask="zip" />
+              </div>
+            }
+          </div>
+        </div>
+        <div class="step-actions">
+          <button class="action-btn" matStepperPrevious>
+            <span class="material-icons-outlined">arrow_back</span> Back
+          </button>
+          <button class="action-btn action-btn--primary"
+            [appValidationPopover]="i9Violations()"
+            [disabled]="i9Form.invalid"
+            matStepperNext>
+            Continue <span class="material-icons-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 6: Direct Deposit                                              -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step [stepControl]="depositForm" label="Direct Deposit"
+        aria-label="Direct Deposit Authorization">
+        <div class="step-content" [formGroup]="depositForm">
+          <h2 class="step-content__title">Direct Deposit Authorization</h2>
+          <p class="step-content__desc">
+            Authorize payroll direct deposit to your bank account. Your routing
+            and account numbers can be found on a check or in your bank's mobile app.
+          </p>
+
+          <div class="step-content__check-hint">
+            <div class="step-content__check-diagram">
+              <div class="check-field check-field--routing">
+                <div class="check-field__label">Routing #</div>
+                <div class="check-field__value">⑆ 123456789 ⑆</div>
+                <div class="check-field__desc">First 9 digits on bottom-left</div>
+              </div>
+              <div class="check-field check-field--account">
+                <div class="check-field__label">Account #</div>
+                <div class="check-field__value">0001234567890 ⑈</div>
+                <div class="check-field__desc">Next number after routing</div>
+              </div>
+            </div>
+          </div>
+
+          <app-input label="Bank Name" formControlName="bankName" [required]="true" />
+          <div class="step-row">
+            <app-input label="Routing Number (9 digits)"
+              formControlName="routingNumber" [required]="true"
+              placeholder="123456789" [maxlength]="9" />
+            <app-input label="Account Number"
+              formControlName="accountNumber" [required]="true" />
+          </div>
+          <app-select label="Account Type"
+            formControlName="accountType"
+            [options]="accountTypeOptions"
+            [required]="true" />
+        </div>
+        <div class="step-actions">
+          <button class="action-btn" matStepperPrevious>
+            <span class="material-icons-outlined">arrow_back</span> Back
+          </button>
+          <button class="action-btn action-btn--primary"
+            [appValidationPopover]="depositViolations()"
+            [disabled]="depositForm.invalid"
+            matStepperNext>
+            Continue <span class="material-icons-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </mat-step>
+
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <!-- Step 7: Acknowledgments                                             -->
+      <!-- ─────────────────────────────────────────────────────────────────── -->
+      <mat-step [stepControl]="ackForm" label="Acknowledge"
+        aria-label="Acknowledgments">
+        <div class="step-content" [formGroup]="ackForm">
+          <h2 class="step-content__title">Acknowledgments</h2>
+          <p class="step-content__desc">
+            Review and acknowledge the following required policies to proceed to the
+            document signing step.
+          </p>
+
+          <div class="ack-card">
+            <div class="ack-card__header">
+              <span class="material-icons-outlined">health_and_safety</span>
+              <strong>Workers' Compensation</strong>
+            </div>
+            <p class="ack-card__body">
+              I acknowledge that I have been informed of my rights under the workers'
+              compensation laws of my state. I understand that workers' compensation
+              insurance covers work-related injuries and illnesses, and I agree to
+              report any such injury or illness to my supervisor immediately.
+            </p>
+            <app-toggle label="I acknowledge the Workers' Compensation policy"
+              formControlName="workersComp" />
+          </div>
+
+          <div class="ack-card">
+            <div class="ack-card__header">
+              <span class="material-icons-outlined">menu_book</span>
+              <strong>Employee Handbook</strong>
+            </div>
+            <p class="ack-card__body">
+              I acknowledge that I have received, read, and understood the Employee
+              Handbook. I understand it is not a contract of employment, that it may
+              be updated at any time, and that I agree to comply with all policies
+              and procedures contained within.
+            </p>
+            <app-toggle label="I acknowledge receipt of the Employee Handbook"
+              formControlName="handbook" />
+          </div>
+
+          <p class="step-content__note">
+            <span class="material-icons-outlined">info</span>
+            After clicking Submit, you'll be guided through electronically signing
+            your W-4, state withholding form, and I-9 via DocuSign.
+          </p>
+        </div>
+        <div class="step-actions">
+          <button class="action-btn" matStepperPrevious>
+            <span class="material-icons-outlined">arrow_back</span> Back
+          </button>
+          <button class="action-btn action-btn--primary"
+            [appValidationPopover]="ackViolations()"
+            [disabled]="ackForm.invalid || submitting()"
+            (click)="submit()">
+            @if (submitting()) {
+              <span class="material-icons-outlined spin">sync</span>
+              Preparing Documents...
+            } @else {
+              <span class="material-icons-outlined">send</span>
+              Submit &amp; Sign Documents
+            }
+          </button>
+        </div>
+      </mat-step>
+
+    </mat-stepper>
+  }
+</div>

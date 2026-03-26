@@ -4,6 +4,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
+import { OnboardingService } from '../../../onboarding/onboarding.service';
+
+const WIZARD_PROFILE_KEYS = new Set([
+  'w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook',
+]);
 
 interface AccountNavItem {
   path: string;
@@ -32,16 +37,27 @@ export class AccountSidebarComponent {
   private readonly router = inject(Router);
   private readonly profileService = inject(EmployeeProfileService);
   private readonly complianceService = inject(ComplianceFormService);
+  private readonly onboardingService = inject(OnboardingService);
   private readonly translate = inject(TranslateService);
 
   protected readonly taxFormsExpanded = signal(false);
   protected readonly completeness = this.profileService.completeness;
   protected readonly templates = this.complianceService.templates;
+  protected readonly onboardingStatus = this.onboardingService.status;
+
+  protected readonly onboardingComplete = computed(() => {
+    const s = this.onboardingStatus();
+    if (!s) return null;
+    return s.allComplete;
+  });
 
   protected readonly taxFormChildren = computed<AccountNavChild[]>(() => {
     const templates = this.templates();
     return templates.map(t => ({
-      path: `tax-forms/${t.profileCompletionKey}`,
+      // Wizard-managed forms route to /onboarding; others keep their own route
+      path: WIZARD_PROFILE_KEYS.has(t.profileCompletionKey)
+        ? '/onboarding'
+        : `tax-forms/${t.profileCompletionKey}`,
       label: t.name,
       icon: t.icon,
       completionKey: t.profileCompletionKey,
@@ -69,6 +85,7 @@ export class AccountSidebarComponent {
 
   constructor() {
     this.complianceService.loadTemplates();
+    this.onboardingService.loadStatus();
   }
 
   protected isItemComplete(item: AccountNavItem): boolean | null {
