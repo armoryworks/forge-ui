@@ -70,6 +70,7 @@ export interface OnboardingSubmitRequest {
   routingNumber: string;
   accountNumber: string;
   accountType: string;
+  voidedCheckFileAttachmentId?: number;
   // Step 7: Acknowledgments
   acknowledgeWorkersComp: boolean;
   acknowledgeHandbook: boolean;
@@ -104,6 +105,39 @@ export interface UploadI9DocumentResult {
   fileName: string;
 }
 
+// ── Per-form review flow models ───────────────────────────────────────────────
+
+export interface OnboardingFormToSignItem {
+  formType: string;
+  formName: string;
+  hasTemplate: boolean;
+}
+
+export interface SaveOnboardingResult {
+  formsToSign: OnboardingFormToSignItem[];
+}
+
+export interface PreviewOnboardingPdfRequest {
+  formData: OnboardingSubmitRequest;
+  formType: string;
+}
+
+export interface PreviewOnboardingPdfResult {
+  hasTemplate: boolean;
+  pdfBase64: string | null;
+}
+
+export interface SignOnboardingFormRequest {
+  formData: OnboardingSubmitRequest;
+  formType: string;
+}
+
+export interface SignOnboardingFormResult {
+  signingUrl: string;
+  submissionId: number;
+  isMock: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class OnboardingService {
   private readonly http = inject(HttpClient);
@@ -127,5 +161,32 @@ export class OnboardingService {
     formData.append('file', file);
     formData.append('documentList', documentList);
     return this.http.post<UploadI9DocumentResult>(`${this.base}/i9-document`, formData);
+  }
+
+  uploadVoidedCheck(file: File): Observable<UploadI9DocumentResult> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<UploadI9DocumentResult>(`${this.base}/voided-check`, formData);
+  }
+
+  // ── Per-form review flow ──────────────────────────────────────────────────
+
+  /** Persist profile data, identity docs, and acknowledgments. Returns forms to sign. */
+  saveData(request: OnboardingSubmitRequest): Observable<SaveOnboardingResult> {
+    return this.http.post<SaveOnboardingResult>(`${this.base}/save`, request).pipe(
+      tap(() => this.loadStatus()),
+    );
+  }
+
+  /** Fill a single form PDF server-side, return base64 for inline preview. */
+  previewPdf(request: PreviewOnboardingPdfRequest): Observable<PreviewOnboardingPdfResult> {
+    return this.http.post<PreviewOnboardingPdfResult>(`${this.base}/preview-pdf`, request);
+  }
+
+  /** Fill a single form PDF and create a DocuSeal submission. Returns signing URL. */
+  signForm(request: SignOnboardingFormRequest): Observable<SignOnboardingFormResult> {
+    return this.http.post<SignOnboardingFormResult>(`${this.base}/sign-form`, request).pipe(
+      tap(() => this.loadStatus()),
+    );
   }
 }

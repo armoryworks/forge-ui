@@ -22,22 +22,21 @@
         Go to Dashboard
       </button>
     </div>
-  } @else if (signingUrls().length > 0) {
-    <!-- ── Signing step ───────────────────────────────────────────────────── -->
+  } @else if (reviewPhase() !== 'idle' && formsToSign().length > 0) {
+    <!-- ── Per-form review + sign loop ────────────────────────────────────── -->
     <div class="onboarding__signing">
+
+      <!-- Progress indicator -->
       <div class="onboarding__signing-header">
-        <h2>Sign Your Documents</h2>
-        <p>
-          Review and sign each document in the frame below. Once you've signed,
-          click the button to proceed to the next document.
-        </p>
+        <h2>Review &amp; Sign Your Documents</h2>
+        <p>Review each pre-filled form, then sign it. You can go back to edit if anything looks wrong.</p>
         <div class="onboarding__signing-progress">
-          @for (item of signingUrls(); track item.submissionId; let i = $index) {
+          @for (item of formsToSign(); track item.formType; let i = $index) {
             <span class="onboarding__signing-step"
-              [class.onboarding__signing-step--active]="i === currentSigningIndex()"
-              [class.onboarding__signing-step--done]="i < currentSigningIndex()">
+              [class.onboarding__signing-step--active]="i === currentFormIndex()"
+              [class.onboarding__signing-step--done]="signedFormIndices().has(i)">
               <span class="material-icons-outlined">
-                {{ i < currentSigningIndex() ? 'check_circle' : (i === currentSigningIndex() ? 'radio_button_checked' : 'radio_button_unchecked') }}
+                {{ signedFormIndices().has(i) ? 'check_circle' : (i === currentFormIndex() ? 'radio_button_checked' : 'radio_button_unchecked') }}
               </span>
               {{ item.formName }}
             </span>
@@ -45,29 +44,131 @@
         </div>
       </div>
 
-      @if (currentSigningUrl()) {
-        <iframe
-          class="onboarding__signing-frame"
-          [src]="currentSigningUrl()"
-          title="Sign {{ currentSigningItem()?.formName }}"
-          allowfullscreen>
-        </iframe>
+      @if (reviewPhase() === 'preview') {
+        <!-- ── PDF Preview ──────────────────────────────────────────────────── -->
+        <div class="onboarding__review-card">
+          <div class="onboarding__review-card-header">
+            <span class="material-icons-outlined">description</span>
+            <h3>{{ currentForm()?.formName }}</h3>
+            <span class="onboarding__signing-doc-count">
+              Form {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
+            </span>
+          </div>
+
+          @if (loadingPreview()) {
+            <div class="onboarding__pdf-loading">
+              <mat-spinner diameter="36" aria-label="Loading PDF preview"></mat-spinner>
+              <span>Generating preview…</span>
+            </div>
+          } @else if (pdfSafeUrl()) {
+            <p class="onboarding__review-warn">
+              <span class="material-icons-outlined">info</span>
+              <span>This is how your form will be filled. If anything is wrong, go back and correct it before signing.</span>
+            </p>
+            <!-- HTML5 embed — renders the filled PDF natively in the browser -->
+            <embed
+              [src]="pdfSafeUrl()"
+              type="application/pdf"
+              class="onboarding__pdf-embed"
+              aria-label="Pre-filled {{ currentForm()?.formName }} for review" />
+          } @else {
+            <p class="onboarding__review-warn">
+              <span class="material-icons-outlined">info</span>
+              <span>No PDF preview is available for this form. Review the details below and proceed to sign.</span>
+            </p>
+            <div class="onboarding__review-summary">
+              @switch (currentForm()?.formType) {
+                @case ('W4') {
+                  <div class="onboarding__review-row"><span>Filing Status</span><strong>{{ w4FilingLabel() }}</strong></div>
+                  <div class="onboarding__review-row"><span>Multiple Jobs</span><strong>{{ _w4Val().multipleJobs ? 'Yes' : 'No' }}</strong></div>
+                  <div class="onboarding__review-row"><span>Exempt from Withholding</span><strong>{{ _w4Val().exemptFromWithholding ? 'Yes' : 'No' }}</strong></div>
+                }
+                @case ('StateWithholding') {
+                  <div class="onboarding__review-row"><span>State</span><strong>{{ selectedStateName() }}</strong></div>
+                  <div class="onboarding__review-row"><span>Filing Status</span><strong>{{ stateFilingLabel() }}</strong></div>
+                  <div class="onboarding__review-row"><span>Allowances</span><strong>{{ _stateVal().stateAllowances ?? 0 }}</strong></div>
+                }
+                @case ('I9') {
+                  <div class="onboarding__review-row"><span>Citizenship / Work Authorization</span><strong>{{ citizenshipLabel() }}</strong></div>
+                  <div class="onboarding__review-row">
+                    <span>Identity Documents</span>
+                    <strong>
+                      @if (_i9Val().documentChoice === 'A') { List A document provided }
+                      @else if (_i9Val().documentChoice === 'BC') { List B + List C documents provided }
+                      @else { Not specified }
+                    </strong>
+                  </div>
+                }
+              }
+            </div>
+          }
+
+          <div class="onboarding__review-actions">
+            <button class="action-btn" (click)="goBackToStep(currentForm()?.formType)">
+              <span class="material-icons-outlined">arrow_back</span>
+              Go back to edit
+            </button>
+            <button class="action-btn action-btn--primary"
+              [disabled]="loadingPreview()"
+              (click)="proceedToSign()">
+              <span class="material-icons-outlined">draw</span>
+              Looks correct — Sign this form
+            </button>
+          </div>
+        </div>
       }
 
-      <div class="onboarding__signing-actions">
-        <p class="onboarding__signing-note">
-          <span class="material-icons-outlined">info</span>
-          Complete your signature in the frame above, then click the button to continue.
-        </p>
-        <button class="action-btn action-btn--primary" (click)="advanceSigning()">
-          @if (currentSigningIndex() < signingUrls().length - 1) {
-            Next Document
-          } @else {
-            Finish Signing
+      @if (reviewPhase() === 'signing') {
+        <!-- ── DocuSeal signing embed ───────────────────────────────────────── -->
+        <div class="onboarding__signing-doc">
+          <div class="onboarding__signing-doc-header">
+            <span class="material-icons-outlined">draw</span>
+            <h3>Sign: {{ currentForm()?.formName }}</h3>
+            <span class="onboarding__signing-doc-count">
+              Form {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
+            </span>
+          </div>
+
+          @if (signingFormInProgress()) {
+            <div class="onboarding__pdf-loading">
+              <mat-spinner diameter="36" aria-label="Preparing signing session"></mat-spinner>
+              <span>Preparing signing session…</span>
+            </div>
+          } @else if (currentSigningUrl()) {
+            <p class="onboarding__signing-instruction">
+              <span class="material-icons-outlined">draw</span>
+              Complete all required fields and apply your signature below.
+            </p>
+            <docuseal-form
+              [attr.data-src]="currentSigningUrl()"
+              (submit)="onDocuSealSubmit()"
+              class="onboarding__docuseal-embed"
+              aria-label="Document signing form for {{ currentForm()?.formName }}">
+            </docuseal-form>
           }
-          <span class="material-icons-outlined">arrow_forward</span>
-        </button>
-      </div>
+
+          <div class="onboarding__signing-actions">
+            @if (pdfSafeUrl()) {
+              <button class="action-btn" (click)="backToPreview()">
+                <span class="material-icons-outlined">arrow_back</span>
+                Back to Preview
+              </button>
+            } @else {
+              <button class="action-btn" (click)="goBackToStep(currentForm()?.formType)">
+                <span class="material-icons-outlined">arrow_back</span>
+                Go back to edit
+              </button>
+            }
+            @if (!currentFormSigned()) {
+              <p class="onboarding__signing-note">
+                <span class="material-icons-outlined">info</span>
+                Complete your signature above to continue to the next form.
+              </p>
+            }
+          </div>
+        </div>
+      }
+
     </div>
   } @else {
     <!-- ── Wizard steps ───────────────────────────────────────────────────── -->
@@ -192,7 +293,7 @@
             <div class="step-content__calc-grid">
               <div class="step-content__calc-row">
                 <app-input label="Qualifying children under age 17 (3a)"
-                  formControlName="qualifyingChildren" type="number" />
+                  formControlName="qualifyingChildren" type="number" [required]="true" />
                 <div class="step-content__calc-display">
                   <span class="step-content__calc-op">× $2,000 =</span>
                   <span class="step-content__calc-result">{{ w4Step3a() | currency:'USD':'symbol':'1.0-0' }}</span>
@@ -201,7 +302,7 @@
 
               <div class="step-content__calc-row">
                 <app-input label="Other dependents (3b)"
-                  formControlName="otherDependents" type="number" />
+                  formControlName="otherDependents" type="number" [required]="true" />
                 <div class="step-content__calc-display">
                   <span class="step-content__calc-op">× $500 =</span>
                   <span class="step-content__calc-result">{{ w4Step3b() | currency:'USD':'symbol':'1.0-0' }}</span>
@@ -279,9 +380,10 @@
             <div class="step-row">
               <app-select label="State Filing Status"
                 formControlName="stateFilingStatus"
-                [options]="stateFilingOptions" />
+                [options]="stateFilingOptions"
+                [required]="!stateExempt()" />
               <app-input label="Allowances"
-                formControlName="stateAllowances" type="number" placeholder="0" />
+                formControlName="stateAllowances" type="number" />
             </div>
             <app-input label="Additional withholding per pay period ($)"
               formControlName="stateAdditionalWithholding" type="number" />
@@ -408,10 +510,10 @@
                 </div>
                 <app-datepicker label="Expiration Date (leave blank if N/A)"
                   formControlName="listAExpiry" />
-                @if (listAAttachment()) {
+                @if (listAAttachment() || _i9Val().listAFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
-                    {{ listAAttachment()!.name }}
+                    {{ listAAttachment()?.name ?? 'Document uploaded' }}
                     <button type="button" class="icon-btn" (click)="clearList('A')"
                       aria-label="Remove uploaded file">
                       <span class="material-icons-outlined">close</span>
@@ -445,10 +547,10 @@
                 </div>
                 <app-datepicker label="Expiration Date"
                   formControlName="listBExpiry" />
-                @if (listBAttachment()) {
+                @if (listBAttachment() || _i9Val().listBFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
-                    {{ listBAttachment()!.name }}
+                    {{ listBAttachment()?.name ?? 'Document uploaded' }}
                     <button type="button" class="icon-btn" (click)="clearList('B')"
                       aria-label="Remove uploaded file">
                       <span class="material-icons-outlined">close</span>
@@ -480,10 +582,10 @@
                 </div>
                 <app-datepicker label="Expiration Date (leave blank if N/A)"
                   formControlName="listCExpiry" />
-                @if (listCAttachment()) {
+                @if (listCAttachment() || _i9Val().listCFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
-                    {{ listCAttachment()!.name }}
+                    {{ listCAttachment()?.name ?? 'Document uploaded' }}
                     <button type="button" class="icon-btn" (click)="clearList('C')"
                       aria-label="Remove uploaded file">
                       <span class="material-icons-outlined">close</span>
@@ -573,6 +675,31 @@
             formControlName="accountType"
             [options]="accountTypeOptions"
             [required]="true" />
+
+          <div class="step-content__section-label">VOIDED CHECK</div>
+          @if (!voidedCheckFileName() && !_depositVal().voidedCheckFileId) {
+            <label class="doc-upload__zone" [class.doc-upload__zone--uploading]="uploadingVoidedCheck()">
+              <input type="file" accept="image/*,.pdf" (change)="onVoidedCheckSelected($event)"
+                style="display:none" [attr.aria-label]="'Upload voided check'" />
+              @if (uploadingVoidedCheck()) {
+                <span class="material-icons-outlined doc-upload__spinner">sync</span>
+                <span>Uploading…</span>
+              } @else {
+                <span class="material-icons-outlined">cloud_upload</span>
+                <span>Click to upload a voided check (PDF or image)</span>
+              }
+            </label>
+          } @else {
+            <div class="doc-upload__attached">
+              <span class="material-icons-outlined doc-upload__attached-icon">check_circle</span>
+              <span class="doc-upload__attached-name">{{ voidedCheckFileName() ?? 'Voided check uploaded' }}</span>
+              <button type="button" class="doc-upload__remove"
+                (click)="clearVoidedCheck()"
+                [attr.aria-label]="'Remove voided check'">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+          }
         </div>
       </mat-step>
 
@@ -645,7 +772,7 @@
       } @else {
         <button class="action-btn action-btn--primary"
           [appValidationPopover]="ackViolations"
-          [disabled]="ackForm.invalid || submitting()"
+          [disabled]="currentFormInvalid()"
           (click)="submit()">
           @if (submitting()) {
             <span class="material-icons-outlined spin">sync</span>

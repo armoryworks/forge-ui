@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   computed,
   effect,
   inject,
@@ -9,13 +10,13 @@ import {
 import { CurrencyPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
-import { map } from 'rxjs';
+import { fromEvent, filter, map, startWith } from 'rxjs';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
@@ -30,6 +31,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { EmployeeProfileService } from '../account/services/employee-profile.service';
 
 import {
+  OnboardingFormToSignItem,
   OnboardingService,
   OnboardingSigningUrl,
   OnboardingSubmitRequest,
@@ -142,6 +144,7 @@ interface I9Attachment {
   templateUrl: './onboarding-wizard.component.html',
   styleUrl: './onboarding-wizard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   providers: [
     { provide: STEPPER_GLOBAL_OPTIONS, useValue: { showError: false } },
   ],
@@ -151,9 +154,9 @@ export class OnboardingWizardComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(EmployeeProfileService);
+  private readonly sanitizer = inject(DomSanitizer);
 
   // ── Step tracking — URL is source of truth (?step=0..6) ──────────────────
   protected readonly currentStepIndex = toSignal(
@@ -179,13 +182,13 @@ export class OnboardingWizardComponent {
 
   protected readonly currentFormInvalid = computed(() => {
     switch (this.currentStepIndex()) {
-      case 0: return this.personalForm.invalid;
-      case 1: return this.addressForm.invalid;
-      case 2: return this.w4Form.invalid;
+      case 0: return this.personalFormStatus()  === 'INVALID';
+      case 1: return this.addressFormStatus()   === 'INVALID';
+      case 2: return this.w4FormStatus()        === 'INVALID';
       case 3: return false;
-      case 4: return this.i9Form.invalid;
-      case 5: return this.depositForm.invalid;
-      case 6: return this.ackForm.invalid || this.submitting();
+      case 4: return this.i9FormStatus()        === 'INVALID';
+      case 5: return this.depositFormStatus()   === 'INVALID';
+      case 6: return this.ackFormStatus()       === 'INVALID' || this.submitting();
       default: return false;
     }
   });
@@ -202,20 +205,58 @@ export class OnboardingWizardComponent {
 
   // ── State ────────────────────────────────────────────────────────────────
   protected readonly submitting = signal(false);
+  // Legacy: kept for DocuSeal postMessage listener compatibility
   protected readonly signingUrls = signal<OnboardingSigningUrl[]>([]);
-  protected readonly currentSigningIndex = signal(0);
   protected readonly signingComplete = signal(false);
 
-  protected readonly currentSigningItem = computed(() => {
-    const urls = this.signingUrls();
-    const idx = this.currentSigningIndex();
-    return idx < urls.length ? urls[idx] : null;
+  // ── Per-form review flow state ────────────────────────────────────────────
+  /** Forms to be reviewed/signed, returned by POST /save */
+  protected readonly formsToSign = signal<OnboardingFormToSignItem[]>([]);
+  protected readonly currentFormIndex = signal(0);
+  protected readonly currentForm = computed(() => {
+    const forms = this.formsToSign();
+    const idx = this.currentFormIndex();
+    return idx < forms.length ? forms[idx] : null;
   });
 
-  protected readonly currentSigningUrl = computed((): SafeResourceUrl | null => {
-    const item = this.currentSigningItem();
-    if (!item) return null;
-    return this.sanitizer.bypassSecurityTrustResourceUrl(item.signingUrl);
+  /** 'idle' = wizard steps; 'preview' = showing filled PDF; 'signing' = DocuSeal embed */
+  protected readonly reviewPhase = signal<'idle' | 'preview' | 'signing'>('idle');
+  protected readonly previewPdfBase64 = signal<string | null>(null);
+  protected readonly loadingPreview = signal(false);
+  protected readonly signingFormInProgress = signal(false);
+  protected readonly currentSigningUrl = signal<string | null>(null);
+  /** Safe blob URL for the <embed> PDF viewer — updated whenever previewPdfBase64 changes. */
+  protected readonly pdfSafeUrl = signal<SafeResourceUrl | null>(null);
+  private _pdfBlobUrl: string | null = null;
+  protected readonly signedFormIndices = signal<Set<number>>(new Set());
+  protected readonly currentFormSigned = computed(() =>
+    this.signedFormIndices().has(this.currentFormIndex())
+  );
+
+  // Legacy compat alias (used in DocuSeal postMessage handler)
+  protected readonly currentSigningIndex = this.currentFormIndex;
+  protected readonly currentSigningItem = computed(() => {
+    const url = this.currentSigningUrl();
+    const form = this.currentForm();
+    if (!url || !form) return null;
+    return { signingUrl: url, formType: form.formType, formName: form.formName, submissionId: 0 } as OnboardingSigningUrl;
+  });
+
+  // Human-readable labels for review summary
+  protected readonly w4FilingLabel = computed(() => {
+    const v = this._w4Val().filingStatus as string | null | undefined;
+    if (!v) return '—';
+    return FILING_STATUS_OPTIONS.find(o => o.value === v)?.label ?? v;
+  });
+  protected readonly stateFilingLabel = computed(() => {
+    const v = this._stateVal().stateFilingStatus;
+    if (!v) return '—';
+    return STATE_FILING_OPTIONS.find(o => o.value === v)?.label ?? v;
+  });
+  protected readonly citizenshipLabel = computed(() => {
+    const v = this._i9Val().citizenshipStatus;
+    if (!v) return '—';
+    return CITIZENSHIP_OPTIONS.find(o => o.value === v)?.label ?? v;
   });
 
   // ── I-9 Document Upload State ─────────────────────────────────────────────
@@ -294,12 +335,12 @@ export class OnboardingWizardComponent {
     filingStatus: new FormControl(null, [Validators.required]),
     multipleJobs: new FormControl(false),
     // Step 3: Claim Dependents — 3a (qualifying children) and 3b (other dependents)
-    qualifyingChildren: new FormControl<number>(0),
-    otherDependents: new FormControl<number>(0),
-    // Step 4: Other Adjustments (optional)
-    otherIncome: new FormControl(0),
-    deductions: new FormControl(0),
-    extraWithholding: new FormControl(0),
+    qualifyingChildren: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    otherDependents: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    // Step 4: Other Adjustments (optional — leave blank if not applicable)
+    otherIncome: new FormControl<number | null>(null, [Validators.min(0)]),
+    deductions: new FormControl<number | null>(null, [Validators.min(0)]),
+    extraWithholding: new FormControl<number | null>(null, [Validators.min(0)]),
     exemptFromWithholding: new FormControl(false),
   });
 
@@ -321,19 +362,29 @@ export class OnboardingWizardComponent {
 
   protected readonly w4Violations = FormValidationService.getViolations(this.w4Form, {
     filingStatus: 'Filing Status',
+    qualifyingChildren: 'Qualifying Children (3a)',
+    otherDependents: 'Other Dependents (3b)',
+    otherIncome: 'Other Income (4a)',
+    deductions: 'Deductions (4b)',
+    extraWithholding: 'Extra Withholding (4c)',
   });
 
   // ── Step 4: State Withholding ─────────────────────────────────────────────
   protected readonly stateForm = new FormGroup({
-    stateFilingStatus: new FormControl(''),
+    stateFilingStatus: new FormControl('', [Validators.required]),
     stateAllowances: new FormControl<number | null>(null),
     stateAdditionalWithholding: new FormControl<number | null>(null),
     stateExempt: new FormControl(false),
   });
 
+  protected readonly stateExempt = toSignal(
+    this.stateForm.controls.stateExempt.valueChanges.pipe(startWith(false)),
+    { initialValue: false },
+  );
+
   // ── Step 5: I-9 Employment Eligibility ───────────────────────────────────
   protected readonly i9Form = new FormGroup({
-    citizenshipStatus: new FormControl('1', [Validators.required]),
+    citizenshipStatus: new FormControl('', [Validators.required]),
     alienRegNumber: new FormControl(''),
     i94Number: new FormControl(''),
     foreignPassportNumber: new FormControl(''),
@@ -347,7 +398,7 @@ export class OnboardingWizardComponent {
     preparerState: new FormControl(''),
     preparerZip: new FormControl(''),
     // Document verification
-    documentChoice: new FormControl<'A' | 'BC' | null>(null),
+    documentChoice: new FormControl<'A' | 'BC' | null>(null, [Validators.required]),
     listAType: new FormControl(''),
     listADocNumber: new FormControl(''),
     listAAuthority: new FormControl(''),
@@ -360,10 +411,27 @@ export class OnboardingWizardComponent {
     listCDocNumber: new FormControl(''),
     listCAuthority: new FormControl(''),
     listCExpiry: new FormControl<Date | null>(null),
+    // Hidden controls that track uploaded file IDs — required conditionally
+    listAFileId: new FormControl<number | null>(null),
+    listBFileId: new FormControl<number | null>(null),
+    listCFileId: new FormControl<number | null>(null),
   });
 
   protected readonly i9Violations = FormValidationService.getViolations(this.i9Form, {
     citizenshipStatus: 'Citizenship Status',
+    documentChoice: 'Document Selection (List A or List B+C)',
+    listAType: 'List A — Document Type',
+    listADocNumber: 'List A — Document Number',
+    listAAuthority: 'List A — Issuing Authority',
+    listAFileId: 'List A — Document Upload',
+    listBType: 'List B — Document Type',
+    listBDocNumber: 'List B — Document Number',
+    listBAuthority: 'List B — Issuing Authority',
+    listBFileId: 'List B — Document Upload',
+    listCType: 'List C — Document Type',
+    listCDocNumber: 'List C — Document Number',
+    listCAuthority: 'List C — Issuing Authority',
+    listCFileId: 'List C — Document Upload',
   });
 
   protected readonly i9CitizenshipStatus = toSignal(
@@ -392,13 +460,18 @@ export class OnboardingWizardComponent {
     routingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{9}$/)]),
     accountNumber: new FormControl('', [Validators.required]),
     accountType: new FormControl('Checking', [Validators.required]),
+    voidedCheckFileId: new FormControl<number | null>(null, [Validators.required]),
   });
+
+  protected readonly voidedCheckFileName = signal<string | null>(null);
+  protected readonly uploadingVoidedCheck = signal(false);
 
   protected readonly depositViolations = FormValidationService.getViolations(this.depositForm, {
     bankName: 'Bank Name',
     routingNumber: 'Routing Number (9 digits)',
     accountNumber: 'Account Number',
     accountType: 'Account Type',
+    voidedCheckFileId: 'Voided Check Upload',
   });
 
   // ── Step 7: Acknowledgments ───────────────────────────────────────────────
@@ -412,17 +485,36 @@ export class OnboardingWizardComponent {
     handbook: 'Employee Handbook Acknowledgment',
   });
 
+  // Reactive form status signals — computed() won't re-run on plain .invalid (not a signal)
+  private readonly personalFormStatus  = toSignal(this.personalForm.statusChanges.pipe(startWith(this.personalForm.status)),  { initialValue: this.personalForm.status });
+  private readonly addressFormStatus   = toSignal(this.addressForm.statusChanges.pipe(startWith(this.addressForm.status)),   { initialValue: this.addressForm.status });
+  private readonly w4FormStatus        = toSignal(this.w4Form.statusChanges.pipe(startWith(this.w4Form.status)),             { initialValue: this.w4Form.status });
+  private readonly i9FormStatus        = toSignal(this.i9Form.statusChanges.pipe(startWith(this.i9Form.status)),             { initialValue: this.i9Form.status });
+  private readonly depositFormStatus   = toSignal(this.depositForm.statusChanges.pipe(startWith(this.depositForm.status)),   { initialValue: this.depositForm.status });
+  private readonly ackFormStatus       = toSignal(this.ackForm.statusChanges.pipe(startWith(this.ackForm.status)),           { initialValue: this.ackForm.status });
+
   // ── Auto-save signals (all forms, must be after form declarations) ────────
   private readonly _personalVal = toSignal(this.personalForm.valueChanges, { initialValue: this.personalForm.value });
   private readonly _addressVal  = toSignal(this.addressForm.valueChanges,  { initialValue: this.addressForm.value });
-  private readonly _w4Val       = toSignal(this.w4Form.valueChanges,       { initialValue: this.w4Form.value });
-  private readonly _stateVal    = toSignal(this.stateForm.valueChanges,    { initialValue: this.stateForm.value });
-  private readonly _i9Val       = toSignal(this.i9Form.valueChanges,       { initialValue: this.i9Form.value });
-  private readonly _depositVal  = toSignal(this.depositForm.valueChanges,  { initialValue: this.depositForm.value });
+  protected readonly _w4Val     = toSignal(this.w4Form.valueChanges,       { initialValue: this.w4Form.value });
+  protected readonly _stateVal  = toSignal(this.stateForm.valueChanges,    { initialValue: this.stateForm.value });
+  protected readonly _i9Val     = toSignal(this.i9Form.valueChanges,       { initialValue: this.i9Form.value });
+  protected readonly _depositVal = toSignal(this.depositForm.valueChanges,  { initialValue: this.depositForm.value });
   private readonly _ackVal      = toSignal(this.ackForm.valueChanges,      { initialValue: this.ackForm.value });
 
   // ── Constructor: restore draft, prefill, auto-save ───────────────────────
   constructor() {
+    // When exempt is toggled on, filing status is no longer required
+    effect(() => {
+      const ctrl = this.stateForm.controls.stateFilingStatus;
+      if (this.stateExempt()) {
+        ctrl.removeValidators(Validators.required);
+      } else {
+        ctrl.addValidators(Validators.required);
+      }
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    });
+
     // Restore saved draft first — takes priority over admin prefill
     const draftRestored = this.restoreDraft();
 
@@ -456,6 +548,34 @@ export class OnboardingWizardComponent {
       });
     }
 
+    // Conditionally require document fields based on selected list
+    effect(() => {
+      const choice = this.i9DocumentChoice();
+      const ctrl = this.i9Form.controls;
+      const listAFields = [ctrl.listAType, ctrl.listADocNumber, ctrl.listAAuthority, ctrl.listAFileId];
+      const listBCFields = [ctrl.listBType, ctrl.listBDocNumber, ctrl.listBAuthority, ctrl.listBFileId,
+                            ctrl.listCType, ctrl.listCDocNumber, ctrl.listCAuthority, ctrl.listCFileId];
+
+      [...listAFields, ...listBCFields].forEach(c => {
+        c.clearValidators();
+        c.updateValueAndValidity({ emitEvent: false });
+      });
+
+      if (choice === 'A') {
+        listAFields.forEach(c => {
+          c.setValidators([Validators.required]);
+          c.updateValueAndValidity({ emitEvent: false });
+        });
+      } else if (choice === 'BC') {
+        listBCFields.forEach(c => {
+          c.setValidators([Validators.required]);
+          c.updateValueAndValidity({ emitEvent: false });
+        });
+      }
+
+      this.i9Form.updateValueAndValidity();
+    });
+
     // Auto-save to localStorage whenever any form value changes
     effect(() => {
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
@@ -468,17 +588,54 @@ export class OnboardingWizardComponent {
         ack:      this._ackVal(),
       }));
     });
+
+    // Convert base64 PDF → blob URL → SafeResourceUrl for <embed> viewer.
+    // Revokes the previous blob URL to prevent memory leaks.
+    effect(() => {
+      const b64 = this.previewPdfBase64();
+      if (this._pdfBlobUrl) {
+        URL.revokeObjectURL(this._pdfBlobUrl);
+        this._pdfBlobUrl = null;
+      }
+      if (!b64) {
+        this.pdfSafeUrl.set(null);
+        return;
+      }
+      const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      this._pdfBlobUrl = URL.createObjectURL(blob);
+      this.pdfSafeUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(this._pdfBlobUrl));
+    });
+
+    // Listen for DocuSeal submission completion via postMessage.
+    // Origin must match the app's own origin because DocuSeal is proxied through
+    // /docuseal/ (same-origin). Rejecting foreign origins prevents any third-party
+    // page from faking a "signed" event.
+    fromEvent<MessageEvent>(window, 'message').pipe(
+      filter(e => {
+        if (e.origin !== window.location.origin) return false;
+        try {
+          const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+          return data?.message === 'docuseal:completed'
+            || data?.docuseal === 'completed'
+            || !!data?.docuseal_completed;
+        } catch { return false; }
+      }),
+      takeUntilDestroyed(),
+    ).subscribe(() => {
+      const idx = this.currentFormIndex();
+      this.signedFormIndices.update((s: Set<number>) => new Set([...s, idx]));
+      // Advance to next form automatically after signing
+      this.advanceToNextForm();
+    });
   }
 
   // ── I-9 Document Methods ──────────────────────────────────────────────────
   protected setDocumentChoice(choice: 'A' | 'BC'): void {
     this.i9Form.controls.documentChoice.setValue(choice);
-    if (choice === 'A') {
-      this.listBAttachment.set(null);
-      this.listCAttachment.set(null);
-    } else {
-      this.listAAttachment.set(null);
-    }
+    // Do NOT clear the other list's uploaded file — the user may switch back and
+    // their upload should be preserved. Validators are conditional so the unused
+    // list's fileId won't affect form validity.
   }
 
   protected onFileSelected(event: Event, list: 'A' | 'B' | 'C'): void {
@@ -495,6 +652,10 @@ export class OnboardingWizardComponent {
         uploading.set(false);
         const attach = list === 'A' ? this.listAAttachment : list === 'B' ? this.listBAttachment : this.listCAttachment;
         attach.set({ id: result.fileAttachmentId, name: result.fileName });
+        const fileCtrl = list === 'A' ? this.i9Form.controls.listAFileId
+          : list === 'B' ? this.i9Form.controls.listBFileId
+          : this.i9Form.controls.listCFileId;
+        fileCtrl.setValue(result.fileAttachmentId);
       },
       error: () => {
         uploading.set(false);
@@ -504,15 +665,45 @@ export class OnboardingWizardComponent {
   }
 
   protected clearList(list: 'A' | 'B' | 'C'): void {
-    if (list === 'A') this.listAAttachment.set(null);
-    else if (list === 'B') this.listBAttachment.set(null);
-    else this.listCAttachment.set(null);
+    if (list === 'A') {
+      this.listAAttachment.set(null);
+      this.i9Form.controls.listAFileId.setValue(null);
+    } else if (list === 'B') {
+      this.listBAttachment.set(null);
+      this.i9Form.controls.listBFileId.setValue(null);
+    } else {
+      this.listCAttachment.set(null);
+      this.i9Form.controls.listCFileId.setValue(null);
+    }
   }
 
-  // ── Submit ────────────────────────────────────────────────────────────────
-  protected submit(): void {
-    if (this.submitting()) return;
+  protected onVoidedCheckSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
 
+    this.uploadingVoidedCheck.set(true);
+    this.service.uploadVoidedCheck(file).subscribe({
+      next: result => {
+        this.uploadingVoidedCheck.set(false);
+        this.voidedCheckFileName.set(result.fileName);
+        this.depositForm.controls.voidedCheckFileId.setValue(result.fileAttachmentId);
+      },
+      error: () => {
+        this.uploadingVoidedCheck.set(false);
+        this.snackbar.error('Failed to upload voided check. Please try again.');
+      },
+    });
+  }
+
+  protected clearVoidedCheck(): void {
+    this.voidedCheckFileName.set(null);
+    this.depositForm.controls.voidedCheckFileId.setValue(null);
+  }
+
+  // ── Build canonical request from all form values ──────────────────────────
+  private buildRequest(): OnboardingSubmitRequest {
     const p = this.personalForm.value;
     const a = this.addressForm.value;
     const w = this.w4Form.value;
@@ -520,9 +711,7 @@ export class OnboardingWizardComponent {
     const i = this.i9Form.value;
     const d = this.depositForm.value;
     const k = this.ackForm.value;
-
-    const request: OnboardingSubmitRequest = {
-      // Personal
+    return {
       firstName: p.firstName!,
       middleName: p.middleName || undefined,
       lastName: p.lastName!,
@@ -531,13 +720,11 @@ export class OnboardingWizardComponent {
       ssn: p.ssn!,
       email: p.email!,
       phone: p.phone!,
-      // Address
       street1: a.street1!,
       street2: a.street2 || undefined,
       city: a.city!,
       addressState: a.state as string,
       zipCode: a.zipCode!,
-      // W-4 — 3a + 3b combined into total dependents credit amount
       w4FilingStatus: w.filingStatus!,
       w4MultipleJobs: w.multipleJobs ?? false,
       w4ClaimDependentsAmount: this.w4Step3Total(),
@@ -545,12 +732,10 @@ export class OnboardingWizardComponent {
       w4Deductions: Number(w.deductions ?? 0),
       w4ExtraWithholding: Number(w.extraWithholding ?? 0),
       w4ExemptFromWithholding: w.exemptFromWithholding ?? false,
-      // State withholding
       stateFilingStatus: s.stateFilingStatus || undefined,
       stateAllowances: s.stateAllowances ?? undefined,
       stateAdditionalWithholding: s.stateAdditionalWithholding ?? undefined,
       stateExempt: s.stateExempt ?? undefined,
-      // I-9 citizenship
       i9CitizenshipStatus: i.citizenshipStatus!,
       i9AlienRegNumber: i.alienRegNumber || undefined,
       i9I94Number: i.i94Number || undefined,
@@ -564,7 +749,6 @@ export class OnboardingWizardComponent {
       i9PreparerCity: i.preparerCity || undefined,
       i9PreparerState: i.preparerState || undefined,
       i9PreparerZip: i.preparerZip || undefined,
-      // I-9 document verification
       i9DocumentChoice: i.documentChoice || undefined,
       i9ListAType: i.listAType || undefined,
       i9ListADocNumber: i.listADocNumber || undefined,
@@ -581,24 +765,29 @@ export class OnboardingWizardComponent {
       i9ListCAuthority: i.listCAuthority || undefined,
       i9ListCExpiry: i.listCExpiry ? toIsoDate(i.listCExpiry) ?? undefined : undefined,
       i9ListCFileAttachmentId: this.listCAttachment()?.id,
-      // Direct deposit
       bankName: d.bankName!,
       routingNumber: d.routingNumber!,
       accountNumber: d.accountNumber!,
       accountType: d.accountType!,
-      // Acknowledgments
+      voidedCheckFileAttachmentId: d.voidedCheckFileId ?? undefined,
       acknowledgeWorkersComp: k.workersComp ?? false,
       acknowledgeHandbook: k.handbook ?? false,
     };
+  }
 
+  // ── Step 1 of review flow: save data, get forms to sign ──────────────────
+  protected submit(): void {
+    if (this.submitting()) return;
     this.submitting.set(true);
-    this.service.submit(request).subscribe({
+    this.service.saveData(this.buildRequest()).subscribe({
       next: result => {
         this.submitting.set(false);
         localStorage.removeItem(DRAFT_KEY);
-        if (result.requiresSigning && result.signingUrls.length > 0) {
-          this.signingUrls.set(result.signingUrls);
-          this.currentSigningIndex.set(0);
+        if (result.formsToSign.length > 0) {
+          this.formsToSign.set(result.formsToSign);
+          this.currentFormIndex.set(0);
+          this.reviewPhase.set('preview');
+          this.loadPreviewForCurrentForm();
         } else {
           this.signingComplete.set(true);
         }
@@ -610,13 +799,111 @@ export class OnboardingWizardComponent {
     });
   }
 
-  protected advanceSigning(): void {
-    const next = this.currentSigningIndex() + 1;
-    if (next >= this.signingUrls().length) {
-      this.signingComplete.set(true);
-    } else {
-      this.currentSigningIndex.set(next);
+  // ── Step 2a: load PDF preview for the current form ────────────────────────
+  protected loadPreviewForCurrentForm(): void {
+    const form = this.currentForm();
+    if (!form) return;
+
+    if (!form.hasTemplate) {
+      // No PDF template configured — skip straight to signing
+      this.reviewPhase.set('signing');
+      this.loadSigningUrlForCurrentForm();
+      return;
     }
+
+    this.loadingPreview.set(true);
+    this.previewPdfBase64.set(null);
+    this.service.previewPdf({ formData: this.buildRequest(), formType: form.formType }).subscribe({
+      next: result => {
+        this.loadingPreview.set(false);
+        if (result.hasTemplate && result.pdfBase64) {
+          this.previewPdfBase64.set(result.pdfBase64);
+          this.reviewPhase.set('preview');
+        } else {
+          // Server says no template — go straight to signing
+          this.reviewPhase.set('signing');
+          this.loadSigningUrlForCurrentForm();
+        }
+      },
+      error: () => {
+        this.loadingPreview.set(false);
+        this.snackbar.error('Could not load PDF preview. Please try again.');
+      },
+    });
+  }
+
+  // ── Step 2b: create DocuSeal submission, show signing embed ───────────────
+  protected loadSigningUrlForCurrentForm(): void {
+    const form = this.currentForm();
+    if (!form) return;
+
+    this.signingFormInProgress.set(true);
+    this.currentSigningUrl.set(null);
+    this.service.signForm({ formData: this.buildRequest(), formType: form.formType }).subscribe({
+      next: result => {
+        this.signingFormInProgress.set(false);
+        this.currentSigningUrl.set(result.signingUrl);
+        this.reviewPhase.set('signing');
+        this.loadDocuSealScript(result.signingUrl);
+      },
+      error: () => {
+        this.signingFormInProgress.set(false);
+        this.snackbar.error('Could not create signing session. Please try again.');
+      },
+    });
+  }
+
+  protected proceedToSign(): void {
+    this.reviewPhase.set('signing');
+    this.loadSigningUrlForCurrentForm();
+  }
+
+  protected backToPreview(): void {
+    this.reviewPhase.set('preview');
+  }
+
+  protected advanceToNextForm(): void {
+    const next = this.currentFormIndex() + 1;
+    if (next >= this.formsToSign().length) {
+      this.signingComplete.set(true);
+      this.reviewPhase.set('idle');
+    } else {
+      this.currentFormIndex.set(next);
+      this.currentSigningUrl.set(null);
+      this.previewPdfBase64.set(null);
+      this.reviewPhase.set('preview');
+      this.loadPreviewForCurrentForm();
+    }
+  }
+
+  protected goBackToStep(formType: string | undefined): void {
+    const stepMap: Record<string, number> = { W4: 2, StateWithholding: 3, I9: 4 };
+    const step = formType ? (stepMap[formType] ?? 0) : 0;
+    this.formsToSign.set([]);
+    this.currentFormIndex.set(0);
+    this.reviewPhase.set('idle');
+    this.previewPdfBase64.set(null);
+    this.currentSigningUrl.set(null);
+    this.signedFormIndices.set(new Set());
+    this.router.navigate([], { relativeTo: this.route, queryParams: { step }, queryParamsHandling: 'merge' });
+  }
+
+  protected onDocuSealSubmit(): void {
+    const idx = this.currentFormIndex();
+    this.signedFormIndices.update((s: Set<number>) => new Set([...s, idx]));
+    this.advanceToNextForm();
+  }
+
+  private loadDocuSealScript(_signingUrl: string): void {
+    if (document.querySelector('script[data-docuseal-embed]')) return;
+    // DocuSeal is proxied through /docuseal/ — always load form.js from that
+    // same-origin path. Never derive the script origin from the signingUrl value,
+    // which would load a script from an arbitrary host.
+    const script = document.createElement('script');
+    script.src = '/docuseal/js/form.js';
+    script.setAttribute('data-docuseal-embed', '');
+    script.async = true;
+    document.head.appendChild(script);
   }
 
   protected goToDashboard(): void {

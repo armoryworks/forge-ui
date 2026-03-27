@@ -92,6 +92,10 @@
       }
 
       .mat-step-header {
+        // Disable direct step-header click navigation — users must use Back/Continue
+        // to keep URL state (currentStepIndex) in sync with the displayed step.
+        pointer-events: none;
+        cursor: default;
         padding: $sp-xxs $sp-sm;
         height: 40px;
         min-height: 0;
@@ -181,7 +185,7 @@
   &__signing {
     display: flex;
     flex-direction: column;
-    gap: $sp-lg;
+    gap: $sp-xl;
     padding: $sp-xl;
   }
 
@@ -221,11 +225,161 @@
     }
   }
 
-  &__signing-frame {
-    width: 100%;
-    height: 680px;
+  // ── Review card ───────────────────────────────────────────────────────────
+
+  &__review-card {
     border: $border-width solid var(--border);
     background: var(--surface);
+    padding: $sp-xl;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__review-card-header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding-bottom: $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+      color: var(--primary);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: $font-size-lg;
+      flex: 1;
+    }
+  }
+
+  &__review-signed-badge {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-sm;
+    color: var(--success);
+    font-weight: 600;
+
+    .material-icons-outlined { font-size: $icon-size-sm; }
+  }
+
+  &__review-summary {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__review-row {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-md;
+    font-size: $font-size-base;
+    padding: $sp-xs 0;
+    border-bottom: $border-width-thin solid var(--border);
+
+    span {
+      color: var(--text-secondary);
+      min-width: 220px;
+      flex-shrink: 0;
+    }
+
+    strong {
+      color: var(--text);
+    }
+  }
+
+  &__review-note {
+    font-size: $font-size-base;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__review-warn {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    background: var(--info-light);
+    padding: $sp-md;
+    border-left: $border-width solid var(--info);
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--info);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+  }
+
+  &__review-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: $sp-md;
+    padding-top: $sp-md;
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  // ── Sign phase ────────────────────────────────────────────────────────────
+
+  &__signing-doc {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__signing-doc-header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding-bottom: $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xl;
+      color: var(--primary);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: $font-size-lg;
+      flex: 1;
+    }
+  }
+
+  &__signing-doc-count {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+
+  &__docuseal-embed {
+    display: block;
+    width: 100%;
+    min-height: 680px;
+    border: $border-width solid var(--border);
+  }
+
+  &__signing-instruction {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    background: var(--warning-light);
+    padding: $sp-md;
+    border-left: $border-width solid var(--warning);
+    margin: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--warning);
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
   }
 
   &__signing-actions {
@@ -234,6 +388,7 @@
     justify-content: space-between;
     gap: $sp-lg;
     padding: $sp-md 0;
+    border-top: $border-width-thin solid var(--border);
   }
 
   &__signing-note {
@@ -243,11 +398,32 @@
     font-size: $font-size-sm;
     color: var(--text-secondary);
     margin: 0;
+    flex: 1;
+    justify-content: center;
 
     .material-icons-outlined {
       font-size: $icon-size-sm;
       color: var(--info);
     }
+  }
+
+  // ── PDF preview embed ──────────────────────────────────────────────────────
+  &__pdf-embed {
+    display: block;
+    width: 100%;
+    height: 680px;
+    border: $border-width solid var(--border);
+    background: #525659; // standard PDF-viewer chrome background
+  }
+
+  &__pdf-loading {
+    display: flex;
+    align-items: center;
+    gap: $sp-lg;
+    justify-content: center;
+    padding: $sp-3xl 0;
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
   }
 }
 
@@ -463,7 +639,7 @@
     gap: $sp-sm;
 
     app-input {
-      flex: 0 0 160px;
+      flex: 0 0 220px;
     }
 
     @include mobile {
