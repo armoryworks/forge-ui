@@ -10,17 +10,30 @@
     }
   </div>
 
-  @for (provider of providers(); track provider.id) {
+  @for (provider of providersWithLogos(); track provider.id) {
     <div class="integration-card"
          [class.integration-card--active]="provider.isConfigured"
          [class.integration-card--local]="provider.id === 'local' && provider.isConfigured">
       <div class="integration-card__header">
-        <span class="material-icons-outlined integration-card__icon">{{ provider.icon }}</span>
+        @if (provider.logoUrl && !logoErrors().includes(provider.id)) {
+          <img class="integration-card__logo" [src]="provider.logoUrl" [alt]="provider.name + ' logo'"
+               (error)="addLogoError(provider.id)" />
+        } @else {
+          <span class="material-icons-outlined integration-card__icon">{{ provider.icon }}</span>
+        }
         <div class="integration-card__info">
           <h3 class="integration-card__name">{{ provider.name }}</h3>
           <p class="integration-card__desc">{{ provider.description }}</p>
           @if (provider.id === 'quickbooks' && qbStatus()?.companyName) {
             <p class="integration-card__company">{{ qbStatus()!.companyName }}</p>
+          }
+          @if (provider.id === 'quickbooks' && showSandboxGuides() && qbIntegration()?.sandboxSteps?.length) {
+            <p class="integration-card__sandbox-hint">
+              <span class="material-icons-outlined">science</span>
+              <button class="link-btn" (click)="configureIntegration(qbIntegration()!)" aria-label="QuickBooks sandbox setup guide">
+                Sandbox setup guide
+              </button>
+            </p>
           }
         </div>
       </div>
@@ -141,7 +154,12 @@
     @for (integration of shippingIntegrations(); track integration.provider) {
       <div class="integration-card" [class.integration-card--active]="integration.isConfigured">
         <div class="integration-card__header">
-          <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
+          @if (integration.logoUrl && !logoErrors().includes(integration.provider)) {
+            <img class="integration-card__logo" [src]="integration.logoUrl" [alt]="integration.name + ' logo'"
+                 (error)="addLogoError(integration.provider)" />
+          } @else {
+            <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
+          }
           <div class="integration-card__info">
             <h3 class="integration-card__name">{{ integration.name }}</h3>
             <p class="integration-card__desc">{{ integration.description }}</p>
@@ -188,7 +206,12 @@
   @for (integration of serviceIntegrations(); track integration.provider) {
     <div class="integration-card" [class.integration-card--active]="integration.isConfigured">
       <div class="integration-card__header">
-        <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
+        @if (integration.logoUrl && !logoErrors().includes(integration.provider)) {
+          <img class="integration-card__logo" [src]="integration.logoUrl" [alt]="integration.name + ' logo'"
+               (error)="addLogoError(integration.provider)" />
+        } @else {
+          <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
+        }
         <div class="integration-card__info">
           <h3 class="integration-card__name">{{ integration.name }}</h3>
           <p class="integration-card__desc">{{ integration.description }}</p>

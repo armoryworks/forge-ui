@@ -1,4 +1,29 @@
 <app-dialog [title]="('integrationConfigDialog.configure' | translate) + ' ' + data.integration.name" width="520px" (closed)="close()">
+  @if (data.showSandboxGuides && data.integration.sandboxSteps && data.integration.sandboxSteps.length > 0) {
+    <div class="sandbox-guide">
+      <button class="sandbox-guide__toggle" (click)="toggleGuide()" [attr.aria-expanded]="guideExpanded()" aria-controls="sandbox-guide-steps">
+        <span class="material-icons-outlined">science</span>
+        <span>Sandbox / Test Environment Setup</span>
+        <span class="material-icons-outlined sandbox-guide__chevron" [class.sandbox-guide__chevron--open]="guideExpanded()">expand_more</span>
+      </button>
+      @if (guideExpanded()) {
+        <div id="sandbox-guide-steps" class="sandbox-guide__steps">
+          <ol>
+            @for (step of data.integration.sandboxSteps; track $index) {
+              <li>{{ step }}</li>
+            }
+          </ol>
+          @if (data.integration.sandboxUrl) {
+            <a class="sandbox-guide__link" [href]="data.integration.sandboxUrl" target="_blank" rel="noopener noreferrer">
+              <span class="material-icons-outlined">open_in_new</span>
+              Open {{ data.integration.name }} Developer Portal
+            </a>
+          }
+        </div>
+      }
+    </div>
+  }
+
   <div [formGroup]="form">
     @for (field of fields; track field.key) {
       @if (field.inputType === 'toggle') {
@@ -22,21 +47,26 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="test()" [disabled]="testing() || saving()" [attr.aria-label]="'integrationConfigDialog.testConnection' | translate">
-      @if (testing()) {
-        <span class="material-icons-outlined spin">sync</span>
-      } @else {
-        <span class="material-icons-outlined">cable</span>
-      }
-      {{ 'integrationConfigDialog.test' | translate }}
-    </button>
-    <span class="footer-spacer"></span>
-    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
-    <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="save()">
-      @if (saving()) {
-        <span class="material-icons-outlined spin">sync</span>
-      }
-      {{ 'common.save' | translate }}
-    </button>
+    @if (fields.length > 0) {
+      <button class="action-btn" (click)="test()" [disabled]="testing() || saving()" [attr.aria-label]="'integrationConfigDialog.testConnection' | translate">
+        @if (testing()) {
+          <span class="material-icons-outlined spin">sync</span>
+        } @else {
+          <span class="material-icons-outlined">cable</span>
+        }
+        {{ 'integrationConfigDialog.test' | translate }}
+      </button>
+      <span class="footer-spacer"></span>
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="save()">
+        @if (saving()) {
+          <span class="material-icons-outlined spin">sync</span>
+        }
+        {{ 'common.save' | translate }}
+      </button>
+    } @else {
+      <span class="footer-spacer"></span>
+      <button class="action-btn action-btn--primary" (click)="close()">{{ 'common.close' | translate }}</button>
+    }
   </div>
 </app-dialog>

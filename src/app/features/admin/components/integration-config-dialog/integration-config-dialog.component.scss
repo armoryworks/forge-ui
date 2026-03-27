@@ -1,5 +1,81 @@
 @use 'styles/variables' as *;
 
+.sandbox-guide {
+  margin-bottom: $sp-lg;
+  border: $border-width-thin solid var(--info);
+  background: var(--info-light);
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    width: 100%;
+    padding: $sp-md $sp-lg;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--info);
+    text-align: left;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+    }
+
+    span:not(.material-icons-outlined) {
+      flex: 1;
+    }
+  }
+
+  &__chevron {
+    transition: transform $transition-fast;
+
+    &--open {
+      transform: rotate(180deg);
+    }
+  }
+
+  &__steps {
+    padding: 0 $sp-lg $sp-lg;
+
+    ol {
+      margin: 0 0 $sp-md $sp-lg;
+      padding: 0;
+
+      li {
+        font-size: $font-size-sm;
+        color: var(--text);
+        line-height: 1.5;
+        margin-bottom: $sp-md;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+
+  &__link {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin-top: $sp-md;
+    font-size: $font-size-sm;
+    color: var(--info);
+    text-decoration: none;
+    font-weight: 500;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 .test-result {
   display: flex;
   align-items: center;

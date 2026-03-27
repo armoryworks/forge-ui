@@ -12,6 +12,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 export interface IntegrationConfigDialogData {
   integration: IntegrationStatus;
+  showSandboxGuides: boolean;
 }
 
 @Component({
@@ -32,6 +33,7 @@ export class IntegrationConfigDialogComponent {
   readonly saving = signal(false);
   readonly testing = signal(false);
   readonly testResult = signal<{ success: boolean; message: string } | null>(null);
+  readonly guideExpanded = signal(false);
 
   readonly form: FormGroup;
   readonly fields: IntegrationSettingField[];
@@ -44,6 +46,10 @@ export class IntegrationConfigDialogComponent {
       controls[field.key] = new FormControl(value);
     }
     this.form = new FormGroup(controls);
+  }
+
+  toggleGuide(): void {
+    this.guideExpanded.update(v => !v);
   }
 
   close(): void {

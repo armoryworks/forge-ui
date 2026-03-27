@@ -1,5 +1,20 @@
 @use 'styles/variables' as *;
 
+.link-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: inherit;
+  color: var(--info);
+  font-weight: 500;
+  text-decoration: underline;
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
 .integrations-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -20,6 +35,17 @@
   &__icon {
     font-size: $icon-size-xxl;
     color: var(--primary);
+    flex-shrink: 0;
+  }
+
+  &__logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: 4px;
+    background: #ffffff;
+    padding: $sp-sm;
   }
 
   &__name {
@@ -39,6 +65,19 @@
     color: var(--success);
     font-weight: 500;
     margin: $sp-xs 0 0;
+  }
+
+  &__sandbox-hint {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-xs;
+    color: var(--info);
+    margin: $sp-sm 0 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
   }
 
   &__actions {

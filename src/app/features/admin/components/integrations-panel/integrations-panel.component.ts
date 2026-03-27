@@ -1,5 +1,30 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 
+// Provider ID → Simple Icons CDN URL (open-source brand icon set, MIT licensed)
+// Format: https://cdn.simpleicons.org/{slug}/{hex-color}
+// Falls back to Material icon on load error.
+const LOGO_MAP: Record<string, string> = {
+  // Accounting
+  quickbooks: 'https://cdn.simpleicons.org/intuit/2CA01C',
+  xero:       'https://cdn.simpleicons.org/xero/13B5EA',
+  sage:       'https://cdn.simpleicons.org/sage/00D639',
+  netsuite:   'https://logos-world.net/wp-content/uploads/2021/09/NetSuite-Emblem.png',
+  zoho:       'https://cdn.simpleicons.org/zoho/E42527',
+  // Shipping
+  ups:        'https://cdn.simpleicons.org/ups/351C15',
+  fedex:      'https://cdn.simpleicons.org/fedex/4D148C',
+  dhl:        'https://cdn.simpleicons.org/dhl/D40511',
+  usps:       'https://cdn.simpleicons.org/usps/004B87',
+  // Services
+  minio:      'https://cdn.simpleicons.org/minio/C72E49',
+  ollama:     'https://cdn.simpleicons.org/ollama/000000',
+  docuseal:   'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/docuseal.svg',
+  // Direct brand assets (not in Simple Icons)
+  freshbooks: 'https://www.freshbooks.com/apple-icon1.png',
+  wave:       'https://cdn.prod.website-files.com/62446230dcb514b828a6e237/677ed61188695f2316217fc5_Wave-2_0-logo-fullcolour-rgb.svg',
+  stamps:     'https://www.stamps.com/wp-content/uploads/2025/01/Stamps-Primary-Lockup-Red-RGB.svg',
+};
+
 import { MatDialog } from '@angular/material/dialog';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -43,17 +68,34 @@ export class IntegrationsPanelComponent implements OnInit {
   readonly qbLoading = this.qbService.loading;
 
   readonly integrations = signal<IntegrationStatus[]>([]);
+  readonly showSandboxGuides = signal(false);
   readonly testingProvider = signal<string | null>(null);
+  readonly logoErrors = signal<string[]>([]);
+
+  readonly qbIntegration = computed(() => this.integrations().find(i => i.provider === 'quickbooks') ?? null);
+
+  /** Accounting providers enriched with logo URLs from the static map. */
+  readonly providersWithLogos = computed(() =>
+    this.providers().map(p => ({ ...p, logoUrl: LOGO_MAP[p.id] ?? null })),
+  );
 
   readonly shippingIntegrations = computed(() =>
-    this.integrations().filter(i => i.category === 'shipping'),
+    this.integrations()
+      .filter(i => i.category === 'shipping')
+      .map(i => ({ ...i, logoUrl: LOGO_MAP[i.provider] ?? i.logoUrl ?? null })),
   );
 
   readonly serviceIntegrations = computed(() =>
-    this.integrations().filter(i => i.category === 'service'),
+    this.integrations()
+      .filter(i => i.category === 'service')
+      .map(i => ({ ...i, logoUrl: LOGO_MAP[i.provider] ?? i.logoUrl ?? null })),
   );
 
   readonly isOAuthProvider = (id: string) => OAUTH_PROVIDERS.has(id);
+
+  protected addLogoError(id: string): void {
+    this.logoErrors.update(errs => [...errs, id]);
+  }
 
   ngOnInit(): void {
     this.accountingService.loadProviders();
@@ -64,7 +106,10 @@ export class IntegrationsPanelComponent implements OnInit {
 
   loadIntegrations(): void {
     this.adminService.getIntegrations().subscribe({
-      next: (data) => this.integrations.set(data),
+      next: (result) => {
+        this.integrations.set(result.integrations);
+        this.showSandboxGuides.set(result.showSandboxGuides);
+      },
     });
   }
 
@@ -106,7 +151,7 @@ export class IntegrationsPanelComponent implements OnInit {
       this.dialog
         .open(IntegrationConfigDialogComponent, {
           width: '520px',
-          data: { integration } satisfies IntegrationConfigDialogData,
+          data: { integration, showSandboxGuides: this.showSandboxGuides() } satisfies IntegrationConfigDialogData,
         })
         .afterClosed()
         .subscribe((saved: boolean) => {
@@ -119,7 +164,7 @@ export class IntegrationsPanelComponent implements OnInit {
     this.dialog
       .open(IntegrationConfigDialogComponent, {
         width: '520px',
-        data: { integration } satisfies IntegrationConfigDialogData,
+        data: { integration, showSandboxGuides: this.showSandboxGuides() } satisfies IntegrationConfigDialogData,
       })
       .afterClosed()
       .subscribe((saved: boolean) => {

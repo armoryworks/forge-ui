@@ -5,4 +5,5 @@ export interface AccountingProviderInfo {
   icon: string;
   requiresOAuth: boolean;
   isConfigured: boolean;
+  logoUrl?: string | null;
 }

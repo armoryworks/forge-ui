@@ -25,7 +25,7 @@ import { AiAssistant } from '../models/ai-assistant.model';
 import { AdminTeam, TeamMember, KioskTerminal } from '../models/admin-team.model';
 import { ComplianceFormTemplate, ComplianceFormSubmission, UserComplianceDetail } from '../../account/models/compliance-form.model';
 import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
-import { IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
+import { IntegrationSettingsResult, IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -373,8 +373,8 @@ export class AdminService {
   }
 
   // Integrations
-  getIntegrations(): Observable<IntegrationStatus[]> {
-    return this.http.get<IntegrationStatus[]>(`${environment.apiUrl}/admin/integrations`);
+  getIntegrations(): Observable<IntegrationSettingsResult> {
+    return this.http.get<IntegrationSettingsResult>(`${environment.apiUrl}/admin/integrations`);
   }
 
   updateIntegration(provider: string, settings: Record<string, string>): Observable<IntegrationStatus> {

@@ -15,6 +15,14 @@ export interface IntegrationStatus {
   isConfigured: boolean;
   fields: IntegrationSettingField[];
   category: 'service' | 'shipping' | 'accounting';
+  sandboxSteps: string[] | null;
+  sandboxUrl: string | null;
+  logoUrl: string | null;
+}
+
+export interface IntegrationSettingsResult {
+  showSandboxGuides: boolean;
+  integrations: IntegrationStatus[];
 }
 
 export interface TestIntegrationResult {
