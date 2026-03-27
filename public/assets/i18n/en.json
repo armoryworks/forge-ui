@@ -1405,6 +1405,9 @@
   "integrations": {
     "accounting": "Accounting",
     "standaloneMode": "Standalone Mode",
+    "standalone": "Standalone",
+    "active": "Active",
+    "available": "Available",
     "qbDescription": "Accounting, invoicing, and payment sync via Intuit",
     "connected": "Connected",
     "notConfigured": "Not Configured",
@@ -1414,11 +1417,16 @@
     "failed": "Failed",
     "lastSync": "Last Sync",
     "servicesAndIntegrations": "Services & Integrations",
+    "shippingCarriers": "Shipping Carriers",
+    "shippingNote": "All configured carriers are used simultaneously for rate comparison",
     "test": "Test",
     "disconnect": "Disconnect",
     "connect": "Connect",
     "configure": "Configure",
     "configured": "Configured",
+    "useStandalone": "Use Standalone",
+    "reconfigure": "Reconfigure",
+    "activate": "Activate",
     "connectionTestFailed": "Connection test failed"
   },
   "complianceTemplates": {

@@ -87,6 +87,17 @@ export class AccountingService {
     });
   }
 
+  connectOAuth(providerId: string): void {
+    this._loading.set(true);
+    this.http.get<{ authorizationUrl: string }>(`${environment.apiUrl}/${providerId}/authorize`).subscribe({
+      next: (result) => {
+        this._loading.set(false);
+        window.location.href = result.authorizationUrl;
+      },
+      error: () => this._loading.set(false),
+    });
+  }
+
   disconnect(): void {
     this._loading.set(true);
     this.http.post<void>(`${environment.apiUrl}/accounting/disconnect`, {}).subscribe({

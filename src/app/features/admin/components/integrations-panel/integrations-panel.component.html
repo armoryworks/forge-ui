@@ -1,77 +1,109 @@
 <div class="integrations-grid">
-  <!-- Accounting Providers Section -->
+  <!-- ─── Accounting Providers ─────────────────────────────────────────── -->
   <div class="section-header">
     <span class="material-icons-outlined">account_balance</span>
     <span>{{ 'integrations.accounting' | translate }}</span>
     @if (isConfigured()) {
-      <span class="active-badge">{{ accountingService.providerName() }}</span>
+      <span class="active-badge">{{ accountingService.providerName() }} — {{ 'integrations.active' | translate }}</span>
     } @else {
       <span class="standalone-badge">{{ 'integrations.standaloneMode' | translate }}</span>
     }
   </div>
 
-  <!-- QuickBooks card -->
-  <div class="integration-card" [class.integration-card--active]="activeProviderId() === 'quickbooks'">
-    <div class="integration-card__header">
-      <span class="material-icons-outlined integration-card__icon">account_balance</span>
-      <div class="integration-card__info">
-        <h3 class="integration-card__name">QuickBooks Online</h3>
-        <p class="integration-card__desc">{{ 'integrations.qbDescription' | translate }}</p>
-        @if (qbCompanyName()) {
-          <p class="integration-card__company">{{ qbCompanyName() }}</p>
-        }
-      </div>
-    </div>
-    <div class="integration-card__footer">
-      <span class="integration-card__status integration-card__status--{{ qbStatusLabel() }}">
-        @if (qbStatusLabel() === 'connected') {
-          <span class="material-icons-outlined">check_circle</span> {{ 'integrations.connected' | translate }}
-        } @else {
-          <span class="material-icons-outlined">settings</span> {{ 'integrations.notConfigured' | translate }}
-        }
-      </span>
-      <div class="integration-card__actions">
-        @if (qbStatusLabel() === 'connected') {
-          <button class="action-btn action-btn--sm" (click)="testConnection()" [disabled]="loading() || qbLoading()"
-                  [attr.aria-label]="'integrations.test' | translate">
-            {{ 'integrations.test' | translate }}
-          </button>
-          <button class="action-btn action-btn--sm" (click)="disconnectAccounting()" [disabled]="loading() || qbLoading()"
-                  [attr.aria-label]="'integrations.disconnect' | translate">
-            {{ 'integrations.disconnect' | translate }}
-          </button>
-        } @else {
-          <button class="action-btn action-btn--sm action-btn--primary" (click)="connectQuickBooks()" [disabled]="loading() || qbLoading()"
-                  [attr.aria-label]="'integrations.connect' | translate">
-            {{ 'integrations.connect' | translate }}
-          </button>
-        }
-      </div>
-    </div>
-  </div>
-
-  <!-- Other accounting providers (available but not yet implemented) -->
   @for (provider of providers(); track provider.id) {
-    @if (provider.id !== 'quickbooks') {
-      <div class="integration-card integration-card--coming-soon">
-        <div class="integration-card__header">
-          <span class="material-icons-outlined integration-card__icon">{{ provider.icon }}</span>
-          <div class="integration-card__info">
-            <h3 class="integration-card__name">{{ provider.name }}</h3>
-            <p class="integration-card__desc">{{ provider.description }}</p>
-          </div>
-        </div>
-        <div class="integration-card__footer">
-          <span class="integration-card__status integration-card__status--not_configured">
-            <span class="material-icons-outlined">schedule</span> {{ 'integrations.comingSoon' | translate }}
-          </span>
+    <div class="integration-card"
+         [class.integration-card--active]="provider.isConfigured"
+         [class.integration-card--local]="provider.id === 'local' && provider.isConfigured">
+      <div class="integration-card__header">
+        <span class="material-icons-outlined integration-card__icon">{{ provider.icon }}</span>
+        <div class="integration-card__info">
+          <h3 class="integration-card__name">{{ provider.name }}</h3>
+          <p class="integration-card__desc">{{ provider.description }}</p>
+          @if (provider.id === 'quickbooks' && qbStatus()?.companyName) {
+            <p class="integration-card__company">{{ qbStatus()!.companyName }}</p>
+          }
         </div>
       </div>
-    }
+
+      <div class="integration-card__footer">
+        <!-- Status indicator -->
+        <span class="integration-card__status"
+              [class.integration-card__status--connected]="provider.isConfigured"
+              [class.integration-card__status--not_configured]="!provider.isConfigured">
+          @if (provider.isConfigured) {
+            <span class="material-icons-outlined">check_circle</span>
+            {{ provider.id === 'local' ? ('integrations.standalone' | translate) : ('integrations.active' | translate) }}
+          } @else {
+            <span class="material-icons-outlined">{{ provider.id === 'local' ? 'storage' : 'radio_button_unchecked' }}</span>
+            {{ provider.id === 'local' ? ('integrations.available' | translate) : ('integrations.notConfigured' | translate) }}
+          }
+        </span>
+
+        <!-- Action buttons -->
+        <div class="integration-card__actions">
+          @if (provider.isConfigured && provider.id !== 'local') {
+            <!-- Active non-local provider: test + disconnect -->
+            <button class="action-btn action-btn--sm"
+                    (click)="testConnection()"
+                    [disabled]="loading()"
+                    [attr.aria-label]="('integrations.test' | translate) + ' ' + provider.name">
+              {{ 'integrations.test' | translate }}
+            </button>
+            <button class="action-btn action-btn--sm"
+                    (click)="disconnectAccounting()"
+                    [disabled]="loading()"
+                    [attr.aria-label]="'integrations.disconnect' | translate">
+              {{ 'integrations.disconnect' | translate }}
+            </button>
+          } @else if (!provider.isConfigured) {
+            @if (provider.id === 'local') {
+              <!-- Switch to standalone -->
+              <button class="action-btn action-btn--sm action-btn--primary"
+                      (click)="connectProvider('local')"
+                      [disabled]="loading()"
+                      aria-label="Use standalone mode">
+                {{ 'integrations.useStandalone' | translate }}
+              </button>
+            } @else if (isOAuthProvider(provider.id)) {
+              <!-- OAuth provider: configure credentials (not QB) + OAuth connect button -->
+              @if (provider.id !== 'quickbooks') {
+                <button class="action-btn action-btn--sm"
+                        (click)="configureProviderCredentials(provider.id)"
+                        [attr.aria-label]="('integrations.configure' | translate) + ' ' + provider.name">
+                  {{ isCredentialsConfigured(provider.id) ? ('integrations.reconfigure' | translate) : ('integrations.configure' | translate) }}
+                </button>
+              }
+              <button class="action-btn action-btn--sm action-btn--primary"
+                      (click)="connectProvider(provider.id)"
+                      [disabled]="loading() || (provider.id !== 'quickbooks' && !isCredentialsConfigured(provider.id))"
+                      [attr.aria-label]="('integrations.connect' | translate) + ' ' + provider.name">
+                <span class="material-icons-outlined">open_in_new</span>
+                {{ 'integrations.connect' | translate }}
+              </button>
+            } @else {
+              <!-- Credential-only provider: configure + activate -->
+              <button class="action-btn action-btn--sm"
+                      (click)="configureProviderCredentials(provider.id)"
+                      [attr.aria-label]="('integrations.configure' | translate) + ' ' + provider.name">
+                {{ isCredentialsConfigured(provider.id) ? ('integrations.reconfigure' | translate) : ('integrations.configure' | translate) }}
+              </button>
+              @if (isCredentialsConfigured(provider.id)) {
+                <button class="action-btn action-btn--sm action-btn--primary"
+                        (click)="connectProvider(provider.id)"
+                        [disabled]="loading()"
+                        [attr.aria-label]="('integrations.activate' | translate) + ' ' + provider.name">
+                  {{ 'integrations.activate' | translate }}
+                </button>
+              }
+            }
+          }
+        </div>
+      </div>
+    </div>
   }
 
-  <!-- Sync Status (when connected) -->
-  @if (isConfigured() && syncStatus()) {
+  <!-- Sync Status (when connected to a non-local provider) -->
+  @if (isConfigured() && activeProviderId() !== 'local' && syncStatus()) {
     <div class="sync-status-card">
       <div class="sync-status-card__header">
         <span class="material-icons-outlined">sync</span>
@@ -98,13 +130,62 @@
     </div>
   }
 
-  <!-- Services & Integrations -->
+  <!-- ─── Shipping Carriers ─────────────────────────────────────────────── -->
+  @if (shippingIntegrations().length > 0) {
+    <div class="section-header">
+      <span class="material-icons-outlined">local_shipping</span>
+      <span>{{ 'integrations.shippingCarriers' | translate }}</span>
+      <span class="section-note">{{ 'integrations.shippingNote' | translate }}</span>
+    </div>
+
+    @for (integration of shippingIntegrations(); track integration.provider) {
+      <div class="integration-card" [class.integration-card--active]="integration.isConfigured">
+        <div class="integration-card__header">
+          <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
+          <div class="integration-card__info">
+            <h3 class="integration-card__name">{{ integration.name }}</h3>
+            <p class="integration-card__desc">{{ integration.description }}</p>
+          </div>
+        </div>
+        <div class="integration-card__footer">
+          <span class="integration-card__status"
+                [class.integration-card__status--connected]="integration.isConfigured"
+                [class.integration-card__status--not_configured]="!integration.isConfigured">
+            @if (integration.isConfigured) {
+              <span class="material-icons-outlined">check_circle</span> {{ 'integrations.configured' | translate }}
+            } @else {
+              <span class="material-icons-outlined">settings</span> {{ 'integrations.notConfigured' | translate }}
+            }
+          </span>
+          <div class="integration-card__actions">
+            @if (integration.isConfigured) {
+              <button class="action-btn action-btn--sm" (click)="testIntegration(integration)"
+                      [disabled]="testingProvider() === integration.provider"
+                      [attr.aria-label]="('integrations.test' | translate) + ' ' + integration.name">
+                @if (testingProvider() === integration.provider) {
+                  <span class="material-icons-outlined spin">sync</span>
+                }
+                {{ 'integrations.test' | translate }}
+              </button>
+            }
+            <button class="action-btn action-btn--sm" [class.action-btn--primary]="!integration.isConfigured"
+                    (click)="configureIntegration(integration)"
+                    [attr.aria-label]="('integrations.configure' | translate) + ' ' + integration.name">
+              {{ 'integrations.configure' | translate }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- ─── Services & Integrations ──────────────────────────────────────── -->
   <div class="section-header">
     <span class="material-icons-outlined">extension</span>
     <span>{{ 'integrations.servicesAndIntegrations' | translate }}</span>
   </div>
 
-  @for (integration of integrations(); track integration.provider) {
+  @for (integration of serviceIntegrations(); track integration.provider) {
     <div class="integration-card" [class.integration-card--active]="integration.isConfigured">
       <div class="integration-card__header">
         <span class="material-icons-outlined integration-card__icon">{{ integration.icon }}</span>
@@ -114,7 +195,8 @@
         </div>
       </div>
       <div class="integration-card__footer">
-        <span class="integration-card__status" [class.integration-card__status--connected]="integration.isConfigured"
+        <span class="integration-card__status"
+              [class.integration-card__status--connected]="integration.isConfigured"
               [class.integration-card__status--not_configured]="!integration.isConfigured">
           @if (integration.isConfigured) {
             <span class="material-icons-outlined">check_circle</span> {{ 'integrations.configured' | translate }}

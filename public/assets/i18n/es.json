@@ -1389,6 +1389,9 @@
   "integrations": {
     "accounting": "Contabilidad",
     "standaloneMode": "Modo Independiente",
+    "standalone": "Independiente",
+    "active": "Activo",
+    "available": "Disponible",
     "qbDescription": "Contabilidad, facturación y sincronización de pagos vía Intuit",
     "connected": "Conectado",
     "notConfigured": "No Configurado",
@@ -1398,11 +1401,16 @@
     "failed": "Fallidos",
     "lastSync": "Última Sincronización",
     "servicesAndIntegrations": "Servicios e Integraciones",
+    "shippingCarriers": "Transportistas",
+    "shippingNote": "Todos los transportistas configurados se usan simultáneamente para comparar tarifas",
     "test": "Probar",
     "disconnect": "Desconectar",
     "connect": "Conectar",
     "configure": "Configurar",
     "configured": "Configurado",
+    "useStandalone": "Usar Independiente",
+    "reconfigure": "Reconfigurar",
+    "activate": "Activar",
     "connectionTestFailed": "La prueba de conexión falló"
   },
   "complianceTemplates": {

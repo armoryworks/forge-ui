@@ -14,6 +14,7 @@ export interface IntegrationStatus {
   icon: string;
   isConfigured: boolean;
   fields: IntegrationSettingField[];
+  category: 'service' | 'shipping' | 'accounting';
 }
 
 export interface TestIntegrationResult {

@@ -70,9 +70,18 @@
 
   &--active { border-color: var(--primary); }
 
-  &--coming-soon {
-    opacity: 0.6;
+  &--local {
+    background: var(--bg);
   }
+}
+
+.section-note {
+  font-size: $font-size-xs;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-transform: none;
+  letter-spacing: 0;
+  margin-left: $sp-sm;
 }
 
 .section-header {

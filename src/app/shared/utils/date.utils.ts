@@ -1,10 +1,13 @@
-export function toIsoDate(date: Date | null | undefined): string | null {
+export function toIsoDate(date: Date | string | null | undefined): string | null {
   if (!date) return null;
+  // Accept string (e.g. from localStorage draft restore) or Date
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return null;
   // Send full ISO 8601 UTC string — Postgres timestamptz requires UTC kind
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}T00:00:00Z`;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}T00:00:00Z`;
 }
 
 // ── Display format constants (project-wide standard) ──

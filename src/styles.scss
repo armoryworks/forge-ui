@@ -50,6 +50,11 @@ html {
     filled-with-label-container-padding-bottom: 0.25rem,
     container-text-size: 0.75rem,
     subscript-text-size: 0.625rem,
+    // ─── Label — same size as input text, bold ───
+    outlined-label-text-size: 0.75rem,
+    filled-label-text-size: 0.75rem,
+    outlined-label-text-weight: 600,
+    filled-label-text-weight: 600,
     // ─── Error colors ───
     outlined-error-outline-color: var(--error),
     outlined-error-focus-outline-color: var(--error),
@@ -99,6 +104,7 @@ html {
     margin-right: $sp-md;
     color: var(--text-muted);
   }
+
 }
 
 // ─── Dark Theme — Material tokens for dark mode ───
@@ -137,6 +143,10 @@ html[data-theme='dark'] {
     filled-with-label-container-padding-bottom: 0.25rem,
     container-text-size: 0.75rem,
     subscript-text-size: 0.625rem,
+    outlined-label-text-size: 0.75rem,
+    filled-label-text-size: 0.75rem,
+    outlined-label-text-weight: 600,
+    filled-label-text-weight: 600,
     outlined-error-outline-color: var(--error),
     outlined-error-focus-outline-color: var(--error),
     outlined-error-hover-outline-color: var(--error),
@@ -167,6 +177,13 @@ html[data-theme='dark'] {
   @include mat.autocomplete-overrides((
     container-shape: 0px,
   ));
+}
+
+// ─── Select Font Size — Match global 12px ───
+// .mat-mdc-select-value does not inherit the form-field container-text-size token.
+.mat-mdc-select-value,
+.mat-mdc-option {
+  font-size: $font-size-base;
 }
 
 // ─── Form Field Width — Fill Container ───

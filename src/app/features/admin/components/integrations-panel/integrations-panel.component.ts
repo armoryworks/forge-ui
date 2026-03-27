@@ -14,6 +14,9 @@ import {
   IntegrationConfigDialogData,
 } from '../integration-config-dialog/integration-config-dialog.component';
 
+// Providers that use OAuth (redirect to external auth page)
+const OAUTH_PROVIDERS = new Set(['quickbooks', 'xero', 'freshbooks', 'sage', 'zoho']);
+
 @Component({
   selector: 'app-integrations-panel',
   standalone: true,
@@ -39,16 +42,18 @@ export class IntegrationsPanelComponent implements OnInit {
   readonly qbStatus = this.qbService.status;
   readonly qbLoading = this.qbService.loading;
 
-  readonly qbStatusLabel = computed(() => {
-    const status = this.qbStatus();
-    if (!status) return 'not_configured' as const;
-    return status.isConnected ? 'connected' as const : 'not_configured' as const;
-  });
-
-  readonly qbCompanyName = computed(() => this.qbStatus()?.companyName ?? null);
-
   readonly integrations = signal<IntegrationStatus[]>([]);
   readonly testingProvider = signal<string | null>(null);
+
+  readonly shippingIntegrations = computed(() =>
+    this.integrations().filter(i => i.category === 'shipping'),
+  );
+
+  readonly serviceIntegrations = computed(() =>
+    this.integrations().filter(i => i.category === 'service'),
+  );
+
+  readonly isOAuthProvider = (id: string) => OAUTH_PROVIDERS.has(id);
 
   ngOnInit(): void {
     this.accountingService.loadProviders();
@@ -63,8 +68,28 @@ export class IntegrationsPanelComponent implements OnInit {
     });
   }
 
-  connectQuickBooks(): void {
-    this.qbService.connect();
+  /** Returns true if credentials have been saved for an accounting provider. */
+  isCredentialsConfigured(providerId: string): boolean {
+    return this.integrations().find(i => i.provider === providerId)?.isConfigured ?? false;
+  }
+
+  /**
+   * Initiates the connect/activate flow for an accounting provider.
+   * - local: set as active provider
+   * - quickbooks: QB OAuth redirect
+   * - xero/freshbooks/sage/zoho: OAuth redirect via AccountingService
+   * - netsuite/wave: set as active provider (credentials-only)
+   */
+  connectProvider(providerId: string): void {
+    if (providerId === 'local') {
+      this.accountingService.setActiveProvider('local');
+    } else if (providerId === 'quickbooks') {
+      this.qbService.connect();
+    } else if (OAUTH_PROVIDERS.has(providerId)) {
+      this.accountingService.connectOAuth(providerId);
+    } else {
+      this.accountingService.setActiveProvider(providerId);
+    }
   }
 
   disconnectAccounting(): void {
@@ -75,9 +100,18 @@ export class IntegrationsPanelComponent implements OnInit {
     this.accountingService.testConnection();
   }
 
-  selectProvider(providerId: string): void {
-    if (providerId === 'quickbooks') {
-      this.qbService.connect();
+  configureProviderCredentials(providerId: string): void {
+    const integration = this.integrations().find(i => i.provider === providerId);
+    if (integration) {
+      this.dialog
+        .open(IntegrationConfigDialogComponent, {
+          width: '520px',
+          data: { integration } satisfies IntegrationConfigDialogData,
+        })
+        .afterClosed()
+        .subscribe((saved: boolean) => {
+          if (saved) this.loadIntegrations();
+        });
     }
   }
 
