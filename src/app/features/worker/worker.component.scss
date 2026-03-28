@@ -64,7 +64,6 @@
   flex: 1;
   overflow-y: auto;
   padding: 0 $sp-lg $sp-xl;
-  @include custom-scrollbar;
 }
 
 .worker__task-list {

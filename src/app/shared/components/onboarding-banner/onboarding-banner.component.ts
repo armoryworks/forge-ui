@@ -6,6 +6,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../services/auth.service';
 import { LayoutService } from '../../services/layout.service';
 import { EmployeeProfileService } from '../../../features/account/services/employee-profile.service';
+import { OnboardingService } from '../../../features/onboarding/onboarding.service';
 
 @Component({
   selector: 'app-onboarding-banner',
@@ -18,10 +19,13 @@ import { EmployeeProfileService } from '../../../features/account/services/emplo
 export class OnboardingBannerComponent {
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(EmployeeProfileService);
+  private readonly onboardingService = inject(OnboardingService);
   private readonly layout = inject(LayoutService);
   private readonly router = inject(Router);
 
   private readonly dismissed = signal(false);
+  protected readonly confirmingBypass = signal(false);
+  protected readonly bypassing = signal(false);
 
   protected readonly visible = computed(() => {
     if (this.dismissed()) return false;
@@ -44,5 +48,24 @@ export class OnboardingBannerComponent {
 
   protected goToIncomplete(): void {
     this.router.navigate([this.profileService.firstIncompleteRoute()]);
+  }
+
+  protected promptBypass(): void {
+    this.confirmingBypass.set(true);
+  }
+
+  protected cancelBypass(): void {
+    this.confirmingBypass.set(false);
+  }
+
+  protected confirmBypass(): void {
+    this.bypassing.set(true);
+    this.onboardingService.bypass().subscribe({
+      next: () => {
+        this.profileService.load();
+        this.dismissed.set(true);
+      },
+      error: () => this.bypassing.set(false),
+    });
   }
 }

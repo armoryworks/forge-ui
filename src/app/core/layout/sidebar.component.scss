@@ -17,7 +17,6 @@
   overflow-y: auto;
   transition: width $transition-sidebar;
   padding: $sp-md 0;
-  @include custom-scrollbar;
 
   &--expanded {
     width: $sidebar-width-expanded;
@@ -153,4 +152,21 @@
 
 .sidebar__spacer {
   flex: 1;
+}
+
+.nav-item--sub {
+  .sidebar--expanded & {
+    padding-left: $sp-2xl;
+    height: 30px;
+    min-height: 30px;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+    color: var(--text-muted);
+  }
+
+  &.nav-item--active .material-icons-outlined {
+    color: var(--primary);
+  }
 }

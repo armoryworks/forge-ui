@@ -181,9 +181,21 @@ html[data-theme='dark'] {
 
 // ─── Select Font Size — Match global 12px ───
 // .mat-mdc-select-value does not inherit the form-field container-text-size token.
-.mat-mdc-select-value,
-.mat-mdc-option {
+.mat-mdc-select-value {
   font-size: $font-size-base;
+}
+
+// ─── Option Items — compact height + font for all dropdowns ───
+// Applies to mat-select panels, mat-autocomplete panels, and any other mat-option usage.
+// Material default min-height is 48px; we use 2rem (32px) to match form field density.
+.mat-mdc-option {
+  min-height: 2rem !important; // match $input-height — override MDC list item default (48px)
+  padding: 0 $sp-lg !important;
+  font-size: $font-size-base !important;
+
+  .mdc-list-item__primary-text {
+    font-size: $font-size-base !important;
+  }
 }
 
 // ─── Form Field Width — Fill Container ───
@@ -335,5 +347,33 @@ html[data-theme='dark'] {
     box-shadow: none !important;
 
     &:hover { color: var(--text) !important; }
+  }
+}
+
+// ─── Global Scrollbar ───
+// Chrome/Edge/Safari: only ::-webkit-scrollbar rules, NO scrollbar-color or
+// scrollbar-width. In Chrome 121+, either of those CSS Scrollbars spec
+// properties activates the overlay/auto-hide system even when
+// ::-webkit-scrollbar is also present. Keeping only webkit pseudo-elements
+// exclusively opts Chrome into classic always-visible scrollbar mode.
+//
+// Firefox: uses scrollbar-width + scrollbar-color (does not support ::-webkit-scrollbar).
+// We target Firefox via @supports using a Firefox-only property.
+
+*::-webkit-scrollbar        { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track  { background: var(--bg); }
+*::-webkit-scrollbar-thumb  {
+  background-color: var(--text-muted);
+  border-radius: 0;
+  border: 1px solid var(--bg);
+  &:hover  { background-color: var(--text-secondary); }
+  &:active { background-color: var(--text); }
+}
+
+// Firefox-only: @supports (-moz-appearance: none) is true only in Firefox
+@supports (-moz-appearance: none) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--text-muted) var(--bg);
   }
 }

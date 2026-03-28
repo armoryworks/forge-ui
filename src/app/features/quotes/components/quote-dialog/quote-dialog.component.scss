@@ -63,3 +63,32 @@
   gap: $sp-sm;
   align-items: end;
 }
+
+.tax-field,
+.price-field {
+  position: relative;
+}
+
+.tax-badge,
+.price-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #fff;
+  font-size: $font-size-xxs;
+  font-family: $font-family-mono;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px $sp-sm;
+  border-radius: 0 0 0 2px;
+  pointer-events: none;
+  line-height: $font-size-lg;
+}
+
+.tax-badge {
+  background: var(--success);
+}
+
+.price-badge {
+  background: var(--info);
+}

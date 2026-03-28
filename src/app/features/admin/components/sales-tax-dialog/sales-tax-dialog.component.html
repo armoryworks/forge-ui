@@ -12,13 +12,19 @@
         [attr.aria-label]="'salesTax.fieldCode' | translate" />
     </div>
 
-    <app-input
-      label="Rate (%)"
-      type="number"
-      formControlName="ratePercent"
-      [required]="true"
-      placeholder="e.g. 8.25"
-      [attr.aria-label]="'salesTax.fieldRate' | translate" />
+    <div class="dialog-row">
+      <app-select label="State" formControlName="stateCode" [options]="stateOptions"
+        aria-label="State code" />
+      <app-input
+        label="Rate (%)"
+        type="number"
+        formControlName="ratePercent"
+        [required]="true"
+        placeholder="e.g. 8.25"
+        [attr.aria-label]="'salesTax.fieldRate' | translate" />
+    </div>
+
+    <app-datepicker label="Effective From" formControlName="effectiveFrom" aria-label="Effective from date" />
 
     <app-textarea
       label="Description (optional)"

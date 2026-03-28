@@ -124,7 +124,6 @@
   gap: $sp-xs;
   max-height: 400px;
   overflow-y: auto;
-  @include custom-scrollbar(6px);
 }
 
 .member-row {

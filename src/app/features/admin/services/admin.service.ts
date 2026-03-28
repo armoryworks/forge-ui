@@ -139,6 +139,12 @@ export class AdminService {
     return this.http.delete<void>(`${environment.apiUrl}/sales-tax-rates/${id}`);
   }
 
+  getTaxRateForCustomer(customerId: number): Observable<SalesTaxRate | null> {
+    return this.http.get<SalesTaxRate | null>(
+      `${environment.apiUrl}/sales-tax-rates/for-customer/${customerId}`,
+    );
+  }
+
   getEmployeeDocuments(userId: number): Observable<EmployeeDocument[]> {
     return this.http.get<EmployeeDocument[]>(`${environment.apiUrl}/admin/users/${userId}/documents`);
   }

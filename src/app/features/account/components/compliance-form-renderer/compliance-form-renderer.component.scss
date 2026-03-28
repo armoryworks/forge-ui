@@ -105,8 +105,6 @@
   display: flex;
   flex-direction: column;
   gap: $sp-sm;
-
-  @include custom-scrollbar(6px);
 }
 
 .compliance-form__section {

@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { QuoteService } from '../../services/quote.service';
 import { CustomerService } from '../../../customers/services/customer.service';
 import { PartsService } from '../../../parts/services/parts.service';
+import { AdminService } from '../../../admin/services/admin.service';
 import { CustomerListItem } from '../../../customers/models/customer-list-item.model';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { CreateQuoteLineRequest } from '../../models/create-quote-line-request.model';
@@ -45,6 +46,7 @@ export class QuoteDialogComponent {
   private readonly quoteService = inject(QuoteService);
   private readonly customerService = inject(CustomerService);
   private readonly partsService = inject(PartsService);
+  private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -55,6 +57,12 @@ export class QuoteDialogComponent {
   protected readonly customers = signal<CustomerListItem[]>([]);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
+  /** True while the unit price reflects the part's list price and hasn't been manually edited. */
+  protected readonly priceIsDefault = signal(false);
+  /** True while the tax rate was auto-filled from the customer's state and hasn't been manually edited. */
+  protected readonly taxAutoFilled = signal(false);
+  /** Display label for the auto-filled tax rate (e.g. "CA 7.25%"). */
+  protected readonly taxAutoLabel = signal('');
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('quotes.selectCustomer') },
@@ -97,13 +105,62 @@ export class QuoteDialogComponent {
     this.customerService.getCustomers(undefined, true).subscribe({
       next: (list) => this.customers.set(list),
     });
-    this.partsService.getParts('Active').subscribe({
+    // Load all non-deleted parts regardless of status
+    this.partsService.getParts().subscribe({
       next: (list) => this.parts.set(list),
+    });
+
+    // Auto-fill tax rate from customer's state when customer is selected
+    this.form.controls.customerId.valueChanges.subscribe((customerId) => {
+      this.taxAutoFilled.set(false);
+      this.taxAutoLabel.set('');
+      if (customerId == null) return;
+      this.adminService.getTaxRateForCustomer(customerId).subscribe({
+        next: (rate) => {
+          if (rate == null) return;
+          const pct = +(rate.rate * 100).toFixed(4);
+          this.form.controls.taxRate.setValue(pct, { emitEvent: false });
+          this.taxAutoFilled.set(true);
+          this.taxAutoLabel.set(
+            rate.stateCode ? `${rate.stateCode} ${pct}%` : `Default ${pct}%`
+          );
+        },
+      });
+    });
+
+    // When tax rate is manually changed, clear the auto-fill indicator
+    this.form.controls.taxRate.valueChanges.subscribe(() => {
+      this.taxAutoFilled.set(false);
+      this.taxAutoLabel.set('');
+    });
+
+    // Pre-fill unit price from part's list price when a part is selected
+    this.lineForm.controls.partId.valueChanges.subscribe((partId) => {
+      this.onPartSelected(partId);
+    });
+
+    // When price is manually changed, clear the "list price" indicator
+    this.lineForm.controls.unitPrice.valueChanges.subscribe(() => {
+      this.priceIsDefault.set(false);
     });
   }
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  private onPartSelected(partId: number | null): void {
+    if (partId == null) {
+      this.priceIsDefault.set(false);
+      return;
+    }
+    const part = this.parts().find(p => p.id === partId);
+    if (part?.defaultPrice != null) {
+      this.lineForm.controls.unitPrice.setValue(part.defaultPrice, { emitEvent: false });
+      this.priceIsDefault.set(true);
+    } else {
+      this.priceIsDefault.set(false);
+    }
   }
 
   protected addLine(): void {
@@ -119,6 +176,7 @@ export class QuoteDialogComponent {
       unitPrice: f.unitPrice!,
     }]);
     this.lineForm.reset({ partId: null, quantity: 1, unitPrice: 0 });
+    this.priceIsDefault.set(false);
   }
 
   protected removeLine(index: number): void {
@@ -130,6 +188,7 @@ export class QuoteDialogComponent {
     this.saving.set(true);
 
     const f = this.form.getRawValue();
+    const taxRateDecimal = (f.taxRate ?? 0) / 100;
     const lineRequests: CreateQuoteLineRequest[] = this.lines().map(l => ({
       partId: l.partId,
       description: l.description,
@@ -140,7 +199,7 @@ export class QuoteDialogComponent {
     this.quoteService.createQuote({
       customerId: f.customerId!,
       expirationDate: f.expirationDate ? toIsoDate(f.expirationDate)! : undefined,
-      taxRate: f.taxRate ?? 0,
+      taxRate: taxRateDecimal,
       notes: f.notes || undefined,
       lines: lineRequests,
     }).subscribe({

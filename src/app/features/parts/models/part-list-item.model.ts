@@ -12,4 +12,5 @@ export interface PartListItem {
   material: string | null;
   bomEntryCount: number;
   createdAt: string;
+  defaultPrice?: number | null;
 }

@@ -53,6 +53,8 @@ export class PoDialogComponent {
   protected readonly vendors = signal<VendorResponse[]>([]);
   protected readonly parts = signal<PartListItem[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
+  /** True while the unit price reflects the part's list price and hasn't been manually edited. */
+  protected readonly priceIsDefault = signal(false);
 
   protected readonly vendorOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('purchaseOrders.selectVendor') },
@@ -96,10 +98,34 @@ export class PoDialogComponent {
     this.partsService.getParts().subscribe({
       next: (list) => this.parts.set(list),
     });
+
+    // Pre-fill unit price from part's list price when a part is selected
+    this.lineForm.controls.partId.valueChanges.subscribe((partId) => {
+      this.onPartSelected(partId);
+    });
+
+    // When price is manually changed, clear the "list price" indicator
+    this.lineForm.controls.unitPrice.valueChanges.subscribe(() => {
+      this.priceIsDefault.set(false);
+    });
   }
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  private onPartSelected(partId: number | null): void {
+    if (partId == null) {
+      this.priceIsDefault.set(false);
+      return;
+    }
+    const part = this.parts().find(p => p.id === partId);
+    if (part?.defaultPrice != null) {
+      this.lineForm.controls.unitPrice.setValue(part.defaultPrice, { emitEvent: false });
+      this.priceIsDefault.set(true);
+    } else {
+      this.priceIsDefault.set(false);
+    }
   }
 
   protected addLine(): void {
@@ -115,6 +141,7 @@ export class PoDialogComponent {
       unitPrice: f.unitPrice!,
     }]);
     this.lineForm.reset({ partId: null, orderedQuantity: 1, unitPrice: 0 });
+    this.priceIsDefault.set(false);
   }
 
   protected removeLine(index: number): void {

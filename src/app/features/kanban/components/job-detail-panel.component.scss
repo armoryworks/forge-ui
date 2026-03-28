@@ -85,7 +85,6 @@
 .panel__body {
   flex: 1; overflow-y: auto; padding: $sp-lg;
   display: flex; flex-direction: column; gap: $sp-lg;
-  @include custom-scrollbar;
 }
 
 .panel__title { font-size: $font-size-title; font-weight: 700; line-height: 1.3; }
@@ -178,7 +177,7 @@
 %search-results {
   position: absolute; top: 100%; left: 0; right: 0; background: var(--surface);
   border: $border-width-thin solid var(--border); border-top: none;
-  z-index: $z-dropdown; max-height: 200px; overflow-y: auto; @include custom-scrollbar;
+  z-index: $z-dropdown; max-height: 200px; overflow-y: auto;
 }
 %search-result {
   display: flex; align-items: center; gap: $sp-sm; width: 100%; padding: $sp-sm $sp-md;

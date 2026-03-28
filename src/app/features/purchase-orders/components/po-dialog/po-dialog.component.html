@@ -53,9 +53,14 @@
 
     <!-- Add Line Form -->
     <div class="add-line" [formGroup]="lineForm">
-      <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" />
+      <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
       <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
-      <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+      <div class="price-field">
+        <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+        @if (priceIsDefault()) {
+          <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
+        }
+      </div>
       <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
         <span class="material-icons-outlined">add</span>
         {{ 'common.add' | translate }}

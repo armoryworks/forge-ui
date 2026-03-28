@@ -17,6 +17,7 @@ import { FileAttachment } from '../../../shared/models/file.model';
 import { ProcessStep } from '../models/process-step.model';
 import { CreateProcessStepRequest } from '../models/create-process-step-request.model';
 import { UpdateProcessStepRequest } from '../models/update-process-step-request.model';
+import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 
 @Injectable({ providedIn: 'root' })
 export class PartsService {
@@ -114,5 +115,13 @@ export class PartsService {
       params = params.append('partIds', String(id));
     }
     return this.http.get<{ partId: number; thumbnailUrl: string | null }[]>(`${this.base}/thumbnails`, { params });
+  }
+
+  getPartPrices(partId: number): Observable<PartPrice[]> {
+    return this.http.get<PartPrice[]>(`${this.base}/${partId}/prices`);
+  }
+
+  addPartPrice(partId: number, request: AddPartPriceRequest): Observable<PartPrice> {
+    return this.http.post<PartPrice>(`${this.base}/${partId}/prices`, request);
   }
 }

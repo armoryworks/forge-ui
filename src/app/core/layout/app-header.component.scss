@@ -122,7 +122,6 @@
 .search-results__col {
   overflow-y: auto;
   max-height: 400px;
-  @include custom-scrollbar;
 
   &--ai {
     border-left: $border-width-thin solid var(--border);

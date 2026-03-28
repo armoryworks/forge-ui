@@ -41,7 +41,6 @@
 .shortcuts-dialog__body {
   padding: $sp-lg;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .shortcuts-group {

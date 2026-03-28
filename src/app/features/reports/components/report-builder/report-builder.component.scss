@@ -19,7 +19,6 @@
   gap: $sp-lg;
   overflow-y: auto;
   padding: $sp-md;
-  @include custom-scrollbar;
 }
 
 .builder__results {
@@ -48,7 +47,6 @@
   gap: $sp-sm;
   max-height: 200px;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .builder__column-check {

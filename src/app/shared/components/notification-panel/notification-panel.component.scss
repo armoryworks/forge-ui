@@ -60,7 +60,6 @@
 .notification-panel__list {
   flex: 1;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .notification-panel__empty {

@@ -44,7 +44,6 @@
   flex: 1;
   overflow-y: auto;
   padding: $sp-lg;
-  @include custom-scrollbar;
 }
 
 .side-panel__footer {

@@ -35,7 +35,6 @@ import { EmployeeProfileService } from './services/employee-profile.service';
     .account-layout__content {
       flex: 1;
       overflow-y: auto;
-      @include custom-scrollbar(6px);
     }
 
     @include mobile {

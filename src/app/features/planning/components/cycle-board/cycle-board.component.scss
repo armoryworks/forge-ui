@@ -109,7 +109,6 @@
     flex: 1;
     overflow-y: auto;
     padding: 0 $sp-lg $sp-lg;
-    @include custom-scrollbar;
     display: flex;
     flex-direction: column;
     gap: $sp-xs;

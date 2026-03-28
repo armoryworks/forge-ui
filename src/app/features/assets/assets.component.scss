@@ -28,7 +28,7 @@
 .detail-type { font-size: $font-size-xs; color: var(--text-muted); }
 
 .detail-body {
-  flex: 1; overflow: auto; @include custom-scrollbar;
+  flex: 1; overflow: auto;
   padding: $sp-lg; display: flex; flex-direction: column; gap: $sp-lg;
 }
 

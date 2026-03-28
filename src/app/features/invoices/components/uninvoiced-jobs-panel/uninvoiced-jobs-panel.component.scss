@@ -24,7 +24,6 @@
   flex-direction: column;
   max-height: 400px;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .uninvoiced-item {

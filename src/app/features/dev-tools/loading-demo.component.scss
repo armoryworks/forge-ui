@@ -7,7 +7,6 @@
   flex-direction: column;
   gap: $sp-xl;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .demo-section {

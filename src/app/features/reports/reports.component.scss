@@ -49,7 +49,6 @@
 .reports-main {
   flex: 1; min-width: 0; padding: $sp-lg; overflow-y: auto;
   display: flex; flex-direction: column; gap: $sp-lg;
-  @include custom-scrollbar;
 }
 
 .report-header {

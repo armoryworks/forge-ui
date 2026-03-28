@@ -121,7 +121,6 @@
 .tree-content {
   flex: 1;
   overflow: auto;
-  @include custom-scrollbar;
   padding: $sp-sm 0;
 }
 
@@ -167,7 +166,6 @@
   flex-direction: column;
   min-height: 0;
   overflow: auto;
-  @include custom-scrollbar;
 }
 
 .detail-header {

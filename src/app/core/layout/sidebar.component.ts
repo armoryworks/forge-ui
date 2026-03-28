@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { filter, map } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -20,8 +22,17 @@ import { NavItem } from '../../shared/models/nav-item.model';
 export class SidebarComponent {
   private readonly auth = inject(AuthService);
   protected readonly layout = inject(LayoutService);
+  private readonly router = inject(Router);
 
   protected readonly collapsed = computed(() => !this.layout.sidebarExpanded());
+
+  protected readonly isAdminRoute = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map(() => this.router.url.startsWith('/admin')),
+    ),
+    { initialValue: this.router.url.startsWith('/admin') },
+  );
 
   private readonly allNavGroups: NavGroup[] = [
     {
@@ -77,9 +88,31 @@ export class SidebarComponent {
   private readonly allBottomItems: NavGroup = {
     items: [
       { icon: 'storefront', label: 'Shop Floor', i18nKey: 'nav.shopFloor', route: '/worker', allowedRoles: ['Admin', 'Manager'] },
-      { icon: 'settings', label: 'Admin', i18nKey: 'nav.admin', route: '/admin', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+      {
+        icon: 'settings', label: 'Admin', i18nKey: 'nav.admin', route: '/admin', allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
+        children: [
+          { icon: 'people', label: 'Users', i18nKey: 'admin.tabs.users', route: '/admin/users', allowedRoles: ['Admin'] },
+          { icon: 'route', label: 'Track Types', i18nKey: 'admin.tabs.trackTypes', route: '/admin/track-types', allowedRoles: ['Admin'] },
+          { icon: 'dataset', label: 'Ref Data', i18nKey: 'admin.tabs.referenceData', route: '/admin/reference-data', allowedRoles: ['Admin'] },
+          { icon: 'translate', label: 'Terminology', i18nKey: 'admin.tabs.terminology', route: '/admin/terminology', allowedRoles: ['Admin'] },
+          { icon: 'settings', label: 'Settings', i18nKey: 'admin.tabs.settings', route: '/admin/settings', allowedRoles: ['Admin'] },
+          { icon: 'hub', label: 'Integrations', i18nKey: 'admin.tabs.integrations', route: '/admin/integrations', allowedRoles: ['Admin'] },
+          { icon: 'smart_toy', label: 'AI Assistants', i18nKey: 'admin.tabs.aiAssistants', route: '/admin/ai-assistants', allowedRoles: ['Admin'] },
+          { icon: 'groups', label: 'Teams', i18nKey: 'admin.tabs.teams', route: '/admin/teams', allowedRoles: ['Admin'] },
+          { icon: 'percent', label: 'Sales Tax', i18nKey: 'admin.tabs.salesTax', route: '/admin/sales-tax', allowedRoles: ['Admin'] },
+          { icon: 'manage_search', label: 'Audit Log', i18nKey: 'admin.tabs.auditLog', route: '/admin/audit-log', allowedRoles: ['Admin'] },
+          { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
+          { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        ],
+      },
     ],
   };
+
+  protected readonly adminChildren = computed(() => {
+    const admin = this.allBottomItems.items.find(i => i.route === '/admin');
+    if (!admin?.children) return [];
+    return admin.children.filter(c => this.isAllowed(c));
+  });
 
   protected readonly navGroups = computed(() => this.filterGroups(this.allNavGroups));
   protected readonly bottomItems = computed(() => this.filterGroup(this.allBottomItems));

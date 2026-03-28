@@ -65,7 +65,6 @@
   &__list {
     flex: 1;
     overflow-y: auto;
-    @include custom-scrollbar;
     padding: $sp-sm;
     display: flex;
     flex-direction: column;

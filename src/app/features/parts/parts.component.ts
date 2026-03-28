@@ -1,4 +1,4 @@
-import { DecimalPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -42,6 +42,9 @@ import { ProcessPlanComponent } from './components/process-plan/process-plan.com
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
 import { BomTreeComponent } from './components/bom-tree/bom-tree.component';
+import { PartPrice } from './models/part-price.model';
+import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
+import { toIsoDate } from '../../shared/utils/date.utils';
 
 type ViewMode = 'table' | 'cards';
 type BomViewMode = 'table' | 'tree';
@@ -50,9 +53,9 @@ type BomViewMode = 'table' | 'tree';
   selector: 'app-parts',
   standalone: true,
   imports: [
-    DecimalPipe, ReactiveFormsModule, TranslatePipe,
+    CurrencyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
-    InputComponent, SelectComponent, TextareaComponent,
+    InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
     EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
     ProcessPlanComponent, BarcodeInfoComponent, MatTooltipModule,
@@ -210,6 +213,23 @@ export class PartsComponent {
 
   protected readonly partStatuses: PartStatus[] = ['Active', 'Draft', 'Prototype', 'Obsolete'];
 
+  // ── Pricing ──
+  protected readonly partPrices = signal<PartPrice[]>([]);
+  protected readonly priceSaving = signal(false);
+
+  protected readonly currentPrice = computed(() =>
+    this.partPrices().find(p => p.isCurrent) ?? null
+  );
+  protected readonly priceHistory = computed(() =>
+    this.partPrices().filter(p => !p.isCurrent).slice(0, 5)
+  );
+
+  protected readonly priceForm = new FormGroup({
+    unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
+    effectiveFrom: new FormControl<Date | null>(new Date()),
+    notes: new FormControl(''),
+  });
+
   // ── Accounting Link Dialog ──
   protected readonly showLinkDialog = signal(false);
   protected readonly accountingItems = signal<AccountingItem[]>([]);
@@ -259,6 +279,8 @@ export class PartsComponent {
     this.detailTab.set('info');
     this.partFiles.set([]);
     this.inventorySummary.set(null);
+    this.partPrices.set([]);
+    this.priceForm.reset({ unitPrice: null, effectiveFrom: new Date(), notes: '' });
     this.partsService.getPartById(part.id).subscribe({
       next: (detail) => {
         this.selectedPart.set(detail);
@@ -268,6 +290,9 @@ export class PartsComponent {
         });
         this.partsService.getPartInventorySummary(detail.id).subscribe({
           next: (summary) => this.inventorySummary.set(summary),
+        });
+        this.partsService.getPartPrices(detail.id).subscribe({
+          next: (prices) => this.partPrices.set(prices),
         });
       },
       error: () => this.detailLoading.set(false),
@@ -351,6 +376,31 @@ export class PartsComponent {
         },
       });
     }
+  }
+
+  protected addPrice(): void {
+    if (this.priceForm.invalid) return;
+    const part = this.selectedPart();
+    if (!part) return;
+    this.priceSaving.set(true);
+    const f = this.priceForm.getRawValue();
+    const request = {
+      unitPrice: f.unitPrice!,
+      effectiveFrom: f.effectiveFrom ? toIsoDate(f.effectiveFrom) ?? undefined : undefined,
+      notes: f.notes || undefined,
+    };
+    this.partsService.addPartPrice(part.id, request).subscribe({
+      next: () => {
+        this.priceSaving.set(false);
+        this.priceForm.reset({ unitPrice: null, effectiveFrom: new Date(), notes: '' });
+        this.partsService.getPartPrices(part.id).subscribe({
+          next: (prices) => this.partPrices.set(prices),
+        });
+        this.loadParts(); // refresh defaultPrice in the list
+        this.snackbar.success('Price updated');
+      },
+      error: () => this.priceSaving.set(false),
+    });
   }
 
   protected updatePartStatus(status: PartStatus): void {

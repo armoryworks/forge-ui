@@ -73,7 +73,6 @@
   min-height: 60px;
   background: var(--surface);
   box-shadow: inset 0 0 0 2px var(--col-tint, transparent);
-  @include custom-scrollbar;
 }
 
 .column__empty {

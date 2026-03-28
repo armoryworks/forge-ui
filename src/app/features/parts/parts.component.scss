@@ -103,13 +103,56 @@
   &__icon { font-size: $icon-size-sm; }
 }
 .tab-badge { display: inline-flex; align-items: center; justify-content: center; min-width: $icon-size-sm; height: $icon-size-sm; padding: 0 $sp-xs; font-size: $font-size-xxs; background: var(--primary-light); color: var(--primary); border-radius: $border-radius; }
-.detail-body { flex: 1; overflow: auto; @include custom-scrollbar; padding: $sp-lg; }
+.detail-body { flex: 1; overflow: auto; padding: $sp-lg; }
 
 // ─── Info ───
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: $sp-lg; }
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
 .info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
 .info-value { font-size: $font-size-sm; }
+// ─── Pricing ───
+.pricing-section {
+  margin-top: $sp-xl;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.pricing-section__header { @include flex-between; align-items: center; }
+
+.pricing-current {
+  display: flex;
+  align-items: baseline;
+  gap: $sp-md;
+
+  &__value { font-size: $font-size-lg; font-weight: 700; font-family: $font-family-mono; color: var(--text); }
+  &__since { font-size: $font-size-xs; color: var(--text-muted); }
+}
+
+.pricing-add {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-sm;
+  align-items: end;
+
+  &__btn { white-space: nowrap; align-self: end; }
+}
+
+.price-history {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.price-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th, td { padding: $sp-xs $sp-sm; text-align: left; border-bottom: $border-width-thin solid var(--border); }
+  th { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+}
+
 .status-actions { margin-top: $sp-xl; display: flex; flex-direction: column; gap: $sp-md; }
 .status-btn-group { display: flex; gap: $sp-sm; }
 .status-btn { @include uppercase-label($font-size-xxs, 0.5px, 600); padding: $sp-sm $sp-md; border: $border-width-thin solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; border-radius: $border-radius; font-family: $font-family-primary; &:hover { color: var(--text); } &--active { &.status-btn--active { background: var(--success-light); border-color: var(--success); color: var(--success); } &.status-btn--draft { background: var(--accent-light); border-color: var(--accent); color: var(--accent); } &.status-btn--obsolete { background: var(--error-light); border-color: var(--error); color: var(--error); } } }
@@ -179,7 +222,7 @@
 }
 
 // ─── Link Dialog Items ───
-.accounting-items-list { display: flex; flex-direction: column; gap: $sp-xs; max-height: 400px; overflow-y: auto; @include custom-scrollbar; }
+.accounting-items-list { display: flex; flex-direction: column; gap: $sp-xs; max-height: 400px; overflow-y: auto; }
 
 .accounting-item-row {
   display: flex; align-items: center; justify-content: space-between; gap: $sp-md;
@@ -194,18 +237,33 @@
   &__price { font-size: $font-size-sm; font-weight: 700; font-family: $font-family-mono; flex-shrink: 0; }
 }
 
-// ─── Mobile ───
-@include mobile {
-  .parts-layout {
-    flex-direction: column;
+// ─── Responsive: overlay mode on sub-desktop viewports ───
+.detail-backdrop { display: none; }
+
+@media (max-width: #{$breakpoint-desktop - 1px}) {
+  .detail-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: $backdrop-color;
+    z-index: $z-dialog - 1;
+    cursor: pointer;
   }
 
   .detail-panel {
-    width: 100%;
-    border-left: none;
-    border-top: $border-width-thin solid var(--border);
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: $z-dialog;
+    width: min(600px, 100vw);
+    border-left: $border-width-thin solid var(--border);
+    box-shadow: $shadow-panel;
   }
+}
 
+// ─── Mobile ───
+@include mobile {
   .info-grid {
     grid-template-columns: 1fr;
   }

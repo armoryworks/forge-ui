@@ -1,65 +1,7 @@
 <app-page-header [title]="pageTitle()" [subtitle]="pageSubtitle()" helpTourId="admin" />
 
 <div class="admin-content">
-  <!-- Tabs -->
-  <div class="tab-bar">
-    @if (isAdmin()) {
-      <button class="tab" [class.tab--active]="activeTab() === 'users'" (click)="switchTab('users')">
-        <span class="material-icons-outlined">people</span>
-        {{ 'admin.tabs.users' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'track-types'" (click)="switchTab('track-types')">
-        <span class="material-icons-outlined">route</span>
-        {{ 'admin.tabs.trackTypes' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'reference-data'" (click)="switchTab('reference-data')">
-        <span class="material-icons-outlined">dataset</span>
-        {{ 'admin.tabs.referenceData' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'terminology'" (click)="switchTab('terminology')">
-        <span class="material-icons-outlined">translate</span>
-        {{ 'admin.tabs.terminology' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
-        <span class="material-icons-outlined">settings</span>
-        {{ 'admin.tabs.settings' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'integrations'" (click)="switchTab('integrations')">
-        <span class="material-icons-outlined">hub</span>
-        {{ 'admin.tabs.integrations' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'ai-assistants'" (click)="switchTab('ai-assistants')">
-        <span class="material-icons-outlined">smart_toy</span>
-        {{ 'admin.tabs.aiAssistants' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'teams'" (click)="switchTab('teams')">
-        <span class="material-icons-outlined">groups</span>
-        {{ 'admin.tabs.teams' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'sales-tax'" (click)="switchTab('sales-tax')"
-        [attr.aria-label]="'admin.tabs.salesTax' | translate">
-        <span class="material-icons-outlined">percent</span>
-        {{ 'admin.tabs.salesTax' | translate }}
-      </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'audit-log'" (click)="switchTab('audit-log')"
-        aria-label="Audit Log">
-        <span class="material-icons-outlined">manage_search</span>
-        Audit Log
-      </button>
-    }
-    @if (isManagerOrAdmin()) {
-      <button class="tab" [class.tab--active]="activeTab() === 'training'" (click)="switchTab('training')">
-        <span class="material-icons-outlined">school</span>
-        {{ 'admin.tabs.training' | translate }}
-      </button>
-    }
-    <button class="tab" [class.tab--active]="activeTab() === 'compliance'" (click)="switchTab('compliance')">
-      <span class="material-icons-outlined">fact_check</span>
-      {{ 'admin.tabs.compliance' | translate }}
-    </button>
-  </div>
-
-  <div [appLoadingBlock]="loading()">
+  <div class="admin-body" [appLoadingBlock]="loading()">
     <!-- Users Tab -->
     @if (activeTab() === 'users') {
       <div class="tab-panel">

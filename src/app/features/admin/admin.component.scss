@@ -18,6 +18,14 @@
   overflow: hidden;
 }
 
+.admin-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+
 .panel-header__count {
   @include uppercase-label($font-size-xs, 0.5px, 600);
   color: var(--text-muted);
@@ -84,7 +92,6 @@
 .accordion-list {
   flex: 1;
   overflow: auto;
-  @include custom-scrollbar;
   padding: 0 $sp-lg $sp-lg;
 }
 

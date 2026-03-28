@@ -7,6 +7,8 @@ import {
   signal,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, ReactiveFormsModule, FormControl } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { startWith } from 'rxjs';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -42,9 +44,14 @@ export class AutocompleteComponent implements ControlValueAccessor {
   protected readonly disabled = signal(false);
   private selectedValue: unknown = null;
 
+  private readonly searchValue = toSignal(
+    this.searchControl.valueChanges.pipe(startWith('')),
+    { initialValue: '' },
+  );
+
   protected readonly filteredOptions = computed(() => {
     const all = this.options();
-    const search = this.searchControl.value ?? '';
+    const search = this.searchValue() ?? '';
     const display = this.displayField();
     const min = this.minChars();
 

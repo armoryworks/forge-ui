@@ -1,19 +1,45 @@
 @if (visible()) {
   <div class="onboarding-banner" role="alert" aria-live="polite">
-    <span class="material-icons-outlined onboarding-banner__icon">warning</span>
-    <span class="onboarding-banner__text">
-      {{ 'onboarding.completeProfile' | translate }} &mdash;
-      @if (incompleteCount() > 0) {
-        {{ incompleteCount() }} {{ incompleteCount() === 1 ? ('onboarding.itemRemaining' | translate) : ('onboarding.itemsRemaining' | translate) }}
-      } @else {
-        {{ 'onboarding.actionRequired' | translate }}
-      }
-    </span>
-    <button class="action-btn action-btn--sm onboarding-banner__action" (click)="goToIncomplete()">
-      {{ 'onboarding.completeNow' | translate }}
-    </button>
-    <button class="icon-btn onboarding-banner__dismiss" (click)="dismiss()" aria-label="Dismiss onboarding banner" matTooltip="Dismiss" matTooltipPosition="above">
-      <span class="material-icons-outlined">close</span>
-    </button>
+    @if (confirmingBypass()) {
+      <span class="material-icons-outlined onboarding-banner__icon onboarding-banner__icon--warn">help_outline</span>
+      <span class="onboarding-banner__text">
+        Mark yourself as onboarded? Your pending paperwork won't be completed — HR may still require it.
+      </span>
+      <button class="action-btn action-btn--sm onboarding-banner__action"
+              [disabled]="bypassing()"
+              (click)="confirmBypass()"
+              aria-label="Confirm mark as onboarded">
+        @if (bypassing()) {
+          <span class="material-icons-outlined spin">sync</span>
+        }
+        Yes, mark as onboarded
+      </button>
+      <button class="action-btn action-btn--sm onboarding-banner__action" (click)="cancelBypass()">
+        Cancel
+      </button>
+    } @else {
+      <span class="material-icons-outlined onboarding-banner__icon">warning</span>
+      <span class="onboarding-banner__text">
+        {{ 'onboarding.completeProfile' | translate }} &mdash;
+        @if (incompleteCount() > 0) {
+          {{ incompleteCount() }} {{ incompleteCount() === 1 ? ('onboarding.itemRemaining' | translate) : ('onboarding.itemsRemaining' | translate) }}
+        } @else {
+          {{ 'onboarding.actionRequired' | translate }}
+        }
+      </span>
+      <button class="action-btn action-btn--sm onboarding-banner__action" (click)="goToIncomplete()">
+        {{ 'onboarding.completeNow' | translate }}
+      </button>
+      <button class="action-btn action-btn--sm onboarding-banner__action--bypass"
+              (click)="promptBypass()"
+              matTooltip="Skip the onboarding wizard and mark yourself as complete"
+              matTooltipPosition="above"
+              aria-label="Skip onboarding">
+        Skip onboarding
+      </button>
+      <button class="icon-btn onboarding-banner__dismiss" (click)="dismiss()" aria-label="Dismiss onboarding banner" matTooltip="Dismiss" matTooltipPosition="above">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    }
   </div>
 }

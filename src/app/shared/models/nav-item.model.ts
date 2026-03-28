@@ -6,4 +6,5 @@ export interface NavItem {
   badge?: number;
   shortcut?: string[];
   allowedRoles?: string[];
+  children?: NavItem[];
 }

@@ -189,4 +189,11 @@ export class OnboardingService {
       tap(() => this.loadStatus()),
     );
   }
+
+  /** Self-certify onboarding complete without going through the wizard. */
+  bypass(): Observable<void> {
+    return this.http.post<void>(`${this.base}/bypass`, null).pipe(
+      tap(() => this.loadStatus()),
+    );
+  }
 }

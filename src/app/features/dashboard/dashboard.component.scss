@@ -153,7 +153,6 @@
   min-height: 0;
   overflow-y: auto;
   padding: $sp-sm;
-  @include custom-scrollbar;
 }
 
 // ─── KPIs Row ───

@@ -76,7 +76,6 @@
 .detail-body {
   flex: 1;
   overflow: auto;
-  @include custom-scrollbar;
   padding: $sp-lg;
   display: flex;
   flex-direction: column;
@@ -161,7 +160,6 @@
   overflow-x: auto;
   overflow-y: hidden;
   align-items: flex-start;
-  @include custom-scrollbar($width: 6px);
 }
 
 // ─── Pipeline Column ───

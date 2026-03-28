@@ -162,7 +162,6 @@
   overflow-x: auto;
   overflow-y: hidden;
   min-height: 0;
-  @include custom-scrollbar;
 }
 
 .page-error {
@@ -273,7 +272,6 @@
   position: relative;
   isolation: isolate;
   padding: 0 $sp-lg $sp-lg;
-  @include custom-scrollbar;
 
   &__corner {
     position: sticky;

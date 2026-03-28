@@ -9,7 +9,6 @@
 
 .virtual-scroll-list {
   height: 100%;
-  @include custom-scrollbar;
 }
 
 .virtual-scroll-list__item {

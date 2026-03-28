@@ -32,6 +32,22 @@
   }
 }
 
+.onboarding-banner__action--bypass {
+  background: none !important;
+  color: var(--text-secondary) !important;
+  border: $border-width-thin solid var(--border) !important;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--text) !important;
+    border-color: var(--text-secondary) !important;
+  }
+}
+
+.onboarding-banner__icon--warn {
+  color: var(--text-secondary);
+}
+
 .onboarding-banner__dismiss {
   color: var(--text-secondary);
 

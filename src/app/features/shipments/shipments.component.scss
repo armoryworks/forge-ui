@@ -62,7 +62,6 @@
 .detail-body {
   flex: 1;
   overflow: auto;
-  @include custom-scrollbar;
   padding: $sp-lg;
   display: flex;
   flex-direction: column;

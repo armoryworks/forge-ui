@@ -39,6 +39,7 @@
     <a class="nav-item"
        [routerLink]="item.route"
        routerLinkActive="nav-item--active"
+       [routerLinkActiveOptions]="{ exact: false }"
        [title]="item.i18nKey! | translate"
        (click)="onNavClick()">
       <span class="material-icons-outlined">{{ item.icon }}</span>
@@ -46,5 +47,17 @@
         <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
       }
     </a>
+    @if (!collapsed() && item.children?.length && isAdminRoute()) {
+      @for (child of adminChildren(); track child.route) {
+        <a class="nav-item nav-item--sub"
+           [routerLink]="child.route"
+           routerLinkActive="nav-item--active"
+           [title]="child.i18nKey! | translate"
+           (click)="onNavClick()">
+          <span class="material-icons-outlined">{{ child.icon }}</span>
+          <span class="nav-item__label">{{ child.i18nKey! | translate }}</span>
+        </a>
+      }
+    }
   }
 </aside>

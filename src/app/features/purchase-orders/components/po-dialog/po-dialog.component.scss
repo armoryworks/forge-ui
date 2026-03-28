@@ -58,3 +58,23 @@
   gap: $sp-sm;
   align-items: end;
 }
+
+.price-field {
+  position: relative;
+}
+
+.price-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: var(--info);
+  color: #fff;
+  font-size: $font-size-xxs;
+  font-family: $font-family-mono;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px $sp-sm;
+  border-radius: 0 0 0 2px;
+  pointer-events: none;
+  line-height: $font-size-lg;
+}

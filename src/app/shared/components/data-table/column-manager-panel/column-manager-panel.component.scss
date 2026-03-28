@@ -37,7 +37,6 @@
   padding: $sp-md 0;
   max-height: 300px;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .col-manager__item {

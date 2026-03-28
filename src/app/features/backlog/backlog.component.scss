@@ -80,7 +80,6 @@
 .page-content--cards {
   flex: 1;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 // ─── Error State ───

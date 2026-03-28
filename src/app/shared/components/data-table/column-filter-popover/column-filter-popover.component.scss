@@ -36,7 +36,6 @@
   gap: $sp-sm;
   max-height: 200px;
   overflow-y: auto;
-  @include custom-scrollbar;
 }
 
 .filter-popover__enum-item {

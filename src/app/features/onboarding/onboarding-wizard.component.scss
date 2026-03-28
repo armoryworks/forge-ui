@@ -118,8 +118,6 @@
         min-height: 0; // required for flex child to shrink and allow overflow scroll
         overflow-y: auto !important; // Material sets overflow:hidden by default
         padding: $sp-sm $sp-lg $sp-md;
-        @include custom-scrollbar(6px);
-
         // Material's inner step wrappers must not block overflow
         .mat-stepper-content,
         .cdk-step-content,
@@ -152,7 +150,6 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    @include custom-scrollbar(6px);
   }
 
   // ── Completion ────────────────────────────────────────────────────────────

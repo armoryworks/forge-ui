@@ -28,26 +28,29 @@
 }
 
 // ─── Scrollbar ───
-@mixin custom-scrollbar($width: 4px) {
+// No scrollbar-color / scrollbar-width — in Chrome 121+ those CSS Scrollbars
+// spec properties activate overlay/auto-hide mode even when ::-webkit-scrollbar
+// is also defined. Webkit rules alone keep Chrome in classic always-visible mode.
+// Firefox colors come from the global @supports (-moz-appearance: none) block
+// in styles.scss so they don't need to be repeated here.
+@mixin custom-scrollbar($width: 6px) {
   &::-webkit-scrollbar {
     width: $width;
+    height: $width;
   }
 
   &::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--bg);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 2px;
+    background-color: var(--text-muted);
+    border-radius: 0;
+    border: 1px solid var(--bg);
 
-    &:hover {
-      background: var(--text-muted);
-    }
+    &:hover  { background-color: var(--text-secondary); }
+    &:active { background-color: var(--text); }
   }
-
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
 }
 
 // ─── Responsive Breakpoints ───

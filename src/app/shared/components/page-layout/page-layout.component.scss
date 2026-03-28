@@ -78,7 +78,6 @@
   flex: 1;
   overflow: auto;
   min-height: 0;
-  @include custom-scrollbar;
 }
 
 .page-layout__actions {
