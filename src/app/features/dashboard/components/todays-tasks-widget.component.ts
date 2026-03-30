@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
-import { Router } from '@angular/router';
 
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -8,6 +8,7 @@ import { AvatarComponent } from '../../../shared/components/avatar/avatar.compon
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { UserPreferencesService } from '../../../shared/services/user-preferences.service';
+import { JobDetailDialogComponent, JobDetailDialogData } from '../../kanban/components/job-detail-dialog.component';
 import { DashboardTask } from '../models/dashboard-task.model';
 
 const TOP3_PREF_KEY = 'dashboard:top3-tomorrow';
@@ -21,7 +22,7 @@ const TOP3_PREF_KEY = 'dashboard:top3-tomorrow';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TodaysTasksWidgetComponent {
-  private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
   private readonly userPreferences = inject(UserPreferencesService);
 
   readonly tasks = input.required<DashboardTask[]>();
@@ -51,6 +52,10 @@ export class TodaysTasksWidgetComponent {
   });
 
   protected viewJob(task: DashboardTask): void {
-    this.router.navigate(['/kanban'], { queryParams: { jobId: task.jobNumber } });
+    this.dialog.open(JobDetailDialogComponent, {
+      width: '800px',
+      maxHeight: '90vh',
+      data: { jobId: task.id } satisfies JobDetailDialogData,
+    });
   }
 }

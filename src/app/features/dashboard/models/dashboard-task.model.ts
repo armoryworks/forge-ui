@@ -1,4 +1,5 @@
 export interface DashboardTask {
+  id: number;
   time: string;
   title: string;
   jobNumber: string;
