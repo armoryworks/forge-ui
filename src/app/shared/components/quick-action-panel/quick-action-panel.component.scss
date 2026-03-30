@@ -42,7 +42,7 @@
 }
 
 .quick-actions__label {
-  @include uppercase-label($font-size-xs, 0.3px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.3px, 600);
   color: var(--text);
   text-align: center;
 }

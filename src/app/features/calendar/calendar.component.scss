@@ -4,7 +4,7 @@
 :host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
 
 .calendar-nav { display: flex; align-items: center; gap: $sp-sm; }
-.month-label { font-weight: 700; font-size: $font-size-title; min-width: 180px; text-align: center; }
+.month-label { font-weight: 700; font-size: var(--font-size-title); min-width: 180px; text-align: center; }
 
 .calendar-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; }
 
@@ -13,7 +13,7 @@
   border-bottom: $border-width-thin solid var(--border); flex-shrink: 0;
 }
 .weekday-label {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   padding: $sp-sm $sp-md; text-align: center; color: var(--text-muted);
   background: var(--surface);
 }
@@ -35,7 +35,7 @@
 }
 
 .cell-date {
-  font-size: $font-size-sm; font-weight: 600; padding: $sp-xs $sp-xs;
+  font-size: var(--font-size-sm); font-weight: 600; padding: $sp-xs $sp-xs;
   align-self: flex-end; margin-bottom: $sp-xs;
 }
 
@@ -47,7 +47,7 @@
   border-left: 3px solid var(--border);
   border-left-color: var(--job-tint, var(--border));
   background: color-mix(in srgb, var(--job-tint, transparent) 10%, var(--surface));
-  font-size: $font-size-sm; cursor: pointer;
+  font-size: var(--font-size-sm); cursor: pointer;
   overflow: hidden; white-space: nowrap;
   &:hover { background: color-mix(in srgb, var(--job-tint, transparent) 15%, var(--bg)); }
 
@@ -65,7 +65,7 @@
 
 .job-chip__number { font-weight: 700; flex-shrink: 0; }
 .job-chip__title { overflow: hidden; text-overflow: ellipsis; color: var(--text-muted); }
-.job-chip__overdue { font-size: $font-size-base; color: var(--error); flex-shrink: 0; }
+.job-chip__overdue { font-size: var(--font-size-base); color: var(--error); flex-shrink: 0; }
 
 .job-chip__priority {
   font-size: $icon-size-xs;
@@ -81,7 +81,7 @@
 }
 
 .job-overflow {
-  font-size: $font-size-xxs; color: var(--text-muted); padding: $sp-xxs $sp-sm;
+  font-size: var(--font-size-xxs); color: var(--text-muted); padding: $sp-xxs $sp-sm;
   cursor: default; font-weight: 600;
 }
 
@@ -90,7 +90,7 @@
   display: flex; border: $border-width-thin solid var(--border); overflow: hidden;
 
   &__btn {
-    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
     padding: $sp-xs $sp-md; background: var(--surface); border: none; cursor: pointer;
     color: var(--text-secondary); transition: background $transition-fast, color $transition-fast;
     &:hover { background: var(--bg); }
@@ -113,9 +113,9 @@
     &:hover { background: var(--bg); }
     &--today { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); }
   }
-  &__weekday { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+  &__weekday { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
   &__date {
-    font-size: $font-size-md; font-weight: 700; color: var(--text);
+    font-size: var(--font-size-md); font-weight: 700; color: var(--text);
     &--today {
       background: var(--primary); color: white; border-radius: 50%;
       width: $btn-icon-size; height: $btn-icon-size;
@@ -133,7 +133,7 @@
   padding: $sp-sm; display: flex; flex-direction: column; gap: $sp-sm;
   min-height: 300px;
   &--today { background: color-mix(in srgb, var(--primary) 4%, var(--bg)); }
-  &__empty { font-size: $font-size-xs; color: var(--text-muted); text-align: center; padding-top: $sp-xl; }
+  &__empty { font-size: var(--font-size-xs); color: var(--text-muted); text-align: center; padding-top: $sp-xl; }
 }
 
 .job-chip--week {
@@ -142,7 +142,7 @@
   border-left: 3px solid var(--border);
   border-left-color: var(--job-tint, var(--border));
 }
-.job-chip__customer { font-size: $font-size-xs; color: var(--text-muted); }
+.job-chip__customer { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 // Day View
 .day-view {
@@ -153,7 +153,7 @@
   padding-bottom: $sp-md; border-bottom: $border-width-thin solid var(--border);
   margin-bottom: $sp-lg;
 }
-.day-view__count { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-secondary); }
+.day-view__count { @include uppercase-label(var(--font-size-xs), 0.5px, 700); color: var(--text-secondary); }
 .day-view__list { display: flex; flex-direction: column; gap: $sp-md; }
 
 .day-job {
@@ -170,9 +170,9 @@
 }
 
 .day-job__header { display: flex; align-items: center; gap: $sp-md; margin-bottom: $sp-sm; }
-.day-job__number { font-weight: 700; font-size: $font-size-md; }
-.day-job__title { font-size: $font-size-base; color: var(--text); flex: 1; }
-.day-job__overdue { font-size: $font-size-md; color: var(--error); }
+.day-job__number { font-weight: 700; font-size: var(--font-size-md); }
+.day-job__title { font-size: var(--font-size-base); color: var(--text); flex: 1; }
+.day-job__overdue { font-size: var(--font-size-md); color: var(--error); }
 
 .day-job__priority-icon {
   font-size: $icon-size-md;
@@ -193,7 +193,7 @@
 .day-job__stage,
 .day-job__assignee {
   display: flex; align-items: center; gap: $sp-xs;
-  font-size: $font-size-sm; color: var(--text-secondary);
+  font-size: var(--font-size-sm); color: var(--text-secondary);
   .material-icons-outlined { font-size: $icon-size-sm; }
 }
 
@@ -206,7 +206,7 @@
 .day-view__po-count {
   display: flex; align-items: center; gap: $sp-xs;
   margin-left: $sp-xl;
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--warning);
   .material-icons-outlined { font-size: $icon-size-sm; }
 }
@@ -217,7 +217,7 @@
   padding: $sp-xs $sp-sm;
   background: color-mix(in srgb, var(--warning) 12%, transparent);
   border-left: $border-width-thin solid var(--warning);
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-secondary);
   @include truncate;
   margin-top: $sp-xs;
@@ -228,7 +228,7 @@
   }
 
   &__icon {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--warning);
     flex-shrink: 0;
   }
@@ -241,7 +241,7 @@
 
   &__vendor {
     @include truncate;
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     color: var(--text-muted);
   }
 
@@ -278,12 +278,12 @@
   }
 
   &__number {
-    font-weight: 700; font-size: $font-size-md;
+    font-weight: 700; font-size: var(--font-size-md);
     font-family: $font-family-mono;
   }
 
   &__vendor {
-    font-size: $font-size-base; color: var(--text); flex: 1;
+    font-size: var(--font-size-base); color: var(--text); flex: 1;
   }
 
   &__status {
@@ -296,6 +296,6 @@
   }
 
   &__lines {
-    font-size: $font-size-sm; color: var(--text-secondary);
+    font-size: var(--font-size-sm); color: var(--text-secondary);
   }
 }

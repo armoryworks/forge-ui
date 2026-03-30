@@ -34,19 +34,19 @@
 }
 
 .column__name {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text);
   flex: 1;
 }
 
 .column__count {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--text-secondary);
 }
 
 .column__wip {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 
   &--warn {
@@ -78,7 +78,7 @@
 .column__empty {
   @include flex-center;
   padding: $sp-xl;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;

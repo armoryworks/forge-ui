@@ -11,7 +11,7 @@
 .ai-help-panel {
   position: fixed;
   right: 0;
-  top: $header-height;
+  top: var(--header-height);
   bottom: 0;
   width: $notification-panel-width;
   background: var(--surface);
@@ -33,7 +33,7 @@
   padding: $sp-md $sp-lg;
   background: var(--primary);
   color: white;
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 600;
   flex-shrink: 0;
 
@@ -75,14 +75,14 @@
 }
 
 .ai-help-panel__welcome-title {
-  font-size: $font-size-lg;
+  font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--text);
   margin: 0;
 }
 
 .ai-help-panel__welcome-text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
@@ -102,7 +102,7 @@
   border-radius: $border-radius;
   background: var(--bg);
   color: var(--text);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-family: $font-family-primary;
   cursor: pointer;
   text-align: left;
@@ -137,7 +137,7 @@
 
 .ai-help-msg__bubble {
   padding: $sp-md $sp-lg;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
   max-width: 85%;
   word-wrap: break-word;
@@ -165,7 +165,7 @@
     ::ng-deep {
       p {
         margin: 0 0 $sp-md;
-        font-size: $font-size-sm;
+        font-size: var(--font-size-sm);
         line-height: 1.6;
         color: var(--text);
 
@@ -173,7 +173,7 @@
       }
 
       h1, h2, h3, h4 {
-        font-size: $font-size-base;
+        font-size: var(--font-size-base);
         font-weight: 700;
         color: var(--text);
         margin: $sp-lg 0 $sp-sm;
@@ -184,7 +184,7 @@
       ul, ol {
         margin: $sp-sm 0 $sp-md $sp-lg;
         padding: 0;
-        font-size: $font-size-sm;
+        font-size: var(--font-size-sm);
         line-height: 1.6;
 
         &:last-child { margin-bottom: 0; }
@@ -211,7 +211,7 @@
 
       code {
         font-family: $font-family-mono;
-        font-size: $font-size-xs;
+        font-size: var(--font-size-xs);
         background: color-mix(in srgb, var(--primary) 8%, var(--bg));
         color: var(--primary);
         padding: 1px $sp-sm;
@@ -299,8 +299,8 @@
 }
 
 .ai-help-panel__suggested-label {
-  @include uppercase-label($font-size-xs, 0.05em, 600);
-  font-size: $font-size-xs;
+  @include uppercase-label(var(--font-size-xs), 0.05em, 600);
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   margin: 0 0 $sp-sm;
 }
@@ -310,7 +310,7 @@
   align-items: center;
   gap: $sp-sm;
   padding: $sp-xs 0;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--primary);
   text-decoration: none;
   cursor: pointer;
@@ -335,12 +335,12 @@
   border: $border-width-thin solid var(--border);
   border-radius: $border-radius;
   padding: $sp-md $sp-lg;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-family: $font-family-primary;
   background: var(--bg);
   color: var(--text);
   outline: none;
-  height: $input-height;
+  height: var(--input-height);
 
   &::placeholder {
     color: var(--text-muted);

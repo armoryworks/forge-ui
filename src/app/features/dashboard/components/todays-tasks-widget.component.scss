@@ -9,7 +9,7 @@
   padding: $sp-sm $sp-md;
   background: var(--error-light);
   border-bottom: $border-width-thin solid var(--error);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--error);
 }
@@ -19,7 +19,7 @@
 }
 
 .overdue-banner__text {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
 }
 
 // ─── Task Items ───
@@ -29,7 +29,7 @@
   gap: $sp-sm;
   padding: $sp-sm $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &:hover {
     background: var(--bg);
@@ -45,7 +45,7 @@
   width: 40px;
   flex-shrink: 0;
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -64,7 +64,7 @@
 
 .task-item__job {
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--primary-dark);
   width: 60px;
@@ -85,7 +85,7 @@
 }
 
 .tomorrow-section__label {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   display: flex;
   align-items: center;
   gap: $sp-sm;
@@ -113,6 +113,6 @@
 }
 
 .tomorrow-item__text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }

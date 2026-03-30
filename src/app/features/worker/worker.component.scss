@@ -44,14 +44,14 @@
 }
 
 .worker__title {
-  font-size: $font-size-xl;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   margin: 0;
   color: var(--text);
 }
 
 .worker__subtitle {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 
@@ -96,12 +96,12 @@
 }
 
 .task-card__number {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
 }
 
 .task-card__title {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 600;
   margin: 0 0 $sp-md;
   color: var(--text);
@@ -115,12 +115,12 @@
 }
 
 .task-card__stage {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   color: var(--stage-color, var(--primary));
 }
 
 .task-card__customer {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
@@ -128,7 +128,7 @@
   display: flex;
   align-items: center;
   gap: $sp-sm;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   margin-bottom: $sp-md;
 }
@@ -157,7 +157,7 @@
 }
 
 .task-card__progress-label {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: nowrap;
 }

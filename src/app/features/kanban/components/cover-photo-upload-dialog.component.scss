@@ -9,7 +9,7 @@
   margin-bottom: $sp-lg;
 
   &__label {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
     margin-bottom: $sp-md;
@@ -18,7 +18,7 @@
 
 .cover-photo-gallery {
   &__label {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
     margin-bottom: $sp-md;

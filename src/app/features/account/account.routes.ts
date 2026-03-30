@@ -44,6 +44,10 @@ export const ACCOUNT_ROUTES: Routes = [
         path: 'security',
         loadComponent: () => import('./pages/security/account-security.component').then(m => m.AccountSecurityComponent),
       },
+      {
+        path: 'customization',
+        loadComponent: () => import('./pages/customization/account-customization.component').then(m => m.AccountCustomizationComponent),
+      },
     ],
   },
 ];

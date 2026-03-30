@@ -15,12 +15,12 @@
 }
 
 .training-header__count {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   color: var(--text-muted);
 }
 
 .training-header__note {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   font-style: italic;
 }
@@ -35,7 +35,7 @@
 }
 
 .last-tour {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .completion-bar-wrapper {
@@ -70,7 +70,7 @@
 
 .completion-pct {
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 600;
   min-width: 36px;
   text-align: right;

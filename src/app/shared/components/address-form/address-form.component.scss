@@ -47,7 +47,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     padding: $sp-sm $sp-md;
 
     .material-icons-outlined {

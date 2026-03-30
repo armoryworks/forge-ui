@@ -12,7 +12,7 @@
 // ─── Panel ───
 .panel {
   position: fixed;
-  top: $header-height;
+  top: var(--header-height);
   right: 0;
   bottom: 0;
   width: $detail-panel-width;
@@ -53,7 +53,7 @@
 }
 
 .panel__header-left { display: flex; align-items: center; gap: $sp-md; }
-.panel__job-number { @include uppercase-label($font-size-sm, 1px, 700); color: var(--text); }
+.panel__job-number { @include uppercase-label(var(--font-size-sm), 1px, 700); color: var(--text); }
 
 .panel__header-actions {
   display: flex;
@@ -87,14 +87,14 @@
   display: flex; flex-direction: column; gap: $sp-lg;
 }
 
-.panel__title { font-size: $font-size-title; font-weight: 700; line-height: 1.3; }
+.panel__title { font-size: var(--font-size-title); font-weight: 700; line-height: 1.3; }
 
 // ─── Metadata ───
 .panel__meta { display: flex; flex-direction: column; gap: $sp-sm; }
 
 .meta-row {
-  display: flex; align-items: center; gap: $sp-md; font-size: $font-size-sm;
-  &__label { @include uppercase-label($font-size-xxs, 0.5px, 600); color: var(--text-muted); width: 72px; flex-shrink: 0; }
+  display: flex; align-items: center; gap: $sp-md; font-size: var(--font-size-sm);
+  &__label { @include uppercase-label(var(--font-size-xxs), 0.5px, 600); color: var(--text-muted); width: 72px; flex-shrink: 0; }
   &__value { display: flex; align-items: center; gap: $sp-sm; color: var(--text); }
   &__dot { width: $dot-size-sm; height: $dot-size-sm; border-radius: 50%; flex-shrink: 0; }
   &__empty { color: var(--text-muted); font-style: italic; }
@@ -105,10 +105,10 @@
 // ─── Section ───
 .panel__section { display: flex; flex-direction: column; gap: $sp-md; }
 .panel__section-header { @include flex-between; }
-.panel__section-title { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-secondary); }
-.panel__section-count { @include uppercase-label($font-size-xxs, 0, 600); color: var(--text-muted); }
-.panel__description { font-size: $font-size-base; line-height: 1.5; color: var(--text-secondary); }
-.panel__empty-hint { font-size: $font-size-xs; color: var(--text-muted); font-style: italic; }
+.panel__section-title { @include uppercase-label(var(--font-size-xs), 0.5px, 700); color: var(--text-secondary); }
+.panel__section-count { @include uppercase-label(var(--font-size-xxs), 0, 600); color: var(--text-muted); }
+.panel__description { font-size: var(--font-size-base); line-height: 1.5; color: var(--text-secondary); }
+.panel__empty-hint { font-size: var(--font-size-xs); color: var(--text-muted); font-style: italic; }
 
 // ─── Sub-Jobs ───
 .sub-jobs-list {
@@ -123,7 +123,7 @@
   gap: $sp-md;
   padding: $sp-sm $sp-md;
   border: $border-width-thin solid var(--border);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &__number {
     font-family: $font-family-mono;
@@ -148,7 +148,7 @@
 }
 
 .subtask__checkbox { flex-shrink: 0; width: $icon-size-xs; height: $icon-size-xs; accent-color: var(--primary); cursor: pointer; }
-.subtask__text { font-size: $font-size-sm; color: var(--text); }
+.subtask__text { font-size: var(--font-size-sm); color: var(--text); }
 
 // ─── Shared: inline add row + search dropdown ───
 .subtask-add,
@@ -181,7 +181,7 @@
 }
 %search-result {
   display: flex; align-items: center; gap: $sp-sm; width: 100%; padding: $sp-sm $sp-md;
-  border: none; background: transparent; color: var(--text); font-size: $font-size-sm;
+  border: none; background: transparent; color: var(--text); font-size: var(--font-size-sm);
   font-family: $font-family-primary; cursor: pointer; text-align: left;
   &:hover { background: var(--bg); }
 }
@@ -210,14 +210,14 @@
   display: flex; align-items: center; gap: $sp-sm; padding: $sp-sm $sp-md; min-height: 32px;
   &:hover { background: var(--bg); .link-item__delete { opacity: 1; } }
   &__icon { font-size: $icon-size-xs; color: var(--text-muted); flex-shrink: 0; }
-  &__type { @include uppercase-label($font-size-xxs, 0.3px, 600); color: var(--text-muted); flex-shrink: 0; width: 64px; }
+  &__type { @include uppercase-label(var(--font-size-xxs), 0.3px, 600); color: var(--text-muted); flex-shrink: 0; width: 64px; }
   &__job { display: flex; align-items: center; gap: $sp-sm; min-width: 0; flex: 1; }
-  &__number { font-size: $font-size-xs; font-weight: 600; color: var(--text); flex-shrink: 0; }
-  &__title { font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
+  &__number { font-size: var(--font-size-xs); font-weight: 600; color: var(--text); flex-shrink: 0; }
+  &__title { font-size: var(--font-size-xs); color: var(--text-secondary); @include truncate; }
   &__delete { @extend %hover-delete; }
 }
 
-.chip--sm { font-size: $font-size-xxs; padding: $sp-xxs $sp-sm; flex-shrink: 0; }
+.chip--sm { font-size: var(--font-size-xxs); padding: $sp-xxs $sp-sm; flex-shrink: 0; }
 
 // ─── Parts ───
 .part-list { display: flex; flex-direction: column; gap: $sp-xxs; }
@@ -227,9 +227,9 @@
   &:hover { background: var(--bg); .part-item__delete { opacity: 1; } }
   &__icon { font-size: $icon-size-sm; color: var(--text-muted); flex-shrink: 0; }
   &__info { display: flex; flex-direction: column; gap: $sp-xxs; min-width: 0; flex: 1; }
-  &__number { font-size: $font-size-xs; font-weight: 600; color: var(--text); }
-  &__description { font-size: $font-size-xxs; color: var(--text-secondary); @include truncate; }
-  &__qty { @include uppercase-label($font-size-xxs, 0, 600); font-family: $font-family-mono; color: var(--text-muted); flex-shrink: 0; }
+  &__number { font-size: var(--font-size-xs); font-weight: 600; color: var(--text); }
+  &__description { font-size: var(--font-size-xxs); color: var(--text-secondary); @include truncate; }
+  &__qty { @include uppercase-label(var(--font-size-xxs), 0, 600); font-family: $font-family-mono; color: var(--text-muted); flex-shrink: 0; }
   &__delete { @extend %hover-delete; }
 }
 
@@ -241,8 +241,8 @@
   &:hover { background: var(--bg); }
   &__icon { font-size: $icon-size-md; color: var(--text-muted); flex-shrink: 0; }
   &__info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: $sp-xxs; }
-  &__name { font-size: $font-size-sm; font-weight: 500; @include truncate; }
-  &__meta { font-size: $font-size-xxs; color: var(--text-muted); }
+  &__name { font-size: var(--font-size-sm); font-weight: 500; @include truncate; }
+  &__meta { font-size: var(--font-size-xxs); color: var(--text-muted); }
 }
 
 // ─── Time Entries ───
@@ -250,12 +250,12 @@
 
 .time-item {
   display: grid; grid-template-columns: 1fr auto auto; gap: $sp-sm $sp-md;
-  padding: $sp-sm $sp-md; font-size: $font-size-sm; align-items: center;
+  padding: $sp-sm $sp-md; font-size: var(--font-size-sm); align-items: center;
   &:hover { background: var(--bg); }
   &__user { font-weight: 600; color: var(--text); }
-  &__date { font-size: $font-size-xs; color: var(--text-muted); }
+  &__date { font-size: var(--font-size-xs); color: var(--text-muted); }
   &__duration { font-family: $font-family-mono; font-weight: 600; color: var(--primary); text-align: right; }
-  &__notes { grid-column: 1 / -1; font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
+  &__notes { grid-column: 1 / -1; font-size: var(--font-size-xs); color: var(--text-secondary); @include truncate; }
 }
 
 // ─── Activity ───

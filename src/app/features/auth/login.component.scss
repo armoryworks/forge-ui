@@ -17,20 +17,20 @@
   }
 
   &__icon {
-    font-size: $font-size-heading;
+    font-size: var(--font-size-heading);
     color: var(--accent);
   }
 
   &__title {
     font-family: $font-family-primary;
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
     font-weight: 700;
     color: var(--text);
   }
 
   &__subtitle {
     color: var(--text-secondary);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 
   // form-stack class handles gap; button fills width
@@ -55,7 +55,7 @@
 
   &__divider-text {
     color: var(--text-muted);
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     white-space: nowrap;
@@ -89,7 +89,7 @@
     display: flex;
     align-items: center;
     gap: $sp-md;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text);
 
@@ -124,7 +124,7 @@
 
   &__setup-link {
     color: var(--text-muted);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
 
     .material-icons-outlined {
       font-size: $icon-size-sm;

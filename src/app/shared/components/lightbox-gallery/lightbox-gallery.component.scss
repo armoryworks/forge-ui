@@ -57,7 +57,7 @@ $lightbox-nav-size: 40px;
   top: $sp-md;
   left: $sp-lg;
   z-index: 2;
-  @include uppercase-label($font-size-sm, 0.5px, 500);
+  @include uppercase-label(var(--font-size-sm), 0.5px, 500);
   color: rgba(255, 255, 255, 0.7);
   font-family: $font-family-mono;
 }
@@ -144,7 +144,7 @@ $lightbox-nav-size: 40px;
 }
 
 .lightbox__placeholder-label {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   color: rgba(255, 255, 255, 0.6);
   font-family: $font-family-primary;
 }
@@ -157,7 +157,7 @@ $lightbox-nav-size: 40px;
   border-radius: $border-radius;
   background: rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.85);
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-family: $font-family-primary;
   text-decoration: none;
   cursor: pointer;
@@ -176,7 +176,7 @@ $lightbox-nav-size: 40px;
 
 .lightbox__title {
   padding: $sp-md 0;
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: rgba(255, 255, 255, 0.8);
   font-family: $font-family-primary;
   text-align: center;

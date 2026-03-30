@@ -10,13 +10,13 @@
   gap: $sp-lg;
 
   &__spinner {
-    font-size: $font-size-heading;
+    font-size: var(--font-size-heading);
     color: var(--primary);
     animation: spin 1s linear infinite;
   }
 
   &__message {
     color: var(--text-secondary);
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
   }
 }

@@ -5,14 +5,14 @@
 }
 
 .pay-stubs__title {
-  font-size: $font-size-lg;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   color: var(--text);
   margin: 0 0 $sp-sm;
 }
 
 .pay-stubs__subtitle {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0 0 $sp-xl;
 }

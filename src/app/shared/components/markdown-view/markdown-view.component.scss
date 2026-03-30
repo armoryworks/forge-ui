@@ -2,14 +2,14 @@
 
 :host {
   display: block;
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   line-height: 1.5;
 
   ::ng-deep {
     p { margin: 0 0 $sp-md; }
     code {
       font-family: $font-family-mono;
-      font-size: $font-size-sm;
+      font-size: var(--font-size-sm);
       background: var(--surface);
       padding: $sp-xs $sp-sm;
     }

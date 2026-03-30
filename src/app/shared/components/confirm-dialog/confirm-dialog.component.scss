@@ -13,7 +13,7 @@
 }
 
 .confirm-dialog__title {
-  @include uppercase-label($font-size-sm, 0.5px, 700);
+  @include uppercase-label(var(--font-size-sm), 0.5px, 700);
 }
 
 .confirm-dialog__body {
@@ -21,7 +21,7 @@
 }
 
 .confirm-dialog__message {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
   line-height: 1.5;
   margin: 0;

@@ -30,7 +30,7 @@
     outline: none;
     background: transparent;
     font-family: $font-family-primary;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: #fff;
 
     &::placeholder {
@@ -82,20 +82,20 @@
   }
 
   &__result-title {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text);
     @include truncate;
   }
 
   &__result-subtitle {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     @include truncate;
   }
 
   &__result-type {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
-    @include uppercase-label($font-size-xxs, 0.5px);
+    @include uppercase-label(var(--font-size-xxs), 0.5px);
   }
 }

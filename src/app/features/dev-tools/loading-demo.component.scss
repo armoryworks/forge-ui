@@ -15,12 +15,12 @@
   gap: $sp-md;
 
   &__title {
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     font-weight: 700;
   }
 
   &__desc {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 }
@@ -51,12 +51,12 @@
   gap: $sp-sm;
 
   &__label {
-    @include uppercase-label($font-size-xs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xs), 0.5px, 700);
     color: var(--primary);
   }
 
   &__text {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 }

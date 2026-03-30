@@ -17,7 +17,7 @@
 }
 
 .chip--sm {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   padding: 0 $sp-sm;
   white-space: nowrap;
 }
@@ -29,7 +29,7 @@
 
 .text-muted {
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .state-expand-btn {

@@ -33,19 +33,19 @@
   }
 
   &__step-number {
-    @include uppercase-label($font-size-xxs, 0.05em, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.05em, 700);
     color: var(--text-muted);
   }
 
   &__step-name {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text);
     @include truncate;
   }
 
   &__step-desc {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -57,7 +57,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
 
     .material-icons-outlined {

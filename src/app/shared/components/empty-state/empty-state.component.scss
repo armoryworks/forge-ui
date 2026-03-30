@@ -16,13 +16,13 @@
 }
 
 .empty-state__message {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
   font-weight: 600;
 }
 
 .empty-state__help {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   max-width: 320px;
   text-align: center;
@@ -30,7 +30,7 @@
 }
 
 .empty-state__action {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--primary);
   background: none;

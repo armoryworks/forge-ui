@@ -37,13 +37,13 @@
 }
 
 .form-detail__title {
-  font-size: $font-size-lg;
+  font-size: var(--font-size-lg);
   font-weight: 600;
   margin: 0;
 }
 
 .form-detail__description {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: $sp-sm 0 0;
 }
@@ -53,7 +53,7 @@
   align-items: center;
   gap: $sp-md;
   padding: $sp-md $sp-lg;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 
   &--complete {
@@ -87,14 +87,14 @@
 }
 
 .form-detail__pending-setup-title {
-  font-size: $font-size-title;
+  font-size: var(--font-size-title);
   font-weight: 600;
   margin: 0 0 $sp-sm;
   color: var(--text);
 }
 
 .form-detail__pending-setup-text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
@@ -114,13 +114,13 @@
 }
 
 .form-detail__card-title {
-  font-size: $font-size-title;
+  font-size: var(--font-size-title);
   font-weight: 600;
   margin: 0;
 }
 
 .form-detail__card-text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
 }
@@ -179,15 +179,15 @@
   border: $border-width-thin solid var(--border);
 
   dt {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-muted);
-    @include uppercase-label($font-size-xs, 0.04em, 600);
+    @include uppercase-label(var(--font-size-xs), 0.04em, 600);
     align-self: center;
   }
 
   dd {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text);
     margin: 0;
     align-self: center;
@@ -203,7 +203,7 @@
   display: flex;
   align-items: flex-start;
   gap: $sp-sm;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.5;
@@ -247,23 +247,23 @@
 }
 
 .form-detail__doc-name {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
 .form-detail__doc-type {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
 
 .form-detail__doc-verified {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--success);
   font-weight: 600;
 }
 
 .form-detail__doc-pending {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--warning);
 }
 
@@ -284,7 +284,7 @@
 }
 
 .form-detail__doc-upload-label {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
@@ -301,7 +301,7 @@
 }
 
 .form-detail__doc-list-badge {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   padding: $sp-xs $sp-sm;
   flex-shrink: 0;
 
@@ -311,12 +311,12 @@
 }
 
 .form-detail__doc-list-title {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .form-detail__doc-list-desc {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0 0 $sp-md;
   line-height: 1.5;
@@ -327,7 +327,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--text-muted);
 
@@ -361,7 +361,7 @@
   padding: 0 $sp-xs;
   background: var(--primary);
   color: #fff;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   border-radius: 999px;
   line-height: 1;

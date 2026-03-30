@@ -3,7 +3,7 @@
 
 .notification-panel {
   position: absolute;
-  top: $header-height;
+  top: var(--header-height);
   right: 0;
   width: $notification-panel-width;
   max-height: 70vh;
@@ -30,7 +30,7 @@
 }
 
 .notification-tab {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xs $sp-md;
   border: none;
   background: none;
@@ -69,7 +69,7 @@
   gap: $sp-md;
   padding: $sp-xl * 2;
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .notification-panel__empty-icon {
@@ -124,14 +124,14 @@
 }
 
 .notification-item__title {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text);
   @include truncate;
 }
 
 .notification-item__message {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   margin-top: $sp-xs;
   display: -webkit-box;
@@ -141,7 +141,7 @@
 }
 
 .notification-item__time {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   margin-top: $sp-xs;
 }
@@ -174,7 +174,7 @@
 }
 
 .notification-panel__dismiss-all {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   border: none;
   background: none;
   color: var(--text-muted);

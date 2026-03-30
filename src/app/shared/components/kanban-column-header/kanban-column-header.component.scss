@@ -35,19 +35,19 @@
 }
 
 .col-header__name {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text);
   @include truncate;
   flex: 1;
 }
 
 .col-header__count {
-  @include uppercase-label($font-size-xxs, 0, 700);
+  @include uppercase-label(var(--font-size-xxs), 0, 700);
   color: var(--text-muted);
 }
 
 .col-header__wip {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
 
   &--warn {

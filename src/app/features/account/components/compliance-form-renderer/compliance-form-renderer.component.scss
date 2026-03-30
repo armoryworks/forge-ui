@@ -32,19 +32,19 @@
 }
 
 .compliance-form__title {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 700;
   margin: 0;
 }
 
 .compliance-form__subtitle {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-secondary);
   margin: 0;
 }
 
 .compliance-form__agency {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   margin: 0;
 }
@@ -67,7 +67,7 @@
   align-items: center;
   gap: $sp-xs;
   padding: $sp-sm $sp-md;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-family: $font-family-primary;
   font-weight: 500;
   color: var(--text-secondary);
@@ -127,19 +127,19 @@
 }
 
 .compliance-form__section-title {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   margin: 0;
 }
 
 .compliance-form__section-subtitle {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   font-style: italic;
 }
 
 .compliance-form__instructions {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: inherit;
   line-height: 1.4;
   background: var(--bg);
@@ -194,7 +194,7 @@
   }
 
   .mdc-text-field--outlined .mdc-notched-outline .mdc-floating-label {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
   }
 
   .mat-mdc-form-field .mdc-text-field {
@@ -202,15 +202,15 @@
   }
 
   .mat-mdc-form-field .mat-mdc-floating-label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   .mat-mdc-form-field input.mat-mdc-input-element {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   .mat-mdc-select-value-text {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   .mat-mdc-radio-group {
@@ -218,22 +218,22 @@
   }
 
   .mat-mdc-radio-button .mdc-label {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     padding-left: $sp-xs;
   }
 
   .mat-mdc-checkbox .mdc-label {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     padding-left: $sp-xs;
   }
 
   .dynamic-form-heading {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     margin: $sp-xxs 0 0;
   }
 
   .dynamic-form-paragraph {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     line-height: 1.35;
 
     p {
@@ -268,7 +268,7 @@
 }
 
 .compliance-form__page-indicator {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-family: $font-family-mono;
   color: var(--text-muted);
 }
@@ -325,7 +325,7 @@ $gov-step-label-pct: 14%;
   padding: 0 $sp-md;
 
   .compliance-form__tab {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
   }
 }
 

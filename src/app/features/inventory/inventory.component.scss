@@ -42,7 +42,7 @@
 }
 
 .low-stock-banner__text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text);
   flex: 1;
@@ -50,7 +50,7 @@
 
 // ─── Panel Header ───
 .panel-count {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   color: var(--text-muted);
 }
 
@@ -58,12 +58,12 @@
 .inv-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   thead { position: sticky; top: 0; z-index: $z-sticky; }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     padding: $sp-md $sp-lg;
     text-align: left;
     color: var(--text-muted);
@@ -93,10 +93,10 @@
 .bin-detail-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     padding: $sp-sm $sp-md;
     text-align: left;
     color: var(--text-muted);
@@ -130,7 +130,7 @@
   gap: $sp-sm;
   padding: $sp-sm $sp-md;
   cursor: pointer;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   &:hover { background: var(--bg); }
   &--selected { background: var(--bg); border-left: $border-width solid var(--primary); }
   &--l1 { padding-left: #{$sp-lg + $sp-md}; }
@@ -151,7 +151,7 @@
 .tree-label { flex: 1; }
 
 .tree-badge {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: 0 $sp-sm;
   background: var(--bg);
   border: $border-width-thin solid var(--border);
@@ -179,8 +179,8 @@
 }
 
 .detail-type-icon { font-size: $icon-size-xl; color: var(--text-muted); }
-.detail-name { font-weight: 700; font-size: $font-size-base; }
-.detail-path { font-size: $font-size-xs; color: var(--text-muted); }
+.detail-name { font-weight: 700; font-size: var(--font-size-base); }
+.detail-path { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 .detail-meta {
   display: grid;
@@ -190,12 +190,12 @@
 }
 
 .meta-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.meta-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
-.meta-value { font-size: $font-size-sm; }
+.meta-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
+.meta-value { font-size: var(--font-size-sm); }
 .mono { font-family: $font-family-mono; }
 
 .contents-section { padding: $sp-md $sp-lg; }
-.section-title { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-muted); display: block; margin-bottom: $sp-md; }
+.section-title { @include uppercase-label(var(--font-size-xs), 0.5px, 700); color: var(--text-muted); display: block; margin-bottom: $sp-md; }
 
 // ─── Empty State ───
 .empty-row, .empty-state {
@@ -243,11 +243,11 @@
 
   &__title {
     font-weight: 700;
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
   }
 
   &__desc {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     text-align: center;
   }
@@ -265,7 +265,7 @@
   padding: $sp-xs $sp-sm;
   border: $border-width-thin solid var(--border);
   border-radius: $border-radius;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-family: $font-family-primary;
   background: var(--surface);
   color: var(--text);
@@ -293,10 +293,10 @@
 }
 
 // ─── Lot Expiry ───
-.lot-chip { font-family: $font-family-mono; font-size: $font-size-xs; }
+.lot-chip { font-family: $font-family-mono; font-size: var(--font-size-xs); }
 
 .lot-expiry {
-  font-size: $font-size-xs; font-variant-numeric: tabular-nums;
+  font-size: var(--font-size-xs); font-variant-numeric: tabular-nums;
 
   &.lot-expiring-soon {
     color: var(--warning);

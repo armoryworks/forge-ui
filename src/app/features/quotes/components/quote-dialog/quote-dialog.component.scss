@@ -22,14 +22,14 @@
 }
 
 .lines-title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
 }
 
 .lines-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th,
   td {
@@ -39,7 +39,7 @@
   }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
   }
 
@@ -49,7 +49,7 @@
 
   &__mono {
     font-family: $font-family-mono;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   &__bold {
@@ -75,14 +75,14 @@
   top: 0;
   right: 0;
   color: #fff;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-family: $font-family-mono;
   font-weight: 700;
   letter-spacing: 0.5px;
   padding: 1px $sp-sm;
   border-radius: 0 0 0 2px;
   pointer-events: none;
-  line-height: $font-size-lg;
+  line-height: var(--font-size-lg);
 }
 
 .tax-badge {

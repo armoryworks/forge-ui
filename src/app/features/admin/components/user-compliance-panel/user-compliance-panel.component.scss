@@ -19,18 +19,18 @@
 }
 
 .user-compliance__name {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--text);
 }
 
 .user-compliance__email {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .user-compliance__section-title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
   margin: $sp-lg 0 $sp-md;
   display: flex;
@@ -49,7 +49,7 @@
 }
 
 .user-compliance__upload-label {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   color: var(--text-muted);
   display: block;
   margin-bottom: $sp-md;
@@ -71,15 +71,15 @@
   gap: $sp-xs;
 
   label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-weight: 600;
   }
 
   input, select {
-    height: $input-height;
+    height: var(--input-height);
     padding: 0 $sp-md;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     border: $border-width-thin solid var(--border);
     background: var(--surface);
     color: var(--text);
@@ -119,18 +119,18 @@
   }
 
   &__state {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--text);
   }
 
   &__detail {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
   &__source {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 }
@@ -143,7 +143,7 @@
 .user-compliance__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th {
     text-align: left;
@@ -151,7 +151,7 @@
     border-bottom: $border-width-thin solid var(--border);
     color: var(--text-muted);
     font-weight: 600;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }

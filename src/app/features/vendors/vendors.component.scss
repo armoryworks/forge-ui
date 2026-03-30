@@ -57,7 +57,7 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; }
-.detail-contact { font-size: $font-size-xs; color: var(--text-muted); }
+.detail-contact { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 .detail-body {
   flex: 1;
@@ -75,17 +75,17 @@
 }
 
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: $font-size-sm; }
+.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: var(--font-size-sm); }
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }
 
 .info-address {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
 }
 
 .info-notes {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   white-space: pre-wrap;
 }
@@ -119,12 +119,12 @@
 
   &__number {
     font-family: $font-family-mono;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     font-weight: 600;
   }
 
   &__job {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 
@@ -135,14 +135,14 @@
   }
 
   &__date {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 }
 
 .po-number {
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
 }
 
@@ -154,7 +154,7 @@
   gap: $sp-md;
   padding: $sp-xl;
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &__icon {
     font-size: $icon-size-xxl;

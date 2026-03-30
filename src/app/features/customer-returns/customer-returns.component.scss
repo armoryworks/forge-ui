@@ -18,13 +18,13 @@
 }
 
 .detail-label {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .detail-value {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
 }

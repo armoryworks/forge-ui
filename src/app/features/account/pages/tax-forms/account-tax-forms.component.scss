@@ -4,7 +4,7 @@
 @use '../../shared/account-page';
 
 .tax-forms__intro {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
 }
@@ -59,24 +59,24 @@
 }
 
 .tax-forms__item-label {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 600;
 }
 
 .tax-forms__item-description {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .tax-forms__item-date {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--success);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .tax-forms__item-required {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--warning);
   font-weight: 600;
   white-space: nowrap;
@@ -88,7 +88,7 @@
 }
 
 .tax-forms__item-badge {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--primary);
   font-style: italic;
 }
@@ -130,12 +130,12 @@
     gap: $sp-xxs;
 
     strong {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       color: var(--primary);
     }
 
     span {
-      font-size: $font-size-sm;
+      font-size: var(--font-size-sm);
       color: var(--text-secondary);
     }
   }

@@ -182,19 +182,19 @@ html[data-theme='dark'] {
 // ─── Select Font Size — Match global 12px ───
 // .mat-mdc-select-value does not inherit the form-field container-text-size token.
 .mat-mdc-select-value {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
 }
 
 // ─── Option Items — compact height + font for all dropdowns ───
 // Applies to mat-select panels, mat-autocomplete panels, and any other mat-option usage.
 // Material default min-height is 48px; we use 2rem (32px) to match form field density.
 .mat-mdc-option {
-  min-height: 2rem !important; // match $input-height — override MDC list item default (48px)
+  min-height: 2rem !important; // match var(--input-height) — override MDC list item default (48px)
   padding: 0 $sp-lg !important;
-  font-size: $font-size-base !important;
+  font-size: var(--font-size-base) !important;
 
   .mdc-list-item__primary-text {
-    font-size: $font-size-base !important;
+    font-size: var(--font-size-base) !important;
   }
 }
 
@@ -257,7 +257,7 @@ html[data-theme='dark'] {
   padding: $sp-lg !important;
 
   .driver-popover-title {
-    font-size: $font-size-title !important;
+    font-size: var(--font-size-title) !important;
     font-weight: 700 !important;
     font-family: $font-family-primary !important;
     color: var(--text) !important;
@@ -267,7 +267,7 @@ html[data-theme='dark'] {
   }
 
   .driver-popover-description {
-    font-size: $font-size-base !important;
+    font-size: var(--font-size-base) !important;
     font-family: $font-family-primary !important;
     color: var(--text-secondary) !important;
     line-height: 1.6 !important;
@@ -284,7 +284,7 @@ html[data-theme='dark'] {
   }
 
   .driver-popover-progress-text {
-    font-size: $font-size-xs !important;
+    font-size: var(--font-size-xs) !important;
     color: var(--text-muted) !important;
     flex: 1 !important;
     font-family: $font-family-mono !important;
@@ -292,7 +292,7 @@ html[data-theme='dark'] {
 
   .driver-popover-prev-btn,
   .driver-popover-next-btn {
-    font-size: $font-size-xs !important;
+    font-size: var(--font-size-xs) !important;
     font-weight: 600 !important;
     letter-spacing: 0.04em !important;
     text-transform: uppercase !important;
@@ -348,6 +348,65 @@ html[data-theme='dark'] {
 
     &:hover { color: var(--text) !important; }
   }
+}
+
+// ─── Font Scale Overrides ───
+// Applied via data-font-size attribute on <html>, set by ThemeService.
+// Overrides the CSS custom property tokens from _variables.scss :root block.
+// Material form-field tokens also overridden so input heights grow with text.
+
+html[data-font-size='comfortable'] {
+  --font-size-xxs: 10px;
+  --font-size-xs: 11px;
+  --font-size-sm: 13px;
+  --font-size-base: 14px;
+  --font-size-title: 15px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-kpi: 23px;
+  --font-size-heading: 36px;
+  --input-height: 2.25rem;
+  --sidebar-nav-height: 40px;
+  --header-height: 48px;
+  --mat-form-field-container-height: 2.25rem;
+  --mat-form-field-container-vertical-padding: 0.375rem;
+}
+
+html[data-font-size='large'] {
+  --font-size-xxs: 11px;
+  --font-size-xs: 12px;
+  --font-size-sm: 15px;
+  --font-size-base: 16px;
+  --font-size-title: 17px;
+  --font-size-md: 18px;
+  --font-size-lg: 21px;
+  --font-size-xl: 24px;
+  --font-size-kpi: 27px;
+  --font-size-heading: 42px;
+  --input-height: 2.5rem;
+  --sidebar-nav-height: 44px;
+  --header-height: 52px;
+  --mat-form-field-container-height: 2.5rem;
+  --mat-form-field-container-vertical-padding: 0.5rem;
+}
+
+html[data-font-size='xl'] {
+  --font-size-xxs: 12px;
+  --font-size-xs: 13px;
+  --font-size-sm: 17px;
+  --font-size-base: 18px;
+  --font-size-title: 19px;
+  --font-size-md: 20px;
+  --font-size-lg: 24px;
+  --font-size-xl: 28px;
+  --font-size-kpi: 32px;
+  --font-size-heading: 48px;
+  --input-height: 2.75rem;
+  --sidebar-nav-height: 48px;
+  --header-height: 56px;
+  --mat-form-field-container-height: 2.75rem;
+  --mat-form-field-container-vertical-padding: 0.625rem;
 }
 
 // ─── Global Scrollbar ───

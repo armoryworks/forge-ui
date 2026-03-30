@@ -11,7 +11,7 @@
     gap: $sp-sm;
     padding: $sp-xs $sp-md;
     border-bottom: $border-width-thin solid var(--border);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     min-height: 32px;
 
     &:hover { background: var(--bg); }
@@ -49,7 +49,7 @@
   }
 
   &__sort-order {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     color: var(--text-muted);
     min-width: 20px;
     text-align: center;
@@ -58,7 +58,7 @@
 
   &__part-number {
     font-family: $font-family-mono;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--primary);
     min-width: 100px;
     flex-shrink: 0;
@@ -70,12 +70,12 @@
     flex: 1;
     color: var(--text);
     @include truncate;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 
   &__quantity {
     font-family: $font-family-mono;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     min-width: 40px;
     text-align: right;
@@ -83,7 +83,7 @@
   }
 
   &__lead-time {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     min-width: 32px;
     text-align: right;
@@ -98,7 +98,7 @@
 
 // Source chip styles (matching parts.component.scss)
 .source-chip {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xxs $sp-sm;
   border: $border-width-thin solid var(--border);
   border-radius: $border-radius;

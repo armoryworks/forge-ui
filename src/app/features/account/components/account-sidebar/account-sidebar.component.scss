@@ -26,7 +26,7 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-family: $font-family-primary;
   cursor: pointer;
   transition: color $transition-fast;
@@ -42,7 +42,7 @@
 
 .account-sidebar__title {
   padding: $sp-md $sp-xl;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -62,9 +62,9 @@
   padding: $sp-md $sp-xl;
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   transition: background $transition-fast, color $transition-fast;
-  height: $sidebar-nav-height;
+  height: var(--sidebar-nav-height);
 
   &:hover {
     background: var(--bg);

@@ -27,7 +27,7 @@
     padding: $sp-lg;
     border-bottom: $border-width-thin solid var(--border);
     font-weight: 600;
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
 
     .material-icons-outlined {
       font-size: $icon-size-lg;
@@ -77,13 +77,13 @@
   }
 
   &__name {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 500;
     color: var(--text);
   }
 
   &__description {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     @include truncate;
   }
@@ -122,11 +122,11 @@
 
   &__header-name {
     font-weight: 600;
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
   }
 
   &__header-desc {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 
@@ -149,8 +149,8 @@
   }
 
   &__welcome-icon .material-icons-outlined { font-size: $icon-size-hero; }
-  &__welcome-title { font-size: $font-size-xl; font-weight: 600; margin: 0; }
-  &__welcome-desc { font-size: $font-size-base; color: var(--text-muted); margin: 0; max-width: 400px; }
+  &__welcome-title { font-size: var(--font-size-xl); font-weight: 600; margin: 0; }
+  &__welcome-desc { font-size: var(--font-size-base); color: var(--text-muted); margin: 0; max-width: 400px; }
 
   &__starters {
     display: flex;
@@ -172,18 +172,18 @@
 
   &__text-input {
     flex: 1;
-    height: $input-height;
+    height: var(--input-height);
     padding: 0 $sp-md;
     border: $border-width solid var(--border);
     background: var(--bg);
     color: var(--text);
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-family: $font-family-primary;
     &:focus { outline: none; border-color: var(--primary); }
     &::placeholder { color: var(--text-muted); }
   }
 
-  &__send { height: $input-height; min-width: $input-height; padding: 0 $sp-md; }
+  &__send { height: var(--input-height); min-width: var(--input-height); padding: 0 $sp-md; }
   &__empty { flex: 1; @include flex-center; }
 }
 
@@ -219,7 +219,7 @@
 
   &__bubble {
     padding: $sp-md $sp-lg;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     line-height: 1.5;
     white-space: pre-wrap;
     word-break: break-word;
@@ -254,7 +254,7 @@
   border: $border-width-thin solid var(--border);
   background: var(--surface);
   color: var(--text);
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-family: $font-family-primary;
   cursor: pointer;
   text-align: left;

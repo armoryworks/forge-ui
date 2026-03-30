@@ -53,7 +53,7 @@
   .sidebar--expanded & {
     justify-content: flex-start;
     padding: 0 $sp-lg;
-    height: $sidebar-nav-height;
+    height: var(--sidebar-nav-height);
     gap: $sp-md;
   }
 
@@ -78,7 +78,7 @@
 }
 
 .nav-item__label {
-  @include uppercase-label($font-size-sm, 0.5px, 600);
+  @include uppercase-label(var(--font-size-sm), 0.5px, 600);
   @include truncate;
 }
 
@@ -120,7 +120,7 @@
   background: var(--bg);
   border: $border-width-thin solid var(--border);
   font-family: $font-family-mono;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 600;
   color: var(--text-secondary);
   line-height: 1;
@@ -132,7 +132,7 @@
 }
 
 .sidebar__section-label {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;

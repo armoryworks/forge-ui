@@ -25,7 +25,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 700;
   margin: 0;
   text-transform: uppercase;
@@ -80,7 +80,7 @@
 }
 
 .account-page__section-label {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;

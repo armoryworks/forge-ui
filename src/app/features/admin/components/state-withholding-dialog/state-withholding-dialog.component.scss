@@ -18,13 +18,13 @@
 }
 
 .state-summary__number {
-  font-size: $font-size-kpi;
+  font-size: var(--font-size-kpi);
   font-weight: 700;
   color: var(--text);
 }
 
 .state-summary__label {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -32,7 +32,7 @@
 }
 
 .state-section__title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
   margin: $sp-xl 0 $sp-sm;
   display: flex;
@@ -45,7 +45,7 @@
 }
 
 .state-section__hint {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   margin: 0 0 $sp-md;
 }
@@ -100,20 +100,20 @@
 }
 
 .state-card__code {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 700;
   color: var(--text);
   font-family: $font-family-mono;
 }
 
 .state-card__name {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   line-height: 1.2;
 }
 
 .state-card__form {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   font-family: $font-family-mono;
 }

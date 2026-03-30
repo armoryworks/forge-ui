@@ -9,7 +9,7 @@
 
 .chat-panel {
   position: fixed;
-  top: $header-height;
+  top: var(--header-height);
   right: 0;
   bottom: 0;
   width: $notification-panel-width;
@@ -26,7 +26,7 @@
 }
 
 .chat-panel__header {
-  height: $header-height;
+  height: var(--header-height);
   padding: 0 $sp-md;
   display: flex;
   align-items: center;
@@ -57,13 +57,13 @@
 }
 
 .chat-panel__header-title {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 600;
   color: var(--text);
 }
 
 .chat-panel__header-name {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 600;
   color: var(--text);
   @include truncate;
@@ -93,7 +93,7 @@
 }
 
 .chat-panel__empty-text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 
@@ -131,19 +131,19 @@
 }
 
 .conversation__name {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 600;
   @include truncate;
 }
 
 .conversation__time {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .conversation__preview {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   @include truncate;
 }
@@ -151,7 +151,7 @@
 .conversation__badge {
   background: var(--accent);
   color: white;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   min-width: $badge-size-sm;
   height: $badge-size-sm;
@@ -199,7 +199,7 @@
 }
 
 .message__text {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
   line-height: 1.4;
   white-space: pre-wrap;
@@ -207,7 +207,7 @@
 }
 
 .message__time {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   align-self: flex-end;
 }
@@ -223,12 +223,12 @@
 
 .chat-panel__input-field {
   flex: 1;
-  height: $input-height;
+  height: var(--input-height);
   padding: 0 $sp-md;
   border: $border-width-thin solid var(--border);
   background: var(--bg);
   color: var(--text);
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-family: $font-family-primary;
   outline: none;
   border-radius: $border-radius;

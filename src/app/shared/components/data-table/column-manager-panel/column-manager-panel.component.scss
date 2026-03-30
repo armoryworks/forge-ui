@@ -16,12 +16,12 @@
 }
 
 .col-manager__title {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text-muted);
 }
 
 .col-manager__reset {
-  @include uppercase-label($font-size-xxs, 0.3px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.3px, 600);
   background: none;
   border: none;
   color: var(--primary);
@@ -44,7 +44,7 @@
   align-items: center;
   gap: $sp-md;
   padding: $sp-sm $sp-lg;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   cursor: grab;
 

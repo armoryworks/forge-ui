@@ -16,7 +16,7 @@
 }
 
 .kpi-chip__value {
-  font-size: $font-size-kpi;
+  font-size: var(--font-size-kpi);
   font-weight: 700;
   line-height: 1;
 
@@ -39,7 +39,7 @@
 }
 
 .kpi-chip__label {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -47,7 +47,7 @@
 }
 
 .kpi-chip__change {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 600;
 
   &--up {

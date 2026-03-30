@@ -11,12 +11,12 @@
 
 .timeline__filter-select {
   font-family: $font-family-primary;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text);
   background: var(--surface);
   border: $border-width-thin solid var(--border);
   padding: $sp-xs $sp-md;
-  height: $input-height;
+  height: var(--input-height);
   cursor: pointer;
 
   &:focus {
@@ -61,7 +61,7 @@
 }
 
 .timeline__desc {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   line-height: 1.4;
 
@@ -73,12 +73,12 @@
 }
 
 .timeline__time {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
 
 .timeline__empty {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   padding: $sp-lg 0;
   text-align: center;
@@ -112,7 +112,7 @@
 }
 
 .timeline__batch-line {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   line-height: 1.4;
 }
@@ -124,7 +124,7 @@
   }
 
   .timeline__desc {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   .timeline__content {

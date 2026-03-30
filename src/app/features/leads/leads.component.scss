@@ -71,7 +71,7 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-company { font-weight: 700; }
-.detail-contact { font-size: $font-size-xs; color: var(--text-muted); }
+.detail-contact { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 .detail-body {
   flex: 1;
@@ -89,11 +89,11 @@
 }
 
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: $font-size-sm; }
+.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: var(--font-size-sm); }
 
 .notes-section { display: flex; flex-direction: column; gap: $sp-sm; }
-.notes-text { font-size: $font-size-sm; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+.notes-text { font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0; line-height: 1.5; }
 
 // ─── Status Actions ───
 .status-actions { display: flex; flex-direction: column; gap: $sp-sm; }
@@ -101,7 +101,7 @@
 .status-btn-group { display: flex; gap: $sp-sm; flex-wrap: wrap; }
 
 .status-btn {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xxs $sp-md;
   border: $border-width-thin solid var(--border);
   background: var(--surface);
@@ -133,7 +133,7 @@
   padding: $sp-md;
   background: var(--success-light);
   color: var(--success);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 }
 
@@ -191,12 +191,12 @@
 }
 
 .pipeline-col__name {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text-secondary);
 }
 
 .pipeline-col__count {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   min-width: $badge-size-md;
   text-align: center;
 }
@@ -224,7 +224,7 @@
   gap: $sp-sm;
   padding: $sp-xl $sp-md;
   color: var(--text-muted);
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   text-align: center;
 
   .material-icons-outlined {
@@ -280,7 +280,7 @@
   background: var(--surface);
   border: $border-width-thin solid var(--primary);
   padding: $sp-sm $sp-md;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   box-shadow: $shadow-dropdown;
   max-width: 220px;
@@ -289,7 +289,7 @@
 
 .pipeline-card__company {
   font-weight: 600;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   @include truncate;
 }
@@ -301,7 +301,7 @@
 }
 
 .pipeline-card__contact-name {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   @include truncate;
 }
@@ -310,7 +310,7 @@
   display: flex;
   align-items: center;
   gap: $sp-xs;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 
   &--overdue {

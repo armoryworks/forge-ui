@@ -65,14 +65,14 @@
 
   &__part-number {
     font-family: $font-family-mono;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text);
     @include truncate;
   }
 
   &__description {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     @include truncate;
   }
@@ -80,7 +80,7 @@
 
 // Status badge styles (mirrored from parts.component.scss)
 .status-badge {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xs $sp-sm;
   border: $border-width-thin solid var(--border);
   border-radius: $border-radius;

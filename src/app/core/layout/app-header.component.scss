@@ -2,7 +2,7 @@
 @use 'styles/mixins' as *;
 
 .app-header {
-  height: $header-height;
+  height: var(--header-height);
   background: var(--header);
   color: white;
   display: flex;
@@ -22,7 +22,7 @@
 }
 
 .app-header__logo {
-  font-size: $font-size-title;
+  font-size: var(--font-size-title);
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -46,7 +46,7 @@
 }
 
 .breadcrumb {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: white;
   display: flex;
   gap: $sp-sm;
@@ -81,7 +81,7 @@
   border: $border-width solid var(--bg);
   padding: $sp-sm $sp-md;
   color: var(--text);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   display: flex;
   align-items: center;
   gap: $sp-sm;
@@ -92,7 +92,7 @@
   kbd {
     background: rgba(255, 255, 255, 0.1);
     padding: 0 $sp-sm;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     font-family: $font-family-mono;
     margin-left: auto;
     flex-shrink: 0;
@@ -103,7 +103,7 @@
 
 .search-input {
   flex: 1; border: none; background: transparent; color: var(--text);
-  font-size: $font-size-sm; font-family: $font-family-primary; outline: none;
+  font-size: var(--font-size-sm); font-family: $font-family-primary; outline: none;
   &::placeholder { color: var(--text-muted); }
 }
 
@@ -130,7 +130,7 @@
 }
 
 .search-results__col-header {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   display: flex; align-items: center; gap: $sp-sm;
   padding: $sp-sm $sp-lg; color: var(--text-muted);
   border-bottom: $border-width-thin solid var(--border);
@@ -147,28 +147,28 @@
 .search-results__empty {
   padding: $sp-xl $sp-lg;
   text-align: center;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
 
 .search-results__thinking {
   display: flex; align-items: center; gap: $sp-sm;
   padding: $sp-md $sp-lg;
-  font-size: $font-size-xs; color: var(--text-muted);
+  font-size: var(--font-size-xs); color: var(--text-muted);
   .material-icons-outlined { font-size: $icon-size-sm; color: var(--accent); }
 }
 
 .search-result {
   display: flex; align-items: center; gap: $sp-md; width: 100%;
   padding: $sp-md $sp-lg; border: none; background: transparent;
-  color: var(--text); font-size: $font-size-sm; font-family: $font-family-primary;
+  color: var(--text); font-size: var(--font-size-sm); font-family: $font-family-primary;
   cursor: pointer; text-align: left;
   &:hover { background: var(--bg); }
   &__icon { font-size: $icon-size-md; color: var(--text-muted); flex-shrink: 0; }
   &__content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: $sp-xxs; }
   &__title { font-weight: 600; @include truncate; }
-  &__subtitle { font-size: $font-size-xs; color: var(--text-secondary); @include truncate; }
-  &__type { @include uppercase-label($font-size-xxs, 0.5px, 600); color: var(--text-muted); flex-shrink: 0; }
+  &__subtitle { font-size: var(--font-size-xs); color: var(--text-secondary); @include truncate; }
+  &__type { @include uppercase-label(var(--font-size-xxs), 0.5px, 600); color: var(--text-muted); flex-shrink: 0; }
 
   &--ai {
     &:hover {
@@ -191,7 +191,7 @@
   }
 
   &__score {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     font-family: $font-family-mono;
     color: var(--primary);
     font-weight: 600;
@@ -214,7 +214,7 @@
 }
 
 .search-results__answer-text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   line-height: 1.5;
 }
@@ -296,7 +296,7 @@
 }
 
 .user-trigger__name {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -337,7 +337,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -350,19 +350,19 @@
 }
 
 .user-menu__name {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 700;
   @include truncate;
 }
 
 .user-menu__email {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   @include truncate;
 }
 
 .user-menu__roles {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -382,7 +382,7 @@
   border: none;
   background: transparent;
   color: var(--text);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-family: $font-family-primary;
   cursor: pointer;
   text-align: left;
@@ -417,7 +417,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   margin-bottom: $sp-sm;
 
@@ -438,7 +438,7 @@
   border-radius: 0;
   background: transparent;
   color: var(--text);
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-family: $font-family-primary;
   cursor: pointer;
   text-align: center;

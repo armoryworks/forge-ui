@@ -34,12 +34,12 @@
 }
 
 .upload-zone__text {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .upload-zone__hint {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
 
@@ -55,7 +55,7 @@
   align-items: center;
   gap: $sp-md;
   padding: $sp-sm $sp-md;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &--error {
     color: var(--error);
@@ -78,7 +78,7 @@
 }
 
 .upload-item__error {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--error);
 }
 
@@ -97,7 +97,7 @@
 }
 
 .upload-item__pct {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   min-width: 32px;
   text-align: right;

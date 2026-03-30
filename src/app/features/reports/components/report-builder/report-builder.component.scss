@@ -36,7 +36,7 @@
 }
 
 .builder__section-title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
   margin: 0;
 }
@@ -53,7 +53,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   cursor: pointer;
 
@@ -90,7 +90,7 @@
 }
 
 .builder__result-meta {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   padding: $sp-md 0;
 }
@@ -104,7 +104,7 @@
     display: inline-flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
 
     .material-icons-outlined {
       font-size: $icon-size-sm;

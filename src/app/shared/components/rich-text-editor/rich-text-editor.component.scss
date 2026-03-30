@@ -6,7 +6,7 @@
 }
 
 .rich-text-editor__label {
-  @include uppercase-label($font-size-xxs, 0.5px, 500);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 500);
   display: block;
   margin-bottom: $sp-sm;
   color: var(--text-secondary);
@@ -24,7 +24,7 @@
   .ql-container {
     border-color: var(--border) !important; /* override third-party quill styles */
     font-family: $font-family-primary;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
   }
 
   .ql-editor {

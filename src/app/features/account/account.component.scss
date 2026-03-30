@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 700;
   margin: 0 0 $sp-md;
   text-transform: uppercase;
@@ -48,12 +48,12 @@
 }
 
 .account__email {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   font-weight: 600;
 }
 
 .account__roles {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -82,7 +82,7 @@
 }
 
 .account__color-label {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -130,7 +130,7 @@
   background: var(--error-light);
   color: var(--error);
   border: $border-width-thin solid var(--error);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 
   .material-icons-outlined {

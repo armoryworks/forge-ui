@@ -15,7 +15,7 @@
   }
 
   &__name {
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     font-weight: 700;
     color: var(--text);
     flex: 1;
@@ -40,7 +40,7 @@
   }
 
   &__stat-value {
-    font-size: $font-size-kpi;
+    font-size: var(--font-size-kpi);
     font-weight: 700;
     font-family: $font-family-mono;
     color: var(--text);
@@ -48,9 +48,9 @@
   }
 
   &__stat-label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
-    @include uppercase-label($font-size-xs, 0.04em, 600);
+    @include uppercase-label(var(--font-size-xs), 0.04em, 600);
   }
 
   &__progress-bar {
@@ -66,10 +66,10 @@
   }
 
   &__section-label {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
-    @include uppercase-label($font-size-sm, 0.04em, 600);
+    @include uppercase-label(var(--font-size-sm), 0.04em, 600);
     padding-bottom: $sp-sm;
     border-bottom: $border-width-thin solid var(--border);
   }
@@ -113,7 +113,7 @@
   }
 
   &__module-title {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text);
     font-weight: 500;
     @include truncate;
@@ -129,7 +129,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: $font-family-mono;
 
@@ -137,20 +137,20 @@
   }
 
   &__module-score {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     font-family: $font-family-mono;
     font-weight: 600;
   }
 
   &__module-date {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: $font-family-mono;
   }
 
   &__module-status {
     flex-shrink: 0;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 }

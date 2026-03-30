@@ -39,7 +39,7 @@
 }
 
 .camera-capture__title {
-  font-size: $font-size-title;
+  font-size: var(--font-size-title);
   font-weight: 600;
   color: var(--text);
 }
@@ -86,13 +86,13 @@
 }
 
 .camera-capture__status-text {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 500;
   color: var(--surface);
 }
 
 .camera-capture__status-hint {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   max-width: 280px;
   line-height: 1.4;

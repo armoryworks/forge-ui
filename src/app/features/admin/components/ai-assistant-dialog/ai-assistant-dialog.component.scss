@@ -6,7 +6,7 @@
   justify-content: center;
   width: 40px;
   min-width: 40px;
-  height: $input-height;
+  height: var(--input-height);
   border: $border-width solid var(--border);
   background: var(--surface);
 
@@ -20,7 +20,7 @@
 
   &__label {
     display: block;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--text-secondary);
     margin-bottom: $sp-sm;
@@ -46,7 +46,7 @@
 
   &__text {
     flex: 1;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
   }
 
   &__add {
@@ -67,7 +67,7 @@
   background: none;
   border: none;
   color: var(--text-secondary);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   padding: $sp-sm 0;
   margin-bottom: $sp-md;
@@ -84,7 +84,7 @@
 .color-input {
   width: 40px;
   min-width: 40px;
-  height: $input-height;
+  height: var(--input-height);
   padding: $sp-xxs;
   border: $border-width solid var(--border);
   background: var(--surface);

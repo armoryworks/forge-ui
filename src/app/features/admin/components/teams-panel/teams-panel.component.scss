@@ -27,7 +27,7 @@
   padding: $sp-xs $sp-md;
   cursor: pointer;
   font-family: inherit;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   transition: border-color $transition-fast;
 
@@ -55,7 +55,7 @@
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   font-weight: 600;
   margin-bottom: $sp-md;
   color: var(--text);
@@ -68,7 +68,7 @@
 
 .device-token {
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   background: var(--bg);
   padding: $sp-xxs $sp-sm;
@@ -83,7 +83,7 @@
 }
 
 .color-picker-label {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
 }
 
@@ -113,7 +113,7 @@
 
 // Member dialog
 .member-hint {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   margin-bottom: $sp-md;
 }
@@ -156,13 +156,13 @@
 }
 
 .member-name {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text);
 }
 
 .member-email {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 }
 

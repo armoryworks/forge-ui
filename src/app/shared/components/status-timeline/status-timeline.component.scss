@@ -24,7 +24,7 @@
   }
 
   &__notes {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
@@ -98,25 +98,25 @@
   }
 
   &__label {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
   }
 
   &__meta {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     margin-top: $sp-xxs;
   }
 
   &__notes {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     margin-top: $sp-xs;
   }
 }
 
 .chip--sm {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   padding: 0 $sp-sm;
   height: $badge-size-md;
   line-height: $badge-size-md;

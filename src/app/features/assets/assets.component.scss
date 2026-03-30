@@ -25,7 +25,7 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; }
-.detail-type { font-size: $font-size-xs; color: var(--text-muted); }
+.detail-type { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 .detail-body {
   flex: 1; overflow: auto;
@@ -34,20 +34,20 @@
 
 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: $sp-md; }
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: $font-size-sm; }
+.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: var(--font-size-sm); }
 .mono { font-family: $font-family-mono; }
 
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }
-.info-section__title { @include uppercase-label($font-size-xs, 0.5px, 700); color: var(--text-secondary); }
+.info-section__title { @include uppercase-label(var(--font-size-xs), 0.5px, 700); color: var(--text-secondary); }
 
 .notes-section { display: flex; flex-direction: column; gap: $sp-sm; }
-.notes-text { font-size: $font-size-sm; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+.notes-text { font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0; line-height: 1.5; }
 
 .status-actions { display: flex; flex-direction: column; gap: $sp-sm; }
 .status-btn-group { display: flex; gap: $sp-sm; flex-wrap: wrap; }
 .status-btn {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xxs $sp-md; border: $border-width-thin solid var(--border);
   background: var(--surface); color: var(--text-muted); cursor: pointer;
   border-radius: $border-radius; font-family: $font-family-primary;
@@ -57,7 +57,7 @@
 
 .maintenance-empty {
   display: flex; align-items: center; gap: $sp-md; color: var(--text-muted);
-  font-size: $font-size-sm; padding: $sp-md 0;
+  font-size: var(--font-size-sm); padding: $sp-md 0;
 }
 
 .maintenance-log-list { display: flex; flex-direction: column; gap: $sp-sm; }
@@ -67,10 +67,10 @@
   padding: $sp-md; border: $border-width-thin solid var(--border); background: var(--bg);
 
   &__header { @include flex-between; gap: $sp-md; }
-  &__name { font-size: $font-size-sm; font-weight: 600; }
-  &__date { font-size: $font-size-xs; }
-  &__meta { display: flex; gap: $sp-xs; font-size: $font-size-xs; }
-  &__notes { margin: 0; font-size: $font-size-xs; line-height: 1.4; }
+  &__name { font-size: var(--font-size-sm); font-weight: 600; }
+  &__date { font-size: var(--font-size-xs); }
+  &__meta { display: flex; gap: $sp-xs; font-size: var(--font-size-xs); }
+  &__notes { margin: 0; font-size: var(--font-size-xs); line-height: 1.4; }
 }
 
 .page-loading--sm { padding: $sp-md 0; }

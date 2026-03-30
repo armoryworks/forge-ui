@@ -32,12 +32,12 @@
   }
 
   &__label {
-    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
     color: var(--text-muted);
   }
 
   &__value {
-    font-size: $font-size-lg;
+    font-size: var(--font-size-lg);
     font-weight: 700;
     font-family: $font-family-mono;
     color: var(--primary);
@@ -65,18 +65,18 @@
   flex-shrink: 0;
 
   &__label {
-    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
     color: var(--text-muted);
   }
 
   &__value {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     font-family: $font-family-mono;
   }
 
   &__count {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     color: var(--text-muted);
   }
 }

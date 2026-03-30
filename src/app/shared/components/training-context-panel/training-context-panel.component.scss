@@ -4,9 +4,9 @@
 .training-context-panel {
   position: fixed;
   right: 0;
-  top: $header-height;
+  top: var(--header-height);
   width: 320px;
-  height: calc(100vh - #{$header-height});
+  height: calc(100vh - #{var(--header-height)});
   background: var(--surface);
   border-left: $border-width-thin solid var(--border);
   box-shadow: $shadow-panel;
@@ -36,7 +36,7 @@
 
   &__title {
     flex: 1;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text);
   }
@@ -69,7 +69,7 @@
     color: var(--text-muted);
 
     .material-icons-outlined { font-size: $icon-size-hero; }
-    p { font-size: $font-size-sm; margin: 0; }
+    p { font-size: var(--font-size-sm); margin: 0; }
   }
 
   &__list {
@@ -111,14 +111,14 @@
   }
 
   &__title {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 500;
     color: var(--text);
     @include truncate;
   }
 
   &__meta {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 

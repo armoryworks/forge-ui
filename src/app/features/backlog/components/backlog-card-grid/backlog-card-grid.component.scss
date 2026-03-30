@@ -21,7 +21,7 @@
   gap: $sp-md;
   padding: $sp-4xl $sp-xl;
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .backlog-card-grid__empty-icon {
@@ -64,18 +64,18 @@
 
   &__number {
     font-family: $font-family-mono;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
   &__hold-badge {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
   }
 
   &__title {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
     @include truncate;
     color: var(--text);
@@ -91,7 +91,7 @@
     align-items: center;
     gap: $sp-md;
     flex-wrap: wrap;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
@@ -99,7 +99,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 
@@ -116,7 +116,7 @@
     align-items: center;
     gap: $sp-sm;
     color: var(--text-secondary);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 
   &__customer-icon {
@@ -139,7 +139,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     white-space: nowrap;
 

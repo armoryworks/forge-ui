@@ -31,7 +31,7 @@
     background: none;
     border: none;
     cursor: pointer;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     padding: $sp-xs $sp-sm;
     transition: color $transition-fast;
@@ -68,14 +68,14 @@
   }
 
   &__title {
-    font-size: $font-size-xl;
+    font-size: var(--font-size-xl);
     font-weight: 700;
     color: var(--text);
     margin: 0;
   }
 
   &__desc {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
     margin: 0;
   }
@@ -84,7 +84,7 @@
     display: flex;
     align-items: center;
     gap: $sp-md;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
   }
 
@@ -131,7 +131,7 @@
   }
 
   &__num {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--text-muted);
     font-family: $font-family-mono;
@@ -161,17 +161,17 @@
   }
 
   &__type-label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
-    @include uppercase-label($font-size-xs, 0.04em, 600);
+    @include uppercase-label(var(--font-size-xs), 0.04em, 600);
   }
 
   &__required {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
   }
 
   &__title {
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
     font-weight: 600;
     color: var(--text);
     margin: 0;
@@ -187,7 +187,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
 
     .material-icons-outlined {

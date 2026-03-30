@@ -10,7 +10,7 @@
   align-items: center;
   gap: $sp-md;
   padding: $sp-md $sp-lg;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   z-index: $z-snackbar;
   border: $border-width solid transparent;
@@ -54,7 +54,7 @@
   min-width: $badge-size-md;
   height: $badge-size-md;
   padding: 0 $sp-sm;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   background: var(--warning);
   color: white;

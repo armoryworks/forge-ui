@@ -23,7 +23,6 @@ export class AccountSecurityComponent {
   private readonly accountService = inject(AccountService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
-
   protected readonly user = this.authService.user;
   protected readonly savingPassword = signal(false);
   protected readonly savingPin = signal(false);

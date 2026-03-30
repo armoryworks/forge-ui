@@ -10,7 +10,7 @@
   background: var(--error-light);
   color: var(--error);
   border: $border-width-thin solid var(--error);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
 
   .material-icons-outlined {
@@ -19,7 +19,8 @@
 }
 
 .security__hint {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
 }
+

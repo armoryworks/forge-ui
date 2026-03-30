@@ -20,7 +20,7 @@
 }
 
 .sync-conflict-dialog__title {
-  @include uppercase-label($font-size-sm, 0.5px, 700);
+  @include uppercase-label(var(--font-size-sm), 0.5px, 700);
   flex: 1;
 }
 
@@ -32,7 +32,7 @@
 }
 
 .sync-conflict-dialog__description {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
   line-height: 1.5;
   margin: 0;
@@ -59,21 +59,21 @@
 }
 
 .sync-conflict-dialog__label {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   color: var(--text-muted);
   min-width: 80px;
   flex-shrink: 0;
 }
 
 .sync-conflict-dialog__value {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
   word-break: break-word;
 }
 
 .sync-conflict-dialog__code {
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-secondary);
   background: var(--bg);
   border: $border-width-thin solid var(--border);

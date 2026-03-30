@@ -55,7 +55,7 @@
   }
 
   &__progress-pct {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     white-space: nowrap;
     min-width: 32px;

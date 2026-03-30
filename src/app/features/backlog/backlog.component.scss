@@ -10,7 +10,7 @@
 }
 
 .new-job-btn {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
   gap: $sp-sm;
   height: 2rem;
@@ -34,7 +34,7 @@
 .row--selected { background: var(--primary-light); }
 
 .job-number {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text);
 }
 

@@ -6,7 +6,7 @@
   gap: $sp-md;
   padding: $sp-sm $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .activity-item__icon {
@@ -33,7 +33,7 @@
 
 .activity-item__time {
   flex-shrink: 0;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   white-space: nowrap;
   text-transform: uppercase;

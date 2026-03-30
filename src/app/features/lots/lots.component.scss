@@ -2,7 +2,7 @@
 
 .lot-number {
   font-family: $font-family-mono;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .text-muted {
@@ -26,14 +26,14 @@
 }
 
 .trace-label {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .trace-value {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
 }
 
@@ -42,7 +42,7 @@
 }
 
 .trace-timeline__title {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -51,7 +51,7 @@
 }
 
 .trace-empty {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text-muted);
   font-style: italic;
 }
@@ -90,17 +90,17 @@
 
 .trace-event__ref {
   font-family: $font-family-mono;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text);
 }
 
 .trace-event__desc {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
 }
 
 .trace-event__date {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 }

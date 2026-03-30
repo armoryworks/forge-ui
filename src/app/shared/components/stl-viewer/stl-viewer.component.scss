@@ -18,7 +18,7 @@
     align-items: center;
     justify-content: center;
     gap: $sp-md;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-muted);
     z-index: 1;
     background: var(--surface);

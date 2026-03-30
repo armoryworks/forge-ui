@@ -36,7 +36,7 @@
 }
 
 .ambient__date {
-  font-size: $font-size-xl;
+  font-size: var(--font-size-xl);
   font-weight: 300;
   color: rgba(white, 0.6);
 }
@@ -58,13 +58,13 @@
 }
 
 .ambient__kpi-value {
-  font-size: $font-size-heading;
+  font-size: var(--font-size-heading);
   font-weight: 700;
   font-family: $font-family-mono;
 }
 
 .ambient__kpi-label {
-  @include uppercase-label($font-size-xs, 1px, 500);
+  @include uppercase-label(var(--font-size-xs), 1px, 500);
   color: rgba(white, 0.5);
 }
 
@@ -77,7 +77,7 @@
 }
 
 .ambient__section-label {
-  @include uppercase-label($font-size-xs, 1px, 600);
+  @include uppercase-label(var(--font-size-xs), 1px, 600);
   color: rgba(white, 0.4);
   margin-bottom: $sp-sm;
 }
@@ -97,13 +97,13 @@
 .ambient__deadline-job {
   font-weight: 700;
   font-family: $font-family-mono;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   min-width: 80px;
 }
 
 .ambient__deadline-desc {
   flex: 1;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: rgba(white, 0.7);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -111,7 +111,7 @@
 }
 
 .ambient__deadline-date {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: rgba(white, 0.4);
   font-family: $font-family-mono;
 }
@@ -119,6 +119,6 @@
 .ambient__hint {
   position: absolute;
   bottom: $sp-xl;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: rgba(white, 0.2);
 }

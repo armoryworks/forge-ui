@@ -20,7 +20,7 @@
   }
 
   &__label {
-    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
     color: var(--text-muted);
     white-space: nowrap;
   }
@@ -31,14 +31,14 @@
     outline: none;
     background: transparent;
     font-family: $font-family-mono;
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     color: var(--text);
     min-width: 0;
 
     &::placeholder {
       color: var(--text-muted);
       font-family: $font-family-primary;
-      font-size: $font-size-sm;
+      font-size: var(--font-size-sm);
     }
   }
 

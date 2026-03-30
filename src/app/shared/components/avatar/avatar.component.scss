@@ -18,12 +18,12 @@
   &--md {
     width: $avatar-size-sm;
     height: $avatar-size-sm;
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
   }
 
   &--lg {
     width: $avatar-size-lg;
     height: $avatar-size-lg;
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
   }
 }

@@ -72,6 +72,7 @@ export class AccountSidebarComponent {
     { path: 'pay-stubs', label: this.translate.instant('account.payStubs'), icon: 'payments' },
     { path: 'tax-documents', label: this.translate.instant('account.taxDocuments'), icon: 'receipt_long' },
     { path: 'security', label: this.translate.instant('account.security'), icon: 'lock' },
+    { path: 'customization', label: this.translate.instant('account.customization'), icon: 'palette' },
   ];
 
   protected readonly taxFormsComplete = computed(() => {

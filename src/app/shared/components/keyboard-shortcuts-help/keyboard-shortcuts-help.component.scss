@@ -31,7 +31,7 @@
   flex-shrink: 0;
 
   h2 {
-    font-size: $font-size-lg;
+    font-size: var(--font-size-lg);
     font-weight: 600;
     margin: 0;
     color: var(--text);
@@ -50,7 +50,7 @@
 }
 
 .shortcuts-group__title {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text-muted);
   margin: 0 0 $sp-md;
 }
@@ -61,7 +61,7 @@
 }
 
 .shortcuts-group__description {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
 }
 
@@ -77,13 +77,13 @@
   border: $border-width-thin solid var(--border);
   padding: $sp-xs $sp-md;
   font-family: $font-family-mono;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   white-space: nowrap;
 }
 
 .shortcuts-group__sep {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: nowrap;
 }

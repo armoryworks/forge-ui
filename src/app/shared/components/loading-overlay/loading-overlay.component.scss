@@ -60,7 +60,7 @@ $enter-duration: 300ms;
 }
 
 .loading-overlay__cause {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   color: var(--text);
   white-space: nowrap;
   opacity: 1;

@@ -22,7 +22,7 @@
 
   &__title {
     flex: 1;
-    font-size: $font-size-xl;
+    font-size: var(--font-size-xl);
     font-weight: 600;
     color: var(--text);
     margin: 0;
@@ -44,7 +44,7 @@
   }
 
   &__section-title {
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
     font-weight: 600;
     color: var(--text-secondary);
     margin: 0;

@@ -38,7 +38,7 @@
 }
 
 .widget__title {
-  @include uppercase-label($font-size-xs, 1px, 700);
+  @include uppercase-label(var(--font-size-xs), 1px, 700);
   display: flex;
   align-items: center;
   gap: $sp-md;
@@ -56,7 +56,7 @@
 .widget__count {
   background: var(--primary);
   color: white;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   min-width: 20px;
   height: 18px;

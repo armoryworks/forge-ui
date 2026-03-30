@@ -9,7 +9,7 @@
 .rates-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th,
   td {
@@ -19,7 +19,7 @@
   }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
   }
 
@@ -65,7 +65,7 @@
   }
 
   &__text {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
   }
 }
@@ -92,7 +92,7 @@
 
   &__title {
     font-weight: 700;
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     color: var(--success);
   }
 
@@ -103,13 +103,13 @@
   }
 
   &__label {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
     min-width: 70px;
   }
 
   &__value {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text);
 
     &--mono {

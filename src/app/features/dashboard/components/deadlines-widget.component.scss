@@ -13,7 +13,7 @@
   width: 40px;
   flex-shrink: 0;
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--text-secondary);
 
@@ -27,7 +27,7 @@
   width: 58px;
   flex-shrink: 0;
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 500;
   color: var(--primary-dark);
 
@@ -38,7 +38,7 @@
 
 .deadline-item__desc {
   flex: 1;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   @include truncate;
 
   .deadline-item--overdue & {

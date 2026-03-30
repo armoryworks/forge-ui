@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 export type ThemeMode = 'light' | 'dark';
+export type FontScale = 'default' | 'comfortable' | 'large' | 'xl';
 
 interface BrandSettings {
   primaryColor: string | null;
@@ -16,6 +17,8 @@ export class ThemeService {
   private readonly http = inject(HttpClient);
   private readonly _theme = signal<ThemeMode>('light');
   readonly theme = this._theme.asReadonly();
+  private readonly _fontScale = signal<FontScale>('default');
+  readonly fontScale = this._fontScale.asReadonly();
   readonly appName = signal('QB Engineer');
   readonly logoUrl = signal<string | null>(null);
 
@@ -27,6 +30,12 @@ export class ThemeService {
       this._theme.set(saved);
     }
     this.applyTheme(this._theme());
+
+    const savedScale = localStorage.getItem('qbe-font-scale') as FontScale | null;
+    if (savedScale === 'comfortable' || savedScale === 'large' || savedScale === 'xl') {
+      this._fontScale.set(savedScale);
+    }
+    this.applyFontScale(this._fontScale());
 
     const cachedBrand = localStorage.getItem('qbe-brand-colors');
     if (cachedBrand) {
@@ -66,8 +75,22 @@ export class ThemeService {
     this.applyBrandColors();
   }
 
+  setFontScale(scale: FontScale): void {
+    this._fontScale.set(scale);
+    localStorage.setItem('qbe-font-scale', scale);
+    this.applyFontScale(scale);
+  }
+
   private applyTheme(theme: ThemeMode): void {
     document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  private applyFontScale(scale: FontScale): void {
+    if (scale === 'default') {
+      document.documentElement.removeAttribute('data-font-size');
+    } else {
+      document.documentElement.setAttribute('data-font-size', scale);
+    }
   }
 
   loadBrandSettings(): void {

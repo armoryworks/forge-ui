@@ -14,7 +14,7 @@ html {
 
 body {
   font-family: $font-family-primary;
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
   background: var(--bg);
   height: 100%;

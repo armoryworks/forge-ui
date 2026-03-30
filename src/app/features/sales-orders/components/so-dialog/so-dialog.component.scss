@@ -17,14 +17,14 @@
 }
 
 .lines-title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
 }
 
 .lines-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th,
   td {
@@ -34,7 +34,7 @@
   }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
   }
 
@@ -44,7 +44,7 @@
 
   &__mono {
     font-family: $font-family-mono;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   &__bold {

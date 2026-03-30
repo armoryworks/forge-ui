@@ -10,7 +10,7 @@
   max-width: 600px;
 
   &__title {
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     font-weight: 600;
     margin-top: $sp-xl;
     margin-bottom: $sp-md;
@@ -38,12 +38,12 @@
   }
 
   &__label {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 500;
   }
 
   &__desc {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
   }
 

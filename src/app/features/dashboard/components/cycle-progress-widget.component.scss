@@ -23,7 +23,7 @@
   gap: $sp-sm;
   padding: $sp-lg;
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &__icon {
     font-size: $icon-size-xxl;
@@ -31,7 +31,7 @@
   }
 
   &__link {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--primary);
     text-decoration: none;
     font-weight: 600;
@@ -50,7 +50,7 @@
 
 .cycle-name {
   font-weight: 700;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   text-decoration: none;
 
@@ -60,7 +60,7 @@
 }
 
 .cycle-status {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--text-muted);
 
   &--overdue {
@@ -92,7 +92,7 @@
   }
 
   &__label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: $font-family-mono;
   }
@@ -132,7 +132,7 @@
 
   &__number {
     font-family: $font-family-mono;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     flex-shrink: 0;
     width: 58px;
@@ -140,13 +140,13 @@
 
   &__title {
     flex: 1;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     @include truncate;
   }
 }
 
 .cycle-more {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--primary);
   text-decoration: none;
   padding: $sp-sm $sp-md;

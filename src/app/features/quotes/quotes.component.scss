@@ -57,7 +57,7 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; }
-.detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
+.detail-customer { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 .detail-body {
   flex: 1;
@@ -75,12 +75,12 @@
 }
 
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: $font-size-sm; }
+.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: var(--font-size-sm); }
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }
 
 .info-notes {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   white-space: pre-wrap;
 }
@@ -95,7 +95,7 @@
 .lines-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th, td {
     padding: $sp-sm $sp-md;
@@ -104,12 +104,12 @@
   }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
   }
 
   &__right { text-align: right; }
-  &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+  &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
 }
 
 // --- Totals ---
@@ -132,7 +132,7 @@
 }
 
 .totals-value {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-family: $font-family-mono;
 }
 

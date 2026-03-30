@@ -15,7 +15,7 @@
   }
 
   &__text {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -56,12 +56,12 @@
   &__number {
     font-family: $font-family-mono;
     font-weight: 600;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     white-space: nowrap;
   }
 
   &__title {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     @include truncate;
   }
 
@@ -69,7 +69,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 

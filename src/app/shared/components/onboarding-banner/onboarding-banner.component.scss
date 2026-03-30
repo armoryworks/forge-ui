@@ -17,7 +17,7 @@
 
 .onboarding-banner__text {
   flex: 1;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text);
 }

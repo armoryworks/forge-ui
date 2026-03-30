@@ -26,7 +26,7 @@
 }
 
 .board-hint__text {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
 
   kbd {
@@ -45,7 +45,7 @@
 }
 
 .track-type-btn {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   padding: $sp-xxs $sp-md;
   border: $border-width solid var(--border);
   background: var(--surface);
@@ -109,7 +109,7 @@
 }
 
 .my-work-btn {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
   gap: $sp-sm;
   padding: $sp-xxs $sp-md;
@@ -135,7 +135,7 @@
 }
 
 .new-job-btn {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
   gap: $sp-sm;
   padding: $sp-xxs $sp-md;
@@ -194,7 +194,7 @@
   z-index: $z-dropdown;
 
   &__count {
-    @include uppercase-label($font-size-xs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xs), 0.5px, 700);
     color: var(--primary);
     white-space: nowrap;
     padding-right: $sp-md;
@@ -203,7 +203,7 @@
 
   &__btn {
     @include flex-center;
-    @include uppercase-label($font-size-xs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xs), 0.5px, 600);
     gap: $sp-sm;
     padding: $sp-sm $sp-md;
     border: $border-width-thin solid var(--border);
@@ -288,7 +288,7 @@
   }
 
   &__corner-label {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-secondary);
   }
 
@@ -306,7 +306,7 @@
   }
 
   &__stage-name {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-secondary);
   }
 
@@ -324,7 +324,7 @@
   }
 
   &__user-name {
-    @include uppercase-label($font-size-xs, 0.3px, 600);
+    @include uppercase-label(var(--font-size-xs), 0.3px, 600);
     color: var(--text);
     white-space: nowrap;
     @include truncate;

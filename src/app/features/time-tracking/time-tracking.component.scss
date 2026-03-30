@@ -10,7 +10,7 @@
   padding: $sp-md $sp-lg; border-bottom: $border-width-thin solid var(--border); flex-shrink: 0;
 }
 .filter-group { display: flex; align-items: center; gap: $sp-sm; min-width: 160px; max-width: 200px; }
-.filter-summary { margin-left: auto; font-size: $font-size-sm; color: var(--text-muted); }
+.filter-summary { margin-left: auto; font-size: var(--font-size-sm); color: var(--text-muted); }
 
 .row--active { background: var(--success-light); }
 
@@ -20,19 +20,19 @@
 .notes-cell { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .job-badge {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xxs $sp-sm; border-radius: $border-radius;
   background: var(--primary-light); color: var(--primary); border: $border-width-thin solid var(--primary);
 }
 
 .running-badge {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xxs $sp-sm; border-radius: $border-radius;
   background: var(--success-light); color: var(--success); border: $border-width-thin solid var(--success);
 }
 
 .entry-type {
-  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
   padding: $sp-xxs $sp-sm; border-radius: $border-radius; border: $border-width-thin solid var(--border);
   &--manual { background: var(--bg); color: var(--text-muted); }
   &--timer { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
@@ -40,4 +40,4 @@
 
 .lock-icon { font-size: $icon-size-xs; color: var(--text-muted); }
 
-.timer-info { font-size: $font-size-sm; color: var(--text-secondary); margin: 0 0 $sp-md 0; }
+.timer-info { font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0 0 $sp-md 0; }

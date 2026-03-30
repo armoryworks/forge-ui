@@ -60,7 +60,7 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; }
-.detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
+.detail-customer { font-size: var(--font-size-xs); color: var(--text-muted); }
 
 .detail-body {
   flex: 1;
@@ -78,12 +78,12 @@
 }
 
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: $font-size-sm; }
+.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: var(--font-size-sm); }
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }
 
 .info-notes {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   white-space: pre-wrap;
 }
@@ -98,7 +98,7 @@
 .lines-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th, td {
     padding: $sp-sm $sp-md;
@@ -107,12 +107,12 @@
   }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
   }
 
   &__right { text-align: right; }
-  &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+  &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
 }
 
 // --- Totals Section ---
@@ -128,11 +128,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &--total {
     font-weight: 700;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     padding-top: $sp-sm;
     border-top: $border-width-thin solid var(--border);
   }
@@ -163,7 +163,7 @@
   padding: $sp-md $sp-lg;
   background: var(--info-light);
   border-bottom: $border-width-thin solid var(--info);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text);
   flex-shrink: 0;
 
@@ -195,14 +195,14 @@
   }
 
   &__text {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text);
     flex: 1;
   }
 
   &__action {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--warning);
   }
 }
@@ -218,7 +218,7 @@
   border-radius: 99px;
   background: var(--warning);
   color: white;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   font-weight: 700;
   line-height: 1;
 }

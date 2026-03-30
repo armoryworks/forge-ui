@@ -29,7 +29,7 @@
 // ─── Lot Number ───
 .quality__lot-number {
   font-family: $font-family-mono;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .quality__results-summary {
@@ -58,12 +58,12 @@
   }
 
   &__label {
-    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
     color: var(--text-muted);
   }
 
   &__value {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text);
   }
@@ -78,7 +78,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
     margin: 0;
@@ -94,7 +94,7 @@
     gap: $sp-md;
     padding: $sp-sm $sp-md;
     border-bottom: $border-width-thin solid var(--border);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 
   &__item-label {
@@ -115,7 +115,7 @@
   gap: $sp-md;
   padding: $sp-xl;
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   .material-icons-outlined {
     font-size: $icon-size-lg;

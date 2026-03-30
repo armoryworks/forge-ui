@@ -22,7 +22,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
 
@@ -35,7 +35,7 @@
   }
 
   &__pool-hint {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-style: italic;
   }
@@ -44,7 +44,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: $font-family-mono;
 
@@ -74,7 +74,7 @@
   }
 
   &__progress-text {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
     font-family: $font-family-mono;
   }
@@ -83,7 +83,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     color: var(--success);
 
@@ -150,14 +150,14 @@
   }
 
   &__score-pct {
-    font-size: $font-size-lg;
+    font-size: var(--font-size-lg);
     font-weight: 700;
     font-family: $font-family-mono;
     line-height: 1;
   }
 
   &__score-label {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -171,14 +171,14 @@
   }
 
   &__score-msg {
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     font-weight: 600;
     color: var(--text);
     margin: 0;
   }
 
   &__score-sub {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     margin: 0;
     font-family: $font-family-mono;
@@ -195,10 +195,10 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text-secondary);
-    @include uppercase-label($font-size-sm, 0.04em, 600);
+    @include uppercase-label(var(--font-size-sm), 0.04em, 600);
     padding-bottom: $sp-sm;
     border-bottom: $border-width-thin solid var(--border);
 
@@ -230,7 +230,7 @@
   }
 
   &__text {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text);
     margin: 0;
@@ -240,7 +240,7 @@
   }
 
   &__num {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     flex-shrink: 0;
   }
@@ -258,7 +258,7 @@
   }
 
   &__explanation {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     background: var(--bg);
     border-left: $border-width solid var(--info);
@@ -332,7 +332,7 @@
   }
 
   &__text {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text);
   }
 }

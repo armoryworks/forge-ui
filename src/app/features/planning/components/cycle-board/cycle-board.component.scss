@@ -20,20 +20,20 @@
   }
 
   &__title {
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     font-weight: 700;
     color: var(--text);
     margin: 0;
   }
 
   &__dates {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     font-family: $font-family-mono;
   }
 
   &__days-left {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--warning);
     background: var(--warning-light);
     padding: $sp-xxs $sp-sm;
@@ -46,14 +46,14 @@
   }
 
   &__count {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-family: $font-family-mono;
     color: var(--text-secondary);
     font-weight: 600;
   }
 
   &__status {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   &__progress {
@@ -77,7 +77,7 @@
   }
 
   &__progress-label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     font-family: $font-family-mono;
     color: var(--text-muted);
     min-width: 32px;
@@ -92,14 +92,14 @@
   }
 
   &__goals-label {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
     display: block;
     margin-bottom: $sp-xs;
   }
 
   &__goals-text {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     margin: 0;
     line-height: 1.4;
@@ -131,7 +131,7 @@
   }
 
   &__empty-hint {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     margin-top: $sp-xs;
   }
 }
@@ -196,14 +196,14 @@
   }
 
   &__job-number {
-    @include uppercase-label($font-size-xs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xs), 0.5px, 700);
     color: var(--text);
     flex-shrink: 0;
   }
 
   &__title {
     @include truncate;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text);
   }
 
@@ -211,11 +211,11 @@
     display: flex;
     align-items: center;
     gap: $sp-md;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   &__priority {
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
     font-weight: 600;
 
     &--urgent { color: var(--error); }
@@ -226,7 +226,7 @@
 
   &__assignee {
     color: var(--text-muted);
-    font-size: $font-size-xxs;
+    font-size: var(--font-size-xxs);
   }
 
   &__rolled-over-badge {

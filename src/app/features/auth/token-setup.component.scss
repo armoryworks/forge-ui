@@ -36,6 +36,6 @@
 
   p {
     margin: 0;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 }

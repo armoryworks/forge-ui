@@ -10,7 +10,7 @@
 }
 
 .approval-queue__summary {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -46,18 +46,18 @@
 }
 
 .review-detail__label {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   color: var(--text-muted);
 }
 
 .review-detail__value {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   color: var(--text);
 }
 
 .review-detail__value--amount {
   font-weight: 700;
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
 }
 
 .icon-btn--success:hover {

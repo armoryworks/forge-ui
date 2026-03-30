@@ -41,7 +41,7 @@
   }
 
   &__title {
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
     font-weight: 700;
     margin: 0;
     color: var(--text);
@@ -104,11 +104,11 @@
       .mat-step-icon {
         width: 18px;
         height: 18px;
-        font-size: $font-size-xs;
+        font-size: var(--font-size-xs);
       }
 
       .mat-step-label {
-        font-size: $font-size-sm;
+        font-size: var(--font-size-sm);
         font-family: $font-family-primary;
       }
 
@@ -159,12 +159,12 @@
     padding: $sp-3xl $sp-lg;
 
     h2 {
-      font-size: $font-size-xl;
+      font-size: var(--font-size-xl);
       margin: $sp-lg 0 $sp-md;
     }
 
     p {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       color: var(--text-secondary);
       max-width: 480px;
       margin: 0 auto $sp-xl;
@@ -188,12 +188,12 @@
 
   &__signing-header {
     h2 {
-      font-size: $font-size-xl;
+      font-size: var(--font-size-xl);
       margin: 0 0 $sp-xs;
     }
 
     p {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       color: var(--text-secondary);
       margin: 0 0 $sp-md;
     }
@@ -209,7 +209,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-muted);
 
     &--active {
@@ -247,7 +247,7 @@
 
     h3 {
       margin: 0;
-      font-size: $font-size-lg;
+      font-size: var(--font-size-lg);
       flex: 1;
     }
   }
@@ -256,7 +256,7 @@
     display: flex;
     align-items: center;
     gap: $sp-xs;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--success);
     font-weight: 600;
 
@@ -273,7 +273,7 @@
     display: flex;
     align-items: baseline;
     gap: $sp-md;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     padding: $sp-xs 0;
     border-bottom: $border-width-thin solid var(--border);
 
@@ -289,7 +289,7 @@
   }
 
   &__review-note {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
     margin: 0;
   }
@@ -298,7 +298,7 @@
     display: flex;
     align-items: flex-start;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     background: var(--info-light);
     padding: $sp-md;
@@ -342,13 +342,13 @@
 
     h3 {
       margin: 0;
-      font-size: $font-size-lg;
+      font-size: var(--font-size-lg);
       flex: 1;
     }
   }
 
   &__signing-doc-count {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     font-family: $font-family-mono;
   }
@@ -364,7 +364,7 @@
     display: flex;
     align-items: flex-start;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     background: var(--warning-light);
     padding: $sp-md;
@@ -392,7 +392,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     margin: 0;
     flex: 1;
@@ -420,7 +420,7 @@
     justify-content: center;
     padding: $sp-3xl 0;
     color: var(--text-secondary);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -435,21 +435,21 @@
   max-width: 820px;
 
   &__title {
-    font-size: $font-size-lg;
+    font-size: var(--font-size-lg);
     font-weight: 700;
     margin: 0 0 $sp-xs;
     color: var(--text);
   }
 
   &__desc {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
     margin: 0 0 $sp-sm;
     line-height: 1.5;
   }
 
   &__state-badge {
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     font-weight: 400;
     color: var(--text-secondary);
   }
@@ -470,14 +470,14 @@
     }
 
     strong {
-      font-size: $font-size-title;
+      font-size: var(--font-size-title);
       color: var(--text);
       display: block;
       margin-bottom: $sp-xs;
     }
 
     p {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       color: var(--text-secondary);
       margin: 0;
     }
@@ -494,7 +494,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     font-weight: 600;
     color: var(--text);
     margin-bottom: $sp-md;
@@ -520,7 +520,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--text-muted);
     padding: $sp-xl 0;
@@ -533,7 +533,7 @@
   }
 
   &__doc-col-title {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--primary);
     text-transform: uppercase;
@@ -547,7 +547,7 @@
     list-style: disc;
 
     li {
-      font-size: $font-size-sm;
+      font-size: var(--font-size-sm);
       color: var(--text-secondary);
       line-height: 1.7;
 
@@ -579,7 +579,7 @@
     margin-bottom: $sp-sm;
 
     h3 {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       font-weight: 700;
       margin: 0 0 $sp-sm;
       text-transform: uppercase;
@@ -588,7 +588,7 @@
     }
 
     p {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       color: var(--text-secondary);
       margin: 0 0 $sp-sm;
       line-height: 1.5;
@@ -613,7 +613,7 @@
   }
 
   &__subsection-title {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -659,14 +659,14 @@
   }
 
   &__calc-op {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
     white-space: nowrap;
   }
 
   &__calc-result {
     font-family: $font-family-mono;
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
     font-weight: 700;
     color: var(--primary);
     min-width: 80px;
@@ -681,13 +681,13 @@
     margin-top: $sp-xs;
 
     span {
-      font-size: $font-size-base;
+      font-size: var(--font-size-base);
       color: var(--text-secondary);
     }
 
     strong {
       font-family: $font-family-mono;
-      font-size: $font-size-md;
+      font-size: var(--font-size-md);
       color: var(--text);
     }
   }
@@ -699,7 +699,7 @@
     background: color-mix(in srgb, var(--info) 8%, transparent);
     border: $border-width-thin solid color-mix(in srgb, var(--info) 30%, transparent);
     padding: $sp-sm $sp-md;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
 
     .material-icons-outlined {
@@ -737,7 +737,7 @@
   min-width: 200px;
 
   &__label {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.04em;
@@ -746,7 +746,7 @@
 
   &__value {
     font-family: $font-family-mono;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--primary);
     background: color-mix(in srgb, var(--primary) 6%, transparent);
     border: $border-width-thin solid color-mix(in srgb, var(--primary) 20%, transparent);
@@ -755,7 +755,7 @@
   }
 
   &__desc {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-muted);
   }
 }
@@ -820,12 +820,12 @@
     gap: $sp-xs;
 
     strong {
-      font-size: $font-size-title;
+      font-size: var(--font-size-title);
       color: var(--text);
     }
 
     span {
-      font-size: $font-size-sm;
+      font-size: var(--font-size-sm);
       color: var(--text-secondary);
       line-height: 1.5;
     }
@@ -835,7 +835,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--text-muted);
     padding: $sp-md 0;
@@ -856,7 +856,7 @@
     border: $border-width-thin dashed var(--border);
     background: var(--bg);
     cursor: pointer;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text-secondary);
     transition: border-color $transition-fast, background $transition-fast;
 
@@ -896,7 +896,7 @@
     padding: $sp-sm $sp-md;
     background: color-mix(in srgb, var(--success) 8%, transparent);
     border: $border-width-thin solid color-mix(in srgb, var(--success) 30%, transparent);
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     color: var(--text);
 
     .material-icons-outlined {
@@ -923,7 +923,7 @@
     display: flex;
     align-items: center;
     gap: $sp-sm;
-    font-size: $font-size-title;
+    font-size: var(--font-size-title);
 
     .material-icons-outlined {
       font-size: $icon-size-md;
@@ -932,7 +932,7 @@
   }
 
   &__body {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-secondary);
     line-height: 1.6;
     margin: 0;

@@ -19,7 +19,7 @@
   padding: $sp-md $sp-lg;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   pointer-events: auto;
 
   &--info { border-left: 3px solid var(--info); }
@@ -52,7 +52,7 @@
 }
 
 .toast__count {
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   font-weight: 700;
   color: var(--text-muted);
   background: var(--bg);
@@ -71,7 +71,7 @@
   padding: $sp-sm;
   background: var(--bg);
   font-family: $font-family-mono;
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
   color: var(--text-muted);
   white-space: pre-wrap;
   word-break: break-all;

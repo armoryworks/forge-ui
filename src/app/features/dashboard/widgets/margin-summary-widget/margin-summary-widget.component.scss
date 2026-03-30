@@ -13,7 +13,7 @@
   gap: $sp-xs;
 
   &__value {
-    font-size: $font-size-kpi;
+    font-size: var(--font-size-kpi);
     font-weight: 700;
 
     &--positive {
@@ -26,7 +26,7 @@
   }
 
   &__label {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -43,7 +43,7 @@
     justify-content: space-between;
     padding: $sp-sm $sp-md;
     background: var(--surface);
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 
   &__label {

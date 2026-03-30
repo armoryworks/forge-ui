@@ -55,7 +55,7 @@
   @include flex-center;
 
   .material-icons-outlined {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
   }
 }
 
@@ -65,7 +65,7 @@
 }
 
 .card__job-number {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   color: var(--primary);
   font-family: $font-family-mono;
   background: none;
@@ -100,11 +100,11 @@
 }
 
 .card__overdue-icon {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
 }
 
 .card__title {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text);
   line-height: 1.3;
@@ -119,7 +119,7 @@
 }
 
 .card__customer {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-muted);
   @include truncate;
   flex: 1;
@@ -145,7 +145,7 @@
   display: flex;
   align-items: center;
   gap: $sp-xs;
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--info);
 }
 
@@ -169,7 +169,7 @@
   align-items: center;
   gap: $sp-xxs;
   color: var(--text-muted);
-  font-size: $font-size-xs;
+  font-size: var(--font-size-xs);
 
   .material-icons-outlined { font-size: $icon-size-sm; }
 
@@ -177,7 +177,7 @@
 }
 
 .card__due {
-  font-size: $font-size-xxs;
+  font-size: var(--font-size-xxs);
   color: var(--text-secondary);
   margin-left: auto;
   white-space: nowrap;

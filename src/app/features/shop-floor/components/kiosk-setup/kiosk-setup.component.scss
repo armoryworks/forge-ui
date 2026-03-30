@@ -29,13 +29,13 @@
 }
 
 .setup__title {
-  font-size: $font-size-xl;
+  font-size: var(--font-size-xl);
   font-weight: 700;
   margin: 0;
 }
 
 .setup__subtitle {
-  font-size: $font-size-md;
+  font-size: var(--font-size-md);
   color: var(--text-muted);
   margin: 0;
   text-align: center;
@@ -49,7 +49,7 @@
   background: var(--error-light);
   color: var(--error);
   border: $border-width-thin solid var(--error);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-weight: 600;
   width: 100%;
 
@@ -64,7 +64,7 @@
 
 .setup__toggle {
   color: var(--primary);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 }
 
 .setup__submit {

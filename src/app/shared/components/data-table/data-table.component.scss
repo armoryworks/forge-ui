@@ -26,7 +26,7 @@
 }
 
 .data-table__filter-badge {
-  @include uppercase-label($font-size-xxs, 0.3px, 600);
+  @include uppercase-label(var(--font-size-xxs), 0.3px, 600);
   color: var(--primary);
   padding: $sp-xs $sp-md;
   border: $border-width-thin solid var(--primary);
@@ -45,13 +45,13 @@
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   background: var(--surface);
 }
 
 // ─── Header ───
 .data-table__th {
-  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
   padding: $sp-md $sp-lg;
   text-align: left;
   color: var(--text-muted);
@@ -119,7 +119,7 @@
 }
 
 .data-table__sort-icon {
-  font-size: $font-size-base;
+  font-size: var(--font-size-base);
   vertical-align: middle;
   margin-left: $sp-xs;
 }
@@ -140,7 +140,7 @@
   transition: opacity $transition-fast;
 
   .material-icons-outlined {
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
   }
 
   &--active {
@@ -262,7 +262,7 @@ mat-paginator {
 
   --mat-paginator-container-background-color: var(--surface);
   --mat-paginator-container-text-color: var(--text-secondary);
-  --mat-paginator-container-text-size: #{$font-size-xs};
+  --mat-paginator-container-text-size: #{var(--font-size-xs)};
 }
 
 // ─── Checkbox ───

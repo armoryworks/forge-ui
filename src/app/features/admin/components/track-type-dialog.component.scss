@@ -11,12 +11,12 @@
 }
 
 .stages-title {
-  @include uppercase-label($font-size-xs, 0.5px, 700);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
   color: var(--text-secondary);
 }
 
 .stages-empty {
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   color: var(--text-muted);
   padding: $sp-lg;
   text-align: center;
@@ -46,7 +46,7 @@
       width: 18px;
       height: 14px;
 
-      .material-icons-outlined { font-size: $font-size-base; }
+      .material-icons-outlined { font-size: var(--font-size-base); }
     }
   }
 
@@ -66,7 +66,7 @@
 
   &__input {
     font-family: $font-family-primary;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     padding: $sp-sm $sp-md;
     border: $border-width-thin solid var(--border);
     background: var(--surface);
@@ -75,7 +75,7 @@
 
     &:focus { border-color: var(--primary); }
     &--name { flex: 2; }
-    &--code { flex: 1; font-family: $font-family-mono; font-size: $font-size-xs; }
+    &--code { flex: 1; font-family: $font-family-mono; font-size: var(--font-size-xs); }
     &--wip { width: 52px; flex: none; text-align: center; }
   }
 

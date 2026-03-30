@@ -20,12 +20,12 @@
 
   &__title {
     font-weight: 700;
-    font-size: $font-size-md;
+    font-size: var(--font-size-md);
     display: block;
   }
 
   &__subtitle {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: #666;
   }
 
@@ -38,7 +38,7 @@
 
   &__value {
     font-family: $font-family-mono;
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
     letter-spacing: 1px;
   }
@@ -59,12 +59,12 @@
   }
 
   &__field-label {
-    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 600);
     color: #999;
   }
 
   &__field-value {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     font-weight: 600;
   }
 

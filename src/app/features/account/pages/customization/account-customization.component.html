@@ -1,0 +1,56 @@
+<div class="account-page">
+  <h1 class="account-page__title">
+    <span class="material-icons-outlined">palette</span>
+    {{ 'account.customization' | translate }}
+  </h1>
+
+  <!-- Theme -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">{{ 'account.colorTheme' | translate }}</span>
+    <p class="customization__hint">{{ 'account.colorThemeHint' | translate }}</p>
+
+    <div class="theme-picker">
+      <button class="theme-option"
+        [class.theme-option--active]="theme() === 'light'"
+        (click)="theme() !== 'light' && toggleTheme()"
+        [attr.aria-pressed]="theme() === 'light'">
+        <span class="theme-option__preview theme-option__preview--light">
+          <span class="theme-option__preview-bar"></span>
+          <span class="theme-option__preview-content"></span>
+        </span>
+        <span class="theme-option__label">{{ 'account.themeLight' | translate }}</span>
+      </button>
+
+      <button class="theme-option"
+        [class.theme-option--active]="theme() === 'dark'"
+        (click)="theme() !== 'dark' && toggleTheme()"
+        [attr.aria-pressed]="theme() === 'dark'">
+        <span class="theme-option__preview theme-option__preview--dark">
+          <span class="theme-option__preview-bar"></span>
+          <span class="theme-option__preview-content"></span>
+        </span>
+        <span class="theme-option__label">{{ 'account.themeDark' | translate }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Text Size -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">{{ 'account.displayPreferences' | translate }}</span>
+    <p class="customization__hint">{{ 'account.fontScaleHint' | translate }}</p>
+
+    <div class="font-scale-picker">
+      @for (opt of fontScaleOptions; track opt.value) {
+        <button
+          class="font-scale-option"
+          [class.font-scale-option--active]="fontScale() === opt.value"
+          (click)="setFontScale(opt.value)"
+          [attr.aria-pressed]="fontScale() === opt.value">
+          <span class="font-scale-option__label">{{ opt.labelKey | translate }}</span>
+          <span class="font-scale-option__hint">{{ opt.hint }}</span>
+          <span class="font-scale-option__sample">Aa</span>
+        </button>
+      }
+    </div>
+  </div>
+</div>

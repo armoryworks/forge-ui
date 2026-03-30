@@ -14,7 +14,7 @@
   }
 
   &__count {
-    font-size: $font-size-sm;
+    font-size: var(--font-size-sm);
     color: var(--text-muted);
     font-family: $font-family-mono;
   }
@@ -33,7 +33,7 @@
     }
 
     p {
-      font-size: $font-size-sm;
+      font-size: var(--font-size-sm);
       margin: 0;
     }
   }
@@ -57,7 +57,7 @@
   }
 
   &__step-num {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     font-family: $font-family-mono;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -97,7 +97,7 @@
   }
 
   &__label {
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -120,7 +120,7 @@
     background: var(--bg);
     color: var(--text);
     font-family: $font-family-primary;
-    font-size: $font-size-base;
+    font-size: var(--font-size-base);
     outline: none;
 
     &:focus {

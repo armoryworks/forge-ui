@@ -1,6 +1,26 @@
 // ─── Color Tokens (CSS Custom Properties) ───
 // Light/dark switching via data-theme attribute on <html>
 
+// ─── Font Scale Tokens (CSS Custom Properties) ───
+// These shadow the SCSS $font-size-* variables at runtime so components can
+// scale dynamically when data-font-size is set on <html>.
+:root {
+  --font-size-xxs: 9px;
+  --font-size-xs: 10px;
+  --font-size-sm: 11px;
+  --font-size-base: 12px;
+  --font-size-title: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 18px;
+  --font-size-kpi: 20px;
+  --font-size-heading: 32px;
+  // Row/container heights that scale with font size
+  --input-height: 2rem;
+  --sidebar-nav-height: 36px;
+  --header-height: 44px;
+}
+
 :root,
 [data-theme='light'] {
   --primary: #0d9488;

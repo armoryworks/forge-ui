@@ -14,7 +14,7 @@
 .receive-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   th,
   td {
@@ -24,7 +24,7 @@
   }
 
   th {
-    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
     color: var(--text-muted);
   }
 
@@ -34,7 +34,7 @@
 
   &__mono {
     font-family: $font-family-mono;
-    font-size: $font-size-xs;
+    font-size: var(--font-size-xs);
   }
 
   &__input {
@@ -45,12 +45,12 @@
 
 .receive-qty-input {
   width: 70px;
-  height: $input-height;
+  height: var(--input-height);
   padding: $sp-xs $sp-sm;
   border: $border-width-thin solid var(--border);
   background: var(--surface);
   color: var(--text);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
   font-family: $font-family-mono;
   text-align: right;
 
@@ -66,7 +66,7 @@
   gap: $sp-md;
   padding: $sp-xl;
   color: var(--text-muted);
-  font-size: $font-size-sm;
+  font-size: var(--font-size-sm);
 
   &__icon {
     font-size: $icon-size-xxl;
