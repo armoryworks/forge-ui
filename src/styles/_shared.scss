@@ -28,7 +28,7 @@
 }
 
 .page-header__title {
-  font-size: $font-size-title;
+  font-size: var(--font-size-title);
   font-weight: 700;
   letter-spacing: 1px;
   text-transform: uppercase;
@@ -40,7 +40,7 @@
 
 // ─── Action Buttons ───
 .action-btn {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
   gap: $sp-sm;
   height: 2rem;
@@ -97,7 +97,7 @@
   &--sm {
     min-width: auto;
     padding: $sp-xs $sp-md;
-    .material-icons-outlined { font-size: $font-size-base; }
+    .material-icons-outlined { font-size: var(--font-size-base); }
   }
 }
 
@@ -153,7 +153,7 @@
 }
 
 .dialog__title {
-  @include uppercase-label($font-size-sm, 0.5px, 700);
+  @include uppercase-label(var(--font-size-sm), 0.5px, 700);
 }
 
 .dialog__body {
@@ -220,7 +220,7 @@
 }
 
 .tab {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   display: flex;
   align-items: center;
   gap: $sp-sm;
@@ -305,7 +305,7 @@
 
 // ─── Chip ───
 .chip {
-  @include uppercase-label($font-size-xs, 0.5px, 600);
+  @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   display: inline-block;
   padding: 0 5px;
   border-radius: $border-radius;

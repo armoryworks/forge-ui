@@ -7,7 +7,7 @@
   text-overflow: ellipsis;
 }
 
-@mixin uppercase-label($size: $font-size-xs, $spacing: 0.5px, $weight: 600) {
+@mixin uppercase-label($size: var(--font-size-xs), $spacing: 0.5px, $weight: 600) {
   font-size: $size;
   font-weight: $weight;
   text-transform: uppercase;
