@@ -25,5 +25,5 @@
   display: flex;
   flex-direction: column;
   gap: $sp-md;
-  padding-top: $sp-lg; // room for mat-label to float above the outline border without clipping
+  padding: $sp-lg; // even padding on all sides; top gives mat-label room to float without clipping
 }
