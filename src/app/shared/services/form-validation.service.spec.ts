@@ -119,7 +119,7 @@ describe('FormValidationService', () => {
           code: 'Part Number',
         });
 
-        expect(violations()).toContain('Part Number is invalid');
+        expect(violations()).toContain('Part Number format is invalid');
       });
     });
 

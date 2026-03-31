@@ -17,6 +17,7 @@ describe('AuthService', () => {
     initials: 'AU',
     avatarColor: '#3366cc',
     roles: ['Admin', 'Manager'],
+    profileComplete: true,
   };
 
   const mockLoginResponse: LoginResponse = {
