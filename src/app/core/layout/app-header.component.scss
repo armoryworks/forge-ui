@@ -473,6 +473,16 @@
   margin-right: $sp-sm;
 }
 
+@include tablet {
+  .hide-tablet {
+    display: none !important; // responsive layout override
+  }
+
+  .app-header__actions {
+    gap: $sp-xxs;
+  }
+}
+
 @include mobile {
   .hide-mobile {
     display: none !important; // responsive layout override

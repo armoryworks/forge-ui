@@ -329,7 +329,18 @@
     "coverPhotoRemoved": "Foto de portada eliminada",
     "uploadNewImage": "Subir una nueva imagen",
     "selectFromExisting": "O seleccionar de archivos existentes",
-    "selectImageAria": "Seleccionar como foto de portada:"
+    "selectImageAria": "Seleccionar como foto de portada:",
+    "noFilesAttached": "Sin archivos adjuntos.",
+    "noNotes": "Sin notas aún.",
+    "noCommentsYet": "Sin comentarios aún.",
+    "noActivityYet": "Sin actividad aún.",
+    "noHistoryYet": "Sin historial registrado.",
+    "addNote": "Agregar una nota...",
+    "saveNote": "Guardar nota",
+    "noteSaved": "Nota guardada",
+    "noteSaveFailed": "Error al guardar nota",
+    "noteDeleted": "Nota eliminada",
+    "noteDeleteFailed": "Error al eliminar nota"
   },
   "backlog": {
     "title": "Pendientes",
@@ -1449,15 +1460,31 @@
     "extractionFailed": "Falló la extracción de la definición del formulario"
   },
   "training": {
-    "users": "usuarios",
-    "trackingNote": "El progreso de los tours se registra por dispositivo en el almacenamiento del navegador",
-    "noUsers": "No se encontraron usuarios",
-    "colUser": "Usuario",
-    "colRole": "Rol",
-    "colCompleted": "Completados",
-    "colTotal": "Total",
-    "colLastTour": "Último Tour",
-    "colCompletion": "% Completado"
+    "title": "Training Library",
+    "myLearning": "My Learning",
+    "pathsTab": "Learning Paths",
+    "searchPlaceholder": "Search modules...",
+    "noModules": "No training modules found",
+    "noEnrollments": "No training paths assigned yet",
+    "noPaths": "No learning paths available",
+    "minutesShort": "min",
+    "startModule": "Start",
+    "continueModule": "Continue",
+    "reviewModule": "Review",
+    "markComplete": "Mark as Complete",
+    "completing": "Saving...",
+    "completedBadge": "Completed",
+    "inProgressBadge": "In Progress",
+    "quizPassingScore": "Passing score: {{score}}%",
+    "quizSubmit": "Submit Answers",
+    "quizPassed": "Passed — {{score}}%",
+    "quizFailed": "{{score}}% — {{required}}% required. Try again.",
+    "quizRetry": "Try Again",
+    "walkthroughStart": "Take the Tour",
+    "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
+    "backToLibrary": "Training Library",
+    "autoAssigned": "Auto-assigned",
+    "modulesCount": "{{count}} modules"
   },
   "aiAssistants": {
     "assistants": "asistentes",
@@ -2088,9 +2115,7 @@
     "receiveQty": "Cant. a Recibir",
     "itemsReceived": "Artículos recibidos.",
     "expected": "Esperada",
-    "newPoTitle": "Nueva Orden de Compra",
-    "ordered": "Ordenado",
-    "received": "Recibido"
+    "newPoTitle": "Nueva Orden de Compra"
   },
   "salesOrders": {
     "title": "Órdenes de Venta",
@@ -2711,7 +2736,6 @@
     "createTeamFailed": "Error al crear equipo.",
     "saveTerminalFailed": "Error al guardar configuración del terminal."
   },
-
   "salesTax": {
     "rates": "tasas de impuesto",
     "addRate": "Agregar Tasa",
@@ -2730,7 +2754,6 @@
     "fieldDescription": "Descripción",
     "fieldDefault": "Establecer como tasa predeterminada"
   },
-
   "customerReturns": {
     "title": "Devoluciones de Clientes",
     "subtitle": "Gestión de productos devueltos",
@@ -2763,7 +2786,6 @@
     "fieldReturnDate": "Fecha de Devolución",
     "fieldNotes": "Notas"
   },
-
   "lots": {
     "title": "Lotes de Producción",
     "subtitle": "Trazabilidad de lotes en trabajos, inventario y QC",
@@ -2786,31 +2808,8 @@
     "fieldExpiration": "Fecha de Vencimiento",
     "fieldNotes": "Notas"
   },
-  "training": {
-    "title": "Training Library",
-    "myLearning": "My Learning",
-    "pathsTab": "Learning Paths",
-    "searchPlaceholder": "Search modules...",
-    "noModules": "No training modules found",
-    "noEnrollments": "No training paths assigned yet",
-    "noPaths": "No learning paths available",
-    "minutesShort": "min",
-    "startModule": "Start",
-    "continueModule": "Continue",
-    "reviewModule": "Review",
-    "markComplete": "Mark as Complete",
-    "completing": "Saving...",
-    "completedBadge": "Completed",
-    "inProgressBadge": "In Progress",
-    "quizPassingScore": "Passing score: {{score}}%",
-    "quizSubmit": "Submit Answers",
-    "quizPassed": "Passed — {{score}}%",
-    "quizFailed": "{{score}}% — {{required}}% required. Try again.",
-    "quizRetry": "Try Again",
-    "walkthroughStart": "Take the Tour",
-    "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
-    "backToLibrary": "Training Library",
-    "autoAssigned": "Auto-assigned",
-    "modulesCount": "{{count}} modules"
+  "rfid": {
+    "relayNotInstalled": "El servicio de retransmisión RFID no está instalado en este equipo.",
+    "downloadInstaller": "Descargar instalador"
   }
 }

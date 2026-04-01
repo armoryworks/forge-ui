@@ -195,6 +195,164 @@
   }
 }
 
+// ─── Split-layout dialog (2-column Jira-style) ───
+// Used by entity dialogs: Quote, SO, PO, Invoice, Shipment, Payment, Vendor
+.dialog--split {
+  max-height: 88vh;
+
+  .dialog__body {
+    padding: 0;
+    gap: 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+
+    // Reset flex-column rule for the dlg-body direct child
+    > * {
+      flex-direction: row;
+      gap: 0;
+    }
+  }
+}
+
+.dlg-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  min-height: 500px;
+}
+
+.dlg-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: $sp-xl;
+  border-right: $border-width-thin solid var(--border);
+  @include custom-scrollbar;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+}
+
+.dlg-sidebar {
+  flex: 0 0 280px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  @include custom-scrollbar;
+}
+
+.dlg-sidebar-section {
+  padding: $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    @include uppercase-label(var(--font-size-xs), 0.08em, 600);
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: $sp-xs;
+  }
+}
+
+.dlg-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__title {
+    @include uppercase-label(var(--font-size-xs), 0.08em, 600);
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: $sp-xs;
+  }
+}
+
+.dlg-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-base);
+  color: var(--text-secondary);
+  padding: $sp-xs 0;
+
+  &--grand {
+    color: var(--text);
+    font-weight: 700;
+    font-size: var(--font-size-title);
+    border-top: $border-width-thin solid var(--border);
+    padding-top: $sp-sm;
+    margin-top: $sp-xs;
+  }
+}
+
+// ─── Lines Table — shared by Quote, SO, PO, Invoice, Shipment, Payment ───
+.lines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+
+  th, td {
+    padding: $sp-sm $sp-md;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  th {
+    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    color: var(--text-muted);
+    background: var(--bg);
+  }
+
+  &__right { text-align: right; }
+  &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
+  &__bold { font-weight: 700; }
+}
+
+.lines-empty {
+  padding: $sp-2xl $sp-lg;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+  border: $border-width-thin dashed var(--border);
+}
+
+// ─── Add-line form row (part autocomplete + qty + price + button) ───
+.add-line {
+  display: grid;
+  align-items: end;
+  gap: $sp-sm;
+  padding-top: $sp-sm;
+  border-top: $border-width-thin solid var(--border);
+}
+
+// ─── Price / Tax badge (overlaid on form field) ───
+.price-field,
+.tax-field {
+  position: relative;
+}
+
+.price-badge,
+.tax-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: #fff;
+  font-size: var(--font-size-xxs);
+  font-family: $font-family-mono;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px $sp-sm;
+  pointer-events: none;
+  line-height: var(--font-size-lg);
+  z-index: 1;
+}
+
+.tax-badge { background: var(--success); }
+.price-badge { background: var(--info); }
+
 // ─── Dialog Row (side-by-side form fields) ───
 .dialog-row {
   display: grid;

@@ -11,15 +11,15 @@
       <div class="app-header__logo">QB<span>:</span>Eng</div>
     }
   </a>
-  <div class="header-sep hide-mobile"></div>
-  <nav class="breadcrumb hide-mobile" aria-label="Breadcrumb">
+  <div class="header-sep hide-tablet"></div>
+  <nav class="breadcrumb hide-tablet" aria-label="Breadcrumb">
     <a routerLink="/dashboard" class="breadcrumb__link">{{ 'header.home' | translate }}</a>
     <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
     <a [routerLink]="layout.breadcrumbRoute()" class="breadcrumb__link breadcrumb__current">{{ layout.breadcrumbLabel() }}</a>
   </nav>
 
   @if (!layout.isOnboardingRoute()) {
-  <div class="app-header__search hide-mobile" [class.app-header__search--focused]="searchFocused()">
+  <div class="app-header__search hide-tablet" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
     <input class="search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
            [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" />
@@ -125,7 +125,7 @@
     </button>
     <div class="app-header__user">
       <button class="user-trigger" (click)="toggleUserMenu()" [attr.aria-label]="'header.userMenu' | translate">
-        <span class="user-trigger__name">{{ userFullName() }}</span>
+        <span class="user-trigger__name hide-tablet">{{ userFullName() }}</span>
         <span class="material-icons-outlined user-trigger__icon">{{ userMenuOpen() ? 'close' : 'menu' }}</span>
       </button>
 

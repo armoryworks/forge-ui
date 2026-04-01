@@ -329,7 +329,18 @@
     "coverPhotoRemoved": "Cover photo removed",
     "uploadNewImage": "Upload a new image",
     "selectFromExisting": "Or select from existing files",
-    "selectImageAria": "Select as cover photo:"
+    "selectImageAria": "Select as cover photo:",
+    "noFilesAttached": "No files attached yet.",
+    "noNotes": "No notes yet.",
+    "noCommentsYet": "No comments yet.",
+    "noActivityYet": "No activity yet.",
+    "noHistoryYet": "No history recorded yet.",
+    "addNote": "Add a note...",
+    "saveNote": "Save Note",
+    "noteSaved": "Note saved",
+    "noteSaveFailed": "Failed to save note",
+    "noteDeleted": "Note deleted",
+    "noteDeleteFailed": "Failed to delete note"
   },
   "backlog": {
     "title": "Backlog",
@@ -1465,15 +1476,31 @@
     "extractionFailed": "Form definition extraction failed"
   },
   "training": {
-    "users": "users",
-    "trackingNote": "Tour completion is tracked per-device via browser storage",
-    "noUsers": "No users found",
-    "colUser": "User",
-    "colRole": "Role",
-    "colCompleted": "Completed",
-    "colTotal": "Total",
-    "colLastTour": "Last Tour",
-    "colCompletion": "Completion %"
+    "title": "Training Library",
+    "myLearning": "My Learning",
+    "pathsTab": "Learning Paths",
+    "searchPlaceholder": "Search modules...",
+    "noModules": "No training modules found",
+    "noEnrollments": "No training paths assigned yet",
+    "noPaths": "No learning paths available",
+    "minutesShort": "min",
+    "startModule": "Start",
+    "continueModule": "Continue",
+    "reviewModule": "Review",
+    "markComplete": "Mark as Complete",
+    "completing": "Saving...",
+    "completedBadge": "Completed",
+    "inProgressBadge": "In Progress",
+    "quizPassingScore": "Passing score: {{score}}%",
+    "quizSubmit": "Submit Answers",
+    "quizPassed": "Passed — {{score}}%",
+    "quizFailed": "{{score}}% — {{required}}% required. Try again.",
+    "quizRetry": "Try Again",
+    "walkthroughStart": "Take the Tour",
+    "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
+    "backToLibrary": "Training Library",
+    "autoAssigned": "Auto-assigned",
+    "modulesCount": "{{count}} modules"
   },
   "aiAssistants": {
     "assistants": "assistants",
@@ -2104,9 +2131,7 @@
     "remaining": "Remaining",
     "receiveQty": "Receive Qty",
     "itemsReceived": "Items received.",
-    "newPoTitle": "New Purchase Order",
-    "ordered": "Ordered",
-    "received": "Received"
+    "newPoTitle": "New Purchase Order"
   },
   "salesOrders": {
     "title": "Sales Orders",
@@ -2727,7 +2752,6 @@
     "createTeamFailed": "Failed to create team.",
     "saveTerminalFailed": "Failed to save terminal configuration."
   },
-
   "salesTax": {
     "rates": "tax rates",
     "addRate": "Add Rate",
@@ -2746,7 +2770,6 @@
     "fieldDescription": "Description",
     "fieldDefault": "Set as default rate"
   },
-
   "customerReturns": {
     "title": "Customer Returns",
     "subtitle": "Track and manage returned goods",
@@ -2779,7 +2802,6 @@
     "fieldReturnDate": "Return Date",
     "fieldNotes": "Notes"
   },
-
   "lots": {
     "title": "Production Lots",
     "subtitle": "Lot traceability across jobs, inventory, and QC",
@@ -2802,32 +2824,8 @@
     "fieldExpiration": "Expiration Date",
     "fieldNotes": "Notes"
   },
-  "training": {
-    "title": "Training Library",
-    "myLearning": "My Learning",
-    "pathsTab": "Learning Paths",
-    "searchPlaceholder": "Search modules...",
-    "noModules": "No training modules found",
-    "noEnrollments": "No training paths assigned yet",
-    "noPaths": "No learning paths available",
-    "minutesShort": "min",
-    "startModule": "Start",
-    "continueModule": "Continue",
-    "reviewModule": "Review",
-    "markComplete": "Mark as Complete",
-    "completing": "Saving...",
-    "completedBadge": "Completed",
-    "inProgressBadge": "In Progress",
-    "quizPassingScore": "Passing score: {{score}}%",
-    "quizSubmit": "Submit Answers",
-    "quizPassed": "Passed — {{score}}%",
-    "quizFailed": "{{score}}% — {{required}}% required. Try again.",
-    "quizRetry": "Try Again",
-    "walkthroughStart": "Take the Tour",
-    "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
-    "backToLibrary": "Training Library",
-    "autoAssigned": "Auto-assigned",
-    "modulesCount": "{{count}} modules"
+  "rfid": {
+    "relayNotInstalled": "RFID relay service is not installed on this computer.",
+    "downloadInstaller": "Download installer"
   }
-
 }

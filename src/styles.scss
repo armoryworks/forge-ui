@@ -107,6 +107,55 @@ html {
 
 }
 
+// ─── Job Detail Dialog — forces width/height and removes Material's built-in constraints ───
+// .jd-dialog-panel is applied to .cdk-overlay-pane via panelClass
+.cdk-overlay-pane.jd-dialog-panel {
+  width: min(1400px, 95vw) !important;
+  max-width: min(1400px, 95vw) !important;
+  height: calc(100dvh - 48px) !important;
+  max-height: calc(100dvh - 48px) !important;
+}
+
+.jd-dialog-panel {
+  width: min(1400px, 95vw) !important;
+  max-width: min(1400px, 95vw) !important;
+
+  // Full height cascade: container → intermediate wrapper → surface → components
+  .mat-mdc-dialog-container {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  // MDC inserts .mdc-dialog__container between the container and surface —
+  // it has no height by default, breaking height: 100% on the surface
+  .mdc-dialog__container {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  .mdc-dialog__surface {
+    max-width: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    flex: 1 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  app-job-detail-dialog,
+  app-job-detail-panel {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 // ─── Dark Theme — Material tokens for dark mode ───
 html[data-theme='dark'] {
   @include mat.theme(
