@@ -76,8 +76,12 @@
               @if (showPoDeliveries()) {
                 @for (po of (poEventsByDate().get(day.dateKey) ?? []); track po.id) {
                   <div class="po-event"
+                       role="button"
+                       tabindex="0"
                        [title]="po.poNumber + ' — ' + po.vendorName + ' (' + po.lineCount + ' lines)'"
-                       (click)="$event.stopPropagation()">
+                       [attr.aria-label]="po.poNumber + ' — ' + po.vendorName"
+                       (click)="$event.stopPropagation()"
+                       (keydown.enter)="$event.stopPropagation()">
                     <span class="material-icons-outlined po-event__icon">local_shipping</span>
                     <span class="po-event__label">{{ po.poNumber }}</span>
                   </div>

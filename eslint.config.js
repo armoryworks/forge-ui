@@ -27,6 +27,14 @@ module.exports = tseslint.config(
     },
   },
   {
+    // dynamic-qb-* components are rendered programmatically via ViewContainerRef
+    // and never used as HTML elements in templates — selector prefix is intentional
+    files: ["**/shared/components/dynamic-form/**/*.ts"],
+    rules: {
+      "@angular-eslint/component-selector": "off",
+    },
+  },
+  {
     files: ["**/*.html"],
     extends: [
       ...angular.configs.templateRecommended,

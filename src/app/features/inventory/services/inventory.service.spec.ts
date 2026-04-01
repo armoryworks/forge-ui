@@ -29,7 +29,7 @@ describe('InventoryService', () => {
     salesOrderLineId: null,
     quantity: 4,
     notes: null,
-    createdAt: '2026-03-10T08:00:00Z',
+    createdAt: new Date('2026-03-10T08:00:00Z'),
   };
 
   const mockCycleCount: CycleCount = {
@@ -38,10 +38,10 @@ describe('InventoryService', () => {
     locationName: 'Bin A1',
     countedById: 1,
     countedByName: 'Alice Kim',
-    countedAt: '2026-03-01T08:00:00Z',
+    countedAt: new Date('2026-03-01T08:00:00Z'),
     status: 'Open',
     notes: 'Quarterly count',
-    createdAt: '2026-03-01T00:00:00Z',
+    createdAt: new Date('2026-03-01T00:00:00Z'),
     lines: [],
   };
 

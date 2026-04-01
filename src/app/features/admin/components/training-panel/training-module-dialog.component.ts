@@ -114,7 +114,7 @@ export class TrainingModuleDialogComponent implements OnInit {
 
     const v = this.form.getRawValue();
 
-    let contentJsonParsed: unknown = {};
+    let contentJsonParsed: unknown;
     try {
       contentJsonParsed = JSON.parse(v.contentJson ?? '{}');
     } catch {

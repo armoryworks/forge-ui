@@ -230,9 +230,12 @@
 
             @for (lead of groupedLeads()[status]; track lead.id) {
               <div class="pipeline-card"
+                role="button"
+                tabindex="0"
                 cdkDrag
                 [cdkDragData]="lead"
                 (click)="selectLead(lead)"
+                (keydown.enter)="selectLead(lead)"
                 [class.pipeline-card--selected]="selectedLead()?.id === lead.id"
                 [attr.aria-label]="lead.companyName">
 

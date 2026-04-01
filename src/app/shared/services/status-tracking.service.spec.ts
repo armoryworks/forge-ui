@@ -20,12 +20,12 @@ describe('StatusTrackingService', () => {
     statusCode: 'in_production',
     statusLabel: 'In Production',
     category: 'workflow',
-    startedAt: '2026-03-10T10:00:00Z',
+    startedAt: new Date('2026-03-10T10:00:00Z'),
     endedAt: null,
     notes: null,
     setById: 7,
     setByName: 'Alice Kim',
-    createdAt: '2026-03-10T10:00:00Z',
+    createdAt: new Date('2026-03-10T10:00:00Z'),
   };
 
   const mockHoldEntry: StatusEntry = {
@@ -35,12 +35,12 @@ describe('StatusTrackingService', () => {
     statusCode: 'quality_hold',
     statusLabel: 'Quality Hold',
     category: 'hold',
-    startedAt: '2026-03-10T12:00:00Z',
+    startedAt: new Date('2026-03-10T12:00:00Z'),
     endedAt: null,
     notes: 'Pending QC review',
     setById: 7,
     setByName: 'Alice Kim',
-    createdAt: '2026-03-10T12:00:00Z',
+    createdAt: new Date('2026-03-10T12:00:00Z'),
   };
 
   const mockActiveStatus: ActiveStatus = {

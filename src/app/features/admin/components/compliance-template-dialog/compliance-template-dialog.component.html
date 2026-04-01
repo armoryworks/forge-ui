@@ -73,9 +73,10 @@
     </div>
 
     <div class="acro-map-section">
-      <label class="acro-map-section__label">{{ 'complianceTemplateDialog.acroFieldMap' | translate }}</label>
+      <label class="acro-map-section__label" for="acro-field-map">{{ 'complianceTemplateDialog.acroFieldMap' | translate }}</label>
       <p class="upload-hint">{{ 'complianceTemplateDialog.acroFieldMapHint' | translate }}</p>
       <textarea
+        id="acro-field-map"
         class="acro-map-section__textarea"
         [value]="acroMapJson()"
         (input)="acroMapJson.set($any($event.target).value)"

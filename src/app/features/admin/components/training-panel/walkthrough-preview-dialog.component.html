@@ -37,8 +37,9 @@
 
         <div class="walkthrough-preview__step-body">
           <div class="walkthrough-preview__field walkthrough-preview__field--full">
-            <label class="walkthrough-preview__label">CSS Selector <span class="walkthrough-preview__label-hint">(null = center overlay)</span></label>
+            <label class="walkthrough-preview__label" [attr.for]="'step-element-' + i">CSS Selector <span class="walkthrough-preview__label-hint">(null = center overlay)</span></label>
             <input class="walkthrough-preview__input" type="text"
+              [attr.id]="'step-element-' + i"
               [value]="step.element ?? ''"
               (change)="updateElement(i, $any($event.target).value)"
               placeholder="e.g. app-page-header, .action-btn--primary" />
@@ -46,16 +47,18 @@
 
           <div class="walkthrough-preview__row">
             <div class="walkthrough-preview__field walkthrough-preview__field--grow">
-              <label class="walkthrough-preview__label">Title</label>
+              <label class="walkthrough-preview__label" [attr.for]="'step-title-' + i">Title</label>
               <input class="walkthrough-preview__input" type="text"
+                [attr.id]="'step-title-' + i"
                 [value]="step.popover.title"
                 (input)="updatePopover(i, { title: $any($event.target).value })"
                 placeholder="Step title" />
             </div>
 
             <div class="walkthrough-preview__field">
-              <label class="walkthrough-preview__label">Side</label>
+              <label class="walkthrough-preview__label" [attr.for]="'step-side-' + i">Side</label>
               <select class="walkthrough-preview__select"
+                [attr.id]="'step-side-' + i"
                 [value]="step.popover.side"
                 (change)="updatePopover(i, { side: $any($event.target).value })">
                 @for (opt of sideOptions; track opt) {
@@ -65,8 +68,9 @@
             </div>
 
             <div class="walkthrough-preview__field">
-              <label class="walkthrough-preview__label">Align</label>
+              <label class="walkthrough-preview__label" [attr.for]="'step-align-' + i">Align</label>
               <select class="walkthrough-preview__select"
+                [attr.id]="'step-align-' + i"
                 [value]="step.popover.align"
                 (change)="updatePopover(i, { align: $any($event.target).value })">
                 <option value="start">start</option>
@@ -77,8 +81,9 @@
           </div>
 
           <div class="walkthrough-preview__field walkthrough-preview__field--full">
-            <label class="walkthrough-preview__label">Description</label>
+            <label class="walkthrough-preview__label" [attr.for]="'step-desc-' + i">Description</label>
             <textarea class="walkthrough-preview__textarea" rows="3"
+              [attr.id]="'step-desc-' + i"
               [value]="step.popover.description"
               (input)="updatePopover(i, { description: $any($event.target).value })"
               placeholder="Explain what this step covers..."></textarea>

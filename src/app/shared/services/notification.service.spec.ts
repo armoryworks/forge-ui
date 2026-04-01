@@ -20,7 +20,7 @@ describe('NotificationService', () => {
     isRead: false,
     isPinned: false,
     isDismissed: false,
-    createdAt: '2026-03-10T12:00:00Z',
+    createdAt: new Date('2026-03-10T12:00:00Z'),
     ...overrides,
   });
 
@@ -174,12 +174,14 @@ describe('NotificationService', () => {
   describe('togglePanel', () => {
     it('should toggle panelOpen from false to true', () => {
       service.togglePanel();
+      httpMock.expectOne(`${environment.apiUrl}/notifications`).flush({ data: [] });
 
       expect(service.panelOpen()).toBe(true);
     });
 
     it('should toggle panelOpen back to false', () => {
       service.togglePanel();
+      httpMock.expectOne(`${environment.apiUrl}/notifications`).flush({ data: [] });
       service.togglePanel();
 
       expect(service.panelOpen()).toBe(false);
@@ -188,7 +190,8 @@ describe('NotificationService', () => {
 
   describe('closePanel', () => {
     it('should set panelOpen to false', () => {
-      service.togglePanel(); // open
+      service.togglePanel(); // open → triggers load()
+      httpMock.expectOne(`${environment.apiUrl}/notifications`).flush({ data: [] });
       service.closePanel();
 
       expect(service.panelOpen()).toBe(false);
@@ -242,8 +245,8 @@ describe('NotificationService', () => {
     });
 
     it('should sort pinned notifications first', () => {
-      service.push(makeNotification({ id: 1, isPinned: false, createdAt: '2026-03-10T14:00:00Z' }));
-      service.push(makeNotification({ id: 2, isPinned: true, createdAt: '2026-03-10T10:00:00Z' }));
+      service.push(makeNotification({ id: 1, isPinned: false, createdAt: new Date('2026-03-10T14:00:00Z') }));
+      service.push(makeNotification({ id: 2, isPinned: true, createdAt: new Date('2026-03-10T10:00:00Z') }));
 
       const filtered = service.filteredNotifications();
 
@@ -252,9 +255,9 @@ describe('NotificationService', () => {
     });
 
     it('should sort by date descending within same pin status', () => {
-      service.push(makeNotification({ id: 1, createdAt: '2026-03-10T08:00:00Z' }));
-      service.push(makeNotification({ id: 2, createdAt: '2026-03-10T12:00:00Z' }));
-      service.push(makeNotification({ id: 3, createdAt: '2026-03-10T10:00:00Z' }));
+      service.push(makeNotification({ id: 1, createdAt: new Date('2026-03-10T08:00:00Z') }));
+      service.push(makeNotification({ id: 2, createdAt: new Date('2026-03-10T12:00:00Z') }));
+      service.push(makeNotification({ id: 3, createdAt: new Date('2026-03-10T10:00:00Z') }));
 
       const filtered = service.filteredNotifications();
 

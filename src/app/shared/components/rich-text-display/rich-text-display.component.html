@@ -1,4 +1,6 @@
 <div
   class="rtd"
+  tabindex="0"
   [innerHTML]="renderedHtml()"
-  (click)="onContentClick($event)"></div>
+  (click)="onContentClick($event)"
+  (keydown.enter)="onContentClick($event)"></div>

@@ -27,7 +27,7 @@ describe('ShipmentService', () => {
     salesOrderId: 10,
     salesOrderNumber: 'SO-010',
     customerName: 'Acme Corp',
-    createdAt: '2026-03-10T08:00:00Z',
+    createdAt: new Date('2026-03-10T08:00:00Z'),
   };
 
   const mockShipmentDetail: ShipmentDetail = {
@@ -47,8 +47,8 @@ describe('ShipmentService', () => {
     salesOrderNumber: 'SO-010',
     customerName: 'Acme Corp',
     lines: [],
-    createdAt: '2026-03-10T08:00:00Z',
-    updatedAt: '2026-03-10T08:00:00Z',
+    createdAt: new Date('2026-03-10T08:00:00Z'),
+    updatedAt: new Date('2026-03-10T08:00:00Z'),
   };
 
   const mockRates: ShippingRate[] = [
@@ -68,7 +68,7 @@ describe('ShipmentService', () => {
     status: 'In Transit',
     estimatedDelivery: '2026-03-15T18:00:00Z',
     events: [
-      { description: 'Package picked up', timestamp: '2026-03-10T14:00:00Z', location: 'Detroit, MI' },
+      { description: 'Package picked up', timestamp: new Date('2026-03-10T14:00:00Z'), location: 'Detroit, MI' },
     ],
   };
 

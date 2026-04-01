@@ -6,6 +6,7 @@
       <div
         class="bom-tree__row"
         role="treeitem"
+        [attr.aria-selected]="false"
         [attr.aria-expanded]="node.hasChildren ? node.isExpanded : null"
         [attr.aria-level]="node.level + 1">
 

@@ -9,6 +9,7 @@
     role="combobox"
     aria-label="Rich text editor with mention support"
     [attr.aria-expanded]="showMentionPicker() && filteredUsers().length > 0"
+    [attr.aria-controls]="showMentionPicker() && filteredUsers().length > 0 ? 'rte-mention-listbox' : null"
     aria-autocomplete="list"
     aria-haspopup="listbox"
     [attr.aria-activedescendant]="activeIndex() >= 0 ? 'mention-option-' + activeIndex() : null"

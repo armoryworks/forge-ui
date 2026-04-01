@@ -120,16 +120,16 @@
                         @if (field.type === 'html') {
                           <span [innerHTML]="field.html"></span>
                         } @else if (field.type === 'ssn') {
-                          @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
-                          <input class="gov-form__input" [formControlName]="field.id"
+                          @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
+                          <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                             (input)="formatSsn($event, field.id)"
                             maxlength="11"
                             [placeholder]="field.placeholder ?? ''"
                             [attr.autocomplete]="field.autocomplete ?? null"
                             aria-label="Social security number">
                         } @else if (field.type === 'textarea') {
-                          @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
-                          <textarea class="gov-form__textarea" [formControlName]="field.id"
+                          @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
+                          <textarea class="gov-form__textarea" [id]="field.id" [formControlName]="field.id"
                             [rows]="field.rows ?? 4"
                             [attr.aria-label]="field.label"></textarea>
                         } @else if (field.type === 'checkbox') {
@@ -139,8 +139,8 @@
                             <span class="gov-form__checkbox-text">{{ field.label }}</span>
                           </label>
                         } @else {
-                          @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
-                          <input class="gov-form__input" [formControlName]="field.id"
+                          @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
+                          <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                             [attr.autocomplete]="field.autocomplete ?? null"
                             [attr.aria-label]="field.label">
                         }
@@ -212,19 +212,19 @@
                     @else if (field.fieldLayout === 'signature-field') {
                       <div class="gov-form__signature-row">
                         <div class="gov-form__signature-field">
-                          <input class="gov-form__input gov-form__input--signature" [formControlName]="field.id"
+                          <input class="gov-form__input gov-form__input--signature" [id]="field.id" [formControlName]="field.id"
                             placeholder="Type your full legal name"
                             [attr.autocomplete]="field.autocomplete ?? null"
                             [attr.aria-label]="field.label">
-                          <label class="gov-form__field-label"><strong>{{ field.label }}</strong> ({{ field.hint }})</label>
+                          <label class="gov-form__field-label" [attr.for]="field.id"><strong>{{ field.label }}</strong> ({{ field.hint }})</label>
                         </div>
                         <!-- Find the signature-date field from the same section -->
                         @for (dateField of section.fields; track dateField.id) {
                           @if (dateField.fieldLayout === 'signature-date') {
                             <div class="gov-form__signature-date">
-                              <input class="gov-form__input" type="date" [formControlName]="dateField.id"
+                              <input class="gov-form__input" type="date" [id]="dateField.id" [formControlName]="dateField.id"
                                 [attr.aria-label]="dateField.label">
-                              <label class="gov-form__field-label"><strong>{{ dateField.label }}</strong></label>
+                              <label class="gov-form__field-label" [attr.for]="dateField.id"><strong>{{ dateField.label }}</strong></label>
                             </div>
                           }
                         }
@@ -267,15 +267,15 @@
                     <!-- Generic text/date/ssn input (fallback for non-grid, non-amount fields) -->
                     @else if (field.type === 'text' || field.type === 'date' || field.type === 'ssn') {
                       <div class="gov-form__field-row">
-                        <label class="gov-form__field-label">{{ field.label }}</label>
+                        <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label>
                         @if (field.type === 'ssn') {
-                          <input class="gov-form__input" [formControlName]="field.id"
+                          <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                             (input)="formatSsn($event, field.id)"
                             maxlength="11"
                             [placeholder]="field.placeholder ?? ''"
                             aria-label="Social security number">
                         } @else {
-                          <input class="gov-form__input" [formControlName]="field.id"
+                          <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                             [attr.type]="field.type === 'date' ? 'date' : 'text'"
                             [attr.autocomplete]="field.autocomplete ?? null"
                             [attr.aria-label]="field.label">
@@ -317,16 +317,16 @@
                       @if (field.type === 'html') {
                         <span [innerHTML]="field.html"></span>
                       } @else if (field.type === 'ssn') {
-                        @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
-                        <input class="gov-form__input" [formControlName]="field.id"
+                        @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
+                        <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                           (input)="formatSsn($event, field.id)"
                           maxlength="11"
                           [placeholder]="field.placeholder ?? ''"
                           [attr.autocomplete]="field.autocomplete ?? null"
                           aria-label="Social security number">
                       } @else if (field.type === 'textarea') {
-                        @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
-                        <textarea class="gov-form__textarea" [formControlName]="field.id"
+                        @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
+                        <textarea class="gov-form__textarea" [id]="field.id" [formControlName]="field.id"
                           [rows]="field.rows ?? 4"
                           [attr.aria-label]="field.label"></textarea>
                       } @else if (field.type === 'checkbox') {
@@ -336,8 +336,8 @@
                           <span class="gov-form__checkbox-text">{{ field.label }}</span>
                         </label>
                       } @else {
-                        @if (!field.noLabel) { <label class="gov-form__field-label">{{ field.label }}</label> }
-                        <input class="gov-form__input" [formControlName]="field.id"
+                        @if (!field.noLabel) { <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label> }
+                        <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                           [attr.autocomplete]="field.autocomplete ?? null"
                           [attr.aria-label]="field.label">
                       }
@@ -384,16 +384,16 @@
                   @else if (field.fieldLayout === 'signature-field') {
                     <div class="gov-form__signature-row">
                       <div class="gov-form__signature-field">
-                        <label class="gov-form__field-label"><strong>{{ field.label }}</strong></label>
-                        <input class="gov-form__input gov-form__input--signature" [formControlName]="field.id"
+                        <label class="gov-form__field-label" [attr.for]="field.id"><strong>{{ field.label }}</strong></label>
+                        <input class="gov-form__input gov-form__input--signature" [id]="field.id" [formControlName]="field.id"
                           placeholder="Type your full legal name"
                           [attr.aria-label]="field.label">
                       </div>
                       @for (dateField of section.fields; track dateField.id) {
                         @if (dateField.fieldLayout === 'signature-date') {
                           <div class="gov-form__signature-date">
-                            <label class="gov-form__field-label"><strong>{{ dateField.label }}</strong></label>
-                            <input class="gov-form__input" type="date" [formControlName]="dateField.id"
+                            <label class="gov-form__field-label" [attr.for]="dateField.id"><strong>{{ dateField.label }}</strong></label>
+                            <input class="gov-form__input" type="date" [id]="dateField.id" [formControlName]="dateField.id"
                               [attr.aria-label]="dateField.label">
                           </div>
                         }
@@ -417,8 +417,8 @@
                   }
                   @else if (field.type === 'text' || field.type === 'date') {
                     <div class="gov-form__field-row">
-                      <label class="gov-form__field-label">{{ field.label }}</label>
-                      <input class="gov-form__input" [formControlName]="field.id"
+                      <label class="gov-form__field-label" [attr.for]="field.id">{{ field.label }}</label>
+                      <input class="gov-form__input" [id]="field.id" [formControlName]="field.id"
                         [attr.type]="field.type === 'date' ? 'date' : 'text'"
                         [attr.autocomplete]="field.autocomplete ?? null"
                         [attr.aria-label]="field.label">
@@ -485,8 +485,8 @@
                     <div [class]="field.cssClass ?? 'gov-form__emp-field'" [innerHTML]="field.html"></div>
                   } @else {
                     <div class="gov-form__emp-field">
-                      <label class="gov-form__field-label gov-form__field-label--muted">{{ field.label }}</label>
-                      <input class="gov-form__input gov-form__input--readonly" [formControlName]="field.id"
+                      <label class="gov-form__field-label gov-form__field-label--muted" [attr.for]="field.id">{{ field.label }}</label>
+                      <input class="gov-form__input gov-form__input--readonly" [id]="field.id" [formControlName]="field.id"
                         [attr.aria-label]="field.label" readonly>
                     </div>
                   }
