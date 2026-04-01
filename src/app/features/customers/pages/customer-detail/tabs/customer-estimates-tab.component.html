@@ -1,0 +1,74 @@
+<div class="tab-toolbar">
+  <span class="tab-toolbar__spacer"></span>
+  <button class="action-btn action-btn--primary" (click)="openCreate()" aria-label="New estimate">
+    <span class="material-icons-outlined">add</span>
+    New Estimate
+  </button>
+</div>
+
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="customer-estimates"
+    [columns]="columns"
+    [data]="estimates()"
+    [loading]="loading()"
+    emptyIcon="request_quote"
+    emptyMessage="No estimates yet"
+    (rowClick)="openEdit($any($event))">
+
+    <ng-template appColumnCell="estimatedAmount" let-row>
+      {{ $any(row).estimatedAmount | currency }}
+    </ng-template>
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="validUntil" let-row>
+      {{ $any(row).validUntil | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ $any(row).createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="row-actions">
+        @if (!$any(row).convertedToQuoteId) {
+          <button class="icon-btn" (click)="$event.stopPropagation(); convertToQuote($any(row))"
+                  aria-label="Convert to quote" title="Convert to Quote">
+            <span class="material-icons-outlined">forward</span>
+          </button>
+        }
+        <button class="icon-btn icon-btn--danger" (click)="$event.stopPropagation(); deleteEstimate($any(row))"
+                aria-label="Delete estimate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showDialog()) {
+  <app-dialog [title]="dialogTitle()" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="estimateForm">
+      <app-input label="Title" formControlName="title" [required]="true" />
+      <app-textarea label="Description" formControlName="description" [rows]="2" />
+      <div class="dialog-row">
+        <app-input label="Estimated Amount" formControlName="estimatedAmount" type="number" [required]="true" prefix="$" />
+        <app-datepicker label="Valid Until" formControlName="validUntil" />
+      </div>
+      @if (isEditing()) {
+        <app-select label="Status" formControlName="status" [options]="statusOptions" />
+      }
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations()"
+        [disabled]="estimateForm.invalid || saving()"
+        (click)="saveEstimate()">Save</button>
+    </div>
+  </app-dialog>
+}

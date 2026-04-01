@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { CustomerListItem } from '../models/customer-list-item.model';
 import { CustomerDetail } from '../models/customer-detail.model';
+import { CustomerSummary } from '../models/customer-summary.model';
 import { Contact } from '../models/contact.model';
 import { CreateCustomerRequest } from '../models/create-customer-request.model';
 import { UpdateCustomerRequest } from '../models/update-customer-request.model';
@@ -48,5 +49,9 @@ export class CustomerService {
 
   deleteContact(customerId: number, contactId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${customerId}/contacts/${contactId}`);
+  }
+
+  getCustomerSummary(id: number): Observable<CustomerSummary> {
+    return this.http.get<CustomerSummary>(`${this.base}/${id}/summary`);
   }
 }

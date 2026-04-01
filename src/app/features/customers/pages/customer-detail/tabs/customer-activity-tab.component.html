@@ -1,0 +1,9 @@
+<div class="tab-content">
+  @if (loading()) {
+    <div class="tab-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+    </div>
+  } @else {
+    <app-activity-timeline [activities]="activities()" />
+  }
+</div>

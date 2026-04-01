@@ -1,0 +1,31 @@
+<div class="tab-content">
+  @if (loading()) {
+    <div class="tab-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+    </div>
+  } @else if (addresses().length === 0) {
+    <div class="tab-empty">
+      <span class="material-icons-outlined">location_off</span>
+      <p>No addresses on file</p>
+    </div>
+  } @else {
+    <div class="address-list">
+      @for (addr of addresses(); track addr.id) {
+        <div class="address-card">
+          <div class="address-card__header">
+            <span class="chip chip--muted">{{ addr.type }}</span>
+            @if (addr.isDefault) {
+              <span class="chip chip--primary">Default</span>
+            }
+          </div>
+          <p class="address-card__line">{{ addr.line1 }}</p>
+          @if (addr.line2) {
+            <p class="address-card__line">{{ addr.line2 }}</p>
+          }
+          <p class="address-card__line">{{ addr.city }}, {{ addr.state }} {{ addr.zipCode }}</p>
+          <p class="address-card__line">{{ addr.country }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,84 @@
+<div class="tab-toolbar">
+  <span class="tab-toolbar__spacer"></span>
+  <button class="action-btn action-btn--primary" (click)="openAdd()" aria-label="Add contact">
+    <span class="material-icons-outlined">add</span>
+    Add Contact
+  </button>
+</div>
+
+<div class="tab-content">
+  @if (loading()) {
+    <div class="tab-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+    </div>
+  } @else if (contacts().length === 0) {
+    <div class="tab-empty">
+      <span class="material-icons-outlined">person_off</span>
+      <p>No contacts yet</p>
+      <button class="action-btn action-btn--primary" (click)="openAdd()">Add First Contact</button>
+    </div>
+  } @else {
+    <div class="contacts-grid">
+      @for (contact of contacts(); track contact.id) {
+        <div class="contact-card" [class.contact-card--primary]="contact.isPrimary">
+          <app-avatar [initials]="getInitials(contact)" size="lg" />
+          <div class="contact-card__info">
+            <div class="contact-card__name">
+              {{ contact.lastName }}, {{ contact.firstName }}
+              @if (contact.isPrimary) {
+                <span class="chip chip--primary">Primary</span>
+              }
+            </div>
+            @if (contact.role) {
+              <div class="contact-card__role">{{ contact.role }}</div>
+            }
+            @if (contact.email) {
+              <a class="contact-card__detail" [href]="'mailto:' + contact.email">
+                <span class="material-icons-outlined">email</span>{{ contact.email }}
+              </a>
+            }
+            @if (contact.phone) {
+              <a class="contact-card__detail" [href]="'tel:' + contact.phone">
+                <span class="material-icons-outlined">phone</span>{{ contact.phone }}
+              </a>
+            }
+          </div>
+          <div class="contact-card__actions">
+            <button class="icon-btn" (click)="openEdit(contact)" aria-label="Edit contact">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" (click)="deleteContact(contact)" aria-label="Remove contact">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showDialog()) {
+  <app-dialog [title]="dialogTitle()" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="contactForm">
+      <div class="dialog-row">
+        <app-input label="First Name" formControlName="firstName" [required]="true" />
+        <app-input label="Last Name" formControlName="lastName" [required]="true" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Email" formControlName="email" type="email" />
+        <app-input label="Phone" formControlName="phone" mask="phone" />
+      </div>
+      <div class="dialog-row">
+        <app-select label="Role" formControlName="role" [options]="roleOptions" />
+        <app-toggle label="Primary Contact" formControlName="isPrimary" />
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations()"
+        [disabled]="contactForm.invalid || saving()"
+        (click)="saveContact()">Save</button>
+    </div>
+  </app-dialog>
+}

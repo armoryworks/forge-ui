@@ -1,0 +1,27 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="customer-quotes"
+    [columns]="columns"
+    [data]="quotes()"
+    [loading]="loading()"
+    emptyIcon="request_quote"
+    emptyMessage="No quotes yet"
+    (rowClick)="openQuote($any($event))">
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="total" let-row>
+      {{ $any(row).total | currency }}
+    </ng-template>
+
+    <ng-template appColumnCell="expirationDate" let-row>
+      {{ $any(row).expirationDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ $any(row).createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>

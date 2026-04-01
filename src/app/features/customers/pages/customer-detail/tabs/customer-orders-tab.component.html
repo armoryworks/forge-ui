@@ -1,0 +1,25 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="customer-orders"
+    [columns]="columns"
+    [data]="orders()"
+    [loading]="loading()"
+    emptyIcon="shopping_cart"
+    emptyMessage="No sales orders yet"
+    (rowClick)="openOrder($any($event))">
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="total" let-row>{{ $any(row).total | currency }}</ng-template>
+
+    <ng-template appColumnCell="requestedDate" let-row>
+      {{ $any(row).requestedDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ $any(row).createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>

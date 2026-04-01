@@ -6,220 +6,51 @@
 </app-page-header>
 
 <div class="customers-layout">
-  <!-- Left: Customer List -->
-  <div class="customers-list-panel">
-    <div class="filters-bar">
-      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'customers.searchPlaceholder' | translate"
-        (keyup.enter)="applyFilters()" />
-      <app-select [label]="'common.status' | translate" [formControl]="activeFilterControl" [options]="activeOptions" />
-    </div>
-
-    <div [appLoadingBlock]="loading()">
-      <app-data-table tableId="customers" [columns]="customerColumns" [data]="customers()"
-        [rowClass]="customerRowClass" emptyIcon="people" [emptyMessage]="'customers.noCustomersFound' | translate"
-        (rowClick)="selectCustomer($any($event))">
-        <ng-template appColumnCell="name" let-row>
-          <span class="customer-name">{{ row.name }}</span>
-        </ng-template>
-        <ng-template appColumnCell="companyName" let-row>
-          <span class="text-muted">{{ row.companyName ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="email" let-row>
-          <span class="text-muted">{{ row.email ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="phone" let-row>
-          <span class="text-muted">{{ row.phone ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="isActive" let-row>
-          <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
-            {{ row.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
-          </span>
-        </ng-template>
-        <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
-        </ng-template>
-      </app-data-table>
-    </div>
+  <div class="filters-bar">
+    <app-input [label]="'common.search' | translate" [formControl]="searchControl"
+      [placeholder]="'customers.searchPlaceholder' | translate"
+      (keyup.enter)="applyFilters()" />
+    <app-select [label]="'common.status' | translate" [formControl]="activeFilterControl" [options]="activeOptions" />
   </div>
 
-  <!-- Right: Detail Panel -->
-  @if (selectedCustomer(); as customer) {
-    <div class="detail-panel">
-      <div class="detail-header">
-        <div class="detail-header__info">
-          <span class="material-icons-outlined detail-icon">business</span>
-          <div>
-            <div class="detail-name">{{ customer.name }}</div>
-            @if (customer.companyName) {
-              <div class="detail-company">{{ customer.companyName }}</div>
-            }
-          </div>
-        </div>
-        <div class="detail-header__actions">
-          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditCustomer()">
-            <span class="material-icons-outlined">edit</span>
-          </button>
-          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
-            <span class="material-icons-outlined">close</span>
-          </button>
-        </div>
-      </div>
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="customers"
+      [columns]="customerColumns"
+      [data]="customers()"
+      emptyIcon="people"
+      [emptyMessage]="'customers.noCustomersFound' | translate"
+      (rowClick)="selectCustomer($any($event))">
 
-      <!-- Tabs -->
-      <div class="tab-bar">
-        <button class="tab" [class.tab--active]="activeTab() === 'info'" (click)="activeTab.set('info')">{{ 'customers.info' | translate }}</button>
-        <button class="tab" [class.tab--active]="activeTab() === 'contacts'" (click)="activeTab.set('contacts')">
-          {{ 'customers.contacts' | translate }} ({{ customer.contacts.length }})
-        </button>
-        <button class="tab" [class.tab--active]="activeTab() === 'jobs'" (click)="activeTab.set('jobs')">
-          {{ 'customers.jobs' | translate }} ({{ customer.jobs.length }})
-        </button>
-      </div>
-
-      <div class="detail-body">
-        <!-- Info Tab -->
-        @if (activeTab() === 'info') {
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">{{ 'common.status' | translate }}</span>
-              <span class="info-value">
-                <span [class]="customer.isActive ? 'chip chip--success' : 'chip chip--muted'">
-                  {{ customer.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
-                </span>
-              </span>
-            </div>
-            @if (customer.email) {
-              <div class="info-item">
-                <span class="info-label">{{ 'common.email' | translate }}</span>
-                <span class="info-value">{{ customer.email }}</span>
-              </div>
-            }
-            @if (customer.phone) {
-              <div class="info-item">
-                <span class="info-label">{{ 'common.phone' | translate }}</span>
-                <span class="info-value">{{ customer.phone }}</span>
-              </div>
-            }
-            <div class="info-item">
-              <span class="info-label">{{ 'common.createdAt' | translate }}</span>
-              <span class="info-value">{{ customer.createdAt | date:'MM/dd/yyyy' }}</span>
-            </div>
-          </div>
-
-          @if (customer.externalId) {
-            <div class="info-section">
-              <span class="info-label">{{ 'customers.accounting' | translate }}</span>
-              <div class="info-grid">
-                <div class="info-item">
-                  <span class="info-label">{{ 'customers.externalId' | translate }}</span>
-                  <span class="info-value">{{ customer.externalId }}</span>
-                </div>
-                @if (customer.provider) {
-                  <div class="info-item">
-                    <span class="info-label">{{ 'customers.provider' | translate }}</span>
-                    <span class="info-value">{{ customer.provider }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <div class="detail-actions">
-            <button class="action-btn" (click)="toggleActive()">
-              <span class="material-icons-outlined">{{ customer.isActive ? 'block' : 'check_circle' }}</span>
-              {{ customer.isActive ? ('customers.deactivate' | translate) : ('customers.activate' | translate) }}
-            </button>
-            <button class="action-btn action-btn--danger" (click)="deleteCustomer()">
-              <span class="material-icons-outlined">delete</span>
-              {{ 'common.delete' | translate }}
-            </button>
-          </div>
-        }
-
-        <!-- Contacts Tab -->
-        @if (activeTab() === 'contacts') {
-          <div class="contacts-header">
-            <button class="action-btn action-btn--sm" (click)="openCreateContact()">
-              <span class="material-icons-outlined">add</span>
-              {{ 'customers.addContact' | translate }}
-            </button>
-          </div>
-
-          @if (customer.contacts.length === 0) {
-            <app-empty-state icon="contacts" [message]="'customers.noContactsYet' | translate" />
-          } @else {
-            <div class="contact-list">
-              @for (contact of customer.contacts; track contact.id) {
-                <div class="contact-card">
-                  <div class="contact-card__info">
-                    <app-avatar [initials]="getInitials(contact)" size="sm" />
-                    <div>
-                      <div class="contact-card__name">
-                        {{ contact.lastName }}, {{ contact.firstName }}
-                        @if (contact.isPrimary) {
-                          <span class="chip chip--primary">{{ 'customers.primary' | translate }}</span>
-                        }
-                      </div>
-                      @if (contact.role) {
-                        <div class="contact-card__role">{{ contact.role }}</div>
-                      }
-                      @if (contact.email) {
-                        <div class="contact-card__detail">{{ contact.email }}</div>
-                      }
-                      @if (contact.phone) {
-                        <div class="contact-card__detail">{{ contact.phone }}</div>
-                      }
-                    </div>
-                  </div>
-                  <div class="contact-card__actions">
-                    <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditContact(contact)">
-                      <span class="material-icons-outlined">edit</span>
-                    </button>
-                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'common.delete' | translate" (click)="deleteContact(contact)">
-                      <span class="material-icons-outlined">delete</span>
-                    </button>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        }
-
-        <!-- Jobs Tab -->
-        @if (activeTab() === 'jobs') {
-          @if (customer.jobs.length === 0) {
-            <app-empty-state icon="work" [message]="'customers.noJobsLinked' | translate" />
-          } @else {
-            <div class="job-list">
-              @for (job of customer.jobs; track job.id) {
-                <div class="job-item">
-                  <div class="job-item__info">
-                    <span class="job-item__number">{{ job.jobNumber }}</span>
-                    <span class="job-item__title">{{ job.title }}</span>
-                  </div>
-                  <div class="job-item__meta">
-                    @if (job.stageName) {
-                      <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
-                    }
-                    @if (job.dueDate) {
-                      <span class="job-item__date">{{ job.dueDate | date:'MM/dd/yyyy' }}</span>
-                    }
-                  </div>
-                </div>
-              }
-            </div>
-          }
-        }
-      </div>
-    </div>
-  }
+      <ng-template appColumnCell="name" let-row>
+        <span class="customer-name">{{ row.name }}</span>
+      </ng-template>
+      <ng-template appColumnCell="companyName" let-row>
+        <span class="text-muted">{{ row.companyName ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="email" let-row>
+        <span class="text-muted">{{ row.email ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="phone" let-row>
+        <span class="text-muted">{{ row.phone ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="isActive" let-row>
+        <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
+          {{ row.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="createdAt" let-row>
+        <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+      </ng-template>
+    </app-data-table>
+  </div>
 </div>
 
-<!-- Customer Dialog -->
+<!-- Create Customer Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="editingCustomer() ? ('customers.editCustomer' | translate) : ('customers.createCustomer' | translate)" (closed)="closeDialog()">
+  <app-dialog [title]="'customers.createCustomer' | translate" (closed)="closeDialog()">
     <div [formGroup]="customerForm">
-      <app-input [label]="'common.name' | translate" formControlName="name" />
+      <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" />
       <app-input [label]="'customers.companyName' | translate" formControlName="companyName" />
       <div class="dialog-row">
         <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
@@ -230,42 +61,11 @@
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="customerViolations"
+        [appValidationPopover]="customerViolations()"
         [disabled]="customerForm.invalid || saving()"
         (click)="saveCustomer()">
         <span class="material-icons-outlined">save</span>
-        {{ editingCustomer() ? ('common.saveChanges' | translate) : ('customers.createCustomer' | translate) }}
-      </button>
-    </div>
-  </app-dialog>
-}
-
-<!-- Contact Dialog -->
-@if (showContactDialog()) {
-  <app-dialog [title]="editingContact() ? ('customers.editContact' | translate) : ('customers.newContact' | translate)" width="420px" (closed)="closeContactDialog()">
-    <div [formGroup]="contactForm">
-      <div class="dialog-row">
-        <app-input [label]="'customers.firstName' | translate" formControlName="firstName" />
-        <app-input [label]="'customers.lastName' | translate" formControlName="lastName" />
-      </div>
-      <div class="dialog-row">
-        <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
-        <app-input [label]="'common.phone' | translate" formControlName="phone" />
-      </div>
-      <div class="dialog-row">
-        <app-select [label]="'customers.role' | translate" formControlName="role" [options]="roleOptions" />
-        <app-toggle [label]="'customers.primaryContact' | translate" formControlName="isPrimary" />
-      </div>
-    </div>
-
-    <div dialog-footer>
-      <button class="action-btn" (click)="closeContactDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
-        [appValidationPopover]="contactViolations"
-        [disabled]="contactForm.invalid || saving()"
-        (click)="saveContact()">
-        <span class="material-icons-outlined">save</span>
-        {{ editingContact() ? ('common.saveChanges' | translate) : ('customers.addContact' | translate) }}
+        {{ 'customers.createCustomer' | translate }}
       </button>
     </div>
   </app-dialog>

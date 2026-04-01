@@ -1,0 +1,155 @@
+<div class="cd-layout">
+
+  @if (loading()) {
+    <div class="cd-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+    </div>
+  } @else if (customer(); as c) {
+
+    <!-- ── Header ── -->
+    <div class="cd-header">
+      <div class="cd-header__top">
+        <a routerLink="/customers" class="cd-back">
+          <span class="material-icons-outlined">chevron_left</span>
+          Customers
+        </a>
+        <div class="cd-header__actions">
+          <button class="action-btn" (click)="openEdit()" aria-label="Edit customer">
+            <span class="material-icons-outlined">edit</span>
+            Edit
+          </button>
+          <button class="action-btn" (click)="archiveCustomer()" aria-label="Archive customer">
+            <span class="material-icons-outlined">archive</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="cd-header__identity">
+        <div class="cd-header__name-row">
+          <h1 class="cd-header__name">{{ c.name }}</h1>
+          <span class="chip" [class.chip--success]="c.isActive" [class.chip--muted]="!c.isActive">
+            {{ c.isActive ? 'Active' : 'Inactive' }}
+          </span>
+          @if (c.provider) {
+            <span class="chip chip--info" [matTooltip]="'Synced with ' + c.provider">
+              <span class="material-icons-outlined">sync</span>
+              {{ c.provider }}
+            </span>
+          }
+        </div>
+        @if (c.companyName) {
+          <p class="cd-header__company">{{ c.companyName }}</p>
+        }
+        <div class="cd-header__contact-row">
+          @if (c.email) {
+            <a [href]="'mailto:' + c.email" class="cd-header__contact-item">
+              <span class="material-icons-outlined">email</span>
+              {{ c.email }}
+            </a>
+          }
+          @if (c.phone) {
+            <a [href]="'tel:' + c.phone" class="cd-header__contact-item">
+              <span class="material-icons-outlined">phone</span>
+              {{ c.phone }}
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="cd-stats">
+        <div class="cd-stat" (click)="switchTab('estimates')" [class.cd-stat--active]="activeTab() === 'estimates'">
+          <span class="cd-stat__value">{{ c.estimateCount }}</span>
+          <span class="cd-stat__label">Open Estimates</span>
+        </div>
+        <div class="cd-stat" (click)="switchTab('quotes')" [class.cd-stat--active]="activeTab() === 'quotes'">
+          <span class="cd-stat__value">{{ c.quoteCount }}</span>
+          <span class="cd-stat__label">Open Quotes</span>
+        </div>
+        <div class="cd-stat" (click)="switchTab('orders')" [class.cd-stat--active]="activeTab() === 'orders'">
+          <span class="cd-stat__value">{{ c.orderCount }}</span>
+          <span class="cd-stat__label">Open Orders</span>
+        </div>
+        <div class="cd-stat" (click)="switchTab('jobs')" [class.cd-stat--active]="activeTab() === 'jobs'">
+          <span class="cd-stat__value">{{ c.activeJobCount }}</span>
+          <span class="cd-stat__label">Active Jobs</span>
+        </div>
+        <div class="cd-stat" (click)="switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
+          <span class="cd-stat__value">{{ c.openInvoiceTotal | currency }}</span>
+          <span class="cd-stat__label">Outstanding</span>
+        </div>
+        <div class="cd-stat">
+          <span class="cd-stat__value">{{ c.ytdRevenue | currency }}</span>
+          <span class="cd-stat__label">YTD Revenue</span>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <nav class="cd-tabs" role="tablist">
+        @for (tab of tabs; track tab) {
+          <button
+            class="cd-tab"
+            [class.cd-tab--active]="activeTab() === tab"
+            (click)="switchTab(tab)"
+            role="tab"
+            [attr.aria-selected]="activeTab() === tab"
+            [attr.aria-label]="tabLabel(tab) + ' tab'">
+            {{ tabLabel(tab) }}
+          </button>
+        }
+      </nav>
+    </div>
+
+    <!-- ── Tab content ── -->
+    <div class="cd-content">
+      @if (activeTab() === 'overview') {
+        <app-customer-overview-tab [customer]="c" />
+      }
+      @if (activeTab() === 'contacts') {
+        <app-customer-contacts-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'addresses') {
+        <app-customer-addresses-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'estimates') {
+        <app-customer-estimates-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'quotes') {
+        <app-customer-quotes-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'orders') {
+        <app-customer-orders-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'jobs') {
+        <app-customer-jobs-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'invoices') {
+        <app-customer-invoices-tab [customerId]="c.id" />
+      }
+      @if (activeTab() === 'activity') {
+        <app-customer-activity-tab [customerId]="c.id" />
+      }
+    </div>
+  }
+</div>
+
+<!-- Edit dialog -->
+@if (showEditDialog()) {
+  <app-dialog title="Edit Customer" width="520px" (closed)="closeEdit()">
+    <div [formGroup]="editForm">
+      <app-input label="Name" formControlName="name" [required]="true" />
+      <app-input label="Company Name" formControlName="companyName" />
+      <div class="dialog-row">
+        <app-input label="Email" formControlName="email" type="email" />
+        <app-input label="Phone" formControlName="phone" mask="phone" />
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeEdit()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations()"
+        [disabled]="editForm.invalid || saving()"
+        (click)="saveEdit()">Save</button>
+    </div>
+  </app-dialog>
+}

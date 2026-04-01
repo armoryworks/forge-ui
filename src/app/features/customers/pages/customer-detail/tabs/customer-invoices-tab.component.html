@@ -1,0 +1,25 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="customer-invoices"
+    [columns]="columns"
+    [data]="invoices()"
+    [loading]="loading()"
+    emptyIcon="receipt_long"
+    emptyMessage="No invoices yet"
+    (rowClick)="openInvoice($any($event))">
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="total" let-row>{{ $any(row).total | currency }}</ng-template>
+
+    <ng-template appColumnCell="dueDate" let-row>
+      {{ $any(row).dueDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ $any(row).createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>

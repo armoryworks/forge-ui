@@ -1,0 +1,67 @@
+<div class="tab-content">
+  <div class="overview-grid">
+
+    <section class="overview-section">
+      <h3 class="overview-section__title">Account Details</h3>
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-row__label">Customer Name</span>
+          <span class="detail-row__value">{{ customer().name }}</span>
+        </div>
+        @if (customer().companyName) {
+          <div class="detail-row">
+            <span class="detail-row__label">Company</span>
+            <span class="detail-row__value">{{ customer().companyName }}</span>
+          </div>
+        }
+        @if (customer().email) {
+          <div class="detail-row">
+            <span class="detail-row__label">Email</span>
+            <a class="detail-row__link" [href]="'mailto:' + customer().email">{{ customer().email }}</a>
+          </div>
+        }
+        @if (customer().phone) {
+          <div class="detail-row">
+            <span class="detail-row__label">Phone</span>
+            <a class="detail-row__link" [href]="'tel:' + customer().phone">{{ customer().phone }}</a>
+          </div>
+        }
+        <div class="detail-row">
+          <span class="detail-row__label">Status</span>
+          <span class="chip" [class.chip--success]="customer().isActive" [class.chip--muted]="!customer().isActive">
+            {{ customer().isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Customer Since</span>
+          <span class="detail-row__value">{{ customer().createdAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+    </section>
+
+    @if (customer().provider) {
+      <section class="overview-section">
+        <h3 class="overview-section__title">Accounting Integration</h3>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-row__label">Provider</span>
+            <span class="detail-row__value">{{ customer().provider }}</span>
+          </div>
+          @if (customer().externalId) {
+            <div class="detail-row">
+              <span class="detail-row__label">External ID</span>
+              <span class="detail-row__value detail-row__value--mono">{{ customer().externalId }}</span>
+            </div>
+          }
+          @if (customer().externalRef) {
+            <div class="detail-row">
+              <span class="detail-row__label">Reference</span>
+              <span class="detail-row__value detail-row__value--mono">{{ customer().externalRef }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+  </div>
+</div>

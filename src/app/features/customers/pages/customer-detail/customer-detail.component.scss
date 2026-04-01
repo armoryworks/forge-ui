@@ -1,0 +1,185 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.cd-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.cd-loading {
+  @include flex-center;
+  height: 100%;
+  color: var(--text-muted);
+  font-size: $icon-size-hero;
+}
+
+// ── Header ──
+.cd-header {
+  flex: 0 0 auto;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+  padding: $sp-md $sp-xl 0;
+}
+
+.cd-header__top {
+  @include flex-between;
+  margin-bottom: $sp-md;
+}
+
+.cd-back {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover { color: var(--primary); }
+
+  .material-icons-outlined { font-size: $icon-size-sm; }
+}
+
+.cd-header__actions {
+  display: flex;
+  gap: $sp-md;
+}
+
+.cd-header__identity {
+  margin-bottom: $sp-md;
+}
+
+.cd-header__name-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  flex-wrap: wrap;
+  margin-bottom: $sp-xs;
+}
+
+.cd-header__name {
+  font-size: $font-size-xl;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.cd-header__company {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0 0 $sp-sm;
+}
+
+.cd-header__contact-row {
+  display: flex;
+  gap: $sp-xl;
+  flex-wrap: wrap;
+}
+
+.cd-header__contact-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  text-decoration: none;
+
+  &:hover { color: var(--primary); }
+
+  .material-icons-outlined { font-size: $icon-size-xs; }
+}
+
+// ── Stats bar ──
+.cd-stats {
+  display: flex;
+  gap: 0;
+  border-top: $border-width-thin solid var(--border);
+  margin: 0 (-$sp-xl);
+}
+
+.cd-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $sp-sm $sp-md;
+  border-right: $border-width-thin solid var(--border);
+  cursor: default;
+  transition: background $transition-fast;
+
+  &:last-child { border-right: none; }
+
+  &[role]:hover,
+  &--active {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  // Only make stat items that have click handlers look clickable
+  &:has(+ .cd-stat) { cursor: pointer; }
+}
+
+.cd-stat__value {
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: var(--text);
+  font-family: $font-family-mono;
+}
+
+.cd-stat__label {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+// ── Tabs ──
+.cd-tabs {
+  display: flex;
+  gap: 0;
+  margin: $sp-md (-$sp-xl) 0;
+  padding: 0 $sp-xl;
+  overflow-x: auto;
+}
+
+.cd-tab {
+  flex: 0 0 auto;
+  padding: $sp-sm $sp-lg;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color $transition-fast, border-color $transition-fast;
+  white-space: nowrap;
+
+  &:hover { color: var(--text); }
+
+  &--active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 500;
+  }
+}
+
+// ── Content ──
+.cd-content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}

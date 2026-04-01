@@ -1,0 +1,25 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="customer-jobs"
+    [columns]="columns"
+    [data]="jobs()"
+    [loading]="loading()"
+    emptyIcon="work_off"
+    emptyMessage="No jobs linked to this customer"
+    (rowClick)="openJob($any($event))">
+
+    <ng-template appColumnCell="stageName" let-row>
+      @if ($any(row).stageName) {
+        <span class="chip" [style.--chip-color]="$any(row).stageColor">{{ $any(row).stageName }}</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="dueDate" let-row>
+      {{ $any(row).dueDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ $any(row).createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>
