@@ -151,6 +151,11 @@ export class PartsComponent {
     moldToolRef: new FormControl(''),
     externalPartNumber: new FormControl(''),
     toolingAssetId: new FormControl<number | null>(null),
+    minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
+    reorderPoint: new FormControl<number | null>(null, [Validators.min(0)]),
+    reorderQuantity: new FormControl<number | null>(null, [Validators.min(0.01)]),
+    leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
+    safetyStockDays: new FormControl<number | null>(null, [Validators.min(0)]),
   });
 
   protected readonly partViolations = FormValidationService.getViolations(this.partForm, {
@@ -311,6 +316,8 @@ export class PartsComponent {
       description: '', revision: 'A',
       partType: 'Part', material: '', moldToolRef: '', externalPartNumber: '',
       toolingAssetId: null,
+      minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
+      leadTimeDays: null, safetyStockDays: null,
     });
     this.showPartDialog.set(true);
   }
@@ -327,6 +334,11 @@ export class PartsComponent {
       moldToolRef: part.moldToolRef ?? '',
       externalPartNumber: part.externalPartNumber ?? '',
       toolingAssetId: part.toolingAssetId,
+      minStockThreshold: part.minStockThreshold,
+      reorderPoint: part.reorderPoint,
+      reorderQuantity: part.reorderQuantity,
+      leadTimeDays: part.leadTimeDays,
+      safetyStockDays: part.safetyStockDays,
     });
     this.showPartDialog.set(true);
   }
@@ -350,6 +362,11 @@ export class PartsComponent {
         moldToolRef: form.moldToolRef || undefined,
         externalPartNumber: form.externalPartNumber || undefined,
         toolingAssetId: form.toolingAssetId ?? undefined,
+        minStockThreshold: form.minStockThreshold ?? undefined,
+        reorderPoint: form.reorderPoint ?? undefined,
+        reorderQuantity: form.reorderQuantity ?? undefined,
+        leadTimeDays: form.leadTimeDays ?? undefined,
+        safetyStockDays: form.safetyStockDays ?? undefined,
       }).subscribe({
         next: (detail) => {
           this.selectedPart.set(detail);
@@ -367,6 +384,11 @@ export class PartsComponent {
         moldToolRef: form.moldToolRef || undefined,
         externalPartNumber: form.externalPartNumber || undefined,
         toolingAssetId: form.toolingAssetId ?? undefined,
+        minStockThreshold: form.minStockThreshold ?? undefined,
+        reorderPoint: form.reorderPoint ?? undefined,
+        reorderQuantity: form.reorderQuantity ?? undefined,
+        leadTimeDays: form.leadTimeDays ?? undefined,
+        safetyStockDays: form.safetyStockDays ?? undefined,
       }).subscribe({
         next: (detail) => {
           this.selectedPart.set(detail);

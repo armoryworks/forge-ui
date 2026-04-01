@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { InventoryService } from './services/inventory.service';
+import { ReplenishmentService } from './services/replenishment.service';
 import { StorageLocation } from './models/storage-location.model';
 import { InventoryPartSummary } from './models/inventory-part-summary.model';
 import { LowStockAlert } from './models/low-stock-alert.model';
@@ -19,6 +20,8 @@ import { CycleCount } from './models/cycle-count.model';
 import { Reservation } from './models/reservation.model';
 import { LocationType } from './models/location-type.type';
 import { StorageLocationFlat } from './models/storage-location-flat.model';
+import { BurnRate } from './models/burn-rate.model';
+import { ReorderSuggestion } from './models/reorder-suggestion.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -36,18 +39,19 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 
-type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOps' | 'cycleCounts' | 'reservations';
+type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOps' | 'cycleCounts' | 'reservations' | 'replenishment';
 
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationPopoverDirective, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationPopoverDirective, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InventoryComponent {
   private readonly inventoryService = inject(InventoryService);
+  private readonly replenishmentService = inject(ReplenishmentService);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly router = inject(Router);
@@ -267,6 +271,7 @@ export class InventoryComponent {
     if (tab === 'receiving' && this.receivingHistory().length === 0) this.loadReceivingHistory();
     if (tab === 'cycleCounts' && this.cycleCounts().length === 0) this.loadCycleCounts();
     if (tab === 'reservations' && this.reservations().length === 0) this.loadReservations();
+    if (tab === 'replenishment') { this.loadBurnRates(); this.loadSuggestions(); }
   }
 
   private loadBinLocations(): void {
@@ -714,5 +719,162 @@ export class InventoryComponent {
     if (daysUntilExpiry < 0) return 'lot-expired';
     if (daysUntilExpiry <= 30) return 'lot-expiring-soon';
     return '';
+  }
+
+  // ── Replenishment Tab ──
+
+  protected readonly burnRates = signal<BurnRate[]>([]);
+  protected readonly suggestions = signal<ReorderSuggestion[]>([]);
+  protected readonly replenishmentLoading = signal(false);
+  protected readonly replenishmentSaving = signal(false);
+  protected readonly burnRateFilter = new FormControl<string>('');
+  protected readonly burnRateNeedsReorderOnly = signal(false);
+  protected readonly selectedSuggestionIds = signal<Set<number>>(new Set());
+  protected readonly showDismissDialog = signal(false);
+  protected readonly dismissTarget = signal<ReorderSuggestion | null>(null);
+  protected readonly dismissReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
+
+  protected readonly pendingSuggestions = computed(() =>
+    this.suggestions().filter(s => s.status === 'Pending'),
+  );
+
+  protected readonly burnRateColumns: ColumnDef[] = [
+    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'partDescription', header: 'Description', sortable: true },
+    { field: 'preferredVendorName', header: 'Vendor', sortable: true, width: '140px' },
+    { field: 'availableStock', header: 'Available', sortable: true, align: 'right', width: '90px' },
+    { field: 'incomingPoQuantity', header: 'On Order', sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRate30Day', header: '30d / day', sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRate60Day', header: '60d / day', sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRate90Day', header: '90d / day', sortable: true, align: 'right', width: '80px' },
+    { field: 'daysOfStockRemaining', header: 'Days Left', sortable: true, align: 'right', width: '80px' },
+    { field: 'projectedStockoutDate', header: 'Stockout', sortable: true, type: 'date', width: '100px' },
+    { field: 'needsReorder', header: 'Reorder', sortable: true, width: '80px', align: 'center' },
+  ];
+
+  protected readonly suggestionColumns: ColumnDef[] = [
+    { field: 'select', header: '', width: '40px' },
+    { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
+    { field: 'partDescription', header: 'Description', sortable: true },
+    { field: 'vendorName', header: 'Vendor', sortable: true, width: '140px' },
+    { field: 'availableStock', header: 'Available', sortable: true, align: 'right', width: '80px' },
+    { field: 'burnRateDailyAvg', header: 'Burn/Day', sortable: true, align: 'right', width: '80px' },
+    { field: 'daysOfStockRemaining', header: 'Days Left', sortable: true, align: 'right', width: '80px' },
+    { field: 'projectedStockoutDate', header: 'Stockout', sortable: true, type: 'date', width: '100px' },
+    { field: 'suggestedQuantity', header: 'Suggest Qty', sortable: true, align: 'right', width: '90px' },
+    { field: 'actions', header: '', width: '120px', align: 'right' },
+  ];
+
+  protected readonly burnRateRowClass = (row: unknown) => {
+    const r = row as BurnRate;
+    return r.needsReorder ? 'row--warning' : '';
+  };
+
+  protected loadBurnRates(): void {
+    this.replenishmentLoading.set(true);
+    const search = this.burnRateFilter.value?.trim() || undefined;
+    this.replenishmentService.getBurnRates(search, this.burnRateNeedsReorderOnly()).subscribe({
+      next: (data) => { this.burnRates.set(data); this.replenishmentLoading.set(false); },
+      error: () => this.replenishmentLoading.set(false),
+    });
+  }
+
+  protected loadSuggestions(): void {
+    this.replenishmentService.getSuggestions('Pending').subscribe({
+      next: (data) => this.suggestions.set(data),
+    });
+  }
+
+  protected toggleBurnRateFilter(): void {
+    this.burnRateNeedsReorderOnly.set(!this.burnRateNeedsReorderOnly());
+    this.loadBurnRates();
+  }
+
+  protected toggleSuggestionSelect(id: number): void {
+    const ids = new Set(this.selectedSuggestionIds());
+    if (ids.has(id)) {
+      ids.delete(id);
+    } else {
+      ids.add(id);
+    }
+    this.selectedSuggestionIds.set(ids);
+  }
+
+  protected isSuggestionSelected(id: number): boolean {
+    return this.selectedSuggestionIds().has(id);
+  }
+
+  protected toggleAllSuggestions(): void {
+    const pending = this.pendingSuggestions();
+    if (this.selectedSuggestionIds().size === pending.length) {
+      this.selectedSuggestionIds.set(new Set());
+    } else {
+      this.selectedSuggestionIds.set(new Set(pending.map(s => s.id)));
+    }
+  }
+
+  protected approveSuggestion(suggestion: ReorderSuggestion): void {
+    this.replenishmentSaving.set(true);
+    this.replenishmentService.approveSuggestion(suggestion.id).subscribe({
+      next: () => {
+        this.replenishmentSaving.set(false);
+        this.loadSuggestions();
+        this.snackbar.success(`Reorder approved — draft PO created for ${suggestion.partNumber}`);
+      },
+      error: () => this.replenishmentSaving.set(false),
+    });
+  }
+
+  protected approveBulk(): void {
+    const ids = [...this.selectedSuggestionIds()];
+    if (ids.length === 0) return;
+    this.replenishmentSaving.set(true);
+    this.replenishmentService.approveBulk(ids).subscribe({
+      next: (result) => {
+        this.replenishmentSaving.set(false);
+        this.selectedSuggestionIds.set(new Set());
+        this.loadSuggestions();
+        this.snackbar.success(`Approved ${result.approvedCount} suggestions — ${result.createdPoIds.length} PO(s) created`);
+      },
+      error: () => this.replenishmentSaving.set(false),
+    });
+  }
+
+  protected openDismissDialog(suggestion: ReorderSuggestion): void {
+    this.dismissTarget.set(suggestion);
+    this.dismissReasonControl.reset();
+    this.showDismissDialog.set(true);
+  }
+
+  protected closeDismissDialog(): void {
+    this.showDismissDialog.set(false);
+    this.dismissTarget.set(null);
+  }
+
+  protected submitDismiss(): void {
+    const target = this.dismissTarget();
+    if (!target || this.dismissReasonControl.invalid) return;
+    this.replenishmentSaving.set(true);
+    this.replenishmentService.dismissSuggestion(target.id, this.dismissReasonControl.value!).subscribe({
+      next: () => {
+        this.replenishmentSaving.set(false);
+        this.closeDismissDialog();
+        this.loadSuggestions();
+        this.snackbar.info('Suggestion dismissed');
+      },
+      error: () => this.replenishmentSaving.set(false),
+    });
+  }
+
+  protected getDaysRemainingClass(days: number | null): string {
+    if (days === null) return '';
+    if (days <= 7) return 'chip chip--error';
+    if (days <= 21) return 'chip chip--warning';
+    return 'chip chip--muted';
+  }
+
+  protected formatBurnRate(rate: number | null): string {
+    if (rate === null) return '—';
+    return rate.toFixed(2);
   }
 }

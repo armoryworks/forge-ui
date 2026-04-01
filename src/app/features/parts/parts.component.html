@@ -501,6 +501,17 @@
         displayField="name"
         [filters]="{ assetType: 'Tooling' }"
         formControlName="toolingAssetId" />
+
+      <div class="dialog-section-label">{{ 'parts.inventoryReplenishment' | translate }}</div>
+      <div class="dialog-row">
+        <app-input [label]="'parts.minStockThreshold' | translate" formControlName="minStockThreshold" type="number" />
+        <app-input [label]="'parts.reorderPoint' | translate" formControlName="reorderPoint" type="number" />
+      </div>
+      <div class="dialog-row">
+        <app-input [label]="'parts.reorderQuantity' | translate" formControlName="reorderQuantity" type="number" />
+        <app-input [label]="'parts.leadTimeDays' | translate" formControlName="leadTimeDays" type="number" />
+      </div>
+      <app-input [label]="'parts.safetyStockDays' | translate" formControlName="safetyStockDays" type="number" />
     </div>
 
     <div dialog-footer>

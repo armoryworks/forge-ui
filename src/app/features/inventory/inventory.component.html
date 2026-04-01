@@ -66,6 +66,13 @@
       <span class="material-icons-outlined">lock</span>
       {{ 'inventory.tabs.reservations' | translate }}
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'replenishment'" (click)="switchTab('replenishment')">
+      <span class="material-icons-outlined">shopping_cart</span>
+      Replenishment
+      @if (pendingSuggestions().length > 0) {
+        <span class="tab__badge">{{ pendingSuggestions().length }}</span>
+      }
+    </button>
   </div>
 
   <div [appLoadingBlock]="loading()">
@@ -682,5 +689,191 @@
           (click)="approveCycleCount()">{{ 'inventory.dialogs.approveAndAdjust' | translate }}</button>
       </div>
     }
+  </app-dialog>
+}
+
+<!-- ── Replenishment Tab ── -->
+@if (activeTab() === 'replenishment') {
+  <div class="tab-panel tab-panel--replenishment" [appLoadingBlock]="replenishmentLoading()">
+
+    <!-- Pending Suggestions Queue -->
+    @if (pendingSuggestions().length > 0) {
+      <div class="replenishment-section">
+        <div class="replenishment-section__header">
+          <div class="replenishment-section__title">
+            <span class="material-icons-outlined replenishment-section__icon">notification_important</span>
+            Pending Reorder Suggestions
+            <span class="chip chip--warning">{{ pendingSuggestions().length }}</span>
+          </div>
+          <div class="replenishment-section__actions">
+            @if (selectedSuggestionIds().size > 0) {
+              <button class="action-btn action-btn--primary action-btn--sm"
+                [disabled]="replenishmentSaving()"
+                (click)="approveBulk()">
+                <span class="material-icons-outlined">shopping_cart</span>
+                Approve Selected ({{ selectedSuggestionIds().size }})
+              </button>
+            }
+          </div>
+        </div>
+        <table class="replenishment-table" role="table" aria-label="Pending reorder suggestions">
+          <thead>
+            <tr>
+              <th scope="col" style="width:36px">
+                <input type="checkbox"
+                  [checked]="selectedSuggestionIds().size === pendingSuggestions().length && pendingSuggestions().length > 0"
+                  (change)="toggleAllSuggestions()"
+                  aria-label="Select all suggestions" />
+              </th>
+              <th scope="col">Part #</th>
+              <th scope="col">Description</th>
+              <th scope="col">Vendor</th>
+              <th scope="col" class="text-right">Available</th>
+              <th scope="col" class="text-right">Burn/Day</th>
+              <th scope="col" class="text-right">Days Left</th>
+              <th scope="col">Est. Stockout</th>
+              <th scope="col" class="text-right">Suggest Qty</th>
+              <th scope="col" style="width:100px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (s of pendingSuggestions(); track s.id) {
+              <tr [class.row--selected]="isSuggestionSelected(s.id)">
+                <td>
+                  <input type="checkbox"
+                    [checked]="isSuggestionSelected(s.id)"
+                    (change)="toggleSuggestionSelect(s.id)"
+                    [attr.aria-label]="'Select suggestion for ' + s.partNumber" />
+                </td>
+                <td class="mono">{{ s.partNumber }}</td>
+                <td>{{ s.partDescription }}</td>
+                <td class="text-muted">{{ s.vendorName ?? '—' }}</td>
+                <td class="text-right">{{ s.availableStock | number:'1.0-2' }}</td>
+                <td class="text-right mono">{{ s.burnRateDailyAvg | number:'1.2-2' }}</td>
+                <td class="text-right">
+                  @if (s.daysOfStockRemaining !== null) {
+                    <span [class]="getDaysRemainingClass(s.daysOfStockRemaining)">
+                      {{ s.daysOfStockRemaining }}d
+                    </span>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td>
+                  @if (s.projectedStockoutDate) {
+                    <span [class]="getDaysRemainingClass(s.daysOfStockRemaining)">
+                      {{ s.projectedStockoutDate | date:'MM/dd/yyyy' }}
+                    </span>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td class="text-right mono">{{ s.suggestedQuantity | number:'1.0-2' }}</td>
+                <td class="replenishment-actions">
+                  <button class="action-btn action-btn--sm action-btn--primary"
+                    [disabled]="replenishmentSaving()"
+                    (click)="approveSuggestion(s)"
+                    aria-label="Approve suggestion for {{ s.partNumber }}">
+                    <span class="material-icons-outlined">shopping_cart</span>
+                    Approve
+                  </button>
+                  <button class="icon-btn"
+                    (click)="openDismissDialog(s)"
+                    aria-label="Dismiss suggestion for {{ s.partNumber }}"
+                    matTooltip="Dismiss">
+                    <span class="material-icons-outlined">close</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <div class="replenishment-empty">
+        <span class="material-icons-outlined replenishment-empty__icon">check_circle</span>
+        <span>No pending reorder suggestions — inventory levels look good.</span>
+      </div>
+    }
+
+    <!-- Burn Rates -->
+    <div class="replenishment-section">
+      <div class="replenishment-section__header">
+        <div class="replenishment-section__title">
+          <span class="material-icons-outlined replenishment-section__icon">local_fire_department</span>
+          Burn Rate Analysis
+        </div>
+        <div class="replenishment-section__actions">
+          <app-input label="Search parts"
+            [formControl]="burnRateFilter"
+            (keydown.enter)="loadBurnRates()" />
+          <button class="action-btn action-btn--sm"
+            [class.action-btn--primary]="burnRateNeedsReorderOnly()"
+            (click)="toggleBurnRateFilter()"
+            matTooltip="Show only parts that need reordering">
+            <span class="material-icons-outlined">filter_list</span>
+            Needs Reorder
+          </button>
+          <button class="icon-btn" (click)="loadBurnRates()" aria-label="Refresh burn rates" matTooltip="Refresh">
+            <span class="material-icons-outlined">refresh</span>
+          </button>
+        </div>
+      </div>
+      <app-data-table
+        tableId="inventory-burn-rates"
+        [columns]="burnRateColumns"
+        [data]="burnRates()"
+        [rowClass]="burnRateRowClass"
+        emptyIcon="local_fire_department"
+        emptyMessage="No burn rate data — start receiving and picking parts to build history">
+        <ng-template appColumnCell="burnRate30Day" let-row>
+          <span class="mono">{{ formatBurnRate($any(row).burnRate30Day) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="burnRate60Day" let-row>
+          <span class="mono">{{ formatBurnRate($any(row).burnRate60Day) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="burnRate90Day" let-row>
+          <span class="mono">{{ formatBurnRate($any(row).burnRate90Day) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="daysOfStockRemaining" let-row>
+          @if ($any(row).daysOfStockRemaining !== null) {
+            <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
+              {{ $any(row).daysOfStockRemaining }}d
+            </span>
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="needsReorder" let-row>
+          @if ($any(row).needsReorder) {
+            <span class="chip chip--error">Yes</span>
+          } @else {
+            <span class="chip chip--success">OK</span>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </div>
+}
+
+<!-- Dismiss Suggestion Dialog -->
+@if (showDismissDialog() && dismissTarget()) {
+  <app-dialog title="Dismiss Reorder Suggestion" width="440px" (closed)="closeDismissDialog()">
+    <p class="text-muted">
+      Dismissing the suggestion for <strong>{{ dismissTarget()!.partNumber }}</strong>.
+      Please provide a reason so it can be reviewed later.
+    </p>
+    <app-textarea
+      label="Reason"
+      [formControl]="dismissReasonControl"
+      [rows]="3"
+      [maxlength]="500"
+      [required]="true" />
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDismissDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="dismissReasonControl.invalid || replenishmentSaving()"
+        (click)="submitDismiss()">Dismiss</button>
+    </div>
   </app-dialog>
 }

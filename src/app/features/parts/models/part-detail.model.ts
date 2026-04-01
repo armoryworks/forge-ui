@@ -20,6 +20,9 @@ export interface PartDetail {
   preferredVendorName: string | null;
   minStockThreshold: number | null;
   reorderPoint: number | null;
+  reorderQuantity: number | null;
+  leadTimeDays: number | null;
+  safetyStockDays: number | null;
   toolingAssetId: number | null;
   toolingAssetName: string | null;
   bomEntries: BOMEntry[];

@@ -327,3 +327,131 @@
     gap: $sp-md;
   }
 }
+
+// ─── Replenishment Tab ───
+
+.tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-xs;
+  border-radius: 8px;
+  background: var(--error);
+  color: #fff;
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  margin-left: $sp-xs;
+  line-height: 1;
+}
+
+.tab-panel--replenishment {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  padding: $sp-lg;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.replenishment-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+
+  &__icon {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    flex-wrap: wrap;
+  }
+}
+
+.replenishment-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-base;
+
+  th {
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:hover td {
+    background: var(--surface);
+  }
+
+  tr.row--selected td {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  .text-right { text-align: right; }
+}
+
+.replenishment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-sm;
+}
+
+.replenishment-empty {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border: $border-width-thin solid var(--border);
+  color: var(--success);
+  font-size: $font-size-sm;
+
+  &__icon {
+    font-size: $icon-size-xl;
+    flex-shrink: 0;
+  }
+}
+
+.mono {
+  font-family: $font-family-mono;
+}
+
+.text-center { text-align: center; }

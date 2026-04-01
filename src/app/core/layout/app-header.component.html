@@ -149,6 +149,10 @@
             <span class="material-icons-outlined">manage_accounts</span>
             {{ 'header.accountSettings' | translate }}
           </button>
+          <button class="user-menu__item" (click)="openAbout()">
+            <span class="material-icons-outlined">info</span>
+            About
+          </button>
           <div class="user-menu__divider"></div>
           <div class="user-menu__lang">
             <span class="user-menu__lang-label">
@@ -187,3 +191,44 @@
   [currentRoute]="currentRoute()"
   [open]="showTrainingPanel()"
   (closed)="showTrainingPanel.set(false)" />
+
+@if (showAboutDialog()) {
+  <app-dialog title="About QB Engineer" width="420px" (closed)="closeAbout()">
+    <div class="about-dialog">
+      <div class="about-dialog__logo">QB<span>:</span>Eng</div>
+      <div class="about-dialog__tagline">Manufacturing Operations Platform</div>
+
+      <div class="about-dialog__meta">
+        <div class="about-dialog__row">
+          <span class="about-dialog__label">Version</span>
+          <span class="about-dialog__value mono">
+            {{ versionService.info()?.buildLabel ?? 'dev' }}
+          </span>
+        </div>
+        @if (versionService.info()?.gitCommit) {
+          <div class="about-dialog__row">
+            <span class="about-dialog__label">Commit</span>
+            <span class="about-dialog__value mono">{{ versionService.info()!.gitCommit }}</span>
+          </div>
+        }
+        <div class="about-dialog__row">
+          <span class="about-dialog__label">License</span>
+          <span class="about-dialog__value">GNU General Public License v3.0</span>
+        </div>
+        <div class="about-dialog__row">
+          <span class="about-dialog__label">Stack</span>
+          <span class="about-dialog__value">Angular 21 · .NET 9 · PostgreSQL</span>
+        </div>
+      </div>
+
+      <p class="about-dialog__desc text-muted">
+        Open-source ERP and production management for small manufacturers.
+        Integrates with QuickBooks Online for accounting sync.
+      </p>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="closeAbout()">Close</button>
+    </div>
+  </app-dialog>
+}

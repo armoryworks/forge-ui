@@ -8,4 +8,9 @@ export interface CreatePartRequest {
   moldToolRef?: string;
   externalPartNumber?: string;
   toolingAssetId?: number;
+  minStockThreshold?: number;
+  reorderPoint?: number;
+  reorderQuantity?: number;
+  leadTimeDays?: number;
+  safetyStockDays?: number;
 }

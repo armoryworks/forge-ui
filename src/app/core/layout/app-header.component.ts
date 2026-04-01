@@ -14,17 +14,19 @@ import { LayoutService } from '../../shared/services/layout.service';
 import { SearchService } from '../../shared/services/search.service';
 import { AiService, AiSearchSuggestion } from '../../shared/services/ai.service';
 import { LanguageService, SupportedLanguage } from '../../shared/services/language.service';
+import { VersionService } from '../../shared/services/version.service';
 import { SearchResult } from '../../shared/models/search.model';
 import { RagSearchResult } from '../../shared/models/rag-search-result.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
 import { ChatComponent } from '../../features/chat/chat.component';
 import { AiHelpPanelComponent } from '../../shared/components/ai-help-panel/ai-help-panel.component';
 import { TrainingContextPanelComponent } from '../../shared/components/training-context-panel/training-context-panel.component';
+import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, MatTooltipModule, TranslatePipe, NotificationPanelComponent, ChatComponent, AiHelpPanelComponent, TrainingContextPanelComponent],
+  imports: [ReactiveFormsModule, RouterLink, MatTooltipModule, TranslatePipe, NotificationPanelComponent, ChatComponent, AiHelpPanelComponent, TrainingContextPanelComponent, DialogComponent],
   templateUrl: './app-header.component.html',
   styleUrl: './app-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,7 +39,10 @@ export class AppHeaderComponent implements OnInit {
   private readonly searchService = inject(SearchService);
   protected readonly aiService = inject(AiService);
   protected readonly languageService = inject(LanguageService);
+  protected readonly versionService = inject(VersionService);
   private readonly router = inject(Router);
+
+  protected readonly showAboutDialog = signal(false);
 
   protected readonly themeIcon = computed(() =>
     this.themeService.theme() === 'light' ? 'dark_mode' : 'light_mode',
@@ -79,6 +84,7 @@ export class AppHeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.aiService.checkAvailability();
+    this.versionService.load();
   }
 
   constructor() {
@@ -248,4 +254,12 @@ export class AppHeaderComponent implements OnInit {
     this.router.navigate(['/account']);
   }
 
+  protected openAbout(): void {
+    this.userMenuOpen.set(false);
+    this.showAboutDialog.set(true);
+  }
+
+  protected closeAbout(): void {
+    this.showAboutDialog.set(false);
+  }
 }

@@ -488,3 +488,69 @@
     display: none !important; // responsive layout override
   }
 }
+
+// ─── About Dialog ───
+
+.about-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__logo {
+    font-size: $font-size-heading;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--primary);
+    line-height: 1;
+
+    span { color: var(--text-muted); }
+  }
+
+  &__tagline {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: (-$sp-md);
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md $sp-lg;
+  }
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-md;
+    font-size: $font-size-base;
+  }
+
+  &__label {
+    min-width: 70px;
+    color: var(--text-muted);
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+
+  &__value {
+    color: var(--text);
+    word-break: break-all;
+
+    &.mono {
+      font-family: $font-family-mono;
+      font-size: $font-size-sm;
+    }
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
