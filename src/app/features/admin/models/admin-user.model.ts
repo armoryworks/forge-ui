@@ -7,7 +7,7 @@ export interface AdminUser {
   avatarColor: string | null;
   isActive: boolean;
   roles: string[];
-  createdAt: string;
+  createdAt: Date;
   hasPassword: boolean;
   hasPendingSetupToken: boolean;
   hasRfidIdentifier: boolean;

@@ -3,14 +3,14 @@
 .orders-summary {
   display: flex;
   flex-direction: column;
-  gap: $sp-md;
+  gap: $sp-sm;
 }
 
 .orders-stat {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: $sp-xs;
+  gap: $sp-xxs;
 
   &__value {
     font-size: var(--font-size-kpi);
@@ -29,12 +29,12 @@
 .orders-breakdown {
   display: flex;
   flex-direction: column;
-  gap: $sp-sm;
+  gap: $sp-xs;
 
   &__row {
     display: flex;
     justify-content: space-between;
-    padding: $sp-sm $sp-md;
+    padding: $sp-xs $sp-md;
     background: var(--surface);
     font-size: var(--font-size-sm);
   }
@@ -53,7 +53,7 @@
   color: var(--primary);
   text-decoration: none;
   text-align: center;
-  padding-top: $sp-sm;
+  padding-top: $sp-xs;
 
   &:hover {
     text-decoration: underline;

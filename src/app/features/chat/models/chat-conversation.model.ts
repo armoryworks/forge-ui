@@ -4,6 +4,6 @@ export interface ChatConversation {
   userInitials: string;
   userColor: string;
   lastMessage: string | null;
-  lastMessageAt: string | null;
+  lastMessageAt: Date | null;
   unreadCount: number;
 }

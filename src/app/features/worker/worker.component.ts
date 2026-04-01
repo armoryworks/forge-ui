@@ -37,8 +37,8 @@ export class WorkerComponent {
       const aOverdue = this.isOverdue(a) ? 0 : 1;
       const bOverdue = this.isOverdue(b) ? 0 : 1;
       if (aOverdue !== bOverdue) return aOverdue - bOverdue;
-      const aDate = a.dueDate ? new Date(a.dueDate).getTime() : Infinity;
-      const bDate = b.dueDate ? new Date(b.dueDate).getTime() : Infinity;
+      const aDate = a.dueDate ? a.dueDate.getTime() : Infinity;
+      const bDate = b.dueDate ? b.dueDate.getTime() : Infinity;
       if (aDate !== bDate) return aDate - bDate;
       return (priorityOrder[a.priority] ?? 2) - (priorityOrder[b.priority] ?? 2);
     });
@@ -75,7 +75,7 @@ export class WorkerComponent {
 
   protected isOverdue(task: WorkerTask): boolean {
     if (!task.dueDate) return false;
-    return new Date(task.dueDate) < new Date();
+    return task.dueDate.getTime() < new Date().getTime();
   }
 
   protected getProgressPercent(task: WorkerTask): number {

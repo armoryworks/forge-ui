@@ -1,78 +1,99 @@
-<app-dialog [title]="'quotes.newQuote' | translate" width="800px" (closed)="close()">
-  <div [formGroup]="form">
-    <div class="dialog-row dialog-row--3col">
-      <app-select [label]="'quotes.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" />
-      <app-datepicker [label]="'quotes.expirationDate' | translate" formControlName="expirationDate" />
-      <div class="tax-field">
-        <app-input [label]="'quotes.taxRate' | translate" type="number" formControlName="taxRate" [required]="true"
-          suffix="%" [matTooltip]="taxAutoFilled() ? 'Auto-filled from customer state. Edit to override.' : ''" />
-        @if (taxAutoFilled()) {
-          <span class="tax-badge" matTooltipPosition="above">{{ taxAutoLabel() }}</span>
+<app-dialog [title]="'quotes.newQuote' | translate" width="1100px" [splitLayout]="true" (closed)="close()">
+  <div class="dlg-body">
+
+    <!-- Main: Line Items -->
+    <div class="dlg-main">
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'quotes.lineItems' | translate }}</span>
+
+        @if (lines().length > 0) {
+          <table class="lines-table" aria-label="Line items">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'quotes.partNumber' | translate }}</th>
+                <th scope="col">{{ 'common.description' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'quotes.qty' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'quotes.unitPrice' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of lines(); track $index) {
+                <tr>
+                  <td class="lines-table__mono">{{ line.partNumber }}</td>
+                  <td>{{ line.description }}</td>
+                  <td class="lines-table__right">{{ line.quantity }}</td>
+                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                  <td class="lines-table__right">{{ line.quantity * line.unitPrice | currency }}</td>
+                  <td>
+                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="lines-empty">{{ 'quotes.noLinesYet' | translate }}</div>
         }
+
+        <!-- Add Line Form -->
+        <div class="add-line add-line--4col" [formGroup]="lineForm">
+          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
+          <app-input [label]="'quotes.qty' | translate" type="number" formControlName="quantity" [required]="true" />
+          <div class="price-field">
+            <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+            @if (priceIsDefault()) {
+              <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
+            }
+          </div>
+          <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
+            <span class="material-icons-outlined">add</span>
+            {{ 'common.add' | translate }}
+          </button>
+        </div>
       </div>
     </div>
-    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
-  </div>
 
-  <!-- Line Items -->
-  <div class="lines-section">
-    <div class="lines-header">
-      <span class="lines-title">{{ 'quotes.lineItems' | translate }}</span>
-    </div>
-
-    @if (lines().length > 0) {
-      <table class="lines-table" aria-label="Line items">
-        <thead>
-          <tr>
-            <th scope="col">{{ 'quotes.partNumber' | translate }}</th>
-            <th scope="col">{{ 'common.description' | translate }}</th>
-            <th scope="col" class="lines-table__right">{{ 'quotes.qty' | translate }}</th>
-            <th scope="col" class="lines-table__right">{{ 'quotes.unitPrice' | translate }}</th>
-            <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
-            <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (line of lines(); track $index) {
-            <tr>
-              <td class="lines-table__mono">{{ line.partNumber }}</td>
-              <td>{{ line.description }}</td>
-              <td class="lines-table__right">{{ line.quantity }}</td>
-              <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-              <td class="lines-table__right">{{ line.quantity * line.unitPrice | currency }}</td>
-              <td>
-                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
-                  <span class="material-icons-outlined">close</span>
-                </button>
-              </td>
-            </tr>
+    <!-- Sidebar: Details + Notes + Summary -->
+    <div class="dlg-sidebar" [formGroup]="form">
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'quotes.details' | translate }}</span>
+        <app-select [label]="'quotes.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" />
+        <app-datepicker [label]="'quotes.expirationDate' | translate" formControlName="expirationDate" />
+        <div class="tax-field">
+          <app-input [label]="'quotes.taxRate' | translate" type="number" formControlName="taxRate" [required]="true"
+            suffix="%" [matTooltip]="taxAutoFilled() ? 'Auto-filled from customer state. Edit to override.' : ''" />
+          @if (taxAutoFilled()) {
+            <span class="tax-badge" matTooltipPosition="above">{{ taxAutoLabel() }}</span>
           }
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
-            <td class="lines-table__right lines-table__bold">{{ lineTotal() | currency }}</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
-    }
-
-    <!-- Add Line Form -->
-    <div class="add-line" [formGroup]="lineForm">
-      <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
-      <app-input [label]="'quotes.qty' | translate" type="number" formControlName="quantity" [required]="true" />
-      <div class="price-field">
-        <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
-        @if (priceIsDefault()) {
-          <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
-        }
+        </div>
       </div>
-      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
-        <span class="material-icons-outlined">add</span>
-        {{ 'common.add' | translate }}
-      </button>
+
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
+        <app-textarea formControlName="notes" [rows]="3" />
+      </div>
+
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
+        <div class="dlg-total-row">
+          <span>{{ 'quotes.subtotal' | translate }}</span>
+          <span>{{ lineTotal() | currency }}</span>
+        </div>
+        <div class="dlg-total-row">
+          <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() }}%)</span>
+          <span>{{ taxAmount() | currency }}</span>
+        </div>
+        <div class="dlg-total-row dlg-total-row--grand">
+          <span>{{ 'common.total' | translate }}</span>
+          <span>{{ grandTotal() | currency }}</span>
+        </div>
+      </div>
     </div>
+
   </div>
 
   <div dialog-footer>

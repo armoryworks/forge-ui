@@ -184,28 +184,19 @@
           (uploaded)="onPayStubFileUploaded($event)" />
         @if (lastPayStubFileId()) {
           <div class="user-compliance__upload-form">
-            <div class="user-compliance__upload-row">
-              <label for="ps-pay-date">{{ 'userCompliance.payDate' | translate }}</label>
-              <input id="ps-pay-date" type="date" #psPayDate />
+            <div class="dialog-row">
+              <app-datepicker [label]="'userCompliance.payDate' | translate" [formControl]="psPayDate" />
+              <app-datepicker [label]="'userCompliance.periodStart' | translate" [formControl]="psPeriodStart" />
             </div>
-            <div class="user-compliance__upload-row">
-              <label for="ps-period-start">{{ 'userCompliance.periodStart' | translate }}</label>
-              <input id="ps-period-start" type="date" #psPeriodStart />
+            <div class="dialog-row">
+              <app-datepicker [label]="'userCompliance.periodEnd' | translate" [formControl]="psPeriodEnd" />
+              <div></div>
             </div>
-            <div class="user-compliance__upload-row">
-              <label for="ps-period-end">{{ 'userCompliance.periodEnd' | translate }}</label>
-              <input id="ps-period-end" type="date" #psPeriodEnd />
+            <div class="dialog-row">
+              <app-input [label]="'userCompliance.grossPay' | translate" type="number" [formControl]="psGrossPay" />
+              <app-input [label]="'userCompliance.netPay' | translate" type="number" [formControl]="psNetPay" />
             </div>
-            <div class="user-compliance__upload-row">
-              <label for="ps-gross">{{ 'userCompliance.grossPay' | translate }}</label>
-              <input id="ps-gross" type="number" step="0.01" #psGross />
-            </div>
-            <div class="user-compliance__upload-row">
-              <label for="ps-net">{{ 'userCompliance.netPay' | translate }}</label>
-              <input id="ps-net" type="number" step="0.01" #psNet />
-            </div>
-            <button class="action-btn action-btn--primary action-btn--sm"
-              (click)="savePayStub(psPayDate.value, psPeriodStart.value, psPeriodEnd.value, psGross.value, psNet.value)">
+            <button class="action-btn action-btn--primary action-btn--sm" (click)="savePayStub()">
               <span class="material-icons-outlined">save</span>
               {{ 'userCompliance.savePayStub' | translate }}
             </button>
@@ -276,22 +267,11 @@
         (uploaded)="onTaxDocFileUploaded($event)" />
       @if (lastTaxDocFileId()) {
         <div class="user-compliance__upload-form">
-          <div class="user-compliance__upload-row">
-            <label for="td-type">{{ 'userCompliance.documentType' | translate }}</label>
-            <select id="td-type" #tdType>
-              <option value="W2">W-2</option>
-              <option value="W2c">W-2c (Corrected)</option>
-              <option value="Misc1099">1099-MISC</option>
-              <option value="Nec1099">1099-NEC</option>
-              <option value="Other">Other</option>
-            </select>
+          <div class="dialog-row">
+            <app-select [label]="'userCompliance.documentType' | translate" [options]="taxDocTypeOptions" [formControl]="tdDocType" />
+            <app-input [label]="'userCompliance.taxYear' | translate" type="number" [formControl]="tdYear" />
           </div>
-          <div class="user-compliance__upload-row">
-            <label for="td-year">{{ 'userCompliance.taxYear' | translate }}</label>
-            <input id="td-year" type="number" min="2000" max="2099" #tdYear />
-          </div>
-          <button class="action-btn action-btn--primary action-btn--sm"
-            (click)="saveTaxDocument(tdType.value, tdYear.value)">
+          <button class="action-btn action-btn--primary action-btn--sm" (click)="saveTaxDocument()">
             <span class="material-icons-outlined">save</span>
             {{ 'userCompliance.saveTaxDocument' | translate }}
           </button>

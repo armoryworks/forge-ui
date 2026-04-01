@@ -10,5 +10,5 @@ export interface ReceivingRecord {
   storageLocationName: string | null;
   lotNumber: string | null;
   notes: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

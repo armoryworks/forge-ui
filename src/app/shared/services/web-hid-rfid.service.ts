@@ -10,6 +10,7 @@ type TransportMode = 'none' | 'websocket' | 'webhid';
 
 const RELAY_URL = 'ws://localhost:9876';
 const WS_RECONNECT_DELAY = 3000;
+const RELAY_NOT_INSTALLED_MSG = 'rfid.relayNotInstalled';
 
 @Injectable({ providedIn: 'root' })
 export class WebHidRfidService implements OnDestroy {
@@ -65,7 +66,7 @@ export class WebHidRfidService implements OnDestroy {
       return this.reconnectWebHid();
     }
 
-    this._error.set('RFID relay not running. Start it with: cd tools/rfid-relay && npm run start:pcsc');
+    this._error.set(RELAY_NOT_INSTALLED_MSG);
     return false;
   }
 
@@ -82,7 +83,7 @@ export class WebHidRfidService implements OnDestroy {
       return this.requestWebHidDevice();
     }
 
-    this._error.set('RFID relay not running. Start it with: cd tools/rfid-relay && npm run start:pcsc');
+    this._error.set(RELAY_NOT_INSTALLED_MSG);
     return false;
   }
 
@@ -121,6 +122,20 @@ export class WebHidRfidService implements OnDestroy {
     }
 
     return false;
+  }
+
+  /**
+   * Silently checks whether the relay WebSocket is reachable.
+   * Sets the error signal to RELAY_NOT_INSTALLED_MSG if it isn't,
+   * so the UI can show the download prompt without the user clicking anything.
+   * No-op if already connected.
+   */
+  async probeRelay(): Promise<void> {
+    if (this._connected()) return;
+    const reachable = await this.connectWebSocket();
+    if (!reachable) {
+      this._error.set(RELAY_NOT_INSTALLED_MSG);
+    }
   }
 
   clearLastScan(): void {

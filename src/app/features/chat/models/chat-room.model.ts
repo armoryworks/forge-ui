@@ -3,7 +3,7 @@ export interface ChatRoom {
   name: string;
   isGroup: boolean;
   createdById: number;
-  createdAt: string;
+  createdAt: Date;
   members: ChatRoomMember[];
 }
 

@@ -4,5 +4,5 @@ export interface CustomerActivityItem {
   activeJobs: number;
   completedJobs: number;
   totalJobs: number;
-  lastJobDate: string | null;
+  lastJobDate: Date | null;
 }

@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
 import { CdkDropList, CdkDrag, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { formatDate } from '../../../../shared/utils/date.utils';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
 import { PlanningCycleEntry } from '../../models/planning-cycle-entry.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
@@ -12,7 +12,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
 @Component({
   selector: 'app-cycle-board',
   standalone: true,
-  imports: [CdkDropList, CdkDrag, MatTooltipModule, TranslatePipe, EmptyStateComponent],
+  imports: [DatePipe, CdkDropList, CdkDrag, MatTooltipModule, TranslatePipe, EmptyStateComponent],
   templateUrl: './cycle-board.component.html',
   styleUrl: './cycle-board.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,10 +46,6 @@ export class CycleBoardComponent {
   });
 
   protected readonly isActive = computed(() => this.cycle().status === 'Active');
-
-  protected formatDate(date: string): string {
-    return formatDate(date);
-  }
 
   protected getPriorityClass(priority: string): string {
     const map: Record<string, string> = {

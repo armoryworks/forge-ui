@@ -1,71 +1,91 @@
-<app-dialog [title]="'purchaseOrders.newPoTitle' | translate" width="800px" (closed)="close()">
-  <div [formGroup]="form">
-    <div class="dialog-row">
-      <app-select [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
-      <app-input [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
-    </div>
-    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
-  </div>
+<app-dialog [title]="'purchaseOrders.newPoTitle' | translate" width="1000px" [splitLayout]="true" (closed)="close()">
+  <div class="dlg-body">
 
-  <!-- Line Items -->
-  <div class="lines-section">
-    <div class="lines-header">
-      <span class="lines-title">{{ 'purchaseOrders.lineItems' | translate }}</span>
-    </div>
+    <!-- Main: Line Items -->
+    <div class="dlg-main">
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'purchaseOrders.lineItems' | translate }}</span>
 
-    @if (lines().length > 0) {
-      <table class="lines-table" aria-label="Line items">
-        <thead>
-          <tr>
-            <th scope="col">{{ 'purchaseOrders.partNumber' | translate }}</th>
-            <th scope="col">{{ 'common.description' | translate }}</th>
-            <th scope="col" class="lines-table__right">{{ 'purchaseOrders.qty' | translate }}</th>
-            <th scope="col" class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
-            <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
-            <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (line of lines(); track $index) {
-            <tr>
-              <td class="lines-table__mono">{{ line.partNumber }}</td>
-              <td>{{ line.description }}</td>
-              <td class="lines-table__right">{{ line.orderedQuantity }}</td>
-              <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-              <td class="lines-table__right">{{ line.orderedQuantity * line.unitPrice | currency }}</td>
-              <td>
-                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
-                  <span class="material-icons-outlined">close</span>
-                </button>
-              </td>
-            </tr>
-          }
-        </tbody>
-        <tfoot>
-          <tr>
-            <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
-            <td class="lines-table__right lines-table__bold">{{ lineTotal() | currency }}</td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
-    }
-
-    <!-- Add Line Form -->
-    <div class="add-line" [formGroup]="lineForm">
-      <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
-      <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
-      <div class="price-field">
-        <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
-        @if (priceIsDefault()) {
-          <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
+        @if (lines().length > 0) {
+          <table class="lines-table" aria-label="Line items">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'purchaseOrders.partNumber' | translate }}</th>
+                <th scope="col">{{ 'common.description' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'purchaseOrders.qty' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of lines(); track $index) {
+                <tr>
+                  <td class="lines-table__mono">{{ line.partNumber }}</td>
+                  <td>{{ line.description }}</td>
+                  <td class="lines-table__right">{{ line.orderedQuantity }}</td>
+                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                  <td class="lines-table__right">{{ line.orderedQuantity * line.unitPrice | currency }}</td>
+                  <td>
+                    <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
+                <td class="lines-table__right lines-table__bold">{{ lineTotal() | currency }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        } @else {
+          <div class="lines-empty">{{ 'purchaseOrders.noLinesYet' | translate }}</div>
         }
+
+        <!-- Add Line Form -->
+        <div class="add-line add-line--4col" [formGroup]="lineForm">
+          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
+          <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
+          <div class="price-field">
+            <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+            @if (priceIsDefault()) {
+              <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
+            }
+          </div>
+          <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
+            <span class="material-icons-outlined">add</span>
+            {{ 'common.add' | translate }}
+          </button>
+        </div>
       </div>
-      <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
-        <span class="material-icons-outlined">add</span>
-        {{ 'common.add' | translate }}
-      </button>
     </div>
+
+    <!-- Sidebar: Details + Notes + Summary -->
+    <div class="dlg-sidebar" [formGroup]="form">
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'purchaseOrders.orderDetails' | translate }}</span>
+        <app-select [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
+        <app-input [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
+      </div>
+
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
+        <app-textarea formControlName="notes" [rows]="3" />
+      </div>
+
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
+        <div class="dlg-total-row">
+          <span>{{ 'quotes.subtotal' | translate }}</span>
+          <span>{{ lineTotal() | currency }}</span>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div dialog-footer>

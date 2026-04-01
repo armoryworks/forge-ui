@@ -10,10 +10,10 @@ export interface RecurringExpense {
   description: string;
   vendor: string | null;
   frequency: RecurrenceFrequency;
-  nextOccurrenceDate: string;
-  lastGeneratedDate: string | null;
-  endDate: string | null;
+  nextOccurrenceDate: Date;
+  lastGeneratedDate: Date | null;
+  endDate: Date | null;
   isActive: boolean;
   autoApprove: boolean;
-  createdAt: string;
+  createdAt: Date;
 }

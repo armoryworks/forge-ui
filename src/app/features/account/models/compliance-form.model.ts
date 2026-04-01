@@ -27,7 +27,7 @@ export interface ComplianceFormTemplate {
   sortOrder: number;
   requiresIdentityDocs: boolean;
   docuSealTemplateId: number | null;
-  lastSyncedAt: string | null;
+  lastSyncedAt: Date | null;
   manualOverrideFileId: number | null;
   blocksJobAssignment: boolean;
   profileCompletionKey: string;
@@ -36,8 +36,8 @@ export interface ComplianceFormTemplate {
   formDefinitionRevision: string | null;
   acroFieldMapJson: string | null;
   filledPdfTemplateId: number | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface ComplianceFormSubmission {
@@ -46,21 +46,21 @@ export interface ComplianceFormSubmission {
   templateName: string;
   formType: ComplianceFormType;
   status: ComplianceSubmissionStatus;
-  signedAt: string | null;
+  signedAt: Date | null;
   signedPdfFileId: number | null;
   docuSealSubmitUrl: string | null;
   formDataJson: string | null;
   formDefinitionVersionId: number | null;
-  createdAt: string;
+  createdAt: Date;
   // PDF fill & I-9 fields
   filledPdfFileId: number | null;
-  i9Section1SignedAt: string | null;
-  i9Section2SignedAt: string | null;
+  i9Section1SignedAt: Date | null;
+  i9Section2SignedAt: Date | null;
   i9EmployerUserId: number | null;
   i9DocumentListType: string | null;
   i9DocumentDataJson: string | null;
-  i9Section2OverdueAt: string | null;
-  i9ReverificationDueAt: string | null;
+  i9Section2OverdueAt: Date | null;
+  i9ReverificationDueAt: Date | null;
 }
 
 export interface IdentityDocument {
@@ -69,12 +69,12 @@ export interface IdentityDocument {
   documentType: IdentityDocumentType;
   fileAttachmentId: number;
   fileName: string;
-  verifiedAt: string | null;
+  verifiedAt: Date | null;
   verifiedById: number | null;
   verifiedByName: string | null;
-  expiresAt: string | null;
+  expiresAt: Date | null;
   notes: string | null;
-  createdAt: string;
+  createdAt: Date;
 }
 
 export interface StateFormDefinitionResult {

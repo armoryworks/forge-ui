@@ -10,8 +10,9 @@
 }
 
 .deadline-item__date {
-  width: 40px;
+  width: 48px;
   flex-shrink: 0;
+  white-space: nowrap;
   font-family: $font-family-mono;
   font-size: var(--font-size-xs);
   font-weight: 500;
@@ -24,8 +25,10 @@
 }
 
 .deadline-item__job {
-  width: 58px;
+  width: 64px;
   flex-shrink: 0;
+  white-space: nowrap;
+  padding: 0 $sp-sm;
   font-family: $font-family-mono;
   font-size: var(--font-size-xs);
   font-weight: 500;
@@ -38,6 +41,7 @@
 
 .deadline-item__desc {
   flex: 1;
+  min-width: 0;
   font-size: var(--font-size-sm);
   @include truncate;
 

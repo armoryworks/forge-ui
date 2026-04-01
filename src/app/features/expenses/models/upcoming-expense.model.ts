@@ -7,7 +7,7 @@ export interface UpcomingExpense {
   classification: string;
   vendor: string | null;
   amount: number;
-  dueDate: string;
+  dueDate: Date;
   frequency: RecurrenceFrequency;
   autoApprove: boolean;
 }

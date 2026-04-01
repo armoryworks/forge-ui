@@ -3,5 +3,5 @@ export interface ScanIdentifier {
   identifierType: string;
   identifierValue: string;
   isActive: boolean;
-  createdAt: string;
+  createdAt: Date;
 }

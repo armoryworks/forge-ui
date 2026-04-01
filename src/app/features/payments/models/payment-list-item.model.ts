@@ -7,7 +7,7 @@ export interface PaymentListItem {
   amount: number;
   appliedAmount: number;
   unappliedAmount: number;
-  paymentDate: string;
+  paymentDate: Date;
   referenceNumber: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

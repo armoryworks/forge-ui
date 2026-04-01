@@ -10,11 +10,11 @@ export interface CustomerReturnDetail {
   status: string;
   reason: string;
   notes: string | null;
-  returnDate: string;
+  returnDate: Date;
   inspectedById: number | null;
   inspectedByName: string | null;
-  inspectedAt: string | null;
+  inspectedAt: Date | null;
   inspectionNotes: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

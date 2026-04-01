@@ -1,94 +1,10 @@
 @use 'styles/variables' as *;
-@use 'styles/mixins' as *;
 
 :host {
   display: block;
 }
 
-// 3-col row: customer (flexible) | expiration date | tax rate (narrow)
-.dialog-row--3col {
-  grid-template-columns: 1fr 1fr 90px;
-}
-
-.lines-section {
-  margin-top: $sp-lg;
-  display: flex;
-  flex-direction: column;
-  gap: $sp-md;
-}
-
-.lines-header {
-  @include flex-between;
-}
-
-.lines-title {
-  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
-  color: var(--text-muted);
-}
-
-.lines-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-
-  th,
-  td {
-    padding: $sp-sm $sp-md;
-    text-align: left;
-    border-bottom: $border-width-thin solid var(--border);
-  }
-
-  th {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
-    color: var(--text-muted);
-  }
-
-  &__right {
-    text-align: right;
-  }
-
-  &__mono {
-    font-family: $font-family-mono;
-    font-size: var(--font-size-xs);
-  }
-
-  &__bold {
-    font-weight: 700;
-  }
-}
-
-.add-line {
-  display: grid;
-  grid-template-columns: 1fr 100px 120px auto;
-  gap: $sp-sm;
-  align-items: end;
-}
-
-.tax-field,
-.price-field {
-  position: relative;
-}
-
-.tax-badge,
-.price-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
-  color: #fff;
-  font-size: var(--font-size-xxs);
-  font-family: $font-family-mono;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 1px $sp-sm;
-  border-radius: 0 0 0 2px;
-  pointer-events: none;
-  line-height: var(--font-size-lg);
-}
-
-.tax-badge {
-  background: var(--success);
-}
-
-.price-badge {
-  background: var(--info);
+// 4-col add-line: part (flex) | qty (narrow) | price (narrow) | button
+.add-line--4col {
+  grid-template-columns: 1fr 90px 120px auto;
 }

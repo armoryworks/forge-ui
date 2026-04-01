@@ -5,5 +5,5 @@ export interface Subtask {
   isCompleted: boolean;
   assigneeId: number | null;
   sortOrder: number;
-  completedAt: string | null;
+  completedAt: Date | null;
 }

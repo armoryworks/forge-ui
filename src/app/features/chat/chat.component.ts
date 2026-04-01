@@ -140,16 +140,16 @@ export class ChatComponent implements OnDestroy {
     return msg.senderId === this.authService.user()?.id;
   }
 
-  protected formatTime(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  protected formatTime(date: Date | string): string {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  protected formatDate(dateString: string | null): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
+  protected formatDate(date: Date | string | null): string {
+    if (!date) return '';
+    const d = typeof date === 'string' ? new Date(date) : date;
     const now = new Date();
-    const diff = now.getTime() - date.getTime();
+    const diff = now.getTime() - d.getTime();
     const minutes = Math.floor(diff / 60000);
 
     if (minutes < 1) return this.translate.instant('chat.justNow');

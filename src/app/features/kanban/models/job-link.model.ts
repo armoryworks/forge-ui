@@ -8,5 +8,5 @@ export interface JobLink {
   linkedJobTitle: string;
   linkedJobStageName: string;
   linkedJobStageColor: string;
-  createdAt: string;
+  createdAt: Date;
 }

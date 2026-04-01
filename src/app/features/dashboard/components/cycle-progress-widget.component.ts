@@ -35,7 +35,7 @@ export class CycleProgressWidgetComponent implements OnInit {
   protected readonly daysRemaining = computed(() => {
     const c = this.cycle();
     if (!c) return 0;
-    const end = new Date(c.endDate);
+    const end = c.endDate;
     const now = new Date();
     const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return Math.max(0, diff);
@@ -44,7 +44,7 @@ export class CycleProgressWidgetComponent implements OnInit {
   protected readonly isOverdue = computed(() => {
     const c = this.cycle();
     if (!c) return false;
-    return new Date(c.endDate) < new Date();
+    return c.endDate.getTime() < new Date().getTime();
   });
 
   protected navigatePlanning(): void {

@@ -70,7 +70,7 @@ export class SalesTaxDialogComponent {
         code: r.code,
         stateCode: r.stateCode ?? null,
         ratePercent: parseFloat((r.rate * 100).toFixed(4)),
-        effectiveFrom: r.effectiveFrom ? new Date(r.effectiveFrom) : new Date(),
+        effectiveFrom: r.effectiveFrom ?? new Date(),
         isDefault: r.isDefault,
         description: r.description ?? '',
       });

@@ -9,6 +9,6 @@ export interface ProcessStep {
   estimatedMinutes: number | null;
   isQcCheckpoint: boolean;
   qcCriteria: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

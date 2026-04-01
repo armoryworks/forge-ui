@@ -10,8 +10,8 @@ export interface InvoiceDetail {
   shipmentId: number | null;
   shipmentNumber: string | null;
   status: string;
-  invoiceDate: string;
-  dueDate: string;
+  invoiceDate: Date;
+  dueDate: Date;
   creditTerms: string | null;
   taxRate: number;
   subtotal: number;
@@ -21,6 +21,6 @@ export interface InvoiceDetail {
   balanceDue: number;
   notes: string | null;
   lines: InvoiceLine[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -4,8 +4,8 @@ export interface SalesTaxRate {
   code: string;
   stateCode: string | null;
   rate: number;
-  effectiveFrom: string;
-  effectiveTo: string | null;
+  effectiveFrom: Date;
+  effectiveTo: Date | null;
   isDefault: boolean;
   isActive: boolean;
   description: string | null;

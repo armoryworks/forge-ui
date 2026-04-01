@@ -3,6 +3,6 @@ export interface UninvoicedJob {
   jobNumber: string;
   title: string;
   customerName: string | null;
-  completedDate: string;
+  completedDate: Date;
   customerId: number | null;
 }

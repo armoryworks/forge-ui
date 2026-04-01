@@ -5,5 +5,5 @@ export interface MyTimeLogItem {
   notes: string | null;
   durationMinutes: number;
   category: string | null;
-  date: string;
+  date: Date;
 }

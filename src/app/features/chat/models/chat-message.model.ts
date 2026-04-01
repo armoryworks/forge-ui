@@ -7,7 +7,7 @@ export interface ChatMessage {
   recipientId: number;
   content: string;
   isRead: boolean;
-  createdAt: string;
+  createdAt: Date;
   chatRoomId: number | null;
   fileAttachment: ChatFileAttachment | null;
   linkedEntityType: string | null;

@@ -15,7 +15,7 @@ export interface VendorDetail {
   notes: string | null;
   isActive: boolean;
   externalId: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   purchaseOrders: PurchaseOrderListItem[];
 }

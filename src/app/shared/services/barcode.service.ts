@@ -9,7 +9,7 @@ export interface BarcodeInfo {
   value: string;
   entityType: string;
   isActive: boolean;
-  createdAt: string;
+  createdAt: Date;
 }
 
 @Injectable({ providedIn: 'root' })

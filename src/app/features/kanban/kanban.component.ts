@@ -8,7 +8,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BoardColumnComponent } from './components/board-column.component';
-import { JobDetailPanelComponent } from './components/job-detail-panel.component';
+import { JobDetailDialogComponent, JobDetailDialogData } from './components/job-detail-dialog.component';
 import { JobDialogComponent, DialogMode } from './components/job-dialog.component';
 import { JobCardComponent } from './components/job-card.component';
 import { KanbanService } from './services/kanban.service';
@@ -40,7 +40,7 @@ export type ViewMode = 'board' | 'team';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    BoardColumnComponent, JobDetailPanelComponent, JobDialogComponent, JobCardComponent,
+    BoardColumnComponent, JobDialogComponent, JobCardComponent,
     PageHeaderComponent, MatMenuModule, MatTooltipModule,
     CdkDropList, CdkDrag,
     SelectComponent, AvatarComponent,
@@ -67,7 +67,6 @@ export class KanbanComponent implements OnInit, OnDestroy {
   protected readonly selectedTrackTypeId = signal<number | null>(null);
   protected readonly columns = signal<BoardColumn[]>([]);
   protected readonly error = signal<string | null>(null);
-  protected readonly selectedJobId = signal<number | null>(null);
   protected readonly showJobDialog = signal(false);
   protected readonly dialogMode = signal<DialogMode>('create');
   protected readonly dialogJob = signal<JobDetail | null>(null);
@@ -194,7 +193,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
       .flatMap(c => c.jobs)
       .find(j => j.jobNumber.toLowerCase() === scan.value.toLowerCase());
     if (job) {
-      this.selectedJobId.set(job.id);
+      this.openJobDetail(job.id);
       this.snackbar.success(this.translate.instant('kanban.foundJob', { number: job.jobNumber }));
     } else {
       this.snackbar.error(this.translate.instant('kanban.jobNotFound', { value: scan.value }));
@@ -210,6 +209,16 @@ export class KanbanComponent implements OnInit, OnDestroy {
           const defaultType = types.find(t => t.isDefault) ?? types[0];
           if (defaultType) {
             this.selectTrackType(defaultType.id);
+          }
+          // Open job detail if navigated from a notification link (?job=id)
+          const jobParam = this.route.snapshot.queryParamMap.get('job');
+          if (jobParam) {
+            const jobId = parseInt(jobParam, 10);
+            if (!isNaN(jobId)) {
+              // Clear the query param so back-nav doesn't re-open the dialog
+              this.router.navigate([], { queryParams: { job: null }, queryParamsHandling: 'merge', replaceUrl: true });
+              this.openJobDetail(jobId);
+            }
           }
         },
         error: () => this.error.set(this.translate.instant('kanban.loadTrackTypesFailed')),
@@ -260,7 +269,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   protected onJobNumberClicked(event: { job: KanbanJob; event: Event }): void {
     if (this.swimlaneDragging) return;
-    this.selectedJobId.set(event.job.id);
+    this.openJobDetail(event.job.id);
   }
 
   protected onCardClicked(event: { job: KanbanJob; event: Event }): void {
@@ -283,15 +292,24 @@ export class KanbanComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.selectedJobId.set(event.job.id);
+    this.openJobDetail(event.job.id);
   }
 
   protected clearSelection(): void {
     this.selectedJobIds.set(new Set());
   }
 
-  protected onPanelClose(): void {
-    this.selectedJobId.set(null);
+  protected openJobDetail(jobId: number): void {
+    this.dialog.open(JobDetailDialogComponent, {
+      width: '1400px',
+      maxWidth: '95vw',
+      panelClass: 'jd-dialog-panel',
+      data: { jobId, users: this.users() } satisfies JobDetailDialogData,
+    }).afterClosed().subscribe(result => {
+      if (result?.action === 'edit') {
+        this.openEditDialog(result.job);
+      }
+    });
   }
 
   protected openCreateDialog(): void {
@@ -308,7 +326,6 @@ export class KanbanComponent implements OnInit, OnDestroy {
 
   protected onDialogSaved(): void {
     this.showJobDialog.set(false);
-    this.selectedJobId.set(null);
     this.reloadBoard();
   }
 

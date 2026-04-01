@@ -6,6 +6,6 @@ export interface RdReportItem {
   totalHours: number;
   currentStage: string;
   assigneeName: string | null;
-  startDate: string | null;
-  completedDate: string | null;
+  startDate: Date | null;
+  completedDate: Date | null;
 }

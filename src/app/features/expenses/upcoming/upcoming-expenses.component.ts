@@ -82,7 +82,7 @@ export class UpcomingExpensesComponent {
   protected readonly upcomingByMonth = computed(() => {
     const groups = new Map<string, { month: string; total: number; count: number }>();
     for (const e of this.upcomingExpenses()) {
-      const d = new Date(e.dueDate);
+      const d = e.dueDate;
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
       const label = formatDate(d);
       const existing = groups.get(key);

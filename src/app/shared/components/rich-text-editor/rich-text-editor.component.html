@@ -1,13 +1,44 @@
-@if (label()) {
-  <span class="rich-text-editor__label" id="rich-text-label">{{ label() }}</span>
-}
-<quill-editor
-  [formControl]="editorControl"
-  [modules]="modules"
-  [placeholder]="placeholder()"
-  [readOnly]="isDisabled()"
-  [styles]="{ height: height() }"
-  [attr.aria-labelledby]="label() ? 'rich-text-label' : null"
-  (onContentChanged)="onContentChanged($event)"
-  (onBlur)="onBlur()"
-  theme="snow" />
+<div class="rte">
+  <textarea
+    #textarea
+    class="rte__textarea"
+    [rows]="rows()"
+    [placeholder]="placeholder()"
+    [disabled]="disabled()"
+    [value]="value()"
+    role="combobox"
+    aria-label="Rich text editor with mention support"
+    [attr.aria-expanded]="showMentionPicker() && filteredUsers().length > 0"
+    aria-autocomplete="list"
+    aria-haspopup="listbox"
+    [attr.aria-activedescendant]="activeIndex() >= 0 ? 'mention-option-' + activeIndex() : null"
+    (input)="onInput($event)"
+    (keydown)="onKeydown($event)"
+    (blur)="onBlur()"></textarea>
+
+  @if (showMentionPicker() && filteredUsers().length) {
+    <div class="rte__mention-picker"
+         role="listbox"
+         id="rte-mention-listbox"
+         aria-label="Mention a user">
+      @for (user of filteredUsers(); track user.id; let i = $index) {
+        <button
+          #mentionOption
+          class="rte__mention-option"
+          [class.rte__mention-option--active]="activeIndex() === i"
+          role="option"
+          type="button"
+          [id]="'mention-option-' + i"
+          [attr.aria-selected]="activeIndex() === i"
+          [attr.aria-label]="'Mention ' + user.name"
+          (mousedown)="selectMention(user)">
+          <span
+            class="rte__mention-avatar"
+            aria-hidden="true"
+            [style.background]="user.color">{{ user.initials }}</span>
+          <span class="rte__mention-name">{{ user.name }}</span>
+        </button>
+      }
+    </div>
+  }
+</div>

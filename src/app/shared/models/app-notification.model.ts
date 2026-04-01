@@ -1,6 +1,6 @@
 export interface AppNotification {
   id: number;
-  type: 'assignment' | 'overdue' | 'expense' | 'maintenance' | 'system' | 'message';
+  type: 'assignment' | 'overdue' | 'expense' | 'maintenance' | 'system' | 'message' | 'mention';
   severity: 'info' | 'warning' | 'critical';
   source: 'user' | 'system';
   title: string;
@@ -12,5 +12,5 @@ export interface AppNotification {
   entityId?: number;
   senderInitials?: string;
   senderColor?: string;
-  createdAt: string;
+  createdAt: Date;
 }

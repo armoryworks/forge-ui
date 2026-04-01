@@ -2,8 +2,8 @@ export interface PartPrice {
   id: number;
   partId: number;
   unitPrice: number;
-  effectiveFrom: string;
-  effectiveTo: string | null;
+  effectiveFrom: Date;
+  effectiveTo: Date | null;
   notes: string | null;
   isCurrent: boolean;
 }

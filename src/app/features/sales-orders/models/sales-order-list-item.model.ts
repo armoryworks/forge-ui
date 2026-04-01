@@ -7,6 +7,6 @@ export interface SalesOrderListItem {
   customerPO: string | null;
   lineCount: number;
   total: number;
-  requestedDeliveryDate: string | null;
-  createdAt: string;
+  requestedDeliveryDate: Date | null;
+  createdAt: Date;
 }

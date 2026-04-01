@@ -6,7 +6,7 @@ export interface WorkerTask {
   stageColor: string;
   priority: string;
   customerName: string | null;
-  dueDate: string | null;
+  dueDate: Date | null;
   subtaskCount: number;
   subtasksCompleted: number;
 }

@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, forkJoin } from 'rxjs';
+
 import { environment } from '../../../../environments/environment';
 import { TrackType } from '../../../shared/models/track-type.model';
+import { ActivityItem } from '../../../shared/models/activity.model';
 import { KanbanJob } from '../models/kanban-job.model';
 import { BoardColumn } from '../models/board-column.model';
 import { JobDetail } from '../models/job-detail.model';
@@ -15,6 +17,7 @@ import { BulkResult } from '../models/bulk-result.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { JobPart } from '../models/job-part.model';
+import { JobNote } from '../models/job-note.model';
 import { PartSearchResult } from '../models/part-search-result.model';
 import { CustomFieldValues } from '../models/custom-field-values.model';
 import { DisposeJobRequest } from '../models/dispose-job-request.model';
@@ -58,8 +61,8 @@ export class KanbanService {
     return this.http.get<Activity[]>(`${environment.apiUrl}/jobs/${jobId}/activity`);
   }
 
-  addComment(jobId: number, comment: string): Observable<Activity> {
-    return this.http.post<Activity>(`${environment.apiUrl}/jobs/${jobId}/comments`, { comment });
+  addComment(jobId: number, comment: string, mentionedUserIds: number[] = []): Observable<Activity> {
+    return this.http.post<Activity>(`${environment.apiUrl}/jobs/${jobId}/comments`, { comment, mentionedUserIds });
   }
 
   toggleSubtask(jobId: number, subtaskId: number, isCompleted: boolean): Observable<unknown> {
@@ -202,6 +205,24 @@ export class KanbanService {
 
   setCoverPhoto(jobId: number, fileAttachmentId: number | null): Observable<void> {
     return this.http.patch<void>(`${environment.apiUrl}/jobs/${jobId}/cover-photo`, { fileAttachmentId });
+  }
+
+  // Notes
+  getNotes(jobId: number): Observable<JobNote[]> {
+    return this.http.get<JobNote[]>(`${environment.apiUrl}/jobs/${jobId}/notes`);
+  }
+
+  createNote(jobId: number, text: string, mentionedUserIds: number[] = []): Observable<JobNote> {
+    return this.http.post<JobNote>(`${environment.apiUrl}/jobs/${jobId}/notes`, { text, mentionedUserIds });
+  }
+
+  deleteNote(jobId: number, noteId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/jobs/${jobId}/notes/${noteId}`);
+  }
+
+  // History
+  getHistory(jobId: number): Observable<ActivityItem[]> {
+    return this.http.get<ActivityItem[]>(`${environment.apiUrl}/jobs/${jobId}/history`);
   }
 
   private buildBoard(trackType: TrackType, jobs: KanbanJob[]): BoardColumn[] {

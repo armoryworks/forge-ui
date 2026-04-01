@@ -4,8 +4,8 @@ export interface PartRevision {
   revision: string;
   changeDescription: string | null;
   changeReason: string | null;
-  effectiveDate: string;
+  effectiveDate: Date;
   isCurrent: boolean;
   fileCount: number;
-  createdAt: string;
+  createdAt: Date;
 }

@@ -2,7 +2,7 @@ export interface LotTraceEvent {
   type: string;
   referenceNumber: string;
   description: string;
-  date: string;
+  date: Date;
   quantity: number | null;
 }
 
@@ -11,7 +11,7 @@ export interface LotTrace {
   partNumber: string;
   partDescription: string;
   quantity: number;
-  expirationDate: string | null;
+  expirationDate: Date | null;
   supplierLotNumber: string | null;
   events: LotTraceEvent[];
 }

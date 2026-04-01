@@ -1,6 +1,6 @@
 export interface AccountingSyncStatus {
   connected: boolean;
-  lastSyncAt: string | null;
+  lastSyncAt: Date | null;
   queueDepth: number;
   failedCount: number;
 }

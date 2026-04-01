@@ -4,6 +4,6 @@ export interface EmployeeDocument {
   contentType: string;
   size: number;
   documentType: string | null;
-  expirationDate: string | null;
-  createdAt: string;
+  expirationDate: Date | null;
+  createdAt: Date;
 }

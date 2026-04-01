@@ -4,5 +4,5 @@ export interface CustomerJob {
   title: string;
   stageName: string | null;
   stageColor: string | null;
-  dueDate: string | null;
+  dueDate: Date | null;
 }

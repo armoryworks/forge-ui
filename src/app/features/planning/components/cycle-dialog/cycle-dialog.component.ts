@@ -58,8 +58,8 @@ export class CycleDialogComponent implements OnInit {
     if (existing) {
       this.form.patchValue({
         name: existing.name,
-        startDate: new Date(existing.startDate),
-        endDate: new Date(existing.endDate),
+        startDate: existing.startDate,
+        endDate: existing.endDate,
         goals: existing.goals ?? '',
       });
     } else {

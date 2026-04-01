@@ -60,7 +60,7 @@ export class CustomerReturnDialogComponent {
         originalJobId: r.originalJobId,
         reason: r.reason,
         notes: r.notes ?? '',
-        returnDate: r.returnDate ? new Date(r.returnDate) : null,
+        returnDate: r.returnDate ?? null,
       });
     }
   }

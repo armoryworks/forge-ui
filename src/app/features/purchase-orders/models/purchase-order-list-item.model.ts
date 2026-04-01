@@ -9,6 +9,6 @@ export interface PurchaseOrderListItem {
   lineCount: number;
   totalOrdered: number;
   totalReceived: number;
-  expectedDeliveryDate: string | null;
-  createdAt: string;
+  expectedDeliveryDate: Date | null;
+  createdAt: Date;
 }

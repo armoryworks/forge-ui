@@ -50,8 +50,8 @@ export interface SavedReport {
   chartLabelField?: string;
   chartValueField?: string;
   isShared: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   createdBy?: string;
 }
 

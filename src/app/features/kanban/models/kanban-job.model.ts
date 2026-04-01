@@ -8,7 +8,7 @@ export interface KanbanJob {
   assigneeInitials: string | null;
   assigneeColor: string | null;
   priorityName: string;
-  dueDate: string | null;
+  dueDate: Date | null;
   isOverdue: boolean;
   customerName: string | null;
   billingStatus: string | null;

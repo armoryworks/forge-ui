@@ -47,7 +47,7 @@ export class NotificationService {
     }).sort((a, b) => {
       // Pinned first, then by date
       if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      return b.createdAt.getTime() - a.createdAt.getTime();
     });
   });
 
@@ -69,7 +69,10 @@ export class NotificationService {
   }
 
   togglePanel(): void {
-    this._panelOpen.update(v => !v);
+    const opening = !this._panelOpen();
+    this._panelOpen.set(opening);
+    // Reload from API each time the panel opens so missed SignalR pushes are caught
+    if (opening) this.load();
   }
 
   closePanel(): void {

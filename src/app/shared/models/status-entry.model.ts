@@ -5,10 +5,10 @@ export interface StatusEntry {
   statusCode: string;
   statusLabel: string;
   category: 'workflow' | 'hold';
-  startedAt: string;
-  endedAt: string | null;
+  startedAt: Date;
+  endedAt: Date | null;
   notes: string | null;
   setById: number | null;
   setByName: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

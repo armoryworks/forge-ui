@@ -9,10 +9,10 @@ export interface PaymentDetail {
   amount: number;
   appliedAmount: number;
   unappliedAmount: number;
-  paymentDate: string;
+  paymentDate: Date;
   referenceNumber: string | null;
   notes: string | null;
   applications: PaymentApplication[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -6,5 +6,5 @@ export interface ChatMessageEvent {
   senderColor: string;
   recipientId: number;
   content: string;
-  createdAt: string;
+  createdAt: Date;
 }

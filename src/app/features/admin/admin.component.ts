@@ -141,7 +141,12 @@ export class AdminComponent {
   ];
 
   // Compliance — selected user for per-user detail panel
-  protected readonly complianceUserId = signal<number | null>(null);
+  protected readonly complianceUserControl = new FormControl<number | null>(null);
+  protected readonly complianceUserId = toSignal(this.complianceUserControl.valueChanges, { initialValue: null });
+  protected readonly complianceUserOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('admin.selectUserPlaceholder') },
+    ...this.users().map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` })),
+  ]);
 
   // Track Types
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -268,6 +273,14 @@ export class AdminComponent {
       this.newScanValue.setValue(scan.uid);
       // Auto-add the scan identifier immediately
       this.addScanIdentifier();
+    });
+
+    // When the user edit panel opens, probe the relay so the "not installed" banner
+    // appears immediately without requiring the admin to click "Connect RFID Reader"
+    effect(() => {
+      if (this.editingUser() !== null) {
+        this.rfid.probeRelay();
+      }
     });
 
     // Auto-reconnect to a previously paired RFID reader
@@ -411,7 +424,7 @@ export class AdminComponent {
     const success = await this.rfid.requestDevice();
     if (success) {
       this.snackbar.success(this.translate.instant('admin.rfidConnected', { device: this.rfid.deviceName() }));
-    } else if (this.rfid.error()) {
+    } else if (this.rfid.error() && this.rfid.error() !== 'rfid.relayNotInstalled') {
       this.snackbar.error(this.rfid.error()!);
     }
   }

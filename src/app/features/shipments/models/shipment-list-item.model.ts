@@ -7,6 +7,6 @@ export interface ShipmentListItem {
   status: string;
   carrier: string | null;
   trackingNumber: string | null;
-  shippedDate: string | null;
-  createdAt: string;
+  shippedDate: Date | null;
+  createdAt: Date;
 }

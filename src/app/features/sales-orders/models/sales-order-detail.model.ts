@@ -11,8 +11,8 @@ export interface SalesOrderDetail {
   billingAddressId: number | null;
   status: string;
   creditTerms: string | null;
-  confirmedDate: string | null;
-  requestedDeliveryDate: string | null;
+  confirmedDate: Date | null;
+  requestedDeliveryDate: Date | null;
   customerPO: string | null;
   notes: string | null;
   taxRate: number;
@@ -20,6 +20,6 @@ export interface SalesOrderDetail {
   taxAmount: number;
   total: number;
   lines: SalesOrderLine[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

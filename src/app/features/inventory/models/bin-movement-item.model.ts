@@ -12,6 +12,6 @@ export interface BinMovementItem {
   toLocationId: number | null;
   toLocationName: string | null;
   movedByName: string;
-  movedAt: string;
+  movedAt: Date;
   reason: BinMovementReason | null;
 }

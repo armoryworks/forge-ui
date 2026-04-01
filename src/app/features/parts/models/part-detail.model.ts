@@ -24,6 +24,6 @@ export interface PartDetail {
   toolingAssetName: string | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

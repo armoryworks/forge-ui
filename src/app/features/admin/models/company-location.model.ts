@@ -10,8 +10,8 @@ export interface CompanyLocation {
   phone: string | null;
   isDefault: boolean;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface CompanyProfile {

@@ -11,5 +11,5 @@ export interface Reservation {
   salesOrderLineId: number | null;
   quantity: number;
   notes: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

@@ -497,6 +497,17 @@
     font-size: var(--font-size-xs);
     color: var(--error);
   }
+
+  &__download {
+    display: inline-block;
+    margin-left: $sp-sm;
+    font-size: $font-size-xs;
+    color: var(--primary);
+    text-decoration: underline;
+    cursor: pointer;
+
+    &:hover { color: var(--primary-dark); }
+  }
 }
 
 // ── Setup Code Banner ──

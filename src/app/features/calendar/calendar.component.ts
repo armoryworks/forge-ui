@@ -81,7 +81,7 @@ export class CalendarComponent {
 
   protected readonly dayJobs = computed(() => {
     const dateStr = this.toDateStr(this.currentDate());
-    return this.jobs().filter(j => j.dueDate?.split('T')[0] === dateStr);
+    return this.jobs().filter(j => j.dueDate ? this.toDateStr(j.dueDate) === dateStr : false);
   });
 
   protected readonly currentDateKey = computed(() => this.toDateStr(this.currentDate()));
@@ -323,7 +323,7 @@ export class CalendarComponent {
     const map = new Map<string, CalendarJob[]>();
     for (const job of jobs) {
       if (!job.dueDate) continue;
-      const dateKey = job.dueDate.split('T')[0];
+      const dateKey = this.toDateStr(job.dueDate);
       const list = map.get(dateKey) ?? [];
       list.push(job);
       map.set(dateKey, list);

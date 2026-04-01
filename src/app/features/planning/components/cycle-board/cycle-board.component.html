@@ -3,7 +3,7 @@
     <div class="cycle-board__info">
       <h3 class="cycle-board__title">{{ cycle().name }}</h3>
       <span class="cycle-board__dates">
-        {{ formatDate(cycle().startDate) }} – {{ formatDate(cycle().endDate) }}
+        {{ cycle().startDate | date:'MM/dd/yyyy' }} – {{ cycle().endDate | date:'MM/dd/yyyy' }}
       </span>
       @if (isActive()) {
         <span class="cycle-board__days-left">{{ daysRemaining() }} {{ 'planning.daysLeft' | translate }}</span>

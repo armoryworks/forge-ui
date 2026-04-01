@@ -10,13 +10,13 @@ export interface ShipmentDetail {
   status: string;
   carrier: string | null;
   trackingNumber: string | null;
-  shippedDate: string | null;
-  deliveredDate: string | null;
+  shippedDate: Date | null;
+  deliveredDate: Date | null;
   shippingCost: number | null;
   weight: number | null;
   notes: string | null;
   invoiceId: number | null;
   lines: ShipmentLine[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

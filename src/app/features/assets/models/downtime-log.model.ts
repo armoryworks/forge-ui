@@ -3,12 +3,12 @@ export interface DowntimeLog {
   assetId: number;
   assetName: string;
   reportedById: number | null;
-  startedAt: string;
-  endedAt: string | null;
+  startedAt: Date;
+  endedAt: Date | null;
   reason: string;
   resolution: string | null;
   isPlanned: boolean;
   notes: string | null;
   durationHours: number;
-  createdAt: string;
+  createdAt: Date;
 }

@@ -2,6 +2,6 @@
   <div class="deadline-item" [class.deadline-item--overdue]="deadline.isOverdue">
     <span class="deadline-item__date">{{ deadline.date }}</span>
     <span class="deadline-item__job">{{ deadline.jobNumber }}</span>
-    <span class="deadline-item__desc">{{ deadline.description }}</span>
+    <span class="deadline-item__desc" [appTruncationTooltip]="deadline.description">{{ deadline.description }}</span>
   </div>
 }

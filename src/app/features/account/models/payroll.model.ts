@@ -4,9 +4,9 @@ export type TaxDocumentType = 'W2' | 'W2c' | 'Misc1099' | 'Nec1099' | 'Other';
 export interface PayStub {
   id: number;
   userId: number;
-  payPeriodStart: string;
-  payPeriodEnd: string;
-  payDate: string;
+  payPeriodStart: Date;
+  payPeriodEnd: Date;
+  payDate: Date;
   grossPay: number;
   netPay: number;
   totalDeductions: number;

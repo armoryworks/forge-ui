@@ -7,6 +7,6 @@ export interface ClockEvent {
   eventType: ClockEventType;
   reason: string | null;
   scanMethod: string | null;
-  timestamp: string;
+  timestamp: Date;
   source: string | null;
 }

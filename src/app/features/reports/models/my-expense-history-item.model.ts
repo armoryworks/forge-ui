@@ -4,6 +4,6 @@ export interface MyExpenseHistoryItem {
   description: string;
   amount: number;
   status: string;
-  expenseDate: string;
+  expenseDate: Date;
   vendor: string | null;
 }

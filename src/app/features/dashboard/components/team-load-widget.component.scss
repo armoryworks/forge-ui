@@ -3,13 +3,13 @@
 .workload-item {
   display: flex;
   align-items: center;
-  gap: $sp-md;
-  padding: $sp-sm $sp-lg;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
   border-bottom: $border-width-thin solid var(--border);
 }
 
 .workload-item__name {
-  width: 60px;
+  width: 80px;
   flex-shrink: 0;
   font-size: var(--font-size-sm);
   font-weight: 600;

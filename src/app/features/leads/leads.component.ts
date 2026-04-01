@@ -210,7 +210,7 @@ export class LeadsComponent {
       phone: lead.phone ?? '',
       source: lead.source ?? '',
       notes: lead.notes ?? '',
-      followUpDate: lead.followUpDate ? new Date(lead.followUpDate) : null,
+      followUpDate: lead.followUpDate ?? null,
     });
     this.showDialog.set(true);
   }
@@ -287,7 +287,7 @@ export class LeadsComponent {
 
   protected isFollowUpOverdue(lead: LeadItem): boolean {
     if (!lead.followUpDate) return false;
-    return new Date(lead.followUpDate) < new Date();
+    return lead.followUpDate.getTime() < new Date().getTime();
   }
 
   protected convertLead(): void {

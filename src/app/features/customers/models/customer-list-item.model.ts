@@ -7,5 +7,5 @@ export interface CustomerListItem {
   isActive: boolean;
   contactCount: number;
   jobCount: number;
-  createdAt: string;
+  createdAt: Date;
 }

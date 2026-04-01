@@ -8,7 +8,7 @@ import { ActivityItem } from '../../models/activity.model';
 export interface DisplayActivity {
   id: number;
   description: string;
-  createdAt: string;
+  createdAt: Date;
   userInitials?: string;
   userColor?: string;
   action?: string;
@@ -77,7 +77,7 @@ export class ActivityTimelineComponent {
         if (
           next.action === 'FieldChanged' &&
           next.userInitials === current.userInitials &&
-          Math.abs(new Date(next.createdAt).getTime() - new Date(current.createdAt).getTime()) < 5000
+          Math.abs(next.createdAt.getTime() - current.createdAt.getTime()) < 5000
         ) {
           batch.push(next);
           i++;
@@ -118,8 +118,7 @@ export class ActivityTimelineComponent {
     this.selectedUser.set(value || null);
   }
 
-  protected formatDate(iso: string): string {
-    const date = new Date(iso);
+  protected formatDate(date: Date): string {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const minutes = Math.floor(diff / 60000);

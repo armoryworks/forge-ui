@@ -9,9 +9,9 @@ export interface LeadItem {
   source: string | null;
   status: LeadStatus;
   notes: string | null;
-  followUpDate: string | null;
+  followUpDate: Date | null;
   lostReason: string | null;
   convertedCustomerId: number | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

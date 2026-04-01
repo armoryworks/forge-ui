@@ -9,8 +9,8 @@ export interface LotRecord {
   productionRunId: number | null;
   purchaseOrderLineId: number | null;
   quantity: number;
-  expirationDate: string | null;
+  expirationDate: Date | null;
   supplierLotNumber: string | null;
   notes: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

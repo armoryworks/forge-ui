@@ -7,5 +7,5 @@ export interface AuditLogEntry {
   entityId: number | null;
   details: string | null;
   ipAddress: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

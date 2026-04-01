@@ -8,7 +8,7 @@ export interface PlanningCycleEntry {
   stageColor: string | null;
   priority: string;
   isRolledOver: boolean;
-  committedAt: string;
-  completedAt: string | null;
+  committedAt: Date;
+  completedAt: Date | null;
   sortOrder: number;
 }

@@ -15,9 +15,9 @@ export interface JobDetail {
   priority: string;
   customerId: number | null;
   customerName: string | null;
-  dueDate: string | null;
-  startDate: string | null;
-  completedDate: string | null;
+  dueDate: Date | null;
+  startDate: Date | null;
+  completedDate: Date | null;
   isArchived: boolean;
   boardPosition: number;
   iterationCount: number;
@@ -27,13 +27,13 @@ export interface JobDetail {
   provider: string | null;
   disposition: string | null;
   dispositionNotes: string | null;
-  dispositionAt: string | null;
+  dispositionAt: Date | null;
   partId: number | null;
   partNumber: string | null;
   parentJobId: number | null;
   parentJobNumber: string | null;
   childJobCount: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   coverPhotoUrl: string | null;
 }

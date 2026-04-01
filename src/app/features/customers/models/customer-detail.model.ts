@@ -11,8 +11,8 @@ export interface CustomerDetail {
   externalId: string | null;
   externalRef: string | null;
   provider: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
   contacts: Contact[];
   jobs: CustomerJob[];
 }

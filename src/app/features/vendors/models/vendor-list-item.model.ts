@@ -6,5 +6,5 @@ export interface VendorListItem {
   phone: string | null;
   isActive: boolean;
   poCount: number;
-  createdAt: string;
+  createdAt: Date;
 }

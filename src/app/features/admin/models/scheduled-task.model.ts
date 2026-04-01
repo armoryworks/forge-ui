@@ -8,7 +8,7 @@ export interface ScheduledTask {
   assigneeId: number | null;
   cronExpression: string;
   isActive: boolean;
-  lastRunAt: string | null;
-  nextRunAt: string | null;
-  createdAt: string;
+  lastRunAt: Date | null;
+  nextRunAt: Date | null;
+  createdAt: Date;
 }

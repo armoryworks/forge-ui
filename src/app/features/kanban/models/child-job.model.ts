@@ -5,5 +5,5 @@ export interface ChildJob {
   stage: string;
   partNumber: string | null;
   quantity: number | null;
-  createdAt: string;
+  createdAt: Date;
 }

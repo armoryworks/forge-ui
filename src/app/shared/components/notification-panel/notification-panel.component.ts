@@ -50,7 +50,23 @@ export class NotificationPanelComponent {
     this.notificationService.markAsRead(notification.id);
     if (notification.entityType && notification.entityId) {
       this.notificationService.closePanel();
-      this.router.navigate(['/', notification.entityType, notification.entityId]);
+      const commands = this.resolveEntityRoute(notification.entityType, notification.entityId);
+      if (commands) this.router.navigate(commands.path, { queryParams: commands.query });
+    }
+  }
+
+  private resolveEntityRoute(entityType: string, entityId: number): { path: any[]; query?: Record<string, unknown> } | null {
+    switch (entityType.toLowerCase()) {
+      case 'job': return { path: ['/board'], query: { job: entityId } };
+      case 'quote': return { path: ['/quotes'], query: { id: entityId } };
+      case 'salesorder': return { path: ['/sales-orders'], query: { id: entityId } };
+      case 'purchaseorder': return { path: ['/purchase-orders'], query: { id: entityId } };
+      case 'invoice': return { path: ['/invoices'], query: { id: entityId } };
+      case 'expense': return { path: ['/expenses'], query: { id: entityId } };
+      case 'lead': return { path: ['/leads'], query: { id: entityId } };
+      case 'part': return { path: ['/parts'], query: { id: entityId } };
+      case 'shipment': return { path: ['/shipments'], query: { id: entityId } };
+      default: return null;
     }
   }
 

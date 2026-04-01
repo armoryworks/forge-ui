@@ -1,60 +1,9 @@
 @use 'styles/variables' as *;
-@use 'styles/mixins' as *;
 
 :host {
   display: block;
 }
 
-.lines-section {
-  margin-top: $sp-lg;
-  display: flex;
-  flex-direction: column;
-  gap: $sp-md;
-}
-
-.lines-header {
-  @include flex-between;
-}
-
-.lines-title {
-  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
-  color: var(--text-muted);
-}
-
-.lines-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-
-  th,
-  td {
-    padding: $sp-sm $sp-md;
-    text-align: left;
-    border-bottom: $border-width-thin solid var(--border);
-  }
-
-  th {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
-    color: var(--text-muted);
-  }
-
-  &__right {
-    text-align: right;
-  }
-
-  &__mono {
-    font-family: $font-family-mono;
-    font-size: var(--font-size-xs);
-  }
-
-  &__bold {
-    font-weight: 700;
-  }
-}
-
-.add-line {
-  display: grid;
-  grid-template-columns: 90px 150px 1fr 100px 120px auto;
-  gap: $sp-sm;
-  align-items: end;
+.add-line--6col {
+  grid-template-columns: 1fr 1fr 1fr 80px 100px auto;
 }

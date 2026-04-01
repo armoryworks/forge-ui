@@ -14,6 +14,6 @@ export interface ExpenseItem {
   approvedBy: number | null;
   approvedByName: string | null;
   approvalNotes: string | null;
-  expenseDate: string;
-  createdAt: string;
+  expenseDate: Date;
+  createdAt: Date;
 }

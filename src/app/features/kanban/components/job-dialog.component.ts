@@ -100,7 +100,7 @@ export class JobDialogComponent implements OnInit {
         customerId: j.customerId,
         assigneeId: j.assigneeId,
         priority: j.priority,
-        dueDate: j.dueDate ? new Date(j.dueDate) : null,
+        dueDate: j.dueDate ?? null,
       });
     } else {
       const types = this.trackTypes();
@@ -126,7 +126,8 @@ export class JobDialogComponent implements OnInit {
     this.saving.set(true);
 
     const f = this.jobForm.getRawValue();
-    const dueDate = toIsoDate(f.dueDate);
+    const dueDateIso = toIsoDate(f.dueDate);
+    const dueDateObj = f.dueDate ?? null;
 
     if (this.mode() === 'create') {
       this.kanbanService.createJob({
@@ -136,7 +137,7 @@ export class JobDialogComponent implements OnInit {
         assigneeId: f.assigneeId,
         customerId: f.customerId,
         priority: f.priority ?? 'Normal',
-        dueDate,
+        dueDate: dueDateIso,
       }).subscribe({
         next: (detail) => {
           this.saving.set(false);
@@ -152,7 +153,7 @@ export class JobDialogComponent implements OnInit {
         assigneeId: f.assigneeId,
         customerId: f.customerId,
         priority: f.priority ?? 'Normal',
-        dueDate,
+        dueDate: dueDateObj,
       }).subscribe({
         next: () => {
           this.saving.set(false);
@@ -163,7 +164,7 @@ export class JobDialogComponent implements OnInit {
             assigneeId: f.assigneeId,
             customerId: f.customerId,
             priority: f.priority ?? 'Normal',
-            dueDate,
+            dueDate: dueDateObj,
           };
           this.saved.emit(updated);
         },

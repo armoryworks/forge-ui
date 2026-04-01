@@ -61,7 +61,7 @@
         {{ job.customerName ?? '—' }}
       </ng-template>
       <ng-template appColumnCell="dueDate" let-job>
-        <span [class.overdue-text]="job.isOverdue">{{ formatDate(job.dueDate) }}</span>
+        <span [class.overdue-text]="job.isOverdue">{{ job.dueDate | date:'MM/dd/yyyy' }}</span>
       </ng-template>
     </app-data-table>
     </div>
@@ -72,13 +72,6 @@
         [selectedJobId]="selectedJobId()"
         (jobClick)="onRowClicked($event)" />
     </div>
-  }
-
-  @if (selectedJobId(); as jobId) {
-    <app-job-detail-panel
-      [jobId]="jobId"
-      (closed)="onPanelClose()"
-      (editRequested)="openEditDialog($event)" />
   }
 
   @if (showJobDialog()) {

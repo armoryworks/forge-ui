@@ -5,7 +5,7 @@ export interface MyWorkHistoryItem {
   stageName: string;
   stageColor: string | null;
   customerName: string | null;
-  dueDate: string | null;
-  createdAt: string;
-  completedAt: string | null;
+  dueDate: Date | null;
+  createdAt: Date;
+  completedAt: Date | null;
 }

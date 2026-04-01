@@ -8,12 +8,12 @@ export interface PurchaseOrderDetail {
   jobId: number | null;
   jobNumber: string | null;
   status: string;
-  submittedDate: string | null;
-  acknowledgedDate: string | null;
-  expectedDeliveryDate: string | null;
-  receivedDate: string | null;
+  submittedDate: Date | null;
+  acknowledgedDate: Date | null;
+  expectedDeliveryDate: Date | null;
+  receivedDate: Date | null;
   notes: string | null;
   lines: PurchaseOrderLine[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

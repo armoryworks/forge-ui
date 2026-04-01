@@ -12,7 +12,7 @@ export interface QcInspection {
   lotNumber: string | null;
   status: string;
   notes: string | null;
-  completedAt: string | null;
+  completedAt: Date | null;
   results: QcInspectionResult[];
-  createdAt: string;
+  createdAt: Date;
 }

@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal, effect } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -9,6 +10,9 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { AdminService } from '../../services/admin.service';
 import { UserComplianceDetail, ComplianceFormSubmission, IdentityDocument } from '../../../account/models/compliance-form.model';
 import { CompleteI9DialogComponent, CompleteI9DialogData } from '../complete-i9-dialog/complete-i9-dialog.component';
@@ -18,7 +22,7 @@ import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
 @Component({
   selector: 'app-user-compliance-panel',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, ConfirmDialogComponent, MatTooltipModule],
+  imports: [DatePipe, CurrencyPipe, ReactiveFormsModule, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, ConfirmDialogComponent, InputComponent, SelectComponent, DatepickerComponent, MatTooltipModule],
   templateUrl: './user-compliance-panel.component.html',
   styleUrl: './user-compliance-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +47,24 @@ export class UserCompliancePanelComponent {
   // Upload state — last uploaded file ID for linking to payroll record
   protected readonly lastPayStubFileId = signal<number | null>(null);
   protected readonly lastTaxDocFileId = signal<number | null>(null);
+
+  // Pay stub form controls
+  protected readonly psPayDate = new FormControl<Date | null>(null);
+  protected readonly psPeriodStart = new FormControl<Date | null>(null);
+  protected readonly psPeriodEnd = new FormControl<Date | null>(null);
+  protected readonly psGrossPay = new FormControl('');
+  protected readonly psNetPay = new FormControl('');
+
+  // Tax document form controls
+  protected readonly tdDocType = new FormControl('W2');
+  protected readonly tdYear = new FormControl(new Date().getFullYear().toString());
+  protected readonly taxDocTypeOptions: SelectOption[] = [
+    { value: 'W2', label: 'W-2' },
+    { value: 'W2c', label: 'W-2c (Corrected)' },
+    { value: 'Misc1099', label: '1099-MISC' },
+    { value: 'Nec1099', label: '1099-NEC' },
+    { value: 'Other', label: 'Other' },
+  ];
 
   constructor() {
     effect(() => {
@@ -154,17 +176,22 @@ export class UserCompliancePanelComponent {
     this.snackbar.success(this.translate.instant('admin.fileUploadedTaxDoc'));
   }
 
-  protected savePayStub(payDate: string, periodStart: string, periodEnd: string, grossPay: string, netPay: string): void {
+  protected savePayStub(): void {
     const id = this.userId();
     const fileId = this.lastPayStubFileId();
+    const payDate = this.psPayDate.value;
+    const periodStart = this.psPeriodStart.value;
+    const periodEnd = this.psPeriodEnd.value;
+    const grossPay = this.psGrossPay.value;
+    const netPay = this.psNetPay.value;
     if (!id || !fileId || !payDate || !periodStart || !periodEnd || !grossPay || !netPay) {
       this.snackbar.error(this.translate.instant('admin.uploadAndFillFields'));
       return;
     }
     this.payrollService.uploadPayStub(id, {
-      payDate: new Date(payDate).toISOString(),
-      payPeriodStart: new Date(periodStart).toISOString(),
-      payPeriodEnd: new Date(periodEnd).toISOString(),
+      payDate: payDate.toISOString(),
+      payPeriodStart: periodStart.toISOString(),
+      payPeriodEnd: periodEnd.toISOString(),
       grossPay: parseFloat(grossPay),
       netPay: parseFloat(netPay),
       fileAttachmentId: fileId,
@@ -172,14 +199,18 @@ export class UserCompliancePanelComponent {
       next: () => {
         this.snackbar.success(this.translate.instant('admin.payStubUploaded'));
         this.lastPayStubFileId.set(null);
+        this.psPayDate.reset(); this.psPeriodStart.reset(); this.psPeriodEnd.reset();
+        this.psGrossPay.reset(''); this.psNetPay.reset('');
         this.loadPayroll(id);
       },
     });
   }
 
-  protected saveTaxDocument(documentType: string, taxYear: string): void {
+  protected saveTaxDocument(): void {
     const id = this.userId();
     const fileId = this.lastTaxDocFileId();
+    const documentType = this.tdDocType.value;
+    const taxYear = this.tdYear.value;
     if (!id || !fileId || !documentType || !taxYear) {
       this.snackbar.error(this.translate.instant('admin.uploadAndFillFields'));
       return;
@@ -192,6 +223,7 @@ export class UserCompliancePanelComponent {
       next: () => {
         this.snackbar.success(this.translate.instant('admin.taxDocUploaded'));
         this.lastTaxDocFileId.set(null);
+        this.tdDocType.reset('W2'); this.tdYear.reset(new Date().getFullYear().toString());
         this.loadPayroll(id);
       },
     });
@@ -203,7 +235,7 @@ export class UserCompliancePanelComponent {
       width: '400px',
       data: {
         title: 'Delete Pay Stub?',
-        message: `This will remove the manually uploaded pay stub for ${new Date(stub.payDate).toLocaleDateString()}.`,
+        message: `This will remove the manually uploaded pay stub for ${stub.payDate.toLocaleDateString()}.`,
         confirmLabel: 'Delete',
         severity: 'danger',
       } satisfies ConfirmDialogData,
@@ -244,7 +276,7 @@ export class UserCompliancePanelComponent {
   protected getI9StatusClass(sub: ComplianceFormSubmission): string {
     if (sub.formType !== 'I9') return '';
     if (!sub.i9Section1SignedAt) return 'chip chip--warning';
-    if (sub.i9Section2OverdueAt && new Date(sub.i9Section2OverdueAt) <= new Date() && !sub.i9Section2SignedAt)
+    if (sub.i9Section2OverdueAt && sub.i9Section2OverdueAt.getTime() <= new Date().getTime() && !sub.i9Section2SignedAt)
       return 'chip chip--error';
     if (!sub.i9Section2SignedAt) return 'chip chip--info';
     return 'chip chip--success';
@@ -253,7 +285,7 @@ export class UserCompliancePanelComponent {
   protected getI9StatusLabel(sub: ComplianceFormSubmission): string {
     if (sub.formType !== 'I9') return '';
     if (!sub.i9Section1SignedAt) return 'Sec 1 Pending';
-    if (sub.i9Section2OverdueAt && new Date(sub.i9Section2OverdueAt) <= new Date() && !sub.i9Section2SignedAt)
+    if (sub.i9Section2OverdueAt && sub.i9Section2OverdueAt.getTime() <= new Date().getTime() && !sub.i9Section2SignedAt)
       return 'Sec 2 Overdue';
     if (!sub.i9Section2SignedAt) return 'Awaiting Sec 2';
     return 'I-9 Complete';

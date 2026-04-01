@@ -6,6 +6,6 @@ export interface QuoteListItem {
   status: string;
   lineCount: number;
   total: number;
-  expirationDate: string | null;
-  createdAt: string;
+  expirationDate: Date | null;
+  createdAt: Date;
 }

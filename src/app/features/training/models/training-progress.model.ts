@@ -5,8 +5,8 @@ export interface TrainingProgress {
   status: TrainingProgressStatus;
   quizScore: number | null;
   quizAttempts: number | null;
-  startedAt: string | null;
-  completedAt: string | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
   timeSpentSeconds: number;
 }
 
@@ -17,6 +17,6 @@ export interface TrainingEnrollment {
   pathIcon: string;
   totalModules: number;
   completedModules: number;
-  enrolledAt: string | null;
-  completedAt: string | null;
+  enrolledAt: Date | null;
+  completedAt: Date | null;
 }

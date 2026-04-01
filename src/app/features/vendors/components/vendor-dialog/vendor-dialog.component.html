@@ -1,22 +1,43 @@
-<app-dialog [title]="isEditing ? ('vendors.editVendor' | translate) : ('vendors.newVendor' | translate)" width="520px" (closed)="close()">
-  <div [formGroup]="form">
-    <app-input [label]="'vendors.companyName' | translate" formControlName="companyName" />
-    <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" />
-    <div class="dialog-row">
-      <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
-      <app-input [label]="'common.phone' | translate" formControlName="phone" />
+<app-dialog [title]="isEditing ? ('vendors.editVendor' | translate) : ('vendors.newVendor' | translate)" width="860px" [splitLayout]="true" (closed)="close()">
+  <div class="dlg-body" [formGroup]="form">
+
+    <!-- Main: Contact + Notes -->
+    <div class="dlg-main">
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'vendors.contact' | translate }}</span>
+        <app-input [label]="'vendors.companyName' | translate" formControlName="companyName" [required]="true" />
+        <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" />
+        <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
+        <app-input [label]="'common.phone' | translate" formControlName="phone" />
+      </div>
+
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'common.notes' | translate }}</span>
+        <app-textarea formControlName="notes" [rows]="3" />
+      </div>
     </div>
-    <app-address-form formControlName="address"
-      [requireLine1]="false"
-      [requireCity]="false"
-      [requireState]="false"
-      [requirePostalCode]="false"
-      [showLine2]="false" />
-    <app-select [label]="'vendors.paymentTerms' | translate" formControlName="paymentTerms" [options]="paymentTermsOptions" />
-    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
-    @if (isEditing) {
-      <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
-    }
+
+    <!-- Sidebar: Address + Settings -->
+    <div class="dlg-sidebar">
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.address' | translate }}</span>
+        <app-address-form formControlName="address"
+          [requireLine1]="false"
+          [requireCity]="false"
+          [requireState]="false"
+          [requirePostalCode]="false"
+          [showLine2]="false" />
+      </div>
+
+      <div class="dlg-sidebar-section">
+        <span class="dlg-sidebar-section__title">{{ 'common.settings' | translate }}</span>
+        <app-select [label]="'vendors.paymentTerms' | translate" formControlName="paymentTerms" [options]="paymentTermsOptions" />
+        @if (isEditing) {
+          <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
+        }
+      </div>
+    </div>
+
   </div>
 
   <div dialog-footer>

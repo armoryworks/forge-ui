@@ -1,5 +1,5 @@
 export interface TrackingEvent {
-  timestamp: string;
+  timestamp: Date;
   location: string;
   description: string;
 }

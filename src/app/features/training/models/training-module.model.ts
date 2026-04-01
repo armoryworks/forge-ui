@@ -15,12 +15,12 @@ export interface TrainingModuleListItem {
   sortOrder: number;
   myStatus: TrainingProgressStatus | null;
   myQuizScore: number | null;
-  myCompletedAt: string | null;
+  myCompletedAt: Date | null;
 }
 
 export interface TrainingModuleDetail extends TrainingModuleListItem {
   contentJson: string;
   appRoutes: string[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

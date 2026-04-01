@@ -7,9 +7,9 @@ export interface QuoteDetail {
   customerName: string;
   shippingAddressId: number | null;
   status: string;
-  sentDate: string | null;
-  expirationDate: string | null;
-  acceptedDate: string | null;
+  sentDate: Date | null;
+  expirationDate: Date | null;
+  acceptedDate: Date | null;
   notes: string | null;
   taxRate: number;
   subtotal: number;
@@ -18,6 +18,6 @@ export interface QuoteDetail {
   salesOrderId: number | null;
   salesOrderNumber: string | null;
   lines: QuoteLine[];
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

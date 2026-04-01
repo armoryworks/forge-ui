@@ -7,5 +7,5 @@ export interface Activity {
   description: string;
   userInitials: string | null;
   userName: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

@@ -7,7 +7,7 @@ export interface LotListItem {
   jobId: number | null;
   jobNumber: string | null;
   quantity: number;
-  expirationDate: string | null;
+  expirationDate: Date | null;
   supplierLotNumber: string | null;
-  createdAt: string;
+  createdAt: Date;
 }

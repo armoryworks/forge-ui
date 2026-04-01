@@ -17,9 +17,9 @@ export class BacklogCardGridComponent {
 
   readonly jobClick = output<KanbanJob>();
 
-  protected formatDate(date: string | null): string {
+  protected formatDate(date: Date | string | null): string {
     if (!date) return '';
-    const d = new Date(date);
+    const d = typeof date === 'string' ? new Date(date) : date;
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const yyyy = d.getFullYear();

@@ -19,6 +19,6 @@ export interface AssetItem {
   currentShotCount: number | null;
   sourceJobNumber: string | null;
   sourcePartNumber: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

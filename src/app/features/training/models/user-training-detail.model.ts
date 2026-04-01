@@ -6,8 +6,8 @@ export interface UserTrainingModuleDetail {
   quizScore: number | null;
   quizAttempts: number;
   timeSpentSeconds: number;
-  startedAt: string | null;
-  completedAt: string | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
 }
 
 export interface UserTrainingDetail {

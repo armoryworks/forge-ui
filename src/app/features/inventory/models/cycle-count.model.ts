@@ -6,9 +6,9 @@ export interface CycleCount {
   locationName: string;
   countedById: number;
   countedByName: string;
-  countedAt: string;
+  countedAt: Date;
   status: string;
   notes: string | null;
   lines: CycleCountLine[];
-  createdAt: string;
+  createdAt: Date;
 }

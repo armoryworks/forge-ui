@@ -1,7 +1,7 @@
 export interface ActivityItem {
   id: number;
   description: string;
-  createdAt: string;
+  createdAt: Date;
   userInitials?: string;
   userColor?: string;
   action?: string;

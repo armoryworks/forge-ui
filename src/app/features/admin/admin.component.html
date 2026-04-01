@@ -420,13 +420,7 @@
 
         <h3 class="compliance-section-divider">{{ 'admin.perUserCompliance' | translate }}</h3>
         <div class="compliance-user-picker">
-          <label class="compliance-user-picker__label" for="compliance-user-select">{{ 'admin.selectUser' | translate }}</label>
-          <select id="compliance-user-select" class="compliance-user-picker__select" (change)="complianceUserId.set(+$any($event.target).value || null)">
-            <option value="">{{ 'admin.selectUserPlaceholder' | translate }}</option>
-            @for (u of users(); track u.id) {
-              <option [value]="u.id">{{ u.lastName }}, {{ u.firstName }}</option>
-            }
-          </select>
+          <app-select [label]="'admin.selectUser' | translate" [options]="complianceUserOptions()" [formControl]="complianceUserControl" />
         </div>
         <app-user-compliance-panel [userId]="complianceUserId()" />
       </div>
@@ -578,7 +572,16 @@
               </button>
             }
             @if (rfid.error()) {
-              <span class="rfid-reader__error">{{ rfid.error() }}</span>
+              @if (rfid.error() === 'rfid.relayNotInstalled') {
+                <span class="rfid-reader__error">
+                  {{ 'rfid.relayNotInstalled' | translate }}
+                  <a class="rfid-reader__download" href="/api/v1/downloads/rfid-relay-setup.exe" download>
+                    {{ 'rfid.downloadInstaller' | translate }}
+                  </a>
+                </span>
+              } @else {
+                <span class="rfid-reader__error">{{ rfid.error() }}</span>
+              }
             }
           </div>
 

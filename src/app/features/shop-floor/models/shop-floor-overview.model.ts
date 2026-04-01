@@ -14,7 +14,7 @@ export interface ShopFloorJob {
   priorityName: string;
   assigneeInitials: string | null;
   assigneeColor: string | null;
-  dueDate: string | null;
+  dueDate: Date | null;
   isOverdue: boolean;
 }
 

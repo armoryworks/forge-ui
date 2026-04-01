@@ -6,9 +6,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { formatDate } from '../../shared/utils/date.utils';
+import { DatePipe } from '@angular/common';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { BacklogService } from './services/backlog.service';
@@ -20,7 +21,7 @@ import { JobDetail } from '../kanban/models/job-detail.model';
 import { PRIORITY_COLORS } from '../kanban/models/priority-colors.const';
 import { PRIORITIES } from '../../shared/models/priority.const';
 import { TrackType } from '../../shared/models/track-type.model';
-import { JobDetailPanelComponent } from '../kanban/components/job-detail-panel.component';
+import { JobDetailDialogComponent, JobDetailDialogData } from '../kanban/components/job-detail-dialog.component';
 import { JobDialogComponent, DialogMode } from '../kanban/components/job-dialog.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -37,8 +38,8 @@ type ViewMode = 'table' | 'card';
   selector: 'app-backlog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, TranslatePipe, MatTooltipModule,
-    JobDetailPanelComponent, JobDialogComponent, AvatarComponent,
+    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    JobDialogComponent, AvatarComponent,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     BacklogCardGridComponent,
@@ -55,6 +56,7 @@ export class BacklogComponent implements OnInit {
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly jobs = signal<KanbanJob[]>([]);
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -210,17 +212,19 @@ export class BacklogComponent implements OnInit {
     return PRIORITY_COLORS[priority] ?? '#94a3b8';
   }
 
-  protected formatDate(date: string | null): string {
-    if (!date) return '—';
-    return formatDate(date);
-  }
-
   protected onRowClicked(job: KanbanJob): void {
     this.selectedJobId.set(job.id);
-  }
-
-  protected onPanelClose(): void {
-    this.selectedJobId.set(null);
+    this.dialog.open(JobDetailDialogComponent, {
+      width: '1400px',
+      maxWidth: '95vw',
+      panelClass: 'jd-dialog-panel',
+      data: { jobId: job.id, users: this.users() } satisfies JobDetailDialogData,
+    }).afterClosed().subscribe(result => {
+      this.selectedJobId.set(null);
+      if (result?.action === 'edit') {
+        this.openEditDialog(result.job);
+      }
+    });
   }
 
   protected openCreateDialog(): void {
@@ -237,7 +241,6 @@ export class BacklogComponent implements OnInit {
 
   protected onDialogSaved(): void {
     this.showJobDialog.set(false);
-    this.selectedJobId.set(null);
     this.loadJobs();
   }
 

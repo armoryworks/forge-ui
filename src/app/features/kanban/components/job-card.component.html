@@ -62,9 +62,9 @@
         <span class="card__sub-jobs-count">{{ job().childJobCount }}</span>
       </span>
     }
-    @if (formattedDueDate()) {
+    @if (job().dueDate) {
       <span class="card__due" [class.card__due--overdue]="job().isOverdue">
-        {{ formattedDueDate() }}
+        {{ job().dueDate | date:'MM/dd/yyyy' }}
       </span>
     }
   </div>

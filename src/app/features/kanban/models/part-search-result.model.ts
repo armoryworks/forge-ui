@@ -7,5 +7,5 @@ export interface PartSearchResult {
   partType: string;
   material: string | null;
   bomEntryCount: number;
-  createdAt: string;
+  createdAt: Date;
 }

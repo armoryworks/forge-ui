@@ -4,13 +4,13 @@ export interface TimeEntry {
   jobNumber: string | null;
   userId: number;
   userName: string;
-  date: string;
+  date: Date;
   durationMinutes: number;
   category: string | null;
   notes: string | null;
-  timerStart: string | null;
-  timerStop: string | null;
+  timerStart: Date | null;
+  timerStop: Date | null;
   isManual: boolean;
   isLocked: boolean;
-  createdAt: string;
+  createdAt: Date;
 }

@@ -9,6 +9,6 @@ export interface CustomerReturnListItem {
   reworkJobNumber: string | null;
   status: string;
   reason: string;
-  returnDate: string;
-  createdAt: string;
+  returnDate: Date;
+  createdAt: Date;
 }

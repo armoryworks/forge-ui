@@ -27,7 +27,7 @@
   display: flex;
   align-items: center;
   gap: $sp-sm;
-  padding: $sp-sm $sp-lg;
+  padding: $sp-sm $sp-md;
   border-bottom: $border-width-thin solid var(--border);
   font-size: var(--font-size-sm);
 
@@ -42,7 +42,7 @@
 }
 
 .task-item__time {
-  width: 40px;
+  width: 48px;
   flex-shrink: 0;
   font-family: $font-family-mono;
   font-size: var(--font-size-xs);

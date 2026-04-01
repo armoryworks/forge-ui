@@ -1,6 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal, output, computed } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { startWith } from 'rxjs';
 
 import { InvoiceService } from '../../services/invoice.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -11,14 +15,11 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface LineEntry {
   partId: number | null;
@@ -96,6 +97,13 @@ export class InvoiceDialogComponent {
   protected readonly lineTotal = computed(() =>
     this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );
+
+  protected readonly taxRateValue = toSignal(
+    this.form.controls.taxRate.valueChanges.pipe(startWith(this.form.controls.taxRate.value ?? 0)),
+    { initialValue: this.form.controls.taxRate.value ?? 0 }
+  );
+  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
+  protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
 
   constructor() {
     this.customerService.getCustomers(undefined, true).subscribe({

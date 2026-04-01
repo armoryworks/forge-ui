@@ -13,5 +13,5 @@ export interface BinContentItem {
   jobId: number | null;
   jobNumber: string | null;
   status: BinContentStatus;
-  placedAt: string;
+  placedAt: Date;
 }

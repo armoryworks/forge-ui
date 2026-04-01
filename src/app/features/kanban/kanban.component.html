@@ -113,14 +113,6 @@
     </div>
   }
 
-  @if (selectedJobId(); as jobId) {
-    <app-job-detail-panel
-      [jobId]="jobId"
-      [users]="users()"
-      (closed)="onPanelClose()"
-      (editRequested)="openEditDialog($event)" />
-  }
-
   @if (showJobDialog()) {
     <app-job-dialog
       [mode]="dialogMode()"

@@ -16,7 +16,7 @@ export interface CreateUserResponse {
   avatarColor: string | null;
   isActive: boolean;
   roles: string[];
-  createdAt: string;
+  createdAt: Date;
   setupToken: string;
   setupTokenExpiresAt: string;
 }

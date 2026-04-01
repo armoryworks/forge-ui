@@ -8,5 +8,5 @@ export interface FileAttachment {
   entityId: number;
   uploadedById: number;
   uploadedByName: string;
-  createdAt: string;
+  createdAt: Date;
 }

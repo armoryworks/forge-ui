@@ -3,56 +3,106 @@
 
 :host {
   display: block;
+  position: relative;
 }
 
-.rich-text-editor__label {
-  @include uppercase-label(var(--font-size-xxs), 0.5px, 500);
-  display: block;
-  margin-bottom: $sp-sm;
-  color: var(--text-secondary);
-}
+.rte {
+  position: relative;
 
-/* stylelint-disable selector-pseudo-element-no-unknown */
-::ng-deep {
-  .ql-toolbar {
-    border-color: var(--border) !important; /* override third-party quill styles */
+  &__textarea {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: $sp-md $sp-md;
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
     background: var(--surface);
-    font-family: $font-family-primary;
-    padding: $sp-sm $sp-md;
-  }
-
-  .ql-container {
-    border-color: var(--border) !important; /* override third-party quill styles */
+    color: var(--text);
     font-family: $font-family-primary;
     font-size: var(--font-size-base);
-  }
+    line-height: 1.5;
+    resize: none;
+    overflow: hidden;
+    transition: border-color $transition-fast;
+    @include custom-scrollbar(4px);
 
-  .ql-editor {
-    color: var(--text);
-
-    &.ql-blank::before {
+    &::placeholder {
       color: var(--text-muted);
-      font-style: normal;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    &:disabled {
+      background: var(--bg);
+      color: var(--text-secondary);
+      cursor: not-allowed;
     }
   }
 
-  .ql-snow .ql-stroke {
-    stroke: var(--text-secondary);
+  &__mention-picker {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + $sp-xs);
+    z-index: $z-dropdown;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+    box-shadow: $shadow-dropdown;
+    max-height: 200px;
+    overflow-y: auto;
+    @include custom-scrollbar(4px);
   }
 
-  .ql-snow .ql-fill {
-    fill: var(--text-secondary);
+  &__mention-option {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    width: 100%;
+    padding: $sp-sm $sp-md;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-family: $font-family-primary;
+    font-size: var(--font-size-base);
+    text-align: left;
+    cursor: pointer;
+    transition: background $transition-fast;
+
+    &:hover,
+    &:focus {
+      background: var(--bg);
+      outline: none;
+    }
+
+    &--active {
+      background: var(--bg);
+      outline: 2px solid var(--primary);
+      outline-offset: -2px;
+    }
   }
 
-  .ql-snow .ql-picker-label {
-    color: var(--text-secondary);
+  &__mention-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: $avatar-size-sm;
+    height: $avatar-size-sm;
+    border-radius: 50%;
+    font-size: var(--font-size-xxs);
+    font-weight: 700;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1;
   }
 
-  .ql-snow .ql-active .ql-stroke {
-    stroke: var(--primary);
-  }
-
-  .ql-snow .ql-active .ql-fill {
-    fill: var(--primary);
+  &__mention-name {
+    @include truncate;
+    font-size: var(--font-size-base);
+    color: var(--text);
   }
 }

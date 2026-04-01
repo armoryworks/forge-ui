@@ -14,5 +14,6 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class DialogComponent {
   readonly title = input.required<string>();
   readonly width = input<string>('420px');
+  readonly splitLayout = input<boolean>(false);
   readonly closed = output<void>();
 }

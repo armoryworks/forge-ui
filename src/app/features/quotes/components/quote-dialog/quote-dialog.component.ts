@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { startWith } from 'rxjs';
 
 import { QuoteService } from '../../services/quote.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -100,6 +102,14 @@ export class QuoteDialogComponent {
   protected readonly lineTotal = computed(() =>
     this.lines().reduce((sum, l) => sum + l.quantity * l.unitPrice, 0)
   );
+
+  protected readonly taxRateValue = toSignal(
+    this.form.controls.taxRate.valueChanges.pipe(startWith(this.form.controls.taxRate.value ?? 0)),
+    { initialValue: this.form.controls.taxRate.value ?? 0 }
+  );
+
+  protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
+  protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
 
   constructor() {
     this.customerService.getCustomers(undefined, true).subscribe({
