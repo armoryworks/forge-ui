@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 
 import { AvatarComponent } from '../avatar/avatar.component';
-import { MentionHighlightPipe } from '../../pipes/mention-highlight.pipe';
+import { RichTextPipe } from '../../pipes/rich-text.pipe';
 import { formatDate } from '../../utils/date.utils';
 import { ActivityItem } from '../../models/activity.model';
 
@@ -18,7 +18,7 @@ export interface DisplayActivity {
 @Component({
   selector: 'app-activity-timeline',
   standalone: true,
-  imports: [AvatarComponent, MentionHighlightPipe],
+  imports: [AvatarComponent, RichTextPipe],
   templateUrl: './activity-timeline.component.html',
   styleUrl: './activity-timeline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

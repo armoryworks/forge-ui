@@ -38,17 +38,17 @@
             <span class="material-icons-outlined timeline__batch-icon">
               {{ expandedBatch() === activity.id ? 'expand_more' : 'chevron_right' }}
             </span>
-            <span class="timeline__desc">{{ activity.description }}</span>
+            <span class="timeline__desc" [innerHTML]="activity.description | richText"></span>
           </button>
           @if (expandedBatch() === activity.id) {
             <div class="timeline__batch-detail">
               @for (item of activity.batchedItems; track item.id) {
-                <span class="timeline__batch-line" [innerHTML]="item.description | mentionHighlight"></span>
+                <span class="timeline__batch-line" [innerHTML]="item.description | richText"></span>
               }
             </div>
           }
         } @else {
-          <span class="timeline__desc" [innerHTML]="activity.description | mentionHighlight"></span>
+          <span class="timeline__desc" [innerHTML]="activity.description | richText"></span>
         }
         <span class="timeline__time">{{ formatDate(activity.createdAt) }}</span>
       </div>

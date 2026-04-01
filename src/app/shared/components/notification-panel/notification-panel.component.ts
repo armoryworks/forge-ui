@@ -7,13 +7,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { NotificationService } from '../../services/notification.service';
 import { AvatarComponent } from '../avatar/avatar.component';
+import { RichTextPipe } from '../../pipes/rich-text.pipe';
 import { AppNotification } from '../../models/app-notification.model';
 import { NotificationTab } from '../../models/notification-tab.type';
 
 @Component({
   selector: 'app-notification-panel',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, AvatarComponent, TranslatePipe],
+  imports: [DatePipe, MatTooltipModule, AvatarComponent, TranslatePipe, RichTextPipe],
   templateUrl: './notification-panel.component.html',
   styleUrl: './notification-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

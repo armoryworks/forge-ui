@@ -43,7 +43,7 @@
           </div>
           <div class="notification-item__content">
             <div class="notification-item__title">{{ n.title }}</div>
-            <div class="notification-item__message">{{ n.message }}</div>
+            <div class="notification-item__message" [innerHTML]="n.message | richText"></div>
             <div class="notification-item__time">{{ n.createdAt | date:'MM/dd/yyyy hh:mm a' }}</div>
           </div>
           <div class="notification-item__actions">

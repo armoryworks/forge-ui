@@ -13,7 +13,13 @@ export class MentionHighlightPipe implements PipeTransform {
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;');
-    const highlighted = escaped.replace(
+    // Handle new structured format: @[Name](user:ID)
+    const withNewMentions = escaped.replace(
+      /@\[([^\]]+)\]\(user:(\d+)\)/g,
+      '<span class="mention">@$1</span>',
+    );
+    // Handle legacy plain format: @username
+    const highlighted = withNewMentions.replace(
       /@(\w+)/g,
       '<span class="mention">@$1</span>',
     );
