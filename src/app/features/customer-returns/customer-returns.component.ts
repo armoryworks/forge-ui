@@ -25,7 +25,6 @@ import { TextareaComponent } from '../../shared/components/textarea/textarea.com
 import { FormGroup, FormControl as FC, Validators } from '@angular/forms';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 
 @Component({
   selector: 'app-customer-returns',
@@ -35,7 +34,7 @@ import { ValidationPopoverDirective } from '../../shared/directives/validation-p
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, DetailSidePanelComponent,
     CustomerReturnDialogComponent, LoadingBlockDirective, DialogComponent,
-    TextareaComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    TextareaComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './customer-returns.component.html',
   styleUrl: './customer-returns.component.scss',

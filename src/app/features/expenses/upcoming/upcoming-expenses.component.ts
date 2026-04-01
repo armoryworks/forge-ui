@@ -16,7 +16,6 @@ import { PageHeaderComponent } from '../../../shared/components/page-header/page
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
-import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
@@ -39,7 +38,7 @@ type LedgerTab = 'upcoming' | 'recurring';
   imports: [
     ReactiveFormsModule, CurrencyPipe, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
-    InputComponent, SelectComponent, TextareaComponent, DatepickerComponent, ToggleComponent,
+    InputComponent, SelectComponent, DatepickerComponent, ToggleComponent,
     DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective, MatTooltipModule,
   ],
   templateUrl: './upcoming-expenses.component.html',

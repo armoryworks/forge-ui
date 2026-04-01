@@ -13,11 +13,10 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
@@ -28,8 +27,8 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
   selector: 'app-teams-panel',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DataTableComponent, ColumnCellDirective, EmptyStateComponent,
-    LoadingBlockDirective, DialogComponent, InputComponent, SelectComponent,
+    ReactiveFormsModule, DataTableComponent, ColumnCellDirective,
+    LoadingBlockDirective, DialogComponent, InputComponent,
     TextareaComponent, ToggleComponent, AvatarComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './teams-panel.component.html',

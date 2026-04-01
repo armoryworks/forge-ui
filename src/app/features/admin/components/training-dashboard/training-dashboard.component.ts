@@ -5,7 +5,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { AdminService } from '../../services/admin.service';
 import { TrainingUserRow } from './training-user-row.model';
 
@@ -14,7 +13,7 @@ const AVAILABLE_TOURS = ['kanban', 'dashboard', 'parts', 'inventory', 'expenses'
 @Component({
   selector: 'app-training-dashboard',
   standalone: true,
-  imports: [TranslatePipe, DataTableComponent, ColumnCellDirective, EmptyStateComponent],
+  imports: [TranslatePipe, DataTableComponent, ColumnCellDirective],
   templateUrl: './training-dashboard.component.html',
   styleUrl: './training-dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

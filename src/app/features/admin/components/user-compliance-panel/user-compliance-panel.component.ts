@@ -22,7 +22,7 @@ import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
 @Component({
   selector: 'app-user-compliance-panel',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, ReactiveFormsModule, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, ConfirmDialogComponent, InputComponent, SelectComponent, DatepickerComponent, MatTooltipModule],
+  imports: [DatePipe, CurrencyPipe, ReactiveFormsModule, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, InputComponent, SelectComponent, DatepickerComponent, MatTooltipModule],
   templateUrl: './user-compliance-panel.component.html',
   styleUrl: './user-compliance-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

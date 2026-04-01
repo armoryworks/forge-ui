@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
@@ -9,7 +9,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AiService, AiHelpMessage, AiHelpResponse } from '../../shared/services/ai.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
-import { InputComponent } from '../../shared/components/input/input.component';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 
 export interface AiAssistantListItem {
@@ -32,7 +31,7 @@ export interface ChatMessage {
 @Component({
   selector: 'app-ai',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, ReactiveFormsModule, MatTooltipModule, LoadingBlockDirective, EmptyStateComponent, InputComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, LoadingBlockDirective, EmptyStateComponent, TranslatePipe],
   templateUrl: './ai.component.html',
   styleUrl: './ai.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

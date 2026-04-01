@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -21,7 +21,7 @@ import { IdentityDocument, IdentityDocumentType, IDENTITY_DOC_LIST_A, IDENTITY_D
 @Component({
   selector: 'app-account-tax-form-detail',
   standalone: true,
-  imports: [DatePipe, UpperCasePipe, RouterLink, MatTooltipModule, TranslatePipe, FileUploadZoneComponent, ComplianceFormRendererComponent, DialogComponent],
+  imports: [DatePipe, UpperCasePipe, MatTooltipModule, TranslatePipe, FileUploadZoneComponent, ComplianceFormRendererComponent, DialogComponent],
   templateUrl: './account-tax-form-detail.component.html',
   styleUrl: './account-tax-form-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

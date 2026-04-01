@@ -5,13 +5,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { PayrollService } from '../../services/payroll.service';
 
 @Component({
   selector: 'app-account-tax-documents',
   standalone: true,
-  imports: [TranslatePipe, MatTooltipModule, DataTableComponent, ColumnCellDirective, LoadingBlockDirective],
+  imports: [TranslatePipe, MatTooltipModule, DataTableComponent, ColumnCellDirective],
   templateUrl: './account-tax-documents.component.html',
   styleUrl: './account-tax-documents.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -6,13 +6,12 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { PayrollService } from '../../services/payroll.service';
 
 @Component({
   selector: 'app-account-pay-stubs',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, TranslatePipe, MatTooltipModule, DataTableComponent, ColumnCellDirective, LoadingBlockDirective],
+  imports: [CurrencyPipe, DatePipe, TranslatePipe, MatTooltipModule, DataTableComponent, ColumnCellDirective],
   templateUrl: './account-pay-stubs.component.html',
   styleUrl: './account-pay-stubs.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

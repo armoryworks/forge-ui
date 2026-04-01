@@ -12,7 +12,6 @@ import { DataTableComponent } from '../../../shared/components/data-table/data-t
 import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { InputComponent } from '../../../shared/components/input/input.component';
-import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
@@ -26,7 +25,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   imports: [
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageLayoutComponent, DataTableComponent, ColumnCellDirective,
-    InputComponent, AvatarComponent, TextareaComponent, DialogComponent,
+    InputComponent, TextareaComponent, DialogComponent,
     LoadingBlockDirective, SpacerDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './expense-approval-queue.component.html',

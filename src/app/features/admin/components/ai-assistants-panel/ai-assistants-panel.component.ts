@@ -12,14 +12,13 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-ai-assistants-panel',
   standalone: true,
   imports: [
-    TranslatePipe, DataTableComponent, ColumnCellDirective, EmptyStateComponent, LoadingBlockDirective, MatTooltipModule,
+    TranslatePipe, DataTableComponent, ColumnCellDirective, LoadingBlockDirective, MatTooltipModule,
   ],
   templateUrl: './ai-assistants-panel.component.html',
   styleUrl: './ai-assistants-panel.component.scss',

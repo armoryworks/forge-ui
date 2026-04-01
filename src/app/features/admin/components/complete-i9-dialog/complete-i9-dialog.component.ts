@@ -23,7 +23,6 @@ export interface CompleteI9DialogData {
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    TranslatePipe,
     DialogComponent,
     InputComponent,
     SelectComponent,

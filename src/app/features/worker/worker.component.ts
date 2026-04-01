@@ -6,7 +6,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { WorkerService } from './services/worker.service';
 import { WorkerTask } from './models/worker-task.model';
 import { AuthService } from '../../shared/services/auth.service';
-import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -14,7 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 @Component({
   selector: 'app-worker',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, AvatarComponent, EmptyStateComponent, LoadingBlockDirective, TranslatePipe],
+  imports: [DatePipe, MatTooltipModule, EmptyStateComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './worker.component.html',
   styleUrl: './worker.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

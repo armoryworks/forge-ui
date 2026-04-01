@@ -3,4 +3,4 @@
   tabindex="0"
   [innerHTML]="renderedHtml()"
   (click)="onContentClick($event)"
-  (keydown.enter)="onContentClick($event)"></div>
+  (keydown.enter)="onContentClick($any($event))"></div>
