@@ -203,7 +203,11 @@
           <span class="about-dialog__label">Your build</span>
           <span class="about-dialog__value mono">
             @if (versionService.local(); as v) {
-              #{{ v.version }} &nbsp;<span class="about-dialog__sha">{{ v.sha }}</span>
+              @if (v.sha === 'dev') {
+                <span class="about-dialog__sha">dev</span>
+              } @else {
+                <span class="about-dialog__sha">{{ v.sha }}</span>
+              }
             } @else {
               dev
             }
@@ -211,7 +215,7 @@
         </div>
         <div class="about-dialog__row">
           <span class="about-dialog__label">Latest on main</span>
-          <span class="about-dialog__value mono">
+          <span class="about-dialog__value about-dialog__value--stack mono">
             @if (versionService.checking()) {
               <span class="about-dialog__checking">
                 <span class="material-icons-outlined spin">sync</span> checking...

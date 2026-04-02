@@ -40,7 +40,7 @@ export class VersionService {
         const sha = commit.sha.slice(0, 7);
         this.latestSha.set(sha);
         const local = this.local();
-        if (local) {
+        if (local && local.sha !== 'dev') {
           this.upToDate.set(local.sha === sha);
         }
       });
