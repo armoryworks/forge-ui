@@ -3,7 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { forkJoin, startWith } from 'rxjs';
 
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -34,6 +34,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    CdkDropList, CdkDrag,
     TranslatePipe, MatTooltipModule,
     PageHeaderComponent, InputComponent, SelectComponent, AvatarComponent,
     CycleBoardComponent, CycleDialogComponent,
@@ -172,6 +173,10 @@ export class PlanningComponent implements OnInit {
   }
 
   // --- Backlog Actions ---
+
+  protected onJobDropped(data: unknown): void {
+    this.commitJob(data as KanbanJob);
+  }
 
   protected commitJob(job: KanbanJob): void {
     const cycle = this.selectedCycle();

@@ -20,9 +20,14 @@
         <app-select [label]="'common.priority' | translate" [formControl]="priorityControl" [options]="priorityOptions" />
       </div>
 
-      <div class="backlog-panel__list">
+      <div class="backlog-panel__list"
+        cdkDropList
+        id="planning-backlog"
+        [cdkDropListData]="filteredBacklog()"
+        [cdkDropListConnectedTo]="['planning-cycle-panel']"
+        [cdkDropListSortingDisabled]="true">
         @for (job of filteredBacklog(); track job.id) {
-          <div class="backlog-job">
+          <div class="backlog-job" cdkDrag [cdkDragData]="job">
             <div class="backlog-job__content">
               <div class="backlog-job__top">
                 <span class="backlog-job__number">{{ job.jobNumber }}</span>
@@ -49,8 +54,13 @@
       </div>
     </div>
 
-    <!-- Right: Cycle Board -->
-    <div class="cycle-panel">
+    <!-- Right: Cycle Board — entire panel is the drop zone for backlog items -->
+    <div class="cycle-panel"
+      cdkDropList
+      id="planning-cycle-panel"
+      [cdkDropListConnectedTo]="['planning-backlog']"
+      [cdkDropListSortingDisabled]="true"
+      (cdkDropListDropped)="onJobDropped($event.item.data)">
       @if (selectedCycle(); as cycle) {
         <div class="cycle-panel__actions">
           <button class="icon-btn" [matTooltip]="'planning.editCycleBtn' | translate" matTooltipPosition="above" (click)="openEditCycleDialog()" [attr.aria-label]="'planning.editCycleBtn' | translate">

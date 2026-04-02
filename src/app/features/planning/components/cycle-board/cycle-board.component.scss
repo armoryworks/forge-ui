@@ -1,11 +1,20 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .cycle-board {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: $sp-md;
-  height: 100%;
 
   &__header {
     @include flex-between;

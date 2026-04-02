@@ -96,8 +96,12 @@
   padding: $sp-sm $sp-md;
   border: $border-width-thin solid var(--border);
   background: var(--surface);
-  cursor: default;
+  cursor: grab;
   transition: border-color $transition-fast;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &:hover {
     border-color: var(--primary);
@@ -169,6 +173,13 @@
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  transition: background $transition-fast;
+
+  &.cdk-drop-list-receiving {
+    background: color-mix(in srgb, var(--primary) 4%, var(--bg));
+    outline: $border-width dashed var(--primary);
+    outline-offset: -2px;
+  }
 
   &__actions {
     display: flex;
