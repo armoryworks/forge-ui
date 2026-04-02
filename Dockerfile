@@ -5,6 +5,11 @@ COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
 
 COPY . .
+
+ARG BUILD_VERSION=0
+ARG BUILD_SHA=dev
+RUN echo "{\"version\":\"$BUILD_VERSION\",\"sha\":\"$BUILD_SHA\"}" > src/assets/version.json
+
 RUN npx ng build --configuration=production
 
 FROM nginx:alpine AS runtime

@@ -200,17 +200,38 @@
 
       <div class="about-dialog__meta">
         <div class="about-dialog__row">
-          <span class="about-dialog__label">Version</span>
+          <span class="about-dialog__label">Your build</span>
           <span class="about-dialog__value mono">
-            {{ versionService.info()?.buildLabel ?? 'dev' }}
+            @if (versionService.local(); as v) {
+              #{{ v.version }} &nbsp;<span class="about-dialog__sha">{{ v.sha }}</span>
+            } @else {
+              dev
+            }
           </span>
         </div>
-        @if (versionService.info()?.gitCommit) {
-          <div class="about-dialog__row">
-            <span class="about-dialog__label">Commit</span>
-            <span class="about-dialog__value mono">{{ versionService.info()!.gitCommit }}</span>
-          </div>
-        }
+        <div class="about-dialog__row">
+          <span class="about-dialog__label">Latest on main</span>
+          <span class="about-dialog__value mono">
+            @if (versionService.checking()) {
+              <span class="about-dialog__checking">
+                <span class="material-icons-outlined spin">sync</span> checking...
+              </span>
+            } @else if (versionService.latestSha(); as sha) {
+              <span class="about-dialog__sha">{{ sha }}</span>
+              @if (versionService.upToDate() === true) {
+                <span class="about-dialog__badge about-dialog__badge--ok">
+                  <span class="material-icons-outlined">check_circle</span> up to date
+                </span>
+              } @else if (versionService.upToDate() === false) {
+                <span class="about-dialog__badge about-dialog__badge--warn">
+                  <span class="material-icons-outlined">update</span> update available
+                </span>
+              }
+            } @else {
+              <span class="about-dialog__sha">unavailable</span>
+            }
+          </span>
+        </div>
         <div class="about-dialog__row">
           <span class="about-dialog__label">License</span>
           <span class="about-dialog__value">GNU General Public License v3.0</span>

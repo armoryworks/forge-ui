@@ -1,27 +1,48 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { environment } from '../../../environments/environment';
+import { catchError, of } from 'rxjs';
 
 export interface AppVersion {
   version: string;
-  gitCommit: string;
-  shortCommit: string;
-  buildLabel: string;
+  sha: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class VersionService {
   private readonly http = inject(HttpClient);
 
-  readonly info = signal<AppVersion | null>(null);
-  readonly loaded = signal(false);
+  readonly local = signal<AppVersion | null>(null);
+  readonly latestSha = signal<string | null>(null);
+  readonly checking = signal(false);
+  readonly upToDate = signal<boolean | null>(null);
 
   load(): void {
-    if (this.loaded()) return;
-    this.http.get<AppVersion>(`${environment.apiUrl}/version`).subscribe({
-      next: (data) => { this.info.set(data); this.loaded.set(true); },
-      error: () => this.loaded.set(true), // silent fail — version is non-critical
-    });
+    this.http
+      .get<AppVersion>('/assets/version.json')
+      .pipe(catchError(() => of(null)))
+      .subscribe(v => {
+        this.local.set(v);
+        this.checkLatest();
+      });
+  }
+
+  checkLatest(): void {
+    this.checking.set(true);
+    this.http
+      .get<{ sha: string }>('https://api.github.com/repos/danielhokanson/qb-engineer-wrapper/commits/main', {
+        headers: { Accept: 'application/vnd.github+json' },
+      })
+      .pipe(catchError(() => of(null)))
+      .subscribe(commit => {
+        this.checking.set(false);
+        if (!commit) return;
+        const sha = commit.sha.slice(0, 7);
+        this.latestSha.set(sha);
+        const local = this.local();
+        if (local) {
+          this.upToDate.set(local.sha === sha);
+        }
+      });
   }
 }
