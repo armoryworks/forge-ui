@@ -87,7 +87,7 @@ export class SidebarComponent {
 
   private readonly allBottomItems: NavGroup = {
     items: [
-      { icon: 'storefront', label: 'Shop Floor', i18nKey: 'nav.shopFloor', route: '/worker', allowedRoles: ['Admin', 'Manager'] },
+      { icon: 'storefront', label: 'Shop Floor', i18nKey: 'nav.shopFloor', route: '/display/shop-floor', allowedRoles: ['Admin', 'Manager'] },
       {
         icon: 'settings', label: 'Admin', i18nKey: 'nav.admin', route: '/admin', allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
         children: [
