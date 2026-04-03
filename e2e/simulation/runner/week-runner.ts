@@ -1,8 +1,7 @@
-import { chromium } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { setSimulatedClock, resetClock } from '../helpers/clock.helper';
-import { createSimContext, closeSimContext, type SimRole } from '../helpers/sim-context.helper';
+import { type SimRole } from '../helpers/sim-context.helper';
 import { getAuthToken } from '../../helpers/auth.helper';
 import type { WeekContext, WeekResult, SimulationReport } from '../types/simulation.types';
 
@@ -59,7 +58,7 @@ async function runWeekScenario(ctx: WeekContext): Promise<WeekResult> {
 }
 
 // ── Main runner ──────────────────────────────────────────────────────────────
-async function runSimulation(): Promise<void> {
+export async function runSimulation(): Promise<SimulationReport> {
   console.log(`\n${'═'.repeat(60)}`);
   console.log(`QB Engineer UI Simulation`);
   console.log(`Range: ${SIM_START.toISOString().slice(0, 10)} → ${SIM_END.toISOString().slice(0, 10)}`);
@@ -149,6 +148,6 @@ async function runSimulation(): Promise<void> {
   console.log(`Total actions: ${report.totalActions} (${report.totalErrors} errors)`);
   console.log(`Report: ${reportPath}`);
   console.log(`${'═'.repeat(60)}\n`);
-}
 
-runSimulation().catch(console.error);
+  return report;
+}
