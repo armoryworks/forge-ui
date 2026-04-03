@@ -1,9 +1,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { chromium, type Browser, type Page } from '@playwright/test';
 import { setSimulatedClock, resetClock } from '../helpers/clock.helper';
-import { type SimRole } from '../helpers/sim-context.helper';
-import { getAuthToken } from '../../helpers/auth.helper';
+import { type SimRole, createSimContext } from '../helpers/sim-context.helper';
+import { getAuthSession } from '../../helpers/auth.helper';
 import type { WeekContext, WeekResult, SimulationReport } from '../types/simulation.types';
+import { runWeek } from '../scenarios/week-scenario';
 
 // ── Configuration ───────────────────────────────────────────────────────────
 const SIM_START = new Date('2024-01-01T00:00:00Z');
@@ -50,13 +52,6 @@ function getWeeks(start: Date, end: Date): Array<{ start: Date; end: Date; index
   return weeks;
 }
 
-// ── Dynamic scenario import ──────────────────────────────────────────────────
-async function runWeekScenario(ctx: WeekContext): Promise<WeekResult> {
-  // Dynamically import the week scenario module (avoids circular deps)
-  const { runWeek } = await import('../scenarios/week-scenario');
-  return runWeek(ctx);
-}
-
 // ── Main runner ──────────────────────────────────────────────────────────────
 export async function runSimulation(): Promise<SimulationReport> {
   console.log(`\n${'═'.repeat(60)}`);
@@ -76,19 +71,56 @@ export async function runSimulation(): Promise<SimulationReport> {
     weeks: [],
   };
 
-  // Pre-authenticate all roles once (tokens are long-lived in dev)
+  // ── Pre-authenticate all roles — one API call each, reuse for both token + browser ─
   console.log('Authenticating simulation users...');
   const tokens: Record<string, string> = {};
+  const sessions: Record<SimRole, { token: string; user: any } | null> = {} as any;
+
   for (const role of ROLES) {
     try {
-      tokens[ROLE_EMAILS[role]] = await getAuthToken(ROLE_EMAILS[role], ROLE_PASSWORDS[role]);
+      const session = await getAuthSession(ROLE_EMAILS[role], ROLE_PASSWORDS[role]);
+      tokens[ROLE_EMAILS[role]] = session.token;
+      sessions[role] = session;
       console.log(`  ✓ ${role} (${ROLE_EMAILS[role]})`);
     } catch (err) {
       console.error(`  ✗ ${role}: ${err}`);
+      sessions[role] = null;
     }
   }
   console.log('');
 
+  // ── Launch browser and create one authenticated page per role ─────────────
+  console.log('Launching browser and seeding role pages...');
+  const browser: Browser = await chromium.launch({
+    headless: true,
+    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
+  });
+  const pages: Record<string, Page> = {};
+
+  async function ensurePage(role: SimRole): Promise<void> {
+    const email = ROLE_EMAILS[role];
+    const existing = pages[email];
+    if (existing && !existing.isClosed()) return;
+    try {
+      const simCtx = await createSimContext(browser, role, sessions[role] ?? undefined);
+      pages[email] = simCtx.page;
+    } catch (err) {
+      console.error(`  ✗ recreate page for ${role}: ${err}`);
+    }
+  }
+
+  for (const role of ROLES) {
+    try {
+      const simCtx = await createSimContext(browser, role, sessions[role] ?? undefined);
+      pages[ROLE_EMAILS[role]] = simCtx.page;
+      console.log(`  ✓ browser page: ${role}`);
+    } catch (err) {
+      console.error(`  ✗ browser page for ${role}: ${err}`);
+    }
+  }
+  console.log('');
+
+  // ── Week loop ─────────────────────────────────────────────────────────────
   for (const week of weeks) {
     const weekStart = Date.now();
     console.log(`\n─── ${week.label} (${week.start.toISOString().slice(0, 10)}) ───`);
@@ -101,17 +133,23 @@ export async function runSimulation(): Promise<SimulationReport> {
       continue;
     }
 
+    // Recover any crashed pages before starting the week
+    for (const role of ROLES) {
+      await ensurePage(role);
+    }
+
     const ctx: WeekContext = {
       weekStart: week.start,
       weekEnd: week.end,
       weekIndex: week.index,
       weekLabel: week.label,
       tokens,
+      pages,
     };
 
     let result: WeekResult;
     try {
-      result = await runWeekScenario(ctx);
+      result = await runWeek(ctx);
     } catch (err) {
       result = {
         weekLabel: week.label,
@@ -131,8 +169,9 @@ export async function runSimulation(): Promise<SimulationReport> {
     console.log(`  Actions: ${result.actionsSucceeded}/${result.actionsAttempted} succeeded, ${result.errors.length} errors (${result.durationMs}ms)`);
   }
 
-  // Reset clock to real time
+  // ── Teardown ──────────────────────────────────────────────────────────────
   try { await resetClock(); } catch { /* ignore */ }
+  await browser.close();
 
   report.completedAt = new Date().toISOString();
 

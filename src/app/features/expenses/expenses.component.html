@@ -1,5 +1,5 @@
 <app-page-header [title]="'expenses.title' | translate" [subtitle]="'expenses.subtitle' | translate" helpTourId="expenses">
-  <button class="action-btn action-btn--primary" (click)="openCreateExpense()">
+  <button data-testid="new-expense-btn" class="action-btn action-btn--primary" (click)="openCreateExpense()">
     <span class="material-icons-outlined">add</span>
     {{ 'expenses.createExpense' | translate }}
   </button>
@@ -9,7 +9,7 @@
   <div class="filters-bar">
     <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'expenses.searchPlaceholder' | translate"
       (keyup.enter)="applyFilters()" />
-    <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
+    <app-select data-testid="status-filter" [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     <span class="total-amount">{{ 'expenses.totalLabel' | translate }} {{ getTotalAmount() | currency }}</span>
   </div>
 
@@ -52,18 +52,18 @@
   <app-dialog [title]="'expenses.newExpenseTitle' | translate" (closed)="closeDialog()">
     <div [formGroup]="expenseForm">
       <div class="dialog-row">
-        <app-input [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />
-        <app-datepicker [label]="'expenses.date' | translate" formControlName="expenseDate" />
+        <app-input data-testid="expense-amount" [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />
+        <app-datepicker data-testid="expense-date" [label]="'expenses.date' | translate" formControlName="expenseDate" />
       </div>
 
-      <app-select [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" />
+      <app-select data-testid="expense-category" [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" />
 
-      <app-textarea [label]="'common.description' | translate" formControlName="description" />
+      <app-textarea data-testid="expense-description" [label]="'common.description' | translate" formControlName="description" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button data-testid="expense-save-btn" class="action-btn action-btn--primary"
         [appValidationPopover]="expenseViolations"
         [disabled]="expenseForm.invalid || saving()"
         (click)="saveExpense()">

@@ -1,5 +1,5 @@
 <app-page-header [title]="'purchaseOrders.title' | translate" [subtitle]="'purchaseOrders.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreatePo()">
+  <button data-testid="new-po-btn" class="action-btn action-btn--primary" (click)="openCreatePo()">
     <span class="material-icons-outlined">add</span>
     {{ 'purchaseOrders.newPo' | translate }}
   </button>
@@ -164,37 +164,37 @@
         <!-- Actions -->
         <div class="detail-actions">
           @if (canSubmit(po.status)) {
-            <button class="action-btn action-btn--primary" (click)="submitPo()">
+            <button data-testid="po-submit-btn" class="action-btn action-btn--primary" (click)="submitPo()">
               <span class="material-icons-outlined">send</span>
               {{ 'purchaseOrders.submit' | translate }}
             </button>
           }
           @if (canAcknowledge(po.status)) {
-            <button class="action-btn action-btn--primary" (click)="acknowledgePo()">
+            <button data-testid="po-acknowledge-btn" class="action-btn action-btn--primary" (click)="acknowledgePo()">
               <span class="material-icons-outlined">thumb_up</span>
               {{ 'purchaseOrders.acknowledge' | translate }}
             </button>
           }
           @if (canReceive(po.status)) {
-            <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
+            <button data-testid="po-receive-btn" class="action-btn action-btn--primary" (click)="openReceiveDialog()">
               <span class="material-icons-outlined">inventory</span>
               {{ 'purchaseOrders.receiveItems' | translate }}
             </button>
           }
           @if (canClose(po.status)) {
-            <button class="action-btn" (click)="closePo()">
+            <button data-testid="po-close-btn" class="action-btn" (click)="closePo()">
               <span class="material-icons-outlined">check_circle</span>
               {{ 'common.close' | translate }}
             </button>
           }
           @if (canCancel(po.status)) {
-            <button class="action-btn" (click)="cancelPo()">
+            <button data-testid="po-cancel-btn" class="action-btn" (click)="cancelPo()">
               <span class="material-icons-outlined">block</span>
               {{ 'common.cancel' | translate }}
             </button>
           }
           @if (canDelete(po.status)) {
-            <button class="action-btn action-btn--danger" (click)="deletePo()">
+            <button data-testid="po-delete-btn" class="action-btn action-btn--danger" (click)="deletePo()">
               <span class="material-icons-outlined">delete</span>
               {{ 'common.delete' | translate }}
             </button>

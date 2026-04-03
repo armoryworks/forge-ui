@@ -36,7 +36,7 @@
       {{ myWorkOnly() ? ('kanban.allJobs' | translate) : ('kanban.myWork' | translate) }}
     </button>
 
-    <button class="new-job-btn" (click)="openCreateDialog()">
+    <button data-testid="new-job-btn" class="new-job-btn" (click)="openCreateDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'jobs.createJob' | translate }}
     </button>

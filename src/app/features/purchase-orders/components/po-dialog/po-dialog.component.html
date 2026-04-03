@@ -48,15 +48,15 @@
 
         <!-- Add Line Form -->
         <div class="add-line add-line--4col" [formGroup]="lineForm">
-          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
-          <app-input [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
+          <app-autocomplete data-testid="po-line-part" [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
+          <app-input data-testid="po-line-qty" [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
           <div class="price-field">
-            <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+            <app-input data-testid="po-line-price" [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
             @if (priceIsDefault()) {
               <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
             }
           </div>
-          <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
+          <button data-testid="po-add-line-btn" class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
           </button>
@@ -68,8 +68,8 @@
     <div class="dlg-sidebar" [formGroup]="form">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'purchaseOrders.orderDetails' | translate }}</span>
-        <app-select [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
-        <app-input [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
+        <app-select data-testid="po-vendor" [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
+        <app-input data-testid="po-job-id" [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
       </div>
 
       <div class="dlg-sidebar-section">
@@ -90,7 +90,7 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
-    <button class="action-btn action-btn--primary"
+    <button data-testid="po-save-btn" class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || lines().length === 0 || saving()"
       (click)="save()">

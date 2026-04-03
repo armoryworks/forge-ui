@@ -64,12 +64,14 @@
       </div>
       <div class="chat-panel__input">
         <input
+          data-testid="chat-message-input"
           class="chat-panel__input-field"
           type="text"
           [placeholder]="'chat.typeMessage' | translate"
           [formControl]="messageControl"
           (keydown)="onKeydown($event)" />
         <button
+          data-testid="chat-send-btn"
           class="icon-btn chat-panel__send"
           [disabled]="!messageControl.value?.trim()"
           (click)="sendMessage()"

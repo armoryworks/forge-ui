@@ -13,7 +13,7 @@
     </span>
   }
   <div class="card__header">
-    <button class="card__job-number" (click)="jobNumberClicked.emit({ job: job(), event: $event }); $event.stopPropagation()">{{ job().jobNumber }}</button>
+    <button class="card__job-number" [attr.data-testid]="'job-card-number-' + job().jobNumber" (click)="jobNumberClicked.emit({ job: job(), event: $event }); $event.stopPropagation()">{{ job().jobNumber }}</button>
     <span class="card__header-indicators">
       @if (job().activeHolds.length > 0) {
         <span class="job-card__hold-indicator"

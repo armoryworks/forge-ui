@@ -1,3 +1,4 @@
+import type { Page } from '@playwright/test';
 import type { SimError } from '../helpers/sim-context.helper';
 
 export interface WeekContext {
@@ -9,8 +10,10 @@ export interface WeekContext {
   weekIndex: number;
   /** ISO week label for logging e.g. "2024-W01" */
   weekLabel: string;
-  /** Auth tokens keyed by role email */
+  /** JWT tokens keyed by role email — used only for clock API and entity queries */
   tokens: Record<string, string>;
+  /** Authenticated browser pages keyed by role email — used for all UI actions */
+  pages: Record<string, Page>;
 }
 
 export interface WeekResult {

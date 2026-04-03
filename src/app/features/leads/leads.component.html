@@ -19,7 +19,7 @@
     </button>
   </div>
 
-  <button class="action-btn action-btn--primary" (click)="openCreateLead()">
+  <button data-testid="new-lead-btn" class="action-btn action-btn--primary" (click)="openCreateLead()">
     <span class="material-icons-outlined">add</span>
     {{ 'leads.createLead' | translate }}
   </button>
@@ -151,6 +151,7 @@
                   @if (s !== 'Converted') {
                     <button class="status-btn" [class.status-btn--active]="lead.status === s"
                       [class]="'status-btn--' + s.toLowerCase()"
+                      [attr.data-testid]="'lead-status-btn-' + s.toLowerCase()"
                       (click)="updateStatus(s)">
                       {{ s }}
                     </button>
@@ -164,7 +165,7 @@
             <div class="convert-actions">
               <span class="info-label">{{ 'leads.convert' | translate }}</span>
               <div class="convert-btn-group">
-                <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
+                <button data-testid="lead-convert-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
                   <span class="material-icons-outlined">person</span>
                   {{ 'leads.convertToCustomer' | translate }}
                 </button>
@@ -395,26 +396,26 @@
 @if (showDialog()) {
   <app-dialog [title]="editingLead() ? ('leads.editLead' | translate) : ('leads.createLead' | translate)" (closed)="closeDialog()">
     <div [formGroup]="leadForm">
-      <app-input [label]="'leads.companyName' | translate" formControlName="companyName" />
+      <app-input data-testid="lead-company-name" [label]="'leads.companyName' | translate" formControlName="companyName" />
 
-      <app-input [label]="'leads.contactName' | translate" formControlName="contactName" />
+      <app-input data-testid="lead-contact-name" [label]="'leads.contactName' | translate" formControlName="contactName" />
 
       <div class="dialog-row">
-        <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
-        <app-input [label]="'common.phone' | translate" formControlName="phone" />
+        <app-input data-testid="lead-email" [label]="'common.email' | translate" type="email" formControlName="email" />
+        <app-input data-testid="lead-phone" [label]="'common.phone' | translate" formControlName="phone" />
       </div>
 
       <div class="dialog-row">
-        <app-select [label]="'leads.source' | translate" formControlName="source" [options]="sourceOptions" />
-        <app-datepicker [label]="'leads.followUpDate' | translate" formControlName="followUpDate" />
+        <app-select data-testid="lead-source" [label]="'leads.source' | translate" formControlName="source" [options]="sourceOptions" />
+        <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate" formControlName="followUpDate" />
       </div>
 
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
+      <app-textarea data-testid="lead-notes" [label]="'common.notes' | translate" formControlName="notes" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button data-testid="lead-save-btn" class="action-btn action-btn--primary"
         [appValidationPopover]="leadViolations"
         [disabled]="leadForm.invalid || saving()"
         (click)="saveLead()">

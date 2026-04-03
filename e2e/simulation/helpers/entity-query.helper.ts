@@ -18,13 +18,16 @@ export interface CustomerListItem {
 
 export interface QuoteListItem {
   id: number;
+  quoteNumber?: string;
   customerId: number;
+  customerName?: string;
   status: string;
   totalAmount: number;
 }
 
 export interface JobListItem {
   id: number;
+  jobNumber?: string;
   title: string;
   currentStageId: number;
   currentStageName: string;

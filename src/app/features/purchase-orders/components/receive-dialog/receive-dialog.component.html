@@ -3,7 +3,7 @@
     <app-empty-state icon="check_circle" [message]="'purchaseOrders.allReceived' | translate" />
   } @else {
     <div class="receive-actions-top">
-      <button class="action-btn action-btn--sm" (click)="receiveAll()">
+      <button data-testid="receive-all-btn" class="action-btn action-btn--sm" (click)="receiveAll()">
         <span class="material-icons-outlined">done_all</span>
         {{ 'purchaseOrders.receiveAll' | translate }}
       </button>
@@ -41,7 +41,7 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
-    <button class="action-btn action-btn--primary"
+    <button data-testid="receive-save-btn" class="action-btn action-btn--primary"
       [disabled]="!hasAnyQuantity || saving()"
       (click)="save()">
       {{ 'purchaseOrders.receiveItems' | translate }}

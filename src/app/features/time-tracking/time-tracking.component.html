@@ -1,16 +1,16 @@
 <app-page-header [title]="'timeTracking.title' | translate" [subtitle]="'timeTracking.subtitle' | translate" helpTourId="time-tracking">
   @if (activeTimer()) {
-    <button class="action-btn action-btn--warn" (click)="openStopTimer()">
+    <button data-testid="stop-timer-btn" class="action-btn action-btn--warn" (click)="openStopTimer()">
       <span class="material-icons-outlined">stop_circle</span>
       {{ 'timeTracking.stopTimer' | translate }} ({{ getTimerElapsed() }})
     </button>
   } @else {
-    <button class="action-btn action-btn--primary" (click)="openStartTimer()">
+    <button data-testid="start-timer-btn" class="action-btn action-btn--primary" (click)="openStartTimer()">
       <span class="material-icons-outlined">play_circle</span>
       {{ 'timeTracking.startTimer' | translate }}
     </button>
   }
-  <button class="action-btn" (click)="openManualEntry()">
+  <button data-testid="manual-entry-btn" class="action-btn" (click)="openManualEntry()">
     <span class="material-icons-outlined">edit_note</span>
     {{ 'timeTracking.manualEntry' | translate }}
   </button>
@@ -90,21 +90,21 @@
   <app-dialog [title]="'timeTracking.logTimeEntry' | translate" (closed)="closeDialog()">
     <div [formGroup]="entryForm">
       <div class="dialog-row">
-        <app-datepicker [label]="'common.date' | translate" formControlName="date" />
-        <app-select [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
+        <app-datepicker data-testid="time-entry-date" [label]="'common.date' | translate" formControlName="date" />
+        <app-select data-testid="time-entry-category" [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
       </div>
 
       <div class="dialog-row">
-        <app-input [label]="'common.hours' | translate" type="number" formControlName="hours" />
-        <app-input [label]="'common.minutes' | translate" type="number" formControlName="minutes" />
+        <app-input data-testid="time-entry-hours" [label]="'common.hours' | translate" type="number" formControlName="hours" />
+        <app-input data-testid="time-entry-minutes" [label]="'common.minutes' | translate" type="number" formControlName="minutes" />
       </div>
 
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
+      <app-textarea data-testid="time-entry-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="3" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button data-testid="time-entry-save-btn" class="action-btn action-btn--primary"
         [appValidationPopover]="entryViolations"
         [disabled]="entryForm.invalid || saving()"
         (click)="saveEntry()">
@@ -118,13 +118,13 @@
 @if (showTimerDialog()) {
   <app-dialog [title]="'timeTracking.startTimer' | translate" (closed)="closeTimerDialog()">
     <div [formGroup]="timerForm">
-      <app-select [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-select data-testid="timer-category" [label]="'common.category' | translate" formControlName="category" [options]="categoryOptions" />
+      <app-textarea data-testid="timer-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeTimerDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary" (click)="startTimer()">
+      <button data-testid="timer-start-btn" class="action-btn action-btn--primary" (click)="startTimer()">
         <span class="material-icons-outlined">play_circle</span>
         {{ 'timeTracking.start' | translate }}
       </button>
@@ -142,11 +142,11 @@
       }
     </p>
 
-    <app-textarea [label]="'timeTracking.notesOptional' | translate" [formControl]="stopNotesControl" [rows]="2" />
+    <app-textarea data-testid="timer-stop-notes" [label]="'timeTracking.notesOptional' | translate" [formControl]="stopNotesControl" [rows]="2" />
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeStopDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--warn" (click)="stopTimer()">
+      <button data-testid="timer-stop-btn" class="action-btn action-btn--warn" (click)="stopTimer()">
         <span class="material-icons-outlined">stop_circle</span>
         {{ 'timeTracking.stopTimer' | translate }}
       </button>

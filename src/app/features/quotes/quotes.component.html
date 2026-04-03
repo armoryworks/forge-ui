@@ -1,5 +1,5 @@
 <app-page-header [title]="'quotes.title' | translate" [subtitle]="'quotes.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+  <button data-testid="new-quote-btn" class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     {{ 'quotes.newQuote' | translate }}
   </button>
@@ -160,31 +160,31 @@
         <!-- Actions -->
         <div class="detail-actions">
           @if (canSend(quote.status)) {
-            <button class="action-btn action-btn--primary" (click)="sendQuote()">
+            <button data-testid="quote-send-btn" class="action-btn action-btn--primary" (click)="sendQuote()">
               <span class="material-icons-outlined">send</span>
               {{ 'quotes.send' | translate }}
             </button>
           }
           @if (canAccept(quote.status)) {
-            <button class="action-btn action-btn--primary" (click)="acceptQuote()">
+            <button data-testid="quote-accept-btn" class="action-btn action-btn--primary" (click)="acceptQuote()">
               <span class="material-icons-outlined">thumb_up</span>
               {{ 'quotes.accept' | translate }}
             </button>
           }
           @if (canReject(quote.status)) {
-            <button class="action-btn" (click)="rejectQuote()">
+            <button data-testid="quote-reject-btn" class="action-btn" (click)="rejectQuote()">
               <span class="material-icons-outlined">thumb_down</span>
               {{ 'quotes.reject' | translate }}
             </button>
           }
           @if (canConvert(quote.status)) {
-            <button class="action-btn action-btn--primary" (click)="convertToOrder()">
+            <button data-testid="quote-convert-btn" class="action-btn action-btn--primary" (click)="convertToOrder()">
               <span class="material-icons-outlined">shopping_cart</span>
               {{ 'quotes.convertToOrder' | translate }}
             </button>
           }
           @if (canDelete(quote.status)) {
-            <button class="action-btn action-btn--danger" (click)="deleteQuote()">
+            <button data-testid="quote-delete-btn" class="action-btn action-btn--danger" (click)="deleteQuote()">
               <span class="material-icons-outlined">delete</span>
               {{ 'common.delete' | translate }}
             </button>

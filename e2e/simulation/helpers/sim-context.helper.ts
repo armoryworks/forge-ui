@@ -1,5 +1,5 @@
 import { type Browser, type BrowserContext, type Page, chromium } from '@playwright/test';
-import { loginViaApi } from '../../helpers/auth.helper';
+import { loginViaApi, seedAuth } from '../../helpers/auth.helper';
 
 export type SimRole = 'admin' | 'engineer' | 'pm' | 'manager' | 'office' | 'worker';
 
@@ -22,12 +22,21 @@ export interface SimContext {
 /**
  * Creates an authenticated browser context for the given role.
  * Each role gets its own isolated context (separate cookies/localStorage).
+ * If a pre-fetched session is provided it is used directly (no additional API login).
  */
-export async function createSimContext(browser: Browser, role: SimRole): Promise<SimContext> {
+export async function createSimContext(
+  browser: Browser,
+  role: SimRole,
+  session?: { token: string; user: { id: number; email: string; firstName: string; lastName: string; initials: string | null; avatarColor: string | null; roles: string[] } },
+): Promise<SimContext> {
   const creds = ROLE_CREDENTIALS[role];
   const context = await browser.newContext();
   const page = await context.newPage();
-  await loginViaApi(page, creds.email, creds.password);
+  if (session) {
+    await seedAuth(page, session);
+  } else {
+    await loginViaApi(page, creds.email, creds.password);
+  }
   return { role, context, page, email: creds.email };
 }
 

@@ -2,7 +2,7 @@ import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 120_000,        // 2 min per week scenario
+  timeout: 360 * 60_000,   // 6 hours — full date range runs as one test
   retries: 0,              // Never retry — failures are logged, not re-thrown
   workers: 1,              // Sequential — clock must be controlled single-threaded
   reporter: [
@@ -14,11 +14,11 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4200',
     headless: true,
-    screenshot: 'on',
-    trace: 'on',
+    screenshot: 'off',
+    trace: 'off',
     video: 'off',
-    actionTimeout: 15_000,
-    navigationTimeout: 30_000,
+    actionTimeout: 8_000,
+    navigationTimeout: 20_000,
   },
 
   projects: [

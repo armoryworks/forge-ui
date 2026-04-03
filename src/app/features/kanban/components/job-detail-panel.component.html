@@ -267,7 +267,7 @@
           <div class="jd-activity-filter" role="group" aria-label="Activity filter">
             <button class="jd-filter-btn" [class.jd-filter-btn--active]="activityFilter() === 'all'"
               (click)="setActivityFilter('all')">All</button>
-            <button class="jd-filter-btn" [class.jd-filter-btn--active]="activityFilter() === 'comments'"
+            <button data-testid="job-filter-comments" class="jd-filter-btn" [class.jd-filter-btn--active]="activityFilter() === 'comments'"
               (click)="setActivityFilter('comments')">Conversation</button>
             <button class="jd-filter-btn" [class.jd-filter-btn--active]="activityFilter() === 'notes'"
               (click)="setActivityFilter('notes')">
@@ -322,10 +322,11 @@
         } @else if (activityFilter() === 'comments') {
           <div class="jd-comment-add">
             <app-rich-text-editor
+              data-testid="job-comment-input"
               [placeholder]="'kanban.addCommentPlaceholder' | translate"
               [users]="mentionUsersForEditor()"
               [formControl]="commentControl" />
-            <button class="jd-comment-send" (click)="postComment()"
+            <button data-testid="job-comment-send" class="jd-comment-send" (click)="postComment()"
               [disabled]="!commentControl.value?.trim()"
               [attr.aria-label]="'kanban.postComment' | translate"
               [matTooltip]="'kanban.postComment' | translate" matTooltipPosition="above">

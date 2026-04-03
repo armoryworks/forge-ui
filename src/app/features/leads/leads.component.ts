@@ -287,7 +287,8 @@ export class LeadsComponent {
 
   protected isFollowUpOverdue(lead: LeadItem): boolean {
     if (!lead.followUpDate) return false;
-    return lead.followUpDate.getTime() < new Date().getTime();
+    const d = lead.followUpDate instanceof Date ? lead.followUpDate : new Date(lead.followUpDate as unknown as string);
+    return d.getTime() < new Date().getTime();
   }
 
   protected convertLead(): void {
