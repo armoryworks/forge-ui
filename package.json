@@ -9,6 +9,8 @@
     "test": "ng test",
     "e2e": "playwright test --config=e2e/playwright.config.ts",
     "e2e:headed": "playwright test --config=e2e/playwright.config.ts --headed",
+    "simulate": "playwright test --config=e2e/simulation/playwright.simulation.config.ts",
+    "simulate:headed": "playwright test --config=e2e/simulation/playwright.simulation.config.ts --headed",
     "e2e:gen-docs": "playwright test --config=e2e/playwright.config.ts --grep generate-ui-docs --timeout 300000",
     "e2e:gen-docs:headed": "playwright test --config=e2e/playwright.config.ts --grep generate-ui-docs --timeout 300000 --headed",
     "e2e:gen-landmarks": "playwright test --config=e2e/playwright.config.ts --grep generate-ui-landmarks --timeout 300000",
