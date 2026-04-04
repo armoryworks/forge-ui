@@ -494,6 +494,104 @@ export const VENDOR_NAMES = [
   'FedEx Freight', 'UPS Supply Chain', 'Forward Air', 'Echo Global Logistics',
 ];
 
+export const ASSET_NAMES: Array<{ name: string; type: string; manufacturer: string; model: string }> = [
+  // CNC machines
+  { name: 'Haas VF-2 #1', type: 'Machine', manufacturer: 'Haas', model: 'VF-2' },
+  { name: 'Haas VF-2 #2', type: 'Machine', manufacturer: 'Haas', model: 'VF-2' },
+  { name: 'Haas VF-4SS', type: 'Machine', manufacturer: 'Haas', model: 'VF-4SS' },
+  { name: 'DMG Mori NLX 2500', type: 'Machine', manufacturer: 'DMG Mori', model: 'NLX 2500/700' },
+  { name: 'Mazak Quick Turn 250', type: 'Machine', manufacturer: 'Mazak', model: 'QT-250MSY' },
+  { name: 'Mazak Nexus 510C-II', type: 'Machine', manufacturer: 'Mazak', model: 'Nexus 510C-II' },
+  { name: 'Fadal 4020', type: 'Machine', manufacturer: 'Fadal', model: 'VMC 4020' },
+  { name: 'Okuma LB 3000 EX', type: 'Machine', manufacturer: 'Okuma', model: 'LB 3000 EX' },
+  { name: 'Matsuura MAM72-35V', type: 'Machine', manufacturer: 'Matsuura', model: 'MAM72-35V' },
+  { name: 'Doosan DNM 650', type: 'Machine', manufacturer: 'Doosan', model: 'DNM 650' },
+  // Support equipment
+  { name: 'DoAll Bandsaw C-916', type: 'Machine', manufacturer: 'DoAll', model: 'C-916A' },
+  { name: 'Haas RT-210 Rotary', type: 'Tooling', manufacturer: 'Haas', model: 'RT-210' },
+  { name: 'Zoller Smile 400', type: 'Tooling', manufacturer: 'Zoller', model: 'Smile 400' },
+  { name: 'Renishaw OMP40', type: 'Tooling', manufacturer: 'Renishaw', model: 'OMP40-2' },
+  // Facility
+  { name: 'Air Compressor — Kaeser', type: 'Facility', manufacturer: 'Kaeser', model: 'ASD 40 T' },
+  { name: 'Coolant Chiller #1', type: 'Facility', manufacturer: 'Daikin', model: 'AKZ568' },
+  { name: 'Overhead Crane 5-ton', type: 'Facility', manufacturer: 'Demag', model: 'DKUN 5-500' },
+  // Vehicles
+  { name: 'Forklift — Yale', type: 'Vehicle', manufacturer: 'Yale', model: 'GLP060VX' },
+  { name: 'Delivery Van', type: 'Vehicle', manufacturer: 'Ford', model: 'Transit 250' },
+];
+
+export const MAINTENANCE_TITLES = [
+  'Spindle lubrication — 500 hr interval',
+  'Way lube check & fill',
+  'Coolant system flush and concentration test',
+  'Air filter replacement — compressor',
+  'Hydraulic pressure check & fluid top-off',
+  'Chip conveyor clean-out',
+  'ATC tool changer alignment check',
+  'Spindle taper wipe & gauge check',
+  'Ball screw backlash measurement',
+  'Servo motor greasing — all axes',
+  'Chiller coil inspection & cleaning',
+  'Coolant pump seal inspection',
+  'Safety interlock test — all doors',
+  'Fire suppression system annual check',
+  'Crane load test — annual',
+  'Forklift tire & brake inspection',
+  'Electrical panel thermal scan',
+  'Emergency stop circuit test',
+  'Laser alignment verification',
+  'Probing system calibration check',
+];
+
+export const DOWNTIME_REASONS = [
+  'Spindle bearing noise — vibration above threshold',
+  'Coolant pump failure — no flow detected',
+  'ATC arm crash — tool change malfunction',
+  'Servo alarm — X-axis position error',
+  'Hydraulic leak — chuck clamp circuit',
+  'Chip conveyor jam — emergency stop tripped',
+  'Power fluctuation — all axes faulted',
+  'Coolant chiller overtemp shutdown',
+  'Air pressure drop below minimum',
+  'Tool breakage — auto-detection triggered',
+  'Control board error — reboot required',
+  'Way cover damage — exposed slide',
+  'Encoder fault — Z-axis',
+  'Pallet shuttle misalignment',
+  'Probe signal loss mid-cycle',
+];
+
+export const DOWNTIME_RESOLUTIONS = [
+  'Bearing replaced. Spindle run-in complete, vibration normal.',
+  'Seal kit installed. Pump tested at pressure — OK.',
+  'ATC arm realigned, new cam follower installed. Tool change verified.',
+  'Servo drive replaced. Axis homed and position confirmed.',
+  'Hose fitting torqued and leak-tested. System bled.',
+  'Conveyor cleared. Chain tension adjusted.',
+  'UPS battery replaced. Power quality stable.',
+  'Condenser coil cleaned. Refrigerant charge verified.',
+  'Air dryer serviced. Line pressure restored.',
+  'Tool holder inspected. Replacement tool loaded.',
+  'Control firmware updated. Watchdog timer cleared.',
+  'Way cover section replaced. Slides cleaned and relubed.',
+  'Encoder head realigned and scale cleaned. Verified with laser.',
+  'Shuttle rails cleaned and pallet relocated. Homing verified.',
+  'Probe battery replaced and signal verified at full range.',
+];
+
+export const SCRAP_REASONS = [
+  'Bore OD out of tolerance — tool wear beyond compensation',
+  'Surface finish Ra 125 — spec requires Ra 32 max',
+  'Thread pitch diameter out of spec — tap worn',
+  'Dimensional creep during long run — thermal expansion',
+  'Fixture slip — parts shifted mid-operation',
+  'Wrong material lot loaded — hardness too high',
+  'Porosity discovered in cast blank after machining',
+  'Anodize lot reject — color mismatch',
+  'Customer spec change mid-run — prior parts non-conforming',
+  'Tool crash — 3 parts damaged in fixture',
+];
+
 /** Pick an item from a pool deterministically by week and offset */
 export function pick<T>(pool: T[], weekIndex: number, offset = 0): T {
   return pool[(weekIndex + offset) % pool.length];

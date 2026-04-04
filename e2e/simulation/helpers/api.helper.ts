@@ -25,7 +25,8 @@ export async function apiCall<T>(
       case 'DELETE': response = await ctx.delete(path); break;
     }
     if (!response.ok()) {
-      console.warn(`  [API ${method} ${path}] ${response.status()}`);
+      const errBody = await response.text().catch(() => '');
+      console.warn(`  [API ${method} ${path}] ${response.status()} ${errBody.slice(0, 200)}`);
       return null;
     }
     const text = await response.text();

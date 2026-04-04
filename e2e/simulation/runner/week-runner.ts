@@ -6,11 +6,26 @@ import { type SimRole, createSimContext } from '../helpers/sim-context.helper';
 import { getAuthSession } from '../../helpers/auth.helper';
 import type { WeekContext, WeekResult, SimulationReport } from '../types/simulation.types';
 import { runWeek } from '../scenarios/week-scenario';
+import { runWeekApi } from '../scenarios/week-scenario-api';
 
 // ── Configuration ───────────────────────────────────────────────────────────
-const SIM_START = new Date('2024-01-01T00:00:00Z');
-const SIM_END   = new Date();  // today
+const SIM_START = new Date(process.env['SIM_START'] ?? '2018-01-01T00:00:00Z');
+const SIM_END   = new Date(process.env['SIM_END'] ?? new Date().toISOString());
 const RESUME    = (process.env['SIM_RESUME'] ?? 'true').toLowerCase() !== 'false';
+
+/**
+ * SIM_MODE controls how weeks are selected:
+ *   full   — run every week from SIM_START to SIM_END
+ *   resume — skip weeks that already have data, run from last data point forward
+ *   gaps   — query DB for coverage, only run weeks with no data (gaps > 1 week)
+ *   range  — run SIM_START to SIM_END exactly (set both via env vars)
+ *   api    — like 'full' but uses API-direct scenario (fast, no browser needed)
+ */
+const SIM_MODE = (process.env['SIM_MODE'] ?? 'api') as 'full' | 'resume' | 'gaps' | 'range' | 'api';
+
+/** When true, use API-direct scenario instead of UI-driven */
+const USE_API = SIM_MODE === 'api' || (process.env['SIM_API'] ?? 'false').toLowerCase() === 'true';
+
 const ROLES: SimRole[] = ['admin', 'engineer', 'pm', 'manager', 'office', 'worker'];
 const ROLE_PASSWORDS: Record<SimRole, string> = {
   admin: 'Admin123!', engineer: 'Engineer123!', pm: 'Engineer123!',
@@ -25,34 +40,77 @@ const ROLE_EMAILS: Record<SimRole, string> = {
   worker:   'bkelly@qbengineer.local',
 };
 
-// ── Resume detection ────────────────────────────────────────────────────────
+// ── Resume / gap detection ──────────────────────────────────────────────────
 /**
- * Queries the API for the latest created_at across simulation-era entities
- * whose timestamps reflect the simulated clock (leads use the clock's date).
+ * Queries the API for the latest created_at across simulation-era entities.
  * Returns the Monday of the week AFTER the latest data, or null if no data.
  */
 async function detectResumeWeek(token: string): Promise<Date | null> {
   const { apiCall } = await import('../helpers/api.helper');
 
-  // Leads are created with the simulated clock date — best resume signal
-  const leads = await apiCall<Array<{ createdAt: string }>>('GET', 'leads', token);
-  if (!leads || leads.length === 0) return null;
+  const leads = await apiCall<{ data: Array<{ createdAt: string }> }>('GET', 'leads?pageSize=500', token);
+  const allLeads = leads?.data ?? [];
+  if (allLeads.length === 0) return null;
 
-  // Find the latest created_at that's in the simulation era
   let latest: Date | null = null;
-  for (const lead of leads) {
+  for (const lead of allLeads) {
     const d = new Date(lead.createdAt);
     if (d >= SIM_START && (!latest || d > latest)) latest = d;
   }
   if (!latest) return null;
 
-  // Return Monday of the following week
   const resume = new Date(latest);
   const day = resume.getUTCDay();
-  // Advance to next Monday
   resume.setUTCDate(resume.getUTCDate() + ((8 - day) % 7 || 7));
   resume.setUTCHours(0, 0, 0, 0);
   return resume;
+}
+
+/**
+ * Detects weeks with no entity data (gaps > 1 week).
+ * Queries leads + expenses (the two most reliably created entities)
+ * and returns a Set of week labels that have zero records.
+ */
+async function detectGapWeeks(
+  token: string,
+  allWeeks: Array<{ start: Date; end: Date; label: string }>,
+): Promise<Set<string>> {
+  const { apiCall } = await import('../helpers/api.helper');
+
+  // Fetch all leads and expenses to build a coverage map
+  const [leadsResp, expensesResp] = await Promise.all([
+    apiCall<{ data: Array<{ createdAt: string }> }>('GET', 'leads?pageSize=2000', token),
+    apiCall<{ data: Array<{ createdAt: string }> }>('GET', 'expenses?pageSize=5000', token),
+  ]);
+
+  const coveredWeeks = new Set<string>();
+
+  const checkEntity = (items: Array<{ createdAt: string }>) => {
+    for (const item of items) {
+      const d = new Date(item.createdAt);
+      if (d < SIM_START) continue;
+      // Find which week this falls in
+      for (const week of allWeeks) {
+        if (d >= week.start && d <= week.end) {
+          coveredWeeks.add(week.label);
+          break;
+        }
+      }
+    }
+  };
+
+  checkEntity(leadsResp?.data ?? []);
+  checkEntity(expensesResp?.data ?? []);
+
+  // Gap weeks = all weeks NOT in coveredWeeks
+  const gapWeeks = new Set<string>();
+  for (const week of allWeeks) {
+    if (!coveredWeeks.has(week.label)) {
+      gapWeeks.add(week.label);
+    }
+  }
+
+  return gapWeeks;
 }
 
 // ── Week helpers ─────────────────────────────────────────────────────────────
@@ -86,7 +144,7 @@ function getWeeks(start: Date, end: Date): Array<{ start: Date; end: Date; index
 // ── Main runner ──────────────────────────────────────────────────────────────
 export async function runSimulation(): Promise<SimulationReport> {
   console.log(`\n${'═'.repeat(60)}`);
-  console.log(`QB Engineer UI Simulation`);
+  console.log(`QB Engineer Simulation (mode: ${SIM_MODE}, api: ${USE_API})`);
   console.log(`Range: ${SIM_START.toISOString().slice(0, 10)} → ${SIM_END.toISOString().slice(0, 10)}`);
   console.log(`${'═'.repeat(60)}\n`);
 
@@ -120,10 +178,11 @@ export async function runSimulation(): Promise<SimulationReport> {
   }
   console.log('');
 
-  // ── Resume detection ─────────────────────────────────────────────────────
+  // ── Week filtering by mode ──────────────────────────────────────────────
   let weeks = allWeeks;
-  if (RESUME) {
-    const adminToken = tokens['admin@qbengineer.local'];
+  const adminToken = tokens['admin@qbengineer.local'];
+
+  if (SIM_MODE === 'resume' || (SIM_MODE !== 'gaps' && SIM_MODE !== 'range' && RESUME)) {
     if (adminToken) {
       const resumeFrom = await detectResumeWeek(adminToken);
       if (resumeFrom) {
@@ -135,17 +194,23 @@ export async function runSimulation(): Promise<SimulationReport> {
         console.log('Resume: no prior simulation data found, starting from beginning\n');
       }
     }
+  } else if (SIM_MODE === 'gaps') {
+    if (adminToken) {
+      console.log('Detecting coverage gaps...');
+      const gapLabels = await detectGapWeeks(adminToken, allWeeks);
+      weeks = allWeeks.filter(w => gapLabels.has(w.label));
+      console.log(`Found ${gapLabels.size} gap weeks out of ${allWeeks.length} total`);
+      console.log(`  Running ${weeks.length} weeks to fill gaps\n`);
+    }
   }
+  // 'range' and 'api' modes just run allWeeks as-is (controlled by SIM_START/SIM_END env)
 
-  // ── Launch browser and create one authenticated page per role ─────────────
-  console.log('Launching browser and seeding role pages...');
-  const browser: Browser = await chromium.launch({
-    headless: true,
-    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
-  });
+  // ── Launch browser (skip for API-only mode) ─────────────────────────────
+  let browser: Browser | null = null;
   const pages: Record<string, Page> = {};
 
   async function ensurePage(role: SimRole): Promise<void> {
+    if (!browser) return;
     const email = ROLE_EMAILS[role];
     const existing = pages[email];
     if (existing && !existing.isClosed()) return;
@@ -157,16 +222,26 @@ export async function runSimulation(): Promise<SimulationReport> {
     }
   }
 
-  for (const role of ROLES) {
-    try {
-      const simCtx = await createSimContext(browser, role, sessions[role] ?? undefined);
-      pages[ROLE_EMAILS[role]] = simCtx.page;
-      console.log(`  ✓ browser page: ${role}`);
-    } catch (err) {
-      console.error(`  ✗ browser page for ${role}: ${err}`);
+  if (!USE_API) {
+    console.log('Launching browser and seeding role pages...');
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
+    });
+
+    for (const role of ROLES) {
+      try {
+        const simCtx = await createSimContext(browser, role, sessions[role] ?? undefined);
+        pages[ROLE_EMAILS[role]] = simCtx.page;
+        console.log(`  ✓ browser page: ${role}`);
+      } catch (err) {
+        console.error(`  ✗ browser page for ${role}: ${err}`);
+      }
     }
+    console.log('');
+  } else {
+    console.log('API-direct mode — skipping browser launch\n');
   }
-  console.log('');
 
   // ── Week loop ─────────────────────────────────────────────────────────────
   for (const week of weeks) {
@@ -181,9 +256,11 @@ export async function runSimulation(): Promise<SimulationReport> {
       continue;
     }
 
-    // Recover any crashed pages before starting the week
-    for (const role of ROLES) {
-      await ensurePage(role);
+    // Recover any crashed pages before starting the week (UI mode only)
+    if (!USE_API) {
+      for (const role of ROLES) {
+        await ensurePage(role);
+      }
     }
 
     const ctx: WeekContext = {
@@ -197,7 +274,7 @@ export async function runSimulation(): Promise<SimulationReport> {
 
     let result: WeekResult;
     try {
-      result = await runWeek(ctx);
+      result = USE_API ? await runWeekApi(ctx) : await runWeek(ctx);
     } catch (err) {
       result = {
         weekLabel: week.label,
@@ -219,7 +296,7 @@ export async function runSimulation(): Promise<SimulationReport> {
 
   // ── Teardown ──────────────────────────────────────────────────────────────
   try { await resetClock(); } catch { /* ignore */ }
-  await browser.close();
+  if (browser) await browser.close();
 
   report.completedAt = new Date().toISOString();
 
