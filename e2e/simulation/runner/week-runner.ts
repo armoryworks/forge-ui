@@ -10,6 +10,7 @@ import { runWeek } from '../scenarios/week-scenario';
 // ── Configuration ───────────────────────────────────────────────────────────
 const SIM_START = new Date('2024-01-01T00:00:00Z');
 const SIM_END   = new Date();  // today
+const RESUME    = (process.env['SIM_RESUME'] ?? 'true').toLowerCase() !== 'false';
 const ROLES: SimRole[] = ['admin', 'engineer', 'pm', 'manager', 'office', 'worker'];
 const ROLE_PASSWORDS: Record<SimRole, string> = {
   admin: 'Admin123!', engineer: 'Engineer123!', pm: 'Engineer123!',
@@ -23,6 +24,36 @@ const ROLE_EMAILS: Record<SimRole, string> = {
   office:   'cthompson@qbengineer.local',
   worker:   'bkelly@qbengineer.local',
 };
+
+// ── Resume detection ────────────────────────────────────────────────────────
+/**
+ * Queries the API for the latest created_at across simulation-era entities
+ * whose timestamps reflect the simulated clock (leads use the clock's date).
+ * Returns the Monday of the week AFTER the latest data, or null if no data.
+ */
+async function detectResumeWeek(token: string): Promise<Date | null> {
+  const { apiCall } = await import('../helpers/api.helper');
+
+  // Leads are created with the simulated clock date — best resume signal
+  const leads = await apiCall<Array<{ createdAt: string }>>('GET', 'leads', token);
+  if (!leads || leads.length === 0) return null;
+
+  // Find the latest created_at that's in the simulation era
+  let latest: Date | null = null;
+  for (const lead of leads) {
+    const d = new Date(lead.createdAt);
+    if (d >= SIM_START && (!latest || d > latest)) latest = d;
+  }
+  if (!latest) return null;
+
+  // Return Monday of the following week
+  const resume = new Date(latest);
+  const day = resume.getUTCDay();
+  // Advance to next Monday
+  resume.setUTCDate(resume.getUTCDate() + ((8 - day) % 7 || 7));
+  resume.setUTCHours(0, 0, 0, 0);
+  return resume;
+}
 
 // ── Week helpers ─────────────────────────────────────────────────────────────
 function getWeeks(start: Date, end: Date): Array<{ start: Date; end: Date; index: number; label: string }> {
@@ -59,13 +90,13 @@ export async function runSimulation(): Promise<SimulationReport> {
   console.log(`Range: ${SIM_START.toISOString().slice(0, 10)} → ${SIM_END.toISOString().slice(0, 10)}`);
   console.log(`${'═'.repeat(60)}\n`);
 
-  const weeks = getWeeks(SIM_START, SIM_END);
-  console.log(`Total weeks to simulate: ${weeks.length}\n`);
+  const allWeeks = getWeeks(SIM_START, SIM_END);
+  console.log(`Total weeks in range: ${allWeeks.length}\n`);
 
   const report: SimulationReport = {
     startedAt: new Date().toISOString(),
     completedAt: '',
-    totalWeeks: weeks.length,
+    totalWeeks: allWeeks.length,
     totalActions: 0,
     totalErrors: 0,
     weeks: [],
@@ -88,6 +119,23 @@ export async function runSimulation(): Promise<SimulationReport> {
     }
   }
   console.log('');
+
+  // ── Resume detection ─────────────────────────────────────────────────────
+  let weeks = allWeeks;
+  if (RESUME) {
+    const adminToken = tokens['admin@qbengineer.local'];
+    if (adminToken) {
+      const resumeFrom = await detectResumeWeek(adminToken);
+      if (resumeFrom) {
+        const skipped = allWeeks.filter(w => w.start < resumeFrom);
+        weeks = allWeeks.filter(w => w.start >= resumeFrom);
+        console.log(`Resume: last data ends before ${resumeFrom.toISOString().slice(0, 10)}`);
+        console.log(`  Skipping ${skipped.length} completed weeks, ${weeks.length} remaining\n`);
+      } else {
+        console.log('Resume: no prior simulation data found, starting from beginning\n');
+      }
+    }
+  }
 
   // ── Launch browser and create one authenticated page per role ─────────────
   console.log('Launching browser and seeding role pages...');
