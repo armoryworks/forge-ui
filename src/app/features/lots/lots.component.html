@@ -28,7 +28,7 @@
     [rowClass]="rowClass"
     emptyIcon="inventory_2"
     [emptyMessage]="'lots.noLots' | translate"
-    (rowClick)="selectLot($event)">
+    [clickableRows]="true" (rowClick)="selectLot($event)">
 
     <ng-template appColumnCell="lotNumber" let-row>
       <span class="lot-number">{{ row.lotNumber }}</span>

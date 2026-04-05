@@ -17,6 +17,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="quotes()"
         [rowClass]="quoteRowClass" emptyIcon="request_quote" [emptyMessage]="'quotes.noQuotesFound' | translate"
+        [clickableRows]="true"
         (rowClick)="selectQuote($any($event))">
         <ng-template appColumnCell="quoteNumber" let-row>
           <span class="qt-number">{{ row.quoteNumber }}</span>

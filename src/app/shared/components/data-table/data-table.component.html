@@ -92,6 +92,7 @@
             <tr
               class="data-table__row"
               [class]="getRowClasses(row)"
+              [class.data-table__row--clickable]="clickableRows()"
               [class.data-table__row--expanded]="expandable() && isRowExpanded(row)"
               [style]="getRowStyles(row)"
               (click)="onRowClick(row)">

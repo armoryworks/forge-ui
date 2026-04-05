@@ -17,6 +17,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="vendors" [columns]="vendorColumns" [data]="vendors()"
         [rowClass]="vendorRowClass" emptyIcon="store" [emptyMessage]="'vendors.noVendorsFound' | translate"
+        [clickableRows]="true"
         (rowClick)="selectVendor($any($event))">
         <ng-template appColumnCell="companyName" let-row>
           <span class="vendor-name">{{ row.companyName }}</span>

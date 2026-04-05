@@ -20,6 +20,7 @@
       [data]="customers()"
       emptyIcon="people"
       [emptyMessage]="'customers.noCustomersFound' | translate"
+      [clickableRows]="true"
       (rowClick)="selectCustomer($any($event))">
 
       <ng-template appColumnCell="name" let-row>

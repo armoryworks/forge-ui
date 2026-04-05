@@ -14,6 +14,7 @@
     [loading]="loading()"
     emptyIcon="request_quote"
     emptyMessage="No estimates yet"
+    [clickableRows]="true"
     (rowClick)="openEdit($any($event))">
 
     <ng-template appColumnCell="estimatedAmount" let-row>

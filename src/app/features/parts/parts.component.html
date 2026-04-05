@@ -41,7 +41,7 @@
       } @else {
         <app-data-table tableId="parts" [columns]="partColumns" [data]="parts()"
           [rowClass]="partRowClass" emptyIcon="inventory_2" [emptyMessage]="'parts.noPartsFound' | translate" [emptyHelpText]="'parts.noPartsHelp' | translate"
-          (rowClick)="selectPart($any($event))">
+          [clickableRows]="true" (rowClick)="selectPart($any($event))">
           <ng-template appColumnCell="partNumber" let-part>
             <span class="part-number">{{ part.partNumber }}</span>
           </ng-template>

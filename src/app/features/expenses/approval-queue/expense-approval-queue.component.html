@@ -12,7 +12,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="expense-approval" [columns]="columns" [data]="pendingExpenses()"
         emptyIcon="fact_check" [emptyMessage]="'expenses.noExpensesAwaiting' | translate"
-        (rowClick)="openReview($any($event))">
+        [clickableRows]="true" (rowClick)="openReview($any($event))">
         <ng-template appColumnCell="expenseDate" let-row>
           <span class="text-muted">{{ row.expenseDate | date:'MM/dd/yyyy' }}</span>
         </ng-template>

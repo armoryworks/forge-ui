@@ -23,7 +23,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="payments" [columns]="paymentColumns" [data]="filteredPayments()"
         [rowClass]="paymentRowClass" emptyIcon="payments" [emptyMessage]="'payments.noPaymentsFound' | translate"
-        (rowClick)="selectPayment($any($event))">
+        [clickableRows]="true" (rowClick)="selectPayment($any($event))">
         <ng-template appColumnCell="paymentNumber" let-row>
           <span class="pmt-number">{{ row.paymentNumber }}</span>
         </ng-template>

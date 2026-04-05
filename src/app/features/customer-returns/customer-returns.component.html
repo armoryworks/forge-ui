@@ -32,6 +32,7 @@
     [rowClass]="rowClass"
     emptyIcon="assignment_return"
     [emptyMessage]="'customerReturns.noReturns' | translate"
+    [clickableRows]="true"
     (rowClick)="selectReturn($event)">
 
     <ng-template appColumnCell="status" let-row>

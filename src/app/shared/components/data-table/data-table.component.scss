@@ -167,7 +167,6 @@
 
 // ─── Rows ───
 .data-table__row {
-  cursor: pointer;
   background: color-mix(in srgb, var(--row-tint, transparent) 5%, var(--surface));
 
   &:nth-child(even) {
@@ -176,6 +175,10 @@
 
   &:hover {
     background: color-mix(in srgb, var(--row-tint, transparent) 8%, var(--bg));
+  }
+
+  &--clickable {
+    cursor: pointer;
   }
 }
 

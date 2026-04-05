@@ -6,6 +6,7 @@
     [loading]="loading()"
     emptyIcon="work_off"
     emptyMessage="No jobs linked to this customer"
+    [clickableRows]="true"
     (rowClick)="openJob($any($event))">
 
     <ng-template appColumnCell="stageName" let-row>

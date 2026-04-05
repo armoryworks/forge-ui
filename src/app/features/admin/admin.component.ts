@@ -1,4 +1,5 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -63,6 +64,7 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AdminComponent {
+  private readonly http = inject(HttpClient);
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -432,6 +434,20 @@ export class AdminComponent {
   protected async unpairRfidReader(): Promise<void> {
     await this.rfid.disconnect();
     this.snackbar.info(this.translate.instant('admin.rfidDisconnected'));
+  }
+
+  protected readonly rfidInstallerDownloading = signal(false);
+
+  protected downloadSetupScript(): void {
+    const token = this.authService.token();
+    if (!token) {
+      this.snackbar.error(this.translate.instant('rfid.setupScriptError'));
+      return;
+    }
+
+    // Direct navigation with token — avoids blob + programmatic click being blocked by strict browsers
+    const url = `/api/v1/downloads/rfid-relay-setup.ps1?access_token=${encodeURIComponent(token)}`;
+    window.open(url, '_blank');
   }
 
   protected copySetupCode(): void {

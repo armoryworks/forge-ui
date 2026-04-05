@@ -19,6 +19,7 @@
     [data]="templates()"
     emptyIcon="description"
     [emptyMessage]="'complianceTemplates.noTemplates' | translate"
+    [clickableRows]="true"
     (rowClick)="onRowClick($any($event))">
 
     <ng-template appColumnCell="icon" let-row>

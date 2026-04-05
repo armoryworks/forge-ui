@@ -571,18 +571,24 @@
                 {{ 'admin.connectRfid' | translate }}
               </button>
             }
-            @if (rfid.error()) {
-              @if (rfid.error() === 'rfid.relayNotInstalled') {
-                <span class="rfid-reader__error">
-                  {{ 'rfid.relayNotInstalled' | translate }}
-                  <a class="rfid-reader__download" href="/api/v1/downloads/rfid-relay-setup.exe" download>
-                    {{ 'rfid.downloadInstaller' | translate }}
-                  </a>
-                </span>
-              } @else {
-                <span class="rfid-reader__error">{{ rfid.error() }}</span>
-              }
+            @if (rfid.error() && rfid.error() !== 'rfid.relayNotInstalled') {
+              <span class="rfid-reader__error">{{ rfid.error() }}</span>
             }
+
+            <!-- RFID Relay Client Setup -->
+            <div class="rfid-reader__setup">
+              <span class="rfid-reader__setup-title">{{ 'rfid.clientSetupTitle' | translate }}</span>
+              <span class="rfid-reader__setup-desc">{{ 'rfid.clientSetupDesc' | translate }}</span>
+              <div class="rfid-reader__setup-actions">
+                <button class="action-btn action-btn--sm" type="button"
+                  (click)="downloadSetupScript()"
+                  aria-label="Download RFID relay setup script">
+                  <span class="material-icons-outlined">download</span>
+                  {{ 'rfid.downloadSetupScript' | translate }}
+                </button>
+              </div>
+              <span class="rfid-reader__setup-hint">{{ 'rfid.setupScriptHint' | translate }}</span>
+            </div>
           </div>
 
           <div class="scan-ids__add">

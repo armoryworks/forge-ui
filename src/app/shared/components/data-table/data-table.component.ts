@@ -72,6 +72,7 @@ export class DataTableComponent implements OnInit {
   readonly expandable = input(false);
   readonly loading = input(false);
   readonly stickyFirstColumn = input(false);
+  readonly clickableRows = input(false);
   readonly rowClass = input<((row: unknown) => string) | null>(null);
   readonly rowStyle = input<((row: unknown) => Record<string, string>) | null>(null);
 

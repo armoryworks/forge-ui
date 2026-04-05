@@ -44,6 +44,7 @@
       } @else {
         <app-data-table tableId="leads" [columns]="leadColumns" [data]="leads()"
           [rowClass]="leadRowClass" emptyIcon="person_search" [emptyMessage]="'leads.noLeadsFound' | translate" [emptyHelpText]="'leads.noLeadsHelp' | translate"
+          [clickableRows]="true"
           (rowClick)="selectLead($any($event))">
           <ng-template appColumnCell="companyName" let-lead>
             <span class="company-name">{{ lead.companyName }}</span>

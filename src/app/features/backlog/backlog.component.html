@@ -36,7 +36,7 @@
     <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
       [rowClass]="backlogRowClass" [rowStyle]="backlogRowStyle"
       emptyIcon="search_off" [emptyMessage]="'backlog.noJobsMatch' | translate" [emptyHelpText]="'backlog.noJobsHelp' | translate"
-      (rowClick)="onRowClicked($any($event))">
+      [clickableRows]="true" (rowClick)="onRowClicked($any($event))">
       <ng-template appColumnCell="jobNumber" let-job>
         <span class="job-number">{{ job.jobNumber }}</span>
       </ng-template>

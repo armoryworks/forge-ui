@@ -13,6 +13,7 @@
     [data]="assistants()"
     emptyIcon="smart_toy"
     [emptyMessage]="'aiAssistants.noAssistants' | translate"
+    [clickableRows]="true"
     (rowClick)="openEdit($any($event))">
 
     <ng-template appColumnCell="icon" let-row>

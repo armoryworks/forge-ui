@@ -498,15 +498,35 @@
     color: var(--error);
   }
 
-  &__download {
-    display: inline-block;
-    margin-left: $sp-sm;
-    font-size: $font-size-xs;
-    color: var(--primary);
-    text-decoration: underline;
-    cursor: pointer;
+  &__setup {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    font-size: var(--font-size-xs);
+    color: var(--text);
+  }
 
-    &:hover { color: var(--primary-dark); }
+  &__setup-title {
+    @include uppercase-label(var(--font-size-xxs), 0.3px, 600);
+    color: var(--text-muted);
+  }
+
+  &__setup-desc {
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  &__setup-actions {
+    display: flex;
+  }
+
+  &__setup-hint {
+    font-size: var(--font-size-xxs);
+    color: var(--text-muted);
+    line-height: 1.4;
   }
 }
 

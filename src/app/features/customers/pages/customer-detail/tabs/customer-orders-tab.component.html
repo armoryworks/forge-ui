@@ -6,6 +6,7 @@
     [loading]="loading()"
     emptyIcon="shopping_cart"
     emptyMessage="No sales orders yet"
+    [clickableRows]="true"
     (rowClick)="openOrder($any($event))">
 
     <ng-template appColumnCell="status" let-row>

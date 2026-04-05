@@ -18,6 +18,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="sales-orders" [columns]="soColumns" [data]="salesOrders()"
         [rowClass]="soRowClass" emptyIcon="receipt_long" [emptyMessage]="'salesOrders.noOrdersFound' | translate"
+        [clickableRows]="true"
         (rowClick)="selectSo($any($event))">
         <ng-template appColumnCell="orderNumber" let-row>
           <span class="so-number">{{ row.orderNumber }}</span>

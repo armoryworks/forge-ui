@@ -41,6 +41,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="invoices" [columns]="invoiceColumns" [data]="invoices()"
         [rowClass]="invoiceRowClass" emptyIcon="receipt_long" [emptyMessage]="'invoices.noInvoicesFound' | translate"
+        [clickableRows]="true"
         (rowClick)="selectInvoice($any($event))">
         <ng-template appColumnCell="invoiceNumber" let-row>
           <span class="inv-number">{{ row.invoiceNumber }}</span>

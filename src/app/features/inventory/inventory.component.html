@@ -434,6 +434,7 @@
 
         <app-data-table tableId="inventory-cycle-counts" [columns]="cycleCountColumns" [data]="cycleCounts()"
           emptyIcon="fact_check" [emptyMessage]="'inventory.noCycleCounts' | translate"
+          [clickableRows]="true"
           (rowClick)="openCycleCountDetail($any($event))">
           <ng-template appColumnCell="status" let-row>
             <span [class]="getCycleCountStatusClass($any(row).status)">{{ $any(row).status }}</span>

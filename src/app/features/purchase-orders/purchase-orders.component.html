@@ -18,7 +18,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
         [rowClass]="poRowClass" emptyIcon="description" [emptyMessage]="'purchaseOrders.noPosFound' | translate"
-        (rowClick)="selectPo($any($event))">
+        [clickableRows]="true" (rowClick)="selectPo($any($event))">
         <ng-template appColumnCell="poNumber" let-row>
           <span class="po-number">{{ row.poNumber }}</span>
         </ng-template>

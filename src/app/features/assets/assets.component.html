@@ -19,7 +19,7 @@
     } @else {
       <app-data-table tableId="assets" [columns]="assetColumns" [data]="assets()"
         [rowClass]="assetRowClass" emptyIcon="precision_manufacturing" [emptyMessage]="'assets.noAssetsFound' | translate"
-        (rowClick)="selectAsset($any($event))">
+        [clickableRows]="true" (rowClick)="selectAsset($any($event))">
         <ng-template appColumnCell="icon" let-asset>
           <span class="material-icons-outlined type-icon">{{ getTypeIcon(asset.assetType) }}</span>
         </ng-template>

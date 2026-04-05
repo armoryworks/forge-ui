@@ -6,6 +6,7 @@
     [loading]="loading()"
     emptyIcon="request_quote"
     emptyMessage="No quotes yet"
+    [clickableRows]="true"
     (rowClick)="openQuote($any($event))">
 
     <ng-template appColumnCell="status" let-row>

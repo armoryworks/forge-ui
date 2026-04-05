@@ -17,6 +17,7 @@
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="shipments" [columns]="shipmentColumns" [data]="shipments()"
         [rowClass]="shipmentRowClass" emptyIcon="local_shipping" [emptyMessage]="'shipments.noShipmentsFound' | translate"
+        [clickableRows]="true"
         (rowClick)="selectShipment($any($event))">
         <ng-template appColumnCell="shipmentNumber" let-row>
           <span class="sh-number">{{ row.shipmentNumber }}</span>
