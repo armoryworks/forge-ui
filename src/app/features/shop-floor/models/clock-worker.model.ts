@@ -1,3 +1,14 @@
+export interface WorkerAssignment {
+  jobId: number;
+  jobNumber: string;
+  title: string;
+  priorityName: string;
+  stageName: string;
+  stageColor: string;
+  isOverdue: boolean;
+  hasActiveTimer: boolean;
+}
+
 export interface ClockWorker {
   userId: number;
   name: string;
@@ -9,4 +20,5 @@ export interface ClockWorker {
   currentTask: string | null;
   currentJobNumber: string | null;
   timeOnTask: string;
+  assignments: WorkerAssignment[];
 }

@@ -1,10 +1,12 @@
-import { Injectable, signal, computed, NgZone, inject, OnDestroy } from '@angular/core';
+import { Injectable, signal, computed, NgZone, inject, OnDestroy, effect } from '@angular/core';
 
 import { ScanEvent, ScanContext } from '../models/scan-event.model';
+import { WebHidRfidService } from './web-hid-rfid.service';
 
 @Injectable({ providedIn: 'root' })
 export class ScannerService implements OnDestroy {
   private readonly zone = inject(NgZone);
+  private readonly rfid = inject(WebHidRfidService);
 
   private readonly SCAN_THRESHOLD_MS = 50;
   private readonly SCAN_COMPLETE_DELAY_MS = 80;
@@ -14,6 +16,7 @@ export class ScannerService implements OnDestroy {
   private lastKeyTime = 0;
   private completeTimer: ReturnType<typeof setTimeout> | null = null;
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
+  private rfidConnected = false;
 
   private readonly _context = signal<ScanContext>('global');
   private readonly _lastScan = signal<ScanEvent | null>(null);
@@ -30,6 +33,18 @@ export class ScannerService implements OnDestroy {
     return Date.now() - scan.timestamp.getTime() < 5000;
   });
 
+  // Bridge RFID relay scans into the unified scan signal
+  private readonly rfidBridge = effect(() => {
+    const rfidScan = this.rfid.lastScan();
+    if (!rfidScan || !this._listening() || !this._enabled()) return;
+    this.rfid.clearLastScan();
+    this._lastScan.set({
+      value: rfidScan.uid,
+      timestamp: rfidScan.timestamp,
+      context: this._context(),
+    });
+  });
+
   start(): void {
     if (this._listening()) return;
 
@@ -40,6 +55,13 @@ export class ScannerService implements OnDestroy {
     });
 
     this._listening.set(true);
+
+    // Auto-connect to RFID relay WebSocket (silent, no error if relay isn't running)
+    if (!this.rfidConnected) {
+      this.rfid.reconnect().then((connected) => {
+        this.rfidConnected = connected;
+      });
+    }
   }
 
   stop(): void {

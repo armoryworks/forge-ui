@@ -97,7 +97,10 @@ export class AppComponent implements OnInit, OnDestroy {
         this.scanner.start();
       } else {
         this.signalr.stopAll();
-        this.scanner.stop();
+        // Don't stop the scanner on display/kiosk routes — they manage their own scanner lifecycle
+        if (!this.layout.isDisplayRoute()) {
+          this.scanner.stop();
+        }
         // Redirect to login when auth is lost (expired token, logout, etc.)
         // Use setTimeout to break out of the reactive context — router.navigate
         // triggers signal changes that conflict with effect execution.
