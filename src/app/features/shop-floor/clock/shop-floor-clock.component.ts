@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal,
+  ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnDestroy, OnInit, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -13,6 +13,7 @@ import { KioskSearchBarComponent } from '../components/kiosk-search-bar/kiosk-se
 import { KioskSetupComponent } from '../components/kiosk-setup/kiosk-setup.component';
 import { ShopFloorService } from '../services/shop-floor.service';
 import { AuthService } from '../../../shared/services/auth.service';
+import { WebHidRfidService } from '../../../shared/services/web-hid-rfid.service';
 import { ClockWorker } from '../models/clock-worker.model';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
 import { KioskTerminal } from '../models/kiosk-terminal.model';
@@ -31,9 +32,10 @@ type KioskPhase = 'setup' | 'dashboard' | 'identifying' | 'pin' | 'job-scanned' 
   styleUrl: './shop-floor-clock.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShopFloorClockComponent implements OnInit {
+export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly authService = inject(AuthService);
+  private readonly rfid = inject(WebHidRfidService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
@@ -82,9 +84,23 @@ export class ShopFloorClockComponent implements OnInit {
 
   private autoLogoutTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // Bridge RFID relay scans into the kiosk scan flow
+  private readonly rfidBridge = effect(() => {
+    const rfidScan = this.rfid.lastScan();
+    if (!rfidScan) return;
+    // Only handle on dashboard or job-scanned phases (same as BarcodeScanInput)
+    const phase = this.kioskPhase();
+    if (phase !== 'dashboard' && phase !== 'job-scanned') return;
+    this.rfid.clearLastScan();
+    this.onScanDetected(rfidScan.uid);
+  });
+
   ngOnInit(): void {
     this.authService.clearAuth();
     this.updateClock();
+
+    // Connect to RFID relay (silent, no error if not running)
+    this.rfid.reconnect();
 
     interval(1000)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -92,6 +108,10 @@ export class ShopFloorClockComponent implements OnInit {
 
     // Check for existing terminal config
     this.checkTerminalConfig();
+  }
+
+  ngOnDestroy(): void {
+    this.rfid.disconnect();
   }
 
   private checkTerminalConfig(): void {

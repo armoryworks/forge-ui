@@ -1,6 +1,9 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+// ─── Layout ───
+$grid-columns: 5;
+
 :host {
   display: flex;
   flex-direction: column;
@@ -15,7 +18,7 @@
   display: flex;
   align-items: center;
   gap: $sp-xl;
-  padding: $sp-lg $sp-xl;
+  padding: $sp-md $sp-xl;
   background: var(--header);
   color: #fff;
   flex-shrink: 0;
@@ -23,81 +26,295 @@
 
 .sf-header__title {
   font-family: $font-family-primary;
-  font-size: var(--font-size-xl);
+  font-size: $font-size-lg;
   font-weight: 700;
   margin: 0;
+  flex-shrink: 0;
 }
 
 .sf-header__stats {
   display: flex;
-  gap: $sp-lg;
+  gap: $sp-md;
   flex: 1;
 }
 
 .sf-header__clock {
   font-family: $font-family-mono;
-  font-size: var(--font-size-lg);
+  font-size: $font-size-lg;
   font-weight: 600;
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .sf-stat {
   display: flex;
   align-items: center;
   gap: $sp-sm;
-  padding: $sp-sm $sp-md;
+  padding: $sp-xs $sp-md;
   background: rgba(255, 255, 255, 0.1);
-}
-
-.sf-stat--success .sf-stat__value {
-  color: var(--success-light);
-}
-
-.sf-stat--warning .sf-stat__value {
-  color: var(--warning-light);
 }
 
 .sf-stat__value {
   font-family: $font-family-mono;
-  font-size: var(--font-size-lg);
+  font-size: $font-size-md;
   font-weight: 700;
 }
 
 .sf-stat__label {
-  font-size: var(--font-size-xs);
+  font-size: $font-size-xxs;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   opacity: 0.8;
 }
 
+.sf-stat--success .sf-stat__value { color: var(--success-light); }
+.sf-stat--warning .sf-stat__value { color: var(--warning-light); }
+.sf-stat--error .sf-stat__value { color: var(--error-light); }
+.sf-stat--accent .sf-stat__value { color: var(--accent-light); }
+
 // ─── Body ───
 .sf-body {
-  display: grid;
-  grid-template-columns: 1fr 2fr;
+  display: flex;
+  flex-direction: column;
   gap: $sp-lg;
   flex: 1;
   padding: $sp-lg;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
+}
+
+// ─── CTA Banner ───
+.sf-cta {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-size: $font-size-sm;
+  font-weight: 600;
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+}
+
+// ─── Worker Grid (5-column) ───
+.sf-grid {
+  display: grid;
+  grid-template-columns: repeat($grid-columns, 1fr);
+  gap: $sp-md;
+}
+
+// ─── Worker Card ───
+.sf-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: border-color $transition-fast, background $transition-fast;
+  position: relative;
   overflow: hidden;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+  border-left: 4px solid var(--border);
+
+  &:hover {
+    border-color: var(--primary);
+    border-left-color: var(--primary);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+  }
+
+  // ─── Status color coding ───
+  &--in {
+    border-left-color: var(--success);
+    background: color-mix(in srgb, var(--success) 6%, var(--surface));
+
+    .sf-card__status { color: var(--success); }
+
+    &:hover { background: color-mix(in srgb, var(--success) 12%, var(--surface)); }
+  }
+
+  &--break {
+    border-left-color: var(--warning);
+    background: color-mix(in srgb, var(--warning) 6%, var(--surface));
+
+    .sf-card__status { color: var(--warning); }
+
+    &:hover { background: color-mix(in srgb, var(--warning) 12%, var(--surface)); }
+  }
+
+  &--out {
+    border-left-color: var(--text-muted);
+    opacity: 0.7;
+
+    .sf-card__status { color: var(--text-muted); }
+    .sf-card__name { color: var(--text-muted); }
+
+    &:hover { opacity: 1; border-color: var(--primary); border-left-color: var(--primary); }
+  }
+
+  &--feedback-success {
+    background: color-mix(in srgb, var(--success) 16%, var(--surface));
+    border-color: var(--success);
+    border-left-color: var(--success);
+    opacity: 1;
+  }
+
+  &--feedback-fail {
+    background: color-mix(in srgb, var(--error) 12%, var(--surface));
+    border-color: var(--error);
+    border-left-color: var(--error);
+    opacity: 1;
+  }
+
+  &--drop-target {
+    border-color: var(--primary);
+    border-left-color: var(--primary);
+    border-style: dashed;
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
+    opacity: 1;
+  }
+}
+
+// Left stripe (hidden — using border-left instead)
+.sf-card__stripe {
+  display: none;
+}
+
+// Identity row — horizontal: avatar | name + status
+.sf-card__identity {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  flex-shrink: 0;
+}
+
+.sf-card__identity-text {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+  flex: 1;
+}
+
+.sf-card__name {
+  font-size: $font-size-md;
+  font-weight: 700;
+  @include truncate;
+}
+
+.sf-card__meta {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.sf-card__status {
+  font-size: $font-size-xs;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sf-card__time {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+// ─── Assigned jobs (tabular layout) ───
+.sf-card__jobs {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-top: $border-width-thin solid color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.sf-card__job {
+  display: grid;
+  grid-template-columns: 6px 72px 1fr auto;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-md;
+  font-size: $font-size-xs;
+  min-height: 0;
+
+  &--active {
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
+  }
+
+  &--overdue .sf-card__job-number {
+    color: var(--error);
+  }
+
+  & + & {
+    border-top: $border-width-thin solid color-mix(in srgb, var(--border) 25%, transparent);
+  }
+}
+
+.sf-card__job-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+}
+
+.sf-card__job-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.sf-card__job-title {
+  @include truncate;
+}
+
+.sf-card__job-timer {
+  font-size: 14px;
+  color: var(--primary);
+}
+
+.sf-card__job-overflow {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: $sp-xs $sp-md;
+  text-align: center;
 }
 
 // ─── Sections ───
 .sf-section {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  gap: $sp-md;
 }
 
-.sf-section__title {
+.sf-section__header {
   display: flex;
   align-items: center;
   gap: $sp-md;
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  margin: 0 0 $sp-md;
-  padding-bottom: $sp-md;
-  border-bottom: $border-width solid var(--border);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  flex-shrink: 0;
+
+  h2 {
+    font-size: $font-size-md;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+  }
 
   .material-icons-outlined {
     font-size: $icon-size-lg;
@@ -105,84 +322,53 @@
   }
 }
 
-// ─── Workers ───
-.sf-workers {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-sm;
-  overflow-y: auto;
-  @include custom-scrollbar(4px);
-}
-
-.sf-worker {
-  display: flex;
-  align-items: center;
-  gap: $sp-md;
-  padding: $sp-md;
-  background: var(--surface);
-  border: $border-width-thin solid var(--border);
-}
-
-.sf-worker__info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: $sp-xxs;
-  min-width: 0;
-}
-
-.sf-worker__name {
-  font-size: var(--font-size-md);
-  font-weight: 600;
-}
-
-.sf-worker__task {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  @include truncate;
-
-  &--idle {
-    color: var(--text-muted);
-    font-style: italic;
-  }
-}
-
-.sf-worker__time {
+.sf-section__count {
   font-family: $font-family-mono;
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
   color: var(--text-muted);
-  flex-shrink: 0;
 }
 
-// ─── Jobs ───
-.sf-jobs {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-xs;
-  overflow-y: auto;
-  @include custom-scrollbar(4px);
+// ─── Unassigned Jobs Grid ───
+.sf-unassigned-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: $sp-sm;
 }
 
-.sf-job {
+.sf-unassigned-card {
   display: flex;
   align-items: center;
   gap: $sp-md;
   padding: $sp-md;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
+  cursor: grab;
+  transition: opacity $transition-fast, border-color $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &--overdue {
     border-left: 3px solid var(--error);
   }
+
+  &--dragging {
+    opacity: 0.4;
+  }
 }
 
-.sf-job__stage-dot {
+.sf-unassigned-card__dot {
   width: $dot-size-md;
   height: $dot-size-md;
   flex-shrink: 0;
 }
 
-.sf-job__main {
+.sf-unassigned-card__main {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -190,52 +376,560 @@
   min-width: 0;
 }
 
-.sf-job__number {
+.sf-unassigned-card__number {
   font-family: $font-family-mono;
-  font-size: var(--font-size-xs);
+  font-size: $font-size-xs;
   color: var(--text-muted);
   font-weight: 600;
 }
 
-.sf-job__title {
-  font-size: var(--font-size-base);
+.sf-unassigned-card__title {
+  font-size: $font-size-base;
   @include truncate;
 }
 
-.sf-job__stage {
-  font-size: var(--font-size-xs);
+.sf-unassigned-card__stage {
+  font-size: $font-size-xs;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.3px;
   flex-shrink: 0;
-  width: 100px;
-  text-align: center;
 }
 
-.sf-job__priority {
-  font-size: var(--font-size-xs);
+.sf-unassigned-card__priority {
+  font-size: $font-size-xs;
   font-weight: 600;
-  width: 60px;
-  text-align: center;
   flex-shrink: 0;
 }
 
-.priority--urgent {
+.sf-unassigned-card__drag-handle {
+  font-size: $icon-size-md;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  opacity: 0.5;
+
+  .sf-unassigned-card:hover & {
+    opacity: 1;
+    color: var(--primary);
+  }
+}
+
+// ─── Priority Colors ───
+.priority--urgent { color: var(--error); }
+.priority--high { color: var(--warning); }
+
+// ─── Overlay (shared) ───
+.sf-overlay {
+  position: fixed;
+  inset: 0;
+  background: $backdrop-color;
+  z-index: $z-dialog;
+  @include flex-center;
+  animation: fadeIn 150ms ease;
+}
+
+// ─── Auth Card ───
+.sf-auth-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xl;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 420px;
+}
+
+.sf-auth-card__icon {
+  font-size: $icon-size-hero;
+  color: var(--primary);
+}
+
+.sf-auth-card__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sf-auth-card__worker {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  width: 100%;
+}
+
+.sf-auth-card__worker-name {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.sf-auth-card__worker-badge {
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: $sp-xs $sp-md;
+
+  &--in { color: var(--success); background: color-mix(in srgb, var(--success) 10%, transparent); }
+  &--break { color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); }
+  &--out { color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 8%, transparent); }
+}
+
+.sf-auth-card__error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--error-light);
   color: var(--error);
+  border: $border-width-thin solid var(--error);
+  font-size: $font-size-sm;
+  font-weight: 600;
+  width: 100%;
+
+  .material-icons-outlined { font-size: $icon-size-md; }
 }
 
-.priority--high {
-  color: var(--warning);
+.sf-auth-card__field {
+  width: 100%;
 }
 
-// ─── Shared ───
+.sf-auth-card__actions {
+  display: flex;
+  gap: $sp-md;
+  width: 100%;
+
+  .action-btn { flex: 1; }
+}
+
+.sf-auth-card__spinner {
+  animation: spin 1s linear infinite;
+}
+
+// ─── Actions Card ───
+.sf-actions-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xl;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 560px;
+}
+
+.sf-actions-card__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  width: 100%;
+}
+
+.sf-actions-card__worker-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.sf-actions-card__name {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sf-actions-card__status {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &--in { color: var(--success); }
+  &--break { color: var(--warning); }
+  &--out { color: var(--text-muted); }
+}
+
+.sf-actions-card__feedback {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  width: 100%;
+  animation: fadeIn 200ms ease;
+
+  .material-icons-outlined { font-size: $icon-size-lg; }
+
+  &--success {
+    background: color-mix(in srgb, var(--success) 10%, var(--surface));
+    color: var(--success);
+    border: $border-width-thin solid var(--success);
+  }
+
+  &--fail {
+    background: color-mix(in srgb, var(--error) 10%, var(--surface));
+    color: var(--error);
+    border: $border-width-thin solid var(--error);
+  }
+}
+
+.sf-actions-card__jobs {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.sf-actions-card__section-title {
+  @include uppercase-label($font-size-xxs, 1px, 600);
+  color: var(--text-muted);
+  margin: 0 0 $sp-xs;
+}
+
+.sf-actions-card__job {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+
+  &--active {
+    border-left: 3px solid var(--success);
+    background: color-mix(in srgb, var(--success) 5%, var(--surface));
+  }
+}
+
+.sf-actions-card__job-dot {
+  width: $dot-size-sm;
+  height: $dot-size-sm;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sf-actions-card__job-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.sf-actions-card__job-number {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  font-family: $font-family-mono;
+}
+
+.sf-actions-card__job-title {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  @include truncate;
+}
+
+.sf-actions-card__job-stage {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  @include uppercase-label($font-size-xxs, 0.5px, 500);
+}
+
+.sf-actions-card__job-actions {
+  display: flex;
+  gap: $sp-sm;
+  flex-shrink: 0;
+}
+
+.sf-actions-card__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: $sp-lg;
+  width: 100%;
+}
+
+.sf-actions-card__cancel {
+  color: var(--text-muted);
+}
+
+// ─── Action Buttons ───
+.sf-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl $sp-lg;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  min-height: 88px;
+  font-family: $font-family-primary;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .material-icons-outlined { font-size: $icon-size-xxl; }
+
+  &--clock-in {
+    border-left: 3px solid var(--success);
+    .material-icons-outlined { color: var(--success); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--success) 8%, var(--surface)); border-color: var(--success); }
+  }
+
+  &--clock-out {
+    border-left: 3px solid var(--error);
+    .material-icons-outlined { color: var(--error); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--error) 8%, var(--surface)); border-color: var(--error); }
+  }
+
+  &--break {
+    border-left: 3px solid var(--warning);
+    .material-icons-outlined { color: var(--warning); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--warning) 8%, var(--surface)); border-color: var(--warning); }
+  }
+
+  &--lunch {
+    border-left: 3px solid var(--info);
+    .material-icons-outlined { color: var(--info); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--info) 8%, var(--surface)); border-color: var(--info); }
+  }
+
+  &--resume {
+    border-left: 3px solid var(--success);
+    .material-icons-outlined { color: var(--success); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--success) 8%, var(--surface)); border-color: var(--success); }
+  }
+
+  &--start-timer {
+    flex-direction: row;
+    min-height: auto;
+    padding: $sp-md $sp-lg;
+    border-left: 3px solid var(--primary);
+    .material-icons-outlined { font-size: $icon-size-lg; color: var(--primary); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); border-color: var(--primary); }
+  }
+
+  &--stop-timer {
+    flex-direction: row;
+    min-height: auto;
+    padding: $sp-md $sp-lg;
+    border-left: 3px solid var(--error);
+    .material-icons-outlined { font-size: $icon-size-lg; color: var(--error); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--error) 8%, var(--surface)); border-color: var(--error); }
+  }
+
+  &--complete {
+    flex-direction: row;
+    min-height: auto;
+    padding: $sp-md $sp-lg;
+    border-left: 3px solid var(--success);
+    .material-icons-outlined { font-size: $icon-size-lg; color: var(--success); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--success) 8%, var(--surface)); border-color: var(--success); }
+  }
+
+  &__spinner {
+    animation: spin 1s linear infinite;
+  }
+}
+
+.sf-action-btn__label {
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+// ─── Job Selection Card ───
+.sf-job-select-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+}
+
+.sf-job-select-card__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+}
+
+.sf-job-select-card__worker {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.sf-job-select-card__hint {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.sf-job-select-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  overflow-y: auto;
+  max-height: 50vh;
+  @include custom-scrollbar(4px);
+}
+
+.sf-job-select-card__job {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &--overdue { border-left: 3px solid var(--error); }
+}
+
+.sf-job-select-card__job-dot {
+  width: $dot-size-md;
+  height: $dot-size-md;
+  flex-shrink: 0;
+}
+
+.sf-job-select-card__job-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-job-select-card__job-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.sf-job-select-card__job-title {
+  font-size: $font-size-base;
+  @include truncate;
+}
+
+.sf-job-select-card__job-stage {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+
+.sf-job-select-card__job-priority {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.sf-job-select-card__spinner {
+  font-size: $icon-size-sm;
+  color: var(--primary);
+  animation: spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+.sf-job-select-card__skip {
+  align-self: center;
+  color: var(--text-muted);
+}
+
+// ─── Bottom Action Bar ───
+.sf-action-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-md $sp-xl;
+  background: var(--surface);
+  border-top: $border-width solid var(--border);
+  flex-shrink: 0;
+}
+
+.sf-action-bar__hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+}
+
+.sf-action-bar__feedback {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  color: var(--primary);
+  animation: fadeIn 200ms ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// ─── Empty State ───
 .sf-empty {
-  font-size: var(--font-size-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-3xl;
   color: var(--text-muted);
   text-align: center;
-  padding: $sp-2xl;
+
+  p { margin: 0; font-size: $font-size-md; }
 }
 
+.sf-empty__icon {
+  font-size: $icon-size-hero;
+  opacity: 0.4;
+}
+
+// ─── Error ───
 .sf-error {
   display: flex;
   flex-direction: column;

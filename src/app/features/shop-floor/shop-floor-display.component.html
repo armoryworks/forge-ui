@@ -5,21 +5,29 @@
   </div>
 } @else {
   <header class="sf-header">
-    <h1 class="sf-header__title">{{ 'shopFloor.title' | translate }}</h1>
+    <h1 class="sf-header__title">Shop Floor</h1>
     <app-kiosk-search-bar />
     <div class="sf-header__stats">
-      <div class="sf-stat">
-        <span class="sf-stat__value">{{ activeJobs().length }}</span>
-        <span class="sf-stat__label">{{ 'shopFloor.activeJobs' | translate }}</span>
-      </div>
       <div class="sf-stat sf-stat--success">
+        <span class="sf-stat__value">{{ workersIn().length }}</span>
+        <span class="sf-stat__label">Working</span>
+      </div>
+      <div class="sf-stat sf-stat--warning">
+        <span class="sf-stat__value">{{ workersOnBreak().length }}</span>
+        <span class="sf-stat__label">On Break</span>
+      </div>
+      <div class="sf-stat">
+        <span class="sf-stat__value">{{ unassignedJobs().length }}</span>
+        <span class="sf-stat__label">Unassigned</span>
+      </div>
+      <div class="sf-stat sf-stat--accent">
         <span class="sf-stat__value">{{ completedToday() }}</span>
-        <span class="sf-stat__label">{{ 'shopFloor.completedToday' | translate }}</span>
+        <span class="sf-stat__label">Done Today</span>
       </div>
       @if (maintenanceAlerts() > 0) {
-        <div class="sf-stat sf-stat--warning">
+        <div class="sf-stat sf-stat--error">
           <span class="sf-stat__value">{{ maintenanceAlerts() }}</span>
-          <span class="sf-stat__label">{{ 'shopFloor.maintenanceAlerts' | translate }}</span>
+          <span class="sf-stat__label">Alerts</span>
         </div>
       }
     </div>
@@ -27,58 +35,406 @@
   </header>
 
   <div class="sf-body">
-    <!-- Worker Presence -->
-    <section class="sf-section sf-section--workers">
-      <h2 class="sf-section__title">
-        <span class="material-icons-outlined">group</span>
-        {{ 'shopFloor.whosHere' | translate }} ({{ workers().length }})
-      </h2>
-      <div class="sf-workers">
+    <!-- All Workers — Single Grid -->
+    @if (workers().length > 0) {
+      <div class="sf-cta">
+        <span class="material-icons-outlined">contactless</span>
+        Scan your badge and enter your PIN, or tap your name and enter your password
+      </div>
+
+      <div class="sf-grid">
         @for (worker of workers(); track worker.userId) {
-          <div class="sf-worker">
+          <button class="sf-card"
+               [class.sf-card--in]="worker.status === 'In'"
+               [class.sf-card--break]="worker.status === 'OnBreak'"
+               [class.sf-card--out]="worker.status === 'Out'"
+               [class.sf-card--drop-target]="dropTargetUserId() === worker.userId"
+               [class.sf-card--feedback-success]="feedbackSuccess(worker.userId)"
+               [class.sf-card--feedback-fail]="hasFeedback(worker.userId) && !feedbackSuccess(worker.userId)"
+               (click)="selectWorker(worker)"
+               (dragover)="onDragOverCard($event, worker)"
+               (dragleave)="onDragLeaveCard()"
+               (drop)="onDropCard($event, worker)"
+               [attr.aria-label]="worker.name + ' - ' + (worker.status === 'In' ? 'Working' : worker.status === 'OnBreak' ? 'On Break' : 'Clocked Out')">
+
+            <!-- Status stripe (left) -->
+            <div class="sf-card__stripe"></div>
+
+            <!-- Identity row — avatar left, name + status right -->
+            <div class="sf-card__identity">
+              <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+              <div class="sf-card__identity-text">
+                <span class="sf-card__name">{{ worker.name }}</span>
+                <div class="sf-card__meta">
+                  <span class="sf-card__status">
+                    @if (worker.status === 'In') {
+                      IN
+                    } @else if (worker.status === 'OnBreak') {
+                      BREAK
+                    } @else {
+                      OUT
+                    }
+                  </span>
+                  @if (workerTimes()[worker.userId]) {
+                    <span class="sf-card__time">{{ workerTimes()[worker.userId] }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Assigned jobs table -->
+            @if (worker.assignments.length > 0) {
+              <div class="sf-card__jobs">
+                @for (assignment of worker.assignments; track assignment.jobId; let i = $index) {
+                  @if (i < maxVisibleJobs) {
+                    <div class="sf-card__job"
+                         [class.sf-card__job--active]="assignment.hasActiveTimer"
+                         [class.sf-card__job--overdue]="assignment.isOverdue">
+                      <div class="sf-card__job-dot" [style.background]="assignment.stageColor"></div>
+                      <span class="sf-card__job-number">{{ assignment.jobNumber }}</span>
+                      <span class="sf-card__job-title">{{ assignment.title }}</span>
+                      @if (assignment.hasActiveTimer) {
+                        <span class="material-icons-outlined sf-card__job-timer">timer</span>
+                      }
+                    </div>
+                  }
+                }
+                @if (worker.assignments.length > maxVisibleJobs) {
+                  <span class="sf-card__job-overflow">+{{ worker.assignments.length - maxVisibleJobs }} more</span>
+                }
+              </div>
+            }
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="sf-empty">
+        <span class="material-icons-outlined sf-empty__icon">person_off</span>
+        <p>No employees found</p>
+      </div>
+    }
+
+    <!-- Unassigned Jobs -->
+    @if (unassignedJobs().length > 0) {
+      <section class="sf-section">
+        <div class="sf-section__header">
+          <span class="material-icons-outlined">assignment_late</span>
+          <h2>Unassigned Jobs</h2>
+          <span class="sf-section__count">{{ unassignedJobs().length }}</span>
+        </div>
+
+        <div class="sf-unassigned-grid">
+          @for (job of unassignedJobs(); track job.id) {
+            <div class="sf-unassigned-card"
+                 [class.sf-unassigned-card--overdue]="job.isOverdue"
+                 [class.sf-unassigned-card--dragging]="draggingJobId() === job.id"
+                 draggable="true"
+                 (dragstart)="onDragStart($event, job)"
+                 (dragend)="onDragEnd()">
+              <div class="sf-unassigned-card__dot" [style.background]="job.stageColor"></div>
+              <div class="sf-unassigned-card__main">
+                <span class="sf-unassigned-card__number">{{ job.jobNumber }}</span>
+                <span class="sf-unassigned-card__title">{{ job.title }}</span>
+              </div>
+              <span class="sf-unassigned-card__stage">{{ job.stageName }}</span>
+              <span class="sf-unassigned-card__priority" [class]="priorityClass(job.priorityName)">
+                {{ job.priorityName }}
+              </span>
+              <span class="material-icons-outlined sf-unassigned-card__drag-handle">drag_indicator</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+
+  <!-- Bottom Status Bar (passive scan — no input needed) -->
+  <div class="sf-action-bar">
+    <div class="sf-action-bar__hint">
+      <span class="material-icons-outlined">contactless</span>
+      Scan your badge or RFID to clock in
+    </div>
+    @if (scanFeedback(); as feedback) {
+      <span class="sf-action-bar__feedback">{{ feedback }}</span>
+    }
+  </div>
+
+  <!-- ─── PIN Overlay ─── -->
+  @if (phase() === 'pin') {
+    <div class="sf-overlay" (click)="cancelPin()">
+      <div class="sf-auth-card" (click)="$event.stopPropagation()">
+        <span class="material-icons-outlined sf-auth-card__icon">lock</span>
+        <h2 class="sf-auth-card__title">{{ isPasswordAuth() ? 'Enter Password' : 'Enter PIN' }}</h2>
+
+        @if (selectedWorker(); as worker) {
+          <div class="sf-auth-card__worker">
             <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
-            <div class="sf-worker__info">
-              <span class="sf-worker__name">{{ worker.name }}</span>
-              @if (worker.currentTask) {
-                <span class="sf-worker__task">{{ worker.currentJobNumber }} — {{ worker.currentTask }}</span>
-              } @else {
-                <span class="sf-worker__task sf-worker__task--idle">{{ 'shopFloor.available' | translate }}</span>
+            <span class="sf-auth-card__worker-name">{{ worker.name }}</span>
+            <div class="sf-auth-card__worker-badge"
+                 [class.sf-auth-card__worker-badge--in]="worker.status === 'In'"
+                 [class.sf-auth-card__worker-badge--break]="worker.status === 'OnBreak'"
+                 [class.sf-auth-card__worker-badge--out]="worker.status === 'Out'">
+              {{ worker.status === 'In' ? 'WORKING' : worker.status === 'OnBreak' ? 'ON BREAK' : 'CLOCKED OUT' }}
+            </div>
+          </div>
+        }
+
+        @if (pinError()) {
+          <div class="sf-auth-card__error">
+            <span class="material-icons-outlined">warning</span>
+            {{ pinError() }}
+          </div>
+        }
+
+        <div class="sf-auth-card__field" (keydown.enter)="onPinSubmit()">
+          <app-input [label]="isPasswordAuth() ? 'Password' : 'PIN'" type="password" [formControl]="pinControl"
+            [placeholder]="isPasswordAuth() ? 'Enter your password' : 'Enter your PIN'" [maxlength]="isPasswordAuth() ? 128 : 8" />
+        </div>
+
+        <div class="sf-auth-card__actions">
+          <button class="action-btn" (click)="cancelPin()" [disabled]="authenticating()"
+                  aria-label="Cancel">
+            <span class="material-icons-outlined">arrow_back</span>
+            Cancel
+          </button>
+          <button class="action-btn action-btn--primary"
+            [disabled]="authenticating() || !pinControl.value"
+            (click)="onPinSubmit()"
+            [attr.aria-label]="isPasswordAuth() ? 'Submit Password' : 'Submit PIN'">
+            @if (authenticating()) {
+              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+              Verifying...
+            } @else {
+              <span class="material-icons-outlined">login</span>
+              Submit
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Actions Overlay ─── -->
+  @if (phase() === 'actions') {
+    <div class="sf-overlay">
+      <div class="sf-actions-card">
+        @if (selectedWorker(); as worker) {
+          <div class="sf-actions-card__header">
+            <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="lg" />
+            <div class="sf-actions-card__worker-info">
+              <h2 class="sf-actions-card__name">{{ worker.name }}</h2>
+              <span class="sf-actions-card__status"
+                    [class.sf-actions-card__status--in]="worker.status === 'In'"
+                    [class.sf-actions-card__status--break]="worker.status === 'OnBreak'"
+                    [class.sf-actions-card__status--out]="worker.status === 'Out'">
+                {{ worker.status === 'In' ? 'Currently Working' : worker.status === 'OnBreak' ? 'On Break' : 'Clocked Out' }}
+              </span>
+            </div>
+          </div>
+
+          @if (hasFeedback(worker.userId)) {
+            <div class="sf-actions-card__feedback"
+                 [class.sf-actions-card__feedback--success]="feedbackSuccess(worker.userId)"
+                 [class.sf-actions-card__feedback--fail]="!feedbackSuccess(worker.userId)">
+              <span class="material-icons-outlined">
+                {{ feedbackSuccess(worker.userId) ? 'check_circle' : 'error' }}
+              </span>
+              {{ feedbackSuccess(worker.userId) ? 'Done!' : 'Action failed. Try again.' }}
+            </div>
+          }
+
+          <!-- Assigned Jobs -->
+          @if (worker.assignments.length > 0) {
+            <div class="sf-actions-card__jobs">
+              <h3 class="sf-actions-card__section-title">YOUR JOBS</h3>
+              @for (assignment of worker.assignments; track assignment.jobId) {
+                <div class="sf-actions-card__job"
+                     [class.sf-actions-card__job--active]="assignment.hasActiveTimer">
+                  <div class="sf-actions-card__job-dot" [style.background]="assignment.stageColor"></div>
+                  <div class="sf-actions-card__job-info">
+                    <span class="sf-actions-card__job-number">{{ assignment.jobNumber }}</span>
+                    <span class="sf-actions-card__job-title">{{ assignment.title }}</span>
+                    <span class="sf-actions-card__job-stage">{{ assignment.stageName }}</span>
+                  </div>
+                  <div class="sf-actions-card__job-actions">
+                    @if (assignment.hasActiveTimer) {
+                      <button class="sf-action-btn sf-action-btn--stop-timer"
+                              [disabled]="processing() !== null"
+                              (click)="stopJobTimer()"
+                              aria-label="Stop timer on {{ assignment.jobNumber }}">
+                        @if (processing() === 'timer-stop') {
+                          <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                        } @else {
+                          <span class="material-icons-outlined">stop_circle</span>
+                        }
+                        <span class="sf-action-btn__label">Stop</span>
+                      </button>
+                    } @else {
+                      <button class="sf-action-btn sf-action-btn--start-timer"
+                              [disabled]="processing() !== null"
+                              (click)="startJobTimer(assignment)"
+                              aria-label="Start timer on {{ assignment.jobNumber }}">
+                        @if (processing() === 'timer-start-' + assignment.jobId) {
+                          <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                        } @else {
+                          <span class="material-icons-outlined">play_circle</span>
+                        }
+                        <span class="sf-action-btn__label">Start</span>
+                      </button>
+                    }
+                    <button class="sf-action-btn sf-action-btn--complete"
+                            [disabled]="processing() !== null"
+                            (click)="completeJob(assignment)"
+                            aria-label="Mark {{ assignment.jobNumber }} complete">
+                      @if (processing() === 'complete-' + assignment.jobId) {
+                        <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                      } @else {
+                        <span class="material-icons-outlined">check_circle</span>
+                      }
+                      <span class="sf-action-btn__label">Done</span>
+                    </button>
+                  </div>
+                </div>
               }
             </div>
-            <span class="sf-worker__time">{{ worker.timeOnTask }}</span>
-          </div>
-        } @empty {
-          <div class="sf-empty">{{ 'shopFloor.noWorkersClockedIn' | translate }}</div>
-        }
-      </div>
-    </section>
+          }
 
-    <!-- Active Jobs -->
-    <section class="sf-section sf-section--jobs">
-      <h2 class="sf-section__title">
-        <span class="material-icons-outlined">assignment</span>
-        {{ 'shopFloor.activeJobs' | translate }}
-      </h2>
-      <div class="sf-jobs">
-        @for (job of activeJobs(); track job.id) {
-          <div class="sf-job" [class.sf-job--overdue]="job.isOverdue">
-            <div class="sf-job__stage-dot" [style.background]="job.stageColor"></div>
-            <div class="sf-job__main">
-              <span class="sf-job__number">{{ job.jobNumber }}</span>
-              <span class="sf-job__title">{{ job.title }}</span>
-            </div>
-            <span class="sf-job__stage">{{ job.stageName }}</span>
-            <span class="sf-job__priority" [class]="priorityClass(job.priorityName)">
-              {{ job.priorityName }}
-            </span>
-            @if (job.assigneeInitials) {
-              <app-avatar [initials]="job.assigneeInitials" [color]="job.assigneeColor ?? '#94a3b8'" size="sm" />
+          <!-- Clock Actions -->
+          <div class="sf-actions-card__grid">
+            @if (worker.status === 'Out') {
+              <button class="sf-action-btn sf-action-btn--clock-in"
+                      [disabled]="processing() !== null"
+                      (click)="clockAction(worker, 'ClockIn')"
+                      aria-label="Clock in">
+                @if (isProcessing(worker.userId, 'ClockIn')) {
+                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">login</span>
+                }
+                <span class="sf-action-btn__label">Clock In</span>
+              </button>
+            }
+
+            @if (worker.status === 'In') {
+              <button class="sf-action-btn sf-action-btn--break"
+                      [disabled]="processing() !== null"
+                      (click)="clockAction(worker, 'BreakStart')"
+                      aria-label="Start break">
+                @if (isProcessing(worker.userId, 'BreakStart')) {
+                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">free_breakfast</span>
+                }
+                <span class="sf-action-btn__label">Start Break</span>
+              </button>
+              <button class="sf-action-btn sf-action-btn--lunch"
+                      [disabled]="processing() !== null"
+                      (click)="clockAction(worker, 'LunchStart')"
+                      aria-label="Start lunch">
+                @if (isProcessing(worker.userId, 'LunchStart')) {
+                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">restaurant</span>
+                }
+                <span class="sf-action-btn__label">Lunch</span>
+              </button>
+              <button class="sf-action-btn sf-action-btn--clock-out"
+                      [disabled]="processing() !== null"
+                      (click)="clockAction(worker, 'ClockOut')"
+                      aria-label="Clock out">
+                @if (isProcessing(worker.userId, 'ClockOut')) {
+                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">logout</span>
+                }
+                <span class="sf-action-btn__label">Clock Out</span>
+              </button>
+            }
+
+            @if (worker.status === 'OnBreak') {
+              <button class="sf-action-btn sf-action-btn--resume"
+                      [disabled]="processing() !== null"
+                      (click)="clockAction(worker, 'BreakEnd')"
+                      aria-label="End break">
+                @if (isProcessing(worker.userId, 'BreakEnd')) {
+                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">play_arrow</span>
+                }
+                <span class="sf-action-btn__label">Resume Work</span>
+              </button>
+              <button class="sf-action-btn sf-action-btn--clock-out"
+                      [disabled]="processing() !== null"
+                      (click)="clockAction(worker, 'ClockOut')"
+                      aria-label="Clock out">
+                @if (isProcessing(worker.userId, 'ClockOut')) {
+                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+                } @else {
+                  <span class="material-icons-outlined">logout</span>
+                }
+                <span class="sf-action-btn__label">Clock Out</span>
+              </button>
             }
           </div>
-        } @empty {
-          <div class="sf-empty">{{ 'shopFloor.noActiveJobs' | translate }}</div>
+
+          <button class="action-btn sf-actions-card__cancel" (click)="cancelActions()"
+                  aria-label="Cancel">
+            <span class="material-icons-outlined">arrow_back</span>
+            Cancel
+          </button>
         }
       </div>
-    </section>
-  </div>
+    </div>
+  }
+
+  <!-- ─── Job Selection Overlay ─── -->
+  @if (phase() === 'job-select') {
+    <div class="sf-overlay">
+      <div class="sf-job-select-card">
+        <div class="sf-job-select-card__header">
+          <span class="material-icons-outlined">assignment</span>
+          <h2>Pick a Job</h2>
+          @if (jobSelectWorker(); as w) {
+            <span class="sf-job-select-card__worker">for {{ w.name }}</span>
+          }
+        </div>
+
+        <p class="sf-job-select-card__hint">Select an unassigned job to work on, or skip to clock in without one.</p>
+
+        <div class="sf-job-select-card__list">
+          @for (job of unassignedJobs(); track job.id) {
+            <button class="sf-job-select-card__job"
+                    [class.sf-job-select-card__job--overdue]="job.isOverdue"
+                    [disabled]="processing() !== null"
+                    (click)="selectJob(job)"
+                    [attr.aria-label]="'Assign ' + job.jobNumber + ' - ' + job.title">
+              <div class="sf-job-select-card__job-dot" [style.background]="job.stageColor"></div>
+              <div class="sf-job-select-card__job-main">
+                <span class="sf-job-select-card__job-number">{{ job.jobNumber }}</span>
+                <span class="sf-job-select-card__job-title">{{ job.title }}</span>
+              </div>
+              <span class="sf-job-select-card__job-stage">{{ job.stageName }}</span>
+              <span class="sf-job-select-card__job-priority" [class]="priorityClass(job.priorityName)">
+                {{ job.priorityName }}
+              </span>
+              @if (processing() === 'assign-' + job.id) {
+                <span class="material-icons-outlined sf-job-select-card__spinner">sync</span>
+              }
+            </button>
+          } @empty {
+            <div class="sf-empty">
+              <span class="material-icons-outlined sf-empty__icon">work_off</span>
+              <p>No unassigned jobs available</p>
+            </div>
+          }
+        </div>
+
+        <button class="action-btn sf-job-select-card__skip" (click)="skipJobSelect()"
+                aria-label="Skip job selection">
+          <span class="material-icons-outlined">skip_next</span>
+          Skip
+        </button>
+      </div>
+    </div>
+  }
 }

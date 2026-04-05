@@ -2816,6 +2816,12 @@
   },
   "rfid": {
     "relayNotInstalled": "El servicio de retransmisión RFID no está instalado en este equipo.",
-    "downloadInstaller": "Descargar instalador"
+    "clientSetupTitle": "Configuración del Cliente",
+    "clientSetupDesc": "Cada estación de trabajo con un lector RFID/NFC necesita el servicio de retransmisión. Descargue el script de configuración y ejecútelo como administrador en la máquina cliente — todo se maneja automáticamente.",
+    "downloadSetupScript": "Descargar Script de Configuración",
+    "downloading": "Descargando...",
+    "setupScriptHint": "Clic derecho en el archivo descargado → Ejecutar con PowerShell (como administrador). El script instala Node.js si es necesario, descarga el relé y lo registra como servicio de Windows.",
+    "setupScriptDownloaded": "Script de configuración descargado. Ejecútelo como administrador en la máquina cliente.",
+    "setupScriptError": "No se pudo descargar el script de configuración. Inténtelo de nuevo o contacte a su administrador."
   }
 }

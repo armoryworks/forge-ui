@@ -12,6 +12,7 @@ export interface ShopFloorJob {
   stageName: string;
   stageColor: string;
   priorityName: string;
+  assigneeId: number | null;
   assigneeInitials: string | null;
   assigneeColor: string | null;
   dueDate: Date | null;

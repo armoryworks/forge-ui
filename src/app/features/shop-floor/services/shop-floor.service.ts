@@ -33,6 +33,24 @@ export class ShopFloorService {
     return this.http.post<ScanIdentification>(`${this.base}/identify-scan`, { scanValue });
   }
 
+  assignJob(jobId: number, userId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/assign-job`, { jobId, userId });
+  }
+
+  startTimer(jobId: number): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/time-tracking/timer/start`, {
+      jobId, category: null, notes: null,
+    });
+  }
+
+  stopTimer(): Observable<unknown> {
+    return this.http.post(`${environment.apiUrl}/time-tracking/timer/stop`, { notes: null });
+  }
+
+  completeJob(jobId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/complete-job`, { jobId });
+  }
+
   // Teams
   getTeams(): Observable<Team[]> {
     return this.http.get<Team[]>(`${this.base}/teams`);

@@ -2832,6 +2832,12 @@
   },
   "rfid": {
     "relayNotInstalled": "RFID relay service is not installed on this computer.",
-    "downloadInstaller": "Download installer"
+    "clientSetupTitle": "Client Setup",
+    "clientSetupDesc": "Each workstation with an RFID/NFC reader needs the relay service installed. Download the setup script and run it as Administrator on the client machine — it handles everything automatically.",
+    "downloadSetupScript": "Download Setup Script",
+    "downloading": "Downloading...",
+    "setupScriptHint": "Right-click the downloaded file → Run with PowerShell (as Administrator). The script installs Node.js if needed, downloads the relay, and registers it as a Windows Service.",
+    "setupScriptDownloaded": "Setup script downloaded. Run it as Administrator on the client machine.",
+    "setupScriptError": "Could not download the setup script. Try again or contact your system administrator."
   }
 }

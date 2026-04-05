@@ -12,6 +12,7 @@ export interface WorkerAssignment {
 export interface ClockWorker {
   userId: number;
   name: string;
+  email: string;
   initials: string;
   avatarColor: string;
   isClockedIn: boolean;
@@ -20,5 +21,6 @@ export interface ClockWorker {
   currentTask: string | null;
   currentJobNumber: string | null;
   timeOnTask: string;
+  statusSince: string | null;
   assignments: WorkerAssignment[];
 }

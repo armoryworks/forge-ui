@@ -184,8 +184,8 @@
             <div class="sf-job-card__stage-dot" [style.background]="job.stageColor"></div>
           }
           <div class="sf-job-card__info">
-            <span class="sf-job-card__number">{{ job.jobNumber }}</span>
-            <span class="sf-job-card__title">{{ job.jobTitle }}</span>
+            <span class="sf-job-card__number">{{ job.entityNumber }}</span>
+            <span class="sf-job-card__title">{{ job.entityTitle }}</span>
           </div>
           @if (job.stageName) {
             <span class="sf-job-card__stage">{{ job.stageName }}</span>
@@ -226,8 +226,8 @@
           @if (job.stageColor) {
             <div class="sf-job-card__stage-dot" [style.background]="job.stageColor"></div>
           }
-          <span class="sf-job-card__number">{{ job.jobNumber }}</span>
-          <span class="sf-job-card__title">{{ job.jobTitle }}</span>
+          <span class="sf-job-card__number">{{ job.entityNumber }}</span>
+          <span class="sf-job-card__title">{{ job.entityTitle }}</span>
         </div>
       }
 
@@ -318,8 +318,8 @@
       @if (scannedJob(); as job) {
         <div class="sf-job-card sf-job-card--banner">
           <span class="material-icons-outlined">work</span>
-          <span class="sf-job-card__number">{{ job.jobNumber }}</span>
-          <span class="sf-job-card__title">{{ job.jobTitle }}</span>
+          <span class="sf-job-card__number">{{ job.entityNumber }}</span>
+          <span class="sf-job-card__title">{{ job.entityTitle }}</span>
         </div>
       }
 
