@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, OnDestroy, OnInit, signal,
+  ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostBinding, inject, OnDestroy, OnInit, Renderer2, signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -12,11 +12,17 @@ import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-sea
 import { ShopFloorService } from './services/shop-floor.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ScannerService } from '../../shared/services/scanner.service';
+import { LoadingService } from '../../shared/services/loading.service';
 import { ShopFloorOverview, ShopFloorJob } from './models/shop-floor-overview.model';
 import { ClockWorker } from './models/clock-worker.model';
 
+const FONT_SIZES = [12, 14, 16, 18, 20] as const;
+type FontSizeStep = typeof FONT_SIZES[number];
+
 const REFRESH_INTERVAL_MS = 15_000;
 const AUTO_LOGOUT_MS = 30_000;
+const PIN_TIMEOUT_MS = 20_000;
+const JOB_SELECT_TIMEOUT_MS = 15_000;
 
 type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select';
 
@@ -29,11 +35,24 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
-  @HostBinding('attr.data-theme') readonly dataTheme = 'light';
+  private readonly renderer = inject(Renderer2);
+
+  // Theme toggle (light/dark) — persisted to localStorage
+  protected readonly theme = signal<'light' | 'dark'>(
+    (localStorage.getItem('sf-theme') as 'light' | 'dark') || 'light',
+  );
+  @HostBinding('attr.data-theme') get dataTheme() { return this.theme(); }
+
+  // Font size scaling — persisted to localStorage
+  protected readonly fontSizeIndex = signal(
+    Math.max(0, Math.min(FONT_SIZES.length - 1, parseInt(localStorage.getItem('sf-font-index') ?? '0', 10) || 0)),
+  );
+  protected readonly fontSize = computed(() => FONT_SIZES[this.fontSizeIndex()]);
 
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly authService = inject(AuthService);
   private readonly scanner = inject(ScannerService);
+  protected readonly loading = inject(LoadingService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
@@ -102,6 +121,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly elRef = inject(ElementRef);
 
   private autoLogoutTimer: ReturnType<typeof setTimeout> | null = null;
+  private phaseTimeoutTimer: ReturnType<typeof setTimeout> | null = null;
 
   // Auto-focus PIN field when entering PIN phase
   private readonly pinFocusEffect = effect(() => {
@@ -129,6 +149,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.authService.clearAuth();
     this.loadData();
     this.updateClock();
+
+    // Apply persisted font size zoom
+    if (this.fontSizeIndex() > 0) {
+      this.applyFontSize();
+    }
 
     // Start passive scanner — listens to keyboard-wedge / RFID on document, no focus needed
     this.scanner.setContext('shop-floor');
@@ -196,11 +221,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.pinControl.reset();
     this.pinError.set(null);
     this.phase.set('pin');
+    this.startPhaseTimeout(PIN_TIMEOUT_MS);
   }
 
   // ─── PIN Auth ───
 
   protected onPinSubmit(): void {
+    this.clearPhaseTimeout(); // User is actively submitting
     const credential = this.pinControl.value?.trim();
     const scanValue = this.scannedValue();
     const worker = this.selectedWorker();
@@ -251,6 +278,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // ─── Actions Phase ───
 
   private enterActionsPhase(): void {
+    this.clearPhaseTimeout();
     this.loadData();
     this.phase.set('actions');
     this.startAutoLogoutTimer();
@@ -262,7 +290,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set(key);
     this.resetAutoLogoutTimer();
 
-    this.shopFloorService.clockInOut(worker.userId, eventType).subscribe({
+    this.loading.track('Processing...', this.shopFloorService.clockInOut(worker.userId, eventType)).subscribe({
       next: () => {
         this.processing.set(null);
         this.actionFeedback.set({ workerId: worker.userId, success: true });
@@ -274,6 +302,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
             this.actionFeedback.set(null);
             this.jobSelectWorker.set(worker);
             this.phase.set('job-select');
+            this.startPhaseTimeout(JOB_SELECT_TIMEOUT_MS);
           }, 800);
         } else {
           setTimeout(() => {
@@ -298,7 +327,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set(`assign-${job.id}`);
     this.resetAutoLogoutTimer();
 
-    this.shopFloorService.assignJob(job.id, worker.userId).subscribe({
+    this.loading.track('Assigning job...', this.shopFloorService.assignJob(job.id, worker.userId)).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -349,7 +378,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     if (isNaN(jobId)) return;
 
     this.processing.set(`assign-${jobId}`);
-    this.shopFloorService.assignJob(jobId, worker.userId).subscribe({
+    this.loading.track('Assigning job...', this.shopFloorService.assignJob(jobId, worker.userId)).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -367,7 +396,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set(`timer-start-${assignment.jobId}`);
     this.resetAutoLogoutTimer();
 
-    this.shopFloorService.startTimer(assignment.jobId).subscribe({
+    this.loading.track('Starting timer...', this.shopFloorService.startTimer(assignment.jobId)).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -385,7 +414,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set(`complete-${assignment.jobId}`);
     this.resetAutoLogoutTimer();
 
-    this.shopFloorService.completeJob(assignment.jobId).subscribe({
+    this.loading.track('Completing job...', this.shopFloorService.completeJob(assignment.jobId)).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -404,7 +433,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.processing.set('timer-stop');
     this.resetAutoLogoutTimer();
 
-    this.shopFloorService.stopTimer().subscribe({
+    this.loading.track('Stopping timer...', this.shopFloorService.stopTimer()).subscribe({
       next: () => {
         this.processing.set(null);
         this.loadData();
@@ -436,6 +465,28 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     return fb?.workerId === workerId && fb.success;
   }
 
+  protected toggleTheme(): void {
+    this.theme.update(t => t === 'light' ? 'dark' : 'light');
+    localStorage.setItem('sf-theme', this.theme());
+  }
+
+  protected increaseFontSize(): void {
+    this.fontSizeIndex.update(i => Math.min(i + 1, FONT_SIZES.length - 1));
+    this.applyFontSize();
+  }
+
+  protected decreaseFontSize(): void {
+    this.fontSizeIndex.update(i => Math.max(i - 1, 0));
+    this.applyFontSize();
+  }
+
+  private applyFontSize(): void {
+    const el = this.elRef.nativeElement as HTMLElement;
+    const scale = FONT_SIZES[this.fontSizeIndex()] / FONT_SIZES[0];
+    el.style.zoom = `${scale}`;
+    localStorage.setItem('sf-font-index', String(this.fontSizeIndex()));
+  }
+
   protected priorityClass(priority: string): string {
     switch (priority) {
       case 'Urgent': return 'priority--urgent';
@@ -455,6 +506,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   private resetToMain(): void {
     this.clearAutoLogoutTimer();
+    this.clearPhaseTimeout();
     this.authService.clearAuth();
     this.selectedWorker.set(null);
     this.scannedValue.set(null);
@@ -477,6 +529,18 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     if (this.autoLogoutTimer) {
       clearTimeout(this.autoLogoutTimer);
       this.autoLogoutTimer = null;
+    }
+  }
+
+  private startPhaseTimeout(ms: number): void {
+    this.clearPhaseTimeout();
+    this.phaseTimeoutTimer = setTimeout(() => this.resetToMain(), ms);
+  }
+
+  private clearPhaseTimeout(): void {
+    if (this.phaseTimeoutTimer) {
+      clearTimeout(this.phaseTimeoutTimer);
+      this.phaseTimeoutTimer = null;
     }
   }
 

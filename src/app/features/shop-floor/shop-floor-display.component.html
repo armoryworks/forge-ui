@@ -31,6 +31,21 @@
         </div>
       }
     </div>
+    <div class="sf-header__controls">
+      <button class="sf-header__control-btn" (click)="decreaseFontSize()"
+              [disabled]="fontSizeIndex() === 0" aria-label="Decrease font size">
+        <span class="material-icons-outlined">text_decrease</span>
+      </button>
+      <span class="sf-header__font-label">{{ fontSize() }}px</span>
+      <button class="sf-header__control-btn" (click)="increaseFontSize()"
+              [disabled]="fontSizeIndex() === 4" aria-label="Increase font size">
+        <span class="material-icons-outlined">text_increase</span>
+      </button>
+      <button class="sf-header__control-btn" (click)="toggleTheme()"
+              [attr.aria-label]="theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'">
+        <span class="material-icons-outlined">{{ theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
+      </button>
+    </div>
     <span class="sf-header__clock">{{ clockDisplay() }}</span>
   </header>
 
