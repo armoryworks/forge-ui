@@ -123,7 +123,7 @@ export class TimeTrackingComponent implements OnDestroy {
     if (entry.isLocked) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return entry.date.getTime() >= today.getTime();
+    return new Date(entry.date).getTime() >= today.getTime();
   }
 
   constructor() {
@@ -237,7 +237,7 @@ export class TimeTrackingComponent implements OnDestroy {
   protected getTimerElapsed(): string {
     const timer = this.activeTimer();
     if (!timer?.timerStart) return '0m';
-    const elapsed = Math.floor((Date.now() - timer.timerStart.getTime()) / 60000);
+    const elapsed = Math.floor((Date.now() - new Date(timer.timerStart).getTime()) / 60000);
     return this.formatDuration(elapsed);
   }
 
