@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
-import { ProcessStep } from '../../models/process-step.model';
+import { Operation } from '../../models/operation.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
@@ -15,14 +15,14 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 
-export interface ProcessStepDialogData {
+export interface OperationDialogData {
   partId: number;
-  step?: ProcessStep;
+  operation?: Operation;
   nextStepNumber?: number;
 }
 
 @Component({
-  selector: 'app-process-step-dialog',
+  selector: 'app-operation-dialog',
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -30,34 +30,34 @@ export interface ProcessStepDialogData {
     ValidationPopoverDirective,
     TranslatePipe,
   ],
-  templateUrl: './process-step-dialog.component.html',
-  styleUrl: './process-step-dialog.component.scss',
+  templateUrl: './operation-dialog.component.html',
+  styleUrl: './operation-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProcessStepDialogComponent {
+export class OperationDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly partsService = inject(PartsService);
   private readonly translate = inject(TranslateService);
-  protected readonly matDialogRef = inject(MatDialogRef<ProcessStepDialogComponent>);
-  protected readonly data = inject<ProcessStepDialogData>(MAT_DIALOG_DATA);
+  protected readonly matDialogRef = inject(MatDialogRef<OperationDialogComponent>);
+  protected readonly data = inject<OperationDialogData>(MAT_DIALOG_DATA);
 
   protected readonly saving = signal(false);
 
   protected readonly draftConfig: DraftConfig = {
-    entityType: 'process-step',
-    entityId: this.data.step?.id?.toString() ?? 'new',
+    entityType: 'operation',
+    entityId: this.data.operation?.id?.toString() ?? 'new',
     route: '/parts',
   };
 
   protected readonly formGroup = new FormGroup({
-    stepNumber: new FormControl<number>(this.data.step?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
-    title: new FormControl(this.data.step?.title ?? '', [Validators.required, Validators.maxLength(200)]),
-    instructions: new FormControl(this.data.step?.instructions ?? ''),
-    workCenterId: new FormControl<number | null>(this.data.step?.workCenterId ?? null),
-    estimatedMinutes: new FormControl<number | null>(this.data.step?.estimatedMinutes ?? null, [Validators.min(1)]),
-    isQcCheckpoint: new FormControl(this.data.step?.isQcCheckpoint ?? false),
-    qcCriteria: new FormControl(this.data.step?.qcCriteria ?? ''),
+    stepNumber: new FormControl<number>(this.data.operation?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
+    title: new FormControl(this.data.operation?.title ?? '', [Validators.required, Validators.maxLength(200)]),
+    instructions: new FormControl(this.data.operation?.instructions ?? ''),
+    workCenterId: new FormControl<number | null>(this.data.operation?.workCenterId ?? null),
+    estimatedMinutes: new FormControl<number | null>(this.data.operation?.estimatedMinutes ?? null, [Validators.min(1)]),
+    isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
+    qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.formGroup, {
@@ -72,8 +72,8 @@ export class ProcessStepDialogComponent {
 
     const raw = this.formGroup.getRawValue();
 
-    if (this.data.step) {
-      this.partsService.updateProcessStep(this.data.partId, this.data.step.id, {
+    if (this.data.operation) {
+      this.partsService.updateOperation(this.data.partId, this.data.operation.id, {
         stepNumber: raw.stepNumber ?? undefined,
         title: raw.title ?? undefined,
         instructions: raw.instructions || undefined,
@@ -90,7 +90,7 @@ export class ProcessStepDialogComponent {
         error: () => this.saving.set(false),
       });
     } else {
-      this.partsService.createProcessStep(this.data.partId, {
+      this.partsService.createOperation(this.data.partId, {
         stepNumber: raw.stepNumber!,
         title: raw.title!,
         instructions: raw.instructions || undefined,

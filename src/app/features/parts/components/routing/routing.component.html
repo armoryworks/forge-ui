@@ -1,0 +1,75 @@
+<div class="routing" [appLoadingBlock]="loading()">
+  <div class="routing__header">
+    <h4>{{ 'parts.routing' | translate }}</h4>
+    <div class="routing__header-actions">
+      <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
+        <button class="icon-btn" [class.icon-btn--active]="routingViewMode() === 'list'"
+                (click)="routingViewMode.set('list')"
+                [matTooltip]="'parts.viewRoutingList' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'parts.viewRoutingList' | translate"
+                [attr.aria-pressed]="routingViewMode() === 'list'">
+          <span class="material-icons-outlined">view_list</span>
+        </button>
+        <button class="icon-btn" [class.icon-btn--active]="routingViewMode() === 'flow'"
+                (click)="routingViewMode.set('flow')"
+                [matTooltip]="'parts.viewRoutingFlow' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'parts.viewRoutingFlow' | translate"
+                [attr.aria-pressed]="routingViewMode() === 'flow'">
+          <span class="material-icons-outlined">account_tree</span>
+        </button>
+      </div>
+      <button class="action-btn action-btn--sm" (click)="openAddOperation()">
+        <span class="material-icons-outlined">add</span> {{ 'parts.addOperation' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (routingViewMode() === 'flow') {
+    <app-routing-flow-view [operations]="operations()" />
+  } @else {
+    @if (operations().length === 0) {
+      <app-empty-state icon="route" [message]="'parts.noOperations' | translate" />
+    } @else {
+      <div class="routing__operations">
+        @for (operation of operations(); track operation.id) {
+          <div class="operation-card">
+            <div class="operation-card__number">{{ operation.stepNumber }}</div>
+            <div class="operation-card__content">
+              <div class="operation-card__title">
+                {{ operation.title }}
+                @if (operation.isQcCheckpoint) {
+                  <span class="chip chip--warning">QC</span>
+                }
+              </div>
+              @if (operation.instructions) {
+                <div class="operation-card__instructions">{{ operation.instructions }}</div>
+              }
+              <div class="operation-card__meta">
+                @if (operation.workCenterName) {
+                  <span class="operation-card__tag">
+                    <span class="material-icons-outlined">precision_manufacturing</span>
+                    {{ operation.workCenterName }}
+                  </span>
+                }
+                @if (operation.estimatedMinutes) {
+                  <span class="operation-card__tag">
+                    <span class="material-icons-outlined">schedule</span>
+                    {{ operation.estimatedMinutes }}min
+                  </span>
+                }
+              </div>
+            </div>
+            <div class="operation-card__actions">
+              <button class="icon-btn" (click)="openEditOperation(operation)" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.editOperationAria' | translate">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" (click)="deleteOperation(operation)" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'parts.deleteOperationAria' | translate">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

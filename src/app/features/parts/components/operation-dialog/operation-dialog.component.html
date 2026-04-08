@@ -1,4 +1,4 @@
-<app-dialog [title]="data.step ? ('parts.editStep' | translate) : ('parts.addProcessStep' | translate)" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
+<app-dialog [title]="data.operation ? ('parts.editOperation' | translate) : ('parts.addOperation' | translate)" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
 
   <div [formGroup]="formGroup">
     <div class="dialog-row">
@@ -19,6 +19,6 @@
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="formGroup.invalid || saving()"
-      (click)="save()">{{ data.step ? ('parts.update' | translate) : ('common.add' | translate) }}</button>
+      (click)="save()">{{ data.operation ? ('parts.update' | translate) : ('common.add' | translate) }}</button>
   </div>
 </app-dialog>

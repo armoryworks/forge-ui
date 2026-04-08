@@ -38,7 +38,7 @@ import { StlViewerComponent } from '../../shared/components/stl-viewer/stl-viewe
 import { FileUploadZoneComponent } from '../../shared/components/file-upload-zone/file-upload-zone.component';
 import { FileAttachment } from '../../shared/models/file.model';
 import { PartInventorySummary } from './models/part-inventory-summary.model';
-import { ProcessPlanComponent } from './components/process-plan/process-plan.component';
+import { RoutingComponent } from './components/routing/routing.component';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
 import { BomTreeComponent } from './components/bom-tree/bom-tree.component';
@@ -58,7 +58,7 @@ type BomViewMode = 'table' | 'tree';
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
     EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
-    ProcessPlanComponent, BarcodeInfoComponent, MatTooltipModule,
+    RoutingComponent, BarcodeInfoComponent, MatTooltipModule,
     PartsCardGridComponent, BomTreeComponent,
   ],
   templateUrl: './parts.component.html',

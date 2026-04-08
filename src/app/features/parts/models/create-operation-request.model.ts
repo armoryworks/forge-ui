@@ -1,4 +1,4 @@
-export interface CreateProcessStepRequest {
+export interface CreateOperationRequest {
   stepNumber: number;
   title: string;
   instructions?: string;

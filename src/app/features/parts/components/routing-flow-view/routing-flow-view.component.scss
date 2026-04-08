@@ -7,7 +7,7 @@
   @include custom-scrollbar(4px);
 }
 
-.process-flow {
+.routing-flow {
   display: flex;
   flex-direction: row;
   padding: $sp-lg $sp-md;
@@ -15,7 +15,7 @@
   align-items: flex-start;
   min-width: max-content;
 
-  &__step {
+  &__operation {
     flex-shrink: 0;
     width: 160px;
     background: var(--surface);
@@ -32,19 +32,19 @@
     }
   }
 
-  &__step-number {
+  &__operation-number {
     @include uppercase-label(var(--font-size-xxs), 0.05em, 700);
     color: var(--text-muted);
   }
 
-  &__step-name {
+  &__operation-name {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--text);
     @include truncate;
   }
 
-  &__step-desc {
+  &__operation-desc {
     font-size: var(--font-size-xs);
     color: var(--text-secondary);
     display: -webkit-box;
@@ -53,7 +53,7 @@
     overflow: hidden;
   }
 
-  &__step-meta {
+  &__operation-meta {
     display: flex;
     align-items: center;
     gap: $sp-xs;
@@ -65,7 +65,7 @@
     }
   }
 
-  &__step-qc {
+  &__operation-qc {
     margin-top: $sp-xs;
   }
 

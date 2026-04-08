@@ -1,6 +1,6 @@
 @use 'styles/variables' as *;
 
-.process-plan {
+.routing {
   &__header {
     display: flex;
     align-items: center;
@@ -20,14 +20,14 @@
     gap: $sp-sm;
   }
 
-  &__steps {
+  &__operations {
     display: flex;
     flex-direction: column;
     gap: $sp-sm;
   }
 }
 
-.step-card {
+.operation-card {
   display: flex;
   align-items: flex-start;
   gap: $sp-md;

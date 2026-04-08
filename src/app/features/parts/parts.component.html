@@ -114,7 +114,7 @@
         </button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'process'"
           (click)="detailTab.set('process')">
-          {{ 'parts.process' | translate }}
+          {{ 'parts.routing' | translate }}
         </button>
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'files'"
           (click)="detailTab.set('files')">
@@ -436,7 +436,7 @@
 
           <!-- Process Tab -->
           @if (detailTab() === 'process') {
-            <app-process-plan [partId]="part.id" />
+            <app-routing [partId]="part.id" />
           }
 
           <!-- Files Tab -->

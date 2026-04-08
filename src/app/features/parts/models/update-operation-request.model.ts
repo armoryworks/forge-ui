@@ -1,4 +1,4 @@
-export interface UpdateProcessStepRequest {
+export interface UpdateOperationRequest {
   stepNumber?: number;
   title?: string;
   instructions?: string;

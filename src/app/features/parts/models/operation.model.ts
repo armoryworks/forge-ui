@@ -1,4 +1,4 @@
-export interface ProcessStep {
+export interface Operation {
   id: number;
   partId: number;
   stepNumber: number;

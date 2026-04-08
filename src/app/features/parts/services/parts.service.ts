@@ -14,9 +14,9 @@ import { PartRevision } from '../models/part-revision.model';
 import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
 import { PartInventorySummary } from '../models/part-inventory-summary.model';
 import { FileAttachment } from '../../../shared/models/file.model';
-import { ProcessStep } from '../models/process-step.model';
-import { CreateProcessStepRequest } from '../models/create-process-step-request.model';
-import { UpdateProcessStepRequest } from '../models/update-process-step-request.model';
+import { Operation } from '../models/operation.model';
+import { CreateOperationRequest } from '../models/create-operation-request.model';
+import { UpdateOperationRequest } from '../models/update-operation-request.model';
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 
 @Injectable({ providedIn: 'root' })
@@ -88,20 +88,20 @@ export class PartsService {
     return this.http.delete<void>(`${this.base}/${partId}/link-accounting-item`);
   }
 
-  getProcessSteps(partId: number): Observable<ProcessStep[]> {
-    return this.http.get<ProcessStep[]>(`${this.base}/${partId}/process-steps`);
+  getOperations(partId: number): Observable<Operation[]> {
+    return this.http.get<Operation[]>(`${this.base}/${partId}/operations`);
   }
 
-  createProcessStep(partId: number, request: CreateProcessStepRequest): Observable<ProcessStep> {
-    return this.http.post<ProcessStep>(`${this.base}/${partId}/process-steps`, request);
+  createOperation(partId: number, request: CreateOperationRequest): Observable<Operation> {
+    return this.http.post<Operation>(`${this.base}/${partId}/operations`, request);
   }
 
-  updateProcessStep(partId: number, stepId: number, request: UpdateProcessStepRequest): Observable<ProcessStep> {
-    return this.http.patch<ProcessStep>(`${this.base}/${partId}/process-steps/${stepId}`, request);
+  updateOperation(partId: number, operationId: number, request: UpdateOperationRequest): Observable<Operation> {
+    return this.http.patch<Operation>(`${this.base}/${partId}/operations/${operationId}`, request);
   }
 
-  deleteProcessStep(partId: number, stepId: number): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${partId}/process-steps/${stepId}`);
+  deleteOperation(partId: number, operationId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${partId}/operations/${operationId}`);
   }
 
   getFileDownloadUrl(fileId: number): string {
