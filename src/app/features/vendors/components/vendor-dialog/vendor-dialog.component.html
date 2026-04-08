@@ -1,4 +1,4 @@
-<app-dialog [title]="isEditing ? ('vendors.editVendor' | translate) : ('vendors.newVendor' | translate)" width="860px" [splitLayout]="true" (closed)="close()">
+<app-dialog [title]="isEditing ? ('vendors.editVendor' | translate) : ('vendors.newVendor' | translate)" width="860px" [splitLayout]="true" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="close()">
   <div class="dlg-body" [formGroup]="form">
 
     <!-- Main: Contact + Notes -->

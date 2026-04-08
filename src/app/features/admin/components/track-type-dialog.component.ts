@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -8,6 +8,7 @@ import { InputComponent } from '../../../shared/components/input/input.component
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { DraftConfig } from '../../../shared/models/draft-config.model';
 import { StageRequest } from '../models/stage-request.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 
@@ -25,13 +26,16 @@ const STAGE_COLORS = [
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrackTypeDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly translate = inject(TranslateService);
+
   readonly trackType = input<TrackType | null>(null);
   readonly saving = input(false);
   readonly closed = output<void>();
   readonly saved = output<{ name: string; code: string; description: string | null; stages: StageRequest[] }>();
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     name: new FormControl('', [Validators.required]),
     code: new FormControl('', [Validators.required, Validators.pattern(/^[A-Z0-9_]+$/)]),
     description: new FormControl(''),
@@ -44,6 +48,12 @@ export class TrackTypeDialogComponent {
   protected readonly isEdit = computed(() => this.trackType() !== null);
   protected readonly title = computed(() => this.isEdit() ? this.translate.instant('trackTypeDialog.editTrackType') : this.translate.instant('trackTypeDialog.createTrackType'));
   protected readonly hasStages = computed(() => this.stages().length > 0);
+
+  protected readonly draftConfig = computed<DraftConfig>(() => ({
+    entityType: 'track-type',
+    entityId: this.trackType()?.id?.toString() ?? 'new',
+    route: '/admin/board',
+  }));
 
   constructor() {
     // Initialize form when trackType input is set
@@ -113,6 +123,7 @@ export class TrackTypeDialogComponent {
 
   protected onSubmit(): void {
     if (this.form.invalid || this.stages().length === 0) return;
+    this.dialogRef.clearDraft();
     const val = this.form.getRawValue();
     this.saved.emit({
       name: val.name!,

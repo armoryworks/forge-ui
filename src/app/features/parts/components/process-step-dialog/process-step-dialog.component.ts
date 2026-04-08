@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -13,6 +13,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 
 export interface ProcessStepDialogData {
   partId: number;
@@ -34,14 +35,22 @@ export interface ProcessStepDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProcessStepDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly partsService = inject(PartsService);
   private readonly translate = inject(TranslateService);
-  protected readonly dialogRef = inject(MatDialogRef<ProcessStepDialogComponent>);
+  protected readonly matDialogRef = inject(MatDialogRef<ProcessStepDialogComponent>);
   protected readonly data = inject<ProcessStepDialogData>(MAT_DIALOG_DATA);
 
   protected readonly saving = signal(false);
 
-  protected readonly form = new FormGroup({
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'process-step',
+    entityId: this.data.step?.id?.toString() ?? 'new',
+    route: '/parts',
+  };
+
+  protected readonly formGroup = new FormGroup({
     stepNumber: new FormControl<number>(this.data.step?.stepNumber ?? this.data.nextStepNumber ?? 1, [Validators.required, Validators.min(1)]),
     title: new FormControl(this.data.step?.title ?? '', [Validators.required, Validators.maxLength(200)]),
     instructions: new FormControl(this.data.step?.instructions ?? ''),
@@ -51,17 +60,17 @@ export class ProcessStepDialogComponent {
     qcCriteria: new FormControl(this.data.step?.qcCriteria ?? ''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  protected readonly violations = FormValidationService.getViolations(this.formGroup, {
     stepNumber: this.translate.instant('parts.stepNumber'),
     title: this.translate.instant('common.title'),
     estimatedMinutes: this.translate.instant('parts.estMinutes'),
   });
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.formGroup.invalid) return;
     this.saving.set(true);
 
-    const raw = this.form.getRawValue();
+    const raw = this.formGroup.getRawValue();
 
     if (this.data.step) {
       this.partsService.updateProcessStep(this.data.partId, this.data.step.id, {
@@ -75,7 +84,8 @@ export class ProcessStepDialogComponent {
       }).subscribe({
         next: (result) => {
           this.saving.set(false);
-          this.dialogRef.close(result);
+          this.dialogRef.clearDraft();
+          this.matDialogRef.close(result);
         },
         error: () => this.saving.set(false),
       });
@@ -91,7 +101,8 @@ export class ProcessStepDialogComponent {
       }).subscribe({
         next: (result) => {
           this.saving.set(false);
-          this.dialogRef.close(result);
+          this.dialogRef.clearDraft();
+          this.matDialogRef.close(result);
         },
         error: () => this.saving.set(false),
       });

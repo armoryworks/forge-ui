@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { AdminService } from '../../services/admin.service';
 import { IntegrationSettingField, IntegrationStatus } from '../../models/integration-status.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 
 export interface IntegrationConfigDialogData {
   integration: IntegrationStatus;
@@ -24,7 +25,9 @@ export interface IntegrationConfigDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class IntegrationConfigDialogComponent {
-  private readonly dialogRef = inject(MatDialogRef<IntegrationConfigDialogComponent>);
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
+  private readonly matDialogRef = inject(MatDialogRef<IntegrationConfigDialogComponent>);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -38,6 +41,8 @@ export class IntegrationConfigDialogComponent {
   readonly form: FormGroup;
   readonly fields: IntegrationSettingField[];
 
+  protected readonly draftConfig: DraftConfig;
+
   constructor() {
     this.fields = this.data.integration.fields;
     const controls: Record<string, FormControl> = {};
@@ -46,6 +51,12 @@ export class IntegrationConfigDialogComponent {
       controls[field.key] = new FormControl(value);
     }
     this.form = new FormGroup(controls);
+
+    this.draftConfig = {
+      entityType: 'integration-config',
+      entityId: this.data.integration.provider,
+      route: '/admin/integrations',
+    };
   }
 
   toggleGuide(): void {
@@ -53,7 +64,7 @@ export class IntegrationConfigDialogComponent {
   }
 
   close(): void {
-    this.dialogRef.close(false);
+    this.matDialogRef.close(false);
   }
 
   save(): void {
@@ -66,9 +77,10 @@ export class IntegrationConfigDialogComponent {
 
     this.adminService.updateIntegration(this.data.integration.provider, settings).subscribe({
       next: () => {
+        this.dialogRef.clearDraft();
         this.snackbar.success(`${this.data.integration.name} ${this.translate.instant('integrationConfigDialog.settingsSaved')}`);
         this.saving.set(false);
-        this.dialogRef.close(true);
+        this.matDialogRef.close(true);
       },
       error: () => {
         this.saving.set(false);

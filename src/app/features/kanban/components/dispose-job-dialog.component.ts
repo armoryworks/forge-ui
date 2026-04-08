@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
+import { DraftConfig } from '../../../shared/models/draft-config.model';
 import { KanbanService } from '../services/kanban.service';
 import { JobDetail } from '../models/job-detail.model';
 import { JobDisposition } from '../models/job-disposition.type';
@@ -28,7 +29,9 @@ export interface DisposeJobDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DisposeJobDialogComponent {
-  readonly dialogRef = inject(MatDialogRef<DisposeJobDialogComponent>);
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
+  readonly matDialogRef = inject(MatDialogRef<DisposeJobDialogComponent>);
   readonly data = inject<DisposeJobDialogData>(MAT_DIALOG_DATA);
   private readonly kanbanService = inject(KanbanService);
   private readonly snackbar = inject(SnackbarService);
@@ -36,12 +39,18 @@ export class DisposeJobDialogComponent {
 
   protected readonly saving = signal(false);
 
-  readonly form = new FormGroup({
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'job-disposition',
+    entityId: this.data.jobId.toString(),
+    route: '/board',
+  };
+
+  readonly formGroup = new FormGroup({
     disposition: new FormControl<JobDisposition | null>(null, [Validators.required]),
     notes: new FormControl('', [Validators.maxLength(2000)]),
   });
 
-  readonly violations = FormValidationService.getViolations(this.form, {
+  readonly violations = FormValidationService.getViolations(this.formGroup, {
     disposition: this.translate.instant('jobs.disposition'),
     notes: this.translate.instant('common.notes'),
   });
@@ -55,18 +64,19 @@ export class DisposeJobDialogComponent {
   ];
 
   save(): void {
-    if (this.form.invalid || this.saving()) return;
+    if (this.formGroup.invalid || this.saving()) return;
 
     this.saving.set(true);
-    const raw = this.form.getRawValue();
+    const raw = this.formGroup.getRawValue();
     this.kanbanService.disposeJob(this.data.jobId, {
       disposition: raw.disposition!,
       notes: raw.notes || undefined,
     }).subscribe({
       next: (result: JobDetail) => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('kanban.jobDisposed'));
-        this.dialogRef.close(result);
+        this.matDialogRef.close(result);
       },
       error: () => this.saving.set(false),
     });

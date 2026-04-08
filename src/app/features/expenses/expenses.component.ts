@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,6 +15,7 @@ import { DatepickerComponent } from '../../shared/components/datepicker/datepick
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
+import { DraftConfig } from '../../shared/models/draft-config.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../shared/utils/date.utils';
@@ -40,6 +41,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ExpensesComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly expensesService = inject(ExpensesService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -48,6 +51,7 @@ export class ExpensesComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly expenses = signal<ExpenseItem[]>([]);
+  protected draftConfig: DraftConfig = { entityType: 'expense', entityId: 'new', route: '/expenses' };
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -142,7 +146,9 @@ export class ExpensesComponent {
     this.showDialog.set(true);
   }
 
-  protected closeDialog(): void { this.showDialog.set(false); }
+  protected closeDialog(): void {
+    this.showDialog.set(false);
+  }
 
   protected saveExpense(): void {
     if (this.expenseForm.invalid) return;
@@ -155,7 +161,13 @@ export class ExpensesComponent {
       description: form.description ?? '',
       expenseDate: toIsoDate(form.expenseDate) ?? new Date().toISOString().split('T')[0],
     }).subscribe({
-      next: () => { this.saving.set(false); this.closeDialog(); this.loadExpenses(); this.snackbar.success(this.translate.instant('expenses.expenseSubmitted')); },
+      next: () => {
+        this.saving.set(false);
+        this.dialogRef.clearDraft();
+        this.closeDialog();
+        this.loadExpenses();
+        this.snackbar.success(this.translate.instant('expenses.expenseSubmitted'));
+      },
       error: () => this.saving.set(false),
     });
   }

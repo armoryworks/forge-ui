@@ -1,4 +1,5 @@
-<app-dialog [title]="isEdit() ? ('aiAssistants.editAssistant' | translate) : ('aiAssistants.createAssistant' | translate)" width="720px" (closed)="close()">
+<app-dialog [title]="isEdit() ? ('aiAssistants.editAssistant' | translate) : ('aiAssistants.createAssistant' | translate)" width="720px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="close()">
+
   <div [formGroup]="form">
     <div class="dialog-row">
       <app-input [label]="'common.name' | translate" formControlName="name" [maxlength]="100" [required]="true" />

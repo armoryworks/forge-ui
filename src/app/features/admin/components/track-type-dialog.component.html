@@ -1,4 +1,5 @@
-<app-dialog [title]="title()" width="680px" (closed)="closed.emit()">
+<app-dialog [title]="title()" width="680px" [draftConfig]="draftConfig()" [draftFormGroup]="form" (closed)="closed.emit()">
+
   <div [formGroup]="form">
     <app-input [label]="'common.name' | translate" formControlName="name" />
     <div class="dialog-row">

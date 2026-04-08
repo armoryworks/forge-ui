@@ -1,4 +1,5 @@
-<app-dialog [title]="isEdit() ? ('companyLocationDialog.editLocation' | translate) : ('companyLocationDialog.newLocation' | translate)" width="520px" (closed)="closed.emit()">
+<app-dialog [title]="isEdit() ? ('companyLocationDialog.editLocation' | translate) : ('companyLocationDialog.newLocation' | translate)" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="closed.emit()">
+
   <div [formGroup]="form">
     <app-input [label]="'companyLocationDialog.locationName' | translate" formControlName="name" [required]="true" [maxlength]="100" />
     <app-input [label]="'common.phone' | translate" formControlName="phone" mask="phone" />

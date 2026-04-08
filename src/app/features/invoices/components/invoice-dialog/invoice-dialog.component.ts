@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, output, computed, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -15,6 +15,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -44,6 +45,7 @@ interface LineEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InvoiceDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly invoiceService = inject(InvoiceService);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
@@ -63,7 +65,7 @@ export class InvoiceDialogComponent {
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
-  protected readonly form = new FormGroup({
+  protected readonly invoiceForm = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     salesOrderId: new FormControl<number | null>(null),
     shipmentId: new FormControl<number | null>(null),
@@ -74,7 +76,7 @@ export class InvoiceDialogComponent {
     notes: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  protected readonly violations = FormValidationService.getViolations(this.invoiceForm, {
     customerId: this.translate.instant('invoices.customer'),
     salesOrderId: this.translate.instant('invoices.salesOrderId'),
     shipmentId: this.translate.instant('invoices.shipmentId'),
@@ -99,11 +101,23 @@ export class InvoiceDialogComponent {
   );
 
   protected readonly taxRateValue = toSignal(
-    this.form.controls.taxRate.valueChanges.pipe(startWith(this.form.controls.taxRate.value ?? 0)),
-    { initialValue: this.form.controls.taxRate.value ?? 0 }
+    this.invoiceForm.controls.taxRate.valueChanges.pipe(startWith(this.invoiceForm.controls.taxRate.value ?? 0)),
+    { initialValue: this.invoiceForm.controls.taxRate.value ?? 0 }
   );
   protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'invoice',
+    entityId: 'new',
+    route: '/invoices',
+    snapshotFn: () => ({ ...this.invoiceForm.getRawValue(), lines: this.lines() }),
+    restoreFn: (data) => {
+      this.invoiceForm.patchValue(data);
+      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      this.invoiceForm.markAsDirty();
+    },
+  };
 
   constructor() {
     this.customerService.getCustomers(undefined, true).subscribe({
@@ -133,10 +147,10 @@ export class InvoiceDialogComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid || this.lines().length === 0) return;
+    if (this.invoiceForm.invalid || this.lines().length === 0) return;
     this.saving.set(true);
 
-    const f = this.form.getRawValue();
+    const f = this.invoiceForm.getRawValue();
     const lineRequests: CreateInvoiceLineRequest[] = this.lines().map(l => ({
       partId: l.partId ?? undefined,
       description: l.description,
@@ -157,6 +171,7 @@ export class InvoiceDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('invoices.invoiceCreated'));
         this.saved.emit();
       },

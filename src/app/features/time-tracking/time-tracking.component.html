@@ -87,7 +87,8 @@
 
 <!-- Manual Entry Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="'timeTracking.logTimeEntry' | translate" (closed)="closeDialog()">
+  <app-dialog [title]="'timeTracking.logTimeEntry' | translate" [draftConfig]="draftConfig" [draftFormGroup]="entryForm" (closed)="closeDialog()">
+
     <div [formGroup]="entryForm">
       <div class="dialog-row">
         <app-datepicker data-testid="time-entry-date" [label]="'common.date' | translate" formControlName="date" />

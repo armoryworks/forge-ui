@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -18,6 +18,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { DraftConfig } from '../../shared/models/draft-config.model';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -35,6 +36,8 @@ import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barco
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AssetsComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly assetsService = inject(AssetsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -46,6 +49,7 @@ export class AssetsComponent {
   protected readonly selectedAsset = signal<AssetItem | null>(null);
   protected readonly maintenanceLogs = signal<MaintenanceLogListItem[]>([]);
   protected readonly maintenanceLogsLoading = signal(false);
+  protected draftConfig: DraftConfig = { entityType: 'asset', entityId: 'new', route: '/assets' };
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -160,6 +164,7 @@ export class AssetsComponent {
 
   protected openCreateAsset(): void {
     this.editingAsset.set(null);
+    this.draftConfig = { entityType: 'asset', entityId: 'new', route: '/assets' };
     this.assetForm.reset({
       name: '', assetType: 'Machine', location: '',
       manufacturer: '', model: '', serialNumber: '', notes: '',
@@ -172,6 +177,7 @@ export class AssetsComponent {
     const asset = this.selectedAsset();
     if (!asset) return;
     this.editingAsset.set(asset);
+    this.draftConfig = { entityType: 'asset', entityId: asset.id.toString(), route: '/assets' };
     this.assetForm.patchValue({
       name: asset.name,
       assetType: asset.assetType,
@@ -187,7 +193,9 @@ export class AssetsComponent {
     this.showDialog.set(true);
   }
 
-  protected closeDialog(): void { this.showDialog.set(false); }
+  protected closeDialog(): void {
+    this.showDialog.set(false);
+  }
 
   protected saveAsset(): void {
     if (this.assetForm.invalid) return;
@@ -209,7 +217,14 @@ export class AssetsComponent {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
-        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success(this.translate.instant('assets.assetUpdated')); },
+        next: (asset) => {
+          this.saving.set(false);
+          this.dialogRef.clearDraft();
+          this.selectedAsset.set(asset);
+          this.closeDialog();
+          this.loadAssets();
+          this.snackbar.success(this.translate.instant('assets.assetUpdated'));
+        },
         error: () => this.saving.set(false),
       });
     } else {
@@ -225,7 +240,14 @@ export class AssetsComponent {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
-        next: (asset) => { this.saving.set(false); this.selectedAsset.set(asset); this.closeDialog(); this.loadAssets(); this.snackbar.success(this.translate.instant('assets.assetCreated')); },
+        next: (asset) => {
+          this.saving.set(false);
+          this.dialogRef.clearDraft();
+          this.selectedAsset.set(asset);
+          this.closeDialog();
+          this.loadAssets();
+          this.snackbar.success(this.translate.instant('assets.assetCreated'));
+        },
         error: () => this.saving.set(false),
       });
     }

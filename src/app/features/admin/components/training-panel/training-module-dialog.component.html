@@ -1,4 +1,5 @@
-<app-dialog [title]="isEditing ? 'Edit Module' : 'New Training Module'" width="800px" (closed)="cancel()">
+<app-dialog [title]="isEditing ? 'Edit Module' : 'New Training Module'" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="cancel()">
+
   <div [formGroup]="form">
     <app-input label="Title" formControlName="title" [required]="true" [maxlength]="200" />
 

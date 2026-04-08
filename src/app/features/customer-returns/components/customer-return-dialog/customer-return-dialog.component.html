@@ -1,9 +1,11 @@
 <app-dialog
   [title]="isEditing ? ('customerReturns.editReturn' | translate) : ('customerReturns.newReturn' | translate)"
   width="560px"
+  [draftConfig]="draftConfig"
+  [draftFormGroup]="returnForm"
   (closed)="close()">
 
-  <div [formGroup]="form">
+  <div [formGroup]="returnForm">
     @if (!isEditing) {
       <app-entity-picker
         label="Customer"
@@ -44,7 +46,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || saving()"
+      [disabled]="returnForm.invalid || saving()"
       (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined account-page__spinner">sync</span>

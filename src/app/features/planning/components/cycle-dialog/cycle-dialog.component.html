@@ -1,5 +1,6 @@
-<app-dialog [title]="dialogTitle()" width="520px" (closed)="close()">
-  <div [formGroup]="form">
+<app-dialog [title]="dialogTitle()" width="520px" [draftConfig]="draftConfig()" [draftFormGroup]="formGroup" (closed)="close()">
+
+  <div [formGroup]="formGroup">
     <app-input [label]="'planning.cycleName' | translate" formControlName="name" [placeholder]="'planning.cycleNamePlaceholder' | translate" />
 
     <div class="dialog-row">
@@ -14,7 +15,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || saving()"
+      [disabled]="formGroup.invalid || saving()"
       (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined spin">sync</span>

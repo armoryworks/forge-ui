@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -8,6 +8,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CompanyLocation } from '../../models/company-location.model';
 import { Address } from '../../../../shared/models/address.model';
 
@@ -23,12 +24,20 @@ import { Address } from '../../../../shared/models/address.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompanyLocationDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   readonly location = input<CompanyLocation | null>(null);
   readonly saving = input(false);
   readonly closed = output<void>();
   readonly saved = output<Partial<CompanyLocation>>();
 
-  protected readonly form = new FormGroup({
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'company-location',
+    entityId: 'new',
+    route: '/admin/settings',
+  };
+
+  readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     phone: new FormControl(''),
     isActive: new FormControl(true),
@@ -45,6 +54,7 @@ export class CompanyLocationDialogComponent {
     const loc = this.location();
     if (loc) {
       this.isEdit.set(true);
+      this.draftConfig = { ...this.draftConfig, entityId: loc.id.toString() };
       this.form.patchValue({
         name: loc.name,
         phone: loc.phone ?? '',
@@ -67,6 +77,7 @@ export class CompanyLocationDialogComponent {
     const v = this.form.getRawValue();
     const addr = v.address;
 
+    this.dialogRef.clearDraft();
     this.saved.emit({
       name: v.name!,
       phone: v.phone || null,

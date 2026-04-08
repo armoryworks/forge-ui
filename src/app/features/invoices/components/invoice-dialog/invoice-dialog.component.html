@@ -1,4 +1,4 @@
-<app-dialog [title]="'invoices.newInvoice' | translate" width="1100px" [splitLayout]="true" (closed)="close()">
+<app-dialog [title]="'invoices.newInvoice' | translate" width="1100px" [splitLayout]="true" [draftConfig]="draftConfig" [draftFormGroup]="invoiceForm" (closed)="close()">
   <div class="dlg-body">
 
     <!-- Main: Line Items -->
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Sidebar: Details + Notes + Summary -->
-    <div class="dlg-sidebar" [formGroup]="form">
+    <div class="dlg-sidebar" [formGroup]="invoiceForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'invoices.invoiceDetails' | translate }}</span>
         <app-select [label]="'invoices.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" />
@@ -102,7 +102,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || lines().length === 0 || saving()"
+      [disabled]="invoiceForm.invalid || lines().length === 0 || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span> {{ 'invoices.createInvoice' | translate }}
     </button>

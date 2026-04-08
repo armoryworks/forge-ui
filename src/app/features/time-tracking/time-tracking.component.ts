@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -15,6 +15,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -45,6 +46,8 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TimeTrackingComponent implements OnDestroy {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly service = inject(TimeTrackingService);
   private readonly timerHub = inject(TimerHubService);
   private readonly dialog = inject(MatDialog);
@@ -55,6 +58,7 @@ export class TimeTrackingComponent implements OnDestroy {
   protected readonly entries = signal<TimeEntry[]>([]);
   protected readonly activeTimer = signal<TimeEntry | null>(null);
   protected readonly saving = signal(false);
+  protected draftConfig: DraftConfig = { entityType: 'time-entry', entityId: 'new', route: '/time-tracking' };
 
   // Page date filters
   protected readonly dateFromControl = new FormControl<Date | null>(null);
@@ -171,7 +175,9 @@ export class TimeTrackingComponent implements OnDestroy {
     this.showDialog.set(true);
   }
 
-  protected closeDialog(): void { this.showDialog.set(false); }
+  protected closeDialog(): void {
+    this.showDialog.set(false);
+  }
 
   protected saveEntry(): void {
     if (this.entryForm.invalid) return;
@@ -187,6 +193,7 @@ export class TimeTrackingComponent implements OnDestroy {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.closeDialog();
         this.loadEntries();
         this.snackbar.success(this.translate.instant('timeTracking.entryAdded'));

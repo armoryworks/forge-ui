@@ -1,4 +1,5 @@
-<app-dialog [title]="('purchaseOrders.receiveTitle' | translate: { number: purchaseOrder().poNumber })" width="700px" (closed)="close()">
+<app-dialog [title]="('purchaseOrders.receiveTitle' | translate: { number: purchaseOrder().poNumber })" width="700px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="close()">
+
   @if (receivableLines().length === 0) {
     <app-empty-state icon="check_circle" [message]="'purchaseOrders.allReceived' | translate" />
   } @else {

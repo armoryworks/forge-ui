@@ -1,4 +1,4 @@
-<app-dialog [title]="'shipments.newShipmentTitle' | translate" width="1000px" [splitLayout]="true" (closed)="close()">
+<app-dialog [title]="'shipments.newShipmentTitle' | translate" width="1000px" [splitLayout]="true" [draftConfig]="draftConfig" [draftFormGroup]="shipmentForm" (closed)="close()">
   <div class="dlg-body">
 
     <!-- Main: Shipment Lines -->
@@ -48,7 +48,7 @@
     </div>
 
     <!-- Sidebar: Details + Notes -->
-    <div class="dlg-sidebar" [formGroup]="form">
+    <div class="dlg-sidebar" [formGroup]="shipmentForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'shipments.shipmentDetails' | translate }}</span>
         <app-autocomplete [label]="'shipments.salesOrder' | translate" [options]="salesOrderOptions()" displayField="label" valueField="value" formControlName="salesOrderId" [required]="true" />
@@ -70,7 +70,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || lines().length === 0 || saving()"
+      [disabled]="shipmentForm.invalid || lines().length === 0 || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span> {{ 'shipments.createShipment' | translate }}
     </button>

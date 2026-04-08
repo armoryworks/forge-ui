@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -14,6 +14,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 @Component({
@@ -28,6 +29,8 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SalesTaxDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -46,7 +49,13 @@ export class SalesTaxDialogComponent {
         'VA','WA','WV','WI','WY','DC'].map(s => ({ value: s, label: s })),
   ];
 
-  protected readonly form = new FormGroup({
+  protected draftConfig: DraftConfig = {
+    entityType: 'sales-tax-rate',
+    entityId: 'new',
+    route: '/admin/settings',
+  };
+
+  readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     code: new FormControl('', [Validators.required, Validators.maxLength(20)]),
     stateCode: new FormControl<string | null>(null),
@@ -65,6 +74,7 @@ export class SalesTaxDialogComponent {
   constructor() {
     const r = this.rate();
     if (r) {
+      this.draftConfig = { ...this.draftConfig, entityId: r.id.toString() };
       this.form.patchValue({
         name: r.name,
         code: r.code,
@@ -107,6 +117,7 @@ export class SalesTaxDialogComponent {
     call.subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant(r ? 'salesTax.updated' : 'salesTax.created'));
         this.saved.emit();
       },

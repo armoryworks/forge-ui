@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -20,6 +20,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -47,6 +48,8 @@ const VIEW_MODE_KEY = 'leads-view-mode';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LeadsComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly leadsService = inject(LeadsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
@@ -56,6 +59,7 @@ export class LeadsComponent {
   protected readonly saving = signal(false);
   protected readonly leads = signal<LeadItem[]>([]);
   protected readonly selectedLead = signal<LeadItem | null>(null);
+  protected draftConfig: DraftConfig = { entityType: 'lead', entityId: 'new', route: '/leads' };
 
   // View mode — persisted to localStorage
   protected readonly viewMode = signal<ViewMode>(
@@ -187,6 +191,7 @@ export class LeadsComponent {
 
   protected openCreateLead(): void {
     this.editingLead.set(null);
+    this.draftConfig = { entityType: 'lead', entityId: 'new', route: '/leads' };
     this.leadForm.reset({
       companyName: '',
       contactName: '',
@@ -203,6 +208,7 @@ export class LeadsComponent {
     const lead = this.selectedLead();
     if (!lead) return;
     this.editingLead.set(lead);
+    this.draftConfig = { entityType: 'lead', entityId: lead.id.toString(), route: '/leads' };
     this.leadForm.patchValue({
       companyName: lead.companyName,
       contactName: lead.contactName ?? '',
@@ -215,7 +221,9 @@ export class LeadsComponent {
     this.showDialog.set(true);
   }
 
-  protected closeDialog(): void { this.showDialog.set(false); }
+  protected closeDialog(): void {
+    this.showDialog.set(false);
+  }
 
   protected saveLead(): void {
     if (this.leadForm.invalid) return;
@@ -236,12 +244,24 @@ export class LeadsComponent {
 
     if (editing) {
       this.leadsService.updateLead(editing.id, payload).subscribe({
-        next: (lead) => { this.saving.set(false); this.selectedLead.set(lead); this.closeDialog(); this.loadLeads(); },
+        next: (lead) => {
+          this.saving.set(false);
+          this.dialogRef.clearDraft();
+          this.selectedLead.set(lead);
+          this.closeDialog();
+          this.loadLeads();
+        },
         error: () => this.saving.set(false),
       });
     } else {
       this.leadsService.createLead(payload).subscribe({
-        next: (lead) => { this.saving.set(false); this.selectedLead.set(lead); this.closeDialog(); this.loadLeads(); },
+        next: (lead) => {
+          this.saving.set(false);
+          this.dialogRef.clearDraft();
+          this.selectedLead.set(lead);
+          this.closeDialog();
+          this.loadLeads();
+        },
         error: () => this.saving.set(false),
       });
     }

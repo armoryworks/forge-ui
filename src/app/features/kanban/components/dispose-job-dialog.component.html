@@ -1,14 +1,15 @@
-<app-dialog [title]="('kanban.disposeJobTitle' | translate) + ' — ' + data.jobNumber" width="520px" (closed)="dialogRef.close()">
-  <div [formGroup]="form">
+<app-dialog [title]="('kanban.disposeJobTitle' | translate) + ' — ' + data.jobNumber" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
+
+  <div [formGroup]="formGroup">
     <app-select [label]="'jobs.disposition' | translate" formControlName="disposition" [options]="dispositionOptions" />
     <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="3" [maxlength]="2000" />
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="dialogRef.close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn" (click)="matDialogRef.close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || saving()"
+      [disabled]="formGroup.invalid || saving()"
       (click)="save()">{{ 'kanban.dispose' | translate }}</button>
   </div>
 </app-dialog>

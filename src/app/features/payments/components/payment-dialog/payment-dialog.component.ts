@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, output, computed, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -11,6 +11,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -38,6 +39,7 @@ interface ApplicationEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly paymentService = inject(PaymentService);
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
@@ -65,7 +67,7 @@ export class PaymentDialogComponent {
     { value: 'Other', label: this.translate.instant('payments.methodOther') },
   ];
 
-  protected readonly form = new FormGroup({
+  protected readonly paymentForm = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     method: new FormControl<string | null>(null, [Validators.required]),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
@@ -74,7 +76,7 @@ export class PaymentDialogComponent {
     notes: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  protected readonly violations = FormValidationService.getViolations(this.paymentForm, {
     customerId: 'Customer',
     method: 'Payment Method',
     amount: 'Amount',
@@ -93,6 +95,18 @@ export class PaymentDialogComponent {
   protected readonly totalApplied = computed(() =>
     this.applications().reduce((sum, a) => sum + a.amount, 0)
   );
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'payment',
+    entityId: 'new',
+    route: '/payments',
+    snapshotFn: () => ({ ...this.paymentForm.getRawValue(), applications: this.applications() }),
+    restoreFn: (data) => {
+      this.paymentForm.patchValue(data);
+      if (Array.isArray(data['applications'])) this.applications.set(data['applications'] as ApplicationEntry[]);
+      this.paymentForm.markAsDirty();
+    },
+  };
 
   constructor() {
     this.customerService.getCustomers(undefined, true).subscribe({
@@ -120,10 +134,10 @@ export class PaymentDialogComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.paymentForm.invalid) return;
     this.saving.set(true);
 
-    const f = this.form.getRawValue();
+    const f = this.paymentForm.getRawValue();
     const appRequests: CreatePaymentApplicationRequest[] = this.applications().map(a => ({
       invoiceId: a.invoiceId,
       amount: a.amount,
@@ -140,6 +154,7 @@ export class PaymentDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('payments.paymentCreated'));
         this.saved.emit();
       },

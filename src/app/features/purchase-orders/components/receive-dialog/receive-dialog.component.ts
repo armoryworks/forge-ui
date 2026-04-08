@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal, OnInit } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal, ViewChild } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { PurchaseOrderDetail } from '../../models/purchase-order-detail.model';
@@ -8,20 +10,23 @@ import { ReceiveLineRequest } from '../../models/receive-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 
 @Component({
   selector: 'app-receive-dialog',
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    DialogComponent, EmptyStateComponent, TranslatePipe,
+    DialogComponent, EmptyStateComponent,
+    TranslatePipe,
   ],
   templateUrl: './receive-dialog.component.html',
   styleUrl: './receive-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ReceiveDialogComponent implements OnInit {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly poService = inject(PurchaseOrderService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -34,6 +39,11 @@ export class ReceiveDialogComponent implements OnInit {
   protected readonly receivableLines = signal<PurchaseOrderLine[]>([]);
   protected readonly lineControls = signal<FormControl<number>[]>([]);
 
+  /** Wrapper FormGroup for draft system — holds line quantities keyed by line ID */
+  protected readonly formGroup = new FormGroup({});
+
+  protected draftConfig!: DraftConfig;
+
   ngOnInit(): void {
     const po = this.purchaseOrder();
     const lines = po.lines.filter(l => l.remainingQuantity > 0);
@@ -44,6 +54,30 @@ export class ReceiveDialogComponent implements OnInit {
         validators: [Validators.min(0), Validators.max(l.remainingQuantity)],
       }))
     );
+
+    this.draftConfig = {
+      entityType: 'po-receipt',
+      entityId: po.id.toString(),
+      route: '/purchase-orders',
+      snapshotFn: () => {
+        const snapshot: Record<string, unknown> = {};
+        const ls = this.receivableLines();
+        const cs = this.lineControls();
+        ls.forEach((l, i) => { snapshot[l.id.toString()] = cs[i].value; });
+        return snapshot;
+      },
+      restoreFn: (data: Record<string, unknown>) => {
+        const ls = this.receivableLines();
+        const cs = this.lineControls();
+        ls.forEach((l, i) => {
+          const val = data[l.id.toString()];
+          if (val !== undefined && typeof val === 'number') {
+            cs[i].setValue(val);
+            cs[i].markAsDirty();
+          }
+        });
+      },
+    };
   }
 
   protected get hasAnyQuantity(): boolean {
@@ -78,6 +112,7 @@ export class ReceiveDialogComponent implements OnInit {
     this.poService.receiveItems(this.purchaseOrder().id, { lines: receiveLines }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('purchaseOrders.itemsReceived'));
         this.saved.emit();
       },

@@ -395,7 +395,8 @@
 
 <!-- Lead Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="editingLead() ? ('leads.editLead' | translate) : ('leads.createLead' | translate)" (closed)="closeDialog()">
+  <app-dialog [title]="editingLead() ? ('leads.editLead' | translate) : ('leads.createLead' | translate)" [draftConfig]="draftConfig" [draftFormGroup]="leadForm" (closed)="closeDialog()">
+
     <div [formGroup]="leadForm">
       <app-input data-testid="lead-company-name" [label]="'leads.companyName' | translate" formControlName="companyName" />
 

@@ -1,6 +1,8 @@
 <app-dialog
   [title]="isEditing ? ('salesTax.editRate' | translate) : ('salesTax.addRate' | translate)"
   width="480px"
+  [draftConfig]="draftConfig"
+  [draftFormGroup]="form"
   (closed)="close()">
 
   <div [formGroup]="form">

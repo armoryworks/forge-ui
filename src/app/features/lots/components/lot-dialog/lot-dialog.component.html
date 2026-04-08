@@ -1,9 +1,11 @@
 <app-dialog
   [title]="'lots.newLot' | translate"
   width="520px"
+  [draftConfig]="draftConfig"
+  [draftFormGroup]="lotForm"
   (closed)="close()">
 
-  <div [formGroup]="form">
+  <div [formGroup]="lotForm">
     <app-entity-picker
       label="Part"
       entityType="parts"
@@ -52,7 +54,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || saving()"
+      [disabled]="lotForm.invalid || saving()"
       (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined account-page__spinner">sync</span>

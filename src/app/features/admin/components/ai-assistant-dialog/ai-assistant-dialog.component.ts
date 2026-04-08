@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +15,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 
 export interface AiAssistantDialogData {
   assistant: AiAssistant | null;
@@ -32,8 +33,10 @@ export interface AiAssistantDialogData {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AiAssistantDialogComponent implements OnInit {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   private readonly adminService = inject(AdminService);
-  private readonly dialogRef = inject(MatDialogRef<AiAssistantDialogComponent>);
+  private readonly matDialogRef = inject(MatDialogRef<AiAssistantDialogComponent>);
   private readonly data: AiAssistantDialogData = inject(MAT_DIALOG_DATA);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -43,7 +46,7 @@ export class AiAssistantDialogComponent implements OnInit {
   protected readonly showAdvanced = signal(false);
   protected readonly starterQuestions = signal<string[]>([]);
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     description: new FormControl('', [Validators.maxLength(500)]),
     category: new FormControl('Custom', [Validators.required]),
@@ -96,6 +99,12 @@ export class AiAssistantDialogComponent implements OnInit {
 
   protected readonly newQuestion = new FormControl('');
 
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'ai-assistant',
+    entityId: this.data.assistant?.id?.toString() ?? 'new',
+    route: '/admin/ai-assistants',
+  };
+
   ngOnInit(): void {
     const assistant = this.data.assistant;
     if (assistant) {
@@ -133,7 +142,7 @@ export class AiAssistantDialogComponent implements OnInit {
   }
 
   protected close(): void {
-    this.dialogRef.close(false);
+    this.matDialogRef.close(false);
   }
 
   protected save(): void {
@@ -163,8 +172,9 @@ export class AiAssistantDialogComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.isEdit() ? this.translate.instant('aiAssistants.assistantUpdated') : this.translate.instant('aiAssistants.assistantCreated'));
-        this.dialogRef.close(true);
+        this.matDialogRef.close(true);
       },
       error: () => {
         this.saving.set(false);

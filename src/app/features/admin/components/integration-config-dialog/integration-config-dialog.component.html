@@ -1,4 +1,5 @@
-<app-dialog [title]="('integrationConfigDialog.configure' | translate) + ' ' + data.integration.name" width="520px" (closed)="close()">
+<app-dialog [title]="('integrationConfigDialog.configure' | translate) + ' ' + data.integration.name" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="close()">
+
   @if (data.showSandboxGuides && data.integration.sandboxSteps && data.integration.sandboxSteps.length > 0) {
     <div class="sandbox-guide">
       <button class="sandbox-guide__toggle" (click)="toggleGuide()" [attr.aria-expanded]="guideExpanded()" aria-controls="sandbox-guide-steps">

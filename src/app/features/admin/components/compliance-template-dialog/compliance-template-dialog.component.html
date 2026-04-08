@@ -98,7 +98,8 @@
     </div>
   </app-dialog>
 } @else {
-  <app-dialog [title]="isEdit ? ('complianceTemplateDialog.editTemplate' | translate) : ('complianceTemplateDialog.newTemplate' | translate)" width="640px" (closed)="close()">
+  <app-dialog [title]="isEdit ? ('complianceTemplateDialog.editTemplate' | translate) : ('complianceTemplateDialog.newTemplate' | translate)" width="640px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="close()">
+
     <div [formGroup]="form">
       <div class="dialog-row">
         <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" />

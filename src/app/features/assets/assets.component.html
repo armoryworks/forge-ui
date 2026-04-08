@@ -211,7 +211,8 @@
 
 <!-- Asset Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="editingAsset() ? ('assets.editAsset' | translate) : ('assets.addAsset' | translate)" (closed)="closeDialog()">
+  <app-dialog [title]="editingAsset() ? ('assets.editAsset' | translate) : ('assets.addAsset' | translate)" [draftConfig]="draftConfig" [draftFormGroup]="assetForm" (closed)="closeDialog()">
+
     <div [formGroup]="assetForm">
       <app-input [label]="'assets.name' | translate" formControlName="name" />
 

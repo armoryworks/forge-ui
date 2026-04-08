@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal, computed, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
@@ -13,6 +13,7 @@ import { FileUploadZoneComponent } from '../../../../shared/components/file-uplo
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { AdminService } from '../../services/admin.service';
 import { ComplianceFormTemplate, ComplianceFormType } from '../../../account/models/compliance-form.model';
 
@@ -32,7 +33,9 @@ const SYSTEM_FORM_TYPES: Set<ComplianceFormType> = new Set([
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ComplianceTemplateDialogComponent {
-  private readonly dialogRef = inject(MatDialogRef<ComplianceTemplateDialogComponent>);
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
+  private readonly matDialogRef = inject(MatDialogRef<ComplianceTemplateDialogComponent>);
   private readonly data = inject<ComplianceFormTemplate | null>(MAT_DIALOG_DATA);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
@@ -58,7 +61,7 @@ export class ComplianceTemplateDialogComponent {
     { value: 'Handbook', label: this.translate.instant('complianceTemplateDialog.formTypeHandbook') },
   ];
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     name: new FormControl(this.data?.name ?? '', [Validators.required, Validators.maxLength(200)]),
     formType: new FormControl(this.data?.formType ?? 'W4', [Validators.required]),
     description: new FormControl(this.data?.description ?? '', [Validators.maxLength(500)]),
@@ -80,8 +83,14 @@ export class ComplianceTemplateDialogComponent {
     profileCompletionKey: 'Profile Key',
   });
 
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'compliance-template',
+    entityId: this.data?.id?.toString() ?? 'new',
+    route: '/admin/compliance',
+  };
+
   protected close(): void {
-    this.dialogRef.close(false);
+    this.matDialogRef.close(false);
   }
 
   protected onFileUploaded(file: { id: string }): void {
@@ -91,7 +100,7 @@ export class ComplianceTemplateDialogComponent {
       next: () => {
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('complianceTemplateDialog.documentUploaded'));
-        this.dialogRef.close(true);
+        this.matDialogRef.close(true);
       },
       error: () => this.saving.set(false),
     });
@@ -163,8 +172,9 @@ export class ComplianceTemplateDialogComponent {
     op.subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.isEdit ? this.translate.instant('complianceTemplateDialog.templateUpdated') : this.translate.instant('complianceTemplateDialog.templateCreated'));
-        this.dialogRef.close(true);
+        this.matDialogRef.close(true);
       },
       error: () => this.saving.set(false),
     });

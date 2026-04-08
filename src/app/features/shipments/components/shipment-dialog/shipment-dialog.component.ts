@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -13,6 +13,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -37,6 +38,7 @@ interface LineEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShipmentDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly shipmentService = inject(ShipmentService);
   private readonly partsService = inject(PartsService);
   private readonly salesOrderService = inject(SalesOrderService);
@@ -60,7 +62,7 @@ export class ShipmentDialogComponent {
       label: `${so.orderNumber} — ${so.customerName}${so.customerPO ? ' (' + so.customerPO + ')' : ''}`,
     })));
 
-  protected readonly form = new FormGroup({
+  protected readonly shipmentForm = new FormGroup({
     salesOrderId: new FormControl<number | null>(null, [Validators.required]),
     carrier: new FormControl(''),
     trackingNumber: new FormControl(''),
@@ -69,7 +71,7 @@ export class ShipmentDialogComponent {
     notes: new FormControl(''),
   });
 
-  private readonly formViolations = FormValidationService.getViolations(this.form, {
+  private readonly formViolations = FormValidationService.getViolations(this.shipmentForm, {
     salesOrderId: 'Sales Order ID',
     carrier: 'Carrier',
     trackingNumber: 'Tracking Number',
@@ -87,6 +89,18 @@ export class ShipmentDialogComponent {
     partId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
   });
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'shipment',
+    entityId: 'new',
+    route: '/shipments',
+    snapshotFn: () => ({ ...this.shipmentForm.getRawValue(), lines: this.lines() }),
+    restoreFn: (data) => {
+      this.shipmentForm.patchValue(data);
+      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      this.shipmentForm.markAsDirty();
+    },
+  };
 
   constructor() {
     this.partsService.getParts('Active').subscribe({
@@ -120,10 +134,10 @@ export class ShipmentDialogComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid || this.lines().length === 0) return;
+    if (this.shipmentForm.invalid || this.lines().length === 0) return;
     this.saving.set(true);
 
-    const f = this.form.getRawValue();
+    const f = this.shipmentForm.getRawValue();
     const lineRequests: CreateShipmentLineRequest[] = this.lines().map(l => ({
       partId: l.partId,
       quantity: l.quantity,
@@ -140,6 +154,7 @@ export class ShipmentDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('shipments.shipmentCreated'));
         this.saved.emit();
       },

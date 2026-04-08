@@ -2,11 +2,20 @@
   <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title()" [style.width]="width()" [class.dialog--split]="splitLayout()" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <div class="dialog__header">
       <span class="dialog__title">{{ title() }}</span>
+      @if (isDraftEnabled()) {
+        <app-dirty-form-indicator [dirty]="isDirty()" />
+      }
       <button class="icon-btn" [attr.aria-label]="'shared.closeDialog' | translate" [matTooltip]="'shared.closeDialog' | translate" matTooltipPosition="above" (click)="tryClose()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
     <div class="dialog__body">
+      @if (isDraftEnabled() && restoredDraftTimestamp() !== null) {
+        <app-draft-recovery-banner
+          [visible]="true"
+          [timestamp]="restoredDraftTimestamp()!"
+          (discarded)="discardDraft()" />
+      }
       <ng-content />
     </div>
     <div class="dialog__footer">

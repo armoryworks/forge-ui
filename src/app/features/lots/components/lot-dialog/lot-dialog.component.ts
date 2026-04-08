@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -26,6 +27,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LotDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly service = inject(LotService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -35,7 +37,7 @@ export class LotDialogComponent {
 
   protected readonly saving = signal(false);
 
-  protected readonly form = new FormGroup({
+  protected readonly lotForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.0001)]),
     jobId: new FormControl<number | null>(null),
@@ -44,19 +46,25 @@ export class LotDialogComponent {
     notes: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  protected readonly violations = FormValidationService.getViolations(this.lotForm, {
     partId: 'Part',
     quantity: 'Quantity',
   });
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'lot',
+    entityId: 'new',
+    route: '/lots',
+  };
 
   protected close(): void {
     this.closed.emit();
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.lotForm.invalid) return;
     this.saving.set(true);
-    const f = this.form.getRawValue();
+    const f = this.lotForm.getRawValue();
 
     this.service.create({
       partId: f.partId!,
@@ -68,6 +76,7 @@ export class LotDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('lots.created'));
         this.saved.emit();
       },

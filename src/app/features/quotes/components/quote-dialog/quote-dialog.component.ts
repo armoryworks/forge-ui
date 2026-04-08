@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -19,6 +19,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -45,6 +46,7 @@ interface LineEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class QuoteDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly quoteService = inject(QuoteService);
   private readonly customerService = inject(CustomerService);
   private readonly partsService = inject(PartsService);
@@ -74,7 +76,7 @@ export class QuoteDialogComponent {
   protected readonly partOptions = computed<AutocompleteOption[]>(() =>
     this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     expirationDate: new FormControl<Date | null>(null),
     taxRate: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
@@ -110,6 +112,18 @@ export class QuoteDialogComponent {
 
   protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'quote',
+    entityId: 'new',
+    route: '/quotes',
+    snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
+    restoreFn: (data) => {
+      this.form.patchValue(data);
+      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      this.form.markAsDirty();
+    },
+  };
 
   constructor() {
     this.customerService.getCustomers(undefined, true).subscribe({
@@ -215,6 +229,7 @@ export class QuoteDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('quotes.quoteCreated'));
         this.saved.emit();
       },

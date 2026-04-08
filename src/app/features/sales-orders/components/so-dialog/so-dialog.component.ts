@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { startWith } from 'rxjs';
-
 
 import { SalesOrderService } from '../../services/sales-order.service';
 import { CustomerService } from '../../../customers/services/customer.service';
@@ -19,6 +18,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -46,6 +46,7 @@ interface LineEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SoDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
   private readonly partsService = inject(PartsService);
@@ -70,7 +71,7 @@ export class SoDialogComponent {
 
   protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     customerPO: new FormControl(''),
     creditTerms: new FormControl<string | null>(null),
@@ -109,6 +110,18 @@ export class SoDialogComponent {
   );
   protected readonly taxAmount = computed(() => (this.taxRateValue() ?? 0) / 100 * this.lineTotal());
   protected readonly grandTotal = computed(() => this.lineTotal() + this.taxAmount());
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'sales-order',
+    entityId: 'new',
+    route: '/sales-orders',
+    snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
+    restoreFn: (data) => {
+      this.form.patchValue(data);
+      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      this.form.markAsDirty();
+    },
+  };
 
   constructor() {
     this.customerService.getCustomers().subscribe({
@@ -165,6 +178,7 @@ export class SoDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('salesOrders.soCreated'));
         this.saved.emit();
       },

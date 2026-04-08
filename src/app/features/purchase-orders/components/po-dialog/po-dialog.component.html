@@ -1,4 +1,4 @@
-<app-dialog [title]="'purchaseOrders.newPoTitle' | translate" width="1000px" [splitLayout]="true" (closed)="close()">
+<app-dialog [title]="'purchaseOrders.newPoTitle' | translate" width="1000px" [splitLayout]="true" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="close()">
   <div class="dlg-body">
 
     <!-- Main: Line Items -->

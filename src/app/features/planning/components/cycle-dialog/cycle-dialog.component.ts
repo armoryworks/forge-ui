@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -9,6 +9,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
 import { CreatePlanningCycleRequest } from '../../models/create-planning-cycle-request.model';
@@ -28,6 +29,8 @@ import { UpdatePlanningCycleRequest } from '../../models/update-planning-cycle-r
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CycleDialogComponent implements OnInit {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
   readonly cycle = input<PlanningCycleDetail | null>(null);
   readonly saving = input(false);
 
@@ -39,14 +42,20 @@ export class CycleDialogComponent implements OnInit {
   protected readonly isEditMode = computed(() => this.cycle() !== null);
   protected readonly dialogTitle = computed(() => this.isEditMode() ? this.translate.instant('planning.editCycle') : this.translate.instant('planning.newPlanningCycle'));
 
-  protected readonly form = new FormGroup({
+  protected readonly draftConfig = computed<DraftConfig>(() => ({
+    entityType: 'planning-cycle',
+    entityId: this.cycle()?.id?.toString() ?? 'new',
+    route: '/planning',
+  }));
+
+  protected readonly formGroup = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(100)]),
     startDate: new FormControl<Date | null>(null, [Validators.required]),
     endDate: new FormControl<Date | null>(null, [Validators.required]),
     goals: new FormControl(''),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  protected readonly violations = FormValidationService.getViolations(this.formGroup, {
     name: 'Name',
     startDate: 'Start Date',
     endDate: 'End Date',
@@ -56,7 +65,7 @@ export class CycleDialogComponent implements OnInit {
   ngOnInit(): void {
     const existing = this.cycle();
     if (existing) {
-      this.form.patchValue({
+      this.formGroup.patchValue({
         name: existing.name,
         startDate: existing.startDate,
         endDate: existing.endDate,
@@ -66,7 +75,7 @@ export class CycleDialogComponent implements OnInit {
       const start = new Date();
       const end = new Date();
       end.setDate(end.getDate() + 14);
-      this.form.patchValue({ startDate: start, endDate: end });
+      this.formGroup.patchValue({ startDate: start, endDate: end });
     }
   }
 
@@ -75,9 +84,9 @@ export class CycleDialogComponent implements OnInit {
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.formGroup.invalid) return;
 
-    const raw = this.form.getRawValue();
+    const raw = this.formGroup.getRawValue();
 
     if (this.isEditMode()) {
       const request: UpdatePlanningCycleRequest = {
@@ -86,6 +95,7 @@ export class CycleDialogComponent implements OnInit {
         endDate: toIsoDate(raw.endDate) ?? undefined,
         goals: raw.goals ?? undefined,
       };
+      this.dialogRef.clearDraft();
       this.saved.emit(request);
     } else {
       const startDate = toIsoDate(raw.startDate);
@@ -102,6 +112,7 @@ export class CycleDialogComponent implements OnInit {
         goals: raw.goals || undefined,
         durationDays: durationDays > 0 ? durationDays : undefined,
       };
+      this.dialogRef.clearDraft();
       this.saved.emit(request);
     }
   }

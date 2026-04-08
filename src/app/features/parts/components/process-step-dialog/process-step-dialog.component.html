@@ -1,5 +1,6 @@
-<app-dialog [title]="data.step ? ('parts.editStep' | translate) : ('parts.addProcessStep' | translate)" width="520px" (closed)="dialogRef.close()">
-  <div [formGroup]="form">
+<app-dialog [title]="data.step ? ('parts.editStep' | translate) : ('parts.addProcessStep' | translate)" width="520px" [draftConfig]="draftConfig" [draftFormGroup]="formGroup" (closed)="matDialogRef.close()">
+
+  <div [formGroup]="formGroup">
     <div class="dialog-row">
       <app-input [label]="'parts.stepNumber' | translate" type="number" formControlName="stepNumber" />
       <app-input [label]="'parts.estMinutes' | translate" type="number" formControlName="estimatedMinutes" />
@@ -8,16 +9,16 @@
     <app-textarea [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="4" [maxlength]="4000" />
     <app-entity-picker [label]="'parts.workCenter' | translate" entityType="assets" displayField="name" formControlName="workCenterId" />
     <app-toggle [label]="'parts.qcCheckpoint' | translate" formControlName="isQcCheckpoint" />
-    @if (form.get('isQcCheckpoint')?.value) {
+    @if (formGroup.get('isQcCheckpoint')?.value) {
       <app-textarea [label]="'parts.qcCriteria' | translate" formControlName="qcCriteria" [rows]="2" [maxlength]="1000" />
     }
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="dialogRef.close()">{{ 'common.cancel' | translate }}</button>
+    <button class="action-btn" (click)="matDialogRef.close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || saving()"
+      [disabled]="formGroup.invalid || saving()"
       (click)="save()">{{ data.step ? ('parts.update' | translate) : ('common.add' | translate) }}</button>
   </div>
 </app-dialog>

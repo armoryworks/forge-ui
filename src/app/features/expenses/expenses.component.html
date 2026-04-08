@@ -49,7 +49,8 @@
 
 <!-- Expense Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="'expenses.newExpenseTitle' | translate" (closed)="closeDialog()">
+  <app-dialog [title]="'expenses.newExpenseTitle' | translate" [draftConfig]="draftConfig" [draftFormGroup]="expenseForm" (closed)="closeDialog()">
+
     <div [formGroup]="expenseForm">
       <div class="dialog-row">
         <app-input data-testid="expense-amount" [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />

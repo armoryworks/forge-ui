@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -27,6 +28,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerReturnDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly service = inject(CustomerReturnService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -37,7 +39,7 @@ export class CustomerReturnDialogComponent {
 
   protected readonly saving = signal(false);
 
-  protected readonly form = new FormGroup({
+  protected readonly returnForm = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),
     originalJobId: new FormControl<number | null>(null, [Validators.required]),
     reason: new FormControl('', [Validators.required, Validators.maxLength(500)]),
@@ -45,17 +47,25 @@ export class CustomerReturnDialogComponent {
     returnDate: new FormControl<Date | null>(new Date(), [Validators.required]),
   });
 
-  protected readonly violations = FormValidationService.getViolations(this.form, {
+  protected readonly violations = FormValidationService.getViolations(this.returnForm, {
     customerId: 'Customer',
     originalJobId: 'Original Job',
     reason: 'Reason',
     returnDate: 'Return Date',
   });
 
+  protected get draftConfig(): DraftConfig {
+    return {
+      entityType: 'customer-return',
+      entityId: this.returnDetail()?.id?.toString() ?? 'new',
+      route: '/customer-returns',
+    };
+  }
+
   constructor() {
     const r = this.returnDetail();
     if (r) {
-      this.form.patchValue({
+      this.returnForm.patchValue({
         customerId: r.customerId,
         originalJobId: r.originalJobId,
         reason: r.reason,
@@ -74,9 +84,9 @@ export class CustomerReturnDialogComponent {
   }
 
   protected save(): void {
-    if (this.form.invalid) return;
+    if (this.returnForm.invalid) return;
     this.saving.set(true);
-    const f = this.form.getRawValue();
+    const f = this.returnForm.getRawValue();
     const r = this.returnDetail();
 
     if (r) {
@@ -87,6 +97,7 @@ export class CustomerReturnDialogComponent {
       }).subscribe({
         next: () => {
           this.saving.set(false);
+          this.dialogRef.clearDraft();
           this.snackbar.success(this.translate.instant('customerReturns.updated'));
           this.saved.emit();
         },
@@ -102,6 +113,7 @@ export class CustomerReturnDialogComponent {
       }).subscribe({
         next: () => {
           this.saving.set(false);
+          this.dialogRef.clearDraft();
           this.snackbar.success(this.translate.instant('customerReturns.created'));
           this.saved.emit();
         },

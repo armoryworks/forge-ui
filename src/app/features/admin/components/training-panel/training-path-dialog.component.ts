@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -9,6 +9,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { TrainingPathRow } from './training-panel.component';
 
 interface TrainingPathDetail extends TrainingPathRow {
@@ -32,14 +33,16 @@ interface TrainingPathDetail extends TrainingPathRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrainingPathDialogComponent implements OnInit {
-  private readonly dialogRef = inject(MatDialogRef<TrainingPathDialogComponent>);
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+
+  private readonly matDialogRef = inject(MatDialogRef<TrainingPathDialogComponent>);
   private readonly data = inject<TrainingPathDetail | null>(MAT_DIALOG_DATA);
   private readonly http = inject(HttpClient);
 
   protected readonly saving = signal(false);
   protected readonly isEditing = !!this.data;
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     title: new FormControl(this.data?.title ?? '', [Validators.required, Validators.maxLength(200)]),
     slug: new FormControl(this.data?.slug ?? '', [Validators.maxLength(200)]),
     description: new FormControl(this.data?.description ?? '', [Validators.maxLength(500)]),
@@ -51,6 +54,12 @@ export class TrainingPathDialogComponent implements OnInit {
   protected readonly violations = FormValidationService.getViolations(this.form, {
     title: 'Title',
   });
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'training-path',
+    entityId: this.data?.id?.toString() ?? 'new',
+    route: '/admin/training',
+  };
 
   ngOnInit(): void {
     this.form.controls.title.valueChanges.subscribe(title => {
@@ -68,7 +77,7 @@ export class TrainingPathDialogComponent implements OnInit {
   }
 
   protected cancel(): void {
-    this.dialogRef.close(false);
+    this.matDialogRef.close(false);
   }
 
   protected save(): void {
@@ -93,7 +102,8 @@ export class TrainingPathDialogComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.saving.set(false);
-        this.dialogRef.close(true);
+        this.dialogRef.clearDraft();
+        this.matDialogRef.close(true);
       },
       error: () => this.saving.set(false),
     });

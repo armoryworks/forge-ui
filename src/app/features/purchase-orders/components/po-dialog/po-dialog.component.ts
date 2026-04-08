@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +15,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -40,6 +41,7 @@ interface LineEntry {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PoDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
   private readonly partsService = inject(PartsService);
@@ -64,7 +66,7 @@ export class PoDialogComponent {
   protected readonly partOptions = computed<AutocompleteOption[]>(() =>
     this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
 
-  protected readonly form = new FormGroup({
+  readonly form = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
     jobId: new FormControl<number | null>(null),
     notes: new FormControl(''),
@@ -90,6 +92,18 @@ export class PoDialogComponent {
   protected readonly lineTotal = computed(() =>
     this.lines().reduce((sum, l) => sum + l.orderedQuantity * l.unitPrice, 0)
   );
+
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'purchase-order',
+    entityId: 'new',
+    route: '/purchase-orders',
+    snapshotFn: () => ({ ...this.form.getRawValue(), lines: this.lines() }),
+    restoreFn: (data) => {
+      this.form.patchValue(data);
+      if (Array.isArray(data['lines'])) this.lines.set(data['lines'] as LineEntry[]);
+      this.form.markAsDirty();
+    },
+  };
 
   constructor() {
     this.vendorService.getVendorDropdown().subscribe({
@@ -167,6 +181,7 @@ export class PoDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('purchaseOrders.poCreated'));
         this.saved.emit();
       },

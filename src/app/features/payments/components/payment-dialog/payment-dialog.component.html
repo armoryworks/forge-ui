@@ -1,4 +1,4 @@
-<app-dialog [title]="'payments.newPaymentTitle' | translate" width="960px" [splitLayout]="true" (closed)="close()">
+<app-dialog [title]="'payments.newPaymentTitle' | translate" width="960px" [splitLayout]="true" [draftConfig]="draftConfig" [draftFormGroup]="paymentForm" (closed)="close()">
   <div class="dlg-body">
 
     <!-- Main: Invoice Applications -->
@@ -54,7 +54,7 @@
     </div>
 
     <!-- Sidebar: Payment Details + Notes + Summary -->
-    <div class="dlg-sidebar" [formGroup]="form">
+    <div class="dlg-sidebar" [formGroup]="paymentForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'payments.paymentDetails' | translate }}</span>
         <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" />
@@ -84,7 +84,7 @@
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
-      [disabled]="form.invalid || saving()"
+      [disabled]="paymentForm.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span> {{ 'payments.createPayment' | translate }}
     </button>
