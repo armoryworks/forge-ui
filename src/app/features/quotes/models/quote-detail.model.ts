@@ -17,6 +17,7 @@ export interface QuoteDetail {
   total: number;
   salesOrderId: number | null;
   salesOrderNumber: string | null;
+  sourceEstimateId: number | null;
   lines: QuoteLine[];
   createdAt: Date;
   updatedAt: Date;

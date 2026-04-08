@@ -47,7 +47,7 @@ export class CustomerQuotesTabComponent implements OnInit {
   protected getStatusClass(status: string): string {
     const map: Record<string, string> = {
       Draft: 'chip--muted', Sent: 'chip--info', Accepted: 'chip--success',
-      Rejected: 'chip--error', Expired: 'chip--warning', Converted: 'chip--primary',
+      Declined: 'chip--error', Expired: 'chip--warning', ConvertedToOrder: 'chip--primary',
     };
     return map[status] ?? 'chip--muted';
   }

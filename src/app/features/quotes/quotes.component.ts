@@ -52,7 +52,7 @@ export class QuotesComponent {
     { value: 'Draft', label: this.translate.instant('status.draft') },
     { value: 'Sent', label: this.translate.instant('quotes.statusSent') },
     { value: 'Accepted', label: this.translate.instant('quotes.statusAccepted') },
-    { value: 'Rejected', label: this.translate.instant('quotes.statusRejected') },
+    { value: 'Declined', label: this.translate.instant('quotes.statusDeclined') },
     { value: 'Expired', label: this.translate.instant('quotes.statusExpired') },
     { value: 'ConvertedToOrder', label: this.translate.instant('quotes.statusConvertedToOrder') },
   ];
@@ -192,7 +192,7 @@ export class QuotesComponent {
       Draft: 'chip--muted',
       Sent: 'chip--info',
       Accepted: 'chip--success',
-      Rejected: 'chip--error',
+      Declined: 'chip--error',
       Expired: 'chip--warning',
       ConvertedToOrder: 'chip--primary',
     };

@@ -1,4 +1,4 @@
-export type EstimateStatus = 'Draft' | 'Sent' | 'Accepted' | 'Declined' | 'Expired';
+export type EstimateStatus = 'Draft' | 'Sent' | 'Accepted' | 'Declined' | 'Expired' | 'ConvertedToQuote';
 
 export interface Estimate {
   id: number;
@@ -8,7 +8,7 @@ export interface Estimate {
   estimatedAmount: number;
   status: EstimateStatus;
   validUntil?: string;
-  convertedToQuoteId?: number;
+  generatedQuoteId?: number;
   assignedToName?: string;
   createdAt: string;
 }

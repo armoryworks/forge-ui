@@ -2174,7 +2174,7 @@
     "statusDraft": "Borrador",
     "statusSent": "Enviada",
     "statusAccepted": "Aceptada",
-    "statusRejected": "Rechazada",
+    "statusDeclined": "Rechazada",
     "statusExpired": "Vencida",
     "statusConvertedToOrder": "Convertida a Orden",
     "quoteSent": "Cotización enviada.",

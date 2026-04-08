@@ -35,7 +35,7 @@
 
     <ng-template appColumnCell="actions" let-row>
       <div class="row-actions">
-        @if (!$any(row).convertedToQuoteId) {
+        @if (!$any(row).generatedQuoteId) {
           <button class="icon-btn" (click)="$event.stopPropagation(); convertToQuote($any(row))"
                   aria-label="Convert to quote" title="Convert to Quote">
             <span class="material-icons-outlined">forward</span>

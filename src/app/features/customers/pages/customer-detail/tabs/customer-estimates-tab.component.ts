@@ -108,6 +108,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
       Accepted: 'chip--success',
       Declined: 'chip--error',
       Expired: 'chip--warning',
+      ConvertedToQuote: 'chip--primary',
     };
     return map[status] ?? 'chip--muted';
   }
