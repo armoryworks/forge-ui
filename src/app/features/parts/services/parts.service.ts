@@ -14,9 +14,11 @@ import { PartRevision } from '../models/part-revision.model';
 import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
 import { PartInventorySummary } from '../models/part-inventory-summary.model';
 import { FileAttachment } from '../../../shared/models/file.model';
-import { Operation } from '../models/operation.model';
+import { ActivityItem } from '../../../shared/models/activity.model';
+import { Operation, OperationMaterial } from '../models/operation.model';
 import { CreateOperationRequest } from '../models/create-operation-request.model';
 import { UpdateOperationRequest } from '../models/update-operation-request.model';
+import { CreateOperationMaterialRequest } from '../models/create-operation-material-request.model';
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 
 @Injectable({ providedIn: 'root' })
@@ -102,6 +104,30 @@ export class PartsService {
 
   deleteOperation(partId: number, operationId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${partId}/operations/${operationId}`);
+  }
+
+  createOperationMaterial(partId: number, operationId: number, request: CreateOperationMaterialRequest): Observable<OperationMaterial> {
+    return this.http.post<OperationMaterial>(`${this.base}/${partId}/operations/${operationId}/materials`, request);
+  }
+
+  deleteOperationMaterial(partId: number, operationId: number, materialId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${partId}/operations/${operationId}/materials/${materialId}`);
+  }
+
+  getOperationFiles(partId: number, operationId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${environment.apiUrl}/operations/${operationId}/files`);
+  }
+
+  deleteOperationFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  getOperationActivity(partId: number, operationId: number): Observable<ActivityItem[]> {
+    return this.http.get<ActivityItem[]>(`${this.base}/${partId}/operations/${operationId}/activity`);
+  }
+
+  addOperationComment(partId: number, operationId: number, comment: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${partId}/operations/${operationId}/activity`, { comment });
   }
 
   getFileDownloadUrl(fileId: number): string {

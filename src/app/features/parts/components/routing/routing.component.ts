@@ -6,6 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
 import { Operation } from '../../models/operation.model';
+import { BOMEntry } from '../../models/bom-entry.model';
 import { OperationDialogComponent, OperationDialogData } from '../operation-dialog/operation-dialog.component';
 import { RoutingFlowViewComponent } from '../routing-flow-view/routing-flow-view.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -30,6 +31,7 @@ export class RoutingComponent {
   private readonly translate = inject(TranslateService);
 
   readonly partId = input.required<number>();
+  readonly bomEntries = input<BOMEntry[]>([]);
 
   protected readonly operations = signal<Operation[]>([]);
   protected readonly loading = signal(false);
@@ -58,10 +60,12 @@ export class RoutingComponent {
 
   protected openAddOperation(): void {
     this.dialog.open(OperationDialogComponent, {
-      width: '520px',
+      width: '800px',
       data: {
         partId: this.partId(),
         nextStepNumber: this.operations().length + 1,
+        operations: this.operations(),
+        bomEntries: this.bomEntries(),
       } satisfies OperationDialogData,
     }).afterClosed().subscribe((result: Operation | undefined) => {
       if (result) {
@@ -73,10 +77,12 @@ export class RoutingComponent {
 
   protected openEditOperation(operation: Operation): void {
     this.dialog.open(OperationDialogComponent, {
-      width: '520px',
+      width: '800px',
       data: {
         partId: this.partId(),
         operation,
+        operations: this.operations(),
+        bomEntries: this.bomEntries(),
       } satisfies OperationDialogData,
     }).afterClosed().subscribe((result: Operation | undefined) => {
       if (result) {

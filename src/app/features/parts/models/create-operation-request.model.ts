@@ -6,4 +6,5 @@ export interface CreateOperationRequest {
   estimatedMinutes?: number;
   isQcCheckpoint: boolean;
   qcCriteria?: string;
+  referencedOperationId?: number;
 }

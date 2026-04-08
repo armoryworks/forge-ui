@@ -436,7 +436,7 @@
 
           <!-- Process Tab -->
           @if (detailTab() === 'process') {
-            <app-routing [partId]="part.id" />
+            <app-routing [partId]="part.id" [bomEntries]="part.bomEntries" />
           }
 
           <!-- Files Tab -->

@@ -1,1 +1,148 @@
-// Dialog shell handles layout — minimal component styles needed.
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.operation-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.operation-materials {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.materials-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th {
+    text-align: left;
+    padding: $sp-sm $sp-md;
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  td {
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__actions {
+    width: 40px;
+    text-align: center;
+  }
+}
+
+.add-material-row {
+  display: flex;
+  align-items: flex-end;
+  gap: $sp-md;
+  padding-top: $sp-sm;
+
+  app-select {
+    flex: 2;
+  }
+
+  app-input {
+    flex: 0 0 80px;
+  }
+
+  .action-btn {
+    flex-shrink: 0;
+  }
+}
+
+.materials-hint {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin: $sp-md 0;
+}
+
+.operation-files {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $sp-md;
+}
+
+.file-card {
+  border: $border-width-thin solid var(--border);
+  overflow: hidden;
+
+  &__preview {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__icon {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+
+    .material-icons-outlined {
+      font-size: $icon-size-hero;
+      color: var(--text-muted);
+    }
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $sp-sm $sp-md;
+    gap: $sp-sm;
+  }
+
+  &__name {
+    font-size: $font-size-xxs;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+  }
+}
+
+.operation-activity {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.add-comment {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  .action-btn {
+    align-self: flex-end;
+  }
+}
+
+.tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-sm;
+  height: $badge-size-sm;
+  padding: 0 $sp-sm;
+  border-radius: 7px;
+  background: var(--primary);
+  color: white;
+  font-size: $font-size-xxs;
+  font-weight: 600;
+  margin-left: $sp-sm;
+}
