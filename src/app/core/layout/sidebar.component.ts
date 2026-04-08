@@ -53,11 +53,11 @@ export class SidebarComponent {
         { icon: 'people', label: 'Customers', i18nKey: 'nav.customers', route: '/customers', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'people_outline', label: 'Leads', i18nKey: 'nav.leads', route: '/leads', allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'shopping_cart', label: 'Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'assignment_return', label: 'Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
       ],
     },
     {
@@ -68,7 +68,7 @@ export class SidebarComponent {
         { icon: 'inventory_2', label: 'Inventory', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
         { icon: 'local_shipping', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'description', label: 'POs', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
     {
