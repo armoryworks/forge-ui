@@ -191,7 +191,13 @@ export class AuthService {
     return this.http.delete<void>(`${environment.apiUrl}/auth/sso/unlink/${provider}`);
   }
 
-  logout(): void {
+  async logout(): Promise<void> {
+    // Run before-logout checks (e.g., draft warning dialog)
+    if (this._beforeLogout) {
+      const proceed = await this._beforeLogout();
+      if (!proceed) return;
+    }
+
     this.clearAuth();
     this._broadcastLogout?.();
   }
@@ -214,10 +220,17 @@ export class AuthService {
 
   /** Set by BroadcastService to avoid circular dependency. */
   private _broadcastLogout?: () => void;
+  /** Set by DraftRecoveryService to check for unsaved drafts before logout. */
+  private _beforeLogout?: () => Promise<boolean>;
 
   /** @internal Used by BroadcastService to register the broadcast callback. */
   registerBroadcastCallback(fn: () => void): void {
     this._broadcastLogout = fn;
+  }
+
+  /** @internal Used by DraftRecoveryService to register before-logout check. */
+  registerBeforeLogoutCallback(fn: () => Promise<boolean>): void {
+    this._beforeLogout = fn;
   }
 
   private loadToken(): string | null {

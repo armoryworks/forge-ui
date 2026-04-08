@@ -1,4 +1,10 @@
-<app-dialog [title]="(mode() === 'create' ? ('kanban.newJob' | translate) : ('kanban.editJob' | translate))" width="520px" (closed)="cancel()">
+<app-dialog [title]="(mode() === 'create' ? ('kanban.newJob' | translate) : ('kanban.editJob' | translate))" width="520px" [dirty]="jobForm.dirty" (closed)="cancel()">
+  <app-dirty-form-indicator [dirty]="jobForm.dirty" />
+  <app-draft-recovery-banner
+    [visible]="restoredDraftTimestamp() !== null"
+    [timestamp]="restoredDraftTimestamp() ?? 0"
+    (discarded)="restoredDraftTimestamp.set(null); draftService.clearDraft(entityType, entityId)" />
+
   @if (loadingRefs()) {
     <div class="dialog-loading">
       <span class="material-icons-outlined">hourglass_empty</span>

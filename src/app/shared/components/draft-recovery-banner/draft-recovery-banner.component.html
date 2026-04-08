@@ -1,0 +1,11 @@
+@if (visible()) {
+  <div class="draft-banner" role="status">
+    <span class="material-icons-outlined draft-banner__icon">restore</span>
+    <span class="draft-banner__text">
+      Recovered unsaved changes from {{ timestamp() | date:'MM/dd/yyyy hh:mm a' }}.
+    </span>
+    <button class="draft-banner__action" aria-label="Discard recovered draft" (click)="discarded.emit()">
+      Discard
+    </button>
+  </div>
+}

@@ -1,0 +1,37 @@
+<div class="dialog-backdrop" role="button" tabindex="0" aria-label="Dismiss" (click)="dismiss()" (keydown.enter)="dismiss()">
+  <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title" style="width: 520px" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+    <div class="dialog__header">
+      <span class="dialog__title">{{ title }}</span>
+      <button class="icon-btn" aria-label="Close" (click)="dismiss()">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="dialog__body">
+      <p class="draft-prompt__description">{{ description }}</p>
+
+      <div class="draft-prompt__list">
+        @for (draft of data.drafts; track draft.key) {
+          <div class="draft-prompt__item">
+            <div class="draft-prompt__item-info">
+              <span class="draft-prompt__item-label">{{ draft.displayLabel }}</span>
+              <span class="draft-prompt__item-time">{{ draft.lastModified | date:'MM/dd/yyyy hh:mm a' }}</span>
+            </div>
+            <button class="action-btn action-btn--sm" aria-label="Go to {{ draft.displayLabel }}" (click)="navigateTo(draft)">
+              <span class="material-icons-outlined">open_in_new</span>
+              Go to
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="dialog__footer">
+      @if (data.mode === 'expiry') {
+        <button class="action-btn" (click)="keepAll()">Keep All</button>
+      }
+      <button class="action-btn" (click)="discardAll()">Discard All</button>
+      <button class="action-btn action-btn--primary" (click)="dismiss()">Review Later</button>
+    </div>
+  </div>
+</div>

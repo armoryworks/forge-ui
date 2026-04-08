@@ -53,4 +53,22 @@
       }
     </div>
   </div>
+
+  <!-- Draft Retention -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">Keep unsaved work for</span>
+    <p class="customization__hint">When a form has unsaved changes, they are saved automatically. Choose how long to keep them before they expire.</p>
+
+    <div class="font-scale-picker">
+      @for (opt of draftTtlOptions; track opt.value) {
+        <button
+          class="font-scale-option"
+          [class.font-scale-option--active]="draftTtl() === opt.value"
+          (click)="setDraftTtl(opt.value)"
+          [attr.aria-pressed]="draftTtl() === opt.value">
+          <span class="font-scale-option__label">{{ opt.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
 </div>

@@ -1,0 +1,46 @@
+@use 'styles/variables' as *;
+
+.logout-drafts {
+  &__description {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0 0 $sp-md;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-md;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    background-color: var(--surface);
+  }
+
+  &__item-info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
+  &__item-label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__item-time {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+}

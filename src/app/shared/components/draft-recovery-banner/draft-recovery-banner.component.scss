@@ -1,0 +1,40 @@
+@use 'styles/variables' as *;
+
+.draft-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background-color: var(--info-light);
+  border-left: $border-width solid var(--info);
+  margin-bottom: $sp-md;
+
+  &__icon {
+    font-size: $icon-size-md;
+    color: var(--info);
+    flex-shrink: 0;
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--text);
+    flex: 1;
+  }
+
+  &__action {
+    background: none;
+    border: none;
+    color: var(--info);
+    font-size: $font-size-sm;
+    font-weight: 600;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: $sp-xs $sp-md;
+    white-space: nowrap;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

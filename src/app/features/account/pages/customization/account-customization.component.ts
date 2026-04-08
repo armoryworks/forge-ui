@@ -1,8 +1,12 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
+import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
+import { DRAFT_TTL_OPTIONS, DEFAULT_DRAFT_TTL, DraftTtlOption } from '../../../../shared/models/draft-ttl.model';
+
+const DRAFT_TTL_PREF_KEY = 'draft:ttlMs';
 
 @Component({
   selector: 'app-account-customization',
@@ -14,6 +18,7 @@ import { FontScale, ThemeService } from '../../../../shared/services/theme.servi
 })
 export class AccountCustomizationComponent {
   private readonly themeService = inject(ThemeService);
+  private readonly preferences = inject(UserPreferencesService);
 
   protected readonly theme = this.themeService.theme;
   protected readonly fontScale = this.themeService.fontScale;
@@ -25,11 +30,21 @@ export class AccountCustomizationComponent {
     { value: 'xl',          labelKey: 'account.fontScaleXl',           hint: '18px' },
   ];
 
+  protected readonly draftTtlOptions: DraftTtlOption[] = DRAFT_TTL_OPTIONS;
+  protected readonly draftTtl = signal(
+    this.preferences.get<number>(DRAFT_TTL_PREF_KEY) ?? DEFAULT_DRAFT_TTL,
+  );
+
   protected setFontScale(scale: FontScale): void {
     this.themeService.setFontScale(scale);
   }
 
   protected toggleTheme(): void {
     this.themeService.toggle();
+  }
+
+  protected setDraftTtl(ttl: number): void {
+    this.draftTtl.set(ttl);
+    this.preferences.set(DRAFT_TTL_PREF_KEY, ttl);
   }
 }

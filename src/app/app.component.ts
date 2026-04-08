@@ -31,6 +31,8 @@ import { BroadcastService } from './shared/services/broadcast.service';
 import { LanguageService } from './shared/services/language.service';
 import { ScannerService } from './shared/services/scanner.service';
 import { OfflineQueueService } from './shared/services/offline-queue.service';
+import { DraftRecoveryService } from './shared/services/draft-recovery.service';
+import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -73,6 +75,8 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly languageService = inject(LanguageService);
   private readonly scanner = inject(ScannerService);
   private readonly offlineQueue = inject(OfflineQueueService);
+  private readonly draftRecovery = inject(DraftRecoveryService);
+  private readonly draftBroadcast = inject(DraftBroadcastService);
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
@@ -95,6 +99,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.accountingService.load();
         this.employeeProfile.load();
         this.scanner.start();
+        this.draftRecovery.onLogin();
       } else {
         this.signalr.stopAll();
         // Don't stop the scanner on display/kiosk routes — they manage their own scanner lifecycle
@@ -122,7 +127,11 @@ export class AppComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.routeLoading.initialize();
     this.broadcast.initialize();
+    this.draftBroadcast.initialize();
     this.languageService.initialize();
+
+    // Register before-logout callback for draft warning
+    this.authService.registerBeforeLogoutCallback(() => this.draftRecovery.checkBeforeLogout());
     this.themeService.loadBrandSettings();
     this.registerTours();
     this.keyboardShortcuts.initialize();
@@ -133,6 +142,7 @@ export class AppComponent implements OnInit, OnDestroy {
     this.signalr.stopAll();
     this.keyboardShortcuts.destroy();
     this.scanner.stop();
+    this.draftRecovery.cancelTtlCheck();
   }
 
   private openConflictDialog(conflict: SyncConflict): void {

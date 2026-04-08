@@ -1,8 +1,8 @@
-<div class="dialog-backdrop" role="button" tabindex="0" [attr.aria-label]="'shared.closeDialog' | translate" (click)="closed.emit()" (keydown.enter)="closed.emit()">
+<div class="dialog-backdrop" role="button" tabindex="0" [attr.aria-label]="'shared.closeDialog' | translate" (click)="tryClose()" (keydown.enter)="tryClose()">
   <div class="dialog" role="dialog" aria-modal="true" [attr.aria-label]="title()" [style.width]="width()" [class.dialog--split]="splitLayout()" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <div class="dialog__header">
       <span class="dialog__title">{{ title() }}</span>
-      <button class="icon-btn" [attr.aria-label]="'shared.closeDialog' | translate" [matTooltip]="'shared.closeDialog' | translate" matTooltipPosition="above" (click)="closed.emit()">
+      <button class="icon-btn" [attr.aria-label]="'shared.closeDialog' | translate" [matTooltip]="'shared.closeDialog' | translate" matTooltipPosition="above" (click)="tryClose()">
         <span class="material-icons-outlined">close</span>
       </button>
     </div>
