@@ -56,7 +56,7 @@
       <app-input label="Title" formControlName="title" [required]="true" />
       <app-textarea label="Description" formControlName="description" [rows]="2" />
       <div class="dialog-row">
-        <app-input label="Estimated Amount" formControlName="estimatedAmount" type="number" [required]="true" prefix="$" />
+        <app-input label="Estimated Amount" formControlName="estimatedAmount" mask="currency" [required]="true" prefix="$" />
         <app-datepicker label="Valid Until" formControlName="validUntil" />
       </div>
       @if (isEditing()) {

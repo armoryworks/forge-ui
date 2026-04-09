@@ -360,7 +360,7 @@
   height: $badge-size-md;
   padding: 0 $sp-xs;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-btn-text);
   font-size: var(--font-size-xxs);
   font-weight: 700;
   border-radius: 999px;

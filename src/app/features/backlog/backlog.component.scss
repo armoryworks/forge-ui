@@ -17,7 +17,7 @@
   padding: 0 $sp-lg;
   border: $border-width solid var(--primary);
   background: var(--primary);
-  color: white;
+  color: var(--primary-btn-text);
   cursor: pointer;
   border-radius: $border-radius;
   margin-left: auto;

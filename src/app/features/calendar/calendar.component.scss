@@ -28,7 +28,7 @@
   &--other { background: var(--bg); }
   &--other .cell-date { color: var(--text-muted); opacity: 0.5; }
   &--today .cell-date {
-    background: var(--primary); color: white;
+    background: var(--primary); color: var(--primary-btn-text);
     border-radius: 50%; width: $btn-icon-size; height: $btn-icon-size;
     display: flex; align-items: center; justify-content: center;
   }
@@ -94,7 +94,7 @@
     padding: $sp-xs $sp-md; background: var(--surface); border: none; cursor: pointer;
     color: var(--text-secondary); transition: background $transition-fast, color $transition-fast;
     &:hover { background: var(--bg); }
-    &--active { background: var(--primary); color: white; }
+    &--active { background: var(--primary); color: var(--primary-btn-text); }
     & + & { border-left: $border-width-thin solid var(--border); }
   }
 }
@@ -117,7 +117,7 @@
   &__date {
     font-size: var(--font-size-md); font-weight: 700; color: var(--text);
     &--today {
-      background: var(--primary); color: white; border-radius: 50%;
+      background: var(--primary); color: var(--primary-btn-text); border-radius: 50%;
       width: $btn-icon-size; height: $btn-icon-size;
       display: flex; align-items: center; justify-content: center;
     }

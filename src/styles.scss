@@ -365,7 +365,7 @@ html[data-theme='dark'] {
   .driver-popover-next-btn {
     background: var(--primary) !important;
     border-color: var(--primary) !important;
-    color: white !important;
+    color: var(--primary-btn-text) !important;
     display: inline-flex !important;
     align-items: center !important;
     gap: 4px !important;

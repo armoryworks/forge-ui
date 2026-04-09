@@ -32,7 +32,7 @@
   gap: $sp-md;
   padding: $sp-md $sp-lg;
   background: var(--primary);
-  color: white;
+  color: var(--primary-btn-text);
   font-size: var(--font-size-base);
   font-weight: 600;
   flex-shrink: 0;
@@ -43,7 +43,7 @@
 
   .icon-btn {
     margin-left: auto;
-    color: white;
+    color: var(--primary-btn-text);
 
     &:hover {
       background: rgba(255, 255, 255, 0.15);
@@ -144,7 +144,7 @@
 
   .ai-help-msg--user & {
     background: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
   }
 
   .ai-help-msg--assistant & {

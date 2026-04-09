@@ -60,7 +60,7 @@
 
   &--active {
     background: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
     border-color: var(--primary);
   }
 }
@@ -100,8 +100,8 @@
 
     &--active {
       background: var(--primary);
-      color: white;
-      &:hover { background: var(--primary-dark); color: white; }
+      color: var(--primary-btn-text);
+      &:hover { background: var(--primary-dark); color: var(--primary-btn-text); }
     }
 
     & + & { border-left: $border-width-thin solid var(--border); }
@@ -141,7 +141,7 @@
   padding: $sp-xxs $sp-md;
   border: $border-width solid var(--primary);
   background: var(--primary);
-  color: white;
+  color: var(--primary-btn-text);
   cursor: pointer;
   border-radius: $border-radius;
   margin-left: auto;

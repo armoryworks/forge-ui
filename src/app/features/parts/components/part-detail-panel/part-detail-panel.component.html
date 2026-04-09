@@ -204,7 +204,7 @@
 
             <!-- Set new price inline form -->
             <div class="pricing-add" [formGroup]="priceForm">
-              <app-input label="New Price" type="number" formControlName="unitPrice" [required]="true" prefix="$" />
+              <app-input label="New Price" formControlName="unitPrice" mask="currency" [required]="true" prefix="$" />
               <app-datepicker label="Effective From" formControlName="effectiveFrom" aria-label="Effective from date" />
               <app-input label="Notes" formControlName="notes" />
               <button class="action-btn action-btn--sm pricing-add__btn"

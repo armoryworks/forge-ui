@@ -53,7 +53,7 @@
 
     <div [formGroup]="expenseForm">
       <div class="dialog-row">
-        <app-input data-testid="expense-amount" [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />
+        <app-input data-testid="expense-amount" [label]="'expenses.amount' | translate" formControlName="amount" mask="currency" prefix="$" />
         <app-datepicker data-testid="expense-date" [label]="'expenses.date' | translate" formControlName="expenseDate" />
       </div>
 

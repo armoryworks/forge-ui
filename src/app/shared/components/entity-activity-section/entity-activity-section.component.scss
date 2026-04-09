@@ -50,7 +50,7 @@
   &--active {
     background: var(--primary);
     border-color: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
   }
 
   &__count {
@@ -81,7 +81,7 @@
   height: $avatar-size-md;
   border: none;
   background: var(--primary);
-  color: white;
+  color: var(--primary-btn-text);
   cursor: pointer;
   flex-shrink: 0;
 

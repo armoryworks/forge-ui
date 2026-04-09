@@ -227,7 +227,7 @@
 
   &--user &__bubble {
     background: var(--primary);
-    color: #fff;
+    color: var(--primary-btn-text);
   }
 
   &--assistant &__bubble {

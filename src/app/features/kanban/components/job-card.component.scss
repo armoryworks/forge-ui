@@ -50,7 +50,7 @@
   width: $icon-size-sm;
   height: $icon-size-sm;
   background: var(--primary);
-  color: white;
+  color: var(--primary-btn-text);
   border-radius: 50%;
   @include flex-center;
 

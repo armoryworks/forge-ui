@@ -68,7 +68,7 @@
   &--primary {
     background: var(--primary);
     border-color: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
     min-width: 140px;
 
     &:hover {
@@ -80,7 +80,7 @@
     &[disabled] {
       background: var(--text-muted);
       border-color: var(--text-muted);
-      color: white;
+      color: var(--primary-btn-text);
       opacity: 0.5;
     }
   }

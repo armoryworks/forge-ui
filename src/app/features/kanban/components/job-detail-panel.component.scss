@@ -153,7 +153,7 @@
   &--active {
     background: var(--primary);
     border-color: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
   }
 
   &__count {
@@ -177,7 +177,7 @@
   align-self: flex-end;
   width: $avatar-size-md; height: $avatar-size-md;
   border: none;
-  background: var(--primary); color: white; cursor: pointer; flex-shrink: 0;
+  background: var(--primary); color: var(--primary-btn-text); cursor: pointer; flex-shrink: 0;
   .material-icons-outlined { font-size: $icon-size-sm; }
   &:hover { background: var(--primary-dark); }
   &:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -335,7 +335,7 @@
   border: $border-width-thin solid var(--border);
   background: var(--surface); color: var(--text-secondary); cursor: pointer; flex-shrink: 0;
   .material-icons-outlined { font-size: $icon-size-sm; }
-  &:hover:not(:disabled) { background: var(--primary); color: white; border-color: var(--primary); }
+  &:hover:not(:disabled) { background: var(--primary); color: var(--primary-btn-text); border-color: var(--primary); }
   &:disabled { opacity: 0.4; cursor: default; }
 }
 .subtask-add__btn, .link-add__btn, .part-add__btn { @extend %add-btn; }

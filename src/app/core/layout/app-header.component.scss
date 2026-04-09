@@ -450,7 +450,7 @@
 
   &--active {
     background: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
     border-color: var(--primary);
 
     &:hover {

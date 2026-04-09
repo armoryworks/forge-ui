@@ -353,7 +353,7 @@
         height: 24px;
         border-radius: 50%;
         background: var(--primary);
-        color: white;
+        color: var(--primary-btn-text);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -599,7 +599,7 @@
       background: color-mix(in srgb, var(--primary) 8%, var(--surface));
 
       .chapters-panel__btn { color: var(--primary); }
-      .chapters-panel__num { background: var(--primary); color: #fff; }
+      .chapters-panel__num { background: var(--primary); color: var(--primary-btn-text); }
       .chapters-panel__label { color: var(--primary); font-weight: 600; }
     }
   }
@@ -827,7 +827,7 @@
     height: 20px;
     border-radius: 50%;
     background: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -849,7 +849,7 @@
     height: 2.5rem;
     padding: 0 $sp-xl;
     background: var(--primary);
-    color: white;
+    color: var(--primary-btn-text);
     border: none;
     cursor: pointer;
     font-size: var(--font-size-base);

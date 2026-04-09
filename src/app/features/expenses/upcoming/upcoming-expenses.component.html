@@ -119,7 +119,7 @@
   <app-dialog [title]="'expenses.newRecurringTitle' | translate" width="520px" (closed)="closeDialog()">
     <div [formGroup]="form">
       <div class="dialog-row">
-        <app-input [label]="'expenses.amount' | translate" type="number" formControlName="amount" prefix="$" />
+        <app-input [label]="'expenses.amount' | translate" formControlName="amount" mask="currency" prefix="$" />
         <app-select [label]="'expenses.frequency' | translate" formControlName="frequency" [options]="frequencyOptions" />
       </div>
       <div class="dialog-row">
