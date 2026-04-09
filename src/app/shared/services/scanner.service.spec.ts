@@ -1,13 +1,25 @@
 import { TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 
 import { ScannerService } from './scanner.service';
+import { WebHidRfidService } from './web-hid-rfid.service';
 
 describe('ScannerService', () => {
   let service: ScannerService;
 
   beforeEach(() => {
+    const mockRfid = {
+      lastScan: signal(null),
+      clearLastScan: vi.fn(),
+      reconnect: vi.fn().mockResolvedValue(false),
+      disconnect: vi.fn().mockResolvedValue(undefined),
+    };
+
     TestBed.configureTestingModule({
-      providers: [ScannerService],
+      providers: [
+        ScannerService,
+        { provide: WebHidRfidService, useValue: mockRfid },
+      ],
     });
 
     service = TestBed.inject(ScannerService);
