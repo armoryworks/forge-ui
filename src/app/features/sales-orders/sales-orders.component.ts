@@ -3,7 +3,6 @@ import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
 
 import { SalesOrderService } from './services/sales-order.service';
 import { SalesOrderListItem } from './models/sales-order-list-item.model';
@@ -18,7 +17,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -37,7 +36,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 export class SalesOrdersComponent {
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
-  private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
 
   protected readonly showCreateDialog = signal(false);
@@ -94,7 +93,14 @@ export class SalesOrdersComponent {
     const customerId = this.customerFilterControl.value ?? undefined;
     const status = this.statusFilterControl.value ?? undefined;
     this.soService.getSalesOrders(customerId, status, search).subscribe({
-      next: (list) => { this.salesOrders.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.salesOrders.set(list);
+        this.loading.set(false);
+        const detail = this.detailDialog.getDetailFromUrl();
+        if (detail?.entityType === 'sales-order') {
+          this.openSalesOrderDetail({ id: detail.entityId } as SalesOrderListItem);
+        }
+      },
       error: () => this.loading.set(false),
     });
   }
@@ -102,8 +108,9 @@ export class SalesOrdersComponent {
   protected applyFilters(): void { this.loadSalesOrders(); }
 
   protected openSalesOrderDetail(item: SalesOrderListItem): void {
-    const ref = openDetailDialog<SalesOrderDetailDialogComponent, SalesOrderDetailDialogData>(
-      this.dialog,
+    const ref = this.detailDialog.open<SalesOrderDetailDialogComponent, SalesOrderDetailDialogData>(
+      'sales-order',
+      item.id,
       SalesOrderDetailDialogComponent,
       { salesOrderId: item.id },
     );

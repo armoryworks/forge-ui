@@ -3,8 +3,6 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { MatDialog } from '@angular/material/dialog';
-
 import { LotService } from './services/lot.service';
 import { LotListItem } from './models/lot-list-item.model';
 import { LotDialogComponent } from './components/lot-dialog/lot-dialog.component';
@@ -16,7 +14,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-lots',
@@ -35,7 +33,7 @@ export class LotsComponent {
   private readonly service = inject(LotService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
-  private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly lots = signal<LotListItem[]>([]);
@@ -63,18 +61,31 @@ export class LotsComponent {
     this.loading.set(true);
     const search = this.searchControl.value?.trim() || undefined;
     this.service.getLots(search).subscribe({
-      next: (list) => { this.lots.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.lots.set(list);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  private autoOpenFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'lot') {
+      this.detailDialog.open<LotDetailDialogComponent, LotDetailDialogData>(
+        'lot', detail.entityId, LotDetailDialogComponent,
+        { lotId: detail.entityId, lotNumber: '' },
+      );
+    }
   }
 
   protected applySearch(): void { this.load(); }
 
   protected openLotDetail(row: unknown): void {
     const item = row as LotListItem;
-    openDetailDialog<LotDetailDialogComponent, LotDetailDialogData>(
-      this.dialog,
-      LotDetailDialogComponent,
+    this.detailDialog.open<LotDetailDialogComponent, LotDetailDialogData>(
+      'lot', item.id, LotDetailDialogComponent,
       { lotId: item.id, lotNumber: item.lotNumber },
     );
   }

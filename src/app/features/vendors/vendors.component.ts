@@ -3,8 +3,6 @@ import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { VendorService } from './services/vendor.service';
@@ -18,7 +16,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-vendors',
@@ -36,8 +34,8 @@ import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 })
 export class VendorsComponent {
   private readonly vendorService = inject(VendorService);
-  private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly vendors = signal<VendorListItem[]>([]);
@@ -78,17 +76,34 @@ export class VendorsComponent {
     const search = (this.searchTerm() ?? '').trim() || undefined;
     const isActive = this.activeFilterControl.value ?? undefined;
     this.vendorService.getVendors(search, isActive).subscribe({
-      next: (list) => { this.vendors.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.vendors.set(list);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  private autoOpenFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'vendor') {
+      this.detailDialog.open<VendorDetailDialogComponent, VendorDetailDialogData, boolean>(
+        'vendor', detail.entityId, VendorDetailDialogComponent,
+        { vendorId: detail.entityId },
+      ).afterClosed().subscribe(changed => {
+        if (changed) {
+          this.loadVendors();
+        }
+      });
+    }
   }
 
   protected applyFilters(): void { this.loadVendors(); }
 
   protected openVendorDetail(item: VendorListItem): void {
-    openDetailDialog<VendorDetailDialogComponent, VendorDetailDialogData, boolean>(
-      this.dialog,
-      VendorDetailDialogComponent,
+    this.detailDialog.open<VendorDetailDialogComponent, VendorDetailDialogData, boolean>(
+      'vendor', item.id, VendorDetailDialogComponent,
       { vendorId: item.id },
     ).afterClosed().subscribe(changed => {
       if (changed) {

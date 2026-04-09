@@ -27,7 +27,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { PartDetailDialogComponent, PartDetailDialogData } from './components/part-detail-dialog/part-detail-dialog.component';
 
 type ViewMode = 'table' | 'cards';
@@ -56,6 +56,7 @@ export class PartsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
@@ -165,9 +166,24 @@ export class PartsComponent {
     const type = (this.typeFilter() ?? '') || undefined;
     const search = (this.searchTerm() ?? '').trim() || undefined;
     this.partsService.getParts(status, type, search).subscribe({
-      next: (parts) => { this.parts.set(parts); this.loading.set(false); },
+      next: (parts) => {
+        this.parts.set(parts);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  /** Auto-open detail dialog when URL contains ?detail=part:{id} */
+  private autoOpenHandled = false;
+  private autoOpenFromUrl(): void {
+    if (this.autoOpenHandled) return;
+    this.autoOpenHandled = true;
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'part') {
+      this.openPartDetail(detail.entityId);
+    }
   }
 
   protected applyFilters(): void {
@@ -182,8 +198,8 @@ export class PartsComponent {
   // ── Detail Dialog ──
 
   protected openPartDetail(partId: number): void {
-    openDetailDialog<PartDetailDialogComponent, PartDetailDialogData, { action: string; part: PartDetail } | undefined>(
-      this.dialog, PartDetailDialogComponent, { partId }
+    this.detailDialog.open<PartDetailDialogComponent, PartDetailDialogData, { action: string; part: PartDetail } | undefined>(
+      'part', partId, PartDetailDialogComponent, { partId }
     ).afterClosed().subscribe(result => {
       if (result?.action === 'edit') {
         this.editPart(result.part);

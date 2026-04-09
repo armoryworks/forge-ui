@@ -3,8 +3,6 @@ import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
-
 import { PaymentService } from './services/payment.service';
 import { PaymentListItem } from './models/payment-list-item.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -19,7 +17,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AccountingService } from '../../shared/services/accounting.service';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { PaymentDetailDialogComponent, PaymentDetailDialogData } from './components/payment-detail-dialog/payment-detail-dialog.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-payments',
@@ -37,9 +35,9 @@ import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 export class PaymentsComponent {
   // ⚡ ACCOUNTING BOUNDARY
   private readonly paymentService = inject(PaymentService);
-  private readonly dialog = inject(MatDialog);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly isStandalone = this.accountingService.isStandalone;
   protected readonly providerName = this.accountingService.providerName;
@@ -107,15 +105,32 @@ export class PaymentsComponent {
   protected loadPayments(): void {
     this.loading.set(true);
     this.paymentService.getPayments().subscribe({
-      next: (list) => { this.payments.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.payments.set(list);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
   }
 
+  private autoOpenFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'payment') {
+      this.detailDialog.open<PaymentDetailDialogComponent, PaymentDetailDialogData, boolean>(
+        'payment', detail.entityId, PaymentDetailDialogComponent,
+        { paymentId: detail.entityId },
+      ).afterClosed().subscribe(changed => {
+        if (changed) {
+          this.loadPayments();
+        }
+      });
+    }
+  }
+
   protected openPaymentDetail(item: PaymentListItem): void {
-    openDetailDialog<PaymentDetailDialogComponent, PaymentDetailDialogData, boolean>(
-      this.dialog,
-      PaymentDetailDialogComponent,
+    this.detailDialog.open<PaymentDetailDialogComponent, PaymentDetailDialogData, boolean>(
+      'payment', item.id, PaymentDetailDialogComponent,
       { paymentId: item.id },
     ).afterClosed().subscribe(changed => {
       if (changed) {

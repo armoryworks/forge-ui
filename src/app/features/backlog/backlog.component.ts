@@ -10,6 +10,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { DatePipe } from '@angular/common';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { BacklogService } from './services/backlog.service';
@@ -21,7 +22,7 @@ import { JobDetail } from '../kanban/models/job-detail.model';
 import { PRIORITY_COLORS } from '../kanban/models/priority-colors.const';
 import { PRIORITIES } from '../../shared/models/priority.const';
 import { TrackType } from '../../shared/models/track-type.model';
-import { JobDetailDialogComponent, JobDetailDialogData } from '../kanban/components/job-detail-dialog.component';
+import { JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult } from '../kanban/components/job-detail-dialog.component';
 import { JobDialogComponent, DialogMode } from '../kanban/components/job-dialog.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -57,6 +58,7 @@ export class BacklogComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly jobs = signal<KanbanJob[]>([]);
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -192,6 +194,12 @@ export class BacklogComponent implements OnInit {
         this.trackTypes.set(trackTypes);
         this.users.set(users);
         this.isLoading.set(false);
+
+        // Auto-open from URL (?detail=job:id)
+        const detail = this.detailDialog.getDetailFromUrl();
+        if (detail?.entityType === 'job') {
+          this.onRowClicked({ id: detail.entityId } as KanbanJob);
+        }
       },
       error: () => {
         this.error.set(this.translate.instant('backlog.loadFailed'));
@@ -214,12 +222,10 @@ export class BacklogComponent implements OnInit {
 
   protected onRowClicked(job: KanbanJob): void {
     this.selectedJobId.set(job.id);
-    this.dialog.open(JobDetailDialogComponent, {
-      width: '1400px',
-      maxWidth: '95vw',
-      panelClass: 'detail-dialog-panel',
-      data: { jobId: job.id, users: this.users() } satisfies JobDetailDialogData,
-    }).afterClosed().subscribe(result => {
+    this.detailDialog.open<JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult | undefined>(
+      'job', job.id, JobDetailDialogComponent,
+      { jobId: job.id, users: this.users() },
+    ).afterClosed().subscribe(result => {
       this.selectedJobId.set(null);
       if (result?.action === 'edit') {
         this.openEditDialog(result.job);

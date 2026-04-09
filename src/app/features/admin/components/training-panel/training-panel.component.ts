@@ -12,7 +12,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { openDetailDialog } from '../../../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
 import { TrainingService } from '../../../training/services/training.service';
 
 export interface TrainingModuleRow {
@@ -66,6 +66,7 @@ export class TrainingPanelComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly trainingService = inject(TrainingService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   private readonly base = `${environment.apiUrl}/training`;
   protected readonly activeSubTab = signal<PanelSubTab>('content');
@@ -130,7 +131,23 @@ export class TrainingPanelComponent implements OnInit {
 
   private loadProgress(): void {
     this.http.get<UserProgressRow[]>(`${this.base}/admin/progress-summary`)
-      .subscribe({ next: data => this.userProgress.set(data) });
+      .subscribe({
+        next: data => {
+          this.userProgress.set(data);
+          this.autoOpenFromUrl();
+        },
+      });
+  }
+
+  private autoOpenFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'training') {
+      import('../training-detail-dialog/training-detail-dialog.component').then(({ TrainingDetailDialogComponent }) => {
+        this.detailDialog.open('training', detail.entityId, TrainingDetailDialogComponent, {
+          userId: detail.entityId,
+        });
+      });
+    }
   }
 
   protected openCreateModuleDialog(): void {
@@ -184,9 +201,9 @@ export class TrainingPanelComponent implements OnInit {
     });
   }
 
-  protected openDetailDialog(user: UserProgressRow): void {
+  protected openUserDetailDialog(user: UserProgressRow): void {
     import('../training-detail-dialog/training-detail-dialog.component').then(({ TrainingDetailDialogComponent }) => {
-      openDetailDialog(this.dialog, TrainingDetailDialogComponent, {
+      this.detailDialog.open('training', user.userId, TrainingDetailDialogComponent, {
         userId: user.userId,
       });
     });

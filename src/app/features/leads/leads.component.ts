@@ -23,7 +23,7 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toIsoDate } from '../../shared/utils/date.utils';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -53,6 +53,7 @@ export class LeadsComponent {
   private readonly leadsService = inject(LeadsService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -167,19 +168,32 @@ export class LeadsComponent {
     const status = (this.statusFilter() ?? undefined) || undefined;
     const search = (this.searchTerm() ?? '').trim() || undefined;
     this.leadsService.getLeads(status, search).subscribe({
-      next: (leads) => { this.leads.set(leads); this.loading.set(false); },
+      next: (leads) => {
+        this.leads.set(leads);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  /** Auto-open detail dialog when URL contains ?detail=lead:{id} */
+  private autoOpenHandled = false;
+  private autoOpenFromUrl(): void {
+    if (this.autoOpenHandled) return;
+    this.autoOpenHandled = true;
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'lead') {
+      this.openLeadDetail(detail.entityId);
+    }
   }
 
   protected applyFilters(): void { this.loadLeads(); }
   protected clearSearch(): void { this.searchControl.setValue(''); this.loadLeads(); }
 
   protected openLeadDetail(leadId: number): void {
-    openDetailDialog<LeadDetailDialogComponent, LeadDetailDialogData, LeadDetailDialogResult | undefined>(
-      this.dialog,
-      LeadDetailDialogComponent,
-      { leadId },
+    this.detailDialog.open<LeadDetailDialogComponent, LeadDetailDialogData, LeadDetailDialogResult | undefined>(
+      'lead', leadId, LeadDetailDialogComponent, { leadId },
     ).afterClosed().subscribe(result => {
       if (result?.action === 'edit') {
         this.openEditLeadFromDetail(result.lead);

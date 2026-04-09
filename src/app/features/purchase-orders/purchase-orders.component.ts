@@ -3,7 +3,6 @@ import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
-import { MatDialog } from '@angular/material/dialog';
 
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { PurchaseOrderListItem } from './models/purchase-order-list-item.model';
@@ -18,7 +17,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -37,7 +36,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 export class PurchaseOrdersComponent {
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
-  private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
@@ -95,7 +94,14 @@ export class PurchaseOrdersComponent {
     const vendorId = this.vendorFilterControl.value ?? undefined;
     const status = this.statusFilterControl.value ?? undefined;
     this.poService.getPurchaseOrders(vendorId, undefined, status, search).subscribe({
-      next: (list) => { this.purchaseOrders.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.purchaseOrders.set(list);
+        this.loading.set(false);
+        const detail = this.detailDialog.getDetailFromUrl();
+        if (detail?.entityType === 'purchase-order') {
+          this.openPurchaseOrderDetail({ id: detail.entityId } as PurchaseOrderListItem);
+        }
+      },
       error: () => this.loading.set(false),
     });
   }
@@ -103,8 +109,9 @@ export class PurchaseOrdersComponent {
   protected applyFilters(): void { this.loadPurchaseOrders(); }
 
   protected openPurchaseOrderDetail(item: PurchaseOrderListItem): void {
-    openDetailDialog<PoDetailDialogComponent, PoDetailDialogData, boolean>(
-      this.dialog,
+    this.detailDialog.open<PoDetailDialogComponent, PoDetailDialogData, boolean>(
+      'purchase-order',
+      item.id,
       PoDetailDialogComponent,
       { purchaseOrderId: item.id },
     ).afterClosed().subscribe(changed => {

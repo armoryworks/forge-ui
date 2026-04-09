@@ -5,10 +5,11 @@ import { map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BoardColumnComponent } from './components/board-column.component';
-import { JobDetailDialogComponent, JobDetailDialogData } from './components/job-detail-dialog.component';
+import { JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult } from './components/job-detail-dialog.component';
 import { JobDialogComponent, DialogMode } from './components/job-dialog.component';
 import { JobCardComponent } from './components/job-card.component';
 import { KanbanService } from './services/kanban.service';
@@ -57,6 +58,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -210,15 +212,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
           if (defaultType) {
             this.selectTrackType(defaultType.id);
           }
-          // Open job detail if navigated from a notification link (?job=id)
-          const jobParam = this.route.snapshot.queryParamMap.get('job');
-          if (jobParam) {
-            const jobId = parseInt(jobParam, 10);
-            if (!isNaN(jobId)) {
-              // Clear the query param so back-nav doesn't re-open the dialog
-              this.router.navigate([], { queryParams: { job: null }, queryParamsHandling: 'merge', replaceUrl: true });
-              this.openJobDetail(jobId);
-            }
+          // Open job detail if navigated with ?detail=job:id (shared link, bookmark, notification)
+          const detail = this.detailDialog.getDetailFromUrl();
+          if (detail?.entityType === 'job') {
+            this.openJobDetail(detail.entityId);
           }
         },
         error: () => this.error.set(this.translate.instant('kanban.loadTrackTypesFailed')),
@@ -300,12 +297,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
   }
 
   protected openJobDetail(jobId: number): void {
-    this.dialog.open(JobDetailDialogComponent, {
-      width: '1400px',
-      maxWidth: '95vw',
-      panelClass: 'detail-dialog-panel',
-      data: { jobId, users: this.users() } satisfies JobDetailDialogData,
-    }).afterClosed().subscribe(result => {
+    this.detailDialog.open<JobDetailDialogComponent, JobDetailDialogData, JobDetailDialogResult | undefined>(
+      'job', jobId, JobDetailDialogComponent,
+      { jobId, users: this.users() },
+    ).afterClosed().subscribe(result => {
       if (result?.action === 'edit') {
         this.openEditDialog(result.job);
       }

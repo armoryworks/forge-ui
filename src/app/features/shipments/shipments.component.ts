@@ -4,7 +4,6 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
-import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ShipmentService } from './services/shipment.service';
@@ -19,7 +18,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-dialog.component';
 import { ShipmentDetailDialogComponent, ShipmentDetailDialogData } from './components/shipment-detail-dialog/shipment-detail-dialog.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-shipments',
@@ -36,9 +35,9 @@ import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 })
 export class ShipmentsComponent {
   private readonly shipmentService = inject(ShipmentService);
-  private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -86,20 +85,32 @@ export class ShipmentsComponent {
     this.loading.set(true);
     const status = this.statusFilterControl.value ?? undefined;
     this.shipmentService.getShipments(undefined, status).subscribe({
-      next: (list) => { this.shipments.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.shipments.set(list);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  private autoOpenFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'shipment') {
+      this.detailDialog.open<ShipmentDetailDialogComponent, ShipmentDetailDialogData>(
+        'shipment', detail.entityId, ShipmentDetailDialogComponent,
+        { shipmentId: detail.entityId },
+      ).afterClosed().subscribe(() => this.loadShipments());
+    }
   }
 
   protected applyFilters(): void { this.loadShipments(); }
 
   protected openShipmentDetail(item: ShipmentListItem): void {
-    const ref = openDetailDialog(
-      this.dialog,
-      ShipmentDetailDialogComponent,
-      { shipmentId: item.id } satisfies ShipmentDetailDialogData,
-    );
-    ref.afterClosed().subscribe(() => this.loadShipments());
+    this.detailDialog.open<ShipmentDetailDialogComponent, ShipmentDetailDialogData>(
+      'shipment', item.id, ShipmentDetailDialogComponent,
+      { shipmentId: item.id },
+    ).afterClosed().subscribe(() => this.loadShipments());
   }
 
   // --- Create Dialog ---

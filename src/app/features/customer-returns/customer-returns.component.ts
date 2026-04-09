@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -15,7 +14,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-customer-returns',
@@ -33,8 +32,8 @@ import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 })
 export class CustomerReturnsComponent {
   private readonly service = inject(CustomerReturnService);
-  private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly returns = signal<CustomerReturnListItem[]>([]);
@@ -78,18 +77,35 @@ export class CustomerReturnsComponent {
     this.loading.set(true);
     const status = this.statusFilterControl.value ?? undefined;
     this.service.getReturns(undefined, status).subscribe({
-      next: (list) => { this.returns.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.returns.set(list);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  private autoOpenFromUrl(): void {
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'customer-return') {
+      this.detailDialog.open<CustomerReturnDetailDialogComponent, CustomerReturnDetailDialogData, boolean>(
+        'customer-return', detail.entityId, CustomerReturnDetailDialogComponent,
+        { customerReturnId: detail.entityId },
+      ).afterClosed().subscribe(updated => {
+        if (updated) {
+          this.load();
+        }
+      });
+    }
   }
 
   protected applyFilters(): void { this.load(); }
 
   protected openCustomerReturnDetail(row: unknown): void {
     const item = row as CustomerReturnListItem;
-    openDetailDialog<CustomerReturnDetailDialogComponent, CustomerReturnDetailDialogData, boolean>(
-      this.dialog,
-      CustomerReturnDetailDialogComponent,
+    this.detailDialog.open<CustomerReturnDetailDialogComponent, CustomerReturnDetailDialogData, boolean>(
+      'customer-return', item.id, CustomerReturnDetailDialogComponent,
       { customerReturnId: item.id },
     ).afterClosed().subscribe(updated => {
       if (updated) {

@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -17,7 +16,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { QuoteDialogComponent } from './components/quote-dialog/quote-dialog.component';
 import { QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogResult } from './components/quote-detail-dialog/quote-detail-dialog.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-quotes',
@@ -34,7 +33,7 @@ import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 })
 export class QuotesComponent {
   private readonly quoteService = inject(QuoteService);
-  private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
 
   protected readonly showCreateDialog = signal(false);
@@ -73,7 +72,14 @@ export class QuotesComponent {
     this.loading.set(true);
     const status = this.statusFilterControl.value ?? undefined;
     this.quoteService.getQuotes(undefined, status).subscribe({
-      next: (list) => { this.quotes.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.quotes.set(list);
+        this.loading.set(false);
+        const detail = this.detailDialog.getDetailFromUrl();
+        if (detail?.entityType === 'quote') {
+          this.openQuoteDetail({ id: detail.entityId } as QuoteListItem);
+        }
+      },
       error: () => this.loading.set(false),
     });
   }
@@ -81,8 +87,9 @@ export class QuotesComponent {
   protected applyFilters(): void { this.loadQuotes(); }
 
   protected openQuoteDetail(item: QuoteListItem): void {
-    openDetailDialog<QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogResult>(
-      this.dialog,
+    this.detailDialog.open<QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogResult>(
+      'quote',
+      item.id,
       QuoteDetailDialogComponent,
       { quoteId: item.id },
     ).afterClosed().subscribe(result => {

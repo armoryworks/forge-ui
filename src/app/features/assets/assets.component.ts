@@ -22,7 +22,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult } from './components/asset-detail-dialog/asset-detail-dialog.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 @Component({
   selector: 'app-assets',
@@ -39,6 +39,7 @@ export class AssetsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -127,19 +128,32 @@ export class AssetsComponent {
     const status = this.statusFilter() ?? undefined;
     const search = (this.searchTerm() ?? '').trim() || undefined;
     this.assetsService.getAssets(type, status, search).subscribe({
-      next: (assets) => { this.assets.set(assets); this.loading.set(false); },
+      next: (assets) => {
+        this.assets.set(assets);
+        this.loading.set(false);
+        this.autoOpenFromUrl();
+      },
       error: () => this.loading.set(false),
     });
+  }
+
+  /** Auto-open detail dialog when URL contains ?detail=asset:{id} */
+  private autoOpenHandled = false;
+  private autoOpenFromUrl(): void {
+    if (this.autoOpenHandled) return;
+    this.autoOpenHandled = true;
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'asset') {
+      this.openAssetDetail({ id: detail.entityId } as AssetItem);
+    }
   }
 
   protected applyFilters(): void { this.loadAssets(); }
   protected clearSearch(): void { this.searchControl.setValue(''); this.loadAssets(); }
 
   protected openAssetDetail(asset: AssetItem): void {
-    const ref = openDetailDialog<AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult | undefined>(
-      this.dialog,
-      AssetDetailDialogComponent,
-      { assetId: asset.id },
+    const ref = this.detailDialog.open<AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult | undefined>(
+      'asset', asset.id, AssetDetailDialogComponent, { assetId: asset.id },
     );
     ref.afterClosed().subscribe(result => {
       if (result?.action === 'edit') {

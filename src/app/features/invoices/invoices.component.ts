@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 
 import { InvoiceService } from './services/invoice.service';
 import { InvoiceListItem } from './models/invoice-list-item.model';
@@ -21,7 +20,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dialog.component';
 import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel/uninvoiced-jobs-panel.component';
 import { InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult } from './components/invoice-detail-dialog/invoice-detail-dialog.component';
-import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
@@ -39,7 +38,7 @@ import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 })
 export class InvoicesComponent {
   private readonly invoiceService = inject(InvoiceService);
-  private readonly dialog = inject(MatDialog);
+  private readonly detailDialog = inject(DetailDialogService);
   private readonly snackbar = inject(SnackbarService);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
@@ -96,7 +95,14 @@ export class InvoicesComponent {
     this.loading.set(true);
     const status = this.statusFilterControl.value ?? undefined;
     this.invoiceService.getInvoices(undefined, status).subscribe({
-      next: (list) => { this.invoices.set(list); this.loading.set(false); },
+      next: (list) => {
+        this.invoices.set(list);
+        this.loading.set(false);
+        const detail = this.detailDialog.getDetailFromUrl();
+        if (detail?.entityType === 'invoice') {
+          this.openInvoiceDetail({ id: detail.entityId } as InvoiceListItem);
+        }
+      },
       error: () => this.loading.set(false),
     });
   }
@@ -104,8 +110,9 @@ export class InvoicesComponent {
   protected applyFilters(): void { this.loadInvoices(); }
 
   protected openInvoiceDetail(item: InvoiceListItem): void {
-    const ref = openDetailDialog<InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult | undefined>(
-      this.dialog,
+    const ref = this.detailDialog.open<InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult | undefined>(
+      'invoice',
+      item.id,
       InvoiceDetailDialogComponent,
       { invoiceId: item.id },
     );
