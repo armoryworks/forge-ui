@@ -111,11 +111,13 @@ export class AppHeaderComponent implements OnInit {
         );
       }),
     ).subscribe(response => {
-      this.ragResults.set(response.results);
+      // Filter out internal documentation — not useful to end users
+      const entityResults = response.results.filter(r => r.entityType !== 'Documentation');
+      this.ragResults.set(entityResults);
       this.ragAnswer.set(response.generatedAnswer);
       this.aiLoading.set(false);
       this.showResults.set(
-        this.searchResults().length > 0 || response.results.length > 0 || !!response.generatedAnswer,
+        this.searchResults().length > 0 || entityResults.length > 0 || !!response.generatedAnswer,
       );
     });
 
@@ -155,7 +157,12 @@ export class AppHeaderComponent implements OnInit {
     this.searchControl.setValue('', { emitEvent: false });
     this.searchResults.set([]);
     this.aiSuggestions.set([]);
-    this.router.navigateByUrl(result.url);
+    const detailType = this.getDetailType(result.entityType);
+    if (detailType) {
+      this.router.navigateByUrl(`${result.url}?detail=${detailType}:${result.entityId}`);
+    } else {
+      this.router.navigateByUrl(result.url);
+    }
   }
 
   protected navigateToSuggestion(suggestion: AiSearchSuggestion): void {
@@ -172,29 +179,51 @@ export class AppHeaderComponent implements OnInit {
     this.searchResults.set([]);
     this.ragResults.set([]);
     this.ragAnswer.set(null);
-    const url = this.getEntityRoute(result.entityType, result.entityId);
-    if (url) {
-      this.router.navigateByUrl(url);
+    const type = result.entityType.toLowerCase();
+    const base = this.entityRouteMap[type];
+    const detailType = this.getDetailType(result.entityType);
+    if (base && detailType) {
+      this.router.navigateByUrl(`${base}?detail=${detailType}:${result.entityId}`);
+    } else if (base) {
+      this.router.navigateByUrl(base);
     }
   }
 
-  protected getEntityRoute(entityType: string, entityId: number): string {
-    const routeMap: Record<string, string> = {
-      job: '/kanban',
-      part: '/parts',
-      customer: '/customers',
-      lead: '/leads',
-      asset: '/assets',
-      expense: '/expenses',
-      vendor: '/vendors',
-      'sales-order': '/sales-orders',
-      'purchase-order': '/purchase-orders',
-      quote: '/quotes',
-      shipment: '/shipments',
-      invoice: '/invoices',
+  private readonly entityRouteMap: Record<string, string> = {
+    job: '/kanban',
+    part: '/parts',
+    customer: '/customers',
+    lead: '/leads',
+    asset: '/assets',
+    expense: '/expenses',
+    vendor: '/vendors',
+    salesorder: '/sales-orders',
+    purchaseorder: '/purchase-orders',
+    quote: '/quotes',
+    shipment: '/shipments',
+    invoice: '/invoices',
+    payment: '/payments',
+    lot: '/quality',
+  };
+
+  /** Map backend entity types to detail dialog type strings */
+  private getDetailType(entityType: string): string | null {
+    const map: Record<string, string> = {
+      job: 'job',
+      part: 'part',
+      customer: 'customer',
+      lead: 'lead',
+      asset: 'asset',
+      vendor: 'vendor',
+      salesorder: 'sales-order',
+      purchaseorder: 'purchase-order',
+      quote: 'quote',
+      shipment: 'shipment',
+      invoice: 'invoice',
+      payment: 'payment',
+      lot: 'lot',
     };
-    const base = routeMap[entityType.toLowerCase()];
-    return base ? `${base}/${entityId}` : `/${entityType.toLowerCase()}s`;
+    return map[entityType.toLowerCase()] ?? null;
   }
 
   protected getEntityIcon(entityType: string): string {
@@ -206,11 +235,13 @@ export class AppHeaderComponent implements OnInit {
       asset: 'precision_manufacturing',
       expense: 'receipt_long',
       vendor: 'store',
-      'sales-order': 'shopping_cart',
-      'purchase-order': 'receipt',
+      salesorder: 'shopping_cart',
+      purchaseorder: 'receipt',
       quote: 'request_quote',
       shipment: 'local_shipping',
       invoice: 'description',
+      payment: 'payments',
+      lot: 'science',
     };
     return iconMap[entityType.toLowerCase()] ?? 'article';
   }
