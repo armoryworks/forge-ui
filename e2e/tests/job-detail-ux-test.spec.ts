@@ -1,4 +1,5 @@
 import { test, request, expect } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 
 const BASE_URL = 'http://localhost:4200';
 const API_BASE = 'http://localhost:5000/api/v1/';
@@ -8,7 +9,7 @@ async function login(browser: any) {
   const page = await context.newPage();
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const response = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   const loginData = await response.json();
   await apiContext.dispose();

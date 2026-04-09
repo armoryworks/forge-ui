@@ -16,6 +16,7 @@
  */
 
 import { test, request, type Page } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import path from 'path';
 
@@ -28,7 +29,7 @@ const DOCS_DIR = path.resolve(__dirname, '../../../docs/ui-flows');
 async function loginAdmin(page: Page) {
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const res = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   const data = await res.json();
   await apiContext.dispose();

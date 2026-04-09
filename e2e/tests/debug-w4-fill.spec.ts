@@ -1,9 +1,10 @@
 import { test, request } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 
 test('debug-w4-fill', async ({ page }) => {
   test.setTimeout(60000);
   const api = await request.newContext({ baseURL: 'http://localhost:5000/api/v1/' });
-  const { token, user } = await (await api.post('auth/login', { data: { email: 'admin@qbengineer.local', password: 'Admin123!' } })).json();
+  const { token, user } = await (await api.post('auth/login', { data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD } })).json();
   await api.dispose();
   await page.goto('http://localhost:4200', { waitUntil: 'commit' });
   await page.evaluate(({t,u}: any) => {

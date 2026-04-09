@@ -27,9 +27,10 @@ const SIM_MODE = (process.env['SIM_MODE'] ?? 'api') as 'full' | 'resume' | 'gaps
 const USE_API = SIM_MODE === 'api' || (process.env['SIM_API'] ?? 'false').toLowerCase() === 'true';
 
 const ROLES: SimRole[] = ['admin', 'engineer', 'pm', 'manager', 'office', 'worker'];
+const SEED_PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
 const ROLE_PASSWORDS: Record<SimRole, string> = {
-  admin: 'Admin123!', engineer: 'Engineer123!', pm: 'Engineer123!',
-  manager: 'Engineer123!', office: 'Engineer123!', worker: 'Engineer123!',
+  admin: SEED_PASSWORD, engineer: SEED_PASSWORD, pm: SEED_PASSWORD,
+  manager: SEED_PASSWORD, office: SEED_PASSWORD, worker: SEED_PASSWORD,
 };
 const ROLE_EMAILS: Record<SimRole, string> = {
   admin:    'admin@qbengineer.local',

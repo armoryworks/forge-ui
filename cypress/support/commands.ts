@@ -6,7 +6,9 @@ declare namespace Cypress {
   }
 }
 
-Cypress.Commands.add('login', (email = 'admin@qbengineer.local', password = 'Admin123!') => {
+const SEED_PASSWORD = Cypress.env('SEED_USER_PASSWORD') || 'Test1234!';
+
+Cypress.Commands.add('login', (email = 'admin@qbengineer.local', password = SEED_PASSWORD) => {
   cy.session([email, password], () => {
     cy.request({
       method: 'POST',

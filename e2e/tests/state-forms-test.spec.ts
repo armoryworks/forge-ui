@@ -1,4 +1,5 @@
 import { test, request } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 import { execSync } from 'child_process';
 
 const BASE_URL = 'http://localhost:4200';
@@ -34,7 +35,7 @@ test('extract and screenshot all state withholding forms', async ({ browser }) =
   // Login once
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const loginRes = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   if (!loginRes.ok()) throw new Error(`Login failed: ${loginRes.status()}`);
   const loginData = await loginRes.json();

@@ -1,4 +1,5 @@
 import { test, request, Page } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 
 const BASE_URL = 'http://localhost:4200';
 const API_BASE = 'http://localhost:5000/api/v1/';
@@ -7,7 +8,7 @@ async function setup(browser: any) {
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
   const page = await ctx.newPage();
   const api = await request.newContext({ baseURL: API_BASE });
-  const r = await api.post('auth/login', { data: { email: 'admin@qbengineer.local', password: 'Admin123!' } });
+  const r = await api.post('auth/login', { data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD } });
   const d = await r.json();
   await api.dispose();
   await page.goto(BASE_URL, { waitUntil: 'commit' });

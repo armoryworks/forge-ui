@@ -3,13 +3,15 @@ import { loginViaApi, seedAuth } from '../../helpers/auth.helper';
 
 export type SimRole = 'admin' | 'engineer' | 'pm' | 'manager' | 'office' | 'worker';
 
+const SEED_PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
+
 const ROLE_CREDENTIALS: Record<SimRole, { email: string; password: string }> = {
-  admin:    { email: 'admin@qbengineer.local',    password: 'Admin123!' },
-  engineer: { email: 'akim@qbengineer.local',     password: 'Engineer123!' },
-  pm:       { email: 'pmorris@qbengineer.local',  password: 'Engineer123!' },
-  manager:  { email: 'lwilson@qbengineer.local',  password: 'Engineer123!' },
-  office:   { email: 'cthompson@qbengineer.local',password: 'Engineer123!' },
-  worker:   { email: 'bkelly@qbengineer.local',   password: 'Engineer123!' },
+  admin:    { email: 'admin@qbengineer.local',    password: SEED_PASSWORD },
+  engineer: { email: 'akim@qbengineer.local',     password: SEED_PASSWORD },
+  pm:       { email: 'pmorris@qbengineer.local',  password: SEED_PASSWORD },
+  manager:  { email: 'lwilson@qbengineer.local',  password: SEED_PASSWORD },
+  office:   { email: 'cthompson@qbengineer.local', password: SEED_PASSWORD },
+  worker:   { email: 'bkelly@qbengineer.local',   password: SEED_PASSWORD },
 };
 
 export interface SimContext {

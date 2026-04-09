@@ -1,5 +1,5 @@
 import { test, type Page } from '@playwright/test';
-import { loginViaApi } from '../helpers/auth.helper';
+import { loginViaApi, SEED_PASSWORD } from '../helpers/auth.helper';
 import {
   navigateTo,
   brief,
@@ -26,7 +26,7 @@ test.describe.serial('00 QB Cleanup', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await loginViaApi(page, 'admin@qbengineer.local', 'Admin123!');
+    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
     await navigateTo(page, '/');
     await page.waitForLoadState('networkidle');
   });

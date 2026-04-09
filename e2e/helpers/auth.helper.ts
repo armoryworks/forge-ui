@@ -1,6 +1,7 @@
 import { type Page, request } from '@playwright/test';
 
 const API_BASE = 'http://localhost:5000/api/v1/';
+export const SEED_PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
 
 interface LoginResponse {
   token: string;

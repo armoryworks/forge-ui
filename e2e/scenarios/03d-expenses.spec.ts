@@ -1,5 +1,5 @@
 import { test, type Page } from '@playwright/test';
-import { loginViaApi } from '../helpers/auth.helper';
+import { loginViaApi, SEED_PASSWORD } from '../helpers/auth.helper';
 import {
   fillInput,
   fillTextarea,
@@ -31,7 +31,7 @@ test.describe.serial('03d Expenses', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await loginViaApi(page, 'admin@qbengineer.local', 'Admin123!');
+    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
     await navigateTo(page, '/');
     await page.waitForLoadState('networkidle');
   });
@@ -44,7 +44,7 @@ test.describe.serial('03d Expenses', () => {
     phase('Submitting expenses as different engineers');
 
     // Submit as A. Kim
-    await loginViaApi(page, 'akim@qbengineer.local', 'Engineer123!');
+    await loginViaApi(page, 'akim@qbengineer.local', SEED_PASSWORD);
     await navigateTo(page, '/expenses');
     await brief(page, 1000);
 
@@ -67,7 +67,7 @@ test.describe.serial('03d Expenses', () => {
     }
 
     // Submit as D. Hart
-    await loginViaApi(page, 'dhart@qbengineer.local', 'Engineer123!');
+    await loginViaApi(page, 'dhart@qbengineer.local', SEED_PASSWORD);
     await navigateTo(page, '/expenses');
     await brief(page, 1000);
 
@@ -117,7 +117,7 @@ test.describe.serial('03d Expenses', () => {
 
   test('manager reviews and approves expenses', async () => {
     // Switch to admin (who has Manager capabilities)
-    await loginViaApi(page, 'admin@qbengineer.local', 'Admin123!');
+    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
     await navigateTo(page, '/expenses/approval-queue');
     await brief(page, 1000);
 
@@ -146,7 +146,7 @@ test.describe.serial('03d Expenses', () => {
       '  5. Verify the queue is empty (or shows approved/rejected)',
       '',
       '  BONUS:',
-      '  6. Switch back to akim@qbengineer.local (Engineer123!)',
+      `  6. Switch back to akim@qbengineer.local (${SEED_PASSWORD})`,
       '  7. Navigate to /expenses',
       '  8. Verify expenses show Approved/Rejected status',
       '',

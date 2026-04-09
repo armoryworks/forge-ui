@@ -1,6 +1,6 @@
 import { test, expect, request } from '@playwright/test';
 
-import { loginViaApi, getAuthToken } from '../helpers/auth.helper';
+import { loginViaApi, getAuthToken, SEED_PASSWORD } from '../helpers/auth.helper';
 
 const API_BASE = 'http://localhost:5000/api/v1/';
 
@@ -19,8 +19,8 @@ test.describe('SignalR Board Sync', () => {
     const pageB = await contextB.newPage();
 
     // ── 2. Log in both users ────────────────────────────────────────
-    await loginViaApi(pageA, 'admin@qbengineer.local', 'Admin123!');
-    await loginViaApi(pageB, 'akim@qbengineer.local', 'Engineer123!');
+    await loginViaApi(pageA, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(pageB, 'akim@qbengineer.local', SEED_PASSWORD);
 
     // ── 3. Both navigate to the kanban board ────────────────────────
     await pageA.goto('/kanban');
@@ -30,7 +30,7 @@ test.describe('SignalR Board Sync', () => {
     await pageB.waitForSelector('.board', { timeout: 10_000 });
 
     // ── 4. Resolve dynamic IDs from the API ─────────────────────────
-    const adminToken = await getAuthToken('admin@qbengineer.local', 'Admin123!');
+    const adminToken = await getAuthToken('admin@qbengineer.local', SEED_PASSWORD);
     const apiContext = await request.newContext({
       baseURL: API_BASE,
       extraHTTPHeaders: { Authorization: `Bearer ${adminToken}` },

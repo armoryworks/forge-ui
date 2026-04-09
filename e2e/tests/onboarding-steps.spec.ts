@@ -1,8 +1,8 @@
 import { test } from '@playwright/test';
-import { loginViaApi } from '../helpers/auth.helper';
+import { loginViaApi, SEED_PASSWORD } from '../helpers/auth.helper';
 
 test('screenshot all onboarding steps', async ({ page }) => {
-  await loginViaApi(page, 'admin@qbengineer.local', 'Admin123!');
+  await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
   await page.goto('http://localhost:4200/onboarding');
   await page.waitForTimeout(1500);
   await page.screenshot({ path: 'e2e/screenshots/onboarding-step1.png' });

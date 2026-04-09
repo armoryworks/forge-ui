@@ -115,8 +115,8 @@ At each ⏸ checkpoint, the scenario:
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@qbengineer.local | Admin123! | Admin |
-| akim@qbengineer.local | Engineer123! | Engineer |
-| dhart@qbengineer.local | Engineer123! | Engineer |
-| jsilva@qbengineer.local | Engineer123! | Engineer |
-| mreyes@qbengineer.local | Engineer123! | Engineer |
+| admin@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Admin |
+| akim@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| dhart@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| jsilva@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| mreyes@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |

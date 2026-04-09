@@ -3,6 +3,7 @@
  * Run from qb-engineer-ui/: npx playwright test training-full-test
  */
 import { test, expect, request, Page, BrowserContext } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -17,7 +18,7 @@ if (!fs.existsSync(SHOT_DIR)) fs.mkdirSync(SHOT_DIR, { recursive: true });
 async function loginAndSeedStorage(page: Page): Promise<void> {
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const resp   = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   if (!resp.ok()) throw new Error(`Login failed: ${resp.status()}`);
   const { token, user } = await resp.json();
@@ -316,7 +317,7 @@ test('batch-5: walkthrough module', async ({ browser }) => {
   // Create a walkthrough module via API
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const loginResp = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   const { token } = await loginResp.json();
 
@@ -467,7 +468,7 @@ test('batch-6: video module', async ({ browser }) => {
   // Create a video module via API
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const loginResp = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   const { token } = await loginResp.json();
 

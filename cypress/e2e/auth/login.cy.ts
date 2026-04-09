@@ -18,7 +18,7 @@ describe('Login', () => {
 
   it('should redirect to dashboard on successful login', () => {
     cy.get('input[formControlName="email"]').type('admin@qbengineer.local');
-    cy.get('input[formControlName="password"]').type('Admin123!');
+    cy.get('input[formControlName="password"]').type(Cypress.env('SEED_USER_PASSWORD') || 'Test1234!');
     cy.get('button[type="submit"]').click();
     cy.url().should('include', '/dashboard');
   });

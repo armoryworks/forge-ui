@@ -14,6 +14,7 @@
  */
 
 import { test, request, Page, APIRequestContext } from '@playwright/test';
+import { SEED_PASSWORD } from '../helpers/auth.helper';
 import path from 'path';
 import fs from 'fs';
 
@@ -33,7 +34,7 @@ let _userId: number = 0;
 async function loginAsAdmin(page: Page): Promise<void> {
   const api = await request.newContext({ baseURL: API_BASE });
   const res  = await api.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: 'Admin123!' },
+    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
   });
   const { token, user } = await res.json();
   _authToken = token;
