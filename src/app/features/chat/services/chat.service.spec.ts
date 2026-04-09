@@ -9,6 +9,7 @@ describe('ChatService', () => {
   let service: ChatService;
   let httpMock: HttpTestingController;
   const apiUrl = environment.apiUrl;
+  const base = `${apiUrl}/chat`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,7 +24,7 @@ describe('ChatService', () => {
   describe('getConversations', () => {
     it('should GET conversations list', () => {
       service.getConversations().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/conversations`);
+      const req = httpMock.expectOne(`${base}/conversations`);
       expect(req.request.method).toBe('GET');
       req.flush([]);
     });
@@ -32,7 +33,7 @@ describe('ChatService', () => {
   describe('getMessages', () => {
     it('should GET messages with pagination', () => {
       service.getMessages(5, 2, 25).subscribe();
-      const req = httpMock.expectOne(r => r.url === `${apiUrl}/chat/conversations/5/messages`);
+      const req = httpMock.expectOne(r => r.url === `${base}/messages/5`);
       expect(req.request.params.get('page')).toBe('2');
       expect(req.request.params.get('pageSize')).toBe('25');
       req.flush([]);
@@ -40,10 +41,11 @@ describe('ChatService', () => {
   });
 
   describe('sendMessage', () => {
-    it('should POST message to recipient', () => {
+    it('should POST message', () => {
       service.sendMessage(3, 'Hello').subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/conversations/3/messages`);
+      const req = httpMock.expectOne(`${base}/messages`);
       expect(req.request.method).toBe('POST');
+      expect(req.request.body.recipientId).toBe(3);
       expect(req.request.body.content).toBe('Hello');
       req.flush({ id: 1 });
     });
@@ -52,7 +54,7 @@ describe('ChatService', () => {
   describe('markAsRead', () => {
     it('should POST mark-as-read', () => {
       service.markAsRead(4).subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/conversations/4/read`);
+      const req = httpMock.expectOne(`${base}/messages/4/read`);
       expect(req.request.method).toBe('POST');
       req.flush(null);
     });
@@ -61,7 +63,7 @@ describe('ChatService', () => {
   describe('getChatRooms', () => {
     it('should GET chat rooms', () => {
       service.getChatRooms().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/rooms`);
+      const req = httpMock.expectOne(`${base}/rooms`);
       expect(req.request.method).toBe('GET');
       req.flush([]);
     });
@@ -70,7 +72,7 @@ describe('ChatService', () => {
   describe('createChatRoom', () => {
     it('should POST new room', () => {
       service.createChatRoom('Team Chat', [1, 2, 3]).subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/rooms`);
+      const req = httpMock.expectOne(`${base}/rooms`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body.name).toBe('Team Chat');
       expect(req.request.body.memberIds).toEqual([1, 2, 3]);
@@ -81,7 +83,7 @@ describe('ChatService', () => {
   describe('sendChatRoomMessage', () => {
     it('should POST message to room', () => {
       service.sendChatRoomMessage(2, 'Room message').subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/rooms/2/messages`);
+      const req = httpMock.expectOne(`${base}/rooms/2/messages`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body.content).toBe('Room message');
       req.flush({ id: 1 });
@@ -91,9 +93,8 @@ describe('ChatService', () => {
   describe('addRoomMember', () => {
     it('should POST add member', () => {
       service.addRoomMember(2, 5).subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/rooms/2/members`);
+      const req = httpMock.expectOne(`${base}/rooms/2/members/5`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.body.userId).toBe(5);
       req.flush(null);
     });
   });
@@ -101,7 +102,7 @@ describe('ChatService', () => {
   describe('removeRoomMember', () => {
     it('should DELETE room member', () => {
       service.removeRoomMember(2, 5).subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/chat/rooms/2/members/5`);
+      const req = httpMock.expectOne(`${base}/rooms/2/members/5`);
       expect(req.request.method).toBe('DELETE');
       req.flush(null);
     });
