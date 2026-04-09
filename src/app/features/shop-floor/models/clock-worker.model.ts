@@ -23,4 +23,5 @@ export interface ClockWorker {
   timeOnTask: string;
   statusSince: string | null;
   assignments: WorkerAssignment[];
+  role: string;
 }

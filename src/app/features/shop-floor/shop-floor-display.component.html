@@ -392,16 +392,29 @@
             }
           </div>
 
-          <!-- Receive Goods Action -->
-          <div class="sf-actions-card__grid" style="margin-top: 8px;">
-            <button class="sf-action-btn sf-action-btn--receive"
-                    [disabled]="processing() !== null"
-                    (click)="enterReceiving()"
-                    aria-label="Receive goods">
-              <span class="material-icons-outlined">local_shipping</span>
-              <span class="sf-action-btn__label">Receive Goods</span>
-            </button>
-          </div>
+          <!-- Dock Actions (Receive / Ship) — role-gated -->
+          @if (canReceive() || canShip()) {
+            <div class="sf-actions-card__grid" style="margin-top: 8px;">
+              @if (canReceive()) {
+                <button class="sf-action-btn sf-action-btn--receive"
+                        [disabled]="processing() !== null"
+                        (click)="enterReceiving()"
+                        aria-label="Receive goods">
+                  <span class="material-icons-outlined">move_to_inbox</span>
+                  <span class="sf-action-btn__label">Receive Goods</span>
+                </button>
+              }
+              @if (canShip()) {
+                <button class="sf-action-btn sf-action-btn--ship"
+                        [disabled]="processing() !== null"
+                        (click)="enterShipping()"
+                        aria-label="Ship goods">
+                  <span class="material-icons-outlined">local_shipping</span>
+                  <span class="sf-action-btn__label">Ship Goods</span>
+                </button>
+              }
+            </div>
+          }
 
           <button class="action-btn sf-actions-card__cancel" (click)="cancelActions()"
                   aria-label="Cancel">
@@ -547,6 +560,96 @@
 
         <button class="action-btn sf-receiving-card__cancel" (click)="cancelReceiving()"
                 aria-label="Cancel receiving">
+          <span class="material-icons-outlined">close</span> Cancel
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Shipping Overlay ─── -->
+  @if (phase() === 'shipping') {
+    <div class="sf-overlay">
+      <div class="sf-shipping-card">
+        <div class="sf-shipping-card__header">
+          <span class="material-icons-outlined">local_shipping</span>
+          <h2>Ship Goods</h2>
+        </div>
+
+        @if (!selectedShipment()) {
+          <!-- Shipment Selection -->
+          <p class="sf-shipping-card__hint">Select a shipment to ship out.</p>
+          <div class="sf-shipping-card__list">
+            @for (shipment of shippableShipments(); track shipment.id) {
+              <button class="sf-shipping-card__item"
+                      (click)="selectShipmentForShipping(shipment)"
+                      [attr.aria-label]="'Select shipment ' + shipment.shipmentNumber">
+                <div class="sf-shipping-card__item-info">
+                  <span class="sf-shipping-card__item-number">{{ shipment.shipmentNumber }}</span>
+                  <span class="sf-shipping-card__item-customer">{{ shipment.customerName }}</span>
+                </div>
+                <div class="sf-shipping-card__item-meta">
+                  <span class="sf-shipping-card__item-so">SO {{ shipment.salesOrderNumber }}</span>
+                  <span class="sf-shipping-card__item-status chip chip--info">{{ shipment.status }}</span>
+                </div>
+              </button>
+            } @empty {
+              <div class="sf-empty">
+                <span class="material-icons-outlined sf-empty__icon">inventory_2</span>
+                <p>No shipments ready to ship</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <!-- Shipment Detail + Confirm -->
+          <div class="sf-shipping-card__detail-header">
+            <strong>{{ selectedShipment()!.shipmentNumber }}</strong>
+            <span class="sf-shipping-card__detail-customer">{{ selectedShipment()!.customerName }}</span>
+            <span class="sf-shipping-card__detail-so">SO {{ selectedShipment()!.salesOrderNumber }}</span>
+          </div>
+
+          @if (selectedShipment()!.carrier) {
+            <div class="sf-shipping-card__carrier">
+              <span class="material-icons-outlined">flight_takeoff</span>
+              {{ selectedShipment()!.carrier }}
+              @if (selectedShipment()!.trackingNumber) {
+                — {{ selectedShipment()!.trackingNumber }}
+              }
+            </div>
+          }
+
+          <div class="sf-shipping-card__lines">
+            @for (line of selectedShipment()!.lines; track line.id) {
+              <div class="sf-shipping-card__line">
+                <span class="sf-shipping-card__line-desc">{{ line.description }}</span>
+                <span class="sf-shipping-card__line-qty">x{{ line.quantity }}</span>
+              </div>
+            }
+          </div>
+
+          <div class="sf-shipping-card__actions">
+            <button class="action-btn" (click)="selectedShipment.set(null)" aria-label="Back to shipment list">
+              <span class="material-icons-outlined">arrow_back</span> Back
+            </button>
+            <button class="action-btn" (click)="printPackingSlip()"
+                    aria-label="Print packing slip">
+              <span class="material-icons-outlined">print</span> Packing Slip
+            </button>
+            <button class="action-btn action-btn--primary"
+                    [disabled]="shippingSubmitting()"
+                    (click)="confirmShip()"
+                    aria-label="Mark as shipped">
+              @if (shippingSubmitting()) {
+                <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">check</span>
+              }
+              Mark Shipped
+            </button>
+          </div>
+        }
+
+        <button class="action-btn sf-shipping-card__cancel" (click)="cancelShipping()"
+                aria-label="Cancel shipping">
           <span class="material-icons-outlined">close</span> Cancel
         </button>
       </div>

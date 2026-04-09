@@ -6,6 +6,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { forkJoin, interval } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
+import { environment } from '../../../environments/environment';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
@@ -19,6 +20,9 @@ import { PurchaseOrderService } from '../purchase-orders/services/purchase-order
 import { PurchaseOrderDetail } from '../purchase-orders/models/purchase-order-detail.model';
 import { PurchaseOrderLine } from '../purchase-orders/models/purchase-order-line.model';
 import { InventoryService } from '../inventory/services/inventory.service';
+import { ShipmentService } from '../shipments/services/shipment.service';
+import { ShipmentListItem } from '../shipments/models/shipment-list-item.model';
+import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20] as const;
@@ -29,7 +33,7 @@ const AUTO_LOGOUT_MS = 30_000;
 const PIN_TIMEOUT_MS = 20_000;
 const JOB_SELECT_TIMEOUT_MS = 15_000;
 
-type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving';
+type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 'shipping';
 
 @Component({
   selector: 'app-shop-floor-display',
@@ -60,6 +64,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly loading = inject(LoadingService);
   private readonly poService = inject(PurchaseOrderService);
   private readonly inventoryService = inject(InventoryService);
+  private readonly shipmentService = inject(ShipmentService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
@@ -126,9 +131,26 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly binLocationOptions = signal<SelectOption[]>([]);
   protected readonly receiveBinId = new FormControl<number | null>(null);
 
+  // Shipping state
+  protected readonly shippableShipments = signal<ShipmentListItem[]>([]);
+  protected readonly selectedShipment = signal<ShipmentDetail | null>(null);
+  protected readonly shippingSubmitting = signal(false);
+
   // Drag-and-drop state
   protected readonly draggingJobId = signal<number | null>(null);
   protected readonly dropTargetUserId = signal<number | null>(null);
+
+  // Role-based UI gating
+  private readonly RECEIVE_ROLES = new Set(['Admin', 'Manager', 'OfficeManager', 'Engineer', 'ProductionWorker']);
+  private readonly SHIP_ROLES = new Set(['Admin', 'Manager', 'OfficeManager']);
+  protected readonly canReceive = computed(() => {
+    const worker = this.selectedWorker();
+    return worker ? this.RECEIVE_ROLES.has(worker.role) : false;
+  });
+  protected readonly canShip = computed(() => {
+    const worker = this.selectedWorker();
+    return worker ? this.SHIP_ROLES.has(worker.role) : false;
+  });
 
   // Scan feedback
   protected readonly scanFeedback = signal<string | null>(null);
@@ -204,6 +226,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           }
         } else if (result.scanType === 'job') {
           this.showScanFeedback(`Job ${result.entityNumber} — ${result.entityTitle}`);
+        } else if (result.scanType === 'sales-order') {
+          this.showScanFeedback(`Sales Order ${result.entityNumber} — tap your badge to ship`);
         } else {
           this.showScanFeedback(`Scan not recognized: ${scanValue}`);
         }
@@ -556,6 +580,62 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   }
 
   protected cancelReceiving(): void {
+    this.phase.set('actions');
+    this.startAutoLogoutTimer();
+  }
+
+  // ─── Shipping ───
+
+  protected enterShipping(): void {
+    this.clearAutoLogoutTimer();
+    this.phase.set('shipping');
+    this.selectedShipment.set(null);
+    this.loadShippableShipments();
+  }
+
+  private loadShippableShipments(): void {
+    this.shipmentService.getShipments(undefined, 'Pending').subscribe(pending => {
+      this.shipmentService.getShipments(undefined, 'Packed').subscribe(packed => {
+        this.shippableShipments.set([...pending, ...packed]);
+      });
+    });
+  }
+
+  protected selectShipmentForShipping(shipment: ShipmentListItem): void {
+    this.shipmentService.getShipmentById(shipment.id).subscribe(detail => {
+      this.selectedShipment.set(detail);
+      this.resetAutoLogoutTimer();
+    });
+  }
+
+  protected confirmShip(): void {
+    const shipment = this.selectedShipment();
+    if (!shipment || this.shippingSubmitting()) return;
+    this.shippingSubmitting.set(true);
+    this.resetAutoLogoutTimer();
+
+    this.shipmentService.shipShipment(shipment.id).subscribe({
+      next: () => {
+        this.shippingSubmitting.set(false);
+        this.showScanFeedback(`${shipment.shipmentNumber} marked as shipped`);
+        setTimeout(() => this.ephemeralLogout(), 1500);
+      },
+      error: () => {
+        this.shippingSubmitting.set(false);
+        this.showScanFeedback('Failed to mark shipment as shipped');
+      },
+    });
+  }
+
+  protected printPackingSlip(): void {
+    const shipment = this.selectedShipment();
+    if (!shipment) return;
+    this.resetAutoLogoutTimer();
+    const url = `${environment.apiUrl}/shipments/${shipment.id}/packing-slip`;
+    window.open(url, '_blank');
+  }
+
+  protected cancelShipping(): void {
     this.phase.set('actions');
     this.startAutoLogoutTimer();
   }

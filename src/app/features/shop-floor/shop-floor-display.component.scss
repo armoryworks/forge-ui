@@ -1121,6 +1121,197 @@ $grid-columns: 5;
   }
 }
 
+.sf-action-btn--ship {
+  background: color-mix(in srgb, var(--success) 15%, var(--surface));
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 30%, var(--surface));
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--success) 25%, var(--surface));
+  }
+}
+
+// ─── Shipping Card ───
+.sf-shipping-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+}
+
+.sf-shipping-card__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    color: var(--success);
+  }
+}
+
+.sf-shipping-card__hint {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.sf-shipping-card__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  overflow-y: auto;
+  max-height: 50vh;
+  @include custom-scrollbar(4px);
+}
+
+.sf-shipping-card__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--success);
+    background: color-mix(in srgb, var(--success) 5%, var(--surface));
+  }
+}
+
+.sf-shipping-card__item-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.sf-shipping-card__item-number {
+  font-family: $font-family-mono;
+  font-weight: 600;
+  font-size: $font-size-base;
+}
+
+.sf-shipping-card__item-customer {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+}
+
+.sf-shipping-card__item-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $sp-xs;
+}
+
+.sf-shipping-card__item-so {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  font-family: $font-family-mono;
+}
+
+.sf-shipping-card__item-status {
+  font-size: $font-size-xxs;
+}
+
+.sf-shipping-card__detail-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: color-mix(in srgb, var(--success) 5%, var(--surface));
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-md;
+  flex-wrap: wrap;
+}
+
+.sf-shipping-card__detail-customer {
+  color: var(--text-secondary);
+}
+
+.sf-shipping-card__detail-so {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.sf-shipping-card__carrier {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  padding: $sp-sm $sp-md;
+  background: color-mix(in srgb, var(--info) 5%, var(--surface));
+  border: $border-width-thin solid var(--border);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--info);
+  }
+}
+
+.sf-shipping-card__lines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  overflow-y: auto;
+  max-height: 40vh;
+  @include custom-scrollbar(4px);
+}
+
+.sf-shipping-card__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-lg;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+}
+
+.sf-shipping-card__line-desc {
+  font-size: $font-size-sm;
+  flex: 1;
+  min-width: 0;
+  @include truncate;
+}
+
+.sf-shipping-card__line-qty {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.sf-shipping-card__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: $sp-md;
+}
+
+.sf-shipping-card__cancel {
+  align-self: center;
+  color: var(--text-muted);
+}
+
 // ─── Bottom Action Bar ───
 .sf-action-bar {
   display: flex;
