@@ -25,10 +25,9 @@
     tableId="lots"
     [columns]="columns"
     [data]="lots()"
-    [rowClass]="rowClass"
     emptyIcon="inventory_2"
     [emptyMessage]="'lots.noLots' | translate"
-    [clickableRows]="true" (rowClick)="selectLot($event)">
+    [clickableRows]="true" (rowClick)="openLotDetail($event)">
 
     <ng-template appColumnCell="lotNumber" let-row>
       <span class="lot-number">{{ row.lotNumber }}</span>
@@ -51,59 +50,6 @@
     </ng-template>
   </app-data-table>
 </div>
-
-<!-- Traceability Detail Panel -->
-<app-detail-side-panel
-  [open]="!!selectedLot()"
-  [title]="selectedLot()?.lotNumber ?? ''"
-  (closed)="closeDetail()">
-
-  <div [appLoadingBlock]="traceLoading()">
-    @if (trace(); as t) {
-      <div class="trace-header">
-        <div class="trace-meta">
-          <span class="trace-label">{{ 'lots.partNumber' | translate }}</span>
-          <span class="trace-value">{{ t.partNumber }}</span>
-        </div>
-        <div class="trace-meta">
-          <span class="trace-label">{{ 'lots.quantity' | translate }}</span>
-          <span class="trace-value">{{ t.quantity }}</span>
-        </div>
-        @if (t.supplierLotNumber) {
-          <div class="trace-meta">
-            <span class="trace-label">{{ 'lots.supplierLot' | translate }}</span>
-            <span class="trace-value">{{ t.supplierLotNumber }}</span>
-          </div>
-        }
-        @if (t.expirationDate) {
-          <div class="trace-meta">
-            <span class="trace-label">{{ 'lots.expires' | translate }}</span>
-            <span class="trace-value">{{ t.expirationDate | date:'MM/dd/yyyy' }}</span>
-          </div>
-        }
-      </div>
-
-      <div class="trace-timeline">
-        <h4 class="trace-timeline__title">{{ 'lots.traceHistory' | translate }}</h4>
-        @if (t.events.length === 0) {
-          <p class="trace-empty">{{ 'lots.noTraceEvents' | translate }}</p>
-        }
-        @for (event of t.events; track event.date + event.type) {
-          <div class="trace-event">
-            <div class="trace-event__icon">
-              <span class="material-icons-outlined">{{ getTraceEventIcon(event.type) }}</span>
-            </div>
-            <div class="trace-event__body">
-              <span class="trace-event__ref">{{ event.referenceNumber }}</span>
-              <span class="trace-event__desc">{{ event.description }}</span>
-              <span class="trace-event__date">{{ event.date | date:'MM/dd/yyyy' }}</span>
-            </div>
-          </div>
-        }
-      </div>
-    }
-  </div>
-</app-detail-side-panel>
 
 <!-- Create Dialog -->
 @if (showCreateDialog()) {

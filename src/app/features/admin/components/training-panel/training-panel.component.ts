@@ -10,11 +10,10 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { DetailSidePanelComponent } from '../../../../shared/components/detail-side-panel/detail-side-panel.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { openDetailDialog } from '../../../../shared/utils/detail-dialog.utils';
 import { TrainingService } from '../../../training/services/training.service';
-import { UserTrainingDetailPanelComponent } from './user-training-detail-panel.component';
 
 export interface TrainingModuleRow {
   id: number;
@@ -57,8 +56,6 @@ export type PanelSubTab = 'content' | 'paths' | 'progress';
     ColumnCellDirective,
     LoadingBlockDirective,
     InputComponent,
-    DetailSidePanelComponent,
-    UserTrainingDetailPanelComponent,
   ],
   templateUrl: './training-panel.component.html',
   styleUrl: './training-panel.component.scss',
@@ -78,7 +75,6 @@ export class TrainingPanelComponent implements OnInit {
   protected readonly modules = signal<TrainingModuleRow[]>([]);
   protected readonly paths = signal<TrainingPathRow[]>([]);
   protected readonly userProgress = signal<UserProgressRow[]>([]);
-  protected readonly selectedUser = signal<UserProgressRow | null>(null);
 
   protected readonly moduleSearchControl = new FormControl('');
 
@@ -188,12 +184,12 @@ export class TrainingPanelComponent implements OnInit {
     });
   }
 
-  protected viewDetail(user: UserProgressRow): void {
-    this.selectedUser.set(user);
-  }
-
-  protected closeDetail(): void {
-    this.selectedUser.set(null);
+  protected openDetailDialog(user: UserProgressRow): void {
+    import('../training-detail-dialog/training-detail-dialog.component').then(({ TrainingDetailDialogComponent }) => {
+      openDetailDialog(this.dialog, TrainingDetailDialogComponent, {
+        userId: user.userId,
+      });
+    });
   }
 
   protected generateWalkthrough(module: TrainingModuleRow): void {

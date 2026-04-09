@@ -171,7 +171,7 @@
 
         <ng-template appColumnCell="detail" let-row>
           <button class="icon-btn" title="View module detail" aria-label="View training detail for this user"
-            (click)="viewDetail(row); $event.stopPropagation()">
+            (click)="openDetailDialog(row); $event.stopPropagation()">
             <span class="material-icons-outlined">open_in_new</span>
           </button>
         </ng-template>
@@ -179,12 +179,3 @@
     </div>
   }
 </div>
-
-<app-detail-side-panel
-  [open]="!!selectedUser()"
-  [title]="selectedUser()?.displayName ?? 'Training Detail'"
-  (closed)="closeDetail()">
-  @if (selectedUser(); as user) {
-    <app-user-training-detail-panel [userId]="user.userId" />
-  }
-</app-detail-side-panel>

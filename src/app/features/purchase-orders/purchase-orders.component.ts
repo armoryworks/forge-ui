@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -7,32 +7,28 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { PurchaseOrderListItem } from './models/purchase-order-list-item.model';
-import { PurchaseOrderDetail } from './models/purchase-order-detail.model';
 import { VendorService } from '../vendors/services/vendor.service';
 import { VendorResponse } from '../vendors/models/vendor-response.model';
 import { PoDialogComponent } from './components/po-dialog/po-dialog.component';
-import { ReceiveDialogComponent } from './components/receive-dialog/receive-dialog.component';
+import { PoDetailDialogComponent, PoDetailDialogData } from './components/po-detail-dialog/po-detail-dialog.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
-import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
-    PoDialogComponent, ReceiveDialogComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule,
+    PoDialogComponent, LoadingBlockDirective,
   ],
   templateUrl: './purchase-orders.component.html',
   styleUrl: './purchase-orders.component.scss',
@@ -42,17 +38,14 @@ export class PurchaseOrdersComponent {
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
   private readonly dialog = inject(MatDialog);
-  private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly purchaseOrders = signal<PurchaseOrderListItem[]>([]);
-  protected readonly selectedPo = signal<PurchaseOrderDetail | null>(null);
   protected readonly vendors = signal<VendorResponse[]>([]);
 
   // Dialogs
   protected readonly showCreateDialog = signal(false);
-  protected readonly showReceiveDialog = signal(false);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -89,11 +82,6 @@ export class PurchaseOrdersComponent {
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
-  protected readonly poRowClass = (row: unknown) => {
-    const po = row as PurchaseOrderListItem;
-    return po.id === this.selectedPo()?.id ? 'row--selected' : '';
-  };
-
   constructor() {
     this.loadPurchaseOrders();
     this.vendorService.getVendorDropdown().subscribe({
@@ -114,13 +102,15 @@ export class PurchaseOrdersComponent {
 
   protected applyFilters(): void { this.loadPurchaseOrders(); }
 
-  protected selectPo(item: PurchaseOrderListItem): void {
-    this.poService.getPurchaseOrderById(item.id).subscribe({
-      next: (detail) => this.selectedPo.set(detail),
+  protected openPurchaseOrderDetail(item: PurchaseOrderListItem): void {
+    openDetailDialog<PoDetailDialogComponent, PoDetailDialogData, boolean>(
+      this.dialog,
+      PoDetailDialogComponent,
+      { purchaseOrderId: item.id },
+    ).afterClosed().subscribe(changed => {
+      if (changed) this.loadPurchaseOrders();
     });
   }
-
-  protected closeDetail(): void { this.selectedPo.set(null); }
 
   // --- Create ---
   protected openCreatePo(): void { this.showCreateDialog.set(true); }
@@ -129,102 +119,6 @@ export class PurchaseOrdersComponent {
   protected onCreateSaved(): void {
     this.closeCreateDialog();
     this.loadPurchaseOrders();
-  }
-
-  // --- Receive ---
-  protected openReceiveDialog(): void { this.showReceiveDialog.set(true); }
-  protected closeReceiveDialog(): void { this.showReceiveDialog.set(false); }
-
-  protected onReceiveSaved(): void {
-    this.closeReceiveDialog();
-    this.loadPurchaseOrders();
-    const po = this.selectedPo();
-    if (po) {
-      this.poService.getPurchaseOrderById(po.id).subscribe(d => this.selectedPo.set(d));
-    }
-  }
-
-  // --- Status Actions ---
-  protected submitPo(): void {
-    const po = this.selectedPo();
-    if (!po) return;
-    this.poService.submitPurchaseOrder(po.id).subscribe({
-      next: () => {
-        this.refreshDetail(po.id);
-        this.loadPurchaseOrders();
-        this.snackbar.success(this.translate.instant('purchaseOrders.poSubmitted'));
-      },
-    });
-  }
-
-  protected acknowledgePo(): void {
-    const po = this.selectedPo();
-    if (!po) return;
-    this.poService.acknowledgePurchaseOrder(po.id).subscribe({
-      next: () => {
-        this.refreshDetail(po.id);
-        this.loadPurchaseOrders();
-        this.snackbar.success(this.translate.instant('purchaseOrders.poAcknowledged'));
-      },
-    });
-  }
-
-  protected cancelPo(): void {
-    const po = this.selectedPo();
-    if (!po) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('purchaseOrders.cancelPoTitle'),
-        message: this.translate.instant('purchaseOrders.cancelPoMessage', { number: po.poNumber }),
-        confirmLabel: this.translate.instant('purchaseOrders.cancelPo'),
-        severity: 'warn',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.poService.cancelPurchaseOrder(po.id).subscribe({
-        next: () => {
-          this.refreshDetail(po.id);
-          this.loadPurchaseOrders();
-          this.snackbar.success(this.translate.instant('purchaseOrders.poCancelled'));
-        },
-      });
-    });
-  }
-
-  protected closePo(): void {
-    const po = this.selectedPo();
-    if (!po) return;
-    this.poService.closePurchaseOrder(po.id).subscribe({
-      next: () => {
-        this.refreshDetail(po.id);
-        this.loadPurchaseOrders();
-        this.snackbar.success(this.translate.instant('purchaseOrders.poClosed'));
-      },
-    });
-  }
-
-  protected deletePo(): void {
-    const po = this.selectedPo();
-    if (!po) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('purchaseOrders.deletePoTitle'),
-        message: this.translate.instant('purchaseOrders.deletePoMessage', { number: po.poNumber }),
-        confirmLabel: this.translate.instant('common.delete'),
-        severity: 'danger',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.poService.deletePurchaseOrder(po.id).subscribe({
-        next: () => {
-          this.selectedPo.set(null);
-          this.loadPurchaseOrders();
-          this.snackbar.success(this.translate.instant('purchaseOrders.poDeleted'));
-        },
-      });
-    });
   }
 
   // --- Helpers ---
@@ -245,20 +139,5 @@ export class PurchaseOrdersComponent {
     const key = 'purchaseOrders.status' + status;
     const translated = this.translate.instant(key);
     return translated !== key ? translated : status;
-  }
-
-  protected canSubmit(status: string): boolean { return status === 'Draft'; }
-  protected canAcknowledge(status: string): boolean { return status === 'Submitted'; }
-  protected canReceive(status: string): boolean {
-    return status === 'Acknowledged' || status === 'PartiallyReceived';
-  }
-  protected canCancel(status: string): boolean {
-    return status === 'Draft' || status === 'Submitted' || status === 'Acknowledged';
-  }
-  protected canClose(status: string): boolean { return status === 'Received'; }
-  protected canDelete(status: string): boolean { return status === 'Draft'; }
-
-  private refreshDetail(id: number): void {
-    this.poService.getPurchaseOrderById(id).subscribe(d => this.selectedPo.set(d));
   }
 }

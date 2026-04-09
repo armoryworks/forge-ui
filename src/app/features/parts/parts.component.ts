@@ -1,5 +1,4 @@
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -9,19 +8,14 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { PartsService } from './services/parts.service';
 import { PartListItem } from './models/part-list-item.model';
 import { PartDetail } from './models/part-detail.model';
-import { BOMEntry } from './models/bom-entry.model';
 import { PartStatus } from './models/part-status.type';
 import { PartType } from './models/part-type.type';
-import { BOMSourceType } from './models/bom-source-type.type';
-import { AccountingService } from '../../shared/services/accounting.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
-import { AccountingItem } from '../admin/models/accounting-item.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
-import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
@@ -30,36 +24,24 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
-import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
-import { StlViewerComponent } from '../../shared/components/stl-viewer/stl-viewer.component';
-import { FileUploadZoneComponent } from '../../shared/components/file-upload-zone/file-upload-zone.component';
-import { FileAttachment } from '../../shared/models/file.model';
-import { PartInventorySummary } from './models/part-inventory-summary.model';
-import { RoutingComponent } from './components/routing/routing.component';
-import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
-import { BomTreeComponent } from './components/bom-tree/bom-tree.component';
-import { PartPrice } from './models/part-price.model';
-import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
-import { toIsoDate } from '../../shared/utils/date.utils';
+import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
+import { PartDetailDialogComponent, PartDetailDialogData } from './components/part-detail-dialog/part-detail-dialog.component';
 
 type ViewMode = 'table' | 'cards';
-type BomViewMode = 'table' | 'tree';
 
 @Component({
   selector: 'app-parts',
   standalone: true,
   imports: [
-    CurrencyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
+    ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
-    InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    InputComponent, SelectComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
-    EmptyStateComponent, LoadingBlockDirective, StlViewerComponent, FileUploadZoneComponent,
-    RoutingComponent, BarcodeInfoComponent, MatTooltipModule,
-    PartsCardGridComponent, BomTreeComponent,
+    LoadingBlockDirective, MatTooltipModule,
+    PartsCardGridComponent,
   ],
   templateUrl: './parts.component.html',
   styleUrl: './parts.component.scss',
@@ -67,7 +49,6 @@ type BomViewMode = 'table' | 'tree';
 })
 export class PartsComponent {
   protected readonly partsService = inject(PartsService);
-  protected readonly accountingService = inject(AccountingService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
@@ -78,8 +59,6 @@ export class PartsComponent {
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
-  protected readonly selectedPart = signal<PartDetail | null>(null);
-  protected readonly detailLoading = signal(false);
 
   // ── View Mode (table / cards) — URL param + persisted preference ──
   protected readonly viewMode = toSignal(
@@ -88,9 +67,6 @@ export class PartsComponent {
     ),
     { initialValue: (this.userPreferences.get<ViewMode>('parts:viewMode') ?? 'table') as ViewMode },
   );
-
-  // ── BOM view mode (table / tree) — session-only ──
-  protected readonly bomViewMode = signal<BomViewMode>('table');
 
   // ── Page Filters ──
   protected readonly searchControl = new FormControl('');
@@ -134,11 +110,6 @@ export class PartsComponent {
     { field: 'bomEntryCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
   ];
 
-  protected readonly partRowClass = (row: unknown) => {
-    const part = row as PartListItem;
-    return part.id === this.selectedPart()?.id ? 'row--selected' : '';
-  };
-
   // ── Part Dialog ──
   protected readonly showPartDialog = signal(false);
   protected readonly editingPart = signal<PartDetail | null>(null);
@@ -172,77 +143,6 @@ export class PartsComponent {
     { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
     { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
   ];
-
-  // ── BOM Dialog ──
-  protected readonly showBomDialog = signal(false);
-
-  protected readonly bomForm = new FormGroup({
-    childPartId: new FormControl<number | null>(null, [Validators.required]),
-    quantity: new FormControl(1, [Validators.required, Validators.min(0.01)]),
-    sourceType: new FormControl('Buy'),
-    referenceDesignator: new FormControl(''),
-    leadTimeDays: new FormControl<number | null>(null),
-    notes: new FormControl(''),
-  });
-
-  protected readonly bomViolations = FormValidationService.getViolations(this.bomForm, {
-    childPartId: 'Child Part', quantity: 'Quantity',
-  });
-
-  protected readonly sourceTypeOptions: SelectOption[] = [
-    { value: 'Make', label: this.translate.instant('parts.sourceMake') },
-    { value: 'Buy', label: this.translate.instant('parts.sourceBuy') },
-    { value: 'Stock', label: this.translate.instant('parts.sourceStock') },
-  ];
-
-  // Detail tab
-  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'process' | 'viewer' | 'files'>('info');
-
-  // Files & Inventory
-  protected readonly partFiles = signal<FileAttachment[]>([]);
-  protected readonly inventorySummary = signal<PartInventorySummary | null>(null);
-  protected readonly stlFile = computed(() => {
-    return this.partFiles().find(f => f.fileName.toLowerCase().endsWith('.stl')) ?? null;
-  });
-  protected readonly stlFileUrl = computed(() => {
-    const file = this.stlFile();
-    return file ? this.partsService.getFileDownloadUrl(file.id) : null;
-  });
-
-  protected readonly isLowStock = computed(() => {
-    const part = this.selectedPart();
-    const inv = this.inventorySummary();
-    if (!part?.minStockThreshold || !inv) return false;
-    return inv.totalQuantity < part.minStockThreshold;
-  });
-
-  protected readonly partStatuses: PartStatus[] = ['Active', 'Draft', 'Prototype', 'Obsolete'];
-
-  // ── Pricing ──
-  protected readonly partPrices = signal<PartPrice[]>([]);
-  protected readonly priceSaving = signal(false);
-
-  protected readonly currentPrice = computed(() =>
-    this.partPrices().find(p => p.isCurrent) ?? null
-  );
-  protected readonly priceHistory = computed(() =>
-    this.partPrices().filter(p => !p.isCurrent).slice(0, 5)
-  );
-
-  protected readonly priceForm = new FormGroup({
-    unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
-    effectiveFrom: new FormControl<Date | null>(new Date()),
-    notes: new FormControl(''),
-  });
-
-  // ── Accounting Link Dialog ──
-  protected readonly showLinkDialog = signal(false);
-  protected readonly accountingItems = signal<AccountingItem[]>([]);
-  protected readonly accountingItemsLoading = signal(false);
-  protected readonly selectedAccountingItem = signal<AccountingItem | null>(null);
-  protected readonly linkSaving = signal(false);
-
-  protected readonly isLinked = computed(() => !!this.selectedPart()?.externalId);
 
   constructor() {
     this.scanner.setContext('parts');
@@ -279,33 +179,17 @@ export class PartsComponent {
     this.loadParts();
   }
 
-  protected selectPart(part: PartListItem): void {
-    this.detailLoading.set(true);
-    this.detailTab.set('info');
-    this.partFiles.set([]);
-    this.inventorySummary.set(null);
-    this.partPrices.set([]);
-    this.priceForm.reset({ unitPrice: null, effectiveFrom: new Date(), notes: '' });
-    this.partsService.getPartById(part.id).subscribe({
-      next: (detail) => {
-        this.selectedPart.set(detail);
-        this.detailLoading.set(false);
-        this.partsService.getPartFiles(detail.id).subscribe({
-          next: (files) => this.partFiles.set(files),
-        });
-        this.partsService.getPartInventorySummary(detail.id).subscribe({
-          next: (summary) => this.inventorySummary.set(summary),
-        });
-        this.partsService.getPartPrices(detail.id).subscribe({
-          next: (prices) => this.partPrices.set(prices),
-        });
-      },
-      error: () => this.detailLoading.set(false),
-    });
-  }
+  // ── Detail Dialog ──
 
-  protected closeDetail(): void {
-    this.selectedPart.set(null);
+  protected openPartDetail(partId: number): void {
+    openDetailDialog<PartDetailDialogComponent, PartDetailDialogData, { action: string; part: PartDetail } | undefined>(
+      this.dialog, PartDetailDialogComponent, { partId }
+    ).afterClosed().subscribe(result => {
+      if (result?.action === 'edit') {
+        this.editPart(result.part);
+      }
+      this.loadParts(); // refresh list
+    });
   }
 
   // ── Part CRUD ──
@@ -322,9 +206,7 @@ export class PartsComponent {
     this.showPartDialog.set(true);
   }
 
-  protected openEditPart(): void {
-    const part = this.selectedPart();
-    if (!part) return;
+  protected editPart(part: PartDetail): void {
     this.editingPart.set(part);
     this.partForm.patchValue({
       description: part.description,
@@ -368,8 +250,7 @@ export class PartsComponent {
         leadTimeDays: form.leadTimeDays ?? undefined,
         safetyStockDays: form.safetyStockDays ?? undefined,
       }).subscribe({
-        next: (detail) => {
-          this.selectedPart.set(detail);
+        next: () => {
           this.closePartDialog();
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partUpdated'));
@@ -391,185 +272,17 @@ export class PartsComponent {
         safetyStockDays: form.safetyStockDays ?? undefined,
       }).subscribe({
         next: (detail) => {
-          this.selectedPart.set(detail);
           this.closePartDialog();
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partCreated'));
+          // Open the newly created part's detail dialog
+          this.openPartDetail(detail.id);
         },
       });
     }
   }
 
-  protected addPrice(): void {
-    if (this.priceForm.invalid) return;
-    const part = this.selectedPart();
-    if (!part) return;
-    this.priceSaving.set(true);
-    const f = this.priceForm.getRawValue();
-    const request = {
-      unitPrice: f.unitPrice!,
-      effectiveFrom: f.effectiveFrom ? toIsoDate(f.effectiveFrom) ?? undefined : undefined,
-      notes: f.notes || undefined,
-    };
-    this.partsService.addPartPrice(part.id, request).subscribe({
-      next: () => {
-        this.priceSaving.set(false);
-        this.priceForm.reset({ unitPrice: null, effectiveFrom: new Date(), notes: '' });
-        this.partsService.getPartPrices(part.id).subscribe({
-          next: (prices) => this.partPrices.set(prices),
-        });
-        this.loadParts(); // refresh defaultPrice in the list
-        this.snackbar.success('Price updated');
-      },
-      error: () => this.priceSaving.set(false),
-    });
-  }
-
-  protected updatePartStatus(status: PartStatus): void {
-    const part = this.selectedPart();
-    if (!part) return;
-    this.partsService.updatePart(part.id, { status }).subscribe({
-      next: (detail) => {
-        this.selectedPart.set(detail);
-        this.loadParts();
-      },
-    });
-  }
-
-  // ── BOM ──
-
-  protected openAddBom(): void {
-    this.bomForm.reset({
-      childPartId: null, quantity: 1, referenceDesignator: '',
-      sourceType: 'Buy', leadTimeDays: null, notes: '',
-    });
-    this.showBomDialog.set(true);
-  }
-
-  protected closeBomDialog(): void {
-    this.showBomDialog.set(false);
-  }
-
-  protected saveBomEntry(): void {
-    if (this.bomForm.invalid) return;
-
-    const part = this.selectedPart();
-    if (!part) return;
-    const form = this.bomForm.getRawValue();
-    this.partsService.createBOMEntry(part.id, {
-      childPartId: form.childPartId!,
-      quantity: form.quantity!,
-      referenceDesignator: form.referenceDesignator || undefined,
-      sourceType: (form.sourceType as BOMSourceType) ?? 'Buy',
-      leadTimeDays: form.leadTimeDays ?? undefined,
-      notes: form.notes || undefined,
-    }).subscribe({
-      next: (detail) => {
-        this.selectedPart.set(detail);
-        this.closeBomDialog();
-        this.loadParts();
-        this.snackbar.success(this.translate.instant('parts.bomEntryAdded'));
-      },
-    });
-  }
-
-  protected deleteBomEntry(entry: BOMEntry): void {
-    const part = this.selectedPart();
-    if (!part) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('parts.deleteBomEntry'),
-        message: this.translate.instant('parts.deleteBomMessage'),
-        confirmLabel: this.translate.instant('common.delete'),
-        severity: 'danger',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.partsService.deleteBOMEntry(part.id, entry.id).subscribe({
-        next: (detail) => {
-          this.selectedPart.set(detail);
-          this.loadParts();
-          this.snackbar.success(this.translate.instant('parts.bomEntryDeleted'));
-        },
-      });
-    });
-  }
-
-  protected deletePart(): void {
-    const part = this.selectedPart();
-    if (!part) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('parts.deletePart'),
-        message: this.translate.instant('parts.deletePartMessage', { partNumber: part.partNumber }),
-        confirmLabel: this.translate.instant('common.delete'),
-        severity: 'danger',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.partsService.deletePart(part.id).subscribe({
-        next: () => {
-          this.selectedPart.set(null);
-          this.loadParts();
-          this.snackbar.success(this.translate.instant('parts.partDeleted'));
-        },
-      });
-    });
-  }
-
-  // ── Accounting Linkage ──
-
-  protected openLinkDialog(): void {
-    this.selectedAccountingItem.set(null);
-    this.accountingItemsLoading.set(true);
-    this.accountingService.loadItems();
-    // Subscribe to items signal change via a one-time load
-    this.accountingItemsLoading.set(false);
-    this.showLinkDialog.set(true);
-  }
-
-  protected closeLinkDialog(): void {
-    this.showLinkDialog.set(false);
-  }
-
-  protected linkToAccountingItem(item: AccountingItem): void {
-    const part = this.selectedPart();
-    if (!part || !item.externalId) return;
-    this.linkSaving.set(true);
-    this.partsService.linkAccountingItem(part.id, item.externalId, item.name).subscribe({
-      next: () => {
-        this.linkSaving.set(false);
-        this.closeLinkDialog();
-        this.selectPart({ id: part.id } as PartListItem);
-        this.snackbar.success(this.translate.instant('parts.link') + ` ${item.name}`);
-      },
-      error: () => this.linkSaving.set(false),
-    });
-  }
-
-  protected unlinkAccountingItem(): void {
-    const part = this.selectedPart();
-    if (!part) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('parts.unlinkAccountingItem'),
-        message: this.translate.instant('parts.unlinkMessage', { partNumber: part.partNumber }),
-        confirmLabel: this.translate.instant('parts.unlink'),
-        severity: 'warn',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.partsService.unlinkAccountingItem(part.id).subscribe({
-        next: () => {
-          this.selectPart({ id: part.id } as PartListItem);
-          this.snackbar.success(this.translate.instant('parts.accountingUnlinked'));
-        },
-      });
-    });
-  }
+  // ── Helpers ──
 
   protected getStatusClass(status: string): string {
     switch (status) {
@@ -579,14 +292,6 @@ export class PartsComponent {
       case 'Obsolete': return 'status-badge--obsolete';
       default: return '';
     }
-  }
-
-  protected onFileUploaded(): void {
-    const part = this.selectedPart();
-    if (!part) return;
-    this.partsService.getPartFiles(part.id).subscribe({
-      next: (files) => this.partFiles.set(files),
-    });
   }
 
   protected getTypeIcon(type: string): string {

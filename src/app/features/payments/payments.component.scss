@@ -35,84 +35,8 @@
 }
 
 // --- Cell Styles ---
-.row--selected { background: var(--bg); }
 .pmt-number { font-family: $font-family-mono; font-weight: 600; }
-
 .text-warning { color: var(--warning); }
-
-// --- Detail Panel ---
-.detail-panel {
-  width: 420px;
-  border-left: $border-width-thin solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.detail-header {
-  @include flex-between;
-  padding: $sp-md $sp-lg;
-  border-bottom: $border-width-thin solid var(--border);
-}
-
-.detail-header__info { display: flex; align-items: center; gap: $sp-md; }
-.detail-header__actions { display: flex; gap: $sp-sm; }
-.detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
-.detail-name { font-weight: 700; }
-.detail-customer { font-size: var(--font-size-xs); color: var(--text-muted); }
-
-.detail-body {
-  flex: 1;
-  overflow: auto;
-  padding: $sp-lg;
-  display: flex;
-  flex-direction: column;
-  gap: $sp-lg;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $sp-md;
-}
-
-.info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: var(--font-size-sm); }
-.info-section { display: flex; flex-direction: column; gap: $sp-md; }
-
-.info-notes {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  white-space: pre-wrap;
-}
-
-// --- Applications Table ---
-.lines-section {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-md;
-}
-
-.lines-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-
-  th, td {
-    padding: $sp-sm $sp-md;
-    text-align: left;
-    border-bottom: $border-width-thin solid var(--border);
-  }
-
-  th {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
-    color: var(--text-muted);
-  }
-
-  &__right { text-align: right; }
-  &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
-}
 
 // --- Accounting Managed Banner ---
 .accounting-managed-banner {
@@ -122,7 +46,7 @@
   padding: $sp-md $sp-lg;
   background: var(--info-light);
   border-bottom: $border-width-thin solid var(--info);
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
   color: var(--text);
   flex-shrink: 0;
 
@@ -130,13 +54,4 @@
     font-size: $icon-size-md;
     color: var(--info);
   }
-}
-
-// --- Actions ---
-.detail-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $sp-md;
-  padding-top: $sp-md;
-  border-top: $border-width-thin solid var(--border);
 }

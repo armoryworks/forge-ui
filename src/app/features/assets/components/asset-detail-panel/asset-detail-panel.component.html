@@ -1,0 +1,169 @@
+@if (loading()) {
+  <div class="page-loading">
+    <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+    <span>{{ 'common.loading' | translate }}</span>
+  </div>
+} @else if (asset(); as asset) {
+  <div class="detail-panel">
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon">{{ getTypeIcon(asset.assetType) }}</span>
+        <div>
+          <div class="detail-name">{{ asset.name }}</div>
+          <div class="detail-type">{{ asset.assetType }}</div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" aria-label="Edit asset" (click)="edit()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" aria-label="Close panel" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value">
+            <span [class]="getStatusClass(asset.status)">{{ getStatusLabel(asset.status) }}</span>
+          </span>
+        </div>
+        @if (asset.location) {
+          <div class="info-item">
+            <span class="info-label">{{ 'assets.location' | translate }}</span>
+            <span class="info-value">{{ asset.location }}</span>
+          </div>
+        }
+        @if (asset.manufacturer) {
+          <div class="info-item">
+            <span class="info-label">{{ 'assets.manufacturer' | translate }}</span>
+            <span class="info-value">{{ asset.manufacturer }}</span>
+          </div>
+        }
+        @if (asset.model) {
+          <div class="info-item">
+            <span class="info-label">{{ 'assets.model' | translate }}</span>
+            <span class="info-value">{{ asset.model }}</span>
+          </div>
+        }
+        @if (asset.serialNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'assets.serialNumber' | translate }}</span>
+            <span class="info-value mono">{{ asset.serialNumber }}</span>
+          </div>
+        }
+        <div class="info-item">
+          <span class="info-label">{{ 'assets.hours' | translate }}</span>
+          <span class="info-value">{{ asset.currentHours }}</span>
+        </div>
+      </div>
+
+      @if (asset.assetType === 'Tooling') {
+        <div class="info-section">
+          <h4 class="info-section__title">{{ 'assets.toolingDetails' | translate }}</h4>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">{{ 'assets.customerOwned' | translate }}</span>
+              <span class="info-value">{{ asset.isCustomerOwned ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
+            </div>
+            @if (asset.cavityCount) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.cavityCount' | translate }}</span>
+                <span class="info-value">{{ asset.cavityCount }}</span>
+              </div>
+            }
+            @if (asset.toolLifeExpectancy) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.toolLife' | translate }}</span>
+                <span class="info-value">{{ asset.currentShotCount }} / {{ asset.toolLifeExpectancy }}</span>
+              </div>
+            }
+            @if (asset.sourceJobNumber) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.sourceJob' | translate }}</span>
+                <span class="info-value">{{ asset.sourceJobNumber }}</span>
+              </div>
+            }
+            @if (asset.sourcePartNumber) {
+              <div class="info-item">
+                <span class="info-label">{{ 'assets.sourcePart' | translate }}</span>
+                <span class="info-value">{{ asset.sourcePartNumber }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (asset.notes) {
+        <div class="notes-section">
+          <span class="info-label">{{ 'common.notes' | translate }}</span>
+          <p class="notes-text">{{ asset.notes }}</p>
+        </div>
+      }
+
+      <app-barcode-info
+        entityType="Asset"
+        [entityId]="asset.id"
+        [entityLabel]="asset.name"
+        [naturalIdentifier]="asset.serialNumber ?? asset.name"
+        [compact]="true" />
+
+      <div class="status-actions">
+        <span class="info-label">{{ 'assets.setStatus' | translate }}</span>
+        <div class="status-btn-group">
+          @for (s of assetStatuses; track s) {
+            <button class="status-btn" [class.status-btn--active]="asset.status === s"
+              (click)="updateStatus(s)">
+              {{ getStatusLabel(s) }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Maintenance History -->
+      <div class="info-section">
+        <h4 class="info-section__title">{{ 'assets.maintenanceHistory' | translate }}</h4>
+        @if (maintenanceLogsLoading()) {
+          <div class="page-loading page-loading--sm">
+            <span class="material-icons-outlined page-loading__icon">hourglass_empty</span>
+            <span>{{ 'common.loading' | translate }}</span>
+          </div>
+        } @else if (maintenanceLogs().length === 0) {
+          <div class="maintenance-empty">
+            <span class="material-icons-outlined text-muted">build_circle</span>
+            <span class="text-muted">{{ 'assets.noMaintenanceLogs' | translate }}</span>
+          </div>
+        } @else {
+          <div class="maintenance-log-list">
+            @for (log of maintenanceLogs(); track log.id) {
+              <div class="maintenance-log-item">
+                <div class="maintenance-log-item__header">
+                  <span class="maintenance-log-item__name">{{ log.scheduleName }}</span>
+                  <span class="maintenance-log-item__date text-muted">{{ log.performedAt | date:'MM/dd/yyyy' }}</span>
+                </div>
+                <div class="maintenance-log-item__meta">
+                  <span class="text-muted">{{ log.performedByName }}</span>
+                  @if (log.hoursSpent) {
+                    <span class="text-muted">· {{ log.hoursSpent }}h</span>
+                  }
+                  @if (log.cost) {
+                    <span class="text-muted">· ${{ log.cost | number:'1.2-2' }}</span>
+                  }
+                </div>
+                @if (log.notes) {
+                  <p class="maintenance-log-item__notes text-muted">{{ log.notes }}</p>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Activity -->
+      <app-entity-activity-section entityType="Asset" [entityId]="assetId()" />
+    </div>
+  </div>
+}

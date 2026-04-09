@@ -6,7 +6,6 @@
 </app-page-header>
 
 <div class="qt-layout">
-  <!-- Left: Quote List -->
   <div class="qt-list-panel">
     <div class="filters-bar">
       <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'quotes.searchPlaceholder' | translate"
@@ -16,9 +15,9 @@
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="quotes" [columns]="quoteColumns" [data]="quotes()"
-        [rowClass]="quoteRowClass" emptyIcon="request_quote" [emptyMessage]="'quotes.noQuotesFound' | translate"
+        emptyIcon="request_quote" [emptyMessage]="'quotes.noQuotesFound' | translate"
         [clickableRows]="true"
-        (rowClick)="selectQuote($any($event))">
+        (rowClick)="openQuoteDetail($any($event))">
         <ng-template appColumnCell="quoteNumber" let-row>
           <span class="qt-number">{{ row.quoteNumber }}</span>
         </ng-template>
@@ -29,7 +28,7 @@
           <span>{{ row.total | currency }}</span>
         </ng-template>
         <ng-template appColumnCell="expirationDate" let-row>
-          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '—' }}</span>
+          <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '---' }}</span>
         </ng-template>
         <ng-template appColumnCell="createdAt" let-row>
           <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
@@ -37,163 +36,6 @@
       </app-data-table>
     </div>
   </div>
-
-  <!-- Right: Detail Panel -->
-  @if (selectedQuote(); as quote) {
-    <div class="detail-panel">
-      <div class="detail-header">
-        <div class="detail-header__info">
-          <span class="material-icons-outlined detail-icon">request_quote</span>
-          <div>
-            <div class="detail-name">{{ quote.quoteNumber }}</div>
-            <div class="detail-customer">{{ quote.customerName }}</div>
-          </div>
-        </div>
-        <div class="detail-header__actions">
-          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
-            <span class="material-icons-outlined">close</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="detail-body">
-        <!-- Status & Dates -->
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">{{ 'common.status' | translate }}</span>
-            <span class="info-value">
-              <span [class]="getStatusClass(quote.status)">{{ getStatusLabel(quote.status) }}</span>
-            </span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">{{ 'quotes.customer' | translate }}</span>
-            <span class="info-value">{{ quote.customerName }}</span>
-          </div>
-          @if (quote.expirationDate) {
-            <div class="info-item">
-              <span class="info-label">{{ 'quotes.expiration' | translate }}</span>
-              <span class="info-value">{{ quote.expirationDate | date:'MM/dd/yyyy' }}</span>
-            </div>
-          }
-          @if (quote.sentDate) {
-            <div class="info-item">
-              <span class="info-label">{{ 'quotes.sent' | translate }}</span>
-              <span class="info-value">{{ quote.sentDate | date:'MM/dd/yyyy' }}</span>
-            </div>
-          }
-          @if (quote.acceptedDate) {
-            <div class="info-item">
-              <span class="info-label">{{ 'quotes.accepted' | translate }}</span>
-              <span class="info-value">{{ quote.acceptedDate | date:'MM/dd/yyyy' }}</span>
-            </div>
-          }
-          @if (quote.salesOrderId) {
-            <div class="info-item">
-              <span class="info-label">{{ 'quotes.linkedOrder' | translate }}</span>
-              <span class="info-value">{{ quote.salesOrderNumber }}</span>
-            </div>
-          }
-        </div>
-
-        @if (quote.notes) {
-          <div class="info-section">
-            <span class="info-label">{{ 'common.notes' | translate }}</span>
-            <div class="info-notes">{{ quote.notes }}</div>
-          </div>
-        }
-
-        <!-- Line Items -->
-        <div class="lines-section">
-          <span class="info-label">{{ 'quotes.lineItems' | translate }} ({{ quote.lines.length }})</span>
-          @if (quote.lines.length > 0) {
-            <table class="lines-table">
-              <thead>
-                <tr>
-                  <th>{{ 'quotes.partNumber' | translate }}</th>
-                  <th>{{ 'common.description' | translate }}</th>
-                  <th class="lines-table__right">{{ 'quotes.qty' | translate }}</th>
-                  <th class="lines-table__right">{{ 'quotes.unitPrice' | translate }}</th>
-                  <th class="lines-table__right">{{ 'common.total' | translate }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (line of quote.lines; track line.id) {
-                  <tr>
-                    <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
-                    <td>{{ line.description }}</td>
-                    <td class="lines-table__right">{{ line.quantity }}</td>
-                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          }
-        </div>
-
-        <!-- Totals -->
-        <div class="totals-section">
-          <div class="totals-row">
-            <span class="info-label">{{ 'quotes.subtotal' | translate }}</span>
-            <span class="totals-value">{{ quote.subtotal | currency }}</span>
-          </div>
-          <div class="totals-row">
-            <span class="info-label">{{ 'quotes.tax' | translate }} ({{ quote.taxRate }}%)</span>
-            <span class="totals-value">{{ quote.taxAmount | currency }}</span>
-          </div>
-          <div class="totals-row totals-row--total">
-            <span class="info-label">{{ 'common.total' | translate }}</span>
-            <span class="totals-value">{{ quote.total | currency }}</span>
-          </div>
-        </div>
-
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">{{ 'common.created' | translate }}</span>
-            <span class="info-value">{{ quote.createdAt | date:'MM/dd/yyyy' }}</span>
-          </div>
-          <div class="info-item">
-            <span class="info-label">{{ 'common.updated' | translate }}</span>
-            <span class="info-value">{{ quote.updatedAt | date:'MM/dd/yyyy' }}</span>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="detail-actions">
-          @if (canSend(quote.status)) {
-            <button data-testid="quote-send-btn" class="action-btn action-btn--primary" (click)="sendQuote()">
-              <span class="material-icons-outlined">send</span>
-              {{ 'quotes.send' | translate }}
-            </button>
-          }
-          @if (canAccept(quote.status)) {
-            <button data-testid="quote-accept-btn" class="action-btn action-btn--primary" (click)="acceptQuote()">
-              <span class="material-icons-outlined">thumb_up</span>
-              {{ 'quotes.accept' | translate }}
-            </button>
-          }
-          @if (canReject(quote.status)) {
-            <button data-testid="quote-reject-btn" class="action-btn" (click)="rejectQuote()">
-              <span class="material-icons-outlined">thumb_down</span>
-              {{ 'quotes.reject' | translate }}
-            </button>
-          }
-          @if (canConvert(quote.status)) {
-            <button data-testid="quote-convert-btn" class="action-btn action-btn--primary" (click)="convertToOrder()">
-              <span class="material-icons-outlined">shopping_cart</span>
-              {{ 'quotes.convertToOrder' | translate }}
-            </button>
-          }
-          @if (canDelete(quote.status)) {
-            <button data-testid="quote-delete-btn" class="action-btn action-btn--danger" (click)="deleteQuote()">
-              <span class="material-icons-outlined">delete</span>
-              {{ 'common.delete' | translate }}
-            </button>
-          }
-        </div>
-      </div>
-    </div>
-  }
 </div>
 
 @if (showCreateDialog()) {

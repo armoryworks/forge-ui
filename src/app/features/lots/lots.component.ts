@@ -1,29 +1,30 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { MatDialog } from '@angular/material/dialog';
+
 import { LotService } from './services/lot.service';
 import { LotListItem } from './models/lot-list-item.model';
-import { LotTrace } from './models/lot-trace.model';
 import { LotDialogComponent } from './components/lot-dialog/lot-dialog.component';
+import { LotDetailDialogComponent, LotDetailDialogData } from './components/lot-detail-dialog/lot-detail-dialog.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
-import { DetailSidePanelComponent } from '../../shared/components/detail-side-panel/detail-side-panel.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 
 @Component({
   selector: 'app-lots',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe,
+    ReactiveFormsModule,
     PageHeaderComponent, InputComponent,
-    DataTableComponent, ColumnCellDirective, DetailSidePanelComponent,
+    DataTableComponent, ColumnCellDirective,
     LotDialogComponent, LoadingBlockDirective, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './lots.component.html',
@@ -34,12 +35,10 @@ export class LotsComponent {
   private readonly service = inject(LotService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly loading = signal(false);
-  protected readonly traceLoading = signal(false);
   protected readonly lots = signal<LotListItem[]>([]);
-  protected readonly trace = signal<LotTrace | null>(null);
-  protected readonly selectedLot = signal<LotListItem | null>(null);
 
   protected readonly showCreateDialog = signal(false);
 
@@ -56,11 +55,6 @@ export class LotsComponent {
     { field: 'createdAt', header: this.translate.instant('common.createdAt'), sortable: true, type: 'date', width: '110px' },
   ];
 
-  protected readonly rowClass = (row: unknown) => {
-    const l = row as LotListItem;
-    return l.lotNumber === this.selectedLot()?.lotNumber ? 'row--selected' : '';
-  };
-
   constructor() {
     this.load();
   }
@@ -76,20 +70,13 @@ export class LotsComponent {
 
   protected applySearch(): void { this.load(); }
 
-  protected selectLot(row: unknown): void {
+  protected openLotDetail(row: unknown): void {
     const item = row as LotListItem;
-    this.selectedLot.set(item);
-    this.trace.set(null);
-    this.traceLoading.set(true);
-    this.service.trace(item.lotNumber).subscribe({
-      next: (t) => { this.trace.set(t); this.traceLoading.set(false); },
-      error: () => this.traceLoading.set(false),
-    });
-  }
-
-  protected closeDetail(): void {
-    this.selectedLot.set(null);
-    this.trace.set(null);
+    openDetailDialog<LotDetailDialogComponent, LotDetailDialogData>(
+      this.dialog,
+      LotDetailDialogComponent,
+      { lotId: item.id, lotNumber: item.lotNumber },
+    );
   }
 
   protected openCreate(): void { this.showCreateDialog.set(true); }
@@ -98,16 +85,5 @@ export class LotsComponent {
   protected onCreated(): void {
     this.closeCreate();
     this.load();
-  }
-
-  protected getTraceEventIcon(type: string): string {
-    const map: Record<string, string> = {
-      Job: 'work',
-      ProductionRun: 'precision_manufacturing',
-      PurchaseOrder: 'description',
-      BinLocation: 'inventory_2',
-      QcInspection: 'fact_check',
-    };
-    return map[type] ?? 'circle';
   }
 }

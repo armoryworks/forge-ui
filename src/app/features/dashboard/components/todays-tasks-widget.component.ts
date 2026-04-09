@@ -55,7 +55,7 @@ export class TodaysTasksWidgetComponent {
     this.dialog.open(JobDetailDialogComponent, {
       width: '1400px',
       maxWidth: '95vw',
-      panelClass: 'jd-dialog-panel',
+      panelClass: 'detail-dialog-panel',
       data: { jobId: task.id } satisfies JobDetailDialogData,
     });
   }

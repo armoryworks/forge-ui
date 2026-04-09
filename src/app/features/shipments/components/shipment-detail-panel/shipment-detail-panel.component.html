@@ -1,0 +1,172 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (shipment(); as shipment) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon">local_shipping</span>
+        <div>
+          <div class="detail-name">{{ shipment.shipmentNumber }}</div>
+          <div class="detail-subtitle">{{ shipment.customerName }}</div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Status & Info -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value">
+            <span [class]="getStatusClass(shipment.status)">{{ getStatusLabel(shipment.status) }}</span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'shipments.salesOrder' | translate }}</span>
+          <span class="info-value">{{ shipment.salesOrderNumber }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'shipments.customer' | translate }}</span>
+          <span class="info-value">{{ shipment.customerName }}</span>
+        </div>
+        @if (shipment.carrier) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.carrier' | translate }}</span>
+            <span class="info-value">{{ shipment.carrier }}</span>
+          </div>
+        }
+        @if (shipment.trackingNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.trackingNumber' | translate }}</span>
+            <span class="info-value sh-number">{{ shipment.trackingNumber }}</span>
+          </div>
+        }
+        @if (shipment.shippedDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.shippedDate' | translate }}</span>
+            <span class="info-value">{{ shipment.shippedDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (shipment.deliveredDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.delivered' | translate }}</span>
+            <span class="info-value">{{ shipment.deliveredDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (shipment.weight) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.weight' | translate }}</span>
+            <span class="info-value">{{ shipment.weight }} {{ 'shipments.lbs' | translate }}</span>
+          </div>
+        }
+        @if (shipment.shippingCost) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.shippingCost' | translate }}</span>
+            <span class="info-value">{{ shipment.shippingCost | currency }}</span>
+          </div>
+        }
+        @if (shipment.invoiceId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'shipments.linkedInvoice' | translate }}</span>
+            <span class="info-value">#{{ shipment.invoiceId }}</span>
+          </div>
+        }
+      </div>
+
+      @if (shipment.notes) {
+        <div class="info-section">
+          <span class="info-label">{{ 'common.notes' | translate }}</span>
+          <div class="info-notes">{{ shipment.notes }}</div>
+        </div>
+      }
+
+      <!-- Line Items -->
+      <div class="lines-section">
+        <span class="info-label">{{ 'shipments.lineItems' | translate }} ({{ shipment.lines.length }})</span>
+        @if (shipment.lines.length > 0) {
+          <table class="lines-table" aria-label="Shipment line items">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'common.description' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'common.quantity' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of shipment.lines; track line.id) {
+                <tr>
+                  <td>{{ line.description }}</td>
+                  <td class="lines-table__right">{{ line.quantity }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.createdAt' | translate }}</span>
+          <span class="info-value">{{ shipment.createdAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'common.updatedAt' | translate }}</span>
+          <span class="info-value">{{ shipment.updatedAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Tracking Timeline -->
+      @if (trackingData(); as tracking) {
+        <div class="tracking-section">
+          <div class="tracking-section__header">
+            <span class="info-label">{{ 'shipments.tracking' | translate }}</span>
+            <button class="icon-btn" [matTooltip]="'shipments.closeTracking' | translate" matTooltipPosition="above" [attr.aria-label]="'shipments.closeTracking' | translate" (click)="closeTracking()">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+          <div [appLoadingBlock]="trackingLoading()">
+            <app-tracking-timeline [tracking]="tracking" />
+          </div>
+        </div>
+      }
+
+      <!-- Activity Section -->
+      <app-entity-activity-section entityType="Shipment" [entityId]="shipment.id" />
+
+      <!-- Actions -->
+      <div class="detail-actions">
+        @if (canShip(shipment.status)) {
+          <button class="action-btn" (click)="openRatesDialog()">
+            <span class="material-icons-outlined">request_quote</span>
+            {{ 'shipments.getRates' | translate }}
+          </button>
+          <button class="action-btn action-btn--primary" (click)="markShipped()">
+            <span class="material-icons-outlined">local_shipping</span>
+            {{ 'shipments.markShipped' | translate }}
+          </button>
+        }
+        @if (shipment.trackingNumber && !trackingData()) {
+          <button class="action-btn" (click)="loadTracking()">
+            <span class="material-icons-outlined">location_searching</span>
+            {{ 'shipments.track' | translate }}
+          </button>
+        }
+        @if (canDeliver(shipment.status)) {
+          <button class="action-btn action-btn--primary" (click)="markDelivered()">
+            <span class="material-icons-outlined">check_circle</span>
+            {{ 'shipments.markDelivered' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+@if (showRatesDialog() && shipment()) {
+  <app-shipping-rates-dialog
+    [shipmentId]="shipment()!.id"
+    (closed)="closeRatesDialog()"
+    (labelCreated)="onLabelCreated($event)" />
+}

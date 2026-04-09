@@ -1,0 +1,113 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (detail(); as r) {
+    <div class="detail-panel__header">
+      <h2 class="detail-panel__title">{{ r.returnNumber }}</h2>
+      <button class="icon-btn" (click)="closed.emit()" aria-label="Close detail panel">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="detail-panel__body">
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="detail-label">{{ 'common.status' | translate }}</span>
+          <span [class]="getStatusClass(r.status)">{{ getStatusLabel(r.status) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ 'common.customer' | translate }}</span>
+          <span class="detail-value">{{ r.customerName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">{{ 'customerReturns.originalJob' | translate }}</span>
+          <span class="detail-value">{{ r.originalJobNumber }}</span>
+        </div>
+        @if (r.reworkJobNumber) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.reworkJob' | translate }}</span>
+            <span class="detail-value">{{ r.reworkJobNumber }}</span>
+          </div>
+        }
+        <div class="detail-item">
+          <span class="detail-label">{{ 'customerReturns.returnDate' | translate }}</span>
+          <span class="detail-value">{{ r.returnDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="detail-item detail-item--full">
+          <span class="detail-label">{{ 'customerReturns.reason' | translate }}</span>
+          <span class="detail-value">{{ r.reason }}</span>
+        </div>
+        @if (r.notes) {
+          <div class="detail-item detail-item--full">
+            <span class="detail-label">{{ 'common.notes' | translate }}</span>
+            <span class="detail-value">{{ r.notes }}</span>
+          </div>
+        }
+        @if (r.inspectionNotes) {
+          <div class="detail-item detail-item--full">
+            <span class="detail-label">{{ 'customerReturns.inspectionNotes' | translate }}</span>
+            <span class="detail-value">{{ r.inspectionNotes }}</span>
+          </div>
+        }
+        @if (r.inspectedByName) {
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.inspectedBy' | translate }}</span>
+            <span class="detail-value">{{ r.inspectedByName }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">{{ 'customerReturns.inspectedAt' | translate }}</span>
+            <span class="detail-value">{{ r.inspectedAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="detail-panel__actions">
+        @if (r.status === 'Received' || r.status === 'ReworkOrdered' || r.status === 'InInspection') {
+          <button class="action-btn action-btn--primary" (click)="openResolve()"
+            [attr.aria-label]="'customerReturns.resolve' | translate">
+            <span class="material-icons-outlined">check_circle</span>
+            {{ 'customerReturns.resolve' | translate }}
+          </button>
+        }
+        @if (r.status === 'Resolved') {
+          <button class="action-btn" (click)="closeReturn(r)"
+            [attr.aria-label]="'customerReturns.close' | translate">
+            <span class="material-icons-outlined">lock</span>
+            {{ 'customerReturns.close' | translate }}
+          </button>
+        }
+      </div>
+
+      <app-entity-activity-section entityType="CustomerReturn" [entityId]="customerReturnId()" />
+    </div>
+  }
+</div>
+
+<!-- Resolve Dialog -->
+@if (showResolveDialog()) {
+  <app-dialog
+    [title]="'customerReturns.resolveTitle' | translate"
+    width="480px"
+    (closed)="closeResolveDialog()">
+
+    <div [formGroup]="resolveForm">
+      <app-textarea
+        label="Inspection Notes (optional)"
+        formControlName="inspectionNotes"
+        [rows]="4"
+        [attr.aria-label]="'customerReturns.inspectionNotes' | translate" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeResolveDialog()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="resolveSaving()"
+        (click)="resolve()">
+        @if (resolveSaving()) {
+          <span class="material-icons-outlined spin">sync</span>
+        } @else {
+          <span class="material-icons-outlined">check_circle</span>
+        }
+        {{ 'customerReturns.resolveConfirm' | translate }}
+      </button>
+    </div>
+  </app-dialog>
+}

@@ -1,0 +1,111 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (payment(); as payment) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon">payments</span>
+        <div>
+          <div class="detail-name">{{ payment.paymentNumber }}</div>
+          <div class="detail-customer">{{ payment.customerName }}</div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Info Grid -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'payments.customer' | translate }}</span>
+          <span class="info-value">{{ payment.customerName }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payments.method' | translate }}</span>
+          <span class="info-value">{{ getMethodLabel(payment.method) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payments.paymentDate' | translate }}</span>
+          <span class="info-value">{{ payment.paymentDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        @if (payment.referenceNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'payments.referenceNumber' | translate }}</span>
+            <span class="info-value">{{ payment.referenceNumber }}</span>
+          </div>
+        }
+        <div class="info-item">
+          <span class="info-label">{{ 'payments.amount' | translate }}</span>
+          <span class="info-value">{{ payment.amount | currency }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payments.applied' | translate }}</span>
+          <span class="info-value">{{ payment.appliedAmount | currency }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payments.unapplied' | translate }}</span>
+          <span class="info-value" [class.text-warning]="payment.unappliedAmount > 0">{{ payment.unappliedAmount | currency }}</span>
+        </div>
+      </div>
+
+      @if (payment.notes) {
+        <div class="info-section">
+          <span class="info-label">{{ 'common.notes' | translate }}</span>
+          <div class="info-notes">{{ payment.notes }}</div>
+        </div>
+      }
+
+      <!-- Applications -->
+      <div class="lines-section">
+        <span class="info-label">{{ 'payments.applications' | translate }} ({{ payment.applications.length }})</span>
+        @if (payment.applications.length > 0) {
+          <table class="lines-table" aria-label="Payment applications">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'payments.invoiceNumber' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'payments.amount' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (app of payment.applications; track app.id) {
+                <tr>
+                  <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
+                  <td class="lines-table__right">{{ app.amount | currency }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.created' | translate }}</span>
+          <span class="info-value">{{ payment.createdAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'common.updated' | translate }}</span>
+          <span class="info-value">{{ payment.updatedAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- History -->
+      <app-entity-activity-section
+        entityType="Payment"
+        [entityId]="paymentIdValue()"
+        [tabs]="activityTabs" />
+
+      <!-- Actions -->
+      <div class="detail-actions">
+        @if (canDelete()) {
+          <button class="action-btn action-btn--danger" (click)="deletePayment()">
+            <span class="material-icons-outlined">delete</span>
+            {{ 'common.delete' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

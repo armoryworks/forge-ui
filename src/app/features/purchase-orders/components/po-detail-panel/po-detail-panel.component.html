@@ -1,0 +1,172 @@
+<div class="po-detail" [appLoadingBlock]="loading()">
+  @if (po(); as po) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon">description</span>
+        <div>
+          <div class="detail-name">{{ po.poNumber }}</div>
+          <div class="detail-vendor">{{ po.vendorName }}</div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Status & Dates -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value">
+            <span [class]="getStatusClass(po.status)">{{ getStatusLabel(po.status) }}</span>
+          </span>
+        </div>
+        @if (po.jobNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'purchaseOrders.job' | translate }}</span>
+            <span class="info-value">{{ po.jobNumber }}</span>
+          </div>
+        }
+        @if (po.expectedDeliveryDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'purchaseOrders.expectedDelivery' | translate }}</span>
+            <span class="info-value">{{ po.expectedDeliveryDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (po.submittedDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'purchaseOrders.submitted' | translate }}</span>
+            <span class="info-value">{{ po.submittedDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (po.acknowledgedDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'purchaseOrders.acknowledged' | translate }}</span>
+            <span class="info-value">{{ po.acknowledgedDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (po.receivedDate) {
+          <div class="info-item">
+            <span class="info-label">{{ 'purchaseOrders.received' | translate }}</span>
+            <span class="info-value">{{ po.receivedDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+      </div>
+
+      <app-barcode-info
+        entityType="PurchaseOrder"
+        [entityId]="po.id"
+        [entityLabel]="po.poNumber"
+        [naturalIdentifier]="po.poNumber"
+        [compact]="true" />
+
+      @if (po.notes) {
+        <div class="info-section">
+          <span class="info-label">{{ 'common.notes' | translate }}</span>
+          <div class="info-notes">{{ po.notes }}</div>
+        </div>
+      }
+
+      <!-- Line Items -->
+      <div class="lines-section">
+        <span class="info-label">{{ 'purchaseOrders.lineItems' | translate }} ({{ po.lines.length }})</span>
+        @if (po.lines.length > 0) {
+          <table class="lines-table" aria-label="Purchase order line items">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'purchaseOrders.partNumber' | translate }}</th>
+                <th scope="col">{{ 'common.description' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'purchaseOrders.ordered' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'purchaseOrders.received' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of po.lines; track line.id) {
+                <tr>
+                  <td class="lines-table__mono">{{ line.partNumber }}</td>
+                  <td>{{ line.description }}</td>
+                  <td class="lines-table__right">{{ line.orderedQuantity }}</td>
+                  <td class="lines-table__right">
+                    <span [class.text-success]="line.receivedQuantity >= line.orderedQuantity"
+                          [class.text-warning]="line.receivedQuantity > 0 && line.receivedQuantity < line.orderedQuantity">
+                      {{ line.receivedQuantity }}
+                    </span>
+                  </td>
+                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                  <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.created' | translate }}</span>
+          <span class="info-value">{{ po.createdAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'common.updated' | translate }}</span>
+          <span class="info-value">{{ po.updatedAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="detail-actions">
+        @if (canSubmit(po.status)) {
+          <button data-testid="po-submit-btn" class="action-btn action-btn--primary" (click)="submitPo()">
+            <span class="material-icons-outlined">send</span>
+            {{ 'purchaseOrders.submit' | translate }}
+          </button>
+        }
+        @if (canAcknowledge(po.status)) {
+          <button data-testid="po-acknowledge-btn" class="action-btn action-btn--primary" (click)="acknowledgePo()">
+            <span class="material-icons-outlined">thumb_up</span>
+            {{ 'purchaseOrders.acknowledge' | translate }}
+          </button>
+        }
+        @if (canReceive(po.status)) {
+          <button data-testid="po-receive-btn" class="action-btn action-btn--primary" (click)="openReceiveDialog()">
+            <span class="material-icons-outlined">inventory</span>
+            {{ 'purchaseOrders.receiveItems' | translate }}
+          </button>
+        }
+        @if (canClose(po.status)) {
+          <button data-testid="po-close-btn" class="action-btn" (click)="closePo()">
+            <span class="material-icons-outlined">check_circle</span>
+            {{ 'common.close' | translate }}
+          </button>
+        }
+        @if (canCancel(po.status)) {
+          <button data-testid="po-cancel-btn" class="action-btn" (click)="cancelPo()">
+            <span class="material-icons-outlined">block</span>
+            {{ 'common.cancel' | translate }}
+          </button>
+        }
+        @if (canDelete(po.status)) {
+          <button data-testid="po-delete-btn" class="action-btn action-btn--danger" (click)="deletePo()">
+            <span class="material-icons-outlined">delete</span>
+            {{ 'common.delete' | translate }}
+          </button>
+        }
+      </div>
+
+      <!-- Activity Section -->
+      <app-entity-activity-section entityType="PurchaseOrder" [entityId]="purchaseOrderId()" />
+    </div>
+  }
+</div>
+
+<!-- Receive Dialog -->
+@if (showReceiveDialog() && po()) {
+  <app-receive-dialog
+    [purchaseOrder]="po()!"
+    (closed)="closeReceiveDialog()"
+    (saved)="onReceiveSaved()" />
+}

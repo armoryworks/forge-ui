@@ -1,0 +1,79 @@
+<div class="training-detail" [appLoadingBlock]="isLoading()">
+  <div class="training-detail__toolbar">
+    <h2 class="training-detail__title">
+      <span class="material-icons-outlined" aria-hidden="true">school</span>
+      Training Detail
+    </h2>
+    <button class="icon-btn" aria-label="Close detail panel" (click)="close()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  @if (!detail() && !isLoading()) {
+    <app-empty-state icon="school" message="No training data found for this user" />
+  }
+
+  @if (detail(); as d) {
+    <div class="training-detail__header">
+      <div class="training-detail__name">{{ d.displayName }}</div>
+      <span class="chip chip--muted training-detail__role">{{ d.role }}</span>
+    </div>
+
+    <div class="training-detail__summary">
+      <div class="training-detail__stat">
+        <span class="training-detail__stat-value">{{ completedCount(d) }}</span>
+        <span class="training-detail__stat-label">of {{ d.modules.length }} completed</span>
+      </div>
+      <div class="training-detail__stat">
+        <span class="training-detail__stat-value">{{ d.overallCompletionPct }}%</span>
+        <span class="training-detail__stat-label">overall progress</span>
+      </div>
+      <div class="training-detail__stat">
+        <span class="training-detail__stat-value">{{ d.totalEnrolled }}</span>
+        <span class="training-detail__stat-label">paths enrolled</span>
+      </div>
+    </div>
+
+    <div class="training-detail__progress-bar" role="progressbar"
+         [attr.aria-valuenow]="d.overallCompletionPct"
+         aria-valuemin="0" aria-valuemax="100"
+         [attr.aria-label]="d.displayName + ' — ' + d.overallCompletionPct + '% complete'">
+      <div class="training-detail__progress-fill" [style.width.%]="d.overallCompletionPct"></div>
+    </div>
+
+    <div class="training-detail__section-label">Module Breakdown</div>
+
+    <div class="training-detail__modules">
+      @for (m of d.modules; track m.moduleId) {
+        <div class="training-detail__module"
+             [class.training-detail__module--completed]="m.status === 'Completed'"
+             [class.training-detail__module--in-progress]="m.status === 'InProgress'">
+          <span class="material-icons-outlined training-detail__module-type-icon" aria-hidden="true">
+            {{ contentTypeIcon(m.contentType) }}
+          </span>
+          <div class="training-detail__module-info">
+            <span class="training-detail__module-title">{{ m.title }}</span>
+            <div class="training-detail__module-meta">
+              @if (m.timeSpentSeconds > 0) {
+                <span class="training-detail__module-time">
+                  <span class="material-icons-outlined" aria-hidden="true">schedule</span>
+                  {{ formatTime(m.timeSpentSeconds) }}
+                </span>
+              }
+              @if (m.quizScore !== null) {
+                <span class="training-detail__module-score">{{ m.quizScore }}%</span>
+              }
+              @if (m.completedAt) {
+                <span class="training-detail__module-date">{{ m.completedAt | date:'MM/dd/yyyy' }}</span>
+              }
+            </div>
+          </div>
+          <span class="chip training-detail__module-status" [class]="statusClass(m.status)"
+                [attr.aria-label]="statusLabel(m.status)">
+            {{ statusLabel(m.status) }}
+          </span>
+        </div>
+      }
+    </div>
+  }
+</div>

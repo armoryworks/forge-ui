@@ -217,7 +217,7 @@ export class BacklogComponent implements OnInit {
     this.dialog.open(JobDetailDialogComponent, {
       width: '1400px',
       maxWidth: '95vw',
-      panelClass: 'jd-dialog-panel',
+      panelClass: 'detail-dialog-panel',
       data: { jobId: job.id, users: this.users() } satisfies JobDetailDialogData,
     }).afterClosed().subscribe(result => {
       this.selectedJobId.set(null);

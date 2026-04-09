@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { InvoiceService } from './services/invoice.service';
 import { InvoiceListItem } from './models/invoice-list-item.model';
-import { InvoiceDetail } from './models/invoice-detail.model';
 import { UninvoicedJob } from './models/uninvoiced-job.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -13,7 +12,6 @@ import { SelectComponent, SelectOption } from '../../shared/components/select/se
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { AccountingService } from '../../shared/services/accounting.service';
@@ -22,6 +20,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dialog.component';
 import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel/uninvoiced-jobs-panel.component';
+import { InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult } from './components/invoice-detail-dialog/invoice-detail-dialog.component';
+import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
@@ -51,7 +51,6 @@ export class InvoicesComponent {
   protected readonly showUninvoicedPanel = signal(false);
   protected readonly loading = signal(false);
   protected readonly invoices = signal<InvoiceListItem[]>([]);
-  protected readonly selectedInvoice = signal<InvoiceDetail | null>(null);
   protected readonly uninvoicedJobs = signal<UninvoicedJob[]>([]);
   protected readonly uninvoicedCount = signal(0);
 
@@ -88,11 +87,6 @@ export class InvoicesComponent {
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
-  protected readonly invoiceRowClass = (row: unknown) => {
-    const inv = row as InvoiceListItem;
-    return inv.id === this.selectedInvoice()?.id ? 'row--selected' : '';
-  };
-
   constructor() {
     this.loadInvoices();
     this.loadUninvoicedJobs();
@@ -109,13 +103,20 @@ export class InvoicesComponent {
 
   protected applyFilters(): void { this.loadInvoices(); }
 
-  protected selectInvoice(item: InvoiceListItem): void {
-    this.invoiceService.getInvoiceById(item.id).subscribe({
-      next: (detail) => this.selectedInvoice.set(detail),
+  protected openInvoiceDetail(item: InvoiceListItem): void {
+    const ref = openDetailDialog<InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult | undefined>(
+      this.dialog,
+      InvoiceDetailDialogComponent,
+      { invoiceId: item.id },
+    );
+    ref.afterClosed().subscribe(result => {
+      // Always reload in case actions were taken inside the dialog
+      this.loadInvoices();
+      if (result?.action === 'edit') {
+        // Handle edit if needed in the future
+      }
     });
   }
-
-  protected closeDetail(): void { this.selectedInvoice.set(null); }
 
   // --- Create Dialog ---
   protected openCreateDialog(): void { this.showCreateDialog.set(true); }
@@ -148,65 +149,6 @@ export class InvoicesComponent {
     });
   }
 
-  // --- Status Actions ---
-  protected sendInvoice(): void {
-    const inv = this.selectedInvoice();
-    if (!inv) return;
-    this.invoiceService.sendInvoice(inv.id).subscribe({
-      next: () => {
-        this.refreshDetail(inv.id);
-        this.loadInvoices();
-        this.snackbar.success(this.translate.instant('invoices.invoiceSent'));
-      },
-    });
-  }
-
-  protected voidInvoice(): void {
-    const inv = this.selectedInvoice();
-    if (!inv) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('invoices.voidInvoiceTitle'),
-        message: this.translate.instant('invoices.voidInvoiceMessage', { number: inv.invoiceNumber }),
-        confirmLabel: this.translate.instant('invoices.void'),
-        severity: 'warn',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.invoiceService.voidInvoice(inv.id).subscribe({
-        next: () => {
-          this.refreshDetail(inv.id);
-          this.loadInvoices();
-          this.snackbar.success(this.translate.instant('invoices.invoiceVoided'));
-        },
-      });
-    });
-  }
-
-  protected deleteInvoice(): void {
-    const inv = this.selectedInvoice();
-    if (!inv) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('invoices.deleteInvoiceTitle'),
-        message: this.translate.instant('invoices.deleteInvoiceMessage', { number: inv.invoiceNumber }),
-        confirmLabel: this.translate.instant('common.delete'),
-        severity: 'danger',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.invoiceService.deleteInvoice(inv.id).subscribe({
-        next: () => {
-          this.selectedInvoice.set(null);
-          this.loadInvoices();
-          this.snackbar.success(this.translate.instant('invoices.invoiceDeleted'));
-        },
-      });
-    });
-  }
-
   // --- Helpers ---
   protected getStatusClass(status: string): string {
     const map: Record<string, string> = {
@@ -223,13 +165,5 @@ export class InvoicesComponent {
   protected getStatusLabel(status: string): string {
     const key = 'invoices.status' + status;
     return this.translate.instant(key);
-  }
-
-  protected canSend(status: string): boolean { return status === 'Draft'; }
-  protected canVoid(status: string): boolean { return status === 'Draft' || status === 'Sent'; }
-  protected canDelete(status: string): boolean { return status === 'Draft'; }
-
-  private refreshDetail(id: number): void {
-    this.invoiceService.getInvoiceById(id).subscribe(d => this.selectedInvoice.set(d));
   }
 }

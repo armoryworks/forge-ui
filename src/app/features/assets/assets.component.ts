@@ -1,11 +1,9 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, ViewChild } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { AssetsService } from './services/assets.service';
 import { AssetItem } from './models/asset-item.model';
-import { MaintenanceLogListItem } from './models/maintenance-log-list-item.model';
 import { AssetType } from './models/asset-type.type';
 import { AssetStatus } from './models/asset-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -20,17 +18,16 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
-import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult } from './components/asset-detail-dialog/asset-detail-dialog.component';
+import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, BarcodeInfoComponent, MatTooltipModule],
+  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,9 +43,6 @@ export class AssetsComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly assets = signal<AssetItem[]>([]);
-  protected readonly selectedAsset = signal<AssetItem | null>(null);
-  protected readonly maintenanceLogs = signal<MaintenanceLogListItem[]>([]);
-  protected readonly maintenanceLogsLoading = signal(false);
   protected draftConfig: DraftConfig = { entityType: 'asset', entityId: 'new', route: '/assets' };
 
   // Filters
@@ -125,19 +119,6 @@ export class AssetsComponent {
 
   constructor() {
     this.loadAssets();
-
-    effect(() => {
-      const asset = this.selectedAsset();
-      if (!asset) {
-        this.maintenanceLogs.set([]);
-        return;
-      }
-      this.maintenanceLogsLoading.set(true);
-      this.assetsService.getMaintenanceLogs(asset.id).subscribe({
-        next: (logs) => { this.maintenanceLogs.set(logs); this.maintenanceLogsLoading.set(false); },
-        error: () => this.maintenanceLogsLoading.set(false),
-      });
-    });
   }
 
   protected loadAssets(): void {
@@ -154,13 +135,19 @@ export class AssetsComponent {
   protected applyFilters(): void { this.loadAssets(); }
   protected clearSearch(): void { this.searchControl.setValue(''); this.loadAssets(); }
 
-  protected readonly assetRowClass = (row: unknown) => {
-    const asset = row as AssetItem;
-    return asset.id === this.selectedAsset()?.id ? 'row--selected' : '';
-  };
-
-  protected selectAsset(asset: AssetItem): void { this.selectedAsset.set(asset); }
-  protected closeDetail(): void { this.selectedAsset.set(null); }
+  protected openAssetDetail(asset: AssetItem): void {
+    const ref = openDetailDialog<AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult | undefined>(
+      this.dialog,
+      AssetDetailDialogComponent,
+      { assetId: asset.id },
+    );
+    ref.afterClosed().subscribe(result => {
+      if (result?.action === 'edit') {
+        this.openEditAssetFromDetail(result.asset);
+      }
+      this.loadAssets();
+    });
+  }
 
   protected openCreateAsset(): void {
     this.editingAsset.set(null);
@@ -173,9 +160,7 @@ export class AssetsComponent {
     this.showDialog.set(true);
   }
 
-  protected openEditAsset(): void {
-    const asset = this.selectedAsset();
-    if (!asset) return;
+  private openEditAssetFromDetail(asset: AssetItem): void {
     this.editingAsset.set(asset);
     this.draftConfig = { entityType: 'asset', entityId: asset.id.toString(), route: '/assets' };
     this.assetForm.patchValue({
@@ -217,10 +202,9 @@ export class AssetsComponent {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
-        next: (asset) => {
+        next: () => {
           this.saving.set(false);
           this.dialogRef.clearDraft();
-          this.selectedAsset.set(asset);
           this.closeDialog();
           this.loadAssets();
           this.snackbar.success(this.translate.instant('assets.assetUpdated'));
@@ -240,10 +224,9 @@ export class AssetsComponent {
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
       }).subscribe({
-        next: (asset) => {
+        next: () => {
           this.saving.set(false);
           this.dialogRef.clearDraft();
-          this.selectedAsset.set(asset);
           this.closeDialog();
           this.loadAssets();
           this.snackbar.success(this.translate.instant('assets.assetCreated'));
@@ -251,14 +234,6 @@ export class AssetsComponent {
         error: () => this.saving.set(false),
       });
     }
-  }
-
-  protected updateStatus(status: AssetStatus): void {
-    const asset = this.selectedAsset();
-    if (!asset) return;
-    this.assetsService.updateAsset(asset.id, { status }).subscribe({
-      next: (updated) => { this.selectedAsset.set(updated); this.loadAssets(); },
-    });
   }
 
   protected getTypeIcon(type: string): string {
@@ -284,25 +259,6 @@ export class AssetsComponent {
   }
 
   protected deleteAsset(): void {
-    const asset = this.selectedAsset();
-    if (!asset) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: 'Delete Asset?',
-        message: `This will permanently delete "${asset.name}".`,
-        confirmLabel: 'Delete',
-        severity: 'danger',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.assetsService.deleteAsset(asset.id).subscribe({
-        next: () => {
-          this.selectedAsset.set(null);
-          this.loadAssets();
-          this.snackbar.success(this.translate.instant('assets.assetDeleted'));
-        },
-      });
-    });
+    // deleteAsset kept for potential future toolbar action
   }
 }

@@ -43,9 +43,9 @@
         </div>
       } @else {
         <app-data-table tableId="leads" [columns]="leadColumns" [data]="leads()"
-          [rowClass]="leadRowClass" emptyIcon="person_search" [emptyMessage]="'leads.noLeadsFound' | translate" [emptyHelpText]="'leads.noLeadsHelp' | translate"
+          emptyIcon="person_search" [emptyMessage]="'leads.noLeadsFound' | translate" [emptyHelpText]="'leads.noLeadsHelp' | translate"
           [clickableRows]="true"
-          (rowClick)="selectLead($any($event))">
+          (rowClick)="openLeadDetail($any($event).id)">
           <ng-template appColumnCell="companyName" let-lead>
             <span class="company-name">{{ lead.companyName }}</span>
           </ng-template>
@@ -71,131 +71,6 @@
         </app-data-table>
       }
     </div>
-
-    <!-- Right: Detail Panel -->
-    @if (selectedLead(); as lead) {
-      <div class="detail-panel">
-        <div class="detail-header">
-          <div class="detail-header__info">
-            <span class="material-icons-outlined detail-icon">business</span>
-            <div>
-              <div class="detail-company">{{ lead.companyName }}</div>
-              @if (lead.contactName) {
-                <div class="detail-contact">{{ lead.contactName }}</div>
-              }
-            </div>
-          </div>
-          <div class="detail-header__actions">
-            <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditLead()">
-              <span class="material-icons-outlined">edit</span>
-            </button>
-            <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
-              <span class="material-icons-outlined">close</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="detail-body">
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">{{ 'common.status' | translate }}</span>
-              <span class="info-value">
-                <span [class]="getStatusClass(lead.status)">{{ lead.status }}</span>
-              </span>
-            </div>
-            @if (lead.email) {
-              <div class="info-item">
-                <span class="info-label">{{ 'common.email' | translate }}</span>
-                <span class="info-value">{{ lead.email }}</span>
-              </div>
-            }
-            @if (lead.phone) {
-              <div class="info-item">
-                <span class="info-label">{{ 'common.phone' | translate }}</span>
-                <span class="info-value">{{ lead.phone }}</span>
-              </div>
-            }
-            @if (lead.source) {
-              <div class="info-item">
-                <span class="info-label">{{ 'leads.source' | translate }}</span>
-                <span class="info-value">{{ lead.source }}</span>
-              </div>
-            }
-            @if (lead.followUpDate) {
-              <div class="info-item">
-                <span class="info-label">{{ 'leads.followUp' | translate }}</span>
-                <span class="info-value" [class.overdue]="isFollowUpOverdue(lead)">
-                  {{ lead.followUpDate | date:'MM/dd/yyyy' }}
-                </span>
-              </div>
-            }
-            @if (lead.lostReason) {
-              <div class="info-item">
-                <span class="info-label">{{ 'leads.lostReason' | translate }}</span>
-                <span class="info-value">{{ lead.lostReason }}</span>
-              </div>
-            }
-          </div>
-
-          @if (lead.notes) {
-            <div class="notes-section">
-              <span class="info-label">{{ 'common.notes' | translate }}</span>
-              <p class="notes-text">{{ lead.notes }}</p>
-            </div>
-          }
-
-          @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
-            <div class="status-actions">
-              <span class="info-label">{{ 'leads.updateStatus' | translate }}</span>
-              <div class="status-btn-group">
-                @for (s of statuses; track s) {
-                  @if (s !== 'Converted') {
-                    <button class="status-btn" [class.status-btn--active]="lead.status === s"
-                      [class]="'status-btn--' + s.toLowerCase()"
-                      [attr.data-testid]="'lead-status-btn-' + s.toLowerCase()"
-                      (click)="updateStatus(s)">
-                      {{ s }}
-                    </button>
-                  }
-                }
-              </div>
-            </div>
-          }
-
-          @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
-            <div class="convert-actions">
-              <span class="info-label">{{ 'leads.convert' | translate }}</span>
-              <div class="convert-btn-group">
-                <button data-testid="lead-convert-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
-                  <span class="material-icons-outlined">person</span>
-                  {{ 'leads.convertToCustomer' | translate }}
-                </button>
-                <button class="action-btn" [disabled]="saving()" (click)="convertLeadWithJob()">
-                  <span class="material-icons-outlined">work</span>
-                  {{ 'leads.convertAndCreateJob' | translate }}
-                </button>
-              </div>
-            </div>
-          }
-
-          @if (lead.status === 'Converted') {
-            <div class="converted-info">
-              <span class="material-icons-outlined converted-icon">check_circle</span>
-              <span>{{ 'leads.convertedInfo' | translate }}</span>
-            </div>
-          }
-
-          @if (lead.status === 'Lost') {
-            <div class="status-actions">
-              <button class="action-btn" (click)="updateStatus('New')">
-                <span class="material-icons-outlined">replay</span>
-                {{ 'leads.reopenLead' | translate }}
-              </button>
-            </div>
-          }
-        </div>
-      </div>
-    }
   </div>
 } @else {
   <!-- ── PIPELINE VIEW ── -->
@@ -236,9 +111,8 @@
                 tabindex="0"
                 cdkDrag
                 [cdkDragData]="lead"
-                (click)="selectLead(lead)"
-                (keydown.enter)="selectLead(lead)"
-                [class.pipeline-card--selected]="selectedLead()?.id === lead.id"
+                (click)="openLeadDetail(lead.id)"
+                (keydown.enter)="openLeadDetail(lead.id)"
                 [attr.aria-label]="lead.companyName">
 
                 <!-- Drag placeholder -->
@@ -284,113 +158,6 @@
     </div>
   }
 
-  <!-- Pipeline detail panel (slide-in overlay) -->
-  @if (selectedLead(); as lead) {
-    <div class="pipeline-detail-backdrop" (click)="closeDetail()" aria-hidden="true"></div>
-    <div class="pipeline-detail" role="dialog" [attr.aria-label]="lead.companyName">
-      <div class="detail-header">
-        <div class="detail-header__info">
-          <span class="material-icons-outlined detail-icon">business</span>
-          <div>
-            <div class="detail-company">{{ lead.companyName }}</div>
-            @if (lead.contactName) {
-              <div class="detail-contact">{{ lead.contactName }}</div>
-            }
-          </div>
-        </div>
-        <div class="detail-header__actions">
-          <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="openEditLead()">
-            <span class="material-icons-outlined">edit</span>
-          </button>
-          <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="closeDetail()">
-            <span class="material-icons-outlined">close</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="detail-body">
-        <div class="info-grid">
-          <div class="info-item">
-            <span class="info-label">{{ 'common.status' | translate }}</span>
-            <span class="info-value">
-              <span [class]="getStatusClass(lead.status)">{{ lead.status }}</span>
-            </span>
-          </div>
-          @if (lead.email) {
-            <div class="info-item">
-              <span class="info-label">{{ 'common.email' | translate }}</span>
-              <span class="info-value">{{ lead.email }}</span>
-            </div>
-          }
-          @if (lead.phone) {
-            <div class="info-item">
-              <span class="info-label">{{ 'common.phone' | translate }}</span>
-              <span class="info-value">{{ lead.phone }}</span>
-            </div>
-          }
-          @if (lead.source) {
-            <div class="info-item">
-              <span class="info-label">{{ 'leads.source' | translate }}</span>
-              <span class="info-value">{{ lead.source }}</span>
-            </div>
-          }
-          @if (lead.followUpDate) {
-            <div class="info-item">
-              <span class="info-label">{{ 'leads.followUp' | translate }}</span>
-              <span class="info-value" [class.overdue]="isFollowUpOverdue(lead)">
-                {{ lead.followUpDate | date:'MM/dd/yyyy' }}
-              </span>
-            </div>
-          }
-          @if (lead.lostReason) {
-            <div class="info-item">
-              <span class="info-label">{{ 'leads.lostReason' | translate }}</span>
-              <span class="info-value">{{ lead.lostReason }}</span>
-            </div>
-          }
-        </div>
-
-        @if (lead.notes) {
-          <div class="notes-section">
-            <span class="info-label">{{ 'common.notes' | translate }}</span>
-            <p class="notes-text">{{ lead.notes }}</p>
-          </div>
-        }
-
-        @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
-          <div class="convert-actions">
-            <span class="info-label">{{ 'leads.convert' | translate }}</span>
-            <div class="convert-btn-group">
-              <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
-                <span class="material-icons-outlined">person</span>
-                {{ 'leads.convertToCustomer' | translate }}
-              </button>
-              <button class="action-btn" [disabled]="saving()" (click)="convertLeadWithJob()">
-                <span class="material-icons-outlined">work</span>
-                {{ 'leads.convertAndCreateJob' | translate }}
-              </button>
-            </div>
-          </div>
-        }
-
-        @if (lead.status === 'Converted') {
-          <div class="converted-info">
-            <span class="material-icons-outlined converted-icon">check_circle</span>
-            <span>{{ 'leads.convertedInfo' | translate }}</span>
-          </div>
-        }
-
-        @if (lead.status === 'Lost') {
-          <div class="status-actions">
-            <button class="action-btn" (click)="updateStatus('New')">
-              <span class="material-icons-outlined">replay</span>
-              {{ 'leads.reopenLead' | translate }}
-            </button>
-          </div>
-        }
-      </div>
-    </div>
-  }
 }
 
 <!-- Lead Dialog -->

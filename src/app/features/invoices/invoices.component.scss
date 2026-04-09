@@ -35,125 +35,10 @@
 }
 
 // --- Cell Styles ---
-.row--selected { background: var(--bg); }
 .inv-number { font-family: $font-family-mono; font-weight: 600; }
 
 .text-warning { color: var(--warning); }
 .text-error { color: var(--error); }
-
-// --- Detail Panel ---
-.detail-panel {
-  width: 420px;
-  border-left: $border-width-thin solid var(--border);
-  display: flex;
-  flex-direction: column;
-  flex-shrink: 0;
-}
-
-.detail-header {
-  @include flex-between;
-  padding: $sp-md $sp-lg;
-  border-bottom: $border-width-thin solid var(--border);
-}
-
-.detail-header__info { display: flex; align-items: center; gap: $sp-md; }
-.detail-header__actions { display: flex; gap: $sp-sm; }
-.detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
-.detail-name { font-weight: 700; }
-.detail-customer { font-size: var(--font-size-xs); color: var(--text-muted); }
-
-.detail-body {
-  flex: 1;
-  overflow: auto;
-  padding: $sp-lg;
-  display: flex;
-  flex-direction: column;
-  gap: $sp-lg;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $sp-md;
-}
-
-.info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: var(--font-size-sm); }
-.info-section { display: flex; flex-direction: column; gap: $sp-md; }
-
-.info-notes {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  white-space: pre-wrap;
-}
-
-// --- Lines Table ---
-.lines-section {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-md;
-}
-
-.lines-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: var(--font-size-sm);
-
-  th, td {
-    padding: $sp-sm $sp-md;
-    text-align: left;
-    border-bottom: $border-width-thin solid var(--border);
-  }
-
-  th {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
-    color: var(--text-muted);
-  }
-
-  &__right { text-align: right; }
-  &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
-}
-
-// --- Totals Section ---
-.totals-section {
-  display: flex;
-  flex-direction: column;
-  gap: $sp-sm;
-  padding: $sp-md;
-  border: $border-width-thin solid var(--border);
-}
-
-.totals-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: var(--font-size-sm);
-
-  &--total {
-    font-weight: 700;
-    font-size: var(--font-size-base);
-    padding-top: $sp-sm;
-    border-top: $border-width-thin solid var(--border);
-  }
-
-  &--balance {
-    font-weight: 700;
-    color: var(--primary);
-  }
-}
-
-.totals-label { color: var(--text-secondary); }
-.totals-value { font-family: $font-family-mono; }
-
-// --- Actions ---
-.detail-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: $sp-md;
-  padding-top: $sp-md;
-  border-top: $border-width-thin solid var(--border);
-}
 
 // --- Accounting Managed Banner ---
 .accounting-managed-banner {
@@ -163,7 +48,7 @@
   padding: $sp-md $sp-lg;
   background: var(--info-light);
   border-bottom: $border-width-thin solid var(--info);
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
   color: var(--text);
   flex-shrink: 0;
 
@@ -195,14 +80,14 @@
   }
 
   &__text {
-    font-size: var(--font-size-sm);
+    font-size: $font-size-sm;
     font-weight: 600;
     color: var(--text);
     flex: 1;
   }
 
   &__action {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
     color: var(--warning);
   }
 }
@@ -218,7 +103,7 @@
   border-radius: 99px;
   background: var(--warning);
   color: white;
-  font-size: var(--font-size-xxs);
+  font-size: $font-size-xxs;
   font-weight: 700;
   line-height: 1;
 }

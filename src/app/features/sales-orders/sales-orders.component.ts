@@ -7,7 +7,6 @@ import { MatDialog } from '@angular/material/dialog';
 
 import { SalesOrderService } from './services/sales-order.service';
 import { SalesOrderListItem } from './models/sales-order-list-item.model';
-import { SalesOrderDetail } from './models/sales-order-detail.model';
 import { CustomerService } from '../customers/services/customer.service';
 import { CustomerListItem } from '../customers/models/customer-list-item.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -16,12 +15,10 @@ import { SelectComponent, SelectOption } from '../../shared/components/select/se
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { SnackbarService } from '../../shared/services/snackbar.service';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
-import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
+import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
+import { openDetailDialog } from '../../shared/utils/detail-dialog.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -31,7 +28,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    SoDialogComponent, BarcodeInfoComponent, MatTooltipModule,
+    SoDialogComponent,
   ],
   templateUrl: './sales-orders.component.html',
   styleUrl: './sales-orders.component.scss',
@@ -41,13 +38,11 @@ export class SalesOrdersComponent {
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
   private readonly dialog = inject(MatDialog);
-  private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly salesOrders = signal<SalesOrderListItem[]>([]);
-  protected readonly selectedSo = signal<SalesOrderDetail | null>(null);
   protected readonly customers = signal<CustomerListItem[]>([]);
 
   // Filters
@@ -84,10 +79,7 @@ export class SalesOrdersComponent {
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
-  protected readonly soRowClass = (row: unknown) => {
-    const so = row as SalesOrderListItem;
-    return so.id === this.selectedSo()?.id ? 'row--selected' : '';
-  };
+  protected readonly soRowClass = (_row: unknown) => '';
 
   constructor() {
     this.loadSalesOrders();
@@ -109,13 +101,14 @@ export class SalesOrdersComponent {
 
   protected applyFilters(): void { this.loadSalesOrders(); }
 
-  protected selectSo(item: SalesOrderListItem): void {
-    this.soService.getSalesOrderById(item.id).subscribe({
-      next: (detail) => this.selectedSo.set(detail),
-    });
+  protected openSalesOrderDetail(item: SalesOrderListItem): void {
+    const ref = openDetailDialog<SalesOrderDetailDialogComponent, SalesOrderDetailDialogData>(
+      this.dialog,
+      SalesOrderDetailDialogComponent,
+      { salesOrderId: item.id },
+    );
+    ref.afterClosed().subscribe(() => this.loadSalesOrders());
   }
-
-  protected closeDetail(): void { this.selectedSo.set(null); }
 
   // --- Create Dialog ---
   protected openCreateDialog(): void { this.showCreateDialog.set(true); }
@@ -123,65 +116,6 @@ export class SalesOrdersComponent {
   protected onCreateSaved(): void {
     this.closeCreateDialog();
     this.loadSalesOrders();
-  }
-
-  // --- Status Actions ---
-  protected confirmSo(): void {
-    const so = this.selectedSo();
-    if (!so) return;
-    this.soService.confirmSalesOrder(so.id).subscribe({
-      next: () => {
-        this.refreshDetail(so.id);
-        this.loadSalesOrders();
-        this.snackbar.success(this.translate.instant('salesOrders.soConfirmed'));
-      },
-    });
-  }
-
-  protected cancelSo(): void {
-    const so = this.selectedSo();
-    if (!so) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('salesOrders.cancelSoTitle'),
-        message: this.translate.instant('salesOrders.cancelSoMessage', { number: so.orderNumber }),
-        confirmLabel: this.translate.instant('salesOrders.cancelOrder'),
-        severity: 'warn',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.soService.cancelSalesOrder(so.id).subscribe({
-        next: () => {
-          this.refreshDetail(so.id);
-          this.loadSalesOrders();
-          this.snackbar.success(this.translate.instant('salesOrders.soCancelled'));
-        },
-      });
-    });
-  }
-
-  protected deleteSo(): void {
-    const so = this.selectedSo();
-    if (!so) return;
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('salesOrders.deleteSoTitle'),
-        message: this.translate.instant('salesOrders.deleteSoMessage', { number: so.orderNumber }),
-        confirmLabel: this.translate.instant('common.delete'),
-        severity: 'danger',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (!confirmed) return;
-      this.soService.deleteSalesOrder(so.id).subscribe({
-        next: () => {
-          this.selectedSo.set(null);
-          this.loadSalesOrders();
-          this.snackbar.success(this.translate.instant('salesOrders.soDeleted'));
-        },
-      });
-    });
   }
 
   // --- Helpers ---
@@ -202,13 +136,5 @@ export class SalesOrdersComponent {
     const key = 'salesOrders.status' + status;
     const translated = this.translate.instant(key);
     return translated !== key ? translated : status;
-  }
-
-  protected canConfirm(status: string): boolean { return status === 'Draft'; }
-  protected canCancel(status: string): boolean { return status === 'Draft' || status === 'Confirmed'; }
-  protected canDelete(status: string): boolean { return status === 'Draft'; }
-
-  private refreshDetail(id: number): void {
-    this.soService.getSalesOrderById(id).subscribe(d => this.selectedSo.set(d));
   }
 }

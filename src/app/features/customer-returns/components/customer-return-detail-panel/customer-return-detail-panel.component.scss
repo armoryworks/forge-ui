@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+
+  &__header {
+    @include flex-between;
+    padding: $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: $sp-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+    @include custom-scrollbar;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-md;
+    justify-content: flex-end;
+  }
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.detail-label {
+  @include uppercase-label($font-size-xxs, 0.05em);
+  color: var(--text-muted);
+}
+
+.detail-value {
+  font-size: $font-size-base;
+  color: var(--text);
+}

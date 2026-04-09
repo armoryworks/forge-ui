@@ -1,19 +1,15 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter, map, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { TimeTrackingService } from '../../time-tracking/services/time-tracking.service';
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../shared/components/file-upload-zone/file-upload-zone.component';
-import { ActivityTimelineComponent } from '../../../shared/components/activity-timeline/activity-timeline.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../shared/components/select/select.component';
-import { RichTextEditorComponent } from '../../../shared/components/rich-text-editor/rich-text-editor.component';
-import { RichTextDisplayComponent } from '../../../shared/components/rich-text-display/rich-text-display.component';
-import { ActivityItem } from '../../../shared/models/activity.model';
-import { MentionUser } from '../../../shared/models/mention-user.model';
+import { EntityActivitySectionComponent } from '../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,9 +20,7 @@ import { KanbanService } from '../services/kanban.service';
 import { DisposeJobDialogComponent, DisposeJobDialogData } from './dispose-job-dialog.component';
 import { UserRef } from '../models/user-ref.model';
 import { JobDetail } from '../models/job-detail.model';
-import { JobNote } from '../models/job-note.model';
 import { Subtask } from '../models/subtask.model';
-import { Activity } from '../models/activity.model';
 import { JobLink } from '../models/job-link.model';
 import { KanbanJob } from '../models/kanban-job.model';
 import { PRIORITY_COLORS } from '../models/priority-colors.const';
@@ -41,12 +35,10 @@ import { StatusTimelineComponent } from '../../../shared/components/status-timel
 import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/barcode-info.component';
 import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-photo-upload-dialog.component';
 
-type ActivityFilter = 'all' | 'comments' | 'notes' | 'history';
-
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, RichTextEditorComponent, RichTextDisplayComponent, ActivityTimelineComponent, StatusTimelineComponent, BarcodeInfoComponent, MatMenuModule, MatTooltipModule],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, MatMenuModule, MatTooltipModule],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,15 +56,12 @@ export class JobDetailPanelComponent implements OnInit {
   readonly editRequested = output<JobDetail>();
 
   protected readonly job = signal<JobDetail | null>(null);
-  private readonly selfLoadedUsers = signal<UserRef[]>([]);
   protected readonly subtasks = signal<Subtask[]>([]);
-  protected readonly activity = signal<Activity[]>([]);
   protected readonly links = signal<JobLink[]>([]);
   protected readonly files = signal<FileAttachment[]>([]);
   protected readonly timeEntries = signal<TimeEntry[]>([]);
   protected readonly loading = signal(true);
   protected readonly newSubtaskControl = new FormControl('');
-  protected readonly commentControl = new FormControl('');
 
   // Link add form
   protected readonly linkSearchControl = new FormControl('');
@@ -94,18 +83,7 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly selectedPart = signal<PartSearchResult | null>(null);
   protected readonly showPartResults = signal(false);
 
-  // Activity filter
-  protected readonly activityFilter = signal<ActivityFilter>('all');
-  protected readonly notes = signal<JobNote[]>([]);
-  protected readonly noteControl = new FormControl('');
-  protected readonly isSavingNote = signal(false);
-  protected readonly historyItems = signal<ActivityItem[]>([]);
-
-  private readonly _historyEffect = effect(() => {
-    if (this.activityFilter() === 'history' && this.historyItems().length === 0) {
-      this.kanbanService.getHistory(this.jobId()).subscribe(h => this.historyItems.set(h));
-    }
-  });
+  // Activity (delegated to shared EntityActivitySectionComponent)
 
   protected readonly isTimerLoading = signal(false);
 
@@ -125,42 +103,9 @@ export class JobDetailPanelComponent implements OnInit {
     return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
   });
 
-  protected readonly mappedActivity = computed<ActivityItem[]>(() =>
-    this.activity().map(a => ({
-      id: a.id,
-      description: a.description,
-      createdAt: a.createdAt,
-      userInitials: a.userInitials ?? undefined,
-      action: a.action,
-    }))
-  );
-
-  protected readonly mentionUsersForEditor = computed<MentionUser[]>(() => {
-    const provided = this.users();
-    const source = provided.length > 0 ? provided : this.selfLoadedUsers();
-    return source.map(u => ({ id: u.id, name: u.name, initials: u.initials, color: u.color }));
-  });
-
-  protected readonly allActivityItems = computed<ActivityItem[]>(() => {
-    const comments = this.mappedActivity();
-    const noteItems: ActivityItem[] = this.notes().map(n => ({
-      id: n.id,
-      description: n.text,
-      createdAt: n.createdAt,
-      userInitials: n.authorInitials ?? undefined,
-      action: 'note',
-    }));
-    return [...comments, ...noteItems].sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
-  });
 
   ngOnInit(): void {
     const id = this.jobId();
-    // Self-load users for @mentions if not provided by the parent (e.g. dashboard widget)
-    if (this.users().length === 0) {
-      this.kanbanService.getUsers().subscribe(u => this.selfLoadedUsers.set(u));
-    }
     this.kanbanService.getJobDetail(id).subscribe(detail => {
       this.job.set(detail);
       this.loading.set(false);
@@ -169,12 +114,10 @@ export class JobDetailPanelComponent implements OnInit {
       }
     });
     this.kanbanService.getSubtasks(id).subscribe(s => this.subtasks.set(s));
-    this.kanbanService.getJobActivity(id).subscribe(a => this.activity.set(a));
     this.kanbanService.getJobLinks(id).subscribe(l => this.links.set(l));
     this.kanbanService.getJobFiles(id).subscribe(f => this.files.set(f));
     this.kanbanService.getJobTimeEntries(id).subscribe(t => this.timeEntries.set(t));
     this.kanbanService.getJobParts(id).subscribe(p => this.jobParts.set(p));
-    this.kanbanService.getNotes(id).subscribe(n => this.notes.set(n));
 
     this.partSearchControl.valueChanges.pipe(
       debounceTime(300),
@@ -264,21 +207,6 @@ export class JobDetailPanelComponent implements OnInit {
     setTimeout(() => this.showLinkResults.set(false), 200);
   }
 
-  private extractMentionIds(text: string): number[] {
-    const matches = [...text.matchAll(/@\[([^\]]+)\]\(user:(\d+)\)/g)];
-    return [...new Set(matches.map(m => parseInt(m[2], 10)))];
-  }
-
-  protected postComment(): void {
-    const text = (this.commentControl.value ?? '').trim();
-    if (!text) return;
-    const mentionIds = this.extractMentionIds(text);
-    this.kanbanService.addComment(this.jobId(), text, mentionIds).subscribe(entry => {
-      this.activity.update(list => [entry, ...list]);
-      this.commentControl.reset();
-      this.snackbar.success(this.translate.instant('kanban.commentPosted'));
-    });
-  }
 
   protected onFileUploaded(file: UploadedFile): void {
     this.kanbanService.getJobFiles(this.jobId()).subscribe(f => {
@@ -464,30 +392,6 @@ export class JobDetailPanelComponent implements OnInit {
     });
   }
 
-  protected setActivityFilter(filter: ActivityFilter): void {
-    this.activityFilter.set(filter);
-  }
-
-  protected saveNote(): void {
-    const text = (this.noteControl.value ?? '').trim();
-    if (!text) return;
-    const mentionIds = this.extractMentionIds(text);
-    this.isSavingNote.set(true);
-    this.kanbanService.createNote(this.jobId(), text, mentionIds).subscribe({
-      next: note => {
-        this.notes.update(n => [note, ...n]);
-        this.noteControl.reset();
-        this.isSavingNote.set(false);
-      },
-      error: () => this.isSavingNote.set(false),
-    });
-  }
-
-  protected deleteNote(note: JobNote): void {
-    this.kanbanService.deleteNote(this.jobId(), note.id).subscribe(() => {
-      this.notes.update(n => n.filter(x => x.id !== note.id));
-    });
-  }
 
 
   protected close(): void {

@@ -1,0 +1,125 @@
+<div class="ea-section">
+  @if (showFilterBar()) {
+    <div class="ea-header">
+      <h3 class="ea-title">Activity</h3>
+      <div class="ea-filter" role="group" aria-label="Activity filter">
+        @for (tab of tabs(); track tab) {
+          <button class="ea-filter-btn" [class.ea-filter-btn--active]="activeFilter() === tab"
+            (click)="setFilter(tab)" [attr.aria-label]="'Filter by ' + tab">
+            @switch (tab) {
+              @case ('all') { All }
+              @case ('comments') { Conversation }
+              @case ('notes') {
+                Notes
+                @if (notes().length) { <span class="ea-filter-btn__count">{{ notes().length }}</span> }
+              }
+              @case ('history') { History }
+            }
+          </button>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="ea-header">
+      <h3 class="ea-title">History</h3>
+    </div>
+  }
+
+  @if (activeFilter() === 'notes') {
+    <!-- Notes tab -->
+    <div class="ea-note-add">
+      <app-rich-text-editor
+        placeholder="Add a note..."
+        [users]="mentionUsers()"
+        [formControl]="noteControl" />
+      <button class="action-btn action-btn--primary"
+        [disabled]="!noteControl.value?.trim() || isSavingNote()"
+        (click)="saveNote()" aria-label="Save note">
+        <span class="material-icons-outlined">save</span> Save Note
+      </button>
+    </div>
+    @if (notes().length) {
+      <div class="ea-note-list">
+        @for (note of notes(); track note.id) {
+          <div class="ea-note-item">
+            <div class="ea-note-item__header">
+              <app-avatar [initials]="note.authorInitials" [color]="note.authorColor" size="sm" />
+              <span class="ea-note-item__author">{{ note.authorName }}</span>
+              <span class="ea-note-item__date">{{ note.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+              <button class="ea-note-item__delete icon-btn icon-btn--danger"
+                (click)="deleteNote(note)" aria-label="Delete note"
+                matTooltip="Delete note" matTooltipPosition="above">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+            <app-rich-text-display [content]="note.text" />
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="ea-empty">No notes yet.</p>
+    }
+  } @else if (activeFilter() === 'history') {
+    @if (historyItems().length) {
+      <app-activity-timeline [activities]="historyItems()" [compact]="true" />
+    } @else {
+      <p class="ea-empty">No history yet.</p>
+    }
+  } @else if (activeFilter() === 'comments') {
+    <div class="ea-comment-add">
+      <app-rich-text-editor
+        placeholder="Add a comment..."
+        [users]="mentionUsers()"
+        [formControl]="commentControl" />
+      <button class="ea-comment-send" (click)="postComment()"
+        [disabled]="!commentControl.value?.trim()"
+        aria-label="Post comment"
+        matTooltip="Post comment" matTooltipPosition="above">
+        <span class="material-icons-outlined">send</span>
+      </button>
+    </div>
+    @if (mappedComments().length) {
+      <div class="ea-comment-list">
+        @for (item of mappedComments(); track item.id) {
+          <div class="ea-comment-item">
+            <div class="ea-comment-item__header">
+              @if (item.userInitials) {
+                <app-avatar [initials]="item.userInitials" [color]="item.userColor ?? '#64748b'" size="sm" />
+              } @else {
+                <span class="material-icons-outlined ea-comment-item__system-icon">account_circle</span>
+              }
+              <span class="ea-comment-item__time">{{ item.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            </div>
+            <app-rich-text-display [content]="item.description" />
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="ea-empty">No comments yet.</p>
+    }
+  } @else {
+    <!-- ALL: merged comments + notes sorted by date -->
+    @if (allActivityItems().length) {
+      <div class="ea-comment-list">
+        @for (item of allActivityItems(); track item.id) {
+          <div class="ea-comment-item">
+            <div class="ea-comment-item__header">
+              @if (item.userInitials) {
+                <app-avatar [initials]="item.userInitials" [color]="item.userColor ?? '#64748b'" size="sm" />
+              } @else {
+                <span class="material-icons-outlined ea-comment-item__system-icon">history</span>
+              }
+              @if (item.action === 'note') {
+                <span class="chip chip--muted ea-comment-item__tag">Note</span>
+              }
+              <span class="ea-comment-item__time">{{ item.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            </div>
+            <app-rich-text-display [content]="item.description" />
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="ea-empty">No activity yet.</p>
+    }
+  }
+</div>

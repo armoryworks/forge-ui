@@ -1,0 +1,131 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.detail-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.detail-header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.detail-header__info { display: flex; align-items: center; gap: $sp-md; }
+.detail-header__actions { display: flex; gap: $sp-sm; }
+.detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
+.detail-name { font-weight: 700; }
+.detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
+
+.detail-body {
+  flex: 1;
+  overflow: auto;
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  @include custom-scrollbar;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+}
+
+.info-item { display: flex; flex-direction: column; gap: $sp-xs; }
+.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: $font-size-sm; }
+.info-section { display: flex; flex-direction: column; gap: $sp-md; }
+
+.info-notes {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+// --- Lines Table ---
+.lines-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.lines-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-sm;
+
+  th, td {
+    padding: $sp-sm $sp-md;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  th {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__right { text-align: right; }
+  &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+}
+
+// --- Totals ---
+.totals-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.totals-row--total {
+  padding-top: $sp-sm;
+  border-top: $border-width-thin solid var(--border);
+  font-weight: 700;
+}
+
+.totals-value {
+  font-size: $font-size-sm;
+  font-family: $font-family-mono;
+}
+
+// --- Actions ---
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-md;
+  padding-top: $sp-md;
+  border-top: $border-width-thin solid var(--border);
+}
+
+// --- Empty state ---
+.detail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-hero;
+    opacity: 0.3;
+  }
+}

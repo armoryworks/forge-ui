@@ -1,0 +1,61 @@
+<div class="detail-panel">
+  <div class="detail-panel__header">
+    <h2 class="detail-panel__title">{{ lotNumber() }}</h2>
+    <button class="icon-btn" aria-label="Close detail" (click)="closed.emit()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="detail-panel__body" [appLoadingBlock]="loading()">
+    @if (trace(); as t) {
+      <div class="trace-header">
+        <div class="trace-meta">
+          <span class="trace-label">{{ 'lots.partNumber' | translate }}</span>
+          <span class="trace-value">{{ t.partNumber }}</span>
+        </div>
+        <div class="trace-meta">
+          <span class="trace-label">{{ 'lots.quantity' | translate }}</span>
+          <span class="trace-value">{{ t.quantity }}</span>
+        </div>
+        @if (t.supplierLotNumber) {
+          <div class="trace-meta">
+            <span class="trace-label">{{ 'lots.supplierLot' | translate }}</span>
+            <span class="trace-value">{{ t.supplierLotNumber }}</span>
+          </div>
+        }
+        @if (t.expirationDate) {
+          <div class="trace-meta">
+            <span class="trace-label">{{ 'lots.expires' | translate }}</span>
+            <span class="trace-value">{{ t.expirationDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="trace-timeline">
+        <h4 class="trace-timeline__title">{{ 'lots.traceHistory' | translate }}</h4>
+        @if (t.events.length === 0) {
+          <p class="trace-empty">{{ 'lots.noTraceEvents' | translate }}</p>
+        }
+        @for (event of t.events; track event.date + event.type) {
+          <div class="trace-event">
+            <div class="trace-event__icon">
+              <span class="material-icons-outlined">{{ getTraceEventIcon(event.type) }}</span>
+            </div>
+            <div class="trace-event__body">
+              <span class="trace-event__ref">{{ event.referenceNumber }}</span>
+              <span class="trace-event__desc">{{ event.description }}</span>
+              <span class="trace-event__date">{{ event.date | date:'MM/dd/yyyy' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <div class="detail-panel__activity">
+      <app-entity-activity-section
+        entityType="Lot"
+        [entityId]="lotId()"
+        [tabs]="['history']" />
+    </div>
+  </div>
+</div>
