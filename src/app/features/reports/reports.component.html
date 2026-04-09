@@ -43,10 +43,11 @@
       <!-- Jobs by Stage -->
       @if (activeReport() === 'jobs-by-stage') {
         <div class="chart-container">
-          <canvas baseChart
-                  type="bar"
-                  [data]="jobsByStageChart()"
-                  [options]="barOptions"></canvas>
+          <app-drillable-chart
+            initialChartType="bar"
+            [initialData]="jobsByStageChart()"
+            [initialOptions]="barOptions"
+            initialLabel="All Stages" />
         </div>
         <app-data-table tableId="report-jobs-by-stage" [columns]="stageColumns" [data]="jobsByStageData()"
                         emptyIcon="view_kanban" [emptyMessage]="'reports.emptyNoJobsFound' | translate" />
@@ -73,10 +74,12 @@
       <!-- Expense Summary -->
       @if (activeReport() === 'expense-summary') {
         <div class="chart-container chart-container--pie">
-          <canvas baseChart
-                  type="pie"
-                  [data]="expenseSummaryChart()"
-                  [options]="pieOptions"></canvas>
+          <app-drillable-chart
+            initialChartType="pie"
+            [initialData]="expenseSummaryChart()"
+            [initialOptions]="pieOptions"
+            initialLabel="All Categories"
+            [drillDataFn]="expenseDrillFn" />
         </div>
         <app-data-table tableId="report-expense-summary" [columns]="expenseColumns" [data]="expenseSummaryData()"
                         emptyIcon="receipt_long" [emptyMessage]="'reports.emptyNoExpenses' | translate" />
@@ -85,10 +88,11 @@
       <!-- Lead Pipeline -->
       @if (activeReport() === 'lead-pipeline') {
         <div class="chart-container">
-          <canvas baseChart
-                  type="bar"
-                  [data]="leadPipelineChart()"
-                  [options]="barOptions"></canvas>
+          <app-drillable-chart
+            initialChartType="bar"
+            [initialData]="leadPipelineChart()"
+            [initialOptions]="barOptions"
+            initialLabel="All Statuses" />
         </div>
         <app-data-table tableId="report-lead-pipeline" [columns]="leadColumns" [data]="leadPipelineData()"
                         emptyIcon="filter_alt" [emptyMessage]="'reports.emptyNoLeads' | translate" />
@@ -203,10 +207,11 @@
       <!-- Revenue -->
       @if (activeReport() === 'revenue') {
         <div class="chart-container">
-          <canvas baseChart
-                  type="bar"
-                  [data]="revenueChart()"
-                  [options]="barOptions"></canvas>
+          <app-drillable-chart
+            initialChartType="bar"
+            [initialData]="revenueChart()"
+            [initialOptions]="barOptions"
+            initialLabel="Revenue" />
         </div>
         <app-data-table tableId="report-revenue" [columns]="revenueColumns" [data]="revenueData()"
                         emptyIcon="attach_money" [emptyMessage]="'reports.emptyNoRevenueData' | translate" />

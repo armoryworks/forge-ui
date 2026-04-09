@@ -1,0 +1,26 @@
+@if (breadcrumbs().length > 1) {
+  <div class="drill-breadcrumbs">
+    @for (crumb of breadcrumbs(); track $index; let last = $last) {
+      @if (!last) {
+        <button class="drill-breadcrumbs__item" (click)="navigateTo($index)" aria-label="Navigate to {{ crumb }}">{{ crumb }}</button>
+        <span class="drill-breadcrumbs__separator material-icons-outlined">chevron_right</span>
+      } @else {
+        <span class="drill-breadcrumbs__current">{{ crumb }}</span>
+      }
+    }
+  </div>
+}
+
+<div class="drill-chart-container">
+  <canvas baseChart
+          [type]="currentLevel().chartType"
+          [data]="currentLevel().data"
+          [options]="chartOptions()"></canvas>
+</div>
+
+@if (canDrillUp()) {
+  <button class="drill-back-btn action-btn action-btn--sm" (click)="drillUp()" aria-label="Back to previous level">
+    <span class="material-icons-outlined">arrow_back</span>
+    Back
+  </button>
+}

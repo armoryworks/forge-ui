@@ -3,6 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
+import { DrillableChartComponent, DrillEvent, DrillLevel } from '../../shared/components/drillable-chart/drillable-chart.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
@@ -45,7 +46,7 @@ import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, PageHeaderComponent, DataTableComponent, DatepickerComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, CurrencyPipe, DecimalPipe, BaseChartDirective, DrillableChartComponent, PageHeaderComponent, DataTableComponent, DatepickerComponent, TranslatePipe],
   templateUrl: './reports.component.html',
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -380,6 +381,25 @@ export class ReportsComponent {
     maintainAspectRatio: false,
     plugins: { legend: { position: 'top' } },
     scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+  };
+
+  // Drill-down functions
+  protected readonly expenseDrillFn = (event: DrillEvent): DrillLevel | null => {
+    const data = this.expenseSummaryData();
+    const category = data[event.index];
+    if (!category || category.count <= 1) return null;
+    // Drill into category shows count-based breakdown with the category total
+    return {
+      label: category.category,
+      chartType: 'pie',
+      data: {
+        labels: [`${category.category} (${category.count} items)`],
+        datasets: [{
+          data: [category.totalAmount],
+          backgroundColor: ['#3b82f6'],
+        }],
+      },
+    };
   };
 
   // Table columns

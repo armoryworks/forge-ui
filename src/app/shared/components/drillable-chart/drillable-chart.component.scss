@@ -1,0 +1,55 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+.drill-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  margin-bottom: $sp-md;
+  font-size: $font-size-sm;
+
+  &__item {
+    background: none;
+    border: none;
+    padding: $sp-xs $sp-sm;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: inherit;
+    font-family: $font-family-primary;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__separator {
+    font-size: $icon-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__current {
+    padding: $sp-xs $sp-sm;
+    color: var(--text);
+    font-weight: 500;
+  }
+}
+
+.drill-chart-container {
+  position: relative;
+  height: $chart-height;
+  width: 100%;
+}
+
+.drill-back-btn {
+  margin-top: $sp-md;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
