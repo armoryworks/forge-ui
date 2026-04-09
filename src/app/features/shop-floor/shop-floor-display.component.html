@@ -392,6 +392,17 @@
             }
           </div>
 
+          <!-- Receive Goods Action -->
+          <div class="sf-actions-card__grid" style="margin-top: 8px;">
+            <button class="sf-action-btn sf-action-btn--receive"
+                    [disabled]="processing() !== null"
+                    (click)="enterReceiving()"
+                    aria-label="Receive goods">
+              <span class="material-icons-outlined">local_shipping</span>
+              <span class="sf-action-btn__label">Receive Goods</span>
+            </button>
+          </div>
+
           <button class="action-btn sf-actions-card__cancel" (click)="cancelActions()"
                   aria-label="Cancel">
             <span class="material-icons-outlined">arrow_back</span>
@@ -448,6 +459,95 @@
                 aria-label="Skip job selection">
           <span class="material-icons-outlined">skip_next</span>
           Skip
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ─── Receiving Overlay ─── -->
+  @if (phase() === 'receiving') {
+    <div class="sf-overlay">
+      <div class="sf-receiving-card">
+        <div class="sf-receiving-card__header">
+          <span class="material-icons-outlined">local_shipping</span>
+          <h2>Receive Goods</h2>
+        </div>
+
+        @if (!selectedPO()) {
+          <!-- PO Selection -->
+          <p class="sf-receiving-card__hint">Select a purchase order to receive items from.</p>
+          <div class="sf-receiving-card__po-list">
+            @for (po of receivablePOs(); track po.id) {
+              <button class="sf-receiving-card__po-item"
+                      (click)="selectPOForReceiving(po)"
+                      attr.aria-label="Select PO {{ po.poNumber }}">
+                <div class="sf-receiving-card__po-info">
+                  <span class="sf-receiving-card__po-number">{{ po.poNumber }}</span>
+                  <span class="sf-receiving-card__po-vendor">{{ po.vendorName }}</span>
+                </div>
+                <span class="sf-receiving-card__po-lines">{{ po.lines.length }} lines</span>
+              </button>
+            } @empty {
+              <div class="sf-empty">
+                <span class="material-icons-outlined sf-empty__icon">inventory</span>
+                <p>No open purchase orders to receive</p>
+              </div>
+            }
+          </div>
+        } @else {
+          <!-- Line Confirmation -->
+          <div class="sf-receiving-card__po-header">
+            <strong>{{ selectedPO()!.poNumber }}</strong> — {{ selectedPO()!.vendorName }}
+          </div>
+
+          <div class="sf-receiving-card__lines">
+            @for (item of receivingLines(); track item.line.id) {
+              <div class="sf-receiving-card__line">
+                <div class="sf-receiving-card__line-info">
+                  <span class="sf-receiving-card__line-part">{{ item.line.partNumber }}</span>
+                  <span class="sf-receiving-card__line-desc">{{ item.line.description }}</span>
+                </div>
+                <div class="sf-receiving-card__line-qty">
+                  <span class="sf-receiving-card__line-remaining">{{ item.line.remainingQuantity }} remaining</span>
+                  <div class="sf-receiving-card__qty-input">
+                    <button class="sf-qty-btn" (click)="updateReceiveQty(item.line.id, item.receiveQty - 1)"
+                            [disabled]="item.receiveQty <= 0" aria-label="Decrease quantity">−</button>
+                    <span class="sf-receiving-card__qty-value">{{ item.receiveQty }}</span>
+                    <button class="sf-qty-btn" (click)="updateReceiveQty(item.line.id, item.receiveQty + 1)"
+                            [disabled]="item.receiveQty >= item.line.remainingQuantity" aria-label="Increase quantity">+</button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          @if (binLocationOptions().length > 0) {
+            <div class="sf-receiving-card__bin">
+              <app-select label="Bin Location" [formControl]="receiveBinId" [options]="binLocationOptions()" />
+            </div>
+          }
+
+          <div class="sf-receiving-card__actions">
+            <button class="action-btn" (click)="selectedPO.set(null)" aria-label="Back to PO list">
+              <span class="material-icons-outlined">arrow_back</span> Back
+            </button>
+            <button class="action-btn action-btn--primary"
+                    [disabled]="receivingSubmitting()"
+                    (click)="submitReceiving()"
+                    aria-label="Confirm receiving">
+              @if (receivingSubmitting()) {
+                <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">check</span>
+              }
+              Receive All
+            </button>
+          </div>
+        }
+
+        <button class="action-btn sf-receiving-card__cancel" (click)="cancelReceiving()"
+                aria-label="Cancel receiving">
+          <span class="material-icons-outlined">close</span> Cancel
         </button>
       </div>
     </div>

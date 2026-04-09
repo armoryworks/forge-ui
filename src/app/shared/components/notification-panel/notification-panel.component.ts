@@ -67,6 +67,16 @@ export class NotificationPanelComponent {
       case 'lead': return { path: ['/leads'], query: { id: entityId } };
       case 'part': return { path: ['/parts'], query: { id: entityId } };
       case 'shipment': return { path: ['/shipments'], query: { id: entityId } };
+      case 'customer': return { path: ['/customers', entityId, 'overview'] };
+      case 'asset': return { path: ['/assets'], query: { id: entityId } };
+      case 'vendor': return { path: ['/vendors'], query: { id: entityId } };
+      case 'timeentry': return { path: ['/time-tracking'], query: { id: entityId } };
+      case 'training': return { path: ['/training'] };
+      case 'users': return { path: ['/admin/users'] };
+      case 'compliance_submissions': return { path: ['/account/tax-forms'] };
+      case 'reorder_suggestions': return { path: ['/inventory/replenishment'] };
+      case 'customerreturn': return { path: ['/customer-returns'], query: { id: entityId } };
+      case 'payment': return { path: ['/payments'], query: { id: entityId } };
       default: return null;
     }
   }

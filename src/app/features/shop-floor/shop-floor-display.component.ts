@@ -15,6 +15,11 @@ import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { ShopFloorOverview, ShopFloorJob } from './models/shop-floor-overview.model';
 import { ClockWorker } from './models/clock-worker.model';
+import { PurchaseOrderService } from '../purchase-orders/services/purchase-order.service';
+import { PurchaseOrderDetail } from '../purchase-orders/models/purchase-order-detail.model';
+import { PurchaseOrderLine } from '../purchase-orders/models/purchase-order-line.model';
+import { InventoryService } from '../inventory/services/inventory.service';
+import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20] as const;
 type FontSizeStep = typeof FONT_SIZES[number];
@@ -24,12 +29,12 @@ const AUTO_LOGOUT_MS = 30_000;
 const PIN_TIMEOUT_MS = 20_000;
 const JOB_SELECT_TIMEOUT_MS = 15_000;
 
-type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select';
+type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving';
 
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, InputComponent, KioskSearchBarComponent],
+  imports: [ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,6 +58,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly scanner = inject(ScannerService);
   protected readonly loading = inject(LoadingService);
+  private readonly poService = inject(PurchaseOrderService);
+  private readonly inventoryService = inject(InventoryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
@@ -110,6 +117,14 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   // Job selection state (shown after clock-in if worker has no assignments)
   protected readonly jobSelectWorker = signal<ClockWorker | null>(null);
+
+  // Receiving state
+  protected readonly receivablePOs = signal<PurchaseOrderDetail[]>([]);
+  protected readonly selectedPO = signal<PurchaseOrderDetail | null>(null);
+  protected readonly receivingLines = signal<{ line: PurchaseOrderLine; receiveQty: number }[]>([]);
+  protected readonly receivingSubmitting = signal(false);
+  protected readonly binLocationOptions = signal<SelectOption[]>([]);
+  protected readonly receiveBinId = new FormControl<number | null>(null);
 
   // Drag-and-drop state
   protected readonly draggingJobId = signal<number | null>(null);
@@ -448,6 +463,101 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected cancelActions(): void {
     this.ephemeralLogout();
+  }
+
+  // ─── Receiving ───
+
+  protected enterReceiving(): void {
+    this.clearAutoLogoutTimer();
+    this.phase.set('receiving');
+    this.selectedPO.set(null);
+    this.receivingLines.set([]);
+    this.loadReceivablePOs();
+    this.loadBinLocations();
+  }
+
+  private loadReceivablePOs(): void {
+    const receivableStatuses = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
+    this.poService.getPurchaseOrders().subscribe(pos => {
+      const openPos = pos.filter(po => receivableStatuses.includes(po.status));
+      const details: PurchaseOrderDetail[] = [];
+      if (openPos.length === 0) {
+        this.receivablePOs.set([]);
+        return;
+      }
+      openPos.forEach(po => {
+        this.poService.getPurchaseOrderById(po.id).subscribe(detail => {
+          if (detail.lines.some(l => l.remainingQuantity > 0)) {
+            details.push(detail);
+            this.receivablePOs.set([...details]);
+          }
+        });
+      });
+    });
+  }
+
+  private loadBinLocations(): void {
+    this.inventoryService.getBinLocations().subscribe(bins => {
+      this.binLocationOptions.set(
+        bins.map(b => ({ value: b.id, label: b.locationPath ?? b.name })),
+      );
+    });
+  }
+
+  protected selectPOForReceiving(po: PurchaseOrderDetail): void {
+    this.selectedPO.set(po);
+    this.receivingLines.set(
+      po.lines
+        .filter(l => l.remainingQuantity > 0)
+        .map(l => ({ line: l, receiveQty: l.remainingQuantity })),
+    );
+    this.resetAutoLogoutTimer();
+  }
+
+  protected updateReceiveQty(lineId: number, qty: number): void {
+    this.receivingLines.update(lines =>
+      lines.map(l => l.line.id === lineId ? { ...l, receiveQty: Math.max(0, Math.min(qty, l.line.remainingQuantity)) } : l),
+    );
+    this.resetAutoLogoutTimer();
+  }
+
+  protected submitReceiving(): void {
+    const lines = this.receivingLines().filter(l => l.receiveQty > 0);
+    if (lines.length === 0) return;
+    this.receivingSubmitting.set(true);
+    this.resetAutoLogoutTimer();
+
+    let completed = 0;
+    const locationId = this.receiveBinId.value ?? undefined;
+
+    lines.forEach(({ line, receiveQty }) => {
+      this.inventoryService.receiveGoods({
+        purchaseOrderLineId: line.id,
+        quantityReceived: receiveQty,
+        locationId,
+      }).subscribe({
+        next: () => {
+          completed++;
+          if (completed === lines.length) {
+            this.receivingSubmitting.set(false);
+            this.showScanFeedback(`Received ${lines.length} line(s) successfully`);
+            setTimeout(() => this.ephemeralLogout(), 1500);
+          }
+        },
+        error: () => {
+          completed++;
+          if (completed === lines.length) {
+            this.receivingSubmitting.set(false);
+            this.showScanFeedback('Some lines failed to receive');
+          }
+        },
+      });
+    });
+  }
+
+  protected cancelReceiving(): void {
+    this.phase.set('actions');
+    this.startAutoLogoutTimer();
   }
 
   // ─── Helpers ───

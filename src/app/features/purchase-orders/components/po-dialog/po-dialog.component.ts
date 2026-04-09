@@ -110,7 +110,7 @@ export class PoDialogComponent {
       next: (list) => this.vendors.set(list),
     });
     this.partsService.getParts().subscribe({
-      next: (list) => this.parts.set(list),
+      next: (list) => this.parts.set(list.filter(p => p.partType !== 'Assembly')),
     });
 
     // Pre-fill unit price from part's list price when a part is selected

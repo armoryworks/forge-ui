@@ -552,7 +552,7 @@
 @if (showReceiveDialog()) {
   <app-dialog [title]="'inventory.dialogs.receiveGoodsTitle' | translate" width="520px" (closed)="closeReceiveDialog()">
     <div [formGroup]="receiveForm">
-      <app-input [label]="'inventory.dialogs.poLineId' | translate" formControlName="purchaseOrderLineId" type="number" />
+      <app-select [label]="'inventory.dialogs.poLineId' | translate" formControlName="purchaseOrderLineId" [options]="poLineOptions()" [required]="true" />
       <app-input [label]="'inventory.dialogs.quantityReceived' | translate" formControlName="quantityReceived" type="number" />
       <app-select [label]="'inventory.dialogs.binLocation' | translate" formControlName="locationId" [options]="binLocationOptions()" />
       <app-input [label]="'inventory.dialogs.lotNumber' | translate" formControlName="lotNumber" />

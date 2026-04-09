@@ -10,6 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { InventoryService } from './services/inventory.service';
 import { ReplenishmentService } from './services/replenishment.service';
+import { PurchaseOrderService } from '../purchase-orders/services/purchase-order.service';
+import { PurchaseOrderListItem } from '../purchase-orders/models/purchase-order-list-item.model';
 import { StorageLocation } from './models/storage-location.model';
 import { InventoryPartSummary } from './models/inventory-part-summary.model';
 import { LowStockAlert } from './models/low-stock-alert.model';
@@ -52,6 +54,7 @@ type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOp
 export class InventoryComponent {
   private readonly inventoryService = inject(InventoryService);
   private readonly replenishmentService = inject(ReplenishmentService);
+  private readonly poService = inject(PurchaseOrderService);
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly router = inject(Router);
@@ -156,6 +159,7 @@ export class InventoryComponent {
 
   // Receive dialog
   protected readonly showReceiveDialog = signal(false);
+  protected readonly poLineOptions = signal<SelectOption[]>([]);
   protected readonly receiveForm = new FormGroup({
     purchaseOrderLineId: new FormControl<number | null>(null, [Validators.required]),
     quantityReceived: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
@@ -439,7 +443,30 @@ export class InventoryComponent {
 
   protected openReceiveDialog(): void {
     this.receiveForm.reset();
+    this.loadPoLineOptions();
     this.showReceiveDialog.set(true);
+  }
+
+  private loadPoLineOptions(): void {
+    const receivableStatuses = ['Submitted', 'Acknowledged', 'PartiallyReceived'];
+    this.poService.getPurchaseOrders().subscribe(pos => {
+      const options: SelectOption[] = [];
+      const openPos = pos.filter(po => receivableStatuses.includes(po.status));
+      openPos.forEach(po => {
+        this.poService.getPurchaseOrderById(po.id).subscribe(detail => {
+          detail.lines
+            .filter(line => line.remainingQuantity > 0)
+            .forEach(line => {
+              options.push({
+                value: line.id,
+                label: `${detail.poNumber} — ${line.partNumber} (${line.remainingQuantity} remaining)`,
+              });
+            });
+          this.poLineOptions.set([...options]);
+        });
+      });
+      if (openPos.length === 0) this.poLineOptions.set([]);
+    });
   }
 
   protected closeReceiveDialog(): void {

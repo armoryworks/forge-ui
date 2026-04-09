@@ -911,6 +911,216 @@ $grid-columns: 5;
   color: var(--text-muted);
 }
 
+// ─── Receiving Card ───
+.sf-receiving-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+}
+
+.sf-receiving-card__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+
+  h2 {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+}
+
+.sf-receiving-card__hint {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.sf-receiving-card__po-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  overflow-y: auto;
+  max-height: 50vh;
+  @include custom-scrollbar(4px);
+}
+
+.sf-receiving-card__po-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  }
+}
+
+.sf-receiving-card__po-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.sf-receiving-card__po-number {
+  font-family: $font-family-mono;
+  font-weight: 600;
+  font-size: $font-size-base;
+}
+
+.sf-receiving-card__po-vendor {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+}
+
+.sf-receiving-card__po-lines {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.sf-receiving-card__po-header {
+  font-size: $font-size-md;
+  padding: $sp-md;
+  background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  border: $border-width-thin solid var(--border);
+}
+
+.sf-receiving-card__lines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  overflow-y: auto;
+  max-height: 40vh;
+  @include custom-scrollbar(4px);
+}
+
+.sf-receiving-card__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-lg;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+}
+
+.sf-receiving-card__line-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.sf-receiving-card__line-part {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.sf-receiving-card__line-desc {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  @include truncate;
+}
+
+.sf-receiving-card__line-qty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $sp-xs;
+  flex-shrink: 0;
+}
+
+.sf-receiving-card__line-remaining {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.sf-receiving-card__qty-input {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.sf-qty-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: $font-size-lg;
+  font-family: $font-family-mono;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
+
+.sf-receiving-card__qty-value {
+  font-family: $font-family-mono;
+  font-size: $font-size-md;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+}
+
+.sf-receiving-card__bin {
+  padding: $sp-sm 0;
+}
+
+.sf-receiving-card__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: $sp-md;
+}
+
+.sf-receiving-card__cancel {
+  align-self: center;
+  color: var(--text-muted);
+}
+
+.sf-action-btn--receive {
+  background: color-mix(in srgb, var(--info) 15%, var(--surface));
+  color: var(--info);
+  border-color: color-mix(in srgb, var(--info) 30%, var(--surface));
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--info) 25%, var(--surface));
+  }
+}
+
 // ─── Bottom Action Bar ───
 .sf-action-bar {
   display: flex;
