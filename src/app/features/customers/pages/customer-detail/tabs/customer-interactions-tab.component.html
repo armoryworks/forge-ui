@@ -1,0 +1,76 @@
+<div class="tab-toolbar">
+  <app-select
+    label="Contact"
+    [formControl]="contactFilterControl"
+    [options]="contactOptions()" />
+  <app-select
+    label="Type"
+    [formControl]="typeFilterControl"
+    [options]="typeOptions" />
+  <span class="tab-toolbar__spacer"></span>
+  <button class="action-btn action-btn--primary" (click)="openCreate()">
+    <span class="material-icons-outlined">add</span>
+    Log Interaction
+  </button>
+</div>
+
+<div class="tab-content tab-content--table" [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="customer-interactions"
+    [columns]="columns"
+    [data]="interactions()"
+    emptyIcon="forum"
+    emptyMessage="No interactions recorded">
+    <ng-template appColumnCell="type" let-row>
+      <span class="chip">
+        <span class="material-icons-outlined chip__icon">{{ typeIcon(row.type) }}</span>
+        {{ row.type }}
+      </span>
+    </ng-template>
+    <ng-template appColumnCell="interactionDate" let-row>
+      {{ row.interactionDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="durationMinutes" let-row>
+      {{ formatDuration(row.durationMinutes) }}
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <div class="row-actions">
+        <button class="icon-btn" aria-label="Edit interaction" (click)="openEdit(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger" aria-label="Delete interaction" (click)="deleteInteraction(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Log/Edit Interaction Dialog -->
+@if (showDialog()) {
+  <app-dialog [title]="editingId() ? 'Edit Interaction' : 'Log Interaction'" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <div class="dialog-row">
+        <app-select label="Type" formControlName="type" [options]="formTypeOptions" [required]="true" />
+        <app-select label="Contact" formControlName="contactId" [options]="contactOptions()" />
+      </div>
+      <app-input label="Subject" formControlName="subject" [maxlength]="200" [required]="true" />
+      <div class="dialog-row">
+        <app-datepicker label="Date" formControlName="interactionDate" [required]="true" />
+        <app-input label="Duration (minutes)" type="number" formControlName="durationMinutes" />
+      </div>
+      <app-textarea label="Notes" formControlName="body" [rows]="4" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ editingId() ? 'Save Changes' : 'Log Interaction' }}
+      </button>
+    </div>
+  </app-dialog>
+}

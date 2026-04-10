@@ -26,8 +26,9 @@ import { CustomerOrdersTabComponent } from './tabs/customer-orders-tab.component
 import { CustomerJobsTabComponent } from './tabs/customer-jobs-tab.component';
 import { CustomerInvoicesTabComponent } from './tabs/customer-invoices-tab.component';
 import { CustomerActivityTabComponent } from './tabs/customer-activity-tab.component';
+import { CustomerInteractionsTabComponent } from './tabs/customer-interactions-tab.component';
 
-const TABS = ['overview', 'contacts', 'addresses', 'estimates', 'quotes', 'orders', 'jobs', 'invoices', 'activity'] as const;
+const TABS = ['overview', 'contacts', 'interactions', 'addresses', 'estimates', 'quotes', 'orders', 'jobs', 'invoices', 'activity'] as const;
 type CustomerTab = typeof TABS[number];
 
 @Component({
@@ -38,7 +39,7 @@ type CustomerTab = typeof TABS[number];
     InputComponent, SelectComponent, DialogComponent, ValidationPopoverDirective,
     CustomerOverviewTabComponent, CustomerContactsTabComponent, CustomerAddressesTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
-    CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent,
+    CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent, CustomerInteractionsTabComponent,
   ],
   templateUrl: './customer-detail.component.html',
   styleUrl: './customer-detail.component.scss',
@@ -177,6 +178,7 @@ export class CustomerDetailComponent {
     const labels: Record<CustomerTab, string> = {
       overview: 'Overview',
       contacts: 'Contacts',
+      interactions: 'Interactions',
       addresses: 'Addresses',
       estimates: 'Estimates',
       quotes: 'Quotes',

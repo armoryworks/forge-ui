@@ -10,6 +10,7 @@ import { CreateCustomerRequest } from '../models/create-customer-request.model';
 import { UpdateCustomerRequest } from '../models/update-customer-request.model';
 import { CreateContactRequest } from '../models/create-contact-request.model';
 import { UpdateContactRequest } from '../models/update-contact-request.model';
+import { ContactInteraction, ContactInteractionRequest } from '../models/contact-interaction.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -53,5 +54,25 @@ export class CustomerService {
 
   getCustomerSummary(id: number): Observable<CustomerSummary> {
     return this.http.get<CustomerSummary>(`${this.base}/${id}/summary`);
+  }
+
+  // ─── Contact Interactions ───
+
+  getInteractions(customerId: number, contactId?: number): Observable<ContactInteraction[]> {
+    let params = new HttpParams();
+    if (contactId) params = params.set('contactId', contactId);
+    return this.http.get<ContactInteraction[]>(`${this.base}/${customerId}/interactions`, { params });
+  }
+
+  createInteraction(customerId: number, request: ContactInteractionRequest): Observable<ContactInteraction> {
+    return this.http.post<ContactInteraction>(`${this.base}/${customerId}/interactions`, request);
+  }
+
+  updateInteraction(customerId: number, interactionId: number, request: ContactInteractionRequest): Observable<ContactInteraction> {
+    return this.http.patch<ContactInteraction>(`${this.base}/${customerId}/interactions/${interactionId}`, request);
+  }
+
+  deleteInteraction(customerId: number, interactionId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${customerId}/interactions/${interactionId}`);
   }
 }

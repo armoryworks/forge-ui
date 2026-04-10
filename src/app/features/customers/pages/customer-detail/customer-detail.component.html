@@ -108,6 +108,9 @@
       @if (activeTab() === 'contacts') {
         <app-customer-contacts-tab [customerId]="c.id" />
       }
+      @if (activeTab() === 'interactions') {
+        <app-customer-interactions-tab [customerId]="c.id" />
+      }
       @if (activeTab() === 'addresses') {
         <app-customer-addresses-tab [customerId]="c.id" />
       }
