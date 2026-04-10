@@ -1,0 +1,32 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="employee-pay"
+    [columns]="columns"
+    [data]="stubs()"
+    [loading]="loading()"
+    emptyIcon="payments"
+    emptyMessage="No pay stubs found">
+
+    <ng-template appColumnCell="grossPay" let-row>
+      {{ row.grossPay | currency }}
+    </ng-template>
+    <ng-template appColumnCell="totalDeductions" let-row>
+      {{ row.totalDeductions | currency }}
+    </ng-template>
+    <ng-template appColumnCell="totalTaxes" let-row>
+      {{ row.totalTaxes | currency }}
+    </ng-template>
+    <ng-template appColumnCell="netPay" let-row>
+      <strong>{{ row.netPay | currency }}</strong>
+    </ng-template>
+    <ng-template appColumnCell="payDate" let-row>
+      {{ row.payDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="payPeriodStart" let-row>
+      {{ row.payPeriodStart | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="payPeriodEnd" let-row>
+      {{ row.payPeriodEnd | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>

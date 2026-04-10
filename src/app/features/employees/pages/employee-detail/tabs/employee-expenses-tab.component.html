@@ -1,0 +1,20 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="employee-expenses"
+    [columns]="columns"
+    [data]="expenses()"
+    [loading]="loading()"
+    emptyIcon="receipt_long"
+    emptyMessage="No expenses found">
+
+    <ng-template appColumnCell="expenseDate" let-row>
+      {{ row.expenseDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="amount" let-row>
+      {{ row.amount | currency }}
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+  </app-data-table>
+</div>

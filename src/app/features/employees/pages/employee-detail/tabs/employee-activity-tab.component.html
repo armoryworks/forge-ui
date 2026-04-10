@@ -1,0 +1,14 @@
+<div class="tab-content">
+  @if (loading()) {
+    <div class="tab-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+    </div>
+  } @else if (activities().length === 0) {
+    <div class="tab-empty">
+      <span class="material-icons-outlined">history</span>
+      <p>No activity recorded</p>
+    </div>
+  } @else {
+    <app-activity-timeline [activities]="$any(activities())" />
+  }
+</div>

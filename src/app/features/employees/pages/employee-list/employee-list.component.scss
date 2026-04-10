@@ -1,0 +1,25 @@
+@use '../../../../../styles/variables' as *;
+
+.employees-layout {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.filters-bar {
+  display: flex;
+  gap: $sp-md;
+  padding: $sp-md $sp-xl;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+  flex: 0 0 auto;
+}
+
+.employee-name-cell {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  font-weight: 500;
+}

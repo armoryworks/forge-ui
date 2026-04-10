@@ -1,0 +1,140 @@
+<div class="tab-content">
+  <div class="overview-grid">
+
+    <section class="overview-section">
+      <h3 class="overview-section__title">Employment Details</h3>
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-row__label">Role</span>
+          <span class="detail-row__value">{{ employee().role }}</span>
+        </div>
+        @if (employee().jobTitle) {
+          <div class="detail-row">
+            <span class="detail-row__label">Job Title</span>
+            <span class="detail-row__value">{{ employee().jobTitle }}</span>
+          </div>
+        }
+        @if (employee().department) {
+          <div class="detail-row">
+            <span class="detail-row__label">Department</span>
+            <span class="detail-row__value">{{ employee().department }}</span>
+          </div>
+        }
+        @if (employee().teamName) {
+          <div class="detail-row">
+            <span class="detail-row__label">Team</span>
+            <span class="detail-row__value">{{ employee().teamName }}</span>
+          </div>
+        }
+        @if (employee().workLocationName) {
+          <div class="detail-row">
+            <span class="detail-row__label">Work Location</span>
+            <span class="detail-row__value">{{ employee().workLocationName }}</span>
+          </div>
+        }
+        @if (employee().startDate) {
+          <div class="detail-row">
+            <span class="detail-row__label">Start Date</span>
+            <span class="detail-row__value">{{ employee().startDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        <div class="detail-row">
+          <span class="detail-row__label">Status</span>
+          <span class="chip" [class.chip--success]="employee().isActive" [class.chip--muted]="!employee().isActive">
+            {{ employee().isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="overview-section">
+      <h3 class="overview-section__title">Contact Information</h3>
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-row__label">Work Email</span>
+          <span class="detail-row__value">{{ employee().email }}</span>
+        </div>
+        @if (employee().personalEmail) {
+          <div class="detail-row">
+            <span class="detail-row__label">Personal Email</span>
+            <span class="detail-row__value">{{ employee().personalEmail }}</span>
+          </div>
+        }
+        @if (employee().phone) {
+          <div class="detail-row">
+            <span class="detail-row__label">Phone</span>
+            <span class="detail-row__value">{{ employee().phone }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    @if (employee().street1) {
+      <section class="overview-section">
+        <h3 class="overview-section__title">Address</h3>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-row__label">Street</span>
+            <span class="detail-row__value">
+              {{ employee().street1 }}
+              @if (employee().street2) { <br>{{ employee().street2 }} }
+            </span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-row__label">City / State / ZIP</span>
+            <span class="detail-row__value">{{ employee().city }}, {{ employee().state }} {{ employee().zipCode }}</span>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (employee().emergencyContactName) {
+      <section class="overview-section">
+        <h3 class="overview-section__title">Emergency Contact</h3>
+        <div class="detail-rows">
+          <div class="detail-row">
+            <span class="detail-row__label">Name</span>
+            <span class="detail-row__value">{{ employee().emergencyContactName }}</span>
+          </div>
+          @if (employee().emergencyContactRelationship) {
+            <div class="detail-row">
+              <span class="detail-row__label">Relationship</span>
+              <span class="detail-row__value">{{ employee().emergencyContactRelationship }}</span>
+            </div>
+          }
+          @if (employee().emergencyContactPhone) {
+            <div class="detail-row">
+              <span class="detail-row__label">Phone</span>
+              <span class="detail-row__value">{{ employee().emergencyContactPhone }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="overview-section">
+      <h3 class="overview-section__title">System Access</h3>
+      <div class="detail-rows">
+        <div class="detail-row">
+          <span class="detail-row__label">PIN Configured</span>
+          <span class="detail-row__value">{{ employee().pinConfigured ? 'Yes' : 'No' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">RFID / NFC</span>
+          <span class="detail-row__value">{{ employee().hasRfidIdentifier ? 'Configured' : 'Not configured' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Barcode</span>
+          <span class="detail-row__value">{{ employee().hasBarcodeIdentifier ? 'Configured' : 'Not configured' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-row__label">Compliance</span>
+          <span class="detail-row__value detail-row__value--mono">
+            {{ employee().complianceCompletedItems }} / {{ employee().complianceTotalItems }}
+          </span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>

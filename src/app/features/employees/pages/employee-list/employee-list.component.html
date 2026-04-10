@@ -1,0 +1,50 @@
+<app-page-header title="Employees" subtitle="Manage team members">
+</app-page-header>
+
+<div class="employees-layout">
+  <div class="filters-bar">
+    <app-input label="Search" [formControl]="searchControl"
+      placeholder="Search by name or email..."
+      (keyup.enter)="applyFilters()" />
+    <app-select label="Role" [formControl]="roleControl" [options]="roleOptions()"
+      (selectionChange)="applyFilters()" />
+    <app-select label="Status" [formControl]="statusControl" [options]="statusOptions"
+      (selectionChange)="applyFilters()" />
+  </div>
+
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="employees-list"
+      [columns]="columns()"
+      [data]="employees()"
+      emptyIcon="badge"
+      emptyMessage="No employees found"
+      [clickableRows]="true"
+      (rowClick)="selectEmployee($any($event))">
+
+      <ng-template appColumnCell="name" let-row>
+        <div class="employee-name-cell">
+          <app-avatar [initials]="row.initials ?? ''" [color]="row.avatarColor ?? ''" size="sm" />
+          <span>{{ formatName(row) }}</span>
+        </div>
+      </ng-template>
+      <ng-template appColumnCell="isActive" let-row>
+        <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
+          {{ row.isActive ? 'Active' : 'Inactive' }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="startDate" let-row>
+        <span class="text-muted">{{ row.startDate | date:'MM/dd/yyyy' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="teamName" let-row>
+        <span class="text-muted">{{ row.teamName ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="jobTitle" let-row>
+        <span class="text-muted">{{ row.jobTitle ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="phone" let-row>
+        <span class="text-muted">{{ row.phone ?? '—' }}</span>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

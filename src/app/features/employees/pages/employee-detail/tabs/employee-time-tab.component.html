@@ -1,0 +1,15 @@
+<div class="tab-toolbar">
+  <app-select label="Period" [formControl]="periodControl" [options]="periodOptions"
+    (selectionChange)="onPeriodChange()" />
+  <span class="tab-toolbar__spacer"></span>
+</div>
+
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="employee-time"
+    [columns]="columns"
+    [data]="entries()"
+    [loading]="loading()"
+    emptyIcon="schedule"
+    emptyMessage="No time entries found" />
+</div>

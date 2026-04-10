@@ -1,0 +1,20 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="employee-compliance"
+    [columns]="columns"
+    [data]="items()"
+    [loading]="loading()"
+    emptyIcon="fact_check"
+    emptyMessage="No compliance forms found">
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+    <ng-template appColumnCell="signedAt" let-row>
+      {{ row.signedAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ row.createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>

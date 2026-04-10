@@ -1,0 +1,23 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="employee-training"
+    [columns]="columns"
+    [data]="items()"
+    [loading]="loading()"
+    emptyIcon="school"
+    emptyMessage="No training records found">
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+    <ng-template appColumnCell="quizScore" let-row>
+      {{ row.quizScore != null ? row.quizScore + '%' : '—' }}
+    </ng-template>
+    <ng-template appColumnCell="startedAt" let-row>
+      {{ row.startedAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="completedAt" let-row>
+      {{ row.completedAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+  </app-data-table>
+</div>

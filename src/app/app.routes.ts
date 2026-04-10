@@ -78,6 +78,12 @@ export const routes: Routes = [
           import('./features/time-tracking/time-tracking.routes').then((m) => m.TIME_TRACKING_ROUTES),
       },
       {
+        path: 'employees',
+        canActivate: [roleGuard('Admin', 'Manager')],
+        loadChildren: () =>
+          import('./features/employees/employees.routes').then((m) => m.EMPLOYEES_ROUTES),
+      },
+      {
         path: 'reports',
         canActivate: [roleGuard('Admin', 'Manager', 'PM')],
         loadChildren: () =>

@@ -260,6 +260,12 @@ html[data-theme='dark'] {
 
 .mat-mdc-form-field-infix {
   width: auto; // Override Material's fixed 180px — let container control width
+  min-width: 0; // Allow shrinking in grid/flex but don't collapse prefix layout
+}
+
+// Prevent prefix (e.g. "$") from wrapping to its own line in narrow fields
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-flex {
+  flex-wrap: nowrap;
 }
 
 // ─── Form Validation Visual Indicator ───

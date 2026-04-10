@@ -1,0 +1,128 @@
+<div class="ed-layout">
+
+  @if (loading()) {
+    <div class="ed-loading">
+      <span class="material-icons-outlined">hourglass_empty</span>
+    </div>
+  } @else if (employee(); as e) {
+
+    <!-- ── Header ── -->
+    <div class="ed-header">
+      <div class="ed-header__top">
+        <a routerLink="/employees" class="ed-back">
+          <span class="material-icons-outlined">chevron_left</span>
+          Employees
+        </a>
+      </div>
+
+      <div class="ed-header__identity">
+        <div class="ed-header__name-row">
+          <app-avatar [initials]="e.initials ?? ''" [color]="e.avatarColor ?? ''" size="md" />
+          <h1 class="ed-header__name">{{ displayName() }}</h1>
+          <span class="chip chip--info">{{ e.role }}</span>
+          <span class="chip" [class.chip--success]="e.isActive" [class.chip--muted]="!e.isActive">
+            {{ e.isActive ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+        <div class="ed-header__meta-row">
+          @if (e.jobTitle) {
+            <span class="ed-header__meta-item">
+              <span class="material-icons-outlined">work</span>
+              {{ e.jobTitle }}
+            </span>
+          }
+          @if (e.teamName) {
+            <span class="ed-header__meta-item">
+              <span class="material-icons-outlined">groups</span>
+              {{ e.teamName }}
+            </span>
+          }
+          @if (e.email) {
+            <a [href]="'mailto:' + e.email" class="ed-header__meta-item">
+              <span class="material-icons-outlined">email</span>
+              {{ e.email }}
+            </a>
+          }
+          @if (e.phone) {
+            <a [href]="'tel:' + e.phone" class="ed-header__meta-item">
+              <span class="material-icons-outlined">phone</span>
+              {{ e.phone }}
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Stats bar -->
+      @if (stats(); as s) {
+        <div class="ed-stats">
+          <div class="ed-stat" (click)="switchTab('time')" [class.ed-stat--active]="activeTab() === 'time'">
+            <span class="ed-stat__value">{{ s.hoursThisPeriod }}h</span>
+            <span class="ed-stat__label">Hours (2 Weeks)</span>
+          </div>
+          <div class="ed-stat" (click)="switchTab('compliance')" [class.ed-stat--active]="activeTab() === 'compliance'">
+            <span class="ed-stat__value">{{ s.compliancePercent }}%</span>
+            <span class="ed-stat__label">Compliance</span>
+          </div>
+          <div class="ed-stat" (click)="switchTab('jobs')" [class.ed-stat--active]="activeTab() === 'jobs'">
+            <span class="ed-stat__value">{{ s.activeJobCount }}</span>
+            <span class="ed-stat__label">Active Jobs</span>
+          </div>
+          <div class="ed-stat" (click)="switchTab('training')" [class.ed-stat--active]="activeTab() === 'training'">
+            <span class="ed-stat__value">{{ s.trainingProgressPercent }}%</span>
+            <span class="ed-stat__label">Training</span>
+          </div>
+          <div class="ed-stat" (click)="switchTab('expenses')" [class.ed-stat--active]="activeTab() === 'expenses'">
+            <span class="ed-stat__value">{{ s.outstandingExpenseCount }}</span>
+            <span class="ed-stat__label">Pending Expenses</span>
+          </div>
+        </div>
+      }
+
+      <!-- Tab bar -->
+      <nav class="ed-tabs" role="tablist">
+        @for (tab of tabs; track tab) {
+          <button
+            class="ed-tab"
+            [class.ed-tab--active]="activeTab() === tab"
+            (click)="switchTab(tab)"
+            role="tab"
+            [attr.aria-selected]="activeTab() === tab"
+            [attr.aria-label]="tabLabel(tab) + ' tab'">
+            {{ tabLabel(tab) }}
+          </button>
+        }
+      </nav>
+    </div>
+
+    <!-- ── Tab content ── -->
+    <div class="ed-content">
+      @if (activeTab() === 'overview') {
+        <app-employee-overview-tab [employee]="e" />
+      }
+      @if (activeTab() === 'time') {
+        <app-employee-time-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'pay') {
+        <app-employee-pay-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'training') {
+        <app-employee-training-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'compliance') {
+        <app-employee-compliance-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'jobs') {
+        <app-employee-jobs-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'expenses') {
+        <app-employee-expenses-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'documents') {
+        <app-employee-documents-tab [employeeId]="e.id" />
+      }
+      @if (activeTab() === 'activity') {
+        <app-employee-activity-tab [employeeId]="e.id" />
+      }
+    </div>
+  }
+</div>

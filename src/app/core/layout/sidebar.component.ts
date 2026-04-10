@@ -77,6 +77,7 @@ export class SidebarComponent {
       items: [
         { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'] },
+        { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai' },
