@@ -10,6 +10,7 @@ import { LeadsService } from './services/leads.service';
 import { LeadItem } from './models/lead-item.model';
 import { LeadStatus } from './models/lead-status.type';
 import { LeadDetailDialogComponent, LeadDetailDialogData, LeadDetailDialogResult } from './components/lead-detail-dialog/lead-detail-dialog.component';
+import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -51,6 +52,7 @@ export class LeadsComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly leadsService = inject(LeadsService);
+  private readonly refDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
@@ -116,17 +118,13 @@ export class LeadsComponent {
   ];
 
   protected readonly statuses: LeadStatus[] = ['New', 'Contacted', 'Quoting', 'Converted', 'Lost'];
-  protected readonly leadSources = ['Referral', 'Website', 'Trade Show', 'Cold Call', 'Email', 'Social Media', 'Other'];
 
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('leads.allStatuses') },
     ...this.statuses.map(s => ({ value: s, label: s })),
   ];
 
-  protected readonly sourceOptions: SelectOption[] = [
-    { value: null, label: this.translate.instant('common.none') },
-    ...this.leadSources.map(s => ({ value: s, label: s })),
-  ];
+  protected readonly sourceOptions = signal<SelectOption[]>([{ value: null, label: this.translate.instant('common.none') }]);
 
   // Filtered leads for pipeline grouping (client-side filter over loaded leads)
   private readonly filteredLeads = computed(() => {
@@ -155,6 +153,8 @@ export class LeadsComponent {
   });
 
   constructor() {
+    this.refDataService.getAsOptions('lead_source', { allLabel: this.translate.instant('common.none'), valueField: 'label' })
+      .subscribe(opts => this.sourceOptions.set(opts));
     this.loadLeads();
   }
 

@@ -13,7 +13,7 @@
           </button>
         </div>
 
-        <app-data-table tableId="admin-users" [columns]="userColumns" [data]="users()" emptyIcon="people" [emptyMessage]="'admin.noUsersFound' | translate">
+        <app-data-table tableId="admin-users" [columns]="userColumns()" [data]="users()" emptyIcon="people" [emptyMessage]="'admin.noUsersFound' | translate">
           <ng-template appColumnCell="avatar" let-user>
             <app-avatar [initials]="user.initials ?? '??'" [color]="user.avatarColor ?? '#94a3b8'" />
           </ng-template>
@@ -452,6 +452,8 @@
                         <th>{{ 'admin.order' | translate }}</th>
                         <th>{{ 'admin.code' | translate }}</th>
                         <th>{{ 'admin.label' | translate }}</th>
+                        <th>Effective From</th>
+                        <th>Effective To</th>
                         <th>{{ 'common.status' | translate }}</th>
                       </tr>
                     </thead>
@@ -461,6 +463,8 @@
                           <td>{{ entry.sortOrder }}</td>
                           <td class="text-muted">{{ entry.code }}</td>
                           <td>{{ entry.label }}</td>
+                          <td class="text-muted">{{ entry.effectiveFrom ? (entry.effectiveFrom | date:'MM/dd/yyyy') : '—' }}</td>
+                          <td class="text-muted">{{ entry.effectiveTo ? (entry.effectiveTo | date:'MM/dd/yyyy') : '—' }}</td>
                           <td>
                             <span class="status-dot" [class.status-dot--active]="entry.isActive" [class.status-dot--inactive]="!entry.isActive"></span>
                             {{ entry.isActive ? ('common.active' | translate) : ('common.inactive' | translate) }}
@@ -503,7 +507,7 @@
 
       <div class="dialog-row">
         <app-input [label]="'admin.initials' | translate" formControlName="initials" [maxlength]="3" />
-        <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions" [required]="true" />
+        <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions()" [required]="true" />
       </div>
 
       @if (editingUser() && locationOptions().length > 1) {

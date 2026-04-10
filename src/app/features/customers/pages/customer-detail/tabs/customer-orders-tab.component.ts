@@ -10,11 +10,11 @@ import { ColumnDef } from '../../../../../shared/models/column-def.model';
 
 interface SalesOrderListItem {
   id: number;
-  soNumber: string;
+  orderNumber: string;
   status: string;
   lineCount: number;
   total: number;
-  requestedDate?: string;
+  requestedDeliveryDate?: string;
   createdAt: string;
 }
 
@@ -36,11 +36,11 @@ export class CustomerOrdersTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'soNumber', header: 'SO #', sortable: true, width: '100px' },
+    { field: 'orderNumber', header: 'SO #', sortable: true, width: '100px' },
     { field: 'status', header: 'Status', sortable: true, width: '120px' },
     { field: 'lineCount', header: 'Lines', sortable: true, width: '70px', align: 'center' },
     { field: 'total', header: 'Total', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'requestedDate', header: 'Req. Date', sortable: true, type: 'date', width: '100px' },
+    { field: 'requestedDeliveryDate', header: 'Req. Date', sortable: true, type: 'date', width: '100px' },
     { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
   ];
 
@@ -55,7 +55,7 @@ export class CustomerOrdersTabComponent implements OnInit {
   ngOnInit(): void {
     this.loading.set(true);
     const params = new HttpParams().set('customerId', String(this.customerId()));
-    this.http.get<SalesOrderListItem[]>(`${environment.apiUrl}/sales-orders`, { params }).subscribe({
+    this.http.get<SalesOrderListItem[]>(`${environment.apiUrl}/orders`, { params }).subscribe({
       next: data => { this.orders.set(data); this.loading.set(false); },
       error: () => this.loading.set(false),
     });

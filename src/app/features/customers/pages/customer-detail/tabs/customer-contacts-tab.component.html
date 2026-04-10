@@ -69,7 +69,7 @@
         <app-input label="Phone" formControlName="phone" mask="phone" />
       </div>
       <div class="dialog-row">
-        <app-select label="Role" formControlName="role" [options]="roleOptions" />
+        <app-select label="Role" formControlName="role" [options]="roleOptions()" />
         <app-toggle label="Primary Contact" formControlName="isPrimary" />
       </div>
     </div>

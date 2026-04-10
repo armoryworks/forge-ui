@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
+
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -23,6 +24,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -44,6 +46,7 @@ export class ExpensesComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly expensesService = inject(ExpensesService);
+  private readonly refDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -91,35 +94,16 @@ export class ExpensesComponent {
   ];
 
   protected readonly statuses: ExpenseStatus[] = ['Pending', 'Approved', 'Rejected', 'SelfApproved'];
-  protected readonly categories = [
-    'Materials', 'Tools', 'Travel', 'Fuel', 'Meals',
-    'Shipping', 'Office Supplies', 'Equipment', 'Maintenance', 'Other',
-  ];
-
-  private readonly categoryKeyMap: Record<string, string> = {
-    Materials: 'expenses.categoryMaterials',
-    Tools: 'expenses.categoryTools',
-    Travel: 'expenses.categoryTravel',
-    Fuel: 'expenses.categoryFuel',
-    Meals: 'expenses.categoryMeals',
-    Shipping: 'expenses.categoryShipping',
-    'Office Supplies': 'expenses.categoryOfficeSupplies',
-    Equipment: 'expenses.categoryEquipment',
-    Maintenance: 'expenses.categoryMaintenance',
-    Other: 'expenses.categoryOther',
-  };
 
   protected readonly statusOptions: SelectOption[] = [
     { value: '', label: this.translate.instant('expenses.allStatuses') },
     ...this.statuses.map(s => ({ value: s, label: s === 'SelfApproved' ? this.translate.instant('expenses.selfApproved') : this.translate.instant(`expenses.${s.toLowerCase()}`) })),
   ];
 
-  protected readonly categoryOptions: SelectOption[] = this.categories.map(c => ({
-    value: c,
-    label: this.translate.instant(this.categoryKeyMap[c] ?? c),
-  }));
+  protected readonly categoryOptions = signal<SelectOption[]>([]);
 
   constructor() {
+    this.refDataService.getAsOptions('expense_category', { valueField: 'label' }).subscribe(opts => this.categoryOptions.set(opts));
     this.loadExpenses();
   }
 

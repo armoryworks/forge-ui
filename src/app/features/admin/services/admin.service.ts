@@ -78,11 +78,18 @@ export class AdminService {
     return this.http.get<ReferenceDataGroup[]>(`${environment.apiUrl}/admin/reference-data`);
   }
 
-  createReferenceData(request: { groupCode: string; code: string; label: string; sortOrder: number; metadata?: string }): Observable<ReferenceDataEntry> {
+  createReferenceData(request: {
+    groupCode: string; code: string; label: string; sortOrder: number;
+    effectiveFrom?: string | null; effectiveTo?: string | null; metadata?: string;
+  }): Observable<ReferenceDataEntry> {
     return this.http.post<ReferenceDataEntry>(`${environment.apiUrl}/admin/reference-data`, request);
   }
 
-  updateReferenceData(id: number, request: { label?: string; sortOrder?: number; isActive?: boolean; metadata?: string }): Observable<ReferenceDataEntry> {
+  updateReferenceData(id: number, request: {
+    label?: string; sortOrder?: number; isActive?: boolean;
+    effectiveFrom?: string | null; effectiveTo?: string | null;
+    clearEffectiveFrom?: boolean; clearEffectiveTo?: boolean; metadata?: string;
+  }): Observable<ReferenceDataEntry> {
     return this.http.put<ReferenceDataEntry>(`${environment.apiUrl}/admin/reference-data/${id}`, request);
   }
 

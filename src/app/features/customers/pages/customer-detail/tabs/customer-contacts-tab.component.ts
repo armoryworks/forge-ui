@@ -4,6 +4,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { CustomerService } from '../../../services/customer.service';
+import { ReferenceDataService } from '../../../../../shared/services/reference-data.service';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -24,15 +25,6 @@ interface Contact {
   isPrimary: boolean;
 }
 
-const CONTACT_ROLE_OPTIONS: SelectOption[] = [
-  { value: null, label: '-- None --' },
-  { value: 'Owner', label: 'Owner' },
-  { value: 'Manager', label: 'Manager' },
-  { value: 'Engineer', label: 'Engineer' },
-  { value: 'Procurement', label: 'Procurement' },
-  { value: 'Billing', label: 'Billing' },
-  { value: 'Shipping', label: 'Shipping' },
-];
 
 @Component({
   selector: 'app-customer-contacts-tab',
@@ -48,6 +40,7 @@ const CONTACT_ROLE_OPTIONS: SelectOption[] = [
 })
 export class CustomerContactsTabComponent implements OnInit {
   private readonly customerService = inject(CustomerService);
+  private readonly refDataService = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -59,7 +52,7 @@ export class CustomerContactsTabComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly showDialog = signal(false);
   protected readonly editingId = signal<number | null>(null);
-  protected readonly roleOptions = CONTACT_ROLE_OPTIONS;
+  protected readonly roleOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
 
   protected readonly contactForm = new FormGroup({
     firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
@@ -87,6 +80,8 @@ export class CustomerContactsTabComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.refDataService.getAsOptions('contact_role', { allLabel: '-- None --', valueField: 'label' })
+      .subscribe(opts => this.roleOptions.set(opts));
     this.loadContacts();
   }
 

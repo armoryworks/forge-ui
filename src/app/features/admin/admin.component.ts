@@ -48,6 +48,7 @@ import { SalesTaxPanelComponent } from './components/sales-tax-panel/sales-tax-p
 import { AuditLogPanelComponent } from './components/audit-log-panel/audit-log-panel.component';
 import { CompanyLocationDialogComponent } from './components/company-location-dialog/company-location-dialog.component';
 import { AuthService } from '../../shared/services/auth.service';
+import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
 
 @Component({
@@ -73,6 +74,7 @@ export class AdminComponent {
   private readonly scanner = inject(ScannerService);
   protected readonly rfid = inject(WebHidRfidService);
   private readonly authService = inject(AuthService);
+  private readonly refDataService = inject(ReferenceDataService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
@@ -219,30 +221,28 @@ export class AdminComponent {
     { key: 'theme.accent_color', label: 'Accent Brand Color', description: 'Accent theme color (hex, e.g. #7c3aed)', type: 'text' },
   ];
 
-  protected readonly userColumns: ColumnDef[] = [
+  protected readonly roleOptions = signal<SelectOption[]>([]);
+
+  protected readonly userColumns = computed<ColumnDef[]>(() => [
     { field: 'avatar', header: '', width: '36px' },
     { field: 'name', header: this.translate.instant('admin.colName'), sortable: true },
     { field: 'email', header: this.translate.instant('admin.colEmail'), sortable: true },
-    { field: 'role', header: this.translate.instant('admin.colRole'), sortable: true, filterable: true, type: 'enum', filterOptions: [
-      { value: 'Admin', label: 'Admin' }, { value: 'Engineer', label: 'Engineer' }, { value: 'Viewer', label: 'Viewer' },
-    ]},
-    { field: 'workLocationName', header: this.translate.instant('admin.colLocation'), sortable: true, filterable: true, type: 'text', width: '150px' },
+    { field: 'role', header: this.translate.instant('admin.colRole'), sortable: true, filterable: true, type: 'enum' as const,
+      filterOptions: this.roleOptions() },
+    { field: 'workLocationName', header: this.translate.instant('admin.colLocation'), sortable: true, filterable: true, type: 'text' as const, width: '150px' },
     { field: 'compliance', header: this.translate.instant('admin.colCompliance'), sortable: true, width: '130px' },
     { field: 'status', header: this.translate.instant('admin.colStatus'), sortable: true },
     { field: 'actions', header: this.translate.instant('admin.colActions'), width: '140px', align: 'right' },
-  ];
-
-  protected readonly roleOptions: SelectOption[] = [
-    { value: 'Admin', label: 'Admin' },
-    { value: 'Engineer', label: 'Engineer' },
-    { value: 'Viewer', label: 'Viewer' },
-  ];
+  ]);
   protected readonly avatarColors = [
     '#0d9488', '#7c3aed', '#c2410c', '#15803d', '#1d4ed8',
     '#be123c', '#92400e', '#6d28d9', '#065f46', '#1e40af',
   ];
 
   constructor() {
+    // Load roles from API (used by user form select + column filter)
+    this.refDataService.getRolesAsOptions().subscribe(opts => this.roleOptions.set(opts));
+
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'users' && this.users().length === 0) this.loadUsers();

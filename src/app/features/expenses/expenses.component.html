@@ -57,7 +57,7 @@
         <app-datepicker data-testid="expense-date" [label]="'expenses.date' | translate" formControlName="expenseDate" />
       </div>
 
-      <app-select data-testid="expense-category" [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" />
+      <app-select data-testid="expense-category" [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions()" />
 
       <app-textarea data-testid="expense-description" [label]="'common.description' | translate" formControlName="description" />
     </div>
