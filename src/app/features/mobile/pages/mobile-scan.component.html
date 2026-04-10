@@ -1,0 +1,91 @@
+<div class="mobile-scan">
+  <h2 class="mobile-scan__title">Scanner</h2>
+
+  <!-- Camera Scanner -->
+  @if (!cameraUnavailable()) {
+    <div class="scanner-viewport">
+      <div id="qr-reader" #reader></div>
+      @if (!scanning() && !lastResult()) {
+        <div class="scanner-viewport__loading">
+          <span class="material-icons-outlined spin">sync</span>
+          <span>Starting camera...</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="scanner-fallback">
+      <span class="material-icons-outlined scanner-fallback__icon">no_photography</span>
+      <p class="scanner-fallback__text">Camera is not available on this device</p>
+    </div>
+  }
+
+  <!-- Scan Result Card -->
+  @if (lastResult(); as result) {
+    <div class="scan-result" [class.scan-result--match]="result.route">
+      <div class="scan-result__header">
+        <span class="material-icons-outlined scan-result__type-icon">
+          @switch (result.type) {
+            @case ('job') { work }
+            @case ('part') { inventory_2 }
+            @case ('asset') { precision_manufacturing }
+            @default { qr_code }
+          }
+        </span>
+        <div class="scan-result__info">
+          <span class="scan-result__label">{{ result.label }}</span>
+          <span class="scan-result__value">{{ result.value }}</span>
+        </div>
+      </div>
+      <div class="scan-result__actions">
+        @if (result.route) {
+          <button class="action-btn action-btn--primary" (click)="navigateToResult()" aria-label="Go to scanned entity">
+            <span class="material-icons-outlined">open_in_new</span>
+            Open
+          </button>
+        } @else {
+          <span class="scan-result__no-match">No matching entity</span>
+        }
+        <button class="action-btn" (click)="resumeScanning()" aria-label="Scan again">
+          <span class="material-icons-outlined">refresh</span>
+          Scan Again
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Manual Entry -->
+  <button class="manual-toggle" (click)="toggleManual()" aria-label="Toggle manual entry">
+    <span class="material-icons-outlined">keyboard</span>
+    {{ showManual() ? 'Hide' : 'Manual Entry' }}
+  </button>
+
+  @if (showManual()) {
+    <div class="manual-entry">
+      <div class="manual-entry__field">
+        <input
+          type="text"
+          class="manual-entry__input"
+          placeholder="Type or paste barcode/QR value..."
+          [value]="manualValue()"
+          (input)="onManualInput($event)"
+          (keydown)="onManualKeydown($event)"
+          aria-label="Manual barcode entry" />
+        <button
+          class="action-btn action-btn--primary"
+          [disabled]="!manualValue().trim()"
+          (click)="submitManual()"
+          aria-label="Submit manual entry">
+          <span class="material-icons-outlined">search</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="scan-error">
+      <span class="material-icons-outlined">warning</span>
+      {{ error() }}
+    </div>
+  }
+</div>

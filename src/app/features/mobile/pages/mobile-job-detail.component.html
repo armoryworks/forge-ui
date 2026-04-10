@@ -1,0 +1,97 @@
+<div class="mobile-job-detail" [appLoadingBlock]="loading()">
+  <!-- Header -->
+  <div class="detail-header">
+    <button class="detail-header__back" (click)="goBack()" aria-label="Back to jobs">
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    @if (job(); as j) {
+      <div class="detail-header__info">
+        <span class="detail-header__number">{{ j.jobNumber }}</span>
+        <span class="detail-header__title">{{ j.title }}</span>
+      </div>
+    }
+  </div>
+
+  @if (job(); as j) {
+    <!-- Status Card -->
+    <div class="status-card">
+      <div class="status-card__row">
+        <span class="status-card__label">Stage</span>
+        <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
+      </div>
+      <div class="status-card__row">
+        <span class="status-card__label">Priority</span>
+        <span class="status-card__value">{{ j.priorityName }}</span>
+      </div>
+      @if (j.customerName) {
+        <div class="status-card__row">
+          <span class="status-card__label">Customer</span>
+          <span class="status-card__value">{{ j.customerName }}</span>
+        </div>
+      }
+      @if (j.partNumber) {
+        <div class="status-card__row">
+          <span class="status-card__label">Part</span>
+          <span class="status-card__value">{{ j.partNumber }}</span>
+        </div>
+      }
+      @if (j.dueDate) {
+        <div class="status-card__row">
+          <span class="status-card__label">Due Date</span>
+          <span class="status-card__value" [class.status-card__value--overdue]="j.isOverdue">
+            {{ j.dueDate | date:'MM/dd/yyyy' }}
+            @if (j.isOverdue) {
+              <span class="material-icons-outlined status-card__overdue-icon">warning</span>
+            }
+          </span>
+        </div>
+      }
+    </div>
+
+    <!-- Timer Control -->
+    <div class="timer-section">
+      <button class="timer-btn"
+              [class.timer-btn--active]="j.hasActiveTimer"
+              [disabled]="submitting()"
+              (click)="toggleTimer()"
+              [attr.aria-label]="j.hasActiveTimer ? 'Stop timer' : 'Start timer'">
+        <span class="material-icons-outlined timer-btn__icon">
+          {{ j.hasActiveTimer ? 'stop' : 'play_arrow' }}
+        </span>
+        <span class="timer-btn__label">
+          {{ j.hasActiveTimer ? 'Stop Timer' : 'Start Timer' }}
+        </span>
+        @if (j.timerStartedAt) {
+          <span class="timer-btn__since">Since {{ j.timerStartedAt | date:'shortTime' }}</span>
+        }
+      </button>
+    </div>
+
+    <!-- Description -->
+    @if (j.description) {
+      <section class="detail-section">
+        <h3 class="detail-section__title">Description</h3>
+        <p class="detail-section__text">{{ j.description }}</p>
+      </section>
+    }
+
+    <!-- Add Note -->
+    <section class="detail-section">
+      <h3 class="detail-section__title">Add Note</h3>
+      <div class="note-input">
+        <textarea class="note-input__textarea"
+                  placeholder="Add a note or update..."
+                  rows="3"
+                  [value]="noteText()"
+                  (input)="onNoteInput($event)"
+                  aria-label="Job note"></textarea>
+        <button class="action-btn action-btn--primary note-input__submit"
+                [disabled]="!noteText().trim() || submitting()"
+                (click)="addNote()">
+          <span class="material-icons-outlined">send</span>
+          Add Note
+        </button>
+      </div>
+    </section>
+  }
+</div>

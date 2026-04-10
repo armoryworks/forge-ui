@@ -1,0 +1,22 @@
+<div class="mobile-clock" [appLoadingBlock]="loading()">
+  <div class="clock-status">
+    <div class="clock-status__indicator" [class]="'clock-status__indicator--' + (status()?.status ?? 'Out').toLowerCase()"></div>
+    <h2 class="clock-status__label">{{ statusLabel }}</h2>
+    @if (status()?.clockedInAt) {
+      <p class="clock-status__since">Since {{ status()?.clockedInAt | date:'shortTime' }}</p>
+    }
+  </div>
+
+  <div class="clock-actions">
+    @for (action of actions(); track action.code) {
+      <button class="clock-btn"
+              [style.--btn-color]="action.color"
+              [disabled]="submitting()"
+              (click)="submitClock(action)"
+              [attr.aria-label]="action.label">
+        <span class="material-icons-outlined clock-btn__icon">{{ action.icon }}</span>
+        <span class="clock-btn__label">{{ action.label }}</span>
+      </button>
+    }
+  </div>
+</div>

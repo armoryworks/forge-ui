@@ -1,0 +1,194 @@
+@use 'styles/variables' as *;
+
+.mobile-hours {
+  padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__note {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    margin: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+}
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    cursor: pointer;
+    padding: 0;
+
+    &:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+}
+
+.week-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-lg;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border: $border-width-thin solid var(--primary);
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  &__value {
+    font-size: $font-size-xl;
+    font-weight: 700;
+    font-family: $font-family-mono;
+    color: var(--primary);
+  }
+}
+
+.day-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.day-row {
+  border-bottom: $border-width-thin solid var(--border);
+
+  &:first-child {
+    border-top: $border-width-thin solid var(--border);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    width: 100%;
+    padding: $sp-md $sp-lg;
+    background: var(--surface);
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+
+    &:disabled {
+      cursor: default;
+    }
+
+    &--expanded {
+      background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+    }
+  }
+
+  &__day {
+    font-size: $font-size-base;
+    font-weight: 600;
+    width: 36px;
+  }
+
+  &__date {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  &__hours {
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    font-weight: 600;
+
+    &--zero {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+  }
+
+  &__chevron {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+  }
+}
+
+.day-detail {
+  padding: 0 $sp-lg $sp-md;
+  background: color-mix(in srgb, var(--primary) 2%, var(--surface));
+}
+
+.entry-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm 0;
+  border-bottom: $border-width-thin dashed var(--border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__time {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    white-space: nowrap;
+    min-width: 100px;
+  }
+
+  &__desc {
+    flex: 1;
+    font-size: $font-size-sm;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__job {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    color: var(--primary);
+    margin-right: $sp-sm;
+  }
+
+  &__hours {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+}

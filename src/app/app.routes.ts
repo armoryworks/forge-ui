@@ -194,6 +194,12 @@ export const routes: Routes = [
     ],
   },
   {
+    path: 'm',
+    canActivate: [authGuard],
+    loadChildren: () =>
+      import('./features/mobile/mobile.routes').then((m) => m.MOBILE_ROUTES),
+  },
+  {
     path: 'display/shop-floor',
     loadChildren: () =>
       import('./features/shop-floor/shop-floor.routes').then((m) => m.SHOP_FLOOR_ROUTES),

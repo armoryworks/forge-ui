@@ -1,0 +1,71 @@
+<div class="mobile-home" [appLoadingBlock]="loading()">
+  <div class="greeting">
+    <h1 class="greeting__text">{{ greeting }}, {{ user()?.firstName }}</h1>
+  </div>
+
+  <!-- Clock Status Banner -->
+  <div class="clock-banner" [class]="statusClass">
+    <div class="clock-banner__status">
+      <span class="clock-banner__dot"></span>
+      <span class="clock-banner__label">{{ statusLabel }}</span>
+    </div>
+    @if (clockStatus()?.currentJobNumber) {
+      <div class="clock-banner__job">
+        Working on {{ clockStatus()?.currentJobNumber }}
+      </div>
+    }
+    @if (clockStatus()?.timeOnTask) {
+      <div class="clock-banner__time">{{ clockStatus()?.timeOnTask }}</div>
+    }
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions">
+    <a class="quick-action" routerLink="/m/clock">
+      <span class="material-icons-outlined quick-action__icon">schedule</span>
+      <span class="quick-action__label">Clock In/Out</span>
+    </a>
+    <a class="quick-action" routerLink="/m/scan">
+      <span class="material-icons-outlined quick-action__icon">qr_code_scanner</span>
+      <span class="quick-action__label">Scan</span>
+    </a>
+    <a class="quick-action" routerLink="/m/jobs">
+      <span class="material-icons-outlined quick-action__icon">work</span>
+      <span class="quick-action__label">My Jobs</span>
+    </a>
+    <a class="quick-action" routerLink="/m/time">
+      <span class="material-icons-outlined quick-action__icon">hourglass_empty</span>
+      <span class="quick-action__label">My Hours</span>
+    </a>
+  </div>
+
+  <!-- Active Jobs -->
+  <section class="section">
+    <h2 class="section__title">Active Jobs</h2>
+    @if (activeJobs().length > 0) {
+      <div class="job-list">
+        @for (job of activeJobs(); track job.id) {
+          <a class="job-card" [routerLink]="['/m/jobs', job.id]">
+            <div class="job-card__stripe" [style.background-color]="job.stageColor"></div>
+            <div class="job-card__content">
+              <div class="job-card__number">{{ job.jobNumber }}</div>
+              <div class="job-card__title">{{ job.title }}</div>
+              <div class="job-card__stage">
+                <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
+                @if (job.hasActiveTimer) {
+                  <span class="job-card__timer">
+                    <span class="material-icons-outlined">timer</span>
+                    Running
+                  </span>
+                }
+              </div>
+            </div>
+            <span class="material-icons-outlined job-card__chevron">chevron_right</span>
+          </a>
+        }
+      </div>
+    } @else {
+      <app-empty-state icon="work" message="No active jobs assigned to you" />
+    }
+  </section>
+</div>

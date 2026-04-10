@@ -1,0 +1,78 @@
+<div class="mobile-hours" [appLoadingBlock]="loading()">
+  <h2 class="mobile-hours__title">My Hours</h2>
+
+  <!-- Week Navigator -->
+  <div class="week-nav">
+    <button class="week-nav__btn" (click)="previousWeek()" aria-label="Previous week">
+      <span class="material-icons-outlined">chevron_left</span>
+    </button>
+    <span class="week-nav__label">{{ weekLabel() }}</span>
+    <button class="week-nav__btn"
+            [disabled]="isCurrentWeek()"
+            (click)="nextWeek()"
+            aria-label="Next week">
+      <span class="material-icons-outlined">chevron_right</span>
+    </button>
+  </div>
+
+  <!-- Week Total -->
+  @if (weekData(); as week) {
+    <div class="week-total">
+      <span class="week-total__label">Week Total</span>
+      <span class="week-total__value">{{ formatHours(week.totalHours) }}</span>
+    </div>
+
+    <!-- Day Rows -->
+    <div class="day-list">
+      @for (day of week.days; track day.date) {
+        <div class="day-row" [class.day-row--has-hours]="day.totalHours > 0">
+          <button class="day-row__header"
+                  [class.day-row__header--expanded]="expandedDay() === day.date"
+                  [disabled]="day.entries.length === 0"
+                  (click)="toggleDay(day.date)"
+                  [attr.aria-label]="day.dayLabel + ' ' + getDayDate(day.date)">
+            <span class="day-row__day">{{ day.dayLabel }}</span>
+            <span class="day-row__date">{{ getDayDate(day.date) }}</span>
+            <span class="day-row__hours" [class.day-row__hours--zero]="day.totalHours === 0">
+              {{ day.totalHours > 0 ? formatHours(day.totalHours) : '-' }}
+            </span>
+            @if (day.entries.length > 0) {
+              <span class="material-icons-outlined day-row__chevron">
+                {{ expandedDay() === day.date ? 'expand_less' : 'expand_more' }}
+              </span>
+            }
+          </button>
+
+          @if (expandedDay() === day.date && day.entries.length > 0) {
+            <div class="day-detail">
+              @for (entry of day.entries; track entry.id) {
+                <div class="entry-row">
+                  <div class="entry-row__time">
+                    {{ formatTime(entry.startTime) }}
+                    @if (entry.endTime) {
+                      - {{ formatTime(entry.endTime) }}
+                    }
+                  </div>
+                  <div class="entry-row__desc">
+                    @if (entry.jobNumber) {
+                      <span class="entry-row__job">{{ entry.jobNumber }}</span>
+                    }
+                    {{ entry.description }}
+                  </div>
+                  <div class="entry-row__hours">{{ formatHours(entry.hours) }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  } @else if (!loading()) {
+    <app-empty-state icon="schedule" message="No time data available" />
+  }
+
+  <p class="mobile-hours__note">
+    <span class="material-icons-outlined">info</span>
+    Time entries are read-only on mobile. Use the desktop app for corrections.
+  </p>
+</div>

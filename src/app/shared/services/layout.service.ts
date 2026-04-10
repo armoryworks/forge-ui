@@ -96,7 +96,7 @@ export class LayoutService {
   }
 
   private checkDisplayRoute(url: string): boolean {
-    return url.startsWith('/display/') || url.startsWith('/__render-form');
+    return url.startsWith('/display/') || url.startsWith('/__render-form') || url.startsWith('/m/') || url === '/m';
   }
 
   private checkAccountRoute(url: string): boolean {

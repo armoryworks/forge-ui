@@ -1,0 +1,100 @@
+@use 'styles/variables' as *;
+
+.mobile-clock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $sp-3xl $sp-lg;
+  min-height: 100%;
+}
+
+.clock-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: $sp-3xl;
+
+  &__indicator {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: $sp-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &--in {
+      background: color-mix(in srgb, var(--success) 15%, transparent);
+      border: 3px solid var(--success);
+    }
+
+    &--onbreak {
+      background: color-mix(in srgb, var(--warning) 15%, transparent);
+      border: 3px solid var(--warning);
+    }
+
+    &--onlunch {
+      background: color-mix(in srgb, var(--info) 15%, transparent);
+      border: 3px solid var(--info);
+    }
+
+    &--out {
+      background: color-mix(in srgb, var(--text-muted) 10%, transparent);
+      border: 3px solid var(--text-muted);
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__since {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    margin: $sp-sm 0 0;
+  }
+}
+
+.clock-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: $sp-lg;
+  width: 100%;
+  max-width: 400px;
+}
+
+.clock-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-md;
+  padding: $sp-xl $sp-lg;
+  min-height: 88px;
+  background: var(--surface);
+  border: $border-width solid var(--btn-color, var(--border));
+  color: var(--btn-color, var(--text));
+  cursor: pointer;
+  font: inherit;
+  transition: all $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--btn-color, var(--primary)) 10%, var(--surface));
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  &__icon {
+    font-size: $icon-size-xxl;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+}
