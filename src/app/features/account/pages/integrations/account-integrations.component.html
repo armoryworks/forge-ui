@@ -1,0 +1,88 @@
+<div class="integrations" [appLoadingBlock]="loading()">
+  <div class="integrations__header">
+    <h2 class="integrations__title">Integrations</h2>
+    <p class="integrations__subtitle">Connect your external accounts for calendar sync, notifications, and file storage.</p>
+  </div>
+
+  @for (group of categoryGroups(); track group.category) {
+    <div class="category-group">
+      <div class="category-group__header">
+        <span class="material-icons-outlined category-group__icon">{{ group.icon }}</span>
+        <h3 class="category-group__title">{{ group.label }}</h3>
+        <span class="category-group__count">{{ group.connected.length }} connected</span>
+      </div>
+
+      @if (group.connected.length > 0) {
+        <div class="connected-list">
+          @for (integration of group.connected; track integration.id) {
+            <div class="integration-card integration-card--connected">
+              <div class="integration-card__icon">
+                <span class="material-icons-outlined">{{ getProviderIcon(integration.providerId) }}</span>
+              </div>
+              <div class="integration-card__info">
+                <div class="integration-card__name">
+                  {{ getProviderLabel(integration.providerId) }}
+                  @if (integration.displayName) {
+                    <span class="integration-card__label">{{ integration.displayName }}</span>
+                  }
+                </div>
+                <div class="integration-card__meta">
+                  @if (integration.isActive) {
+                    <span class="integration-card__status integration-card__status--active">Active</span>
+                  } @else {
+                    <span class="integration-card__status integration-card__status--inactive">Inactive</span>
+                  }
+                  <span class="integration-card__sync">Last sync: {{ formatDate(integration.lastSyncAt) }}</span>
+                </div>
+                @if (integration.lastError) {
+                  <div class="integration-card__error">{{ integration.lastError }}</div>
+                }
+              </div>
+              <div class="integration-card__actions">
+                <button class="icon-btn" aria-label="Test connection"
+                        [disabled]="testing() === integration.id"
+                        (click)="testConnection(integration)">
+                  <span class="material-icons-outlined"
+                        [class.spin]="testing() === integration.id">
+                    {{ testing() === integration.id ? 'sync' : 'check_circle' }}
+                  </span>
+                </button>
+                <button class="icon-btn icon-btn--danger" aria-label="Disconnect integration"
+                        (click)="disconnect(integration)">
+                  <span class="material-icons-outlined">link_off</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (group.available.length > 0) {
+        <div class="available-list">
+          @for (provider of group.available; track provider.providerId) {
+            <button class="integration-card integration-card--available"
+                    (click)="connectProvider(provider)">
+              <div class="integration-card__icon">
+                <span class="material-icons-outlined">{{ provider.icon ?? 'extension' }}</span>
+              </div>
+              <div class="integration-card__info">
+                <div class="integration-card__name">{{ provider.displayName }}</div>
+                @if (provider.description) {
+                  <div class="integration-card__description">{{ provider.description }}</div>
+                }
+              </div>
+              <div class="integration-card__connect">
+                <span class="material-icons-outlined">add</span>
+                Connect
+              </div>
+            </button>
+          }
+        </div>
+      }
+
+      @if (group.connected.length === 0 && group.available.length === 0) {
+        <app-empty-state icon="extension" message="No providers available for this category" />
+      }
+    </div>
+  }
+</div>

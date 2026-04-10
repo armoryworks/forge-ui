@@ -1,0 +1,43 @@
+<app-dialog [title]="'Connect ' + data.provider.displayName" width="480px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input label="Display Name (optional)"
+               placeholder="e.g., Work Calendar"
+               formControlName="displayName"
+               data-testid="integration-display-name" />
+
+    @if (!isNoAuth) {
+      @if (data.provider.authType === 'webhook' || data.provider.authType === 'oauth2' || data.provider.authType === 'app_password') {
+        <app-input [label]="credentialLabel"
+                   [placeholder]="credentialPlaceholder"
+                   formControlName="credentials"
+                   [required]="true"
+                   data-testid="integration-credentials" />
+      } @else {
+        <app-textarea [label]="credentialLabel"
+                      [placeholder]="credentialPlaceholder"
+                      formControlName="credentials"
+                      [rows]="4"
+                      data-testid="integration-credentials" />
+      }
+    }
+
+    @if (data.provider.description) {
+      <p class="connect-hint">
+        <span class="material-icons-outlined">info</span>
+        {{ data.provider.description }}
+      </p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn action-btn--primary"
+            [appValidationPopover]="violations"
+            [disabled]="form.invalid || saving()"
+            (click)="save()"
+            data-testid="integration-save-btn">
+      <span class="material-icons-outlined">{{ saving() ? 'sync' : 'link' }}</span>
+      {{ saving() ? 'Connecting...' : 'Connect' }}
+    </button>
+  </div>
+</app-dialog>
