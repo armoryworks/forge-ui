@@ -1,0 +1,40 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.time-corrections-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__filters {
+    display: flex;
+    gap: $sp-md;
+    align-items: flex-start;
+    flex-wrap: wrap;
+
+    app-select { flex: 1 1 200px; }
+    app-datepicker { flex: 1 1 140px; }
+  }
+
+  &__section-title {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+    margin: $sp-md 0 $sp-xs;
+  }
+}
+
+.correction-original {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $sp-xs $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  margin-bottom: $sp-md;
+  font-size: $font-size-sm;
+
+  &__label {
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+}

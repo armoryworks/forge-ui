@@ -10,6 +10,8 @@ import { UpdateTimeEntryRequest } from '../models/update-time-entry-request.mode
 import { ClockEvent } from '../models/clock-event.model';
 import { CreateClockEventRequest } from '../models/create-clock-event-request.model';
 import { PayPeriod } from '../models/pay-period.model';
+import { TimeCorrectionLog } from '../models/time-correction-log.model';
+import { CorrectTimeEntryRequest } from '../models/correct-time-entry-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimeTrackingService {
@@ -63,5 +65,17 @@ export class TimeTrackingService {
 
   updatePayPeriodSettings(type: string, anchorDate?: string): Observable<void> {
     return this.http.put<void>(`${this.base}/pay-period/settings`, { type, anchorDate });
+  }
+
+  correctTimeEntry(id: number, request: CorrectTimeEntryRequest): Observable<TimeEntry> {
+    return this.http.patch<TimeEntry>(`${this.base}/entries/${id}/correct`, request);
+  }
+
+  getCorrections(userId?: number, from?: string, to?: string): Observable<TimeCorrectionLog[]> {
+    let params = new HttpParams();
+    if (userId) params = params.set('userId', userId);
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get<TimeCorrectionLog[]>(`${this.base}/corrections`, { params });
   }
 }

@@ -1,0 +1,93 @@
+<div class="time-corrections-panel">
+  <div class="time-corrections-panel__filters">
+    <app-select
+      label="Employee"
+      [formControl]="userControl"
+      [options]="userOptions()" />
+    <app-datepicker
+      label="From Date"
+      [formControl]="fromDateControl" />
+    <app-datepicker
+      label="To Date"
+      [formControl]="toDateControl" />
+  </div>
+
+  <!-- Time Entries -->
+  <h3 class="time-corrections-panel__section-title">Time Entries</h3>
+  <div [appLoadingBlock]="isLoading()">
+    <app-data-table
+      tableId="admin-time-entries"
+      [columns]="entryColumns"
+      [data]="entries()"
+      emptyIcon="schedule"
+      emptyMessage="No time entries found">
+      <ng-template appColumnCell="date" let-row>
+        {{ row.date | date:'MM/dd/yyyy' }}
+      </ng-template>
+      <ng-template appColumnCell="durationMinutes" let-row>
+        {{ formatDuration(row.durationMinutes) }}
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn" aria-label="Correct time entry" (click)="openCorrection(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  </div>
+
+  <!-- Correction History -->
+  <h3 class="time-corrections-panel__section-title">Correction History</h3>
+  <app-data-table
+    tableId="admin-time-corrections"
+    [columns]="correctionColumns"
+    [data]="corrections()"
+    emptyIcon="history"
+    emptyMessage="No corrections recorded">
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ row.createdAt | date:'MM/dd/yyyy hh:mm a' }}
+    </ng-template>
+    <ng-template appColumnCell="originalDate" let-row>
+      {{ row.originalDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="originalDurationMinutes" let-row>
+      {{ formatDuration(row.originalDurationMinutes) }}
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Correction Dialog -->
+@if (showDialog()) {
+  <app-dialog title="Correct Time Entry" width="520px" (closed)="closeDialog()">
+    @if (editingEntry(); as entry) {
+      <div class="correction-original">
+        <span class="correction-original__label">Employee:</span>
+        <span>{{ entry.userName }}</span>
+        <span class="correction-original__label">Original Date:</span>
+        <span>{{ entry.date | date:'MM/dd/yyyy' }}</span>
+        <span class="correction-original__label">Original Duration:</span>
+        <span>{{ formatDuration(entry.durationMinutes) }}</span>
+      </div>
+    }
+
+    <div [formGroup]="correctionForm">
+      <div class="dialog-row">
+        <app-datepicker label="Date" formControlName="date" />
+        <app-input label="Duration (minutes)" type="number" formControlName="durationMinutes" />
+      </div>
+      <app-input label="Category" formControlName="category" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-textarea label="Reason for Correction" formControlName="reason" [rows]="3" [required]="true" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="correctionForm.invalid || saving()"
+        (click)="saveCorrection()">
+        <span class="material-icons-outlined">save</span>
+        Save Correction
+      </button>
+    </div>
+  </app-dialog>
+}
