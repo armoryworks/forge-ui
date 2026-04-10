@@ -13,6 +13,7 @@ import { KioskSearchBarComponent } from '../components/kiosk-search-bar/kiosk-se
 import { KioskSetupComponent } from '../components/kiosk-setup/kiosk-setup.component';
 import { ShopFloorService } from '../services/shop-floor.service';
 import { AuthService } from '../../../shared/services/auth.service';
+import { ClockEventTypeService } from '../../../shared/services/clock-event-type.service';
 import { WebHidRfidService } from '../../../shared/services/web-hid-rfid.service';
 import { ClockWorker } from '../models/clock-worker.model';
 import { ShopFloorOverview } from '../models/shop-floor-overview.model';
@@ -38,6 +39,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   private readonly rfid = inject(WebHidRfidService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  protected readonly clockTypes = inject(ClockEventTypeService);
 
   // Terminal config
   protected readonly terminal = signal<KioskTerminal | null>(null);
@@ -54,9 +56,9 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   protected readonly processing = signal<number | null>(null);
 
   // Computed dashboard views
-  protected readonly workersIn = computed(() => this.workers().filter(w => w.status === 'In'));
-  protected readonly workersOnBreak = computed(() => this.workers().filter(w => w.status === 'OnBreak'));
-  protected readonly workersOut = computed(() => this.workers().filter(w => w.status === 'Out'));
+  protected readonly workersIn = computed(() => this.workers().filter(w => this.clockTypes.isWorking(w.status)));
+  protected readonly workersOnBreak = computed(() => this.workers().filter(w => this.clockTypes.isOnBreakOrLunch(w.status)));
+  protected readonly workersOut = computed(() => this.workers().filter(w => this.clockTypes.isClockedOut(w.status)));
   protected readonly activeJobs = computed(() => this.overview()?.activeJobs ?? []);
   protected readonly completedToday = computed(() => this.overview()?.completedToday ?? 0);
   protected readonly overdueJobs = computed(() => this.activeJobs().filter(j => j.isOverdue).length);
@@ -97,6 +99,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.authService.clearAuth();
+    this.clockTypes.load();
     this.updateClock();
 
     // Connect to RFID relay (silent, no error if not running)

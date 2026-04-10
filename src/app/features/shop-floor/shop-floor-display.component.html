@@ -60,9 +60,9 @@
       <div class="sf-grid">
         @for (worker of workers(); track worker.userId) {
           <button class="sf-card"
-               [class.sf-card--in]="worker.status === 'In'"
-               [class.sf-card--break]="worker.status === 'OnBreak'"
-               [class.sf-card--out]="worker.status === 'Out'"
+               [class.sf-card--in]="clockTypes.isWorking(worker.status)"
+               [class.sf-card--break]="clockTypes.isOnBreakOrLunch(worker.status)"
+               [class.sf-card--out]="clockTypes.isClockedOut(worker.status)"
                [class.sf-card--drop-target]="dropTargetUserId() === worker.userId"
                [class.sf-card--feedback-success]="feedbackSuccess(worker.userId)"
                [class.sf-card--feedback-fail]="hasFeedback(worker.userId) && !feedbackSuccess(worker.userId)"
@@ -70,7 +70,7 @@
                (dragover)="onDragOverCard($event, worker)"
                (dragleave)="onDragLeaveCard()"
                (drop)="onDropCard($event, worker)"
-               [attr.aria-label]="worker.name + ' - ' + (worker.status === 'In' ? 'Working' : worker.status === 'OnBreak' ? 'On Break' : 'Clocked Out')">
+               [attr.aria-label]="worker.name + ' - ' + clockTypes.getLabel(worker.status)">
 
             <!-- Status stripe (left) -->
             <div class="sf-card__stripe"></div>
@@ -81,15 +81,7 @@
               <div class="sf-card__identity-text">
                 <span class="sf-card__name">{{ worker.name }}</span>
                 <div class="sf-card__meta">
-                  <span class="sf-card__status">
-                    @if (worker.status === 'In') {
-                      IN
-                    } @else if (worker.status === 'OnBreak') {
-                      BREAK
-                    } @else {
-                      OUT
-                    }
-                  </span>
+                  <span class="sf-card__status">{{ clockTypes.getShortLabel(worker.status) }}</span>
                   @if (workerTimes()[worker.userId]) {
                     <span class="sf-card__time">{{ workerTimes()[worker.userId] }}</span>
                   }
@@ -222,10 +214,10 @@
             <app-avatar [initials]="worker.initials" [color]="worker.avatarColor" size="md" />
             <span class="sf-auth-card__worker-name">{{ worker.name }}</span>
             <div class="sf-auth-card__worker-badge"
-                 [class.sf-auth-card__worker-badge--in]="worker.status === 'In'"
-                 [class.sf-auth-card__worker-badge--break]="worker.status === 'OnBreak'"
-                 [class.sf-auth-card__worker-badge--out]="worker.status === 'Out'">
-              {{ worker.status === 'In' ? 'WORKING' : worker.status === 'OnBreak' ? 'ON BREAK' : 'CLOCKED OUT' }}
+                 [class.sf-auth-card__worker-badge--in]="clockTypes.isWorking(worker.status)"
+                 [class.sf-auth-card__worker-badge--break]="clockTypes.isOnBreakOrLunch(worker.status)"
+                 [class.sf-auth-card__worker-badge--out]="clockTypes.isClockedOut(worker.status)">
+              {{ clockTypes.getShortLabel(worker.status) }}
             </div>
           </div>
         }
@@ -275,10 +267,10 @@
             <div class="sf-actions-card__worker-info">
               <h2 class="sf-actions-card__name">{{ worker.name }}</h2>
               <span class="sf-actions-card__status"
-                    [class.sf-actions-card__status--in]="worker.status === 'In'"
-                    [class.sf-actions-card__status--break]="worker.status === 'OnBreak'"
-                    [class.sf-actions-card__status--out]="worker.status === 'Out'">
-                {{ worker.status === 'In' ? 'Currently Working' : worker.status === 'OnBreak' ? 'On Break' : 'Clocked Out' }}
+                    [class.sf-actions-card__status--in]="clockTypes.isWorking(worker.status)"
+                    [class.sf-actions-card__status--break]="clockTypes.isOnBreakOrLunch(worker.status)"
+                    [class.sf-actions-card__status--out]="clockTypes.isClockedOut(worker.status)">
+                {{ clockTypes.getLabel(worker.status) }}
               </span>
             </div>
           </div>
@@ -350,80 +342,20 @@
             </div>
           }
 
-          <!-- Clock Actions -->
+          <!-- Clock Actions (dynamic from reference data) -->
           <div class="sf-actions-card__grid">
-            @if (worker.status === 'Out') {
-              <button class="sf-action-btn sf-action-btn--clock-in"
+            @for (action of clockTypes.getAvailableActions(worker.status); track action.code) {
+              <button class="sf-action-btn"
+                      [style.--btn-color]="action.color"
                       [disabled]="processing() !== null"
-                      (click)="clockAction(worker, 'ClockIn')"
-                      aria-label="Clock in">
-                @if (isProcessing(worker.userId, 'ClockIn')) {
+                      (click)="clockAction(worker, action.code)"
+                      [attr.aria-label]="action.label">
+                @if (isProcessing(worker.userId, action.code)) {
                   <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
                 } @else {
-                  <span class="material-icons-outlined">login</span>
+                  <span class="material-icons-outlined">{{ action.icon }}</span>
                 }
-                <span class="sf-action-btn__label">Clock In</span>
-              </button>
-            }
-
-            @if (worker.status === 'In') {
-              <button class="sf-action-btn sf-action-btn--break"
-                      [disabled]="processing() !== null"
-                      (click)="clockAction(worker, 'BreakStart')"
-                      aria-label="Start break">
-                @if (isProcessing(worker.userId, 'BreakStart')) {
-                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                } @else {
-                  <span class="material-icons-outlined">free_breakfast</span>
-                }
-                <span class="sf-action-btn__label">Start Break</span>
-              </button>
-              <button class="sf-action-btn sf-action-btn--lunch"
-                      [disabled]="processing() !== null"
-                      (click)="clockAction(worker, 'LunchStart')"
-                      aria-label="Start lunch">
-                @if (isProcessing(worker.userId, 'LunchStart')) {
-                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                } @else {
-                  <span class="material-icons-outlined">restaurant</span>
-                }
-                <span class="sf-action-btn__label">Lunch</span>
-              </button>
-              <button class="sf-action-btn sf-action-btn--clock-out"
-                      [disabled]="processing() !== null"
-                      (click)="clockAction(worker, 'ClockOut')"
-                      aria-label="Clock out">
-                @if (isProcessing(worker.userId, 'ClockOut')) {
-                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                } @else {
-                  <span class="material-icons-outlined">logout</span>
-                }
-                <span class="sf-action-btn__label">Clock Out</span>
-              </button>
-            }
-
-            @if (worker.status === 'OnBreak') {
-              <button class="sf-action-btn sf-action-btn--resume"
-                      [disabled]="processing() !== null"
-                      (click)="clockAction(worker, 'BreakEnd')"
-                      aria-label="End break">
-                @if (isProcessing(worker.userId, 'BreakEnd')) {
-                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                } @else {
-                  <span class="material-icons-outlined">play_arrow</span>
-                }
-                <span class="sf-action-btn__label">Resume Work</span>
-              </button>
-              <button class="sf-action-btn sf-action-btn--clock-out"
-                      [disabled]="processing() !== null"
-                      (click)="clockAction(worker, 'ClockOut')"
-                      aria-label="Clock out">
-                @if (isProcessing(worker.userId, 'ClockOut')) {
-                  <span class="material-icons-outlined sf-action-btn__spinner">sync</span>
-                } @else {
-                  <span class="material-icons-outlined">logout</span>
-                }
-                <span class="sf-action-btn__label">Clock Out</span>
+                <span class="sf-action-btn__label">{{ action.label }}</span>
               </button>
             }
           </div>

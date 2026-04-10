@@ -17,7 +17,7 @@ export interface ClockWorker {
   avatarColor: string;
   isClockedIn: boolean;
   clockedInAt: Date | null;
-  status: 'In' | 'OnBreak' | 'Out';
+  status: string;
   currentTask: string | null;
   currentJobNumber: string | null;
   timeOnTask: string;

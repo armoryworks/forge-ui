@@ -1,7 +1,5 @@
-import { ClockEventType } from './clock-event-type.type';
-
 export interface CreateClockEventRequest {
-  eventType: ClockEventType;
+  eventTypeCode: string;
   reason?: string;
   scanMethod?: string;
   source?: string;

@@ -435,24 +435,11 @@
     font-size: $icon-size-xxl;
   }
 
-  &--clock-in {
-    border-left: 3px solid var(--success);
-    .material-icons-outlined { color: var(--success); }
-  }
-
-  &--clock-out {
-    border-left: 3px solid var(--error);
-    .material-icons-outlined { color: var(--error); }
-  }
-
-  &--break {
-    border-left: 3px solid var(--warning);
-    .material-icons-outlined { color: var(--warning); }
-  }
-
-  &--resume {
-    border-left: 3px solid var(--info);
-    .material-icons-outlined { color: var(--info); }
+  // Dynamic color from --btn-color CSS custom property (set via [style.--btn-color] from metadata)
+  &[style*='--btn-color'] {
+    border-left: 3px solid var(--btn-color);
+    .material-icons-outlined { color: var(--btn-color); }
+    &:hover:not(:disabled) { background: color-mix(in srgb, var(--btn-color) 8%, var(--surface)); border-color: var(--btn-color); }
   }
 }
 

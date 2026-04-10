@@ -1,1 +1,1 @@
-export type ClockEventType = 'ClockIn' | 'ClockOut';
+export type ClockEventType = string;

@@ -324,66 +324,21 @@
       }
 
       <div class="sf-clock-actions__grid">
-        @for (worker of clockedOut(); track worker.userId) {
-          <button class="sf-action-btn sf-action-btn--clock-in"
-            [disabled]="processing() !== null"
-            (click)="clockAction(worker, 'ClockIn')">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">login</span>
-            }
-            <span class="sf-action-btn__label">{{ 'shopFloor.clockIn' | translate }}</span>
-            <span class="sf-action-btn__name">{{ worker.name }}</span>
-          </button>
-        }
-        @for (worker of workersIn(); track worker.userId) {
-          <button class="sf-action-btn sf-action-btn--clock-out"
-            [disabled]="processing() !== null"
-            (click)="clockAction(worker, 'ClockOut')">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">logout</span>
-            }
-            <span class="sf-action-btn__label">{{ 'shopFloor.clockOut' | translate }}</span>
-            <span class="sf-action-btn__name">{{ worker.name }}</span>
-          </button>
-          <button class="sf-action-btn sf-action-btn--break"
-            [disabled]="processing() !== null"
-            (click)="clockAction(worker, 'BreakStart')">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">free_breakfast</span>
-            }
-            <span class="sf-action-btn__label">{{ 'shopFloor.startBreak' | translate }}</span>
-            <span class="sf-action-btn__name">{{ worker.name }}</span>
-          </button>
-        }
-        @for (worker of workersOnBreak(); track worker.userId) {
-          <button class="sf-action-btn sf-action-btn--resume"
-            [disabled]="processing() !== null"
-            (click)="clockAction(worker, 'BreakEnd')">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">play_arrow</span>
-            }
-            <span class="sf-action-btn__label">{{ 'shopFloor.endBreak' | translate }}</span>
-            <span class="sf-action-btn__name">{{ worker.name }}</span>
-          </button>
-          <button class="sf-action-btn sf-action-btn--clock-out"
-            [disabled]="processing() !== null"
-            (click)="clockAction(worker, 'ClockOut')">
-            @if (processing() === worker.userId) {
-              <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
-            } @else {
-              <span class="material-icons-outlined">logout</span>
-            }
-            <span class="sf-action-btn__label">{{ 'shopFloor.clockOut' | translate }}</span>
-            <span class="sf-action-btn__name">{{ worker.name }}</span>
-          </button>
+        @for (worker of workers(); track worker.userId) {
+          @for (action of clockTypes.getAvailableActions(worker.status); track action.code) {
+            <button class="sf-action-btn"
+              [style.--btn-color]="action.color"
+              [disabled]="processing() !== null"
+              (click)="clockAction(worker, action.code)">
+              @if (processing() === worker.userId) {
+                <span class="material-icons-outlined sf-auth-card__spinner">sync</span>
+              } @else {
+                <span class="material-icons-outlined">{{ action.icon }}</span>
+              }
+              <span class="sf-action-btn__label">{{ action.label }}</span>
+              <span class="sf-action-btn__name">{{ worker.name }}</span>
+            </button>
+          }
         }
       </div>
       <button class="action-btn sf-clock-actions__cancel" (click)="resetToDashboard()">

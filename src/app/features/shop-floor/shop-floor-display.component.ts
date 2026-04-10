@@ -4,7 +4,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
-import { forkJoin, interval } from 'rxjs';
+import { catchError, forkJoin, interval, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { environment } from '../../../environments/environment';
@@ -12,6 +12,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
 import { ShopFloorService } from './services/shop-floor.service';
+import { ClockEventTypeService } from '../../shared/services/clock-event-type.service';
 import { EventsService } from '../events/services/events.service';
 import { AppEvent } from '../events/models/event.model';
 import { AuthService } from '../../shared/services/auth.service';
@@ -65,6 +66,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly scanner = inject(ScannerService);
   protected readonly loading = inject(LoadingService);
+  protected readonly clockTypes = inject(ClockEventTypeService);
   private readonly poService = inject(PurchaseOrderService);
   private readonly inventoryService = inject(InventoryService);
   private readonly shipmentService = inject(ShipmentService);
@@ -96,12 +98,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     return map;
   });
 
-  // Computed worker groups
-  protected readonly workersIn = computed(() => this.workers().filter(w => w.status === 'In'));
-  protected readonly workersOnBreak = computed(() => this.workers().filter(w => w.status === 'OnBreak'));
-  protected readonly workersOut = computed(() => this.workers().filter(w => w.status === 'Out'));
-  protected readonly activeWorkers = computed(() => this.workers().filter(w => w.status !== 'Out'));
-  protected readonly inactiveWorkers = computed(() => this.workers().filter(w => w.status === 'Out'));
+  // Computed worker groups (using ClockEventTypeService for status checks)
+  protected readonly workersIn = computed(() => this.workers().filter(w => this.clockTypes.isWorking(w.status)));
+  protected readonly workersOnBreak = computed(() => this.workers().filter(w => this.clockTypes.isOnBreakOrLunch(w.status)));
+  protected readonly workersOut = computed(() => this.workers().filter(w => this.clockTypes.isClockedOut(w.status)));
+  protected readonly activeWorkers = computed(() => this.workers().filter(w => this.clockTypes.isActive(w.status)));
+  protected readonly inactiveWorkers = computed(() => this.workers().filter(w => this.clockTypes.isClockedOut(w.status)));
   protected readonly activeJobs = computed(() => this.overview()?.activeJobs ?? []);
   protected readonly unassignedJobs = computed(() =>
     this.activeJobs().filter(j => !j.assigneeId),
@@ -150,11 +152,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly SHIP_ROLES = new Set(['Admin', 'Manager', 'OfficeManager']);
   protected readonly canReceive = computed(() => {
     const worker = this.selectedWorker();
-    return worker ? this.RECEIVE_ROLES.has(worker.role) : false;
+    return worker ? this.RECEIVE_ROLES.has(worker.role) && this.clockTypes.isActive(worker.status) : false;
   });
   protected readonly canShip = computed(() => {
     const worker = this.selectedWorker();
-    return worker ? this.SHIP_ROLES.has(worker.role) : false;
+    return worker ? this.SHIP_ROLES.has(worker.role) && this.clockTypes.isActive(worker.status) : false;
   });
 
   // Scan feedback
@@ -189,6 +191,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.authService.clearAuth();
+    this.clockTypes.load();
     this.loadData();
     this.updateClock();
 
@@ -341,7 +344,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         this.loadData();
 
         // After clock-in, if worker has no assignments → show job picker
-        if (eventType === 'ClockIn' && worker.assignments.length === 0) {
+        const eventDef = this.clockTypes.definitions().find(d => d.code === eventType);
+        if (eventDef?.statusMapping === 'In' && eventDef.category === 'work' && worker.assignments.length === 0) {
           setTimeout(() => {
             this.actionFeedback.set(null);
             this.jobSelectWorker.set(worker);
@@ -754,13 +758,20 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     forkJoin({
       overview: this.shopFloorService.getOverview(),
       workers: this.shopFloorService.getClockStatus(),
-      events: this.eventsService.getUpcomingEvents(),
+      events: this.eventsService.getUpcomingEvents().pipe(catchError(() => of([]))),
     }).subscribe({
       next: ({ overview, workers, events }) => {
         this.overview.set(overview);
         this.workers.set(workers);
         this.upcomingEvents.set(events);
         this.error.set(null);
+
+        // Refresh selectedWorker with updated data (timer status, assignments, etc.)
+        const current = this.selectedWorker();
+        if (current) {
+          const updated = workers.find(w => w.userId === current.userId);
+          if (updated) this.selectedWorker.set(updated);
+        }
       },
       error: () => this.error.set(this.translate.instant('shopFloor.loadFailed')),
     });
