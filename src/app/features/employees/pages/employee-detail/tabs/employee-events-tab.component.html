@@ -1,0 +1,37 @@
+<div class="tab-content tab-content--table">
+  <app-data-table
+    tableId="employee-events"
+    [columns]="columns"
+    [data]="events()"
+    [loading]="loading()"
+    emptyIcon="event"
+    emptyMessage="No upcoming events">
+
+    <ng-template appColumnCell="eventType" let-row>
+      <span class="chip">
+        <span class="material-icons-outlined chip__icon">{{ eventTypeIcon(row.eventType) }}</span>
+        {{ row.eventType }}
+      </span>
+    </ng-template>
+    <ng-template appColumnCell="startTime" let-row>
+      {{ row.startTime | date:'MM/dd/yyyy hh:mm a' }}
+    </ng-template>
+    <ng-template appColumnCell="endTime" let-row>
+      {{ row.endTime | date:'MM/dd/yyyy hh:mm a' }}
+    </ng-template>
+    <ng-template appColumnCell="isRequired" let-row>
+      @if (row.isRequired) {
+        <span class="chip chip--warning">Required</span>
+      } @else {
+        <span class="text-muted">Optional</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class.chip--success]="getAttendeeStatus(row) === 'Accepted'"
+            [class.chip--error]="getAttendeeStatus(row) === 'Declined'"
+            [class.chip--info]="getAttendeeStatus(row) === 'Invited'">
+        {{ getAttendeeStatus(row) }}
+      </span>
+    </ng-template>
+  </app-data-table>
+</div>

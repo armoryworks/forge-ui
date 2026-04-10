@@ -1,0 +1,23 @@
+@use 'styles/variables' as *;
+
+.events-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__spacer {
+    flex: 1;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+}
+
+.row-actions {
+  display: flex;
+  gap: $sp-xs;
+  justify-content: flex-end;
+}

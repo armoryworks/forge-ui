@@ -161,6 +161,42 @@
         </div>
       </section>
     }
+
+    <!-- Upcoming Events -->
+    @if (upcomingEvents().length > 0) {
+      <section class="sf-section">
+        <div class="sf-section__header">
+          <span class="material-icons-outlined">event</span>
+          <h2>Upcoming Events</h2>
+          <span class="sf-section__count">{{ upcomingEvents().length }}</span>
+        </div>
+
+        <div class="sf-events-grid">
+          @for (event of upcomingEvents(); track event.id) {
+            <div class="sf-event-card" [class.sf-event-card--required]="event.isRequired">
+              <div class="sf-event-card__icon">
+                <span class="material-icons-outlined">{{ eventTypeIcon(event.eventType) }}</span>
+              </div>
+              <div class="sf-event-card__content">
+                <span class="sf-event-card__title">{{ event.title }}</span>
+                <span class="sf-event-card__time">
+                  {{ event.startTime | date:'MM/dd hh:mm a' }}
+                </span>
+                @if (event.location) {
+                  <span class="sf-event-card__location">
+                    <span class="material-icons-outlined">place</span>
+                    {{ event.location }}
+                  </span>
+                }
+              </div>
+              @if (event.isRequired) {
+                <span class="sf-event-card__badge">Required</span>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
   </div>
 
   <!-- Bottom Status Bar (passive scan — no input needed) -->

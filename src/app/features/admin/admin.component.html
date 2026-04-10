@@ -406,6 +406,20 @@
       </div>
     }
 
+    <!-- Time Corrections Tab -->
+    @if (activeTab() === 'time-corrections') {
+      <div class="tab-panel">
+        <app-time-corrections-panel />
+      </div>
+    }
+
+    <!-- Events Tab -->
+    @if (activeTab() === 'events') {
+      <div class="tab-panel">
+        <app-events-panel />
+      </div>
+    }
+
     <!-- Audit Log Tab -->
     @if (activeTab() === 'audit-log') {
       <div class="tab-panel">

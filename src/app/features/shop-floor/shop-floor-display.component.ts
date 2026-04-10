@@ -3,6 +3,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { DatePipe } from '@angular/common';
 import { forkJoin, interval } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -11,6 +12,8 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
 import { ShopFloorService } from './services/shop-floor.service';
+import { EventsService } from '../events/services/events.service';
+import { AppEvent } from '../events/models/event.model';
 import { AuthService } from '../../shared/services/auth.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -38,7 +41,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,11 +68,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly poService = inject(PurchaseOrderService);
   private readonly inventoryService = inject(InventoryService);
   private readonly shipmentService = inject(ShipmentService);
+  private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
   // Data
   protected readonly overview = signal<ShopFloorOverview | null>(null);
+  protected readonly upcomingEvents = signal<AppEvent[]>([]);
   protected readonly workers = signal<ClockWorker[]>([]);
   protected readonly error = signal<string | null>(null);
   protected readonly clockDisplay = signal('');
@@ -685,6 +690,15 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     }
   }
 
+  protected eventTypeIcon(type: string): string {
+    switch (type) {
+      case 'Meeting': return 'groups';
+      case 'Training': return 'school';
+      case 'Safety': return 'health_and_safety';
+      default: return 'event';
+    }
+  }
+
   // ─── Ephemeral Auth ───
 
   private ephemeralLogout(): void {
@@ -740,10 +754,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     forkJoin({
       overview: this.shopFloorService.getOverview(),
       workers: this.shopFloorService.getClockStatus(),
+      events: this.eventsService.getUpcomingEvents(),
     }).subscribe({
-      next: ({ overview, workers }) => {
+      next: ({ overview, workers, events }) => {
         this.overview.set(overview);
         this.workers.set(workers);
+        this.upcomingEvents.set(events);
         this.error.set(null);
       },
       error: () => this.error.set(this.translate.instant('shopFloor.loadFailed')),

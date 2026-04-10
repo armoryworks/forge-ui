@@ -114,6 +114,9 @@
       @if (activeTab() === 'jobs') {
         <app-employee-jobs-tab [employeeId]="e.id" />
       }
+      @if (activeTab() === 'events') {
+        <app-employee-events-tab [employeeId]="e.id" />
+      }
       @if (activeTab() === 'expenses') {
         <app-employee-expenses-tab [employeeId]="e.id" />
       }

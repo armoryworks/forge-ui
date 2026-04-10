@@ -102,6 +102,8 @@ export class SidebarComponent {
           { icon: 'groups', label: 'Teams', i18nKey: 'admin.tabs.teams', route: '/admin/teams', allowedRoles: ['Admin'] },
           { icon: 'percent', label: 'Sales Tax', i18nKey: 'admin.tabs.salesTax', route: '/admin/sales-tax', allowedRoles: ['Admin'] },
           { icon: 'manage_search', label: 'Audit Log', i18nKey: 'admin.tabs.auditLog', route: '/admin/audit-log', allowedRoles: ['Admin'] },
+          { icon: 'edit_note', label: 'Time Corrections', i18nKey: 'admin.tabs.timeCorrections', route: '/admin/time-corrections', allowedRoles: ['Admin', 'Manager'] },
+          { icon: 'event', label: 'Events', i18nKey: 'admin.tabs.events', route: '/admin/events', allowedRoles: ['Admin', 'Manager'] },
           { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
           { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         ],

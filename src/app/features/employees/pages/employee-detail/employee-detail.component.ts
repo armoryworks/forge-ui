@@ -15,8 +15,9 @@ import { EmployeeJobsTabComponent } from './tabs/employee-jobs-tab.component';
 import { EmployeeExpensesTabComponent } from './tabs/employee-expenses-tab.component';
 import { EmployeeDocumentsTabComponent } from './tabs/employee-documents-tab.component';
 import { EmployeeActivityTabComponent } from './tabs/employee-activity-tab.component';
+import { EmployeeEventsTabComponent } from './tabs/employee-events-tab.component';
 
-const TABS = ['overview', 'time', 'pay', 'training', 'compliance', 'jobs', 'expenses', 'documents', 'activity'] as const;
+const TABS = ['overview', 'time', 'pay', 'training', 'compliance', 'jobs', 'events', 'expenses', 'documents', 'activity'] as const;
 type EmployeeTab = typeof TABS[number];
 
 @Component({
@@ -27,6 +28,7 @@ type EmployeeTab = typeof TABS[number];
     EmployeeOverviewTabComponent, EmployeeTimeTabComponent, EmployeePayTabComponent,
     EmployeeTrainingTabComponent, EmployeeComplianceTabComponent, EmployeeJobsTabComponent,
     EmployeeExpensesTabComponent, EmployeeDocumentsTabComponent, EmployeeActivityTabComponent,
+    EmployeeEventsTabComponent,
   ],
   templateUrl: './employee-detail.component.html',
   styleUrl: './employee-detail.component.scss',
@@ -101,6 +103,7 @@ export class EmployeeDetailComponent {
       training: 'Training',
       compliance: 'Compliance',
       jobs: 'Jobs',
+      events: 'Events',
       expenses: 'Expenses',
       documents: 'Documents',
       activity: 'Activity',
