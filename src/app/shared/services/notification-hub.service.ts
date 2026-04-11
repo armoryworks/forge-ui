@@ -16,6 +16,7 @@ export class NotificationHubService {
 
     const connection = this.signalr.getOrCreateConnection('notifications');
 
+    connection.off('notificationReceived');
     connection.on('notificationReceived', (notification: AppNotification) => {
       this.notificationService.push(notification);
     });
@@ -25,6 +26,8 @@ export class NotificationHubService {
 
   async disconnect(): Promise<void> {
     this.connected = false;
+    const connection = this.signalr.getOrCreateConnection('notifications');
+    connection.off('notificationReceived');
     await this.signalr.stopConnection('notifications');
   }
 }

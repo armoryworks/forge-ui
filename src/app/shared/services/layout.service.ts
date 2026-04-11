@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, NgZone, inject, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 
@@ -57,6 +58,7 @@ export class LayoutService {
   constructor() {
     this.router.events.pipe(
       filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(e => {
       this._isDisplayRoute.set(this.checkDisplayRoute(e.urlAfterRedirects));
       this._isAccountRoute.set(this.checkAccountRoute(e.urlAfterRedirects));

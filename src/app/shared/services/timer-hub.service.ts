@@ -28,6 +28,7 @@ export class TimerHubService {
 
   async disconnect(): Promise<void> {
     await this.leaveUserGroup();
+    this.unregisterHandlers();
     await this.signalr.stopConnection('timer');
     this.connection = null;
     this.connectPromise = null;
@@ -63,9 +64,15 @@ export class TimerHubService {
 
   private registerHandlers(): void {
     if (!this.connection) return;
-
+    this.unregisterHandlers();
     this.connection.on('timerStarted', (event: TimerEvent) => this.onTimerStarted?.(event));
     this.connection.on('timerStopped', (event: TimerEvent) => this.onTimerStopped?.(event));
+  }
+
+  private unregisterHandlers(): void {
+    if (!this.connection) return;
+    this.connection.off('timerStarted');
+    this.connection.off('timerStopped');
   }
 
   private async rejoinGroups(): Promise<void> {

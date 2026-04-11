@@ -33,6 +33,7 @@ export class BoardHubService {
   async disconnect(): Promise<void> {
     await this.leaveBoard();
     await this.leaveJob();
+    this.unregisterHandlers();
     await this.signalr.stopConnection('board');
     this.connection = null;
     this.connectPromise = null;
@@ -101,11 +102,23 @@ export class BoardHubService {
   private registerHandlers(): void {
     if (!this.connection) return;
 
+    // Remove any existing handlers to prevent accumulation on reconnect
+    this.unregisterHandlers();
+
     this.connection.on('jobCreated', (event) => this.onJobCreated?.(event));
     this.connection.on('jobMoved', (event) => this.onJobMoved?.(event));
     this.connection.on('jobUpdated', (event) => this.onJobUpdated?.(event));
     this.connection.on('jobPositionChanged', (event) => this.onJobPositionChanged?.(event));
     this.connection.on('subtaskChanged', (event) => this.onSubtaskChanged?.(event));
+  }
+
+  private unregisterHandlers(): void {
+    if (!this.connection) return;
+    this.connection.off('jobCreated');
+    this.connection.off('jobMoved');
+    this.connection.off('jobUpdated');
+    this.connection.off('jobPositionChanged');
+    this.connection.off('subtaskChanged');
   }
 
   private async rejoinGroups(): Promise<void> {

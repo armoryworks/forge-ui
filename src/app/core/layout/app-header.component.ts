@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, HostListener, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, HostListener, OnInit } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, filter, map, switchMap, catchError, of, EMPTY } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -37,6 +37,7 @@ export class AppHeaderComponent implements OnInit {
   private readonly authService = inject(AuthService);
   protected readonly layout = inject(LayoutService);
   private readonly searchService = inject(SearchService);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly aiService = inject(AiService);
   protected readonly languageService = inject(LanguageService);
   protected readonly versionService = inject(VersionService);
@@ -93,6 +94,7 @@ export class AppHeaderComponent implements OnInit {
       distinctUntilChanged(),
       filter(v => (v?.length ?? 0) >= 2),
       switchMap(term => this.searchService.search(term!)),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(results => {
       this.searchResults.set(results);
       this.showResults.set(results.length > 0 || this.aiService.available() || this.aiSuggestions().length > 0);
@@ -110,6 +112,7 @@ export class AppHeaderComponent implements OnInit {
           catchError(() => of({ results: [] as RagSearchResult[], generatedAnswer: null })),
         );
       }),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(response => {
       // Filter out internal documentation — not useful to end users
       const entityResults = response.results.filter(r => r.entityType !== 'Documentation');
@@ -123,6 +126,7 @@ export class AppHeaderComponent implements OnInit {
 
     this.searchControl.valueChanges.pipe(
       filter(v => !v || v.length < 2),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(() => {
       this.aiSuggestions.set([]);
       this.ragResults.set([]);

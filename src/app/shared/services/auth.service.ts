@@ -180,6 +180,11 @@ export class AuthService {
         this._user.set(user);
         localStorage.setItem('qbe-user', JSON.stringify(user));
       },
+      error: () => {
+        // SSO token was valid but /me failed — clear stale state
+        this._token.set(null);
+        localStorage.removeItem('qbe-token');
+      },
     });
   }
 

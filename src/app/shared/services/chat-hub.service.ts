@@ -22,6 +22,7 @@ export class ChatHubService {
 
   async disconnect(): Promise<void> {
     this.connected = false;
+    this.unregisterHandlers();
     await this.signalr.stopConnection('chat');
     this.connection = null;
   }
@@ -32,7 +33,11 @@ export class ChatHubService {
 
   private registerHandlers(): void {
     if (!this.connection) return;
-
+    this.unregisterHandlers();
     this.connection.on('messageReceived', (event) => this.onMessage?.(event));
+  }
+
+  private unregisterHandlers(): void {
+    this.connection?.off('messageReceived');
   }
 }

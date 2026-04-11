@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, NgZone, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, NgZone, computed, effect, inject, OnDestroy, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
@@ -80,6 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
 
   /** Prevents double-launching an inline tour on direct ?walkthrough= navigation. */
@@ -179,7 +181,10 @@ export class AppComponent implements OnInit, OnDestroy {
    */
   private watchWalkthroughUrl(): void {
     this.router.events
-      .pipe(filter(e => e instanceof NavigationEnd))
+      .pipe(
+        filter(e => e instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe((e: NavigationEnd) => {
         const url = this.router.parseUrl((e as NavigationEnd).urlAfterRedirects ?? (e as NavigationEnd).url);
         if (!this.authService.isAuthenticated()) return;

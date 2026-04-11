@@ -149,21 +149,33 @@ export class KanbanComponent implements OnInit, OnDestroy {
       rowUsers = allUsers.filter(u => assignedUserIds.has(u.id));
     }
 
+    // Pre-group jobs by assigneeId per column to avoid O(n*m) filtering
+    const colJobsByUser = cols.map(col => {
+      const grouped = new Map<number | null, typeof col.jobs>();
+      for (const job of col.jobs) {
+        const key = job.assigneeId ?? null;
+        const list = grouped.get(key);
+        if (list) list.push(job);
+        else grouped.set(key, [job]);
+      }
+      return grouped;
+    });
+
     const rows: SwimlaneRow[] = rowUsers.map(user => ({
       user,
-      cells: cols.map(col => ({
-        jobs: col.jobs.filter(j => j.assigneeId === user.id),
+      cells: colJobsByUser.map(grouped => ({
+        jobs: grouped.get(user.id) ?? [],
       })),
     }));
 
     // Unassigned row
-    const hasUnassigned = allJobs.some(j => !j.assigneeId);
+    const hasUnassigned = colJobsByUser.some(grouped => grouped.has(null));
     const showUnassigned = selectedIds.length === 0 || hasUnassigned;
     if (showUnassigned) {
       rows.push({
         user: null,
-        cells: cols.map(col => ({
-          jobs: col.jobs.filter(j => !j.assigneeId),
+        cells: colJobsByUser.map(grouped => ({
+          jobs: grouped.get(null) ?? [],
         })),
       });
     }
