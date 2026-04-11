@@ -24,6 +24,12 @@
       <ng-template appColumnCell="date" let-row>
         {{ row.date | date:'MM/dd/yyyy' }}
       </ng-template>
+      <ng-template appColumnCell="timerStart" let-row>
+        {{ formatTime(row.timerStart) }}
+      </ng-template>
+      <ng-template appColumnCell="timerStop" let-row>
+        {{ formatTime(row.timerStop) }}
+      </ng-template>
       <ng-template appColumnCell="durationMinutes" let-row>
         {{ formatDuration(row.durationMinutes) }}
       </ng-template>
@@ -49,6 +55,12 @@
     <ng-template appColumnCell="originalDate" let-row>
       {{ row.originalDate | date:'MM/dd/yyyy' }}
     </ng-template>
+    <ng-template appColumnCell="originalStartTime" let-row>
+      {{ formatTime(row.originalStartTime) }}
+    </ng-template>
+    <ng-template appColumnCell="originalEndTime" let-row>
+      {{ formatTime(row.originalEndTime) }}
+    </ng-template>
     <ng-template appColumnCell="originalDurationMinutes" let-row>
       {{ formatDuration(row.originalDurationMinutes) }}
     </ng-template>
@@ -64,16 +76,26 @@
         <span>{{ entry.userName }}</span>
         <span class="correction-original__label">Original Date:</span>
         <span>{{ entry.date | date:'MM/dd/yyyy' }}</span>
+        <span class="correction-original__label">Original Start:</span>
+        <span>{{ formatTime(entry.timerStart) }}</span>
+        <span class="correction-original__label">Original End:</span>
+        <span>{{ formatTime(entry.timerStop) }}</span>
         <span class="correction-original__label">Original Duration:</span>
         <span>{{ formatDuration(entry.durationMinutes) }}</span>
       </div>
     }
 
     <div [formGroup]="correctionForm">
+      <app-datepicker label="Date" formControlName="date" />
       <div class="dialog-row">
-        <app-datepicker label="Date" formControlName="date" />
-        <app-input label="Duration (minutes)" type="number" formControlName="durationMinutes" />
+        <app-input label="Start Time" type="time" formControlName="startTime" />
+        <app-input label="End Time" type="time" formControlName="endTime" />
       </div>
+      @if (calculatedDuration(); as dur) {
+        <div class="correction-calculated-duration">
+          Calculated duration: <strong>{{ dur }}</strong>
+        </div>
+      }
       <app-input label="Category" formControlName="category" />
       <app-textarea label="Notes" formControlName="notes" [rows]="2" />
       <app-textarea label="Reason for Correction" formControlName="reason" [rows]="3" [required]="true" />

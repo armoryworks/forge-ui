@@ -60,7 +60,7 @@
 }
 
 .col-manager__drag {
-  font-size: 14px;
+  font-size: $icon-size-xs;
   color: var(--text-muted);
   cursor: grab;
 }

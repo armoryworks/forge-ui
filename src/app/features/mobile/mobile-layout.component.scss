@@ -72,7 +72,7 @@
     align-items: center;
     justify-content: center;
     flex: 1;
-    gap: 2px;
+    gap: $sp-xs;
     text-decoration: none;
     color: var(--text-muted);
     transition: color $transition-fast;
@@ -93,6 +93,6 @@
   }
 
   &__label {
-    @include uppercase-label(10px, 0.3px, 500);
+    @include uppercase-label($font-size-xs, 0.3px, 500);
   }
 }

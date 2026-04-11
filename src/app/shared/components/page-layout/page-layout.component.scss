@@ -20,7 +20,7 @@
   align-items: center;
   padding: $sp-sm $sp-lg;
   background: var(--surface);
-  border-bottom: 3px solid var(--header);
+  border-bottom: $border-width-accent solid var(--header);
   flex-shrink: 0;
   height: 48px;
   gap: $sp-md;

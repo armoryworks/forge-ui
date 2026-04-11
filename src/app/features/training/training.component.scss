@@ -45,7 +45,7 @@
 // Per-type accent colors used in the type-bar
 $type-colors: (
   'Article':     var(--info),
-  'Video':       #8b5cf6,
+  'Video':       var(--accent),
   'Walkthrough': var(--primary),
   'QuickRef':    var(--accent),
   'Quiz':        var(--warning),
@@ -73,7 +73,7 @@ $type-colors: (
 
     .training-card__type-bar {
       // Blue glow on the top of the card for in-progress state
-      border-top: 2px solid var(--primary);
+      border-top: $border-width solid var(--primary);
     }
   }
 
@@ -90,7 +90,7 @@ $type-colors: (
       width: 0;
       height: 0;
       border-style: solid;
-      border-width: 0 28px 28px 0;
+      border-width: 0 $sp-2xl $sp-2xl 0;
       border-color: transparent var(--success) transparent transparent;
     }
   }
@@ -103,12 +103,12 @@ $type-colors: (
     background: var(--bg);
     border-bottom: $border-width-thin solid var(--border);
     // Colored left accent per content type
-    border-left: 3px solid var(--type-accent, var(--border));
+    border-left: $border-width solid var(--type-accent, var(--border));
   }
 
   // Apply type-specific accent via data attribute
   &__type-bar[data-type='Article']     { --type-accent: var(--info); }
-  &__type-bar[data-type='Video']       { --type-accent: #8b5cf6; }
+  &__type-bar[data-type='Video']       { --type-accent: var(--accent); }
   &__type-bar[data-type='Walkthrough'] { --type-accent: var(--primary); }
   &__type-bar[data-type='QuickRef']    { --type-accent: var(--accent); }
   &__type-bar[data-type='Quiz']        { --type-accent: var(--warning); }
@@ -129,7 +129,7 @@ $type-colors: (
     font-size: var(--font-size-xs);
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: $sp-xs;
   }
 
   &__body {
@@ -277,7 +277,7 @@ $type-colors: (
   &__cta {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: $sp-xs;
     font-size: var(--font-size-xs);
     font-weight: 600;
     color: var(--primary);
@@ -385,7 +385,7 @@ $type-colors: (
 
   // Progress bar sits flush under the card
   &__progress-bar {
-    height: 4px;
+    height: $progress-bar-height;
     background: var(--border);
     border: $border-width-thin solid var(--border);
     border-top: none;

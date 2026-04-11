@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
@@ -41,10 +42,11 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   styleUrl: './time-corrections-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TimeCorrectionsPanelComponent {
+export class TimeCorrectionsPanelComponent implements OnInit {
   private readonly timeService = inject(TimeTrackingService);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isLoading = signal(false);
   protected readonly saving = signal(false);
@@ -64,7 +66,8 @@ export class TimeCorrectionsPanelComponent {
   protected readonly correctionForm = new FormGroup({
     jobId: new FormControl<number | null>(null),
     date: new FormControl<Date | null>(null),
-    durationMinutes: new FormControl<number | null>(null),
+    startTime: new FormControl<string | null>(null),
+    endTime: new FormControl<string | null>(null),
     category: new FormControl<string | null>(null),
     notes: new FormControl<string | null>(null),
     reason: new FormControl('', [Validators.required, Validators.minLength(3)]),
@@ -74,11 +77,15 @@ export class TimeCorrectionsPanelComponent {
     reason: 'Reason',
   });
 
+  protected readonly calculatedDuration = signal<string>('');
+
   protected readonly entryColumns: ColumnDef[] = [
     { field: 'userName', header: 'Employee', sortable: true },
     { field: 'date', header: 'Date', sortable: true, type: 'date', width: '110px' },
     { field: 'jobNumber', header: 'Job #', sortable: true, width: '120px' },
-    { field: 'durationMinutes', header: 'Duration (min)', sortable: true, type: 'number', width: '120px' },
+    { field: 'timerStart', header: 'Start', sortable: true, width: '100px' },
+    { field: 'timerStop', header: 'End', sortable: true, width: '100px' },
+    { field: 'durationMinutes', header: 'Duration', sortable: true, type: 'number', width: '100px' },
     { field: 'category', header: 'Category', sortable: true, width: '120px' },
     { field: 'notes', header: 'Notes', sortable: true },
     { field: 'actions', header: '', width: '60px' },
@@ -90,30 +97,37 @@ export class TimeCorrectionsPanelComponent {
     { field: 'timeEntryId', header: 'Entry ID', sortable: true, width: '90px' },
     { field: 'originalJobNumber', header: 'Orig. Job #', sortable: true, width: '110px' },
     { field: 'originalDate', header: 'Orig. Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'originalStartTime', header: 'Orig. Start', sortable: true, width: '100px' },
+    { field: 'originalEndTime', header: 'Orig. End', sortable: true, width: '100px' },
     { field: 'originalDurationMinutes', header: 'Orig. Duration', sortable: true, type: 'number', width: '110px' },
     { field: 'reason', header: 'Reason', sortable: true },
   ];
 
-  constructor() {
+  ngOnInit(): void {
     this.loadUsers();
     this.loadEntries();
     this.loadCorrections();
 
-    // Reload when filters change
-    effect(() => {
-      this.userControl.valueChanges.subscribe(() => {
-        this.loadEntries();
-        this.loadCorrections();
-      });
-      this.fromDateControl.valueChanges.subscribe(() => {
-        this.loadEntries();
-        this.loadCorrections();
-      });
-      this.toDateControl.valueChanges.subscribe(() => {
-        this.loadEntries();
-        this.loadCorrections();
-      });
+    this.userControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadEntries();
+      this.loadCorrections();
     });
+    this.fromDateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadEntries();
+      this.loadCorrections();
+    });
+    this.toDateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadEntries();
+      this.loadCorrections();
+    });
+
+    // Auto-calculate duration when start/end times change
+    this.correctionForm.controls.startTime.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateCalculatedDuration());
+    this.correctionForm.controls.endTime.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.updateCalculatedDuration());
   }
 
   private loadUsers(): void {
@@ -153,10 +167,12 @@ export class TimeCorrectionsPanelComponent {
     this.correctionForm.patchValue({
       jobId: entry.jobId,
       date: entry.date ? new Date(entry.date) : null,
-      durationMinutes: entry.durationMinutes,
+      startTime: entry.timerStart ? this.toTimeString(new Date(entry.timerStart)) : null,
+      endTime: entry.timerStop ? this.toTimeString(new Date(entry.timerStop)) : null,
       category: entry.category,
       notes: entry.notes,
     });
+    this.updateCalculatedDuration();
     this.showDialog.set(true);
   }
 
@@ -178,7 +194,17 @@ export class TimeCorrectionsPanelComponent {
     // Only include fields that changed
     if (val.jobId !== entry.jobId) request.jobId = val.jobId;
     if (val.date && toIsoDate(val.date) !== toIsoDate(new Date(entry.date))) request.date = toIsoDate(val.date);
-    if (val.durationMinutes !== entry.durationMinutes) request.durationMinutes = val.durationMinutes;
+
+    const origStartStr = entry.timerStart ? this.toTimeString(new Date(entry.timerStart)) : null;
+    const origEndStr = entry.timerStop ? this.toTimeString(new Date(entry.timerStop)) : null;
+
+    if (val.startTime !== origStartStr || val.endTime !== origEndStr) {
+      // Build full DateTimeOffset from date + time
+      const dateVal = val.date ?? new Date(entry.date);
+      if (val.startTime) request.startTime = this.combineDateTime(dateVal, val.startTime);
+      if (val.endTime) request.endTime = this.combineDateTime(dateVal, val.endTime);
+    }
+
     if (val.category !== entry.category) request.category = val.category;
     if (val.notes !== entry.notes) request.notes = val.notes;
 
@@ -200,5 +226,37 @@ export class TimeCorrectionsPanelComponent {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  }
+
+  protected formatTime(dateStr: Date | string | null): string {
+    if (!dateStr) return '--';
+    const d = new Date(dateStr);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  private toTimeString(date: Date): string {
+    const h = date.getHours().toString().padStart(2, '0');
+    const m = date.getMinutes().toString().padStart(2, '0');
+    return `${h}:${m}`;
+  }
+
+  private combineDateTime(date: Date, time: string): string {
+    const [h, m] = time.split(':').map(Number);
+    const combined = new Date(date);
+    combined.setHours(h, m, 0, 0);
+    return combined.toISOString();
+  }
+
+  private updateCalculatedDuration(): void {
+    const start = this.correctionForm.controls.startTime.value;
+    const end = this.correctionForm.controls.endTime.value;
+    if (start && end) {
+      const [sh, sm] = start.split(':').map(Number);
+      const [eh, em] = end.split(':').map(Number);
+      const minutes = (eh * 60 + em) - (sh * 60 + sm);
+      this.calculatedDuration.set(minutes > 0 ? this.formatDuration(minutes) : '--');
+    } else {
+      this.calculatedDuration.set('');
+    }
   }
 }

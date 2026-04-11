@@ -25,22 +25,22 @@
 
     &--in {
       background: color-mix(in srgb, var(--success) 15%, transparent);
-      border: 3px solid var(--success);
+      border: $border-width-accent solid var(--success);
     }
 
     &--onbreak {
       background: color-mix(in srgb, var(--warning) 15%, transparent);
-      border: 3px solid var(--warning);
+      border: $border-width-accent solid var(--warning);
     }
 
     &--onlunch {
       background: color-mix(in srgb, var(--info) 15%, transparent);
-      border: 3px solid var(--info);
+      border: $border-width-accent solid var(--info);
     }
 
     &--out {
       background: color-mix(in srgb, var(--text-muted) 10%, transparent);
-      border: 3px solid var(--text-muted);
+      border: $border-width-accent solid var(--text-muted);
     }
   }
 

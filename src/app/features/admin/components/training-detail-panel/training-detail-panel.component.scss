@@ -116,11 +116,11 @@
     transition: border-color $transition-fast;
 
     &--completed {
-      border-left: 3px solid var(--success);
+      border-left: $border-width-accent solid var(--success);
     }
 
     &--in-progress {
-      border-left: 3px solid var(--info);
+      border-left: $border-width-accent solid var(--info);
     }
   }
 

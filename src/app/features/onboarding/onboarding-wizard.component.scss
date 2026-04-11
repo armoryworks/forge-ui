@@ -20,7 +20,7 @@
   height: 100%; // fixed height = fills the padded host
   border: $border-width solid var(--border);
   background: var(--surface);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: $shadow-dropdown;
   overflow: hidden; // card clips; internal areas scroll
 
   &__header {
@@ -29,7 +29,7 @@
     gap: $sp-md;
     flex-shrink: 0;
     padding: 0 $sp-lg;
-    height: 36px;
+    height: $avatar-size-lg;
     border-bottom: $border-width solid var(--border);
     background: var(--surface);
   }

@@ -8,10 +8,10 @@
   color: var(--text-muted);
   font-size: var(--font-size-sm);
 
-  .material-icons-outlined { font-size: 18px; opacity: 0.5; }
+  .material-icons-outlined { font-size: $icon-size-md; opacity: 0.5; }
 }
 
 .btn-spinner {
-  font-size: 14px;
+  font-size: $icon-size-xs;
   animation: spin 0.8s linear infinite;
 }

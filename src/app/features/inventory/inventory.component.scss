@@ -32,7 +32,7 @@
   gap: $sp-md;
   padding: $sp-sm $sp-lg;
   background: var(--warning-light);
-  border-left: 3px solid var(--warning);
+  border-left: $border-width-accent solid var(--warning);
   flex-shrink: 0;
 }
 

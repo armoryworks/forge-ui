@@ -27,7 +27,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class InputComponent implements ControlValueAccessor {
   readonly label = input.required<string>();
-  readonly type = input<'text' | 'number' | 'email' | 'password'>('text');
+  readonly type = input<'text' | 'number' | 'email' | 'password' | 'time' | 'datetime-local'>('text');
   readonly info = input<string>('');
   readonly placeholder = input<string>('');
   readonly prefix = input<string>('');

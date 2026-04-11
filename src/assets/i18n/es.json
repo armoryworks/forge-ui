@@ -988,7 +988,9 @@
       "teams": "Equipos y Kioscos",
       "salesTax": "Impuesto",
       "auditLog": "Registro de Auditoría",
-      "compliance": "Cumplimiento"
+      "compliance": "Cumplimiento",
+      "timeCorrections": "Correcciones de Tiempo",
+      "events": "Eventos"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",

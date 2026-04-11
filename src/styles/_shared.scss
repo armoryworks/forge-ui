@@ -401,11 +401,11 @@
   flex-direction: column;
   min-height: 0;
   overflow: auto;
+  padding: $sp-md $sp-lg;
 }
 
 .panel-header {
   @include flex-between;
-  padding: $sp-md $sp-lg;
   flex-shrink: 0;
 }
 

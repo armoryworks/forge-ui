@@ -92,7 +92,6 @@
 .accordion-list {
   flex: 1;
   overflow: auto;
-  padding: 0 $sp-lg $sp-lg;
 }
 
 .accordion-item {
@@ -252,7 +251,7 @@
 
 // ─── Settings Sections ───
 .settings-section {
-  padding: 0 $sp-lg $sp-xl;
+  padding: 0 0 $sp-xl;
   border-bottom: $border-width-thin solid var(--border);
   margin-bottom: $sp-xl;
 
@@ -291,7 +290,6 @@
   display: flex;
   flex-direction: column;
   gap: $sp-xs;
-  padding: 0 $sp-lg $sp-lg;
 }
 
 .settings-item {

@@ -22,10 +22,10 @@
   font-size: var(--font-size-sm);
   pointer-events: auto;
 
-  &--info { border-left: 3px solid var(--info); }
-  &--success { border-left: 3px solid var(--success); }
-  &--warning { border-left: 3px solid var(--warning); }
-  &--error { border-left: 3px solid var(--error); }
+  &--info { border-left: $border-width-accent solid var(--info); }
+  &--success { border-left: $border-width-accent solid var(--success); }
+  &--warning { border-left: $border-width-accent solid var(--warning); }
+  &--error { border-left: $border-width-accent solid var(--error); }
 }
 
 .toast__icon {

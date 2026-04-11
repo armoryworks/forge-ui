@@ -8,6 +8,8 @@ export interface TimeCorrectionLog {
   originalJobNumber: string | null;
   originalDate: string;
   originalDurationMinutes: number;
+  originalStartTime: string | null;
+  originalEndTime: string | null;
   originalCategory: string | null;
   originalNotes: string | null;
   createdAt: string;

@@ -390,7 +390,7 @@ $grid-columns: 5;
   }
 
   &--overdue {
-    border-left: 3px solid var(--error);
+    border-left: $border-width-accent solid var(--error);
   }
 
   &--dragging {
@@ -471,7 +471,7 @@ $grid-columns: 5;
   transition: border-color $transition-fast;
 
   &--required {
-    border-left: 3px solid var(--warning);
+    border-left: $border-width-accent solid var(--warning);
   }
 
   &__icon {
@@ -721,7 +721,7 @@ $grid-columns: 5;
   min-height: 100px;
 
   &--active {
-    border-top: 3px solid var(--success);
+    border-top: $border-width-accent solid var(--success);
     background: color-mix(in srgb, var(--success) 5%, var(--surface));
   }
 }
@@ -806,7 +806,7 @@ $grid-columns: 5;
 
   // Dynamic color from --btn-color CSS custom property (set via [style.--btn-color] from metadata)
   &[style*='--btn-color'] {
-    border-left: 3px solid var(--btn-color);
+    border-left: $border-width-accent solid var(--btn-color);
     .material-icons-outlined { color: var(--btn-color); }
     &:hover:not(:disabled) { background: color-mix(in srgb, var(--btn-color) 8%, var(--surface)); border-color: var(--btn-color); }
   }
@@ -815,7 +815,7 @@ $grid-columns: 5;
     flex-direction: row;
     min-height: auto;
     padding: $sp-md $sp-lg;
-    border-left: 3px solid var(--primary);
+    border-left: $border-width-accent solid var(--primary);
     .material-icons-outlined { font-size: $icon-size-lg; color: var(--primary); }
     &:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 8%, var(--surface)); border-color: var(--primary); }
   }
@@ -824,7 +824,7 @@ $grid-columns: 5;
     flex-direction: row;
     min-height: auto;
     padding: $sp-md $sp-lg;
-    border-left: 3px solid var(--error);
+    border-left: $border-width-accent solid var(--error);
     .material-icons-outlined { font-size: $icon-size-lg; color: var(--error); }
     &:hover:not(:disabled) { background: color-mix(in srgb, var(--error) 8%, var(--surface)); border-color: var(--error); }
   }
@@ -833,7 +833,7 @@ $grid-columns: 5;
     flex-direction: row;
     min-height: auto;
     padding: $sp-md $sp-lg;
-    border-left: 3px solid var(--success);
+    border-left: $border-width-accent solid var(--success);
     .material-icons-outlined { font-size: $icon-size-lg; color: var(--success); }
     &:hover:not(:disabled) { background: color-mix(in srgb, var(--success) 8%, var(--surface)); border-color: var(--success); }
   }
@@ -919,7 +919,7 @@ $grid-columns: 5;
   }
 
   &:disabled { opacity: 0.5; cursor: not-allowed; }
-  &--overdue { border-left: 3px solid var(--error); }
+  &--overdue { border-left: $border-width-accent solid var(--error); }
 }
 
 .sf-job-select-card__job-dot {

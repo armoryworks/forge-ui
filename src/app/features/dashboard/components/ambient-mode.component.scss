@@ -5,7 +5,7 @@
   position: fixed;
   inset: 0;
   z-index: $z-loading;
-  background: #0f172a;
+  background: var(--text);
   color: white;
   display: flex;
   flex-direction: column;
@@ -29,7 +29,7 @@
 }
 
 .ambient__time {
-  font-size: 80px;
+  font-size: $sp-4xl;
   font-weight: 200;
   letter-spacing: -2px;
   font-family: $font-family-primary;
@@ -53,7 +53,7 @@
   gap: $sp-sm;
 
   &--warning .ambient__kpi-value {
-    color: #fbbf24;
+    color: var(--warning);
   }
 }
 
@@ -90,7 +90,7 @@
   background: rgba(white, 0.05);
 
   &--overdue {
-    border-left: 3px solid #ef4444;
+    border-left: $border-width solid var(--error);
   }
 }
 

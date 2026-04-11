@@ -26,7 +26,7 @@
   @include flex-between;
   flex-wrap: wrap;
   padding: $sp-md;
-  border-top: 4px solid;
+  border-top: $progress-bar-height solid;
   background: var(--surface);
   border-bottom: $border-width-thin solid var(--border);
   flex-shrink: 0;
@@ -60,7 +60,7 @@
 }
 
 .column__lock-icon {
-  font-size: 12px;
+  font-size: $icon-size-xs;
 }
 
 .column__body {
@@ -72,7 +72,7 @@
   gap: $sp-sm;
   min-height: 60px;
   background: var(--surface);
-  box-shadow: inset 0 0 0 2px var(--col-tint, transparent);
+  box-shadow: inset 0 0 0 $border-width var(--col-tint, transparent);
 }
 
 .column__empty {
@@ -96,10 +96,10 @@
   }
 
   .cdk-drag-animating {
-    transition: transform 200ms ease;
+    transition: transform $transition-normal;
   }
 
   .cdk-drop-list-dragging .cdk-drag:not(.cdk-drag-placeholder) {
-    transition: transform 200ms ease;
+    transition: transform $transition-normal;
   }
 }

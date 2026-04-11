@@ -15,7 +15,7 @@
     padding: $sp-sm $sp-md;
     background: var(--bg);
     border: $border-width-thin solid var(--border);
-    border-left: 3px solid var(--warning);
+    border-left: $border-width solid var(--warning);
   }
 
   &__question-count {
@@ -54,7 +54,7 @@
   // ── Progress header (before submit) ──────────────────────────────────────
 
   &__progress-bar-wrap {
-    height: 4px;
+    height: $progress-bar-height;
     background: var(--border);
     overflow: hidden;
     border-radius: 0;
@@ -128,9 +128,9 @@
 
   &__score-circle {
     flex-shrink: 0;
-    width: 80px;
-    height: 80px;
-    border: 3px solid currentColor;
+    width: $sp-4xl;
+    height: $sp-4xl;
+    border: $border-width solid currentColor;
     border-radius: 50%;
     display: flex;
     flex-direction: column;

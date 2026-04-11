@@ -38,3 +38,9 @@
     font-weight: 600;
   }
 }
+
+.correction-calculated-duration {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  padding: $sp-xs 0;
+}

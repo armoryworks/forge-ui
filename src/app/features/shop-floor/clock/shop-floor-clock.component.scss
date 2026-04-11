@@ -152,11 +152,11 @@
   border: $border-width-thin solid var(--border);
 
   &--in {
-    border-left: 3px solid var(--success);
+    border-left: $border-width-accent solid var(--success);
   }
 
   &--break {
-    border-left: 3px solid var(--warning);
+    border-left: $border-width-accent solid var(--warning);
   }
 
   &--out {
@@ -231,7 +231,7 @@
   border: $border-width-thin solid var(--border);
 
   &--overdue {
-    border-left: 3px solid var(--error);
+    border-left: $border-width-accent solid var(--error);
   }
 }
 
@@ -437,7 +437,7 @@
 
   // Dynamic color from --btn-color CSS custom property (set via [style.--btn-color] from metadata)
   &[style*='--btn-color'] {
-    border-left: 3px solid var(--btn-color);
+    border-left: $border-width-accent solid var(--btn-color);
     .material-icons-outlined { color: var(--btn-color); }
     &:hover:not(:disabled) { background: color-mix(in srgb, var(--btn-color) 8%, var(--surface)); border-color: var(--btn-color); }
   }
@@ -547,5 +547,5 @@
 
 .sf-job-card--banner {
   margin-bottom: $sp-md;
-  border-left: 3px solid var(--info);
+  border-left: $border-width-accent solid var(--info);
 }

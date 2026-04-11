@@ -2,15 +2,15 @@
   display: block;
   width: 100%;
   min-height: 100vh;
-  background: #fff;
+  background: var(--surface);
 }
 
 .headless-render__container {
   width: 100%;
   max-width: 850px;
   margin: 0 auto;
-  background: #fff;
-  color: #000;
+  background: var(--surface);
+  color: var(--text);
 }
 
 .headless-render__waiting {
@@ -19,5 +19,5 @@
   justify-content: center;
   height: 100vh;
   font-family: sans-serif;
-  color: #999;
+  color: var(--text-muted);
 }

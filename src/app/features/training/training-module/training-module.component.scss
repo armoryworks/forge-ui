@@ -233,7 +233,7 @@
 .article-outline {
   background: var(--bg);
   border: $border-width-thin solid var(--border);
-  border-left: 3px solid var(--info);
+  border-left: $border-width-accent solid var(--info);
 
   &__header {
     display: flex;
@@ -649,7 +649,7 @@
   &__detail {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: $sp-xs;
     min-width: 0;
     flex: 1;
   }

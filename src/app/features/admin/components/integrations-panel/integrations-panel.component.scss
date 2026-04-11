@@ -43,8 +43,8 @@
     height: 50px;
     object-fit: contain;
     flex-shrink: 0;
-    border-radius: 4px;
-    background: #ffffff;
+    border-radius: $border-radius;
+    background: var(--surface);
     padding: $sp-sm;
   }
 

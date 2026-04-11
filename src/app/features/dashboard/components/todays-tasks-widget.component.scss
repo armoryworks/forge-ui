@@ -37,7 +37,7 @@
 
   &--overdue {
     background: color-mix(in srgb, var(--error) 5%, var(--surface));
-    border-left: 3px solid var(--error);
+    border-left: $border-width-accent solid var(--error);
   }
 }
 

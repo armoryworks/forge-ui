@@ -988,7 +988,9 @@
       "teams": "Teams & Kiosks",
       "salesTax": "Sales Tax",
       "auditLog": "Audit Log",
-      "compliance": "Compliance"
+      "compliance": "Compliance",
+      "timeCorrections": "Time Corrections",
+      "events": "Events"
     },
     "users": "Users",
     "addUser": "Add User",

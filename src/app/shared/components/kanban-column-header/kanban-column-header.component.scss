@@ -6,7 +6,7 @@
   align-items: center;
   gap: $sp-sm;
   padding: $sp-md;
-  border-top: 3px solid var(--primary);
+  border-top: $border-width-accent solid var(--primary);
   background: var(--surface);
   flex-shrink: 0;
 
