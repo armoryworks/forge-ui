@@ -28,6 +28,7 @@
     "training": "Capacitación",
     "shopFloor": "Planta",
     "worker": "Operario",
+    "employees": "Empleados",
     "collapse": "Contraer",
     "expand": "Expandir"
   },
@@ -155,7 +156,9 @@
     "allStatuses": "Todos los Estados",
     "send": "Enviar",
     "customer": "Cliente",
-    "part": "Parte"
+    "part": "Parte",
+    "addComment": "Agregar Comentario",
+    "post": "Publicar"
   },
   "dashboard": {
     "title": "Panel",
@@ -479,6 +482,16 @@
     "update": "Actualizar",
     "deleteOperation": "¿Eliminar Operación?",
     "deleteOperationMessage": "Esto eliminará la operación {{stepNumber}}: \"{{title}}\" del enrutamiento.",
+    "operationDetails": "Detalles",
+    "operationMaterials": "Materiales",
+    "operationFiles": "Archivos",
+    "operationActivity": "Actividad",
+    "referencedOperation": "Referencia a Operación",
+    "noMaterials": "Sin materiales asignados a esta operación",
+    "noMaterialsHint": "Agregue entradas de BOM a esta pieza primero, luego asígnelas a operaciones.",
+    "bomEntry": "Entrada de BOM",
+    "materialAdded": "Material asignado a la operación.",
+    "materialRemoved": "Material eliminado de la operación.",
     "operationAdded": "Operación agregada.",
     "operationUpdated": "Operación actualizada.",
     "operationDeleted": "Operación eliminada.",
@@ -1003,7 +1016,9 @@
       "teams": "Equipos y Kioscos",
       "salesTax": "Impuesto",
       "auditLog": "Registro de Auditoría",
-      "compliance": "Cumplimiento"
+      "compliance": "Cumplimiento",
+      "timeCorrections": "Correcciones de Tiempo",
+      "events": "Eventos"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",

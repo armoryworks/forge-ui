@@ -28,6 +28,7 @@
     "training": "Training",
     "shopFloor": "Shop Floor",
     "worker": "Worker",
+    "employees": "Employees",
     "collapse": "Collapse",
     "expand": "Expand"
   },
@@ -155,7 +156,9 @@
     "allStatuses": "All Statuses",
     "send": "Send",
     "customer": "Customer",
-    "part": "Part"
+    "part": "Part",
+    "addComment": "Add Comment",
+    "post": "Post"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -479,6 +482,16 @@
     "update": "Update",
     "deleteOperation": "Delete Operation?",
     "deleteOperationMessage": "This will remove operation {{stepNumber}}: \"{{title}}\" from the routing.",
+    "operationDetails": "Details",
+    "operationMaterials": "Materials",
+    "operationFiles": "Files",
+    "operationActivity": "Activity",
+    "referencedOperation": "References Operation",
+    "noMaterials": "No materials assigned to this operation",
+    "noMaterialsHint": "Add BOM entries to this part first, then assign them to operations.",
+    "bomEntry": "BOM Entry",
+    "materialAdded": "Material assigned to operation.",
+    "materialRemoved": "Material removed from operation.",
     "operationAdded": "Operation added.",
     "operationUpdated": "Operation updated.",
     "operationDeleted": "Operation deleted.",
@@ -1003,7 +1016,9 @@
       "teams": "Teams & Kiosks",
       "salesTax": "Sales Tax",
       "auditLog": "Audit Log",
-      "compliance": "Compliance"
+      "compliance": "Compliance",
+      "timeCorrections": "Time Corrections",
+      "events": "Events"
     },
     "users": "Users",
     "addUser": "Add User",
