@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
@@ -28,6 +28,7 @@ import { SsoProvider } from '../../shared/models/sso-provider.model';
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly layout = inject(LayoutService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
@@ -52,6 +53,14 @@ export class LoginComponent implements OnInit {
   protected readonly setupCodeControl = new FormControl('');
 
   ngOnInit(): void {
+    // Show session expired message if redirected after token invalidation
+    const reason = this.route.snapshot.queryParamMap.get('reason');
+    if (reason === 'session_expired') {
+      this.snackbar.info(this.translate.instant('auth.sessionExpired'));
+      // Clean the query param from URL without triggering navigation
+      this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
+    }
+
     // Load available SSO providers
     this.authService.getSsoProviders().subscribe(providers => {
       this.ssoProviders.set(providers);

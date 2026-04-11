@@ -1,6 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, map } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { SsoProvider } from '../models/sso-provider.model';
@@ -196,12 +196,29 @@ export class AuthService {
     return this.http.delete<void>(`${environment.apiUrl}/auth/sso/unlink/${provider}`);
   }
 
+  /** Attempt to refresh the current token. Returns the new token or null on failure. */
+  refreshAccessToken(): Observable<string | null> {
+    return this.http.post<LoginResponse>(`${environment.apiUrl}/auth/refresh`, {}).pipe(
+      tap((response) => {
+        this._token.set(response.token);
+        this._user.set(response.user);
+        localStorage.setItem('qbe-token', response.token);
+        localStorage.setItem('qbe-user', JSON.stringify(response.user));
+      }),
+      map((response) => response.token),
+      catchError(() => of(null)),
+    );
+  }
+
   async logout(): Promise<void> {
     // Run before-logout checks (e.g., draft warning dialog)
     if (this._beforeLogout) {
       const proceed = await this._beforeLogout();
       if (!proceed) return;
     }
+
+    // Notify server to revoke the session (fire-and-forget)
+    this.http.post(`${environment.apiUrl}/auth/logout`, {}).pipe(catchError(() => of(null))).subscribe();
 
     this.clearAuth();
     this._broadcastLogout?.();
