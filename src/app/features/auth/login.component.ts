@@ -52,12 +52,23 @@ export class LoginComponent implements OnInit {
   protected readonly showSetupCode = signal(false);
   protected readonly setupCodeControl = new FormControl('');
 
+  /** Intended destination captured from the auth guard redirect. */
+  private returnUrl: string | null = null;
+
   ngOnInit(): void {
+    const params = this.route.snapshot.queryParamMap;
+
     // Show session expired message if redirected after token invalidation
-    const reason = this.route.snapshot.queryParamMap.get('reason');
+    const reason = params.get('reason');
     if (reason === 'session_expired') {
       this.snackbar.info(this.translate.instant('auth.sessionExpired'));
-      // Clean the query param from URL without triggering navigation
+    }
+
+    // Capture return URL from auth guard
+    this.returnUrl = params.get('returnUrl');
+
+    // Clean query params from URL without triggering navigation
+    if (reason || this.returnUrl) {
       this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
     }
 
@@ -80,7 +91,7 @@ export class LoginComponent implements OnInit {
   }
 
   protected goToDashboard(): void {
-    this.router.navigate([this.layout.getDefaultRoute()]);
+    this.navigatePostLogin(true);
   }
 
   protected switchAccount(): void {
@@ -102,10 +113,22 @@ export class LoginComponent implements OnInit {
     this.loadingService.track(this.translate.instant('auth.signingIn'), this.authService.login({ email: email!, password: password! }))
       .subscribe({
         next: (response) => {
-          this.router.navigate([response.user.profileComplete ? this.layout.getDefaultRoute() : '/account/profile']);
+          this.navigatePostLogin(response.user.profileComplete);
         },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
+  }
+
+  private navigatePostLogin(profileComplete: boolean): void {
+    if (!profileComplete) {
+      this.router.navigate(['/account/profile']);
+      return;
+    }
+    if (this.returnUrl) {
+      this.router.navigateByUrl(this.returnUrl);
+      return;
+    }
+    this.router.navigate([this.layout.getDefaultRoute()]);
   }
 
   private handleError(err: HttpErrorResponse): void {

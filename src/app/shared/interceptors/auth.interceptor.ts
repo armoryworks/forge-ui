@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, switchMap, throwError } from 'rxjs';
 import { AuthService } from '../services/auth.service';
+import { LayoutService } from '../services/layout.service';
 
 const OWN_API_PATTERN = /^(\/api\/|https?:\/\/localhost)/;
 
@@ -14,6 +15,7 @@ let isRefreshing = false;
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const layout = inject(LayoutService);
   const token = authService.token();
   const isOwnApi = OWN_API_PATTERN.test(req.url);
 
@@ -21,20 +23,30 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
 
+  /** Redirect to login preserving the current route as returnUrl. */
+  const redirectToLogin = () => {
+    authService.clearAuth();
+    const currentUrl = router.url;
+    const queryParams: Record<string, string> = { reason: 'session_expired' };
+    // Preserve current route so user returns here after re-login
+    if (currentUrl && currentUrl !== '/' && !layout.isAuthRoute()) {
+      queryParams['returnUrl'] = currentUrl;
+    }
+    router.navigate(['/login'], { queryParams });
+  };
+
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && isOwnApi && authService.isAuthenticated()) {
         // Don't attempt refresh for auth endpoints themselves
         if (NO_REFRESH_URLS.some(url => req.url.includes(url))) {
-          authService.clearAuth();
-          router.navigate(['/login'], { queryParams: { reason: 'session_expired' } });
+          redirectToLogin();
           return throwError(() => error);
         }
 
         // Prevent concurrent refresh attempts
         if (isRefreshing) {
-          authService.clearAuth();
-          router.navigate(['/login'], { queryParams: { reason: 'session_expired' } });
+          redirectToLogin();
           return throwError(() => error);
         }
 
@@ -48,14 +60,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               return next(retryReq);
             }
             // Refresh failed — session is gone
-            authService.clearAuth();
-            router.navigate(['/login'], { queryParams: { reason: 'session_expired' } });
+            redirectToLogin();
             return throwError(() => error);
           }),
           catchError((refreshError) => {
             isRefreshing = false;
-            authService.clearAuth();
-            router.navigate(['/login'], { queryParams: { reason: 'session_expired' } });
+            redirectToLogin();
             return throwError(() => refreshError);
           }),
         );

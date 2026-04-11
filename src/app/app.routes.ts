@@ -4,6 +4,7 @@ import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
 import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { roleGuard } from './shared/guards/role.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
 
@@ -14,7 +15,7 @@ export const routes: Routes = [
   { path: 'setup/:token', component: TokenSetupComponent },
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, mobileRedirectGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
