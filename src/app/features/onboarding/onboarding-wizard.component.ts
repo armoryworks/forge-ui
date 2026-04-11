@@ -24,6 +24,7 @@ import { DatepickerComponent } from '../../shared/components/datepicker/datepick
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
 
@@ -153,6 +154,7 @@ export class OnboardingWizardComponent {
   private readonly service = inject(OnboardingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
+  private readonly layout = inject(LayoutService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly profileService = inject(EmployeeProfileService);
@@ -907,7 +909,7 @@ export class OnboardingWizardComponent {
   }
 
   protected goToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate([this.layout.getDefaultRoute()]);
   }
 
   // ── Draft persistence ─────────────────────────────────────────────────────

@@ -11,6 +11,7 @@ import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -27,6 +28,7 @@ import { SsoProvider } from '../../shared/models/sso-provider.model';
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly layout = inject(LayoutService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
@@ -69,7 +71,7 @@ export class LoginComponent implements OnInit {
   }
 
   protected goToDashboard(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate([this.layout.getDefaultRoute()]);
   }
 
   protected switchAccount(): void {
@@ -91,7 +93,7 @@ export class LoginComponent implements OnInit {
     this.loadingService.track(this.translate.instant('auth.signingIn'), this.authService.login({ email: email!, password: password! }))
       .subscribe({
         next: (response) => {
-          this.router.navigate([response.user.profileComplete ? '/dashboard' : '/account/profile']);
+          this.router.navigate([response.user.profileComplete ? this.layout.getDefaultRoute() : '/account/profile']);
         },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });

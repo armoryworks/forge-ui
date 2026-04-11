@@ -10,6 +10,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../shared/components/address-form/address-form.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -28,6 +29,7 @@ import { ToastService } from '../../shared/services/toast.service';
 export class SetupComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly layout = inject(LayoutService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
@@ -100,7 +102,7 @@ export class SetupComponent {
       locationState: address?.['state'] || undefined,
       locationPostalCode: address?.['postalCode'] || undefined,
     })).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      next: () => this.router.navigate([this.layout.getDefaultRoute()]),
       error: (err: HttpErrorResponse) => this.handleError(err),
     });
   }

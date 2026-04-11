@@ -13,6 +13,13 @@ export class LayoutService {
   private readonly _sidebarCollapsed = signal(this.loadCollapsedState());
   private readonly _mobileMenuOpen = signal(false);
   private readonly _isMobile = signal(window.innerWidth < MOBILE_BREAKPOINT);
+
+  /**
+   * True when running on a phone-like device (touch + narrow viewport).
+   * Used for auto-redirect to `/m/` after login — NOT the same as `isMobile`,
+   * which toggles sidebar behavior at the breakpoint.
+   */
+  readonly isMobileDevice = signal(this.detectMobileDevice());
   private readonly _isDisplayRoute = signal(this.checkDisplayRoute(window.location.pathname));
   private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
   private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
@@ -148,5 +155,21 @@ export class LayoutService {
     // Extract first path segment: "/parts/42" → "parts"
     const segment = url.split('/').filter(Boolean)[0] ?? 'dashboard';
     return labels[segment] ?? segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  /**
+   * Returns the default post-login route: `/m` for mobile devices, `/dashboard` for desktop.
+   * Use this everywhere a login flow redirects the user.
+   */
+  getDefaultRoute(): string {
+    return this.isMobileDevice() ? '/m' : '/dashboard';
+  }
+
+  private detectMobileDevice(): boolean {
+    const hasTouch = navigator.maxTouchPoints > 0;
+    const isNarrow = window.innerWidth < MOBILE_BREAKPOINT;
+    // Standalone PWA or Capacitor native always counts as mobile device
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    return (hasTouch && isNarrow) || isStandalone;
   }
 }

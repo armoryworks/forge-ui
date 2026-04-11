@@ -80,6 +80,24 @@ describe('LayoutService', () => {
     });
   });
 
+  describe('isMobileDevice', () => {
+    it('should return a boolean', () => {
+      expect(typeof service.isMobileDevice()).toBe('boolean');
+    });
+
+    it('should return false in test environment (no touch, wide viewport)', () => {
+      // jsdom has maxTouchPoints=0 and default wide viewport
+      expect(service.isMobileDevice()).toBe(false);
+    });
+  });
+
+  describe('getDefaultRoute', () => {
+    it('should return /dashboard on desktop', () => {
+      // Test environment is desktop-like
+      expect(service.getDefaultRoute()).toBe('/dashboard');
+    });
+  });
+
   describe('localStorage restore', () => {
     it('should restore collapsed=false from localStorage', () => {
       localStorage.setItem('qbe-sidebar-collapsed', 'false');

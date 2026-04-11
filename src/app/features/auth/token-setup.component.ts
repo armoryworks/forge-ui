@@ -10,6 +10,7 @@ import { AuthService, SetupTokenInfo } from '../../shared/services/auth.service'
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -26,6 +27,7 @@ export class TokenSetupComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly layout = inject(LayoutService);
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
@@ -79,7 +81,7 @@ export class TokenSetupComponent implements OnInit {
     })).subscribe({
       next: (response) => {
         this.snackbar.success(this.translate.instant('auth.setupComplete'));
-        this.router.navigate([response.user.profileComplete ? '/dashboard' : '/account/profile']);
+        this.router.navigate([response.user.profileComplete ? this.layout.getDefaultRoute() : '/account/profile']);
       },
       error: (err: HttpErrorResponse) => {
         const detail = err.error?.detail ?? err.error?.title ?? 'Setup failed.';

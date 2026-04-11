@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../shared/services/auth.service';
+import { LayoutService } from '../../shared/services/layout.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 
 @Component({
@@ -18,6 +19,7 @@ export class SsoCallbackComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly layout = inject(LayoutService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -28,7 +30,7 @@ export class SsoCallbackComponent implements OnInit {
 
     if (token) {
       this.authService.handleSsoToken(token);
-      this.router.navigate(['/dashboard'], { replaceUrl: true });
+      this.router.navigate([this.layout.getDefaultRoute()], { replaceUrl: true });
     } else if (error === 'sso_failed') {
       this.snackbar.error(this.translate.instant('auth.ssoFailed'));
       this.router.navigate(['/login'], { replaceUrl: true });
