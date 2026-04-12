@@ -33,6 +33,14 @@ export const MOBILE_ROUTES: Routes = [
         loadComponent: () => import('./pages/mobile-hours.component').then(m => m.MobileHoursComponent),
       },
       {
+        path: 'chat',
+        loadComponent: () => import('./pages/mobile-chat.component').then(m => m.MobileChatComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./pages/mobile-notifications.component').then(m => m.MobileNotificationsComponent),
+      },
+      {
         path: 'account',
         loadComponent: () => import('./pages/mobile-account.component').then(m => m.MobileAccountComponent),
       },

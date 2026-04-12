@@ -1,0 +1,89 @@
+@use 'styles/variables' as *;
+
+.mobile-page { padding: $sp-lg; }
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  margin-bottom: $sp-xl;
+  padding-bottom: $sp-lg;
+  border-bottom: 1px solid var(--border);
+
+  &__name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__email {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: $sp-xs 0 0;
+  }
+}
+
+.account-section {
+  margin-bottom: $sp-xl;
+
+  &__label {
+    display: block;
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: 0 $sp-lg;
+    margin-bottom: $sp-sm;
+  }
+}
+
+.account-links {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.account-link {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  text-decoration: none;
+  color: var(--text);
+  border: 1px solid var(--border);
+  background: var(--surface);
+
+  &:hover { border-color: var(--primary); }
+
+  .material-icons-outlined:first-child {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+  }
+
+  span:nth-child(2) {
+    flex: 1;
+    font-size: $font-size-base;
+  }
+
+  &__chevron {
+    font-size: $icon-size-md;
+    color: var(--text-muted);
+  }
+}
+
+.account-footer {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  .action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .action-btn--danger {
+    color: var(--error);
+    border-color: var(--error);
+  }
+}

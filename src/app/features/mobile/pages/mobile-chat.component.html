@@ -1,0 +1,115 @@
+@if (!selectedConversation() && !showUserPicker()) {
+  <div class="mobile-chat">
+    <div class="mobile-chat__header">
+      <h2 class="mobile-chat__title">{{ 'chat.title' | translate }}</h2>
+      <button class="action-btn action-btn--primary action-btn--sm" (click)="openUserPicker()" aria-label="New conversation">
+        <span class="material-icons-outlined">add</span>
+        {{ 'chat.newMessage' | translate }}
+      </button>
+    </div>
+
+    <div class="mobile-chat__list">
+      @if (conversations().length === 0) {
+        <div class="mobile-chat__empty">
+          <span class="material-icons-outlined mobile-chat__empty-icon">chat_bubble_outline</span>
+          <span class="mobile-chat__empty-text">{{ 'chat.noConversations' | translate }}</span>
+        </div>
+      }
+      @for (conv of conversations(); track conv.userId) {
+        <button class="mobile-chat__conv" (click)="selectConversation(conv)">
+          <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="md" />
+          <div class="mobile-chat__conv-content">
+            <div class="mobile-chat__conv-top">
+              <span class="mobile-chat__conv-name">{{ conv.userName }}</span>
+              @if (conv.lastMessageAt) {
+                <span class="mobile-chat__conv-time">{{ formatDate(conv.lastMessageAt) }}</span>
+              }
+            </div>
+            @if (conv.lastMessage) {
+              <span class="mobile-chat__conv-preview">{{ conv.lastMessage }}</span>
+            }
+          </div>
+          @if (conv.unreadCount > 0) {
+            <span class="mobile-chat__badge">{{ conv.unreadCount }}</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+} @else if (showUserPicker()) {
+  <div class="mobile-chat">
+    <div class="mobile-chat__header">
+      <button class="icon-btn" (click)="cancelUserPicker()" [attr.aria-label]="'chat.backToConversations' | translate">
+        <span class="material-icons-outlined">arrow_back</span>
+      </button>
+      <h2 class="mobile-chat__title">{{ 'chat.newMessage' | translate }}</h2>
+    </div>
+    <div class="mobile-chat__search">
+      <span class="material-icons-outlined">search</span>
+      <input
+        class="mobile-chat__search-input"
+        type="text"
+        [placeholder]="'chat.searchUsers' | translate"
+        [formControl]="userSearchControl"
+        autofocus />
+    </div>
+    <div class="mobile-chat__list">
+      @for (user of filteredUsers(); track user.id) {
+        <button class="mobile-chat__conv" (click)="selectUser(user)">
+          <app-avatar [initials]="user.initials" [color]="user.color" size="md" />
+          <div class="mobile-chat__conv-content">
+            <span class="mobile-chat__conv-name">{{ user.name }}</span>
+          </div>
+        </button>
+      }
+      @if (filteredUsers().length === 0) {
+        <div class="mobile-chat__empty">
+          <span class="mobile-chat__empty-text">{{ 'chat.noUsersFound' | translate }}</span>
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="mobile-chat mobile-chat--conversation">
+    <div class="mobile-chat__header">
+      <button class="icon-btn" (click)="backToList()" [attr.aria-label]="'chat.backToConversations' | translate">
+        <span class="material-icons-outlined">arrow_back</span>
+      </button>
+      <app-avatar
+        [initials]="selectedConversation()!.userInitials"
+        [color]="selectedConversation()!.userColor"
+        size="sm" />
+      <span class="mobile-chat__conv-name">{{ selectedConversation()!.userName }}</span>
+    </div>
+
+    <div class="mobile-chat__messages" #messagesContainer>
+      @for (msg of messages(); track msg.id) {
+        <div class="mobile-msg" [class.mobile-msg--own]="isOwnMessage(msg)">
+          @if (!isOwnMessage(msg)) {
+            <app-avatar [initials]="msg.senderInitials" [color]="msg.senderColor" size="sm" />
+          }
+          <div class="mobile-msg__bubble">
+            <span class="mobile-msg__text">{{ msg.content }}</span>
+            <span class="mobile-msg__time">{{ formatTime(msg.createdAt) }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="mobile-chat__input">
+      <input
+        class="mobile-chat__input-field"
+        type="text"
+        [placeholder]="'chat.typeMessage' | translate"
+        [formControl]="messageControl"
+        (keydown)="onKeydown($event)" />
+      <button
+        class="icon-btn mobile-chat__send"
+        [disabled]="!messageControl.value?.trim()"
+        (click)="sendMessage()"
+        [attr.aria-label]="'chat.sendMessage' | translate">
+        <span class="material-icons-outlined">send</span>
+      </button>
+    </div>
+  </div>
+}

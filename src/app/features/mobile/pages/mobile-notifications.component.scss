@@ -1,0 +1,105 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.mobile-page {
+  padding: $sp-lg;
+}
+
+.mobile-notif__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $sp-lg;
+}
+
+.mobile-notif__title {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  margin: 0;
+}
+
+.mobile-notif__list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notif-item {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &--unread {
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+
+    .notif-item__title {
+      font-weight: 600;
+    }
+  }
+}
+
+.notif-item__icon-wrap {
+  flex-shrink: 0;
+  width: $avatar-size-sm;
+  height: $avatar-size-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &--critical {
+    color: var(--error);
+  }
+
+  &--warning {
+    color: var(--warning);
+  }
+
+  &--info {
+    color: var(--info);
+  }
+}
+
+.notif-item__icon {
+  font-size: $icon-size-lg;
+}
+
+.notif-item__content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.notif-item__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $sp-sm;
+}
+
+.notif-item__title {
+  font-size: $font-size-base;
+  @include truncate;
+}
+
+.notif-item__time {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.notif-item__message {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -1,0 +1,39 @@
+<div class="mobile-page">
+  <div class="mobile-notif__header">
+    <h2 class="mobile-notif__title">Notifications</h2>
+    @if (unreadCount() > 0) {
+      <button class="action-btn action-btn--sm" (click)="markAllRead()" aria-label="Mark all as read">
+        <span class="material-icons-outlined">done_all</span>
+        Mark All Read
+      </button>
+    }
+  </div>
+
+  @if (notifications().length === 0) {
+    <app-empty-state icon="notifications_none" message="No notifications" />
+  } @else {
+    <div class="mobile-notif__list">
+      @for (n of notifications(); track n.id) {
+        <div class="notif-item" [class.notif-item--unread]="!n.isRead" (click)="markAsRead(n.id)">
+          <div class="notif-item__icon-wrap" [class]="'notif-item__icon-wrap--' + n.severity">
+            @if (n.senderInitials) {
+              <app-avatar [initials]="n.senderInitials" [color]="n.senderColor ?? '#6366f1'" size="sm" />
+            } @else {
+              <span class="material-icons-outlined notif-item__icon">{{ getSeverityIcon(n.severity) }}</span>
+            }
+          </div>
+          <div class="notif-item__content">
+            <div class="notif-item__top">
+              <span class="notif-item__title">{{ n.title }}</span>
+              <span class="notif-item__time">{{ formatTime(n.createdAt) }}</span>
+            </div>
+            <span class="notif-item__message">{{ n.message }}</span>
+          </div>
+          <button class="icon-btn" (click)="dismiss(n.id, $event)" aria-label="Dismiss notification">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,29 @@
+<div class="mobile-page" [appLoadingBlock]="loading()">
+  <h2 class="mobile-page__title">My Jobs</h2>
+
+  @if (jobs().length > 0) {
+    <div class="job-list">
+      @for (job of jobs(); track job.id) {
+        <a class="job-item" [routerLink]="['/m/jobs', job.id]" [attr.aria-label]="job.jobNumber + ': ' + job.title">
+          <div class="job-item__stripe" [style.background-color]="job.stageColor"></div>
+          <div class="job-item__content">
+            <div class="job-item__header">
+              <span class="job-item__number">{{ job.jobNumber }}</span>
+              @if (job.isOverdue) {
+                <span class="job-item__overdue">Overdue</span>
+              }
+            </div>
+            <div class="job-item__title">{{ job.title }}</div>
+            <div class="job-item__meta">
+              <span class="chip" [style.--chip-color]="job.stageColor">{{ job.stageName }}</span>
+              <span class="job-item__priority">{{ job.priorityName }}</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined job-item__chevron">chevron_right</span>
+        </a>
+      }
+    </div>
+  } @else {
+    <app-empty-state icon="work" message="No jobs assigned to you" />
+  }
+</div>
