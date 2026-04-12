@@ -158,7 +158,9 @@
     "addComment": "Agregar Comentario",
     "post": "Publicar",
     "customer": "Cliente",
-    "part": "Parte"
+    "part": "Parte",
+    "settings": "Configuración",
+    "summary": "Resumen"
   },
   "dashboard": {
     "title": "Panel",
@@ -214,7 +216,10 @@
     "revenue": "Ingresos",
     "margin": "Margen",
     "jobs30d": "Trabajos (30d)",
-    "loadFailed": "Error al cargar datos del panel"
+    "loadFailed": "Error al cargar datos del panel",
+    "enterFocusMode": "Entrar en Modo Enfoque",
+    "exitFocusMode": "Salir del Modo Enfoque",
+    "focusMode": "Modo Enfoque"
   },
   "kanban": {
     "title": "Tablero",
@@ -324,7 +329,21 @@
     "noteSaved": "Nota guardada",
     "noteSaveFailed": "Error al guardar nota",
     "noteDeleted": "Nota eliminada",
-    "noteDeleteFailed": "Error al eliminar nota"
+    "noteDeleteFailed": "Error al eliminar nota",
+    "allJobs": "Todos los Trabajos",
+    "coverPhotoRemoved": "Foto de portada eliminada",
+    "coverPhotoSet": "Foto de portada establecida",
+    "myWork": "Mi Trabajo",
+    "removeCoverPhoto": "Eliminar Foto de Portada",
+    "selectCoverPhoto": "Seleccionar Foto de Portada",
+    "selectFromExisting": "Seleccionar de adjuntos existentes",
+    "selectImageAria": "Seleccionar imagen como foto de portada",
+    "setCoverPhoto": "Establecer Foto de Portada",
+    "startTimer": "Iniciar Temporizador",
+    "stopTimer": "Detener Temporizador",
+    "timerStarted": "Temporizador iniciado",
+    "timerStopped": "Temporizador detenido",
+    "uploadNewImage": "Subir Nueva Imagen"
   },
   "backlog": {
     "title": "Pendientes",
@@ -495,7 +514,12 @@
     "viewModeLabel": "Modo de vista",
     "noThumbnail": "Sin imagen",
     "step": "Paso",
-    "operation": "Op"
+    "operation": "Op",
+    "fileDeleted": "Archivo eliminado",
+    "inventoryReplenishment": "Inventario y Reposición",
+    "minStockThreshold": "Umbral Mínimo de Stock",
+    "reorderQuantity": "Cantidad de Reorden",
+    "safetyStockDays": "Días de Stock de Seguridad"
   },
   "inventory": {
     "title": "Inventario",
@@ -557,7 +581,8 @@
       "reserved": "Reservado",
       "available": "Disponible",
       "status": "Estado",
-      "lotNumber": "Lote #"
+      "lotNumber": "Lote #",
+      "expiration": "Vencimiento"
     },
     "binContentHeaders": {
       "item": "Artículo",
@@ -710,7 +735,11 @@
       "procurement": "Compras",
       "billing": "Facturación",
       "shipping": "Envíos"
-    }
+    },
+    "archiveMessage": "Este cliente será archivado.",
+    "archiveTitle": "¿Archivar Cliente?",
+    "archived": "Cliente archivado",
+    "saved": "Cliente guardado"
   },
   "leads": {
     "title": "Prospectos",
@@ -969,7 +998,9 @@
     "colLocation": "Ubicación",
     "colManufacturer": "Fabricante",
     "colStatus": "Estado",
-    "colHours": "Horas"
+    "colHours": "Horas",
+    "maintenanceHistory": "Historial de Mantenimiento",
+    "noMaintenanceLogs": "Sin registros de mantenimiento"
   },
   "admin": {
     "title": "Configuración Admin",
@@ -1146,7 +1177,12 @@
     "loadSettingsFailed": "Error al cargar configuración del sistema",
     "removeScanId": "Eliminar identificador de escaneo",
     "qbConnectionVerified": "Conexión verificada — {{name}}",
-    "qbConnectionFailed": "Error en prueba de conexión"
+    "qbConnectionFailed": "Error en prueba de conexión",
+    "completeI9Section2": "Completar Sección 2 del I-9",
+    "lockPeriod": "Bloquear Período",
+    "lockPeriodFailed": "Error al bloquear período",
+    "lockPeriodHint": "Bloquear un período de nómina para evitar ediciones",
+    "payPeriod": "Período de Nómina"
   },
   "teamsPanel": {
     "teams": "equipos",
@@ -1338,7 +1374,20 @@
     "nec1099": "1099-NEC",
     "other": "Otro",
     "settingsNav": "Navegación de configuración de cuenta",
-    "backToDashboard": "Volver al panel"
+    "backToDashboard": "Volver al panel",
+    "docListATitle": "Documentos de la Lista A",
+    "docListADesc": "Documentos que establecen identidad y autorización de empleo",
+    "docListBTitle": "Documentos de la Lista B",
+    "docListBDesc": "Documentos que establecen identidad",
+    "docListCTitle": "Documentos de la Lista C",
+    "docListCDesc": "Documentos que establecen autorización de empleo",
+    "downloadFormCopy": "Descargar Copia del Formulario",
+    "employeeOnboarding": "Incorporación de Empleados",
+    "fillAndSignReady": "Este formulario está listo para firma digital.",
+    "formReadyToSign": "Formulario Listo para Firmar",
+    "identityDocNeedListB": "Necesita un documento de la Lista B (identidad)",
+    "identityDocNeedListC": "Necesita un documento de la Lista C (autorización de empleo)",
+    "identityDocRequired": "Se requieren documentos de identidad para la verificación I-9"
   },
   "errors": {
     "generic": "Ocurrió un error. Intente de nuevo.",
@@ -1468,7 +1517,16 @@
     "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
     "backToLibrary": "Training Library",
     "autoAssigned": "Auto-assigned",
-    "modulesCount": "{{count}} modules"
+    "modulesCount": "{{count}} modules",
+    "colCompleted": "Completados",
+    "colCompletion": "Progreso",
+    "colLastTour": "Último Tour",
+    "colRole": "Rol",
+    "colTotal": "Total",
+    "colUser": "Usuario",
+    "noUsers": "No se encontraron usuarios",
+    "trackingNote": "El progreso de tours se rastrea por dispositivo mediante almacenamiento del navegador.",
+    "users": "Usuarios"
   },
   "aiAssistants": {
     "assistants": "asistentes",
@@ -1700,7 +1758,10 @@
     "wed": "Mié",
     "thu": "Jue",
     "fri": "Vie",
-    "sat": "Sáb"
+    "sat": "Sáb",
+    "poDeliveries": "Entregas de OC",
+    "poDeliveriesCount": "{{count}} entregas",
+    "poLines": "Líneas de OC"
   },
   "shared": {
     "closeDialog": "Cerrar diálogo",
@@ -1964,7 +2025,10 @@
     "completedDate": "Completado",
     "invoice": "Facturar",
     "createInvoiceForJob": "Crear factura para este trabajo",
-    "noCustomerAssigned": "Sin cliente asignado"
+    "noCustomerAssigned": "Sin cliente asignado",
+    "invoiceDetails": "Detalles de Factura",
+    "loadingInvoice": "Cargando factura...",
+    "noLinesYet": "Sin líneas aún"
   },
   "payments": {
     "title": "Pagos",
@@ -2004,7 +2068,9 @@
     "amount": "Monto",
     "newPaymentTitle": "Nuevo Pago",
     "optional": "Opcional",
-    "amountPlaceholder": "0.00"
+    "amountPlaceholder": "0.00",
+    "noApplicationsYet": "Sin aplicaciones de pago aún",
+    "paymentDetails": "Detalles de Pago"
   },
   "vendors": {
     "title": "Proveedores",
@@ -2094,7 +2160,9 @@
     "receiveQty": "Cant. a Recibir",
     "itemsReceived": "Artículos recibidos.",
     "expected": "Esperada",
-    "newPoTitle": "Nueva Orden de Compra"
+    "newPoTitle": "Nueva Orden de Compra",
+    "noLinesYet": "Sin líneas aún",
+    "orderDetails": "Detalles de la Orden"
   },
   "salesOrders": {
     "title": "Órdenes de Venta",
@@ -2146,7 +2214,9 @@
     "partId": "ID de Pieza",
     "newOrderTitle": "Nueva Orden de Venta",
     "optional": "Opcional",
-    "customerPOLabel": "OC del Cliente"
+    "customerPOLabel": "OC del Cliente",
+    "noLinesYet": "Sin líneas aún",
+    "orderDetails": "Detalles de la Orden"
   },
   "quotes": {
     "title": "Cotizaciones",
@@ -2193,7 +2263,9 @@
     "createQuote": "Crear Cotización",
     "selectCustomer": "Seleccionar cliente...",
     "taxRate": "Tasa de Impuesto (%)",
-    "partId": "ID de Pieza"
+    "partId": "ID de Pieza",
+    "details": "Detalles de Cotización",
+    "noLinesYet": "Sin líneas aún"
   },
   "shipments": {
     "title": "Envíos",
@@ -2255,7 +2327,9 @@
     "noTrackingEvents": "Sin eventos de seguimiento aún.",
     "lbs": "lbs",
     "newShipmentTitle": "Nuevo Envío",
-    "optional": "Opcional"
+    "optional": "Opcional",
+    "noLinesYet": "Sin líneas aún",
+    "shipmentDetails": "Detalles del Envío"
   },
   "planning": {
     "title": "Planificación",
@@ -2599,7 +2673,10 @@
     "noConversations": "Sin conversaciones aún",
     "typeMessage": "Escriba un mensaje...",
     "sendMessage": "Enviar mensaje",
-    "justNow": "Ahora mismo"
+    "justNow": "Ahora mismo",
+    "newMessage": "Nuevo Mensaje",
+    "noUsersFound": "No se encontraron usuarios",
+    "searchUsers": "Buscar usuarios"
   },
   "ai": {
     "title": "Asistentes IA",
@@ -2714,5 +2791,82 @@
     "teamNameRequired": "El nombre del equipo es requerido.",
     "createTeamFailed": "Error al crear equipo.",
     "saveTerminalFailed": "Error al guardar configuración del terminal."
+  },
+  "customerReturns": {
+    "allStatuses": "Todos los Estados",
+    "close": "Cerrar",
+    "closeConfirm": "¿Cerrar esta devolución? Esta acción no se puede deshacer.",
+    "closeMessage": "La devolución se marcará como cerrada.",
+    "closeTitle": "¿Cerrar Devolución?",
+    "closed": "Devolución cerrada",
+    "created": "Devolución creada",
+    "editReturn": "Editar Devolución",
+    "fieldCustomer": "Cliente",
+    "fieldNotes": "Notas",
+    "fieldOriginalJob": "Trabajo Original",
+    "fieldReason": "Motivo",
+    "fieldReturnDate": "Fecha de Devolución",
+    "inspectedAt": "Inspeccionado el",
+    "inspectedBy": "Inspeccionado por",
+    "inspectionNotes": "Notas de Inspección",
+    "newReturn": "Nueva Devolución",
+    "noReturns": "No se encontraron devoluciones",
+    "originalJob": "Trabajo Original",
+    "reason": "Motivo",
+    "resolve": "Resolver",
+    "resolveConfirm": "¿Marcar esta devolución como resuelta?",
+    "resolveTitle": "¿Resolver Devolución?",
+    "resolved": "Devolución resuelta",
+    "returnDate": "Fecha de Devolución",
+    "returnNumber": "Devolución #",
+    "reworkJob": "Trabajo de Retrabajo",
+    "subtitle": "Rastrear y gestionar devoluciones de clientes",
+    "title": "Devoluciones de Clientes",
+    "updated": "Devolución actualizada"
+  },
+  "lots": {
+    "created": "Lote creado",
+    "description": "Descripción",
+    "expires": "Vence",
+    "fieldExpiration": "Fecha de Vencimiento",
+    "fieldJob": "Trabajo",
+    "fieldNotes": "Notas",
+    "fieldPart": "Pieza",
+    "fieldQuantity": "Cantidad",
+    "fieldSupplierLot": "Número de Lote del Proveedor",
+    "job": "Trabajo",
+    "lotNumber": "Número de Lote",
+    "newLot": "Nuevo Lote",
+    "noLots": "No se encontraron lotes de producción",
+    "noTraceEvents": "Sin eventos de trazabilidad",
+    "partNumber": "Número de Pieza",
+    "quantity": "Cantidad",
+    "subtitle": "Rastrear trazabilidad de lotes de producción",
+    "supplierLot": "Lote del Proveedor",
+    "title": "Lotes de Producción",
+    "traceHistory": "Historial de Trazabilidad"
+  },
+  "rfid": {
+    "clientSetupDesc": "Descargue y ejecute el script de configuración del cliente RFID para habilitar el escaneo de credenciales NFC/RFID en esta estación.",
+    "clientSetupTitle": "Configuración del Cliente RFID",
+    "downloadSetupScript": "Descargar Script de Configuración",
+    "setupScriptError": "Error al generar el script de configuración",
+    "setupScriptHint": "Ejecute el script descargado como Administrador para instalar el servicio de cliente RFID."
+  },
+  "salesTax": {
+    "addRate": "Agregar Tasa",
+    "default": "Predeterminada",
+    "deleteFailed": "Error al eliminar la tasa de impuesto",
+    "deleteMessage": "Esta tasa de impuesto será eliminada permanentemente.",
+    "deleteTitle": "¿Eliminar Tasa de Impuesto?",
+    "deleted": "Tasa de impuesto eliminada",
+    "editRate": "Editar Tasa",
+    "fieldCode": "Código",
+    "fieldDefault": "Tasa Predeterminada",
+    "fieldDescription": "Descripción",
+    "fieldName": "Nombre",
+    "fieldRate": "Tasa (%)",
+    "noRates": "No hay tasas de impuesto configuradas",
+    "rates": "Tasas de Impuesto"
   }
 }

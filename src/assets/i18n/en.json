@@ -158,7 +158,9 @@
     "addComment": "Add Comment",
     "post": "Post",
     "customer": "Customer",
-    "part": "Part"
+    "part": "Part",
+    "settings": "Settings",
+    "summary": "Summary"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -214,7 +216,10 @@
     "revenue": "Revenue",
     "margin": "Margin",
     "jobs30d": "Jobs (30d)",
-    "loadFailed": "Failed to load dashboard data"
+    "loadFailed": "Failed to load dashboard data",
+    "enterFocusMode": "Enter Focus Mode",
+    "exitFocusMode": "Exit Focus Mode",
+    "focusMode": "Focus Mode"
   },
   "kanban": {
     "title": "Board",
@@ -324,7 +329,21 @@
     "noteSaved": "Note saved",
     "noteSaveFailed": "Failed to save note",
     "noteDeleted": "Note deleted",
-    "noteDeleteFailed": "Failed to delete note"
+    "noteDeleteFailed": "Failed to delete note",
+    "allJobs": "All Jobs",
+    "coverPhotoRemoved": "Cover photo removed",
+    "coverPhotoSet": "Cover photo set",
+    "myWork": "My Work",
+    "removeCoverPhoto": "Remove Cover Photo",
+    "selectCoverPhoto": "Select Cover Photo",
+    "selectFromExisting": "Select from existing attachments",
+    "selectImageAria": "Select image as cover photo",
+    "setCoverPhoto": "Set Cover Photo",
+    "startTimer": "Start Timer",
+    "stopTimer": "Stop Timer",
+    "timerStarted": "Timer started",
+    "timerStopped": "Timer stopped",
+    "uploadNewImage": "Upload New Image"
   },
   "backlog": {
     "title": "Backlog",
@@ -495,7 +514,12 @@
     "viewModeLabel": "View mode",
     "noThumbnail": "No image",
     "step": "Step",
-    "operation": "Op"
+    "operation": "Op",
+    "fileDeleted": "File deleted",
+    "inventoryReplenishment": "Inventory & Replenishment",
+    "minStockThreshold": "Min Stock Threshold",
+    "reorderQuantity": "Reorder Quantity",
+    "safetyStockDays": "Safety Stock Days"
   },
   "inventory": {
     "title": "Inventory",
@@ -557,7 +581,8 @@
       "reserved": "Reserved",
       "available": "Available",
       "status": "Status",
-      "lotNumber": "Lot #"
+      "lotNumber": "Lot #",
+      "expiration": "Expiration"
     },
     "binContentHeaders": {
       "item": "Item",
@@ -710,7 +735,11 @@
       "procurement": "Procurement",
       "billing": "Billing",
       "shipping": "Shipping"
-    }
+    },
+    "archiveMessage": "This customer will be archived.",
+    "archiveTitle": "Archive Customer?",
+    "archived": "Customer archived",
+    "saved": "Customer saved"
   },
   "leads": {
     "title": "Leads",
@@ -969,7 +998,9 @@
     "colLocation": "Location",
     "colManufacturer": "Manufacturer",
     "colStatus": "Status",
-    "colHours": "Hours"
+    "colHours": "Hours",
+    "maintenanceHistory": "Maintenance History",
+    "noMaintenanceLogs": "No maintenance logs"
   },
   "admin": {
     "title": "Admin Settings",
@@ -1146,7 +1177,12 @@
     "loadSettingsFailed": "Failed to load system settings",
     "removeScanId": "Remove scan identifier",
     "qbConnectionVerified": "Connection verified — {{name}}",
-    "qbConnectionFailed": "Connection test failed"
+    "qbConnectionFailed": "Connection test failed",
+    "completeI9Section2": "Complete I-9 Section 2",
+    "lockPeriod": "Lock Period",
+    "lockPeriodFailed": "Failed to lock period",
+    "lockPeriodHint": "Lock a pay period to prevent further edits",
+    "payPeriod": "Pay Period"
   },
   "teamsPanel": {
     "teams": "teams",
@@ -1338,7 +1374,20 @@
     "nec1099": "1099-NEC",
     "other": "Other",
     "settingsNav": "Account settings navigation",
-    "backToDashboard": "Back to dashboard"
+    "backToDashboard": "Back to dashboard",
+    "docListATitle": "List A Documents",
+    "docListADesc": "Documents that establish both identity and employment authorization",
+    "docListBTitle": "List B Documents",
+    "docListBDesc": "Documents that establish identity",
+    "docListCTitle": "List C Documents",
+    "docListCDesc": "Documents that establish employment authorization",
+    "downloadFormCopy": "Download Form Copy",
+    "employeeOnboarding": "Employee Onboarding",
+    "fillAndSignReady": "This form is ready for digital signing.",
+    "formReadyToSign": "Form Ready to Sign",
+    "identityDocNeedListB": "You need a document from List B (identity)",
+    "identityDocNeedListC": "You need a document from List C (employment authorization)",
+    "identityDocRequired": "Identity documents are required for I-9 verification"
   },
   "errors": {
     "generic": "An error occurred. Please try again.",
@@ -1468,7 +1517,16 @@
     "walkthroughDesc": "This is an interactive guided tour. Click the button to start, and the tour will walk you through the interface step by step.",
     "backToLibrary": "Training Library",
     "autoAssigned": "Auto-assigned",
-    "modulesCount": "{{count}} modules"
+    "modulesCount": "{{count}} modules",
+    "colCompleted": "Completed",
+    "colCompletion": "Completion",
+    "colLastTour": "Last Tour",
+    "colRole": "Role",
+    "colTotal": "Total",
+    "colUser": "User",
+    "noUsers": "No users found",
+    "trackingNote": "Tour completion is tracked per-device via browser storage.",
+    "users": "Users"
   },
   "aiAssistants": {
     "assistants": "assistants",
@@ -1700,7 +1758,10 @@
     "wed": "Wed",
     "thu": "Thu",
     "fri": "Fri",
-    "sat": "Sat"
+    "sat": "Sat",
+    "poDeliveries": "PO Deliveries",
+    "poDeliveriesCount": "{{count}} deliveries",
+    "poLines": "PO Lines"
   },
   "shared": {
     "closeDialog": "Close dialog",
@@ -1964,7 +2025,10 @@
     "completedDate": "Completed",
     "invoice": "Invoice",
     "createInvoiceForJob": "Create invoice for this job",
-    "noCustomerAssigned": "No customer assigned"
+    "noCustomerAssigned": "No customer assigned",
+    "invoiceDetails": "Invoice Details",
+    "loadingInvoice": "Loading invoice...",
+    "noLinesYet": "No lines yet"
   },
   "payments": {
     "title": "Payments",
@@ -2004,7 +2068,9 @@
     "amount": "Amount",
     "newPaymentTitle": "New Payment",
     "optional": "Optional",
-    "amountPlaceholder": "0.00"
+    "amountPlaceholder": "0.00",
+    "noApplicationsYet": "No payment applications yet",
+    "paymentDetails": "Payment Details"
   },
   "vendors": {
     "title": "Vendors",
@@ -2094,7 +2160,9 @@
     "remaining": "Remaining",
     "receiveQty": "Receive Qty",
     "itemsReceived": "Items received.",
-    "newPoTitle": "New Purchase Order"
+    "newPoTitle": "New Purchase Order",
+    "noLinesYet": "No lines yet",
+    "orderDetails": "Order Details"
   },
   "salesOrders": {
     "title": "Sales Orders",
@@ -2146,7 +2214,9 @@
     "partId": "Part ID",
     "newOrderTitle": "New Sales Order",
     "optional": "Optional",
-    "customerPOLabel": "Customer PO"
+    "customerPOLabel": "Customer PO",
+    "noLinesYet": "No lines yet",
+    "orderDetails": "Order Details"
   },
   "quotes": {
     "title": "Quotes",
@@ -2193,7 +2263,9 @@
     "createQuote": "Create Quote",
     "selectCustomer": "Select customer...",
     "taxRate": "Tax Rate (%)",
-    "partId": "Part ID"
+    "partId": "Part ID",
+    "details": "Quote Details",
+    "noLinesYet": "No lines yet"
   },
   "shipments": {
     "title": "Shipments",
@@ -2255,7 +2327,9 @@
     "noTrackingEvents": "No tracking events yet.",
     "lbs": "lbs",
     "newShipmentTitle": "New Shipment",
-    "optional": "Optional"
+    "optional": "Optional",
+    "noLinesYet": "No lines yet",
+    "shipmentDetails": "Shipment Details"
   },
   "planning": {
     "title": "Planning",
@@ -2599,7 +2673,10 @@
     "noConversations": "No conversations yet",
     "typeMessage": "Type a message...",
     "sendMessage": "Send message",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "newMessage": "New Message",
+    "noUsersFound": "No users found",
+    "searchUsers": "Search users"
   },
   "ai": {
     "title": "AI Assistants",
@@ -2714,5 +2791,82 @@
     "teamNameRequired": "Team name is required.",
     "createTeamFailed": "Failed to create team.",
     "saveTerminalFailed": "Failed to save terminal configuration."
+  },
+  "customerReturns": {
+    "allStatuses": "All Statuses",
+    "close": "Close",
+    "closeConfirm": "Close this return? This cannot be undone.",
+    "closeMessage": "The return will be marked as closed.",
+    "closeTitle": "Close Return?",
+    "closed": "Return closed",
+    "created": "Return created",
+    "editReturn": "Edit Return",
+    "fieldCustomer": "Customer",
+    "fieldNotes": "Notes",
+    "fieldOriginalJob": "Original Job",
+    "fieldReason": "Reason",
+    "fieldReturnDate": "Return Date",
+    "inspectedAt": "Inspected At",
+    "inspectedBy": "Inspected By",
+    "inspectionNotes": "Inspection Notes",
+    "newReturn": "New Return",
+    "noReturns": "No customer returns found",
+    "originalJob": "Original Job",
+    "reason": "Reason",
+    "resolve": "Resolve",
+    "resolveConfirm": "Mark this return as resolved?",
+    "resolveTitle": "Resolve Return?",
+    "resolved": "Return resolved",
+    "returnDate": "Return Date",
+    "returnNumber": "Return #",
+    "reworkJob": "Rework Job",
+    "subtitle": "Track and manage customer returns",
+    "title": "Customer Returns",
+    "updated": "Return updated"
+  },
+  "lots": {
+    "created": "Lot created",
+    "description": "Description",
+    "expires": "Expires",
+    "fieldExpiration": "Expiration Date",
+    "fieldJob": "Job",
+    "fieldNotes": "Notes",
+    "fieldPart": "Part",
+    "fieldQuantity": "Quantity",
+    "fieldSupplierLot": "Supplier Lot Number",
+    "job": "Job",
+    "lotNumber": "Lot Number",
+    "newLot": "New Lot",
+    "noLots": "No production lots found",
+    "noTraceEvents": "No traceability events",
+    "partNumber": "Part Number",
+    "quantity": "Quantity",
+    "subtitle": "Track production lot traceability",
+    "supplierLot": "Supplier Lot",
+    "title": "Production Lots",
+    "traceHistory": "Traceability History"
+  },
+  "rfid": {
+    "clientSetupDesc": "Download and run the RFID relay client setup script to enable NFC/RFID badge scanning on this workstation.",
+    "clientSetupTitle": "RFID Client Setup",
+    "downloadSetupScript": "Download Setup Script",
+    "setupScriptError": "Failed to generate setup script",
+    "setupScriptHint": "Run the downloaded script as Administrator to install the RFID relay client service."
+  },
+  "salesTax": {
+    "addRate": "Add Rate",
+    "default": "Default",
+    "deleteFailed": "Failed to delete tax rate",
+    "deleteMessage": "This tax rate will be permanently deleted.",
+    "deleteTitle": "Delete Tax Rate?",
+    "deleted": "Tax rate deleted",
+    "editRate": "Edit Rate",
+    "fieldCode": "Code",
+    "fieldDefault": "Default Rate",
+    "fieldDescription": "Description",
+    "fieldName": "Name",
+    "fieldRate": "Rate (%)",
+    "noRates": "No sales tax rates configured",
+    "rates": "Tax Rates"
   }
 }
