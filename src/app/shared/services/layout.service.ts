@@ -19,8 +19,13 @@ export class LayoutService {
    * True when running on a phone-like device (touch + narrow viewport).
    * Used for auto-redirect to `/m/` after login — NOT the same as `isMobile`,
    * which toggles sidebar behavior at the breakpoint.
+   * Re-evaluated on every access via computed to avoid stale one-shot detection.
    */
-  readonly isMobileDevice = signal(this.detectMobileDevice());
+  readonly isMobileDevice = computed(() => {
+    // Subscribe to _isMobile so this recomputes on resize
+    this._isMobile();
+    return this.detectMobileDevice();
+  });
   private readonly _isDisplayRoute = signal(this.checkDisplayRoute(window.location.pathname));
   private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
   private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
