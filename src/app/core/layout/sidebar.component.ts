@@ -70,6 +70,7 @@ export class SidebarComponent {
         { icon: 'local_shipping', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'event_note', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', allowedRoles: ['Admin', 'Manager'] },
       ],
     },
     {

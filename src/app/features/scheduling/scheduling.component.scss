@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.scheduling {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+
+  &__kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: $sp-md;
+  }
+}
+
+.tab-panel {
+  min-height: 300px;
+}

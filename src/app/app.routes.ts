@@ -193,6 +193,12 @@ export const routes: Routes = [
           import('./features/mrp/mrp.routes').then((m) => m.MRP_ROUTES),
       },
       {
+        path: 'scheduling',
+        canActivate: [roleGuard('Admin', 'Manager')],
+        loadChildren: () =>
+          import('./features/scheduling/scheduling.routes').then((m) => m.SCHEDULING_ROUTES),
+      },
+      {
         path: 'admin',
         canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
