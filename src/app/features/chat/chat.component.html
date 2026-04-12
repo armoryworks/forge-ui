@@ -20,7 +20,13 @@
       </button>
     </div>
 
-    @if (!selectedConversation()) {
+    @if (!selectedConversation() && !showUserPicker()) {
+      <div class="chat-panel__compose-bar">
+        <button class="action-btn action-btn--primary action-btn--sm chat-panel__compose-btn" (click)="openUserPicker()" aria-label="New conversation">
+          <span class="material-icons-outlined">add</span>
+          {{ 'chat.newMessage' | translate }}
+        </button>
+      </div>
       <div class="chat-panel__conversations">
         @if (conversations().length === 0) {
           <div class="chat-panel__empty">
@@ -47,6 +53,36 @@
             }
           </button>
         }
+      </div>
+    } @else if (showUserPicker()) {
+      <div class="chat-panel__user-picker">
+        <div class="chat-panel__picker-search">
+          <span class="material-icons-outlined">search</span>
+          <input
+            class="chat-panel__picker-input"
+            type="text"
+            [placeholder]="'chat.searchUsers' | translate"
+            [formControl]="userSearchControl"
+            autofocus />
+          <button class="icon-btn" (click)="cancelUserPicker()" aria-label="Cancel">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <div class="chat-panel__picker-list">
+          @for (user of filteredUsers(); track user.id) {
+            <button class="conversation" (click)="selectUser(user)">
+              <app-avatar [initials]="user.initials" [color]="user.color" size="sm" />
+              <div class="conversation__content">
+                <span class="conversation__name">{{ user.name }}</span>
+              </div>
+            </button>
+          }
+          @if (filteredUsers().length === 0) {
+            <div class="chat-panel__empty">
+              <span class="chat-panel__empty-text">{{ 'chat.noUsersFound' | translate }}</span>
+            </div>
+          }
+        </div>
       </div>
     } @else {
       <div class="chat-panel__messages" #messagesContainer>

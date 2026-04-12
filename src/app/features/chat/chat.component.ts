@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, signal, computed, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -13,6 +14,13 @@ import { ChatConversation } from './models/chat-conversation.model';
 import { ChatMessage } from './models/chat-message.model';
 import { ChatMessageEvent } from './models/chat-message-event.model';
 
+interface UserListItem {
+  id: number;
+  initials: string;
+  name: string;
+  color: string;
+}
+
 @Component({
   selector: 'app-chat',
   standalone: true,
@@ -25,6 +33,7 @@ export class ChatComponent implements OnDestroy {
   private readonly chatService = inject(ChatService);
   private readonly chatHub = inject(ChatHubService);
   private readonly authService = inject(AuthService);
+  private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
@@ -35,6 +44,21 @@ export class ChatComponent implements OnDestroy {
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly messageControl = new FormControl('');
   readonly totalUnread = signal(0);
+
+  // New conversation state
+  protected readonly showUserPicker = signal(false);
+  protected readonly allUsers = signal<UserListItem[]>([]);
+  protected readonly userSearchControl = new FormControl('');
+  protected readonly userSearchTerm = signal('');
+  protected readonly filteredUsers = computed(() => {
+    const term = this.userSearchTerm().toLowerCase();
+    const currentUserId = this.authService.user()?.id;
+    const existingUserIds = new Set(this.conversations().map(c => c.userId));
+    return this.allUsers()
+      .filter(u => u.id !== currentUserId)
+      .filter(u => !term || u.name.toLowerCase().includes(term))
+      .filter(u => !existingUserIds.has(u.id));
+  });
 
   private hubConnected = false;
 
@@ -48,6 +72,7 @@ export class ChatComponent implements OnDestroy {
     } else {
       this.selectedConversation.set(null);
       this.messages.set([]);
+      this.showUserPicker.set(false);
     }
   }
 
@@ -60,7 +85,39 @@ export class ChatComponent implements OnDestroy {
   backToList(): void {
     this.selectedConversation.set(null);
     this.messages.set([]);
+    this.showUserPicker.set(false);
     this.loadConversations();
+  }
+
+  protected openUserPicker(): void {
+    this.showUserPicker.set(true);
+    this.userSearchControl.setValue('');
+    this.userSearchTerm.set('');
+    if (this.allUsers().length === 0) {
+      this.http.get<UserListItem[]>('/api/v1/users').subscribe(users => {
+        this.allUsers.set(users);
+      });
+    }
+    this.userSearchControl.valueChanges.subscribe(v => this.userSearchTerm.set(v ?? ''));
+  }
+
+  protected selectUser(user: UserListItem): void {
+    this.showUserPicker.set(false);
+    const conv: ChatConversation = {
+      userId: user.id,
+      userName: user.name,
+      userInitials: user.initials,
+      userColor: user.color,
+      lastMessage: null,
+      lastMessageAt: null,
+      unreadCount: 0,
+    };
+    this.selectedConversation.set(conv);
+    this.loadMessages(user.id);
+  }
+
+  protected cancelUserPicker(): void {
+    this.showUserPicker.set(false);
   }
 
   sendMessage(): void {

@@ -2641,7 +2641,10 @@
     "noConversations": "Sin conversaciones aún",
     "typeMessage": "Escriba un mensaje...",
     "sendMessage": "Enviar mensaje",
-    "justNow": "Ahora mismo"
+    "justNow": "Ahora mismo",
+    "newMessage": "Nuevo Mensaje",
+    "searchUsers": "Buscar usuarios...",
+    "noUsersFound": "No se encontraron usuarios"
   },
   "ai": {
     "title": "Asistentes IA",

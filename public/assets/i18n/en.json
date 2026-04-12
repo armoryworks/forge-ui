@@ -2657,7 +2657,10 @@
     "noConversations": "No conversations yet",
     "typeMessage": "Type a message...",
     "sendMessage": "Send message",
-    "justNow": "Just now"
+    "justNow": "Just now",
+    "newMessage": "New Message",
+    "searchUsers": "Search users...",
+    "noUsersFound": "No users found"
   },
   "ai": {
     "title": "AI Assistants",
