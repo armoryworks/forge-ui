@@ -1,0 +1,17 @@
+@use 'styles/variables' as *;
+
+.spc-char__spec {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.spc-char__cpk {
+  font-family: $font-family-mono;
+  font-weight: 600;
+  font-size: $font-size-sm;
+}
+
+.spc-cpk--good { color: var(--success); }
+.spc-cpk--warning { color: var(--warning); }
+.spc-cpk--danger { color: var(--error); }

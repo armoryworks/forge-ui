@@ -11,6 +11,12 @@
       {{ 'quality.newLot' | translate }}
     </button>
   }
+  @if (activeTab() === 'spc-charts' || activeTab() === 'spc-data') {
+    <button class="action-btn action-btn--primary" (click)="spcCharsComponent?.openCreate()">
+      <span class="material-icons-outlined">add</span>
+      New Characteristic
+    </button>
+  }
 </app-page-header>
 
 <div class="quality-content">
@@ -23,6 +29,18 @@
     <button class="tab" [class.tab--active]="activeTab() === 'lots'" (click)="switchTab('lots')">
       <span class="material-icons-outlined">qr_code_2</span>
       {{ 'quality.lotTracking' | translate }}
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'spc-charts'" (click)="switchTab('spc-charts')">
+      <span class="material-icons-outlined">show_chart</span>
+      SPC Charts
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'spc-data'" (click)="switchTab('spc-data')">
+      <span class="material-icons-outlined">edit_note</span>
+      SPC Data Entry
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
+      <span class="material-icons-outlined">warning</span>
+      OOC Events
     </button>
   </div>
 
@@ -90,6 +108,43 @@
         </ng-template>
       </app-data-table>
     </div>
+  }
+
+  <!-- SPC Charts Tab -->
+  @if (activeTab() === 'spc-charts') {
+    <div class="spc-tab-content">
+      @if (selectedCharacteristic(); as char) {
+        <div class="spc-tab-content__sidebar">
+          <app-spc-characteristics (characteristicSelected)="onCharacteristicSelected($event)" />
+        </div>
+        <div class="spc-tab-content__main">
+          <app-spc-chart [characteristic]="char" />
+        </div>
+      } @else {
+        <app-spc-characteristics (characteristicSelected)="onCharacteristicSelected($event)" />
+      }
+    </div>
+  }
+
+  <!-- SPC Data Entry Tab -->
+  @if (activeTab() === 'spc-data') {
+    <div class="spc-tab-content">
+      @if (selectedCharacteristic(); as char) {
+        <div class="spc-tab-content__sidebar">
+          <app-spc-characteristics (characteristicSelected)="selectedCharacteristic.set($event)" />
+        </div>
+        <div class="spc-tab-content__main">
+          <app-spc-data-entry [characteristic]="char" (measurementRecorded)="onMeasurementRecorded()" />
+        </div>
+      } @else {
+        <app-spc-characteristics (characteristicSelected)="selectedCharacteristic.set($event)" />
+      }
+    </div>
+  }
+
+  <!-- SPC OOC Events Tab -->
+  @if (activeTab() === 'spc-ooc') {
+    <app-spc-ooc-list />
   }
 </div>
 

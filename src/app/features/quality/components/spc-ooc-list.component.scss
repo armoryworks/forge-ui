@@ -1,0 +1,37 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.spc-ooc {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__actions {
+    display: flex;
+    gap: $sp-xs;
+  }
+
+  &__ack-info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    margin-bottom: $sp-md;
+  }
+
+  &__ack-field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__ack-label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+}
+
+.filters-bar {
+  display: flex;
+  gap: $sp-md;
+  align-items: flex-end;
+}

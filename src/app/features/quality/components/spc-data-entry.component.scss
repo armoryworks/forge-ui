@@ -1,0 +1,113 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.spc-entry {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: $font-size-xs;
+    font-family: $font-family-mono;
+    color: var(--text-muted);
+  }
+
+  &__context {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+  }
+
+  &__grid {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+  }
+
+  &__grid-header {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: $sp-md;
+  }
+
+  &__label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 60px 1fr;
+    gap: $sp-md;
+    align-items: center;
+  }
+
+  &__row-label {
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    text-align: center;
+  }
+
+  &__input {
+    height: $input-height;
+    padding: $sp-sm $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-family: $font-family-mono;
+    font-size: $font-size-base;
+    outline: none;
+    width: 100%;
+
+    &:focus {
+      border-color: var(--primary);
+    }
+  }
+
+  &__computed {
+    display: flex;
+    gap: $sp-xl;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__stat-label {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__stat-value {
+    font-family: $font-family-mono;
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-md;
+    justify-content: flex-end;
+  }
+}

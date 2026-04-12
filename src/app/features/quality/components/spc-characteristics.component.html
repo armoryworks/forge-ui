@@ -1,0 +1,78 @@
+<div [appLoadingBlock]="loading()">
+  <app-data-table tableId="spc-characteristics" [columns]="columns" [data]="characteristics()"
+    [clickableRows]="true" emptyIcon="straighten" emptyMessage="No SPC characteristics defined"
+    (rowClick)="selectCharacteristic($any($event))">
+    <ng-template appColumnCell="operationName" let-row>
+      <span class="text-muted">{{ row.operationName ?? '—' }}</span>
+    </ng-template>
+    <ng-template appColumnCell="specLimits" let-row>
+      <span class="spc-char__spec">{{ row.lowerSpecLimit }} — {{ row.upperSpecLimit }}</span>
+    </ng-template>
+    <ng-template appColumnCell="measurementCount" let-row>
+      {{ row.measurementCount }}
+    </ng-template>
+    <ng-template appColumnCell="latestCpk" let-row>
+      @if (row.latestCpk != null) {
+        <span class="spc-char__cpk" [class]="getCpkClass(row.latestCpk)">{{ row.latestCpk | number:'1.2-2' }}</span>
+      } @else {
+        <span class="text-muted">—</span>
+      }
+    </ng-template>
+    <ng-template appColumnCell="isActive" let-row>
+      <span class="material-icons-outlined" [style.color]="row.isActive ? 'var(--success)' : 'var(--text-muted)'">
+        {{ row.isActive ? 'check_circle' : 'cancel' }}
+      </span>
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <button class="icon-btn" aria-label="Edit characteristic" (click)="openEdit(row); $event.stopPropagation()">
+        <span class="material-icons-outlined">edit</span>
+      </button>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showDialog()) {
+  <app-dialog [title]="editingId() ? 'Edit Characteristic' : 'New Characteristic'" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <div class="dialog-row">
+        <app-input label="Part ID" type="number" formControlName="partId" [required]="true" />
+        <app-input label="Operation ID" type="number" formControlName="operationId" />
+      </div>
+
+      <app-input label="Name" formControlName="name" [required]="true" />
+      <app-textarea label="Description" formControlName="description" />
+
+      <app-select label="Measurement Type" formControlName="measurementType" [options]="measurementTypeOptions" />
+
+      <div class="dialog-row">
+        <app-input label="Nominal Value" type="number" formControlName="nominalValue" [required]="true" />
+        <app-input label="Unit of Measure" formControlName="unitOfMeasure" />
+      </div>
+
+      <div class="dialog-row">
+        <app-input label="Lower Spec Limit" type="number" formControlName="lowerSpecLimit" [required]="true" />
+        <app-input label="Upper Spec Limit" type="number" formControlName="upperSpecLimit" [required]="true" />
+      </div>
+
+      <div class="dialog-row">
+        <app-input label="Sample Size (n)" type="number" formControlName="sampleSize" [required]="true" />
+        <app-input label="Decimal Places" type="number" formControlName="decimalPlaces" [required]="true" />
+      </div>
+
+      <app-input label="Sample Frequency" formControlName="sampleFrequency" placeholder="e.g., Every 50 pieces" />
+
+      <div class="dialog-row">
+        <app-toggle label="Notify on OOC" formControlName="notifyOnOoc" />
+        <app-toggle label="Active" formControlName="isActive" />
+      </div>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">{{ editingId() ? 'Update' : 'Create' }}</button>
+    </div>
+  </app-dialog>
+}

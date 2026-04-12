@@ -1,0 +1,55 @@
+<div class="spc-entry">
+  <div class="spc-entry__header">
+    <h4 class="spc-entry__title">Record Subgroup — {{ characteristic().name }}</h4>
+    <span class="spc-entry__subtitle">
+      {{ characteristic().partNumber }} · n={{ characteristic().sampleSize }}
+      @if (characteristic().unitOfMeasure) { · {{ characteristic().unitOfMeasure }} }
+    </span>
+  </div>
+
+  <div class="spc-entry__context">
+    <app-input label="Job ID" type="number" [formControl]="jobIdControl" />
+    <app-input label="Lot Number" [formControl]="lotNumberControl" />
+  </div>
+
+  <div class="spc-entry__grid">
+    <div class="spc-entry__grid-header">
+      <span class="spc-entry__label">Reading</span>
+      <span class="spc-entry__label">Value</span>
+    </div>
+    @for (i of sampleIndices(); track i) {
+      <div class="spc-entry__row">
+        <span class="spc-entry__row-label">{{ i + 1 }}</span>
+        <input class="spc-entry__input"
+          type="number"
+          [step]="stepValue()"
+          [attr.data-testid]="'spc-value-' + i"
+          [value]="values()[i] ?? ''"
+          (input)="onValueChange(i, $event)"
+          (keydown.enter)="allFilled() ? submit() : null" />
+      </div>
+    }
+  </div>
+
+  <div class="spc-entry__computed">
+    <div class="spc-entry__stat">
+      <span class="spc-entry__stat-label">Mean (X̄)</span>
+      <span class="spc-entry__stat-value">{{ computedMean() != null ? formatValue(computedMean()) : '—' }}</span>
+    </div>
+    <div class="spc-entry__stat">
+      <span class="spc-entry__stat-label">Range (R)</span>
+      <span class="spc-entry__stat-value">{{ computedRange() != null ? formatValue(computedRange()) : '—' }}</span>
+    </div>
+  </div>
+
+  <app-textarea label="Notes" [formControl]="notes" [rows]="2" />
+
+  <div class="spc-entry__actions">
+    <button class="action-btn" (click)="clearForm()">Clear</button>
+    <button class="action-btn action-btn--primary"
+      [disabled]="!allFilled() || saving()"
+      (click)="submit()">
+      <span class="material-icons-outlined">save</span> Record Subgroup
+    </button>
+  </div>
+</div>

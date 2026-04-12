@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, computed, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators, FormArray } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 
 import { QualityService } from './services/quality.service';
 import { QcInspection } from './models/qc-inspection.model';
 import { QcTemplate } from './models/qc-template.model';
 import { LotRecord } from './models/lot-record.model';
 import { LotTraceability } from './models/lot-traceability.model';
+import { SpcCharacteristic } from './models/spc.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
@@ -22,8 +26,14 @@ import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { SpcCharacteristicsComponent } from './components/spc-characteristics.component';
+import { SpcChartComponent } from './components/spc-chart.component';
+import { SpcDataEntryComponent } from './components/spc-data-entry.component';
+import { SpcOocListComponent } from './components/spc-ooc-list.component';
 
-type QualityTab = 'inspections' | 'lots';
+type QualityTab = 'inspections' | 'lots' | 'spc-charts' | 'spc-data' | 'spc-ooc';
+
+const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data', 'spc-ooc'];
 
 @Component({
   selector: 'app-quality',
@@ -35,6 +45,8 @@ type QualityTab = 'inspections' | 'lots';
     DataTableComponent, ColumnCellDirective,
     ValidationPopoverDirective, LoadingBlockDirective,
     TranslatePipe, MatTooltipModule,
+    SpcCharacteristicsComponent, SpcChartComponent,
+    SpcDataEntryComponent, SpcOocListComponent,
   ],
   templateUrl: './quality.component.html',
   styleUrl: './quality.component.scss',
@@ -45,10 +57,24 @@ export class QualityComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
 
-  protected readonly activeTab = signal<QualityTab>('inspections');
+  @ViewChild(SpcCharacteristicsComponent) spcCharsComponent?: SpcCharacteristicsComponent;
+
+  protected readonly activeTab = toSignal(
+    this.route.paramMap.pipe(map(p => {
+      const tab = p.get('tab') as QualityTab;
+      return VALID_TABS.includes(tab) ? tab : 'inspections';
+    })),
+    { initialValue: 'inspections' as QualityTab },
+  );
+
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+
+  // SPC state
+  protected readonly selectedCharacteristic = signal<SpcCharacteristic | null>(null);
 
   // ─── Inspections ───
   protected readonly inspections = signal<QcInspection[]>([]);
@@ -151,12 +177,27 @@ export class QualityComponent {
         this.inspectionSearchControl.setValue(scan.value);
       }
     });
+
+    // Load data when switching tabs
+    effect(() => {
+      const tab = this.activeTab();
+      if (tab === 'lots') this.loadLots();
+      if (tab === 'inspections') this.loadInspections();
+    });
   }
 
   protected switchTab(tab: QualityTab): void {
-    this.activeTab.set(tab);
-    if (tab === 'inspections') this.loadInspections();
-    if (tab === 'lots') this.loadLots();
+    this.router.navigate(['..', tab], { relativeTo: this.route });
+  }
+
+  protected onCharacteristicSelected(char: SpcCharacteristic): void {
+    this.selectedCharacteristic.set(char);
+    this.switchTab('spc-charts');
+  }
+
+  protected onMeasurementRecorded(): void {
+    // Refresh the characteristics list for updated measurement count
+    this.spcCharsComponent?.loadCharacteristics();
   }
 
   // ─── Inspection Methods ───

@@ -108,6 +108,30 @@
   }
 }
 
+// ─── SPC Tab Layout ───
+.spc-tab-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  overflow: hidden;
+  padding: $sp-md $sp-lg;
+  gap: $sp-lg;
+
+  &__sidebar {
+    width: 400px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-right: $border-width-thin solid var(--border);
+    padding-right: $sp-lg;
+  }
+
+  &__main {
+    flex: 1;
+    overflow-y: auto;
+    min-width: 0;
+  }
+}
+
 .trace-empty {
   display: flex;
   align-items: center;

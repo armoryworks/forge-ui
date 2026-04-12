@@ -1,0 +1,63 @@
+<div class="spc-ooc">
+  <div class="filters-bar">
+    <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
+      (selectionChange)="applyFilters()" />
+    <app-select label="Severity" [formControl]="severityFilter" [options]="severityOptions"
+      (selectionChange)="applyFilters()" />
+  </div>
+
+  <div [appLoadingBlock]="loading()">
+    <app-data-table tableId="spc-ooc-events" [columns]="columns" [data]="events()"
+      emptyIcon="warning" emptyMessage="No out-of-control events">
+      <ng-template appColumnCell="detectedAt" let-row>
+        <span class="text-muted">{{ row.detectedAt | date:'MM/dd/yyyy HH:mm' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="severity" let-row>
+        <span [class]="getSeverityClass(row.severity)">{{ row.severity }}</span>
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+      </ng-template>
+      <ng-template appColumnCell="acknowledgedByName" let-row>
+        <span class="text-muted">{{ row.acknowledgedByName ?? '—' }}</span>
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <div class="spc-ooc__actions">
+          @if (row.status === 'Open') {
+            <button class="icon-btn" aria-label="Acknowledge event" (click)="openAcknowledge(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">done</span>
+            </button>
+          }
+          @if (row.status === 'Open' || row.status === 'Acknowledged') {
+            <button class="icon-btn" aria-label="Create CAPA" (click)="createCapa(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">assignment</span>
+            </button>
+          }
+        </div>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+@if (showAckDialog()) {
+  <app-dialog title="Acknowledge OOC Event" (closed)="closeAckDialog()">
+    <div class="spc-ooc__ack-info">
+      <div class="spc-ooc__ack-field">
+        <span class="spc-ooc__ack-label">Rule</span>
+        <span>{{ ackEvent()?.ruleName }}</span>
+      </div>
+      <div class="spc-ooc__ack-field">
+        <span class="spc-ooc__ack-label">Description</span>
+        <span>{{ ackEvent()?.description }}</span>
+      </div>
+    </div>
+    <app-textarea label="Acknowledgment Notes" [formControl]="ackNotes" [rows]="3" />
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeAckDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="acknowledge()">
+        <span class="material-icons-outlined">done</span> Acknowledge
+      </button>
+    </div>
+  </app-dialog>
+}
