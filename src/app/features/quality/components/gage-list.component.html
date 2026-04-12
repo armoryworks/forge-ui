@@ -1,0 +1,237 @@
+<!-- Filter Bar -->
+<div class="filters-bar">
+  <app-input label="Search" [formControl]="searchControl" placeholder="Search gages..."
+    (keyup.enter)="applyFilters()" />
+  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
+    (selectionChange)="applyFilters()" />
+</div>
+
+<!-- Gage Table -->
+<div [appLoadingBlock]="loading()">
+  <app-data-table tableId="gage-list" [columns]="columns" [data]="gages()"
+    emptyIcon="straighten" emptyMessage="No gages found" [clickableRows]="true"
+    (rowClick)="openDetail($any($event))">
+    <ng-template appColumnCell="gageNumber" let-row>
+      <span class="gage-list__number">{{ row.gageNumber }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+    </ng-template>
+    <ng-template appColumnCell="nextCalibrationDue" let-row>
+      <span class="text-muted">{{ row.nextCalibrationDue ? (row.nextCalibrationDue | date:'MM/dd/yyyy') : '—' }}</span>
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Create Gage Dialog -->
+@if (showCreateDialog()) {
+  <app-dialog title="New Gage" width="520px" (closed)="closeCreate()">
+    <div [formGroup]="createForm">
+      <app-input label="Description" formControlName="description" [required]="true" />
+
+      <div class="dialog-row">
+        <app-input label="Gage Type" formControlName="gageType" />
+        <app-input label="Manufacturer" formControlName="manufacturer" />
+      </div>
+
+      <div class="dialog-row">
+        <app-input label="Model" formControlName="model" />
+        <app-input label="Serial Number" formControlName="serialNumber" />
+      </div>
+
+      <app-input label="Calibration Interval (Days)" type="number" formControlName="calibrationIntervalDays" [required]="true" />
+
+      <div class="dialog-row">
+        <app-input label="Accuracy Spec" formControlName="accuracySpec" />
+        <app-input label="Range Spec" formControlName="rangeSpec" />
+      </div>
+
+      <app-input label="Resolution" formControlName="resolution" />
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreate()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="createViolations"
+        [disabled]="createForm.invalid || saving()"
+        (click)="saveGage()">
+        <span class="material-icons-outlined">save</span> Create
+      </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Gage Detail Dialog -->
+@if (showDetailDialog() && selectedGage(); as gage) {
+  <app-dialog [title]="gage.gageNumber" width="800px" (closed)="closeDetail()">
+    <div class="gage-detail">
+      <div class="gage-detail__header">
+        <span [class]="getStatusClass(gage.status)">{{ getStatusLabel(gage.status) }}</span>
+        <span class="gage-detail__desc">{{ gage.description }}</span>
+      </div>
+
+      <div class="gage-detail__grid">
+        @if (gage.gageType) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Type</span>
+            <span class="gage-detail__value">{{ gage.gageType }}</span>
+          </div>
+        }
+        @if (gage.manufacturer) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Manufacturer</span>
+            <span class="gage-detail__value">{{ gage.manufacturer }}</span>
+          </div>
+        }
+        @if (gage.model) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Model</span>
+            <span class="gage-detail__value">{{ gage.model }}</span>
+          </div>
+        }
+        @if (gage.serialNumber) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Serial Number</span>
+            <span class="gage-detail__value">{{ gage.serialNumber }}</span>
+          </div>
+        }
+        <div class="gage-detail__field">
+          <span class="gage-detail__label">Cal Interval</span>
+          <span class="gage-detail__value">{{ gage.calibrationIntervalDays }} days</span>
+        </div>
+        @if (gage.lastCalibratedAt) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Last Calibrated</span>
+            <span class="gage-detail__value">{{ gage.lastCalibratedAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (gage.nextCalibrationDue) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Next Cal Due</span>
+            <span class="gage-detail__value">{{ gage.nextCalibrationDue | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (gage.accuracySpec) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Accuracy</span>
+            <span class="gage-detail__value">{{ gage.accuracySpec }}</span>
+          </div>
+        }
+        @if (gage.rangeSpec) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Range</span>
+            <span class="gage-detail__value">{{ gage.rangeSpec }}</span>
+          </div>
+        }
+        @if (gage.resolution) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Resolution</span>
+            <span class="gage-detail__value">{{ gage.resolution }}</span>
+          </div>
+        }
+        @if (gage.locationName) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Location</span>
+            <span class="gage-detail__value">{{ gage.locationName }}</span>
+          </div>
+        }
+        @if (gage.assetName) {
+          <div class="gage-detail__field">
+            <span class="gage-detail__label">Asset</span>
+            <span class="gage-detail__value">{{ gage.assetName }}</span>
+          </div>
+        }
+      </div>
+
+      @if (gage.notes) {
+        <div class="gage-detail__notes">
+          <span class="gage-detail__label">Notes</span>
+          <p>{{ gage.notes }}</p>
+        </div>
+      }
+
+      <!-- Calibration History -->
+      <div class="gage-detail__section">
+        <div class="gage-detail__section-header">
+          <h4 class="gage-detail__section-title">Calibration History</h4>
+          <button class="action-btn action-btn--sm action-btn--primary" (click)="openCalDialog()">
+            <span class="material-icons-outlined">add</span> Record Calibration
+          </button>
+        </div>
+
+        <div [appLoadingBlock]="calibrationLoading()">
+          @if (calibrations().length > 0) {
+            <table class="cal-table" aria-label="Calibration records">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Result</th>
+                  <th scope="col">Lab</th>
+                  <th scope="col">Standards</th>
+                  <th scope="col">As Found</th>
+                  <th scope="col">As Left</th>
+                  <th scope="col">Next Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (cal of calibrations(); track cal.id) {
+                  <tr>
+                    <td>{{ cal.calibratedAt | date:'MM/dd/yyyy' }}</td>
+                    <td><span [class]="getCalResultClass(cal.result)">{{ cal.result }}</span></td>
+                    <td>{{ cal.labName ?? '—' }}</td>
+                    <td>{{ cal.standardsUsed ?? '—' }}</td>
+                    <td>{{ cal.asFoundCondition ?? '—' }}</td>
+                    <td>{{ cal.asLeftCondition ?? '—' }}</td>
+                    <td>{{ cal.nextCalibrationDue ? (cal.nextCalibrationDue | date:'MM/dd/yyyy') : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="cal-empty">
+              <span class="material-icons-outlined">info</span>
+              No calibration records yet
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="closeDetail()">Close</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Record Calibration Dialog -->
+@if (showCalDialog()) {
+  <app-dialog title="Record Calibration" width="520px" (closed)="closeCalDialog()">
+    <div [formGroup]="calForm">
+      <div class="dialog-row">
+        <app-datepicker label="Calibrated Date" formControlName="calibratedAt" [required]="true" />
+        <app-select label="Result" formControlName="result" [options]="calResultOptions" [required]="true" />
+      </div>
+
+      <app-input label="Lab Name" formControlName="labName" />
+      <app-input label="Standards Used" formControlName="standardsUsed" />
+
+      <div class="dialog-row">
+        <app-input label="As Found Condition" formControlName="asFoundCondition" />
+        <app-input label="As Left Condition" formControlName="asLeftCondition" />
+      </div>
+
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCalDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="calViolations"
+        [disabled]="calForm.invalid || calSaving()"
+        (click)="saveCalibration()">
+        <span class="material-icons-outlined">save</span> Save
+      </button>
+    </div>
+  </app-dialog>
+}

@@ -7,6 +7,7 @@ import { QcTemplate } from '../models/qc-template.model';
 import { QcInspection } from '../models/qc-inspection.model';
 import { LotRecord } from '../models/lot-record.model';
 import { LotTraceability } from '../models/lot-traceability.model';
+import { Gage, GageStatus, CalibrationRecord, CreateGageRequest, CreateCalibrationRecordRequest } from '../models/gage.model';
 
 @Injectable({ providedIn: 'root' })
 export class QualityService {
@@ -98,5 +99,39 @@ export class QualityService {
 
   getLotTraceability(lotNumber: string): Observable<LotTraceability> {
     return this.http.get<LotTraceability>(`${this.lotsBase}/${encodeURIComponent(lotNumber)}/trace`);
+  }
+
+  // ── Gages ──
+
+  getGages(status?: GageStatus, search?: string): Observable<Gage[]> {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    if (search) params = params.set('search', search);
+    return this.http.get<Gage[]>(`${this.qualityBase}/gages`, { params });
+  }
+
+  getGageById(id: number): Observable<Gage> {
+    return this.http.get<Gage>(`${this.qualityBase}/gages/${id}`);
+  }
+
+  createGage(request: CreateGageRequest): Observable<Gage> {
+    return this.http.post<Gage>(`${this.qualityBase}/gages`, request);
+  }
+
+  updateGage(id: number, request: Partial<CreateGageRequest>): Observable<Gage> {
+    return this.http.patch<Gage>(`${this.qualityBase}/gages/${id}`, request);
+  }
+
+  getGagesDue(daysAhead = 30): Observable<Gage[]> {
+    const params = new HttpParams().set('daysAhead', daysAhead);
+    return this.http.get<Gage[]>(`${this.qualityBase}/gages/due`, { params });
+  }
+
+  getGageCalibrations(gageId: number): Observable<CalibrationRecord[]> {
+    return this.http.get<CalibrationRecord[]>(`${this.qualityBase}/gages/${gageId}/calibrations`);
+  }
+
+  createCalibrationRecord(gageId: number, request: CreateCalibrationRecordRequest): Observable<CalibrationRecord> {
+    return this.http.post<CalibrationRecord>(`${this.qualityBase}/gages/${gageId}/calibrations`, request);
   }
 }

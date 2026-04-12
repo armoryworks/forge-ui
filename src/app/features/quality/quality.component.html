@@ -35,6 +35,12 @@
       New ECO
     </button>
   }
+  @if (activeTab() === 'gages') {
+    <button class="action-btn action-btn--primary" (click)="gageListComponent?.openCreate()">
+      <span class="material-icons-outlined">add</span>
+      New Gage
+    </button>
+  }
 </app-page-header>
 
 <div class="quality-content">
@@ -71,6 +77,10 @@
     <button class="tab" [class.tab--active]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
       <span class="material-icons-outlined">engineering</span>
       ECOs
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'gages'" (click)="switchTab('gages')">
+      <span class="material-icons-outlined">straighten</span>
+      Gages
     </button>
   </div>
 
@@ -190,6 +200,11 @@
   <!-- ECOs Tab -->
   @if (activeTab() === 'ecos') {
     <app-eco-list />
+  }
+
+  <!-- Gages Tab -->
+  @if (activeTab() === 'gages') {
+    <app-gage-list />
   }
 </div>
 
