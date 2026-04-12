@@ -1,0 +1,114 @@
+@use 'styles/variables' as *;
+
+.cost-tab {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__summary {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $sp-sm $sp-md;
+      text-align: left;
+      border-bottom: $border-width-thin solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: $font-size-xxs;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  &__num {
+    text-align: right !important; // override table default
+    font-family: $font-family-mono;
+  }
+
+  &__total-row {
+    border-top: $border-width solid var(--border);
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+  }
+
+  &__pct {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    margin-left: $sp-xs;
+  }
+
+  &__variance {
+    &--over {
+      color: var(--error);
+    }
+
+    &--under {
+      color: var(--success);
+    }
+  }
+
+  &__margin {
+    display: flex;
+    gap: $sp-xl;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__margin-item {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__margin-label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  &__margin-value {
+    font-size: $font-size-md;
+    font-family: $font-family-mono;
+    font-weight: 600;
+
+    &--positive {
+      color: var(--success);
+    }
+
+    &--negative {
+      color: var(--error);
+    }
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__section-title {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+}

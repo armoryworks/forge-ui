@@ -1,0 +1,116 @@
+<div class="cost-tab" [appLoadingBlock]="loading()">
+  @if (!hasCostData() && !loading()) {
+    <app-empty-state icon="attach_money" message="No cost data available for this job." />
+  } @else if (costSummary(); as summary) {
+    <!-- Cost Summary Grid -->
+    <div class="cost-tab__summary">
+      <table class="cost-tab__table" aria-label="Job cost summary">
+        <thead>
+          <tr>
+            <th scope="col">Category</th>
+            <th scope="col" class="cost-tab__num">Estimated</th>
+            <th scope="col" class="cost-tab__num">Actual</th>
+            <th scope="col" class="cost-tab__num">Variance</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Material</td>
+            <td class="cost-tab__num">{{ summary.materialEstimated | currency }}</td>
+            <td class="cost-tab__num">{{ summary.materialActual | currency }}</td>
+            <td class="cost-tab__num" [class]="getVarianceClass(summary.materialVariance)">
+              {{ summary.materialVariance | currency }}
+            </td>
+          </tr>
+          <tr>
+            <td>Labor</td>
+            <td class="cost-tab__num">{{ summary.laborEstimated | currency }}</td>
+            <td class="cost-tab__num">{{ summary.laborActual | currency }}</td>
+            <td class="cost-tab__num" [class]="getVarianceClass(summary.laborVariance)">
+              {{ summary.laborVariance | currency }}
+            </td>
+          </tr>
+          <tr>
+            <td>Burden</td>
+            <td class="cost-tab__num">{{ summary.burdenEstimated | currency }}</td>
+            <td class="cost-tab__num">{{ summary.burdenActual | currency }}</td>
+            <td class="cost-tab__num" [class]="getVarianceClass(summary.burdenVariance)">
+              {{ summary.burdenVariance | currency }}
+            </td>
+          </tr>
+          <tr>
+            <td>Subcontract</td>
+            <td class="cost-tab__num">{{ summary.subcontractEstimated | currency }}</td>
+            <td class="cost-tab__num">{{ summary.subcontractActual | currency }}</td>
+            <td class="cost-tab__num" [class]="getVarianceClass(summary.subcontractVariance)">
+              {{ summary.subcontractVariance | currency }}
+            </td>
+          </tr>
+          <tr class="cost-tab__total-row">
+            <td><strong>Total</strong></td>
+            <td class="cost-tab__num"><strong>{{ summary.totalEstimated | currency }}</strong></td>
+            <td class="cost-tab__num"><strong>{{ summary.totalActual | currency }}</strong></td>
+            <td class="cost-tab__num" [class]="getVarianceClass(summary.totalVariance)">
+              <strong>{{ summary.totalVariance | currency }}</strong>
+              <span class="cost-tab__pct">({{ summary.totalVariancePercent | number:'1.1-1' }}%)</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Margin Summary -->
+      <div class="cost-tab__margin">
+        <div class="cost-tab__margin-item">
+          <span class="cost-tab__margin-label">Quoted Price</span>
+          <span class="cost-tab__margin-value">{{ summary.quotedPrice | currency }}</span>
+        </div>
+        <div class="cost-tab__margin-item">
+          <span class="cost-tab__margin-label">Actual Margin</span>
+          <span class="cost-tab__margin-value" [class]="summary.actualMargin >= 0 ? 'cost-tab__margin-value--positive' : 'cost-tab__margin-value--negative'">
+            {{ summary.actualMargin | currency }} ({{ summary.actualMarginPercent | number:'1.1-1' }}%)
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Material Issues -->
+    <div class="cost-tab__section">
+      <div class="cost-tab__section-header">
+        <span class="cost-tab__section-title">MATERIAL ISSUES</span>
+        <button class="action-btn action-btn--sm" (click)="recalculateCosts()" aria-label="Recalculate costs">
+          <span class="material-icons-outlined">refresh</span> Recalculate
+        </button>
+      </div>
+
+      @if (materialIssues().length === 0) {
+        <app-empty-state icon="inventory_2" message="No materials issued to this job." />
+      } @else {
+        <app-data-table
+          tableId="job-material-issues"
+          [columns]="materialColumns"
+          [data]="materialIssues()"
+          emptyIcon="inventory_2"
+          emptyMessage="No material issues">
+          <ng-template appColumnCell="totalCost" let-row>
+            {{ row.totalCost | currency }}
+          </ng-template>
+          <ng-template appColumnCell="unitCost" let-row>
+            {{ row.unitCost | currency }}
+          </ng-template>
+          <ng-template appColumnCell="issueType" let-row>
+            <span [class]="'chip chip--' + (row.issueType === 'Return' ? 'info' : row.issueType === 'Scrap' ? 'error' : 'success')">
+              {{ row.issueType }}
+            </span>
+          </ng-template>
+          <ng-template appColumnCell="actions" let-row>
+            @if (row.issueType === 'Issue') {
+              <button class="icon-btn" (click)="returnMaterial(row)" aria-label="Return material">
+                <span class="material-icons-outlined">undo</span>
+              </button>
+            }
+          </ng-template>
+        </app-data-table>
+      }
+    </div>
+  }
+</div>
