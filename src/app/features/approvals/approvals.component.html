@@ -1,0 +1,25 @@
+<app-page-header title="Approvals" icon="rule" />
+
+<div class="tab-bar">
+  <button class="tab" [class.tab--active]="activeTab() === 'inbox'" (click)="switchTab('inbox')">
+    <span class="material-icons-outlined">inbox</span> Inbox
+  </button>
+  @if (canManageWorkflows()) {
+    <button class="tab" [class.tab--active]="activeTab() === 'workflows'" (click)="switchTab('workflows')">
+      <span class="material-icons-outlined">account_tree</span> Workflows
+    </button>
+  }
+</div>
+
+<div class="tab-panel">
+  @switch (activeTab()) {
+    @case ('inbox') {
+      <app-approval-inbox />
+    }
+    @case ('workflows') {
+      @if (canManageWorkflows()) {
+        <app-approval-workflow-editor />
+      }
+    }
+  }
+</div>

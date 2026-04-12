@@ -149,6 +149,12 @@ export const routes: Routes = [
           import('./features/worker/worker.routes').then((m) => m.WORKER_ROUTES),
       },
       {
+        path: 'approvals',
+        canActivate: [roleGuard('Admin', 'Manager', 'PM', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/approvals/approvals.routes').then((m) => m.APPROVALS_ROUTES),
+      },
+      {
         path: 'quality',
         canActivate: [roleGuard('Admin', 'Manager', 'Engineer')],
         loadChildren: () =>

@@ -1,0 +1,93 @@
+<div class="workflow-editor">
+  <div class="workflow-editor__header">
+    <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreate()">
+      <span class="material-icons-outlined">add</span> New Workflow
+    </button>
+  </div>
+
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="approval-workflows"
+      [columns]="columns"
+      [data]="getWorkflowData()"
+      [clickableRows]="true"
+      emptyIcon="rule"
+      emptyMessage="No approval workflows configured"
+      (rowClick)="openEdit($any($event))">
+      <ng-template appColumnCell="isActive" let-row>
+        @if (row.isActive) {
+          <span class="chip chip--success">Active</span>
+        } @else {
+          <span class="chip chip--muted">Inactive</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="createdAt" let-row>
+        {{ row.createdAt | date:'MM/dd/yyyy' }}
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn" aria-label="Edit workflow" (click)="openEdit(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+@if (showDialog()) {
+  <app-dialog [title]="editingWorkflow() ? 'Edit Approval Workflow' : 'New Approval Workflow'" width="800px" (closed)="showDialog.set(false)">
+    <div [formGroup]="workflowForm">
+      <div class="dialog-row">
+        <app-input label="Workflow Name" formControlName="name" [required]="true" placeholder="e.g. PO Approval > $500" />
+        <app-select label="Entity Type" formControlName="entityType" [options]="entityTypeOptions" [required]="true" />
+      </div>
+      <div class="dialog-row">
+        <app-textarea label="Description" formControlName="description" [rows]="2" />
+        <app-input label="Amount Threshold ($)" formControlName="amountThreshold" type="number" placeholder="Activate when amount exceeds" />
+      </div>
+
+      <div class="steps-section">
+        <div class="steps-section__header">
+          <span class="steps-section__title">Approval Steps</span>
+          <button class="action-btn action-btn--sm" (click)="addStep()">
+            <span class="material-icons-outlined">add</span> Add Step
+          </button>
+        </div>
+
+        @for (step of stepsArray.controls; track step; let i = $index) {
+          <div class="step-row" [formGroup]="$any(step)">
+            <div class="step-row__number">{{ i + 1 }}</div>
+            <div class="step-row__fields">
+              <div class="dialog-row">
+                <app-input label="Step Name" formControlName="name" [required]="true" />
+                <app-select label="Approver Type" formControlName="approverType" [options]="approverTypeOptions" />
+              </div>
+              @if (step.value.approverType === 'Role') {
+                <app-select label="Role" formControlName="approverRole" [options]="roleOptions" />
+              }
+              <div class="dialog-row">
+                <app-input label="Auto-Approve Below ($)" formControlName="autoApproveBelow" type="number" />
+                <app-input label="Escalate After (hours)" formControlName="escalationHours" type="number" />
+              </div>
+            </div>
+            @if (stepsArray.length > 1) {
+              <button class="icon-btn icon-btn--danger" (click)="removeStep(i)" aria-label="Remove step">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="showDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="workflowForm.invalid || stepsArray.length === 0 || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ editingWorkflow() ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </app-dialog>
+}

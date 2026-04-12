@@ -82,6 +82,7 @@ export class SidebarComponent {
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'] },
         { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai' },
         { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },

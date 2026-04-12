@@ -1,0 +1,7 @@
+@use 'styles/variables' as *;
+
+.approval-actions {
+  display: flex;
+  gap: $sp-sm;
+  align-items: center;
+}
