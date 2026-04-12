@@ -427,6 +427,13 @@
       </div>
     }
 
+    <!-- EDI Tab -->
+    @if (activeTab() === 'edi') {
+      <div class="tab-panel">
+        <app-edi-panel />
+      </div>
+    }
+
     <!-- Compliance Tab -->
     @if (activeTab() === 'compliance') {
       <div class="tab-panel">

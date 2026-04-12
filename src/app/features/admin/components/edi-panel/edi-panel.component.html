@@ -1,0 +1,168 @@
+<div class="edi-panel">
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="subTab() === 'partners'" (click)="switchSubTab('partners')">
+      <span class="material-icons-outlined">business</span>
+      Trading Partners
+    </button>
+    <button class="tab" [class.tab--active]="subTab() === 'transactions'" (click)="switchSubTab('transactions')">
+      <span class="material-icons-outlined">swap_horiz</span>
+      Transactions
+    </button>
+  </div>
+
+  @if (subTab() === 'partners') {
+    <div class="edi-panel__toolbar">
+      <button class="action-btn action-btn--primary" (click)="openCreatePartner()">
+        <span class="material-icons-outlined">add</span>
+        New Partner
+      </button>
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="edi-partners" [columns]="partnerColumns" [data]="partners()"
+        emptyIcon="business" emptyMessage="No trading partners configured">
+        <ng-template appColumnCell="customerName" let-row>
+          {{ row.customerName ?? '—' }}
+        </ng-template>
+        <ng-template appColumnCell="vendorName" let-row>
+          {{ row.vendorName ?? '—' }}
+        </ng-template>
+        <ng-template appColumnCell="isActive" let-row>
+          <span class="material-icons-outlined" [style.color]="row.isActive ? 'var(--success)' : 'var(--text-muted)'">
+            {{ row.isActive ? 'check_circle' : 'cancel' }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="errorCount" let-row>
+          @if (row.errorCount > 0) {
+            <span class="chip chip--error">{{ row.errorCount }}</span>
+          } @else {
+            {{ row.errorCount }}
+          }
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <div class="edi-panel__actions">
+            <button class="icon-btn" aria-label="Test connection" (click)="testConnection(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">wifi_tethering</span>
+            </button>
+            <button class="icon-btn" aria-label="Edit partner" (click)="openEditPartner(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+            <button class="icon-btn icon-btn--danger" aria-label="Delete partner" (click)="deletePartner(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  @if (subTab() === 'transactions') {
+    <div class="filters-bar">
+      <app-select label="Direction" [formControl]="directionFilter" [options]="directionOptions" (selectionChange)="loadTransactions()" />
+      <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadTransactions()" />
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table tableId="edi-transactions" [columns]="transactionColumns" [data]="transactions()"
+        emptyIcon="swap_horiz" emptyMessage="No EDI transactions" [clickableRows]="true"
+        (rowClick)="viewTransaction($any($event))">
+        <ng-template appColumnCell="direction" let-row>
+          <span [class]="getDirectionClass(row.direction)">{{ row.direction }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+        </ng-template>
+        <ng-template appColumnCell="receivedAt" let-row>
+          {{ row.receivedAt | date:'MM/dd/yyyy HH:mm' }}
+        </ng-template>
+        <ng-template appColumnCell="relatedEntityType" let-row>
+          {{ row.relatedEntityType ?? '—' }}
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          @if (row.status === 'Error') {
+            <button class="icon-btn" aria-label="Retry transaction" (click)="retryTransaction(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">refresh</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>
+
+<!-- Partner Dialog -->
+@if (showPartnerDialog()) {
+  <app-dialog [title]="editingPartner() ? 'Edit Trading Partner' : 'New Trading Partner'" width="520px" (closed)="showPartnerDialog.set(false)">
+    <div [formGroup]="partnerForm">
+      <app-input label="Name" formControlName="name" [required]="true" />
+      <div class="dialog-row">
+        <app-input label="Qualifier ID" formControlName="qualifierId" [required]="true" />
+        <app-input label="Qualifier Value" formControlName="qualifierValue" [required]="true" />
+      </div>
+      <div class="dialog-row">
+        <app-select label="Format" formControlName="defaultFormat" [options]="formatOptions" />
+        <app-select label="Transport" formControlName="transportMethod" [options]="transportOptions" />
+      </div>
+      <div class="dialog-row">
+        <app-toggle label="Auto-process" formControlName="autoProcess" />
+        <app-toggle label="Require Ack" formControlName="requireAcknowledgment" />
+      </div>
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showPartnerDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="partnerViolations"
+        [disabled]="partnerForm.invalid || saving()"
+        (click)="savePartner()">{{ editingPartner() ? 'Save' : 'Create' }}</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Transaction Detail Dialog -->
+@if (showTransactionDetail() && selectedTransaction(); as txn) {
+  <app-dialog title="Transaction Detail" width="800px" (closed)="showTransactionDetail.set(false)">
+    <div class="txn-detail">
+      <div class="txn-detail__header">
+        <div class="txn-detail__field">
+          <span class="txn-detail__label">Partner</span>
+          <span class="txn-detail__value">{{ txn.tradingPartnerName }}</span>
+        </div>
+        <div class="txn-detail__field">
+          <span class="txn-detail__label">Direction</span>
+          <span [class]="getDirectionClass(txn.direction)">{{ txn.direction }}</span>
+        </div>
+        <div class="txn-detail__field">
+          <span class="txn-detail__label">Set</span>
+          <span class="txn-detail__value">{{ txn.transactionSet }}</span>
+        </div>
+        <div class="txn-detail__field">
+          <span class="txn-detail__label">Status</span>
+          <span [class]="getStatusClass(txn.status)">{{ txn.status }}</span>
+        </div>
+      </div>
+
+      @if (txn.errorMessage) {
+        <div class="txn-detail__error">
+          <span class="material-icons-outlined">error</span>
+          {{ txn.errorMessage }}
+        </div>
+      }
+
+      <div class="txn-detail__section">
+        <h4 class="txn-detail__section-title">Raw Payload</h4>
+        <pre class="txn-detail__payload">{{ txn.rawPayload }}</pre>
+      </div>
+
+      @if (txn.parsedDataJson) {
+        <div class="txn-detail__section">
+          <h4 class="txn-detail__section-title">Parsed Data</h4>
+          <pre class="txn-detail__payload">{{ txn.parsedDataJson }}</pre>
+        </div>
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="showTransactionDetail.set(false)">Close</button>
+    </div>
+  </app-dialog>
+}
