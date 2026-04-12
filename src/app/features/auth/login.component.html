@@ -25,6 +25,14 @@
         </button>
       </div>
     </mat-card>
+  } @else if (mfaRequired() && mfaUserId()) {
+    <mat-card appearance="outlined" class="auth-card">
+      <div class="auth-card__header">
+        <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
+        <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
+      </div>
+      <app-mfa-challenge [userId]="mfaUserId()!" (validated)="onMfaValidated($event)" (cancelled)="onMfaCancelled()" />
+    </mat-card>
   } @else {
     <mat-card appearance="outlined" class="auth-card form-stack">
       <div class="auth-card__header">

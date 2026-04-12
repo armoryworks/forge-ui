@@ -1,0 +1,85 @@
+<div class="mfa-challenge">
+  @if (loading()) {
+    <div class="mfa-challenge__loading">
+      <span class="material-icons-outlined mfa-challenge__spinner">sync</span>
+      <p>Preparing verification...</p>
+    </div>
+  } @else {
+    <div class="mfa-challenge__header">
+      <span class="material-icons-outlined mfa-challenge__icon">verified_user</span>
+      <h2>Two-Factor Authentication</h2>
+      @if (challenge()?.maskedTarget; as target) {
+        <p class="mfa-challenge__hint">Code sent to {{ target }}</p>
+      }
+    </div>
+
+    @if (!showRecovery()) {
+      <form [formGroup]="codeForm" (ngSubmit)="submitCode()" class="mfa-challenge__form">
+        <app-input label="6-digit code" formControlName="code"
+          placeholder="000000" [maxlength]="6" [required]="true"
+          data-testid="mfa-code" />
+
+        <label class="mfa-challenge__remember">
+          <input type="checkbox" formControlName="rememberDevice" />
+          Remember this device for 30 days
+        </label>
+
+        @if (error(); as err) {
+          <div class="mfa-challenge__error">
+            <span class="material-icons-outlined">warning</span>
+            {{ err }}
+          </div>
+        }
+
+        <button class="action-btn action-btn--primary mfa-challenge__submit" type="submit"
+          [appValidationPopover]="codeViolations"
+          [disabled]="codeForm.invalid || verifying()"
+          data-testid="mfa-submit">
+          @if (verifying()) {
+            <span class="material-icons-outlined mfa-challenge__spinner">sync</span>
+            Verifying...
+          } @else {
+            Verify
+          }
+        </button>
+      </form>
+
+      <button class="mfa-challenge__alt-link" (click)="showRecovery.set(true)" type="button">
+        Use a recovery code instead
+      </button>
+    } @else {
+      <form [formGroup]="recoveryForm" (ngSubmit)="submitRecovery()" class="mfa-challenge__form">
+        <app-input label="Recovery Code" formControlName="recoveryCode"
+          placeholder="XXXXX-XXXXX" [required]="true"
+          data-testid="mfa-recovery-code" />
+
+        @if (error(); as err) {
+          <div class="mfa-challenge__error">
+            <span class="material-icons-outlined">warning</span>
+            {{ err }}
+          </div>
+        }
+
+        <button class="action-btn action-btn--primary mfa-challenge__submit" type="submit"
+          [disabled]="recoveryForm.invalid || verifying()"
+          data-testid="mfa-recovery-submit">
+          @if (verifying()) {
+            <span class="material-icons-outlined mfa-challenge__spinner">sync</span>
+            Verifying...
+          } @else {
+            Verify Recovery Code
+          }
+        </button>
+      </form>
+
+      <button class="mfa-challenge__alt-link" (click)="showRecovery.set(false)" type="button">
+        Use authenticator code instead
+      </button>
+    }
+
+    <button class="mfa-challenge__cancel" (click)="cancel()" type="button">
+      <span class="material-icons-outlined">arrow_back</span>
+      Back to login
+    </button>
+  }
+</div>

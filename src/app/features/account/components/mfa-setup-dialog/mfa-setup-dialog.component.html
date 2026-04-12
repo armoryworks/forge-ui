@@ -1,0 +1,90 @@
+<app-dialog [title]="'Set Up Two-Factor Authentication'" width="480px" (closed)="close()">
+  @if (step() === 'loading') {
+    <div class="mfa-setup__loading">
+      <span class="material-icons-outlined mfa-setup__spinner">sync</span>
+      <p>Preparing authenticator setup...</p>
+    </div>
+  }
+
+  @if (step() === 'scan') {
+    <div class="mfa-setup__scan">
+      <p class="mfa-setup__instructions">
+        Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+      </p>
+
+      @if (setupData(); as data) {
+        <div class="mfa-setup__qr-wrapper">
+          <app-qr-code [value]="data.qrCodeUri" [size]="200" errorCorrectionLevel="M" />
+        </div>
+
+        <div class="mfa-setup__manual">
+          <button class="mfa-setup__toggle-key" (click)="showManualKey.set(!showManualKey())" type="button">
+            <span class="material-icons-outlined">{{ showManualKey() ? 'expand_less' : 'expand_more' }}</span>
+            Can't scan? Enter key manually
+          </button>
+
+          @if (showManualKey()) {
+            <div class="mfa-setup__key-display">
+              <code class="mfa-setup__key">{{ data.manualEntryKey }}</code>
+              <button class="icon-btn" (click)="copyManualKey()" aria-label="Copy key" type="button">
+                <span class="material-icons-outlined">content_copy</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="mfa-setup__verify-form">
+        <p class="mfa-setup__verify-label">Enter the 6-digit code from your app:</p>
+        <app-input label="Verification Code" [formControl]="codeControl"
+          placeholder="000000" [maxlength]="6" [required]="true"
+          data-testid="mfa-verify-code" />
+
+        @if (verifyError(); as err) {
+          <div class="mfa-setup__error">
+            <span class="material-icons-outlined">warning</span>
+            {{ err }}
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (step() === 'complete') {
+    <div class="mfa-setup__complete">
+      <span class="material-icons-outlined mfa-setup__success-icon">verified_user</span>
+      <h3>Two-Factor Authentication Enabled</h3>
+      <p>Your account is now protected with two-factor authentication. You'll need your authenticator app each time you sign in.</p>
+      <p class="mfa-setup__recovery-hint">
+        <span class="material-icons-outlined">info</span>
+        Generate recovery codes from the Security page in case you lose access to your authenticator.
+      </p>
+    </div>
+  }
+
+  <div dialog-footer>
+    @if (step() === 'scan') {
+      <button class="action-btn" (click)="close()" type="button">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="codeControl.invalid || verifying()"
+        (click)="verifyCode()"
+        data-testid="mfa-verify-submit"
+        type="button">
+        @if (verifying()) {
+          <span class="material-icons-outlined mfa-setup__spinner">sync</span>
+          Verifying...
+        } @else {
+          <span class="material-icons-outlined">verified</span>
+          Verify & Enable
+        }
+      </button>
+    }
+
+    @if (step() === 'complete') {
+      <button class="action-btn action-btn--primary" (click)="close()" type="button">
+        <span class="material-icons-outlined">check</span>
+        Done
+      </button>
+    }
+  </div>
+</app-dialog>

@@ -1,4 +1,5 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 @use '../../shared/account-page';
 
@@ -22,5 +23,129 @@
   font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
+}
+
+.security__spinner {
+  animation: spin 1s linear infinite;
+}
+
+.security__mfa-loading {
+  display: flex;
+  justify-content: center;
+  padding: $sp-lg 0;
+  color: var(--text-secondary);
+}
+
+.security__mfa-status {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+  }
+
+  &--enabled {
+    background: var(--success-light);
+    color: var(--success);
+    border: $border-width-thin solid var(--success);
+  }
+
+  &--disabled {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: $border-width-thin solid var(--border);
+  }
+}
+
+.security__mfa-enforced {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--info-light);
+  color: var(--info);
+  border: $border-width-thin solid var(--info);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+
+  &--required {
+    background: var(--warning-light);
+    color: var(--warning);
+    border-color: var(--warning);
+  }
+}
+
+.security__mfa-devices {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.security__mfa-devices-label {
+  @include uppercase-label($font-size-xxs, 0.5px);
+  color: var(--text-muted);
+}
+
+.security__mfa-device {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.security__mfa-device-info {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+}
+
+.security__mfa-device-name {
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.security__mfa-device-meta {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+.security__mfa-recovery {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.action-btn--danger {
+  color: var(--error);
+
+  &:hover {
+    background: var(--error-light);
+  }
 }
 

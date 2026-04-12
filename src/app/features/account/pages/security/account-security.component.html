@@ -67,6 +67,99 @@
         </button>
       </div>
     </div>
+
+    <!-- Two-Factor Authentication -->
+    <div class="account-page__card">
+      <span class="account-page__section-label">Two-Factor Authentication</span>
+
+      @if (mfaLoading()) {
+        <div class="security__mfa-loading">
+          <span class="material-icons-outlined security__spinner">sync</span>
+        </div>
+      } @else if (mfaStatus(); as status) {
+        @if (status.isEnabled) {
+          <div class="security__mfa-status security__mfa-status--enabled">
+            <span class="material-icons-outlined">verified_user</span>
+            <span>Two-factor authentication is <strong>enabled</strong></span>
+          </div>
+
+          @if (status.isEnforcedByPolicy) {
+            <div class="security__mfa-enforced">
+              <span class="material-icons-outlined">policy</span>
+              Required by organization policy
+            </div>
+          }
+
+          <div class="security__mfa-devices">
+            <span class="security__mfa-devices-label">Registered Devices</span>
+            @for (device of status.devices; track device.id) {
+              <div class="security__mfa-device">
+                <div class="security__mfa-device-info">
+                  <span class="material-icons-outlined">{{ device.deviceType === 'Totp' ? 'phone_android' : 'key' }}</span>
+                  <div>
+                    <span class="security__mfa-device-name">{{ device.deviceName ?? device.deviceType }}</span>
+                    @if (device.lastUsedAt) {
+                      <span class="security__mfa-device-meta">Last used: {{ device.lastUsedAt | date:'MM/dd/yyyy' }}</span>
+                    }
+                  </div>
+                  @if (device.isDefault) {
+                    <span class="chip chip--primary">Default</span>
+                  }
+                </div>
+                <button class="icon-btn icon-btn--danger" (click)="removeDevice(device)" [attr.aria-label]="'Remove ' + (device.deviceName ?? device.deviceType)">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="security__mfa-recovery">
+            <span class="material-icons-outlined">vpn_key</span>
+            <span>{{ status.recoveryCodesRemaining }} recovery codes remaining</span>
+          </div>
+
+          <div class="account-page__actions">
+            <button class="action-btn" (click)="setupMfa()">
+              <span class="material-icons-outlined">add</span>
+              Add Device
+            </button>
+            <button class="action-btn" (click)="generateRecoveryCodes()">
+              <span class="material-icons-outlined">vpn_key</span>
+              New Recovery Codes
+            </button>
+            @if (!status.isEnforcedByPolicy) {
+              <button class="action-btn action-btn--danger" (click)="disableMfa()">
+                <span class="material-icons-outlined">block</span>
+                Disable MFA
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="security__mfa-status security__mfa-status--disabled">
+            <span class="material-icons-outlined">shield</span>
+            <span>Two-factor authentication is <strong>not enabled</strong></span>
+          </div>
+
+          @if (status.isEnforcedByPolicy) {
+            <div class="security__mfa-enforced security__mfa-enforced--required">
+              <span class="material-icons-outlined">warning</span>
+              Required by organization policy — you must enable MFA
+            </div>
+          }
+
+          <p class="security__hint">Add an extra layer of security by requiring a verification code from an authenticator app when signing in.</p>
+
+          <div class="account-page__actions">
+            <button class="action-btn action-btn--primary" (click)="setupMfa()">
+              <span class="material-icons-outlined">verified_user</span>
+              Enable Two-Factor Authentication
+            </button>
+          </div>
+        }
+      } @else {
+        <p class="security__hint">Unable to load MFA status.</p>
+      }
+    </div>
   </div>
 
 </div>

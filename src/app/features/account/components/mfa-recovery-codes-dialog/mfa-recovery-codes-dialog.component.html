@@ -1,0 +1,39 @@
+<app-dialog [title]="'Recovery Codes'" width="480px" (closed)="close()">
+  @if (loading()) {
+    <div class="recovery__loading">
+      <span class="material-icons-outlined recovery__spinner">sync</span>
+      <p>Generating recovery codes...</p>
+    </div>
+  } @else {
+    <div class="recovery__content">
+      <div class="recovery__warning">
+        <span class="material-icons-outlined">warning</span>
+        <p>{{ warning() }}</p>
+      </div>
+
+      <div class="recovery__codes">
+        @for (code of codes(); track code) {
+          <code class="recovery__code">{{ code }}</code>
+        }
+      </div>
+
+      <div class="recovery__actions">
+        <button class="action-btn" (click)="copyAll()" type="button">
+          <span class="material-icons-outlined">content_copy</span>
+          Copy All
+        </button>
+        <button class="action-btn" (click)="download()" type="button">
+          <span class="material-icons-outlined">download</span>
+          Download
+        </button>
+      </div>
+    </div>
+  }
+
+  <div dialog-footer>
+    <button class="action-btn action-btn--primary" (click)="close()" type="button">
+      <span class="material-icons-outlined">check</span>
+      I've Saved These Codes
+    </button>
+  </div>
+</app-dialog>

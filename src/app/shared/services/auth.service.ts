@@ -26,6 +26,8 @@ export interface LoginResponse {
   token: string;
   expiresAt: string;
   user: AuthUser;
+  mfaRequired?: boolean;
+  mfaUserId?: number;
 }
 
 export interface SetupStatusResponse {
@@ -85,12 +87,28 @@ export class AuthService {
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credentials)
       .pipe(
         tap((response) => {
+          // Don't persist auth when MFA verification is still needed
+          if (response.mfaRequired) return;
+
           this._token.set(response.token);
           this._user.set(response.user);
           localStorage.setItem('qbe-token', response.token);
           localStorage.setItem('qbe-user', JSON.stringify(response.user));
         }),
       );
+  }
+
+  /** Complete auth after successful MFA validation. */
+  completeMfaLogin(token: string): void {
+    this._token.set(token);
+    localStorage.setItem('qbe-token', token);
+    // Fetch user profile from /me endpoint
+    this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
+      next: (user) => {
+        this._user.set(user);
+        localStorage.setItem('qbe-user', JSON.stringify(user));
+      },
+    });
   }
 
   checkSetupStatus(): Observable<SetupStatusResponse> {

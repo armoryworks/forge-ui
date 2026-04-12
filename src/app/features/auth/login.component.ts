@@ -16,11 +16,13 @@ import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
 import { SsoProvider } from '../../shared/models/sso-provider.model';
+import { MfaChallengeComponent } from './mfa-challenge.component';
+import { MfaValidateResponse } from '../account/models/mfa.model';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, MatDividerModule, TranslatePipe, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, MatDividerModule, TranslatePipe, InputComponent, ValidationPopoverDirective, MfaChallengeComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,6 +53,8 @@ export class LoginComponent implements OnInit {
   protected readonly ssoProviders = signal<SsoProvider[]>([]);
   protected readonly showSetupCode = signal(false);
   protected readonly setupCodeControl = new FormControl('');
+  protected readonly mfaRequired = signal(false);
+  protected readonly mfaUserId = signal<number | null>(null);
 
   /** Intended destination captured from the auth guard redirect. */
   private returnUrl: string | null = null;
@@ -113,10 +117,37 @@ export class LoginComponent implements OnInit {
     this.loadingService.track(this.translate.instant('auth.signingIn'), this.authService.login({ email: email!, password: password! }))
       .subscribe({
         next: (response) => {
+          if (response.mfaRequired && response.mfaUserId) {
+            this.mfaRequired.set(true);
+            this.mfaUserId.set(response.mfaUserId);
+            return;
+          }
           this.navigatePostLogin(response.user.profileComplete);
         },
         error: (err: HttpErrorResponse) => this.handleError(err),
       });
+  }
+
+  protected onMfaValidated(result: MfaValidateResponse): void {
+    this.authService.completeMfaLogin(result.accessToken);
+    this.mfaRequired.set(false);
+    this.mfaUserId.set(null);
+    // Fetch user profile to determine navigation
+    this.authService.refreshAccessToken().subscribe({
+      next: () => {
+        const user = this.authService.user();
+        this.navigatePostLogin(user?.profileComplete ?? true);
+      },
+      error: () => {
+        // Token is valid, just navigate to dashboard
+        this.router.navigate([this.layout.getDefaultRoute()]);
+      },
+    });
+  }
+
+  protected onMfaCancelled(): void {
+    this.mfaRequired.set(false);
+    this.mfaUserId.set(null);
   }
 
   private navigatePostLogin(profileComplete: boolean): void {

@@ -1,0 +1,60 @@
+<div class="mfa-policy" [appLoadingBlock]="loading()">
+  <div class="mfa-policy__header">
+    <div class="mfa-policy__title">
+      <span class="material-icons-outlined">admin_panel_settings</span>
+      <h3>MFA Policy</h3>
+    </div>
+    <p class="mfa-policy__description">
+      Require two-factor authentication for users with specific roles.
+      Enforced users must set up MFA on their next login.
+    </p>
+  </div>
+
+  <div class="mfa-policy__controls">
+    <app-select label="Require MFA for roles" [options]="roles()" [formControl]="enforcedRolesControl" [multiple]="true" placeholder="Select roles to enforce..." />
+    <button class="action-btn action-btn--primary"
+      [disabled]="saving()"
+      (click)="savePolicy()"
+      data-testid="mfa-save-policy">
+      @if (saving()) {
+        <span class="material-icons-outlined mfa-policy__spinner">sync</span>
+        Saving...
+      } @else {
+        <span class="material-icons-outlined">save</span>
+        Save Policy
+      }
+    </button>
+  </div>
+
+  <div class="mfa-policy__compliance">
+    <h4>User Compliance</h4>
+    <app-data-table
+      tableId="mfa-compliance"
+      [columns]="columns"
+      [data]="users()"
+      emptyIcon="verified_user"
+      emptyMessage="No users found">
+      <ng-template appColumnCell="mfaEnabled" let-row>
+        @if ($any(row).mfaEnabled) {
+          <span class="chip chip--success">Enabled</span>
+        } @else {
+          <span class="chip chip--muted">Disabled</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="mfaDeviceType" let-row>
+        @if ($any(row).mfaDeviceType) {
+          <span>{{ $any(row).mfaDeviceType }}</span>
+        } @else {
+          <span class="mfa-policy__none">—</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="isEnforcedByPolicy" let-row>
+        @if ($any(row).isEnforcedByPolicy) {
+          <span class="chip chip--warning">Enforced</span>
+        } @else {
+          <span class="mfa-policy__none">—</span>
+        }
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

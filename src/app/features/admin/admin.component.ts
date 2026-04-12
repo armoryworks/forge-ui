@@ -49,6 +49,7 @@ import { AuditLogPanelComponent } from './components/audit-log-panel/audit-log-p
 import { TimeCorrectionsPanelComponent } from './components/time-corrections-panel/time-corrections-panel.component';
 import { EventsPanelComponent } from './components/events-panel/events-panel.component';
 import { EdiPanelComponent } from './components/edi-panel/edi-panel.component';
+import { MfaPolicyPanelComponent } from './components/mfa-policy-panel/mfa-policy-panel.component';
 import { CompanyLocationDialogComponent } from './components/company-location-dialog/company-location-dialog.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
@@ -61,7 +62,7 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, EdiPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
+    EmptyStateComponent, LoadingBlockDirective, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -82,8 +83,8 @@ export class AdminComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
-  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'edi']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'sales-tax', 'audit-log', 'edi']);
+  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'edi', 'mfa']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'sales-tax', 'audit-log', 'edi', 'mfa']);
   private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training', 'time-corrections', 'events']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));

@@ -434,6 +434,13 @@
       </div>
     }
 
+    <!-- MFA Policy Tab -->
+    @if (activeTab() === 'mfa') {
+      <div class="tab-panel">
+        <app-mfa-policy-panel />
+      </div>
+    }
+
     <!-- Compliance Tab -->
     @if (activeTab() === 'compliance') {
       <div class="tab-panel">

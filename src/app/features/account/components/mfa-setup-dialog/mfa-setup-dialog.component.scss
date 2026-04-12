@@ -1,0 +1,140 @@
+@use 'styles/variables' as *;
+
+.mfa-setup__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl 0;
+  color: var(--text-secondary);
+}
+
+.mfa-setup__spinner {
+  animation: spin 1s linear infinite;
+}
+
+.mfa-setup__scan {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.mfa-setup__instructions {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.mfa-setup__qr-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.mfa-setup__manual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.mfa-setup__toggle-key {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: $font-size-sm;
+  cursor: pointer;
+  padding: 0;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.mfa-setup__key-display {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.mfa-setup__key {
+  font-family: $font-family-mono;
+  font-size: $font-size-base;
+  letter-spacing: 1px;
+  word-break: break-all;
+  flex: 1;
+}
+
+.mfa-setup__verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.mfa-setup__verify-label {
+  margin: 0;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.mfa-setup__error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--error-light);
+  color: var(--error);
+  border: $border-width-thin solid var(--error);
+  font-size: $font-size-sm;
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.mfa-setup__complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-lg 0;
+  text-align: center;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-md;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}
+
+.mfa-setup__success-icon {
+  font-size: $icon-size-hero;
+  color: var(--success);
+}
+
+.mfa-setup__recovery-hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md;
+  background: var(--info-light);
+  color: var(--info);
+  border: $border-width-thin solid var(--info);
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
