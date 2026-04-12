@@ -1,0 +1,120 @@
+<div class="uom-management">
+  <div class="uom-management__tabs">
+    <button class="tab" [class.tab--active]="activeSection() === 'uoms'" (click)="switchSection('uoms')">
+      Units of Measure
+    </button>
+    <button class="tab" [class.tab--active]="activeSection() === 'conversions'" (click)="switchSection('conversions')">
+      Conversions
+    </button>
+  </div>
+
+  @if (activeSection() === 'uoms') {
+    <div class="uom-management__header">
+      <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateUom()">
+        <span class="material-icons-outlined">add</span> New UOM
+      </button>
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="uom-list"
+        [columns]="uomColumns"
+        [data]="uoms()"
+        [clickableRows]="true"
+        emptyIcon="straighten"
+        emptyMessage="No units of measure configured"
+        (rowClick)="openEditUom($any($event))">
+        <ng-template appColumnCell="isBaseUnit" let-row>
+          @if (row.isBaseUnit) {
+            <span class="material-icons-outlined" aria-label="Base unit">check</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" aria-label="Edit UOM" (click)="openEditUom(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  @if (activeSection() === 'conversions') {
+    <div class="uom-management__header">
+      <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateConversion()">
+        <span class="material-icons-outlined">add</span> New Conversion
+      </button>
+    </div>
+
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="uom-conversions"
+        [columns]="conversionColumns"
+        [data]="conversions()"
+        emptyIcon="swap_horiz"
+        emptyMessage="No conversions configured">
+        <ng-template appColumnCell="isReversible" let-row>
+          @if (row.isReversible) {
+            <span class="material-icons-outlined" aria-label="Reversible">check</span>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>
+
+<!-- UOM Dialog -->
+@if (showUomDialog()) {
+  <app-dialog [title]="editingUom() ? 'Edit Unit of Measure' : 'New Unit of Measure'" width="520px" (closed)="showUomDialog.set(false)">
+    <div [formGroup]="uomForm">
+      <div class="dialog-row">
+        <app-input label="Code" formControlName="code" [required]="true" placeholder="e.g. EA, FT, LB" />
+        <app-input label="Name" formControlName="name" [required]="true" placeholder="e.g. Each, Foot, Pound" />
+      </div>
+      <div class="dialog-row">
+        <app-select label="Category" formControlName="category" [options]="categoryOptions" [required]="true" />
+        <app-input label="Symbol" formControlName="symbol" placeholder="e.g. ft, lb, kg" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Decimal Places" formControlName="decimalPlaces" type="number" [required]="true" />
+        <app-input label="Sort Order" formControlName="sortOrder" type="number" />
+      </div>
+      <app-toggle label="Base Unit for Category" formControlName="isBaseUnit" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="showUomDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="uomViolations"
+        [disabled]="uomForm.invalid || saving()"
+        (click)="saveUom()">
+        <span class="material-icons-outlined">save</span>
+        {{ editingUom() ? 'Update' : 'Create' }}
+      </button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Conversion Dialog -->
+@if (showConversionDialog()) {
+  <app-dialog title="New Conversion" width="520px" (closed)="showConversionDialog.set(false)">
+    <div [formGroup]="conversionForm">
+      <div class="dialog-row">
+        <app-select label="From UOM" formControlName="fromUomId" [options]="uomSelectOptions()" [required]="true" />
+        <app-select label="To UOM" formControlName="toUomId" [options]="uomSelectOptions()" [required]="true" />
+      </div>
+      <app-input label="Conversion Factor" formControlName="conversionFactor" type="number" [required]="true"
+        placeholder="e.g. 12 (1 ft = 12 in)" />
+      <app-toggle label="Reversible (auto-creates inverse)" formControlName="isReversible" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="showConversionDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="conversionViolations"
+        [disabled]="conversionForm.invalid || saving()"
+        (click)="saveConversion()">
+        <span class="material-icons-outlined">save</span> Create
+      </button>
+    </div>
+  </app-dialog>
+}

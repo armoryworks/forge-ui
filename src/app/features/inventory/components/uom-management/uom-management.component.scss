@@ -1,0 +1,19 @@
+@use 'styles/variables' as *;
+
+.uom-management {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__tabs {
+    display: flex;
+    gap: $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+    padding-bottom: $sp-sm;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

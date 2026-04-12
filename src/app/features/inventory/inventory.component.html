@@ -73,6 +73,10 @@
         <span class="tab__badge">{{ pendingSuggestions().length }}</span>
       }
     </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'uom'" (click)="switchTab('uom')">
+      <span class="material-icons-outlined">straighten</span>
+      Units of Measure
+    </button>
   </div>
 
   <div [appLoadingBlock]="loading()">
@@ -854,6 +858,13 @@
         </ng-template>
       </app-data-table>
     </div>
+  </div>
+}
+
+<!-- ── UOM Tab ── -->
+@if (activeTab() === 'uom') {
+  <div class="tab-panel">
+    <app-uom-management />
   </div>
 }
 

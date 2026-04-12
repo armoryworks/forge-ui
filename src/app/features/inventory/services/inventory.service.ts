@@ -17,6 +17,8 @@ import { Reservation } from '../models/reservation.model';
 import { CreateReservationRequest } from '../models/create-reservation-request.model';
 import { LowStockAlert } from '../models/low-stock-alert.model';
 import { PendingInspectionItem } from '../models/pending-inspection.model';
+import { UnitOfMeasure } from '../models/unit-of-measure.model';
+import { UomConversion } from '../models/uom-conversion.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -137,5 +139,45 @@ export class InventoryService {
 
   waiveInspection(receivingRecordId: number): Observable<void> {
     return this.http.post<void>(`${this.base}/inspect/${receivingRecordId}/waive`, {});
+  }
+
+  // ── Units of Measure ──
+
+  getUnitsOfMeasure(category?: string): Observable<UnitOfMeasure[]> {
+    let params = new HttpParams();
+    if (category) params = params.set('category', category);
+    return this.http.get<UnitOfMeasure[]>(`${this.base}/uom`, { params });
+  }
+
+  createUnitOfMeasure(data: Omit<UnitOfMeasure, 'id' | 'isActive'>): Observable<UnitOfMeasure> {
+    return this.http.post<UnitOfMeasure>(`${this.base}/uom`, data);
+  }
+
+  updateUnitOfMeasure(id: number, data: Omit<UnitOfMeasure, 'id' | 'isActive'>): Observable<UnitOfMeasure> {
+    return this.http.put<UnitOfMeasure>(`${this.base}/uom/${id}`, data);
+  }
+
+  getUomConversions(partId?: number): Observable<UomConversion[]> {
+    let params = new HttpParams();
+    if (partId) params = params.set('partId', partId.toString());
+    return this.http.get<UomConversion[]>(`${this.base}/uom/conversions`, { params });
+  }
+
+  createUomConversion(data: {
+    fromUomId: number; toUomId: number; conversionFactor: number;
+    partId?: number; isReversible?: boolean;
+  }): Observable<UomConversion> {
+    return this.http.post<UomConversion>(`${this.base}/uom/conversions`, data);
+  }
+
+  convertQuantity(fromUomId: number, toUomId: number, quantity: number, partId?: number):
+    Observable<{ convertedQuantity: number; conversionFactor: number }> {
+    let params = new HttpParams()
+      .set('fromUomId', fromUomId.toString())
+      .set('toUomId', toUomId.toString())
+      .set('quantity', quantity.toString());
+    if (partId) params = params.set('partId', partId.toString());
+    return this.http.get<{ convertedQuantity: number; conversionFactor: number }>(
+      `${this.base}/uom/convert`, { params });
   }
 }
