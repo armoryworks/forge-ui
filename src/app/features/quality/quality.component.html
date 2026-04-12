@@ -17,6 +17,18 @@
       New Characteristic
     </button>
   }
+  @if (activeTab() === 'ncrs') {
+    <button class="action-btn action-btn--primary" (click)="ncrListComponent?.openCreate()">
+      <span class="material-icons-outlined">add</span>
+      New NCR
+    </button>
+  }
+  @if (activeTab() === 'capas') {
+    <button class="action-btn action-btn--primary" (click)="capaListComponent?.openCreate()">
+      <span class="material-icons-outlined">add</span>
+      New CAPA
+    </button>
+  }
 </app-page-header>
 
 <div class="quality-content">
@@ -41,6 +53,14 @@
     <button class="tab" [class.tab--active]="activeTab() === 'spc-ooc'" (click)="switchTab('spc-ooc')">
       <span class="material-icons-outlined">warning</span>
       OOC Events
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'ncrs'" (click)="switchTab('ncrs')">
+      <span class="material-icons-outlined">report_problem</span>
+      NCRs
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'capas'" (click)="switchTab('capas')">
+      <span class="material-icons-outlined">assignment_turned_in</span>
+      CAPAs
     </button>
   </div>
 
@@ -145,6 +165,16 @@
   <!-- SPC OOC Events Tab -->
   @if (activeTab() === 'spc-ooc') {
     <app-spc-ooc-list />
+  }
+
+  <!-- NCRs Tab -->
+  @if (activeTab() === 'ncrs') {
+    <app-ncr-list />
+  }
+
+  <!-- CAPAs Tab -->
+  @if (activeTab() === 'capas') {
+    <app-capa-list />
   }
 </div>
 

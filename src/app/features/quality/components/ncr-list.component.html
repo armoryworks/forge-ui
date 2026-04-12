@@ -1,0 +1,79 @@
+<div class="filters-bar">
+  <app-select label="Type" [formControl]="typeFilter" [options]="typeOptions" (selectionChange)="loadNcrs()" />
+  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadNcrs()" />
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table tableId="ncr-list" [columns]="columns" [data]="ncrs()"
+    emptyIcon="report_problem" emptyMessage="No non-conformances found">
+    <ng-template appColumnCell="type" let-row>
+      <span class="chip chip--muted">{{ row.type }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+    <ng-template appColumnCell="detectedAt" let-row>
+      {{ row.detectedAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <div class="ncr-list__actions">
+        @if (row.status !== 'Dispositioned' && row.status !== 'Closed') {
+          <button class="icon-btn" aria-label="Disposition NCR" (click)="openDisposition(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">gavel</span>
+          </button>
+        }
+        @if (!row.capaId && row.status !== 'Closed') {
+          <button class="icon-btn" aria-label="Create CAPA" (click)="createCapa(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">assignment_turned_in</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showCreateDialog()) {
+  <app-dialog title="Create Non-Conformance" width="520px" (closed)="showCreateDialog.set(false)">
+    <div [formGroup]="createForm">
+      <div class="dialog-row">
+        <app-select label="Type" formControlName="type" [options]="typeOptions.slice(1)" [required]="true" />
+        <app-select label="Detection Stage" formControlName="detectedAtStage" [options]="detectionStageOptions" [required]="true" />
+      </div>
+      <div class="dialog-row">
+        <app-input label="Part ID" type="number" formControlName="partId" [required]="true" />
+        <app-input label="Job ID" type="number" formControlName="jobId" />
+      </div>
+      <app-textarea label="Description" formControlName="description" [required]="true" />
+      <div class="dialog-row">
+        <app-input label="Affected Quantity" type="number" formControlName="affectedQuantity" [required]="true" />
+        <app-input label="Defective Quantity" type="number" formControlName="defectiveQuantity" />
+      </div>
+      <app-textarea label="Containment Actions" formControlName="containmentActions" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="createViolations"
+        [disabled]="createForm.invalid || saving()"
+        (click)="saveNcr()">Create</button>
+    </div>
+  </app-dialog>
+}
+
+@if (showDispositionDialog()) {
+  <app-dialog title="Disposition NCR" width="420px" (closed)="showDispositionDialog.set(false)">
+    <div [formGroup]="dispositionForm">
+      <app-select label="Disposition Code" formControlName="code" [options]="dispositionCodeOptions" [required]="true" />
+      <app-textarea label="Notes" formControlName="notes" />
+      @if (dispositionForm.controls.code.value === 'Rework') {
+        <app-textarea label="Rework Instructions" formControlName="reworkInstructions" [required]="true" />
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showDispositionDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="saving()"
+        (click)="saveDisposition()">Record Disposition</button>
+    </div>
+  </app-dialog>
+}

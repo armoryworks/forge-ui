@@ -1,0 +1,48 @@
+import { NcrDetectionStage } from './ncr-detection-stage.model';
+import { NcrDispositionCode } from './ncr-disposition-code.model';
+import { NcrStatus } from './ncr-status.model';
+import { NcrType } from './ncr-type.model';
+
+export interface NonConformance {
+  id: number;
+  ncrNumber: string;
+  type: NcrType;
+  partId: number;
+  partNumber: string;
+  partDescription: string;
+  jobId: number | null;
+  jobNumber: string | null;
+  productionRunId: number | null;
+  lotNumber: string | null;
+  salesOrderLineId: number | null;
+  purchaseOrderLineId: number | null;
+  qcInspectionId: number | null;
+  detectedById: number;
+  detectedByName: string;
+  detectedAt: string;
+  detectedAtStage: NcrDetectionStage;
+  description: string;
+  affectedQuantity: number;
+  defectiveQuantity: number | null;
+  containmentActions: string | null;
+  containmentById: number | null;
+  containmentByName: string | null;
+  containmentAt: string | null;
+  dispositionCode: NcrDispositionCode | null;
+  dispositionById: number | null;
+  dispositionByName: string | null;
+  dispositionAt: string | null;
+  dispositionNotes: string | null;
+  reworkInstructions: string | null;
+  materialCost: number | null;
+  laborCost: number | null;
+  totalCostImpact: number | null;
+  status: NcrStatus;
+  capaId: number | null;
+  capaNumber: string | null;
+  customerId: number | null;
+  customerName: string | null;
+  vendorId: number | null;
+  vendorName: string | null;
+  createdAt: string;
+}

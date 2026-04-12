@@ -1,0 +1,8 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.filters-bar {
+  display: flex;
+  gap: $sp-md;
+  align-items: flex-end;
+}

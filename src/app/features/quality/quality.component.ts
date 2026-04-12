@@ -30,10 +30,12 @@ import { SpcCharacteristicsComponent } from './components/spc-characteristics.co
 import { SpcChartComponent } from './components/spc-chart.component';
 import { SpcDataEntryComponent } from './components/spc-data-entry.component';
 import { SpcOocListComponent } from './components/spc-ooc-list.component';
+import { NcrListComponent } from './components/ncr-list.component';
+import { CapaListComponent } from './components/capa-list.component';
 
-type QualityTab = 'inspections' | 'lots' | 'spc-charts' | 'spc-data' | 'spc-ooc';
+type QualityTab = 'inspections' | 'lots' | 'spc-charts' | 'spc-data' | 'spc-ooc' | 'ncrs' | 'capas';
 
-const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data', 'spc-ooc'];
+const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data', 'spc-ooc', 'ncrs', 'capas'];
 
 @Component({
   selector: 'app-quality',
@@ -47,6 +49,7 @@ const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data
     TranslatePipe, MatTooltipModule,
     SpcCharacteristicsComponent, SpcChartComponent,
     SpcDataEntryComponent, SpcOocListComponent,
+    NcrListComponent, CapaListComponent,
   ],
   templateUrl: './quality.component.html',
   styleUrl: './quality.component.scss',
@@ -61,6 +64,8 @@ export class QualityComponent {
   private readonly router = inject(Router);
 
   @ViewChild(SpcCharacteristicsComponent) spcCharsComponent?: SpcCharacteristicsComponent;
+  @ViewChild(NcrListComponent) ncrListComponent?: NcrListComponent;
+  @ViewChild(CapaListComponent) capaListComponent?: CapaListComponent;
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => {

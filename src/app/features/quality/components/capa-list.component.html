@@ -1,0 +1,58 @@
+<div class="filters-bar">
+  <app-select label="Type" [formControl]="typeFilter" [options]="typeOptions" (selectionChange)="loadCapas()" />
+  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadCapas()" />
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table tableId="capa-list" [columns]="columns" [data]="capas()"
+    emptyIcon="assignment_turned_in" emptyMessage="No corrective actions found">
+    <ng-template appColumnCell="type" let-row>
+      <span class="chip chip--muted">{{ row.type }}</span>
+    </ng-template>
+    <ng-template appColumnCell="priority" let-row>
+      <span [class]="getPriorityClass(row.priority)">{{ row.priority }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+    <ng-template appColumnCell="dueDate" let-row>
+      {{ row.dueDate | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="tasks" let-row>
+      {{ row.completedTaskCount }}/{{ row.taskCount }}
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      @if (row.status !== 'Closed') {
+        <button class="icon-btn" aria-label="Advance CAPA phase" (click)="advancePhase(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      }
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showCreateDialog()) {
+  <app-dialog title="Create CAPA" width="520px" (closed)="showCreateDialog.set(false)">
+    <div [formGroup]="createForm">
+      <div class="dialog-row">
+        <app-select label="Type" formControlName="type" [options]="typeOptions.slice(1)" [required]="true" />
+        <app-select label="Source" formControlName="sourceType" [options]="sourceTypeOptions" [required]="true" />
+      </div>
+      <app-input label="Title" formControlName="title" [required]="true" />
+      <app-textarea label="Problem Description" formControlName="problemDescription" [required]="true" />
+      <app-textarea label="Impact Description" formControlName="impactDescription" />
+      <div class="dialog-row">
+        <app-input label="Owner ID" type="number" formControlName="ownerId" [required]="true" />
+        <app-select label="Priority" formControlName="priority" [options]="priorityOptions" />
+      </div>
+      <app-datepicker label="Due Date" formControlName="dueDate" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="createViolations"
+        [disabled]="createForm.invalid || saving()"
+        (click)="saveCapa()">Create</button>
+    </div>
+  </app-dialog>
+}

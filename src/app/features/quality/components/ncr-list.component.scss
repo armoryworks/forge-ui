@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.ncr-list__actions {
+  display: flex;
+  gap: $sp-xs;
+}
+
+.filters-bar {
+  display: flex;
+  gap: $sp-md;
+  align-items: flex-end;
+}

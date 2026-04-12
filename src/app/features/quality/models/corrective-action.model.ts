@@ -1,0 +1,48 @@
+import { CapaSourceType } from './capa-source-type.model';
+import { CapaStatus } from './capa-status.model';
+import { CapaType } from './capa-type.model';
+import { RootCauseMethod } from './root-cause-method.model';
+
+export interface CorrectiveAction {
+  id: number;
+  capaNumber: string;
+  type: CapaType;
+  sourceType: CapaSourceType;
+  sourceEntityId: number | null;
+  sourceEntityType: string | null;
+  title: string;
+  problemDescription: string;
+  impactDescription: string | null;
+  rootCauseAnalysis: string | null;
+  rootCauseMethod: RootCauseMethod | null;
+  rootCauseMethodData: string | null;
+  rootCauseAnalyzedById: number | null;
+  rootCauseAnalyzedByName: string | null;
+  rootCauseCompletedAt: string | null;
+  containmentAction: string | null;
+  correctiveActionDescription: string | null;
+  preventiveAction: string | null;
+  verificationMethod: string | null;
+  verificationResult: string | null;
+  verifiedById: number | null;
+  verifiedByName: string | null;
+  verificationDate: string | null;
+  effectivenessCheckDueDate: string | null;
+  effectivenessCheckDate: string | null;
+  effectivenessResult: string | null;
+  isEffective: boolean | null;
+  effectivenessCheckedById: number | null;
+  effectivenessCheckedByName: string | null;
+  ownerId: number;
+  ownerName: string;
+  status: CapaStatus;
+  priority: number;
+  dueDate: string;
+  closedAt: string | null;
+  closedById: number | null;
+  closedByName: string | null;
+  taskCount: number;
+  completedTaskCount: number;
+  relatedNcrCount: number;
+  createdAt: string;
+}
