@@ -1,0 +1,18 @@
+@use 'styles/variables' as *;
+
+.alternates-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: $sp-md;
+}
+
+.part-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.approved-icon {
+  color: var(--success);
+  font-size: $icon-size-md;
+}

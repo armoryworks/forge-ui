@@ -1,0 +1,73 @@
+<div [appLoadingBlock]="loading()">
+  <div class="alternates-header">
+    <button class="action-btn action-btn--sm action-btn--primary" (click)="openAdd()" aria-label="Add alternate part">
+      <span class="material-icons-outlined">add</span> Add Alternate
+    </button>
+  </div>
+
+  @if (alternates().length === 0 && !loading()) {
+    <app-empty-state icon="swap_horiz" message="No alternate parts defined" />
+  } @else {
+    <app-data-table
+      tableId="part-alternates"
+      [columns]="columns"
+      [data]="alternates()"
+      emptyIcon="swap_horiz"
+      emptyMessage="No alternate parts">
+      <ng-template appColumnCell="alternatePartNumber" let-row>
+        <span class="part-number">{{ row.alternatePartNumber }}</span>
+      </ng-template>
+      <ng-template appColumnCell="type" let-row>
+        <span [class]="getTypeClass(row.type)">{{ row.type }}</span>
+      </ng-template>
+      <ng-template appColumnCell="isApproved" let-row>
+        @if (row.isApproved) {
+          <span class="material-icons-outlined approved-icon" matTooltip="Approved">check_circle</span>
+        } @else {
+          <button class="action-btn action-btn--sm" (click)="approve(row)" aria-label="Approve alternate">Approve</button>
+        }
+      </ng-template>
+      <ng-template appColumnCell="isBidirectional" let-row>
+        <span class="material-icons-outlined" [matTooltip]="row.isBidirectional ? 'Bidirectional' : 'One-way'">
+          {{ row.isBidirectional ? 'swap_horiz' : 'arrow_forward' }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn icon-btn--danger" matTooltip="Remove" (click)="deleteAlternate(row)" aria-label="Remove alternate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+@if (showDialog()) {
+  <app-dialog title="Add Alternate Part" width="520px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <app-entity-picker
+        label="Alternate Part"
+        entityType="parts"
+        displayField="partNumber"
+        formControlName="alternatePartId"
+        [required]="true" />
+      <div class="dialog-row">
+        <app-select label="Type" [options]="typeOptions" formControlName="type" />
+        <app-input label="Priority" type="number" formControlName="priority" [required]="true" />
+      </div>
+      <app-input label="Conversion Factor" type="number" formControlName="conversionFactor" placeholder="e.g. 1.2" />
+      <app-textarea label="Notes" formControlName="notes" />
+      <div class="dialog-row">
+        <app-toggle label="Approved" formControlName="isApproved" />
+        <app-toggle label="Bidirectional" formControlName="isBidirectional" />
+      </div>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">Save</button>
+    </div>
+  </app-dialog>
+}

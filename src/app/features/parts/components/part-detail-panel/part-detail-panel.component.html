@@ -47,6 +47,10 @@
           <span class="tab-badge">{{ partFiles().length }}</span>
         }
       </button>
+      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'alternates'"
+        (click)="detailTab.set('alternates')">
+        Alternates
+      </button>
       @if (stlFile()) {
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'viewer'"
           (click)="detailTab.set('viewer')">
@@ -387,6 +391,11 @@
           } @else {
             <app-empty-state icon="attach_file" [message]="'parts.noFilesAttached' | translate" />
           }
+        }
+
+        <!-- Alternates Tab -->
+        @if (detailTab() === 'alternates') {
+          <app-part-alternates-tab [partId]="part.id" />
         }
 
         <!-- 3D Viewer Tab -->

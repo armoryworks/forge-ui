@@ -20,6 +20,7 @@ import { CreateOperationRequest } from '../models/create-operation-request.model
 import { UpdateOperationRequest } from '../models/update-operation-request.model';
 import { CreateOperationMaterialRequest } from '../models/create-operation-material-request.model';
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
+import { PartAlternate, CreatePartAlternateRequest, UpdatePartAlternateRequest } from '../models/part-alternate.model';
 
 @Injectable({ providedIn: 'root' })
 export class PartsService {
@@ -149,5 +150,21 @@ export class PartsService {
 
   addPartPrice(partId: number, request: AddPartPriceRequest): Observable<PartPrice> {
     return this.http.post<PartPrice>(`${this.base}/${partId}/prices`, request);
+  }
+
+  getPartAlternates(partId: number): Observable<PartAlternate[]> {
+    return this.http.get<PartAlternate[]>(`${this.base}/${partId}/alternates`);
+  }
+
+  createPartAlternate(partId: number, request: CreatePartAlternateRequest): Observable<PartAlternate> {
+    return this.http.post<PartAlternate>(`${this.base}/${partId}/alternates`, request);
+  }
+
+  updatePartAlternate(partId: number, alternateId: number, request: UpdatePartAlternateRequest): Observable<PartAlternate> {
+    return this.http.patch<PartAlternate>(`${this.base}/${partId}/alternates/${alternateId}`, request);
+  }
+
+  deletePartAlternate(partId: number, alternateId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${partId}/alternates/${alternateId}`);
   }
 }
