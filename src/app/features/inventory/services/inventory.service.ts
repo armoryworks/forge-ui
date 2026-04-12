@@ -16,6 +16,7 @@ import { CycleCount } from '../models/cycle-count.model';
 import { Reservation } from '../models/reservation.model';
 import { CreateReservationRequest } from '../models/create-reservation-request.model';
 import { LowStockAlert } from '../models/low-stock-alert.model';
+import { PendingInspectionItem } from '../models/pending-inspection.model';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -119,5 +120,22 @@ export class InventoryService {
 
   releaseReservation(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/reservations/${id}`);
+  }
+
+  // ── Receiving Inspection ──
+
+  getPendingInspections(): Observable<PendingInspectionItem[]> {
+    return this.http.get<PendingInspectionItem[]>(`${this.base}/pending-inspection`);
+  }
+
+  recordInspectionResult(receivingRecordId: number, data: {
+    result: string; acceptedQuantity?: number; rejectedQuantity?: number;
+    notes?: string; createNcrOnReject?: boolean; qcInspectionId?: number;
+  }): Observable<void> {
+    return this.http.post<void>(`${this.base}/inspect/${receivingRecordId}`, data);
+  }
+
+  waiveInspection(receivingRecordId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/inspect/${receivingRecordId}/waive`, {});
   }
 }

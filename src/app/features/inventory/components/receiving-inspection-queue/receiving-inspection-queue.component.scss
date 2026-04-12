@@ -1,0 +1,15 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+:host ::ng-deep {
+  .row--overdue-warning {
+    background-color: color-mix(in srgb, var(--warning) 8%, transparent);
+  }
+
+  .row--overdue-critical {
+    background-color: color-mix(in srgb, var(--error) 8%, transparent);
+  }
+}

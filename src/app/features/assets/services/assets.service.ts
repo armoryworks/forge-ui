@@ -10,6 +10,7 @@ import { AssetStatus } from '../models/asset-status.type';
 import { DowntimeLog } from '../models/downtime-log.model';
 import { CreateDowntimeRequest } from '../models/create-downtime-request.model';
 import { MaintenanceLogListItem } from '../models/maintenance-log-list-item.model';
+import { SubcontractOrder } from '../models/subcontract-order.model';
 
 @Injectable({ providedIn: 'root' })
 export class AssetsService {
@@ -57,5 +58,27 @@ export class AssetsService {
 
   createMaintenanceJob(scheduleId: number): Observable<{ jobId: number }> {
     return this.http.post<{ jobId: number }>(`${this.base}/maintenance/${scheduleId}/create-job`, {});
+  }
+
+  // ── Subcontract Orders ──
+
+  getSubcontractOrders(jobId: number): Observable<SubcontractOrder[]> {
+    return this.http.get<SubcontractOrder[]>(`${environment.apiUrl}/jobs/${jobId}/subcontract-orders`);
+  }
+
+  sendOutSubcontract(jobId: number, operationId: number, data: {
+    quantity: number; unitCost: number; expectedReturnDate?: string;
+    shippingTrackingNumber?: string; notes?: string; createPurchaseOrder?: boolean;
+  }): Observable<SubcontractOrder> {
+    return this.http.post<SubcontractOrder>(
+      `${environment.apiUrl}/jobs/${jobId}/operations/${operationId}/send-out`, data);
+  }
+
+  receiveBackSubcontract(orderId: number, data: {
+    receivedQuantity: number; returnTrackingNumber?: string;
+    passedInspection?: boolean; notes?: string;
+  }): Observable<SubcontractOrder> {
+    return this.http.post<SubcontractOrder>(
+      `${environment.apiUrl}/subcontract-orders/${orderId}/receive`, data);
   }
 }

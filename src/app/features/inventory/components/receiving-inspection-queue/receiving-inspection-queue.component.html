@@ -1,0 +1,17 @@
+<div [appLoadingBlock]="loading()">
+  @if (items().length === 0 && !loading()) {
+    <app-empty-state icon="fact_check" message="No items pending inspection" />
+  } @else {
+    <app-data-table
+      tableId="receiving-inspection-queue"
+      [columns]="columns"
+      [data]="items()"
+      [rowClass]="rowClass"
+      emptyIcon="fact_check"
+      emptyMessage="No items pending inspection">
+      <ng-template appColumnCell="receivedAt" let-row>
+        {{ row.receivedAt | date:'MM/dd/yyyy' }}
+      </ng-template>
+    </app-data-table>
+  }
+</div>
