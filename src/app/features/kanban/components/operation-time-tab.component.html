@@ -1,0 +1,70 @@
+<div class="op-time" [appLoadingBlock]="loading()">
+  @if (operations().length === 0 && !loading()) {
+    <app-empty-state icon="schedule" message="No operation time data. This job may not have a part with operations defined." />
+  } @else {
+    <!-- Summary Bar -->
+    <div class="op-time__summary">
+      <div class="op-time__summary-item">
+        <span class="op-time__summary-label">Estimated</span>
+        <span class="op-time__summary-value">{{ formatMinutes(totalEstimated()) }}</span>
+      </div>
+      <div class="op-time__summary-item">
+        <span class="op-time__summary-label">Actual</span>
+        <span class="op-time__summary-value">{{ formatMinutes(totalActual()) }}</span>
+      </div>
+      <div class="op-time__summary-item">
+        <span class="op-time__summary-label">Efficiency</span>
+        <span class="op-time__summary-value" [class]="getEfficiencyClass(overallEfficiency())">
+          {{ overallEfficiency() | number:'1.0-0' }}%
+        </span>
+      </div>
+    </div>
+
+    <!-- Operations Table -->
+    <table class="op-time__table" aria-label="Operation time analysis">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Operation</th>
+          <th scope="col" class="op-time__num">Est. Setup</th>
+          <th scope="col" class="op-time__num">Act. Setup</th>
+          <th scope="col" class="op-time__num">Est. Run</th>
+          <th scope="col" class="op-time__num">Act. Run</th>
+          <th scope="col" class="op-time__num">Total</th>
+          <th scope="col" class="op-time__num">Eff.</th>
+          <th scope="col" class="op-time__bar-col">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (op of operations(); track op.operationId) {
+          <tr>
+            <td>{{ op.operationSequence }}</td>
+            <td>{{ op.operationName }}</td>
+            <td class="op-time__num">{{ formatMinutes(op.estimatedSetupMinutes) }}</td>
+            <td class="op-time__num" [class]="getVarianceClass(op.setupVarianceMinutes)">
+              {{ formatMinutes(op.actualSetupMinutes) }}
+            </td>
+            <td class="op-time__num">{{ formatMinutes(op.estimatedRunMinutes) }}</td>
+            <td class="op-time__num" [class]="getVarianceClass(op.runVarianceMinutes)">
+              {{ formatMinutes(op.actualRunMinutes) }}
+            </td>
+            <td class="op-time__num"><strong>{{ formatMinutes(op.actualTotalMinutes) }}</strong></td>
+            <td class="op-time__num" [class]="getEfficiencyClass(op.efficiencyPercent)">
+              {{ op.efficiencyPercent | number:'1.0-0' }}%
+            </td>
+            <td class="op-time__bar-cell">
+              <div class="op-time__bar-track">
+                <div
+                  class="op-time__bar-fill"
+                  [class]="getEfficiencyClass(op.efficiencyPercent)"
+                  [style.width.%]="getBarWidth(op.actualTotalMinutes, op.estimatedSetupMinutes + op.estimatedRunMinutes)">
+                </div>
+                <div class="op-time__bar-target"></div>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

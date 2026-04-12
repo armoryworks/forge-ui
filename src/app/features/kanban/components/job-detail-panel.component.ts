@@ -34,11 +34,13 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/compo
 import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
 import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/barcode-info.component';
 import { CoverPhotoUploadDialogComponent, CoverPhotoDialogData } from './cover-photo-upload-dialog.component';
+import { JobCostTabComponent } from './job-cost-tab.component';
+import { OperationTimeTabComponent } from './operation-time-tab.component';
 
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, MatMenuModule, MatTooltipModule],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

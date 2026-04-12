@@ -12,6 +12,7 @@ describe('SnackbarService', () => {
   };
   let routerSpy: {
     navigate: ReturnType<typeof vi.fn>;
+    events: Subject<unknown>;
   };
   let actionSubject: Subject<void>;
 
@@ -22,10 +23,12 @@ describe('SnackbarService', () => {
       open: vi.fn().mockReturnValue({
         onAction: () => actionSubject.asObservable(),
       } as Partial<MatSnackBarRef<TextOnlySnackBar>>),
+      dismiss: vi.fn(),
     };
 
     routerSpy = {
       navigate: vi.fn(),
+      events: new Subject<unknown>(),
     };
 
     TestBed.configureTestingModule({
@@ -61,20 +64,22 @@ describe('SnackbarService', () => {
   });
 
   describe('warn', () => {
-    it('should open snackbar with warn panel class and no duration', () => {
+    it('should open snackbar with warn panel class and 8s duration', () => {
       service.warn('Low stock detected');
 
       expect(snackBarSpy.open).toHaveBeenCalledWith('Low stock detected', 'Dismiss', {
+        duration: 8000,
         panelClass: ['snackbar--warn'],
       });
     });
   });
 
   describe('error', () => {
-    it('should open snackbar with error panel class and no duration', () => {
+    it('should open snackbar with error panel class and 10s duration', () => {
       service.error('Failed to save');
 
       expect(snackBarSpy.open).toHaveBeenCalledWith('Failed to save', 'Dismiss', {
+        duration: 10000,
         panelClass: ['snackbar--error'],
       });
     });

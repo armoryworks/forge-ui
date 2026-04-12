@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { JobCostSummary, JobProfitabilityRow, LaborRate, MaterialIssue, MaterialIssueRequest } from '../models/job-cost.model';
+import { OperationTimeAnalysis } from '../models/operation-time.model';
 
 @Injectable({ providedIn: 'root' })
 export class JobCostService {
@@ -50,5 +51,9 @@ export class JobCostService {
 
   createLaborRate(rate: Omit<LaborRate, 'id'>): Observable<LaborRate> {
     return this.http.post<LaborRate>(`${this.baseUrl}/admin/labor-rates`, rate);
+  }
+
+  getOperationTimeSummary(jobId: number): Observable<OperationTimeAnalysis[]> {
+    return this.http.get<OperationTimeAnalysis[]>(`${this.baseUrl}/jobs/${jobId}/operation-time-summary`);
   }
 }

@@ -260,6 +260,22 @@
         </div>
       </div>
 
+      <!-- Cost Summary -->
+      <div class="jd-section">
+        <div class="jd-section__header">
+          <h3 class="jd-section__title">Cost Analysis</h3>
+        </div>
+        <app-job-cost-tab [jobId]="j.id" />
+      </div>
+
+      <!-- Operation Time Analysis -->
+      <div class="jd-section">
+        <div class="jd-section__header">
+          <h3 class="jd-section__title">Operation Time</h3>
+        </div>
+        <app-operation-time-tab [jobId]="j.id" />
+      </div>
+
       <!-- Activity + Comments + Notes + History (shared component) -->
       <app-entity-activity-section entityType="Job" [entityId]="j.id" />
 

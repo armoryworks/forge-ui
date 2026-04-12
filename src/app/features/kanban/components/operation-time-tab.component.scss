@@ -1,0 +1,138 @@
+@use 'styles/variables' as *;
+
+.op-time {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__summary {
+    display: flex;
+    gap: $sp-lg;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__summary-label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__summary-value {
+    font-size: $font-size-md;
+    font-weight: 600;
+    font-family: $font-family-mono;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th,
+    td {
+      padding: $sp-sm $sp-md;
+      text-align: left;
+      border-bottom: $border-width-thin solid var(--border);
+    }
+
+    th {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+  }
+
+  &__num {
+    text-align: right !important; // override table default
+    font-family: $font-family-mono;
+  }
+
+  &__bar-col {
+    width: 120px;
+  }
+
+  &__bar-cell {
+    width: 120px;
+  }
+
+  &__bar-track {
+    position: relative;
+    height: 6px;
+    background: var(--border);
+    width: 100%;
+  }
+
+  &__bar-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    transition: width $transition-normal;
+  }
+
+  &__bar-target {
+    position: absolute;
+    top: -2px;
+    left: 100%;
+    width: 2px;
+    height: 10px;
+    background: var(--text-muted);
+  }
+
+  &__variance--over {
+    color: var(--error);
+  }
+
+  &__variance--under {
+    color: var(--success);
+  }
+
+  &__efficiency--good {
+    color: var(--success);
+    background-color: var(--success);
+  }
+
+  &__efficiency--fair {
+    color: var(--warning);
+    background-color: var(--warning);
+  }
+
+  &__efficiency--poor {
+    color: var(--error);
+    background-color: var(--error);
+  }
+
+  // For text labels, don't apply background
+  td > &__efficiency--good,
+  td > &__efficiency--fair,
+  td > &__efficiency--poor,
+  span.op-time__summary-value.op-time__efficiency--good,
+  span.op-time__summary-value.op-time__efficiency--fair,
+  span.op-time__summary-value.op-time__efficiency--poor {
+    background-color: transparent;
+  }
+
+  // Only bar fills get background
+  &__bar-fill.op-time__efficiency--good {
+    background-color: var(--success);
+  }
+
+  &__bar-fill.op-time__efficiency--fair {
+    background-color: var(--warning);
+  }
+
+  &__bar-fill.op-time__efficiency--poor {
+    background-color: var(--error);
+  }
+}
