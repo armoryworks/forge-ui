@@ -260,6 +260,18 @@ export class AdminComponent {
       if (tab === 'compliance' && this.users().length === 0) this.loadUsers();
     });
 
+    // When editing a user, ensure scanner is active and set context.
+    // Also probe the relay so the "not installed" banner appears immediately.
+    effect(() => {
+      if (this.editingUser() !== null) {
+        this.scanner.setContext('global');
+        // Ensure the scanner keydown listener is registered (guards against
+        // timing issues where the auth effect may not have started it yet)
+        this.scanner.start();
+        this.rfid.probeRelay();
+      }
+    });
+
     // When editing a user and a keyboard-wedge scan is detected, populate the scan value field
     effect(() => {
       const scan = this.scanner.lastScan();
@@ -279,14 +291,6 @@ export class AdminComponent {
       this.newScanValue.setValue(scan.uid);
       // Auto-add the scan identifier immediately
       this.addScanIdentifier();
-    });
-
-    // When the user edit panel opens, probe the relay so the "not installed" banner
-    // appears immediately without requiring the admin to click "Connect RFID Reader"
-    effect(() => {
-      if (this.editingUser() !== null) {
-        this.rfid.probeRelay();
-      }
     });
 
     // Auto-reconnect to a previously paired RFID reader

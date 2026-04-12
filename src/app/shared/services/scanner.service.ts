@@ -76,6 +76,24 @@ export class ScannerService implements OnDestroy {
     this._listening.set(false);
   }
 
+  /**
+   * Force-restart the scanner. Removes any existing listener and re-registers.
+   * Use on pages that manage their own scanner lifecycle (e.g., shop floor kiosk)
+   * to guarantee the listener is active regardless of prior state.
+   */
+  restart(): void {
+    // Tear down unconditionally
+    if (this.keydownHandler) {
+      document.removeEventListener('keydown', this.keydownHandler, { capture: true });
+      this.keydownHandler = null;
+    }
+    this.clearBuffer();
+    this._listening.set(false);
+
+    // Re-register
+    this.start();
+  }
+
   setContext(context: ScanContext): void {
     this._context.set(context);
   }

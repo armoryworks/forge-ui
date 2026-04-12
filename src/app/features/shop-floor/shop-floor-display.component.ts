@@ -200,9 +200,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
       this.applyFontSize();
     }
 
-    // Start passive scanner — listens to keyboard-wedge / RFID on document, no focus needed
+    // Start passive scanner — listens to keyboard-wedge / RFID on document, no focus needed.
+    // Use restart() to guarantee the listener is active regardless of auth effect timing
+    // (clearAuth() above triggers the auth effect asynchronously, which may call scanner.stop()).
     this.scanner.setContext('shop-floor');
-    this.scanner.start();
+    this.scanner.restart();
 
     interval(REFRESH_INTERVAL_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
