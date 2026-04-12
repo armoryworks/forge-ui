@@ -7,6 +7,7 @@ import { PurchaseOrderListItem } from '../models/purchase-order-list-item.model'
 import { PurchaseOrderDetail } from '../models/purchase-order-detail.model';
 import { CreatePurchaseOrderRequest } from '../models/create-purchase-order-request.model';
 import { ReceiveItemsRequest } from '../models/receive-items-request.model';
+import { PurchaseOrderRelease, CreatePurchaseOrderReleaseRequest, UpdatePurchaseOrderReleaseRequest } from '../models/purchase-order-release.model';
 
 @Injectable({ providedIn: 'root' })
 export class PurchaseOrderService {
@@ -56,5 +57,19 @@ export class PurchaseOrderService {
 
   deletePurchaseOrder(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  // ── Blanket PO Releases ──
+
+  getReleases(poId: number): Observable<PurchaseOrderRelease[]> {
+    return this.http.get<PurchaseOrderRelease[]>(`${this.base}/${poId}/releases`);
+  }
+
+  createRelease(poId: number, request: CreatePurchaseOrderReleaseRequest): Observable<PurchaseOrderRelease> {
+    return this.http.post<PurchaseOrderRelease>(`${this.base}/${poId}/releases`, request);
+  }
+
+  updateRelease(poId: number, releaseNum: number, request: UpdatePurchaseOrderReleaseRequest): Observable<void> {
+    return this.http.patch<void>(`${this.base}/${poId}/releases/${releaseNum}`, request);
   }
 }

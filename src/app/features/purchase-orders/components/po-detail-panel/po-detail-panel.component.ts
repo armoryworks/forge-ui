@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal, computed } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -7,21 +8,32 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderService } from '../../services/purchase-order.service';
 import { PurchaseOrderDetail } from '../../models/purchase-order-detail.model';
+import { PurchaseOrderRelease, CreatePurchaseOrderReleaseRequest } from '../../models/purchase-order-release.model';
 import { ReceiveDialogComponent } from '../receive-dialog/receive-dialog.component';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-po-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, TranslatePipe,
+    DatePipe, CurrencyPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     ReceiveDialogComponent, LoadingBlockDirective,
+    DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
+    ValidationPopoverDirective,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',
@@ -40,6 +52,9 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly po = signal<PurchaseOrderDetail | null>(null);
   protected readonly loading = signal(false);
   protected readonly showReceiveDialog = signal(false);
+  protected readonly releases = signal<PurchaseOrderRelease[]>([]);
+  protected readonly showCreateReleaseDialog = signal(false);
+  protected readonly releaseSaving = signal(false);
 
   ngOnInit(): void {
     this.loadDetail();
@@ -48,7 +63,11 @@ export class PoDetailPanelComponent implements OnInit {
   protected loadDetail(): void {
     this.loading.set(true);
     this.poService.getPurchaseOrderById(this.purchaseOrderId()).subscribe({
-      next: (detail) => { this.po.set(detail); this.loading.set(false); },
+      next: (detail) => {
+        this.po.set(detail);
+        this.loading.set(false);
+        if (detail.isBlanket) this.loadReleases();
+      },
       error: () => this.loading.set(false),
     });
   }
@@ -148,6 +167,74 @@ export class PoDetailPanelComponent implements OnInit {
         },
       });
     });
+  }
+
+  // --- Releases ---
+  protected readonly lineOptions = computed<SelectOption[]>(() => {
+    const po = this.po();
+    if (!po) return [];
+    return po.lines.map(l => ({ value: l.id, label: `${l.partNumber} — ${l.description}` }));
+  });
+
+  protected readonly releaseForm = new FormGroup({
+    purchaseOrderLineId: new FormControl<number | null>(null, [Validators.required]),
+    quantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    requestedDeliveryDate: new FormControl<Date | null>(null, [Validators.required]),
+    notes: new FormControl(''),
+  });
+
+  protected readonly releaseViolations = FormValidationService.getViolations(this.releaseForm, {
+    purchaseOrderLineId: 'Line Item',
+    quantity: 'Quantity',
+    requestedDeliveryDate: 'Delivery Date',
+  });
+
+  protected loadReleases(): void {
+    const po = this.po();
+    if (!po?.isBlanket) return;
+    this.poService.getReleases(po.id).subscribe({
+      next: (data) => this.releases.set(data),
+    });
+  }
+
+  protected openCreateRelease(): void {
+    this.releaseForm.reset();
+    this.showCreateReleaseDialog.set(true);
+  }
+
+  protected saveRelease(): void {
+    const po = this.po();
+    if (!po || this.releaseForm.invalid) return;
+    this.releaseSaving.set(true);
+    const form = this.releaseForm.getRawValue();
+    const request: CreatePurchaseOrderReleaseRequest = {
+      purchaseOrderLineId: form.purchaseOrderLineId!,
+      quantity: form.quantity!,
+      requestedDeliveryDate: toIsoDate(form.requestedDeliveryDate!)!,
+      notes: form.notes || undefined,
+    };
+    this.poService.createRelease(po.id, request).subscribe({
+      next: () => {
+        this.snackbar.success('Release created');
+        this.showCreateReleaseDialog.set(false);
+        this.releaseSaving.set(false);
+        this.loadReleases();
+        this.loadDetail();
+        this.changed.emit();
+      },
+      error: () => this.releaseSaving.set(false),
+    });
+  }
+
+  protected getReleaseStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      Open: 'chip--info',
+      Sent: 'chip--primary',
+      PartialReceived: 'chip--warning',
+      Received: 'chip--success',
+      Cancelled: 'chip--error',
+    };
+    return `chip ${map[status] ?? ''}`.trim();
   }
 
   // --- Helpers ---

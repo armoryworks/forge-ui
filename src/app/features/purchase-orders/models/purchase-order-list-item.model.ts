@@ -10,5 +10,6 @@ export interface PurchaseOrderListItem {
   totalOrdered: number;
   totalReceived: number;
   expectedDeliveryDate: Date | null;
+  isBlanket: boolean;
   createdAt: Date;
 }

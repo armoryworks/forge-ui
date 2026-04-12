@@ -56,6 +56,46 @@
         }
       </div>
 
+      <!-- Blanket PO Info -->
+      @if (po.isBlanket) {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Type</span>
+            <span class="info-value"><span class="chip chip--primary">Blanket PO</span></span>
+          </div>
+          @if (po.blanketTotalQuantity != null) {
+            <div class="info-item">
+              <span class="info-label">Total Qty</span>
+              <span class="info-value">{{ po.blanketTotalQuantity }}</span>
+            </div>
+          }
+          @if (po.blanketReleasedQuantity != null) {
+            <div class="info-item">
+              <span class="info-label">Released</span>
+              <span class="info-value">{{ po.blanketReleasedQuantity }}</span>
+            </div>
+          }
+          @if (po.blanketRemainingQuantity != null) {
+            <div class="info-item">
+              <span class="info-label">Remaining</span>
+              <span class="info-value">{{ po.blanketRemainingQuantity }}</span>
+            </div>
+          }
+          @if (po.agreedUnitPrice != null) {
+            <div class="info-item">
+              <span class="info-label">Agreed Price</span>
+              <span class="info-value">{{ po.agreedUnitPrice | currency }}</span>
+            </div>
+          }
+          @if (po.blanketExpirationDate) {
+            <div class="info-item">
+              <span class="info-label">Expires</span>
+              <span class="info-value">{{ po.blanketExpirationDate | date:'MM/dd/yyyy' }}</span>
+            </div>
+          }
+        </div>
+      }
+
       <app-barcode-info
         entityType="PurchaseOrder"
         [entityId]="po.id"
@@ -105,6 +145,44 @@
           </table>
         }
       </div>
+
+      <!-- Releases Section (Blanket POs only) -->
+      @if (po.isBlanket) {
+        <div class="lines-section">
+          <div class="lines-section__header">
+            <span class="info-label">Releases ({{ releases().length }})</span>
+            <button class="action-btn action-btn--sm" (click)="openCreateRelease()">
+              <span class="material-icons-outlined">add</span> New Release
+            </button>
+          </div>
+          @if (releases().length > 0) {
+            <table class="lines-table" aria-label="Purchase order releases">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Part</th>
+                  <th scope="col" class="lines-table__right">Qty</th>
+                  <th scope="col">Req. Delivery</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (rel of releases(); track rel.id) {
+                  <tr>
+                    <td>{{ rel.releaseNumber }}</td>
+                    <td class="lines-table__mono">{{ rel.partNumber }}</td>
+                    <td class="lines-table__right">{{ rel.quantity }}</td>
+                    <td>{{ rel.requestedDeliveryDate | date:'MM/dd/yyyy' }}</td>
+                    <td><span [class]="getReleaseStatusClass(rel.status)">{{ rel.status }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="lines-section__empty">No releases yet</div>
+          }
+        </div>
+      }
 
       <div class="info-grid">
         <div class="info-item">
@@ -169,4 +247,23 @@
     [purchaseOrder]="po()!"
     (closed)="closeReceiveDialog()"
     (saved)="onReceiveSaved()" />
+}
+
+<!-- Create Release Dialog -->
+@if (showCreateReleaseDialog()) {
+  <app-dialog title="Create Release" width="420px" (closed)="showCreateReleaseDialog.set(false)">
+    <div [formGroup]="releaseForm">
+      <app-select label="Line Item" formControlName="purchaseOrderLineId" [options]="lineOptions()" [required]="true" />
+      <app-input label="Quantity" type="number" formControlName="quantity" [required]="true" />
+      <app-datepicker label="Requested Delivery Date" formControlName="requestedDeliveryDate" [required]="true" />
+      <app-textarea label="Notes" formControlName="notes" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showCreateReleaseDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="releaseViolations"
+        [disabled]="releaseForm.invalid || releaseSaving()"
+        (click)="saveRelease()">Create</button>
+    </div>
+  </app-dialog>
 }
