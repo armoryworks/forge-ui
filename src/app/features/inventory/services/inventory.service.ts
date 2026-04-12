@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { AtpResult, AtpBucket } from '../models/atp.model';
 import { StorageLocation } from '../models/storage-location.model';
 import { StorageLocationFlat } from '../models/storage-location-flat.model';
 import { BinContentItem } from '../models/bin-content-item.model';
@@ -179,5 +180,19 @@ export class InventoryService {
     if (partId) params = params.set('partId', partId.toString());
     return this.http.get<{ convertedQuantity: number; conversionFactor: number }>(
       `${this.base}/uom/convert`, { params });
+  }
+
+  // ── ATP ──
+
+  getAtp(partId: number, quantity = 1): Observable<AtpResult> {
+    const params = new HttpParams().set('quantity', quantity.toString());
+    return this.http.get<AtpResult>(`${this.base}/atp/${partId}`, { params });
+  }
+
+  getAtpTimeline(partId: number, from?: string, to?: string): Observable<AtpBucket[]> {
+    let params = new HttpParams();
+    if (from) params = params.set('from', from);
+    if (to) params = params.set('to', to);
+    return this.http.get<AtpBucket[]>(`${this.base}/atp/${partId}/timeline`, { params });
   }
 }
