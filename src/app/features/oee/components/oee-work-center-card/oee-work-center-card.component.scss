@@ -1,0 +1,99 @@
+@use 'styles/variables' as *;
+
+.oee-card {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  padding: $sp-lg;
+  cursor: pointer;
+  transition: border-color $transition-fast;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary);
+    outline: none;
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: $font-size-title;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__badge .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--warning);
+  }
+
+  &__gauge {
+    text-align: center;
+    padding: $sp-md 0;
+
+    &-value {
+      display: block;
+      font-size: $font-size-kpi;
+      font-weight: 700;
+      font-family: $font-family-mono;
+    }
+
+    &-label {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+  }
+
+  &__factors {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-sm;
+    text-align: center;
+  }
+
+  &__factor {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+
+    &-label {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    &-value {
+      font-size: $font-size-sm;
+      font-family: $font-family-mono;
+      font-weight: 600;
+      color: var(--text);
+    }
+  }
+
+  &__stats {
+    display: flex;
+    justify-content: space-between;
+    border-top: $border-width-thin solid var(--border);
+    padding-top: $sp-sm;
+  }
+
+  &__stat {
+    font-size: $font-size-xxs;
+    color: var(--text-secondary);
+    font-family: $font-family-mono;
+  }
+}
+
+.oee-gauge--world-class .oee-card__gauge-value { color: var(--success); }
+.oee-gauge--good .oee-card__gauge-value { color: var(--primary); }
+.oee-gauge--fair .oee-card__gauge-value { color: var(--warning); }
+.oee-gauge--poor .oee-card__gauge-value { color: var(--error); }

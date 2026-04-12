@@ -1,0 +1,15 @@
+<div class="oee-trend-chart">
+  @if (data().length > 0) {
+    <canvas baseChart
+      [type]="chartConfig().type"
+      [data]="chartConfig().data"
+      [options]="chartConfig().options"
+      aria-label="OEE trend chart showing availability, performance, quality, and overall OEE over time">
+    </canvas>
+  } @else {
+    <div class="oee-trend-chart__empty">
+      <span class="material-icons-outlined">show_chart</span>
+      <span>No trend data available for this period</span>
+    </div>
+  }
+</div>

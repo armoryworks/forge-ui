@@ -1,0 +1,55 @@
+<app-page-layout pageTitle="OEE Dashboard">
+  <ng-container toolbar>
+    <app-date-range-picker
+      label="Period"
+      [presets]="['Last 30 Days', 'This Month', 'This Week']"
+      [formControl]="dateRangeControl" />
+    <span appSpacer></span>
+    <app-kpi-chip label="Avg OEE" [value]="(averageOee() | number:'1.1-1') + '%'"
+      [valueColor]="averageOee() >= 85 ? 'success' : averageOee() >= 60 ? 'primary' : 'warn'" />
+    <app-kpi-chip label="World Class" [value]="worldClassCount() + '/' + workCenters().length"
+      valueColor="success" />
+  </ng-container>
+
+  <ng-container content>
+    <div class="oee-page" [appLoadingBlock]="loading()">
+      @if (workCenters().length === 0 && !loading()) {
+        <app-empty-state icon="precision_manufacturing" message="No work centers with production data found for this period" />
+      } @else {
+        <!-- Work Center Grid -->
+        <section class="oee-page__grid" aria-label="Work center OEE overview">
+          @for (wc of workCenters(); track wc.workCenterId) {
+            <app-oee-work-center-card
+              [data]="wc"
+              [class.oee-page__card--selected]="selectedWorkCenterId() === wc.workCenterId"
+              (selected)="selectWorkCenter($event)" />
+          }
+        </section>
+
+        <!-- Detail Panel -->
+        @if (selectedWorkCenter()) {
+          <section class="oee-page__detail" [appLoadingBlock]="detailLoading()">
+            <div class="oee-page__detail-header">
+              <h3 class="oee-page__detail-title">{{ selectedWorkCenter()!.workCenterName }} — Detail</h3>
+              <app-select label="Granularity" [formControl]="granularityControl" [options]="granularityOptions" />
+            </div>
+
+            <div class="oee-page__charts">
+              <div class="oee-page__chart-section">
+                <h4 class="oee-page__section-label">OEE TREND</h4>
+                <app-oee-trend-chart [data]="trendData()" />
+              </div>
+
+              <div class="oee-page__chart-section">
+                <h4 class="oee-page__section-label">SIX BIG LOSSES</h4>
+                @if (lossesData()) {
+                  <app-six-big-losses-chart [data]="lossesData()!" />
+                }
+              </div>
+            </div>
+          </section>
+        }
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

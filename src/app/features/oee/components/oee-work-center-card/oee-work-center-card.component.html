@@ -1,0 +1,39 @@
+<div class="oee-card" (click)="selected.emit(data().workCenterId)" role="button" tabindex="0"
+     [attr.aria-label]="data().workCenterName + ' OEE: ' + data().oeePercent.toFixed(1) + '%'"
+     (keydown.enter)="selected.emit(data().workCenterId)"
+     (keydown.space)="selected.emit(data().workCenterId)">
+  <div class="oee-card__header">
+    <span class="oee-card__name">{{ data().workCenterName }}</span>
+    @if (data().isWorldClass) {
+      <span class="oee-card__badge" aria-label="World class OEE">
+        <span class="material-icons-outlined">star</span>
+      </span>
+    }
+  </div>
+
+  <div class="oee-card__gauge" [class]="getOeeClass(data().oeePercent)">
+    <span class="oee-card__gauge-value">{{ data().oeePercent | number:'1.1-1' }}%</span>
+    <span class="oee-card__gauge-label">OEE</span>
+  </div>
+
+  <div class="oee-card__factors">
+    <div class="oee-card__factor">
+      <span class="oee-card__factor-label">Availability</span>
+      <span class="oee-card__factor-value">{{ (data().availability * 100) | number:'1.1-1' }}%</span>
+    </div>
+    <div class="oee-card__factor">
+      <span class="oee-card__factor-label">Performance</span>
+      <span class="oee-card__factor-value">{{ (data().performance * 100) | number:'1.1-1' }}%</span>
+    </div>
+    <div class="oee-card__factor">
+      <span class="oee-card__factor-label">Quality</span>
+      <span class="oee-card__factor-value">{{ (data().quality * 100) | number:'1.1-1' }}%</span>
+    </div>
+  </div>
+
+  <div class="oee-card__stats">
+    <span class="oee-card__stat">{{ data().totalQuantity }} total</span>
+    <span class="oee-card__stat">{{ data().goodQuantity }} good</span>
+    <span class="oee-card__stat">{{ data().scrapQuantity }} scrap</span>
+  </div>
+</div>

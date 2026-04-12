@@ -1,0 +1,21 @@
+<div class="six-big-losses">
+  @if (data().totalLossMinutes > 0) {
+    <div class="six-big-losses__total">
+      Total Loss: <strong>{{ data().totalLossMinutes | number:'1.0-0' }} min</strong>
+      ({{ (data().totalLossMinutes / 60) | number:'1.1-1' }} hrs)
+    </div>
+    <div class="six-big-losses__chart">
+      <canvas baseChart
+        [type]="chartConfig().type"
+        [data]="chartConfig().data"
+        [options]="chartConfig().options"
+        aria-label="Six big losses breakdown chart">
+      </canvas>
+    </div>
+  } @else {
+    <div class="six-big-losses__empty">
+      <span class="material-icons-outlined">check_circle</span>
+      <span>No losses recorded for this period</span>
+    </div>
+  }
+</div>
