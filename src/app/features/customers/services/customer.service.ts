@@ -11,6 +11,7 @@ import { UpdateCustomerRequest } from '../models/update-customer-request.model';
 import { CreateContactRequest } from '../models/create-contact-request.model';
 import { UpdateContactRequest } from '../models/update-contact-request.model';
 import { ContactInteraction, ContactInteractionRequest } from '../models/contact-interaction.model';
+import { CreditStatus } from '../models/credit-status.model';
 
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
@@ -54,6 +55,24 @@ export class CustomerService {
 
   getCustomerSummary(id: number): Observable<CustomerSummary> {
     return this.http.get<CustomerSummary>(`${this.base}/${id}/summary`);
+  }
+
+  // ─── Credit Management ───
+
+  getCreditStatus(customerId: number): Observable<CreditStatus> {
+    return this.http.get<CreditStatus>(`${this.base}/${customerId}/credit-status`);
+  }
+
+  placeCreditHold(customerId: number, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${customerId}/credit-hold`, { reason });
+  }
+
+  releaseCreditHold(customerId: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${customerId}/credit-release`, {});
+  }
+
+  getCreditRiskReport(): Observable<CreditStatus[]> {
+    return this.http.get<CreditStatus[]>(`${this.base}/credit-risk-report`);
   }
 
   // ─── Contact Interactions ───

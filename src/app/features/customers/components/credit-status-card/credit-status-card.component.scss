@@ -1,0 +1,95 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.credit-card {
+  border: $border-width-thin solid var(--border);
+  padding: $sp-lg;
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $sp-md;
+  }
+
+  &__title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+
+  &__hold-banner {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: var(--error-light);
+    color: var(--error);
+    margin-bottom: $sp-md;
+    font-size: $font-size-sm;
+
+    .material-icons-outlined {
+      font-size: $icon-size-lg;
+    }
+
+    p {
+      margin: $sp-xs 0 0;
+      font-size: $font-size-xs;
+    }
+
+    .action-btn {
+      margin-left: auto;
+    }
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $sp-sm $sp-md;
+    margin-bottom: $sp-md;
+  }
+
+  &__metric {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__metric-label {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__metric-value {
+    font-size: $font-size-sm;
+    font-weight: 600;
+
+    &--danger {
+      color: var(--error);
+    }
+  }
+
+  &__bar-container {
+    margin-bottom: $sp-md;
+  }
+
+  &__bar {
+    height: $progress-bar-height;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  &__bar-fill {
+    height: 100%;
+    background: var(--primary);
+    transition: width $transition-normal;
+
+    &--danger {
+      background: var(--error);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}

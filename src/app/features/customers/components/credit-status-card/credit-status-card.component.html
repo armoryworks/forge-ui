@@ -1,0 +1,77 @@
+<section class="credit-card" [appLoadingBlock]="loading()">
+  @if (credit(); as c) {
+    <div class="credit-card__header">
+      <h3 class="credit-card__title">Credit Status</h3>
+      <span class="chip" [class]="'chip--' + riskClass(c.riskLevel)">{{ c.riskLevel }}</span>
+    </div>
+
+    @if (c.isOnHold) {
+      <div class="credit-card__hold-banner">
+        <span class="material-icons-outlined">block</span>
+        <div>
+          <strong>Credit Hold</strong>
+          @if (c.holdReason) {
+            <p>{{ c.holdReason }}</p>
+          }
+        </div>
+        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="releaseHold()">Release</button>
+      </div>
+    }
+
+    <div class="credit-card__metrics">
+      <div class="credit-card__metric">
+        <span class="credit-card__metric-label">Credit Limit</span>
+        <span class="credit-card__metric-value">{{ c.creditLimit !== null ? (c.creditLimit | currency) : 'None' }}</span>
+      </div>
+      <div class="credit-card__metric">
+        <span class="credit-card__metric-label">Open AR</span>
+        <span class="credit-card__metric-value">{{ c.openArBalance | currency }}</span>
+      </div>
+      <div class="credit-card__metric">
+        <span class="credit-card__metric-label">Pending Orders</span>
+        <span class="credit-card__metric-value">{{ c.pendingOrdersTotal | currency }}</span>
+      </div>
+      <div class="credit-card__metric">
+        <span class="credit-card__metric-label">Total Exposure</span>
+        <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.isOverLimit">{{ c.totalExposure | currency }}</span>
+      </div>
+      @if (c.creditLimit !== null) {
+        <div class="credit-card__metric">
+          <span class="credit-card__metric-label">Available Credit</span>
+          <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.availableCredit < 0">{{ c.availableCredit | currency }}</span>
+        </div>
+        <div class="credit-card__metric">
+          <span class="credit-card__metric-label">Utilization</span>
+          <span class="credit-card__metric-value">{{ c.utilizationPercent | number:'1.0-1' }}%</span>
+        </div>
+      }
+    </div>
+
+    @if (c.creditLimit !== null) {
+      <div class="credit-card__bar-container">
+        <div class="credit-card__bar">
+          <div class="credit-card__bar-fill" [class.credit-card__bar-fill--danger]="c.isOverLimit" [style.width.%]="barWidth(c)"></div>
+        </div>
+      </div>
+    }
+
+    @if (!c.isOnHold) {
+      <div class="credit-card__actions">
+        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="openHoldDialog()" aria-label="Place credit hold">
+          <span class="material-icons-outlined">block</span> Place Hold
+        </button>
+      </div>
+    }
+  }
+</section>
+
+@if (showHoldDialog()) {
+  <app-dialog title="Place Credit Hold" width="440px" (closed)="showHoldDialog.set(false)">
+    <p class="text-muted">Customer will be blocked from new orders while on hold.</p>
+    <app-textarea label="Hold Reason" [formControl]="holdReason" [rows]="3" [required]="true" [maxlength]="500" />
+    <div dialog-footer>
+      <button class="action-btn" (click)="showHoldDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary" [disabled]="holdReason.invalid || saving()" (click)="placeHold()">Place Hold</button>
+    </div>
+  </app-dialog>
+}
