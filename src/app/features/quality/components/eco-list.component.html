@@ -1,0 +1,188 @@
+<div class="filters-bar">
+  <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadEcos()" />
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table tableId="eco-list" [columns]="columns" [data]="ecos()"
+    emptyIcon="engineering" emptyMessage="No engineering change orders found"
+    [clickableRows]="true" (rowClick)="openDetail($any($event))">
+    <ng-template appColumnCell="changeType" let-row>
+      <span class="chip chip--muted">{{ getStatusLabel(row.changeType) }}</span>
+    </ng-template>
+    <ng-template appColumnCell="priority" let-row>
+      <span [class]="getPriorityClass(row.priority)">{{ row.priority }}</span>
+    </ng-template>
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+    </ng-template>
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ row.createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+    <ng-template appColumnCell="actions" let-row>
+      <button class="icon-btn" aria-label="View ECO details" matTooltip="View details" (click)="openDetail(row); $event.stopPropagation()">
+        <span class="material-icons-outlined">visibility</span>
+      </button>
+    </ng-template>
+  </app-data-table>
+</div>
+
+<!-- Create ECO Dialog -->
+@if (showCreateDialog()) {
+  <app-dialog title="Create Engineering Change Order" width="520px" (closed)="showCreateDialog.set(false)">
+    <div [formGroup]="createForm">
+      <app-input label="Title" formControlName="title" [required]="true" data-testid="eco-title" />
+      <div class="dialog-row">
+        <app-select label="Change Type" formControlName="changeType" [options]="changeTypeOptions" [required]="true" data-testid="eco-change-type" />
+        <app-select label="Priority" formControlName="priority" [options]="priorityOptions" [required]="true" data-testid="eco-priority" />
+      </div>
+      <app-textarea label="Description" formControlName="description" [required]="true" data-testid="eco-description" />
+      <app-textarea label="Reason for Change" formControlName="reasonForChange" data-testid="eco-reason" />
+      <app-textarea label="Impact Analysis" formControlName="impactAnalysis" data-testid="eco-impact" />
+      <app-datepicker label="Effective Date" formControlName="effectiveDate" data-testid="eco-effective-date" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="createViolations"
+        [disabled]="createForm.invalid || saving()"
+        (click)="saveEco()" data-testid="eco-save-btn">Create</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- ECO Detail Dialog -->
+@if (showDetailDialog() && selectedEco(); as eco) {
+  <app-dialog [title]="eco.ecoNumber + ' — ' + eco.title" width="800px" (closed)="closeDetail()">
+    <div class="eco-detail">
+      <!-- Header Info -->
+      <div class="eco-detail__header">
+        <div class="eco-detail__meta">
+          <span [class]="getStatusClass(eco.status)">{{ getStatusLabel(eco.status) }}</span>
+          <span [class]="getPriorityClass(eco.priority)">{{ eco.priority }}</span>
+          <span class="chip chip--muted">{{ getStatusLabel(eco.changeType) }}</span>
+        </div>
+        <div class="eco-detail__info">
+          <div class="eco-detail__field">
+            <span class="eco-detail__label">Requested By</span>
+            <span class="eco-detail__value">{{ eco.requestedByName }}</span>
+          </div>
+          <div class="eco-detail__field">
+            <span class="eco-detail__label">Created</span>
+            <span class="eco-detail__value">{{ eco.createdAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+          @if (eco.effectiveDate) {
+            <div class="eco-detail__field">
+              <span class="eco-detail__label">Effective Date</span>
+              <span class="eco-detail__value">{{ eco.effectiveDate }}</span>
+            </div>
+          }
+          @if (eco.approvedByName) {
+            <div class="eco-detail__field">
+              <span class="eco-detail__label">Approved By</span>
+              <span class="eco-detail__value">{{ eco.approvedByName }} &middot; {{ eco.approvedAt | date:'MM/dd/yyyy' }}</span>
+            </div>
+          }
+          @if (eco.implementedAt) {
+            <div class="eco-detail__field">
+              <span class="eco-detail__label">Implemented</span>
+              <span class="eco-detail__value">{{ eco.implementedAt | date:'MM/dd/yyyy' }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="eco-detail__section">
+        <h4 class="eco-detail__section-title">Description</h4>
+        <p class="eco-detail__text">{{ eco.description }}</p>
+      </div>
+
+      @if (eco.reasonForChange) {
+        <div class="eco-detail__section">
+          <h4 class="eco-detail__section-title">Reason for Change</h4>
+          <p class="eco-detail__text">{{ eco.reasonForChange }}</p>
+        </div>
+      }
+
+      @if (eco.impactAnalysis) {
+        <div class="eco-detail__section">
+          <h4 class="eco-detail__section-title">Impact Analysis</h4>
+          <p class="eco-detail__text">{{ eco.impactAnalysis }}</p>
+        </div>
+      }
+
+      <!-- Affected Items -->
+      <div class="eco-detail__section">
+        <div class="eco-detail__section-header">
+          <h4 class="eco-detail__section-title">Affected Items ({{ eco.affectedItems.length }})</h4>
+          @if (canEdit(eco)) {
+            <button class="action-btn action-btn--sm" (click)="openAddItem()">
+              <span class="material-icons-outlined">add</span> Add Item
+            </button>
+          }
+        </div>
+        @if (eco.affectedItems.length > 0) {
+          <app-data-table tableId="eco-affected-items" [columns]="affectedItemColumns" [data]="eco.affectedItems"
+            emptyIcon="list" emptyMessage="No affected items">
+            <ng-template appColumnCell="entityType" let-row>
+              <span class="chip chip--muted">{{ row.entityType }}</span>
+            </ng-template>
+            <ng-template appColumnCell="isImplemented" let-row>
+              @if (row.isImplemented) {
+                <span class="material-icons-outlined eco-detail__check" aria-label="Implemented">check_circle</span>
+              } @else {
+                <span class="material-icons-outlined eco-detail__pending" aria-label="Pending">radio_button_unchecked</span>
+              }
+            </ng-template>
+            <ng-template appColumnCell="actions" let-row>
+              @if (canEdit(eco)) {
+                <button class="icon-btn icon-btn--danger" aria-label="Remove affected item"
+                  (click)="deleteAffectedItem(row); $event.stopPropagation()">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              }
+            </ng-template>
+          </app-data-table>
+        } @else {
+          <p class="eco-detail__empty">No affected items added yet.</p>
+        }
+      </div>
+    </div>
+
+    <div dialog-footer>
+      @if (canApprove(eco)) {
+        <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="approveEco()">
+          <span class="material-icons-outlined">check</span> Approve
+        </button>
+      }
+      @if (canImplement(eco)) {
+        <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="implementEco()">
+          <span class="material-icons-outlined">build</span> Implement
+        </button>
+      }
+      <button class="action-btn" (click)="closeDetail()">Close</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Add Affected Item Dialog -->
+@if (showAddItemDialog()) {
+  <app-dialog title="Add Affected Item" width="520px" (closed)="showAddItemDialog.set(false)">
+    <div [formGroup]="addItemForm">
+      <div class="dialog-row">
+        <app-select label="Entity Type" formControlName="entityType" [options]="entityTypeOptions" [required]="true" />
+        <app-input label="Entity ID" type="number" formControlName="entityId" [required]="true" />
+      </div>
+      <app-textarea label="Change Description" formControlName="changeDescription" [required]="true" />
+      <app-textarea label="Old Value (JSON)" formControlName="oldValue" />
+      <app-textarea label="New Value (JSON)" formControlName="newValue" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showAddItemDialog.set(false)">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="addItemViolations"
+        [disabled]="addItemForm.invalid || saving()"
+        (click)="saveAffectedItem()">Add</button>
+    </div>
+  </app-dialog>
+}

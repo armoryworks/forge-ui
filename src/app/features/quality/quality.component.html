@@ -29,6 +29,12 @@
       New CAPA
     </button>
   }
+  @if (activeTab() === 'ecos') {
+    <button class="action-btn action-btn--primary" (click)="ecoListComponent?.openCreate()">
+      <span class="material-icons-outlined">add</span>
+      New ECO
+    </button>
+  }
 </app-page-header>
 
 <div class="quality-content">
@@ -61,6 +67,10 @@
     <button class="tab" [class.tab--active]="activeTab() === 'capas'" (click)="switchTab('capas')">
       <span class="material-icons-outlined">assignment_turned_in</span>
       CAPAs
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'ecos'" (click)="switchTab('ecos')">
+      <span class="material-icons-outlined">engineering</span>
+      ECOs
     </button>
   </div>
 
@@ -175,6 +185,11 @@
   <!-- CAPAs Tab -->
   @if (activeTab() === 'capas') {
     <app-capa-list />
+  }
+
+  <!-- ECOs Tab -->
+  @if (activeTab() === 'ecos') {
+    <app-eco-list />
   }
 </div>
 

@@ -1,0 +1,88 @@
+@use 'styles/variables' as *;
+
+.eco-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__meta {
+    display: flex;
+    gap: $sp-sm;
+    flex-wrap: wrap;
+  }
+
+  &__info {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: $sp-sm $sp-lg;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: $font-size-sm;
+    color: var(--text);
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__section-title {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  &__check {
+    color: var(--success);
+    font-size: $icon-size-md;
+  }
+
+  &__pending {
+    color: var(--text-muted);
+    font-size: $icon-size-md;
+  }
+
+  &__empty {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    margin: 0;
+    padding: $sp-md;
+    text-align: center;
+  }
+}

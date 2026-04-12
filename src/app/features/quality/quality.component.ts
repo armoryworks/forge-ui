@@ -32,10 +32,11 @@ import { SpcDataEntryComponent } from './components/spc-data-entry.component';
 import { SpcOocListComponent } from './components/spc-ooc-list.component';
 import { NcrListComponent } from './components/ncr-list.component';
 import { CapaListComponent } from './components/capa-list.component';
+import { EcoListComponent } from './components/eco-list.component';
 
-type QualityTab = 'inspections' | 'lots' | 'spc-charts' | 'spc-data' | 'spc-ooc' | 'ncrs' | 'capas';
+type QualityTab = 'inspections' | 'lots' | 'spc-charts' | 'spc-data' | 'spc-ooc' | 'ncrs' | 'capas' | 'ecos';
 
-const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data', 'spc-ooc', 'ncrs', 'capas'];
+const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data', 'spc-ooc', 'ncrs', 'capas', 'ecos'];
 
 @Component({
   selector: 'app-quality',
@@ -49,7 +50,7 @@ const VALID_TABS: QualityTab[] = ['inspections', 'lots', 'spc-charts', 'spc-data
     TranslatePipe, MatTooltipModule,
     SpcCharacteristicsComponent, SpcChartComponent,
     SpcDataEntryComponent, SpcOocListComponent,
-    NcrListComponent, CapaListComponent,
+    NcrListComponent, CapaListComponent, EcoListComponent,
   ],
   templateUrl: './quality.component.html',
   styleUrl: './quality.component.scss',
@@ -66,6 +67,7 @@ export class QualityComponent {
   @ViewChild(SpcCharacteristicsComponent) spcCharsComponent?: SpcCharacteristicsComponent;
   @ViewChild(NcrListComponent) ncrListComponent?: NcrListComponent;
   @ViewChild(CapaListComponent) capaListComponent?: CapaListComponent;
+  @ViewChild(EcoListComponent) ecoListComponent?: EcoListComponent;
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
