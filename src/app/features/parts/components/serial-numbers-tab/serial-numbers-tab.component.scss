@@ -1,0 +1,143 @@
+@use 'styles/variables' as *;
+
+.serial-tab {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+}
+
+.serial-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-sm $sp-lg;
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+
+    &--full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__section-title {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+}
+
+.serial-history {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__entry {
+    padding: $sp-sm $sp-md;
+    border-left: $border-width-accent solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__action {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+
+  &__arrow {
+    font-size: $icon-size-xs;
+  }
+
+  &__date {
+    margin-left: auto;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__details {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+}
+
+.genealogy-tree {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.genealogy-node {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-sm;
+
+  &__icon {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__serial {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    font-family: $font-family-mono;
+  }
+
+  &__part {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+}

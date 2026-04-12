@@ -1,0 +1,181 @@
+<div class="serial-tab">
+  <div class="serial-tab__toolbar">
+    <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
+      (selectionChange)="applyStatusFilter()" />
+    <span class="serial-tab__spacer"></span>
+    <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreate()">
+      <span class="material-icons-outlined">add</span> New Serial
+    </button>
+  </div>
+
+  <div [appLoadingBlock]="loading()">
+    @if (serials().length > 0) {
+      <app-data-table
+        tableId="part-serials"
+        [columns]="columns"
+        [data]="serials()"
+        [clickableRows]="true"
+        emptyIcon="qr_code_2"
+        emptyMessage="No serial numbers"
+        (rowClick)="openDetail($any($event))">
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+        </ng-template>
+        <ng-template appColumnCell="manufacturedAt" let-row>
+          {{ row.manufacturedAt | date:'MM/dd/yyyy' }}
+        </ng-template>
+      </app-data-table>
+    } @else {
+      <app-empty-state icon="qr_code_2" message="No serial numbers registered for this part" />
+    }
+  </div>
+</div>
+
+<!-- Create Serial Dialog -->
+@if (showCreateDialog()) {
+  <app-dialog title="Create Serial Number" width="420px" (closed)="closeCreate()">
+    <div [formGroup]="createForm">
+      <app-input label="Serial Number" formControlName="serialValue" [required]="true"
+        data-testid="serial-value" />
+      <app-textarea label="Notes" formControlName="notes" [rows]="3"
+        data-testid="serial-notes" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreate()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="createForm.invalid || saving()"
+        (click)="saveSerial()"
+        data-testid="serial-save-btn">Save</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Serial Detail Dialog -->
+@if (showDetailDialog() && selectedSerial(); as serial) {
+  <app-dialog [title]="'Serial: ' + serial.serialValue" width="600px" (closed)="closeDetail()">
+    <div class="serial-detail">
+      <div class="serial-detail__header">
+        <span [class]="getStatusClass(serial.status)">{{ serial.status }}</span>
+        <button class="action-btn action-btn--sm" (click)="openGenealogy(serial)"
+          aria-label="View genealogy">
+          <span class="material-icons-outlined">account_tree</span> Genealogy
+        </button>
+      </div>
+
+      <div class="serial-detail__grid">
+        <div class="serial-detail__item">
+          <span class="serial-detail__label">Part</span>
+          <span class="serial-detail__value">{{ serial.partNumber }}</span>
+        </div>
+        @if (serial.jobNumber) {
+          <div class="serial-detail__item">
+            <span class="serial-detail__label">Job</span>
+            <span class="serial-detail__value">{{ serial.jobNumber }}</span>
+          </div>
+        }
+        @if (serial.currentLocationName) {
+          <div class="serial-detail__item">
+            <span class="serial-detail__label">Location</span>
+            <span class="serial-detail__value">{{ serial.currentLocationName }}</span>
+          </div>
+        }
+        @if (serial.customerName) {
+          <div class="serial-detail__item">
+            <span class="serial-detail__label">Customer</span>
+            <span class="serial-detail__value">{{ serial.customerName }}</span>
+          </div>
+        }
+        @if (serial.parentSerialValue) {
+          <div class="serial-detail__item">
+            <span class="serial-detail__label">Parent Serial</span>
+            <span class="serial-detail__value">{{ serial.parentSerialValue }}</span>
+          </div>
+        }
+        @if (serial.manufacturedAt) {
+          <div class="serial-detail__item">
+            <span class="serial-detail__label">Manufactured</span>
+            <span class="serial-detail__value">{{ serial.manufacturedAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (serial.shippedAt) {
+          <div class="serial-detail__item">
+            <span class="serial-detail__label">Shipped</span>
+            <span class="serial-detail__value">{{ serial.shippedAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+        }
+        @if (serial.notes) {
+          <div class="serial-detail__item serial-detail__item--full">
+            <span class="serial-detail__label">Notes</span>
+            <span class="serial-detail__value">{{ serial.notes }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="serial-detail__section">
+        <h4 class="serial-detail__section-title">History</h4>
+        <div [appLoadingBlock]="historyLoading()">
+          @if (serialHistory().length > 0) {
+            <div class="serial-history">
+              @for (entry of serialHistory(); track entry.id) {
+                <div class="serial-history__entry">
+                  <div class="serial-history__action">{{ entry.action }}</div>
+                  <div class="serial-history__meta">
+                    @if (entry.fromLocationName) {
+                      <span>{{ entry.fromLocationName }}</span>
+                      <span class="material-icons-outlined serial-history__arrow">arrow_forward</span>
+                    }
+                    @if (entry.toLocationName) {
+                      <span>{{ entry.toLocationName }}</span>
+                    }
+                    <span class="serial-history__date">{{ entry.occurredAt | date:'MM/dd/yyyy HH:mm' }}</span>
+                  </div>
+                  @if (entry.details) {
+                    <div class="serial-history__details">{{ entry.details }}</div>
+                  }
+                </div>
+              }
+            </div>
+          } @else {
+            <app-empty-state icon="history" message="No history entries" />
+          }
+        </div>
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDetail()">Close</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Genealogy Dialog -->
+@if (showGenealogyDialog()) {
+  <app-dialog title="Serial Genealogy" width="600px" (closed)="closeGenealogy()">
+    <div [appLoadingBlock]="genealogyLoading()">
+      @if (genealogy(); as tree) {
+        <div class="genealogy-tree">
+          <ng-container *ngTemplateOutlet="genealogyNode; context: { $implicit: tree, depth: 0 }" />
+        </div>
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeGenealogy()">Close</button>
+    </div>
+  </app-dialog>
+}
+
+<ng-template #genealogyNode let-node let-depth="depth">
+  <div class="genealogy-node" [style.padding-left.px]="depth * 24">
+    <span class="material-icons-outlined genealogy-node__icon">
+      {{ node.children?.length > 0 ? 'account_tree' : 'qr_code_2' }}
+    </span>
+    <span class="genealogy-node__serial">{{ node.serialValue }}</span>
+    <span class="genealogy-node__part">{{ node.partNumber }}</span>
+    <span [class]="getStatusClass(node.status)">{{ node.status }}</span>
+  </div>
+  @if (node.children) {
+    @for (child of node.children; track child.id) {
+      <ng-container *ngTemplateOutlet="genealogyNode; context: { $implicit: child, depth: depth + 1 }" />
+    }
+  }
+</ng-template>

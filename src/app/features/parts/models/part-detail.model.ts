@@ -23,6 +23,7 @@ export interface PartDetail {
   reorderQuantity: number | null;
   leadTimeDays: number | null;
   safetyStockDays: number | null;
+  isSerialTracked: boolean;
   toolingAssetId: number | null;
   toolingAssetName: string | null;
   bomEntries: BOMEntry[];

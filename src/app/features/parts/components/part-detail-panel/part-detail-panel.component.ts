@@ -36,6 +36,7 @@ import { RoutingComponent } from '../routing/routing.component';
 import { BomTreeComponent } from '../bom-tree/bom-tree.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { PartAlternatesTabComponent } from '../part-alternates-tab/part-alternates-tab.component';
+import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-tab.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 type BomViewMode = 'table' | 'tree';
@@ -50,6 +51,7 @@ type BomViewMode = 'table' | 'tree';
     EntityPickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationPopoverDirective,
     StlViewerComponent, FileUploadZoneComponent, BarcodeInfoComponent,
     RoutingComponent, BomTreeComponent, EntityActivitySectionComponent, PartAlternatesTabComponent,
+    SerialNumbersTabComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
   styleUrl: './part-detail-panel.component.scss',
@@ -68,7 +70,7 @@ export class PartDetailPanelComponent {
 
   protected readonly part = signal<PartDetail | null>(null);
   protected readonly detailLoading = signal(false);
-  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'process' | 'viewer' | 'files' | 'alternates'>('info');
+  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'process' | 'viewer' | 'files' | 'alternates' | 'serials'>('info');
 
   // ── BOM view mode ──
   protected readonly bomViewMode = signal<BomViewMode>('table');

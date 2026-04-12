@@ -51,6 +51,13 @@
         (click)="detailTab.set('alternates')">
         Alternates
       </button>
+      @if (part.isSerialTracked) {
+        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'serials'"
+          (click)="detailTab.set('serials')">
+          <span class="material-icons-outlined detail-tab__icon">qr_code_2</span>
+          Serials
+        </button>
+      }
       @if (stlFile()) {
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'viewer'"
           (click)="detailTab.set('viewer')">
@@ -396,6 +403,11 @@
         <!-- Alternates Tab -->
         @if (detailTab() === 'alternates') {
           <app-part-alternates-tab [partId]="part.id" />
+        }
+
+        <!-- Serials Tab -->
+        @if (detailTab() === 'serials') {
+          <app-serial-numbers-tab [partId]="part.id" />
         }
 
         <!-- 3D Viewer Tab -->
