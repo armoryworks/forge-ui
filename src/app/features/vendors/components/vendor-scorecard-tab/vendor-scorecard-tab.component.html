@@ -1,0 +1,92 @@
+<div [appLoadingBlock]="loading()">
+  @if (scorecard(); as sc) {
+    <div class="scorecard">
+      <div class="scorecard__header">
+        <div class="scorecard__grade">
+          <span class="scorecard__grade-value chip" [class]="'chip--' + gradeClass(sc.grade)">{{ sc.grade }}</span>
+          <span class="scorecard__score">{{ sc.overallScore | number:'1.0-1' }} / 100</span>
+        </div>
+        <span class="scorecard__period">{{ sc.periodStart }} — {{ sc.periodEnd }}</span>
+      </div>
+
+      <div class="scorecard__kpis">
+        <app-kpi-chip label="On-Time Delivery" [value]="(sc.onTimeDeliveryPercent | number:'1.0-1') + '%'" />
+        <app-kpi-chip label="Quality Acceptance" [value]="(sc.qualityAcceptancePercent | number:'1.0-1') + '%'" />
+        <app-kpi-chip label="Qty Accuracy" [value]="(sc.quantityAccuracyPercent | number:'1.0-1') + '%'" />
+        <app-kpi-chip label="Total Spend" [value]="(sc.totalSpend | currency) ?? ''" />
+      </div>
+
+      <div class="scorecard__sections">
+        <section class="scorecard__section">
+          <h4 class="scorecard__section-title">Delivery (40%)</h4>
+          <div class="detail-rows">
+            <div class="detail-row">
+              <span class="detail-row__label">Total POs</span>
+              <span class="detail-row__value">{{ sc.totalPurchaseOrders }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">Lines Received</span>
+              <span class="detail-row__value">{{ sc.totalLinesReceived }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">On-Time</span>
+              <span class="detail-row__value">{{ sc.onTimeDeliveryPercent | number:'1.0-1' }}%</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">Late Deliveries</span>
+              <span class="detail-row__value">{{ sc.lateDeliveries }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="scorecard__section">
+          <h4 class="scorecard__section-title">Quality (30%)</h4>
+          <div class="detail-rows">
+            <div class="detail-row">
+              <span class="detail-row__label">Inspected</span>
+              <span class="detail-row__value">{{ sc.totalInspected }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">Rejected</span>
+              <span class="detail-row__value">{{ sc.totalRejected }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">NCRs</span>
+              <span class="detail-row__value">{{ sc.totalNcrs }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">Acceptance Rate</span>
+              <span class="detail-row__value">{{ sc.qualityAcceptancePercent | number:'1.0-1' }}%</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="scorecard__section">
+          <h4 class="scorecard__section-title">Price (20%)</h4>
+          <div class="detail-rows">
+            <div class="detail-row">
+              <span class="detail-row__label">Total Spend</span>
+              <span class="detail-row__value">{{ sc.totalSpend | currency }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-row__label">Avg Price Variance</span>
+              <span class="detail-row__value">{{ sc.avgPriceVariancePercent | number:'1.0-1' }}%</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="scorecard__section">
+          <h4 class="scorecard__section-title">Quantity (10%)</h4>
+          <div class="detail-rows">
+            <div class="detail-row">
+              <span class="detail-row__label">Qty Accuracy</span>
+              <span class="detail-row__value">{{ sc.quantityAccuracyPercent | number:'1.0-1' }}%</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  } @else if (!loading()) {
+    <app-empty-state icon="analytics" message="No scorecard data available" />
+  }
+</div>

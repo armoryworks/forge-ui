@@ -20,6 +20,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
+import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scorecard-tab.component';
 
 @Component({
   selector: 'app-vendor-detail-panel',
@@ -30,7 +31,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
     TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     EmptyStateComponent, LoadingBlockDirective,
-    VendorDialogComponent, EntityActivitySectionComponent,
+    VendorDialogComponent, EntityActivitySectionComponent, VendorScorecardTabComponent,
   ],
   templateUrl: './vendor-detail-panel.component.html',
   styleUrl: './vendor-detail-panel.component.scss',
@@ -48,7 +49,7 @@ export class VendorDetailPanelComponent {
 
   protected readonly loading = signal(false);
   protected readonly vendor = signal<VendorDetail | null>(null);
-  protected readonly activeTab = signal<'info' | 'purchase-orders'>('info');
+  protected readonly activeTab = signal<'info' | 'purchase-orders' | 'scorecard'>('info');
 
   // Inline edit dialog
   protected readonly showEditDialog = signal(false);

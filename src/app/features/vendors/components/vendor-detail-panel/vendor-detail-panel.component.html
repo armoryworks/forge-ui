@@ -27,6 +27,9 @@
       <button class="tab" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
         {{ 'vendors.purchaseOrders' | translate }} ({{ vendor.purchaseOrders.length }})
       </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'scorecard'" (click)="activeTab.set('scorecard')">
+        Scorecard
+      </button>
     </div>
 
     <!-- Body -->
@@ -147,6 +150,10 @@
             </ng-template>
           </app-data-table>
         }
+      }
+
+      @if (activeTab() === 'scorecard') {
+        <app-vendor-scorecard-tab [vendorId]="vendor.id" />
       }
     </div>
   }

@@ -8,6 +8,7 @@ import { VendorDetail } from '../models/vendor-detail.model';
 import { VendorResponse } from '../models/vendor-response.model';
 import { CreateVendorRequest } from '../models/create-vendor-request.model';
 import { UpdateVendorRequest } from '../models/update-vendor-request.model';
+import { VendorScorecard, VendorComparisonRow } from '../models/vendor-scorecard.model';
 
 @Injectable({ providedIn: 'root' })
 export class VendorService {
@@ -39,5 +40,19 @@ export class VendorService {
 
   deleteVendor(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getVendorScorecard(vendorId: number, dateFrom?: string, dateTo?: string): Observable<VendorScorecard> {
+    let params = new HttpParams();
+    if (dateFrom) params = params.set('dateFrom', dateFrom);
+    if (dateTo) params = params.set('dateTo', dateTo);
+    return this.http.get<VendorScorecard>(`${this.base}/${vendorId}/scorecard`, { params });
+  }
+
+  getPerformanceReport(dateFrom?: string, dateTo?: string): Observable<VendorComparisonRow[]> {
+    let params = new HttpParams();
+    if (dateFrom) params = params.set('dateFrom', dateFrom);
+    if (dateTo) params = params.set('dateTo', dateTo);
+    return this.http.get<VendorComparisonRow[]>(`${this.base}/performance-report`, { params });
   }
 }

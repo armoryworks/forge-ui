@@ -1,0 +1,56 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.scorecard {
+  &__header {
+    @include flex-between;
+    margin-bottom: $sp-lg;
+  }
+
+  &__grade {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__grade-value {
+    font-size: $font-size-lg;
+    font-weight: 700;
+    min-width: 32px;
+    text-align: center;
+  }
+
+  &__score {
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  &__period {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: $sp-md;
+    margin-bottom: $sp-lg;
+  }
+
+  &__sections {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $sp-lg;
+  }
+
+  &__section {
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+  }
+
+  &__section-title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+    margin-bottom: $sp-md;
+  }
+}
