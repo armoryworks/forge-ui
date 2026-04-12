@@ -1,6 +1,9 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, RouterStateSnapshot } from '@angular/router';
 import { LayoutService } from '../services/layout.service';
+
+/** Desktop routes that work fine on mobile — don't redirect these. */
+const MOBILE_EXEMPT_PREFIXES = ['/account', '/onboarding'];
 
 /**
  * Redirects mobile devices to the `/m/` mobile UI.
@@ -8,11 +11,15 @@ import { LayoutService } from '../services/layout.service';
  * Users can opt out by setting `preferDesktop` in sessionStorage
  * (e.g., via a "View Desktop Site" link in the mobile UI).
  */
-export const mobileRedirectGuard: CanActivateFn = () => {
+export const mobileRedirectGuard: CanActivateFn = (_route, state: RouterStateSnapshot) => {
   const layout = inject(LayoutService);
   const router = inject(Router);
 
   if (layout.isMobileDevice() && sessionStorage.getItem('preferDesktop') !== 'true') {
+    // Allow certain desktop routes that work on mobile
+    if (MOBILE_EXEMPT_PREFIXES.some(prefix => state.url.startsWith(prefix))) {
+      return true;
+    }
     return router.createUrlTree(['/m']);
   }
 

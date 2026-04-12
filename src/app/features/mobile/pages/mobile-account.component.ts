@@ -142,6 +142,7 @@ export class MobileAccountComponent {
   protected readonly user = this.authService.user;
 
   protected openDesktop(): void {
+    sessionStorage.setItem('preferDesktop', 'true');
     this.router.navigate(['/dashboard']);
   }
 
