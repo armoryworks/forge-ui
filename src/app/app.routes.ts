@@ -103,6 +103,12 @@ export const routes: Routes = [
           import('./features/vendors/vendors.routes').then((m) => m.VENDORS_ROUTES),
       },
       {
+        path: 'purchasing',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
+        loadChildren: () =>
+          import('./features/purchasing/purchasing.routes').then((m) => m.PURCHASING_ROUTES),
+      },
+      {
         path: 'purchase-orders',
         canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>

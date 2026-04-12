@@ -1,0 +1,22 @@
+<app-page-header title="RFQs" subtitle="Request for Quotes">
+  <button data-testid="new-rfq-btn" class="action-btn action-btn--primary" (click)="openCreateDialog()">
+    <span class="material-icons-outlined">add</span>
+    New RFQ
+  </button>
+</app-page-header>
+
+<div class="purchasing-layout">
+  <div class="purchasing-list-panel">
+    <div class="filters-bar">
+      <app-input label="Search" [formControl]="searchControl" placeholder="Search RFQs..."
+        (keyup.enter)="applyFilters()" />
+      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <app-rfq-list [data]="rfqs()" [loading]="loading()" (rowClicked)="openRfqDetail($event)" />
+  </div>
+</div>
+
+@if (showCreateDialog()) {
+  <app-rfq-dialog (closed)="closeCreateDialog()" (saved)="onCreateSaved()" />
+}

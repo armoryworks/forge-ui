@@ -1,0 +1,92 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.rfq-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  min-height: 300px;
+}
+
+.rfq-detail__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.info-label {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.info-value {
+  font-size: $font-size-base;
+  color: var(--text);
+}
+
+.info-value--link {
+  color: var(--primary);
+  font-family: $font-family-mono;
+  font-weight: 600;
+}
+
+.info-block {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.info-text {
+  margin: 0;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  white-space: pre-wrap;
+}
+
+.rfq-detail__actions {
+  display: flex;
+  gap: $sp-md;
+}
+
+.rfq-detail__form-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+}
+
+.section-title {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-md;
+}
+
+.rfq-detail__responses {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.vendor-cell {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}

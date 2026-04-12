@@ -1,0 +1,169 @@
+<app-dialog [title]="rfq()?.rfqNumber ?? 'RFQ Detail'" width="800px" (closed)="close()">
+  <div class="rfq-detail" [appLoadingBlock]="loading()">
+    @if (rfq(); as rfq) {
+      <!-- Info Section -->
+      <div class="rfq-detail__info">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Part</span>
+            <span class="info-value">{{ rfq.partNumber }} — {{ rfq.partDescription }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Quantity</span>
+            <span class="info-value">{{ rfq.quantity }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Required Date</span>
+            <span class="info-value">{{ rfq.requiredDate | date:'MM/dd/yyyy' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Status</span>
+            <span class="info-value">{{ rfq.status }}</span>
+          </div>
+          @if (rfq.responseDeadline) {
+            <div class="info-item">
+              <span class="info-label">Response Deadline</span>
+              <span class="info-value">{{ rfq.responseDeadline | date:'MM/dd/yyyy' }}</span>
+            </div>
+          }
+          @if (rfq.sentAt) {
+            <div class="info-item">
+              <span class="info-label">Sent At</span>
+              <span class="info-value">{{ rfq.sentAt | date:'MM/dd/yyyy hh:mm' }}</span>
+            </div>
+          }
+          @if (rfq.awardedAt) {
+            <div class="info-item">
+              <span class="info-label">Awarded At</span>
+              <span class="info-value">{{ rfq.awardedAt | date:'MM/dd/yyyy hh:mm' }}</span>
+            </div>
+          }
+          @if (rfq.generatedPurchaseOrderId) {
+            <div class="info-item">
+              <span class="info-label">Generated PO</span>
+              <span class="info-value info-value--link">PO #{{ rfq.generatedPurchaseOrderId }}</span>
+            </div>
+          }
+        </div>
+        @if (rfq.description) {
+          <div class="info-block">
+            <span class="info-label">Description</span>
+            <p class="info-text">{{ rfq.description }}</p>
+          </div>
+        }
+        @if (rfq.specialInstructions) {
+          <div class="info-block">
+            <span class="info-label">Special Instructions</span>
+            <p class="info-text">{{ rfq.specialInstructions }}</p>
+          </div>
+        }
+        @if (rfq.notes) {
+          <div class="info-block">
+            <span class="info-label">Notes</span>
+            <p class="info-text">{{ rfq.notes }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="rfq-detail__actions">
+        @if (canSend()) {
+          <button class="action-btn action-btn--sm" (click)="toggleSendForm()" aria-label="Send to vendors">
+            <span class="material-icons-outlined">send</span> Send to Vendors
+          </button>
+        }
+        @if (canRecordResponse()) {
+          <button class="action-btn action-btn--sm" (click)="toggleResponseForm()" aria-label="Record response">
+            <span class="material-icons-outlined">edit_note</span> Record Response
+          </button>
+        }
+      </div>
+
+      <!-- Send to Vendors Form -->
+      @if (showSendForm()) {
+        <div class="rfq-detail__form-section">
+          <span class="section-title">SEND TO VENDORS</span>
+          <app-select label="Vendors" [formControl]="sendVendorControl" [options]="vendorOptions()" [multiple]="true" [required]="true" />
+          <div class="form-actions">
+            <button class="action-btn action-btn--sm" (click)="toggleSendForm()">Cancel</button>
+            <button class="action-btn action-btn--sm action-btn--primary"
+              [disabled]="!sendVendorControl.value?.length || saving()"
+              (click)="sendToVendors()">
+              <span class="material-icons-outlined">send</span> Send
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Record Response Form -->
+      @if (showResponseForm()) {
+        <div class="rfq-detail__form-section" [formGroup]="responseForm">
+          <span class="section-title">RECORD VENDOR RESPONSE</span>
+          <app-select label="Vendor" formControlName="vendorId" [options]="pendingVendorOptions()" [required]="true" />
+          <div class="dialog-row">
+            <app-input label="Unit Price" type="number" formControlName="unitPrice" />
+            <app-input label="Lead Time (days)" type="number" formControlName="leadTimeDays" />
+          </div>
+          <div class="dialog-row">
+            <app-input label="MOQ" type="number" formControlName="minimumOrderQuantity" />
+            <app-input label="Tooling Cost" type="number" formControlName="toolingCost" />
+          </div>
+          <app-datepicker label="Quote Valid Until" formControlName="quoteValidUntil" />
+          <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+          <div class="form-actions">
+            <button class="action-btn action-btn--sm" (click)="toggleResponseForm()">Cancel</button>
+            <button class="action-btn action-btn--sm action-btn--primary"
+              [appValidationPopover]="responseViolations"
+              [disabled]="responseForm.invalid || saving()"
+              (click)="recordResponse()">
+              <span class="material-icons-outlined">save</span> Record
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- Vendor Responses Table -->
+      <div class="rfq-detail__responses">
+        <span class="section-title">VENDOR RESPONSES ({{ rfq.vendorResponses.length }})</span>
+        <app-data-table tableId="rfq-responses" [columns]="responseColumns" [data]="rfq.vendorResponses"
+          emptyIcon="group" emptyMessage="No vendor responses yet">
+          <ng-template appColumnCell="responseStatus" let-row>
+            <span [class]="getResponseStatusClass(row.responseStatus)">{{ row.responseStatus }}</span>
+          </ng-template>
+          <ng-template appColumnCell="unitPrice" let-row>
+            <span>{{ row.unitPrice !== null ? (row.unitPrice | currency) : '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="leadTimeDays" let-row>
+            <span>{{ row.leadTimeDays !== null ? row.leadTimeDays + ' days' : '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="minimumOrderQuantity" let-row>
+            <span>{{ row.minimumOrderQuantity ?? '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="toolingCost" let-row>
+            <span>{{ row.toolingCost !== null ? (row.toolingCost | currency) : '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="quoteValidUntil" let-row>
+            <span class="text-muted">{{ row.quoteValidUntil ? (row.quoteValidUntil | date:'MM/dd/yyyy') : '—' }}</span>
+          </ng-template>
+          <ng-template appColumnCell="vendorName" let-row>
+            <div class="vendor-cell">
+              <span>{{ row.vendorName }}</span>
+              @if (canAward() && isReceived(row)) {
+                <button class="action-btn action-btn--sm action-btn--primary" (click)="awardVendor(row)" aria-label="Award to vendor">
+                  Award
+                </button>
+              }
+              @if (row.isAwarded) {
+                <span class="chip chip--success">Awarded</span>
+              }
+            </div>
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Close</button>
+  </div>
+</app-dialog>

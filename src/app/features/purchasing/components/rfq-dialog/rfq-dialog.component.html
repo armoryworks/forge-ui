@@ -1,0 +1,23 @@
+<app-dialog [title]="isEdit ? 'Edit RFQ' : 'New RFQ'" width="520px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-select data-testid="rfq-part" label="Part" formControlName="partId" [options]="partOptions()" [required]="true" />
+    <div class="dialog-row">
+      <app-input data-testid="rfq-quantity" label="Quantity" type="number" formControlName="quantity" [required]="true" />
+      <app-datepicker data-testid="rfq-required-date" label="Required Date" formControlName="requiredDate" />
+    </div>
+    <app-datepicker data-testid="rfq-response-deadline" label="Response Deadline" formControlName="responseDeadline" />
+    <app-textarea data-testid="rfq-description" label="Description" formControlName="description" [rows]="3" />
+    <app-textarea data-testid="rfq-special-instructions" label="Special Instructions" formControlName="specialInstructions" [rows]="3" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button data-testid="rfq-save-btn" class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()">
+      <span class="material-icons-outlined">save</span>
+      {{ isEdit ? 'Update' : 'Create RFQ' }}
+    </button>
+  </div>
+</app-dialog>

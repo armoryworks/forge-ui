@@ -69,6 +69,7 @@ export class SidebarComponent {
         { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
         { icon: 'local_shipping', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'event_note', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', allowedRoles: ['Admin', 'Manager'] },
