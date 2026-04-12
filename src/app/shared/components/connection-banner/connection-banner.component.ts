@@ -1,12 +1,16 @@
 import {
-  ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal,
+  ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal,
 } from '@angular/core';
 
 import { TranslateService } from '@ngx-translate/core';
 
 import { SignalrService } from '../../services/signalr.service';
 
-const STARTUP_GRACE_MS = 8_000;
+/** Don't show the banner during initial app load. */
+const STARTUP_GRACE_MS = 10_000;
+
+/** Only show the banner after the connection has been down for this long. */
+const DEBOUNCE_MS = 5_000;
 
 @Component({
   selector: 'app-connection-banner',
@@ -15,11 +19,15 @@ const STARTUP_GRACE_MS = 8_000;
   styleUrl: './connection-banner.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ConnectionBannerComponent implements OnInit {
+export class ConnectionBannerComponent implements OnInit, OnDestroy {
   private readonly signalr = inject(SignalrService);
   private readonly translate = inject(TranslateService);
   private readonly startupReady = signal(false);
   private readonly dismissed = signal(false);
+
+  /** Becomes true only after connection has been down for DEBOUNCE_MS. */
+  private readonly debouncedDisconnected = signal(false);
+  private debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   protected readonly state = this.signalr.connectionState;
 
@@ -35,14 +43,26 @@ export class ConnectionBannerComponent implements OnInit {
     if (!this.startupReady()) return false;
     if (this.dismissed()) return false;
     if (!this.signalr.hasEverConnected()) return false;
-    return this.state() === 'reconnecting' || this.state() === 'disconnected';
+    return this.debouncedDisconnected();
   });
 
   constructor() {
-    // Auto-clear dismissed state when connection recovers
+    // Debounce disconnection state to avoid flashing banner on brief blips
     effect(() => {
-      if (this.state() === 'connected') {
+      const state = this.state();
+      if (state === 'connected') {
+        // Immediately clear — connection is back
+        this.clearDebounceTimer();
+        this.debouncedDisconnected.set(false);
         this.dismissed.set(false);
+      } else if (state === 'reconnecting' || state === 'disconnected') {
+        // Start debounce timer — only show banner if still disconnected after delay
+        if (!this.debounceTimer && !this.debouncedDisconnected()) {
+          this.debounceTimer = setTimeout(() => {
+            this.debounceTimer = null;
+            this.debouncedDisconnected.set(true);
+          }, DEBOUNCE_MS);
+        }
       }
     });
   }
@@ -51,7 +71,18 @@ export class ConnectionBannerComponent implements OnInit {
     setTimeout(() => this.startupReady.set(true), STARTUP_GRACE_MS);
   }
 
+  ngOnDestroy(): void {
+    this.clearDebounceTimer();
+  }
+
   protected dismiss(): void {
     this.dismissed.set(true);
+  }
+
+  private clearDebounceTimer(): void {
+    if (this.debounceTimer) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
   }
 }
