@@ -12,6 +12,8 @@ import { CreateClockEventRequest } from '../models/create-clock-event-request.mo
 import { PayPeriod } from '../models/pay-period.model';
 import { TimeCorrectionLog } from '../models/time-correction-log.model';
 import { CorrectTimeEntryRequest } from '../models/correct-time-entry-request.model';
+import { OvertimeRule, CreateOvertimeRuleRequest, OvertimeBreakdown } from '../models/overtime.model';
+import { ShiftAssignment, CreateShiftAssignmentRequest } from '../models/shift-assignment.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimeTrackingService {
@@ -77,5 +79,38 @@ export class TimeTrackingService {
     if (from) params = params.set('from', from);
     if (to) params = params.set('to', to);
     return this.http.get<TimeCorrectionLog[]>(`${this.base}/corrections`, { params });
+  }
+
+  // ── Overtime ──
+
+  getOvertimeBreakdown(userId: number, weekOf: string): Observable<OvertimeBreakdown> {
+    const params = new HttpParams().set('weekOf', weekOf);
+    return this.http.get<OvertimeBreakdown>(`${this.base}/overtime/${userId}`, { params });
+  }
+
+  getOvertimeRules(): Observable<OvertimeRule[]> {
+    return this.http.get<OvertimeRule[]>(`${this.base}/overtime-rules`);
+  }
+
+  createOvertimeRule(request: CreateOvertimeRuleRequest): Observable<OvertimeRule> {
+    return this.http.post<OvertimeRule>(`${this.base}/overtime-rules`, request);
+  }
+
+  // ── Shift Assignments ──
+
+  private readonly adminBase = `${environment.apiUrl}/admin`;
+
+  getShiftAssignments(userId?: number): Observable<ShiftAssignment[]> {
+    let params = new HttpParams();
+    if (userId) params = params.set('userId', userId);
+    return this.http.get<ShiftAssignment[]>(`${this.adminBase}/shift-assignments`, { params });
+  }
+
+  createShiftAssignment(request: CreateShiftAssignmentRequest): Observable<ShiftAssignment> {
+    return this.http.post<ShiftAssignment>(`${this.adminBase}/shift-assignments`, request);
+  }
+
+  deleteShiftAssignment(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.adminBase}/shift-assignments/${id}`);
   }
 }
