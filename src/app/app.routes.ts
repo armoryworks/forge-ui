@@ -187,6 +187,12 @@ export const routes: Routes = [
           import('./features/ai/ai.routes').then((m) => m.AI_ROUTES),
       },
       {
+        path: 'mrp',
+        canActivate: [roleGuard('Admin', 'Manager')],
+        loadChildren: () =>
+          import('./features/mrp/mrp.routes').then((m) => m.MRP_ROUTES),
+      },
+      {
         path: 'admin',
         canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>

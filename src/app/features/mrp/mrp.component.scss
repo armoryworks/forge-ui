@@ -1,0 +1,63 @@
+@use 'styles/variables' as *;
+
+.mrp__dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+}
+
+.mrp__kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: $sp-md;
+}
+
+.mrp__actions {
+  display: flex;
+  gap: $sp-md;
+}
+
+.mrp__section-title {
+  font-size: $font-size-xs;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin: 0 0 $sp-md;
+}
+
+.mrp__summary {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  padding: $sp-lg;
+}
+
+.mrp__summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: $sp-md;
+}
+
+.mrp__summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.mrp__summary-label {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.mrp__recent-exceptions {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  padding: $sp-lg;
+}
+
+.tab-panel {
+  padding: $sp-md $sp-lg;
+}
