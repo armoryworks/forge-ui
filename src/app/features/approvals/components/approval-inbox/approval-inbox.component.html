@@ -4,7 +4,7 @@
     [columns]="columns"
     [data]="pending()"
     emptyIcon="task_alt"
-    emptyMessage="No pending approvals">
+    [emptyMessage]="'approvals.inbox.noPending' | translate">
     <ng-template appColumnCell="amount" let-row>
       @if (row.amount !== null) {
         {{ row.amount | currency }}
@@ -21,7 +21,7 @@
           [disabled]="saving()"
           (click)="approve(row)"
           aria-label="Approve request">
-          <span class="material-icons-outlined">check</span> Approve
+          <span class="material-icons-outlined">check</span> {{ 'approvals.inbox.approve' | translate }}
         </button>
         <button class="icon-btn icon-btn--danger"
           [disabled]="saving()"
@@ -35,21 +35,21 @@
 </div>
 
 @if (showRejectDialog()) {
-  <app-dialog title="Reject Approval" width="440px" (closed)="showRejectDialog.set(false)">
+  <app-dialog [title]="'approvals.inbox.rejectTitle' | translate" width="440px" (closed)="showRejectDialog.set(false)">
     <p class="text-muted">
       Rejecting: <strong>{{ rejectTarget()?.entitySummary ?? rejectTarget()?.entityType }}</strong>
     </p>
     <app-textarea
-      label="Reason for Rejection"
+      [label]="'approvals.inbox.reasonLabel' | translate"
       [formControl]="rejectComments"
       [rows]="3"
       [maxlength]="1000"
       [required]="true" />
     <div dialog-footer>
-      <button class="action-btn" (click)="showRejectDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showRejectDialog.set(false)">{{ 'approvals.inbox.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [disabled]="rejectComments.invalid || saving()"
-        (click)="submitReject()">Reject</button>
+        (click)="submitReject()">{{ 'approvals.inbox.reject' | translate }}</button>
     </div>
   </app-dialog>
 }

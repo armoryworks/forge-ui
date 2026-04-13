@@ -2,8 +2,8 @@
   <div class="onboarding__header">
     <span class="material-icons-outlined onboarding__logo">assignment_ind</span>
     <div>
-      <h1 class="onboarding__title">New Employee Onboarding</h1>
-      <p class="onboarding__subtitle">Complete all steps to finish your onboarding paperwork.</p>
+      <h1 class="onboarding__title">{{ 'onboarding.title' | translate }}</h1>
+      <p class="onboarding__subtitle">{{ 'onboarding.subtitle' | translate }}</p>
     </div>
   </div>
 
@@ -11,15 +11,11 @@
     <!-- ── Completion screen ──────────────────────────────────────────────── -->
     <div class="onboarding__complete">
       <span class="material-icons-outlined onboarding__complete-icon">check_circle</span>
-      <h2>Onboarding Complete</h2>
-      <p>
-        Your forms have been submitted and sent for signing. Your employer will
-        review your I-9 identity documents within 3 business days of your start date.
-        You'll receive email confirmations as each document is processed.
-      </p>
+      <h2>{{ 'onboarding.completeTitle' | translate }}</h2>
+      <p>{{ 'onboarding.completeMessage' | translate }}</p>
       <button class="action-btn action-btn--primary" (click)="goToDashboard()">
         <span class="material-icons-outlined">dashboard</span>
-        Go to Dashboard
+        {{ 'onboarding.goToDashboard' | translate }}
       </button>
     </div>
   } @else if (reviewPhase() !== 'idle' && formsToSign().length > 0) {
@@ -28,8 +24,8 @@
 
       <!-- Progress indicator -->
       <div class="onboarding__signing-header">
-        <h2>Review &amp; Sign Your Documents</h2>
-        <p>Review each pre-filled form, then sign it. You can go back to edit if anything looks wrong.</p>
+        <h2>{{ 'onboarding.reviewTitle' | translate }}</h2>
+        <p>{{ 'onboarding.reviewSubtitle' | translate }}</p>
         <div class="onboarding__signing-progress">
           @for (item of formsToSign(); track item.formType; let i = $index) {
             <span class="onboarding__signing-step"
@@ -51,19 +47,19 @@
             <span class="material-icons-outlined">description</span>
             <h3>{{ currentForm()?.formName }}</h3>
             <span class="onboarding__signing-doc-count">
-              Form {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
+              {{ 'onboarding.formCounter' | translate }} {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
             </span>
           </div>
 
           @if (loadingPreview()) {
             <div class="onboarding__pdf-loading">
               <mat-spinner diameter="36" aria-label="Loading PDF preview"></mat-spinner>
-              <span>Generating preview…</span>
+              <span>{{ 'onboarding.generatingPreview' | translate }}</span>
             </div>
           } @else if (pdfSafeUrl()) {
             <p class="onboarding__review-warn">
               <span class="material-icons-outlined">info</span>
-              <span>This is how your form will be filled. If anything is wrong, go back and correct it before signing.</span>
+              <span>{{ 'onboarding.previewWarning' | translate }}</span>
             </p>
             <!-- HTML5 embed — renders the filled PDF natively in the browser -->
             <embed
@@ -74,28 +70,28 @@
           } @else {
             <p class="onboarding__review-warn">
               <span class="material-icons-outlined">info</span>
-              <span>No PDF preview is available for this form. Review the details below and proceed to sign.</span>
+              <span>{{ 'onboarding.noPdfPreview' | translate }}</span>
             </p>
             <div class="onboarding__review-summary">
               @switch (currentForm()?.formType) {
                 @case ('W4') {
-                  <div class="onboarding__review-row"><span>Filing Status</span><strong>{{ w4FilingLabel() }}</strong></div>
-                  <div class="onboarding__review-row"><span>Multiple Jobs</span><strong>{{ _w4Val().multipleJobs ? 'Yes' : 'No' }}</strong></div>
-                  <div class="onboarding__review-row"><span>Exempt from Withholding</span><strong>{{ _w4Val().exemptFromWithholding ? 'Yes' : 'No' }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.filingStatus' | translate }}</span><strong>{{ w4FilingLabel() }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.multipleJobs' | translate }}</span><strong>{{ _w4Val().multipleJobs ? ('onboarding.yes' | translate) : ('onboarding.no' | translate) }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.exemptWithholding' | translate }}</span><strong>{{ _w4Val().exemptFromWithholding ? ('onboarding.yes' | translate) : ('onboarding.no' | translate) }}</strong></div>
                 }
                 @case ('StateWithholding') {
-                  <div class="onboarding__review-row"><span>State</span><strong>{{ selectedStateName() }}</strong></div>
-                  <div class="onboarding__review-row"><span>Filing Status</span><strong>{{ stateFilingLabel() }}</strong></div>
-                  <div class="onboarding__review-row"><span>Allowances</span><strong>{{ _stateVal().stateAllowances ?? 0 }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.state' | translate }}</span><strong>{{ selectedStateName() }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.filingStatus' | translate }}</span><strong>{{ stateFilingLabel() }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.allowances' | translate }}</span><strong>{{ _stateVal().stateAllowances ?? 0 }}</strong></div>
                 }
                 @case ('I9') {
-                  <div class="onboarding__review-row"><span>Citizenship / Work Authorization</span><strong>{{ citizenshipLabel() }}</strong></div>
+                  <div class="onboarding__review-row"><span>{{ 'onboarding.citizenshipAuth' | translate }}</span><strong>{{ citizenshipLabel() }}</strong></div>
                   <div class="onboarding__review-row">
-                    <span>Identity Documents</span>
+                    <span>{{ 'onboarding.identityDocuments' | translate }}</span>
                     <strong>
-                      @if (_i9Val().documentChoice === 'A') { List A document provided }
-                      @else if (_i9Val().documentChoice === 'BC') { List B + List C documents provided }
-                      @else { Not specified }
+                      @if (_i9Val().documentChoice === 'A') { {{ 'onboarding.listADocProvided' | translate }} }
+                      @else if (_i9Val().documentChoice === 'BC') { {{ 'onboarding.listBCDocProvided' | translate }} }
+                      @else { {{ 'onboarding.notSpecified' | translate }} }
                     </strong>
                   </div>
                 }
@@ -106,13 +102,13 @@
           <div class="onboarding__review-actions">
             <button class="action-btn" (click)="goBackToStep(currentForm()?.formType)">
               <span class="material-icons-outlined">arrow_back</span>
-              Go back to edit
+              {{ 'onboarding.goBackToEdit' | translate }}
             </button>
             <button class="action-btn action-btn--primary"
               [disabled]="loadingPreview()"
               (click)="proceedToSign()">
               <span class="material-icons-outlined">draw</span>
-              Looks correct — Sign this form
+              {{ 'onboarding.signForm' | translate }}
             </button>
           </div>
         </div>
@@ -123,21 +119,21 @@
         <div class="onboarding__signing-doc">
           <div class="onboarding__signing-doc-header">
             <span class="material-icons-outlined">draw</span>
-            <h3>Sign: {{ currentForm()?.formName }}</h3>
+            <h3>{{ 'onboarding.signPrefix' | translate }} {{ currentForm()?.formName }}</h3>
             <span class="onboarding__signing-doc-count">
-              Form {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
+              {{ 'onboarding.formCounter' | translate }} {{ currentFormIndex() + 1 }} of {{ formsToSign().length }}
             </span>
           </div>
 
           @if (signingFormInProgress()) {
             <div class="onboarding__pdf-loading">
               <mat-spinner diameter="36" aria-label="Preparing signing session"></mat-spinner>
-              <span>Preparing signing session…</span>
+              <span>{{ 'onboarding.preparingSigningSession' | translate }}</span>
             </div>
           } @else if (currentSigningUrl()) {
             <p class="onboarding__signing-instruction">
               <span class="material-icons-outlined">draw</span>
-              Complete all required fields and apply your signature below.
+              {{ 'onboarding.signInstruction' | translate }}
             </p>
             <docuseal-form
               [attr.data-src]="currentSigningUrl()"
@@ -151,18 +147,18 @@
             @if (pdfSafeUrl()) {
               <button class="action-btn" (click)="backToPreview()">
                 <span class="material-icons-outlined">arrow_back</span>
-                Back to Preview
+                {{ 'onboarding.backToPreview' | translate }}
               </button>
             } @else {
               <button class="action-btn" (click)="goBackToStep(currentForm()?.formType)">
                 <span class="material-icons-outlined">arrow_back</span>
-                Go back to edit
+                {{ 'onboarding.goBackToEdit' | translate }}
               </button>
             }
             @if (!currentFormSigned()) {
               <p class="onboarding__signing-note">
                 <span class="material-icons-outlined">info</span>
-                Complete your signature above to continue to the next form.
+                {{ 'onboarding.completeSignatureNote' | translate }}
               </p>
             }
           </div>
@@ -179,41 +175,37 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 1: Personal Information                                        -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="personalForm" label="Personal Info"
+      <mat-step [stepControl]="personalForm" [label]="'onboarding.steps.personalInfo' | translate"
         aria-label="Personal Information">
         <div class="step-content" [formGroup]="personalForm">
-          <h2 class="step-content__title">Personal Information</h2>
-          <p class="step-content__desc">
-            This information is used to pre-fill your W-4, I-9, and state withholding forms.
-            Enter it once here — you won't need to re-enter it on each form.
-          </p>
+          <h2 class="step-content__title">{{ 'onboarding.personal.title' | translate }}</h2>
+          <p class="step-content__desc">{{ 'onboarding.personal.desc' | translate }}</p>
 
           <div class="step-row step-row--3">
-            <app-input label="First Name" formControlName="firstName" [required]="true" />
-            <app-input label="Middle Name" formControlName="middleName" />
-            <app-input label="Last Name" formControlName="lastName" [required]="true" />
+            <app-input [label]="'onboarding.personal.firstName' | translate" formControlName="firstName" [required]="true" />
+            <app-input [label]="'onboarding.personal.middleName' | translate" formControlName="middleName" />
+            <app-input [label]="'onboarding.personal.lastName' | translate" formControlName="lastName" [required]="true" />
           </div>
 
-          <app-input label="Other Last Names Used (since age 16)" formControlName="otherLastNames"
-            placeholder="Maiden name, prior last name, etc." />
+          <app-input [label]="'onboarding.personal.otherLastNames' | translate" formControlName="otherLastNames"
+            [placeholder]="'onboarding.personal.otherLastNamesPlaceholder' | translate" />
 
           <div class="step-row">
-            <app-datepicker label="Date of Birth" formControlName="dateOfBirth" [required]="true" />
-            <app-input label="Social Security Number" formControlName="ssn"
-              mask="ssn" [required]="true" placeholder="XXX-XX-XXXX" />
+            <app-datepicker [label]="'onboarding.personal.dateOfBirth' | translate" formControlName="dateOfBirth" [required]="true" />
+            <app-input [label]="'onboarding.personal.ssn' | translate" formControlName="ssn"
+              mask="ssn" [required]="true" [placeholder]="'onboarding.personal.ssnPlaceholder' | translate" />
           </div>
 
           <div class="step-row">
-            <app-input label="Email Address" formControlName="email"
+            <app-input [label]="'onboarding.personal.email' | translate" formControlName="email"
               type="email" [required]="true" />
-            <app-input label="Phone Number" formControlName="phone"
+            <app-input [label]="'onboarding.personal.phone' | translate" formControlName="phone"
               mask="phone" [required]="true" />
           </div>
 
           <p class="step-content__note">
             <span class="material-icons-outlined">lock</span>
-            Your SSN and date of birth are encrypted and used only for official
-            tax form submission. They are never stored in plain text.
+            {{ 'onboarding.personal.securityNote' | translate }}
           </p>
         </div>
       </mat-step>
@@ -221,25 +213,22 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 2: Home Address                                                -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="addressForm" label="Address"
+      <mat-step [stepControl]="addressForm" [label]="'onboarding.steps.address' | translate"
         aria-label="Home Address">
         <div class="step-content" [formGroup]="addressForm">
-          <h2 class="step-content__title">Home Address</h2>
-          <p class="step-content__desc">
-            Your residential address is required for W-4, I-9, and state withholding.
-            The state you select also determines which state withholding form applies to you.
-          </p>
+          <h2 class="step-content__title">{{ 'onboarding.addressStep.title' | translate }}</h2>
+          <p class="step-content__desc">{{ 'onboarding.addressStep.desc' | translate }}</p>
 
-          <app-input label="Street Address" formControlName="street1" [required]="true" />
-          <app-input label="Apartment / Suite / Unit" formControlName="street2" />
+          <app-input [label]="'onboarding.addressStep.street1' | translate" formControlName="street1" [required]="true" />
+          <app-input [label]="'onboarding.addressStep.street2' | translate" formControlName="street2" />
 
           <div class="step-row">
-            <app-input label="City" formControlName="city" [required]="true" />
-            <app-select label="State" formControlName="state"
+            <app-input [label]="'onboarding.addressStep.city' | translate" formControlName="city" [required]="true" />
+            <app-select [label]="'onboarding.addressStep.state' | translate" formControlName="state"
               [options]="usStateOptions" [required]="true"
-              placeholder="Select state" />
-            <app-input label="ZIP Code" formControlName="zipCode"
-              mask="zip" [required]="true" placeholder="00000" />
+              [placeholder]="'onboarding.addressStep.statePlaceholder' | translate" />
+            <app-input [label]="'onboarding.addressStep.zipCode' | translate" formControlName="zipCode"
+              mask="zip" [required]="true" [placeholder]="'onboarding.addressStep.zipPlaceholder' | translate" />
           </div>
         </div>
       </mat-step>
@@ -247,52 +236,45 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 3: Federal Tax Withholding (W-4)                              -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="w4Form" label="Federal Tax"
+      <mat-step [stepControl]="w4Form" [label]="'onboarding.steps.federalTax' | translate"
         aria-label="W-4 Federal Tax Withholding">
         <div class="step-content" [formGroup]="w4Form">
-          <h2 class="step-content__title">W-4: Federal Tax Withholding</h2>
+          <h2 class="step-content__title">{{ 'onboarding.w4.title' | translate }}</h2>
 
           <div class="step-content__instructions">
-            <h3>How to complete this form</h3>
+            <h3>{{ 'onboarding.w4.howToComplete' | translate }}</h3>
             <p>
-              <strong>Filing Status (Step 1c):</strong> Choose the status that best describes
-              your situation. This is the most important field and affects every paycheck.
+              <strong>{{ 'onboarding.w4.filingStatusInstructions' | translate }}</strong> {{ 'onboarding.w4.filingStatusDesc' | translate }}
             </p>
             <p>
-              <strong>Multiple Jobs (Step 2):</strong> Check this if you (or your spouse)
-              hold more than one job simultaneously. This prevents under-withholding.
+              <strong>{{ 'onboarding.w4.multipleJobsInstructions' | translate }}</strong> {{ 'onboarding.w4.multipleJobsDesc' | translate }}
             </p>
             <p>
-              <strong>Dependents (Step 3):</strong> Enter the number of qualifying children
-              under 17 (line 3a, worth $2,000 each) and other dependents (line 3b, worth $500
-              each). Most employees leave both at 0.
+              <strong>{{ 'onboarding.w4.dependentsInstructions' | translate }}</strong> {{ 'onboarding.w4.dependentsDesc' | translate }}
             </p>
             <p>
-              <strong>Other Adjustments (Step 4 — Optional):</strong> Use these fields to
-              fine-tune withholding for investment income, itemized deductions, or extra
-              withholding per paycheck.
+              <strong>{{ 'onboarding.w4.otherAdjustmentsInstructions' | translate }}</strong> {{ 'onboarding.w4.otherAdjustmentsDesc' | translate }}
             </p>
             <p>
-              <strong>Exempt:</strong> Only claim exempt if you owed $0 in federal tax
-              last year and expect to owe $0 this year. Most employees do not qualify.
+              <strong>{{ 'onboarding.w4.exemptInstructions' | translate }}</strong> {{ 'onboarding.w4.exemptDesc' | translate }}
             </p>
           </div>
 
-          <app-select label="Filing Status (Step 1c)"
+          <app-select [label]="'onboarding.w4.filingStatusLabel' | translate"
             formControlName="filingStatus"
             [options]="filingStatusOptions"
             [required]="true" />
 
-          <app-toggle label="Multiple jobs or spouse also works (Step 2)"
+          <app-toggle [label]="'onboarding.w4.multipleJobsLabel' | translate"
             formControlName="multipleJobs" />
 
           <!-- Step 3: Claim Dependents -->
           <div class="step-content__subsection">
-            <div class="step-content__subsection-title">Step 3 — Claim Dependents</div>
+            <div class="step-content__subsection-title">{{ 'onboarding.w4.step3Title' | translate }}</div>
 
             <div class="step-content__calc-grid">
               <div class="step-content__calc-row">
-                <app-input label="Qualifying children under age 17 (3a)"
+                <app-input [label]="'onboarding.w4.qualifyingChildren' | translate"
                   formControlName="qualifyingChildren" type="number" [required]="true" />
                 <div class="step-content__calc-display">
                   <span class="step-content__calc-op">× $2,000 =</span>
@@ -301,7 +283,7 @@
               </div>
 
               <div class="step-content__calc-row">
-                <app-input label="Other dependents (3b)"
+                <app-input [label]="'onboarding.w4.otherDependents' | translate"
                   formControlName="otherDependents" type="number" [required]="true" />
                 <div class="step-content__calc-display">
                   <span class="step-content__calc-op">× $500 =</span>
@@ -311,31 +293,30 @@
             </div>
 
             <div class="step-content__calc-total">
-              <span>Total credit amount (line 3)</span>
+              <span>{{ 'onboarding.w4.totalCredit' | translate }}</span>
               <strong>{{ w4Step3Total() | currency:'USD':'symbol':'1.0-0' }}</strong>
             </div>
           </div>
 
           <!-- Step 4: Other Adjustments (optional) -->
           <div class="step-content__subsection">
-            <div class="step-content__subsection-title">Step 4 — Other Adjustments (Optional)</div>
+            <div class="step-content__subsection-title">{{ 'onboarding.w4.step4Title' | translate }}</div>
             <div class="step-row">
-              <app-input label="Other income not from jobs — 4a ($)"
+              <app-input [label]="'onboarding.w4.otherIncome' | translate"
                 formControlName="otherIncome" type="number" />
-              <app-input label="Deductions — 4b ($)"
+              <app-input [label]="'onboarding.w4.deductions' | translate"
                 formControlName="deductions" type="number" />
             </div>
-            <app-input label="Extra withholding per pay period — 4c ($)"
+            <app-input [label]="'onboarding.w4.extraWithholding' | translate"
               formControlName="extraWithholding" type="number" />
           </div>
 
-          <app-toggle label="Claim exempt from federal withholding"
+          <app-toggle [label]="'onboarding.w4.exemptLabel' | translate"
             formControlName="exemptFromWithholding" />
 
           <p class="step-content__note">
             <span class="material-icons-outlined">calculate</span>
-            For the most accurate withholding, use the IRS Withholding Estimator
-            at <strong>irs.gov/W4App</strong> before completing this step.
+            {{ 'onboarding.w4.irsNote' | translate }} <strong>{{ 'onboarding.w4.irsUrl' | translate }}</strong> {{ 'onboarding.w4.irsNoteSuffix' | translate }}
           </p>
         </div>
       </mat-step>
@@ -343,9 +324,9 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 4: State Withholding                                           -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step label="State Tax" aria-label="State Tax Withholding">
+      <mat-step [label]="'onboarding.steps.stateTax' | translate" aria-label="State Tax Withholding">
         <div class="step-content" [formGroup]="stateForm">
-          <h2 class="step-content__title">State Tax Withholding
+          <h2 class="step-content__title">{{ 'onboarding.stateTax.title' | translate }}
             @if (selectedStateName()) {
               <span class="step-content__state-badge">— {{ selectedStateName() }}</span>
             }
@@ -355,39 +336,33 @@
             <div class="step-content__skip-notice">
               <span class="material-icons-outlined">check_circle</span>
               <div>
-                <strong>{{ selectedStateName() }} has no state income tax.</strong>
-                <p>No state withholding certificate is required. Click Continue to proceed.</p>
+                <strong>{{ 'onboarding.stateTax.noIncomeTaxTitle' | translate:{ state: selectedStateName() } }}</strong>
+                <p>{{ 'onboarding.stateTax.noIncomeTaxDesc' | translate }}</p>
               </div>
             </div>
           } @else {
             <div class="step-content__instructions">
-              <h3>Instructions</h3>
+              <h3>{{ 'onboarding.stateTax.instructionsTitle' | translate }}</h3>
+              <p>{{ 'onboarding.stateTax.instructionsDesc' | translate }}</p>
               <p>
-                State withholding varies by state. Enter your filing status and allowances
-                as shown on your state's withholding certificate.
+                <strong>{{ 'onboarding.stateTax.allowancesDesc' | translate }}</strong> {{ 'onboarding.stateTax.allowancesExplain' | translate }}
               </p>
               <p>
-                <strong>Allowances:</strong> Each allowance reduces the amount withheld
-                per paycheck. Claiming more allowances = less withheld; fewer = more withheld.
-                Enter 0 if unsure — your state will apply the default.
-              </p>
-              <p>
-                <strong>Exempt:</strong> Only claim exempt if you owed no state income
-                tax last year and expect none this year.
+                <strong>{{ 'onboarding.stateTax.exemptDesc' | translate }}</strong> {{ 'onboarding.stateTax.exemptExplain' | translate }}
               </p>
             </div>
 
             <div class="step-row">
-              <app-select label="State Filing Status"
+              <app-select [label]="'onboarding.stateTax.filingStatusLabel' | translate"
                 formControlName="stateFilingStatus"
                 [options]="stateFilingOptions"
                 [required]="!stateExempt()" />
-              <app-input label="Allowances"
+              <app-input [label]="'onboarding.stateTax.allowancesLabel' | translate"
                 formControlName="stateAllowances" type="number" />
             </div>
-            <app-input label="Additional withholding per pay period ($)"
+            <app-input [label]="'onboarding.stateTax.additionalWithholding' | translate"
               formControlName="stateAdditionalWithholding" type="number" />
-            <app-toggle label="Claim exempt from state withholding"
+            <app-toggle [label]="'onboarding.stateTax.exemptLabel' | translate"
               formControlName="stateExempt" />
           }
         </div>
@@ -396,83 +371,77 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 5: I-9 Employment Eligibility                                 -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="i9Form" label="I-9"
+      <mat-step [stepControl]="i9Form" [label]="'onboarding.steps.i9' | translate"
         aria-label="I-9 Employment Eligibility">
         <div class="step-content" [formGroup]="i9Form">
-          <h2 class="step-content__title">I-9: Employment Eligibility Verification</h2>
+          <h2 class="step-content__title">{{ 'onboarding.i9.title' | translate }}</h2>
 
           <div class="step-content__instructions">
-            <h3>Section 1 — Employee (Complete by your first day)</h3>
+            <h3>{{ 'onboarding.i9.section1Title' | translate }}</h3>
             <p>
-              Federal law requires you to verify your identity and authorization to work
-              in the U.S. You complete Section 1 now; your employer completes Section 2
-              within <strong>3 business days</strong> of your first day of employment.
+              {{ 'onboarding.i9.section1Desc' | translate }}
+              <strong>{{ 'onboarding.i9.section1Days' | translate }}</strong> {{ 'onboarding.i9.section1Suffix' | translate }}
             </p>
             <p>
-              <strong>Lawful Permanent Residents:</strong> Enter your Alien Registration
-              Number (A-Number, starts with "A") in the field provided.
+              <strong>{{ 'onboarding.i9.lprInstructions' | translate }}</strong> {{ 'onboarding.i9.lprDesc' | translate }}
             </p>
             <p>
-              <strong>Aliens Authorized to Work:</strong> Provide your A-Number, Form I-94
-              Admission Number, or foreign passport details as applicable.
+              <strong>{{ 'onboarding.i9.alienInstructions' | translate }}</strong> {{ 'onboarding.i9.alienDesc' | translate }}
             </p>
           </div>
 
           <div class="step-content__doc-list">
             <div class="step-content__doc-list-header">
               <span class="material-icons-outlined">badge</span>
-              Documents you must present to your employer on your first day
+              {{ 'onboarding.i9.docsHeader' | translate }}
             </div>
             <div class="step-content__doc-columns">
               <div class="step-content__doc-col">
-                <div class="step-content__doc-col-title">List A (any one)</div>
+                <div class="step-content__doc-col-title">{{ 'onboarding.i9.listATitle' | translate }}</div>
                 <ul>
-                  <li>U.S. Passport or Passport Card</li>
-                  <li>Permanent Resident Card (Form I-551)</li>
-                  <li>Employment Authorization Document (Form I-766)</li>
-                  <li>Foreign Passport with I-94 or I-551 stamp</li>
+                  @for (item of ('onboarding.i9.listAItems' | translate); track item) {
+                    <li>{{ item }}</li>
+                  }
                 </ul>
               </div>
-              <div class="step-content__doc-or">OR</div>
+              <div class="step-content__doc-or">{{ 'onboarding.i9.or' | translate }}</div>
               <div class="step-content__doc-col">
-                <div class="step-content__doc-col-title">List B + List C (one each)</div>
+                <div class="step-content__doc-col-title">{{ 'onboarding.i9.listBCTitle' | translate }}</div>
                 <ul>
-                  <li><em>B:</em> Driver's license / State ID card</li>
-                  <li><em>B:</em> School ID with photograph</li>
-                  <li><em>C:</em> U.S. Social Security card</li>
-                  <li><em>C:</em> Birth certificate (certified copy)</li>
+                  @for (item of ('onboarding.i9.listBCItems' | translate); track item) {
+                    <li>{{ item }}</li>
+                  }
                 </ul>
               </div>
             </div>
           </div>
 
-          <app-select label="I am (citizenship / immigration status)"
+          <app-select [label]="'onboarding.i9.citizenshipLabel' | translate"
             formControlName="citizenshipStatus"
             [options]="citizenshipOptions"
             [required]="true" />
 
           @if (i9NeedsAlienInfo()) {
             <div class="step-row">
-              <app-input label="Alien Registration Number (A-Number)"
-                formControlName="alienRegNumber" placeholder="A000000000" />
-              <app-input label="Form I-94 Admission Number"
+              <app-input [label]="'onboarding.i9.alienRegNumber' | translate"
+                formControlName="alienRegNumber" [placeholder]="'onboarding.i9.alienRegPlaceholder' | translate" />
+              <app-input [label]="'onboarding.i9.i94Number' | translate"
                 formControlName="i94Number" />
             </div>
             <div class="step-row">
-              <app-input label="Foreign Passport Number"
+              <app-input [label]="'onboarding.i9.foreignPassport' | translate"
                 formControlName="foreignPassportNumber" />
-              <app-input label="Country of Issuance"
+              <app-input [label]="'onboarding.i9.countryOfIssuance' | translate"
                 formControlName="foreignPassportCountry" />
             </div>
-            <app-datepicker label="Work Authorization Expiration Date"
+            <app-datepicker [label]="'onboarding.i9.workAuthExpiry' | translate"
               formControlName="workAuthExpiry" />
           }
 
           <!-- Document Verification -->
           <div class="step-section">
             <p class="step-content__desc" style="margin:0">
-              Pre-upload copies of your identity documents. Physical originals must be
-              presented to your employer on or before your first day of employment.
+              {{ 'onboarding.i9.docUploadDesc' | translate }}
             </p>
 
             <div class="doc-choice">
@@ -482,38 +451,38 @@
                 aria-label="Select one List A document">
                 <span class="material-icons-outlined">badge</span>
                 <div class="doc-choice__text">
-                  <strong>List A</strong>
-                  <span>One document — U.S. Passport, Permanent Resident Card, or Employment Authorization</span>
+                  <strong>{{ 'onboarding.i9.listAChoice' | translate }}</strong>
+                  <span>{{ 'onboarding.i9.listAChoiceDesc' | translate }}</span>
                 </div>
               </button>
-              <div class="doc-choice__or">OR</div>
+              <div class="doc-choice__or">{{ 'onboarding.i9.or' | translate }}</div>
               <button type="button" class="doc-choice__btn"
                 [class.doc-choice__btn--active]="i9DocumentChoice() === 'BC'"
                 (click)="setDocumentChoice('BC')"
                 aria-label="Select List B and List C documents">
                 <span class="material-icons-outlined">perm_identity</span>
                 <div class="doc-choice__text">
-                  <strong>List B + List C</strong>
-                  <span>Two documents — Identity (e.g., Driver's license) + Employment auth (e.g., SSN card)</span>
+                  <strong>{{ 'onboarding.i9.listBCChoice' | translate }}</strong>
+                  <span>{{ 'onboarding.i9.listBCChoiceDesc' | translate }}</span>
                 </div>
               </button>
             </div>
 
             @if (i9DocumentChoice() === 'A') {
               <div class="step-content__subsection">
-                <div class="step-content__subsection-title">List A — Identity &amp; Work Authorization</div>
-                <app-select label="Document Type" formControlName="listAType"
+                <div class="step-content__subsection-title">{{ 'onboarding.i9.listASubTitle' | translate }}</div>
+                <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listAType"
                   [options]="listATypeOptions" />
                 <div class="step-row">
-                  <app-input label="Document Number" formControlName="listADocNumber" />
-                  <app-input label="Issuing Authority" formControlName="listAAuthority" />
+                  <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listADocNumber" />
+                  <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listAAuthority" />
                 </div>
-                <app-datepicker label="Expiration Date (leave blank if N/A)"
+                <app-datepicker [label]="'onboarding.i9.expirationDate' | translate"
                   formControlName="listAExpiry" />
                 @if (listAAttachment() || _i9Val().listAFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
-                    {{ listAAttachment()?.name ?? 'Document uploaded' }}
+                    {{ listAAttachment()?.name ?? ('onboarding.i9.documentUploaded' | translate) }}
                     <button type="button" class="icon-btn" (click)="clearList('A')"
                       aria-label="Remove uploaded file">
                       <span class="material-icons-outlined">close</span>
@@ -524,10 +493,10 @@
                     [class.doc-upload__zone--loading]="uploadingListA()">
                     @if (uploadingListA()) {
                       <span class="material-icons-outlined spin">sync</span>
-                      Uploading...
+                      {{ 'onboarding.i9.uploading' | translate }}
                     } @else {
                       <span class="material-icons-outlined">cloud_upload</span>
-                      Click to upload List A document (PDF or image)
+                      {{ 'onboarding.i9.uploadListA' | translate }}
                     }
                     <input type="file" accept="image/*,.pdf"
                       (change)="onFileSelected($event, 'A')" />
@@ -538,19 +507,19 @@
 
             @if (i9DocumentChoice() === 'BC') {
               <div class="step-content__subsection">
-                <div class="step-content__subsection-title">List B — Identity Document</div>
-                <app-select label="Document Type" formControlName="listBType"
+                <div class="step-content__subsection-title">{{ 'onboarding.i9.listBSubTitle' | translate }}</div>
+                <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listBType"
                   [options]="listBTypeOptions" />
                 <div class="step-row">
-                  <app-input label="Document Number" formControlName="listBDocNumber" />
-                  <app-input label="Issuing Authority" formControlName="listBAuthority" />
+                  <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listBDocNumber" />
+                  <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listBAuthority" />
                 </div>
-                <app-datepicker label="Expiration Date"
+                <app-datepicker [label]="'onboarding.i9.expirationDateShort' | translate"
                   formControlName="listBExpiry" />
                 @if (listBAttachment() || _i9Val().listBFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
-                    {{ listBAttachment()?.name ?? 'Document uploaded' }}
+                    {{ listBAttachment()?.name ?? ('onboarding.i9.documentUploaded' | translate) }}
                     <button type="button" class="icon-btn" (click)="clearList('B')"
                       aria-label="Remove uploaded file">
                       <span class="material-icons-outlined">close</span>
@@ -561,10 +530,10 @@
                     [class.doc-upload__zone--loading]="uploadingListB()">
                     @if (uploadingListB()) {
                       <span class="material-icons-outlined spin">sync</span>
-                      Uploading...
+                      {{ 'onboarding.i9.uploading' | translate }}
                     } @else {
                       <span class="material-icons-outlined">cloud_upload</span>
-                      Click to upload List B document (PDF or image)
+                      {{ 'onboarding.i9.uploadListB' | translate }}
                     }
                     <input type="file" accept="image/*,.pdf"
                       (change)="onFileSelected($event, 'B')" />
@@ -573,19 +542,19 @@
               </div>
 
               <div class="step-content__subsection">
-                <div class="step-content__subsection-title">List C — Employment Authorization</div>
-                <app-select label="Document Type" formControlName="listCType"
+                <div class="step-content__subsection-title">{{ 'onboarding.i9.listCSubTitle' | translate }}</div>
+                <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listCType"
                   [options]="listCTypeOptions" />
                 <div class="step-row">
-                  <app-input label="Document Number" formControlName="listCDocNumber" />
-                  <app-input label="Issuing Authority" formControlName="listCAuthority" />
+                  <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listCDocNumber" />
+                  <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listCAuthority" />
                 </div>
-                <app-datepicker label="Expiration Date (leave blank if N/A)"
+                <app-datepicker [label]="'onboarding.i9.expirationDate' | translate"
                   formControlName="listCExpiry" />
                 @if (listCAttachment() || _i9Val().listCFileId) {
                   <div class="doc-upload__chip">
                     <span class="material-icons-outlined">attach_file</span>
-                    {{ listCAttachment()?.name ?? 'Document uploaded' }}
+                    {{ listCAttachment()?.name ?? ('onboarding.i9.documentUploaded' | translate) }}
                     <button type="button" class="icon-btn" (click)="clearList('C')"
                       aria-label="Remove uploaded file">
                       <span class="material-icons-outlined">close</span>
@@ -596,10 +565,10 @@
                     [class.doc-upload__zone--loading]="uploadingListC()">
                     @if (uploadingListC()) {
                       <span class="material-icons-outlined spin">sync</span>
-                      Uploading...
+                      {{ 'onboarding.i9.uploading' | translate }}
                     } @else {
                       <span class="material-icons-outlined">cloud_upload</span>
-                      Click to upload List C document (PDF or image)
+                      {{ 'onboarding.i9.uploadListC' | translate }}
                     }
                     <input type="file" accept="image/*,.pdf"
                       (change)="onFileSelected($event, 'C')" />
@@ -611,24 +580,24 @@
 
           <!-- Preparer / Translator -->
           <div class="step-section">
-            <app-toggle label="A preparer or translator helped me complete this form"
+            <app-toggle [label]="'onboarding.i9.preparerToggle' | translate"
               formControlName="preparedByPreparer" />
 
             @if (i9PreparedByPreparer()) {
               <div class="step-row">
-                <app-input label="Preparer First Name"
+                <app-input [label]="'onboarding.i9.preparerFirstName' | translate"
                   formControlName="preparerFirstName" />
-                <app-input label="Preparer Last Name"
+                <app-input [label]="'onboarding.i9.preparerLastName' | translate"
                   formControlName="preparerLastName" />
               </div>
-              <app-input label="Preparer Street Address"
+              <app-input [label]="'onboarding.i9.preparerStreet' | translate"
                 formControlName="preparerAddress" />
               <div class="step-row">
-                <app-input label="City"
+                <app-input [label]="'onboarding.i9.preparerCity' | translate"
                   formControlName="preparerCity" />
-                <app-select label="State" formControlName="preparerState"
+                <app-select [label]="'onboarding.i9.preparerState' | translate" formControlName="preparerState"
                   [options]="usStateOptions" />
-                <app-input label="ZIP Code" formControlName="preparerZip"
+                <app-input [label]="'onboarding.i9.preparerZip' | translate" formControlName="preparerZip"
                   mask="zip" />
               </div>
             }
@@ -639,60 +608,57 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 6: Direct Deposit                                              -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="depositForm" label="Direct Deposit"
+      <mat-step [stepControl]="depositForm" [label]="'onboarding.steps.directDeposit' | translate"
         aria-label="Direct Deposit Authorization">
         <div class="step-content" [formGroup]="depositForm">
-          <h2 class="step-content__title">Direct Deposit Authorization</h2>
-          <p class="step-content__desc">
-            Authorize payroll direct deposit to your bank account. Your routing
-            and account numbers can be found on a check or in your bank's mobile app.
-          </p>
+          <h2 class="step-content__title">{{ 'onboarding.deposit.title' | translate }}</h2>
+          <p class="step-content__desc">{{ 'onboarding.deposit.desc' | translate }}</p>
 
           <div class="step-content__check-hint">
             <div class="step-content__check-diagram">
               <div class="check-field check-field--routing">
-                <div class="check-field__label">Routing #</div>
-                <div class="check-field__value">⑆ 123456789 ⑆</div>
-                <div class="check-field__desc">First 9 digits on bottom-left</div>
+                <div class="check-field__label">{{ 'onboarding.deposit.routingLabel' | translate }}</div>
+                <div class="check-field__value">{{ 'onboarding.deposit.routingValue' | translate }}</div>
+                <div class="check-field__desc">{{ 'onboarding.deposit.routingDesc' | translate }}</div>
               </div>
               <div class="check-field check-field--account">
-                <div class="check-field__label">Account #</div>
-                <div class="check-field__value">0001234567890 ⑈</div>
-                <div class="check-field__desc">Next number after routing</div>
+                <div class="check-field__label">{{ 'onboarding.deposit.accountLabel' | translate }}</div>
+                <div class="check-field__value">{{ 'onboarding.deposit.accountValue' | translate }}</div>
+                <div class="check-field__desc">{{ 'onboarding.deposit.accountDesc' | translate }}</div>
               </div>
             </div>
           </div>
 
-          <app-input label="Bank Name" formControlName="bankName" [required]="true" />
+          <app-input [label]="'onboarding.deposit.bankName' | translate" formControlName="bankName" [required]="true" />
           <div class="step-row">
-            <app-input label="Routing Number (9 digits)"
+            <app-input [label]="'onboarding.deposit.routingNumber' | translate"
               formControlName="routingNumber" [required]="true"
-              placeholder="123456789" [maxlength]="9" />
-            <app-input label="Account Number"
+              [placeholder]="'onboarding.deposit.routingPlaceholder' | translate" [maxlength]="9" />
+            <app-input [label]="'onboarding.deposit.accountNumber' | translate"
               formControlName="accountNumber" [required]="true" />
           </div>
-          <app-select label="Account Type"
+          <app-select [label]="'onboarding.deposit.accountType' | translate"
             formControlName="accountType"
             [options]="accountTypeOptions"
             [required]="true" />
 
-          <div class="step-content__section-label">VOIDED CHECK</div>
+          <div class="step-content__section-label">{{ 'onboarding.deposit.voidedCheck' | translate }}</div>
           @if (!voidedCheckFileName() && !_depositVal().voidedCheckFileId) {
             <label class="doc-upload__zone" [class.doc-upload__zone--uploading]="uploadingVoidedCheck()">
               <input type="file" accept="image/*,.pdf" (change)="onVoidedCheckSelected($event)"
                 style="display:none" [attr.aria-label]="'Upload voided check'" />
               @if (uploadingVoidedCheck()) {
                 <span class="material-icons-outlined doc-upload__spinner">sync</span>
-                <span>Uploading…</span>
+                <span>{{ 'onboarding.deposit.uploadingCheck' | translate }}</span>
               } @else {
                 <span class="material-icons-outlined">cloud_upload</span>
-                <span>Click to upload a voided check (PDF or image)</span>
+                <span>{{ 'onboarding.deposit.uploadVoidedCheck' | translate }}</span>
               }
             </label>
           } @else {
             <div class="doc-upload__attached">
               <span class="material-icons-outlined doc-upload__attached-icon">check_circle</span>
-              <span class="doc-upload__attached-name">{{ voidedCheckFileName() ?? 'Voided check uploaded' }}</span>
+              <span class="doc-upload__attached-name">{{ voidedCheckFileName() ?? ('onboarding.deposit.voidedCheckUploaded' | translate) }}</span>
               <button type="button" class="doc-upload__remove"
                 (click)="clearVoidedCheck()"
                 [attr.aria-label]="'Remove voided check'">
@@ -706,49 +672,35 @@
       <!-- ─────────────────────────────────────────────────────────────────── -->
       <!-- Step 7: Acknowledgments                                             -->
       <!-- ─────────────────────────────────────────────────────────────────── -->
-      <mat-step [stepControl]="ackForm" label="Acknowledge"
+      <mat-step [stepControl]="ackForm" [label]="'onboarding.steps.acknowledge' | translate"
         aria-label="Acknowledgments">
         <div class="step-content" [formGroup]="ackForm">
-          <h2 class="step-content__title">Acknowledgments</h2>
-          <p class="step-content__desc">
-            Review and acknowledge the following required policies to proceed to the
-            document signing step.
-          </p>
+          <h2 class="step-content__title">{{ 'onboarding.ack.title' | translate }}</h2>
+          <p class="step-content__desc">{{ 'onboarding.ack.desc' | translate }}</p>
 
           <div class="ack-card">
             <div class="ack-card__header">
               <span class="material-icons-outlined">health_and_safety</span>
-              <strong>Workers' Compensation</strong>
+              <strong>{{ 'onboarding.ack.workersCompTitle' | translate }}</strong>
             </div>
-            <p class="ack-card__body">
-              I acknowledge that I have been informed of my rights under the workers'
-              compensation laws of my state. I understand that workers' compensation
-              insurance covers work-related injuries and illnesses, and I agree to
-              report any such injury or illness to my supervisor immediately.
-            </p>
-            <app-toggle label="I acknowledge the Workers' Compensation policy"
+            <p class="ack-card__body">{{ 'onboarding.ack.workersCompBody' | translate }}</p>
+            <app-toggle [label]="'onboarding.ack.workersCompToggle' | translate"
               formControlName="workersComp" />
           </div>
 
           <div class="ack-card">
             <div class="ack-card__header">
               <span class="material-icons-outlined">menu_book</span>
-              <strong>Employee Handbook</strong>
+              <strong>{{ 'onboarding.ack.handbookTitle' | translate }}</strong>
             </div>
-            <p class="ack-card__body">
-              I acknowledge that I have received, read, and understood the Employee
-              Handbook. I understand it is not a contract of employment, that it may
-              be updated at any time, and that I agree to comply with all policies
-              and procedures contained within.
-            </p>
-            <app-toggle label="I acknowledge receipt of the Employee Handbook"
+            <p class="ack-card__body">{{ 'onboarding.ack.handbookBody' | translate }}</p>
+            <app-toggle [label]="'onboarding.ack.handbookToggle' | translate"
               formControlName="handbook" />
           </div>
 
           <p class="step-content__note">
             <span class="material-icons-outlined">info</span>
-            After clicking Submit, you'll be guided through electronically signing
-            your W-4, state withholding form, and I-9 via DocuSign.
+            {{ 'onboarding.ack.submitNote' | translate }}
           </p>
         </div>
       </mat-step>
@@ -759,7 +711,7 @@
     <div class="onboarding__actions">
       @if (currentStepIndex() > 0) {
         <button class="action-btn" (click)="prevStep()">
-          <span class="material-icons-outlined">arrow_back</span> Back
+          <span class="material-icons-outlined">arrow_back</span> {{ 'onboarding.actions.back' | translate }}
         </button>
       }
       @if (currentStepIndex() < 6) {
@@ -767,7 +719,7 @@
           [appValidationPopover]="currentViolations"
           [disabled]="currentFormInvalid()"
           (click)="nextStep()">
-          Continue <span class="material-icons-outlined">arrow_forward</span>
+          {{ 'onboarding.actions.continue' | translate }} <span class="material-icons-outlined">arrow_forward</span>
         </button>
       } @else {
         <button class="action-btn action-btn--primary"
@@ -776,10 +728,10 @@
           (click)="submit()">
           @if (submitting()) {
             <span class="material-icons-outlined spin">sync</span>
-            Preparing Documents...
+            {{ 'onboarding.actions.preparingDocuments' | translate }}
           } @else {
             <span class="material-icons-outlined">send</span>
-            Submit &amp; Sign Documents
+            {{ 'onboarding.actions.submitAndSign' | translate }}
           }
         </button>
       }

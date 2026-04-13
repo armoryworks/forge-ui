@@ -3,6 +3,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PurchasingService } from './services/purchasing.service';
 import { RfqListItem } from './models/rfq.model';
 import { RfqListComponent } from './components/rfq-list/rfq-list.component';
@@ -17,7 +19,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   selector: 'app-purchasing',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     RfqListComponent, RfqDialogComponent,
   ],
@@ -28,6 +30,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 export class PurchasingComponent {
   private readonly purchasingService = inject(PurchasingService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly rfqs = signal<RfqListItem[]>([]);
@@ -40,14 +43,14 @@ export class PurchasingComponent {
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: 'All Statuses' },
-    { value: 'Draft', label: 'Draft' },
-    { value: 'Sent', label: 'Sent' },
-    { value: 'Receiving', label: 'Receiving' },
-    { value: 'EvaluatingResponses', label: 'Evaluating' },
-    { value: 'Awarded', label: 'Awarded' },
-    { value: 'Cancelled', label: 'Cancelled' },
-    { value: 'Expired', label: 'Expired' },
+    { value: null, label: this.translate.instant('purchasing.allStatuses') },
+    { value: 'Draft', label: this.translate.instant('purchasing.statuses.draft') },
+    { value: 'Sent', label: this.translate.instant('purchasing.statuses.sent') },
+    { value: 'Receiving', label: this.translate.instant('purchasing.statuses.receiving') },
+    { value: 'EvaluatingResponses', label: this.translate.instant('purchasing.statuses.evaluating') },
+    { value: 'Awarded', label: this.translate.instant('purchasing.statuses.awarded') },
+    { value: 'Cancelled', label: this.translate.instant('purchasing.statuses.cancelled') },
+    { value: 'Expired', label: this.translate.instant('purchasing.statuses.expired') },
   ];
 
   constructor() {

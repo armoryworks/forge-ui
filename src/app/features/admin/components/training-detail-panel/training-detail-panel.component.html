@@ -2,7 +2,7 @@
   <div class="training-detail__toolbar">
     <h2 class="training-detail__title">
       <span class="material-icons-outlined" aria-hidden="true">school</span>
-      Training Detail
+      {{ 'adminPanels.trainingDetail.title' | translate }}
     </h2>
     <button class="icon-btn" aria-label="Close detail panel" (click)="close()">
       <span class="material-icons-outlined">close</span>
@@ -10,7 +10,7 @@
   </div>
 
   @if (!detail() && !isLoading()) {
-    <app-empty-state icon="school" message="No training data found for this user" />
+    <app-empty-state icon="school" [message]="'adminPanels.trainingDetail.noData' | translate" />
   }
 
   @if (detail(); as d) {
@@ -22,15 +22,15 @@
     <div class="training-detail__summary">
       <div class="training-detail__stat">
         <span class="training-detail__stat-value">{{ completedCount(d) }}</span>
-        <span class="training-detail__stat-label">of {{ d.modules.length }} completed</span>
+        <span class="training-detail__stat-label">{{ 'adminPanels.trainingDetail.of' | translate }} {{ d.modules.length }} {{ 'adminPanels.trainingDetail.completedStat' | translate }}</span>
       </div>
       <div class="training-detail__stat">
         <span class="training-detail__stat-value">{{ d.overallCompletionPct }}%</span>
-        <span class="training-detail__stat-label">overall progress</span>
+        <span class="training-detail__stat-label">{{ 'adminPanels.trainingDetail.overallProgress' | translate }}</span>
       </div>
       <div class="training-detail__stat">
         <span class="training-detail__stat-value">{{ d.totalEnrolled }}</span>
-        <span class="training-detail__stat-label">paths enrolled</span>
+        <span class="training-detail__stat-label">{{ 'adminPanels.trainingDetail.pathsEnrolled' | translate }}</span>
       </div>
     </div>
 
@@ -41,7 +41,7 @@
       <div class="training-detail__progress-fill" [style.width.%]="d.overallCompletionPct"></div>
     </div>
 
-    <div class="training-detail__section-label">Module Breakdown</div>
+    <div class="training-detail__section-label">{{ 'adminPanels.trainingDetail.moduleBreakdown' | translate }}</div>
 
     <div class="training-detail__modules">
       @for (m of d.modules; track m.moduleId) {

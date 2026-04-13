@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { ApprovalsService } from '../../services/approvals.service';
 import { ApprovalRequest } from '../../models/approval.model';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -18,7 +20,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
   selector: 'app-approval-inbox',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe,
+    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
     DataTableComponent, ColumnCellDirective, DialogComponent,
     TextareaComponent, LoadingBlockDirective, EmptyStateComponent,
   ],
@@ -29,6 +31,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 export class ApprovalInboxComponent implements OnInit {
   private readonly approvalsService = inject(ApprovalsService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -39,13 +42,13 @@ export class ApprovalInboxComponent implements OnInit {
   protected readonly rejectComments = new FormControl('', { nonNullable: true, validators: [Validators.required] });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'entityType', header: 'Type', sortable: true, width: '120px' },
-    { field: 'entitySummary', header: 'Summary', sortable: true },
-    { field: 'workflowName', header: 'Workflow', sortable: true, width: '150px' },
-    { field: 'currentStepName', header: 'Step', sortable: true, width: '150px' },
-    { field: 'amount', header: 'Amount', sortable: true, align: 'right', width: '100px' },
-    { field: 'requestedByName', header: 'Requested By', sortable: true, width: '150px' },
-    { field: 'requestedAt', header: 'Submitted', sortable: true, type: 'date', width: '120px' },
+    { field: 'entityType', header: this.translate.instant('approvals.cols.type'), sortable: true, width: '120px' },
+    { field: 'entitySummary', header: this.translate.instant('approvals.cols.summary'), sortable: true },
+    { field: 'workflowName', header: this.translate.instant('approvals.cols.workflow'), sortable: true, width: '150px' },
+    { field: 'currentStepName', header: this.translate.instant('approvals.cols.step'), sortable: true, width: '150px' },
+    { field: 'amount', header: this.translate.instant('approvals.cols.amount'), sortable: true, align: 'right', width: '100px' },
+    { field: 'requestedByName', header: this.translate.instant('approvals.cols.requestedBy'), sortable: true, width: '150px' },
+    { field: 'requestedAt', header: this.translate.instant('approvals.cols.submitted'), sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', width: '140px' },
   ];
 
@@ -59,7 +62,7 @@ export class ApprovalInboxComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackbar.success('Approved');
+          this.snackbar.success(this.translate.instant('approvals.snackbar.approved'));
           this.saving.set(false);
           this.loadPending();
         },
@@ -81,7 +84,7 @@ export class ApprovalInboxComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
-          this.snackbar.success('Rejected');
+          this.snackbar.success(this.translate.instant('approvals.snackbar.rejected'));
           this.showRejectDialog.set(false);
           this.saving.set(false);
           this.loadPending();

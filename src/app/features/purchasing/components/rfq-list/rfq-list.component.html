@@ -1,6 +1,6 @@
 <div [appLoadingBlock]="loading()">
   <app-data-table tableId="rfq-list" [columns]="rfqColumns" [data]="data()"
-    emptyIcon="request_quote" emptyMessage="No RFQs found"
+    emptyIcon="request_quote" [emptyMessage]="'purchasing.noRfqs' | translate"
     [clickableRows]="true" (rowClick)="onRowClick($event)">
     <ng-template appColumnCell="rfqNumber" let-row>
       <span class="rfq-number">{{ row.rfqNumber }}</span>

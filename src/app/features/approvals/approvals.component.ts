@@ -3,6 +3,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+import { TranslatePipe } from '@ngx-translate/core';
+
 import { AuthService } from '../../shared/services/auth.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { ApprovalInboxComponent } from './components/approval-inbox/approval-inbox.component';
@@ -13,7 +15,7 @@ type ApprovalsTab = 'inbox' | 'workflows';
 @Component({
   selector: 'app-approvals',
   standalone: true,
-  imports: [PageHeaderComponent, ApprovalInboxComponent, ApprovalWorkflowEditorComponent],
+  imports: [TranslatePipe, PageHeaderComponent, ApprovalInboxComponent, ApprovalWorkflowEditorComponent],
   templateUrl: './approvals.component.html',
   styleUrl: './approvals.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

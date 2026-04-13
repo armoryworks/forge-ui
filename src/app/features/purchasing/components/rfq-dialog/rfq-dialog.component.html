@@ -1,23 +1,23 @@
-<app-dialog [title]="isEdit ? 'Edit RFQ' : 'New RFQ'" width="520px" (closed)="close()">
+<app-dialog [title]="(isEdit ? 'purchasing.editRfq' : 'purchasing.createRfq') | translate" width="520px" (closed)="close()">
   <div [formGroup]="form">
-    <app-select data-testid="rfq-part" label="Part" formControlName="partId" [options]="partOptions()" [required]="true" />
+    <app-select data-testid="rfq-part" [label]="'purchasing.part' | translate" formControlName="partId" [options]="partOptions()" [required]="true" />
     <div class="dialog-row">
-      <app-input data-testid="rfq-quantity" label="Quantity" type="number" formControlName="quantity" [required]="true" />
-      <app-datepicker data-testid="rfq-required-date" label="Required Date" formControlName="requiredDate" />
+      <app-input data-testid="rfq-quantity" [label]="'purchasing.quantity' | translate" type="number" formControlName="quantity" [required]="true" />
+      <app-datepicker data-testid="rfq-required-date" [label]="'purchasing.requiredDate' | translate" formControlName="requiredDate" />
     </div>
-    <app-datepicker data-testid="rfq-response-deadline" label="Response Deadline" formControlName="responseDeadline" />
-    <app-textarea data-testid="rfq-description" label="Description" formControlName="description" [rows]="3" />
-    <app-textarea data-testid="rfq-special-instructions" label="Special Instructions" formControlName="specialInstructions" [rows]="3" />
+    <app-datepicker data-testid="rfq-response-deadline" [label]="'purchasing.responseDeadline' | translate" formControlName="responseDeadline" />
+    <app-textarea data-testid="rfq-description" [label]="'purchasing.description' | translate" formControlName="description" [rows]="3" />
+    <app-textarea data-testid="rfq-special-instructions" [label]="'purchasing.specialInstructions' | translate" formControlName="specialInstructions" [rows]="3" />
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'purchasing.cancel' | translate }}</button>
     <button data-testid="rfq-save-btn" class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>
-      {{ isEdit ? 'Update' : 'Create RFQ' }}
+      {{ (isEdit ? 'purchasing.update' : 'purchasing.createRfq') | translate }}
     </button>
   </div>
 </app-dialog>

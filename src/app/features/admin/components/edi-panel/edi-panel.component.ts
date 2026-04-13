@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EdiService } from '../../services/edi.service';
 import { EdiTradingPartner } from '../../models/edi-trading-partner.model';
@@ -27,7 +28,7 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
   selector: 'app-edi-panel',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, ToggleComponent,
     DialogComponent, LoadingBlockDirective, ValidationPopoverDirective,
@@ -39,6 +40,7 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
 export class EdiPanelComponent {
   private readonly ediService = inject(EdiService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -55,58 +57,58 @@ export class EdiPanelComponent {
   protected readonly directionFilter = new FormControl<EdiDirection | ''>('');
 
   protected readonly formatOptions: SelectOption[] = [
-    { value: 'X12', label: 'X12 (ANSI)' },
-    { value: 'Edifact', label: 'EDIFACT (UN)' },
+    { value: 'X12', label: this.translate.instant('adminPanels.edi.formats.x12') },
+    { value: 'Edifact', label: this.translate.instant('adminPanels.edi.formats.edifact') },
   ];
 
   protected readonly transportOptions: SelectOption[] = [
-    { value: 'As2', label: 'AS2' },
-    { value: 'Sftp', label: 'SFTP' },
-    { value: 'Van', label: 'VAN' },
-    { value: 'Email', label: 'Email' },
-    { value: 'Api', label: 'API' },
-    { value: 'Manual', label: 'Manual' },
+    { value: 'As2', label: this.translate.instant('adminPanels.edi.transports.as2') },
+    { value: 'Sftp', label: this.translate.instant('adminPanels.edi.transports.sftp') },
+    { value: 'Van', label: this.translate.instant('adminPanels.edi.transports.van') },
+    { value: 'Email', label: this.translate.instant('adminPanels.edi.transports.email') },
+    { value: 'Api', label: this.translate.instant('adminPanels.edi.transports.api') },
+    { value: 'Manual', label: this.translate.instant('adminPanels.edi.transports.manual') },
   ];
 
   protected readonly directionOptions: SelectOption[] = [
-    { value: '', label: 'All Directions' },
-    { value: 'Inbound', label: 'Inbound' },
-    { value: 'Outbound', label: 'Outbound' },
+    { value: '', label: this.translate.instant('adminPanels.edi.directions.all') },
+    { value: 'Inbound', label: this.translate.instant('adminPanels.edi.directions.inbound') },
+    { value: 'Outbound', label: this.translate.instant('adminPanels.edi.directions.outbound') },
   ];
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: '', label: 'All Statuses' },
-    { value: 'Received', label: 'Received' },
-    { value: 'Parsing', label: 'Parsing' },
-    { value: 'Parsed', label: 'Parsed' },
-    { value: 'Processing', label: 'Processing' },
-    { value: 'Applied', label: 'Applied' },
-    { value: 'Error', label: 'Error' },
-    { value: 'Acknowledged', label: 'Acknowledged' },
-    { value: 'Rejected', label: 'Rejected' },
+    { value: '', label: this.translate.instant('adminPanels.edi.statuses.all') },
+    { value: 'Received', label: this.translate.instant('adminPanels.edi.statuses.received') },
+    { value: 'Parsing', label: this.translate.instant('adminPanels.edi.statuses.parsing') },
+    { value: 'Parsed', label: this.translate.instant('adminPanels.edi.statuses.parsed') },
+    { value: 'Processing', label: this.translate.instant('adminPanels.edi.statuses.processing') },
+    { value: 'Applied', label: this.translate.instant('adminPanels.edi.statuses.applied') },
+    { value: 'Error', label: this.translate.instant('adminPanels.edi.statuses.error') },
+    { value: 'Acknowledged', label: this.translate.instant('adminPanels.edi.statuses.acknowledged') },
+    { value: 'Rejected', label: this.translate.instant('adminPanels.edi.statuses.rejected') },
   ];
 
   protected readonly partnerColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'customerName', header: 'Customer', sortable: true, width: '150px' },
-    { field: 'vendorName', header: 'Vendor', sortable: true, width: '150px' },
-    { field: 'defaultFormat', header: 'Format', sortable: true, width: '90px' },
-    { field: 'transportMethod', header: 'Transport', sortable: true, width: '100px' },
-    { field: 'transactionCount', header: 'Txns', sortable: true, width: '70px', align: 'right' },
-    { field: 'errorCount', header: 'Errors', sortable: true, width: '70px', align: 'right' },
-    { field: 'isActive', header: 'Active', width: '70px', align: 'center' },
+    { field: 'name', header: this.translate.instant('adminPanels.edi.cols.name'), sortable: true },
+    { field: 'customerName', header: this.translate.instant('adminPanels.edi.cols.customer'), sortable: true, width: '150px' },
+    { field: 'vendorName', header: this.translate.instant('adminPanels.edi.cols.vendor'), sortable: true, width: '150px' },
+    { field: 'defaultFormat', header: this.translate.instant('adminPanels.edi.cols.format'), sortable: true, width: '90px' },
+    { field: 'transportMethod', header: this.translate.instant('adminPanels.edi.cols.transport'), sortable: true, width: '100px' },
+    { field: 'transactionCount', header: this.translate.instant('adminPanels.edi.cols.txns'), sortable: true, width: '70px', align: 'right' },
+    { field: 'errorCount', header: this.translate.instant('adminPanels.edi.cols.errors'), sortable: true, width: '70px', align: 'right' },
+    { field: 'isActive', header: this.translate.instant('adminPanels.edi.cols.active'), width: '70px', align: 'center' },
     { field: 'actions', header: '', width: '100px' },
   ];
 
   protected readonly transactionColumns: ColumnDef[] = [
-    { field: 'tradingPartnerName', header: 'Partner', sortable: true, width: '150px' },
-    { field: 'direction', header: 'Dir', sortable: true, filterable: true, type: 'enum', filterOptions: this.directionOptions.slice(1), width: '90px' },
-    { field: 'transactionSet', header: 'Set', sortable: true, width: '60px', align: 'center' },
-    { field: 'controlNumber', header: 'Control #', sortable: true, width: '120px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '110px' },
-    { field: 'relatedEntityType', header: 'Entity', sortable: true, width: '100px' },
-    { field: 'receivedAt', header: 'Received', sortable: true, type: 'date', width: '110px' },
-    { field: 'retryCount', header: 'Retries', sortable: true, width: '70px', align: 'right' },
+    { field: 'tradingPartnerName', header: this.translate.instant('adminPanels.edi.cols.partner'), sortable: true, width: '150px' },
+    { field: 'direction', header: this.translate.instant('adminPanels.edi.cols.dir'), sortable: true, filterable: true, type: 'enum', filterOptions: this.directionOptions.slice(1), width: '90px' },
+    { field: 'transactionSet', header: this.translate.instant('adminPanels.edi.cols.set'), sortable: true, width: '60px', align: 'center' },
+    { field: 'controlNumber', header: this.translate.instant('adminPanels.edi.cols.controlNumber'), sortable: true, width: '120px' },
+    { field: 'status', header: this.translate.instant('adminPanels.edi.cols.status'), sortable: true, filterable: true, type: 'enum', filterOptions: this.statusOptions.slice(1), width: '110px' },
+    { field: 'relatedEntityType', header: this.translate.instant('adminPanels.edi.cols.entity'), sortable: true, width: '100px' },
+    { field: 'receivedAt', header: this.translate.instant('adminPanels.edi.cols.received'), sortable: true, type: 'date', width: '110px' },
+    { field: 'retryCount', header: this.translate.instant('adminPanels.edi.cols.retries'), sortable: true, width: '70px', align: 'right' },
     { field: 'actions', header: '', width: '80px' },
   ];
 
@@ -191,7 +193,7 @@ export class EdiPanelComponent {
 
     obs.subscribe({
       next: () => {
-        this.snackbar.success(editing ? 'Partner updated' : 'Partner created');
+        this.snackbar.success(editing ? this.translate.instant('adminPanels.edi.snackbar.partnerUpdated') : this.translate.instant('adminPanels.edi.snackbar.partnerCreated'));
         this.showPartnerDialog.set(false);
         this.saving.set(false);
         this.loadPartners();
@@ -203,7 +205,7 @@ export class EdiPanelComponent {
   protected deletePartner(partner: EdiTradingPartner): void {
     this.ediService.deleteTradingPartner(partner.id).subscribe({
       next: () => {
-        this.snackbar.success('Partner deleted');
+        this.snackbar.success(this.translate.instant('adminPanels.edi.snackbar.partnerDeleted'));
         this.loadPartners();
       },
     });
@@ -212,8 +214,8 @@ export class EdiPanelComponent {
   protected testConnection(partner: EdiTradingPartner): void {
     this.ediService.testConnection(partner.id).subscribe({
       next: result => {
-        if (result.success) this.snackbar.success('Connection successful');
-        else this.snackbar.error(`Connection failed: ${result.message}`);
+        if (result.success) this.snackbar.success(this.translate.instant('adminPanels.edi.snackbar.connectionSuccess'));
+        else this.snackbar.error(this.translate.instant('adminPanels.edi.snackbar.connectionFailed') + ' ' + result.message);
       },
     });
   }
@@ -230,7 +232,7 @@ export class EdiPanelComponent {
   protected retryTransaction(txn: EdiTransaction): void {
     this.ediService.retryTransaction(txn.id).subscribe({
       next: () => {
-        this.snackbar.success('Transaction queued for retry');
+        this.snackbar.success(this.translate.instant('adminPanels.edi.snackbar.retryQueued'));
         this.loadTransactions();
       },
     });

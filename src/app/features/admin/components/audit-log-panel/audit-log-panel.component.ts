@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@ang
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { AdminService } from '../../services/admin.service';
 import { AuditLogEntry } from '../../models/audit-log-entry.model';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -17,6 +19,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    TranslatePipe,
     DataTableComponent,
     InputComponent,
     SelectComponent,
@@ -30,6 +33,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 })
 export class AuditLogPanelComponent {
   private readonly adminService = inject(AdminService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly isLoading = signal(false);
   protected readonly entries = signal<AuditLogEntry[]>([]);
@@ -43,31 +47,31 @@ export class AuditLogPanelComponent {
   protected readonly toDateControl = new FormControl<Date | null>(null);
 
   protected readonly entityTypeOptions: SelectOption[] = [
-    { value: '', label: '-- All Types --' },
-    { value: 'Job', label: 'Job' },
-    { value: 'Part', label: 'Part' },
-    { value: 'Customer', label: 'Customer' },
-    { value: 'Vendor', label: 'Vendor' },
-    { value: 'Expense', label: 'Expense' },
-    { value: 'Invoice', label: 'Invoice' },
-    { value: 'Payment', label: 'Payment' },
-    { value: 'User', label: 'User' },
-    { value: 'PurchaseOrder', label: 'Purchase Order' },
-    { value: 'SalesOrder', label: 'Sales Order' },
-    { value: 'Quote', label: 'Quote' },
-    { value: 'Shipment', label: 'Shipment' },
-    { value: 'TimeEntry', label: 'Time Entry' },
-    { value: 'Asset', label: 'Asset' },
+    { value: '', label: this.translate.instant('adminPanels.auditLog.allTypes') },
+    { value: 'Job', label: this.translate.instant('adminPanels.auditLog.types.job') },
+    { value: 'Part', label: this.translate.instant('adminPanels.auditLog.types.part') },
+    { value: 'Customer', label: this.translate.instant('adminPanels.auditLog.types.customer') },
+    { value: 'Vendor', label: this.translate.instant('adminPanels.auditLog.types.vendor') },
+    { value: 'Expense', label: this.translate.instant('adminPanels.auditLog.types.expense') },
+    { value: 'Invoice', label: this.translate.instant('adminPanels.auditLog.types.invoice') },
+    { value: 'Payment', label: this.translate.instant('adminPanels.auditLog.types.payment') },
+    { value: 'User', label: this.translate.instant('adminPanels.auditLog.types.user') },
+    { value: 'PurchaseOrder', label: this.translate.instant('adminPanels.auditLog.types.purchaseOrder') },
+    { value: 'SalesOrder', label: this.translate.instant('adminPanels.auditLog.types.salesOrder') },
+    { value: 'Quote', label: this.translate.instant('adminPanels.auditLog.types.quote') },
+    { value: 'Shipment', label: this.translate.instant('adminPanels.auditLog.types.shipment') },
+    { value: 'TimeEntry', label: this.translate.instant('adminPanels.auditLog.types.timeEntry') },
+    { value: 'Asset', label: this.translate.instant('adminPanels.auditLog.types.asset') },
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'createdAt', header: 'Time', sortable: true, type: 'date', width: '140px' },
-    { field: 'userName', header: 'User', sortable: true, width: '160px' },
-    { field: 'action', header: 'Action', sortable: true, width: '120px' },
-    { field: 'entityType', header: 'Type', sortable: true, width: '120px' },
-    { field: 'entityId', header: 'ID', width: '60px', align: 'right' },
-    { field: 'details', header: 'Details' },
-    { field: 'ipAddress', header: 'IP', width: '130px' },
+    { field: 'createdAt', header: this.translate.instant('adminPanels.auditLog.cols.time'), sortable: true, type: 'date', width: '140px' },
+    { field: 'userName', header: this.translate.instant('adminPanels.auditLog.cols.user'), sortable: true, width: '160px' },
+    { field: 'action', header: this.translate.instant('adminPanels.auditLog.cols.action'), sortable: true, width: '120px' },
+    { field: 'entityType', header: this.translate.instant('adminPanels.auditLog.cols.type'), sortable: true, width: '120px' },
+    { field: 'entityId', header: this.translate.instant('adminPanels.auditLog.cols.id'), width: '60px', align: 'right' },
+    { field: 'details', header: this.translate.instant('adminPanels.auditLog.cols.details') },
+    { field: 'ipAddress', header: this.translate.instant('adminPanels.auditLog.cols.ip'), width: '130px' },
   ];
 
   constructor() {

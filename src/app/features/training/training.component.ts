@@ -3,6 +3,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -24,6 +25,7 @@ type TrainingTab = 'my-learning' | 'paths' | 'all-modules';
   imports: [
     ReactiveFormsModule,
     RouterLink,
+    TranslatePipe,
     InputComponent,
     SelectComponent,
     LoadingBlockDirective,
@@ -36,6 +38,7 @@ type TrainingTab = 'my-learning' | 'paths' | 'all-modules';
 })
 export class TrainingComponent implements OnInit {
   private readonly trainingService = inject(TrainingService);
+  private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -54,18 +57,18 @@ export class TrainingComponent implements OnInit {
   protected readonly learningStyleControl = new FormControl<string>('');
 
   protected readonly contentTypeOptions: SelectOption[] = [
-    { value: '', label: 'All Types' },
-    { value: 'Article', label: 'Article' },
-    { value: 'Walkthrough', label: 'Walkthrough' },
-    { value: 'QuickRef', label: 'Quick Reference' },
-    { value: 'Quiz', label: 'Quiz / Assessment' },
+    { value: '', label: this.translate.instant('trainingPage.typeOptions.all') },
+    { value: 'Article', label: this.translate.instant('trainingPage.typeOptions.article') },
+    { value: 'Walkthrough', label: this.translate.instant('trainingPage.typeOptions.walkthrough') },
+    { value: 'QuickRef', label: this.translate.instant('trainingPage.typeOptions.quickRef') },
+    { value: 'Quiz', label: this.translate.instant('trainingPage.typeOptions.quiz') },
   ];
 
   protected readonly learningStyleOptions: SelectOption[] = [
-    { value: '', label: 'All Learning Styles' },
-    { value: 'visual', label: 'Visual' },
-    { value: 'reading', label: 'Reading / Writing' },
-    { value: 'kinesthetic', label: 'Hands-on / Kinesthetic' },
+    { value: '', label: this.translate.instant('trainingPage.styleOptions.all') },
+    { value: 'visual', label: this.translate.instant('trainingPage.styleOptions.visual') },
+    { value: 'reading', label: this.translate.instant('trainingPage.styleOptions.reading') },
+    { value: 'kinesthetic', label: this.translate.instant('trainingPage.styleOptions.handson') },
   ];
 
   private readonly searchValue = toSignal(this.searchControl.valueChanges, { initialValue: '' });
@@ -141,10 +144,10 @@ export class TrainingComponent implements OnInit {
 
   protected contentTypeLabel(type: TrainingContentType): string {
     const labels: Record<TrainingContentType, string> = {
-      Article: 'Article',
-      Walkthrough: 'Interactive Tour',
-      QuickRef: 'Quick Reference',
-      Quiz: 'Quiz / Assessment',
+      Article: this.translate.instant('trainingPage.typeOptions.article'),
+      Walkthrough: this.translate.instant('trainingPage.typeOptions.walkthrough'),
+      QuickRef: this.translate.instant('trainingPage.typeOptions.quickRef'),
+      Quiz: this.translate.instant('trainingPage.typeOptions.quiz'),
     };
     return labels[type] ?? type;
   }

@@ -1,65 +1,64 @@
-<app-dialog title="Complete I-9 Section 2" width="600px" (closed)="close()">
+<app-dialog [title]="'adminPanels.completeI9.title' | translate" width="600px" (closed)="close()">
   <div [formGroup]="form">
 
     <div class="dialog-row">
       <app-select
-        label="Document List Type"
+        [label]="'adminPanels.completeI9.documentListType' | translate"
         formControlName="documentListType"
         [options]="documentListOptions"
         [required]="true" />
       <app-datepicker
-        label="First Day of Employment"
+        [label]="'adminPanels.completeI9.firstDayEmployment' | translate"
         formControlName="startDate"
         [required]="true" />
     </div>
 
     @if (form.get('documentListType')?.value === 'A') {
-      <h4 class="i9-section-heading">List A Document</h4>
+      <h4 class="i9-section-heading">{{ 'adminPanels.completeI9.listADocument' | translate }}</h4>
       <div class="dialog-row">
-        <app-input label="Document Type" formControlName="listA_doc_type" />
-        <app-input label="Document Number" formControlName="listA_doc_number" />
+        <app-input [label]="'adminPanels.completeI9.documentType' | translate" formControlName="listA_doc_type" />
+        <app-input [label]="'adminPanels.completeI9.documentNumber' | translate" formControlName="listA_doc_number" />
       </div>
       <div class="dialog-row">
-        <app-input label="Issuing Authority" formControlName="listA_doc_issuer" />
-        <app-datepicker label="Expiration Date" formControlName="listA_doc_expiration" />
+        <app-input [label]="'adminPanels.completeI9.issuingAuthority' | translate" formControlName="listA_doc_issuer" />
+        <app-datepicker [label]="'adminPanels.completeI9.expirationDate' | translate" formControlName="listA_doc_expiration" />
       </div>
     }
 
     @if (form.get('documentListType')?.value === 'B+C') {
-      <h4 class="i9-section-heading">List B Document (Identity)</h4>
+      <h4 class="i9-section-heading">{{ 'adminPanels.completeI9.listBDocument' | translate }}</h4>
       <div class="dialog-row">
-        <app-input label="Document Type" formControlName="listB_doc_type" />
-        <app-input label="Document Number" formControlName="listB_doc_number" />
+        <app-input [label]="'adminPanels.completeI9.documentType' | translate" formControlName="listB_doc_type" />
+        <app-input [label]="'adminPanels.completeI9.documentNumber' | translate" formControlName="listB_doc_number" />
       </div>
       <div class="dialog-row">
-        <app-input label="Issuing Authority" formControlName="listB_doc_issuer" />
-        <app-datepicker label="Expiration Date" formControlName="listB_doc_expiration" />
+        <app-input [label]="'adminPanels.completeI9.issuingAuthority' | translate" formControlName="listB_doc_issuer" />
+        <app-datepicker [label]="'adminPanels.completeI9.expirationDate' | translate" formControlName="listB_doc_expiration" />
       </div>
 
-      <h4 class="i9-section-heading">List C Document (Employment Authorization)</h4>
+      <h4 class="i9-section-heading">{{ 'adminPanels.completeI9.listCDocument' | translate }}</h4>
       <div class="dialog-row">
-        <app-input label="Document Type" formControlName="listC_doc_type" />
-        <app-input label="Document Number" formControlName="listC_doc_number" />
+        <app-input [label]="'adminPanels.completeI9.documentType' | translate" formControlName="listC_doc_type" />
+        <app-input [label]="'adminPanels.completeI9.documentNumber' | translate" formControlName="listC_doc_number" />
       </div>
       <div class="dialog-row">
-        <app-input label="Issuing Authority" formControlName="listC_doc_issuer" />
-        <app-datepicker label="Expiration Date" formControlName="listC_doc_expiration" />
+        <app-input [label]="'adminPanels.completeI9.issuingAuthority' | translate" formControlName="listC_doc_issuer" />
+        <app-datepicker [label]="'adminPanels.completeI9.expirationDate' | translate" formControlName="listC_doc_expiration" />
       </div>
     }
 
-    <h4 class="i9-section-heading">Reverification (Optional)</h4>
+    <h4 class="i9-section-heading">{{ 'adminPanels.completeI9.reverification' | translate }}</h4>
     <app-datepicker
-      label="Work Authorization Expiration Date"
+      [label]="'adminPanels.completeI9.workAuthExpiration' | translate"
       formControlName="reverificationDueAt" />
     <p class="i9-reverification-note">
-      Leave blank for US citizens, permanent residents, and documents with no expiration.
-      When set, a reminder will be sent 90 days before expiration.
+      {{ 'adminPanels.completeI9.reverificationNote' | translate }}
     </p>
 
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Cancel</button>
+    <button class="action-btn" (click)="close()">{{ 'adminPanels.completeI9.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
@@ -69,7 +68,7 @@
       } @else {
         <span class="material-icons-outlined">how_to_reg</span>
       }
-      Complete Section 2
+      {{ 'adminPanels.completeI9.completeSection2' | translate }}
     </button>
   </div>
 </app-dialog>

@@ -17,6 +17,7 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
@@ -141,6 +142,7 @@ interface I9Attachment {
     DatepickerComponent,
     ToggleComponent,
     ValidationPopoverDirective,
+    TranslatePipe,
   ],
   templateUrl: './onboarding-wizard.component.html',
   styleUrl: './onboarding-wizard.component.scss',
@@ -157,6 +159,7 @@ export class OnboardingWizardComponent {
   private readonly layout = inject(LayoutService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
+  private readonly translate = inject(TranslateService);
   private readonly profileService = inject(EmployeeProfileService);
   private readonly sanitizer = inject(DomSanitizer);
 
@@ -661,7 +664,7 @@ export class OnboardingWizardComponent {
       },
       error: () => {
         uploading.set(false);
-        this.snackbar.error(`Failed to upload document. Please try again.`);
+        this.snackbar.error(this.translate.instant('onboarding.errors.uploadFailed'));
       },
     });
   }
@@ -694,7 +697,7 @@ export class OnboardingWizardComponent {
       },
       error: () => {
         this.uploadingVoidedCheck.set(false);
-        this.snackbar.error('Failed to upload voided check. Please try again.');
+        this.snackbar.error(this.translate.instant('onboarding.errors.voidedCheckFailed'));
       },
     });
   }
@@ -796,7 +799,7 @@ export class OnboardingWizardComponent {
       },
       error: () => {
         this.submitting.set(false);
-        this.snackbar.error('Submission failed. Please try again.');
+        this.snackbar.error(this.translate.instant('onboarding.errors.submissionFailed'));
       },
     });
   }
@@ -829,7 +832,7 @@ export class OnboardingWizardComponent {
       },
       error: () => {
         this.loadingPreview.set(false);
-        this.snackbar.error('Could not load PDF preview. Please try again.');
+        this.snackbar.error(this.translate.instant('onboarding.errors.previewFailed'));
       },
     });
   }
@@ -850,7 +853,7 @@ export class OnboardingWizardComponent {
       },
       error: () => {
         this.signingFormInProgress.set(false);
-        this.snackbar.error('Could not create signing session. Please try again.');
+        this.snackbar.error(this.translate.instant('onboarding.errors.signingFailed'));
       },
     });
   }

@@ -1,60 +1,60 @@
-<app-page-header title="Material Requirements Planning" />
+<app-page-header [title]="'mrp.title' | translate" />
 
 <div class="tab-bar">
-  <button class="tab" [class.tab--active]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">Dashboard</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'planned-orders'" (click)="switchTab('planned-orders')">Planned Orders</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'exceptions'" (click)="switchTab('exceptions')">Exceptions</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'runs'" (click)="switchTab('runs')">Run History</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'master-schedule'" (click)="switchTab('master-schedule')">Master Schedule</button>
-  <button class="tab" [class.tab--active]="activeTab() === 'forecasts'" (click)="switchTab('forecasts')">Forecasts</button>
+  <button class="tab" [class.tab--active]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">{{ 'mrp.tabs.dashboard' | translate }}</button>
+  <button class="tab" [class.tab--active]="activeTab() === 'planned-orders'" (click)="switchTab('planned-orders')">{{ 'mrp.tabs.plannedOrders' | translate }}</button>
+  <button class="tab" [class.tab--active]="activeTab() === 'exceptions'" (click)="switchTab('exceptions')">{{ 'mrp.tabs.exceptions' | translate }}</button>
+  <button class="tab" [class.tab--active]="activeTab() === 'runs'" (click)="switchTab('runs')">{{ 'mrp.tabs.runHistory' | translate }}</button>
+  <button class="tab" [class.tab--active]="activeTab() === 'master-schedule'" (click)="switchTab('master-schedule')">{{ 'mrp.tabs.masterSchedule' | translate }}</button>
+  <button class="tab" [class.tab--active]="activeTab() === 'forecasts'" (click)="switchTab('forecasts')">{{ 'mrp.tabs.forecasts' | translate }}</button>
 </div>
 
 <!-- Dashboard Tab -->
 @if (activeTab() === 'dashboard') {
   <div class="mrp__dashboard">
     <div class="mrp__kpis">
-      <app-kpi-chip label="Latest Run" [value]="latestRun()?.runNumber ?? 'None'" />
-      <app-kpi-chip label="Planned Orders" [value]="plannedOrderCount().toString()" valueColor="primary" />
-      <app-kpi-chip label="Firmed Orders" [value]="firmedOrderCount().toString()" valueColor="warn" />
-      <app-kpi-chip label="Unresolved Exceptions" [value]="unresolvedExceptionCount().toString()"
+      <app-kpi-chip [label]="'mrp.kpi.latestRun' | translate" [value]="latestRun()?.runNumber ?? ('mrp.kpi.none' | translate)" />
+      <app-kpi-chip [label]="'mrp.kpi.plannedOrders' | translate" [value]="plannedOrderCount().toString()" valueColor="primary" />
+      <app-kpi-chip [label]="'mrp.kpi.firmedOrders' | translate" [value]="firmedOrderCount().toString()" valueColor="warn" />
+      <app-kpi-chip [label]="'mrp.kpi.unresolvedExceptions' | translate" [value]="unresolvedExceptionCount().toString()"
         [valueColor]="unresolvedExceptionCount() > 0 ? 'warn' : 'success'" />
     </div>
 
     <div class="mrp__actions">
       <button class="action-btn action-btn--primary" [disabled]="executingRun()" (click)="executeRun(false)">
-        <span class="material-icons-outlined">play_arrow</span> Run MRP
+        <span class="material-icons-outlined">play_arrow</span> {{ 'mrp.runMrp' | translate }}
       </button>
       <button class="action-btn" [disabled]="executingRun()" (click)="executeRun(true)">
-        <span class="material-icons-outlined">science</span> Simulate
+        <span class="material-icons-outlined">science</span> {{ 'mrp.simulate' | translate }}
       </button>
     </div>
 
     @if (latestRun(); as run) {
       <div class="mrp__summary">
-        <h3 class="mrp__section-title">Latest Run Summary</h3>
+        <h3 class="mrp__section-title">{{ 'mrp.latestRunSummary' | translate }}</h3>
         <div class="mrp__summary-grid">
           <div class="mrp__summary-item">
-            <span class="mrp__summary-label">Status</span>
+            <span class="mrp__summary-label">{{ 'mrp.status' | translate }}</span>
             <span [class]="getRunStatusClass(run.status)">{{ run.status }}</span>
           </div>
           <div class="mrp__summary-item">
-            <span class="mrp__summary-label">Type</span>
+            <span class="mrp__summary-label">{{ 'mrp.type' | translate }}</span>
             <span>{{ run.runType }}</span>
           </div>
           <div class="mrp__summary-item">
-            <span class="mrp__summary-label">Demands</span>
+            <span class="mrp__summary-label">{{ 'mrp.demands' | translate }}</span>
             <span>{{ run.totalDemandCount }}</span>
           </div>
           <div class="mrp__summary-item">
-            <span class="mrp__summary-label">Supplies</span>
+            <span class="mrp__summary-label">{{ 'mrp.supplies' | translate }}</span>
             <span>{{ run.totalSupplyCount }}</span>
           </div>
           <div class="mrp__summary-item">
-            <span class="mrp__summary-label">Planned Orders</span>
+            <span class="mrp__summary-label">{{ 'mrp.plannedOrders' | translate }}</span>
             <span>{{ run.plannedOrderCount }}</span>
           </div>
           <div class="mrp__summary-item">
-            <span class="mrp__summary-label">Exceptions</span>
+            <span class="mrp__summary-label">{{ 'mrp.exceptions' | translate }}</span>
             <span>{{ run.exceptionCount }}</span>
           </div>
         </div>
@@ -63,14 +63,14 @@
 
     @if (exceptions().length > 0) {
       <div class="mrp__recent-exceptions">
-        <h3 class="mrp__section-title">Unresolved Exceptions</h3>
+        <h3 class="mrp__section-title">{{ 'mrp.unresolvedExceptions' | translate }}</h3>
         <app-data-table
           tableId="mrp-dashboard-exceptions"
           [columns]="exceptionColumns"
           [data]="exceptions()"
           [loading]="loadingExceptions()"
           emptyIcon="check_circle"
-          emptyMessage="No unresolved exceptions"
+          [emptyMessage]="'mrp.noUnresolvedException' | translate"
           [clickableRows]="false">
 
           <ng-template appColumnCell="exceptionType" let-row>
@@ -85,7 +85,7 @@
 
           <ng-template appColumnCell="actions" let-row>
             @if (!row.isResolved) {
-              <button class="icon-btn" aria-label="Resolve exception" (click)="resolveException(row)">
+              <button class="icon-btn" [attr.aria-label]="'mrp.snackbar.exceptionResolved' | translate" (click)="resolveException(row)">
                 <span class="material-icons-outlined">done</span>
               </button>
             }
@@ -100,7 +100,7 @@
 @if (activeTab() === 'planned-orders') {
   <div class="tab-panel" [appLoadingBlock]="loadingOrders()">
     <app-toolbar>
-      <app-select label="Status" [formControl]="orderStatusControl" [options]="orderStatusOptions" />
+      <app-select [label]="'mrp.status' | translate" [formControl]="orderStatusControl" [options]="orderStatusOptions" />
       <span appSpacer></span>
     </app-toolbar>
 
@@ -109,7 +109,7 @@
       [columns]="orderColumns"
       [data]="plannedOrders()"
       emptyIcon="assignment"
-      emptyMessage="No planned orders. Run MRP to generate."
+      [emptyMessage]="'mrp.noPlannedOrders' | translate"
       [clickableRows]="false">
 
       <ng-template appColumnCell="status" let-row>
@@ -124,12 +124,12 @@
 
       <ng-template appColumnCell="actions" let-row>
         @if (row.status === 'Planned') {
-          <button class="icon-btn" aria-label="Firm order" title="Firm" (click)="firmOrder(row)">
+          <button class="icon-btn" [attr.aria-label]="'mrp.firm' | translate" [title]="'mrp.firm' | translate" (click)="firmOrder(row)">
             <span class="material-icons-outlined">lock</span>
           </button>
         }
         @if (row.status === 'Planned' || row.status === 'Firmed') {
-          <button class="icon-btn" aria-label="Release order" title="Release" (click)="releaseOrder(row)">
+          <button class="icon-btn" [attr.aria-label]="'mrp.release' | translate" [title]="'mrp.release' | translate" (click)="releaseOrder(row)">
             <span class="material-icons-outlined">send</span>
           </button>
         }
@@ -142,7 +142,7 @@
 @if (activeTab() === 'exceptions') {
   <div class="tab-panel" [appLoadingBlock]="loadingExceptions()">
     <app-toolbar>
-      <app-select label="Filter" [formControl]="exceptionFilterControl" [options]="exceptionFilterOptions" />
+      <app-select [label]="'mrp.filter' | translate" [formControl]="exceptionFilterControl" [options]="exceptionFilterOptions" />
       <span appSpacer></span>
     </app-toolbar>
 
@@ -151,7 +151,7 @@
       [columns]="exceptionColumns"
       [data]="exceptions()"
       emptyIcon="check_circle"
-      emptyMessage="No exceptions to display"
+      [emptyMessage]="'mrp.noExceptions' | translate"
       [clickableRows]="false">
 
       <ng-template appColumnCell="exceptionType" let-row>
@@ -166,7 +166,7 @@
 
       <ng-template appColumnCell="actions" let-row>
         @if (!row.isResolved) {
-          <button class="icon-btn" aria-label="Resolve exception" (click)="resolveException(row)">
+          <button class="icon-btn" [attr.aria-label]="'mrp.snackbar.exceptionResolved' | translate" (click)="resolveException(row)">
             <span class="material-icons-outlined">done</span>
           </button>
         }
@@ -181,10 +181,10 @@
     <app-toolbar>
       <span appSpacer></span>
       <button class="action-btn action-btn--primary" [disabled]="executingRun()" (click)="executeRun(false)">
-        <span class="material-icons-outlined">play_arrow</span> Run MRP
+        <span class="material-icons-outlined">play_arrow</span> {{ 'mrp.runMrp' | translate }}
       </button>
       <button class="action-btn" [disabled]="executingRun()" (click)="executeRun(true)">
-        <span class="material-icons-outlined">science</span> Simulate
+        <span class="material-icons-outlined">science</span> {{ 'mrp.simulate' | translate }}
       </button>
     </app-toolbar>
 
@@ -193,7 +193,7 @@
       [columns]="runColumns"
       [data]="runs()"
       emptyIcon="play_circle"
-      emptyMessage="No MRP runs yet"
+      [emptyMessage]="'mrp.noRuns' | translate"
       [clickableRows]="false">
 
       <ng-template appColumnCell="status" let-row>
@@ -215,7 +215,7 @@
       [columns]="scheduleColumns"
       [data]="masterSchedules()"
       emptyIcon="calendar_month"
-      emptyMessage="No master schedules"
+      [emptyMessage]="'mrp.noMasterSchedules' | translate"
       [clickableRows]="false">
 
       <ng-template appColumnCell="status" let-row>
@@ -237,7 +237,7 @@
       [columns]="forecastColumns"
       [data]="forecasts()"
       emptyIcon="trending_up"
-      emptyMessage="No demand forecasts"
+      [emptyMessage]="'mrp.noForecasts' | translate"
       [clickableRows]="false">
 
       <ng-template appColumnCell="status" let-row>

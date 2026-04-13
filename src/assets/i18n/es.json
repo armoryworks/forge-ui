@@ -30,7 +30,12 @@
     "shopFloor": "Planta",
     "worker": "Operario",
     "collapse": "Contraer",
-    "expand": "Expandir"
+    "expand": "Expandir",
+    "purchasing": "Solicitudes",
+    "mrp": "MRP",
+    "scheduling": "Programación",
+    "oee": "OEE",
+    "approvals": "Aprobaciones"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -1021,7 +1026,9 @@
       "auditLog": "Registro de Auditoría",
       "compliance": "Cumplimiento",
       "timeCorrections": "Correcciones de Tiempo",
-      "events": "Eventos"
+      "events": "Eventos",
+      "edi": "EDI",
+      "mfa": "Política MFA"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -1223,7 +1230,50 @@
     "itemsRemaining": "elementos restantes",
     "itemRemaining": "elemento restante",
     "actionRequired": "acción requerida",
-    "completeNow": "Completar Ahora"
+    "completeNow": "Completar Ahora",
+    "title": "Incorporación de Nuevo Empleado",
+    "subtitle": "Complete todos los pasos para finalizar su documentación de incorporación.",
+    "completeTitle": "Incorporación Completada",
+    "completeMessage": "Sus formularios han sido enviados y enviados para firma. Su empleador revisará sus documentos de identidad I-9 dentro de 3 días hábiles de su fecha de inicio. Recibirá confirmaciones por correo electrónico a medida que se procese cada documento.",
+    "goToDashboard": "Ir al Panel",
+    "reviewTitle": "Revise y Firme Sus Documentos",
+    "reviewSubtitle": "Revise cada formulario prellenado, luego fírmelo. Puede volver atrás para editar si algo se ve incorrecto.",
+    "formCounter": "Formulario",
+    "generatingPreview": "Generando vista previa…",
+    "previewWarning": "Así es como se llenará su formulario. Si algo está mal, regrese y corríjalo antes de firmar.",
+    "noPdfPreview": "No hay vista previa PDF disponible para este formulario. Revise los detalles a continuación y proceda a firmar.",
+    "filingStatus": "Estado Civil Fiscal",
+    "multipleJobs": "Empleos Múltiples",
+    "exemptWithholding": "Exento de Retenciones",
+    "state": "Estado",
+    "allowances": "Deducciones",
+    "citizenshipAuth": "Ciudadanía / Autorización de Trabajo",
+    "identityDocuments": "Documentos de Identidad",
+    "goBackToEdit": "Volver para editar",
+    "signForm": "Se ve correcto — Firmar este formulario",
+    "signPrefix": "Firmar:",
+    "signInstruction": "Complete todos los campos requeridos y aplique su firma a continuación.",
+    "filingStatuses": {
+      "single": "Soltero/a o Casado/a declarando por separado",
+      "marriedJoint": "Casado/a declarando conjuntamente o Cónyuge sobreviviente calificado",
+      "headOfHousehold": "Cabeza de familia"
+    },
+    "accountTypes": {
+      "checking": "Cuenta Corriente",
+      "savings": "Cuenta de Ahorro"
+    },
+    "citizenshipStatuses": {
+      "citizen": "Ciudadano de los Estados Unidos",
+      "noncitizen": "Nacional no ciudadano de los Estados Unidos",
+      "permanent": "Residente permanente legal",
+      "alien": "Extranjero autorizado para trabajar"
+    },
+    "stateFilingStatuses": {
+      "single": "Soltero/a",
+      "married": "Casado/a",
+      "marriedJoint": "Casado/a declarando conjuntamente",
+      "headOfHousehold": "Cabeza de familia"
+    }
   },
   "account": {
     "title": "Cuenta",
@@ -2868,5 +2918,754 @@
     "fieldRate": "Tasa (%)",
     "noRates": "No hay tasas de impuesto configuradas",
     "rates": "Tasas de Impuesto"
+  },
+  "mrp": {
+    "title": "Planificación de Requerimientos de Materiales",
+    "tabs": {
+      "dashboard": "Panel",
+      "plannedOrders": "Órdenes Planificadas",
+      "exceptions": "Excepciones",
+      "runHistory": "Historial de Ejecuciones",
+      "masterSchedule": "Programa Maestro",
+      "forecasts": "Pronósticos"
+    },
+    "kpi": {
+      "latestRun": "Última Ejecución",
+      "plannedOrders": "Órdenes Planificadas",
+      "firmedOrders": "Órdenes Confirmadas",
+      "unresolvedExceptions": "Excepciones Sin Resolver",
+      "none": "Ninguna"
+    },
+    "runMrp": "Ejecutar MRP",
+    "simulate": "Simular",
+    "latestRunSummary": "Resumen de Última Ejecución",
+    "status": "Estado",
+    "type": "Tipo",
+    "demands": "Demandas",
+    "supplies": "Suministros",
+    "plannedOrders": "Órdenes Planificadas",
+    "exceptions": "Excepciones",
+    "unresolvedExceptions": "Excepciones Sin Resolver",
+    "noUnresolvedException": "Sin excepciones sin resolver",
+    "noPlannedOrders": "Sin órdenes planificadas. Ejecute MRP para generar.",
+    "firm": "Confirmar",
+    "release": "Liberar",
+    "filter": "Filtro",
+    "noExceptions": "Sin excepciones para mostrar",
+    "noRuns": "Sin ejecuciones MRP aún",
+    "noMasterSchedules": "Sin programas maestros",
+    "noForecasts": "Sin pronósticos de demanda",
+    "cols": {
+      "runNumber": "Ejecución #",
+      "type": "Tipo",
+      "status": "Estado",
+      "orders": "Órdenes",
+      "exceptions": "Excepciones",
+      "demands": "Demandas",
+      "supplies": "Suministros",
+      "started": "Inicio",
+      "completed": "Completado",
+      "partNumber": "Pieza #",
+      "description": "Descripción",
+      "qty": "Cant.",
+      "start": "Inicio",
+      "due": "Vence",
+      "firmed": "Confirmada",
+      "message": "Mensaje",
+      "suggestedAction": "Acción Sugerida",
+      "resolved": "Resuelta",
+      "name": "Nombre",
+      "end": "Fin",
+      "lines": "Líneas",
+      "created": "Creado",
+      "method": "Método",
+      "periods": "Periodos",
+      "overrides": "Anulaciones"
+    },
+    "filters": {
+      "all": "-- Todos --",
+      "planned": "Planificada",
+      "firmed": "Confirmada",
+      "released": "Liberada",
+      "cancelled": "Cancelada",
+      "unresolvedOnly": "Solo Sin Resolver"
+    },
+    "runTypes": {
+      "full": "Completa",
+      "netChange": "Cambio Neto",
+      "simulation": "Simulación"
+    },
+    "orderTypes": {
+      "purchase": "Compra",
+      "manufacture": "Manufactura"
+    },
+    "exceptionTypes": {
+      "expedite": "Expeditar",
+      "defer": "Diferir",
+      "cancel": "Cancelar",
+      "pastDue": "Vencida",
+      "shortSupply": "Falta de Suministro",
+      "overSupply": "Exceso de Suministro",
+      "leadTime": "Tiempo de Entrega"
+    },
+    "scheduleStatuses": {
+      "draft": "Borrador",
+      "active": "Activo",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    },
+    "forecastStatuses": {
+      "draft": "Borrador",
+      "approved": "Aprobado",
+      "applied": "Aplicado",
+      "expired": "Expirado"
+    },
+    "snackbar": {
+      "simulationComplete": "Simulación MRP completada",
+      "runComplete": "Ejecución MRP completada",
+      "orderFirmed": "Orden confirmada",
+      "releasedAs": "Liberada como",
+      "exceptionResolved": "Excepción resuelta"
+    }
+  },
+  "scheduling": {
+    "title": "Programación",
+    "kpi": {
+      "scheduledOps": "Ops Programadas",
+      "inProgress": "En Progreso",
+      "workCenters": "Centros de Trabajo"
+    },
+    "tabs": {
+      "schedule": "Programa",
+      "dispatchList": "Lista de Despacho",
+      "workCenters": "Centros de Trabajo",
+      "shifts": "Turnos",
+      "runHistory": "Historial"
+    },
+    "runScheduler": "Ejecutar Programador",
+    "noScheduledOps": "Sin operaciones programadas. Ejecute el programador para generar un programa.",
+    "noOpsScheduled": "Sin operaciones programadas",
+    "workCenter": "Centro de Trabajo",
+    "selectWorkCenter": "Seleccione un centro de trabajo para ver su lista de despacho.",
+    "noOpsDispatched": "Sin operaciones despachadas",
+    "noWorkCenters": "Sin centros de trabajo definidos. Agregue centros para habilitar programación.",
+    "noWorkCentersShort": "Sin centros de trabajo",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "noShifts": "Sin turnos definidos. Agregue turnos y asígnelos a centros de trabajo.",
+    "noShiftsShort": "Sin turnos",
+    "noRuns": "Sin ejecuciones de programación aún.",
+    "noRunsShort": "Sin ejecuciones",
+    "cols": {
+      "jobNumber": "Trabajo #",
+      "operation": "Operación",
+      "workCenter": "Centro de Trabajo",
+      "start": "Inicio",
+      "end": "Fin",
+      "hours": "Horas",
+      "status": "Estado",
+      "locked": "Bloqueado",
+      "code": "Código",
+      "name": "Nombre",
+      "dailyCap": "Cap. Diaria (hrs)",
+      "efficiency": "Eficiencia %",
+      "machines": "Máquinas",
+      "active": "Activo",
+      "asset": "Activo",
+      "location": "Ubicación",
+      "breakMin": "Descanso (min)",
+      "netHours": "Horas Netas",
+      "runDate": "Fecha",
+      "direction": "Dirección",
+      "opsScheduled": "Ops Programadas",
+      "conflicts": "Conflictos",
+      "completed": "Completado",
+      "seq": "Sec",
+      "setupHrs": "Prep. (hrs)",
+      "runHrs": "Ejec. (hrs)",
+      "priority": "Prioridad",
+      "dueDate": "Fecha Venc."
+    },
+    "statuses": {
+      "scheduled": "Programado",
+      "inProgress": "En Progreso",
+      "complete": "Completo",
+      "completed": "Completado",
+      "running": "Ejecutando",
+      "failed": "Fallido"
+    },
+    "rules": {
+      "dueDate": "Fecha de Vencimiento",
+      "priority": "Prioridad",
+      "fifo": "FIFO (Primero en Entrar)"
+    },
+    "snackbar": {
+      "scheduled": "Programado",
+      "operationLocked": "Operación bloqueada",
+      "operationUnlocked": "Operación desbloqueada"
+    }
+  },
+  "oee": {
+    "title": "Panel OEE",
+    "period": "Periodo",
+    "presets": {
+      "last30": "Últimos 30 Días",
+      "thisMonth": "Este Mes",
+      "thisWeek": "Esta Semana"
+    },
+    "avgOee": "OEE Promedio",
+    "worldClass": "Clase Mundial",
+    "noData": "Sin centros de trabajo con datos de producción para este periodo",
+    "detail": "Detalle",
+    "granularity": "Granularidad",
+    "oeeTrend": "TENDENCIA OEE",
+    "sixBigLosses": "SEIS GRANDES PÉRDIDAS",
+    "daily": "Diario",
+    "weekly": "Semanal",
+    "monthly": "Mensual",
+    "worldClassOee": "OEE clase mundial",
+    "oeeLabel": "OEE",
+    "availability": "Disponibilidad",
+    "performance": "Rendimiento",
+    "quality": "Calidad",
+    "total": "total",
+    "good": "buenas",
+    "scrap": "scrap",
+    "trendAriaLabel": "Gráfico de tendencia OEE mostrando disponibilidad, rendimiento, calidad y OEE general",
+    "noTrendData": "Sin datos de tendencia para este periodo",
+    "totalLoss": "Pérdida Total:",
+    "noLosses": "Sin pérdidas registradas para este periodo",
+    "minutesLost": "Minutos Perdidos",
+    "losses": {
+      "equipmentFailure": "Falla de Equipo",
+      "setupAdjustment": "Configuración y Ajuste",
+      "idlingMinorStops": "Paradas Menores",
+      "reducedSpeed": "Velocidad Reducida",
+      "processDefects": "Defectos de Proceso",
+      "reducedYield": "Rendimiento Reducido"
+    }
+  },
+  "purchasing": {
+    "title": "Solicitudes",
+    "subtitle": "Solicitudes de Cotización",
+    "newRfq": "Nueva Solicitud",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar solicitudes...",
+    "status": "Estado",
+    "editRfq": "Editar Solicitud",
+    "cols": {
+      "rfqNumber": "Solicitud #",
+      "part": "Pieza",
+      "description": "Descripción",
+      "qty": "Cant.",
+      "status": "Estado",
+      "vendors": "Proveedores",
+      "received": "Recibidas",
+      "required": "Requerida",
+      "deadline": "Límite",
+      "created": "Creada"
+    },
+    "statuses": {
+      "draft": "Borrador",
+      "sent": "Enviada",
+      "receiving": "Recibiendo",
+      "evaluating": "Evaluando",
+      "awarded": "Adjudicada",
+      "cancelled": "Cancelada",
+      "expired": "Expirada"
+    },
+    "dialog": {
+      "part": "Pieza",
+      "quantity": "Cantidad",
+      "requiredDate": "Fecha Requerida",
+      "responseDeadline": "Límite de Respuesta",
+      "description": "Descripción",
+      "specialInstructions": "Instrucciones Especiales",
+      "cancel": "Cancelar",
+      "update": "Actualizar",
+      "createRfq": "Crear Solicitud"
+    },
+    "detail": {
+      "title": "Detalle de Solicitud",
+      "part": "Pieza",
+      "quantity": "Cantidad",
+      "requiredDate": "Fecha Requerida",
+      "status": "Estado",
+      "responseDeadline": "Límite de Respuesta",
+      "sentAt": "Enviada",
+      "awardedAt": "Adjudicada",
+      "generatedPo": "OC Generada",
+      "description": "Descripción",
+      "specialInstructions": "Instrucciones Especiales",
+      "notes": "Notas",
+      "sendToVendors": "Enviar a Proveedores",
+      "recordResponse": "Registrar Respuesta",
+      "sendToVendorsTitle": "ENVIAR A PROVEEDORES",
+      "vendors": "Proveedores",
+      "recordResponseTitle": "REGISTRAR RESPUESTA DE PROVEEDOR",
+      "vendor": "Proveedor",
+      "unitPrice": "Precio Unitario",
+      "leadTimeDays": "Tiempo de Entrega (días)",
+      "moq": "Cantidad Mínima",
+      "toolingCost": "Costo de Herramental",
+      "quoteValidUntil": "Cotización Válida Hasta",
+      "vendorResponses": "RESPUESTAS DE PROVEEDORES",
+      "noResponses": "Sin respuestas de proveedores aún",
+      "vendorCol": "Proveedor",
+      "statusCol": "Estado",
+      "unitPriceCol": "Precio Unit.",
+      "leadTimeCol": "T. Entrega",
+      "moqCol": "Cant. Mín.",
+      "toolingCol": "Herramental",
+      "validUntilCol": "Válido Hasta"
+    },
+    "snackbar": {
+      "rfqUpdated": "Solicitud actualizada",
+      "rfqCreated": "Solicitud creada",
+      "sentToVendors": "Solicitud enviada a proveedores",
+      "responseRecorded": "Respuesta de proveedor registrada",
+      "awardedPo": "Solicitud adjudicada. OC creada."
+    },
+    "confirm": {
+      "awardTitle": "¿Adjudicar solicitud?"
+    }
+  },
+  "approvals": {
+    "title": "Aprobaciones",
+    "tabs": {
+      "inbox": "Bandeja",
+      "workflows": "Flujos de Trabajo"
+    },
+    "noPending": "Sin aprobaciones pendientes",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "rejectTitle": "Rechazar Aprobación",
+    "rejectReason": "Motivo del Rechazo",
+    "cancel": "Cancelar",
+    "cols": {
+      "type": "Tipo",
+      "summary": "Resumen",
+      "workflow": "Flujo",
+      "step": "Paso",
+      "amount": "Monto",
+      "requestedBy": "Solicitado Por",
+      "submitted": "Enviado",
+      "name": "Nombre",
+      "entityType": "Tipo de Entidad",
+      "active": "Activo",
+      "steps": "Pasos",
+      "created": "Creado"
+    },
+    "snackbar": {
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "workflowUpdated": "Flujo actualizado",
+      "workflowCreated": "Flujo creado"
+    },
+    "workflow": {
+      "newWorkflow": "Nuevo Flujo",
+      "noWorkflows": "Sin flujos de aprobación configurados",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "editTitle": "Editar Flujo de Aprobación",
+      "newTitle": "Nuevo Flujo de Aprobación",
+      "name": "Nombre del Flujo",
+      "namePlaceholder": "ej. Aprobación OC > $500",
+      "entityType": "Tipo de Entidad",
+      "description": "Descripción",
+      "amountThreshold": "Umbral de Monto ($)",
+      "amountPlaceholder": "Activar cuando monto exceda",
+      "approvalSteps": "Pasos de Aprobación",
+      "addStep": "Agregar Paso",
+      "stepName": "Nombre del Paso",
+      "approverType": "Tipo de Aprobador",
+      "role": "Rol",
+      "autoApproveBelow": "Auto-Aprobar Debajo de ($)",
+      "escalateAfter": "Escalar Después de (horas)",
+      "update": "Actualizar",
+      "create": "Crear"
+    },
+    "entityTypes": {
+      "purchaseOrder": "Orden de Compra",
+      "expense": "Gasto",
+      "quote": "Cotización",
+      "timeEntry": "Entrada de Tiempo",
+      "salesOrder": "Orden de Venta"
+    },
+    "approverTypes": {
+      "specificUser": "Usuario Específico",
+      "role": "Rol",
+      "directManager": "Gerente Directo"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "manager": "Gerente",
+      "officeManager": "Gerente de Oficina",
+      "pm": "PM"
+    }
+  },
+  "employees": {
+    "title": "Empleados",
+    "subtitle": "Gestionar miembros del equipo",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar por nombre o correo...",
+    "role": "Rol",
+    "status": "Estado",
+    "noEmployees": "No se encontraron empleados",
+    "cols": {
+      "name": "Nombre",
+      "role": "Rol",
+      "team": "Equipo",
+      "title": "Título",
+      "email": "Correo",
+      "phone": "Teléfono",
+      "status": "Estado",
+      "startDate": "Fecha de Inicio"
+    },
+    "filters": {
+      "all": "-- Todos --",
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "detail": {
+      "backToEmployees": "Empleados",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "hoursLabel": "Horas (2 Semanas)",
+      "compliance": "Cumplimiento",
+      "activeJobs": "Trabajos Activos",
+      "training": "Capacitación",
+      "pendingExpenses": "Gastos Pendientes",
+      "tabs": {
+        "overview": "General",
+        "time": "Tiempo y Asistencia",
+        "pay": "Nómina",
+        "training": "Capacitación",
+        "compliance": "Cumplimiento",
+        "jobs": "Trabajos",
+        "events": "Eventos",
+        "expenses": "Gastos",
+        "documents": "Documentos",
+        "activity": "Actividad"
+      }
+    }
+  },
+  "trainingPage": {
+    "tabs": {
+      "myLearning": "Mi Aprendizaje",
+      "learningPaths": "Rutas de Aprendizaje",
+      "allModules": "Todos los Módulos"
+    },
+    "searchModules": "Buscar módulos",
+    "type": "Tipo",
+    "learningStyle": "Estilo de Aprendizaje",
+    "noModules": "No se encontraron módulos de capacitación",
+    "completed": "Completado",
+    "inProgress": "En Progreso",
+    "noPaths": "Sin rutas de aprendizaje asignadas aún",
+    "modules": "módulos",
+    "continue": "Continuar",
+    "noPathsAvailable": "Sin rutas de aprendizaje disponibles",
+    "complete": "completo",
+    "autoAssigned": "Auto-asignado",
+    "typeOptions": {
+      "all": "Todos los Tipos",
+      "article": "Artículo",
+      "walkthrough": "Tutorial",
+      "quickRef": "Referencia Rápida",
+      "quiz": "Quiz / Evaluación"
+    },
+    "styleOptions": {
+      "all": "Todos los Estilos",
+      "visual": "Visual",
+      "reading": "Lectura / Escritura",
+      "handson": "Práctico / Kinestésico"
+    }
+  },
+  "adminPanels": {
+    "auditLog": {
+      "entityType": "Tipo de Entidad",
+      "action": "Acción",
+      "actionPlaceholder": "ej. Creado, Actualizado",
+      "fromDate": "Desde",
+      "toDate": "Hasta",
+      "noEntries": "No se encontraron entradas de auditoría",
+      "allTypes": "-- Todos los Tipos --",
+      "cols": {
+        "time": "Hora",
+        "user": "Usuario",
+        "action": "Acción",
+        "type": "Tipo",
+        "id": "ID",
+        "details": "Detalles",
+        "ip": "IP"
+      },
+      "types": {
+        "job": "Trabajo",
+        "part": "Pieza",
+        "customer": "Cliente",
+        "vendor": "Proveedor",
+        "expense": "Gasto",
+        "invoice": "Factura",
+        "payment": "Pago",
+        "user": "Usuario",
+        "purchaseOrder": "Orden de Compra",
+        "salesOrder": "Orden de Venta",
+        "quote": "Cotización",
+        "shipment": "Envío",
+        "timeEntry": "Entrada de Tiempo",
+        "asset": "Activo"
+      }
+    },
+    "edi": {
+      "tabs": {
+        "tradingPartners": "Socios Comerciales",
+        "transactions": "Transacciones"
+      },
+      "newPartner": "Nuevo Socio",
+      "noPartners": "Sin socios comerciales configurados",
+      "direction": "Dirección",
+      "status": "Estado",
+      "noTransactions": "Sin transacciones EDI",
+      "editPartner": "Editar Socio Comercial",
+      "newPartnerTitle": "Nuevo Socio Comercial",
+      "name": "Nombre",
+      "qualifierId": "ID Calificador",
+      "qualifierValue": "Valor Calificador",
+      "format": "Formato",
+      "transport": "Transporte",
+      "autoProcess": "Auto-procesar",
+      "requireAck": "Requerir Acuse",
+      "notes": "Notas",
+      "transactionDetail": "Detalle de Transacción",
+      "partner": "Socio",
+      "set": "Conjunto",
+      "rawPayload": "Datos Crudos",
+      "parsedData": "Datos Procesados",
+      "formats": {
+        "x12": "X12 (ANSI)",
+        "edifact": "EDIFACT (ONU)"
+      },
+      "transports": {
+        "as2": "AS2",
+        "sftp": "SFTP",
+        "van": "VAN",
+        "email": "Correo",
+        "api": "API",
+        "manual": "Manual"
+      },
+      "directions": {
+        "all": "Todas las Direcciones",
+        "inbound": "Entrante",
+        "outbound": "Saliente"
+      },
+      "statuses": {
+        "all": "Todos los Estados",
+        "received": "Recibido",
+        "parsing": "Analizando",
+        "parsed": "Analizado",
+        "processing": "Procesando",
+        "applied": "Aplicado",
+        "error": "Error",
+        "acknowledged": "Confirmado",
+        "rejected": "Rechazado"
+      },
+      "cols": {
+        "name": "Nombre",
+        "customer": "Cliente",
+        "vendor": "Proveedor",
+        "format": "Formato",
+        "transport": "Transporte",
+        "txns": "Txns",
+        "errors": "Errores",
+        "active": "Activo",
+        "partner": "Socio",
+        "dir": "Dir",
+        "set": "Conj",
+        "controlNumber": "Control #",
+        "status": "Estado",
+        "entity": "Entidad",
+        "received": "Recibido",
+        "retries": "Reintentos"
+      },
+      "snackbar": {
+        "partnerUpdated": "Socio actualizado",
+        "partnerCreated": "Socio creado",
+        "partnerDeleted": "Socio eliminado",
+        "connectionSuccess": "Conexión exitosa",
+        "connectionFailed": "Conexión fallida:",
+        "retryQueued": "Transacción en cola para reintento"
+      }
+    },
+    "events": {
+      "events": "eventos",
+      "type": "Tipo",
+      "noEvents": "No se encontraron eventos",
+      "required": "Obligatorio",
+      "optional": "Opcional",
+      "editEvent": "Editar Evento",
+      "newEvent": "Nuevo Evento",
+      "title": "Título",
+      "location": "Ubicación",
+      "startDate": "Fecha Inicio",
+      "startTime": "Hora Inicio",
+      "startTimePlaceholder": "HH:MM",
+      "endDate": "Fecha Fin",
+      "endTime": "Hora Fin",
+      "endTimePlaceholder": "HH:MM",
+      "description": "Descripción",
+      "attendees": "Asistentes",
+      "requiredAttendance": "Asistencia obligatoria",
+      "saveChanges": "Guardar Cambios",
+      "createEvent": "Crear Evento",
+      "allTypes": "-- Todos los Tipos --",
+      "types": {
+        "meeting": "Reunión",
+        "training": "Capacitación",
+        "safety": "Seguridad",
+        "other": "Otro"
+      },
+      "cols": {
+        "title": "Título",
+        "type": "Tipo",
+        "start": "Inicio",
+        "end": "Fin",
+        "location": "Ubicación",
+        "attendees": "Asistentes",
+        "required": "Obligatorio"
+      },
+      "snackbar": {
+        "eventUpdated": "Evento actualizado",
+        "eventCreated": "Evento creado",
+        "eventCancelled": "Evento cancelado"
+      }
+    },
+    "mfa": {
+      "title": "Política MFA",
+      "description": "Requerir autenticación de dos factores para usuarios con roles específicos. Los usuarios obligados deben configurar MFA en su próximo inicio de sesión.",
+      "requireMfa": "Requerir MFA para roles",
+      "placeholder": "Seleccionar roles a aplicar...",
+      "savePolicy": "Guardar Política",
+      "userCompliance": "Cumplimiento de Usuarios",
+      "noUsers": "No se encontraron usuarios",
+      "enabled": "Habilitado",
+      "disabled": "Deshabilitado",
+      "enforced": "Obligatorio",
+      "cols": {
+        "name": "Nombre",
+        "email": "Correo",
+        "role": "Rol",
+        "mfaEnabled": "MFA Habilitado",
+        "deviceType": "Tipo Dispositivo",
+        "enforced": "Obligatorio"
+      },
+      "snackbar": {
+        "policyUpdated": "Política MFA actualizada"
+      }
+    },
+    "timeCorrections": {
+      "employee": "Empleado",
+      "fromDate": "Desde",
+      "toDate": "Hasta",
+      "timeEntries": "Entradas de Tiempo",
+      "noEntries": "No se encontraron entradas de tiempo",
+      "correctionHistory": "Historial de Correcciones",
+      "noCorrections": "Sin correcciones registradas",
+      "correctTitle": "Corregir Entrada de Tiempo",
+      "employeeLabel": "Empleado:",
+      "originalDate": "Fecha Original:",
+      "originalStart": "Inicio Original:",
+      "originalEnd": "Fin Original:",
+      "originalDuration": "Duración Original:",
+      "date": "Fecha",
+      "startTime": "Hora Inicio",
+      "endTime": "Hora Fin",
+      "calculatedDuration": "Duración calculada:",
+      "category": "Categoría",
+      "notes": "Notas",
+      "reasonForCorrection": "Motivo de Corrección",
+      "saveCorrection": "Guardar Corrección",
+      "cols": {
+        "employee": "Empleado",
+        "date": "Fecha",
+        "jobNumber": "Trabajo #",
+        "start": "Inicio",
+        "end": "Fin",
+        "duration": "Duración",
+        "category": "Categoría",
+        "notes": "Notas",
+        "correctedBy": "Corregido Por",
+        "entryId": "ID Entrada",
+        "origJob": "Trab. Orig. #",
+        "origDate": "Fecha Orig.",
+        "origStart": "Inicio Orig.",
+        "origEnd": "Fin Orig.",
+        "origDuration": "Duración Orig.",
+        "reason": "Motivo"
+      },
+      "snackbar": {
+        "corrected": "Entrada de tiempo corregida"
+      }
+    },
+    "training": {
+      "tabs": {
+        "content": "Contenido",
+        "paths": "Rutas",
+        "userProgress": "Progreso de Usuarios"
+      },
+      "modules": "módulos",
+      "search": "Buscar",
+      "newModule": "Nuevo Módulo",
+      "noModules": "No se encontraron módulos de capacitación",
+      "published": "Publicado",
+      "draft": "Borrador",
+      "regenerateWalkthrough": "Regenerar pasos de tutorial",
+      "editModule": "Editar módulo",
+      "deleteModule": "Eliminar módulo",
+      "paths": "rutas",
+      "newPath": "Nueva Ruta",
+      "cols": {
+        "title": "Título",
+        "type": "Tipo",
+        "timeMin": "Tiempo (min)",
+        "published": "Publicado",
+        "modules": "Módulos",
+        "autoAssign": "Auto-Asignar",
+        "active": "Activo",
+        "user": "Usuario",
+        "role": "Rol",
+        "enrolled": "Inscrito",
+        "completed": "Completado",
+        "progress": "Progreso",
+        "lastActivity": "Última Actividad"
+      }
+    },
+    "trainingDetail": {
+      "title": "Detalle de Capacitación",
+      "noData": "Sin datos de capacitación para este usuario",
+      "of": "de",
+      "overallProgress": "progreso general",
+      "pathsEnrolled": "rutas inscritas",
+      "moduleBreakdown": "Desglose de Módulos",
+      "completed": "Completado",
+      "inProgress": "En Progreso"
+    },
+    "completeI9": {
+      "title": "Completar I-9 Sección 2",
+      "documentListType": "Tipo de Lista de Documentos",
+      "firstDayEmployment": "Primer Día de Empleo",
+      "listADocument": "Documento Lista A",
+      "listBDocument": "Documento Lista B (Identidad)",
+      "listCDocument": "Documento Lista C (Autorización de Empleo)",
+      "documentType": "Tipo de Documento",
+      "documentNumber": "Número de Documento",
+      "issuingAuthority": "Autoridad Emisora",
+      "expirationDate": "Fecha de Vencimiento",
+      "reverification": "Reverificación (Opcional)",
+      "workAuthExpiration": "Fecha de Vencimiento de Autorización de Trabajo",
+      "reverificationNote": "Dejar en blanco para ciudadanos estadounidenses, residentes permanentes y documentos sin vencimiento. Cuando se establezca, se enviará un recordatorio 90 días antes del vencimiento.",
+      "cancel": "Cancelar",
+      "completeSection2": "Completar Sección 2"
+    }
   }
 }

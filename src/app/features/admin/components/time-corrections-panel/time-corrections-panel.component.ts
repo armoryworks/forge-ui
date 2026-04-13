@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { TimeTrackingService } from '../../../time-tracking/services/time-tracking.service';
 import { AdminService } from '../../services/admin.service';
 import { TimeEntry } from '../../../time-tracking/models/time-entry.model';
@@ -37,6 +39,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     DialogComponent,
     LoadingBlockDirective,
     ValidationPopoverDirective,
+    TranslatePipe,
   ],
   templateUrl: './time-corrections-panel.component.html',
   styleUrl: './time-corrections-panel.component.scss',
@@ -47,6 +50,7 @@ export class TimeCorrectionsPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   protected readonly isLoading = signal(false);
   protected readonly saving = signal(false);
@@ -80,8 +84,8 @@ export class TimeCorrectionsPanelComponent implements OnInit {
   protected readonly calculatedDuration = signal<string>('');
 
   protected readonly entryColumns: ColumnDef[] = [
-    { field: 'userName', header: 'Employee', sortable: true },
-    { field: 'date', header: 'Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'userName', header: this.translate.instant('adminPanels.timeCorrections.cols.employee'), sortable: true },
+    { field: 'date', header: this.translate.instant('adminPanels.timeCorrections.cols.date'), sortable: true, type: 'date', width: '110px' },
     { field: 'jobNumber', header: 'Job #', sortable: true, width: '120px' },
     { field: 'timerStart', header: 'Start', sortable: true, width: '100px' },
     { field: 'timerStop', header: 'End', sortable: true, width: '100px' },
@@ -92,15 +96,15 @@ export class TimeCorrectionsPanelComponent implements OnInit {
   ];
 
   protected readonly correctionColumns: ColumnDef[] = [
-    { field: 'correctedByName', header: 'Corrected By', sortable: true },
-    { field: 'createdAt', header: 'Date', sortable: true, type: 'date', width: '140px' },
+    { field: 'correctedByName', header: this.translate.instant('adminPanels.timeCorrections.cols.correctedBy'), sortable: true },
+    { field: 'createdAt', header: this.translate.instant('adminPanels.timeCorrections.cols.correctedAt'), sortable: true, type: 'date', width: '140px' },
     { field: 'timeEntryId', header: 'Entry ID', sortable: true, width: '90px' },
     { field: 'originalJobNumber', header: 'Orig. Job #', sortable: true, width: '110px' },
-    { field: 'originalDate', header: 'Orig. Date', sortable: true, type: 'date', width: '110px' },
-    { field: 'originalStartTime', header: 'Orig. Start', sortable: true, width: '100px' },
-    { field: 'originalEndTime', header: 'Orig. End', sortable: true, width: '100px' },
+    { field: 'originalDate', header: this.translate.instant('adminPanels.timeCorrections.cols.date'), sortable: true, type: 'date', width: '110px' },
+    { field: 'originalStartTime', header: this.translate.instant('adminPanels.timeCorrections.cols.originalValue'), sortable: true, width: '100px' },
+    { field: 'originalEndTime', header: this.translate.instant('adminPanels.timeCorrections.cols.newValue'), sortable: true, width: '100px' },
     { field: 'originalDurationMinutes', header: 'Orig. Duration', sortable: true, type: 'number', width: '110px' },
-    { field: 'reason', header: 'Reason', sortable: true },
+    { field: 'reason', header: this.translate.instant('adminPanels.timeCorrections.cols.reason'), sortable: true },
   ];
 
   ngOnInit(): void {
@@ -134,7 +138,7 @@ export class TimeCorrectionsPanelComponent implements OnInit {
     this.adminService.getUsers().subscribe({
       next: (users) => {
         this.userOptions.set([
-          { value: null, label: '-- All Employees --' },
+          { value: null, label: this.translate.instant('adminPanels.timeCorrections.allEmployees') },
           ...users.map(u => ({ value: u.id, label: `${u.lastName}, ${u.firstName}` })),
         ]);
       },
@@ -214,7 +218,7 @@ export class TimeCorrectionsPanelComponent implements OnInit {
         this.closeDialog();
         this.loadEntries();
         this.loadCorrections();
-        this.snackbar.success('Time entry corrected');
+        this.snackbar.success(this.translate.instant('adminPanels.timeCorrections.snackbar.correctionSaved'));
       },
       error: () => {
         this.saving.set(false);

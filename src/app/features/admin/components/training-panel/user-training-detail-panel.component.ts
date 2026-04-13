@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { TrainingService } from '../../../training/services/training.service';
@@ -9,13 +11,14 @@ import { UserTrainingDetail } from '../../../training/models/user-training-detai
 @Component({
   selector: 'app-user-training-detail-panel',
   standalone: true,
-  imports: [DatePipe, LoadingBlockDirective, EmptyStateComponent],
+  imports: [DatePipe, LoadingBlockDirective, EmptyStateComponent, TranslatePipe],
   templateUrl: './user-training-detail-panel.component.html',
   styleUrl: './user-training-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UserTrainingDetailPanelComponent {
   private readonly trainingService = inject(TrainingService);
+  private readonly translate = inject(TranslateService);
 
   readonly userId = input.required<number>();
 
@@ -44,9 +47,9 @@ export class UserTrainingDetailPanelComponent {
 
   protected statusLabel(status: string | null): string {
     switch (status) {
-      case 'Completed':  return 'Completed';
-      case 'InProgress': return 'In Progress';
-      default:           return 'Not Started';
+      case 'Completed':  return this.translate.instant('adminPanels.trainingDetail.completed');
+      case 'InProgress': return this.translate.instant('adminPanels.trainingDetail.inProgress');
+      default:           return this.translate.instant('adminPanels.trainingDetail.notStarted');
     }
   }
 

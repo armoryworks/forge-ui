@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { OeeCalculation } from '../../models/oee-calculation.model';
 
 @Component({
   selector: 'app-oee-work-center-card',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, TranslatePipe],
   templateUrl: './oee-work-center-card.component.html',
   styleUrl: './oee-work-center-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

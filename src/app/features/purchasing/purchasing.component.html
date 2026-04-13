@@ -1,16 +1,16 @@
-<app-page-header title="RFQs" subtitle="Request for Quotes">
+<app-page-header [title]="'purchasing.title' | translate" [subtitle]="'purchasing.subtitle' | translate">
   <button data-testid="new-rfq-btn" class="action-btn action-btn--primary" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
-    New RFQ
+    {{ 'purchasing.newRfq' | translate }}
   </button>
 </app-page-header>
 
 <div class="purchasing-layout">
   <div class="purchasing-list-panel">
     <div class="filters-bar">
-      <app-input label="Search" [formControl]="searchControl" placeholder="Search RFQs..."
+      <app-input [label]="'purchasing.search' | translate" [formControl]="searchControl" [placeholder]="'purchasing.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
-      <app-select label="Status" [formControl]="statusFilterControl" [options]="statusOptions" />
+      <app-select [label]="'purchasing.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
     <app-rfq-list [data]="rfqs()" [loading]="loading()" (rowClicked)="openRfqDetail($event)" />

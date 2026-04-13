@@ -1,18 +1,18 @@
 <div class="audit-log-panel">
   <div class="audit-log-panel__filters">
     <app-select
-      label="Entity Type"
+      [label]="'adminPanels.auditLog.entityType' | translate"
       [formControl]="entityTypeControl"
       [options]="entityTypeOptions" />
     <app-input
-      label="Action"
+      [label]="'adminPanels.auditLog.action' | translate"
       [formControl]="actionControl"
-      placeholder="e.g. Created, Updated" />
+      [placeholder]="'adminPanels.auditLog.actionPlaceholder' | translate" />
     <app-datepicker
-      label="From Date"
+      [label]="'adminPanels.auditLog.fromDate' | translate"
       [formControl]="fromDateControl" />
     <app-datepicker
-      label="To Date"
+      [label]="'adminPanels.auditLog.toDate' | translate"
       [formControl]="toDateControl" />
   </div>
 
@@ -22,7 +22,7 @@
       [columns]="columns"
       [data]="entries()"
       emptyIcon="manage_search"
-      emptyMessage="No audit log entries found" />
+      [emptyMessage]="'adminPanels.auditLog.noEntries' | translate" />
   </div>
 
   <mat-paginator

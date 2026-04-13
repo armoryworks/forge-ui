@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, input, output, signal } fro
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map } from 'rxjs';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PurchasingService } from '../../services/purchasing.service';
 import { PartsService } from '../../../parts/services/parts.service';
 import { PartListItem } from '../../../parts/models/part-list-item.model';
@@ -20,7 +22,7 @@ import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
   selector: 'app-rfq-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, ValidationPopoverDirective,
   ],
@@ -32,6 +34,7 @@ export class RfqDialogComponent {
   private readonly purchasingService = inject(PurchasingService);
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly rfq = input<RfqListItem | null>(null);
   readonly closed = output<void>();
@@ -52,12 +55,12 @@ export class RfqDialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    partId: 'Part',
-    quantity: 'Quantity',
-    requiredDate: 'Required Date',
-    description: 'Description',
-    specialInstructions: 'Special Instructions',
-    responseDeadline: 'Response Deadline',
+    partId: this.translate.instant('purchasing.part'),
+    quantity: this.translate.instant('purchasing.quantity'),
+    requiredDate: this.translate.instant('purchasing.requiredDate'),
+    description: this.translate.instant('purchasing.description'),
+    specialInstructions: this.translate.instant('purchasing.specialInstructions'),
+    responseDeadline: this.translate.instant('purchasing.responseDeadline'),
   });
 
   constructor() {
@@ -65,7 +68,7 @@ export class RfqDialogComponent {
       next: (list) => {
         this.parts.set(list);
         this.partOptions.set([
-          { value: null, label: '-- Select Part --' },
+          { value: null, label: this.translate.instant('purchasing.selectPart') },
           ...list.map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })),
         ]);
       },
@@ -113,7 +116,7 @@ export class RfqDialogComponent {
 
     obs$.subscribe({
       next: () => {
-        this.snackbar.success(existing ? 'RFQ updated' : 'RFQ created');
+        this.snackbar.success(this.translate.instant(existing ? 'purchasing.snackbar.rfqUpdated' : 'purchasing.snackbar.rfqCreated'));
         this.saving.set(false);
         this.saved.emit();
       },

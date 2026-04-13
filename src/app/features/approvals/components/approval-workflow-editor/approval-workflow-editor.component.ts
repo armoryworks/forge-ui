@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { ApprovalsService } from '../../services/approvals.service';
 import { ApprovalWorkflow, ApproverType } from '../../models/approval.model';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -21,7 +23,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
   selector: 'app-approval-workflow-editor',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     DataTableComponent, ColumnCellDirective, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
     ValidationPopoverDirective, LoadingBlockDirective,
@@ -33,6 +35,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 export class ApprovalWorkflowEditorComponent implements OnInit {
   private readonly approvalsService = inject(ApprovalsService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -42,32 +45,32 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
   protected readonly editingWorkflow = signal<ApprovalWorkflow | null>(null);
 
   protected readonly entityTypeOptions: SelectOption[] = [
-    { value: 'PurchaseOrder', label: 'Purchase Order' },
-    { value: 'Expense', label: 'Expense' },
-    { value: 'Quote', label: 'Quote' },
-    { value: 'TimeEntry', label: 'Time Entry' },
-    { value: 'SalesOrder', label: 'Sales Order' },
+    { value: 'PurchaseOrder', label: this.translate.instant('approvals.entityTypes.purchaseOrder') },
+    { value: 'Expense', label: this.translate.instant('approvals.entityTypes.expense') },
+    { value: 'Quote', label: this.translate.instant('approvals.entityTypes.quote') },
+    { value: 'TimeEntry', label: this.translate.instant('approvals.entityTypes.timeEntry') },
+    { value: 'SalesOrder', label: this.translate.instant('approvals.entityTypes.salesOrder') },
   ];
 
   protected readonly approverTypeOptions: SelectOption[] = [
-    { value: 'SpecificUser', label: 'Specific User' },
-    { value: 'Role', label: 'Role' },
-    { value: 'Manager', label: 'Direct Manager' },
+    { value: 'SpecificUser', label: this.translate.instant('approvals.approverTypes.specificUser') },
+    { value: 'Role', label: this.translate.instant('approvals.approverTypes.role') },
+    { value: 'Manager', label: this.translate.instant('approvals.approverTypes.manager') },
   ];
 
   protected readonly roleOptions: SelectOption[] = [
-    { value: 'Admin', label: 'Admin' },
-    { value: 'Manager', label: 'Manager' },
-    { value: 'OfficeManager', label: 'Office Manager' },
-    { value: 'PM', label: 'PM' },
+    { value: 'Admin', label: this.translate.instant('approvals.roles.admin') },
+    { value: 'Manager', label: this.translate.instant('approvals.roles.manager') },
+    { value: 'OfficeManager', label: this.translate.instant('approvals.roles.officeManager') },
+    { value: 'PM', label: this.translate.instant('approvals.roles.pm') },
   ];
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'entityType', header: 'Entity Type', sortable: true, width: '150px' },
-    { field: 'isActive', header: 'Active', sortable: true, align: 'center', width: '80px' },
-    { field: 'stepsCount', header: 'Steps', align: 'center', width: '80px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '120px' },
+    { field: 'name', header: this.translate.instant('approvals.cols.name'), sortable: true },
+    { field: 'entityType', header: this.translate.instant('approvals.cols.entityType'), sortable: true, width: '150px' },
+    { field: 'isActive', header: this.translate.instant('approvals.cols.active'), sortable: true, align: 'center', width: '80px' },
+    { field: 'stepsCount', header: this.translate.instant('approvals.cols.steps'), align: 'center', width: '80px' },
+    { field: 'createdAt', header: this.translate.instant('approvals.cols.created'), sortable: true, type: 'date', width: '120px' },
     { field: 'actions', header: '', width: '60px' },
   ];
 
@@ -80,7 +83,8 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.workflowForm, {
-    name: 'Name', entityType: 'Entity Type',
+    name: this.translate.instant('approvals.workflows.workflowName'),
+    entityType: this.translate.instant('approvals.workflows.entityType'),
   });
 
   protected get stepsArray(): FormArray<FormGroup> {
@@ -172,7 +176,7 @@ export class ApprovalWorkflowEditorComponent implements OnInit {
 
     obs.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
-        this.snackbar.success(editing ? 'Workflow updated' : 'Workflow created');
+        this.snackbar.success(this.translate.instant(editing ? 'approvals.snackbar.workflowUpdated' : 'approvals.snackbar.workflowCreated'));
         this.showDialog.set(false);
         this.saving.set(false);
         this.loadWorkflows();

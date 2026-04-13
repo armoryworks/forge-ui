@@ -4,6 +4,8 @@ import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MatDialog } from '@angular/material/dialog';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { environment } from '../../../../../environments/environment';
 
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -56,6 +58,7 @@ export type PanelSubTab = 'content' | 'paths' | 'progress';
     ColumnCellDirective,
     LoadingBlockDirective,
     InputComponent,
+    TranslatePipe,
   ],
   templateUrl: './training-panel.component.html',
   styleUrl: './training-panel.component.scss',
@@ -67,6 +70,7 @@ export class TrainingPanelComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly trainingService = inject(TrainingService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly translate = inject(TranslateService);
 
   private readonly base = `${environment.apiUrl}/training`;
   protected readonly activeSubTab = signal<PanelSubTab>('content');
@@ -80,28 +84,28 @@ export class TrainingPanelComponent implements OnInit {
   protected readonly moduleSearchControl = new FormControl('');
 
   protected readonly moduleColumns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'contentType', header: 'Type', sortable: true, width: '120px' },
-    { field: 'estimatedMinutes', header: 'Time (min)', sortable: true, width: '100px', align: 'right' },
-    { field: 'isPublished', header: 'Published', sortable: true, width: '100px', align: 'center' },
+    { field: 'title', header: this.translate.instant('adminPanels.training.cols.title'), sortable: true },
+    { field: 'contentType', header: this.translate.instant('adminPanels.training.cols.type'), sortable: true, width: '120px' },
+    { field: 'estimatedMinutes', header: this.translate.instant('adminPanels.training.cols.timeMin'), sortable: true, width: '100px', align: 'right' },
+    { field: 'isPublished', header: this.translate.instant('adminPanels.training.cols.published'), sortable: true, width: '100px', align: 'center' },
     { field: 'actions', header: '', width: '120px', align: 'right' },
   ];
 
   protected readonly pathColumns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'moduleCount', header: 'Modules', sortable: true, width: '90px', align: 'right' },
-    { field: 'isAutoAssigned', header: 'Auto-Assign', sortable: true, width: '110px', align: 'center' },
-    { field: 'isActive', header: 'Active', sortable: true, width: '80px', align: 'center' },
+    { field: 'title', header: this.translate.instant('adminPanels.training.cols.title'), sortable: true },
+    { field: 'moduleCount', header: this.translate.instant('adminPanels.training.cols.modules'), sortable: true, width: '90px', align: 'right' },
+    { field: 'isAutoAssigned', header: this.translate.instant('adminPanels.training.cols.autoAssign'), sortable: true, width: '110px', align: 'center' },
+    { field: 'isActive', header: this.translate.instant('adminPanels.training.cols.active'), sortable: true, width: '80px', align: 'center' },
     { field: 'actions', header: '', width: '60px', align: 'right' },
   ];
 
   protected readonly progressColumns: ColumnDef[] = [
-    { field: 'displayName', header: 'User', sortable: true },
-    { field: 'role', header: 'Role', sortable: true, width: '120px' },
-    { field: 'totalEnrolled', header: 'Enrolled', sortable: true, width: '90px', align: 'right' },
-    { field: 'totalCompleted', header: 'Completed', sortable: true, width: '100px', align: 'right' },
-    { field: 'overallCompletionPct', header: 'Progress', sortable: true, width: '100px', align: 'right' },
-    { field: 'lastActivityAt', header: 'Last Activity', sortable: true, type: 'date', width: '130px' },
+    { field: 'displayName', header: this.translate.instant('adminPanels.training.cols.user'), sortable: true },
+    { field: 'role', header: this.translate.instant('adminPanels.training.cols.role'), sortable: true, width: '120px' },
+    { field: 'totalEnrolled', header: this.translate.instant('adminPanels.training.cols.enrolled'), sortable: true, width: '90px', align: 'right' },
+    { field: 'totalCompleted', header: this.translate.instant('adminPanels.training.cols.completed'), sortable: true, width: '100px', align: 'right' },
+    { field: 'overallCompletionPct', header: this.translate.instant('adminPanels.training.cols.progress'), sortable: true, width: '100px', align: 'right' },
+    { field: 'lastActivityAt', header: this.translate.instant('adminPanels.training.cols.lastActivity'), sortable: true, type: 'date', width: '130px' },
     { field: 'detail', header: '', width: '60px', align: 'right' },
   ];
 
@@ -158,7 +162,7 @@ export class TrainingPanelComponent implements OnInit {
       }).afterClosed().subscribe(created => {
         if (created) {
           this.loadModules();
-          this.snackbar.success('Training module created');
+          this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.moduleCreated'));
         }
       });
     });
@@ -172,7 +176,7 @@ export class TrainingPanelComponent implements OnInit {
       }).afterClosed().subscribe(updated => {
         if (updated) {
           this.loadModules();
-          this.snackbar.success('Training module updated');
+          this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.moduleUpdated'));
         }
       });
     });
@@ -182,7 +186,7 @@ export class TrainingPanelComponent implements OnInit {
     this.http.delete(`${this.base}/modules/${module.id}`).subscribe({
       next: () => {
         this.loadModules();
-        this.snackbar.success('Module deleted');
+        this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.moduleDeleted'));
       },
     });
   }
@@ -195,7 +199,7 @@ export class TrainingPanelComponent implements OnInit {
       }).afterClosed().subscribe(created => {
         if (created) {
           this.loadPaths();
-          this.snackbar.success('Training path created');
+          this.snackbar.success(this.translate.instant('adminPanels.training.snackbar.pathCreated'));
         }
       });
     });
@@ -230,7 +234,7 @@ export class TrainingPanelComponent implements OnInit {
       },
       error: () => {
         this.generatingModuleId.set(null);
-        this.snackbar.error('Failed to generate walkthrough steps');
+        this.snackbar.error(this.translate.instant('adminPanels.training.snackbar.walkthroughFailed'));
       },
     });
   }

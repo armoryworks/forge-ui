@@ -1,7 +1,7 @@
 <div class="workflow-editor">
   <div class="workflow-editor__header">
     <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreate()">
-      <span class="material-icons-outlined">add</span> New Workflow
+      <span class="material-icons-outlined">add</span> {{ 'approvals.workflows.newWorkflow' | translate }}
     </button>
   </div>
 
@@ -12,7 +12,7 @@
       [data]="getWorkflowData()"
       [clickableRows]="true"
       emptyIcon="rule"
-      emptyMessage="No approval workflows configured"
+      [emptyMessage]="'approvals.workflows.noWorkflows' | translate"
       (rowClick)="openEdit($any($event))">
       <ng-template appColumnCell="isActive" let-row>
         @if (row.isActive) {
@@ -34,22 +34,22 @@
 </div>
 
 @if (showDialog()) {
-  <app-dialog [title]="editingWorkflow() ? 'Edit Approval Workflow' : 'New Approval Workflow'" width="800px" (closed)="showDialog.set(false)">
+  <app-dialog [title]="(editingWorkflow() ? 'approvals.workflows.editWorkflow' : 'approvals.workflows.newWorkflowTitle') | translate" width="800px" (closed)="showDialog.set(false)">
     <div [formGroup]="workflowForm">
       <div class="dialog-row">
-        <app-input label="Workflow Name" formControlName="name" [required]="true" placeholder="e.g. PO Approval > $500" />
-        <app-select label="Entity Type" formControlName="entityType" [options]="entityTypeOptions" [required]="true" />
+        <app-input [label]="'approvals.workflows.workflowName' | translate" formControlName="name" [required]="true" placeholder="e.g. PO Approval > $500" />
+        <app-select [label]="'approvals.workflows.entityType' | translate" formControlName="entityType" [options]="entityTypeOptions" [required]="true" />
       </div>
       <div class="dialog-row">
-        <app-textarea label="Description" formControlName="description" [rows]="2" />
-        <app-input label="Amount Threshold ($)" formControlName="amountThreshold" type="number" placeholder="Activate when amount exceeds" />
+        <app-textarea [label]="'approvals.workflows.description' | translate" formControlName="description" [rows]="2" />
+        <app-input [label]="'approvals.workflows.amountThreshold' | translate" formControlName="amountThreshold" type="number" [placeholder]="'approvals.workflows.amountPlaceholder' | translate" />
       </div>
 
       <div class="steps-section">
         <div class="steps-section__header">
-          <span class="steps-section__title">Approval Steps</span>
+          <span class="steps-section__title">{{ 'approvals.workflows.approvalSteps' | translate }}</span>
           <button class="action-btn action-btn--sm" (click)="addStep()">
-            <span class="material-icons-outlined">add</span> Add Step
+            <span class="material-icons-outlined">add</span> {{ 'approvals.workflows.addStep' | translate }}
           </button>
         </div>
 
@@ -58,15 +58,15 @@
             <div class="step-row__number">{{ i + 1 }}</div>
             <div class="step-row__fields">
               <div class="dialog-row">
-                <app-input label="Step Name" formControlName="name" [required]="true" />
-                <app-select label="Approver Type" formControlName="approverType" [options]="approverTypeOptions" />
+                <app-input [label]="'approvals.workflows.stepName' | translate" formControlName="name" [required]="true" />
+                <app-select [label]="'approvals.workflows.approverType' | translate" formControlName="approverType" [options]="approverTypeOptions" />
               </div>
               @if (step.value.approverType === 'Role') {
-                <app-select label="Role" formControlName="approverRole" [options]="roleOptions" />
+                <app-select [label]="'approvals.workflows.role' | translate" formControlName="approverRole" [options]="roleOptions" />
               }
               <div class="dialog-row">
-                <app-input label="Auto-Approve Below ($)" formControlName="autoApproveBelow" type="number" />
-                <app-input label="Escalate After (hours)" formControlName="escalationHours" type="number" />
+                <app-input [label]="'approvals.workflows.autoApproveBelow' | translate" formControlName="autoApproveBelow" type="number" />
+                <app-input [label]="'approvals.workflows.escalateAfter' | translate" formControlName="escalationHours" type="number" />
               </div>
             </div>
             @if (stepsArray.length > 1) {
@@ -80,13 +80,13 @@
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="showDialog.set(false)">Cancel</button>
+      <button class="action-btn" (click)="showDialog.set(false)">{{ 'approvals.workflows.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="violations"
         [disabled]="workflowForm.invalid || stepsArray.length === 0 || saving()"
         (click)="save()">
         <span class="material-icons-outlined">save</span>
-        {{ editingWorkflow() ? 'Update' : 'Create' }}
+        {{ (editingWorkflow() ? 'approvals.workflows.update' : 'approvals.workflows.create') | translate }}
       </button>
     </div>
   </app-dialog>

@@ -1,20 +1,20 @@
-<app-page-layout pageTitle="OEE Dashboard">
+<app-page-layout [pageTitle]="'oee.title' | translate">
   <ng-container toolbar>
     <app-date-range-picker
-      label="Period"
+      [label]="'oee.period' | translate"
       [presets]="['Last 30 Days', 'This Month', 'This Week']"
       [formControl]="dateRangeControl" />
     <span appSpacer></span>
-    <app-kpi-chip label="Avg OEE" [value]="(averageOee() | number:'1.1-1') + '%'"
+    <app-kpi-chip [label]="'oee.avgOee' | translate" [value]="(averageOee() | number:'1.1-1') + '%'"
       [valueColor]="averageOee() >= 85 ? 'success' : averageOee() >= 60 ? 'primary' : 'warn'" />
-    <app-kpi-chip label="World Class" [value]="worldClassCount() + '/' + workCenters().length"
+    <app-kpi-chip [label]="'oee.worldClass' | translate" [value]="worldClassCount() + '/' + workCenters().length"
       valueColor="success" />
   </ng-container>
 
   <ng-container content>
     <div class="oee-page" [appLoadingBlock]="loading()">
       @if (workCenters().length === 0 && !loading()) {
-        <app-empty-state icon="precision_manufacturing" message="No work centers with production data found for this period" />
+        <app-empty-state icon="precision_manufacturing" [message]="'oee.noWorkCenters' | translate" />
       } @else {
         <!-- Work Center Grid -->
         <section class="oee-page__grid" aria-label="Work center OEE overview">
@@ -30,18 +30,18 @@
         @if (selectedWorkCenter()) {
           <section class="oee-page__detail" [appLoadingBlock]="detailLoading()">
             <div class="oee-page__detail-header">
-              <h3 class="oee-page__detail-title">{{ selectedWorkCenter()!.workCenterName }} — Detail</h3>
-              <app-select label="Granularity" [formControl]="granularityControl" [options]="granularityOptions" />
+              <h3 class="oee-page__detail-title">{{ selectedWorkCenter()!.workCenterName }} — {{ 'oee.detail' | translate }}</h3>
+              <app-select [label]="'oee.granularity' | translate" [formControl]="granularityControl" [options]="granularityOptions" />
             </div>
 
             <div class="oee-page__charts">
               <div class="oee-page__chart-section">
-                <h4 class="oee-page__section-label">OEE TREND</h4>
+                <h4 class="oee-page__section-label">{{ 'oee.oeeTrend' | translate }}</h4>
                 <app-oee-trend-chart [data]="trendData()" />
               </div>
 
               <div class="oee-page__chart-section">
-                <h4 class="oee-page__section-label">SIX BIG LOSSES</h4>
+                <h4 class="oee-page__section-label">{{ 'oee.sixBigLosses' | translate }}</h4>
                 @if (lossesData()) {
                   <app-six-big-losses-chart [data]="lossesData()!" />
                 }

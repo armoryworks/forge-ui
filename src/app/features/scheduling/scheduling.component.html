@@ -1,20 +1,20 @@
-<app-page-header title="Scheduling" />
+<app-page-header [title]="'scheduling.title' | translate" />
 
 <div class="scheduling">
   <!-- KPI Row -->
   <div class="scheduling__kpis">
-    <app-kpi-chip label="Scheduled Ops" [value]="totalScheduled().toString()" />
-    <app-kpi-chip label="In Progress" [value]="totalInProgress().toString()" valueColor="warn" />
-    <app-kpi-chip label="Work Centers" [value]="totalWorkCenters().toString()" valueColor="primary" />
+    <app-kpi-chip [label]="'scheduling.kpi.scheduledOps' | translate" [value]="totalScheduled().toString()" />
+    <app-kpi-chip [label]="'scheduling.kpi.inProgress' | translate" [value]="totalInProgress().toString()" valueColor="warn" />
+    <app-kpi-chip [label]="'scheduling.kpi.workCenters' | translate" [value]="totalWorkCenters().toString()" valueColor="primary" />
   </div>
 
   <!-- Tabs -->
   <div class="tab-bar">
-    <button class="tab" [class.tab--active]="activeTab() === 'gantt'" (click)="switchTab('gantt')">Schedule</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'dispatch'" (click)="switchTab('dispatch')">Dispatch List</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'work-centers'" (click)="switchTab('work-centers')">Work Centers</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'shifts'" (click)="switchTab('shifts')">Shifts</button>
-    <button class="tab" [class.tab--active]="activeTab() === 'runs'" (click)="switchTab('runs')">Run History</button>
+    <button class="tab" [class.tab--active]="activeTab() === 'gantt'" (click)="switchTab('gantt')">{{ 'scheduling.tabs.schedule' | translate }}</button>
+    <button class="tab" [class.tab--active]="activeTab() === 'dispatch'" (click)="switchTab('dispatch')">{{ 'scheduling.tabs.dispatch' | translate }}</button>
+    <button class="tab" [class.tab--active]="activeTab() === 'work-centers'" (click)="switchTab('work-centers')">{{ 'scheduling.tabs.workCenters' | translate }}</button>
+    <button class="tab" [class.tab--active]="activeTab() === 'shifts'" (click)="switchTab('shifts')">{{ 'scheduling.tabs.shifts' | translate }}</button>
+    <button class="tab" [class.tab--active]="activeTab() === 'runs'" (click)="switchTab('runs')">{{ 'scheduling.tabs.runHistory' | translate }}</button>
   </div>
 
   <!-- Gantt / Schedule Tab -->
@@ -22,12 +22,12 @@
     <div class="tab-panel" [appLoadingBlock]="loading()">
       <app-toolbar>
         <button class="action-btn action-btn--primary" (click)="executeSchedule()" aria-label="Run scheduler">
-          <span class="material-icons-outlined">play_arrow</span> Run Scheduler
+          <span class="material-icons-outlined">play_arrow</span> {{ 'scheduling.runScheduler' | translate }}
         </button>
       </app-toolbar>
 
       @if (ganttOps().length === 0 && !loading()) {
-        <app-empty-state icon="event_note" message="No scheduled operations. Run the scheduler to generate a schedule." />
+        <app-empty-state icon="event_note" [message]="'scheduling.noOps' | translate" />
       } @else {
         <app-data-table
           tableId="scheduling-gantt"
@@ -35,7 +35,7 @@
           [data]="ganttOps()"
           [clickableRows]="true"
           emptyIcon="event_note"
-          emptyMessage="No operations scheduled">
+          [emptyMessage]="'scheduling.noOpsTable' | translate">
           <ng-template appColumnCell="status" let-row>
             <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
           </ng-template>
@@ -53,21 +53,21 @@
   @if (activeTab() === 'dispatch') {
     <div class="tab-panel" [appLoadingBlock]="loading()">
       <app-toolbar>
-        <app-select label="Work Center" [formControl]="selectedWorkCenterControl" [options]="workCenterOptions()" placeholder="Select work center" />
+        <app-select [label]="'scheduling.workCenter' | translate" [formControl]="selectedWorkCenterControl" [options]="workCenterOptions()" [placeholder]="'scheduling.selectWorkCenter' | translate" />
         <button class="action-btn action-btn--primary" (click)="loadDispatch()" [disabled]="!selectedWorkCenterControl.value" aria-label="Load dispatch list">
-          <span class="material-icons-outlined">refresh</span> Load
+          <span class="material-icons-outlined">refresh</span> {{ 'scheduling.load' | translate }}
         </button>
       </app-toolbar>
 
       @if (dispatchList().length === 0 && !loading()) {
-        <app-empty-state icon="assignment" message="Select a work center to view its dispatch list." />
+        <app-empty-state icon="assignment" [message]="'scheduling.noDispatch' | translate" />
       } @else {
         <app-data-table
           tableId="scheduling-dispatch"
           [columns]="dispatchColumns"
           [data]="dispatchList()"
           emptyIcon="assignment"
-          emptyMessage="No operations dispatched">
+          [emptyMessage]="'scheduling.noDispatchTable' | translate">
           <ng-template appColumnCell="priority" let-row>
             <span class="chip chip--info">{{ row.priority }}</span>
           </ng-template>
@@ -80,16 +80,16 @@
   @if (activeTab() === 'work-centers') {
     <div class="tab-panel" [appLoadingBlock]="loading()">
       @if (workCenters().length === 0 && !loading()) {
-        <app-empty-state icon="precision_manufacturing" message="No work centers defined. Add work centers to enable scheduling." />
+        <app-empty-state icon="precision_manufacturing" [message]="'scheduling.noWorkCenters' | translate" />
       } @else {
         <app-data-table
           tableId="scheduling-work-centers"
           [columns]="workCenterColumns"
           [data]="workCenters()"
           emptyIcon="precision_manufacturing"
-          emptyMessage="No work centers">
+          [emptyMessage]="'scheduling.noWorkCentersTable' | translate">
           <ng-template appColumnCell="isActive" let-row>
-            <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ row.isActive ? 'Active' : 'Inactive' }}</span>
+            <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ (row.isActive ? 'scheduling.active' : 'scheduling.inactive') | translate }}</span>
           </ng-template>
         </app-data-table>
       }
@@ -100,16 +100,16 @@
   @if (activeTab() === 'shifts') {
     <div class="tab-panel" [appLoadingBlock]="loading()">
       @if (shifts().length === 0 && !loading()) {
-        <app-empty-state icon="schedule" message="No shifts defined. Add shifts and assign them to work centers." />
+        <app-empty-state icon="schedule" [message]="'scheduling.noShifts' | translate" />
       } @else {
         <app-data-table
           tableId="scheduling-shifts"
           [columns]="shiftColumns"
           [data]="shifts()"
           emptyIcon="schedule"
-          emptyMessage="No shifts">
+          [emptyMessage]="'scheduling.noShiftsTable' | translate">
           <ng-template appColumnCell="isActive" let-row>
-            <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ row.isActive ? 'Active' : 'Inactive' }}</span>
+            <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">{{ (row.isActive ? 'scheduling.active' : 'scheduling.inactive') | translate }}</span>
           </ng-template>
         </app-data-table>
       }
@@ -120,14 +120,14 @@
   @if (activeTab() === 'runs') {
     <div class="tab-panel" [appLoadingBlock]="loading()">
       @if (scheduleRuns().length === 0 && !loading()) {
-        <app-empty-state icon="history" message="No scheduling runs yet." />
+        <app-empty-state icon="history" [message]="'scheduling.noRuns' | translate" />
       } @else {
         <app-data-table
           tableId="scheduling-runs"
           [columns]="runColumns"
           [data]="scheduleRuns()"
           emptyIcon="history"
-          emptyMessage="No runs">
+          [emptyMessage]="'scheduling.noRunsTable' | translate">
           <ng-template appColumnCell="status" let-row>
             <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
           </ng-template>

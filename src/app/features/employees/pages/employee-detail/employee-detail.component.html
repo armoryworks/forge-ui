@@ -11,7 +11,7 @@
       <div class="ed-header__top">
         <a routerLink="/employees" class="ed-back">
           <span class="material-icons-outlined">chevron_left</span>
-          Employees
+          {{ 'employees.detail.backToEmployees' | translate }}
         </a>
       </div>
 
@@ -21,7 +21,7 @@
           <h1 class="ed-header__name">{{ displayName() }}</h1>
           <span class="chip chip--info">{{ e.role }}</span>
           <span class="chip" [class.chip--success]="e.isActive" [class.chip--muted]="!e.isActive">
-            {{ e.isActive ? 'Active' : 'Inactive' }}
+            {{ (e.isActive ? 'employees.detail.active' : 'employees.detail.inactive') | translate }}
           </span>
         </div>
         <div class="ed-header__meta-row">
@@ -57,23 +57,23 @@
         <div class="ed-stats">
           <div class="ed-stat" (click)="switchTab('time')" [class.ed-stat--active]="activeTab() === 'time'">
             <span class="ed-stat__value">{{ s.hoursThisPeriod }}h</span>
-            <span class="ed-stat__label">Hours (2 Weeks)</span>
+            <span class="ed-stat__label">{{ 'employees.detail.hoursLabel' | translate }}</span>
           </div>
           <div class="ed-stat" (click)="switchTab('compliance')" [class.ed-stat--active]="activeTab() === 'compliance'">
             <span class="ed-stat__value">{{ s.compliancePercent }}%</span>
-            <span class="ed-stat__label">Compliance</span>
+            <span class="ed-stat__label">{{ 'employees.detail.compliance' | translate }}</span>
           </div>
           <div class="ed-stat" (click)="switchTab('jobs')" [class.ed-stat--active]="activeTab() === 'jobs'">
             <span class="ed-stat__value">{{ s.activeJobCount }}</span>
-            <span class="ed-stat__label">Active Jobs</span>
+            <span class="ed-stat__label">{{ 'employees.detail.activeJobs' | translate }}</span>
           </div>
           <div class="ed-stat" (click)="switchTab('training')" [class.ed-stat--active]="activeTab() === 'training'">
             <span class="ed-stat__value">{{ s.trainingProgressPercent }}%</span>
-            <span class="ed-stat__label">Training</span>
+            <span class="ed-stat__label">{{ 'employees.detail.training' | translate }}</span>
           </div>
           <div class="ed-stat" (click)="switchTab('expenses')" [class.ed-stat--active]="activeTab() === 'expenses'">
             <span class="ed-stat__value">{{ s.outstandingExpenseCount }}</span>
-            <span class="ed-stat__label">Pending Expenses</span>
+            <span class="ed-stat__label">{{ 'employees.detail.pendingExpenses' | translate }}</span>
           </div>
         </div>
       }

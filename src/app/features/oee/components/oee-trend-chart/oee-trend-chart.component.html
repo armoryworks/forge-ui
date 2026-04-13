@@ -4,12 +4,12 @@
       [type]="chartConfig().type"
       [data]="chartConfig().data"
       [options]="chartConfig().options"
-      aria-label="OEE trend chart showing availability, performance, quality, and overall OEE over time">
+      [attr.aria-label]="'oee.trendChartLabel' | translate">
     </canvas>
   } @else {
     <div class="oee-trend-chart__empty">
       <span class="material-icons-outlined">show_chart</span>
-      <span>No trend data available for this period</span>
+      <span>{{ 'oee.noTrendData' | translate }}</span>
     </div>
   }
 </div>

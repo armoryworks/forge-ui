@@ -1,14 +1,14 @@
 <div class="time-corrections-panel">
   <div class="time-corrections-panel__filters">
     <app-select
-      label="Employee"
+      [label]="'adminPanels.timeCorrections.employee' | translate"
       [formControl]="userControl"
       [options]="userOptions()" />
     <app-datepicker
-      label="From Date"
+      [label]="'adminPanels.timeCorrections.fromDate' | translate"
       [formControl]="fromDateControl" />
     <app-datepicker
-      label="To Date"
+      [label]="'adminPanels.timeCorrections.toDate' | translate"
       [formControl]="toDateControl" />
   </div>
 
@@ -20,7 +20,7 @@
       [columns]="entryColumns"
       [data]="entries()"
       emptyIcon="schedule"
-      emptyMessage="No time entries found">
+      [emptyMessage]="'adminPanels.timeCorrections.noCorrections' | translate">
       <ng-template appColumnCell="date" let-row>
         {{ row.date | date:'MM/dd/yyyy' }}
       </ng-template>
@@ -48,7 +48,7 @@
     [columns]="correctionColumns"
     [data]="corrections()"
     emptyIcon="history"
-    emptyMessage="No corrections recorded">
+    [emptyMessage]="'adminPanels.timeCorrections.noCorrections' | translate">
     <ng-template appColumnCell="createdAt" let-row>
       {{ row.createdAt | date:'MM/dd/yyyy hh:mm a' }}
     </ng-template>

@@ -4,17 +4,17 @@
     <button class="tab" [class.tab--active]="activeSubTab() === 'content'"
       (click)="switchSubTab('content')">
       <span class="material-icons-outlined">library_books</span>
-      Content
+      {{ 'adminPanels.training.tabs.content' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeSubTab() === 'paths'"
       (click)="switchSubTab('paths')">
       <span class="material-icons-outlined">route</span>
-      Paths
+      {{ 'adminPanels.training.tabs.paths' | translate }}
     </button>
     <button class="tab" [class.tab--active]="activeSubTab() === 'progress'"
       (click)="switchSubTab('progress')">
       <span class="material-icons-outlined">insights</span>
-      User Progress
+      {{ 'adminPanels.training.tabs.userProgress' | translate }}
     </button>
   </div>
 
@@ -22,13 +22,13 @@
   @if (activeSubTab() === 'content') {
     <div class="tab-panel" [appLoadingBlock]="isLoading()">
       <div class="panel-header">
-        <span class="panel-header__count">{{ modules().length }} modules</span>
+        <span class="panel-header__count">{{ modules().length }} {{ 'adminPanels.training.modules' | translate }}</span>
         <div class="panel-header__actions">
-          <app-input label="Search" [formControl]="moduleSearchControl" />
+          <app-input [label]="'adminPanels.training.search' | translate" [formControl]="moduleSearchControl" />
           <button class="action-btn action-btn--primary" (click)="openCreateModuleDialog()"
-            aria-label="New Training Module">
+            [attr.aria-label]="'adminPanels.training.newModule' | translate">
             <span class="material-icons-outlined">add</span>
-            New Module
+            {{ 'adminPanels.training.newModule' | translate }}
           </button>
         </div>
       </div>
@@ -38,7 +38,7 @@
         [columns]="moduleColumns"
         [data]="modules()"
         emptyIcon="library_books"
-        emptyMessage="No training modules found">
+        [emptyMessage]="'adminPanels.training.noModules' | translate">
 
         <ng-template appColumnCell="contentType" let-row>
           <span class="chip" [class]="contentTypeClass(row.contentType)">
@@ -50,17 +50,17 @@
         <ng-template appColumnCell="isPublished" let-row>
           @if (row.isPublished) {
             <span class="material-icons-outlined training-panel__published-icon training-panel__published-icon--yes"
-              title="Published">check_circle</span>
+              [title]="'adminPanels.training.published' | translate">check_circle</span>
           } @else {
             <span class="material-icons-outlined training-panel__published-icon training-panel__published-icon--no"
-              title="Draft">unpublished</span>
+              [title]="'adminPanels.training.draft' | translate">unpublished</span>
           }
         </ng-template>
 
         <ng-template appColumnCell="actions" let-row>
           <div class="action-cell">
             @if (row.contentType === 'Walkthrough') {
-              <button class="icon-btn" title="Regenerate walkthrough steps" aria-label="Regenerate walkthrough steps"
+              <button class="icon-btn" [title]="'adminPanels.training.regenerateWalkthrough' | translate" [attr.aria-label]="'adminPanels.training.regenerateWalkthrough' | translate"
                 [disabled]="generatingModuleId() !== null"
                 (click)="generateWalkthrough(row); $event.stopPropagation()">
                 <span class="material-icons-outlined"
@@ -69,11 +69,11 @@
                 </span>
               </button>
             }
-            <button class="icon-btn" title="Edit module" aria-label="Edit module"
+            <button class="icon-btn" [title]="'adminPanels.training.editModule' | translate" [attr.aria-label]="'adminPanels.training.editModule' | translate"
               (click)="openEditModuleDialog(row); $event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>
             </button>
-            <button class="icon-btn icon-btn--danger" title="Delete module" aria-label="Delete module"
+            <button class="icon-btn icon-btn--danger" [title]="'adminPanels.training.deleteModule' | translate" [attr.aria-label]="'adminPanels.training.deleteModule' | translate"
               (click)="deleteModule(row); $event.stopPropagation()">
               <span class="material-icons-outlined">delete</span>
             </button>
@@ -87,11 +87,11 @@
   @if (activeSubTab() === 'paths') {
     <div class="tab-panel" [appLoadingBlock]="isLoading()">
       <div class="panel-header">
-        <span class="panel-header__count">{{ paths().length }} paths</span>
+        <span class="panel-header__count">{{ paths().length }} {{ 'adminPanels.training.paths' | translate }}</span>
         <button class="action-btn action-btn--primary" (click)="openCreatePathDialog()"
-          aria-label="New Training Path">
+          [attr.aria-label]="'adminPanels.training.newPath' | translate">
           <span class="material-icons-outlined">add</span>
-          New Path
+          {{ 'adminPanels.training.newPath' | translate }}
         </button>
       </div>
 
@@ -100,27 +100,27 @@
         [columns]="pathColumns"
         [data]="paths()"
         emptyIcon="route"
-        emptyMessage="No training paths defined">
+        [emptyMessage]="'adminPanels.training.noPaths' | translate">
 
         <ng-template appColumnCell="isAutoAssigned" let-row>
           @if (row.isAutoAssigned) {
-            <span class="chip chip--success">Auto</span>
+            <span class="chip chip--success">{{ 'adminPanels.training.auto' | translate }}</span>
           } @else {
-            <span class="chip chip--muted">Manual</span>
+            <span class="chip chip--muted">{{ 'adminPanels.training.manual' | translate }}</span>
           }
         </ng-template>
 
         <ng-template appColumnCell="isActive" let-row>
           @if (row.isActive) {
-            <span class="chip chip--success">Active</span>
+            <span class="chip chip--success">{{ 'adminPanels.training.activeLabel' | translate }}</span>
           } @else {
-            <span class="chip chip--muted">Inactive</span>
+            <span class="chip chip--muted">{{ 'adminPanels.training.inactive' | translate }}</span>
           }
         </ng-template>
 
         <ng-template appColumnCell="actions" let-row>
           <div class="action-cell">
-            <button class="icon-btn" title="Edit path" aria-label="Edit path"
+            <button class="icon-btn" [title]="'adminPanels.training.editPath' | translate" [attr.aria-label]="'adminPanels.training.editPath' | translate"
               (click)="$event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>
             </button>
@@ -134,7 +134,7 @@
   @if (activeSubTab() === 'progress') {
     <div class="tab-panel" [appLoadingBlock]="isLoading()">
       <div class="panel-header">
-        <span class="panel-header__count">{{ userProgress().length }} users</span>
+        <span class="panel-header__count">{{ userProgress().length }} {{ 'adminPanels.training.users' | translate }}</span>
       </div>
 
       <app-data-table
@@ -142,7 +142,7 @@
         [columns]="progressColumns"
         [data]="userProgress()"
         emptyIcon="insights"
-        emptyMessage="No user progress data available">
+        [emptyMessage]="'adminPanels.training.noProgress' | translate">
 
         <ng-template appColumnCell="role" let-row>
           <span class="chip" [class.chip--primary]="row.role === 'Admin'">{{ row.role }}</span>
@@ -170,7 +170,7 @@
         </ng-template>
 
         <ng-template appColumnCell="detail" let-row>
-          <button class="icon-btn" title="View module detail" aria-label="View training detail for this user"
+          <button class="icon-btn" [title]="'adminPanels.training.viewDetail' | translate" [attr.aria-label]="'adminPanels.training.viewDetail' | translate"
             (click)="openUserDetailDialog(row); $event.stopPropagation()">
             <span class="material-icons-outlined">open_in_new</span>
           </button>

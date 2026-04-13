@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnIni
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageLayoutComponent } from '../../shared/components/page-layout/page-layout.component';
 import { ToolbarComponent } from '../../shared/components/toolbar/toolbar.component';
@@ -35,6 +36,7 @@ import { SixBigLossesChartComponent } from './components/six-big-losses-chart/si
     KpiChipComponent,
     EmptyStateComponent,
     LoadingBlockDirective,
+    TranslatePipe,
     OeeWorkCenterCardComponent,
     OeeTrendChartComponent,
     SixBigLossesChartComponent,
@@ -46,6 +48,7 @@ import { SixBigLossesChartComponent } from './components/six-big-losses-chart/si
 export class OeeComponent implements OnInit {
   private readonly oeeService = inject(OeeService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   // State
   protected readonly loading = signal(false);
@@ -64,9 +67,9 @@ export class OeeComponent implements OnInit {
   // Granularity control
   protected readonly granularityControl = new FormControl<OeeTrendGranularity>('Daily');
   protected readonly granularityOptions: SelectOption[] = [
-    { value: 'Daily', label: 'Daily' },
-    { value: 'Weekly', label: 'Weekly' },
-    { value: 'Monthly', label: 'Monthly' },
+    { value: 'Daily', label: this.translate.instant('oee.granularities.daily') },
+    { value: 'Weekly', label: this.translate.instant('oee.granularities.weekly') },
+    { value: 'Monthly', label: this.translate.instant('oee.granularities.monthly') },
   ];
 
   // Computed

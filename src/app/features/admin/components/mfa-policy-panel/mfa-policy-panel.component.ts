@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -14,7 +16,7 @@ import { MfaComplianceUser } from '../../../account/models/mfa.model';
 @Component({
   selector: 'app-mfa-policy-panel',
   standalone: true,
-  imports: [ReactiveFormsModule, DataTableComponent, ColumnCellDirective, SelectComponent, LoadingBlockDirective],
+  imports: [ReactiveFormsModule, DataTableComponent, ColumnCellDirective, SelectComponent, LoadingBlockDirective, TranslatePipe],
   templateUrl: './mfa-policy-panel.component.html',
   styleUrl: './mfa-policy-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +25,7 @@ export class MfaPolicyPanelComponent implements OnInit {
   private readonly mfaService = inject(MfaService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(true);
   protected readonly saving = signal(false);
@@ -73,12 +76,12 @@ export class MfaPolicyPanelComponent implements OnInit {
     this.mfaService.setPolicy(this.enforcedRolesControl.value).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('MFA policy updated');
+        this.snackbar.success(this.translate.instant('adminPanels.mfa.snackbar.policySaved'));
         this.loadData();
       },
       error: () => {
         this.saving.set(false);
-        this.snackbar.error('Failed to update MFA policy');
+        this.snackbar.error(this.translate.instant('adminPanels.mfa.snackbar.policyReset'));
       },
     });
   }

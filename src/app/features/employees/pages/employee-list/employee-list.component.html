@@ -1,14 +1,14 @@
-<app-page-header title="Employees" subtitle="Manage team members">
+<app-page-header [title]="'employees.title' | translate" [subtitle]="'employees.subtitle' | translate">
 </app-page-header>
 
 <div class="employees-layout">
   <div class="filters-bar">
-    <app-input label="Search" [formControl]="searchControl"
-      placeholder="Search by name or email..."
+    <app-input [label]="'employees.search' | translate" [formControl]="searchControl"
+      [placeholder]="'employees.searchPlaceholder' | translate"
       (keyup.enter)="applyFilters()" />
-    <app-select label="Role" [formControl]="roleControl" [options]="roleOptions()"
+    <app-select [label]="'employees.role' | translate" [formControl]="roleControl" [options]="roleOptions()"
       (selectionChange)="applyFilters()" />
-    <app-select label="Status" [formControl]="statusControl" [options]="statusOptions"
+    <app-select [label]="'employees.status' | translate" [formControl]="statusControl" [options]="statusOptions"
       (selectionChange)="applyFilters()" />
   </div>
 
@@ -18,7 +18,7 @@
       [columns]="columns()"
       [data]="employees()"
       emptyIcon="badge"
-      emptyMessage="No employees found"
+      [emptyMessage]="'employees.noEmployees' | translate"
       [clickableRows]="true"
       (rowClick)="selectEmployee($any($event))">
 
@@ -30,7 +30,7 @@
       </ng-template>
       <ng-template appColumnCell="isActive" let-row>
         <span [class]="row.isActive ? 'chip chip--success' : 'chip chip--muted'">
-          {{ row.isActive ? 'Active' : 'Inactive' }}
+          {{ (row.isActive ? 'employees.filters.active' : 'employees.filters.inactive') | translate }}
         </span>
       </ng-template>
       <ng-template appColumnCell="startDate" let-row>

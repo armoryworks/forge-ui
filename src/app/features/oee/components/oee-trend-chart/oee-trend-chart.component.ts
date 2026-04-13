@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ChartConfiguration } from 'chart.js';
 
 import { OeeTrendPoint } from '../../models/oee-trend-point.model';
@@ -7,7 +8,7 @@ import { OeeTrendPoint } from '../../models/oee-trend-point.model';
 @Component({
   selector: 'app-oee-trend-chart',
   standalone: true,
-  imports: [BaseChartDirective],
+  imports: [BaseChartDirective, TranslatePipe],
   templateUrl: './oee-trend-chart.component.html',
   styleUrl: './oee-trend-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

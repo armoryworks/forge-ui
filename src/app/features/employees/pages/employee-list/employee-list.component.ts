@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { EmployeeService } from '../../services/employee.service';
 import { EmployeeListItem } from '../../models/employee.model';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
@@ -21,7 +23,7 @@ import { AvatarComponent } from '../../../../shared/components/avatar/avatar.com
   selector: 'app-employee-list',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     AvatarComponent,
@@ -34,6 +36,7 @@ export class EmployeeListComponent {
   private readonly employeeService = inject(EmployeeService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   protected readonly loading = signal(false);
   protected readonly employees = signal<EmployeeListItem[]>([]);
@@ -47,21 +50,21 @@ export class EmployeeListComponent {
   protected readonly roleOptions = signal<SelectOption[]>([{ value: null, label: '-- All Roles --' }]);
 
   protected readonly statusOptions: SelectOption[] = [
-    { value: null, label: '-- All --' },
-    { value: true, label: 'Active' },
-    { value: false, label: 'Inactive' },
+    { value: null, label: this.translate.instant('employees.filters.all') },
+    { value: true, label: this.translate.instant('employees.filters.active') },
+    { value: false, label: this.translate.instant('employees.filters.inactive') },
   ];
 
   protected readonly columns = computed<ColumnDef[]>(() => [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'role', header: 'Role', sortable: true, filterable: true, type: 'enum' as const,
+    { field: 'name', header: this.translate.instant('employees.cols.name'), sortable: true },
+    { field: 'role', header: this.translate.instant('employees.cols.role'), sortable: true, filterable: true, type: 'enum' as const,
       filterOptions: this.roleOptions().filter(o => o.value !== null), width: '130px' },
-    { field: 'teamName', header: 'Team', sortable: true, width: '120px' },
-    { field: 'jobTitle', header: 'Title', sortable: true, width: '140px' },
-    { field: 'email', header: 'Email', sortable: true },
-    { field: 'phone', header: 'Phone', sortable: true, width: '130px' },
-    { field: 'isActive', header: 'Status', sortable: true, width: '80px' },
-    { field: 'startDate', header: 'Start Date', sortable: true, type: 'date' as const, width: '100px' },
+    { field: 'teamName', header: this.translate.instant('employees.cols.team'), sortable: true, width: '120px' },
+    { field: 'jobTitle', header: this.translate.instant('employees.cols.title'), sortable: true, width: '140px' },
+    { field: 'email', header: this.translate.instant('employees.cols.email'), sortable: true },
+    { field: 'phone', header: this.translate.instant('employees.cols.phone'), sortable: true, width: '130px' },
+    { field: 'isActive', header: this.translate.instant('employees.cols.status'), sortable: true, width: '80px' },
+    { field: 'startDate', header: this.translate.instant('employees.cols.startDate'), sortable: true, type: 'date' as const, width: '100px' },
   ]);
 
   constructor() {

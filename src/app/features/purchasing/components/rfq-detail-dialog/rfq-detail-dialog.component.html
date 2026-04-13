@@ -5,61 +5,61 @@
       <div class="rfq-detail__info">
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Part</span>
+            <span class="info-label">{{ 'purchasing.part' | translate }}</span>
             <span class="info-value">{{ rfq.partNumber }} — {{ rfq.partDescription }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Quantity</span>
+            <span class="info-label">{{ 'purchasing.quantity' | translate }}</span>
             <span class="info-value">{{ rfq.quantity }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Required Date</span>
+            <span class="info-label">{{ 'purchasing.requiredDate' | translate }}</span>
             <span class="info-value">{{ rfq.requiredDate | date:'MM/dd/yyyy' }}</span>
           </div>
           <div class="info-item">
-            <span class="info-label">Status</span>
+            <span class="info-label">{{ 'purchasing.status' | translate }}</span>
             <span class="info-value">{{ rfq.status }}</span>
           </div>
           @if (rfq.responseDeadline) {
             <div class="info-item">
-              <span class="info-label">Response Deadline</span>
+              <span class="info-label">{{ 'purchasing.responseDeadline' | translate }}</span>
               <span class="info-value">{{ rfq.responseDeadline | date:'MM/dd/yyyy' }}</span>
             </div>
           }
           @if (rfq.sentAt) {
             <div class="info-item">
-              <span class="info-label">Sent At</span>
+              <span class="info-label">{{ 'purchasing.sentAt' | translate }}</span>
               <span class="info-value">{{ rfq.sentAt | date:'MM/dd/yyyy hh:mm' }}</span>
             </div>
           }
           @if (rfq.awardedAt) {
             <div class="info-item">
-              <span class="info-label">Awarded At</span>
+              <span class="info-label">{{ 'purchasing.awardedAt' | translate }}</span>
               <span class="info-value">{{ rfq.awardedAt | date:'MM/dd/yyyy hh:mm' }}</span>
             </div>
           }
           @if (rfq.generatedPurchaseOrderId) {
             <div class="info-item">
-              <span class="info-label">Generated PO</span>
+              <span class="info-label">{{ 'purchasing.generatedPo' | translate }}</span>
               <span class="info-value info-value--link">PO #{{ rfq.generatedPurchaseOrderId }}</span>
             </div>
           }
         </div>
         @if (rfq.description) {
           <div class="info-block">
-            <span class="info-label">Description</span>
+            <span class="info-label">{{ 'purchasing.description' | translate }}</span>
             <p class="info-text">{{ rfq.description }}</p>
           </div>
         }
         @if (rfq.specialInstructions) {
           <div class="info-block">
-            <span class="info-label">Special Instructions</span>
+            <span class="info-label">{{ 'purchasing.specialInstructions' | translate }}</span>
             <p class="info-text">{{ rfq.specialInstructions }}</p>
           </div>
         }
         @if (rfq.notes) {
           <div class="info-block">
-            <span class="info-label">Notes</span>
+            <span class="info-label">{{ 'purchasing.notes' | translate }}</span>
             <p class="info-text">{{ rfq.notes }}</p>
           </div>
         }
@@ -69,12 +69,12 @@
       <div class="rfq-detail__actions">
         @if (canSend()) {
           <button class="action-btn action-btn--sm" (click)="toggleSendForm()" aria-label="Send to vendors">
-            <span class="material-icons-outlined">send</span> Send to Vendors
+            <span class="material-icons-outlined">send</span> {{ 'purchasing.sendToVendors' | translate }}
           </button>
         }
         @if (canRecordResponse()) {
           <button class="action-btn action-btn--sm" (click)="toggleResponseForm()" aria-label="Record response">
-            <span class="material-icons-outlined">edit_note</span> Record Response
+            <span class="material-icons-outlined">edit_note</span> {{ 'purchasing.recordResponse' | translate }}
           </button>
         }
       </div>
@@ -82,14 +82,14 @@
       <!-- Send to Vendors Form -->
       @if (showSendForm()) {
         <div class="rfq-detail__form-section">
-          <span class="section-title">SEND TO VENDORS</span>
-          <app-select label="Vendors" [formControl]="sendVendorControl" [options]="vendorOptions()" [multiple]="true" [required]="true" />
+          <span class="section-title">{{ 'purchasing.sendToVendors' | translate }}</span>
+          <app-select [label]="'purchasing.vendors' | translate" [formControl]="sendVendorControl" [options]="vendorOptions()" [multiple]="true" [required]="true" />
           <div class="form-actions">
-            <button class="action-btn action-btn--sm" (click)="toggleSendForm()">Cancel</button>
+            <button class="action-btn action-btn--sm" (click)="toggleSendForm()">{{ 'purchasing.cancel' | translate }}</button>
             <button class="action-btn action-btn--sm action-btn--primary"
               [disabled]="!sendVendorControl.value?.length || saving()"
               (click)="sendToVendors()">
-              <span class="material-icons-outlined">send</span> Send
+              <span class="material-icons-outlined">send</span> {{ 'purchasing.send' | translate }}
             </button>
           </div>
         </div>
@@ -98,25 +98,25 @@
       <!-- Record Response Form -->
       @if (showResponseForm()) {
         <div class="rfq-detail__form-section" [formGroup]="responseForm">
-          <span class="section-title">RECORD VENDOR RESPONSE</span>
-          <app-select label="Vendor" formControlName="vendorId" [options]="pendingVendorOptions()" [required]="true" />
+          <span class="section-title">{{ 'purchasing.recordVendorResponse' | translate }}</span>
+          <app-select [label]="'purchasing.cols.vendor' | translate" formControlName="vendorId" [options]="pendingVendorOptions()" [required]="true" />
           <div class="dialog-row">
-            <app-input label="Unit Price" type="number" formControlName="unitPrice" />
-            <app-input label="Lead Time (days)" type="number" formControlName="leadTimeDays" />
+            <app-input [label]="'purchasing.unitPrice' | translate" type="number" formControlName="unitPrice" />
+            <app-input [label]="'purchasing.leadTimeDays' | translate" type="number" formControlName="leadTimeDays" />
           </div>
           <div class="dialog-row">
-            <app-input label="MOQ" type="number" formControlName="minimumOrderQuantity" />
-            <app-input label="Tooling Cost" type="number" formControlName="toolingCost" />
+            <app-input [label]="'purchasing.moq' | translate" type="number" formControlName="minimumOrderQuantity" />
+            <app-input [label]="'purchasing.toolingCost' | translate" type="number" formControlName="toolingCost" />
           </div>
-          <app-datepicker label="Quote Valid Until" formControlName="quoteValidUntil" />
-          <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+          <app-datepicker [label]="'purchasing.quoteValidUntil' | translate" formControlName="quoteValidUntil" />
+          <app-textarea [label]="'purchasing.notes' | translate" formControlName="notes" [rows]="2" />
           <div class="form-actions">
-            <button class="action-btn action-btn--sm" (click)="toggleResponseForm()">Cancel</button>
+            <button class="action-btn action-btn--sm" (click)="toggleResponseForm()">{{ 'purchasing.cancel' | translate }}</button>
             <button class="action-btn action-btn--sm action-btn--primary"
               [appValidationPopover]="responseViolations"
               [disabled]="responseForm.invalid || saving()"
               (click)="recordResponse()">
-              <span class="material-icons-outlined">save</span> Record
+              <span class="material-icons-outlined">save</span> {{ 'purchasing.record' | translate }}
             </button>
           </div>
         </div>
@@ -124,9 +124,9 @@
 
       <!-- Vendor Responses Table -->
       <div class="rfq-detail__responses">
-        <span class="section-title">VENDOR RESPONSES ({{ rfq.vendorResponses.length }})</span>
+        <span class="section-title">{{ 'purchasing.vendorResponses' | translate }} ({{ rfq.vendorResponses.length }})</span>
         <app-data-table tableId="rfq-responses" [columns]="responseColumns" [data]="rfq.vendorResponses"
-          emptyIcon="group" emptyMessage="No vendor responses yet">
+          emptyIcon="group" [emptyMessage]="'purchasing.noVendorResponses' | translate">
           <ng-template appColumnCell="responseStatus" let-row>
             <span [class]="getResponseStatusClass(row.responseStatus)">{{ row.responseStatus }}</span>
           </ng-template>
@@ -150,11 +150,11 @@
               <span>{{ row.vendorName }}</span>
               @if (canAward() && isReceived(row)) {
                 <button class="action-btn action-btn--sm action-btn--primary" (click)="awardVendor(row)" aria-label="Award to vendor">
-                  Award
+                  {{ 'purchasing.award' | translate }}
                 </button>
               }
               @if (row.isAwarded) {
-                <span class="chip chip--success">Awarded</span>
+                <span class="chip chip--success">{{ 'purchasing.awarded' | translate }}</span>
               }
             </div>
           </ng-template>
@@ -164,6 +164,6 @@
   </div>
 
   <div dialog-footer>
-    <button class="action-btn" (click)="close()">Close</button>
+    <button class="action-btn" (click)="close()">{{ 'purchasing.close' | translate }}</button>
   </div>
 </app-dialog>

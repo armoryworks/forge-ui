@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { BaseChartDirective } from 'ng2-charts';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ChartConfiguration } from 'chart.js';
 
 import { SixBigLosses } from '../../models/six-big-losses.model';
@@ -8,7 +9,7 @@ import { SixBigLosses } from '../../models/six-big-losses.model';
 @Component({
   selector: 'app-six-big-losses-chart',
   standalone: true,
-  imports: [BaseChartDirective, DecimalPipe],
+  imports: [BaseChartDirective, DecimalPipe, TranslatePipe],
   templateUrl: './six-big-losses-chart.component.html',
   styleUrl: './six-big-losses-chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

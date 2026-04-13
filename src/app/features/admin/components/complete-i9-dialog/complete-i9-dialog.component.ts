@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -28,6 +28,7 @@ export interface CompleteI9DialogData {
     SelectComponent,
     DatepickerComponent,
     ValidationPopoverDirective,
+    TranslatePipe,
   ],
   templateUrl: './complete-i9-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,7 @@ export class CompleteI9DialogComponent {
   private readonly data = inject<CompleteI9DialogData>(MAT_DIALOG_DATA);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   readonly submission = this.data.submission;
   protected readonly saving = signal(false);
@@ -69,8 +71,8 @@ export class CompleteI9DialogComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    documentListType: 'Document List Type',
-    startDate: 'First Day of Employment',
+    documentListType: this.translate.instant('adminPanels.completeI9.documentListType'),
+    startDate: this.translate.instant('adminPanels.completeI9.firstDayEmployment'),
   });
 
   protected save(): void {
@@ -106,7 +108,7 @@ export class CompleteI9DialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.snackbar.success('I-9 Section 2 completed');
+        this.snackbar.success(this.translate.instant('adminPanels.completeI9.snackbar.i9Completed'));
         this.dialogRef.close(true);
       },
       error: () => this.saving.set(false),

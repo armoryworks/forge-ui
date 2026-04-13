@@ -1,14 +1,14 @@
 <div class="events-panel">
   <div class="panel-header">
-    <span class="panel-header__count">{{ events().length }} events</span>
+    <span class="panel-header__count">{{ events().length }} {{ 'adminPanels.events.events' | translate }}</span>
     <app-select
-      label="Type"
+      [label]="'adminPanels.events.type' | translate"
       [formControl]="typeFilterControl"
       [options]="typeOptions" />
     <span class="events-panel__spacer"></span>
     <button class="action-btn action-btn--primary" (click)="openCreate()">
       <span class="material-icons-outlined">add</span>
-      New Event
+      {{ 'adminPanels.events.newEvent' | translate }}
     </button>
   </div>
 
@@ -18,7 +18,7 @@
       [columns]="columns"
       [data]="events()"
       emptyIcon="event"
-      emptyMessage="No events found">
+      [emptyMessage]="'adminPanels.events.noEvents' | translate">
       <ng-template appColumnCell="eventType" let-row>
         <span class="chip">
           <span class="material-icons-outlined chip__icon">{{ eventTypeIcon(row.eventType) }}</span>
@@ -33,7 +33,7 @@
       </ng-template>
       <ng-template appColumnCell="isRequired" let-row>
         @if (row.isRequired) {
-          <span class="chip chip--warning">Required</span>
+          <span class="chip chip--warning">{{ 'adminPanels.events.required' | translate }}</span>
         } @else {
           <span class="text-muted">Optional</span>
         }
@@ -54,26 +54,26 @@
 
 <!-- Event Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="editingEvent() ? 'Edit Event' : 'New Event'" width="600px" (closed)="closeDialog()">
+  <app-dialog [title]="(editingEvent() ? 'adminPanels.events.editEvent' : 'adminPanels.events.newEvent') | translate" width="600px" (closed)="closeDialog()">
     <div [formGroup]="form">
-      <app-input label="Title" formControlName="title" [maxlength]="200" [required]="true" />
+      <app-input [label]="'adminPanels.events.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
 
       <div class="dialog-row">
-        <app-select label="Type" formControlName="eventType" [options]="formTypeOptions" [required]="true" />
-        <app-input label="Location" formControlName="location" />
+        <app-select [label]="'adminPanels.events.eventType' | translate" formControlName="eventType" [options]="formTypeOptions" [required]="true" />
+        <app-input [label]="'adminPanels.events.location' | translate" formControlName="location" />
       </div>
 
       <div class="dialog-row">
-        <app-datepicker label="Start Date" formControlName="startDate" [required]="true" />
-        <app-input label="Start Time" formControlName="startTime" placeholder="HH:MM" [required]="true" />
+        <app-datepicker [label]="'adminPanels.events.startDate' | translate" formControlName="startDate" [required]="true" />
+        <app-input [label]="'adminPanels.events.startDate' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" />
       </div>
 
       <div class="dialog-row">
-        <app-datepicker label="End Date" formControlName="endDate" [required]="true" />
-        <app-input label="End Time" formControlName="endTime" placeholder="HH:MM" [required]="true" />
+        <app-datepicker [label]="'adminPanels.events.endDate' | translate" formControlName="endDate" [required]="true" />
+        <app-input [label]="'adminPanels.events.endDate' | translate" formControlName="endTime" placeholder="HH:MM" [required]="true" />
       </div>
 
-      <app-textarea label="Description" formControlName="description" [rows]="3" />
+      <app-textarea [label]="'adminPanels.events.description' | translate" formControlName="description" [rows]="3" />
 
       <app-select
         label="Attendees"
@@ -81,17 +81,17 @@
         [options]="userOptions()"
         [multiple]="true" />
 
-      <app-toggle label="Required attendance" formControlName="isRequired" />
+      <app-toggle [label]="'adminPanels.events.isRequired' | translate" formControlName="isRequired" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'adminPanels.events.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">
         <span class="material-icons-outlined">save</span>
-        {{ editingEvent() ? 'Save Changes' : 'Create Event' }}
+        {{ editingEvent() ? ('adminPanels.events.update' | translate) : ('adminPanels.events.create' | translate) }}
       </button>
     </div>
   </app-dialog>

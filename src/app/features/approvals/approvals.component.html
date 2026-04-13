@@ -1,12 +1,12 @@
-<app-page-header title="Approvals" icon="rule" />
+<app-page-header [title]="'approvals.title' | translate" icon="rule" />
 
 <div class="tab-bar">
   <button class="tab" [class.tab--active]="activeTab() === 'inbox'" (click)="switchTab('inbox')">
-    <span class="material-icons-outlined">inbox</span> Inbox
+    <span class="material-icons-outlined">inbox</span> {{ 'approvals.tabs.inbox' | translate }}
   </button>
   @if (canManageWorkflows()) {
     <button class="tab" [class.tab--active]="activeTab() === 'workflows'" (click)="switchTab('workflows')">
-      <span class="material-icons-outlined">account_tree</span> Workflows
+      <span class="material-icons-outlined">account_tree</span> {{ 'approvals.tabs.workflows' | translate }}
     </button>
   }
 </div>

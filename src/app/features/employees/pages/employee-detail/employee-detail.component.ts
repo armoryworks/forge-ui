@@ -3,6 +3,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { EmployeeService } from '../../services/employee.service';
 import { EmployeeDetail, EmployeeStats } from '../../models/employee.model';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
@@ -24,7 +26,7 @@ type EmployeeTab = typeof TABS[number];
   selector: 'app-employee-detail',
   standalone: true,
   imports: [
-    RouterLink, AvatarComponent,
+    RouterLink, TranslatePipe, AvatarComponent,
     EmployeeOverviewTabComponent, EmployeeTimeTabComponent, EmployeePayTabComponent,
     EmployeeTrainingTabComponent, EmployeeComplianceTabComponent, EmployeeJobsTabComponent,
     EmployeeExpensesTabComponent, EmployeeDocumentsTabComponent, EmployeeActivityTabComponent,
@@ -38,6 +40,7 @@ export class EmployeeDetailComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly employeeService = inject(EmployeeService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly employeeId = toSignal(
     this.route.paramMap.pipe(map(p => +p.get('id')!)),
@@ -96,18 +99,6 @@ export class EmployeeDetailComponent {
   }
 
   protected tabLabel(tab: EmployeeTab): string {
-    const labels: Record<EmployeeTab, string> = {
-      overview: 'Overview',
-      time: 'Time & Attendance',
-      pay: 'Pay',
-      training: 'Training',
-      compliance: 'Compliance',
-      jobs: 'Jobs',
-      events: 'Events',
-      expenses: 'Expenses',
-      documents: 'Documents',
-      activity: 'Activity',
-    };
-    return labels[tab];
+    return this.translate.instant(`employees.detail.tabs.${tab}`);
   }
 }

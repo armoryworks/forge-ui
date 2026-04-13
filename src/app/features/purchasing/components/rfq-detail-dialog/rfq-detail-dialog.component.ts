@@ -3,6 +3,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchasingService } from '../../services/purchasing.service';
 import { VendorService } from '../../../vendors/services/vendor.service';
@@ -31,7 +32,7 @@ export interface RfqDetailDialogData {
   selector: 'app-rfq-detail-dialog',
   standalone: true,
   imports: [
-    CurrencyPipe, DatePipe, ReactiveFormsModule,
+    CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationPopoverDirective,
@@ -46,6 +47,7 @@ export class RfqDetailDialogComponent {
   private readonly purchasingService = inject(PurchasingService);
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   protected readonly data = inject<RfqDetailDialogData>(MAT_DIALOG_DATA);
 
@@ -78,13 +80,13 @@ export class RfqDetailDialogComponent {
   });
 
   protected readonly responseViolations = FormValidationService.getViolations(this.responseForm, {
-    vendorId: 'Vendor',
-    unitPrice: 'Unit Price',
-    leadTimeDays: 'Lead Time',
-    minimumOrderQuantity: 'MOQ',
-    toolingCost: 'Tooling Cost',
-    quoteValidUntil: 'Valid Until',
-    notes: 'Notes',
+    vendorId: this.translate.instant('purchasing.cols.vendor'),
+    unitPrice: this.translate.instant('purchasing.unitPrice'),
+    leadTimeDays: this.translate.instant('purchasing.leadTime'),
+    minimumOrderQuantity: this.translate.instant('purchasing.moq'),
+    toolingCost: this.translate.instant('purchasing.toolingCost'),
+    quoteValidUntil: this.translate.instant('purchasing.quoteValidUntil'),
+    notes: this.translate.instant('purchasing.notes'),
   });
 
   protected readonly pendingVendorOptions = computed<SelectOption[]>(() => {
@@ -95,13 +97,13 @@ export class RfqDetailDialogComponent {
   });
 
   protected readonly responseColumns: ColumnDef[] = [
-    { field: 'vendorName', header: 'Vendor', sortable: true },
-    { field: 'responseStatus', header: 'Status', sortable: true, width: '120px' },
-    { field: 'unitPrice', header: 'Unit Price', sortable: true, width: '110px', align: 'right' },
-    { field: 'leadTimeDays', header: 'Lead Time', sortable: true, width: '100px', align: 'center' },
-    { field: 'minimumOrderQuantity', header: 'MOQ', sortable: true, width: '80px', align: 'center' },
-    { field: 'toolingCost', header: 'Tooling', sortable: true, width: '100px', align: 'right' },
-    { field: 'quoteValidUntil', header: 'Valid Until', sortable: true, type: 'date', width: '110px' },
+    { field: 'vendorName', header: this.translate.instant('purchasing.cols.vendor'), sortable: true },
+    { field: 'responseStatus', header: this.translate.instant('purchasing.cols.status'), sortable: true, width: '120px' },
+    { field: 'unitPrice', header: this.translate.instant('purchasing.cols.unitPrice'), sortable: true, width: '110px', align: 'right' },
+    { field: 'leadTimeDays', header: this.translate.instant('purchasing.cols.leadTime'), sortable: true, width: '100px', align: 'center' },
+    { field: 'minimumOrderQuantity', header: this.translate.instant('purchasing.cols.moq'), sortable: true, width: '80px', align: 'center' },
+    { field: 'toolingCost', header: this.translate.instant('purchasing.cols.tooling'), sortable: true, width: '100px', align: 'right' },
+    { field: 'quoteValidUntil', header: this.translate.instant('purchasing.cols.validUntil'), sortable: true, type: 'date', width: '110px' },
   ];
 
   constructor() {
@@ -138,7 +140,7 @@ export class RfqDetailDialogComponent {
     this.saving.set(true);
     this.purchasingService.sendToVendors(this.data.rfqId, { vendorIds }).subscribe({
       next: () => {
-        this.snackbar.success('RFQ sent to vendors');
+        this.snackbar.success(this.translate.instant('purchasing.snackbar.rfqSent'));
         this.saving.set(false);
         this.showSendForm.set(false);
         this.sendVendorControl.reset([]);
@@ -169,7 +171,7 @@ export class RfqDetailDialogComponent {
       notes: val.notes || undefined,
     }).subscribe({
       next: () => {
-        this.snackbar.success('Vendor response recorded');
+        this.snackbar.success(this.translate.instant('purchasing.snackbar.responseRecorded'));
         this.saving.set(false);
         this.showResponseForm.set(false);
         this.responseForm.reset();
@@ -185,9 +187,9 @@ export class RfqDetailDialogComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Award RFQ?',
-        message: `Award this RFQ to ${response.vendorName}? A Purchase Order will be created automatically.`,
-        confirmLabel: 'Award',
+        title: this.translate.instant('purchasing.awardRfqTitle'),
+        message: this.translate.instant('purchasing.awardRfqMessage', { vendor: response.vendorName }),
+        confirmLabel: this.translate.instant('purchasing.award'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -196,7 +198,7 @@ export class RfqDetailDialogComponent {
       this.saving.set(true);
       this.purchasingService.awardRfq(this.data.rfqId, response.id).subscribe({
         next: (result) => {
-          this.snackbar.successWithNav(`RFQ awarded. PO created.`, `/purchase-orders`, 'View PO');
+          this.snackbar.successWithNav(this.translate.instant('purchasing.snackbar.rfqAwarded'), `/purchase-orders`, 'View PO');
           this.saving.set(false);
           this.hasChanged = true;
           this.loadRfq();

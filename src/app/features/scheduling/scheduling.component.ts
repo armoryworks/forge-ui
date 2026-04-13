@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
@@ -44,6 +45,7 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
     SpacerDirective,
     EmptyStateComponent,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './scheduling.component.html',
   styleUrl: './scheduling.component.scss',
@@ -54,6 +56,7 @@ export class SchedulingComponent {
   private readonly router = inject(Router);
   private readonly schedulingService = inject(SchedulingService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -83,9 +86,9 @@ export class SchedulingComponent {
 
   // Priority rule options
   protected readonly priorityOptions: SelectOption[] = [
-    { value: 'DueDate', label: 'Due Date' },
-    { value: 'Priority', label: 'Priority' },
-    { value: 'FIFO', label: 'FIFO (First In)' },
+    { value: 'DueDate', label: this.translate.instant('scheduling.priorityRules.dueDate') },
+    { value: 'Priority', label: this.translate.instant('scheduling.priorityRules.priority') },
+    { value: 'FIFO', label: this.translate.instant('scheduling.priorityRules.fifo') },
   ];
 
   // KPIs
@@ -101,64 +104,64 @@ export class SchedulingComponent {
 
   // Column definitions
   protected readonly ganttColumns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'operationTitle', header: 'Operation', sortable: true },
-    { field: 'workCenterName', header: 'Work Center', sortable: true, filterable: true, type: 'text' },
-    { field: 'scheduledStart', header: 'Start', sortable: true, type: 'date', width: '140px' },
-    { field: 'scheduledEnd', header: 'End', sortable: true, type: 'date', width: '140px' },
-    { field: 'totalHours', header: 'Hours', sortable: true, type: 'number', width: '80px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'jobNumber', header: this.translate.instant('scheduling.cols.jobNumber'), sortable: true, width: '100px' },
+    { field: 'operationTitle', header: this.translate.instant('scheduling.cols.operation'), sortable: true },
+    { field: 'workCenterName', header: this.translate.instant('scheduling.cols.workCenter'), sortable: true, filterable: true, type: 'text' },
+    { field: 'scheduledStart', header: this.translate.instant('scheduling.cols.start'), sortable: true, type: 'date', width: '140px' },
+    { field: 'scheduledEnd', header: this.translate.instant('scheduling.cols.end'), sortable: true, type: 'date', width: '140px' },
+    { field: 'totalHours', header: this.translate.instant('scheduling.cols.hours'), sortable: true, type: 'number', width: '80px' },
+    { field: 'status', header: this.translate.instant('scheduling.cols.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
-        { value: 'Scheduled', label: 'Scheduled' },
-        { value: 'InProgress', label: 'In Progress' },
-        { value: 'Complete', label: 'Complete' },
+        { value: 'Scheduled', label: this.translate.instant('scheduling.statuses.scheduled') },
+        { value: 'InProgress', label: this.translate.instant('scheduling.statuses.inProgress') },
+        { value: 'Complete', label: this.translate.instant('scheduling.statuses.complete') },
       ] },
-    { field: 'isLocked', header: 'Locked', sortable: true, width: '70px' },
+    { field: 'isLocked', header: this.translate.instant('scheduling.cols.locked'), sortable: true, width: '70px' },
   ];
 
   protected readonly workCenterColumns: ColumnDef[] = [
-    { field: 'code', header: 'Code', sortable: true, width: '100px' },
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'dailyCapacityHours', header: 'Daily Cap (hrs)', sortable: true, type: 'number', width: '120px' },
-    { field: 'efficiencyPercent', header: 'Efficiency %', sortable: true, type: 'number', width: '110px' },
-    { field: 'numberOfMachines', header: 'Machines', sortable: true, type: 'number', width: '90px' },
-    { field: 'isActive', header: 'Active', sortable: true, width: '70px' },
-    { field: 'assetName', header: 'Asset', sortable: true },
-    { field: 'locationName', header: 'Location', sortable: true },
+    { field: 'code', header: this.translate.instant('scheduling.cols.code'), sortable: true, width: '100px' },
+    { field: 'name', header: this.translate.instant('scheduling.cols.name'), sortable: true },
+    { field: 'dailyCapacityHours', header: this.translate.instant('scheduling.cols.dailyCap'), sortable: true, type: 'number', width: '120px' },
+    { field: 'efficiencyPercent', header: this.translate.instant('scheduling.cols.efficiency'), sortable: true, type: 'number', width: '110px' },
+    { field: 'numberOfMachines', header: this.translate.instant('scheduling.cols.machines'), sortable: true, type: 'number', width: '90px' },
+    { field: 'isActive', header: this.translate.instant('scheduling.cols.active'), sortable: true, width: '70px' },
+    { field: 'assetName', header: this.translate.instant('scheduling.cols.asset'), sortable: true },
+    { field: 'locationName', header: this.translate.instant('scheduling.cols.location'), sortable: true },
   ];
 
   protected readonly shiftColumns: ColumnDef[] = [
-    { field: 'name', header: 'Name', sortable: true },
-    { field: 'startTime', header: 'Start', sortable: true, width: '100px' },
-    { field: 'endTime', header: 'End', sortable: true, width: '100px' },
-    { field: 'breakMinutes', header: 'Break (min)', sortable: true, type: 'number', width: '100px' },
-    { field: 'netHours', header: 'Net Hours', sortable: true, type: 'number', width: '100px' },
-    { field: 'isActive', header: 'Active', sortable: true, width: '70px' },
+    { field: 'name', header: this.translate.instant('scheduling.cols.name'), sortable: true },
+    { field: 'startTime', header: this.translate.instant('scheduling.cols.startTime'), sortable: true, width: '100px' },
+    { field: 'endTime', header: this.translate.instant('scheduling.cols.endTime'), sortable: true, width: '100px' },
+    { field: 'breakMinutes', header: this.translate.instant('scheduling.cols.breakMin'), sortable: true, type: 'number', width: '100px' },
+    { field: 'netHours', header: this.translate.instant('scheduling.cols.netHours'), sortable: true, type: 'number', width: '100px' },
+    { field: 'isActive', header: this.translate.instant('scheduling.cols.active'), sortable: true, width: '70px' },
   ];
 
   protected readonly runColumns: ColumnDef[] = [
-    { field: 'runDate', header: 'Run Date', sortable: true, type: 'date', width: '140px' },
-    { field: 'direction', header: 'Direction', sortable: true, width: '100px' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'runDate', header: this.translate.instant('scheduling.cols.runDate'), sortable: true, type: 'date', width: '140px' },
+    { field: 'direction', header: this.translate.instant('scheduling.cols.direction'), sortable: true, width: '100px' },
+    { field: 'status', header: this.translate.instant('scheduling.cols.status'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: [
-        { value: 'Completed', label: 'Completed' },
-        { value: 'Running', label: 'Running' },
-        { value: 'Failed', label: 'Failed' },
+        { value: 'Completed', label: this.translate.instant('scheduling.statuses.completed') },
+        { value: 'Running', label: this.translate.instant('scheduling.statuses.running') },
+        { value: 'Failed', label: this.translate.instant('scheduling.statuses.failed') },
       ] },
-    { field: 'operationsScheduled', header: 'Ops Scheduled', sortable: true, type: 'number', width: '120px' },
-    { field: 'conflictsDetected', header: 'Conflicts', sortable: true, type: 'number', width: '100px' },
-    { field: 'completedAt', header: 'Completed', sortable: true, type: 'date', width: '140px' },
+    { field: 'operationsScheduled', header: this.translate.instant('scheduling.cols.opsScheduled'), sortable: true, type: 'number', width: '120px' },
+    { field: 'conflictsDetected', header: this.translate.instant('scheduling.cols.conflicts'), sortable: true, type: 'number', width: '100px' },
+    { field: 'completedAt', header: this.translate.instant('scheduling.cols.completed'), sortable: true, type: 'date', width: '140px' },
   ];
 
   protected readonly dispatchColumns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '100px' },
-    { field: 'operationTitle', header: 'Operation', sortable: true },
-    { field: 'sequenceNumber', header: 'Seq', sortable: true, type: 'number', width: '60px' },
-    { field: 'scheduledStart', header: 'Start', sortable: true, type: 'date', width: '140px' },
-    { field: 'setupHours', header: 'Setup (hrs)', sortable: true, type: 'number', width: '100px' },
-    { field: 'runHours', header: 'Run (hrs)', sortable: true, type: 'number', width: '100px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '90px' },
-    { field: 'jobDueDate', header: 'Due Date', sortable: true, type: 'date', width: '120px' },
+    { field: 'jobNumber', header: this.translate.instant('scheduling.cols.jobNumber'), sortable: true, width: '100px' },
+    { field: 'operationTitle', header: this.translate.instant('scheduling.cols.operation'), sortable: true },
+    { field: 'sequenceNumber', header: this.translate.instant('scheduling.cols.seq'), sortable: true, type: 'number', width: '60px' },
+    { field: 'scheduledStart', header: this.translate.instant('scheduling.cols.start'), sortable: true, type: 'date', width: '140px' },
+    { field: 'setupHours', header: this.translate.instant('scheduling.cols.setupHrs'), sortable: true, type: 'number', width: '100px' },
+    { field: 'runHours', header: this.translate.instant('scheduling.cols.runHrs'), sortable: true, type: 'number', width: '100px' },
+    { field: 'priority', header: this.translate.instant('scheduling.cols.priority'), sortable: true, width: '90px' },
+    { field: 'jobDueDate', header: this.translate.instant('scheduling.cols.dueDate'), sortable: true, type: 'date', width: '120px' },
   ];
 
   constructor() {
@@ -249,7 +252,7 @@ export class SchedulingComponent {
       priorityRule: 'DueDate',
     }).subscribe({
       next: run => {
-        this.snackbar.success(`Scheduled ${run.operationsScheduled} operations`);
+        this.snackbar.success(`${this.translate.instant('scheduling.snackbar.scheduled')} ${run.operationsScheduled} ${this.translate.instant('scheduling.snackbar.operations')}`);
         this.loadGanttData();
         this.loadRuns();
       },
@@ -259,7 +262,7 @@ export class SchedulingComponent {
   protected toggleLock(op: ScheduledOperation): void {
     this.schedulingService.lockOperation(op.id, !op.isLocked).subscribe({
       next: () => {
-        this.snackbar.success(op.isLocked ? 'Operation unlocked' : 'Operation locked');
+        this.snackbar.success(op.isLocked ? this.translate.instant('scheduling.snackbar.unlocked') : this.translate.instant('scheduling.snackbar.locked'));
         this.loadGanttData();
       },
     });

@@ -2,11 +2,11 @@
   <div class="tab-bar">
     <button class="tab" [class.tab--active]="subTab() === 'partners'" (click)="switchSubTab('partners')">
       <span class="material-icons-outlined">business</span>
-      Trading Partners
+      {{ 'adminPanels.edi.tabs.tradingPartners' | translate }}
     </button>
     <button class="tab" [class.tab--active]="subTab() === 'transactions'" (click)="switchSubTab('transactions')">
       <span class="material-icons-outlined">swap_horiz</span>
-      Transactions
+      {{ 'adminPanels.edi.tabs.transactions' | translate }}
     </button>
   </div>
 
@@ -14,13 +14,13 @@
     <div class="edi-panel__toolbar">
       <button class="action-btn action-btn--primary" (click)="openCreatePartner()">
         <span class="material-icons-outlined">add</span>
-        New Partner
+        {{ 'adminPanels.edi.newPartner' | translate }}
       </button>
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="edi-partners" [columns]="partnerColumns" [data]="partners()"
-        emptyIcon="business" emptyMessage="No trading partners configured">
+        emptyIcon="business" [emptyMessage]="'adminPanels.edi.noPartners' | translate">
         <ng-template appColumnCell="customerName" let-row>
           {{ row.customerName ?? '—' }}
         </ng-template>
@@ -58,13 +58,13 @@
 
   @if (subTab() === 'transactions') {
     <div class="filters-bar">
-      <app-select label="Direction" [formControl]="directionFilter" [options]="directionOptions" (selectionChange)="loadTransactions()" />
-      <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadTransactions()" />
+      <app-select [label]="'adminPanels.edi.direction' | translate" [formControl]="directionFilter" [options]="directionOptions" (selectionChange)="loadTransactions()" />
+      <app-select [label]="'adminPanels.edi.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadTransactions()" />
     </div>
 
     <div [appLoadingBlock]="loading()">
       <app-data-table tableId="edi-transactions" [columns]="transactionColumns" [data]="transactions()"
-        emptyIcon="swap_horiz" emptyMessage="No EDI transactions" [clickableRows]="true"
+        emptyIcon="swap_horiz" [emptyMessage]="'adminPanels.edi.noTransactions' | translate" [clickableRows]="true"
         (rowClick)="viewTransaction($any($event))">
         <ng-template appColumnCell="direction" let-row>
           <span [class]="getDirectionClass(row.direction)">{{ row.direction }}</span>
@@ -92,22 +92,22 @@
 
 <!-- Partner Dialog -->
 @if (showPartnerDialog()) {
-  <app-dialog [title]="editingPartner() ? 'Edit Trading Partner' : 'New Trading Partner'" width="520px" (closed)="showPartnerDialog.set(false)">
+  <app-dialog [title]="editingPartner() ? ('adminPanels.edi.editPartner' | translate) : ('adminPanels.edi.newPartnerTitle' | translate)" width="520px" (closed)="showPartnerDialog.set(false)">
     <div [formGroup]="partnerForm">
-      <app-input label="Name" formControlName="name" [required]="true" />
+      <app-input [label]="'adminPanels.edi.name' | translate" formControlName="name" [required]="true" />
       <div class="dialog-row">
-        <app-input label="Qualifier ID" formControlName="qualifierId" [required]="true" />
-        <app-input label="Qualifier Value" formControlName="qualifierValue" [required]="true" />
+        <app-input [label]="'adminPanels.edi.qualifierId' | translate" formControlName="qualifierId" [required]="true" />
+        <app-input [label]="'adminPanels.edi.qualifierValue' | translate" formControlName="qualifierValue" [required]="true" />
       </div>
       <div class="dialog-row">
-        <app-select label="Format" formControlName="defaultFormat" [options]="formatOptions" />
-        <app-select label="Transport" formControlName="transportMethod" [options]="transportOptions" />
+        <app-select [label]="'adminPanels.edi.format' | translate" formControlName="defaultFormat" [options]="formatOptions" />
+        <app-select [label]="'adminPanels.edi.transport' | translate" formControlName="transportMethod" [options]="transportOptions" />
       </div>
       <div class="dialog-row">
-        <app-toggle label="Auto-process" formControlName="autoProcess" />
-        <app-toggle label="Require Ack" formControlName="requireAcknowledgment" />
+        <app-toggle [label]="'adminPanels.edi.autoProcess' | translate" formControlName="autoProcess" />
+        <app-toggle [label]="'adminPanels.edi.requireAck' | translate" formControlName="requireAcknowledgment" />
       </div>
-      <app-textarea label="Notes" formControlName="notes" />
+      <app-textarea [label]="'adminPanels.edi.notes' | translate" formControlName="notes" />
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showPartnerDialog.set(false)">Cancel</button>
@@ -121,23 +121,23 @@
 
 <!-- Transaction Detail Dialog -->
 @if (showTransactionDetail() && selectedTransaction(); as txn) {
-  <app-dialog title="Transaction Detail" width="800px" (closed)="showTransactionDetail.set(false)">
+  <app-dialog [title]="'adminPanels.edi.transactionDetail' | translate" width="800px" (closed)="showTransactionDetail.set(false)">
     <div class="txn-detail">
       <div class="txn-detail__header">
         <div class="txn-detail__field">
-          <span class="txn-detail__label">Partner</span>
+          <span class="txn-detail__label">{{ 'adminPanels.edi.partner' | translate }}</span>
           <span class="txn-detail__value">{{ txn.tradingPartnerName }}</span>
         </div>
         <div class="txn-detail__field">
-          <span class="txn-detail__label">Direction</span>
+          <span class="txn-detail__label">{{ 'adminPanels.edi.direction' | translate }}</span>
           <span [class]="getDirectionClass(txn.direction)">{{ txn.direction }}</span>
         </div>
         <div class="txn-detail__field">
-          <span class="txn-detail__label">Set</span>
+          <span class="txn-detail__label">{{ 'adminPanels.edi.set' | translate }}</span>
           <span class="txn-detail__value">{{ txn.transactionSet }}</span>
         </div>
         <div class="txn-detail__field">
-          <span class="txn-detail__label">Status</span>
+          <span class="txn-detail__label">{{ 'adminPanels.edi.status' | translate }}</span>
           <span [class]="getStatusClass(txn.status)">{{ txn.status }}</span>
         </div>
       </div>
@@ -150,13 +150,13 @@
       }
 
       <div class="txn-detail__section">
-        <h4 class="txn-detail__section-title">Raw Payload</h4>
+        <h4 class="txn-detail__section-title">{{ 'adminPanels.edi.rawPayload' | translate }}</h4>
         <pre class="txn-detail__payload">{{ txn.rawPayload }}</pre>
       </div>
 
       @if (txn.parsedDataJson) {
         <div class="txn-detail__section">
-          <h4 class="txn-detail__section-title">Parsed Data</h4>
+          <h4 class="txn-detail__section-title">{{ 'adminPanels.edi.parsedData' | translate }}</h4>
           <pre class="txn-detail__payload">{{ txn.parsedDataJson }}</pre>
         </div>
       }

@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { EventsService } from '../../../events/services/events.service';
 import { AppEvent, EventRequest } from '../../../events/models/event.model';
 import { AdminService } from '../../services/admin.service';
@@ -38,6 +40,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     DialogComponent,
     ValidationPopoverDirective,
     LoadingBlockDirective,
+    TranslatePipe,
   ],
   templateUrl: './events-panel.component.html',
   styleUrl: './events-panel.component.scss',
@@ -48,6 +51,7 @@ export class EventsPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+  private readonly translate = inject(TranslateService);
 
   protected readonly isLoading = signal(false);
   protected readonly saving = signal(false);
@@ -59,18 +63,18 @@ export class EventsPanelComponent implements OnInit {
   protected readonly typeFilterControl = new FormControl<string>('');
 
   protected readonly typeOptions: SelectOption[] = [
-    { value: '', label: '-- All Types --' },
-    { value: 'Meeting', label: 'Meeting' },
-    { value: 'Training', label: 'Training' },
-    { value: 'Safety', label: 'Safety' },
-    { value: 'Other', label: 'Other' },
+    { value: '', label: this.translate.instant('adminPanels.events.types.all') },
+    { value: 'Meeting', label: this.translate.instant('adminPanels.events.types.meeting') },
+    { value: 'Training', label: this.translate.instant('adminPanels.events.types.training') },
+    { value: 'Safety', label: this.translate.instant('adminPanels.events.types.safety') },
+    { value: 'Other', label: this.translate.instant('adminPanels.events.types.other') },
   ];
 
   protected readonly formTypeOptions: SelectOption[] = [
-    { value: 'Meeting', label: 'Meeting' },
-    { value: 'Training', label: 'Training' },
-    { value: 'Safety', label: 'Safety' },
-    { value: 'Other', label: 'Other' },
+    { value: 'Meeting', label: this.translate.instant('adminPanels.events.types.meeting') },
+    { value: 'Training', label: this.translate.instant('adminPanels.events.types.training') },
+    { value: 'Safety', label: this.translate.instant('adminPanels.events.types.safety') },
+    { value: 'Other', label: this.translate.instant('adminPanels.events.types.other') },
   ];
 
   protected readonly form = new FormGroup({
@@ -96,14 +100,14 @@ export class EventsPanelComponent implements OnInit {
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'eventType', header: 'Type', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'title', header: this.translate.instant('adminPanels.events.cols.title'), sortable: true },
+    { field: 'eventType', header: this.translate.instant('adminPanels.events.cols.type'), sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: this.formTypeOptions },
-    { field: 'startTime', header: 'Start', sortable: true, type: 'date', width: '160px' },
-    { field: 'endTime', header: 'End', sortable: true, type: 'date', width: '160px' },
-    { field: 'location', header: 'Location', sortable: true, width: '150px' },
-    { field: 'attendeeCount', header: 'Attendees', sortable: true, type: 'number', width: '100px' },
-    { field: 'isRequired', header: 'Required', sortable: true, width: '90px' },
+    { field: 'startTime', header: this.translate.instant('adminPanels.events.cols.start'), sortable: true, type: 'date', width: '160px' },
+    { field: 'endTime', header: this.translate.instant('adminPanels.events.cols.end'), sortable: true, type: 'date', width: '160px' },
+    { field: 'location', header: this.translate.instant('adminPanels.events.cols.location'), sortable: true, width: '150px' },
+    { field: 'attendeeCount', header: this.translate.instant('adminPanels.events.cols.attendees'), sortable: true, type: 'number', width: '100px' },
+    { field: 'isRequired', header: this.translate.instant('adminPanels.events.cols.required'), sortable: true, width: '90px' },
     { field: 'actions', header: '', width: '80px' },
   ];
 
@@ -202,7 +206,7 @@ export class EventsPanelComponent implements OnInit {
         this.saving.set(false);
         this.closeDialog();
         this.loadEvents();
-        this.snackbar.success(editing ? 'Event updated' : 'Event created');
+        this.snackbar.success(editing ? this.translate.instant('adminPanels.events.snackbar.eventUpdated') : this.translate.instant('adminPanels.events.snackbar.eventCreated'));
       },
       error: () => this.saving.set(false),
     });
@@ -222,7 +226,7 @@ export class EventsPanelComponent implements OnInit {
       this.eventsService.deleteEvent(event.id).subscribe({
         next: () => {
           this.loadEvents();
-          this.snackbar.success('Event cancelled');
+          this.snackbar.success(this.translate.instant('adminPanels.events.snackbar.eventDeleted'));
         },
       });
     });

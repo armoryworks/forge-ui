@@ -2,16 +2,15 @@
   <div class="mfa-policy__header">
     <div class="mfa-policy__title">
       <span class="material-icons-outlined">admin_panel_settings</span>
-      <h3>MFA Policy</h3>
+      <h3>{{ 'adminPanels.mfa.title' | translate }}</h3>
     </div>
     <p class="mfa-policy__description">
-      Require two-factor authentication for users with specific roles.
-      Enforced users must set up MFA on their next login.
+      {{ 'adminPanels.mfa.description' | translate }}
     </p>
   </div>
 
   <div class="mfa-policy__controls">
-    <app-select label="Require MFA for roles" [options]="roles()" [formControl]="enforcedRolesControl" [multiple]="true" placeholder="Select roles to enforce..." />
+    <app-select [label]="'adminPanels.mfa.requiredForRoles' | translate" [options]="roles()" [formControl]="enforcedRolesControl" [multiple]="true" [placeholder]="'adminPanels.mfa.selectRoles' | translate" />
     <button class="action-btn action-btn--primary"
       [disabled]="saving()"
       (click)="savePolicy()"
@@ -21,7 +20,7 @@
         Saving...
       } @else {
         <span class="material-icons-outlined">save</span>
-        Save Policy
+        {{ 'adminPanels.mfa.save' | translate }}
       }
     </button>
   </div>

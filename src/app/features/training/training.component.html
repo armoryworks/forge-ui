@@ -1,23 +1,23 @@
-<app-page-layout pageTitle="Training">
+<app-page-layout [pageTitle]="'training.title' | translate">
   <ng-container toolbar>
     <div class="training-tabs" role="tablist" aria-label="Training sections">
       <button class="tab" [class.tab--active]="activeTab() === 'my-learning'"
               role="tab" [attr.aria-selected]="activeTab() === 'my-learning'"
               (click)="switchTab('my-learning')">
         <span class="material-icons-outlined" aria-hidden="true">school</span>
-        My Learning
+        {{ 'trainingPage.tabs.myLearning' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'paths'"
               role="tab" [attr.aria-selected]="activeTab() === 'paths'"
               (click)="switchTab('paths')">
         <span class="material-icons-outlined" aria-hidden="true">route</span>
-        Learning Paths
+        {{ 'trainingPage.tabs.learningPaths' | translate }}
       </button>
       <button class="tab" [class.tab--active]="activeTab() === 'all-modules'"
               role="tab" [attr.aria-selected]="activeTab() === 'all-modules'"
               (click)="switchTab('all-modules')">
         <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
-        All Modules
+        {{ 'trainingPage.tabs.allModules' | translate }}
       </button>
     </div>
   </ng-container>
@@ -25,13 +25,13 @@
   <ng-container content>
     @if (activeTab() === 'all-modules') {
       <div class="training__filters">
-        <app-input label="Search modules" [formControl]="searchControl" prefix="search" />
-        <app-select label="Type" [formControl]="contentTypeControl" [options]="contentTypeOptions" />
-        <app-select label="Learning Style" [formControl]="learningStyleControl" [options]="learningStyleOptions" />
+        <app-input [label]="'trainingPage.searchModules' | translate" [formControl]="searchControl" prefix="search" />
+        <app-select [label]="'trainingPage.type' | translate" [formControl]="contentTypeControl" [options]="contentTypeOptions" />
+        <app-select [label]="'trainingPage.learningStyle' | translate" [formControl]="learningStyleControl" [options]="learningStyleOptions" />
       </div>
       <div [appLoadingBlock]="isLoading()">
         @if (modules().length === 0 && !isLoading()) {
-          <app-empty-state icon="school" message="No training modules found" />
+          <app-empty-state icon="school" [message]="'trainingPage.noModules' | translate" />
         } @else {
           <div class="training-grid">
             @for (module of modules(); track module.id) {
@@ -49,12 +49,12 @@
                   <span class="material-icons-outlined training-card__type-icon" aria-hidden="true">{{ contentTypeIcon(module.contentType) }}</span>
                   <span class="training-card__type-label">{{ contentTypeLabel(module.contentType) }}</span>
                   @if (module.myStatus === 'Completed') {
-                    <span class="chip chip--success training-card__status-chip" aria-label="Completed">
+                    <span class="chip chip--success training-card__status-chip" [attr.aria-label]="'trainingPage.completed' | translate">
                       <span class="material-icons-outlined" aria-hidden="true" style="font-size:12px">check_circle</span>
-                      Completed
+                      {{ 'trainingPage.completed' | translate }}
                     </span>
                   } @else if (module.myStatus === 'InProgress') {
-                    <span class="chip chip--info training-card__status-chip">In Progress</span>
+                    <span class="chip chip--info training-card__status-chip">{{ 'trainingPage.inProgress' | translate }}</span>
                   }
                 </div>
                 <div class="training-card__body">
@@ -83,7 +83,7 @@
 
     @if (activeTab() === 'my-learning') {
       @if (enrollments().length === 0) {
-        <app-empty-state icon="school" message="No training paths assigned yet" />
+        <app-empty-state icon="school" [message]="'trainingPage.noPaths' | translate" />
       } @else {
         <div class="training-enrollments">
           @for (enrollment of enrollments(); track enrollment.id) {
@@ -99,16 +99,16 @@
                     <p class="enrollment-card__desc">{{ pathDesc }}</p>
                   }
                   <div class="enrollment-card__meta">
-                    <span class="enrollment-card__count">{{ enrollment.completedModules }} / {{ enrollment.totalModules }} modules</span>
+                    <span class="enrollment-card__count">{{ enrollment.completedModules }} / {{ enrollment.totalModules }} {{ 'trainingPage.modules' | translate }}</span>
                     <span class="enrollment-card__pct">{{ enrollmentProgress(enrollment) }}%</span>
                   </div>
                 </div>
                 @if (enrollment.completedAt) {
-                  <span class="chip chip--success">Completed</span>
+                  <span class="chip chip--success">{{ 'trainingPage.completed' | translate }}</span>
                 } @else {
                   <span class="enrollment-card__cta">
                     <span class="material-icons-outlined" aria-hidden="true">chevron_right</span>
-                    Continue
+                    {{ 'trainingPage.continue' | translate }}
                   </span>
                 }
               </div>
@@ -127,7 +127,7 @@
 
     @if (activeTab() === 'paths') {
       @if (paths().length === 0) {
-        <app-empty-state icon="route" message="No learning paths available" />
+        <app-empty-state icon="route" [message]="'trainingPage.noPathsAvailable' | translate" />
       } @else {
         <div class="training-paths-list">
           @for (path of paths(); track path.id) {
@@ -140,19 +140,19 @@
                 <h3 class="path-card__title">{{ path.title }}</h3>
                 <p class="path-card__desc">{{ path.description }}</p>
                 <div class="path-card__meta">
-                  <span class="path-card__count">{{ path.modules.length }} modules</span>
+                  <span class="path-card__count">{{ path.modules.length }} {{ 'trainingPage.modules' | translate }}</span>
                   @if (enrollment) {
                     <span class="path-card__progress-label">
-                      {{ enrollment.completedModules }}/{{ enrollment.totalModules }} complete
+                      {{ enrollment.completedModules }}/{{ enrollment.totalModules }} {{ 'trainingPage.complete' | translate }}
                     </span>
                   }
                 </div>
               </div>
               <div class="path-card__right">
                 @if (enrollment?.completedAt) {
-                  <span class="chip chip--success">Completed</span>
+                  <span class="chip chip--success">{{ 'trainingPage.completed' | translate }}</span>
                 } @else if (path.isAutoAssigned) {
-                  <span class="chip chip--primary path-card__badge">Auto-assigned</span>
+                  <span class="chip chip--primary path-card__badge">{{ 'trainingPage.autoAssigned' | translate }}</span>
                 }
               </div>
             </div>

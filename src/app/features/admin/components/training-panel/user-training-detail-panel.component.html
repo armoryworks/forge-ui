@@ -1,6 +1,6 @@
 <div class="user-detail" [appLoadingBlock]="isLoading()">
   @if (!detail() && !isLoading()) {
-    <app-empty-state icon="school" message="Select a user to view their training progress" />
+    <app-empty-state icon="school" [message]="'adminPanels.trainingDetail.selectUser' | translate" />
   }
 
   @if (detail(); as d) {
@@ -12,15 +12,15 @@
     <div class="user-detail__summary">
       <div class="user-detail__stat">
         <span class="user-detail__stat-value">{{ completedCount(d) }}</span>
-        <span class="user-detail__stat-label">of {{ d.modules.length }} completed</span>
+        <span class="user-detail__stat-label">{{ 'adminPanels.trainingDetail.of' | translate }} {{ d.modules.length }} {{ 'adminPanels.trainingDetail.completedStat' | translate }}</span>
       </div>
       <div class="user-detail__stat">
         <span class="user-detail__stat-value">{{ d.overallCompletionPct }}%</span>
-        <span class="user-detail__stat-label">overall progress</span>
+        <span class="user-detail__stat-label">{{ 'adminPanels.trainingDetail.overallProgress' | translate }}</span>
       </div>
       <div class="user-detail__stat">
         <span class="user-detail__stat-value">{{ d.totalEnrolled }}</span>
-        <span class="user-detail__stat-label">paths enrolled</span>
+        <span class="user-detail__stat-label">{{ 'adminPanels.trainingDetail.pathsEnrolled' | translate }}</span>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
       <div class="user-detail__progress-fill" [style.width.%]="d.overallCompletionPct"></div>
     </div>
 
-    <div class="user-detail__section-label">Module Breakdown</div>
+    <div class="user-detail__section-label">{{ 'adminPanels.trainingDetail.moduleBreakdown' | translate }}</div>
 
     <div class="user-detail__modules">
       @for (m of d.modules; track m.moduleId) {
