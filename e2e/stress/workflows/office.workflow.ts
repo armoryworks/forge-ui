@@ -29,7 +29,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-01',
         name: 'Navigate to dashboard',
         execute: async (page: Page) => {
-          await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/dashboard', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('.dashboard, app-dashboard', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(800, 1500));
         },
@@ -42,7 +42,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-02',
         name: 'Navigate to customers',
         execute: async (page: Page) => {
-          await page.goto('/customers', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/customers', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -125,7 +125,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-06',
         name: 'Go back to customers list',
         execute: async (page: Page) => {
-          await page.goto('/customers', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/customers', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1000));
         },
@@ -138,7 +138,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-07',
         name: 'Navigate to quotes',
         execute: async (page: Page) => {
-          await page.goto('/quotes', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/quotes', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -261,7 +261,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-10',
         name: 'Navigate to sales orders',
         execute: async (page: Page) => {
-          await page.goto('/sales-orders', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/sales-orders', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -349,7 +349,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-14',
         name: 'Navigate to vendors',
         execute: async (page: Page) => {
-          await page.goto('/vendors', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/vendors', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -468,7 +468,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-19',
         name: 'Navigate to purchase orders',
         execute: async (page: Page) => {
-          await page.goto('/purchase-orders', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/purchase-orders', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -508,7 +508,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-21',
         name: 'Navigate to invoices',
         execute: async (page: Page) => {
-          await page.goto('/invoices', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/invoices', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForSelector('app-data-table', { timeout: 10_000 });
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -558,7 +558,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-23',
         name: 'Navigate to shipments',
         execute: async (page: Page) => {
-          await page.goto('/shipments', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/shipments', { waitUntil: 'load', timeout: 15_000 });
           try {
             await page.waitForSelector('app-data-table', { timeout: 10_000 });
           } catch {
@@ -600,7 +600,7 @@ export function getOfficeWorkflow(): Workflow {
             await page.waitForTimeout(randomDelay(300, 600));
             return;
           }
-          await page.goto('/payments', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/payments', { waitUntil: 'load', timeout: 15_000 });
           try {
             await page.waitForSelector('app-data-table', { timeout: 10_000 });
             // Browse payment rows
@@ -630,7 +630,7 @@ export function getOfficeWorkflow(): Workflow {
         id: 'ofc-25',
         name: 'Send office update in chat',
         execute: async (page: Page) => {
-          await page.goto('/chat', { waitUntil: 'domcontentloaded', timeout: 15_000 });
+          await page.goto('/chat', { waitUntil: 'load', timeout: 15_000 });
           await page.waitForTimeout(randomDelay(800, 1500));
 
           try {

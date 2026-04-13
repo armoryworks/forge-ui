@@ -23,7 +23,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-01',
         name: 'Navigate to dashboard',
         execute: async (page: Page) => {
-          await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/dashboard', { waitUntil: 'load', timeout: 15000 });
 
           // Wait for dashboard widgets or KPI chips to render
           await page.locator('.dashboard-widget, app-kpi-chip, app-dashboard-widget').first()
@@ -71,7 +71,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-03',
         name: 'Navigate to kanban',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: 15000 });
 
           // Wait for the board columns to appear
           await page.locator('.kanban-column, .board-column, app-kanban-column-header').first()
@@ -201,7 +201,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-08',
         name: 'Navigate to backlog',
         execute: async (page: Page) => {
-          await page.goto('/backlog', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/backlog', { waitUntil: 'load', timeout: 15000 });
 
           // Wait for data table to appear
           await page.locator('app-data-table').first()
@@ -279,7 +279,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-11',
         name: 'Navigate to time tracking',
         execute: async (page: Page) => {
-          await page.goto('/time-tracking', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/time-tracking', { waitUntil: 'load', timeout: 15000 });
 
           await page.locator('app-data-table, .time-tracking').first()
             .waitFor({ state: 'visible', timeout: 10000 });
@@ -331,7 +331,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-13',
         name: 'Navigate to expenses',
         execute: async (page: Page) => {
-          await page.goto('/expenses', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/expenses', { waitUntil: 'load', timeout: 15000 });
 
           await page.locator('app-data-table, .expenses').first()
             .waitFor({ state: 'visible', timeout: 10000 });
@@ -390,7 +390,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-15',
         name: 'Navigate to reports',
         execute: async (page: Page) => {
-          await page.goto('/reports', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/reports', { waitUntil: 'load', timeout: 15000 });
 
           // Wait for report list or builder to load
           await page.locator('app-data-table, .report-list, .reports, app-page-layout').first()
@@ -451,7 +451,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-17',
         name: 'Navigate to planning',
         execute: async (page: Page) => {
-          await page.goto('/planning', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/planning', { waitUntil: 'load', timeout: 15000 });
 
           // Wait for planning content
           await page.locator('app-page-layout, app-data-table, .planning').first()
@@ -489,7 +489,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-18',
         name: 'Navigate to leads',
         execute: async (page: Page) => {
-          await page.goto('/leads', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/leads', { waitUntil: 'load', timeout: 15000 });
 
           await page.locator('app-data-table, .leads').first()
             .waitFor({ state: 'visible', timeout: 10000 });
@@ -530,7 +530,7 @@ export function getManagerWorkflow(): Workflow {
         id: 'mgr-19',
         name: 'Navigate to chat',
         execute: async (page: Page) => {
-          await page.goto('/chat', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/chat', { waitUntil: 'load', timeout: 15000 });
 
           // Wait for chat UI to render
           await page.locator('.chat-room, .chat-list, app-page-layout, [class*="chat"]').first()

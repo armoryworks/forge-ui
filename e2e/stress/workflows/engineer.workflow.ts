@@ -139,7 +139,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-01',
         name: 'Navigate to dashboard',
         execute: async (page: Page) => {
-          await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/dashboard', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Verify at least one KPI widget or dashboard widget rendered
@@ -156,7 +156,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-02',
         name: 'Navigate to kanban board',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Wait for at least one kanban column to render
@@ -323,7 +323,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-07',
         name: 'Navigate to backlog',
         execute: async (page: Page) => {
-          await page.goto('/backlog', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/backlog', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Wait for DataTable to render
@@ -394,7 +394,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-10',
         name: 'Navigate to parts catalog',
         execute: async (page: Page) => {
-          await page.goto('/parts', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/parts', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Wait for parts table
@@ -587,7 +587,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-16',
         name: 'Navigate to inventory',
         execute: async (page: Page) => {
-          await page.goto('/inventory', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/inventory', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           const table = page.locator('app-data-table, table, .data-table').first();
@@ -643,7 +643,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-18',
         name: 'Navigate to quality',
         execute: async (page: Page) => {
-          await page.goto('/quality', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/quality', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Wait for quality page content (table or tabs)
@@ -695,7 +695,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-20',
         name: 'Navigate to chat',
         execute: async (page: Page) => {
-          await page.goto('/chat', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/chat', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Wait for chat interface to load
@@ -794,7 +794,7 @@ export function getEngineerWorkflow(): Workflow {
         name: 'Check time tracking',
         execute: async (page: Page) => {
           if (maybe(0.6)) {
-            await page.goto('/time-tracking', { waitUntil: 'domcontentloaded', timeout: 15000 });
+            await page.goto('/time-tracking', { waitUntil: 'load', timeout: 15000 });
             await page.waitForTimeout(randomDelay(500, 1500));
 
             const content = page.locator('app-data-table, .time-entries, app-page-layout').first();
@@ -814,7 +814,7 @@ export function getEngineerWorkflow(): Workflow {
         id: 'eng-24',
         name: 'Return to kanban board',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: 15000 });
           await page.waitForTimeout(randomDelay(500, 1500));
 
           // Verify board is still rendered

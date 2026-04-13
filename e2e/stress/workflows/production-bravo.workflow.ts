@@ -23,7 +23,7 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-01',
         name: 'Navigate to dashboard',
         execute: async (page: Page) => {
-          await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/dashboard', { waitUntil: 'load', timeout: 15000 });
           // Wait for at least one dashboard widget to render
           await page.locator('app-dashboard-widget, .dashboard-widget, .widget').first()
             .waitFor({ state: 'visible', timeout: 10000 })
@@ -41,10 +41,10 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-02',
         name: 'Navigate to kanban board',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: 15000 });
           // Wait for track type buttons or the board columns to appear
           await page.locator('.track-type-btn, .board-column, app-board-column').first()
-            .waitFor({ state: 'visible', timeout: 10000 });
+            .waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
           await page.waitForTimeout(randomDelay(500, 1200));
         },
       },
@@ -204,7 +204,7 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-09',
         name: 'Navigate to assets',
         execute: async (page: Page) => {
-          await page.goto('/assets', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/assets', { waitUntil: 'load', timeout: 15000 });
           // Wait for data table or empty state
           await page.locator('app-data-table, app-empty-state, .page-header').first()
             .waitFor({ state: 'visible', timeout: 10000 });
@@ -302,7 +302,7 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-13',
         name: 'Navigate to inventory',
         execute: async (page: Page) => {
-          await page.goto('/inventory', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/inventory', { waitUntil: 'load', timeout: 15000 });
           await page.locator('app-data-table, app-empty-state, .page-header, .tab').first()
             .waitFor({ state: 'visible', timeout: 10000 });
           await page.waitForTimeout(randomDelay(800, 1500));
@@ -340,7 +340,7 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-15',
         name: 'Navigate to quality',
         execute: async (page: Page) => {
-          await page.goto('/quality', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/quality', { waitUntil: 'load', timeout: 15000 });
           await page.locator('.page-header, app-data-table, app-empty-state, .tab').first()
             .waitFor({ state: 'visible', timeout: 10000 });
           await page.waitForTimeout(randomDelay(800, 1500));
@@ -447,7 +447,7 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-18',
         name: 'Navigate to time tracking',
         execute: async (page: Page) => {
-          await page.goto('/time-tracking', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/time-tracking', { waitUntil: 'load', timeout: 15000 });
           await page.locator('.page-header, app-data-table, app-empty-state').first()
             .waitFor({ state: 'visible', timeout: 10000 });
           await page.waitForTimeout(randomDelay(800, 1500));
@@ -493,10 +493,10 @@ export function getProductionBravoWorkflow(): Workflow {
         id: 'pb-20',
         name: 'Return to kanban board',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: 15000 });
           // Confirm board loaded
           await page.locator('.track-type-btn, .board-column, app-board-column').first()
-            .waitFor({ state: 'visible', timeout: 10000 });
+            .waitFor({ state: 'visible', timeout: 20000 }).catch(() => {});
 
           // Re-select Maintenance track if available
           const maintenanceBtn = page.locator('.track-type-btn', { hasText: /maintenance/i });

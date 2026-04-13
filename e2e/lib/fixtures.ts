@@ -49,3 +49,4 @@ export function getUsersByRole(role: StressRole): TestUser[] {
 export const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:4200';
 export const API_URL = process.env.E2E_API_URL || 'http://localhost:5000';
 export const STRESS_DURATION_MS = parseInt(process.env.E2E_STRESS_DURATION || '5400000', 10); // 90 min default
+export const MAX_WORKERS = parseInt(process.env.E2E_MAX_WORKERS || '20', 10); // limit concurrent workers

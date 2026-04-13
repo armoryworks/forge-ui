@@ -1,6 +1,6 @@
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 
-import { STRESS_USERS, BASE_URL, API_URL, STRESS_DURATION_MS, TestUser } from '../lib/fixtures';
+import { STRESS_USERS, BASE_URL, API_URL, STRESS_DURATION_MS, MAX_WORKERS, TestUser } from '../lib/fixtures';
 import { StressMetrics, WorkerState, WorkflowError, StepResult } from '../lib/types';
 
 // Workflow imports — each returns a Workflow describing the loop for that role/team
@@ -75,7 +75,23 @@ export class StressOrchestrator {
 
   async start(): Promise<void> {
     this.log('Launching browser (headless Chromium)...');
-    this.browser = await chromium.launch({ headless: true });
+    this.browser = await chromium.launch({
+      headless: true,
+      args: [
+        '--disable-dev-shm-usage',    // Use /tmp instead of /dev/shm (prevents OOM)
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-extensions',
+        '--disable-background-networking',
+        '--disable-default-apps',
+        '--disable-sync',
+        '--disable-translate',
+        '--metrics-recording-only',
+        '--mute-audio',
+        '--no-first-run',
+        '--safebrowsing-disable-auto-update',
+      ],
+    });
     this.running = true;
     this.metrics = this.createEmptyMetrics();
     this.errors = [];
@@ -84,12 +100,13 @@ export class StressOrchestrator {
     // Authenticate and launch each worker with a 500ms stagger
     const workerPromises: Promise<void>[] = [];
 
-    for (let i = 0; i < STRESS_USERS.length; i++) {
-      const user = STRESS_USERS[i];
+    const usersToLaunch = STRESS_USERS.slice(0, MAX_WORKERS);
+    for (let i = 0; i < usersToLaunch.length; i++) {
+      const user = usersToLaunch[i];
 
-      // Stagger: wait 500ms between each worker launch
+      // Stagger: wait 2s between each worker launch to avoid resource exhaustion
       if (i > 0) {
-        await this.delay(500);
+        await this.delay(2000);
       }
 
       this.log(`[W${user.workerId}] Initializing ${user.email} (${user.role})...`);
@@ -186,6 +203,7 @@ export class StressOrchestrator {
 
   private async createWorker(user: TestUser): Promise<WorkerContext> {
     const context = await this.browser.newContext({
+      baseURL: BASE_URL,
       viewport: { width: 1920, height: 1080 },
       ignoreHTTPSErrors: true,
     });
@@ -305,7 +323,7 @@ export class StressOrchestrator {
         // Cooldown before retry — try to recover by navigating to a known page
         try {
           await wc.page.waitForTimeout(5000);
-          await wc.page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 15000 });
+          await wc.page.goto('/', { waitUntil: 'domcontentloaded', timeout: 15000 });
           wc.state.status = 'running';
         } catch {
           // If we can't even navigate, try recreating the page
@@ -361,7 +379,10 @@ export class StressOrchestrator {
     page: Page,
     user: TestUser,
   ): Promise<void> {
-    const response = await page.request.post(`${API_URL}/api/v1/auth/login`, {
+    // Use context.request (APIRequestContext) instead of page.request to avoid
+    // corrupting the page's CDP session — page.request.post goes through the
+    // page's protocol session and can leave it in a bad state.
+    const response = await context.request.post(`${API_URL}/api/v1/auth/login`, {
       data: { email: user.email, password: user.password },
     });
 
@@ -385,10 +406,11 @@ export class StressOrchestrator {
       { token: body.token, user: body.user },
     );
 
-    // Navigate to the app so localStorage is scoped to the correct origin
-    await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Navigate to the app root — baseURL is set on the context so '/' works.
+    // This scopes localStorage to the correct origin.
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 30000 });
 
-    // Also set directly (addInitScript only fires on future navigations)
+    // Set tokens directly for this first load (addInitScript fires on future navigations)
     await page.evaluate(
       (data: { token: string; user: unknown }) => {
         localStorage.setItem('qbe-token', data.token);
@@ -396,6 +418,21 @@ export class StressOrchestrator {
       },
       { token: body.token, user: body.user },
     );
+
+    // Reload to pick up the token — Angular's auth guard reads localStorage on init
+    await page.reload({ waitUntil: 'load', timeout: 30000 });
+
+    // Wait for the app shell to appear
+    await page.waitForSelector('app-sidebar, .nav-item, app-header', {
+      timeout: 15000,
+    }).catch(() => {});
+
+    // Dismiss the onboarding banner if present
+    const skipBtn = page.locator('button', { hasText: /skip onboarding/i }).first();
+    if (await skipBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await skipBtn.click();
+      await page.waitForTimeout(500);
+    }
   }
 
   // -----------------------------------------------------------------------

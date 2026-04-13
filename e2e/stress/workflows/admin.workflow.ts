@@ -61,7 +61,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-01',
         name: 'Navigate to dashboard',
         execute: async (page: Page) => {
-          await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.locator('app-dashboard-widget, .dashboard, .page-content').first()
             .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
           await page.waitForTimeout(randomDelay(800, 1500));
@@ -75,7 +75,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-02',
         name: 'Navigate to admin users',
         execute: async (page: Page) => {
-          await page.goto('/admin/users', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/users', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForDataTable(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -186,7 +186,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-06',
         name: 'Navigate to admin settings',
         execute: async (page: Page) => {
-          await page.goto('/admin/settings', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/settings', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForAdminContent(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -228,7 +228,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-08',
         name: 'Navigate to reference data',
         execute: async (page: Page) => {
-          await page.goto('/admin/reference-data', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/reference-data', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForAdminContent(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -271,7 +271,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-10',
         name: 'Navigate to track types',
         execute: async (page: Page) => {
-          await page.goto('/admin/track-types', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/track-types', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForAdminContent(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -313,7 +313,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-12',
         name: 'Navigate to terminology',
         execute: async (page: Page) => {
-          await page.goto('/admin/terminology', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/terminology', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForAdminContent(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -351,7 +351,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-14',
         name: 'Navigate to events',
         execute: async (page: Page) => {
-          await page.goto('/admin/events', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/events', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForAdminContent(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -399,7 +399,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-16',
         name: 'Navigate to scheduled tasks',
         execute: async (page: Page) => {
-          await page.goto('/admin/scheduled-tasks', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/admin/scheduled-tasks', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await waitForAdminContent(page);
           await page.waitForTimeout(randomDelay(600, 1200));
         },
@@ -435,7 +435,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-18',
         name: 'Navigate to training',
         execute: async (page: Page) => {
-          await page.goto('/training', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/training', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.locator('app-data-table, .training-module, .module-card, .page-content').first()
             .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
           await page.waitForTimeout(randomDelay(600, 1200));
@@ -485,7 +485,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-20',
         name: 'Navigate to reports',
         execute: async (page: Page) => {
-          await page.goto('/reports', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/reports', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.locator('app-data-table, .report-card, .report-list, .page-content').first()
             .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
           await page.waitForTimeout(randomDelay(600, 1200));
@@ -532,7 +532,7 @@ export function getAdminWorkflow(): Workflow {
         id: 'adm-22',
         name: 'Navigate to chat',
         execute: async (page: Page) => {
-          await page.goto('/chat', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.locator('.chat-room, .chat-list, .chat-container, .page-content').first()
             .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
           await page.waitForTimeout(randomDelay(600, 1200));

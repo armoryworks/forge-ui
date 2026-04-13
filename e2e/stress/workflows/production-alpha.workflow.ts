@@ -38,7 +38,7 @@ export function getProductionAlphaWorkflow(): Workflow {
         id: 'pa-01',
         name: 'Navigate to dashboard',
         execute: async (page: Page) => {
-          await page.goto('/dashboard', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.waitForSelector('.dashboard-widget, app-dashboard-widget', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
           await page.waitForTimeout(randomDelay(800, 1500));
         },
@@ -86,7 +86,7 @@ export function getProductionAlphaWorkflow(): Workflow {
         id: 'pa-03',
         name: 'Navigate to kanban board',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.waitForSelector('.kanban-board, .board-column, app-kanban-board', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -254,7 +254,7 @@ export function getProductionAlphaWorkflow(): Workflow {
         id: 'pa-09',
         name: 'Navigate to time tracking',
         execute: async (page: Page) => {
-          await page.goto('/time-tracking', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.waitForSelector('app-data-table, .time-tracking, [class*="time-tracking"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
           await page.waitForTimeout(randomDelay(500, 1200));
         },
@@ -300,7 +300,7 @@ export function getProductionAlphaWorkflow(): Workflow {
         id: 'pa-11',
         name: 'Navigate to parts catalog',
         execute: async (page: Page) => {
-          await page.goto('/parts', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/parts', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.waitForSelector('app-data-table, table, [class*="data-table"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
           await page.waitForTimeout(randomDelay(500, 1000));
         },
@@ -405,7 +405,7 @@ export function getProductionAlphaWorkflow(): Workflow {
         id: 'pa-15',
         name: 'Navigate to chat',
         execute: async (page: Page) => {
-          await page.goto('/chat', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.waitForSelector(
             'app-chat, [class*="chat"], [class*="message-list"], [class*="chat-room"]',
             { timeout: ELEMENT_TIMEOUT },
@@ -469,7 +469,7 @@ export function getProductionAlphaWorkflow(): Workflow {
         id: 'pa-17',
         name: 'Return to kanban board',
         execute: async (page: Page) => {
-          await page.goto('/kanban', { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT });
+          await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
           await page.waitForSelector('.kanban-board, .board-column, app-kanban-board', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
           await page.waitForTimeout(randomDelay(500, 1000));
         },
