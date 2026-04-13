@@ -32,7 +32,9 @@
     "scenario:qb-clean": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --headed --grep \"00\"",
     "scenario:qb-fresh": "playwright test --config=e2e/scenarios/playwright.scenarios.config.ts --headed --grep \"00|01|02e\"",
     "screenshots": "playwright test --config=e2e/screenshots/playwright.screenshots.config.ts",
-    "screenshots:headed": "playwright test --config=e2e/screenshots/playwright.screenshots.config.ts --headed"
+    "screenshots:headed": "playwright test --config=e2e/screenshots/playwright.screenshots.config.ts --headed",
+    "stress": "npx tsx e2e/stress/run.ts",
+    "stress:quick": "cross-env E2E_STRESS_DURATION=600000 npx tsx e2e/stress/run.ts"
   },
   "private": true,
   "packageManager": "npm@11.8.0",
@@ -92,7 +94,10 @@
     "@typescript-eslint/eslint-plugin": "^8.57.0",
     "@typescript-eslint/parser": "^8.57.0",
     "angular-eslint": "^21.3.0",
+    "ansi-escapes": "^7.3.0",
     "axe-core": "^4.11.1",
+    "chalk": "^5.6.2",
+    "cli-table3": "^0.6.5",
     "cypress": "^15.11.0",
     "cypress-axe": "^1.7.0",
     "eslint": "^10.0.3",
