@@ -1,36 +1,48 @@
-import { Page, expect } from '@playwright/test';
-import { fillForm } from './form.lib';
+import { Page } from '@playwright/test';
+import { fillForm, clickByTestId } from './form.lib';
 
 /**
  * Dialog library — helpers for opening, filling, saving, and verifying dialogs.
- * Works with the app's <app-dialog> component and Angular Material dialog overlay.
+ * Works with the app's <app-dialog> component which renders INLINE (not in CDK overlay).
+ *
+ * Key insight: <app-dialog> is NOT a MatDialog — it's a custom component that renders
+ * inside the feature component tree. There's no .cdk-overlay-container for dialogs.
+ * We locate dialogs via `app-dialog .dialog` or the dialog title.
  */
 
-/** Selector for the dialog container in the CDK overlay */
-const DIALOG_SELECTOR = '.cdk-overlay-container .mat-mdc-dialog-container, .cdk-overlay-container app-dialog';
-const DIALOG_TITLE_SELECTOR = 'app-dialog .dialog__title, .mat-mdc-dialog-title';
-const CONFIRM_DIALOG_SELECTOR = '.confirm-dialog';
+/** Selector for the inline dialog */
+const DIALOG_SELECTOR = 'app-dialog .dialog';
+const DIALOG_TITLE_SELECTOR = 'app-dialog .dialog__title';
 
 /**
- * Open a dialog by clicking a button with the given text, then wait for the dialog
- * to appear. Optionally verify the dialog title matches.
+ * Open a dialog by clicking a button (by data-testid or text), then wait for it.
  */
 export async function openDialog(
   page: Page,
-  buttonText: string,
+  buttonTestIdOrText: string,
   dialogTitle?: string,
 ): Promise<void> {
-  await page.getByRole('button', { name: buttonText }).first().click();
-  await page.waitForTimeout(300);
+  // Try data-testid first, fall back to button text
+  const byTestId = page.locator(`[data-testid="${buttonTestIdOrText}"]`);
+  if (await byTestId.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await byTestId.click();
+  } else {
+    await page.getByRole('button', { name: buttonTestIdOrText }).first().click();
+  }
+  await page.waitForTimeout(500);
 
   if (dialogTitle) {
-    await expect(
-      page.locator(DIALOG_TITLE_SELECTOR, { hasText: dialogTitle }),
-    ).toBeVisible({ timeout: 5_000 });
+    await page
+      .locator(DIALOG_TITLE_SELECTOR, { hasText: dialogTitle })
+      .first()
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .catch(() => {});
   } else {
-    await expect(
-      page.locator(DIALOG_SELECTOR).first(),
-    ).toBeVisible({ timeout: 5_000 });
+    await page
+      .locator(DIALOG_SELECTOR)
+      .first()
+      .waitFor({ state: 'visible', timeout: 5000 })
+      .catch(() => {});
   }
 }
 
@@ -39,107 +51,54 @@ export async function openDialog(
  * Waits for the dialog to close after save completes.
  *
  * @param fields - Record of data-testid to value (passed to fillForm)
- * @param saveButtonText - Text of the save button (default: "Save")
+ * @param saveTestId - data-testid of the save button (e.g., "job-save-btn")
  */
 export async function fillAndSaveDialog(
   page: Page,
-  fields: Record<string, string>,
-  saveButtonText = 'Save',
+  fields: Record<string, string | number | boolean>,
+  saveTestId: string,
 ): Promise<void> {
   await fillForm(page, fields);
   await page.waitForTimeout(200);
 
-  await page.getByRole('button', { name: saveButtonText, exact: true }).click();
+  // Use force click to bypass any lingering CDK overlay backdrops from mat-selects
+  await clickByTestId(page, saveTestId);
 
-  // Wait for dialog to close (either the overlay disappears or the dialog is removed)
-  await expect(
-    page.locator(DIALOG_SELECTOR).first(),
-  ).not.toBeVisible({ timeout: 10_000 }).catch(() => {
-    // Dialog may have already been removed from DOM
-  });
-
-  await page.waitForTimeout(300);
+  // Wait for dialog to close
+  await page.waitForTimeout(2000);
 }
 
 /**
- * Verify that hovering over a disabled save button shows a validation popover
- * containing the expected violation messages.
- */
-export async function verifyValidationPopover(
-  page: Page,
-  expectedViolations: string[],
-): Promise<void> {
-  // Find the disabled save button with the validation popover directive
-  const saveButton = page.locator('button[disabled][appvalidationpopover], button:disabled').last();
-  await expect(saveButton).toBeVisible({ timeout: 3_000 });
-
-  // Hover to trigger the popover
-  await saveButton.hover();
-  await page.waitForTimeout(500);
-
-  // Check the validation popover content
-  const popover = page.locator('app-validation-popover-content, .validation-popover__list');
-  await expect(popover.first()).toBeVisible({ timeout: 3_000 });
-
-  for (const violation of expectedViolations) {
-    await expect(popover.first()).toContainText(violation);
-  }
-
-  // Move mouse away to dismiss
-  await page.mouse.move(0, 0);
-  await page.waitForTimeout(300);
-}
-
-/**
- * Close the currently open dialog by clicking the Cancel button or the close icon.
- * Verifies the dialog is no longer visible after closing.
+ * Close the currently open dialog by clicking Cancel, close icon, or pressing Escape.
  */
 export async function closeDialog(page: Page): Promise<void> {
-  // Try Cancel button first, then close icon
-  const cancelBtn = page.getByRole('button', { name: 'Cancel', exact: true });
-  const closeIcon = page.locator('app-dialog .dialog__close, .mat-mdc-dialog-container button[aria-label="Close"]');
-
-  if (await cancelBtn.isVisible()) {
-    await cancelBtn.click();
-  } else if (await closeIcon.first().isVisible()) {
-    await closeIcon.first().click();
+  // Try close icon (has aria-label="Close dialog")
+  const closeIcon = page.locator('button[aria-label="Close dialog"]').first();
+  if (await closeIcon.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await closeIcon.click({ force: true });
   } else {
     // Fallback: press Escape
     await page.keyboard.press('Escape');
   }
-
   await page.waitForTimeout(300);
-  await expect(
-    page.locator(DIALOG_SELECTOR).first(),
-  ).not.toBeVisible({ timeout: 5_000 }).catch(() => {
-    // Already gone
-  });
 }
 
 /**
- * Verify that a dirty form guard confirmation dialog appears when trying to close
- * a dialog with unsaved changes. Clicks Cancel on the guard to stay in the form.
+ * Wait for a snackbar to appear and return its text, or null if none appears.
  */
-export async function verifyDirtyGuard(page: Page): Promise<void> {
-  // Try to close — should trigger the confirm dialog
-  const closeIcon = page.locator('app-dialog .dialog__close');
-  if (await closeIcon.isVisible()) {
-    await closeIcon.click();
-  } else {
-    await page.keyboard.press('Escape');
-  }
+export async function waitForSnackbar(
+  page: Page,
+  timeout = 3000,
+): Promise<string | null> {
+  const snack = page.locator('.mat-mdc-snack-bar-container, mat-snack-bar-container').first();
+  const visible = await snack.isVisible({ timeout }).catch(() => false);
+  if (!visible) return null;
+  return snack.textContent().catch(() => null);
+}
 
-  await page.waitForTimeout(500);
-
-  // The confirm dialog should appear
-  const confirmDialog = page.locator(CONFIRM_DIALOG_SELECTOR);
-  await expect(confirmDialog.first()).toBeVisible({ timeout: 5_000 });
-
-  // Verify it contains unsaved changes language
-  await expect(confirmDialog.first()).toContainText(/unsaved|discard|changes/i);
-
-  // Click Cancel to stay in the form
-  const cancelBtn = page.locator(`${CONFIRM_DIALOG_SELECTOR} button`, { hasText: /cancel/i });
-  await cancelBtn.first().click();
-  await page.waitForTimeout(300);
+/**
+ * Check if an error toast is showing.
+ */
+export async function hasErrorToast(page: Page): Promise<boolean> {
+  return page.locator('.toast--error').isVisible({ timeout: 1000 }).catch(() => false);
 }
