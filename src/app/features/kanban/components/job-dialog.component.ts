@@ -186,6 +186,9 @@ export class JobDialogComponent implements OnInit {
   }
 
   protected cancel(): void {
+    if (this.mode() === 'create') {
+      this.dialogRef.clearDraft();
+    }
     this.cancelled.emit();
   }
 }

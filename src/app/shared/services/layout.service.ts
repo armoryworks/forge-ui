@@ -126,7 +126,8 @@ export class LayoutService {
   }
 
   private routeToPath(url: string): string {
-    const segment = url.split('/').filter(Boolean)[0] ?? 'dashboard';
+    const pathname = url.split('?')[0];
+    const segment = pathname.split('/').filter(Boolean)[0] ?? 'dashboard';
     return `/${segment}`;
   }
 
@@ -159,8 +160,9 @@ export class LayoutService {
       chat: 'Chat',
       notifications: 'Notifications',
     };
-    // Extract first path segment: "/parts/42" → "parts"
-    const segment = url.split('/').filter(Boolean)[0] ?? 'dashboard';
+    // Strip query params, then extract first path segment: "/parts/42?detail=part:1" → "parts"
+    const pathname = url.split('?')[0];
+    const segment = pathname.split('/').filter(Boolean)[0] ?? 'dashboard';
     return labels[segment] ?? segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
@@ -183,21 +185,6 @@ export class LayoutService {
     // Standalone PWA or Capacitor native always counts as mobile device
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
     const result = (hasTouch && isPhoneSize) || (hasTouch && mobileUA) || isStandalone;
-
-    // Diagnostic: remove after confirming mobile detection works
-    console.debug('[MobileDetect]', {
-      result,
-      hasTouch,
-      maxTouchPoints: navigator.maxTouchPoints,
-      innerWidth: window.innerWidth,
-      innerHeight: window.innerHeight,
-      narrowDimension,
-      isPhoneSize,
-      mobileUA,
-      isStandalone,
-      userAgent: navigator.userAgent,
-    });
-
     return result;
   }
 }

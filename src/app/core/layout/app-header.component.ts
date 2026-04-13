@@ -157,6 +157,7 @@ export class AppHeaderComponent implements OnInit {
   }
 
   protected navigateToResult(result: SearchResult): void {
+    this.layout.closeMobileMenu();
     this.showResults.set(false);
     this.searchControl.setValue('', { emitEvent: false });
     this.searchResults.set([]);
@@ -170,6 +171,7 @@ export class AppHeaderComponent implements OnInit {
   }
 
   protected navigateToSuggestion(suggestion: AiSearchSuggestion): void {
+    this.layout.closeMobileMenu();
     this.showResults.set(false);
     this.searchControl.setValue('', { emitEvent: false });
     this.searchResults.set([]);
@@ -178,6 +180,7 @@ export class AppHeaderComponent implements OnInit {
   }
 
   protected navigateToRagResult(result: RagSearchResult): void {
+    this.layout.closeMobileMenu();
     this.showResults.set(false);
     this.searchControl.setValue('', { emitEvent: false });
     this.searchResults.set([]);

@@ -656,7 +656,7 @@
           <span class="setup-code-banner__hint">
             {{ 'admin.setupCodeHint' | translate }}
             @if (setupTokenExpiresAt()) {
-              {{ 'admin.setupCodeExpires' | translate }} {{ setupTokenExpiresAt() | date:'mediumDate' }}.
+              {{ 'admin.setupCodeExpires' | translate }} {{ setupTokenExpiresAt() | date:'MM/dd/yyyy' }}.
             }
           </span>
         </div>

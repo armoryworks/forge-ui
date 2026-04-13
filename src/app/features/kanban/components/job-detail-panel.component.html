@@ -388,7 +388,7 @@
                 <span class="material-icons-outlined file-item__icon">{{ fileIcon(f.contentType) }}</span>
                 <div class="file-item__info">
                   <span class="file-item__name">{{ f.fileName }}</span>
-                  <span class="file-item__meta">{{ formatFileSize(f.size) }} · {{ f.createdAt | date:'shortTime' }}</span>
+                  <span class="file-item__meta">{{ formatFileSize(f.size) }} · {{ f.createdAt | date:'MM/dd/yyyy hh:mm' }}</span>
                 </div>
                 <button class="icon-btn" [matTooltip]="'common.download' | translate" matTooltipPosition="above"
                   [attr.aria-label]="'kanban.downloadFile' | translate" (click)="downloadFile(f)">
