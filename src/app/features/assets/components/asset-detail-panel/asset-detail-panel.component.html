@@ -81,16 +81,20 @@
                 <span class="info-value">{{ asset.currentShotCount }} / {{ asset.toolLifeExpectancy }}</span>
               </div>
             }
-            @if (asset.sourceJobNumber) {
+            @if (asset.sourceJobId) {
               <div class="info-item">
                 <span class="info-label">{{ 'assets.sourceJob' | translate }}</span>
-                <span class="info-value">{{ asset.sourceJobNumber }}</span>
+                <span class="info-value">
+                  <app-entity-link type="job" [entityId]="asset.sourceJobId">{{ asset.sourceJobNumber }}</app-entity-link>
+                </span>
               </div>
             }
-            @if (asset.sourcePartNumber) {
+            @if (asset.sourcePartId) {
               <div class="info-item">
                 <span class="info-label">{{ 'assets.sourcePart' | translate }}</span>
-                <span class="info-value">{{ asset.sourcePartNumber }}</span>
+                <span class="info-value">
+                  <app-entity-link type="part" [entityId]="asset.sourcePartId">{{ asset.sourcePartNumber }}</app-entity-link>
+                </span>
               </div>
             }
           </div>

@@ -134,6 +134,8 @@
             tableId="vendor-pos"
             [columns]="poColumns"
             [data]="vendor.purchaseOrders"
+            [clickableRows]="true"
+            (rowClick)="openPurchaseOrder($any($event))"
             emptyIcon="receipt_long"
             [emptyMessage]="'vendors.noPurchaseOrders' | translate">
             <ng-template appColumnCell="poNumber" let-row>

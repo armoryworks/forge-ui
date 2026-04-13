@@ -3,6 +3,7 @@ import {
   input, output, signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -40,6 +41,7 @@ import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scor
 export class VendorDetailPanelComponent {
   private readonly vendorService = inject(VendorService);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -148,5 +150,9 @@ export class VendorDetailPanelComponent {
 
   protected getPoStatusLabel(status: string): string {
     return status === 'PartiallyReceived' ? this.translate.instant('vendors.poStatusPartial') : status;
+  }
+
+  protected openPurchaseOrder(row: { id: number }): void {
+    this.router.navigate(['/purchase-orders'], { queryParams: { detail: `purchase-order:${row.id}` } });
   }
 }

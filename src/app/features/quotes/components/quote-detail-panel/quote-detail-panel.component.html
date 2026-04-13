@@ -5,7 +5,7 @@
         <span class="material-icons-outlined detail-icon">request_quote</span>
         <div>
           <div class="detail-name">{{ quote.quoteNumber }}</div>
-          <div class="detail-customer">{{ quote.customerName }}</div>
+          <div class="detail-customer"><app-entity-link type="customer" [entityId]="quote.customerId">{{ quote.customerName }}</app-entity-link></div>
         </div>
       </div>
       <div class="detail-header__actions">
@@ -26,7 +26,7 @@
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'quotes.customer' | translate }}</span>
-          <span class="info-value">{{ quote.customerName }}</span>
+          <span class="info-value"><app-entity-link type="customer" [entityId]="quote.customerId">{{ quote.customerName }}</app-entity-link></span>
         </div>
         @if (quote.expirationDate) {
           <div class="info-item">
@@ -49,7 +49,7 @@
         @if (quote.salesOrderId) {
           <div class="info-item">
             <span class="info-label">{{ 'quotes.linkedOrder' | translate }}</span>
-            <span class="info-value">{{ quote.salesOrderNumber }}</span>
+            <span class="info-value"><app-entity-link type="sales-order" [entityId]="quote.salesOrderId">{{ quote.salesOrderNumber }}</app-entity-link></span>
           </div>
         }
       </div>

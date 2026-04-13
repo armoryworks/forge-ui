@@ -5,7 +5,7 @@
         <span class="material-icons-outlined detail-icon">receipt_long</span>
         <div>
           <div class="detail-name">{{ so.orderNumber }}</div>
-          <div class="detail-customer">{{ so.customerName }}</div>
+          <div class="detail-customer"><app-entity-link type="customer" [entityId]="so.customerId">{{ so.customerName }}</app-entity-link></div>
         </div>
       </div>
       <div class="detail-header__actions">
@@ -33,7 +33,13 @@
         @if (so.quoteNumber) {
           <div class="info-item">
             <span class="info-label">{{ 'salesOrders.quote' | translate }}</span>
-            <span class="info-value">{{ so.quoteNumber }}</span>
+            <span class="info-value">
+              @if (so.quoteId) {
+                <app-entity-link type="quote" [entityId]="so.quoteId">{{ so.quoteNumber }}</app-entity-link>
+              } @else {
+                {{ so.quoteNumber }}
+              }
+            </span>
           </div>
         }
         @if (so.creditTerms) {

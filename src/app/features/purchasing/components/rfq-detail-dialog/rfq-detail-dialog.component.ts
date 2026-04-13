@@ -22,6 +22,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 export interface RfqDetailDialogData {
@@ -35,7 +36,7 @@ export interface RfqDetailDialogData {
     CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
-    LoadingBlockDirective, ValidationPopoverDirective,
+    LoadingBlockDirective, ValidationPopoverDirective, EntityLinkComponent,
   ],
   templateUrl: './rfq-detail-dialog.component.html',
   styleUrl: './rfq-detail-dialog.component.scss',

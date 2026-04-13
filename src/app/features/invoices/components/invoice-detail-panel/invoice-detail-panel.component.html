@@ -5,7 +5,7 @@
         <span class="material-icons-outlined detail-icon">receipt_long</span>
         <div>
           <div class="detail-name">{{ inv.invoiceNumber }}</div>
-          <div class="detail-customer">{{ inv.customerName }}</div>
+          <div class="detail-customer"><app-entity-link type="customer" [entityId]="inv.customerId">{{ inv.customerName }}</app-entity-link></div>
         </div>
       </div>
       <div class="detail-header__actions">
@@ -26,18 +26,18 @@
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'invoices.customer' | translate }}</span>
-          <span class="info-value">{{ inv.customerName }}</span>
+          <span class="info-value"><app-entity-link type="customer" [entityId]="inv.customerId">{{ inv.customerName }}</app-entity-link></span>
         </div>
         @if (inv.salesOrderNumber) {
           <div class="info-item">
             <span class="info-label">{{ 'invoices.salesOrder' | translate }}</span>
-            <span class="info-value">{{ inv.salesOrderNumber }}</span>
+            <span class="info-value"><app-entity-link type="sales-order" [entityId]="inv.salesOrderId!">{{ inv.salesOrderNumber }}</app-entity-link></span>
           </div>
         }
         @if (inv.shipmentNumber) {
           <div class="info-item">
             <span class="info-label">{{ 'invoices.shipment' | translate }}</span>
-            <span class="info-value">{{ inv.shipmentNumber }}</span>
+            <span class="info-value"><app-entity-link type="shipment" [entityId]="inv.shipmentId!">{{ inv.shipmentNumber }}</app-entity-link></span>
           </div>
         }
         <div class="info-item">

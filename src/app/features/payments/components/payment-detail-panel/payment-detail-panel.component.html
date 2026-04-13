@@ -20,7 +20,9 @@
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">{{ 'payments.customer' | translate }}</span>
-          <span class="info-value">{{ payment.customerName }}</span>
+          <span class="info-value">
+            <app-entity-link type="customer" [entityId]="payment.customerId">{{ payment.customerName }}</app-entity-link>
+          </span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'payments.method' | translate }}</span>

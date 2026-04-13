@@ -17,7 +17,9 @@ export interface AssetItem {
   cavityCount: number | null;
   toolLifeExpectancy: number | null;
   currentShotCount: number | null;
+  sourceJobId: number | null;
   sourceJobNumber: string | null;
+  sourcePartId: number | null;
   sourcePartNumber: string | null;
   createdAt: Date;
   updatedAt: Date;

@@ -6,7 +6,7 @@
         <div class="info-grid">
           <div class="info-item">
             <span class="info-label">{{ 'purchasing.part' | translate }}</span>
-            <span class="info-value">{{ rfq.partNumber }} — {{ rfq.partDescription }}</span>
+            <span class="info-value"><app-entity-link type="part" [entityId]="rfq.partId">{{ rfq.partNumber }}</app-entity-link> — {{ rfq.partDescription }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">{{ 'purchasing.quantity' | translate }}</span>
@@ -41,7 +41,7 @@
           @if (rfq.generatedPurchaseOrderId) {
             <div class="info-item">
               <span class="info-label">{{ 'purchasing.generatedPo' | translate }}</span>
-              <span class="info-value info-value--link">PO #{{ rfq.generatedPurchaseOrderId }}</span>
+              <span class="info-value"><app-entity-link type="purchase-order" [entityId]="rfq.generatedPurchaseOrderId">PO #{{ rfq.generatedPurchaseOrderId }}</app-entity-link></span>
             </div>
           }
         </div>

@@ -5,7 +5,7 @@
         <span class="material-icons-outlined detail-icon">description</span>
         <div>
           <div class="detail-name">{{ po.poNumber }}</div>
-          <div class="detail-vendor">{{ po.vendorName }}</div>
+          <div class="detail-vendor"><app-entity-link type="vendor" [entityId]="po.vendorId">{{ po.vendorName }}</app-entity-link></div>
         </div>
       </div>
       <div class="detail-header__actions">
@@ -27,7 +27,13 @@
         @if (po.jobNumber) {
           <div class="info-item">
             <span class="info-label">{{ 'purchaseOrders.job' | translate }}</span>
-            <span class="info-value">{{ po.jobNumber }}</span>
+            <span class="info-value">
+              @if (po.jobId) {
+                <app-entity-link type="job" [entityId]="po.jobId">{{ po.jobNumber }}</app-entity-link>
+              } @else {
+                {{ po.jobNumber }}
+              }
+            </span>
           </div>
         }
         @if (po.expectedDeliveryDate) {

@@ -26,7 +26,9 @@
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'shipments.salesOrder' | translate }}</span>
-          <span class="info-value">{{ shipment.salesOrderNumber }}</span>
+          <span class="info-value">
+            <app-entity-link type="sales-order" [entityId]="shipment.salesOrderId">{{ shipment.salesOrderNumber }}</app-entity-link>
+          </span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'shipments.customer' | translate }}</span>
@@ -71,7 +73,9 @@
         @if (shipment.invoiceId) {
           <div class="info-item">
             <span class="info-label">{{ 'shipments.linkedInvoice' | translate }}</span>
-            <span class="info-value">#{{ shipment.invoiceId }}</span>
+            <span class="info-value">
+              <app-entity-link type="invoice" [entityId]="shipment.invoiceId!">{{ '#' + shipment.invoiceId }}</app-entity-link>
+            </span>
           </div>
         }
       </div>

@@ -11,6 +11,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { EntityActivitySectionComponent, ActivityFilterTab } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 
 @Component({
   selector: 'app-payment-detail-panel',
@@ -18,7 +19,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   imports: [
     DatePipe, CurrencyPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
-    EntityActivitySectionComponent,
+    EntityActivitySectionComponent, EntityLinkComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',

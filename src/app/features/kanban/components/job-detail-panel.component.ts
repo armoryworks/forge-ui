@@ -28,6 +28,7 @@ import { LINK_TYPE_OPTIONS } from '../models/link-type-options.const';
 import { LINK_TYPE_ICONS } from '../models/link-type-icons.const';
 import { LINK_TYPE_LABELS } from '../models/link-type-labels.const';
 import { JobPart } from '../models/job-part.model';
+import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
 import { PartSearchResult } from '../models/part-search-result.model';
 import { ChildJob } from '../models/child-job.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -40,7 +41,7 @@ import { OperationTimeTabComponent } from './operation-time-tab.component';
 @Component({
   selector: 'app-job-detail-panel',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule],
+  imports: [DatePipe, ReactiveFormsModule, TranslatePipe, AvatarComponent, FileUploadZoneComponent, InputComponent, SelectComponent, EntityActivitySectionComponent, StatusTimelineComponent, BarcodeInfoComponent, JobCostTabComponent, OperationTimeTabComponent, MatMenuModule, MatTooltipModule, EntityLinkComponent],
   templateUrl: './job-detail-panel.component.html',
   styleUrl: './job-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -10,12 +10,13 @@ import { AssetStatus } from '../../models/asset-status.type';
 import { MaintenanceLogListItem } from '../../models/maintenance-log-list-item.model';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
+import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 @Component({
   selector: 'app-asset-detail-panel',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent],
+  imports: [DatePipe, DecimalPipe, TranslatePipe, MatTooltipModule, BarcodeInfoComponent, EntityActivitySectionComponent, EntityLinkComponent],
   templateUrl: './asset-detail-panel.component.html',
   styleUrl: './asset-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

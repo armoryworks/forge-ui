@@ -140,7 +140,9 @@
           <div class="sub-jobs-list">
             @for (child of childJobs(); track child.id) {
               <div class="sub-job-item">
-                <span class="sub-job-item__number">{{ child.jobNumber }}</span>
+                <span class="sub-job-item__number">
+                  <app-entity-link type="job" [entityId]="child.id">{{ child.jobNumber }}</app-entity-link>
+                </span>
                 <span class="sub-job-item__title">{{ child.title }}</span>
                 <span class="chip chip--muted">{{ child.stage }}</span>
               </div>
@@ -173,7 +175,9 @@
                 <span class="material-icons-outlined link-item__icon">{{ linkTypeIcons[lk.linkType] ?? 'link' }}</span>
                 <span class="link-item__type">{{ linkTypeLabels[lk.linkType] ?? lk.linkType }}</span>
                 <span class="link-item__job">
-                  <span class="link-item__number">{{ lk.linkedJobNumber }}</span>
+                  <span class="link-item__number">
+                    <app-entity-link type="job" [entityId]="lk.linkedJobId">{{ lk.linkedJobNumber }}</app-entity-link>
+                  </span>
                   <span class="link-item__title">{{ lk.linkedJobTitle }}</span>
                 </span>
                 <span class="chip chip--sm" [style.--chip-color]="lk.linkedJobStageColor">{{ lk.linkedJobStageName }}</span>
@@ -224,7 +228,9 @@
               <div class="part-item">
                 <span class="material-icons-outlined part-item__icon">settings</span>
                 <div class="part-item__info">
-                  <span class="part-item__number">{{ jp.partNumber }}</span>
+                  <span class="part-item__number">
+                    <app-entity-link type="part" [entityId]="jp.partId">{{ jp.partNumber }}</app-entity-link>
+                  </span>
                   <span class="part-item__description">{{ jp.partDescription }}</span>
                 </div>
                 <span class="part-item__qty">x{{ jp.quantity }}</span>
@@ -343,7 +349,13 @@
           </mat-menu>
           <div class="jd-detail-row">
             <span class="jd-detail-label">{{ 'kanban.customer' | translate }}</span>
-            <span class="jd-detail-value">{{ j.customerName ?? '—' }}</span>
+            <span class="jd-detail-value">
+              @if (j.customerId) {
+                <app-entity-link type="customer" [entityId]="j.customerId">{{ j.customerName }}</app-entity-link>
+              } @else {
+                —
+              }
+            </span>
           </div>
           <div class="jd-detail-row">
             <span class="jd-detail-label">{{ 'kanban.dueDate' | translate }}</span>
@@ -357,16 +369,20 @@
             <span class="jd-detail-label">{{ 'jobs.track' | translate }}</span>
             <span class="jd-detail-value">{{ j.trackTypeName }}</span>
           </div>
-          @if (j.partNumber) {
+          @if (j.partId) {
             <div class="jd-detail-row">
               <span class="jd-detail-label">{{ 'kanban.part' | translate }}</span>
-              <span class="jd-detail-value">{{ j.partNumber }}</span>
+              <span class="jd-detail-value">
+                <app-entity-link type="part" [entityId]="j.partId">{{ j.partNumber }}</app-entity-link>
+              </span>
             </div>
           }
-          @if (j.parentJobNumber) {
+          @if (j.parentJobId) {
             <div class="jd-detail-row">
               <span class="jd-detail-label">{{ 'jobs.parentJob' | translate }}</span>
-              <span class="jd-detail-value">{{ j.parentJobNumber }}</span>
+              <span class="jd-detail-value">
+                <app-entity-link type="job" [entityId]="j.parentJobId">{{ j.parentJobNumber }}</app-entity-link>
+              </span>
             </div>
           }
         </div>

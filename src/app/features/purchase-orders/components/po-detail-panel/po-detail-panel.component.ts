@@ -23,6 +23,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -34,6 +35,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     ReceiveDialogComponent, LoadingBlockDirective,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
     ValidationPopoverDirective,
+    EntityLinkComponent,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',

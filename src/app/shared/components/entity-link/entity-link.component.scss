@@ -1,0 +1,17 @@
+@use 'styles/variables' as *;
+
+.entity-link {
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: color $transition-fast;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+  }
+}

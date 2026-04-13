@@ -9,6 +9,7 @@ import { InvoiceService } from '../../services/invoice.service';
 import { InvoiceDetail } from '../../models/invoice-detail.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
+import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
@@ -18,7 +19,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   imports: [
     DatePipe, CurrencyPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
-    EntityActivitySectionComponent,
+    EntityActivitySectionComponent, EntityLinkComponent,
   ],
   templateUrl: './invoice-detail-panel.component.html',
   styleUrl: './invoice-detail-panel.component.scss',

@@ -12,6 +12,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 
 @Component({
   selector: 'app-sales-order-detail-panel',
@@ -20,6 +21,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
     DatePipe, CurrencyPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
+    EntityLinkComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
