@@ -15,7 +15,13 @@ export const mobileRedirectGuard: CanActivateFn = (_route, state: RouterStateSna
   const layout = inject(LayoutService);
   const router = inject(Router);
 
-  if (layout.isMobileDevice() && sessionStorage.getItem('preferDesktop') !== 'true') {
+  const isMobile = layout.isMobileDevice();
+  const preferDesktop = sessionStorage.getItem('preferDesktop');
+
+  // Diagnostic: remove after confirming mobile redirect works
+  console.debug('[MobileGuard]', { url: state.url, isMobile, preferDesktop });
+
+  if (isMobile && preferDesktop !== 'true') {
     // Allow certain desktop routes that work on mobile
     if (MOBILE_EXEMPT_PREFIXES.some(prefix => state.url.startsWith(prefix))) {
       return true;

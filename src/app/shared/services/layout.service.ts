@@ -182,6 +182,22 @@ export class LayoutService {
     const mobileUA = /Android|iPhone|iPod|webOS|BlackBerry|Opera Mini/i.test(navigator.userAgent);
     // Standalone PWA or Capacitor native always counts as mobile device
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    return (hasTouch && isPhoneSize) || (hasTouch && mobileUA) || isStandalone;
+    const result = (hasTouch && isPhoneSize) || (hasTouch && mobileUA) || isStandalone;
+
+    // Diagnostic: remove after confirming mobile detection works
+    console.debug('[MobileDetect]', {
+      result,
+      hasTouch,
+      maxTouchPoints: navigator.maxTouchPoints,
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      narrowDimension,
+      isPhoneSize,
+      mobileUA,
+      isStandalone,
+      userAgent: navigator.userAgent,
+    });
+
+    return result;
   }
 }
