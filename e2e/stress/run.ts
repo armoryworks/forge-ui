@@ -28,6 +28,17 @@ const metricsDir = path.join(__dirname, 'metrics');
 fs.mkdirSync(errorDir, { recursive: true });
 fs.mkdirSync(metricsDir, { recursive: true });
 
+// Suppress unhandled rejections from Playwright calls that fire during shutdown
+// (e.g., page.keyboard.press after browser.close). These are expected and harmless.
+process.on('unhandledRejection', (reason) => {
+  const msg = reason instanceof Error ? reason.message : String(reason);
+  if (msg.includes('has been closed') || msg.includes('Target closed') || msg.includes('disposed')) {
+    // Expected during graceful shutdown — swallow
+    return;
+  }
+  console.error('Unhandled rejection:', reason);
+});
+
 // ── Bootstrap ───────────────────────────────────────────────────────
 
 const ui = new ConsoleUI(STRESS_DURATION_MS);

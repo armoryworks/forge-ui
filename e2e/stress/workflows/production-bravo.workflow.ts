@@ -427,8 +427,8 @@ export function getProductionBravoWorkflow(): Workflow {
                 }
 
                 // Close chat panel
-                await chatBtn.click({ timeout: 3000 }).catch(() => {
-                  page.keyboard.press('Escape');
+                await chatBtn.click({ timeout: 3000 }).catch(async () => {
+                  await page.keyboard.press('Escape').catch(() => {});
                 });
               }
             }
