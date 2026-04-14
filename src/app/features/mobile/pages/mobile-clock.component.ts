@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { AuthService } from '../../../shared/services/auth.service';
@@ -36,6 +36,17 @@ export class MobileClockComponent implements OnInit {
 
   protected readonly actions = signal<ClockAction[]>([]);
 
+  constructor() {
+    // Recompute actions whenever clock type definitions load (resolves race condition)
+    effect(() => {
+      const defs = this.clockTypes.definitions();
+      const s = this.status();
+      if (defs.length > 0 && s) {
+        this.actions.set(this.clockTypes.getAvailableActions(s.status));
+      }
+    });
+  }
+
   ngOnInit(): void {
     this.clockTypes.load();
     this.loadStatus();
@@ -49,15 +60,10 @@ export class MobileClockComponent implements OnInit {
     this.http.get<ClockStatus>(`/api/v1/shop-floor/clock-status/${userId}`).subscribe({
       next: (s) => {
         this.status.set(s);
-        this.updateActions(s);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
-  }
-
-  private updateActions(s: ClockStatus): void {
-    this.actions.set(this.clockTypes.getAvailableActions(s.status));
   }
 
   protected submitClock(action: ClockAction): void {
