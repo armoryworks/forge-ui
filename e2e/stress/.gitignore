@@ -1,0 +1,5 @@
+test-output*.log
+errors/
+metrics/
+screenshots/
+recursive-results/
