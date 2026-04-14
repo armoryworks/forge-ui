@@ -235,6 +235,29 @@
   gap: $sp-md;
 }
 
+.message-date-separator {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm 0;
+  align-self: stretch;
+}
+
+.message-date-separator__line {
+  flex: 1;
+  height: $border-width-thin;
+  background: var(--border);
+}
+
+.message-date-separator__label {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
 .message {
   display: flex;
   align-items: flex-end;

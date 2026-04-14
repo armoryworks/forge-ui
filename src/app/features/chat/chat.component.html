@@ -86,7 +86,14 @@
       </div>
     } @else {
       <div class="chat-panel__messages" #messagesContainer>
-        @for (msg of messages(); track msg.id) {
+        @for (msg of messages(); track msg.id; let i = $index) {
+          @if (dateSeparator(i); as label) {
+            <div class="message-date-separator">
+              <span class="message-date-separator__line"></span>
+              <span class="message-date-separator__label">{{ label }}</span>
+              <span class="message-date-separator__line"></span>
+            </div>
+          }
           <div class="message" [class.message--own]="isOwnMessage(msg)">
             @if (!isOwnMessage(msg)) {
               <app-avatar [initials]="msg.senderInitials" [color]="msg.senderColor" size="sm" />
