@@ -35,6 +35,7 @@ import { EmptyStateComponent } from '../empty-state/empty-state.component';
 import { ColumnFilterPopoverComponent, ColumnFilterState } from './column-filter-popover/column-filter-popover.component';
 import { ColumnManagerPanelComponent, ColumnManagerState } from './column-manager-panel/column-manager-panel.component';
 import { UserPreferencesService } from '../../services/user-preferences.service';
+import { formatDateTime } from '../../utils/date.utils';
 
 @Component({
   selector: 'app-data-table',
@@ -254,6 +255,14 @@ export class DataTableComponent implements OnInit {
   getRowStyles(row: unknown): Record<string, string> {
     const fn = this.rowStyle();
     return fn ? fn(row) : {};
+  }
+
+  formatCellValue(row: unknown, col: ColumnDef): unknown {
+    const val = (row as Record<string, unknown>)[col.field];
+    if (col.type === 'date' && val) {
+      return formatDateTime(val as string | Date);
+    }
+    return val;
   }
 
   getColumnWidth(col: ColumnDef): string | null {

@@ -118,7 +118,7 @@
                   @if (getCellTemplate(col.field); as tmpl) {
                     <ng-container *ngTemplateOutlet="tmpl; context: { $implicit: row }" />
                   } @else {
-                    {{ $any(row)[col.field] }}
+                    {{ formatCellValue(row, col) }}
                   }
                 </td>
               }
