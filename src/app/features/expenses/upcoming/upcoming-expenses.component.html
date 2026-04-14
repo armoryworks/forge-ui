@@ -1,5 +1,5 @@
 <app-page-header [title]="'expenses.ledgerTitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+  <button class="action-btn action-btn--primary" data-testid="new-recurring-btn" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span> {{ 'expenses.newRecurring' | translate }}
   </button>
 </app-page-header>
@@ -119,25 +119,26 @@
   <app-dialog [title]="'expenses.newRecurringTitle' | translate" width="520px" (closed)="closeDialog()">
     <div [formGroup]="form">
       <div class="dialog-row">
-        <app-input [label]="'expenses.amount' | translate" formControlName="amount" mask="currency" prefix="$" />
-        <app-select [label]="'expenses.frequency' | translate" formControlName="frequency" [options]="frequencyOptions" />
+        <app-input [label]="'expenses.amount' | translate" formControlName="amount" mask="currency" prefix="$" data-testid="recurring-amount" />
+        <app-select [label]="'expenses.frequency' | translate" formControlName="frequency" [options]="frequencyOptions" data-testid="recurring-frequency" />
       </div>
       <div class="dialog-row">
-        <app-select [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" />
-        <app-select [label]="'expenses.classification' | translate" formControlName="classification" [options]="classificationOptions.slice(1)" />
+        <app-select [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions" data-testid="recurring-category" />
+        <app-select [label]="'expenses.classification' | translate" formControlName="classification" [options]="classificationOptions.slice(1)" data-testid="recurring-classification" />
       </div>
-      <app-input [label]="'common.description' | translate" formControlName="description" />
-      <app-input [label]="'expenses.vendor' | translate" formControlName="vendor" [placeholder]="'expenses.vendorPlaceholder' | translate" />
+      <app-input [label]="'common.description' | translate" formControlName="description" data-testid="recurring-description" />
+      <app-input [label]="'expenses.vendor' | translate" formControlName="vendor" [placeholder]="'expenses.vendorPlaceholder' | translate" data-testid="recurring-vendor" />
       <div class="dialog-row">
-        <app-datepicker [label]="'expenses.startDate' | translate" formControlName="startDate" />
-        <app-datepicker [label]="'expenses.endDateOptional' | translate" formControlName="endDate" />
+        <app-datepicker [label]="'expenses.startDate' | translate" formControlName="startDate" data-testid="recurring-start" />
+        <app-datepicker [label]="'expenses.endDateOptional' | translate" formControlName="endDate" data-testid="recurring-end" />
       </div>
-      <app-toggle [label]="'expenses.autoApprove' | translate" formControlName="autoApprove" />
+      <app-toggle [label]="'expenses.autoApprove' | translate" formControlName="autoApprove" data-testid="recurring-auto-approve" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="recurring-save-btn"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">{{ 'common.create' | translate }}</button>

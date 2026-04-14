@@ -1,5 +1,5 @@
 <app-page-header [title]="'customers.title' | translate" [subtitle]="'customers.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateCustomer()">
+  <button class="action-btn action-btn--primary" data-testid="new-customer-btn" (click)="openCreateCustomer()">
     <span class="material-icons-outlined">add</span>
     {{ 'customers.createCustomer' | translate }}
   </button>
@@ -51,17 +51,18 @@
 @if (showDialog()) {
   <app-dialog [title]="'customers.createCustomer' | translate" (closed)="closeDialog()">
     <div [formGroup]="customerForm">
-      <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" />
-      <app-input [label]="'customers.companyName' | translate" formControlName="companyName" />
+      <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" data-testid="customer-name" />
+      <app-input [label]="'customers.companyName' | translate" formControlName="companyName" data-testid="customer-company" />
       <div class="dialog-row">
-        <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
-        <app-input [label]="'common.phone' | translate" formControlName="phone" />
+        <app-input [label]="'common.email' | translate" type="email" formControlName="email" data-testid="customer-email" />
+        <app-input [label]="'common.phone' | translate" formControlName="phone" data-testid="customer-phone" />
       </div>
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="customer-save-btn"
         [appValidationPopover]="customerViolations()"
         [disabled]="customerForm.invalid || saving()"
         (click)="saveCustomer()">

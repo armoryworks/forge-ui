@@ -17,7 +17,7 @@
     {{ 'common.filter' | translate }}
   </button>
   <span style="flex:1"></span>
-  <button class="action-btn action-btn--primary" (click)="openCreate()"
+  <button class="action-btn action-btn--primary" data-testid="new-return-btn" (click)="openCreate()"
     [attr.aria-label]="'customerReturns.newReturn' | translate">
     <span class="material-icons-outlined">add</span>
     {{ 'customerReturns.newReturn' | translate }}

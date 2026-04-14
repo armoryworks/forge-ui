@@ -38,7 +38,7 @@
         <!-- Add Line Form -->
         <div class="add-line add-line--3col" [formGroup]="lineForm">
           <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" />
-          <app-input [label]="'shipments.qty' | translate" type="number" formControlName="quantity" [required]="true" />
+          <app-input [label]="'shipments.qty' | translate" type="number" formControlName="quantity" [required]="true" data-testid="shipment-line-qty" />
           <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
@@ -51,16 +51,16 @@
     <div class="dlg-sidebar" [formGroup]="shipmentForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'shipments.shipmentDetails' | translate }}</span>
-        <app-autocomplete [label]="'shipments.salesOrder' | translate" [options]="salesOrderOptions()" displayField="label" valueField="value" formControlName="salesOrderId" [required]="true" />
-        <app-input [label]="'shipments.carrier' | translate" formControlName="carrier" [placeholder]="'shipments.optional' | translate" />
-        <app-input [label]="'shipments.trackingNumber' | translate" formControlName="trackingNumber" [placeholder]="'shipments.optional' | translate" />
-        <app-input [label]="'shipments.weight' | translate" type="number" formControlName="weight" [placeholder]="'shipments.optional' | translate" />
-        <app-input [label]="'shipments.shippingCost' | translate" type="number" formControlName="shippingCost" [placeholder]="'shipments.optional' | translate" />
+        <app-autocomplete [label]="'shipments.salesOrder' | translate" [options]="salesOrderOptions()" displayField="label" valueField="value" formControlName="salesOrderId" [required]="true" data-testid="shipment-so" />
+        <app-input [label]="'shipments.carrier' | translate" formControlName="carrier" [placeholder]="'shipments.optional' | translate" data-testid="shipment-carrier" />
+        <app-input [label]="'shipments.trackingNumber' | translate" formControlName="trackingNumber" [placeholder]="'shipments.optional' | translate" data-testid="shipment-tracking" />
+        <app-input [label]="'shipments.weight' | translate" type="number" formControlName="weight" [placeholder]="'shipments.optional' | translate" data-testid="shipment-weight" />
+        <app-input [label]="'shipments.shippingCost' | translate" type="number" formControlName="shippingCost" [placeholder]="'shipments.optional' | translate" data-testid="shipment-cost" />
       </div>
 
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
-        <app-textarea formControlName="notes" [rows]="3" />
+        <app-textarea formControlName="notes" [rows]="3" data-testid="shipment-notes" />
       </div>
     </div>
 
@@ -69,6 +69,7 @@
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
+      data-testid="shipment-save-btn"
       [appValidationPopover]="violations"
       [disabled]="shipmentForm.invalid || lines().length === 0 || saving()"
       (click)="save()">

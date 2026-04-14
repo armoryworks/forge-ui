@@ -6,7 +6,7 @@
       [formControl]="typeFilterControl"
       [options]="typeOptions" />
     <span class="events-panel__spacer"></span>
-    <button class="action-btn action-btn--primary" (click)="openCreate()">
+    <button class="action-btn action-btn--primary" data-testid="new-event-btn" (click)="openCreate()">
       <span class="material-icons-outlined">add</span>
       {{ 'adminPanels.events.newEvent' | translate }}
     </button>
@@ -56,24 +56,24 @@
 @if (showDialog()) {
   <app-dialog [title]="(editingEvent() ? 'adminPanels.events.editEvent' : 'adminPanels.events.newEvent') | translate" width="600px" (closed)="closeDialog()">
     <div [formGroup]="form">
-      <app-input [label]="'adminPanels.events.title' | translate" formControlName="title" [maxlength]="200" [required]="true" />
+      <app-input [label]="'adminPanels.events.title' | translate" formControlName="title" [maxlength]="200" [required]="true" data-testid="event-title" />
 
       <div class="dialog-row">
-        <app-select [label]="'adminPanels.events.eventType' | translate" formControlName="eventType" [options]="formTypeOptions" [required]="true" />
-        <app-input [label]="'adminPanels.events.location' | translate" formControlName="location" />
+        <app-select [label]="'adminPanels.events.eventType' | translate" formControlName="eventType" [options]="formTypeOptions" [required]="true" data-testid="event-type" />
+        <app-input [label]="'adminPanels.events.location' | translate" formControlName="location" data-testid="event-location" />
       </div>
 
       <div class="dialog-row">
-        <app-datepicker [label]="'adminPanels.events.startDate' | translate" formControlName="startDate" [required]="true" />
-        <app-input [label]="'adminPanels.events.startDate' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" />
+        <app-datepicker [label]="'adminPanels.events.startDate' | translate" formControlName="startDate" [required]="true" data-testid="event-start-date" />
+        <app-input [label]="'adminPanels.events.startDate' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" data-testid="event-start-time" />
       </div>
 
       <div class="dialog-row">
-        <app-datepicker [label]="'adminPanels.events.endDate' | translate" formControlName="endDate" [required]="true" />
-        <app-input [label]="'adminPanels.events.endDate' | translate" formControlName="endTime" placeholder="HH:MM" [required]="true" />
+        <app-datepicker [label]="'adminPanels.events.endDate' | translate" formControlName="endDate" [required]="true" data-testid="event-end-date" />
+        <app-input [label]="'adminPanels.events.endDate' | translate" formControlName="endTime" placeholder="HH:MM" [required]="true" data-testid="event-end-time" />
       </div>
 
-      <app-textarea [label]="'adminPanels.events.description' | translate" formControlName="description" [rows]="3" />
+      <app-textarea [label]="'adminPanels.events.description' | translate" formControlName="description" [rows]="3" data-testid="event-description" />
 
       <app-select
         label="Attendees"
@@ -81,12 +81,13 @@
         [options]="userOptions()"
         [multiple]="true" />
 
-      <app-toggle [label]="'adminPanels.events.isRequired' | translate" formControlName="isRequired" />
+      <app-toggle [label]="'adminPanels.events.isRequired' | translate" formControlName="isRequired" data-testid="event-required" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'adminPanels.events.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="event-save-btn"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">

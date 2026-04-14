@@ -2,7 +2,7 @@
   <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'assets.searchPlaceholder' | translate"  />
   <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
   <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
-  <button class="action-btn action-btn--primary" (click)="openCreateAsset()">
+  <button class="action-btn action-btn--primary" data-testid="new-asset-btn" (click)="openCreateAsset()">
     <span class="material-icons-outlined">add</span>
     {{ 'assets.addAsset' | translate }}
   </button>
@@ -50,21 +50,21 @@
   <app-dialog [title]="editingAsset() ? ('assets.editAsset' | translate) : ('assets.addAsset' | translate)" [draftConfig]="draftConfig" [draftFormGroup]="assetForm" (closed)="closeDialog()">
 
     <div [formGroup]="assetForm">
-      <app-input [label]="'assets.name' | translate" formControlName="name" />
+      <app-input [label]="'assets.name' | translate" formControlName="name" data-testid="asset-name" />
 
       <div class="dialog-row">
-        <app-select [label]="'common.type' | translate" formControlName="assetType" [options]="assetTypeOptions" />
-        <app-input [label]="'assets.location' | translate" formControlName="location" />
+        <app-select [label]="'common.type' | translate" formControlName="assetType" [options]="assetTypeOptions" data-testid="asset-type" />
+        <app-input [label]="'assets.location' | translate" formControlName="location" data-testid="asset-location" />
       </div>
 
       <div class="dialog-row">
-        <app-input [label]="'assets.manufacturer' | translate" formControlName="manufacturer" />
-        <app-input [label]="'assets.model' | translate" formControlName="model" />
+        <app-input [label]="'assets.manufacturer' | translate" formControlName="manufacturer" data-testid="asset-manufacturer" />
+        <app-input [label]="'assets.model' | translate" formControlName="model" data-testid="asset-model" />
       </div>
 
-      <app-input [label]="'assets.serialNumber' | translate" formControlName="serialNumber" />
+      <app-input [label]="'assets.serialNumber' | translate" formControlName="serialNumber" data-testid="asset-serial" />
 
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" data-testid="asset-notes" />
 
       @if (assetForm.get('assetType')?.value === 'Tooling') {
         <app-toggle [label]="'assets.customerOwned' | translate" formControlName="isCustomerOwned" />
@@ -78,6 +78,7 @@
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="asset-save-btn"
         [appValidationPopover]="assetViolations"
         [disabled]="assetForm.invalid || saving()"
         (click)="saveAsset()">

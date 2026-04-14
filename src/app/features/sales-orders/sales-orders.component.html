@@ -1,5 +1,5 @@
 <app-page-header [title]="'salesOrders.title' | translate" [subtitle]="'salesOrders.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+  <button class="action-btn action-btn--primary" data-testid="new-so-btn" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     {{ 'salesOrders.newOrder' | translate }}
   </button>

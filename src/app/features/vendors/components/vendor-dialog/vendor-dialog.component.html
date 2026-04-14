@@ -5,15 +5,15 @@
     <div class="dlg-main">
       <div class="dlg-section">
         <span class="dlg-section__title">{{ 'vendors.contact' | translate }}</span>
-        <app-input [label]="'vendors.companyName' | translate" formControlName="companyName" [required]="true" />
-        <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" />
-        <app-input [label]="'common.email' | translate" type="email" formControlName="email" />
-        <app-input [label]="'common.phone' | translate" formControlName="phone" />
+        <app-input [label]="'vendors.companyName' | translate" formControlName="companyName" [required]="true" data-testid="vendor-company" />
+        <app-input [label]="'vendors.contactName' | translate" formControlName="contactName" data-testid="vendor-contact" />
+        <app-input [label]="'common.email' | translate" type="email" formControlName="email" data-testid="vendor-email" />
+        <app-input [label]="'common.phone' | translate" formControlName="phone" data-testid="vendor-phone" />
       </div>
 
       <div class="dlg-section">
         <span class="dlg-section__title">{{ 'common.notes' | translate }}</span>
-        <app-textarea formControlName="notes" [rows]="3" />
+        <app-textarea formControlName="notes" [rows]="3" data-testid="vendor-notes" />
       </div>
     </div>
 
@@ -31,7 +31,7 @@
 
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'common.settings' | translate }}</span>
-        <app-select [label]="'vendors.paymentTerms' | translate" formControlName="paymentTerms" [options]="paymentTermsOptions" />
+        <app-select [label]="'vendors.paymentTerms' | translate" formControlName="paymentTerms" [options]="paymentTermsOptions" data-testid="vendor-terms" />
         @if (isEditing) {
           <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
         }
@@ -43,6 +43,7 @@
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
+      data-testid="vendor-save-btn"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">

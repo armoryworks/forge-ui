@@ -1,5 +1,5 @@
 <app-page-header [title]="'payments.title' | translate" [subtitle]="'payments.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+  <button class="action-btn action-btn--primary" data-testid="new-payment-btn" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     {{ 'payments.newPayment' | translate }}
   </button>

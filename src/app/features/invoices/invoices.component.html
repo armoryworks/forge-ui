@@ -6,7 +6,7 @@
       <span class="nudge-badge">{{ uninvoicedCount() }}</span>
     }
   </button>
-  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+  <button class="action-btn action-btn--primary" data-testid="new-invoice-btn" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     {{ 'invoices.newInvoice' | translate }}
   </button>

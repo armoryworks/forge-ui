@@ -13,6 +13,7 @@
         displayField="name"
         formControlName="customerId"
         [required]="true"
+        data-testid="return-customer"
         [attr.aria-label]="'customerReturns.fieldCustomer' | translate" />
 
       <app-entity-picker
@@ -21,6 +22,7 @@
         displayField="jobNumber"
         formControlName="originalJobId"
         [required]="true"
+        data-testid="return-job"
         [attr.aria-label]="'customerReturns.fieldOriginalJob' | translate" />
     }
 
@@ -28,23 +30,27 @@
       label="Reason"
       formControlName="reason"
       [required]="true"
+      data-testid="return-reason"
       [attr.aria-label]="'customerReturns.fieldReason' | translate" />
 
     <app-datepicker
       label="Return Date"
       formControlName="returnDate"
+      data-testid="return-date"
       [attr.aria-label]="'customerReturns.fieldReturnDate' | translate" />
 
     <app-textarea
       label="Notes (optional)"
       formControlName="notes"
       [rows]="3"
+      data-testid="return-notes"
       [attr.aria-label]="'customerReturns.fieldNotes' | translate" />
   </div>
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
+      data-testid="return-save-btn"
       [appValidationPopover]="violations"
       [disabled]="returnForm.invalid || saving()"
       (click)="save()">

@@ -1,5 +1,5 @@
 <app-page-header [title]="'shipments.title' | translate" [subtitle]="'shipments.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateDialog()">
+  <button class="action-btn action-btn--primary" data-testid="new-shipment-btn" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span>
     {{ 'shipments.newShipment' | translate }}
   </button>

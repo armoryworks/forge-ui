@@ -1,5 +1,5 @@
 <app-page-header [title]="'parts.title' | translate" [subtitle]="'parts.subtitle' | translate" helpTourId="parts">
-  <button class="action-btn action-btn--primary" (click)="openCreatePart()">
+  <button class="action-btn action-btn--primary" data-testid="new-part-btn" (click)="openCreatePart()">
     <span class="material-icons-outlined">add</span>
     {{ 'parts.createPart' | translate }}
   </button>
@@ -82,14 +82,14 @@
           <span class="info-value">{{ editingPart()!.partNumber }}</span>
         </div>
       }
-      <app-select [label]="'common.type' | translate" formControlName="partType" [options]="partTypeOptions" />
-      <app-input [label]="'common.description' | translate" formControlName="description" />
+      <app-select [label]="'common.type' | translate" formControlName="partType" [options]="partTypeOptions" data-testid="part-type" />
+      <app-input [label]="'common.description' | translate" formControlName="description" data-testid="part-description" />
       <div class="dialog-row">
-        <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" />
-        <app-input [label]="'parts.externalPartNumber' | translate" formControlName="externalPartNumber" [placeholder]="'parts.externalPartNumberPlaceholder' | translate" />
+        <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" data-testid="part-revision" />
+        <app-input [label]="'parts.externalPartNumber' | translate" formControlName="externalPartNumber" [placeholder]="'parts.externalPartNumberPlaceholder' | translate" data-testid="part-external-number" />
       </div>
       <div class="dialog-row">
-        <app-input [label]="'parts.material' | translate" formControlName="material" />
+        <app-input [label]="'parts.material' | translate" formControlName="material" data-testid="part-material" />
         <app-input [label]="'parts.moldToolRef' | translate" formControlName="moldToolRef" />
       </div>
 
@@ -115,6 +115,7 @@
     <div dialog-footer>
       <button class="action-btn" (click)="closePartDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="part-save-btn"
         [appValidationPopover]="partViolations"
         [disabled]="partForm.invalid"
         (click)="savePart()">

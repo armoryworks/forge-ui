@@ -1,5 +1,5 @@
 <app-page-header [title]="'vendors.title' | translate" [subtitle]="'vendors.subtitle' | translate">
-  <button class="action-btn action-btn--primary" (click)="openCreateVendor()">
+  <button class="action-btn action-btn--primary" data-testid="new-vendor-btn" (click)="openCreateVendor()">
     <span class="material-icons-outlined">add</span>
     {{ 'vendors.newVendor' | translate }}
   </button>

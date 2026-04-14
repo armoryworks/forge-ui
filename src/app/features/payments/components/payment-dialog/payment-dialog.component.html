@@ -57,16 +57,16 @@
     <div class="dlg-sidebar" [formGroup]="paymentForm">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'payments.paymentDetails' | translate }}</span>
-        <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" />
-        <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" />
-        <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" />
-        <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" />
-        <app-input [label]="'payments.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'payments.optional' | translate" />
+        <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" data-testid="payment-customer" />
+        <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
+        <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
+        <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" data-testid="payment-date" />
+        <app-input [label]="'payments.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'payments.optional' | translate" data-testid="payment-ref" />
       </div>
 
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
-        <app-textarea formControlName="notes" [rows]="3" />
+        <app-textarea formControlName="notes" [rows]="3" data-testid="payment-notes" />
       </div>
 
       <div class="dlg-sidebar-section">
@@ -83,6 +83,7 @@
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
+      data-testid="payment-save-btn"
       [appValidationPopover]="violations"
       [disabled]="paymentForm.invalid || saving()"
       (click)="save()">

@@ -12,6 +12,7 @@
       displayField="partNumber"
       formControlName="partId"
       [required]="true"
+      data-testid="lot-part"
       [attr.aria-label]="'lots.fieldPart' | translate" />
 
     <div class="dialog-row">
@@ -20,12 +21,14 @@
         type="number"
         formControlName="quantity"
         [required]="true"
+        data-testid="lot-quantity"
         [attr.aria-label]="'lots.fieldQuantity' | translate" />
 
       <app-input
         label="Supplier Lot #"
         formControlName="supplierLotNumber"
         placeholder="Optional"
+        data-testid="lot-supplier-number"
         [attr.aria-label]="'lots.fieldSupplierLot' | translate" />
     </div>
 
@@ -35,11 +38,13 @@
         entityType="jobs"
         displayField="jobNumber"
         formControlName="jobId"
+        data-testid="lot-job"
         [attr.aria-label]="'lots.fieldJob' | translate" />
 
       <app-datepicker
         label="Expiration Date (optional)"
         formControlName="expirationDate"
+        data-testid="lot-expiration"
         [attr.aria-label]="'lots.fieldExpiration' | translate" />
     </div>
 
@@ -47,12 +52,14 @@
       label="Notes (optional)"
       formControlName="notes"
       [rows]="2"
+      data-testid="lot-notes"
       [attr.aria-label]="'lots.fieldNotes' | translate" />
   </div>
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
+      data-testid="lot-save-btn"
       [appValidationPopover]="violations"
       [disabled]="lotForm.invalid || saving()"
       (click)="save()">

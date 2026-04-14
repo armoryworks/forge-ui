@@ -41,10 +41,10 @@
 
         <!-- Add Line Form -->
         <div class="add-line add-line--4col" [formGroup]="lineForm">
-          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" />
-          <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" />
-          <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
-          <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
+          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" data-testid="so-line-part" />
+          <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" data-testid="so-line-qty" />
+          <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" data-testid="so-line-price" />
+          <button class="action-btn action-btn--sm" data-testid="so-add-line-btn" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
           </button>
@@ -56,16 +56,16 @@
     <div class="dlg-sidebar" [formGroup]="form">
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'salesOrders.orderDetails' | translate }}</span>
-        <app-select [label]="'salesOrders.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" />
-        <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" />
-        <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" />
-        <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" />
-        <app-input [label]="'salesOrders.taxRate' | translate" type="number" formControlName="taxRate" [required]="true" suffix="%" />
+        <app-select [label]="'salesOrders.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" data-testid="so-customer" />
+        <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" [placeholder]="'salesOrders.optional' | translate" data-testid="so-customer-po" />
+        <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-credit-terms" />
+        <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-delivery-date" />
+        <app-input [label]="'salesOrders.taxRate' | translate" type="number" formControlName="taxRate" [required]="true" suffix="%" data-testid="so-tax-rate" />
       </div>
 
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'common.notes' | translate }}</span>
-        <app-textarea formControlName="notes" [rows]="3" />
+        <app-textarea formControlName="notes" [rows]="3" data-testid="so-notes" />
       </div>
 
       <div class="dlg-sidebar-section">
@@ -90,6 +90,7 @@
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
     <button class="action-btn action-btn--primary"
+      data-testid="so-save-btn"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || lines().length === 0 || saving()"
       (click)="save()">

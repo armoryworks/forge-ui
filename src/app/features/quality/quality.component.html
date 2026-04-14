@@ -1,6 +1,6 @@
 <app-page-header [title]="'quality.title' | translate" [subtitle]="'quality.subtitle' | translate">
   @if (activeTab() === 'inspections') {
-    <button class="action-btn action-btn--primary" (click)="openCreateInspection()">
+    <button class="action-btn action-btn--primary" data-testid="new-inspection-btn" (click)="openCreateInspection()">
       <span class="material-icons-outlined">add</span>
       {{ 'quality.newInspection' | translate }}
     </button>
@@ -36,7 +36,7 @@
     </button>
   }
   @if (activeTab() === 'gages') {
-    <button class="action-btn action-btn--primary" (click)="gageListComponent?.openCreate()">
+    <button class="action-btn action-btn--primary" data-testid="new-gage-btn" (click)="gageListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       New Gage
     </button>
@@ -212,19 +212,20 @@
 @if (showInspectionDialog()) {
   <app-dialog [title]="'quality.newQcInspection' | translate" (closed)="closeInspectionDialog()">
     <div [formGroup]="inspectionForm">
-      <app-select [label]="'quality.template' | translate" formControlName="templateId" [options]="templateOptions()" />
+      <app-select [label]="'quality.template' | translate" formControlName="templateId" [options]="templateOptions()" data-testid="inspection-template" />
 
       <div class="dialog-row">
-        <app-input [label]="'quality.jobId' | translate" type="number" formControlName="jobId" />
-        <app-input [label]="'quality.lotNumber' | translate" formControlName="lotNumber" />
+        <app-input [label]="'quality.jobId' | translate" type="number" formControlName="jobId" data-testid="inspection-job" />
+        <app-input [label]="'quality.lotNumber' | translate" formControlName="lotNumber" data-testid="inspection-lot" />
       </div>
 
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" data-testid="inspection-notes" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeInspectionDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="inspection-save-btn"
         [appValidationPopover]="inspectionViolations"
         [disabled]="saving()"
         (click)="saveInspection()">{{ 'quality.createInspection' | translate }}</button>
