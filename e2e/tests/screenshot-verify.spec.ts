@@ -3,7 +3,7 @@ import { SEED_PASSWORD } from '../helpers/auth.helper';
 
 const BASE_URL = 'http://localhost:4200';
 const API_BASE = 'http://localhost:5000/api/v1/';
-const TARGET_PATH = process.env.TARGET_PATH?.replace(/^[A-Z]:\/Git/i, '') || '/dashboard';
+const TARGET_PATH = process.env.TARGET_PATH?.replace(/^[A-Z]:\\Git/i, '').replace(/^[A-Z]:\/Git/i, '') || '/dashboard';
 
 test(`screenshot ${TARGET_PATH}`, async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 1920, height: 1080 }, deviceScaleFactor: 2 });

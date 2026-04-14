@@ -6,6 +6,7 @@ import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { ClockEventTypeService, ClockEventTypeDef } from '../../../shared/services/clock-event-type.service';
+import { MobileClockStateService } from '../services/mobile-clock-state.service';
 
 interface ClockStatus {
   isClockedIn: boolean;
@@ -27,6 +28,7 @@ export class MobileClockComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly snackbar = inject(SnackbarService);
+  private readonly clockState = inject(MobileClockStateService);
   protected readonly clockTypes = inject(ClockEventTypeService);
 
   protected readonly user = this.authService.user;
@@ -57,9 +59,10 @@ export class MobileClockComponent implements OnInit {
     if (!userId) return;
 
     this.loading.set(true);
-    this.http.get<ClockStatus>(`/api/v1/shop-floor/clock-status/${userId}`).subscribe({
+    this.http.get<ClockStatus>('/api/v1/time-tracking/clock-status').subscribe({
       next: (s) => {
         this.status.set(s);
+        this.clockState.update(s.isClockedIn);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

@@ -7,11 +7,7 @@ export const MOBILE_ROUTES: Routes = [
     path: '',
     component: MobileLayoutComponent,
     children: [
-      { path: '', redirectTo: 'home', pathMatch: 'full' },
-      {
-        path: 'home',
-        loadComponent: () => import('./pages/mobile-home.component').then(m => m.MobileHomeComponent),
-      },
+      { path: '', redirectTo: 'clock', pathMatch: 'full' },
       {
         path: 'jobs',
         loadComponent: () => import('./pages/mobile-jobs.component').then(m => m.MobileJobsComponent),
