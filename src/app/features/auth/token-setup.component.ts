@@ -81,7 +81,9 @@ export class TokenSetupComponent implements OnInit {
     })).subscribe({
       next: (response) => {
         this.snackbar.success(this.translate.instant('auth.setupComplete'));
-        this.router.navigate([response.user.profileComplete ? this.layout.getDefaultRoute() : '/account/profile']);
+        const isMobile = window.innerWidth <= 768;
+        const dest = (!response.user.profileComplete && !isMobile) ? '/account/profile' : this.layout.getDefaultRoute();
+        this.router.navigate([dest]);
       },
       error: (err: HttpErrorResponse) => {
         const detail = err.error?.detail ?? err.error?.title ?? 'Setup failed.';

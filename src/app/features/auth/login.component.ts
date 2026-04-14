@@ -151,7 +151,8 @@ export class LoginComponent implements OnInit {
   }
 
   private navigatePostLogin(profileComplete: boolean): void {
-    if (!profileComplete) {
+    const isMobile = window.innerWidth <= 768;
+    if (!profileComplete && !isMobile) {
       this.router.navigate(['/account/profile']);
       return;
     }
