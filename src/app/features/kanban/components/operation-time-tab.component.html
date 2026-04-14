@@ -21,50 +21,46 @@
     </div>
 
     <!-- Operations Table -->
-    <table class="op-time__table" aria-label="Operation time analysis">
-      <thead>
-        <tr>
-          <th scope="col">#</th>
-          <th scope="col">Operation</th>
-          <th scope="col" class="op-time__num">Est. Setup</th>
-          <th scope="col" class="op-time__num">Act. Setup</th>
-          <th scope="col" class="op-time__num">Est. Run</th>
-          <th scope="col" class="op-time__num">Act. Run</th>
-          <th scope="col" class="op-time__num">Total</th>
-          <th scope="col" class="op-time__num">Eff.</th>
-          <th scope="col" class="op-time__bar-col">Progress</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (op of operations(); track op.operationId) {
-          <tr>
-            <td>{{ op.operationSequence }}</td>
-            <td>{{ op.operationName }}</td>
-            <td class="op-time__num">{{ formatMinutes(op.estimatedSetupMinutes) }}</td>
-            <td class="op-time__num" [class]="getVarianceClass(op.setupVarianceMinutes)">
-              {{ formatMinutes(op.actualSetupMinutes) }}
-            </td>
-            <td class="op-time__num">{{ formatMinutes(op.estimatedRunMinutes) }}</td>
-            <td class="op-time__num" [class]="getVarianceClass(op.runVarianceMinutes)">
-              {{ formatMinutes(op.actualRunMinutes) }}
-            </td>
-            <td class="op-time__num"><strong>{{ formatMinutes(op.actualTotalMinutes) }}</strong></td>
-            <td class="op-time__num" [class]="getEfficiencyClass(op.efficiencyPercent)">
-              {{ op.efficiencyPercent | number:'1.0-0' }}%
-            </td>
-            <td class="op-time__bar-cell">
-              <div class="op-time__bar-track">
-                <div
-                  class="op-time__bar-fill"
-                  [class]="getEfficiencyClass(op.efficiencyPercent)"
-                  [style.width.%]="getBarWidth(op.actualTotalMinutes, op.estimatedSetupMinutes + op.estimatedRunMinutes)">
-                </div>
-                <div class="op-time__bar-target"></div>
-              </div>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
+    <app-data-table
+      tableId="operation-time-analysis"
+      [columns]="opColumns"
+      [data]="operations()"
+      emptyIcon="schedule"
+      emptyMessage="No operation time data">
+      <ng-template appColumnCell="estimatedSetupMinutes" let-row>
+        <span class="op-time__num">{{ formatMinutes(row.estimatedSetupMinutes) }}</span>
+      </ng-template>
+      <ng-template appColumnCell="actualSetupMinutes" let-row>
+        <span class="op-time__num" [class]="getVarianceClass(row.setupVarianceMinutes)">
+          {{ formatMinutes(row.actualSetupMinutes) }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="estimatedRunMinutes" let-row>
+        <span class="op-time__num">{{ formatMinutes(row.estimatedRunMinutes) }}</span>
+      </ng-template>
+      <ng-template appColumnCell="actualRunMinutes" let-row>
+        <span class="op-time__num" [class]="getVarianceClass(row.runVarianceMinutes)">
+          {{ formatMinutes(row.actualRunMinutes) }}
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="actualTotalMinutes" let-row>
+        <span class="op-time__num"><strong>{{ formatMinutes(row.actualTotalMinutes) }}</strong></span>
+      </ng-template>
+      <ng-template appColumnCell="efficiencyPercent" let-row>
+        <span class="op-time__num" [class]="getEfficiencyClass(row.efficiencyPercent)">
+          {{ row.efficiencyPercent | number:'1.0-0' }}%
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="progress" let-row>
+        <div class="op-time__bar-track">
+          <div
+            class="op-time__bar-fill"
+            [class]="getEfficiencyBarClass(row.efficiencyPercent)"
+            [style.width.%]="getBarWidth(row.actualTotalMinutes, row.estimatedSetupMinutes + row.estimatedRunMinutes)">
+          </div>
+          <div class="op-time__bar-target"></div>
+        </div>
+      </ng-template>
+    </app-data-table>
   }
 </div>

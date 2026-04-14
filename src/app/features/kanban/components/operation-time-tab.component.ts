@@ -1,8 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 
+import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
+import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
+import { ColumnDef } from '../../../shared/models/column-def.model';
 import { JobCostService } from '../services/job-cost.service';
 import { OperationTimeAnalysis } from '../models/operation-time.model';
 
@@ -11,7 +14,9 @@ import { OperationTimeAnalysis } from '../models/operation-time.model';
   standalone: true,
   imports: [
     DecimalPipe,
+    DataTableComponent,
     EmptyStateComponent,
+    ColumnCellDirective,
     LoadingBlockDirective,
   ],
   templateUrl: './operation-time-tab.component.html',
@@ -25,6 +30,18 @@ export class OperationTimeTabComponent {
 
   readonly loading = signal(false);
   readonly operations = signal<OperationTimeAnalysis[]>([]);
+
+  readonly opColumns: ColumnDef[] = [
+    { field: 'operationSequence', header: '#', sortable: true, width: '50px', align: 'center' },
+    { field: 'operationName', header: 'Operation', sortable: true },
+    { field: 'estimatedSetupMinutes', header: 'Est. Setup', sortable: true, width: '90px', align: 'right' },
+    { field: 'actualSetupMinutes', header: 'Act. Setup', sortable: true, width: '90px', align: 'right' },
+    { field: 'estimatedRunMinutes', header: 'Est. Run', sortable: true, width: '90px', align: 'right' },
+    { field: 'actualRunMinutes', header: 'Act. Run', sortable: true, width: '90px', align: 'right' },
+    { field: 'actualTotalMinutes', header: 'Total', sortable: true, width: '80px', align: 'right' },
+    { field: 'efficiencyPercent', header: 'Eff.', sortable: true, type: 'number', width: '70px', align: 'right' },
+    { field: 'progress', header: 'Progress', width: '120px' },
+  ];
 
   readonly totalEstimated = computed(() => {
     const ops = this.operations();
@@ -76,6 +93,12 @@ export class OperationTimeTabComponent {
     if (efficiency >= 100) return 'op-time__efficiency--good';
     if (efficiency >= 80) return 'op-time__efficiency--fair';
     return 'op-time__efficiency--poor';
+  }
+
+  getEfficiencyBarClass(efficiency: number): string {
+    if (efficiency >= 100) return 'op-time__bar-fill--good';
+    if (efficiency >= 80) return 'op-time__bar-fill--fair';
+    return 'op-time__bar-fill--poor';
   }
 
   getBarWidth(actual: number, estimated: number): number {

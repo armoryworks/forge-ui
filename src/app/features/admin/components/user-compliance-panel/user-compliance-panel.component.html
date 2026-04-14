@@ -125,53 +125,52 @@
       {{ 'userCompliance.payStubs' | translate }}
     </h4>
     <div [appLoadingBlock]="payrollLoading()">
-      @if (payStubs().length > 0) {
-        <table class="user-compliance__table" [attr.aria-label]="'userCompliance.payStubs' | translate">
-          <thead>
-            <tr>
-              <th scope="col">{{ 'userCompliance.payDate' | translate }}</th>
-              <th scope="col">{{ 'userCompliance.period' | translate }}</th>
-              <th scope="col">{{ 'userCompliance.gross' | translate }}</th>
-              <th scope="col">{{ 'userCompliance.net' | translate }}</th>
-              <th scope="col">{{ 'userCompliance.source' | translate }}</th>
-              <th scope="col">{{ 'common.actions' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (stub of payStubs(); track stub.id) {
-              <tr>
-                <td>{{ stub.payDate | date:'MM/dd/yyyy' }}</td>
-                <td>{{ stub.payPeriodStart | date:'MM/dd' }} – {{ stub.payPeriodEnd | date:'MM/dd/yyyy' }}</td>
-                <td>{{ stub.grossPay | currency }}</td>
-                <td>{{ stub.netPay | currency }}</td>
-                <td>
-                  @if (stub.source === 'Accounting') {
-                    <span class="chip chip--info">{{ 'userCompliance.synced' | translate }}</span>
-                  } @else {
-                    <span class="chip chip--muted">{{ 'userCompliance.manual' | translate }}</span>
-                  }
-                </td>
-                <td>
-                  <div class="action-cell">
-                    @if (stub.fileAttachmentId) {
-                      <button class="icon-btn" (click)="downloadPayStubPdf(stub.id)" [attr.aria-label]="'common.download' | translate" [matTooltip]="'common.download' | translate" matTooltipPosition="above">
-                        <span class="material-icons-outlined">download</span>
-                      </button>
-                    }
-                    @if (stub.source === 'Manual') {
-                      <button class="icon-btn icon-btn--danger" (click)="deletePayStub(stub)" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
-                        <span class="material-icons-outlined">delete</span>
-                      </button>
-                    }
-                  </div>
-                </td>
-              </tr>
+      <app-data-table
+        tableId="user-compliance-pay-stubs"
+        [columns]="payStubColumns"
+        [data]="payStubs()"
+        emptyIcon="payments"
+        [emptyMessage]="'userCompliance.noPayStubs' | translate">
+
+        <ng-template appColumnCell="payDate" let-row>
+          {{ $any(row).payDate | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="period" let-row>
+          {{ $any(row).payPeriodStart | date:'MM/dd' }} – {{ $any(row).payPeriodEnd | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="grossPay" let-row>
+          {{ $any(row).grossPay | currency }}
+        </ng-template>
+
+        <ng-template appColumnCell="netPay" let-row>
+          {{ $any(row).netPay | currency }}
+        </ng-template>
+
+        <ng-template appColumnCell="source" let-row>
+          @if ($any(row).source === 'Accounting') {
+            <span class="chip chip--info">{{ 'userCompliance.synced' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'userCompliance.manual' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <div class="action-cell">
+            @if ($any(row).fileAttachmentId) {
+              <button class="icon-btn" (click)="downloadPayStubPdf($any(row).id)" [attr.aria-label]="'common.download' | translate" [matTooltip]="'common.download' | translate" matTooltipPosition="above">
+                <span class="material-icons-outlined">download</span>
+              </button>
             }
-          </tbody>
-        </table>
-      } @else {
-        <app-empty-state icon="payments" [message]="'userCompliance.noPayStubs' | translate" />
-      }
+            @if ($any(row).source === 'Manual') {
+              <button class="icon-btn icon-btn--danger" (click)="deletePayStub($any(row))" [attr.aria-label]="'common.delete' | translate" [matTooltip]="'common.delete' | translate" matTooltipPosition="above">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            }
+          </div>
+        </ng-template>
+      </app-data-table>
 
       <div class="user-compliance__upload-section">
         <span class="user-compliance__upload-label">{{ 'userCompliance.uploadPayStub' | translate }}</span>

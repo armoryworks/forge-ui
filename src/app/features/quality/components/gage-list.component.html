@@ -161,39 +161,16 @@
         </div>
 
         <div [appLoadingBlock]="calibrationLoading()">
-          @if (calibrations().length > 0) {
-            <table class="cal-table" aria-label="Calibration records">
-              <thead>
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Result</th>
-                  <th scope="col">Lab</th>
-                  <th scope="col">Standards</th>
-                  <th scope="col">As Found</th>
-                  <th scope="col">As Left</th>
-                  <th scope="col">Next Due</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (cal of calibrations(); track cal.id) {
-                  <tr>
-                    <td>{{ cal.calibratedAt | date:'MM/dd/yyyy' }}</td>
-                    <td><span [class]="getCalResultClass(cal.result)">{{ cal.result }}</span></td>
-                    <td>{{ cal.labName ?? '—' }}</td>
-                    <td>{{ cal.standardsUsed ?? '—' }}</td>
-                    <td>{{ cal.asFoundCondition ?? '—' }}</td>
-                    <td>{{ cal.asLeftCondition ?? '—' }}</td>
-                    <td>{{ cal.nextCalibrationDue ? (cal.nextCalibrationDue | date:'MM/dd/yyyy') : '—' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          } @else {
-            <div class="cal-empty">
-              <span class="material-icons-outlined">info</span>
-              No calibration records yet
-            </div>
-          }
+          <app-data-table
+            tableId="gage-calibration-history"
+            [columns]="calibrationColumns"
+            [data]="calibrations()"
+            emptyIcon="info"
+            emptyMessage="No calibration records yet">
+            <ng-template appColumnCell="result" let-row>
+              <span [class]="getCalResultClass(row.result)">{{ row.result }}</span>
+            </ng-template>
+          </app-data-table>
         </div>
       </div>
     </div>

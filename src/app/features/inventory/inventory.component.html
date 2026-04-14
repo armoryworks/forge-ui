@@ -721,78 +721,74 @@
             }
           </div>
         </div>
-        <table class="replenishment-table" role="table" aria-label="Pending reorder suggestions">
-          <thead>
-            <tr>
-              <th scope="col" style="width:36px">
-                <input type="checkbox"
-                  [checked]="selectedSuggestionIds().size === pendingSuggestions().length && pendingSuggestions().length > 0"
-                  (change)="toggleAllSuggestions()"
-                  aria-label="Select all suggestions" />
-              </th>
-              <th scope="col">Part #</th>
-              <th scope="col">Description</th>
-              <th scope="col">Vendor</th>
-              <th scope="col" class="text-right">Available</th>
-              <th scope="col" class="text-right">Burn/Day</th>
-              <th scope="col" class="text-right">Days Left</th>
-              <th scope="col">Est. Stockout</th>
-              <th scope="col" class="text-right">Suggest Qty</th>
-              <th scope="col" style="width:100px"></th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (s of pendingSuggestions(); track s.id) {
-              <tr [class.row--selected]="isSuggestionSelected(s.id)">
-                <td>
-                  <input type="checkbox"
-                    [checked]="isSuggestionSelected(s.id)"
-                    (change)="toggleSuggestionSelect(s.id)"
-                    [attr.aria-label]="'Select suggestion for ' + s.partNumber" />
-                </td>
-                <td class="mono">{{ s.partNumber }}</td>
-                <td>{{ s.partDescription }}</td>
-                <td class="text-muted">{{ s.vendorName ?? '—' }}</td>
-                <td class="text-right">{{ s.availableStock | number:'1.0-2' }}</td>
-                <td class="text-right mono">{{ s.burnRateDailyAvg | number:'1.2-2' }}</td>
-                <td class="text-right">
-                  @if (s.daysOfStockRemaining !== null) {
-                    <span [class]="getDaysRemainingClass(s.daysOfStockRemaining)">
-                      {{ s.daysOfStockRemaining }}d
-                    </span>
-                  } @else {
-                    <span class="text-muted">—</span>
-                  }
-                </td>
-                <td>
-                  @if (s.projectedStockoutDate) {
-                    <span [class]="getDaysRemainingClass(s.daysOfStockRemaining)">
-                      {{ s.projectedStockoutDate | date:'MM/dd/yyyy' }}
-                    </span>
-                  } @else {
-                    <span class="text-muted">—</span>
-                  }
-                </td>
-                <td class="text-right mono">{{ s.suggestedQuantity | number:'1.0-2' }}</td>
-                <td class="replenishment-actions">
-                  <button class="action-btn action-btn--sm action-btn--primary"
-                    [disabled]="replenishmentSaving()"
-                    (click)="approveSuggestion(s)"
-                    aria-label="Approve suggestion for {{ s.partNumber }}">
-                    <span class="material-icons-outlined">shopping_cart</span>
-                    Approve
-                  </button>
-                  <button class="icon-btn"
-                    (click)="openDismissDialog(s)"
-                    aria-label="Dismiss suggestion for {{ s.partNumber }}"
-                    matTooltip="Dismiss">
-                    <span class="material-icons-outlined">close</span>
-                  </button>
-                </td>
-              </tr>
+        <app-data-table
+          tableId="replenishment-suggestions"
+          [columns]="suggestionColumns"
+          [data]="pendingSuggestions()"
+          [selectable]="true"
+          emptyIcon="check_circle"
+          emptyMessage="No pending reorder suggestions"
+          (selectionChange)="onSuggestionSelectionChange($event)">
+
+          <ng-template appColumnCell="partNumber" let-row>
+            <span class="mono">{{ $any(row).partNumber }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="vendorName" let-row>
+            <span class="text-muted">{{ $any(row).vendorName ?? '—' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="availableStock" let-row>
+            {{ $any(row).availableStock | number:'1.0-2' }}
+          </ng-template>
+
+          <ng-template appColumnCell="burnRateDailyAvg" let-row>
+            <span class="mono">{{ $any(row).burnRateDailyAvg | number:'1.2-2' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="daysOfStockRemaining" let-row>
+            @if ($any(row).daysOfStockRemaining !== null) {
+              <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
+                {{ $any(row).daysOfStockRemaining }}d
+              </span>
+            } @else {
+              <span class="text-muted">—</span>
             }
-          </tbody>
-        </table>
+          </ng-template>
+
+          <ng-template appColumnCell="projectedStockoutDate" let-row>
+            @if ($any(row).projectedStockoutDate) {
+              <span [class]="getDaysRemainingClass($any(row).daysOfStockRemaining)">
+                {{ $any(row).projectedStockoutDate | date:'MM/dd/yyyy' }}
+              </span>
+            } @else {
+              <span class="text-muted">—</span>
+            }
+          </ng-template>
+
+          <ng-template appColumnCell="suggestedQuantity" let-row>
+            <span class="mono">{{ $any(row).suggestedQuantity | number:'1.0-2' }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="actions" let-row>
+            <div class="replenishment-actions">
+              <button class="action-btn action-btn--sm action-btn--primary"
+                [disabled]="replenishmentSaving()"
+                (click)="approveSuggestion($any(row)); $event.stopPropagation()"
+                aria-label="Approve suggestion for {{ $any(row).partNumber }}">
+                <span class="material-icons-outlined">shopping_cart</span>
+                Approve
+              </button>
+              <button class="icon-btn"
+                (click)="openDismissDialog($any(row)); $event.stopPropagation()"
+                aria-label="Dismiss suggestion for {{ $any(row).partNumber }}"
+                matTooltip="Dismiss">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+          </ng-template>
+
+        </app-data-table>
       </div>
     } @else {
       <div class="replenishment-empty">

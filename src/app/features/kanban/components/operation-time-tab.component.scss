@@ -32,38 +32,8 @@
     font-family: $font-family-mono;
   }
 
-  &__table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: $font-size-sm;
-
-    th,
-    td {
-      padding: $sp-sm $sp-md;
-      text-align: left;
-      border-bottom: $border-width-thin solid var(--border);
-    }
-
-    th {
-      font-size: $font-size-xxs;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-  }
-
   &__num {
-    text-align: right !important; // override table default
     font-family: $font-family-mono;
-  }
-
-  &__bar-col {
-    width: 120px;
-  }
-
-  &__bar-cell {
-    width: 120px;
   }
 
   &__bar-track {
@@ -100,39 +70,25 @@
 
   &__efficiency--good {
     color: var(--success);
-    background-color: var(--success);
   }
 
   &__efficiency--fair {
     color: var(--warning);
-    background-color: var(--warning);
   }
 
   &__efficiency--poor {
     color: var(--error);
-    background-color: var(--error);
   }
 
-  // For text labels, don't apply background
-  td > &__efficiency--good,
-  td > &__efficiency--fair,
-  td > &__efficiency--poor,
-  span.op-time__summary-value.op-time__efficiency--good,
-  span.op-time__summary-value.op-time__efficiency--fair,
-  span.op-time__summary-value.op-time__efficiency--poor {
-    background-color: transparent;
-  }
-
-  // Only bar fills get background
-  &__bar-fill.op-time__efficiency--good {
+  &__bar-fill--good {
     background-color: var(--success);
   }
 
-  &__bar-fill.op-time__efficiency--fair {
+  &__bar-fill--fair {
     background-color: var(--warning);
   }
 
-  &__bar-fill.op-time__efficiency--poor {
+  &__bar-fill--poor {
     background-color: var(--error);
   }
 }

@@ -297,76 +297,48 @@
           @if (bomViewMode() === 'tree') {
             <app-bom-tree [entries]="part.bomEntries" (entryDelete)="deleteBomEntry($event)" />
           } @else {
-            @if (part.bomEntries.length > 0) {
-              <table class="bom-table">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">{{ 'parts.bomPart' | translate }}</th>
-                    <th scope="col">{{ 'parts.bomQty' | translate }}</th>
-                    <th scope="col">{{ 'parts.bomSource' | translate }}</th>
-                    <th scope="col">{{ 'parts.bomLeadTime' | translate }}</th>
-                    <th scope="col">{{ 'parts.bomRefDes' | translate }}</th>
-                    <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (entry of part.bomEntries; track entry.id) {
-                    <tr class="bom-row">
-                      <td class="text-muted">{{ entry.sortOrder }}</td>
-                      <td>
-                        <div class="bom-part-info">
-                          <span class="bom-part-number">{{ entry.childPartNumber }}</span>
-                          <span class="bom-part-desc">{{ entry.childDescription }}</span>
-                        </div>
-                      </td>
-                      <td class="text-center">{{ entry.quantity }}</td>
-                      <td>
-                        <span class="source-chip" [class.source-chip--make]="entry.sourceType === 'Make'" [class.source-chip--stock]="entry.sourceType === 'Stock'">
-                          {{ entry.sourceType }}
-                        </span>
-                      </td>
-                      <td class="text-muted">{{ entry.leadTimeDays !== null ? entry.leadTimeDays + 'd' : '---' }}</td>
-                      <td class="text-muted">{{ entry.referenceDesignator ?? '---' }}</td>
-                      <td class="col-actions">
-                        <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomEntry(entry)" [attr.aria-label]="'common.remove' | translate">
-                          <span class="material-icons-outlined">delete</span>
-                        </button>
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            } @else {
-              <app-empty-state icon="inventory_2" [message]="'parts.noBomEntries' | translate" />
-            }
+            <app-data-table
+              tableId="part-bom"
+              [columns]="bomColumns"
+              [data]="part.bomEntries"
+              emptyIcon="inventory_2"
+              [emptyMessage]="'parts.noBomEntries' | translate">
+              <ng-template appColumnCell="childPartNumber" let-row>
+                <div class="bom-part-info">
+                  <span class="bom-part-number">{{ $any(row).childPartNumber }}</span>
+                  <span class="bom-part-desc">{{ $any(row).childDescription }}</span>
+                </div>
+              </ng-template>
+              <ng-template appColumnCell="sourceType" let-row>
+                <span class="source-chip" [class.source-chip--make]="$any(row).sourceType === 'Make'" [class.source-chip--stock]="$any(row).sourceType === 'Stock'">
+                  {{ $any(row).sourceType }}
+                </span>
+              </ng-template>
+              <ng-template appColumnCell="leadTimeDays" let-row>
+                <span class="text-muted">{{ $any(row).leadTimeDays !== null ? $any(row).leadTimeDays + 'd' : '---' }}</span>
+              </ng-template>
+              <ng-template appColumnCell="referenceDesignator" let-row>
+                <span class="text-muted">{{ $any(row).referenceDesignator ?? '---' }}</span>
+              </ng-template>
+              <ng-template appColumnCell="actions" let-row>
+                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomEntry($any(row))" [attr.aria-label]="'common.remove' | translate">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </ng-template>
+            </app-data-table>
           }
         }
 
         <!-- Used In Tab -->
         @if (detailTab() === 'usage') {
-          @if (part.usedIn.length > 0) {
-            <table class="bom-table">
-              <thead>
-                <tr>
-                  <th>{{ 'parts.parentPart' | translate }}</th>
-                  <th>{{ 'common.description' | translate }}</th>
-                  <th>{{ 'parts.bomQty' | translate }}</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (usage of part.usedIn; track usage.id) {
-                  <tr class="bom-row bom-row--clickable" (click)="navigateToPart(usage)">
-                    <td class="bom-part-number">{{ usage.parentPartNumber }}</td>
-                    <td>{{ usage.parentDescription }}</td>
-                    <td class="text-center">{{ usage.quantity }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          } @else {
-            <app-empty-state icon="link_off" [message]="'parts.notUsedInAssemblies' | translate" />
-          }
+          <app-data-table
+            tableId="part-used-in"
+            [columns]="usedInColumns"
+            [data]="part.usedIn"
+            [clickableRows]="true"
+            emptyIcon="link_off"
+            [emptyMessage]="'parts.notUsedInAssemblies' | translate"
+            (rowClick)="navigateToPart($any($event))" />
         }
 
         <!-- Process Tab -->

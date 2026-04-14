@@ -74,6 +74,16 @@ export class GageListComponent {
     { field: 'calibrationCount', header: 'Cal Records', sortable: true, type: 'number', width: '90px', align: 'center' },
   ];
 
+  protected readonly calibrationColumns: ColumnDef[] = [
+    { field: 'calibratedAt', header: 'Date', sortable: true, type: 'date', width: '110px' },
+    { field: 'result', header: 'Result', sortable: true, width: '120px' },
+    { field: 'labName', header: 'Lab', sortable: true },
+    { field: 'standardsUsed', header: 'Standards', sortable: true },
+    { field: 'asFoundCondition', header: 'As Found', sortable: true },
+    { field: 'asLeftCondition', header: 'As Left', sortable: true },
+    { field: 'nextCalibrationDue', header: 'Next Due', sortable: true, type: 'date', width: '110px' },
+  ];
+
   protected readonly statusOptions: SelectOption[] = [
     { value: null, label: '-- All --' },
     { value: 'InService', label: 'In Service' },

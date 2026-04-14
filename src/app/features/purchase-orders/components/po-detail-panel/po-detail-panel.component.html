@@ -161,32 +161,25 @@
               <span class="material-icons-outlined">add</span> New Release
             </button>
           </div>
-          @if (releases().length > 0) {
-            <table class="lines-table" aria-label="Purchase order releases">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Part</th>
-                  <th scope="col" class="lines-table__right">Qty</th>
-                  <th scope="col">Req. Delivery</th>
-                  <th scope="col">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (rel of releases(); track rel.id) {
-                  <tr>
-                    <td>{{ rel.releaseNumber }}</td>
-                    <td class="lines-table__mono">{{ rel.partNumber }}</td>
-                    <td class="lines-table__right">{{ rel.quantity }}</td>
-                    <td>{{ rel.requestedDeliveryDate | date:'MM/dd/yyyy' }}</td>
-                    <td><span [class]="getReleaseStatusClass(rel.status)">{{ rel.status }}</span></td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          } @else {
-            <div class="lines-section__empty">No releases yet</div>
-          }
+          <app-data-table
+            tableId="po-blanket-releases"
+            [columns]="releaseColumns"
+            [data]="releases()"
+            emptyIcon="local_shipping"
+            emptyMessage="No releases yet">
+
+            <ng-template appColumnCell="partNumber" let-row>
+              <span class="lines-table__mono">{{ $any(row).partNumber }}</span>
+            </ng-template>
+
+            <ng-template appColumnCell="requestedDeliveryDate" let-row>
+              {{ $any(row).requestedDeliveryDate | date:'MM/dd/yyyy' }}
+            </ng-template>
+
+            <ng-template appColumnCell="status" let-row>
+              <span [class]="getReleaseStatusClass($any(row).status)">{{ $any(row).status }}</span>
+            </ng-template>
+          </app-data-table>
         </div>
       }
 

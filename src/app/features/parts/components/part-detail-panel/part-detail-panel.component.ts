@@ -32,6 +32,9 @@ import { StlViewerComponent } from '../../../../shared/components/stl-viewer/stl
 import { FileUploadZoneComponent } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { RoutingComponent } from '../routing/routing.component';
 import { BomTreeComponent } from '../bom-tree/bom-tree.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
@@ -50,6 +53,7 @@ type BomViewMode = 'table' | 'tree';
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     EntityPickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationPopoverDirective,
     StlViewerComponent, FileUploadZoneComponent, BarcodeInfoComponent,
+    DataTableComponent, ColumnCellDirective,
     RoutingComponent, BomTreeComponent, EntityActivitySectionComponent, PartAlternatesTabComponent,
     SerialNumbersTabComponent,
   ],
@@ -139,6 +143,25 @@ export class PartDetailPanelComponent {
     { value: 'Make', label: this.translate.instant('parts.sourceMake') },
     { value: 'Buy', label: this.translate.instant('parts.sourceBuy') },
     { value: 'Stock', label: this.translate.instant('parts.sourceStock') },
+  ];
+
+  // ── BOM Table Columns ──
+  protected readonly bomColumns: ColumnDef[] = [
+    { field: 'sortOrder', header: '#', width: '40px', align: 'center' },
+    { field: 'childPartNumber', header: this.translate.instant('parts.bomPart'), sortable: true },
+    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '60px', align: 'center', sortable: true },
+    { field: 'sourceType', header: this.translate.instant('parts.bomSource'), width: '80px', sortable: true, filterable: true, type: 'enum',
+      filterOptions: this.sourceTypeOptions },
+    { field: 'leadTimeDays', header: this.translate.instant('parts.bomLeadTime'), width: '90px' },
+    { field: 'referenceDesignator', header: this.translate.instant('parts.bomRefDes') },
+    { field: 'actions', header: '', width: '40px' },
+  ];
+
+  // ── Used In Table Columns ──
+  protected readonly usedInColumns: ColumnDef[] = [
+    { field: 'parentPartNumber', header: this.translate.instant('parts.parentPart'), sortable: true },
+    { field: 'parentDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '60px', align: 'center', sortable: true },
   ];
 
   constructor() {

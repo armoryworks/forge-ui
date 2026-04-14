@@ -24,6 +24,9 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 
 @Component({
   selector: 'app-po-detail-panel',
@@ -36,6 +39,7 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
     ValidationPopoverDirective,
     EntityLinkComponent,
+    DataTableComponent, ColumnCellDirective,
   ],
   templateUrl: './po-detail-panel.component.html',
   styleUrl: './po-detail-panel.component.scss',
@@ -57,6 +61,14 @@ export class PoDetailPanelComponent implements OnInit {
   protected readonly releases = signal<PurchaseOrderRelease[]>([]);
   protected readonly showCreateReleaseDialog = signal(false);
   protected readonly releaseSaving = signal(false);
+
+  protected readonly releaseColumns: ColumnDef[] = [
+    { field: 'releaseNumber', header: '#', sortable: true, width: '60px' },
+    { field: 'partNumber', header: 'Part', sortable: true, width: '120px' },
+    { field: 'quantity', header: 'Qty', sortable: true, type: 'number', width: '80px', align: 'right' },
+    { field: 'requestedDeliveryDate', header: 'Req. Delivery', sortable: true, type: 'date', width: '120px' },
+    { field: 'status', header: 'Status', sortable: true, width: '110px' },
+  ];
 
   ngOnInit(): void {
     this.loadDetail();

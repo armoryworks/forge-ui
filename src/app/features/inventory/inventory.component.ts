@@ -781,7 +781,6 @@ export class InventoryComponent {
   ];
 
   protected readonly suggestionColumns: ColumnDef[] = [
-    { field: 'select', header: '', width: '40px' },
     { field: 'partNumber', header: 'Part #', sortable: true, width: '120px' },
     { field: 'partDescription', header: 'Description', sortable: true },
     { field: 'vendorName', header: 'Vendor', sortable: true, width: '140px' },
@@ -818,27 +817,9 @@ export class InventoryComponent {
     this.loadBurnRates();
   }
 
-  protected toggleSuggestionSelect(id: number): void {
-    const ids = new Set(this.selectedSuggestionIds());
-    if (ids.has(id)) {
-      ids.delete(id);
-    } else {
-      ids.add(id);
-    }
-    this.selectedSuggestionIds.set(ids);
-  }
-
-  protected isSuggestionSelected(id: number): boolean {
-    return this.selectedSuggestionIds().has(id);
-  }
-
-  protected toggleAllSuggestions(): void {
-    const pending = this.pendingSuggestions();
-    if (this.selectedSuggestionIds().size === pending.length) {
-      this.selectedSuggestionIds.set(new Set());
-    } else {
-      this.selectedSuggestionIds.set(new Set(pending.map(s => s.id)));
-    }
+  protected onSuggestionSelectionChange(rows: unknown[]): void {
+    const suggestions = rows as ReorderSuggestion[];
+    this.selectedSuggestionIds.set(new Set(suggestions.map(s => s.id)));
   }
 
   protected approveSuggestion(suggestion: ReorderSuggestion): void {

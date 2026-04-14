@@ -13,6 +13,9 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { AdminService } from '../../services/admin.service';
 import { UserComplianceDetail, ComplianceFormSubmission, IdentityDocument } from '../../../account/models/compliance-form.model';
 import { CompleteI9DialogComponent, CompleteI9DialogData } from '../complete-i9-dialog/complete-i9-dialog.component';
@@ -22,7 +25,7 @@ import { PayStub, TaxDocument } from '../../../account/models/payroll.model';
 @Component({
   selector: 'app-user-compliance-panel',
   standalone: true,
-  imports: [DatePipe, CurrencyPipe, ReactiveFormsModule, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, InputComponent, SelectComponent, DatepickerComponent, MatTooltipModule],
+  imports: [DatePipe, CurrencyPipe, ReactiveFormsModule, TranslatePipe, LoadingBlockDirective, EmptyStateComponent, FileUploadZoneComponent, InputComponent, SelectComponent, DatepickerComponent, MatTooltipModule, DataTableComponent, ColumnCellDirective],
   templateUrl: './user-compliance-panel.component.html',
   styleUrl: './user-compliance-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -64,6 +67,15 @@ export class UserCompliancePanelComponent {
     { value: 'Misc1099', label: '1099-MISC' },
     { value: 'Nec1099', label: '1099-NEC' },
     { value: 'Other', label: 'Other' },
+  ];
+
+  protected readonly payStubColumns: ColumnDef[] = [
+    { field: 'payDate', header: 'Pay Date', sortable: true, type: 'date', width: '100px' },
+    { field: 'period', header: 'Period', sortable: false, width: '160px' },
+    { field: 'grossPay', header: 'Gross', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'netPay', header: 'Net', sortable: true, type: 'number', width: '100px', align: 'right' },
+    { field: 'source', header: 'Source', sortable: true, width: '90px' },
+    { field: 'actions', header: 'Actions', sortable: false, width: '80px' },
   ];
 
   constructor() {

@@ -393,41 +393,6 @@
   }
 }
 
-.replenishment-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: $font-size-base;
-
-  th {
-    background: var(--surface);
-    color: var(--text-muted);
-    font-size: $font-size-xxs;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: $sp-sm $sp-md;
-    border-bottom: $border-width solid var(--border);
-    text-align: left;
-    white-space: nowrap;
-  }
-
-  td {
-    padding: $sp-sm $sp-md;
-    border-bottom: $border-width-thin solid var(--border);
-    vertical-align: middle;
-  }
-
-  tr:hover td {
-    background: var(--surface);
-  }
-
-  tr.row--selected td {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
-  }
-
-  .text-right { text-align: right; }
-}
-
 .replenishment-actions {
   display: flex;
   align-items: center;
