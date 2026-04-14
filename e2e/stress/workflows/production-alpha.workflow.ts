@@ -1,6 +1,6 @@
 import type { Page } from 'playwright';
 import type { Workflow } from '../orchestrator';
-import { fillByTestId, selectByTestId, fillDateByTestId } from '../../lib/form.lib';
+import { fillByTestId, selectByTestId, clickByTestId, fillDateByTestId, fillEntityPickerByTestId } from '../../lib/form.lib';
 import { waitForAnySnackbar, dismissSnackbar } from '../../lib/snackbar.lib';
 import { waitForTable, sortByColumn } from '../../lib/data-table.lib';
 import { randomDelay, testId, maybe, randomPick, randomInt, randomDate, randomAmount } from '../../lib/random.lib';
@@ -9,7 +9,7 @@ import { randomDelay, testId, maybe, randomPick, randomInt, randomDate, randomAm
 // Production Alpha Workflow
 //
 // Simulates a production worker on the Production track during a full shift.
-// 25 steps covering every page a floor worker would realistically visit:
+// 30 steps covering every page a floor worker would realistically visit:
 // dashboard, timer, kanban, job details, parts, inventory, quality, chat,
 // backlog, calendar, training, expenses, account, notifications, reports,
 // AI assistant, events, and lots. The orchestrator loops this workflow for
@@ -94,9 +94,11 @@ const EXPENSE_DESCRIPTIONS = [
   'Cable ties and zip tie gun',
 ];
 
-const EXPENSE_CATEGORIES = ['Shop Supplies', 'Safety Equipment', 'Tools', 'PPE'];
+// Must match seed data in SeedData.Essential.cs (expense_category group)
+const EXPENSE_CATEGORIES = ['Materials', 'Tools', 'Equipment', 'Maintenance', 'Other'];
 
-const TIME_CATEGORIES = ['Production', 'Setup', 'Cleanup', 'Training', 'Break'];
+// Must match categoryOptions in time-tracking.component.ts
+const TIME_CATEGORIES = ['Production', 'Setup', 'Cleanup', 'Training', 'Maintenance'];
 
 const AI_QUESTIONS = [
   'What is the recommended torque spec for 1/2-13 Grade 8 bolts?',
@@ -119,6 +121,8 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-01',
         name: 'Check dashboard KPIs',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -153,11 +157,19 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-02',
         name: 'Start shift timer',
+        category: 'timer-start',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
             await page.waitForSelector('app-data-table, [class*="time-tracking"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
             await page.waitForTimeout(randomDelay(500, 1000));
+
+            // If a timer is already running, skip
+            const alreadyRunning = page.locator('[data-testid="stop-timer-btn"]');
+            if (await alreadyRunning.isVisible({ timeout: 2000 }).catch(() => false)) {
+              return;
+            }
 
             const startBtn = page.locator('[data-testid="start-timer-btn"]');
             if (await startBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -177,6 +189,7 @@ export function getProductionAlphaWorkflow(): Workflow {
 
                 await waitForAnySnackbar(page, 4000).catch(() => {});
                 await dismissSnackbar(page).catch(() => {});
+                return 'timer';
               }
             }
           } catch {
@@ -191,6 +204,8 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-03',
         name: 'Browse production kanban board',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -221,13 +236,138 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 4. Open a job card — browse tabs (overview, subtasks, files, activity)
+      // 4. Manual time entry — fill out yesterday's forgotten entry
       // ------------------------------------------------------------------
       {
-        id: 'pa-04',
-        name: 'Open job card and browse detail tabs',
+        id: 'pa-04',  // originally pa-17
+        name: 'Create manual time entry',
+        category: 'create',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
+            const url = page.url();
+            if (!url.includes('/time-tracking')) {
+              await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+              await page.waitForSelector('app-data-table, [class*="time-tracking"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            }
+            await page.waitForTimeout(randomDelay(400, 800));
+
+            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
+            if (await manualBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+              await manualBtn.click();
+              await page.waitForTimeout(randomDelay(400, 800));
+
+              const entryDate = randomDate(-3, 3);
+              const hours = randomInt(1, 8);
+              const minutes = randomPick([0, 15, 30, 45]);
+
+              await fillDateByTestId(page, 'time-entry-date', entryDate);
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              await selectByTestId(page, 'time-entry-category', randomPick(TIME_CATEGORIES));
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              await fillByTestId(page, 'time-entry-hours', String(hours));
+              await page.waitForTimeout(randomDelay(150, 300));
+
+              await fillByTestId(page, 'time-entry-minutes', String(minutes));
+              await page.waitForTimeout(randomDelay(150, 300));
+
+              await fillByTestId(page, 'time-entry-notes', randomPick(MANUAL_ENTRY_NOTES));
+              await page.waitForTimeout(randomDelay(300, 600));
+
+              const saveBtn = page.locator('[data-testid="time-entry-save-btn"]');
+              if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                const isDisabled = await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) { btn.click(); return false; }
+                  return true;
+                });
+                if (isDisabled) {
+                  console.log('[prod-alpha] pa-04 save button disabled — form invalid, skipping');
+                } else {
+                  await page.waitForTimeout(3000);
+                  await dismissSnackbar(page).catch(() => {});
+                  return 'time-entry';
+                }
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 5. Expenses — submit a small PPE/shop supplies expense
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-05',  // originally pa-18
+        name: 'Submit expense for shop supplies',
+        category: 'create',
+        tags: ['expenses'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, [class*="expense"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            const newExpenseBtn = page.locator('[data-testid="new-expense-btn"]');
+            if (await newExpenseBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+              await newExpenseBtn.click();
+              await page.waitForTimeout(randomDelay(400, 800));
+
+              const amount = randomAmount(5, 75);
+              const expenseDate = randomDate(-7, 7);
+
+              await fillByTestId(page, 'expense-amount', amount);
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              await fillDateByTestId(page, 'expense-date', expenseDate);
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              await selectByTestId(page, 'expense-category', randomPick(EXPENSE_CATEGORIES));
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              await fillByTestId(page, 'expense-description', randomPick(EXPENSE_DESCRIPTIONS));
+              await page.waitForTimeout(randomDelay(300, 600));
+
+              const saveBtn = page.locator('[data-testid="expense-save-btn"]');
+              if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+                const isDisabled = await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) { btn.click(); return false; }
+                  return true;
+                });
+                if (isDisabled) {
+                  console.log('[prod-alpha] pa-05 save button disabled — form invalid, skipping');
+                } else {
+                  await page.waitForTimeout(3000);
+                  await dismissSnackbar(page).catch(() => {});
+                  return 'expense';
+                }
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 6. Open a job card — browse tabs (overview, subtasks, files, activity)
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-06',  // originally pa-04
+        name: 'Open job card and browse detail tabs',
+        category: 'browse',
+        tags: ['kanban'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('.kanban-board, .board-column, app-kanban-board', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1000));
+
             const cards = page.locator('.job-card, [class*="job-card"]');
             const count = await cards.count();
 
@@ -294,11 +434,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 5. Parts catalog — search for material, browse results
+      // 7. Parts catalog — search for material, browse results
       // ------------------------------------------------------------------
       {
-        id: 'pa-05',
+        id: 'pa-07',  // originally pa-05
         name: 'Search parts catalog for material',
+        category: 'search',
+        tags: ['parts'],
         execute: async (page: Page) => {
           try {
             await page.goto('/parts', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -348,11 +490,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 6. Inventory check — browse stock levels, search for consumables
+      // 8. Inventory check — browse stock levels, search for consumables
       // ------------------------------------------------------------------
       {
-        id: 'pa-06',
+        id: 'pa-08',  // originally pa-06
         name: 'Check inventory stock levels',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/inventory/stock', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -392,11 +536,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 7. Back to kanban — open a different job, read details
+      // 9. Back to kanban — open a different job, read details
       // ------------------------------------------------------------------
       {
-        id: 'pa-07',
+        id: 'pa-09',  // originally pa-07
         name: 'View another job on kanban',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -437,11 +583,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 8. Quality check — browse inspections and lots tabs
+      // 10. Quality check — browse inspections and lots tabs
       // ------------------------------------------------------------------
       {
-        id: 'pa-08',
+        id: 'pa-10',  // originally pa-08
         name: 'Browse quality inspections',
+        category: 'browse',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/inspections', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -481,11 +629,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 9. Chat — send a shift update message
+      // 11. Chat — send a shift update message
       // ------------------------------------------------------------------
       {
-        id: 'pa-09',
+        id: 'pa-11',  // originally pa-09
         name: 'Send chat message to team',
+        category: 'chat',
+        tags: ['chat'],
         execute: async (page: Page) => {
           try {
             await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -535,11 +685,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 10. Stop timer — end first production run
+      // 12. Stop timer — end first production run
       // ------------------------------------------------------------------
       {
-        id: 'pa-10',
+        id: 'pa-12',  // originally pa-10
         name: 'Stop production timer',
+        category: 'timer-stop',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -570,11 +722,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 11. Start new timer — Setup/Cleanup task
+      // 13. Start new timer — Setup/Cleanup task
       // ------------------------------------------------------------------
       {
-        id: 'pa-11',
+        id: 'pa-13',  // originally pa-11
         name: 'Start secondary timer (setup/cleanup)',
+        category: 'timer-start',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             const url = page.url();
@@ -583,6 +737,12 @@ export function getProductionAlphaWorkflow(): Workflow {
               await page.waitForSelector('app-data-table, [class*="time-tracking"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
             }
             await page.waitForTimeout(randomDelay(400, 800));
+
+            // If a timer is already running, skip
+            const alreadyRunning = page.locator('[data-testid="stop-timer-btn"]');
+            if (await alreadyRunning.isVisible({ timeout: 2000 }).catch(() => false)) {
+              return;
+            }
 
             const startBtn = page.locator('[data-testid="start-timer-btn"]');
             if (await startBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
@@ -603,6 +763,7 @@ export function getProductionAlphaWorkflow(): Workflow {
 
                 await waitForAnySnackbar(page, 4000).catch(() => {});
                 await dismissSnackbar(page).catch(() => {});
+                return 'timer';
               }
             }
           } catch {
@@ -612,11 +773,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 12. Backlog — browse job list, sort by priority or due date
+      // 14. Backlog — browse job list, sort by priority or due date
       // ------------------------------------------------------------------
       {
-        id: 'pa-12',
+        id: 'pa-14',  // originally pa-12
         name: 'Browse backlog and sort',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
             await page.goto('/backlog', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -648,11 +811,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 13. Calendar — check schedule for the week
+      // 15. Calendar — check schedule for the week
       // ------------------------------------------------------------------
       {
-        id: 'pa-13',
+        id: 'pa-15',  // originally pa-13
         name: 'Browse calendar',
+        category: 'browse',
+        tags: ['calendar'],
         execute: async (page: Page) => {
           try {
             await page.goto('/calendar', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -689,11 +854,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 14. Kanban — interact with a job (try moving a card)
+      // 16. Kanban — interact with a job (try moving a card)
       // ------------------------------------------------------------------
       {
-        id: 'pa-14',
+        id: 'pa-16',  // originally pa-14
         name: 'Interact with job on kanban board',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -760,11 +927,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 15. Training — browse modules, maybe click into one
+      // 17. Training — browse modules, maybe click into one
       // ------------------------------------------------------------------
       {
-        id: 'pa-15',
+        id: 'pa-17',  // originally pa-15
         name: 'Browse training modules',
+        category: 'browse',
+        tags: ['training'],
         execute: async (page: Page) => {
           try {
             await page.goto('/training/my-learning', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -803,11 +972,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 16. Stop secondary timer
+      // 18. Stop secondary timer
       // ------------------------------------------------------------------
       {
-        id: 'pa-16',
+        id: 'pa-18',  // originally pa-16
         name: 'Stop secondary timer',
+        category: 'timer-stop',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -840,114 +1011,13 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 17. Manual time entry — fill out yesterday's forgotten entry
-      // ------------------------------------------------------------------
-      {
-        id: 'pa-17',
-        name: 'Create manual time entry',
-        execute: async (page: Page) => {
-          try {
-            const url = page.url();
-            if (!url.includes('/time-tracking')) {
-              await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-              await page.waitForSelector('app-data-table, [class*="time-tracking"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
-            }
-            await page.waitForTimeout(randomDelay(400, 800));
-
-            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
-            if (await manualBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-              await manualBtn.click();
-              await page.waitForTimeout(randomDelay(400, 800));
-
-              const entryDate = randomDate(-3, 3);
-              const hours = randomInt(1, 8);
-              const minutes = randomPick([0, 15, 30, 45]);
-
-              await fillDateByTestId(page, 'time-entry-date', entryDate);
-              await page.waitForTimeout(randomDelay(200, 400));
-
-              await selectByTestId(page, 'time-entry-category', randomPick(TIME_CATEGORIES));
-              await page.waitForTimeout(randomDelay(200, 400));
-
-              await fillByTestId(page, 'time-entry-hours', String(hours));
-              await page.waitForTimeout(randomDelay(150, 300));
-
-              await fillByTestId(page, 'time-entry-minutes', String(minutes));
-              await page.waitForTimeout(randomDelay(150, 300));
-
-              await fillByTestId(page, 'time-entry-notes', randomPick(MANUAL_ENTRY_NOTES));
-              await page.waitForTimeout(randomDelay(300, 600));
-
-              const saveBtn = page.locator('[data-testid="time-entry-save-btn"]');
-              if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.evaluate(() => {
-                  const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
-                  if (btn && !btn.disabled) btn.click();
-                });
-                await page.waitForTimeout(3000);
-                await dismissSnackbar(page).catch(() => {});
-              }
-            }
-          } catch {
-            await page.keyboard.press('Escape').catch(() => {});
-          }
-        },
-      },
-
-      // ------------------------------------------------------------------
-      // 18. Expenses — submit a small PPE/shop supplies expense
-      // ------------------------------------------------------------------
-      {
-        id: 'pa-18',
-        name: 'Submit expense for shop supplies',
-        execute: async (page: Page) => {
-          try {
-            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-            await page.waitForSelector('app-data-table, [class*="expense"]', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
-            await page.waitForTimeout(randomDelay(500, 1000));
-
-            const newExpenseBtn = page.locator('[data-testid="new-expense-btn"]');
-            if (await newExpenseBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-              await newExpenseBtn.click();
-              await page.waitForTimeout(randomDelay(400, 800));
-
-              const amount = randomAmount(5, 75);
-              const expenseDate = randomDate(-7, 7);
-
-              await fillByTestId(page, 'expense-amount', amount);
-              await page.waitForTimeout(randomDelay(200, 400));
-
-              await fillDateByTestId(page, 'expense-date', expenseDate);
-              await page.waitForTimeout(randomDelay(200, 400));
-
-              await selectByTestId(page, 'expense-category', randomPick(EXPENSE_CATEGORIES));
-              await page.waitForTimeout(randomDelay(200, 400));
-
-              await fillByTestId(page, 'expense-description', randomPick(EXPENSE_DESCRIPTIONS));
-              await page.waitForTimeout(randomDelay(300, 600));
-
-              const saveBtn = page.locator('[data-testid="expense-save-btn"]');
-              if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-                await page.evaluate(() => {
-                  const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
-                  if (btn && !btn.disabled) btn.click();
-                });
-                await page.waitForTimeout(3000);
-                await dismissSnackbar(page).catch(() => {});
-              }
-            }
-          } catch {
-            await page.keyboard.press('Escape').catch(() => {});
-          }
-        },
-      },
-
-      // ------------------------------------------------------------------
       // 19. Account profile — review personal info
       // ------------------------------------------------------------------
       {
         id: 'pa-19',
         name: 'Review account profile',
+        category: 'browse',
+        tags: ['account'],
         execute: async (page: Page) => {
           try {
             await page.goto('/account/profile', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -974,6 +1044,8 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-20',
         name: 'Check and read notifications',
+        category: 'browse',
+        tags: ['notifications'],
         execute: async (page: Page) => {
           try {
             const bellButton = page.locator(
@@ -1028,6 +1100,8 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-21',
         name: 'View personal report',
+        category: 'report',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             await page.goto('/reports', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1069,6 +1143,8 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-22',
         name: 'Ask AI assistant a question',
+        category: 'search',
+        tags: ['ai'],
         execute: async (page: Page) => {
           try {
             await page.goto('/ai', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1119,6 +1195,8 @@ export function getProductionAlphaWorkflow(): Workflow {
       {
         id: 'pa-23',
         name: 'Browse upcoming events',
+        category: 'browse',
+        tags: ['events'],
         execute: async (page: Page) => {
           try {
             await page.goto('/admin/events', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1148,36 +1226,115 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 24. Lots — browse production lot records for traceability
+      // 24. Lots — create production lot record
       // ------------------------------------------------------------------
       {
         id: 'pa-24',
-        name: 'Browse production lot records',
+        name: 'Create lot record',
+        category: 'create',
+        tags: ['lots'],
         execute: async (page: Page) => {
           try {
-            await page.goto('/quality/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.goto('/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            await clickByTestId(page, 'new-lot-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            // Fill required entity-picker: part
+            let foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'bracket');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'aluminum');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'steel');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'bearing');
+            if (!foundPart) {
+              console.log('[prod-alpha] pa-24 no parts found for entity-picker — skipping lot creation');
+              await page.keyboard.press('Escape').catch(() => {});
+              return;
+            }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'lot-quantity', String(randomInt(50, 500)));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'lot-notes', `Alpha lot — ${new Date().toISOString()}`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'lot-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+          return 'lot';
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 26. Browse account pay stubs
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-26',
+        name: 'Browse account pay stubs',
+        category: 'browse',
+        tags: ['account', 'payroll'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/pay-stubs', { waitUntil: 'load', timeout: NAV_TIMEOUT });
             await page.waitForSelector(
-              'app-data-table, table, [class*="lot"]',
+              'app-data-table, table, [class*="pay-stub"], .page-header',
               { timeout: ELEMENT_TIMEOUT },
             ).catch(() => {});
             await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch {
+            // Pay stubs page may not be accessible — non-critical
+          }
+        },
+      },
 
-            // Sort by lot number or date
-            const sortCol = randomPick(['Lot #', 'Created', 'Part', 'Quantity']);
-            await sortByColumn(page, sortCol).catch(() => {});
+      // ------------------------------------------------------------------
+      // 27. Browse account security
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-27',
+        name: 'Browse account security',
+        category: 'browse',
+        tags: ['account', 'security'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/security', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector(
+              '[class*="security"], .page-header, mat-card, [class*="mfa"]',
+              { timeout: ELEMENT_TIMEOUT },
+            ).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch {
+            // Security page load failed — non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 28. Use global search
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-28',
+        name: 'Use global search',
+        category: 'search',
+        tags: ['search', 'header'],
+        execute: async (page: Page) => {
+          try {
+            await page.keyboard.press('Control+k');
             await page.waitForTimeout(randomDelay(500, 1000));
-
-            // Click a lot row if available
-            const rows = page.locator('app-data-table tbody tr');
-            const rowCount = await rows.count();
-            if (rowCount > 0 && maybe(0.4)) {
-              const rowIndex = randomInt(0, Math.min(rowCount - 1, 4));
-              await rows.nth(rowIndex).click({ timeout: 3000 }).catch(() => {});
-              await page.waitForTimeout(randomDelay(800, 1500));
-              await page.keyboard.press('Escape').catch(() => {});
-              await page.waitForTimeout(randomDelay(300, 500));
-              await page.waitForSelector('app-dialog .dialog', { state: 'hidden', timeout: 3000 }).catch(() => {});
+            const searchInput = page.locator('input[type="search"], .search-input, [placeholder*="Search"]').first();
+            if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+              const terms = ['bracket', 'motor', 'seal', 'pump', 'gasket'];
+              await searchInput.fill(randomPick(terms));
+              await page.waitForTimeout(randomDelay(1000, 2000));
             }
+            await page.keyboard.press('Escape');
           } catch {
             await page.keyboard.press('Escape').catch(() => {});
           }
@@ -1185,11 +1342,35 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // 25. Return to dashboard — end of shift cycle review
+      // 29. Browse account tax forms
       // ------------------------------------------------------------------
       {
-        id: 'pa-25',
+        id: 'pa-29',
+        name: 'Browse account tax forms',
+        category: 'browse',
+        tags: ['account', 'compliance'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/tax-forms', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector(
+              'app-data-table, table, [class*="tax-form"], .page-header, mat-tab-group',
+              { timeout: ELEMENT_TIMEOUT },
+            ).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch {
+            // Tax forms page may not be accessible — non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 30. Return to dashboard — end of shift cycle review
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-30',
         name: 'Return to dashboard — end of shift cycle',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });

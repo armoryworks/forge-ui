@@ -16,7 +16,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
 import { DraftConfig } from '../../shared/models/draft-config.model';
-import { toIsoDate } from '../../shared/utils/date.utils';
+import { toDateOnly } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -150,8 +150,8 @@ export class TimeTrackingComponent implements OnDestroy {
 
   protected loadEntries(): void {
     this.loading.set(true);
-    const from = toIsoDate(this.dateFromControl.value) ?? undefined;
-    const to = toIsoDate(this.dateToControl.value) ?? undefined;
+    const from = toDateOnly(this.dateFromControl.value) ?? undefined;
+    const to = toDateOnly(this.dateToControl.value) ?? undefined;
     this.service.getTimeEntries(undefined, undefined, from, to).subscribe({
       next: (entries) => {
         this.entries.set(entries);
@@ -186,7 +186,7 @@ export class TimeTrackingComponent implements OnDestroy {
     if (duration <= 0) return;
     this.saving.set(true);
     this.service.createTimeEntry({
-      date: toIsoDate(form.date) ?? new Date().toISOString().split('T')[0],
+      date: toDateOnly(form.date) ?? new Date().toISOString().split('T')[0],
       durationMinutes: duration,
       category: form.category || undefined,
       notes: form.notes || undefined,

@@ -19,6 +19,8 @@ export interface WorkerState {
   signalrEvents: number;
   chatMessages: number;
   avgResponseMs: number;
+  /** Tracks data created by this worker: entity type → count */
+  dataCreated: Record<string, number>;
 }
 
 export interface StressMetrics {
@@ -44,6 +46,8 @@ export interface StepResult {
   durationMs: number;
   error?: string;
   screenshot?: string;
+  /** Data created during this step (e.g., 'job', 'expense', 'lead') */
+  dataCreated?: string;
 }
 
 export interface WorkflowError {

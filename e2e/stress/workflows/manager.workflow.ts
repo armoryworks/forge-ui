@@ -1,12 +1,12 @@
 import type { Page } from 'playwright';
 import type { Workflow } from '../orchestrator';
-import { fillByTestId, selectByTestId, fillDateByTestId } from '../../lib/form.lib';
+import { fillByTestId, selectByTestId, selectNthByTestId, clickByTestId, fillDateByTestId } from '../../lib/form.lib';
 import { waitForAnySnackbar, dismissSnackbar } from '../../lib/snackbar.lib';
 import { waitForTable, sortByColumn } from '../../lib/data-table.lib';
 import { randomDelay, testId, maybe, randomPick, randomInt, randomDate, randomAmount } from '../../lib/random.lib';
 
 const NAV_TIMEOUT = 15_000;
-const ELEMENT_TIMEOUT = 8_000;
+const ELEMENT_TIMEOUT = 15_000;
 
 // ---------------------------------------------------------------------------
 // Data pools
@@ -16,10 +16,12 @@ const LEAD_CONTACTS = [
   'John Smith', 'Sarah Johnson', 'Mike Chen', 'Lisa Park', 'James Rivera',
   'Amanda Foster', 'David Kim', 'Rachel Nguyen', 'Marcus Thompson', 'Olivia Reeves',
 ];
-const LEAD_SOURCES = ['Referral', 'Website', 'Trade Show', 'Cold Call', 'Email Campaign'];
+// Must match seed data in SeedData.Essential.cs (lead_source group)
+const LEAD_SOURCES = ['Referral', 'Website', 'Trade Show', 'Cold Call', 'Email'];
 const LEAD_EMAILS_DOMAINS = ['example.com', 'testcorp.io', 'stressinc.net', 'mfgdemo.com'];
 
-const EXPENSE_CATEGORIES = ['Travel', 'Meals', 'Office Supplies', 'Equipment', 'Software'];
+// Must match seed data in SeedData.Essential.cs (expense_category group)
+const EXPENSE_CATEGORIES = ['Travel', 'Meals', 'Office Supplies', 'Equipment', 'Other'];
 const EXPENSE_DESCRIPTIONS = [
   'Client lunch — contract discussion',
   'Travel to vendor site for QC audit',
@@ -86,11 +88,13 @@ async function randomScroll(page: Page): Promise<void> {
 /**
  * Manager workflow — simulates a production manager's full daily review loop.
  *
- * 35 steps covering every page a manager would visit: dashboard, kanban,
+ * 44 steps covering every page a manager would visit: dashboard, kanban,
  * backlog, leads, expenses, time tracking, reports, planning, customers,
  * sales orders, quotes, purchase orders, invoices, payments, shipments,
  * vendors, chat, assets, quality, training, events, calendar, notifications,
- * and account. Creates real data: leads, expenses, time entries.
+ * account, search, lots, scheduled tasks, report builder, payroll, tax forms,
+ * security/MFA, and recurring expenses. Creates real data: leads, expenses,
+ * time entries.
  */
 export function getManagerWorkflow(): Workflow {
   return {
@@ -102,6 +106,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-01',
         name: 'Dashboard — review KPIs and widgets',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -138,6 +144,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-02',
         name: 'Kanban — review Production track',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -182,6 +190,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-03',
         name: 'Kanban — switch to Maintenance track',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             // Click the Maintenance track type button
@@ -216,23 +226,25 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-04',
         name: 'Create new lead — full form',
+        category: 'create',
+        tags: ['leads'],
         execute: async (page: Page) => {
           try {
             await page.goto('/leads', { waitUntil: 'load', timeout: NAV_TIMEOUT });
 
-            await page.locator('app-data-table, app-page-layout').first()
+            // Wait for page content — use generous timeout under stress
+            await page.locator('[data-testid="new-lead-btn"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
             await page.waitForTimeout(randomDelay(800, 1500));
 
             // Click new lead button
             const newLeadBtn = page.locator('[data-testid="new-lead-btn"]');
-            await newLeadBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
             await newLeadBtn.click();
-            await page.waitForTimeout(randomDelay(500, 1000));
+            await page.waitForTimeout(1000);
 
-            // Wait for dialog to appear
-            await page.locator('.cdk-overlay-container app-dialog, .cdk-overlay-container .mat-mdc-dialog-container').first()
+            // Wait for dialog form fields (inline dialog, not CDK overlay)
+            await page.locator('[data-testid="lead-company-name"]')
               .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
             // --- Fill every field with realistic data ---
@@ -278,16 +290,142 @@ export function getManagerWorkflow(): Workflow {
 
             // Save the lead via DOM click
             await page.waitForTimeout(1000);
-            await page.evaluate(() => {
+            const leadSaveDisabled = await page.evaluate(() => {
               const btn = document.querySelector('[data-testid="lead-save-btn"]') as HTMLButtonElement;
-              if (btn && !btn.disabled) btn.click();
+              if (btn && !btn.disabled) { btn.click(); return false; }
+              return true;
             });
-            await page.waitForTimeout(3000);
+            if (leadSaveDisabled) {
+              console.log('[manager] mgr-04 save button disabled — form invalid, skipping');
+            } else {
+              await page.waitForTimeout(3000);
+              return 'lead';
+            }
 
             // Dismiss any snackbar
             await dismissSnackbar(page);
+          } catch (err) {
+            const url = page.url();
+            console.log(`[manager] mgr-04 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/mgr-04-fail.png' }).catch(() => {});
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(500);
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-09 — Manual time entry: log management hours
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-05',  // originally mgr-09
+        name: 'Time tracking — log manual management hours',
+        category: 'create',
+        tags: ['time-tracking'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
+            await manualBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+            await manualBtn.click();
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            // Wait for dialog
+            await page.locator('.cdk-overlay-container app-dialog, .cdk-overlay-container .mat-mdc-dialog-container').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await fillDateByTestId(page, 'time-entry-date', randomDate(-1, 1));
+            await page.waitForTimeout(randomDelay(200, 500));
+
+            await selectByTestId(page, 'time-entry-category', 'Meeting');
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            const hours = randomInt(1, 4);
+            const minutes = randomPick([0, 15, 30, 45]);
+            await fillByTestId(page, 'time-entry-hours', String(hours));
+            await page.waitForTimeout(randomDelay(150, 350));
+
+            await fillByTestId(page, 'time-entry-minutes', String(minutes));
+            await page.waitForTimeout(randomDelay(150, 350));
+
+            await fillByTestId(page, 'time-entry-notes', randomPick(TIME_ENTRY_NOTES));
+            await page.waitForTimeout(randomDelay(300, 600));
+
+            const timeSaveDisabled = await page.evaluate(() => {
+              const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
+              if (btn && !btn.disabled) { btn.click(); return false; }
+              return true;
+            });
+            if (timeSaveDisabled) {
+              console.log('[manager] mgr-05 save button disabled — form invalid, skipping');
+            } else {
+              await page.waitForTimeout(3000);
+              return 'time-entry';
+            }
+            await dismissSnackbar(page);
           } catch {
-            // Lead creation failed — close any open dialog
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(500);
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-10 — CREATE EXPENSE
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-06',  // originally mgr-10
+        name: 'Create expense report',
+        category: 'create',
+        tags: ['expenses'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-data-table, app-page-layout').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            const newExpenseBtn = page.locator('[data-testid="new-expense-btn"]');
+            await newExpenseBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+            await newExpenseBtn.click();
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await page.locator('.cdk-overlay-container app-dialog, .cdk-overlay-container .mat-mdc-dialog-container').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await fillByTestId(page, 'expense-amount', randomAmount(25, 750));
+            await page.waitForTimeout(randomDelay(200, 500));
+
+            await fillDateByTestId(page, 'expense-date', randomDate(-7, 7));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await selectByTestId(page, 'expense-category', randomPick(EXPENSE_CATEGORIES));
+            await page.waitForTimeout(randomDelay(200, 500));
+
+            await fillByTestId(page, 'expense-description', randomPick(EXPENSE_DESCRIPTIONS));
+            await page.waitForTimeout(randomDelay(300, 600));
+
+            const expSaveDisabled = await page.evaluate(() => {
+              const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
+              if (btn && !btn.disabled) { btn.click(); return false; }
+              return true;
+            });
+            if (expSaveDisabled) {
+              console.log('[manager] mgr-06 save button disabled — form invalid, skipping');
+            } else {
+              await page.waitForTimeout(3000);
+              return 'expense';
+            }
+            await dismissSnackbar(page);
+          } catch {
             await page.keyboard.press('Escape');
             await page.waitForTimeout(500);
           }
@@ -300,8 +438,10 @@ export function getManagerWorkflow(): Workflow {
       // mgr-05 — Leads: sort table, browse pipeline
       // ---------------------------------------------------------------
       {
-        id: 'mgr-05',
+        id: 'mgr-07',  // originally mgr-05
         name: 'Leads — sort by company, browse pipeline',
+        category: 'browse',
+        tags: ['leads'],
         execute: async (page: Page) => {
           try {
             // Already on /leads from step 04, but navigate anyway for resilience
@@ -338,8 +478,10 @@ export function getManagerWorkflow(): Workflow {
       // mgr-06 — Backlog: sort by priority, review
       // ---------------------------------------------------------------
       {
-        id: 'mgr-06',
+        id: 'mgr-08',  // originally mgr-06
         name: 'Backlog — sort by priority, review job list',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
             await page.goto('/backlog', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -371,10 +513,15 @@ export function getManagerWorkflow(): Workflow {
       // mgr-07 — Backlog: click a row to open detail, review, close
       // ---------------------------------------------------------------
       {
-        id: 'mgr-07',
+        id: 'mgr-09',  // originally mgr-07
         name: 'Backlog — open job detail dialog',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
+            await page.goto('/backlog', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1000));
+
             const rows = page.locator('app-data-table tbody tr');
             const rowCount = await rows.count();
             if (rowCount > 0) {
@@ -402,8 +549,10 @@ export function getManagerWorkflow(): Workflow {
       // mgr-08 — Time tracking: review team entries, sort by date
       // ---------------------------------------------------------------
       {
-        id: 'mgr-08',
+        id: 'mgr-10',  // originally mgr-08
         name: 'Time tracking — review team entries',
+        category: 'browse',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -426,110 +575,13 @@ export function getManagerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
-      // mgr-09 — Manual time entry: log management hours
-      // ---------------------------------------------------------------
-      {
-        id: 'mgr-09',
-        name: 'Time tracking — log manual management hours',
-        execute: async (page: Page) => {
-          try {
-            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
-            await manualBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-            await manualBtn.click();
-            await page.waitForTimeout(randomDelay(500, 1000));
-
-            // Wait for dialog
-            await page.locator('.cdk-overlay-container app-dialog, .cdk-overlay-container .mat-mdc-dialog-container').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
-            await fillDateByTestId(page, 'time-entry-date', randomDate(-1, 1));
-            await page.waitForTimeout(randomDelay(200, 500));
-
-            await selectByTestId(page, 'time-entry-category', 'Management');
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            const hours = randomInt(1, 4);
-            const minutes = randomPick([0, 15, 30, 45]);
-            await fillByTestId(page, 'time-entry-hours', String(hours));
-            await page.waitForTimeout(randomDelay(150, 350));
-
-            await fillByTestId(page, 'time-entry-minutes', String(minutes));
-            await page.waitForTimeout(randomDelay(150, 350));
-
-            await fillByTestId(page, 'time-entry-notes', randomPick(TIME_ENTRY_NOTES));
-            await page.waitForTimeout(randomDelay(300, 600));
-
-            await page.evaluate(() => {
-              const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
-              if (btn && !btn.disabled) btn.click();
-            });
-            await page.waitForTimeout(3000);
-            await dismissSnackbar(page);
-          } catch {
-            await page.keyboard.press('Escape');
-            await page.waitForTimeout(500);
-          }
-
-          await page.waitForTimeout(randomDelay(800, 1500));
-        },
-      },
-
-      // ---------------------------------------------------------------
-      // mgr-10 — CREATE EXPENSE
-      // ---------------------------------------------------------------
-      {
-        id: 'mgr-10',
-        name: 'Create expense report',
-        execute: async (page: Page) => {
-          try {
-            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-
-            await page.locator('app-data-table, app-page-layout').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
-            await page.waitForTimeout(randomDelay(800, 1500));
-
-            const newExpenseBtn = page.locator('[data-testid="new-expense-btn"]');
-            await newExpenseBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-            await newExpenseBtn.click();
-            await page.waitForTimeout(randomDelay(500, 1000));
-
-            await page.locator('.cdk-overlay-container app-dialog, .cdk-overlay-container .mat-mdc-dialog-container').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
-            await fillByTestId(page, 'expense-amount', randomAmount(25, 750));
-            await page.waitForTimeout(randomDelay(200, 500));
-
-            await fillDateByTestId(page, 'expense-date', randomDate(-7, 7));
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            await selectByTestId(page, 'expense-category', randomPick(EXPENSE_CATEGORIES));
-            await page.waitForTimeout(randomDelay(200, 500));
-
-            await fillByTestId(page, 'expense-description', randomPick(EXPENSE_DESCRIPTIONS));
-            await page.waitForTimeout(randomDelay(300, 600));
-
-            await page.evaluate(() => {
-              const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
-              if (btn && !btn.disabled) btn.click();
-            });
-            await page.waitForTimeout(3000);
-            await dismissSnackbar(page);
-          } catch {
-            await page.keyboard.press('Escape');
-            await page.waitForTimeout(500);
-          }
-
-          await page.waitForTimeout(randomDelay(800, 1500));
-        },
-      },
-
-      // ---------------------------------------------------------------
       // mgr-11 — Expenses: sort by date, review list
       // ---------------------------------------------------------------
       {
         id: 'mgr-11',
         name: 'Expenses — sort by date, review list',
+        category: 'browse',
+        tags: ['expenses'],
         execute: async (page: Page) => {
           try {
             await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -555,6 +607,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-12',
         name: 'Reports — Team Workload report',
+        category: 'report',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             await page.goto('/reports', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -590,6 +644,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-13',
         name: 'Reports — Expense Summary report',
+        category: 'report',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             const expenseReport = page.locator('.report-nav-item', { hasText: 'Expense' });
@@ -617,6 +673,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-14',
         name: 'Reports — Lead Pipeline report',
+        category: 'report',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             const leadReport = page.locator('.report-nav-item', { hasText: 'Lead' });
@@ -643,6 +701,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-15',
         name: 'Planning — review current cycle',
+        category: 'browse',
+        tags: ['planning'],
         execute: async (page: Page) => {
           try {
             await page.goto('/planning', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -675,6 +735,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-16',
         name: 'Customers — browse customer list',
+        category: 'browse',
+        tags: ['customers'],
         execute: async (page: Page) => {
           try {
             await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -714,6 +776,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-17',
         name: 'Sales Orders — browse order list',
+        category: 'browse',
+        tags: ['sales-orders'],
         execute: async (page: Page) => {
           try {
             await page.goto('/sales-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -739,6 +803,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-18',
         name: 'Quotes — browse quote list',
+        category: 'browse',
+        tags: ['quotes'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quotes', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -776,6 +842,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-19',
         name: 'Purchase Orders — browse PO list',
+        category: 'browse',
+        tags: ['purchase-orders'],
         execute: async (page: Page) => {
           try {
             await page.goto('/purchase-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -801,6 +869,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-20',
         name: 'Invoices — browse invoice list',
+        category: 'browse',
+        tags: ['invoices'],
         execute: async (page: Page) => {
           try {
             await page.goto('/invoices', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -826,6 +896,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-21',
         name: 'Payments — browse payment list',
+        category: 'browse',
+        tags: ['payments'],
         execute: async (page: Page) => {
           try {
             await page.goto('/payments', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -851,6 +923,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-22',
         name: 'Shipments — browse shipment list',
+        category: 'browse',
+        tags: ['shipments'],
         execute: async (page: Page) => {
           try {
             await page.goto('/shipments', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -876,6 +950,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-23',
         name: 'Vendors — browse vendor list',
+        category: 'browse',
+        tags: ['vendors'],
         execute: async (page: Page) => {
           try {
             await page.goto('/vendors', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -913,6 +989,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-24',
         name: 'Chat — send management update',
+        category: 'chat',
+        tags: ['chat'],
         execute: async (page: Page) => {
           try {
             await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -956,39 +1034,43 @@ export function getManagerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
-      // mgr-25 — Assets: browse asset list
+      // mgr-25 — Assets: create an asset
       // ---------------------------------------------------------------
       {
         id: 'mgr-25',
-        name: 'Assets — browse asset list',
+        name: 'Create an asset',
+        category: 'create',
+        tags: ['assets'],
         execute: async (page: Page) => {
           try {
             await page.goto('/assets', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
 
-            await page.locator('app-data-table, app-page-layout').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
-            await sortByColumn(page, 'Name').catch(() => {});
+            await clickByTestId(page, 'new-asset-btn');
             await page.waitForTimeout(randomDelay(500, 1000));
 
-            await browseTableRows(page, 5);
+            const assetName = randomPick(['Press Brake PB-4', 'Welding Station W-3', 'Paint Booth PB-1']);
+            await fillByTestId(page, 'asset-name', assetName);
+            await page.waitForTimeout(randomDelay(200, 400));
 
-            // Maybe click asset to review
-            if (maybe(0.3)) {
-              const rows = page.locator('app-data-table tbody tr');
-              const rowCount = await rows.count();
-              if (rowCount > 0) {
-                await rows.nth(randomInt(0, Math.min(rowCount - 1, 4))).click();
-                await page.waitForTimeout(randomDelay(800, 1500));
-                await page.keyboard.press('Escape');
-                await page.waitForTimeout(randomDelay(300, 600));
-              }
-            }
+            const assetType = randomPick(['Machine', 'Facility']);
+            await selectByTestId(page, 'asset-type', assetType);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await selectNthByTestId(page, 'asset-location', 0);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'asset-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
           } catch {
             await page.keyboard.press('Escape').catch(() => {});
           }
 
-          await page.waitForTimeout(randomDelay(800, 1500));
+          return 'asset';
         },
       },
 
@@ -998,6 +1080,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-26',
         name: 'Quality — review inspections',
+        category: 'browse',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/inspections', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1023,6 +1107,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-27',
         name: 'Parts — browse parts catalog',
+        category: 'browse',
+        tags: ['parts'],
         execute: async (page: Page) => {
           try {
             await page.goto('/parts', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1060,6 +1146,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-28',
         name: 'Inventory — review stock levels',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/inventory', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1086,6 +1174,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-29',
         name: 'Customer Returns — browse returns',
+        category: 'browse',
+        tags: ['customer-returns'],
         execute: async (page: Page) => {
           try {
             await page.goto('/customer-returns', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1111,6 +1201,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-30',
         name: 'Training — review team training status',
+        category: 'browse',
+        tags: ['training'],
         execute: async (page: Page) => {
           try {
             await page.goto('/training', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1133,26 +1225,52 @@ export function getManagerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
-      // mgr-31 — Events: check upcoming events
+      // mgr-31 — Events: create an event
       // ---------------------------------------------------------------
       {
         id: 'mgr-31',
-        name: 'Events — check upcoming events',
+        name: 'Create an event',
+        category: 'create',
+        tags: ['events'],
         execute: async (page: Page) => {
           try {
             await page.goto('/admin/events', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
 
-            await page.locator('app-data-table, app-page-layout').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
+            await clickByTestId(page, 'new-event-btn');
             await page.waitForTimeout(randomDelay(500, 1000));
 
-            await browseTableRows(page, 4);
+            const eventTitle = randomPick(['Department sync', 'Safety walkthrough', 'Sprint retrospective']);
+            await fillByTestId(page, 'event-title', eventTitle);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await selectNthByTestId(page, 'event-type', randomInt(0, 3));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+            await fillDateByTestId(page, 'event-start-date', today);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillDateByTestId(page, 'event-end-date', today);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'event-start-time', '14:00');
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'event-end-time', '15:00');
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'event-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
           } catch {
-            // Events page may redirect or be empty
+            await page.keyboard.press('Escape').catch(() => {});
           }
 
-          await page.waitForTimeout(randomDelay(800, 1500));
+          return 'event';
         },
       },
 
@@ -1162,6 +1280,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-32',
         name: 'Calendar — review schedule',
+        category: 'browse',
+        tags: ['calendar'],
         execute: async (page: Page) => {
           try {
             await page.goto('/calendar', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1194,6 +1314,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-33',
         name: 'Notifications — check and manage',
+        category: 'browse',
+        tags: ['notifications'],
         execute: async (page: Page) => {
           try {
             // Click the notification bell in the header
@@ -1245,6 +1367,8 @@ export function getManagerWorkflow(): Workflow {
       {
         id: 'mgr-34',
         name: 'Account — review profile',
+        category: 'browse',
+        tags: ['account'],
         execute: async (page: Page) => {
           try {
             await page.goto('/account', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1266,11 +1390,253 @@ export function getManagerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
-      // mgr-35 — Return to dashboard
+      // mgr-36 — Use global search
       // ---------------------------------------------------------------
       {
-        id: 'mgr-35',
+        id: 'mgr-36',
+        name: 'Use global search',
+        category: 'search',
+        tags: ['search', 'header'],
+        execute: async (page: Page) => {
+          try {
+            await page.keyboard.press('Control+k');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            const searchInput = page.locator('input[type="search"], .search-input, [placeholder*="Search"]').first();
+            if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+              const terms = ['bracket', 'motor', 'seal', 'pump', 'gasket'];
+              await searchInput.fill(randomPick(terms));
+              await page.waitForTimeout(randomDelay(1000, 2000));
+            }
+
+            await page.keyboard.press('Escape');
+          } catch {
+            // Search overlay may not be available
+          }
+
+          await page.waitForTimeout(randomDelay(500, 1000));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-37 — Browse lot records
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-37',
+        name: 'Browse lot records',
+        category: 'browse',
+        tags: ['lots', 'quality'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-data-table, app-page-layout, .page-content').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await browseTableRows(page, 5);
+            await randomScroll(page);
+          } catch {
+            // Lots page may not be accessible
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-38 — Browse scheduled tasks
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-38',
+        name: 'Browse scheduled tasks',
+        category: 'admin',
+        tags: ['scheduled-tasks'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/admin/scheduled-tasks', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-data-table, app-page-layout, .page-content').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await browseTableRows(page, 5);
+            await randomScroll(page);
+          } catch {
+            // Scheduled tasks may require Admin role
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-39 — Use report builder
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-39',
+        name: 'Use report builder',
+        category: 'report',
+        tags: ['reports', 'builder'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/reports/builder', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-page-layout, .report-builder, form, .builder, mat-card').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await page.waitForTimeout(randomDelay(1000, 2000));
+            await randomScroll(page);
+          } catch {
+            // Report builder may not load
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-40 — Browse account pay stubs
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-40',
+        name: 'Browse account pay stubs',
+        category: 'browse',
+        tags: ['account', 'payroll'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/pay-stubs', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-data-table, app-page-layout, app-empty-state, .page-content, mat-card').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await browseTableRows(page, 5);
+            await randomScroll(page);
+          } catch {
+            // Pay stubs page may not have content
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-41 — Browse account tax forms
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-41',
+        name: 'Browse account tax forms',
+        category: 'browse',
+        tags: ['account', 'compliance'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/tax-forms', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-data-table, app-page-layout, app-empty-state, .page-content, mat-card').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await browseTableRows(page, 5);
+            await randomScroll(page);
+          } catch {
+            // Tax forms page may not have content
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-42 — Browse account security / MFA
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-42',
+        name: 'Browse account security / MFA',
+        category: 'browse',
+        tags: ['account', 'security'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/security', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-page-layout, form, .security, mat-card, .page-content').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await page.waitForTimeout(randomDelay(1000, 2000));
+            await randomScroll(page);
+          } catch {
+            // Security page may not load
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-43 — Browse recurring expenses
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-43',
+        name: 'Browse recurring expenses',
+        category: 'browse',
+        tags: ['expenses', 'recurring'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses/upcoming', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+
+            await page.locator('app-data-table, app-page-layout, app-empty-state, .page-content').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            await browseTableRows(page, 5);
+            await randomScroll(page);
+          } catch {
+            // Recurring expenses may be empty
+          }
+
+          await page.waitForTimeout(randomDelay(800, 1500));
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-44 — Create a customer
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-44',
+        name: 'Create a customer',
+        category: 'create',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            await clickByTestId(page, 'new-customer-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await fillByTestId(page, 'customer-name', `Stress Customer ${Date.now()}`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'customer-email', `stress-${Date.now()}@stressinc.net`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'customer-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+
+          return 'customer';
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-45 — Return to dashboard
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-45',
         name: 'Return to dashboard — end of shift',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });

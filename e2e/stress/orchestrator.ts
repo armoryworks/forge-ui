@@ -2,6 +2,7 @@ import { chromium, Browser, BrowserContext, Page } from 'playwright';
 
 import { STRESS_USERS, BASE_URL, API_URL, STRESS_DURATION_MS, MAX_WORKERS, TestUser } from '../lib/fixtures';
 import { StressMetrics, WorkerState, WorkflowError, StepResult } from '../lib/types';
+import { clearOverlayBackdrops, dismissDraftRecoveryPrompt, clearAllDrafts } from '../lib/form.lib';
 
 // Workflow imports — each returns a Workflow describing the loop for that role/team
 import { getProductionAlphaWorkflow } from './workflows/production-alpha.workflow';
@@ -15,10 +16,17 @@ import { getAdminWorkflow } from './workflows/admin.workflow';
 // Public types
 // ---------------------------------------------------------------------------
 
+export type StepCategory = 'browse' | 'create' | 'timer-start' | 'timer-stop' | 'chat' | 'search' | 'admin' | 'report';
+
 export interface WorkflowStep {
   id: string;
   name: string;
-  execute: (page: Page) => Promise<void>;
+  /** Step categorization for filtering and metrics */
+  category: StepCategory;
+  /** Tags for grouping related steps (e.g., 'kanban', 'inventory', 'time-tracking') */
+  tags: string[];
+  /** Returns optional entity type string if data was created (e.g., 'job', 'lead') */
+  execute: (page: Page) => Promise<string | void>;
 }
 
 export interface Workflow {
@@ -104,9 +112,9 @@ export class StressOrchestrator {
     for (let i = 0; i < usersToLaunch.length; i++) {
       const user = usersToLaunch[i];
 
-      // Stagger: wait 2s between each worker launch to avoid resource exhaustion
+      // Stagger: wait 500ms between each worker launch (auth is the bottleneck)
       if (i > 0) {
-        await this.delay(2000);
+        await this.delay(500);
       }
 
       this.log(`[W${user.workerId}] Initializing ${user.email} (${user.role})...`);
@@ -164,8 +172,8 @@ export class StressOrchestrator {
       wc.abortController.abort();
     }
 
-    // Give workers a moment to finish their current step
-    await this.delay(2000);
+    // Give workers time to finish their current step (steps avg ~9s)
+    await this.delay(15_000);
 
     // Close all contexts and the browser
     for (const [, wc] of this.workers) {
@@ -227,6 +235,7 @@ export class StressOrchestrator {
       signalrEvents: 0,
       chatMessages: 0,
       avgResponseMs: 0,
+      dataCreated: {},
     };
 
     const wc: WorkerContext = {
@@ -236,6 +245,41 @@ export class StressOrchestrator {
       state,
       abortController: new AbortController(),
     };
+
+    // Track 401 burst to trigger re-auth
+    let consecutive401s = 0;
+    let reauthing = false;
+
+    page.on('response', (res) => {
+      if (res.url().includes('/api/v1/')) {
+        if (res.status() === 401) {
+          consecutive401s++;
+          // After 3 consecutive 401s, re-authenticate (session likely expired)
+          if (consecutive401s >= 3 && !reauthing) {
+            reauthing = true;
+            this.log(`[W${user.workerId}] Session expired — re-authenticating...`);
+            this.authenticate(context, page, user)
+              .then(() => {
+                consecutive401s = 0;
+                reauthing = false;
+                this.log(`[W${user.workerId}] Re-authenticated successfully`);
+              })
+              .catch(() => { reauthing = false; });
+          }
+        } else if (res.ok()) {
+          consecutive401s = 0; // Reset on any successful call
+        }
+
+        if (res.status() >= 400) {
+          const url = res.url().replace(API_URL, '');
+          // Skip noisy expected errors
+          if (res.status() === 401) return; // handled by re-auth above
+          if (res.status() === 403 && (url.includes('planning-cycles') || url.includes('/admin/'))) return;
+          if (res.status() === 409 && url.includes('timer/stop')) return;
+          this.log(`[W${user.workerId}] HTTP ${res.status()} ${res.request().method()} ${url}`);
+        }
+      }
+    });
 
     // Authenticate
     await this.authenticate(context, page, user);
@@ -252,10 +296,20 @@ export class StressOrchestrator {
     while (this.running && !wc.abortController.signal.aborted) {
       wc.state.loopCount++;
 
+      // Clear stale drafts at the start of each loop to prevent recovery prompts
+      await clearAllDrafts(wc.page).catch(() => {});
+
+      // Shuffle step order each iteration — Fisher-Yates
+      const steps = [...workflow.steps];
+      for (let i = steps.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [steps[i], steps[j]] = [steps[j], steps[i]];
+      }
+
       try {
         let completedAllSteps = true;
 
-        for (const step of workflow.steps) {
+        for (const step of steps) {
           // Check stop conditions before each step
           if (!this.running || wc.abortController.signal.aborted) {
             completedAllSteps = false;
@@ -266,7 +320,12 @@ export class StressOrchestrator {
           const start = Date.now();
 
           try {
-            await step.execute(wc.page);
+            // Clear tooltips/overlays before each step to prevent pointer interception
+            await clearOverlayBackdrops(wc.page).catch(() => {});
+            // Dismiss any draft recovery dialogs left by previous steps
+            await dismissDraftRecoveryPrompt(wc.page).catch(() => {});
+
+            const dataCreated = await step.execute(wc.page);
             const duration = Date.now() - start;
 
             this.recordStep(wc, {
@@ -274,11 +333,19 @@ export class StressOrchestrator {
               stepName: step.name,
               success: true,
               durationMs: duration,
+              dataCreated: dataCreated || undefined,
             });
 
-            // Random delay between steps (2-15 seconds to simulate human pace)
+            // Clean up any lingering CDK overlay backdrops before next step
+            await clearOverlayBackdrops(wc.page).catch(() => {});
+
+            // Random delay between steps — scales with test duration
+            // Short tests (< 5 min): 1-3s, medium (5-30 min): 2-8s, long (> 30 min): 2-15s
             if (this.running && !wc.abortController.signal.aborted) {
-              await wc.page.waitForTimeout(2000 + Math.random() * 13000);
+              const durationMin = STRESS_DURATION_MS / 60_000;
+              const minDelay = durationMin < 5 ? 1000 : 2000;
+              const maxDelay = durationMin < 5 ? 3000 : durationMin < 30 ? 8000 : 15000;
+              await wc.page.waitForTimeout(minDelay + Math.random() * (maxDelay - minDelay));
             }
           } catch (err) {
             const duration = Date.now() - start;
@@ -427,12 +494,34 @@ export class StressOrchestrator {
       timeout: 15000,
     }).catch(() => {});
 
-    // Dismiss the onboarding banner if present
+    // Permanently dismiss onboarding: click "Skip onboarding" then confirm "Yes, mark as onboarded"
     const skipBtn = page.locator('button', { hasText: /skip onboarding/i }).first();
     if (await skipBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-      await skipBtn.click();
+      // Use DOM click to avoid tooltip interception
+      await page.evaluate(() => {
+        const btns = Array.from(document.querySelectorAll('button'));
+        const skip = btns.find(b => /skip onboarding/i.test(b.textContent ?? ''));
+        if (skip) skip.click();
+      });
       await page.waitForTimeout(500);
+
+      // Confirm the bypass
+      const confirmBtn = page.locator('button', { hasText: /yes.*mark.*onboarded/i }).first();
+      if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+        await confirmBtn.click();
+        await page.waitForTimeout(1000);
+      } else {
+        // If confirm doesn't appear, just dismiss the banner
+        const dismissBtn = page.locator('.onboarding-banner__dismiss').first();
+        if (await dismissBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+          await dismissBtn.click();
+          await page.waitForTimeout(300);
+        }
+      }
     }
+
+    // Clear any lingering tooltips or overlay backdrops
+    await clearOverlayBackdrops(page).catch(() => {});
   }
 
   // -----------------------------------------------------------------------
@@ -455,6 +544,12 @@ export class StressOrchestrator {
       if (result.error.toLowerCase().includes('deadlock')) {
         this.metrics.deadlocks++;
       }
+    }
+
+    // Track data creation
+    if (result.dataCreated) {
+      wc.state.dataCreated[result.dataCreated] = (wc.state.dataCreated[result.dataCreated] || 0) + 1;
+      this.log(`[W${wc.user.workerId}] ✓ Created ${result.dataCreated}`);
     }
 
     // Update global counters

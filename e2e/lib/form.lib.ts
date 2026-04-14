@@ -24,8 +24,18 @@ export async function fillByTestId(
   value: string,
 ): Promise<void> {
   const wrapper = page.locator(`[data-testid="${testId}"]`);
+
+  // Try textarea first (e.g., app-textarea), then input
+  const textarea = wrapper.locator('textarea').first();
+  if (await textarea.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await textarea.click({ timeout: 5000 });
+    await textarea.fill(value);
+    await page.waitForTimeout(100);
+    return;
+  }
+
   const input = wrapper.locator('input[matInput], input[matinput], input').first();
-  await input.click({ timeout: 5000 });
+  await input.click({ timeout: 5000, force: true });
   await input.fill(value);
   await page.waitForTimeout(100);
 }
@@ -99,7 +109,7 @@ export async function fillDateByTestId(
 ): Promise<void> {
   const wrapper = page.locator(`[data-testid="${testId}"]`);
   const input = wrapper.locator('input[matInput], input[matinput], input').first();
-  await input.click({ timeout: 5000 });
+  await input.click({ timeout: 5000, force: true });
   await input.fill(dateStr);
 
   // Only press Escape if a calendar overlay is open — otherwise it closes the parent dialog
@@ -108,8 +118,8 @@ export async function fillDateByTestId(
     await page.keyboard.press('Escape');
   }
 
-  // Click outside the input to blur it and dismiss any overlay
-  await page.locator('body').click({ position: { x: 0, y: 0 }, force: true });
+  // Blur the input without clicking a potentially interactive element (sidebar, header)
+  await input.evaluate((el) => (el as HTMLInputElement).blur());
   await page.waitForTimeout(100);
 }
 
@@ -192,6 +202,128 @@ export async function fillForm(
 
     await fillByTestId(page, testId, strValue);
   }
+}
+
+/**
+ * Remove any lingering CDK overlay backdrops that can block clicks.
+ * Call between steps or before opening a new dialog.
+ */
+export async function clearOverlayBackdrops(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    // Click backdrops to close any open dialogs/dropdowns
+    document.querySelectorAll('.cdk-overlay-backdrop').forEach((el) => {
+      (el as HTMLElement).click();
+    });
+    // Remove any lingering tooltip surfaces that block pointer events
+    document.querySelectorAll('.mat-mdc-tooltip-surface, .mdc-tooltip__surface').forEach((el) => {
+      el.closest('.cdk-overlay-pane')?.remove();
+    });
+  });
+  await page.waitForTimeout(200);
+}
+
+/**
+ * Dismiss any draft recovery prompt ("UNSAVED WORK FOUND") or other blocking
+ * dialog that may appear after login or page navigation. Uses Playwright
+ * locator with Escape key fallback.
+ */
+export async function dismissDraftRecoveryPrompt(page: Page): Promise<void> {
+  // Try multiple strategies to dismiss blocking dialogs
+
+  // Strategy 1: Click "Discard All" button via Playwright locator (case-insensitive)
+  const discardBtn = page.getByRole('button', { name: /discard all/i }).first();
+  if (await discardBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await discardBtn.click({ force: true });
+    await page.waitForTimeout(500);
+    return;
+  }
+
+  // Strategy 2: Click "Review Later" button
+  const reviewBtn = page.getByRole('button', { name: /review later/i }).first();
+  if (await reviewBtn.isVisible({ timeout: 500 }).catch(() => false)) {
+    await reviewBtn.click({ force: true });
+    await page.waitForTimeout(500);
+    return;
+  }
+
+  // Strategy 3: Press Escape to dismiss any dialog
+  const anyDialog = page.locator('.dialog-backdrop, .cdk-overlay-backdrop').first();
+  if (await anyDialog.isVisible({ timeout: 500 }).catch(() => false)) {
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
+  }
+}
+
+/**
+ * Clear all drafts from IndexedDB to prevent the draft recovery prompt
+ * from appearing. Call once after authentication, before workflow starts.
+ */
+export async function clearAllDrafts(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    try {
+      const dbs = await indexedDB.databases();
+      for (const db of dbs) {
+        if (db.name?.includes('draft')) {
+          indexedDB.deleteDatabase(db.name);
+        }
+      }
+    } catch {
+      // IndexedDB may not support databases() — fallback
+      try { indexedDB.deleteDatabase('qb-engineer-drafts'); } catch {}
+    }
+  });
+  await page.waitForTimeout(200);
+}
+
+/**
+ * Fill an entity-picker (mat-autocomplete) by its data-testid attribute.
+ * Types searchText into the input, waits for autocomplete options to appear,
+ * then clicks the first (or Nth) option. If no options appear, clears and skips.
+ */
+export async function fillEntityPickerByTestId(
+  page: Page,
+  testId: string,
+  searchText: string,
+  optionIndex = 0,
+): Promise<boolean> {
+  const wrapper = page.locator(`[data-testid="${testId}"]`);
+  const input = wrapper.locator('input').first();
+  await input.click({ timeout: 5000, force: true });
+  await input.fill('');
+  await page.waitForTimeout(200);
+  await input.pressSequentially(searchText, { delay: 50 });
+  await page.waitForTimeout(800);
+
+  // Wait for autocomplete options to appear
+  const option = page.locator('mat-option').nth(optionIndex);
+  const visible = await option.isVisible({ timeout: 3000 }).catch(() => false);
+  if (visible) {
+    await option.click();
+    await page.waitForTimeout(300);
+    return true;
+  }
+
+  // No options — clear and move on
+  await input.fill('');
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(200);
+  return false;
+}
+
+/**
+ * Click the Nth row in a data table. Returns true if a row was clicked.
+ */
+export async function clickTableRow(
+  page: Page,
+  index = 0,
+  timeout = 5000,
+): Promise<boolean> {
+  const row = page.locator('app-data-table tbody tr').nth(index);
+  if (await row.isVisible({ timeout }).catch(() => false)) {
+    await row.click({ timeout });
+    return true;
+  }
+  return false;
 }
 
 /**

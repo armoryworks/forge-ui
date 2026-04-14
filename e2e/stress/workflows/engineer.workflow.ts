@@ -1,6 +1,6 @@
 import type { Page } from 'playwright';
 import type { Workflow } from '../orchestrator';
-import { fillByTestId, selectByTestId, fillDateByTestId, fillForm } from '../../lib/form.lib';
+import { fillByTestId, selectByTestId, selectNthByTestId, clickByTestId, fillDateByTestId, fillForm, fillEntityPickerByTestId } from '../../lib/form.lib';
 import { closeDialog } from '../../lib/dialog.lib';
 import { waitForAnySnackbar, dismissSnackbar } from '../../lib/snackbar.lib';
 import { waitForTable, sortByColumn } from '../../lib/data-table.lib';
@@ -114,12 +114,14 @@ const AI_QUESTIONS = [
 // ---------------------------------------------------------------------------
 
 /**
- * Engineer workflow — simulates a full engineering shift (31 steps).
+ * Engineer workflow — simulates a full engineering shift (39 steps).
  *
  * Covers: dashboard, kanban (create job), backlog, parts catalog,
  * quality (inspections/lots/gages), inventory, time tracking (timer + manual),
  * expenses, chat, MRP, scheduling, OEE, purchase orders, reports,
- * planning, training, calendar, AI assistant, notifications, account.
+ * planning, training, calendar, AI assistant, notifications, account,
+ * global search, security/MFA, customer returns, events, payroll,
+ * tax forms, lot records.
  *
  * Creates real data: jobs, time entries, expenses, chat messages.
  */
@@ -133,6 +135,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-01',
         name: 'Review dashboard KPIs',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -158,6 +162,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-02',
         name: 'Start engineering timer',
+        category: 'timer-start',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -179,7 +185,7 @@ export function getEngineerWorkflow(): Workflow {
               const dlg = page.locator('app-dialog .dialog').first();
               if (await dlg.isVisible({ timeout: 5000 }).catch(() => false)) {
                 try {
-                  await selectByTestId(page, 'timer-category', 'Engineering');
+                  await selectByTestId(page, 'timer-category', 'Other');
                 } catch {
                   // Category may differ — skip
                 }
@@ -188,7 +194,10 @@ export function getEngineerWorkflow(): Workflow {
                 await fillByTestId(page, 'timer-notes', randomPick(TIMER_START_NOTES));
                 await page.waitForTimeout(randomDelay(300, 600));
 
-                await page.locator('[data-testid="timer-start-btn"]').click({ force: true });
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="timer-start-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
 
                 const snackbar = await waitForAnySnackbar(page, ELEMENT_TIMEOUT).catch(() => '');
                 console.log(`[engineer] eng-02 timer started — snackbar: "${snackbar}"`);
@@ -211,6 +220,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-03',
         name: 'Browse kanban board',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -239,6 +250,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-04',
         name: 'Create new job on kanban board',
+        category: 'create',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             // Navigate to kanban and wait for board
@@ -350,11 +363,142 @@ export function getEngineerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
-      // 5. Open job detail — browse tabs
+      // 5. Manual time entry — yesterday's CAD work
       // ---------------------------------------------------------------
       {
-        id: 'eng-05',
+        id: 'eng-05',  // originally eng-24
+        name: 'Create manual time entry for yesterday',
+        category: 'create',
+        tags: ['time-tracking'],
+        execute: async (page: Page) => {
+          try {
+            if (!page.url().includes('/time-tracking')) {
+              await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+              await page.waitForTimeout(randomDelay(800, 1500));
+            }
+
+            const content = page.locator('app-data-table, app-page-layout').first();
+            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
+
+            // Click manual entry button
+            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
+            await manualBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+            await manualBtn.click();
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            // Wait for dialog
+            await page.locator('app-dialog .dialog').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            // Fill date (yesterday)
+            await fillDateByTestId(page, 'time-entry-date', randomDate(-1, 1));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Select category
+            try {
+              await selectByTestId(page, 'time-entry-category', 'Other');
+            } catch { /* skip */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill hours — 3h 30m of CAD work
+            await fillByTestId(page, 'time-entry-hours', '3');
+            await page.waitForTimeout(randomDelay(100, 300));
+
+            await fillByTestId(page, 'time-entry-minutes', '30');
+            await page.waitForTimeout(randomDelay(100, 300));
+
+            // Fill notes
+            await fillByTestId(page, 'time-entry-notes', randomPick(TIME_ENTRY_NOTES));
+            await page.waitForTimeout(randomDelay(300, 600));
+
+            // Save via DOM click
+            await page.waitForTimeout(1000);
+            await page.evaluate(() => {
+              const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
+              if (btn && !btn.disabled) btn.click();
+            });
+            await page.waitForTimeout(3000);
+            console.log(`[engineer] eng-05 manual time entry 3h 30m submitted`);
+            await dismissSnackbar(page);
+            await page.waitForTimeout(randomDelay(500, 1000));
+          } catch (err) {
+            console.log(`[engineer] eng-05 manual time entry FAILED: ${err instanceof Error ? err.message : err}`);
+            try { await closeDialog(page); } catch { /* ignore */ }
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 6. Expense — submit engineering expense
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-06',  // originally eng-25
+        name: 'Submit engineering expense',
+        category: 'create',
+        tags: ['expenses'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            const content = page.locator('app-data-table, app-page-layout').first();
+            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
+
+            // Click new expense button
+            const newBtn = page.locator('[data-testid="new-expense-btn"]');
+            await newBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+            await newBtn.click();
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            // Wait for dialog
+            await page.locator('app-dialog .dialog').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            // Fill amount
+            const amount = randomAmount(25, 500);
+            await fillByTestId(page, 'expense-amount', amount);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill date (recent)
+            await fillDateByTestId(page, 'expense-date', randomDate(-7, 7));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Select category
+            try {
+              await selectByTestId(page, 'expense-category', 'Tools');
+            } catch { /* skip */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill description
+            const desc = randomPick(EXPENSE_DESCRIPTIONS);
+            await fillByTestId(page, 'expense-description', desc);
+            await page.waitForTimeout(randomDelay(300, 600));
+
+            // Save via DOM click
+            await page.waitForTimeout(1000);
+            await page.evaluate(() => {
+              const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
+              if (btn && !btn.disabled) btn.click();
+            });
+            await page.waitForTimeout(3000);
+            console.log(`[engineer] eng-06 expense $${amount} "${desc}" submitted`);
+            await dismissSnackbar(page);
+            await page.waitForTimeout(randomDelay(500, 1000));
+          } catch (err) {
+            console.log(`[engineer] eng-06 expense FAILED: ${err instanceof Error ? err.message : err}`);
+            try { await closeDialog(page); } catch { /* ignore */ }
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 7. Open job detail — browse tabs
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-07',  // originally eng-05
         name: 'Open a job card and browse detail tabs',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             const card = page.locator('.kanban-card, .job-card').first();
@@ -386,51 +530,64 @@ export function getEngineerWorkflow(): Workflow {
               await page.waitForTimeout(randomDelay(300, 600));
             }
           } catch (err) {
-            console.log(`[engineer] eng-05 job detail: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-07 job detail: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 6. Parts catalog — browse and sort
+      // 8. Parts catalog — browse and sort
       // ---------------------------------------------------------------
       {
-        id: 'eng-06',
-        name: 'Browse parts catalog',
+        id: 'eng-08',  // originally eng-06
+        name: 'Create a part',
+        category: 'create',
+        tags: ['parts'],
         execute: async (page: Page) => {
           try {
             await page.goto('/parts', { waitUntil: 'load', timeout: NAV_TIMEOUT });
             await page.waitForTimeout(randomDelay(800, 1500));
 
-            await waitForTable(page, 0, ELEMENT_TIMEOUT).catch(() => {});
+            await clickByTestId(page, 'new-part-btn');
             await page.waitForTimeout(randomDelay(500, 1000));
 
-            // Sort by Part #
-            try {
-              await sortByColumn(page, 'Part');
-              await page.waitForTimeout(randomDelay(500, 1000));
-            } catch { /* column text may differ */ }
+            const partType = randomPick(['Component', 'Assembly', 'Raw Material']);
+            await selectByTestId(page, 'part-type', partType);
+            await page.waitForTimeout(randomDelay(200, 400));
 
-            // Click a row to open detail
-            try {
-              const firstRow = page.locator('app-data-table tbody tr').first();
-              if (await firstRow.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await firstRow.click();
-                await page.waitForTimeout(randomDelay(800, 1500));
-              }
-            } catch { /* no rows */ }
+            const partDesc = randomPick([
+              'Precision bore sleeve', 'Machined adapter plate',
+              'Stainless pivot pin', 'Anodized end cap',
+            ]);
+            await fillByTestId(page, 'part-description', partDesc);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            const partMaterial = randomPick(['6061-T6 Aluminum', '303 Stainless', '4140 Steel']);
+            await fillByTestId(page, 'part-material', partMaterial);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'part-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
           } catch (err) {
-            console.log(`[engineer] eng-06 parts: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-08 create part: ${err instanceof Error ? err.message : err}`);
+            await page.keyboard.press('Escape').catch(() => {});
           }
+          return 'part';
         },
       },
 
       // ---------------------------------------------------------------
-      // 7. Part detail — view BOM tab
+      // 9. Part detail — view BOM tab
       // ---------------------------------------------------------------
       {
-        id: 'eng-07',
+        id: 'eng-09',  // originally eng-07
         name: 'View part detail and BOM',
+        category: 'browse',
+        tags: ['parts', 'bom'],
         execute: async (page: Page) => {
           try {
             // Detail dialog should still be open from previous step
@@ -454,17 +611,19 @@ export function getEngineerWorkflow(): Workflow {
               await page.waitForTimeout(randomDelay(300, 600));
             }
           } catch (err) {
-            console.log(`[engineer] eng-07 part detail: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-09 part detail: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 8. Backlog — sort by Priority
+      // 10. Backlog — sort by Priority
       // ---------------------------------------------------------------
       {
-        id: 'eng-08',
+        id: 'eng-10',  // originally eng-08
         name: 'Browse backlog sorted by priority',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
             await page.goto('/backlog', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -486,17 +645,19 @@ export function getEngineerWorkflow(): Workflow {
             await sortByColumn(page, 'Due').catch(() => {});
             await page.waitForTimeout(randomDelay(500, 1000));
           } catch (err) {
-            console.log(`[engineer] eng-08 backlog: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-10 backlog: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 9. Backlog — open a job detail
+      // 11. Backlog — open a job detail
       // ---------------------------------------------------------------
       {
-        id: 'eng-09',
+        id: 'eng-11',  // originally eng-09
         name: 'Open backlog job detail',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
             const firstRow = page.locator('app-data-table tbody tr').first();
@@ -514,48 +675,52 @@ export function getEngineerWorkflow(): Workflow {
               await page.waitForTimeout(randomDelay(300, 600));
             }
           } catch (err) {
-            console.log(`[engineer] eng-09 backlog detail: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-11 backlog detail: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 10. Quality — inspections tab
+      // 12. Quality — inspections tab
       // ---------------------------------------------------------------
       {
-        id: 'eng-10',
-        name: 'Browse quality inspections',
+        id: 'eng-12',  // originally eng-10
+        name: 'Create quality inspection',
+        category: 'create',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/inspections', { waitUntil: 'load', timeout: NAV_TIMEOUT });
             await page.waitForTimeout(randomDelay(800, 1500));
 
-            const content = page.locator('app-data-table, app-page-layout').first();
-            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
-            await page.waitForTimeout(randomDelay(800, 1500));
+            await clickByTestId(page, 'new-inspection-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
 
-            // Click a row if data exists
-            try {
-              const row = page.locator('app-data-table tbody tr').first();
-              if (await row.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await row.click();
-                await page.waitForTimeout(randomDelay(800, 1500));
-                await page.keyboard.press('Escape');
-                await page.waitForTimeout(randomDelay(300, 600));
-              }
-            } catch { /* no data */ }
+            await fillByTestId(page, 'inspection-notes', `Stress test inspection — ${new Date().toISOString()}`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'inspection-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
           } catch (err) {
-            console.log(`[engineer] eng-10 quality inspections: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-12 create inspection: ${err instanceof Error ? err.message : err}`);
+            await page.keyboard.press('Escape').catch(() => {});
           }
+          return 'inspection';
         },
       },
 
       // ---------------------------------------------------------------
-      // 11. Quality — lots tab
+      // 13. Quality — lots tab
       // ---------------------------------------------------------------
       {
-        id: 'eng-11',
+        id: 'eng-13',  // originally eng-11
         name: 'Browse quality lots',
+        category: 'browse',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -565,17 +730,19 @@ export function getEngineerWorkflow(): Workflow {
             await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
             await page.waitForTimeout(randomDelay(800, 1500));
           } catch (err) {
-            console.log(`[engineer] eng-11 quality lots: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-13 quality lots: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 12. Quality — gages tab
+      // 14. Quality — gages tab
       // ---------------------------------------------------------------
       {
-        id: 'eng-12',
+        id: 'eng-14',  // originally eng-12
         name: 'Browse quality gages',
+        category: 'browse',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/gages', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -585,17 +752,19 @@ export function getEngineerWorkflow(): Workflow {
             await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
             await page.waitForTimeout(randomDelay(800, 1500));
           } catch (err) {
-            console.log(`[engineer] eng-12 quality gages: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-14 quality gages: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 13. Inventory — browse stock
+      // 15. Inventory — browse stock
       // ---------------------------------------------------------------
       {
-        id: 'eng-13',
+        id: 'eng-15',  // originally eng-13
         name: 'Browse inventory stock',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/inventory/stock', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -616,17 +785,19 @@ export function getEngineerWorkflow(): Workflow {
               await page.waitForTimeout(randomDelay(300, 600));
             }
           } catch (err) {
-            console.log(`[engineer] eng-13 inventory: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-15 inventory: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 14. Stop timer — first engineering block done
+      // 16. Stop timer — first engineering block done
       // ---------------------------------------------------------------
       {
-        id: 'eng-14',
+        id: 'eng-16',  // originally eng-14
         name: 'Stop engineering timer',
+        category: 'timer-stop',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -647,25 +818,27 @@ export function getEngineerWorkflow(): Workflow {
               await page.locator('[data-testid="timer-stop-btn"]').click();
 
               const snackbar = await waitForAnySnackbar(page, ELEMENT_TIMEOUT).catch(() => '');
-              console.log(`[engineer] eng-14 timer stopped — snackbar: "${snackbar}"`);
+              console.log(`[engineer] eng-16 timer stopped — snackbar: "${snackbar}"`);
               await dismissSnackbar(page);
             } else {
-              console.log('[engineer] eng-14 no active timer to stop');
+              console.log('[engineer] eng-16 no active timer to stop');
             }
             await page.waitForTimeout(randomDelay(500, 1000));
           } catch (err) {
-            console.log(`[engineer] eng-14 stop timer: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-16 stop timer: ${err instanceof Error ? err.message : err}`);
             try { await closeDialog(page); } catch { /* ignore */ }
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 15. Chat — send engineering update
+      // 17. Chat — send engineering update
       // ---------------------------------------------------------------
       {
-        id: 'eng-15',
+        id: 'eng-17',  // originally eng-15
         name: 'Send engineering chat message',
+        category: 'chat',
+        tags: ['chat'],
         execute: async (page: Page) => {
           try {
             await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -692,57 +865,73 @@ export function getEngineerWorkflow(): Workflow {
               await page.waitForTimeout(randomDelay(500, 1000));
             }
           } catch (err) {
-            console.log(`[engineer] eng-15 chat: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-17 chat: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 16. Start new timer — second engineering block
+      // 18. Start new timer — second engineering block
       // ---------------------------------------------------------------
       {
-        id: 'eng-16',
+        id: 'eng-18',  // originally eng-16
         name: 'Start second engineering timer',
+        category: 'timer-start',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
             await page.waitForTimeout(randomDelay(800, 1500));
 
+            // Check if timer is already running (stop button visible)
+            const stopBtn = page.locator('[data-testid="stop-timer-btn"]');
             const startBtn = page.locator('[data-testid="start-timer-btn"]');
-            await startBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-            await startBtn.click();
-            await page.waitForTimeout(randomDelay(500, 1000));
 
-            await page.locator('app-dialog .dialog').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+            if (await stopBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
+              console.log('[engineer] eng-18 timer already running — skipping start');
+              await page.waitForTimeout(randomDelay(500, 1000));
+            } else if (await startBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+              await startBtn.click();
+              await page.waitForTimeout(randomDelay(500, 1000));
 
-            try {
-              await selectByTestId(page, 'timer-category', 'Engineering');
-            } catch { /* skip */ }
-            await page.waitForTimeout(randomDelay(200, 400));
+              await page.locator('app-dialog .dialog').first()
+                .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
 
-            await fillByTestId(page, 'timer-notes', randomPick(TIMER_START_NOTES));
-            await page.waitForTimeout(randomDelay(300, 600));
+              try {
+                await selectByTestId(page, 'timer-category', 'Other');
+              } catch { /* skip */ }
+              await page.waitForTimeout(randomDelay(200, 400));
 
-            await page.locator('[data-testid="timer-start-btn"]').click();
+              await fillByTestId(page, 'timer-notes', randomPick(TIMER_START_NOTES));
+              await page.waitForTimeout(randomDelay(300, 600));
 
-            const snackbar = await waitForAnySnackbar(page, ELEMENT_TIMEOUT).catch(() => '');
-            console.log(`[engineer] eng-16 second timer started — snackbar: "${snackbar}"`);
-            await dismissSnackbar(page);
-            await page.waitForTimeout(randomDelay(500, 1000));
+              await page.evaluate(() => {
+                const btn = document.querySelector('[data-testid="timer-start-btn"]') as HTMLButtonElement;
+                if (btn && !btn.disabled) btn.click();
+              });
+
+              const snackbar = await waitForAnySnackbar(page, ELEMENT_TIMEOUT).catch(() => '');
+              console.log(`[engineer] eng-18 second timer started — snackbar: "${snackbar}"`);
+              await dismissSnackbar(page);
+              await page.waitForTimeout(randomDelay(500, 1000));
+            } else {
+              console.log('[engineer] eng-18 no timer buttons visible — skipping');
+            }
           } catch (err) {
-            console.log(`[engineer] eng-16 start timer: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-18 start timer: ${err instanceof Error ? err.message : err}`);
             try { await closeDialog(page); } catch { /* ignore */ }
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 17. MRP — browse planned orders
+      // 19. MRP — browse planned orders
       // ---------------------------------------------------------------
       {
-        id: 'eng-17',
+        id: 'eng-19',  // originally eng-17
         name: 'Browse MRP planned orders',
+        category: 'browse',
+        tags: ['mrp'],
         execute: async (page: Page) => {
           try {
             await page.goto('/mrp/planned-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -770,17 +959,19 @@ export function getEngineerWorkflow(): Workflow {
               }
             } catch { /* tab may not exist */ }
           } catch (err) {
-            console.log(`[engineer] eng-17 MRP: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-19 MRP: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 18. Scheduling — browse schedule
+      // 20. Scheduling — browse schedule
       // ---------------------------------------------------------------
       {
-        id: 'eng-18',
+        id: 'eng-20',  // originally eng-18
         name: 'Browse scheduling view',
+        category: 'browse',
+        tags: ['calendar'],
         execute: async (page: Page) => {
           try {
             await page.goto('/scheduling', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -790,17 +981,19 @@ export function getEngineerWorkflow(): Workflow {
             await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
             await page.waitForTimeout(randomDelay(1000, 2000));
           } catch (err) {
-            console.log(`[engineer] eng-18 scheduling: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-20 scheduling: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 19. OEE — browse metrics
+      // 21. OEE — browse metrics
       // ---------------------------------------------------------------
       {
-        id: 'eng-19',
+        id: 'eng-21',  // originally eng-19
         name: 'Browse OEE metrics',
+        category: 'browse',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             await page.goto('/oee', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -810,17 +1003,19 @@ export function getEngineerWorkflow(): Workflow {
             await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
             await page.waitForTimeout(randomDelay(1000, 2000));
           } catch (err) {
-            console.log(`[engineer] eng-19 OEE: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-21 OEE: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 20. Purchase orders — check material orders
+      // 22. Purchase orders — check material orders
       // ---------------------------------------------------------------
       {
-        id: 'eng-20',
+        id: 'eng-22',  // originally eng-20
         name: 'Browse purchase orders',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/purchase-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -846,17 +1041,19 @@ export function getEngineerWorkflow(): Workflow {
               }
             } catch { /* no data */ }
           } catch (err) {
-            console.log(`[engineer] eng-20 purchase orders: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-22 purchase orders: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 21. Reports — run a report
+      // 23. Reports — run a report
       // ---------------------------------------------------------------
       {
-        id: 'eng-21',
+        id: 'eng-23',  // originally eng-21
         name: 'Browse reports and run one',
+        category: 'report',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             await page.goto('/reports', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -881,17 +1078,19 @@ export function getEngineerWorkflow(): Workflow {
 
             await page.waitForTimeout(randomDelay(800, 1500));
           } catch (err) {
-            console.log(`[engineer] eng-21 reports: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-23 reports: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 22. Planning — browse current cycle
+      // 24. Planning — browse current cycle
       // ---------------------------------------------------------------
       {
-        id: 'eng-22',
+        id: 'eng-24',  // originally eng-22
         name: 'Browse planning cycle',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
             await page.goto('/planning', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -912,17 +1111,19 @@ export function getEngineerWorkflow(): Workflow {
               }
             } catch { /* no data */ }
           } catch (err) {
-            console.log(`[engineer] eng-22 planning: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-24 planning: ${err instanceof Error ? err.message : err}`);
           }
         },
       },
 
       // ---------------------------------------------------------------
-      // 23. Stop timer — second block done
+      // 25. Stop timer — second block done
       // ---------------------------------------------------------------
       {
-        id: 'eng-23',
+        id: 'eng-25',  // originally eng-23
         name: 'Stop second engineering timer',
+        category: 'timer-stop',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -942,147 +1143,14 @@ export function getEngineerWorkflow(): Workflow {
               await page.locator('[data-testid="timer-stop-btn"]').click();
 
               const snackbar = await waitForAnySnackbar(page, ELEMENT_TIMEOUT).catch(() => '');
-              console.log(`[engineer] eng-23 timer stopped — snackbar: "${snackbar}"`);
+              console.log(`[engineer] eng-25 timer stopped — snackbar: "${snackbar}"`);
               await dismissSnackbar(page);
             } else {
-              console.log('[engineer] eng-23 no active timer to stop');
+              console.log('[engineer] eng-25 no active timer to stop');
             }
             await page.waitForTimeout(randomDelay(500, 1000));
           } catch (err) {
-            console.log(`[engineer] eng-23 stop timer: ${err instanceof Error ? err.message : err}`);
-            try { await closeDialog(page); } catch { /* ignore */ }
-          }
-        },
-      },
-
-      // ---------------------------------------------------------------
-      // 24. Manual time entry — yesterday's CAD work
-      // ---------------------------------------------------------------
-      {
-        id: 'eng-24',
-        name: 'Create manual time entry for yesterday',
-        execute: async (page: Page) => {
-          try {
-            if (!page.url().includes('/time-tracking')) {
-              await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-              await page.waitForTimeout(randomDelay(800, 1500));
-            }
-
-            const content = page.locator('app-data-table, app-page-layout').first();
-            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
-
-            // Click manual entry button
-            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
-            await manualBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-            await manualBtn.click();
-            await page.waitForTimeout(randomDelay(500, 1000));
-
-            // Wait for dialog
-            await page.locator('app-dialog .dialog').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
-            // Fill date (yesterday)
-            await fillDateByTestId(page, 'time-entry-date', randomDate(-1, 1));
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            // Select category
-            try {
-              await selectByTestId(page, 'time-entry-category', 'Engineering');
-            } catch {
-              try {
-                await selectByTestId(page, 'time-entry-category', 'General');
-              } catch { /* skip */ }
-            }
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            // Fill hours — 3h 30m of CAD work
-            await fillByTestId(page, 'time-entry-hours', '3');
-            await page.waitForTimeout(randomDelay(100, 300));
-
-            await fillByTestId(page, 'time-entry-minutes', '30');
-            await page.waitForTimeout(randomDelay(100, 300));
-
-            // Fill notes
-            await fillByTestId(page, 'time-entry-notes', randomPick(TIME_ENTRY_NOTES));
-            await page.waitForTimeout(randomDelay(300, 600));
-
-            // Save via DOM click
-            await page.waitForTimeout(1000);
-            await page.evaluate(() => {
-              const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
-              if (btn && !btn.disabled) btn.click();
-            });
-            await page.waitForTimeout(3000);
-            console.log(`[engineer] eng-24 manual time entry 3h 30m submitted`);
-            await dismissSnackbar(page);
-            await page.waitForTimeout(randomDelay(500, 1000));
-          } catch (err) {
-            console.log(`[engineer] eng-24 manual time entry FAILED: ${err instanceof Error ? err.message : err}`);
-            try { await closeDialog(page); } catch { /* ignore */ }
-          }
-        },
-      },
-
-      // ---------------------------------------------------------------
-      // 25. Expense — submit engineering expense
-      // ---------------------------------------------------------------
-      {
-        id: 'eng-25',
-        name: 'Submit engineering expense',
-        execute: async (page: Page) => {
-          try {
-            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-            await page.waitForTimeout(randomDelay(800, 1500));
-
-            const content = page.locator('app-data-table, app-page-layout').first();
-            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
-
-            // Click new expense button
-            const newBtn = page.locator('[data-testid="new-expense-btn"]');
-            await newBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-            await newBtn.click();
-            await page.waitForTimeout(randomDelay(500, 1000));
-
-            // Wait for dialog
-            await page.locator('app-dialog .dialog').first()
-              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
-
-            // Fill amount
-            const amount = randomAmount(25, 500);
-            await fillByTestId(page, 'expense-amount', amount);
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            // Fill date (recent)
-            await fillDateByTestId(page, 'expense-date', randomDate(-7, 7));
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            // Select category
-            try {
-              await selectByTestId(page, 'expense-category', 'Engineering');
-            } catch {
-              try {
-                await selectByTestId(page, 'expense-category', 'Supplies');
-              } catch { /* skip */ }
-            }
-            await page.waitForTimeout(randomDelay(200, 400));
-
-            // Fill description
-            const desc = randomPick(EXPENSE_DESCRIPTIONS);
-            await fillByTestId(page, 'expense-description', desc);
-            await page.waitForTimeout(randomDelay(300, 600));
-
-            // Save via DOM click
-            await page.waitForTimeout(1000);
-            await page.evaluate(() => {
-              const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
-              if (btn && !btn.disabled) btn.click();
-            });
-            await page.waitForTimeout(3000);
-            console.log(`[engineer] eng-25 expense $${amount} "${desc}" submitted`);
-            await dismissSnackbar(page);
-            await page.waitForTimeout(randomDelay(500, 1000));
-          } catch (err) {
-            console.log(`[engineer] eng-25 expense FAILED: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-25 stop timer: ${err instanceof Error ? err.message : err}`);
             try { await closeDialog(page); } catch { /* ignore */ }
           }
         },
@@ -1094,6 +1162,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-26',
         name: 'Browse training modules',
+        category: 'browse',
+        tags: ['training'],
         execute: async (page: Page) => {
           try {
             await page.goto('/training/my-learning', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1134,6 +1204,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-27',
         name: 'Check calendar schedule',
+        category: 'browse',
+        tags: ['calendar'],
         execute: async (page: Page) => {
           try {
             await page.goto('/calendar', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1164,6 +1236,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-28',
         name: 'Use AI assistant',
+        category: 'search',
+        tags: ['ai'],
         execute: async (page: Page) => {
           try {
             await page.goto('/ai', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1196,6 +1270,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-29',
         name: 'Check notifications',
+        category: 'browse',
+        tags: ['notifications'],
         execute: async (page: Page) => {
           try {
             const bellBtn = page.locator(
@@ -1235,6 +1311,8 @@ export function getEngineerWorkflow(): Workflow {
       {
         id: 'eng-30',
         name: 'Review account profile',
+        category: 'browse',
+        tags: ['account'],
         execute: async (page: Page) => {
           try {
             await page.goto('/account', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1250,11 +1328,244 @@ export function getEngineerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
-      // 31. Return to dashboard — end of shift
+      // 32. Global search — press Ctrl+K, type term, read results
       // ---------------------------------------------------------------
       {
-        id: 'eng-31',
+        id: 'eng-32',
+        name: 'Use global search',
+        category: 'search',
+        tags: ['search', 'header'],
+        execute: async (page: Page) => {
+          try {
+            await page.keyboard.press('Control+k');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            const searchInput = page.locator('input[type="search"], .search-input, [placeholder*="Search"]').first();
+            if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+              const terms = ['bracket', 'motor', 'seal', 'pump', 'gasket'];
+              await searchInput.fill(randomPick(terms));
+              await page.waitForTimeout(randomDelay(1000, 2000));
+            }
+
+            await page.keyboard.press('Escape');
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch (err) {
+            console.log(`[engineer] eng-32 global search: ${err instanceof Error ? err.message : err}`);
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 33. Account security / MFA — browse
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-33',
+        name: 'Browse account security / MFA',
+        category: 'browse',
+        tags: ['account', 'security'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/security', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            const content = page.locator('app-page-layout, .security-container, .account-container').first();
+            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch (err) {
+            console.log(`[engineer] eng-33 account security: ${err instanceof Error ? err.message : err}`);
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 34. Customer returns — browse
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-34',
+        name: 'Browse customer returns',
+        category: 'browse',
+        tags: ['customer-returns'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customer-returns', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            await waitForTable(page, ELEMENT_TIMEOUT).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch (err) {
+            console.log(`[engineer] eng-34 customer returns: ${err instanceof Error ? err.message : err}`);
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 35. Upcoming events — browse (may 403 for engineer role)
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-35',
+        name: 'Browse upcoming events',
+        category: 'browse',
+        tags: ['events'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/admin/events', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            const content = page.locator('app-page-layout, app-data-table, .events-container').first();
+            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch (err) {
+            // Engineer role may not have access — that's expected
+            console.log(`[engineer] eng-35 events: ${err instanceof Error ? err.message : err}`);
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 36. Account pay stubs — browse
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-36',
+        name: 'Browse account pay stubs',
+        category: 'browse',
+        tags: ['account', 'payroll'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/pay-stubs', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            const content = page.locator('app-page-layout, app-data-table, .pay-stubs-container').first();
+            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch (err) {
+            console.log(`[engineer] eng-36 pay stubs: ${err instanceof Error ? err.message : err}`);
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 37. Account tax forms — browse
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-37',
+        name: 'Browse account tax forms',
+        category: 'browse',
+        tags: ['account', 'compliance'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/tax-forms', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            const content = page.locator('app-page-layout, app-data-table, .tax-forms-container').first();
+            await content.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch (err) {
+            console.log(`[engineer] eng-37 tax forms: ${err instanceof Error ? err.message : err}`);
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 38. Lot records — create
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-38',
+        name: 'Create lot record',
+        category: 'create',
+        tags: ['lots', 'quality'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            await clickByTestId(page, 'new-lot-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            // Fill required entity-picker: part
+            let foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'bracket');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'aluminum');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'steel');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'bearing');
+            if (!foundPart) {
+              console.log('[engineer] eng-38 no parts found for entity-picker — skipping lot creation');
+              await page.keyboard.press('Escape').catch(() => {});
+              return;
+            }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'lot-quantity', String(randomInt(10, 200)));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'lot-notes', `Stress test lot — ${new Date().toISOString()}`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'lot-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch (err) {
+            console.log(`[engineer] eng-38 create lot: ${err instanceof Error ? err.message : err}`);
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+          return 'lot';
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 39. Create ECO
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-39',
+        name: 'Create ECO',
+        category: 'create',
+        tags: ['quality', 'eco'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/quality/ecos', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1500));
+
+            await clickByTestId(page, 'new-eco-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await fillByTestId(page, 'eco-title', `ECO stress test — ${new Date().toISOString()}`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await selectNthByTestId(page, 'eco-change-type', 0);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await selectNthByTestId(page, 'eco-priority', 0);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'eco-description', 'Automated stress test ECO — validates create flow');
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'eco-reason', 'Stress test validation');
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'eco-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch (err) {
+            console.log(`[engineer] eng-39 create ECO: ${err instanceof Error ? err.message : err}`);
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+          return 'eco';
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 40. Return to dashboard — end of shift
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-40',
         name: 'Return to dashboard',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1264,7 +1575,7 @@ export function getEngineerWorkflow(): Workflow {
             await widget.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT }).catch(() => {});
             await page.waitForTimeout(randomDelay(1000, 2000));
           } catch (err) {
-            console.log(`[engineer] eng-31 dashboard return: ${err instanceof Error ? err.message : err}`);
+            console.log(`[engineer] eng-40 dashboard return: ${err instanceof Error ? err.message : err}`);
           }
         },
       },

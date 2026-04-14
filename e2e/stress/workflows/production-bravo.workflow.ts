@@ -1,6 +1,6 @@
 import type { Page } from 'playwright';
 import type { Workflow } from '../orchestrator';
-import { fillByTestId, selectByTestId, fillDateByTestId } from '../../lib/form.lib';
+import { fillByTestId, selectByTestId, clickByTestId, fillDateByTestId, fillEntityPickerByTestId } from '../../lib/form.lib';
 import { waitForAnySnackbar, dismissSnackbar } from '../../lib/snackbar.lib';
 import { waitForTable, sortByColumn } from '../../lib/data-table.lib';
 import { randomDelay, testId, maybe, randomPick, randomInt, randomDate, randomAmount } from '../../lib/random.lib';
@@ -84,13 +84,8 @@ const EXPENSE_DESCRIPTIONS = [
   'Lockout/tagout padlock set — 6 pack',
 ];
 
-const EXPENSE_CATEGORIES = [
-  'Maintenance Supplies',
-  'Repair Parts',
-  'Safety Equipment',
-  'Consumables',
-  'Tools',
-];
+// Must match seed data in SeedData.Essential.cs (expense_category group)
+const EXPENSE_CATEGORIES = ['Materials', 'Tools', 'Equipment', 'Maintenance', 'Other'];
 
 const ASSET_SEARCH_TERMS = ['CNC', 'lathe', 'press', 'mill', 'compressor', 'conveyor', 'saw', 'welder', 'pump', 'drill'];
 const INVENTORY_SEARCH_TERMS = ['bearing', 'filter', 'belt', 'seal', 'gasket', 'lubricant', 'hose', 'grease', 'coolant', 'wire'];
@@ -117,6 +112,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-01',
         name: 'Dashboard — review KPIs',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -134,6 +131,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-02',
         name: 'Start maintenance timer',
+        category: 'timer-start',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -170,6 +169,7 @@ export function getProductionBravoWorkflow(): Workflow {
                 await page.waitForTimeout(randomDelay(500, 1000));
                 await waitForAnySnackbar(page, 3000).catch(() => {});
                 await dismissSnackbar(page).catch(() => {});
+                return 'timer';
               }
             }
           } catch {
@@ -184,6 +184,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-03',
         name: 'Switch to Maintenance kanban',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -210,11 +212,153 @@ export function getProductionBravoWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
+      // pb-19: Manual time entry — yesterday's unrecorded work
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-04',  // originally pb-19
+        name: 'Create manual time entry',
+        category: 'create',
+        tags: ['time-tracking'],
+        execute: async (page: Page) => {
+          try {
+            const currentUrl = page.url();
+            if (!currentUrl.includes('/time-tracking')) {
+              await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+              await page.waitForSelector('app-data-table, .page-header', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+              await page.waitForTimeout(randomDelay(500, 800));
+            }
+
+            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
+            if (await manualBtn.isVisible({ timeout: ELEMENT_TIMEOUT })) {
+              await manualBtn.click();
+              await page.waitForTimeout(randomDelay(500, 1000));
+
+              const dateField = page.locator('[data-testid="time-entry-date"]');
+              if (await dateField.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await fillDateByTestId(page, 'time-entry-date', randomDate(1, 2)); // yesterday or day before
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const categoryField = page.locator('[data-testid="time-entry-category"]');
+              if (await categoryField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await selectByTestId(page, 'time-entry-category', 'Maintenance');
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const hoursField = page.locator('[data-testid="time-entry-hours"]');
+              if (await hoursField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await fillByTestId(page, 'time-entry-hours', String(randomInt(1, 3)));
+                await page.waitForTimeout(randomDelay(200, 300));
+              }
+
+              const minutesField = page.locator('[data-testid="time-entry-minutes"]');
+              if (await minutesField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await fillByTestId(page, 'time-entry-minutes', String(randomPick([0, 15, 30, 45])));
+                await page.waitForTimeout(randomDelay(200, 300));
+              }
+
+              const notesField = page.locator('[data-testid="time-entry-notes"]');
+              if (await notesField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await fillByTestId(page, 'time-entry-notes', randomPick(MANUAL_ENTRY_NOTES));
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const saveBtn = page.locator('[data-testid="time-entry-save-btn"]');
+              if (await saveBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+                const isDisabled = await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) { btn.click(); return false; }
+                  return true;
+                });
+                if (isDisabled) {
+                  console.log('[prod-bravo] pb-04 save button disabled — form invalid, skipping');
+                } else {
+                  await page.waitForTimeout(3000);
+                  await dismissSnackbar(page).catch(() => {});
+                  return 'time-entry';
+                }
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-20: Expense — submit maintenance expense
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-05',  // originally pb-20
+        name: 'Submit maintenance expense',
+        category: 'create',
+        tags: ['expenses'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state, .page-header', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            const newExpenseBtn = page.locator('[data-testid="new-expense-btn"]');
+            if (await newExpenseBtn.isVisible({ timeout: ELEMENT_TIMEOUT })) {
+              await newExpenseBtn.click();
+              await page.waitForTimeout(randomDelay(500, 1000));
+              await page.waitForSelector('.mat-mdc-dialog-container, app-dialog', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+
+              const amountField = page.locator('[data-testid="expense-amount"]');
+              if (await amountField.isVisible({ timeout: 3000 }).catch(() => false)) {
+                await fillByTestId(page, 'expense-amount', randomAmount(15, 500));
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const dateField = page.locator('[data-testid="expense-date"]');
+              if (await dateField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await fillDateByTestId(page, 'expense-date', randomDate(0, 1));
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const categoryField = page.locator('[data-testid="expense-category"]');
+              if (await categoryField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await selectByTestId(page, 'expense-category', randomPick(EXPENSE_CATEGORIES));
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const descField = page.locator('[data-testid="expense-description"]');
+              if (await descField.isVisible({ timeout: 2000 }).catch(() => false)) {
+                await fillByTestId(page, 'expense-description', randomPick(EXPENSE_DESCRIPTIONS));
+                await page.waitForTimeout(randomDelay(200, 400));
+              }
+
+              const saveBtn = page.locator('[data-testid="expense-save-btn"]');
+              if (await saveBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
+                const isDisabled = await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) { btn.click(); return false; }
+                  return true;
+                });
+                if (isDisabled) {
+                  console.log('[prod-bravo] pb-05 save button disabled — form invalid, skipping');
+                } else {
+                  await page.waitForTimeout(3000);
+                  await dismissSnackbar(page).catch(() => {});
+                  return 'expense';
+                }
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
       // pb-04: Open a maintenance job — browse detail tabs
       // ------------------------------------------------------------------
       {
-        id: 'pb-04',
+        id: 'pb-06',  // originally pb-04
         name: 'Open maintenance job detail',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             const cards = page.locator('.job-card, [class*="job-card"], app-job-card');
@@ -252,8 +396,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-05: Assets — browse equipment, search, view detail
       // ------------------------------------------------------------------
       {
-        id: 'pb-05',
+        id: 'pb-07',  // originally pb-05
         name: 'Browse and search assets',
+        category: 'search',
+        tags: ['assets'],
         execute: async (page: Page) => {
           try {
             await page.goto('/assets', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -303,8 +449,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-06: Inventory stock — search for spare parts
       // ------------------------------------------------------------------
       {
-        id: 'pb-06',
+        id: 'pb-08',  // originally pb-06
         name: 'Inventory stock — search spare parts',
+        category: 'search',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/inventory/stock', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -340,8 +488,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-07: Inventory receiving — browse received items
       // ------------------------------------------------------------------
       {
-        id: 'pb-07',
+        id: 'pb-09',  // originally pb-07
         name: 'Inventory receiving — browse',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/inventory/receiving', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -373,8 +523,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-08: Inventory locations — browse storage layout
       // ------------------------------------------------------------------
       {
-        id: 'pb-08',
+        id: 'pb-10',  // originally pb-08
         name: 'Inventory locations — browse',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/inventory/locations', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -400,8 +552,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-09: Back to kanban (Maintenance) — view another work order
       // ------------------------------------------------------------------
       {
-        id: 'pb-09',
+        id: 'pb-11',  // originally pb-09
         name: 'Kanban — view another maintenance WO',
+        category: 'browse',
+        tags: ['kanban'],
         execute: async (page: Page) => {
           try {
             await page.goto('/kanban', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -437,8 +591,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-10: Quality inspections — browse
       // ------------------------------------------------------------------
       {
-        id: 'pb-10',
+        id: 'pb-12',  // originally pb-10
         name: 'Quality inspections — browse',
+        category: 'browse',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/inspections', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -467,28 +623,49 @@ export function getProductionBravoWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // pb-11: Quality lots — browse lot records
+      // pb-11: Quality lots — create lot record
       // ------------------------------------------------------------------
       {
-        id: 'pb-11',
-        name: 'Quality lots — browse',
+        id: 'pb-13',  // originally pb-11
+        name: 'Create lot record',
+        category: 'create',
+        tags: ['lots'],
         execute: async (page: Page) => {
           try {
-            await page.goto('/quality/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-            await page.waitForSelector('app-data-table, app-empty-state, .page-header', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.goto('/lots', { waitUntil: 'load', timeout: NAV_TIMEOUT });
             await page.waitForTimeout(randomDelay(800, 1500));
 
-            const rows = page.locator('app-data-table tbody tr, .data-table__row');
-            const rowCount = await rows.count().catch(() => 0);
-            if (rowCount > 0 && maybe(0.4)) {
-              await rows.nth(randomInt(0, Math.min(rowCount - 1, 4))).click({ timeout: 3000 }).catch(() => {});
-              await page.waitForTimeout(randomDelay(1000, 1800));
+            await clickByTestId(page, 'new-lot-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            // Fill required entity-picker: part
+            let foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'bracket');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'aluminum');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'steel');
+            if (!foundPart) foundPart = await fillEntityPickerByTestId(page, 'lot-part', 'bearing');
+            if (!foundPart) {
+              console.log('[prod-bravo] pb-13 no parts found for entity-picker — skipping lot creation');
               await page.keyboard.press('Escape').catch(() => {});
-              await page.waitForTimeout(randomDelay(300, 500));
+              return;
             }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'lot-quantity', String(randomInt(50, 500)));
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await fillByTestId(page, 'lot-notes', `Bravo lot — ${new Date().toISOString()}`);
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'lot-save-btn');
+            await page.waitForTimeout(randomDelay(500, 1000));
+
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            await page.waitForTimeout(randomDelay(300, 600));
           } catch {
             await page.keyboard.press('Escape').catch(() => {});
           }
+          return 'lot';
         },
       },
 
@@ -496,8 +673,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-12: Chat — send maintenance team update
       // ------------------------------------------------------------------
       {
-        id: 'pb-12',
+        id: 'pb-14',  // originally pb-12
         name: 'Send chat message',
+        category: 'chat',
+        tags: ['chat'],
         execute: async (page: Page) => {
           try {
             await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -548,8 +727,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-13: Stop timer — end first maintenance round
       // ------------------------------------------------------------------
       {
-        id: 'pb-13',
+        id: 'pb-15',  // originally pb-13
         name: 'Stop maintenance timer',
+        category: 'timer-stop',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -585,8 +766,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-14: Start new timer — second maintenance round
       // ------------------------------------------------------------------
       {
-        id: 'pb-14',
+        id: 'pb-16',  // originally pb-14
         name: 'Start second maintenance timer',
+        category: 'timer-start',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             // Should still be on time-tracking
@@ -625,6 +808,7 @@ export function getProductionBravoWorkflow(): Workflow {
                 await page.waitForTimeout(randomDelay(500, 1000));
                 await waitForAnySnackbar(page, 3000).catch(() => {});
                 await dismissSnackbar(page).catch(() => {});
+                return 'timer';
               }
             }
           } catch {
@@ -637,8 +821,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-15: Parts — search for replacement parts
       // ------------------------------------------------------------------
       {
-        id: 'pb-15',
+        id: 'pb-17',  // originally pb-15
         name: 'Parts — search replacement parts',
+        category: 'search',
+        tags: ['parts'],
         execute: async (page: Page) => {
           try {
             await page.goto('/parts', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -676,8 +862,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-16: Backlog — browse maintenance backlog items
       // ------------------------------------------------------------------
       {
-        id: 'pb-16',
+        id: 'pb-18',  // originally pb-16
         name: 'Backlog — browse maintenance items',
+        category: 'browse',
+        tags: ['backlog'],
         execute: async (page: Page) => {
           try {
             await page.goto('/backlog', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -709,8 +897,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-17: Calendar — check schedule
       // ------------------------------------------------------------------
       {
-        id: 'pb-17',
+        id: 'pb-19',  // originally pb-17
         name: 'Calendar — check schedule',
+        category: 'browse',
+        tags: ['calendar'],
         execute: async (page: Page) => {
           try {
             await page.goto('/calendar', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -736,8 +926,10 @@ export function getProductionBravoWorkflow(): Workflow {
       // pb-18: Stop timer — end second round
       // ------------------------------------------------------------------
       {
-        id: 'pb-18',
+        id: 'pb-20',  // originally pb-18
         name: 'Stop second timer',
+        category: 'timer-stop',
+        tags: ['time-tracking'],
         execute: async (page: Page) => {
           try {
             await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -770,135 +962,13 @@ export function getProductionBravoWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // pb-19: Manual time entry — yesterday's unrecorded work
-      // ------------------------------------------------------------------
-      {
-        id: 'pb-19',
-        name: 'Create manual time entry',
-        execute: async (page: Page) => {
-          try {
-            const currentUrl = page.url();
-            if (!currentUrl.includes('/time-tracking')) {
-              await page.goto('/time-tracking', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-              await page.waitForSelector('app-data-table, .page-header', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
-              await page.waitForTimeout(randomDelay(500, 800));
-            }
-
-            const manualBtn = page.locator('[data-testid="manual-entry-btn"]');
-            if (await manualBtn.isVisible({ timeout: ELEMENT_TIMEOUT })) {
-              await manualBtn.click();
-              await page.waitForTimeout(randomDelay(500, 1000));
-
-              const dateField = page.locator('[data-testid="time-entry-date"]');
-              if (await dateField.isVisible({ timeout: 3000 }).catch(() => false)) {
-                await fillDateByTestId(page, 'time-entry-date', randomDate(1, 2)); // yesterday or day before
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const categoryField = page.locator('[data-testid="time-entry-category"]');
-              if (await categoryField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await selectByTestId(page, 'time-entry-category', 'Maintenance');
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const hoursField = page.locator('[data-testid="time-entry-hours"]');
-              if (await hoursField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await fillByTestId(page, 'time-entry-hours', String(randomInt(1, 3)));
-                await page.waitForTimeout(randomDelay(200, 300));
-              }
-
-              const minutesField = page.locator('[data-testid="time-entry-minutes"]');
-              if (await minutesField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await fillByTestId(page, 'time-entry-minutes', String(randomPick([0, 15, 30, 45])));
-                await page.waitForTimeout(randomDelay(200, 300));
-              }
-
-              const notesField = page.locator('[data-testid="time-entry-notes"]');
-              if (await notesField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await fillByTestId(page, 'time-entry-notes', randomPick(MANUAL_ENTRY_NOTES));
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const saveBtn = page.locator('[data-testid="time-entry-save-btn"]');
-              if (await saveBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await page.evaluate(() => {
-                  const btn = document.querySelector('[data-testid="time-entry-save-btn"]') as HTMLButtonElement;
-                  if (btn && !btn.disabled) btn.click();
-                });
-                await page.waitForTimeout(3000);
-                await dismissSnackbar(page).catch(() => {});
-              }
-            }
-          } catch {
-            await page.keyboard.press('Escape').catch(() => {});
-          }
-        },
-      },
-
-      // ------------------------------------------------------------------
-      // pb-20: Expense — submit maintenance expense
-      // ------------------------------------------------------------------
-      {
-        id: 'pb-20',
-        name: 'Submit maintenance expense',
-        execute: async (page: Page) => {
-          try {
-            await page.goto('/expenses', { waitUntil: 'load', timeout: NAV_TIMEOUT });
-            await page.waitForSelector('app-data-table, app-empty-state, .page-header', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
-            await page.waitForTimeout(randomDelay(500, 1000));
-
-            const newExpenseBtn = page.locator('[data-testid="new-expense-btn"]');
-            if (await newExpenseBtn.isVisible({ timeout: ELEMENT_TIMEOUT })) {
-              await newExpenseBtn.click();
-              await page.waitForTimeout(randomDelay(500, 1000));
-              await page.waitForSelector('.mat-mdc-dialog-container, app-dialog', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
-
-              const amountField = page.locator('[data-testid="expense-amount"]');
-              if (await amountField.isVisible({ timeout: 3000 }).catch(() => false)) {
-                await fillByTestId(page, 'expense-amount', randomAmount(15, 500));
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const dateField = page.locator('[data-testid="expense-date"]');
-              if (await dateField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await fillDateByTestId(page, 'expense-date', randomDate(0, 1));
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const categoryField = page.locator('[data-testid="expense-category"]');
-              if (await categoryField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await selectByTestId(page, 'expense-category', randomPick(EXPENSE_CATEGORIES));
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const descField = page.locator('[data-testid="expense-description"]');
-              if (await descField.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await fillByTestId(page, 'expense-description', randomPick(EXPENSE_DESCRIPTIONS));
-                await page.waitForTimeout(randomDelay(200, 400));
-              }
-
-              const saveBtn = page.locator('[data-testid="expense-save-btn"]');
-              if (await saveBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
-                await page.evaluate(() => {
-                  const btn = document.querySelector('[data-testid="expense-save-btn"]') as HTMLButtonElement;
-                  if (btn && !btn.disabled) btn.click();
-                });
-                await page.waitForTimeout(3000);
-                await dismissSnackbar(page).catch(() => {});
-              }
-            }
-          } catch {
-            await page.keyboard.press('Escape').catch(() => {});
-          }
-        },
-      },
-
-      // ------------------------------------------------------------------
       // pb-21: Training — browse safety modules
       // ------------------------------------------------------------------
       {
         id: 'pb-21',
         name: 'Training — browse safety modules',
+        category: 'browse',
+        tags: ['training'],
         execute: async (page: Page) => {
           try {
             await page.goto('/training/catalog', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -933,6 +1003,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-22',
         name: 'Reports — view maintenance report',
+        category: 'report',
+        tags: ['reports'],
         execute: async (page: Page) => {
           try {
             await page.goto('/reports', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -972,6 +1044,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-23',
         name: 'Account profile — browse',
+        category: 'browse',
+        tags: ['account'],
         execute: async (page: Page) => {
           try {
             await page.goto('/account/profile', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -989,6 +1063,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-24',
         name: 'Check notifications',
+        category: 'browse',
+        tags: ['notifications'],
         execute: async (page: Page) => {
           try {
             const bellButton = page.locator('button[aria-label*="otification"], button[aria-label*="bell"], .notification-bell').first();
@@ -1024,6 +1100,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-25',
         name: 'Quality gages — browse',
+        category: 'browse',
+        tags: ['quality'],
         execute: async (page: Page) => {
           try {
             await page.goto('/quality/gages', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1057,6 +1135,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-26',
         name: 'Events — check upcoming',
+        category: 'browse',
+        tags: ['events'],
         execute: async (page: Page) => {
           try {
             await page.goto('/admin/events', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1084,6 +1164,8 @@ export function getProductionBravoWorkflow(): Workflow {
       {
         id: 'pb-27',
         name: 'Purchase orders — check parts on order',
+        category: 'browse',
+        tags: ['inventory'],
         execute: async (page: Page) => {
           try {
             await page.goto('/purchase-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
@@ -1113,11 +1195,104 @@ export function getProductionBravoWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
-      // pb-28: Return to dashboard — end of shift review
+      // pb-29: Browse account tax documents
       // ------------------------------------------------------------------
       {
-        id: 'pb-28',
+        id: 'pb-29',
+        name: 'Browse account tax documents',
+        category: 'browse',
+        tags: ['account', 'payroll'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/tax-documents', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector(
+              'app-data-table, table, [class*="tax-document"], .page-header',
+              { timeout: ELEMENT_TIMEOUT },
+            ).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch {
+            // Tax documents page may not be accessible — non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-30: Use global search
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-30',
+        name: 'Use global search',
+        category: 'search',
+        tags: ['search', 'header'],
+        execute: async (page: Page) => {
+          try {
+            await page.keyboard.press('Control+k');
+            await page.waitForTimeout(randomDelay(500, 1000));
+            const searchInput = page.locator('input[type="search"], .search-input, [placeholder*="Search"]').first();
+            if (await searchInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+              const terms = ['bracket', 'motor', 'seal', 'pump', 'gasket'];
+              await searchInput.fill(randomPick(terms));
+              await page.waitForTimeout(randomDelay(1000, 2000));
+            }
+            await page.keyboard.press('Escape');
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-31: Browse account pay stubs
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-31',
+        name: 'Browse account pay stubs',
+        category: 'browse',
+        tags: ['account', 'payroll'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/pay-stubs', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector(
+              'app-data-table, table, [class*="pay-stub"], .page-header',
+              { timeout: ELEMENT_TIMEOUT },
+            ).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch {
+            // Pay stubs page may not be accessible — non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-32: Browse account security
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-32',
+        name: 'Browse account security',
+        category: 'browse',
+        tags: ['account', 'security'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/account/security', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector(
+              '[class*="security"], .page-header, mat-card, [class*="mfa"]',
+              { timeout: ELEMENT_TIMEOUT },
+            ).catch(() => {});
+            await page.waitForTimeout(randomDelay(1000, 2000));
+          } catch {
+            // Security page load failed — non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-33: Return to dashboard — end of shift review
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-33',
         name: 'Return to dashboard — shift review',
+        category: 'browse',
+        tags: ['dashboard'],
         execute: async (page: Page) => {
           try {
             await page.goto('/dashboard', { waitUntil: 'load', timeout: NAV_TIMEOUT });

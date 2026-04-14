@@ -178,19 +178,34 @@ export class ConsoleUI {
       `P99: ${chalk.bold.white(p99)}`,
     ];
 
-    const signalr = m ? this.formatNum(m.signalrEvents) : '0';
-    const chat = m ? m.chatMessages.toString() : '0';
-    const notify = m ? m.notificationsSent.toString() : '0';
+    // Aggregate data creation counts across all workers
+    const dataTotals: Record<string, number> = {};
+    if (m) {
+      for (const wr of m.workers) {
+        for (const [entity, count] of Object.entries(wr.dataCreated || {})) {
+          dataTotals[entity] = (dataTotals[entity] || 0) + count;
+        }
+      }
+    }
+    const totalCreated = Object.values(dataTotals).reduce((s, n) => s + n, 0);
+
     const conflicts = m ? m.conflicts409.toString() : '0';
     const deadlocks = m ? m.deadlocks.toString() : '0';
 
     const line2Parts = [
-      `SignalR: ${chalk.bold.white(signalr)} evts`,
-      `Chat: ${chalk.bold.white(chat)} msgs`,
-      `Notify: ${chalk.bold.white(notify)}`,
+      `Created: ${chalk.bold.green(totalCreated.toString())} records`,
       `409s: ${m && m.conflicts409 > 0 ? chalk.yellow(conflicts) : chalk.bold.white(conflicts)}`,
       `Deadlocks: ${m && m.deadlocks > 0 ? chalk.red(deadlocks) : chalk.bold.white(deadlocks)}`,
     ];
+
+    // Build creation breakdown (e.g., "3 jobs, 14 expenses, 2 leads")
+    if (totalCreated > 0) {
+      const parts = Object.entries(dataTotals)
+        .sort((a, b) => b[1] - a[1])
+        .map(([entity, count]) => `${count} ${entity}`)
+        .join(', ');
+      line2Parts.push(chalk.dim(`(${parts})`));
+    }
 
     lines.push(this.padLine(line1Parts.join('    '), w));
     lines.push(this.padLine(line2Parts.join('    '), w));
@@ -348,14 +363,52 @@ export class ConsoleUI {
     console.log(`  Avg response: ${m ? m.avgResponseMs.toFixed(0) + 'ms' : '—'}`);
     console.log(`  P95 response: ${m ? m.p95ResponseMs.toFixed(0) + 'ms' : '—'}`);
     console.log(`  P99 response: ${m ? m.p99ResponseMs.toFixed(0) + 'ms' : '—'}`);
-    console.log(`  SignalR:      ${m ? this.formatNum(m.signalrEvents) + ' events' : '—'}`);
-    console.log(`  Chat:         ${m ? m.chatMessages + ' messages' : '—'}`);
-    console.log(`  Notifications:${m ? ' ' + m.notificationsSent : '—'}`);
     console.log(`  409 conflicts:${m ? ' ' + m.conflicts409 : '—'}`);
     console.log(`  Deadlocks:    ${m ? m.deadlocks : '—'}`);
     console.log('');
 
     if (m) {
+      // ── Data Creation Summary ──
+      const dataTotals: Record<string, number> = {};
+      const roleData: Record<string, Record<string, number>> = {};
+
+      for (const wr of m.workers) {
+        const role = wr.role + (wr.team ? ` (${wr.team})` : '');
+        if (!roleData[role]) roleData[role] = {};
+        for (const [entity, count] of Object.entries(wr.dataCreated || {})) {
+          dataTotals[entity] = (dataTotals[entity] || 0) + count;
+          roleData[role][entity] = (roleData[role][entity] || 0) + count;
+        }
+      }
+
+      const totalCreated = Object.values(dataTotals).reduce((s, n) => s + n, 0);
+
+      if (totalCreated > 0) {
+        console.log(chalk.bold.green(`  Data Created: ${totalCreated} records`));
+        // Sort by count descending
+        const sorted = Object.entries(dataTotals).sort((a, b) => b[1] - a[1]);
+        for (const [entity, count] of sorted) {
+          console.log(`    ${chalk.white(String(count).padStart(4))} ${entity}`);
+        }
+        console.log('');
+
+        // Per-role breakdown
+        console.log(chalk.bold.white('  Per-Role Breakdown:'));
+        for (const [role, entities] of Object.entries(roleData).sort()) {
+          const roleTotal = Object.values(entities).reduce((s, n) => s + n, 0);
+          const parts = Object.entries(entities)
+            .sort((a, b) => b[1] - a[1])
+            .map(([e, c]) => `${c} ${e}`)
+            .join(', ');
+          console.log(`    ${chalk.cyan(role.padEnd(28))} ${chalk.white(String(roleTotal).padStart(3))} — ${parts}`);
+        }
+        console.log('');
+      } else {
+        console.log(chalk.yellow('  No data records created.'));
+        console.log('');
+      }
+
+      // ── Worker Status ──
       const failed = m.workers.filter(wr => wr.status === 'failed');
       if (failed.length > 0) {
         console.log(chalk.red(`  ${failed.length} worker(s) failed:`));

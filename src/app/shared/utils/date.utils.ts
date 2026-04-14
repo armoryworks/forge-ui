@@ -10,6 +10,20 @@ export function toIsoDate(date: Date | string | null | undefined): string | null
   return `${y}-${m}-${day}T00:00:00Z`;
 }
 
+/**
+ * Convert a Date to date-only string (YYYY-MM-DD) for .NET DateOnly API fields.
+ * Unlike toIsoDate(), this has no time component — required for APIs using DateOnly.
+ */
+export function toDateOnly(date: Date | string | null | undefined): string | null {
+  if (!date) return null;
+  const d = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(d.getTime())) return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 // ── Display format constants (project-wide standard) ──
 
 /** Angular DatePipe format: MM/dd/yyyy (e.g., "03/11/2026") */
