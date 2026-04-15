@@ -59,40 +59,40 @@
       <app-input [label]="'adminPanels.events.title' | translate" formControlName="title" [maxlength]="200" [required]="true" data-testid="event-title" />
 
       <div class="dialog-row">
-        <app-select [label]="'adminPanels.events.eventType' | translate" formControlName="eventType" [options]="formTypeOptions" [required]="true" data-testid="event-type" />
+        <app-select [label]="'adminPanels.events.type' | translate" formControlName="eventType" [options]="formTypeOptions" [required]="true" data-testid="event-type" />
         <app-input [label]="'adminPanels.events.location' | translate" formControlName="location" data-testid="event-location" />
       </div>
 
       <div class="dialog-row">
         <app-datepicker [label]="'adminPanels.events.startDate' | translate" formControlName="startDate" [required]="true" data-testid="event-start-date" />
-        <app-input [label]="'adminPanels.events.startDate' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" data-testid="event-start-time" />
+        <app-input [label]="'adminPanels.events.startTime' | translate" formControlName="startTime" placeholder="HH:MM" [required]="true" data-testid="event-start-time" />
       </div>
 
       <div class="dialog-row">
         <app-datepicker [label]="'adminPanels.events.endDate' | translate" formControlName="endDate" [required]="true" data-testid="event-end-date" />
-        <app-input [label]="'adminPanels.events.endDate' | translate" formControlName="endTime" placeholder="HH:MM" [required]="true" data-testid="event-end-time" />
+        <app-input [label]="'adminPanels.events.endTime' | translate" formControlName="endTime" placeholder="HH:MM" [required]="true" data-testid="event-end-time" />
       </div>
 
       <app-textarea [label]="'adminPanels.events.description' | translate" formControlName="description" [rows]="3" data-testid="event-description" />
 
       <app-select
-        label="Attendees"
+        [label]="'adminPanels.events.attendees' | translate"
         formControlName="attendeeUserIds"
         [options]="userOptions()"
         [multiple]="true" />
 
-      <app-toggle [label]="'adminPanels.events.isRequired' | translate" formControlName="isRequired" data-testid="event-required" />
+      <app-toggle [label]="'adminPanels.events.requiredAttendance' | translate" formControlName="isRequired" data-testid="event-required" />
     </div>
 
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">{{ 'adminPanels.events.cancel' | translate }}</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"
         data-testid="event-save-btn"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">
         <span class="material-icons-outlined">save</span>
-        {{ editingEvent() ? ('adminPanels.events.update' | translate) : ('adminPanels.events.create' | translate) }}
+        {{ editingEvent() ? ('adminPanels.events.saveChanges' | translate) : ('adminPanels.events.createEvent' | translate) }}
       </button>
     </div>
   </app-dialog>

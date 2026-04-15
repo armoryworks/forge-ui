@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { map, startWith } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -59,11 +59,20 @@ export class InventoryComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly scanner = inject(ScannerService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
+
+  private static readonly VALID_TABS: InventoryTab[] = ['stock', 'locations', 'movements', 'receiving', 'stockOps', 'cycleCounts', 'reservations', 'replenishment', 'uom'];
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
-  protected readonly activeTab = signal<InventoryTab>('stock');
+  protected readonly activeTab = toSignal(
+    this.route.paramMap.pipe(map(p => {
+      const tab = p.get('tab') as InventoryTab;
+      return InventoryComponent.VALID_TABS.includes(tab) ? tab : 'stock';
+    })),
+    { initialValue: 'stock' },
+  );
 
   // Stock tab
   protected readonly partSummaries = signal<InventoryPartSummary[]>([]);
@@ -263,21 +272,27 @@ export class InventoryComponent {
       if (!scan || scan.context !== 'inventory') return;
       this.scanner.clearLastScan();
       this.searchControl.setValue(scan.value);
-      this.activeTab.set('stock');
+      this.router.navigate(['..', 'stock'], { relativeTo: this.route });
       this.loadStock();
     });
   }
 
   protected switchTab(tab: InventoryTab): void {
-    this.activeTab.set(tab);
-    if (tab === 'stock' && this.partSummaries().length === 0) this.loadStock();
-    if (tab === 'locations' && this.locationTree().length === 0) this.loadLocations();
-    if (tab === 'movements' && this.movements().length === 0) this.loadMovements();
-    if (tab === 'receiving' && this.receivingHistory().length === 0) this.loadReceivingHistory();
-    if (tab === 'cycleCounts' && this.cycleCounts().length === 0) this.loadCycleCounts();
-    if (tab === 'reservations' && this.reservations().length === 0) this.loadReservations();
-    if (tab === 'replenishment') { this.loadBurnRates(); this.loadSuggestions(); }
+    this.router.navigate(['..', tab], { relativeTo: this.route });
   }
+
+  private readonly tabEffect = effect(() => {
+    const tab = this.activeTab();
+    untracked(() => {
+      if (tab === 'stock' && this.partSummaries().length === 0) this.loadStock();
+      if (tab === 'locations' && this.locationTree().length === 0) this.loadLocations();
+      if (tab === 'movements' && this.movements().length === 0) this.loadMovements();
+      if (tab === 'receiving' && this.receivingHistory().length === 0) this.loadReceivingHistory();
+      if (tab === 'cycleCounts' && this.cycleCounts().length === 0) this.loadCycleCounts();
+      if (tab === 'reservations' && this.reservations().length === 0) this.loadReservations();
+      if (tab === 'replenishment') { this.loadBurnRates(); this.loadSuggestions(); }
+    });
+  });
 
   private loadBinLocations(): void {
     this.inventoryService.getBinLocations().subscribe({

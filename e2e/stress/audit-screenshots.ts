@@ -143,6 +143,19 @@ function collectNetworkFailures(page: Page): { failures: string[]; stop: () => v
   };
 }
 
+async function navigateInApp(page: Page, targetPath: string, waitMs: number): Promise<void> {
+  // Use client-side navigation (pushState + popstate) instead of page.goto()
+  // to avoid full Angular re-bootstrap. This preserves TranslateService cache,
+  // SignalR connections, and other singleton service state.
+  await page.evaluate((p) => {
+    window.history.pushState({}, '', p);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  }, targetPath);
+  await page.waitForTimeout(Math.max(waitMs, 1500));
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+  await page.waitForTimeout(500);
+}
+
 async function capturePage(
   page: Page,
   name: string,
@@ -155,8 +168,15 @@ async function capturePage(
   const netCollector = collectNetworkFailures(page);
 
   try {
-    await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
-    await page.waitForTimeout(waitMs);
+    const targetPath = new URL(url).pathname;
+    await navigateInApp(page, targetPath, waitMs);
+
+    // Ensure theme attribute is correct
+    const currentTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    if (currentTheme !== theme) {
+      await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      await page.waitForTimeout(300);
+    }
 
     await dismissDraftRecoveryPrompt(page).catch(() => {});
     await clearOverlayBackdrops(page).catch(() => {});
@@ -202,9 +222,16 @@ async function captureDialog(
   const netCollector = collectNetworkFailures(page);
 
   try {
-    // Navigate to the page
-    await page.goto(`${BASE_URL}${dialog.pagePath}`, { waitUntil: 'networkidle', timeout: 15000 });
-    await page.waitForTimeout(1500);
+    // Navigate to the page (client-side to preserve translation cache)
+    await navigateInApp(page, dialog.pagePath, 1500);
+
+    // Ensure theme attribute is correct
+    const currentTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+    if (currentTheme !== theme) {
+      await page.evaluate((t) => document.documentElement.setAttribute('data-theme', t), theme);
+      await page.waitForTimeout(300);
+    }
+
     await dismissDraftRecoveryPrompt(page).catch(() => {});
     await clearOverlayBackdrops(page).catch(() => {});
 
@@ -319,13 +346,17 @@ async function main(): Promise<void> {
   );
   await clearAllDrafts(page).catch(() => {});
 
+  // Pre-load the app so translations are cached
+  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 20000 });
+  await page.waitForTimeout(2000);
+
   const allResults: PageResult[] = [];
   let completed = 0;
 
   // ── Pass 1: Light theme ──
   console.log('── LIGHT THEME ──');
   await page.evaluate(() => {
-    localStorage.setItem('themeMode', 'light');
+    localStorage.setItem('qbe-theme', 'light');
     document.documentElement.setAttribute('data-theme', 'light');
   });
 
@@ -352,23 +383,25 @@ async function main(): Promise<void> {
 
   // ── Pass 2: Dark theme ──
   console.log('\n── DARK THEME ──');
+  // The app reads 'qbe-theme' from localStorage on bootstrap (ThemeService constructor).
+  // Set it before navigating so the Angular app initializes in dark mode.
   await page.evaluate(() => {
-    localStorage.setItem('themeMode', 'dark');
+    localStorage.setItem('qbe-theme', 'dark');
     document.documentElement.setAttribute('data-theme', 'dark');
   });
-  // Reload to apply theme fully
-  await page.goto(BASE_URL, { waitUntil: 'commit' });
-  await page.evaluate(
-    ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
-      localStorage.setItem('language', 'en');
-      localStorage.setItem('themeMode', 'dark');
-    },
-    { token: loginData.token, user: loginData.user },
-  );
+  // Full reload so Angular bootstraps with dark theme from localStorage
+  await page.goto(`${BASE_URL}/dashboard`, { waitUntil: 'networkidle', timeout: 15000 });
+  // Verify dark theme is actually applied
+  await page.waitForTimeout(1000);
+  const appliedTheme = await page.evaluate(() => document.documentElement.getAttribute('data-theme'));
+  if (appliedTheme !== 'dark') {
+    console.warn(`  ⚠ Dark theme not applied (got "${appliedTheme}"), forcing...`);
+    await page.evaluate(() => {
+      localStorage.setItem('qbe-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'dark');
+    });
+  }
   await clearAllDrafts(page).catch(() => {});
-  await page.waitForTimeout(500);
 
   // Pages
   for (const pg of PAGES) {

@@ -217,6 +217,11 @@ export const routes: Routes = [
           import('./features/scheduling/scheduling.routes').then((m) => m.SCHEDULING_ROUTES),
       },
       {
+        path: 'chat',
+        loadChildren: () =>
+          import('./features/chat/chat.routes').then((m) => m.CHAT_ROUTES),
+      },
+      {
         path: 'admin',
         canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
