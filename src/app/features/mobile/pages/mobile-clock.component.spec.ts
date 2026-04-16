@@ -6,6 +6,7 @@ import { signal } from '@angular/core';
 import { AuthService } from '../../../shared/services/auth.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { ClockEventTypeService } from '../../../shared/services/clock-event-type.service';
+import { MobileClockStateService } from '../services/mobile-clock-state.service';
 
 // Stub the LoadingBlockDirective to avoid input.required errors
 import { Directive, Input } from '@angular/core';
@@ -33,18 +34,25 @@ describe('MobileClockComponent', () => {
     error: vi.fn(),
   };
 
+  const clockInAction = { code: 'ClockIn', label: 'Clock In', statusMapping: 'In', oppositeCode: 'ClockOut', category: 'work', countsAsActive: true, isMismatchable: false, icon: 'login', color: '#22c55e' };
+
+  const mockDefinitions = signal<unknown[]>([]);
+
   const mockClockTypes = {
     load: vi.fn(),
     getLabel: vi.fn().mockReturnValue('Clocked Out'),
     getStatusCssClass: vi.fn().mockReturnValue('out'),
-    getAvailableActions: vi.fn().mockReturnValue([
-      { code: 'ClockIn', label: 'Clock In', statusMapping: 'In', oppositeCode: 'ClockOut', category: 'work', countsAsActive: true, isMismatchable: false, icon: 'login', color: '#22c55e' },
-    ]),
-    definitions: signal([]),
+    getAvailableActions: vi.fn().mockReturnValue([clockInAction]),
+    definitions: mockDefinitions,
+  };
+
+  const mockClockState = {
+    update: vi.fn(),
   };
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    mockDefinitions.set([]);
 
     await TestBed.configureTestingModule({
       imports: [MobileClockComponent],
@@ -54,6 +62,7 @@ describe('MobileClockComponent', () => {
         { provide: AuthService, useValue: mockAuthService },
         { provide: SnackbarService, useValue: mockSnackbar },
         { provide: ClockEventTypeService, useValue: mockClockTypes },
+        { provide: MobileClockStateService, useValue: mockClockState },
       ],
     })
       .overrideComponent(MobileClockComponent, {
@@ -73,11 +82,14 @@ describe('MobileClockComponent', () => {
   }
 
   function flushInitRequests(): void {
-    httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`).flush({
+    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
       isClockedIn: false,
       status: 'Out',
       clockedInAt: null,
     });
+    // Trigger the effect that recomputes actions when definitions load
+    mockDefinitions.set([clockInAction]);
+    fixture.detectChanges();
   }
 
   afterEach(() => {
@@ -99,7 +111,7 @@ describe('MobileClockComponent', () => {
   it('should load current status on init', () => {
     createComponent();
 
-    const req = httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`);
+    const req = httpTesting.expectOne('/api/v1/time-tracking/clock-status');
     expect(req.request.method).toBe('GET');
     req.flush({
       isClockedIn: true,
@@ -151,7 +163,7 @@ describe('MobileClockComponent', () => {
     expect(component.submitting()).toBe(false);
 
     // Should reload status after successful submit
-    httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`).flush({
+    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
       isClockedIn: true,
       status: 'In',
       clockedInAt: '2026-04-10T08:00:00Z',
