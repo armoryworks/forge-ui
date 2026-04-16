@@ -1,0 +1,3141 @@
+{
+  "totalSelectors": 174,
+  "foundCount": 174,
+  "missingCount": 0,
+  "invisibleCount": 0,
+  "failures": [],
+  "allResults": [
+    {
+      "moduleSlug": "kanban-board-basics",
+      "moduleTitle": "Understanding the Kanban Board",
+      "route": "/kanban",
+      "stepIndex": 1,
+      "stepTitle": "Board Columns",
+      "selector": "[data-tour='board-columns']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 19
+      },
+      "tagName": "div",
+      "textSnippet": "info_outline\nDrag cards between columns to move jobs. Ctrl+Click to multi-select"
+    },
+    {
+      "moduleSlug": "kanban-board-basics",
+      "moduleTitle": "Understanding the Kanban Board",
+      "route": "/kanban",
+      "stepIndex": 2,
+      "stepTitle": "Board Filters",
+      "selector": "[data-tour='board-filters']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1504.796875,
+        "y": 52,
+        "width": 212,
+        "height": 29
+      },
+      "tagName": "app-select",
+      "textSnippet": "Team Members\nAll assigned users"
+    },
+    {
+      "moduleSlug": "kanban-board-basics",
+      "moduleTitle": "Understanding the Kanban Board",
+      "route": "/kanban",
+      "stepIndex": 3,
+      "stepTitle": "Job Cards",
+      "selector": "[data-tour='job-card']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 73,
+        "y": 158,
+        "width": 190,
+        "height": 61.296875
+      },
+      "tagName": "app-job-card",
+      "textSnippet": "J-1050\nCustom bracket quote — Meridian\nMeridian Systems"
+    },
+    {
+      "moduleSlug": "kanban-board-basics",
+      "moduleTitle": "Understanding the Kanban Board",
+      "route": "/kanban",
+      "stepIndex": 4,
+      "stepTitle": "WIP Limits",
+      "selector": "[data-tour='wip-limit']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 69,
+        "y": 120,
+        "width": 198,
+        "height": 34
+      },
+      "tagName": "div",
+      "textSnippet": "QUOTE REQUESTED\n46"
+    },
+    {
+      "moduleSlug": "kanban-board-basics",
+      "moduleTitle": "Understanding the Kanban Board",
+      "route": "/kanban",
+      "stepIndex": 5,
+      "stepTitle": "Track Type Switcher",
+      "selector": "[data-tour='track-type-switcher']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1151.8125,
+        "y": 57,
+        "width": 270.984375,
+        "height": 19
+      },
+      "tagName": "div",
+      "textSnippet": "PRODUCTION\nR&D/TOOLING\nMAINTENANCE"
+    },
+    {
+      "moduleSlug": "navigating-the-app",
+      "moduleTitle": "Navigating the App — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 1,
+      "stepTitle": "Sidebar Navigation",
+      "selector": ".sidebar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 0,
+        "y": 44,
+        "width": 52,
+        "height": 1036
+      },
+      "tagName": "aside",
+      "textSnippet": "chevron_right\ndashboard\nview_kanban\ninbox\nevent_note\ncalendar_month\npeople\npeopl"
+    },
+    {
+      "moduleSlug": "navigating-the-app",
+      "moduleTitle": "Navigating the App — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 2,
+      "stepTitle": "App Header",
+      "selector": ".app-header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 44
+      },
+      "tagName": "header",
+      "textSnippet": "QB:ENG\nHOME\nchevron_right\nDASHBOARD\nsearch\nCtrl+K\nchat_bubble_outline\nsmart_toy\n"
+    },
+    {
+      "moduleSlug": "navigating-the-app",
+      "moduleTitle": "Navigating the App — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 3,
+      "stepTitle": "Notifications",
+      "selector": ".app-header__actions",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1634.484375,
+        "y": 7,
+        "width": 269.515625,
+        "height": 30
+      },
+      "tagName": "div",
+      "textSnippet": "chat_bubble_outline\nsmart_toy\nschool\nnotifications_none\n1\ndark_mode\nUser, Admin\n"
+    },
+    {
+      "moduleSlug": "navigating-the-app",
+      "moduleTitle": "Navigating the App — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 4,
+      "stepTitle": "User Menu",
+      "selector": ".user-trigger",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1798.484375,
+        "y": 8,
+        "width": 105.515625,
+        "height": 28
+      },
+      "tagName": "button",
+      "textSnippet": "User, Admin\nmenu"
+    },
+    {
+      "moduleSlug": "navigating-the-app",
+      "moduleTitle": "Navigating the App — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 5,
+      "stepTitle": "Dashboard Widgets",
+      "selector": ".dashboard-content",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 988
+      },
+      "tagName": "div",
+      "textSnippet": "101\nACTIVE\n0\n25\nOVERDUE\n0\n823.4h\nHOURS\nup\ntask_alt\nTODAY'S TASKS\nfilter_list\nswa"
+    },
+    {
+      "moduleSlug": "admin-walkthrough",
+      "moduleTitle": "Admin Panel — Guided Tour",
+      "route": "/admin",
+      "stepIndex": 1,
+      "stepTitle": "Admin Content Area",
+      "selector": ".admin-content",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 988
+      },
+      "tagName": "div",
+      "textSnippet": "23 USERS\nadd\nADD USER\n\tNAME\n\tEMAIL\n\tROLE \nfilter_list\n\tLOCATION \nfilter_list\n\tCO"
+    },
+    {
+      "moduleSlug": "admin-walkthrough",
+      "moduleTitle": "Admin Panel — Guided Tour",
+      "route": "/admin",
+      "stepIndex": 2,
+      "stepTitle": "Admin Header",
+      "selector": "app-page-header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 44,
+        "width": 1868,
+        "height": 48
+      },
+      "tagName": "app-page-header",
+      "textSnippet": "ADMIN SETTINGS\nUsers, track types, reference data, and system configuration\nhelp"
+    },
+    {
+      "moduleSlug": "admin-walkthrough",
+      "moduleTitle": "Admin Panel — Guided Tour",
+      "route": "/admin",
+      "stepIndex": 3,
+      "stepTitle": "Users Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 132,
+        "width": 1836,
+        "height": 940
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "\tNAME\n\tEMAIL\n\tROLE \nfilter_list\n\tLOCATION \nfilter_list\n\tCOMPLIANCE\n\tSTATUS\n\tACTI"
+    },
+    {
+      "moduleSlug": "admin-walkthrough",
+      "moduleTitle": "Admin Panel — Guided Tour",
+      "route": "/admin",
+      "stepIndex": 4,
+      "stepTitle": "Section Header",
+      "selector": ".panel-header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100,
+        "width": 1836,
+        "height": 32
+      },
+      "tagName": "div",
+      "textSnippet": "23 USERS\nadd\nADD USER"
+    },
+    {
+      "moduleSlug": "admin-walkthrough",
+      "moduleTitle": "Admin Panel — Guided Tour",
+      "route": "/admin",
+      "stepIndex": 5,
+      "stepTitle": "Action Buttons",
+      "selector": ".action-btn--primary",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 100,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nADD USER"
+    },
+    {
+      "moduleSlug": "ai-walkthrough",
+      "moduleTitle": "AI Assistant — Guided Tour",
+      "route": "/ai",
+      "stepIndex": 1,
+      "stepTitle": "Assistant Sidebar",
+      "selector": ".ai-sidebar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 44,
+        "width": 260,
+        "height": 1036
+      },
+      "tagName": "aside",
+      "textSnippet": "smart_toy\nAI Assistants\nsmart_toy\nGeneral Assistant\nGeneral-purpose help for nav"
+    },
+    {
+      "moduleSlug": "ai-walkthrough",
+      "moduleTitle": "AI Assistant — Guided Tour",
+      "route": "/ai",
+      "stepIndex": 2,
+      "stepTitle": "Welcome Screen",
+      "selector": ".ai-chat__welcome",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 328,
+        "y": 108,
+        "width": 1576,
+        "height": 907
+      },
+      "tagName": "div",
+      "textSnippet": "smart_toy\nGeneral Assistant\n\nGeneral-purpose help for navigating and using QB En"
+    },
+    {
+      "moduleSlug": "ai-walkthrough",
+      "moduleTitle": "AI Assistant — Guided Tour",
+      "route": "/ai",
+      "stepIndex": 3,
+      "stepTitle": "Starter Questions",
+      "selector": ".ai-chat__starters",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 866,
+        "y": 543,
+        "width": 500,
+        "height": 168
+      },
+      "tagName": "div",
+      "textSnippet": "chat_bubble_outline\nHow do I create a new job?\nchat_bubble_outline\nHow does the "
+    },
+    {
+      "moduleSlug": "ai-walkthrough",
+      "moduleTitle": "AI Assistant — Guided Tour",
+      "route": "/ai",
+      "stepIndex": 4,
+      "stepTitle": "Message Input",
+      "selector": ".ai-chat__text-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 328,
+        "y": 1040,
+        "width": 1536,
+        "height": 32
+      },
+      "tagName": "input",
+      "textSnippet": ""
+    },
+    {
+      "moduleSlug": "ai-walkthrough",
+      "moduleTitle": "AI Assistant — Guided Tour",
+      "route": "/ai",
+      "stepIndex": 5,
+      "stepTitle": "Send Message",
+      "selector": ".ai-chat__send",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1872,
+        "y": 1040,
+        "width": 32,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "send"
+    },
+    {
+      "moduleSlug": "assets-walkthrough",
+      "moduleTitle": "Assets — Guided Tour",
+      "route": "/assets",
+      "stepIndex": 1,
+      "stepTitle": "Add Asset Button",
+      "selector": "[data-testid='new-asset-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nADD ASSET"
+    },
+    {
+      "moduleSlug": "assets-walkthrough",
+      "moduleTitle": "Assets — Guided Tour",
+      "route": "/assets",
+      "stepIndex": 2,
+      "stepTitle": "Search Assets",
+      "selector": ".page-header app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1104,
+        "y": 50.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "assets-walkthrough",
+      "moduleTitle": "Assets — Guided Tour",
+      "route": "/assets",
+      "stepIndex": 3,
+      "stepTitle": "Type Filter",
+      "selector": ".page-header app-select:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1324,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Type"
+    },
+    {
+      "moduleSlug": "assets-walkthrough",
+      "moduleTitle": "Assets — Guided Tour",
+      "route": "/assets",
+      "stepIndex": 4,
+      "stepTitle": "Status Filter",
+      "selector": ".page-header app-select:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1544,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "assets-walkthrough",
+      "moduleTitle": "Assets — Guided Tour",
+      "route": "/assets",
+      "stepIndex": 5,
+      "stepTitle": "Assets Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 988
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "\tNAME\n\tTYPE \nfilter_list\n\tLOCATION\n\tMANUFACTURER\n\tSTATUS\n\tHOURS\n\t\ndownload\nsetti"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 1,
+      "stepTitle": "Search Jobs",
+      "selector": ".page-header app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 855.8125,
+        "y": 50.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 2,
+      "stepTitle": "Track Type Filter",
+      "selector": ".page-header app-select:nth-of-type(1)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1075.8125,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Track"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 3,
+      "stepTitle": "Priority Filter",
+      "selector": ".page-header app-select:nth-of-type(2)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1295.8125,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Priority"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 4,
+      "stepTitle": "Assignee Filter",
+      "selector": ".page-header app-select:nth-of-type(3)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1515.8125,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Assignee"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 5,
+      "stepTitle": "View Mode Toggle",
+      "selector": ".view-toggle",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1739.8125,
+        "y": 51.5,
+        "width": 56,
+        "height": 30
+      },
+      "tagName": "div",
+      "textSnippet": "view_list\nview_module"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 6,
+      "stepTitle": "Create Job",
+      "selector": ".new-job-btn",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1803.8125,
+        "y": 50.5,
+        "width": 100.1875,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW JOB"
+    },
+    {
+      "moduleSlug": "backlog-walkthrough",
+      "moduleTitle": "Backlog — Guided Tour",
+      "route": "/backlog",
+      "stepIndex": 7,
+      "stepTitle": "Jobs Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100,
+        "width": 1836,
+        "height": 972
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "JOB # \nfilter_list\n\tTITLE \nfilter_list\n\tSTAGE \nfilter_list\n\tPRIORITY arrow_downw"
+    },
+    {
+      "moduleSlug": "calendar-walkthrough",
+      "moduleTitle": "Calendar — Guided Tour",
+      "route": "/calendar",
+      "stepIndex": 1,
+      "stepTitle": "Track Type Filter",
+      "selector": ".calendar-nav app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1151.265625,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Track Type"
+    },
+    {
+      "moduleSlug": "calendar-walkthrough",
+      "moduleTitle": "Calendar — Guided Tour",
+      "route": "/calendar",
+      "stepIndex": 2,
+      "stepTitle": "View Toggle Buttons",
+      "selector": ".view-toggle",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1367.265625,
+        "y": 57.5,
+        "width": 129.390625,
+        "height": 18
+      },
+      "tagName": "div",
+      "textSnippet": "MONTH\nWEEK\nDAY"
+    },
+    {
+      "moduleSlug": "calendar-walkthrough",
+      "moduleTitle": "Calendar — Guided Tour",
+      "route": "/calendar",
+      "stepIndex": 3,
+      "stepTitle": "Navigation Controls",
+      "selector": ".month-label",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1528.65625,
+        "y": 58,
+        "width": 180,
+        "height": 17
+      },
+      "tagName": "span",
+      "textSnippet": "April 2026"
+    },
+    {
+      "moduleSlug": "calendar-walkthrough",
+      "moduleTitle": "Calendar — Guided Tour",
+      "route": "/calendar",
+      "stepIndex": 4,
+      "stepTitle": "PO Deliveries Toggle",
+      "selector": ".calendar-nav .action-btn--sm:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1795.65625,
+        "y": 50.5,
+        "width": 108.34375,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "local_shipping\nPO DELIVERIES"
+    },
+    {
+      "moduleSlug": "calendar-walkthrough",
+      "moduleTitle": "Calendar — Guided Tour",
+      "route": "/calendar",
+      "stepIndex": 5,
+      "stepTitle": "Calendar Content Area",
+      "selector": ".calendar-grid,.week-grid,.day-list",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 988
+      },
+      "tagName": "div",
+      "textSnippet": "SUN\nMON\nTUE\nWED\nTHU\nFRI\nSAT\n29\n30\n31\n1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\narrow_upward\nJ-1033"
+    },
+    {
+      "moduleSlug": "compliance-forms-walkthrough",
+      "moduleTitle": "Compliance Forms — Guided Tour",
+      "route": "/account/tax-forms",
+      "stepIndex": 1,
+      "stepTitle": "Form Card",
+      "selector": ".tax-forms__item:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 624,
+        "y": 150,
+        "width": 912,
+        "height": 95
+      },
+      "tagName": "a",
+      "textSnippet": "request_quote\nW-4 Federal Tax Withholding\nEmployee's Withholding Certificate — d"
+    },
+    {
+      "moduleSlug": "compliance-forms-walkthrough",
+      "moduleTitle": "Compliance Forms — Guided Tour",
+      "route": "/account/tax-forms",
+      "stepIndex": 2,
+      "stepTitle": "Completion Indicator",
+      "selector": ".tax-forms__item-icon",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 649,
+        "y": 185.5,
+        "width": 24,
+        "height": 24
+      },
+      "tagName": "span",
+      "textSnippet": "request_quote"
+    },
+    {
+      "moduleSlug": "compliance-forms-walkthrough",
+      "moduleTitle": "Compliance Forms — Guided Tour",
+      "route": "/account/tax-forms",
+      "stepIndex": 3,
+      "stepTitle": "Navigate to Form Detail",
+      "selector": ".tax-forms__item-chevron",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1491,
+        "y": 187.5,
+        "width": 20,
+        "height": 20
+      },
+      "tagName": "span",
+      "textSnippet": "chevron_right"
+    },
+    {
+      "moduleSlug": "compliance-forms-walkthrough",
+      "moduleTitle": "Compliance Forms — Guided Tour",
+      "route": "/account/tax-forms",
+      "stepIndex": 4,
+      "stepTitle": "Completed Form",
+      "selector": ".tax-forms__item:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 624,
+        "y": 745,
+        "width": 912,
+        "height": 95
+      },
+      "tagName": "a",
+      "textSnippet": "menu_book\nEmployee Handbook Acknowledgment\nAcknowledge receipt and understanding"
+    },
+    {
+      "moduleSlug": "customers-walkthrough",
+      "moduleTitle": "Customers — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 1,
+      "stepTitle": "Add Customer Button",
+      "selector": "[data-testid='new-customer-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW CUSTOMER"
+    },
+    {
+      "moduleSlug": "customers-walkthrough",
+      "moduleTitle": "Customers — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 2,
+      "stepTitle": "Search Customers",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "customers-walkthrough",
+      "moduleTitle": "Customers — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 3,
+      "stepTitle": "Active/Inactive Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "customers-walkthrough",
+      "moduleTitle": "Customers — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 4,
+      "stepTitle": "Customers Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 916
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "NAME\n\tCOMPANY\n\tEMAIL\n\tPHONE\n\tACTIVE \nfilter_list\n\tCONTACTS\n\tJOBS\n\tCREATED\n\t\ndown"
+    },
+    {
+      "moduleSlug": "dashboard-walkthrough",
+      "moduleTitle": "Dashboard — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 1,
+      "stepTitle": "Dashboard Content Area",
+      "selector": ".dashboard-content",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 988
+      },
+      "tagName": "div",
+      "textSnippet": "101\nACTIVE\n0\n25\nOVERDUE\n0\n823.4h\nHOURS\nup\ntask_alt\nTODAY'S TASKS\nfilter_list\nswa"
+    },
+    {
+      "moduleSlug": "dashboard-walkthrough",
+      "moduleTitle": "Dashboard — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 2,
+      "stepTitle": "KPI Overview",
+      "selector": ".dashboard-kpis",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 56,
+        "y": 96,
+        "width": 1860,
+        "height": 45
+      },
+      "tagName": "div",
+      "textSnippet": "101\nACTIVE\n0\n25\nOVERDUE\n0\n823.4h\nHOURS\nup"
+    },
+    {
+      "moduleSlug": "dashboard-walkthrough",
+      "moduleTitle": "Dashboard — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 3,
+      "stepTitle": "Page Header & Controls",
+      "selector": "app-page-header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 44,
+        "width": 1868,
+        "height": 48
+      },
+      "tagName": "app-page-header",
+      "textSnippet": "DASHBOARD\nKey metrics and upcoming work at a glance\nhelp_outline\nPRODUCTION\ncent"
+    },
+    {
+      "moduleSlug": "dashboard-walkthrough",
+      "moduleTitle": "Dashboard — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 4,
+      "stepTitle": "Dashboard Widget",
+      "selector": "app-dashboard-widget",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 60,
+        "y": 149,
+        "width": 611.984375,
+        "height": 232
+      },
+      "tagName": "app-dashboard-widget",
+      "textSnippet": "task_alt\nTODAY'S TASKS\nfilter_list\nswap_vert\ntune\n8:00a\nCustom bracket quote — M"
+    },
+    {
+      "moduleSlug": "edi-walkthrough",
+      "moduleTitle": "EDI — Guided Tour",
+      "route": "/admin/edi",
+      "stepIndex": 1,
+      "stepTitle": "EDI Sub-Tabs",
+      "selector": ".edi-panel .tab-bar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100,
+        "width": 1836,
+        "height": 35
+      },
+      "tagName": "div",
+      "textSnippet": "business\nTRADING PARTNERS\nswap_horiz\nTRANSACTIONS"
+    },
+    {
+      "moduleSlug": "edi-walkthrough",
+      "moduleTitle": "EDI — Guided Tour",
+      "route": "/admin/edi",
+      "stepIndex": 2,
+      "stepTitle": "New Trading Partner",
+      "selector": ".edi-panel__toolbar .action-btn--primary",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 143,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW PARTNER"
+    },
+    {
+      "moduleSlug": "edi-walkthrough",
+      "moduleTitle": "EDI — Guided Tour",
+      "route": "/admin/edi",
+      "stepIndex": 3,
+      "stepTitle": "Trading Partners Table",
+      "selector": "app-data-table[tableId='edi-partners']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 183,
+        "width": 1836,
+        "height": 122
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "business\n\nNo trading partners configured"
+    },
+    {
+      "moduleSlug": "edi-walkthrough",
+      "moduleTitle": "EDI — Guided Tour",
+      "route": "/admin/edi",
+      "stepIndex": 4,
+      "stepTitle": "Transactions Tab",
+      "selector": ".tab:nth-child(2)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 220.140625,
+        "y": 100,
+        "width": 129.796875,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "swap_horiz\nTRANSACTIONS"
+    },
+    {
+      "moduleSlug": "estimates-walkthrough",
+      "moduleTitle": "Estimates — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 1,
+      "stepTitle": "Customer List",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 916
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "NAME\n\tCOMPANY\n\tEMAIL\n\tPHONE\n\tACTIVE \nfilter_list\n\tCONTACTS\n\tJOBS\n\tCREATED\n\t\ndown"
+    },
+    {
+      "moduleSlug": "estimates-walkthrough",
+      "moduleTitle": "Estimates — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 2,
+      "stepTitle": "Create Customer",
+      "selector": "[data-testid='new-customer-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW CUSTOMER"
+    },
+    {
+      "moduleSlug": "estimates-walkthrough",
+      "moduleTitle": "Estimates — Guided Tour",
+      "route": "/customers",
+      "stepIndex": 3,
+      "stepTitle": "Search Customers",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "events-walkthrough",
+      "moduleTitle": "Events — Guided Tour",
+      "route": "/admin/events",
+      "stepIndex": 1,
+      "stepTitle": "New Event Button",
+      "selector": "[data-testid='new-event-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 100.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW EVENT"
+    },
+    {
+      "moduleSlug": "events-walkthrough",
+      "moduleTitle": "Events — Guided Tour",
+      "route": "/admin/events",
+      "stepIndex": 2,
+      "stepTitle": "Type Filter",
+      "selector": ".panel-header app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 132.75,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Type\nadminPanels.events.types.all"
+    },
+    {
+      "moduleSlug": "events-walkthrough",
+      "moduleTitle": "Events — Guided Tour",
+      "route": "/admin/events",
+      "stepIndex": 3,
+      "stepTitle": "Events Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 141,
+        "width": 1836,
+        "height": 1006
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "TITLE\n\tTYPE \nfilter_list\n\tSTART\n\tEND\n\tLOCATION\n\tATTENDEES\n\tREQUIRED\n\t\n\t\ndownload"
+    },
+    {
+      "moduleSlug": "expenses-walkthrough",
+      "moduleTitle": "Expenses — Guided Tour",
+      "route": "/expenses",
+      "stepIndex": 1,
+      "stepTitle": "Search Expenses",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "expenses-walkthrough",
+      "moduleTitle": "Expenses — Guided Tour",
+      "route": "/expenses",
+      "stepIndex": 2,
+      "stepTitle": "Status Filter",
+      "selector": "[data-testid='status-filter']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status\nAll Statuses"
+    },
+    {
+      "moduleSlug": "expenses-walkthrough",
+      "moduleTitle": "Expenses — Guided Tour",
+      "route": "/expenses",
+      "stepIndex": 3,
+      "stepTitle": "Expenses Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 1741
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "DATE\n\tCATEGORY\n\tDESCRIPTION\n\tJOB\n\tSUBMITTED BY\n\tAMOUNT\n\tSTATUS \nfilter_list\n\tACT"
+    },
+    {
+      "moduleSlug": "expenses-walkthrough",
+      "moduleTitle": "Expenses — Guided Tour",
+      "route": "/expenses",
+      "stepIndex": 4,
+      "stepTitle": "Add Expense",
+      "selector": "[data-testid='expense-save-btn'], [data-testid='new-expense-btn'], .action-btn--primary",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW EXPENSE"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 1,
+      "stepTitle": "Inventory Tabs",
+      "selector": ".tab-bar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 35
+      },
+      "tagName": "div",
+      "textSnippet": "inventory\nSTOCK LEVELS\nwarehouse\nLOCATIONS\nswap_horiz\nMOVEMENTS\nlocal_shipping\nR"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 2,
+      "stepTitle": "Stock Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 207,
+        "width": 1836,
+        "height": 163
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "inventory_2\n\nNo inventory data\n\nStock appears here when parts are received into "
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 3,
+      "stepTitle": "Search Parts",
+      "selector": "app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 175,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 4,
+      "stepTitle": "Locations Tab",
+      "selector": ".tab-bar .tab:nth-child(2)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 177.625,
+        "y": 92,
+        "width": 108.421875,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "warehouse\nLOCATIONS"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 5,
+      "stepTitle": "Movements Tab",
+      "selector": ".tab-bar .tab:nth-child(3)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 286.046875,
+        "y": 92,
+        "width": 116.46875,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "swap_horiz\nMOVEMENTS"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 6,
+      "stepTitle": "Receiving Tab",
+      "selector": ".tab-bar .tab:nth-child(4)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 402.515625,
+        "y": 92,
+        "width": 105.03125,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "local_shipping\nRECEIVING"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 7,
+      "stepTitle": "Stock Operations Tab",
+      "selector": ".tab-bar .tab:nth-child(5)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 507.546875,
+        "y": 92,
+        "width": 108.734375,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "tune\nSTOCK OPS"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 8,
+      "stepTitle": "Cycle Counts Tab",
+      "selector": ".tab-bar .tab:nth-child(6)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 616.28125,
+        "y": 92,
+        "width": 128.53125,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "fact_check\nCYCLE COUNTS"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 9,
+      "stepTitle": "Reservations Tab",
+      "selector": ".tab-bar .tab:nth-child(7)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 744.8125,
+        "y": 92,
+        "width": 127.0625,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "lock\nRESERVATIONS"
+    },
+    {
+      "moduleSlug": "inventory-walkthrough",
+      "moduleTitle": "Inventory — Guided Tour",
+      "route": "/inventory/stock",
+      "stepIndex": 10,
+      "stepTitle": "Replenishment Tab",
+      "selector": ".tab-bar .tab:nth-child(9)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1008.09375,
+        "y": 92,
+        "width": 150.328125,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "straighten\nUNITS OF MEASURE"
+    },
+    {
+      "moduleSlug": "invoices-walkthrough",
+      "moduleTitle": "Invoices — Guided Tour",
+      "route": "/invoices",
+      "stepIndex": 1,
+      "stepTitle": "Create Invoice Button",
+      "selector": "[data-testid='new-invoice-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW INVOICE"
+    },
+    {
+      "moduleSlug": "invoices-walkthrough",
+      "moduleTitle": "Invoices — Guided Tour",
+      "route": "/invoices",
+      "stepIndex": 2,
+      "stepTitle": "Uninvoiced Jobs",
+      "selector": ".page-header .action-btn:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1612.15625,
+        "y": 50.5,
+        "width": 143.84375,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "pending_actions\nUNINVOICED JOBS"
+    },
+    {
+      "moduleSlug": "invoices-walkthrough",
+      "moduleTitle": "Invoices — Guided Tour",
+      "route": "/invoices",
+      "stepIndex": 3,
+      "stepTitle": "Search Invoices",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "invoices-walkthrough",
+      "moduleTitle": "Invoices — Guided Tour",
+      "route": "/invoices",
+      "stepIndex": 4,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "invoices-walkthrough",
+      "moduleTitle": "Invoices — Guided Tour",
+      "route": "/invoices",
+      "stepIndex": 5,
+      "stepTitle": "Invoices Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 543
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "INVOICE #\n\tCUSTOMER\n\tSTATUS \nfilter_list\n\tINVOICE DATE arrow_upward\n\tDUE DATE\n\tT"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 1,
+      "stepTitle": "Track Type Selector",
+      "selector": "[data-tour='track-type-switcher']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1151.8125,
+        "y": 57,
+        "width": 270.984375,
+        "height": 19
+      },
+      "tagName": "div",
+      "textSnippet": "PRODUCTION\nR&D/TOOLING\nMAINTENANCE"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 2,
+      "stepTitle": "Board View vs. Team View",
+      "selector": ".view-toggle",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1430.796875,
+        "y": 53.5,
+        "width": 66,
+        "height": 26
+      },
+      "tagName": "div",
+      "textSnippet": "view_column\npeople"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 3,
+      "stepTitle": "Team Members Filter",
+      "selector": "[data-tour='board-filters']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1504.796875,
+        "y": 52,
+        "width": 212,
+        "height": 29
+      },
+      "tagName": "app-select",
+      "textSnippet": "Team Members\nAll assigned users"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 4,
+      "stepTitle": "My Work Toggle",
+      "selector": ".my-work-btn",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1724.796875,
+        "y": 56.5,
+        "width": 87.015625,
+        "height": 20
+      },
+      "tagName": "button",
+      "textSnippet": "person\nMY WORK"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 5,
+      "stepTitle": "Create New Job",
+      "selector": "[data-testid='new-job-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1819.8125,
+        "y": 56.5,
+        "width": 84.1875,
+        "height": 20
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW JOB"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 6,
+      "stepTitle": "Board Columns and Hint Bar",
+      "selector": "[data-tour='board-columns']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 19
+      },
+      "tagName": "div",
+      "textSnippet": "info_outline\nDrag cards between columns to move jobs. Ctrl+Click to multi-select"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 7,
+      "stepTitle": "Column Header",
+      "selector": "[data-tour='wip-limit']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 69,
+        "y": 120,
+        "width": 198,
+        "height": 34
+      },
+      "tagName": "div",
+      "textSnippet": "QUOTE REQUESTED\n46"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 8,
+      "stepTitle": "Job Card",
+      "selector": "[data-tour='job-card']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 73,
+        "y": 158,
+        "width": 190,
+        "height": 61.296875
+      },
+      "tagName": "app-job-card",
+      "textSnippet": "J-1050\nCustom bracket quote — Meridian\nMeridian Systems"
+    },
+    {
+      "moduleSlug": "kanban-walkthrough",
+      "moduleTitle": "Kanban Board — Guided Tour",
+      "route": "/kanban",
+      "stepIndex": 9,
+      "stepTitle": "Drag-and-Drop",
+      "selector": ".column",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 119,
+        "width": 200,
+        "height": 953
+      },
+      "tagName": "div",
+      "textSnippet": "QUOTE REQUESTED\n46\nJ-1050\nCustom bracket quote — Meridian\nMeridian Systems\nJ-240"
+    },
+    {
+      "moduleSlug": "leads-walkthrough",
+      "moduleTitle": "Leads — Guided Tour",
+      "route": "/leads",
+      "stepIndex": 1,
+      "stepTitle": "Add Lead Button",
+      "selector": "[data-testid='new-lead-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW LEAD"
+    },
+    {
+      "moduleSlug": "leads-walkthrough",
+      "moduleTitle": "Leads — Guided Tour",
+      "route": "/leads",
+      "stepIndex": 2,
+      "stepTitle": "View Mode Toggle",
+      "selector": ".view-toggle",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1698,
+        "y": 54.5,
+        "width": 50,
+        "height": 24
+      },
+      "tagName": "div",
+      "textSnippet": "view_list\nview_column"
+    },
+    {
+      "moduleSlug": "leads-walkthrough",
+      "moduleTitle": "Leads — Guided Tour",
+      "route": "/leads",
+      "stepIndex": 3,
+      "stepTitle": "Search Leads",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "leads-walkthrough",
+      "moduleTitle": "Leads — Guided Tour",
+      "route": "/leads",
+      "stepIndex": 4,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "leads-walkthrough",
+      "moduleTitle": "Leads — Guided Tour",
+      "route": "/leads",
+      "stepIndex": 5,
+      "stepTitle": "Leads Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 938
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "COMPANY\n\tCONTACT\n\tSOURCE\n\tSTATUS \nfilter_list\n\tFOLLOW-UP\n\tCREATED\n\t\ndownload\nset"
+    },
+    {
+      "moduleSlug": "mfa-walkthrough",
+      "moduleTitle": "MFA Setup — Guided Tour",
+      "route": "/account/security",
+      "stepIndex": 1,
+      "stepTitle": "MFA Status Banner",
+      "selector": ".security__mfa-status",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 649,
+        "y": 469,
+        "width": 394,
+        "height": 38
+      },
+      "tagName": "div",
+      "textSnippet": "shield\nTwo-factor authentication is not enabled"
+    },
+    {
+      "moduleSlug": "mfa-walkthrough",
+      "moduleTitle": "MFA Setup — Guided Tour",
+      "route": "/account/security",
+      "stepIndex": 2,
+      "stepTitle": "Enable / Add Device Button",
+      "selector": ".account-page__actions .action-btn--primary",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 863,
+        "y": 326,
+        "width": 180,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "lock_reset\nCHANGE PASSWORD"
+    },
+    {
+      "moduleSlug": "notifications-walkthrough",
+      "moduleTitle": "Notifications — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 1,
+      "stepTitle": "Header Actions",
+      "selector": ".app-header__actions",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1634.484375,
+        "y": 7,
+        "width": 269.515625,
+        "height": 30
+      },
+      "tagName": "div",
+      "textSnippet": "chat_bubble_outline\nsmart_toy\nschool\nnotifications_none\n1\ndark_mode\nUser, Admin\n"
+    },
+    {
+      "moduleSlug": "notifications-walkthrough",
+      "moduleTitle": "Notifications — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 2,
+      "stepTitle": "User Menu",
+      "selector": ".user-trigger",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1798.484375,
+        "y": 8,
+        "width": 105.515625,
+        "height": 28
+      },
+      "tagName": "button",
+      "textSnippet": "User, Admin\nmenu"
+    },
+    {
+      "moduleSlug": "parts-walkthrough",
+      "moduleTitle": "Parts Catalog — Guided Tour",
+      "route": "/parts",
+      "stepIndex": 1,
+      "stepTitle": "Create Part Button",
+      "selector": "[data-testid='new-part-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW PART"
+    },
+    {
+      "moduleSlug": "parts-walkthrough",
+      "moduleTitle": "Parts Catalog — Guided Tour",
+      "route": "/parts",
+      "stepIndex": 2,
+      "stepTitle": "Search Parts",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "parts-walkthrough",
+      "moduleTitle": "Parts Catalog — Guided Tour",
+      "route": "/parts",
+      "stepIndex": 3,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status\nAll Statuses"
+    },
+    {
+      "moduleSlug": "parts-walkthrough",
+      "moduleTitle": "Parts Catalog — Guided Tour",
+      "route": "/parts",
+      "stepIndex": 4,
+      "stepTitle": "Type Filter",
+      "selector": ".filters-bar app-select:nth-of-type(2)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 508,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Type\nAll Types"
+    },
+    {
+      "moduleSlug": "parts-walkthrough",
+      "moduleTitle": "Parts Catalog — Guided Tour",
+      "route": "/parts",
+      "stepIndex": 5,
+      "stepTitle": "View Mode Toggle",
+      "selector": ".view-toggle",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1854,
+        "y": 104.5,
+        "width": 50,
+        "height": 24
+      },
+      "tagName": "div",
+      "textSnippet": "table_rows\ngrid_view"
+    },
+    {
+      "moduleSlug": "parts-walkthrough",
+      "moduleTitle": "Parts Catalog — Guided Tour",
+      "route": "/parts",
+      "stepIndex": 6,
+      "stepTitle": "Parts Data Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 938
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "PART # arrow_upward\n\tEXT. PART #\n\tDESCRIPTION\n\tREV\n\tTYPE\n\tSTATUS \nfilter_list\n\tM"
+    },
+    {
+      "moduleSlug": "payments-walkthrough",
+      "moduleTitle": "Payments — Guided Tour",
+      "route": "/payments",
+      "stepIndex": 1,
+      "stepTitle": "Record Payment Button",
+      "selector": "[data-testid='new-payment-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW PAYMENT"
+    },
+    {
+      "moduleSlug": "payments-walkthrough",
+      "moduleTitle": "Payments — Guided Tour",
+      "route": "/payments",
+      "stepIndex": 2,
+      "stepTitle": "Search Payments",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "payments-walkthrough",
+      "moduleTitle": "Payments — Guided Tour",
+      "route": "/payments",
+      "stepIndex": 3,
+      "stepTitle": "Payment Method Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Method"
+    },
+    {
+      "moduleSlug": "payments-walkthrough",
+      "moduleTitle": "Payments — Guided Tour",
+      "route": "/payments",
+      "stepIndex": 4,
+      "stepTitle": "Payments Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 595
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "PAYMENT #\n\tCUSTOMER\n\tMETHOD \nfilter_list\n\tAMOUNT\n\tAPPLIED\n\tUNAPPLIED\n\tDATE\n\tREFE"
+    },
+    {
+      "moduleSlug": "payroll-walkthrough",
+      "moduleTitle": "Payroll — Guided Tour",
+      "route": "/account/pay-stubs",
+      "stepIndex": 1,
+      "stepTitle": "Account Sidebar",
+      "selector": ".account-sidebar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 0,
+        "y": 44,
+        "width": 240,
+        "height": 1036
+      },
+      "tagName": "nav",
+      "textSnippet": "arrow_back\nBack\nACCOUNT SETTINGS\nperson\nProfile\nhome\nContact & Address\nemergency"
+    },
+    {
+      "moduleSlug": "payroll-walkthrough",
+      "moduleTitle": "Payroll — Guided Tour",
+      "route": "/account/pay-stubs",
+      "stepIndex": 2,
+      "stepTitle": "Pay Stubs Page",
+      "selector": ".pay-stubs__title",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 264,
+        "y": 68,
+        "width": 1632,
+        "height": 21
+      },
+      "tagName": "h2",
+      "textSnippet": "Pay Stubs"
+    },
+    {
+      "moduleSlug": "payroll-walkthrough",
+      "moduleTitle": "Payroll — Guided Tour",
+      "route": "/account/pay-stubs",
+      "stepIndex": 3,
+      "stepTitle": "Pay Stubs Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 264,
+        "y": 131,
+        "width": 1632,
+        "height": 122
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "payments\n\nNo pay stubs available"
+    },
+    {
+      "moduleSlug": "planning-walkthrough",
+      "moduleTitle": "Planning Cycles — Guided Tour",
+      "route": "/planning",
+      "stepIndex": 1,
+      "stepTitle": "Cycle Selector",
+      "selector": ".page-header app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1544,
+        "y": 50,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Cycle"
+    },
+    {
+      "moduleSlug": "planning-walkthrough",
+      "moduleTitle": "Planning Cycles — Guided Tour",
+      "route": "/planning",
+      "stepIndex": 2,
+      "stepTitle": "New Cycle Button",
+      "selector": ".page-header .action-btn--primary",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW CYCLE"
+    },
+    {
+      "moduleSlug": "planning-walkthrough",
+      "moduleTitle": "Planning Cycles — Guided Tour",
+      "route": "/planning",
+      "stepIndex": 3,
+      "stepTitle": "Backlog Panel Header",
+      "selector": ".backlog-panel__header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 398,
+        "height": 34
+      },
+      "tagName": "div",
+      "textSnippet": "Backlog\n173 JOBS"
+    },
+    {
+      "moduleSlug": "planning-walkthrough",
+      "moduleTitle": "Planning Cycles — Guided Tour",
+      "route": "/planning",
+      "stepIndex": 4,
+      "stepTitle": "Backlog Filters",
+      "selector": ".backlog-panel__filters",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 126,
+        "width": 398,
+        "height": 42
+      },
+      "tagName": "div",
+      "textSnippet": "Search\nPriority"
+    },
+    {
+      "moduleSlug": "planning-walkthrough",
+      "moduleTitle": "Planning Cycles — Guided Tour",
+      "route": "/planning",
+      "stepIndex": 5,
+      "stepTitle": "Backlog Job List",
+      "selector": ".backlog-panel__list",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 168,
+        "width": 398,
+        "height": 7956
+      },
+      "tagName": "div",
+      "textSnippet": "J-2404\nadmin-job-xlxkaz-1179\nREQUESTED\nLow\nJ-2410\nadmin-job-xo4w77-a977\nCONCEPT\n"
+    },
+    {
+      "moduleSlug": "planning-walkthrough",
+      "moduleTitle": "Planning Cycles — Guided Tour",
+      "route": "/planning",
+      "stepIndex": 6,
+      "stepTitle": "Cycle Board Panel",
+      "selector": ".cycle-panel",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 452,
+        "y": 92,
+        "width": 1468,
+        "height": 8032
+      },
+      "tagName": "div",
+      "textSnippet": "event_note\n\nNo planning cycle selected\n\nCREATE FIRST CYCLE"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 1,
+      "stepTitle": "Create Purchase Order",
+      "selector": "[data-testid='new-po-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW PO"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 2,
+      "stepTitle": "Search POs",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 3,
+      "stepTitle": "Vendor Filter",
+      "selector": ".filters-bar app-select:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Vendor"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 4,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 508,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 5,
+      "stepTitle": "Purchase Orders Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 351
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "PO #\n\tVENDOR\n\tJOB\n\tSTATUS \nfilter_list\n\tLINES\n\tORDERED\n\tRECEIVED\n\tEXPECTED\n\tCREA"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 6,
+      "stepTitle": "Status Column",
+      "selector": "app-data-table thead th:nth-child(5)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1417,
+        "y": 143,
+        "width": 70,
+        "height": 61
+      },
+      "tagName": "th",
+      "textSnippet": "LINES"
+    },
+    {
+      "moduleSlug": "purchase-orders-walkthrough",
+      "moduleTitle": "Purchase Orders — Guided Tour",
+      "route": "/purchase-orders",
+      "stepIndex": 7,
+      "stepTitle": "Ordered vs. Received",
+      "selector": "app-data-table thead th:nth-child(7)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1577,
+        "y": 143,
+        "width": 90,
+        "height": 61
+      },
+      "tagName": "th",
+      "textSnippet": "RECEIVED"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 1,
+      "stepTitle": "Quality Tabs",
+      "selector": ".tab-bar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 1868,
+        "height": 35
+      },
+      "tagName": "div",
+      "textSnippet": "fact_check\nQC INSPECTIONS\nqr_code_2\nLOT TRACKING\nshow_chart\nSPC CHARTS\nedit_note"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 2,
+      "stepTitle": "QC Inspections Tab",
+      "selector": ".tab:nth-child(1)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 135.921875,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "fact_check\nQC INSPECTIONS"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 3,
+      "stepTitle": "New Inspection Button",
+      "selector": "[data-testid='new-inspection-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW INSPECTION"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 4,
+      "stepTitle": "Lot Tracking Tab",
+      "selector": ".tab:nth-child(2)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 187.921875,
+        "y": 92,
+        "width": 124.5,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "qr_code_2\nLOT TRACKING"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 5,
+      "stepTitle": "SPC Charts Tab",
+      "selector": ".tab:nth-child(3)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 312.421875,
+        "y": 92,
+        "width": 115.4375,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "show_chart\nSPC CHARTS"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 6,
+      "stepTitle": "SPC Data Entry Tab",
+      "selector": ".tab:nth-child(4)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 427.859375,
+        "y": 92,
+        "width": 136.78125,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "edit_note\nSPC DATA ENTRY"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 7,
+      "stepTitle": "OOC Events Tab",
+      "selector": ".tab:nth-child(5)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 564.640625,
+        "y": 92,
+        "width": 115.265625,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "warning\nOOC EVENTS"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 8,
+      "stepTitle": "NCRs Tab",
+      "selector": ".tab:nth-child(6)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 679.90625,
+        "y": 92,
+        "width": 79.515625,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "report_problem\nNCRS"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 9,
+      "stepTitle": "CAPAs Tab",
+      "selector": ".tab:nth-child(7)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 759.421875,
+        "y": 92,
+        "width": 85.0625,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "assignment_turned_in\nCAPAS"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 10,
+      "stepTitle": "ECOs Tab",
+      "selector": ".tab:nth-child(8)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 844.484375,
+        "y": 92,
+        "width": 78.8125,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "engineering\nECOS"
+    },
+    {
+      "moduleSlug": "quality-walkthrough",
+      "moduleTitle": "Quality — Guided Tour",
+      "route": "/quality",
+      "stepIndex": 11,
+      "stepTitle": "Gages Tab",
+      "selector": ".tab:nth-child(9)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 923.296875,
+        "y": 92,
+        "width": 85.625,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "straighten\nGAGES"
+    },
+    {
+      "moduleSlug": "quotes-walkthrough",
+      "moduleTitle": "Quotes — Guided Tour",
+      "route": "/quotes",
+      "stepIndex": 1,
+      "stepTitle": "New Quote Button",
+      "selector": "[data-testid='new-quote-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW QUOTE"
+    },
+    {
+      "moduleSlug": "quotes-walkthrough",
+      "moduleTitle": "Quotes — Guided Tour",
+      "route": "/quotes",
+      "stepIndex": 2,
+      "stepTitle": "Search Quotes",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "quotes-walkthrough",
+      "moduleTitle": "Quotes — Guided Tour",
+      "route": "/quotes",
+      "stepIndex": 3,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "quotes-walkthrough",
+      "moduleTitle": "Quotes — Guided Tour",
+      "route": "/quotes",
+      "stepIndex": 4,
+      "stepTitle": "Quotes Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 735
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "QUOTE #\n\tCUSTOMER\n\tSTATUS \nfilter_list\n\tLINES\n\tTOTAL\n\tEXPIRES\n\tCREATED\n\t\ndownloa"
+    },
+    {
+      "moduleSlug": "quotes-walkthrough",
+      "moduleTitle": "Quotes — Guided Tour",
+      "route": "/quotes",
+      "stepIndex": 5,
+      "stepTitle": "Quote Creation Workflow",
+      "selector": "[data-testid='new-quote-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW QUOTE"
+    },
+    {
+      "moduleSlug": "reports-walkthrough",
+      "moduleTitle": "Reports — Guided Tour",
+      "route": "/reports",
+      "stepIndex": 1,
+      "stepTitle": "Report Navigation Sidebar",
+      "selector": ".reports-sidebar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 92,
+        "width": 200,
+        "height": 988
+      },
+      "tagName": "aside",
+      "textSnippet": "view_kanban\nJobs by Stage\nwarning\nOverdue Jobs\nschedule\nTime by User\nreceipt_lon"
+    },
+    {
+      "moduleSlug": "reports-walkthrough",
+      "moduleTitle": "Reports — Guided Tour",
+      "route": "/reports",
+      "stepIndex": 2,
+      "stepTitle": "Report Header & Filters",
+      "selector": ".report-header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 268,
+        "y": 108,
+        "width": 1636,
+        "height": 17
+      },
+      "tagName": "div",
+      "textSnippet": "Jobs by Stage"
+    },
+    {
+      "moduleSlug": "reports-walkthrough",
+      "moduleTitle": "Reports — Guided Tour",
+      "route": "/reports",
+      "stepIndex": 3,
+      "stepTitle": "Chart Visualization",
+      "selector": "canvas",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 268,
+        "y": 141,
+        "width": 1636,
+        "height": 300
+      },
+      "tagName": "canvas",
+      "textSnippet": ""
+    },
+    {
+      "moduleSlug": "reports-walkthrough",
+      "moduleTitle": "Reports — Guided Tour",
+      "route": "/reports",
+      "stepIndex": 4,
+      "stepTitle": "Report Data Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 268,
+        "y": 457,
+        "width": 1636,
+        "height": 607
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "STAGE\n\tCOUNT\n\t\ndownload\nsettings\n\nConcept\t28\t\nIn Production\t12\t\nInvoiced/Sent\t5\t"
+    },
+    {
+      "moduleSlug": "reports-walkthrough",
+      "moduleTitle": "Reports — Guided Tour",
+      "route": "/reports",
+      "stepIndex": 5,
+      "stepTitle": "Report Builder",
+      "selector": ".report-nav-item:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 1132,
+        "width": 199,
+        "height": 34
+      },
+      "tagName": "button",
+      "textSnippet": "build\nReport Builder"
+    },
+    {
+      "moduleSlug": "sales-orders-walkthrough",
+      "moduleTitle": "Sales Orders — Guided Tour",
+      "route": "/sales-orders",
+      "stepIndex": 1,
+      "stepTitle": "New Sales Order",
+      "selector": "[data-testid='new-so-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW ORDER"
+    },
+    {
+      "moduleSlug": "sales-orders-walkthrough",
+      "moduleTitle": "Sales Orders — Guided Tour",
+      "route": "/sales-orders",
+      "stepIndex": 2,
+      "stepTitle": "Search Orders",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "sales-orders-walkthrough",
+      "moduleTitle": "Sales Orders — Guided Tour",
+      "route": "/sales-orders",
+      "stepIndex": 3,
+      "stepTitle": "Customer Filter",
+      "selector": ".filters-bar app-select:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Customer"
+    },
+    {
+      "moduleSlug": "sales-orders-walkthrough",
+      "moduleTitle": "Sales Orders — Guided Tour",
+      "route": "/sales-orders",
+      "stepIndex": 4,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 508,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "sales-orders-walkthrough",
+      "moduleTitle": "Sales Orders — Guided Tour",
+      "route": "/sales-orders",
+      "stepIndex": 5,
+      "stepTitle": "Sales Orders Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 731
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "ORDER #\n\tCUSTOMER\n\tCUST PO\n\tSTATUS \nfilter_list\n\tLINES\n\tTOTAL\n\tDELIVERY\n\tCREATED"
+    },
+    {
+      "moduleSlug": "search-walkthrough",
+      "moduleTitle": "Search — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 1,
+      "stepTitle": "Global Search Bar",
+      "selector": ".app-header__search",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 221.3125,
+        "y": 8,
+        "width": 1405.171875,
+        "height": 28
+      },
+      "tagName": "div",
+      "textSnippet": "search\nCtrl+K"
+    },
+    {
+      "moduleSlug": "search-walkthrough",
+      "moduleTitle": "Search — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 2,
+      "stepTitle": "Search Input",
+      "selector": ".app-header__search input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 251.3125,
+        "y": 15,
+        "width": 1317.171875,
+        "height": 14
+      },
+      "tagName": "input",
+      "textSnippet": ""
+    },
+    {
+      "moduleSlug": "search-walkthrough",
+      "moduleTitle": "Search — Guided Tour",
+      "route": "/dashboard",
+      "stepIndex": 3,
+      "stepTitle": "Keyboard Shortcut Hint",
+      "selector": ".app-header__search kbd",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1572.484375,
+        "y": 15.5,
+        "width": 44,
+        "height": 13
+      },
+      "tagName": "kbd",
+      "textSnippet": "Ctrl+K"
+    },
+    {
+      "moduleSlug": "shipments-walkthrough",
+      "moduleTitle": "Shipments — Guided Tour",
+      "route": "/shipments",
+      "stepIndex": 1,
+      "stepTitle": "New Shipment Button",
+      "selector": "[data-testid='new-shipment-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW SHIPMENT"
+    },
+    {
+      "moduleSlug": "shipments-walkthrough",
+      "moduleTitle": "Shipments — Guided Tour",
+      "route": "/shipments",
+      "stepIndex": 2,
+      "stepTitle": "Search Shipments",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "shipments-walkthrough",
+      "moduleTitle": "Shipments — Guided Tour",
+      "route": "/shipments",
+      "stepIndex": 3,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "shipments-walkthrough",
+      "moduleTitle": "Shipments — Guided Tour",
+      "route": "/shipments",
+      "stepIndex": 4,
+      "stepTitle": "Shipments Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 608
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "SHIPMENT #\n\tSO #\n\tCUSTOMER\n\tSTATUS \nfilter_list\n\tCARRIER\n\tTRACKING #\n\tSHIPPED\n\tC"
+    },
+    {
+      "moduleSlug": "shipments-walkthrough",
+      "moduleTitle": "Shipments — Guided Tour",
+      "route": "/shipments",
+      "stepIndex": 5,
+      "stepTitle": "Creating a Shipment — Walkthrough",
+      "selector": "[data-testid='new-shipment-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW SHIPMENT"
+    },
+    {
+      "moduleSlug": "shipments-walkthrough",
+      "moduleTitle": "Shipments — Guided Tour",
+      "route": "/shipments",
+      "stepIndex": 6,
+      "stepTitle": "Shipment Detail View",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 608
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "SHIPMENT #\n\tSO #\n\tCUSTOMER\n\tSTATUS \nfilter_list\n\tCARRIER\n\tTRACKING #\n\tSHIPPED\n\tC"
+    },
+    {
+      "moduleSlug": "shop-floor-walkthrough",
+      "moduleTitle": "Shop Floor Display — Guided Tour",
+      "route": "/display/shop-floor",
+      "stepIndex": 1,
+      "stepTitle": "Shop Floor Header",
+      "selector": ".sf-header",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 0,
+        "y": 0,
+        "width": 1920,
+        "height": 56
+      },
+      "tagName": "header",
+      "textSnippet": "Shop Floor\nsearch\n0\nWORKING\n0\nON BREAK\n0\nUNASSIGNED\n0\nDONE TODAY\n1\nALERTS\ntext_d"
+    },
+    {
+      "moduleSlug": "shop-floor-walkthrough",
+      "moduleTitle": "Shop Floor Display — Guided Tour",
+      "route": "/display/shop-floor",
+      "stepIndex": 2,
+      "stepTitle": "Status Summary Bar",
+      "selector": ".sf-header__stats",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 364.34375,
+        "y": 17,
+        "width": 1238.046875,
+        "height": 22
+      },
+      "tagName": "div",
+      "textSnippet": "0\nWORKING\n0\nON BREAK\n0\nUNASSIGNED\n0\nDONE TODAY\n1\nALERTS"
+    },
+    {
+      "moduleSlug": "shop-floor-walkthrough",
+      "moduleTitle": "Shop Floor Display — Guided Tour",
+      "route": "/display/shop-floor",
+      "stepIndex": 3,
+      "stepTitle": "Worker Cards Grid",
+      "selector": ".sf-grid",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 16,
+        "y": 128,
+        "width": 1888,
+        "height": 1888.015625
+      },
+      "tagName": "div",
+      "textSnippet": "AK\nA. Kim\nOUT\nJ-1042\nCNC setup — Bracket Assy Rev C\nJ-1036\nAssembly — Pneumatic "
+    },
+    {
+      "moduleSlug": "shop-floor-walkthrough",
+      "moduleTitle": "Shop Floor Display — Guided Tour",
+      "route": "/display/shop-floor",
+      "stepIndex": 4,
+      "stepTitle": "Worker Card",
+      "selector": ".sf-card",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 16,
+        "y": 128,
+        "width": 371.1875,
+        "height": 371.1875
+      },
+      "tagName": "button",
+      "textSnippet": "AK\nA. Kim\nOUT\nJ-1042\nCNC setup — Bracket Assy Rev C\nJ-1036\nAssembly — Pneumatic "
+    },
+    {
+      "moduleSlug": "shop-floor-walkthrough",
+      "moduleTitle": "Shop Floor Display — Guided Tour",
+      "route": "/display/shop-floor",
+      "stepIndex": 5,
+      "stepTitle": "Action Bar",
+      "selector": ".sf-action-bar",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 0,
+        "y": 1042,
+        "width": 1920,
+        "height": 38
+      },
+      "tagName": "div",
+      "textSnippet": "contactless\nScan your badge or RFID to clock in"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 1,
+      "stepTitle": "Start Timer",
+      "selector": "[data-testid='start-timer-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1625.109375,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "play_circle\nSTART TIMER"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 2,
+      "stepTitle": "Manual Entry",
+      "selector": "[data-testid='manual-entry-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1773.109375,
+        "y": 50.5,
+        "width": 130.890625,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "edit_note\nMANUAL ENTRY"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 3,
+      "stepTitle": "From Date Filter",
+      "selector": ".filters-bar app-datepicker:first-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100,
+        "width": 200,
+        "height": 36
+      },
+      "tagName": "app-datepicker",
+      "textSnippet": "From"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 4,
+      "stepTitle": "To Date Filter",
+      "selector": ".filters-bar app-datepicker:last-of-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100,
+        "width": 200,
+        "height": 36
+      },
+      "tagName": "app-datepicker",
+      "textSnippet": "From"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 5,
+      "stepTitle": "Summary Line",
+      "selector": ".filter-summary",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1733.3125,
+        "y": 111,
+        "width": 170.6875,
+        "height": 14
+      },
+      "tagName": "div",
+      "textSnippet": "Total: 2189.1h across 703 entries"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 6,
+      "stepTitle": "Time Entries Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 145,
+        "width": 1868,
+        "height": 935
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "\tDATE\n\tUSER\n\tJOB\n\tCATEGORY\n\tDURATION\n\tNOTES\n\tTYPE\n\t\n\t\ndownload\nsettings\n\nedit_no"
+    },
+    {
+      "moduleSlug": "time-tracking-walkthrough",
+      "moduleTitle": "Time Tracking — Guided Tour",
+      "route": "/time-tracking",
+      "stepIndex": 7,
+      "stepTitle": "Entry Type Badge",
+      "selector": ".entry-type",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1757.859375,
+        "y": 218.5,
+        "width": 49.140625,
+        "height": 16
+      },
+      "tagName": "span",
+      "textSnippet": "MANUAL"
+    },
+    {
+      "moduleSlug": "vendors-walkthrough",
+      "moduleTitle": "Vendors — Guided Tour",
+      "route": "/vendors",
+      "stepIndex": 1,
+      "stepTitle": "Add Vendor Button",
+      "selector": "[data-testid='new-vendor-btn']",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1764,
+        "y": 50.5,
+        "width": 140,
+        "height": 32
+      },
+      "tagName": "button",
+      "textSnippet": "add\nNEW VENDOR"
+    },
+    {
+      "moduleSlug": "vendors-walkthrough",
+      "moduleTitle": "Vendors — Guided Tour",
+      "route": "/vendors",
+      "stepIndex": 2,
+      "stepTitle": "Search Vendors",
+      "selector": ".filters-bar app-input",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 68,
+        "y": 100.5,
+        "width": 212,
+        "height": 32
+      },
+      "tagName": "app-input",
+      "textSnippet": "Search"
+    },
+    {
+      "moduleSlug": "vendors-walkthrough",
+      "moduleTitle": "Vendors — Guided Tour",
+      "route": "/vendors",
+      "stepIndex": 3,
+      "stepTitle": "Status Filter",
+      "selector": ".filters-bar app-select",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 288,
+        "y": 100,
+        "width": 212,
+        "height": 33
+      },
+      "tagName": "app-select",
+      "textSnippet": "Status"
+    },
+    {
+      "moduleSlug": "vendors-walkthrough",
+      "moduleTitle": "Vendors — Guided Tour",
+      "route": "/vendors",
+      "stepIndex": 4,
+      "stepTitle": "Vendors Table",
+      "selector": "app-data-table",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 52,
+        "y": 142,
+        "width": 1868,
+        "height": 575
+      },
+      "tagName": "app-data-table",
+      "textSnippet": "COMPANY NAME arrow_downward\n\tCONTACT\n\tEMAIL\n\tPHONE\n\tACTIVE \nfilter_list\n\tPOS\n\tCR"
+    },
+    {
+      "moduleSlug": "vendors-walkthrough",
+      "moduleTitle": "Vendors — Guided Tour",
+      "route": "/vendors",
+      "stepIndex": 5,
+      "stepTitle": "PO Count Column",
+      "selector": "app-data-table thead th:nth-child(6)",
+      "found": true,
+      "visible": true,
+      "boundingBox": {
+        "x": 1707,
+        "y": 143,
+        "width": 70,
+        "height": 61
+      },
+      "tagName": "th",
+      "textSnippet": "POS"
+    }
+  ]
+}

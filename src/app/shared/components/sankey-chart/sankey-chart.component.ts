@@ -31,7 +31,8 @@ export class SankeyChartComponent {
   readonly data = input.required<SankeyFlowItem[]>();
   readonly height = input<number>(400);
 
-  protected readonly chartData = computed<ChartData<'sankey'>>(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected readonly chartData = computed<ChartData<any>>(() => {
     const items = this.data();
     const dataPoints: SankeyDataPoint[] = items.map(i => ({
       from: i.from,
@@ -49,11 +50,11 @@ export class SankeyChartComponent {
       datasets: [{
         label: '',
         data: dataPoints,
-        colorFrom: (ctx) => {
+        colorFrom: (ctx: any) => {
           const dp = ctx.dataset.data[ctx.dataIndex] as SankeyDataPoint | undefined;
           return dp ? colorMap.get(dp.from) ?? '#999' : '#999';
         },
-        colorTo: (ctx) => {
+        colorTo: (ctx: any) => {
           const dp = ctx.dataset.data[ctx.dataIndex] as SankeyDataPoint | undefined;
           return dp ? colorMap.get(dp.to) ?? '#999' : '#999';
         },
@@ -62,14 +63,15 @@ export class SankeyChartComponent {
     };
   });
 
-  protected readonly chartOptions: ChartOptions<'sankey'> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  protected readonly chartOptions: ChartOptions<any> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (ctx) => {
+          label: (ctx: any) => {
             const dp = ctx.dataset.data[ctx.dataIndex] as SankeyDataPoint;
             return `${dp.from} → ${dp.to}: ${dp.flow}`;
           },

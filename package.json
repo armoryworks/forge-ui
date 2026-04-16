@@ -20,6 +20,8 @@
     "audit:tours": "npx tsx scripts/audit-tours.ts",
     "audit:screenshots": "npx tsx e2e/stress/audit-screenshots.ts",
     "audit:review": "npx tsx e2e/stress/review-screenshots.ts",
+    "training:verify": "npx tsx e2e/training-verification/verify-training.ts",
+    "training:verify:fix": "npx tsx e2e/training-verification/verify-training.ts --fix",
     "lint": "ng lint",
     "lint:a11y": "npx eslint \"src/**/*.html\" --no-error-on-unmatched-pattern",
     "test:a11y": "npx cypress run --spec cypress/e2e/accessibility/a11y.cy.ts",
