@@ -1,0 +1,14 @@
+@if (data().length > 0) {
+  <div class="sankey-chart" [style.height.px]="height()">
+    <canvas baseChart
+            type="sankey"
+            [data]="chartData()"
+            [options]="chartOptions">
+    </canvas>
+  </div>
+} @else {
+  <div class="sankey-chart__empty">
+    <span class="material-icons-outlined">analytics</span>
+    <p>No flow data available</p>
+  </div>
+}

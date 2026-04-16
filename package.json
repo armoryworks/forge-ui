@@ -66,6 +66,7 @@
     "angularx-qrcode": "^21.0.4",
     "bwip-js": "^4.8.0",
     "chart.js": "^4.5.1",
+    "chartjs-chart-sankey": "^0.14.0",
     "date-fns": "^4.1.0",
     "driver.js": "^1.4.0",
     "gridstack": "^12.4.2",

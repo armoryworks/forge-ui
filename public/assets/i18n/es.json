@@ -2675,7 +2675,23 @@
     "filterExpense": "Gasto",
     "filterInProgress": "En Progreso",
     "filterPassed": "Aprobada",
-    "filterFailed": "Reprobada"
+    "filterFailed": "Reprobada",
+    "sankeyDiagrams": "Diagramas Sankey",
+    "sankey": {
+      "title": "Diagramas Sankey",
+      "subtitle": "Visualiza flujos y relaciones en tus datos",
+      "backToReports": "Volver a Reportes",
+      "quoteToCash": "Cotización a Cobro",
+      "jobStageFlow": "Flujo de Etapas de Trabajo",
+      "materialToProduct": "Material a Producto",
+      "workerOrders": "Trabajador a Órdenes",
+      "expenseFlow": "Flujo de Gastos",
+      "vendorSupplyChain": "Cadena de Suministro",
+      "qualityRejection": "Flujo de Calidad / Rechazo",
+      "inventoryLocation": "Flujo de Ubicación de Inventario",
+      "customerRevenue": "Desglose de Ingresos por Cliente",
+      "trainingCompletion": "Finalización de Capacitación"
+    }
   },
   "quality": {
     "title": "Calidad y Trazabilidad",

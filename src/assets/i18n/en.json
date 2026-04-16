@@ -2853,7 +2853,23 @@
     "filterExpense": "Expense",
     "filterInProgress": "In Progress",
     "filterPassed": "Passed",
-    "filterFailed": "Failed"
+    "filterFailed": "Failed",
+    "sankeyDiagrams": "Sankey Diagrams",
+    "sankey": {
+      "title": "Sankey Diagrams",
+      "subtitle": "Visualize flows and relationships across your data",
+      "backToReports": "Back to Reports",
+      "quoteToCash": "Quote-to-Cash Pipeline",
+      "jobStageFlow": "Job Stage Flow",
+      "materialToProduct": "Material to Product",
+      "workerOrders": "Worker to Orders",
+      "expenseFlow": "Expense Flow",
+      "vendorSupplyChain": "Vendor Supply Chain",
+      "qualityRejection": "Quality / Rejection Flow",
+      "inventoryLocation": "Inventory Location Flow",
+      "customerRevenue": "Customer Revenue Breakdown",
+      "trainingCompletion": "Training Completion"
+    }
   },
   "quality": {
     "title": "Quality & Traceability",

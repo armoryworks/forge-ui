@@ -10,4 +10,11 @@ export const REPORTS_ROUTES: Routes = [
         m => m.ReportBuilderComponent,
       ),
   },
+  {
+    path: 'sankey',
+    loadComponent: () =>
+      import('./components/sankey-reports/sankey-reports.component').then(
+        m => m.SankeyReportsComponent,
+      ),
+  },
 ];

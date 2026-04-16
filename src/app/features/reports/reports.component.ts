@@ -752,6 +752,10 @@ export class ReportsComponent {
     this.router.navigate(['/reports/builder']);
   }
 
+  protected openSankeyReports(): void {
+    this.router.navigate(['/reports/sankey']);
+  }
+
   protected readonly arAgingBuckets = computed(() => {
     const data = this.arAgingData();
     const buckets: { key: string; label: string }[] = [
