@@ -62,16 +62,47 @@
   padding: $sp-3xl $sp-lg;
   background: var(--surface);
   border: $border-width-thin solid var(--border);
+  text-align: center;
 
   &__icon {
-    font-size: 48px;
+    font-size: $icon-size-hero;
     color: var(--text-muted);
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
   }
 
   &__text {
     font-size: $font-size-sm;
     color: var(--text-muted);
     margin: 0;
+    line-height: 1.5;
+    max-width: 320px;
+  }
+
+  &__steps {
+    text-align: left;
+    padding: $sp-md $sp-lg;
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+    border: $border-width-thin solid color-mix(in srgb, var(--primary) 20%, transparent);
+    width: 100%;
+    max-width: 320px;
+  }
+
+  &__step {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0;
+    padding: $sp-xs 0;
+    line-height: 1.4;
+  }
+
+  &__retry {
+    margin-top: $sp-md;
   }
 }
 

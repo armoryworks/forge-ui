@@ -43,6 +43,7 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
   protected readonly manualValue = signal('');
   protected readonly showManual = signal(false);
   protected readonly cameraUnavailable = signal(false);
+  protected readonly cameraError = signal<'permission' | 'not-found' | 'insecure' | 'generic' | null>(null);
 
   ngAfterViewInit(): void {
     this.startScanner();
@@ -74,8 +75,27 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
     } catch (err) {
       this.scanning.set(false);
       this.cameraUnavailable.set(true);
-      this.error.set('Camera not available. Use manual entry below.');
       this.showManual.set(true);
+
+      const errorName = (err as DOMException)?.name ?? '';
+      const errorMsg = (err as Error)?.message ?? String(err);
+
+      if (errorName === 'NotAllowedError' || errorMsg.includes('Permission')) {
+        this.cameraError.set('permission');
+        this.error.set('Camera permission was denied.');
+      } else if (errorName === 'NotFoundError' || errorMsg.includes('no camera') || errorMsg.includes('Requested device not found')) {
+        this.cameraError.set('not-found');
+        this.error.set('No camera detected on this device.');
+      } else if (errorName === 'NotReadableError' || errorName === 'AbortError') {
+        this.cameraError.set('generic');
+        this.error.set('Camera is in use by another app. Close other apps using the camera and try again.');
+      } else if (errorMsg.includes('insecure') || errorMsg.includes('secure context') || errorMsg.includes('https')) {
+        this.cameraError.set('insecure');
+        this.error.set('Camera requires a secure (HTTPS) connection.');
+      } else {
+        this.cameraError.set('generic');
+        this.error.set('Camera is not available.');
+      }
     }
   }
 
@@ -179,6 +199,17 @@ export class MobileScanComponent implements AfterViewInit, OnDestroy {
     if (this.html5Qrcode?.getState() === Html5QrcodeScannerState.PAUSED) {
       this.html5Qrcode.resume();
     }
+  }
+
+  protected async retryCamera(): Promise<void> {
+    await this.stopScanner();
+    this.cameraUnavailable.set(false);
+    this.cameraError.set(null);
+    this.error.set(null);
+    this.lastResult.set(null);
+
+    // Small delay to allow DOM to re-render the #reader element
+    setTimeout(() => this.startScanner(), 100);
   }
 
   protected toggleManual(): void {

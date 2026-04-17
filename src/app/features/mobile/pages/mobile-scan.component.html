@@ -14,8 +14,48 @@
     </div>
   } @else {
     <div class="scanner-fallback">
-      <span class="material-icons-outlined scanner-fallback__icon">no_photography</span>
-      <p class="scanner-fallback__text">Camera is not available on this device</p>
+      @switch (cameraError()) {
+        @case ('permission') {
+          <span class="material-icons-outlined scanner-fallback__icon">lock</span>
+          <p class="scanner-fallback__title">Camera Permission Required</p>
+          <p class="scanner-fallback__text">
+            To scan barcodes and QR codes, allow camera access for this site.
+          </p>
+          <div class="scanner-fallback__steps">
+            <p class="scanner-fallback__step">1. Tap the lock icon in your browser's address bar</p>
+            <p class="scanner-fallback__step">2. Find "Camera" and set it to "Allow"</p>
+            <p class="scanner-fallback__step">3. Tap "Try Again" below</p>
+          </div>
+        }
+        @case ('not-found') {
+          <span class="material-icons-outlined scanner-fallback__icon">no_photography</span>
+          <p class="scanner-fallback__title">No Camera Detected</p>
+          <p class="scanner-fallback__text">
+            This device doesn't appear to have a camera, or it's not accessible.
+            Use the manual entry option below to type or paste a barcode value.
+          </p>
+        }
+        @case ('insecure') {
+          <span class="material-icons-outlined scanner-fallback__icon">https</span>
+          <p class="scanner-fallback__title">Secure Connection Required</p>
+          <p class="scanner-fallback__text">
+            Camera access requires a secure (HTTPS) connection.
+            Make sure the URL starts with <strong>https://</strong>.
+          </p>
+        }
+        @default {
+          <span class="material-icons-outlined scanner-fallback__icon">videocam_off</span>
+          <p class="scanner-fallback__title">Camera Unavailable</p>
+          <p class="scanner-fallback__text">
+            Could not start the camera. It may be in use by another app.
+            Close other apps and try again.
+          </p>
+        }
+      }
+      <button class="action-btn action-btn--primary scanner-fallback__retry" (click)="retryCamera()" aria-label="Try camera again">
+        <span class="material-icons-outlined">refresh</span>
+        Try Again
+      </button>
     </div>
   }
 
@@ -81,8 +121,8 @@
     </div>
   }
 
-  <!-- Error -->
-  @if (error()) {
+  <!-- Error (non-camera errors) -->
+  @if (error() && !cameraUnavailable()) {
     <div class="scan-error">
       <span class="material-icons-outlined">warning</span>
       {{ error() }}
