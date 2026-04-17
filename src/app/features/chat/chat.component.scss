@@ -132,9 +132,9 @@
   &__action {
     width: $btn-icon-size;
     height: $btn-icon-size;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    color: var(--primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -145,7 +145,8 @@
     }
 
     &:hover {
-      color: var(--text);
+      background: var(--primary-light);
+      color: var(--primary-dark);
     }
   }
 

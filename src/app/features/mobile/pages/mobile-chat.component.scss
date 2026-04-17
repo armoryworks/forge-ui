@@ -297,9 +297,9 @@
   &__action {
     width: 32px;
     height: 32px;
-    border: none;
-    background: transparent;
-    color: var(--text-muted);
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    color: var(--primary);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -307,6 +307,10 @@
 
     .material-icons-outlined {
       font-size: $icon-size-md;
+    }
+
+    &:active {
+      background: var(--primary-light);
     }
   }
 }

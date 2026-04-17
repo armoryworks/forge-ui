@@ -14,6 +14,12 @@ export const routes: Routes = [
   { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
   { path: 'setup/:token', component: TokenSetupComponent },
   {
+    path: 'chat/popout',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/chat/components/chat-popout/chat-popout.component').then(m => m.ChatPopoutComponent),
+  },
+  {
     path: '',
     canActivate: [authGuard, mobileRedirectGuard],
     children: [
