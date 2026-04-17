@@ -92,10 +92,10 @@ export class MobileLayoutComponent implements OnInit {
       next: (status) => {
         this.clockState.update(status.isClockedIn);
 
-        // If not clocked in, redirect to clock page
+        // If not clocked in, redirect to clock page (but not from chat — chat is always accessible)
         if (!status.isClockedIn) {
           const url = this.router.url;
-          if (url === '/m' || url === '/m/' || url === '/m/chat') {
+          if (url === '/m' || url === '/m/') {
             this.router.navigate(['/m/clock']);
           }
         }
