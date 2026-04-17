@@ -52,7 +52,7 @@ export class MobileHomeComponent implements OnInit {
     if (!userId) return;
 
     // Load clock status
-    this.http.get<MobileClockStatus>(`/api/v1/shop-floor/clock-status/${userId}`).subscribe({
+    this.http.get<MobileClockStatus>('/api/v1/time-tracking/clock-status').subscribe({
       next: (status) => this.clockStatus.set(status),
       error: () => this.clockStatus.set(null),
     });

@@ -141,6 +141,41 @@ export class MobileChatComponent implements OnDestroy {
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
+  /** Returns a date label if the message starts a new day boundary. */
+  protected dateSeparator(index: number): string | null {
+    const msgs = this.messages();
+    const current = new Date(msgs[index].createdAt);
+    const currentDay = this.toDayKey(current);
+
+    if (index === 0) {
+      return this.isToday(current) ? null : this.formatDayLabel(current);
+    }
+
+    const prev = new Date(msgs[index - 1].createdAt);
+    const prevDay = this.toDayKey(prev);
+
+    if (currentDay !== prevDay) {
+      return this.isToday(current) ? 'Today' : this.formatDayLabel(current);
+    }
+    return null;
+  }
+
+  private toDayKey(d: Date): string {
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  }
+
+  private isToday(d: Date): boolean {
+    const now = new Date();
+    return this.toDayKey(d) === this.toDayKey(now);
+  }
+
+  private formatDayLabel(d: Date): string {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (this.toDayKey(d) === this.toDayKey(yesterday)) return 'Yesterday';
+    return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
   protected formatDate(date: Date | string | null): string {
     if (!date) return '';
     const d = typeof date === 'string' ? new Date(date) : date;

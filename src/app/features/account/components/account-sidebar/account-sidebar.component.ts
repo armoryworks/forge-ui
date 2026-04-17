@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
 import { ComplianceFormService } from '../../services/compliance-form.service';
 import { OnboardingService } from '../../../onboarding/onboarding.service';
+import { LayoutService } from '../../../../shared/services/layout.service';
 
 const WIZARD_PROFILE_KEYS = new Set([
   'w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook',
@@ -35,6 +36,7 @@ interface AccountNavChild {
 })
 export class AccountSidebarComponent {
   private readonly router = inject(Router);
+  private readonly layout = inject(LayoutService);
   private readonly profileService = inject(EmployeeProfileService);
   private readonly complianceService = inject(ComplianceFormService);
   private readonly onboardingService = inject(OnboardingService);
@@ -111,6 +113,6 @@ export class AccountSidebarComponent {
   }
 
   protected goBack(): void {
-    this.router.navigate(['/dashboard']);
+    this.router.navigate([this.layout.getDefaultRoute()]);
   }
 }

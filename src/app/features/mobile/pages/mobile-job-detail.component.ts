@@ -82,7 +82,7 @@ export class MobileJobDetailComponent implements OnInit {
 
     if (j.hasActiveTimer && j.activeTimerId) {
       // Stop timer
-      this.http.post(`/api/v1/time-tracking/entries/${j.activeTimerId}/stop`, {}).subscribe({
+      this.http.post('/api/v1/time-tracking/timer/stop', {}).subscribe({
         next: () => {
           this.submitting.set(false);
           this.snackbar.success('Timer stopped');
@@ -95,9 +95,8 @@ export class MobileJobDetailComponent implements OnInit {
       });
     } else {
       // Start timer
-      this.http.post('/api/v1/time-tracking/entries/start', {
+      this.http.post('/api/v1/time-tracking/timer/start', {
         jobId: j.id,
-        userId,
       }).subscribe({
         next: () => {
           this.submitting.set(false);

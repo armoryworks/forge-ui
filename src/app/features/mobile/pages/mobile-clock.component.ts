@@ -74,7 +74,7 @@ export class MobileClockComponent implements OnInit {
     if (!userId || this.submitting()) return;
 
     this.submitting.set(true);
-    this.http.post('/api/v1/shop-floor/clock', {
+    this.http.post('/api/v1/display/shop-floor/clock', {
       userId,
       eventType: action.code,
     }).subscribe({

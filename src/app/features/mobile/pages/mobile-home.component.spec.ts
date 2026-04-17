@@ -72,7 +72,7 @@ describe('MobileHomeComponent', () => {
       currentJobNumber: null,
       timeOnTask: '00:00',
     };
-    httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`).flush(
+    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush(
       clockStatusOverride ?? defaultStatus,
     );
     httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ data: [] });
@@ -91,7 +91,7 @@ describe('MobileHomeComponent', () => {
   it('should load clock status on init', () => {
     createComponent();
 
-    const clockReq = httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`);
+    const clockReq = httpTesting.expectOne('/api/v1/time-tracking/clock-status');
     expect(clockReq.request.method).toBe('GET');
     clockReq.flush({
       isClockedIn: true,
@@ -111,7 +111,7 @@ describe('MobileHomeComponent', () => {
   it('should load active jobs on init', () => {
     createComponent();
 
-    httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`).flush({
+    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
       isClockedIn: false, status: 'Out', clockedInAt: null, currentJobNumber: null, timeOnTask: '00:00',
     });
 
@@ -142,7 +142,7 @@ describe('MobileHomeComponent', () => {
   it('statusLabel should return correct label from clock types service', () => {
     createComponent();
 
-    httpTesting.expectOne(`/api/v1/shop-floor/clock-status/${mockUser.id}`).flush({
+    httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
       isClockedIn: true, status: 'In', clockedInAt: '2026-04-10T08:00:00Z',
       currentJobNumber: null, timeOnTask: '01:00',
     });

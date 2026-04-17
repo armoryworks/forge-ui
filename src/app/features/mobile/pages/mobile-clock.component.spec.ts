@@ -151,7 +151,7 @@ describe('MobileClockComponent', () => {
 
     component.submitClock(action);
 
-    const clockReq = httpTesting.expectOne('/api/v1/shop-floor/clock');
+    const clockReq = httpTesting.expectOne('/api/v1/display/shop-floor/clock');
     expect(clockReq.request.method).toBe('POST');
     expect(clockReq.request.body).toEqual({
       userId: mockUser.id,
@@ -188,7 +188,7 @@ describe('MobileClockComponent', () => {
 
     component.submitClock(action);
 
-    httpTesting.expectOne('/api/v1/shop-floor/clock').flush(
+    httpTesting.expectOne('/api/v1/display/shop-floor/clock').flush(
       { message: 'Server error' },
       { status: 500, statusText: 'Internal Server Error' },
     );

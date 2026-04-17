@@ -206,6 +206,27 @@
   align-self: flex-end;
 }
 
+.mobile-chat__date-separator {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md 0;
+}
+
+.mobile-chat__date-line {
+  flex: 1;
+  height: $border-width-thin;
+  background: var(--border);
+}
+
+.mobile-chat__date-label {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
 .mobile-chat__input {
   display: flex;
   align-items: center;
