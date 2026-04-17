@@ -461,6 +461,13 @@
   .mat-mdc-snack-bar-action { color: white !important; }
 }
 
+// Shift snackbar above mobile bottom nav (56px + safe area)
+@include mobile {
+  .mat-mdc-snack-bar-container {
+    margin-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
 // ─── Chip ───
 .chip {
   @include uppercase-label(var(--font-size-xs), 0.5px, 600);
