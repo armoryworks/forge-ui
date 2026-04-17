@@ -40,7 +40,7 @@ export async function loginViaApi(
   await apiContext.dispose();
 
   // Navigate to origin so localStorage is scoped correctly
-  await page.goto('/', { waitUntil: 'commit' });
+  await page.goto('http://localhost:4200/', { waitUntil: 'commit' });
 
   // Seed localStorage with keys that AuthService reads on init
   await page.evaluate(

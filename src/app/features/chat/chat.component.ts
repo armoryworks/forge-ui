@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, signal, computed, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, OnInit, signal, computed, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -29,16 +30,19 @@ interface UserListItem {
   styleUrl: './chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChatComponent implements OnDestroy {
+export class ChatComponent implements OnInit, OnDestroy {
   private readonly chatService = inject(ChatService);
   private readonly chatHub = inject(ChatHubService);
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
   readonly panelOpen = signal(false);
+  /** True when rendered via router-outlet at /chat (full-page mode) */
+  readonly isRoutedPage = signal(false);
   protected readonly conversations = signal<ChatConversation[]>([]);
   protected readonly selectedConversation = signal<ChatConversation | null>(null);
   protected readonly messages = signal<ChatMessage[]>([]);
@@ -61,6 +65,16 @@ export class ChatComponent implements OnDestroy {
   });
 
   private hubConnected = false;
+
+  ngOnInit(): void {
+    // When rendered as a routed page (/chat), auto-open the panel
+    if (this.route.snapshot.routeConfig !== null) {
+      this.isRoutedPage.set(true);
+      this.panelOpen.set(true);
+      this.loadConversations();
+      this.connectHub();
+    }
+  }
 
   toggle(): void {
     const isOpen = !this.panelOpen();

@@ -1,6 +1,8 @@
 @if (panelOpen()) {
-  <div class="chat-backdrop" role="button" tabindex="0" [attr.aria-label]="'chat.closeChat' | translate" (click)="toggle()" (keydown.enter)="toggle()"></div>
-  <div class="chat-panel">
+  @if (!isRoutedPage()) {
+    <div class="chat-backdrop" role="button" tabindex="0" [attr.aria-label]="'chat.closeChat' | translate" (click)="toggle()" (keydown.enter)="toggle()"></div>
+  }
+  <div class="chat-panel" [class.chat-panel--page]="isRoutedPage()">
     <div class="chat-panel__header">
       @if (selectedConversation()) {
         <button class="icon-btn chat-panel__back" (click)="backToList()" [attr.aria-label]="'chat.backToConversations' | translate" [matTooltip]="'chat.backToConversations' | translate" matTooltipPosition="above">
@@ -15,9 +17,11 @@
         <span class="chat-panel__header-title">{{ 'chat.title' | translate }}</span>
       }
       <span class="chat-panel__spacer"></span>
-      <button class="icon-btn" (click)="toggle()" [attr.aria-label]="'chat.closeChat' | translate" [matTooltip]="'chat.closeChat' | translate" matTooltipPosition="above">
-        <span class="material-icons-outlined">close</span>
-      </button>
+      @if (!isRoutedPage()) {
+        <button class="icon-btn" (click)="toggle()" [attr.aria-label]="'chat.closeChat' | translate" [matTooltip]="'chat.closeChat' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      }
     </div>
 
     @if (!selectedConversation() && !showUserPicker()) {
