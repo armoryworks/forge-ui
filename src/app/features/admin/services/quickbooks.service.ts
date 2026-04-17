@@ -48,7 +48,7 @@ export class QuickBooksService {
 
   disconnect(): void {
     this.loading.set(true);
-    this.http.post<void>(`${environment.apiUrl}/quickbooks/disconnect`, {}).subscribe({
+    this.http.post<void>(`${environment.apiUrl}/accounting/disconnect`, {}).subscribe({
       next: () => {
         this.status.set({
           isConnected: false,
@@ -71,7 +71,7 @@ export class QuickBooksService {
   testConnection(): void {
     this.loading.set(true);
     this.http.post<{ success: boolean; companyName?: string; message?: string }>(
-      `${environment.apiUrl}/quickbooks/test`, {}
+      `${environment.apiUrl}/accounting/test`, {}
     ).subscribe({
       next: (result) => {
         this.loading.set(false);

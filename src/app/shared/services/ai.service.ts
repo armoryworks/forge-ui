@@ -158,7 +158,7 @@ export class AiService {
   }
 
   ragHelpChat(message: string, conversationHistory?: string[]): Observable<string> {
-    return this.http.post(`${this.base}/chat`, { message, conversationHistory }, { responseType: 'text' });
+    return this.http.post(`${this.base}/help`, { message, conversationHistory }, { responseType: 'text' });
   }
 
   indexDocument(entityType: string, entityId: number): Observable<number> {

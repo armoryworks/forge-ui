@@ -250,7 +250,7 @@ describe('AiService', () => {
 
       service.ragHelpChat('What are the open jobs?').subscribe((res) => { result = res; });
 
-      const req = httpMock.expectOne(`${baseUrl}/chat`);
+      const req = httpMock.expectOne(`${baseUrl}/help`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({
         message: 'What are the open jobs?',
@@ -265,7 +265,7 @@ describe('AiService', () => {
       const history = ['Previous message'];
       service.ragHelpChat('Follow-up', history).subscribe();
 
-      const req = httpMock.expectOne(`${baseUrl}/chat`);
+      const req = httpMock.expectOne(`${baseUrl}/help`);
       expect(req.request.body.conversationHistory).toEqual(history);
       req.flush('Answer to follow-up');
     });
