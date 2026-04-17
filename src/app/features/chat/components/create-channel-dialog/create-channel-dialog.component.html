@@ -1,0 +1,59 @@
+<app-dialog title="Create Channel" width="520px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input label="Channel Name" formControlName="name" [required]="true" data-testid="channel-name" />
+      <app-select label="Type" formControlName="channelType" [options]="channelTypeOptions" [required]="true" data-testid="channel-type" />
+    </div>
+    <app-textarea label="Description" formControlName="description" [rows]="2" data-testid="channel-description" />
+
+    <div class="member-section">
+      <label class="member-section__label">Members</label>
+      @if (selectedMembers().length > 0) {
+        <div class="member-chips">
+          @for (member of selectedMembers(); track member.id) {
+            <div class="member-chip">
+              <app-avatar [initials]="member.initials" [color]="member.color" size="sm" />
+              <span class="member-chip__name">{{ member.name }}</span>
+              <button class="member-chip__remove" (click)="removeMember(member.id)" aria-label="Remove member">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+      <div class="member-search">
+        <input
+          class="member-search__input"
+          type="text"
+          placeholder="Search users..."
+          [formControl]="memberSearchControl"
+          data-testid="channel-member-search" />
+      </div>
+      @if (memberSearchTerm()) {
+        <div class="member-results">
+          @for (user of filteredUsers(); track user.id) {
+            <button class="member-result" (click)="addMember(user)">
+              <app-avatar [initials]="user.initials" [color]="user.color" size="sm" />
+              <span class="member-result__name">{{ user.name }}</span>
+            </button>
+          }
+          @if (filteredUsers().length === 0) {
+            <div class="member-results__empty">No users found</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    <button
+      class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving() || selectedMembers().length === 0"
+      (click)="save()"
+      data-testid="channel-save-btn">
+      {{ saving() ? 'Creating...' : 'Create Channel' }}
+    </button>
+  </div>
+</app-dialog>

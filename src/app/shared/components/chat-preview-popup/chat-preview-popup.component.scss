@@ -1,0 +1,87 @@
+@use 'styles/variables' as *;
+
+.chat-preview-popup {
+  position: fixed;
+  top: calc(#{$header-height} + #{$sp-md});
+  right: $sp-lg;
+  z-index: $z-toast;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  pointer-events: none;
+  max-width: 360px;
+}
+
+.preview-card {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border: $border-width-thin solid var(--border);
+  box-shadow: $shadow-dropdown;
+  pointer-events: auto;
+  cursor: pointer;
+  animation: slideIn $transition-fast;
+
+  &__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
+  &__sender {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__content {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  &__dismiss {
+    width: $btn-icon-size;
+    height: $btn-icon-size;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+
+    &:hover {
+      color: var(--text);
+    }
+  }
+
+  &:hover {
+    background: var(--surface);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

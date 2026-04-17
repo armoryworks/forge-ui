@@ -420,6 +420,13 @@
       </div>
     }
 
+    <!-- Announcements Tab -->
+    @if (activeTab() === 'announcements') {
+      <div class="tab-panel">
+        <app-announcements-panel />
+      </div>
+    }
+
     <!-- Audit Log Tab -->
     @if (activeTab() === 'audit-log') {
       <div class="tab-panel">

@@ -7,7 +7,10 @@ import { SignalrService } from './signalr.service';
 
 type BroadcastEvent =
   | { type: 'logout' }
-  | { type: 'theme-change'; theme: ThemeMode };
+  | { type: 'theme-change'; theme: ThemeMode }
+  | { type: 'chat-window-opened' }
+  | { type: 'chat-window-closed' }
+  | { type: 'chat-open-conversation'; channelId?: number; userId?: number };
 
 const CHANNEL_NAME = 'qb-engineer-sync';
 
@@ -37,6 +40,21 @@ export class BroadcastService implements OnDestroy {
     this.themeService.registerBroadcastCallback((theme: ThemeMode) => {
       this.channel?.postMessage({ type: 'theme-change', theme } satisfies BroadcastEvent);
     });
+  }
+
+  send(channel: string, data: unknown): void {
+    // Generic send for additional channels (e.g., chat sync)
+    try {
+      const ch = new BroadcastChannel(channel);
+      ch.postMessage(data);
+      ch.close();
+    } catch {
+      // BroadcastChannel not supported
+    }
+  }
+
+  sendChatEvent(event: BroadcastEvent): void {
+    this.channel?.postMessage(event);
   }
 
   ngOnDestroy(): void {

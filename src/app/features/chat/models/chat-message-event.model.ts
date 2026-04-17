@@ -7,4 +7,6 @@ export interface ChatMessageEvent {
   recipientId: number;
   content: string;
   createdAt: Date;
+  parentMessageId?: number | null;
+  threadReplyCount?: number;
 }

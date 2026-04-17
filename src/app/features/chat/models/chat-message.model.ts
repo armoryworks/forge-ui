@@ -12,6 +12,16 @@ export interface ChatMessage {
   fileAttachment: ChatFileAttachment | null;
   linkedEntityType: string | null;
   linkedEntityId: number | null;
+  parentMessageId: number | null;
+  threadReplyCount: number;
+  threadLastReplyAt: Date | null;
+  mentions: ChatMessageMention[];
+}
+
+export interface ChatMessageMention {
+  entityType: string;
+  entityId: number;
+  displayText: string;
 }
 
 export interface ChatFileAttachment {

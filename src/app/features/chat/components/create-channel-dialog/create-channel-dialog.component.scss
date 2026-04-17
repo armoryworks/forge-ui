@@ -1,0 +1,104 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.member-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.08em, 600);
+    color: var(--text-muted);
+  }
+}
+
+.member-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-sm;
+}
+
+.member-chip {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-sm;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+
+  &__name {
+    font-size: $font-size-sm;
+  }
+
+  &__remove {
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+
+    &:hover {
+      color: var(--error);
+    }
+  }
+}
+
+.member-search__input {
+  width: 100%;
+  height: $input-height;
+  padding: 0 $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: $font-size-base;
+  font-family: $font-family-primary;
+  outline: none;
+
+  &:focus {
+    border-color: var(--primary);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.member-results {
+  max-height: 200px;
+  overflow-y: auto;
+  border: $border-width-thin solid var(--border);
+
+  &__empty {
+    padding: $sp-md;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+}
+
+.member-result {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-sm $sp-md;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: $font-family-primary;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: var(--bg);
+  }
+
+  &__name {
+    font-size: $font-size-base;
+  }
+}

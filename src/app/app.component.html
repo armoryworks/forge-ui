@@ -2,6 +2,7 @@
 @if (showShell()) {
   <app-header />
   <app-connection-banner />
+  <app-announcement-overlay />
   <app-onboarding-banner />
   <div class="app-body" [attr.inert]="isGlobalLoading() || null">
     @if (layout.sidebarVisible()) {
@@ -24,3 +25,4 @@
 <app-loading-overlay />
 <app-toast-container />
 <app-keyboard-shortcuts-help />
+<app-chat-preview-popup />

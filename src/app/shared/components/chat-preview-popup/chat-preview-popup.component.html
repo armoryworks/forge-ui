@@ -1,0 +1,16 @@
+@if (previews().length > 0) {
+  <div class="chat-preview-popup">
+    @for (item of previews(); track item.message.id) {
+      <div class="preview-card" (click)="dismiss(item.message)">
+        <app-avatar [initials]="item.message.senderInitials" [color]="item.message.senderColor" size="sm" />
+        <div class="preview-card__body">
+          <span class="preview-card__sender">{{ item.message.senderName }}</span>
+          <span class="preview-card__content">{{ truncateContent(item.message.content) }}</span>
+        </div>
+        <button class="preview-card__dismiss" aria-label="Dismiss" (click)="dismiss(item.message); $event.stopPropagation()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    }
+  </div>
+}

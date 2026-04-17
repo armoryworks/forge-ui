@@ -4,7 +4,7 @@
   }
   <div class="chat-panel" [class.chat-panel--page]="isRoutedPage()">
     <div class="chat-panel__header">
-      @if (selectedConversation()) {
+      @if (view() === 'dm' && selectedConversation()) {
         <button class="icon-btn chat-panel__back" (click)="backToList()" [attr.aria-label]="'chat.backToConversations' | translate" [matTooltip]="'chat.backToConversations' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">arrow_back</span>
         </button>
@@ -13,52 +13,119 @@
           [color]="selectedConversation()!.userColor"
           size="sm" />
         <span class="chat-panel__header-name">{{ selectedConversation()!.userName }}</span>
+      } @else if (view() === 'channel' && selectedChannel()) {
+        <button class="icon-btn chat-panel__back" (click)="backToList()" [attr.aria-label]="'chat.backToConversations' | translate" [matTooltip]="'chat.backToConversations' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">arrow_back</span>
+        </button>
+        <span class="material-icons-outlined chat-panel__channel-icon">{{ getChannelIcon(selectedChannel()!) }}</span>
+        <span class="chat-panel__header-name">{{ selectedChannel()!.name }}</span>
       } @else {
         <span class="chat-panel__header-title">{{ 'chat.title' | translate }}</span>
       }
       <span class="chat-panel__spacer"></span>
       @if (!isRoutedPage()) {
+        <button class="icon-btn" (click)="popOut()" aria-label="Pop out chat" matTooltip="Pop out" matTooltipPosition="above">
+          <span class="material-icons-outlined">open_in_new</span>
+        </button>
         <button class="icon-btn" (click)="toggle()" [attr.aria-label]="'chat.closeChat' | translate" [matTooltip]="'chat.closeChat' | translate" matTooltipPosition="above">
           <span class="material-icons-outlined">close</span>
         </button>
       }
     </div>
 
-    @if (!selectedConversation() && !showUserPicker()) {
-      <div class="chat-panel__compose-bar">
-        <button class="action-btn action-btn--primary action-btn--sm chat-panel__compose-btn" (click)="openUserPicker()" aria-label="New conversation">
-          <span class="material-icons-outlined">add</span>
-          {{ 'chat.newMessage' | translate }}
-        </button>
-      </div>
-      <div class="chat-panel__conversations">
-        @if (conversations().length === 0) {
-          <div class="chat-panel__empty">
-            <span class="material-icons-outlined chat-panel__empty-icon">chat_bubble_outline</span>
-            <span class="chat-panel__empty-text">{{ 'chat.noConversations' | translate }}</span>
-          </div>
-        }
-        @for (conv of conversations(); track conv.userId) {
-          <button class="conversation" (click)="selectConversation(conv)">
-            <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="sm" />
-            <div class="conversation__content">
-              <div class="conversation__top">
-                <span class="conversation__name">{{ conv.userName }}</span>
-                @if (conv.lastMessageAt) {
-                  <span class="conversation__time">{{ formatDate(conv.lastMessageAt) }}</span>
-                }
-              </div>
-              @if (conv.lastMessage) {
-                <span class="conversation__preview">{{ conv.lastMessage }}</span>
+    @if (view() === 'list') {
+      <!-- Channel list view -->
+      <div class="chat-panel__channel-list">
+        <!-- Direct Messages section -->
+        <div class="channel-section">
+          <button class="channel-section__header" (click)="toggleSection('dms')" aria-label="Toggle direct messages">
+            <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['dms']">expand_more</span>
+            <span class="channel-section__title">Direct Messages</span>
+            <span class="channel-section__spacer"></span>
+            <button class="icon-btn channel-section__action" (click)="openUserPicker(); $event.stopPropagation()" aria-label="New message" [matTooltip]="'chat.newMessage' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">add</span>
+            </button>
+          </button>
+          @if (channelSectionsExpanded()['dms']) {
+            <div class="channel-section__items">
+              @if (dmConversations().length === 0) {
+                <div class="channel-section__empty">No conversations yet</div>
+              }
+              @for (conv of dmConversations(); track conv.userId) {
+                <button class="conversation" (click)="selectConversation(conv)">
+                  <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="sm" />
+                  <div class="conversation__content">
+                    <div class="conversation__top">
+                      <span class="conversation__name">{{ conv.userName }}</span>
+                      @if (conv.lastMessageAt) {
+                        <span class="conversation__time">{{ formatDate(conv.lastMessageAt) }}</span>
+                      }
+                    </div>
+                    @if (conv.lastMessage) {
+                      <span class="conversation__preview">{{ conv.lastMessage }}</span>
+                    }
+                  </div>
+                  @if (conv.unreadCount > 0) {
+                    <span class="conversation__badge">{{ conv.unreadCount }}</span>
+                  }
+                </button>
               }
             </div>
-            @if (conv.unreadCount > 0) {
-              <span class="conversation__badge">{{ conv.unreadCount }}</span>
-            }
+          }
+        </div>
+
+        <!-- Channels section -->
+        <div class="channel-section">
+          <button class="channel-section__header" (click)="toggleSection('channels')" aria-label="Toggle channels">
+            <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['channels']">expand_more</span>
+            <span class="channel-section__title">Channels</span>
+            <span class="channel-section__spacer"></span>
+            <button class="icon-btn channel-section__action" (click)="openCreateChannel(); $event.stopPropagation()" aria-label="New channel" matTooltip="New Channel" matTooltipPosition="above">
+              <span class="material-icons-outlined">add</span>
+            </button>
           </button>
+          @if (channelSectionsExpanded()['channels']) {
+            <div class="channel-section__items">
+              @if (groupChannels().length === 0) {
+                <div class="channel-section__empty">No channels</div>
+              }
+              @for (channel of groupChannels(); track channel.id) {
+                <button class="channel-item" (click)="selectChannel(channel)">
+                  <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
+                  <span class="channel-item__name">{{ channel.name }}</span>
+                  @if (channel.unreadCount > 0) {
+                    <span class="conversation__badge">{{ channel.unreadCount }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Teams section -->
+        @if (teamChannels().length > 0) {
+          <div class="channel-section">
+            <button class="channel-section__header" (click)="toggleSection('teams')" aria-label="Toggle teams">
+              <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['teams']">expand_more</span>
+              <span class="channel-section__title">Teams</span>
+            </button>
+            @if (channelSectionsExpanded()['teams']) {
+              <div class="channel-section__items">
+                @for (channel of teamChannels(); track channel.id) {
+                  <button class="channel-item" (click)="selectChannel(channel)">
+                    <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
+                    <span class="channel-item__name">{{ channel.name }}</span>
+                    @if (channel.unreadCount > 0) {
+                      <span class="conversation__badge">{{ channel.unreadCount }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </div>
         }
       </div>
-    } @else if (showUserPicker()) {
+    } @else if (view() === 'userPicker') {
       <div class="chat-panel__user-picker">
         <div class="chat-panel__picker-search">
           <span class="material-icons-outlined">search</span>
@@ -89,43 +156,150 @@
         </div>
       </div>
     } @else {
-      <div class="chat-panel__messages" #messagesContainer>
-        @for (msg of messages(); track msg.id; let i = $index) {
-          @if (dateSeparator(i); as label) {
-            <div class="message-date-separator">
-              <span class="message-date-separator__line"></span>
-              <span class="message-date-separator__label">{{ label }}</span>
-              <span class="message-date-separator__line"></span>
+      <!-- DM or Channel message view -->
+      <div class="chat-panel__content-area" [class.chat-panel__content-area--threaded]="threadParentMessage()">
+        <div class="chat-panel__messages" #messagesContainer>
+          @for (msg of topLevelMessages(); track msg.id; let i = $index) {
+            @if (dateSeparator(i); as label) {
+              <div class="message-date-separator">
+                <span class="message-date-separator__line"></span>
+                <span class="message-date-separator__label">{{ label }}</span>
+                <span class="message-date-separator__line"></span>
+              </div>
+            }
+            <div class="message" [class.message--own]="isOwnMessage(msg)">
+              @if (!isOwnMessage(msg)) {
+                <app-avatar [initials]="msg.senderInitials" [color]="msg.senderColor" size="sm" />
+              }
+              <div class="message__bubble">
+                @if (view() === 'channel' && !isOwnMessage(msg)) {
+                  <span class="message__sender">{{ msg.senderName }}</span>
+                }
+                @if (msg.fileAttachment) {
+                  <div class="message__attachment">
+                    <span class="material-icons-outlined message__attachment-icon">{{ getFileIcon(msg.fileAttachment.contentType) }}</span>
+                    <a class="message__attachment-name" [href]="'/api/v1/files/' + msg.fileAttachment.id + '/download'" target="_blank" rel="noopener">
+                      {{ msg.fileAttachment.fileName }}
+                    </a>
+                    <span class="message__attachment-size">{{ formatFileSize(msg.fileAttachment.size) }}</span>
+                  </div>
+                }
+                @if (msg.content) {
+                  <span class="message__text" [innerHTML]="msg.content | mentionRender"></span>
+                }
+                <span class="message__time">{{ formatTime(msg.createdAt) }}</span>
+              </div>
+              @if (msg.threadReplyCount > 0) {
+                <button class="message__thread-link" (click)="openThread(msg)" aria-label="View thread replies">
+                  <span class="material-icons-outlined">forum</span>
+                  {{ msg.threadReplyCount }} {{ msg.threadReplyCount === 1 ? 'reply' : 'replies' }}
+                </button>
+              }
+              <button class="message__reply-btn" (click)="openThread(msg)" aria-label="Reply in thread" matTooltip="Reply in thread" matTooltipPosition="above">
+                <span class="material-icons-outlined">reply</span>
+              </button>
             </div>
           }
-          <div class="message" [class.message--own]="isOwnMessage(msg)">
-            @if (!isOwnMessage(msg)) {
-              <app-avatar [initials]="msg.senderInitials" [color]="msg.senderColor" size="sm" />
-            }
-            <div class="message__bubble">
-              <span class="message__text">{{ msg.content }}</span>
-              <span class="message__time">{{ formatTime(msg.createdAt) }}</span>
+        </div>
+
+        <!-- Thread side panel -->
+        @if (threadParentMessage(); as parent) {
+          <div class="thread-panel">
+            <div class="thread-panel__header">
+              <span class="thread-panel__title">Thread</span>
+              <button class="icon-btn" (click)="closeThread()" aria-label="Close thread">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            </div>
+            <div class="thread-panel__messages">
+              <!-- Parent message -->
+              <div class="message">
+                <app-avatar [initials]="parent.senderInitials" [color]="parent.senderColor" size="sm" />
+                <div class="message__bubble">
+                  <span class="message__sender">{{ parent.senderName }}</span>
+                  <span class="message__text" [innerHTML]="parent.content | mentionRender"></span>
+                  <span class="message__time">{{ formatTime(parent.createdAt) }}</span>
+                </div>
+              </div>
+              @if (threadReplies().length > 0) {
+                <div class="thread-panel__divider">
+                  <span class="thread-panel__divider-text">{{ threadReplies().length }} {{ threadReplies().length === 1 ? 'reply' : 'replies' }}</span>
+                </div>
+              }
+              @for (reply of threadReplies(); track reply.id) {
+                <div class="message" [class.message--own]="isOwnMessage(reply)">
+                  @if (!isOwnMessage(reply)) {
+                    <app-avatar [initials]="reply.senderInitials" [color]="reply.senderColor" size="sm" />
+                  }
+                  <div class="message__bubble">
+                    @if (!isOwnMessage(reply)) {
+                      <span class="message__sender">{{ reply.senderName }}</span>
+                    }
+                    <span class="message__text" [innerHTML]="reply.content | mentionRender"></span>
+                    <span class="message__time">{{ formatTime(reply.createdAt) }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="chat-panel__input">
+              <input
+                class="chat-panel__input-field"
+                type="text"
+                placeholder="Reply in thread..."
+                [formControl]="threadReplyControl"
+                (keydown)="onThreadKeydown($event)" />
+              <button
+                class="icon-btn chat-panel__send"
+                [disabled]="!threadReplyControl.value?.trim()"
+                (click)="sendThreadReply()"
+                aria-label="Send thread reply">
+                <span class="material-icons-outlined">send</span>
+              </button>
             </div>
           </div>
         }
       </div>
-      <div class="chat-panel__input">
-        <input
-          data-testid="chat-message-input"
-          class="chat-panel__input-field"
-          type="text"
-          [placeholder]="'chat.typeMessage' | translate"
-          [formControl]="messageControl"
-          (keydown)="onKeydown($event)" />
-        <button
-          data-testid="chat-send-btn"
-          class="icon-btn chat-panel__send"
-          [disabled]="!messageControl.value?.trim()"
-          (click)="sendMessage()"
-          [attr.aria-label]="'chat.sendMessage' | translate"
-          [matTooltip]="'chat.sendMessage' | translate" matTooltipPosition="above">
-          <span class="material-icons-outlined">send</span>
-        </button>
+      <div class="chat-panel__input-area" [class.chat-panel__input-area--hidden]="threadParentMessage()">
+        @if (pendingFile()) {
+          <div class="chat-panel__pending-file">
+            <span class="material-icons-outlined">attach_file</span>
+            <span class="chat-panel__pending-file-name">{{ pendingFile()!.name }}</span>
+            <span class="chat-panel__pending-file-size">{{ formatFileSize(pendingFile()!.size) }}</span>
+            @if (isUploading()) {
+              <span class="material-icons-outlined spin">sync</span>
+            }
+            <button class="icon-btn" (click)="clearPendingFile()" aria-label="Remove file">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        }
+        <div class="chat-panel__input" >
+          @if (isInputDisabled()) {
+            <span class="chat-panel__readonly">This channel is read-only</span>
+          } @else {
+            <input type="file" #fileInput class="chat-panel__file-input" (change)="onFileSelected($event)"
+              accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt,.step,.stl,.dxf" />
+            <button class="icon-btn" (click)="fileInput.click()" aria-label="Attach file" matTooltip="Attach file" matTooltipPosition="above">
+              <span class="material-icons-outlined">attach_file</span>
+            </button>
+            <input
+              data-testid="chat-message-input"
+              class="chat-panel__input-field"
+              type="text"
+              [placeholder]="'chat.typeMessage' | translate"
+              [formControl]="messageControl"
+              (keydown)="onKeydown($event)" />
+            <button
+              data-testid="chat-send-btn"
+              class="icon-btn chat-panel__send"
+              [disabled]="(!messageControl.value?.trim() && !pendingFileAttachmentId()) || isUploading()"
+              (click)="sendMessage()"
+              [attr.aria-label]="'chat.sendMessage' | translate"
+              [matTooltip]="'chat.sendMessage' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">send</span>
+            </button>
+          }
+        </div>
       </div>
     }
   </div>

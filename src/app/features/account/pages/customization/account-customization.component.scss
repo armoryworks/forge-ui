@@ -90,6 +90,61 @@
   }
 }
 
+// ─── Toggle List ───
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  margin-top: $sp-lg;
+}
+
+.toggle-option {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: var(--surface);
+  }
+
+  &--active {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  &__icon {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+
+    .toggle-option--active & { color: var(--primary); }
+  }
+
+  &__label {
+    flex: 1;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    text-align: left;
+  }
+
+  &__status {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+
+    .toggle-option--active & { color: var(--primary); }
+  }
+}
+
 // ─── Font Scale Picker ───
 .font-scale-picker {
   display: flex;

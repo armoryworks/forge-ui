@@ -54,6 +54,25 @@
     </div>
   </div>
 
+  <!-- Chat Notifications -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">Chat Notifications</span>
+    <p class="customization__hint">Control sound and vibration when receiving chat messages.</p>
+
+    <div class="toggle-list">
+      <button class="toggle-option" [class.toggle-option--active]="chatSoundEnabled()" (click)="toggleChatSound()" [attr.aria-pressed]="chatSoundEnabled()">
+        <span class="material-icons-outlined toggle-option__icon">volume_up</span>
+        <span class="toggle-option__label">Notification sound</span>
+        <span class="toggle-option__status">{{ chatSoundEnabled() ? 'On' : 'Off' }}</span>
+      </button>
+      <button class="toggle-option" [class.toggle-option--active]="chatVibrateEnabled()" (click)="toggleChatVibrate()" [attr.aria-pressed]="chatVibrateEnabled()">
+        <span class="material-icons-outlined toggle-option__icon">vibration</span>
+        <span class="toggle-option__label">Vibration (mobile)</span>
+        <span class="toggle-option__status">{{ chatVibrateEnabled() ? 'On' : 'Off' }}</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Draft Retention -->
   <div class="account-page__card">
     <span class="account-page__section-label">Keep unsaved work for</span>

@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+
+.announcements-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__spacer {
+    flex: 1;
+  }
+}
+
+.ack-summary {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md 0;
+  border-bottom: $border-width-thin solid var(--border);
+  margin-bottom: $sp-md;
+
+  &__count {
+    font-weight: 600;
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  &__required {
+    font-size: $font-size-sm;
+    color: var(--warning);
+  }
+}
+
+.ack-empty {
+  text-align: center;
+  padding: $sp-xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.ack-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ack-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-sm $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+
+  &__name {
+    font-size: $font-size-base;
+    color: var(--text);
+  }
+
+  &__time {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+}

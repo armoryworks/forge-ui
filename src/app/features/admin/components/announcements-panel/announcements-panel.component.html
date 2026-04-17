@@ -1,0 +1,125 @@
+<div class="announcements-panel">
+  <div class="panel-header">
+    <div class="tab-bar">
+      <button class="tab" [class.tab--active]="activeView() === 'announcements'" (click)="switchView('announcements')">
+        Announcements
+      </button>
+      <button class="tab" [class.tab--active]="activeView() === 'templates'" (click)="switchView('templates')">
+        Templates
+      </button>
+    </div>
+    <span class="announcements-panel__spacer"></span>
+    @if (activeView() === 'announcements') {
+      <button class="action-btn action-btn--primary" data-testid="new-announcement-btn" (click)="openCreateAnnouncement()">
+        <span class="material-icons-outlined">campaign</span>
+        New Announcement
+      </button>
+    } @else {
+      <button class="action-btn action-btn--primary" data-testid="new-template-btn" (click)="openCreateTemplate()">
+        <span class="material-icons-outlined">add</span>
+        New Template
+      </button>
+    }
+  </div>
+
+  @if (activeView() === 'announcements') {
+    <div [appLoadingBlock]="isLoading()">
+      <app-data-table
+        tableId="admin-announcements"
+        [columns]="announcementColumns"
+        [data]="announcements()"
+        emptyIcon="campaign"
+        emptyMessage="No announcements sent yet"
+        [clickableRows]="true"
+        (rowClick)="viewAcknowledgments($any($event))">
+        <ng-template appColumnCell="severity" let-row>
+          <span [class]="severityChipClass(row.severity)">{{ row.severity }}</span>
+        </ng-template>
+        <ng-template appColumnCell="createdAt" let-row>
+          {{ row.createdAt | date:'MM/dd/yyyy hh:mm' }}
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" aria-label="View acknowledgments" (click)="viewAcknowledgments(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">visibility</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  } @else {
+    <app-data-table
+      tableId="admin-announcement-templates"
+      [columns]="templateColumns"
+      [data]="templates()"
+      emptyIcon="description"
+      emptyMessage="No templates created yet">
+      <ng-template appColumnCell="defaultSeverity" let-row>
+        <span [class]="severityChipClass(row.defaultSeverity)">{{ row.defaultSeverity }}</span>
+      </ng-template>
+      <ng-template appColumnCell="defaultRequiresAcknowledgment" let-row>
+        @if (row.defaultRequiresAcknowledgment) {
+          <span class="chip chip--warning">Yes</span>
+        } @else {
+          <span class="text-muted">No</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn icon-btn--danger" aria-label="Delete template" (click)="deleteTemplate(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</div>
+
+<!-- Acknowledgments Dialog -->
+@if (showAckDialog()) {
+  <app-dialog [title]="'Acknowledgments — ' + selectedAnnouncement()?.title" width="520px" (closed)="closeAckDialog()">
+    <div class="ack-summary">
+      <span class="ack-summary__count">{{ acknowledgments().length }} acknowledged</span>
+      @if (selectedAnnouncement()?.requiresAcknowledgment) {
+        <span class="ack-summary__required">Acknowledgment required</span>
+      }
+    </div>
+    @if (acknowledgments().length === 0) {
+      <div class="ack-empty">No acknowledgments yet</div>
+    } @else {
+      <div class="ack-list">
+        @for (ack of acknowledgments(); track ack.userId) {
+          <div class="ack-item">
+            <span class="ack-item__name">{{ ack.userName }}</span>
+            <span class="ack-item__time">{{ ack.acknowledgedAt | date:'MM/dd/yyyy hh:mm' }}</span>
+          </div>
+        }
+      </div>
+    }
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeAckDialog()">Close</button>
+    </div>
+  </app-dialog>
+}
+
+<!-- Create Template Dialog -->
+@if (showTemplateDialog()) {
+  <app-dialog title="New Template" width="520px" (closed)="closeTemplateDialog()">
+    <div [formGroup]="templateForm">
+      <app-input label="Name" formControlName="name" [required]="true" [maxlength]="200" data-testid="template-name" />
+      <app-textarea label="Content" formControlName="content" [required]="true" [rows]="4" [maxlength]="5000" data-testid="template-content" />
+      <div class="dialog-row">
+        <app-select label="Default Severity" formControlName="defaultSeverity" [options]="severityOptions" [required]="true" />
+        <app-select label="Default Scope" formControlName="defaultScope" [options]="scopeOptions" [required]="true" />
+      </div>
+      <app-toggle label="Require Acknowledgment by Default" formControlName="defaultRequiresAcknowledgment" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeTemplateDialog()">Cancel</button>
+      <button class="action-btn action-btn--primary"
+        data-testid="template-save-btn"
+        [appValidationPopover]="templateViolations"
+        [disabled]="templateForm.invalid || savingTemplate()"
+        (click)="saveTemplate()">
+        <span class="material-icons-outlined">save</span>
+        Create Template
+      </button>
+    </div>
+  </app-dialog>
+}

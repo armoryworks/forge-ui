@@ -1,0 +1,24 @@
+@if (visibleAnnouncements().length > 0) {
+  <div class="announcement-overlay">
+    @for (announcement of visibleAnnouncements(); track announcement.id) {
+      <div class="announcement" [class]="getSeverityClass(announcement.severity)">
+        <span class="material-icons-outlined announcement__icon">{{ getSeverityIcon(announcement.severity) }}</span>
+        <div class="announcement__content">
+          <span class="announcement__title">{{ announcement.title }}</span>
+          <span class="announcement__message">{{ announcement.content }}</span>
+        </div>
+        <div class="announcement__actions">
+          @if (announcement.requiresAcknowledgment) {
+            <button class="action-btn action-btn--sm announcement__ack-btn" (click)="acknowledge(announcement)">
+              I Understand
+            </button>
+          } @else {
+            <button class="icon-btn announcement__dismiss" (click)="dismiss(announcement)" aria-label="Dismiss">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

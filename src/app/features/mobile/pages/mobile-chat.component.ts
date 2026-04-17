@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, OnDestroy, sign
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
+import { MatDialog } from '@angular/material/dialog';
+
 import { AvatarComponent } from '../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../shared/services/auth.service';
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
@@ -10,6 +12,9 @@ import { ChatService } from '../../chat/services/chat.service';
 import { ChatConversation } from '../../chat/models/chat-conversation.model';
 import { ChatMessage } from '../../chat/models/chat-message.model';
 import { ChatMessageEvent } from '../../chat/models/chat-message-event.model';
+import { ChatRoom } from '../../chat/models/chat-room.model';
+import { CreateChannelDialogComponent } from '../../chat/components/create-channel-dialog/create-channel-dialog.component';
+import { MentionRenderPipe } from '../../chat/pipes/mention-render.pipe';
 import { formatDate } from '../../../shared/utils/date.utils';
 
 interface UserListItem {
@@ -19,10 +24,12 @@ interface UserListItem {
   color: string;
 }
 
+type MobileChatView = 'list' | 'dm' | 'channel' | 'userPicker';
+
 @Component({
   selector: 'app-mobile-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, AvatarComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, AvatarComponent, TranslatePipe, MentionRenderPipe],
   templateUrl: './mobile-chat.component.html',
   styleUrl: './mobile-chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,16 +40,24 @@ export class MobileChatComponent implements OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
+  protected readonly view = signal<MobileChatView>('list');
   protected readonly conversations = signal<ChatConversation[]>([]);
+  protected readonly channels = signal<ChatRoom[]>([]);
   protected readonly selectedConversation = signal<ChatConversation | null>(null);
+  protected readonly selectedChannel = signal<ChatRoom | null>(null);
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly messageControl = new FormControl('');
+  protected readonly channelSectionsExpanded = signal<Record<string, boolean>>({
+    dms: true,
+    channels: true,
+    teams: true,
+  });
 
   // New conversation state
-  protected readonly showUserPicker = signal(false);
   protected readonly allUsers = signal<UserListItem[]>([]);
   protected readonly userSearchControl = new FormControl('');
   protected readonly userSearchTerm = signal('');
@@ -56,28 +71,50 @@ export class MobileChatComponent implements OnDestroy {
       .filter(u => !existingUserIds.has(u.id));
   });
 
+  // Computed channel groups
+  protected readonly groupChannels = computed(() =>
+    this.channels().filter(c => c.channelType === 'Group' || c.channelType === 'Custom' || c.channelType === 'System' || c.channelType === 'Broadcast'));
+  protected readonly teamChannels = computed(() =>
+    this.channels().filter(c => c.channelType === 'TeamAuto'));
+
   private hubConnected = false;
 
   constructor() {
     this.loadConversations();
+    this.loadChannels();
     this.connectHub();
   }
 
   protected selectConversation(conv: ChatConversation): void {
     this.selectedConversation.set(conv);
+    this.selectedChannel.set(null);
+    this.view.set('dm');
     this.loadMessages(conv.userId);
     this.chatService.markAsRead(conv.userId).subscribe();
   }
 
-  protected backToList(): void {
+  protected selectChannel(channel: ChatRoom): void {
+    this.selectedChannel.set(channel);
     this.selectedConversation.set(null);
+    this.view.set('channel');
+    this.loadChannelMessages(channel.id);
+    this.chatService.markChannelRead(channel.id).subscribe();
+    this.chatHub.joinChannel(channel.id);
+  }
+
+  protected backToList(): void {
+    const ch = this.selectedChannel();
+    if (ch) this.chatHub.leaveChannel(ch.id);
+    this.selectedConversation.set(null);
+    this.selectedChannel.set(null);
     this.messages.set([]);
-    this.showUserPicker.set(false);
+    this.view.set('list');
     this.loadConversations();
+    this.loadChannels();
   }
 
   protected openUserPicker(): void {
-    this.showUserPicker.set(true);
+    this.view.set('userPicker');
     this.userSearchControl.setValue('');
     this.userSearchTerm.set('');
     if (this.allUsers().length === 0) {
@@ -89,7 +126,6 @@ export class MobileChatComponent implements OnDestroy {
   }
 
   protected selectUser(user: UserListItem): void {
-    this.showUserPicker.set(false);
     const conv: ChatConversation = {
       userId: user.id,
       userName: user.name,
@@ -100,23 +136,49 @@ export class MobileChatComponent implements OnDestroy {
       unreadCount: 0,
     };
     this.selectedConversation.set(conv);
+    this.selectedChannel.set(null);
+    this.view.set('dm');
     this.loadMessages(user.id);
   }
 
   protected cancelUserPicker(): void {
-    this.showUserPicker.set(false);
+    this.view.set('list');
+  }
+
+  protected openCreateChannel(): void {
+    this.dialog.open(CreateChannelDialogComponent, { width: '520px' })
+      .afterClosed().subscribe((result: ChatRoom | undefined) => {
+        if (result) {
+          this.loadChannels();
+          this.selectChannel(result);
+        }
+      });
+  }
+
+  protected toggleSection(section: string): void {
+    this.channelSectionsExpanded.update(s => ({ ...s, [section]: !s[section] }));
   }
 
   protected sendMessage(): void {
-    const conv = this.selectedConversation();
     const content = this.messageControl.value?.trim();
-    if (!conv || !content) return;
+    if (!content) return;
 
-    this.chatService.sendMessage(conv.userId, content).subscribe((msg) => {
-      this.messages.update((msgs) => [...msgs, msg]);
-      this.messageControl.setValue('');
-      this.scrollToBottom();
-    });
+    const conv = this.selectedConversation();
+    const channel = this.selectedChannel();
+
+    if (conv) {
+      this.chatService.sendMessage(conv.userId, content).subscribe((msg) => {
+        this.messages.update((msgs) => [...msgs, msg]);
+        this.messageControl.setValue('');
+        this.scrollToBottom();
+      });
+    } else if (channel) {
+      this.chatService.sendChatRoomMessage(channel.id, content).subscribe((msg) => {
+        this.messages.update((msgs) => [...msgs, msg]);
+        this.messageControl.setValue('');
+        this.scrollToBottom();
+      });
+    }
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -132,6 +194,79 @@ export class MobileChatComponent implements OnDestroy {
     }
   }
 
+  protected getChannelIcon(channel: ChatRoom): string {
+    if (channel.iconName) return channel.iconName;
+    switch (channel.channelType) {
+      case 'System': return 'forum';
+      case 'Broadcast': return 'campaign';
+      case 'TeamAuto': return 'group';
+      case 'Custom': return 'tag';
+      default: return 'chat';
+    }
+  }
+
+  protected isInputDisabled(): boolean {
+    const ch = this.selectedChannel();
+    if (!ch) return false;
+    return ch.isReadOnly;
+  }
+
+  // Thread state
+  protected readonly threadParentMessage = signal<ChatMessage | null>(null);
+  protected readonly threadReplies = signal<ChatMessage[]>([]);
+  protected readonly threadReplyControl = new FormControl('');
+
+  protected readonly topLevelMessages = computed(() =>
+    this.messages().filter(m => !m.parentMessageId),
+  );
+
+  protected openThread(msg: ChatMessage): void {
+    this.threadParentMessage.set(msg);
+    this.threadReplies.set([]);
+    this.threadReplyControl.setValue('');
+    this.chatService.getThread(msg.id).subscribe(replies => {
+      this.threadReplies.set(replies);
+    });
+  }
+
+  protected closeThread(): void {
+    this.threadParentMessage.set(null);
+    this.threadReplies.set([]);
+  }
+
+  protected sendThreadReply(): void {
+    const content = this.threadReplyControl.value?.trim();
+    const parent = this.threadParentMessage();
+    if (!content || !parent) return;
+
+    this.chatService.replyInThread(parent.id, content).subscribe(reply => {
+      this.threadReplies.update(r => [...r, reply]);
+      this.threadReplyControl.setValue('');
+      this.messages.update(msgs => msgs.map(m =>
+        m.id === parent.id ? { ...m, threadReplyCount: m.threadReplyCount + 1 } : m,
+      ));
+    });
+  }
+
+  protected onThreadKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendThreadReply();
+    }
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  protected getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType === 'application/pdf') return 'picture_as_pdf';
+    return 'attach_file';
+  }
+
   protected isOwnMessage(msg: ChatMessage): boolean {
     return msg.senderId === this.authService.user()?.id;
   }
@@ -141,7 +276,6 @@ export class MobileChatComponent implements OnDestroy {
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  /** Returns a date label if the message starts a new day boundary. */
   protected dateSeparator(index: number): string | null {
     const msgs = this.messages();
     const current = new Date(msgs[index].createdAt);
@@ -198,6 +332,19 @@ export class MobileChatComponent implements OnDestroy {
     });
   }
 
+  private loadChannels(): void {
+    this.chatService.getChannels().subscribe((chs) => {
+      this.channels.set(chs);
+    });
+  }
+
+  private loadChannelMessages(channelId: number): void {
+    this.chatService.getChatRoomMessages(channelId).subscribe((msgs) => {
+      this.messages.set(msgs);
+      this.scrollToBottom();
+    });
+  }
+
   private loadMessages(otherUserId: number): void {
     this.chatService.getMessages(otherUserId).subscribe((msgs) => {
       this.messages.set(msgs);
@@ -214,7 +361,7 @@ export class MobileChatComponent implements OnDestroy {
       const selectedUserId = this.selectedConversation()?.userId;
 
       if (msg.senderId === selectedUserId || msg.recipientId === selectedUserId) {
-        const chatMessage: ChatMessage = { ...msg, isRead: true, chatRoomId: null, fileAttachment: null, linkedEntityType: null, linkedEntityId: null };
+        const chatMessage: ChatMessage = { ...msg, isRead: true, chatRoomId: null, fileAttachment: null, linkedEntityType: null, linkedEntityId: null, parentMessageId: msg.parentMessageId ?? null, threadReplyCount: msg.threadReplyCount ?? 0, threadLastReplyAt: null, mentions: [] };
         this.messages.update((msgs) => [...msgs, chatMessage]);
         this.scrollToBottom();
 
@@ -224,6 +371,29 @@ export class MobileChatComponent implements OnDestroy {
       }
 
       this.loadConversations();
+    });
+
+    this.chatHub.onRoomMessageReceived((event: unknown) => {
+      const data = event as { roomId: number; message: ChatMessageEvent };
+      const selectedChannelId = this.selectedChannel()?.id;
+      if (data.roomId === selectedChannelId) {
+        const chatMessage: ChatMessage = {
+          ...data.message,
+          isRead: true,
+          chatRoomId: data.roomId,
+          fileAttachment: null,
+          linkedEntityType: null,
+          linkedEntityId: null,
+          parentMessageId: data.message.parentMessageId ?? null,
+          threadReplyCount: data.message.threadReplyCount ?? 0,
+          threadLastReplyAt: null,
+          mentions: [],
+        };
+        this.messages.update((msgs) => [...msgs, chatMessage]);
+        this.scrollToBottom();
+        this.chatService.markChannelRead(data.roomId).subscribe();
+      }
+      this.loadChannels();
     });
 
     await this.chatHub.connect();

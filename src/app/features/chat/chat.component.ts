@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
 
 import { formatDate } from '../../shared/utils/date.utils';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -14,6 +15,9 @@ import { ChatService } from './services/chat.service';
 import { ChatConversation } from './models/chat-conversation.model';
 import { ChatMessage } from './models/chat-message.model';
 import { ChatMessageEvent } from './models/chat-message-event.model';
+import { ChatRoom, ChannelType } from './models/chat-room.model';
+import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
+import { MentionRenderPipe } from './pipes/mention-render.pipe';
 
 interface UserListItem {
   id: number;
@@ -22,10 +26,12 @@ interface UserListItem {
   color: string;
 }
 
+type ChatView = 'list' | 'dm' | 'channel' | 'userPicker';
+
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe, MentionRenderPipe],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,20 +43,37 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
   readonly panelOpen = signal(false);
-  /** True when rendered via router-outlet at /chat (full-page mode) */
   readonly isRoutedPage = signal(false);
+  protected readonly view = signal<ChatView>('list');
   protected readonly conversations = signal<ChatConversation[]>([]);
+  protected readonly channels = signal<ChatRoom[]>([]);
   protected readonly selectedConversation = signal<ChatConversation | null>(null);
+  protected readonly selectedChannel = signal<ChatRoom | null>(null);
   protected readonly messages = signal<ChatMessage[]>([]);
   protected readonly messageControl = new FormControl('');
   readonly totalUnread = signal(0);
+  protected readonly channelSectionsExpanded = signal<Record<string, boolean>>({
+    dms: true,
+    channels: true,
+    teams: true,
+  });
+
+  // File attachment state
+  protected readonly pendingFile = signal<File | null>(null);
+  protected readonly pendingFileAttachmentId = signal<number | null>(null);
+  protected readonly isUploading = signal(false);
+
+  // Thread state
+  protected readonly threadParentMessage = signal<ChatMessage | null>(null);
+  protected readonly threadReplies = signal<ChatMessage[]>([]);
+  protected readonly threadReplyControl = new FormControl('');
 
   // New conversation state
-  protected readonly showUserPicker = signal(false);
   protected readonly allUsers = signal<UserListItem[]>([]);
   protected readonly userSearchControl = new FormControl('');
   protected readonly userSearchTerm = signal('');
@@ -64,16 +87,28 @@ export class ChatComponent implements OnInit, OnDestroy {
       .filter(u => !existingUserIds.has(u.id));
   });
 
+  // Computed channel groups
+  protected readonly dmConversations = this.conversations;
+  protected readonly groupChannels = computed(() =>
+    this.channels().filter(c => c.channelType === 'Group' || c.channelType === 'Custom' || c.channelType === 'System' || c.channelType === 'Broadcast'));
+  protected readonly teamChannels = computed(() =>
+    this.channels().filter(c => c.channelType === 'TeamAuto'));
+
   private hubConnected = false;
 
   ngOnInit(): void {
-    // When rendered as a routed page (/chat), auto-open the panel
     if (this.route.snapshot.routeConfig !== null) {
       this.isRoutedPage.set(true);
       this.panelOpen.set(true);
       this.loadConversations();
+      this.loadChannels();
       this.connectHub();
     }
+  }
+
+  popOut(): void {
+    window.open('/chat/popout', 'qb-chat', 'width=800,height=600');
+    this.panelOpen.set(false);
   }
 
   toggle(): void {
@@ -82,29 +117,46 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     if (isOpen) {
       this.loadConversations();
+      this.loadChannels();
       this.connectHub();
     } else {
       this.selectedConversation.set(null);
+      this.selectedChannel.set(null);
       this.messages.set([]);
-      this.showUserPicker.set(false);
+      this.view.set('list');
     }
   }
 
   selectConversation(conv: ChatConversation): void {
     this.selectedConversation.set(conv);
+    this.selectedChannel.set(null);
+    this.view.set('dm');
     this.loadMessages(conv.userId);
     this.chatService.markAsRead(conv.userId).subscribe();
   }
 
-  backToList(): void {
+  selectChannel(channel: ChatRoom): void {
+    this.selectedChannel.set(channel);
     this.selectedConversation.set(null);
+    this.view.set('channel');
+    this.loadChannelMessages(channel.id);
+    this.chatService.markChannelRead(channel.id).subscribe();
+    this.chatHub.joinChannel(channel.id);
+  }
+
+  backToList(): void {
+    const ch = this.selectedChannel();
+    if (ch) this.chatHub.leaveChannel(ch.id);
+    this.selectedConversation.set(null);
+    this.selectedChannel.set(null);
     this.messages.set([]);
-    this.showUserPicker.set(false);
+    this.view.set('list');
     this.loadConversations();
+    this.loadChannels();
   }
 
   protected openUserPicker(): void {
-    this.showUserPicker.set(true);
+    this.view.set('userPicker');
     this.userSearchControl.setValue('');
     this.userSearchTerm.set('');
     if (this.allUsers().length === 0) {
@@ -116,7 +168,6 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   protected selectUser(user: UserListItem): void {
-    this.showUserPicker.set(false);
     const conv: ChatConversation = {
       userId: user.id,
       userName: user.name,
@@ -127,23 +178,49 @@ export class ChatComponent implements OnInit, OnDestroy {
       unreadCount: 0,
     };
     this.selectedConversation.set(conv);
+    this.selectedChannel.set(null);
+    this.view.set('dm');
     this.loadMessages(user.id);
   }
 
   protected cancelUserPicker(): void {
-    this.showUserPicker.set(false);
+    this.view.set('list');
+  }
+
+  protected openCreateChannel(): void {
+    this.dialog.open(CreateChannelDialogComponent, { width: '520px' })
+      .afterClosed().subscribe((result: ChatRoom | undefined) => {
+        if (result) {
+          this.loadChannels();
+          this.selectChannel(result);
+        }
+      });
+  }
+
+  protected toggleSection(section: string): void {
+    this.channelSectionsExpanded.update(s => ({ ...s, [section]: !s[section] }));
   }
 
   sendMessage(): void {
-    const conv = this.selectedConversation();
     const content = this.messageControl.value?.trim();
-    if (!conv || !content) return;
+    if (!content && !this.pendingFileAttachmentId()) return;
 
-    this.chatService.sendMessage(conv.userId, content).subscribe((msg) => {
+    const conv = this.selectedConversation();
+    const channel = this.selectedChannel();
+    const fileId = this.pendingFileAttachmentId() ?? undefined;
+
+    const onSent = (msg: ChatMessage) => {
       this.messages.update((msgs) => [...msgs, msg]);
       this.messageControl.setValue('');
+      this.clearPendingFile();
       this.scrollToBottom();
-    });
+    };
+
+    if (conv) {
+      this.chatService.sendMessage(conv.userId, content ?? '', fileId).subscribe(onSent);
+    } else if (channel) {
+      this.chatService.sendChatRoomMessage(channel.id, content ?? '', fileId).subscribe(onSent);
+    }
   }
 
   onKeydown(event: KeyboardEvent): void {
@@ -153,21 +230,151 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
   }
 
+  protected onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // Max 10MB
+    if (file.size > 10 * 1024 * 1024) return;
+
+    this.pendingFile.set(file);
+    input.value = '';
+
+    // Upload immediately
+    const channel = this.selectedChannel();
+    if (channel) {
+      this.isUploading.set(true);
+      this.chatService.uploadChatFile(channel.id, file).subscribe({
+        next: (attachment) => {
+          this.pendingFileAttachmentId.set(attachment.id);
+          this.isUploading.set(false);
+        },
+        error: () => {
+          this.pendingFile.set(null);
+          this.isUploading.set(false);
+        },
+      });
+    }
+  }
+
+  protected clearPendingFile(): void {
+    this.pendingFile.set(null);
+    this.pendingFileAttachmentId.set(null);
+  }
+
+  protected formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  protected isImageFile(contentType: string): boolean {
+    return contentType.startsWith('image/');
+  }
+
+  protected getFileIcon(contentType: string): string {
+    if (contentType.startsWith('image/')) return 'image';
+    if (contentType === 'application/pdf') return 'picture_as_pdf';
+    if (contentType.includes('spreadsheet') || contentType.includes('excel')) return 'table_chart';
+    if (contentType.includes('document') || contentType.includes('word')) return 'description';
+    return 'attach_file';
+  }
+
+  protected openThread(msg: ChatMessage): void {
+    this.threadParentMessage.set(msg);
+    this.threadReplies.set([]);
+    this.threadReplyControl.setValue('');
+    this.chatService.getThread(msg.id).subscribe(replies => {
+      this.threadReplies.set(replies);
+    });
+  }
+
+  protected closeThread(): void {
+    this.threadParentMessage.set(null);
+    this.threadReplies.set([]);
+  }
+
+  protected sendThreadReply(): void {
+    const content = this.threadReplyControl.value?.trim();
+    const parent = this.threadParentMessage();
+    if (!content || !parent) return;
+
+    this.chatService.replyInThread(parent.id, content).subscribe(reply => {
+      this.threadReplies.update(r => [...r, reply]);
+      this.threadReplyControl.setValue('');
+      // Update parent's reply count in main messages list
+      this.messages.update(msgs => msgs.map(m =>
+        m.id === parent.id ? { ...m, threadReplyCount: m.threadReplyCount + 1, threadLastReplyAt: new Date() } : m,
+      ));
+      this.threadParentMessage.update(p => p ? { ...p, threadReplyCount: p.threadReplyCount + 1 } : p);
+    });
+  }
+
+  protected onThreadKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.sendThreadReply();
+    }
+  }
+
+  // Filter out thread replies from main message list
+  protected readonly topLevelMessages = computed(() =>
+    this.messages().filter(m => !m.parentMessageId),
+  );
+
   ngOnDestroy(): void {
     if (this.hubConnected) {
       this.chatHub.disconnect();
     }
   }
 
+  protected getChannelIcon(channel: ChatRoom): string {
+    if (channel.iconName) return channel.iconName;
+    switch (channel.channelType) {
+      case 'System': return 'forum';
+      case 'Broadcast': return 'campaign';
+      case 'TeamAuto': return 'group';
+      case 'Custom': return 'tag';
+      default: return 'chat';
+    }
+  }
+
+  protected isInputDisabled(): boolean {
+    const ch = this.selectedChannel();
+    if (!ch) return false;
+    return ch.isReadOnly;
+  }
+
   private loadConversations(): void {
     this.chatService.getConversations().subscribe((convs) => {
       this.conversations.set(convs);
-      this.totalUnread.set(convs.reduce((sum, c) => sum + c.unreadCount, 0));
+      this.updateUnreadCount();
     });
+  }
+
+  private loadChannels(): void {
+    this.chatService.getChannels().subscribe((chs) => {
+      this.channels.set(chs);
+      this.updateUnreadCount();
+    });
+  }
+
+  private updateUnreadCount(): void {
+    const dmUnread = this.conversations().reduce((sum, c) => sum + c.unreadCount, 0);
+    const chUnread = this.channels().reduce((sum, c) => sum + c.unreadCount, 0);
+    this.totalUnread.set(dmUnread + chUnread);
   }
 
   private loadMessages(otherUserId: number): void {
     this.chatService.getMessages(otherUserId).subscribe((msgs) => {
+      this.messages.set(msgs);
+      this.scrollToBottom();
+    });
+  }
+
+  private loadChannelMessages(channelId: number): void {
+    this.chatService.getChatRoomMessages(channelId).subscribe((msgs) => {
       this.messages.set(msgs);
       this.scrollToBottom();
     });
@@ -182,7 +389,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       const selectedUserId = this.selectedConversation()?.userId;
 
       if (msg.senderId === selectedUserId || msg.recipientId === selectedUserId) {
-        const chatMessage: ChatMessage = { ...msg, isRead: true, chatRoomId: null, fileAttachment: null, linkedEntityType: null, linkedEntityId: null };
+        const chatMessage: ChatMessage = { ...msg, isRead: true, chatRoomId: null, fileAttachment: null, linkedEntityType: null, linkedEntityId: null, parentMessageId: msg.parentMessageId ?? null, threadReplyCount: msg.threadReplyCount ?? 0, threadLastReplyAt: null, mentions: [] };
         this.messages.update((msgs) => {
           const updated = [...msgs, chatMessage];
           updated.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -196,6 +403,29 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
 
       this.loadConversations();
+    });
+
+    this.chatHub.onRoomMessageReceived((event: unknown) => {
+      const data = event as { roomId: number; message: ChatMessageEvent };
+      const selectedChannelId = this.selectedChannel()?.id;
+      if (data.roomId === selectedChannelId) {
+        const chatMessage: ChatMessage = {
+          ...data.message,
+          isRead: true,
+          chatRoomId: data.roomId,
+          fileAttachment: null,
+          linkedEntityType: null,
+          linkedEntityId: null,
+          parentMessageId: data.message.parentMessageId ?? null,
+          threadReplyCount: data.message.threadReplyCount ?? 0,
+          threadLastReplyAt: null,
+          mentions: [],
+        };
+        this.messages.update((msgs) => [...msgs, chatMessage]);
+        this.scrollToBottom();
+        this.chatService.markChannelRead(data.roomId).subscribe();
+      }
+      this.loadChannels();
     });
 
     await this.chatHub.connect();
@@ -220,14 +450,12 @@ export class ChatComponent implements OnInit, OnDestroy {
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  /** Returns a date label if the message starts a new day boundary. */
   protected dateSeparator(index: number): string | null {
     const msgs = this.messages();
     const current = new Date(msgs[index].createdAt);
     const currentDay = this.toDayKey(current);
 
     if (index === 0) {
-      // Always show separator for first message unless it's today
       return this.isToday(current) ? null : this.formatDayLabel(current);
     }
 

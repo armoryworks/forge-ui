@@ -9,7 +9,9 @@ import { AppHeaderComponent } from './core/layout/app-header.component';
 import { SidebarComponent } from './core/layout/sidebar.component';
 import { ToastContainerComponent } from './shared/components/toast/toast.component';
 import { ConnectionBannerComponent } from './shared/components/connection-banner/connection-banner.component';
+import { AnnouncementOverlayComponent } from './shared/components/announcement-overlay/announcement-overlay.component';
 import { OnboardingBannerComponent } from './shared/components/onboarding-banner/onboarding-banner.component';
+import { ChatPreviewPopupComponent } from './shared/components/chat-preview-popup/chat-preview-popup.component';
 import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
 import { KeyboardShortcutsHelpComponent } from './shared/components/keyboard-shortcuts-help/keyboard-shortcuts-help.component';
@@ -34,6 +36,7 @@ import { ScannerService } from './shared/services/scanner.service';
 import { OfflineQueueService } from './shared/services/offline-queue.service';
 import { DraftRecoveryService } from './shared/services/draft-recovery.service';
 import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
+import { AnnouncementService } from './shared/services/announcement.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -52,7 +55,7 @@ import { PLANNING_TOUR } from './shared/tours/planning-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent],
+  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -78,6 +81,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly offlineQueue = inject(OfflineQueueService);
   private readonly draftRecovery = inject(DraftRecoveryService);
   private readonly draftBroadcast = inject(DraftBroadcastService);
+  private readonly announcementService = inject(AnnouncementService);
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
@@ -102,6 +106,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.employeeProfile.load();
         this.scanner.start();
         this.draftRecovery.onLogin();
+        this.announcementService.loadActive();
       } else {
         this.signalr.stopAll();
         // Don't stop the scanner on display/kiosk routes — they manage their own scanner lifecycle
