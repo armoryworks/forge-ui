@@ -1,6 +1,6 @@
 <app-page-header [title]="'inventory.title' | translate" [subtitle]="'inventory.subtitle' | translate" helpTourId="inventory">
   @if (activeTab() === 'locations') {
-    <button class="action-btn action-btn--primary" (click)="openCreateLocation()">
+    <button class="action-btn action-btn--primary" data-testid="add-location-btn" (click)="openCreateLocation()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.addLocation' | translate }}
     </button>
@@ -12,17 +12,17 @@
     </button>
   }
   @if (activeTab() === 'receiving') {
-    <button class="action-btn action-btn--primary" (click)="openReceiveDialog()">
+    <button class="action-btn action-btn--primary" data-testid="receive-goods-btn" (click)="openReceiveDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.receiveGoods' | translate }}
     </button>
   }
   @if (activeTab() === 'stockOps') {
-    <button class="action-btn" (click)="openTransferDialog()">
+    <button class="action-btn" data-testid="transfer-btn" (click)="openTransferDialog()">
       <span class="material-icons-outlined">swap_horiz</span>
       {{ 'inventory.transfer' | translate }}
     </button>
-    <button class="action-btn" (click)="openAdjustDialog()">
+    <button class="action-btn" data-testid="adjust-btn" (click)="openAdjustDialog()">
       <span class="material-icons-outlined">tune</span>
       {{ 'inventory.adjust' | translate }}
     </button>
@@ -531,20 +531,20 @@
 @if (showLocationDialog()) {
   <app-dialog [title]="'inventory.dialogs.addLocationTitle' | translate" (closed)="closeLocationDialog()">
     <div [formGroup]="locationForm">
-      <app-input [label]="'common.name' | translate" formControlName="name" />
+      <app-input data-testid="location-name" [label]="'common.name' | translate" formControlName="name" />
 
-      <app-select [label]="'common.type' | translate" formControlName="locationType" [options]="locationTypeOptions" />
+      <app-select data-testid="location-type" [label]="'common.type' | translate" formControlName="locationType" [options]="locationTypeOptions" />
 
       @if (locationForm.controls.locationType.value === 'Bin') {
-        <app-input [label]="'inventory.dialogs.barcode' | translate" formControlName="barcode" />
+        <app-input data-testid="location-barcode" [label]="'inventory.dialogs.barcode' | translate" formControlName="barcode" />
       }
 
-      <app-input [label]="'common.description' | translate" formControlName="description" />
+      <app-input data-testid="location-description" [label]="'common.description' | translate" formControlName="description" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeLocationDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="location-save-btn"
         [appValidationPopover]="locationViolations"
         [disabled]="locationForm.invalid || saving()"
         (click)="saveLocation()">{{ 'inventory.dialogs.createLocation' | translate }}</button>
@@ -597,15 +597,15 @@
 @if (showAdjustDialog()) {
   <app-dialog [title]="'inventory.dialogs.adjustStockTitle' | translate" width="520px" (closed)="closeAdjustDialog()">
     <div [formGroup]="adjustForm">
-      <app-input [label]="'inventory.dialogs.binContentId' | translate" formControlName="binContentId" type="number" />
-      <app-input [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="number" />
-      <app-input [label]="'inventory.dialogs.reason' | translate" formControlName="reason" />
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-input data-testid="adjust-bin-content-id" [label]="'inventory.dialogs.binContentId' | translate" formControlName="binContentId" type="number" />
+      <app-input data-testid="adjust-new-quantity" [label]="'inventory.dialogs.newQuantity' | translate" formControlName="newQuantity" type="number" />
+      <app-input data-testid="adjust-reason" [label]="'inventory.dialogs.reason' | translate" formControlName="reason" />
+      <app-textarea data-testid="adjust-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeAdjustDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="adjust-save-btn"
         [appValidationPopover]="adjustViolations"
         [disabled]="adjustForm.invalid || saving()"
         (click)="submitAdjust()">{{ 'inventory.adjust' | translate }}</button>

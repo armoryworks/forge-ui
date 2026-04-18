@@ -244,10 +244,34 @@ export async function runSimulation(): Promise<SimulationReport> {
     console.log('API-direct mode — skipping browser launch\n');
   }
 
+  // ── Token refresh helper ──────────────────────────────────────────────────
+  const TOKEN_REFRESH_INTERVAL = 50; // Re-authenticate every 50 weeks
+  let weeksSinceRefresh = 0;
+
+  async function refreshTokens(): Promise<void> {
+    console.log('  Refreshing auth tokens...');
+    for (const role of ROLES) {
+      try {
+        const session = await getAuthSession(ROLE_EMAILS[role], ROLE_PASSWORDS[role]);
+        tokens[ROLE_EMAILS[role]] = session.token;
+        sessions[role] = session;
+      } catch (err) {
+        console.error(`  ✗ token refresh for ${role}: ${err}`);
+      }
+    }
+    weeksSinceRefresh = 0;
+  }
+
   // ── Week loop ─────────────────────────────────────────────────────────────
   for (const week of weeks) {
     const weekStart = Date.now();
     console.log(`\n─── ${week.label} (${week.start.toISOString().slice(0, 10)}) ───`);
+
+    // Refresh tokens periodically to prevent JWT expiry during long runs
+    if (weeksSinceRefresh >= TOKEN_REFRESH_INTERVAL) {
+      await refreshTokens();
+    }
+    weeksSinceRefresh++;
 
     // Set server clock to start of this week
     try {

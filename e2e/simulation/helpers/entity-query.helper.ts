@@ -153,3 +153,73 @@ export async function getEngineers(token: string): Promise<UserListItem[]> {
   const users = result?.data ?? [];
   return users.filter(u => u.roles?.includes('Engineer') || u.roles?.includes('ProductionWorker'));
 }
+
+// ── Additional entity queries for expanded simulation ─────────────────────
+
+export interface PartListItem {
+  id: number;
+  partNumber: string;
+  description: string;
+  status: string;
+}
+
+export interface VendorListItem {
+  id: number;
+  name: string;
+}
+
+export interface AssetListItem {
+  id: number;
+  name: string;
+  assetType: string;
+  status: string;
+}
+
+export interface StorageLocationItem {
+  id: number;
+  name: string;
+  locationType: string;
+}
+
+export interface EventListItem {
+  id: number;
+  title: string;
+  eventType: string;
+  startDate: string;
+}
+
+/** Get parts */
+export async function getParts(token: string): Promise<PartListItem[]> {
+  const result = await apiCall<{ data: PartListItem[] }>('GET', 'parts?pageSize=100', token);
+  return result?.data ?? [];
+}
+
+/** Get vendors */
+export async function getVendors(token: string): Promise<VendorListItem[]> {
+  const result = await apiCall<{ data: VendorListItem[] }>('GET', 'vendors?pageSize=100', token);
+  return result?.data ?? [];
+}
+
+/** Get assets */
+export async function getAssets(token: string): Promise<AssetListItem[]> {
+  const result = await apiCall<{ data: AssetListItem[] }>('GET', 'assets?pageSize=100', token);
+  return result?.data ?? [];
+}
+
+/** Get storage locations */
+export async function getStorageLocations(token: string): Promise<StorageLocationItem[]> {
+  const result = await apiCall<{ data: StorageLocationItem[] }>('GET', 'inventory/locations?pageSize=100', token);
+  return result?.data ?? [];
+}
+
+/** Get events */
+export async function getEvents(token: string): Promise<EventListItem[]> {
+  const result = await apiCall<{ data: EventListItem[] }>('GET', 'events?pageSize=50', token);
+  return result?.data ?? [];
+}
+
+/** Get open invoices (for payment tracking) */
+export async function getOpenInvoices(token: string): Promise<InvoiceListItem[]> {
+  const result = await apiCall<{ data: InvoiceListItem[] }>('GET', 'invoices?pageSize=100', token);
+  return (result?.data ?? []).filter(i => i.status === 'Sent' || i.status === 'Draft');
+}

@@ -1,29 +1,29 @@
 <app-dialog [title]="isEditing ? 'Edit Module' : 'New Training Module'" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="cancel()">
 
   <div [formGroup]="form">
-    <app-input label="Title" formControlName="title" [required]="true" [maxlength]="200" />
+    <app-input data-testid="module-title" label="Title" formControlName="title" [required]="true" [maxlength]="200" />
 
-    <app-input label="Slug" formControlName="slug" [maxlength]="200"
+    <app-input data-testid="module-slug" label="Slug" formControlName="slug" [maxlength]="200"
       placeholder="auto-generated-from-title" />
 
-    <app-textarea label="Summary" formControlName="summary" [rows]="2" [required]="true" [maxlength]="500" />
+    <app-textarea data-testid="module-summary" label="Summary" formControlName="summary" [rows]="2" [required]="true" [maxlength]="500" />
 
     <div class="dialog-row">
-      <app-select label="Content Type" formControlName="contentType"
+      <app-select data-testid="module-content-type" label="Content Type" formControlName="contentType"
         [options]="contentTypeOptions" [required]="true" />
-      <app-input label="Estimated Minutes" formControlName="estimatedMinutes"
+      <app-input data-testid="module-est-minutes" label="Estimated Minutes" formControlName="estimatedMinutes"
         type="number" [required]="true" />
     </div>
 
-    <app-input label="App Routes" formControlName="appRoutes"
+    <app-input data-testid="module-app-routes" label="App Routes" formControlName="appRoutes"
       placeholder="/kanban, /backlog" />
 
-    <app-input label="Tags" formControlName="tags"
+    <app-input data-testid="module-tags" label="Tags" formControlName="tags"
       placeholder="onboarding, kanban" />
 
-    <app-toggle label="Published" formControlName="isPublished" />
+    <app-toggle data-testid="module-published" label="Published" formControlName="isPublished" />
 
-    <app-textarea [label]="contentJsonLabel()" formControlName="contentJson" [rows]="12" />
+    <app-textarea data-testid="module-content-json" [label]="contentJsonLabel()" formControlName="contentJson" [rows]="12" />
 
     <p class="training-module-dialog__json-hint">
       Edit the content JSON directly. See training docs for format by type.
@@ -32,7 +32,7 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="cancel()">Cancel</button>
-    <button class="action-btn action-btn--primary"
+    <button class="action-btn action-btn--primary" data-testid="module-save-btn"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">

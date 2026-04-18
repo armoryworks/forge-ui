@@ -1,25 +1,25 @@
 <app-dialog [title]="isEditing ? 'Edit Training Path' : 'New Training Path'" width="600px" [draftConfig]="draftConfig" [draftFormGroup]="form" (closed)="cancel()">
 
   <div [formGroup]="form">
-    <app-input label="Title" formControlName="title" [required]="true" [maxlength]="200" />
+    <app-input data-testid="path-title" label="Title" formControlName="title" [required]="true" [maxlength]="200" />
 
-    <app-input label="Slug" formControlName="slug" [maxlength]="200"
+    <app-input data-testid="path-slug" label="Slug" formControlName="slug" [maxlength]="200"
       placeholder="auto-generated-from-title" />
 
-    <app-textarea label="Description" formControlName="description" [rows]="2" [maxlength]="500" />
+    <app-textarea data-testid="path-description" label="Description" formControlName="description" [rows]="2" [maxlength]="500" />
 
-    <app-input label="Icon" formControlName="icon"
+    <app-input data-testid="path-icon" label="Icon" formControlName="icon"
       placeholder="school" />
 
     <div class="toggle-group">
-      <app-toggle label="Auto-assign to new users" formControlName="isAutoAssigned" />
-      <app-toggle label="Active" formControlName="isActive" />
+      <app-toggle data-testid="path-auto-assign" label="Auto-assign to new users" formControlName="isAutoAssigned" />
+      <app-toggle data-testid="path-active" label="Active" formControlName="isActive" />
     </div>
   </div>
 
   <div dialog-footer>
     <button class="action-btn" (click)="cancel()">Cancel</button>
-    <button class="action-btn action-btn--primary"
+    <button class="action-btn action-btn--primary" data-testid="path-save-btn"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">

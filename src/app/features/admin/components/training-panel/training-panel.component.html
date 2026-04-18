@@ -25,7 +25,7 @@
         <span class="panel-header__count">{{ modules().length }} {{ 'adminPanels.training.modules' | translate }}</span>
         <div class="panel-header__actions">
           <app-input [label]="'adminPanels.training.search' | translate" [formControl]="moduleSearchControl" />
-          <button class="action-btn action-btn--primary" (click)="openCreateModuleDialog()"
+          <button class="action-btn action-btn--primary" data-testid="new-module-btn" (click)="openCreateModuleDialog()"
             [attr.aria-label]="'adminPanels.training.newModule' | translate">
             <span class="material-icons-outlined">add</span>
             {{ 'adminPanels.training.newModule' | translate }}
@@ -88,7 +88,7 @@
     <div class="tab-panel" [appLoadingBlock]="isLoading()">
       <div class="panel-header">
         <span class="panel-header__count">{{ paths().length }} {{ 'adminPanels.training.paths' | translate }}</span>
-        <button class="action-btn action-btn--primary" (click)="openCreatePathDialog()"
+        <button class="action-btn action-btn--primary" data-testid="new-path-btn" (click)="openCreatePathDialog()"
           [attr.aria-label]="'adminPanels.training.newPath' | translate">
           <span class="material-icons-outlined">add</span>
           {{ 'adminPanels.training.newPath' | translate }}

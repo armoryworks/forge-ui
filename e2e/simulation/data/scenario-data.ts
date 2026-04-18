@@ -592,6 +592,86 @@ export const SCRAP_REASONS = [
   'Tool crash — 3 parts damaged in fixture',
 ];
 
+// ── Additional data pools for expanded simulation ───────────────────────────
+
+export const STORAGE_LOCATION_NAMES = [
+  'Raw Stock - Aisle A', 'Raw Stock - Aisle B', 'Finished Goods - Bay 1',
+  'Finished Goods - Bay 2', 'WIP Staging', 'Shipping Dock', 'Receiving Dock',
+  'Tool Crib', 'Quality Hold Area', 'Reject Bin', 'Overflow Storage',
+  'Climate Controlled - Room 1', 'Hazmat Cabinet', 'Pallet Rack A1',
+  'Pallet Rack A2', 'Pallet Rack B1', 'Pallet Rack B2', 'Floor Stock',
+  'Machine Side Staging', 'Inspection Bench', 'Assembly Station 1',
+  'Assembly Station 2', 'Sub-Assembly Area', 'Paint Booth Staging',
+];
+
+export const LOCATION_TYPES = ['Area', 'Zone', 'Bin', 'Shelf'];
+
+export const EVENT_TITLES = [
+  'Weekly Safety Meeting', 'Production Planning Review', 'Quality Circle Meeting',
+  'New Employee Orientation', 'Forklift Safety Training', 'ISO 9001 Internal Audit',
+  'Customer Visit — Shop Tour', 'Lean Manufacturing Workshop',
+  'First Aid / CPR Refresher', 'Emergency Evacuation Drill',
+  'Machine Maintenance Training', 'Lockout/Tagout Refresher',
+  'Quarterly All-Hands Meeting', 'Continuous Improvement Session',
+  'PPE Inspection & Training', 'Hazardous Material Handling',
+  'Calibration Procedures Training', 'GD&T Basics Workshop',
+  'SPC Chart Interpretation', 'Root Cause Analysis Training',
+  'Annual Safety Review', 'Fire Extinguisher Training',
+  'Ergonomics Assessment', 'Shift Changeover Meeting',
+];
+
+export const EVENT_LOCATIONS = [
+  'Conference Room A', 'Conference Room B', 'Shop Floor', 'Break Room',
+  'Training Center', 'Quality Lab', 'Front Office', 'Loading Dock',
+  'Machine Area 1', 'Machine Area 2', 'Assembly Area', 'Outdoor Lot',
+];
+
+export const TRAINING_MODULE_TITLES = [
+  'Shop Safety Fundamentals', 'CNC Operation Basics', 'Blueprint Reading 101',
+  'Quality Inspection Procedures', 'Micrometer & Caliper Use', 'GD&T Introduction',
+  'Material Identification', 'Coolant Management', 'Tool Setup & Alignment',
+  'SPC for Operators', 'Lean 5S Methodology', 'Machine Maintenance Basics',
+  'First Article Inspection', 'Non-Conformance Reporting', 'ERP System Navigation',
+  'Customer Communication', 'Document Control Procedures', 'Change Order Process',
+];
+
+export const TRAINING_MODULE_SUMMARIES = [
+  'Learn the fundamentals of shop floor safety and PPE requirements.',
+  'Introduction to CNC mill and lathe operation procedures.',
+  'How to read and interpret engineering drawings and specifications.',
+  'Standard quality inspection procedures and documentation.',
+  'Proper use and care of precision measuring instruments.',
+  'Geometric Dimensioning and Tolerancing basics for machinists.',
+  'Identifying common metals, alloys, and their properties.',
+  'Coolant types, concentration management, and disposal.',
+  'Setting up tooling, fixtures, and work holding devices.',
+  'Statistical Process Control charts and their interpretation.',
+  'Implementing 5S methodology on the shop floor.',
+  'Basic machine maintenance checks and lubrication schedules.',
+  'Conducting and documenting first article inspections.',
+  'How to document and route non-conforming material.',
+  'Navigating the QB Engineer ERP system effectively.',
+  'Professional communication with customers and vendors.',
+  'Document control policies and revision management.',
+  'Processing engineering change orders and updates.',
+];
+
+export const PART_NUMBERS_PREFIX = [
+  'BRK', 'SHF', 'HSG', 'PLT', 'VLV', 'GER', 'BRG', 'FLG', 'MNT', 'CAP',
+  'NZL', 'ARM', 'PIN', 'ROD', 'COV', 'FRM', 'INS', 'JIG', 'FIX', 'SPL',
+];
+
+export const CUSTOMER_NOTES = [
+  'Net 30 terms. Good payment history.',
+  'Requires FAIR with first shipment.',
+  'ISO 9001 certified supplier requirement.',
+  'Preferred shipping method: UPS Ground.',
+  'Tax exempt — certificate on file.',
+  'Key account — priority handling.',
+  'New customer — credit application pending.',
+  'Annual blanket order renewal in Q4.',
+];
+
 /** Pick an item from a pool deterministically by week and offset */
 export function pick<T>(pool: T[], weekIndex: number, offset = 0): T {
   return pool[(weekIndex + offset) % pool.length];

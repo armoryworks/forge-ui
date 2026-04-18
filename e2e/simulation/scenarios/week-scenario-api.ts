@@ -327,12 +327,12 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
   for (const token of [engineer, worker]) {
     inc(await tryAction('clock-in', async () => {
       await apiCall('POST', 'time-tracking/clock-events', token, {
-        eventType: 'ClockIn', reason: null, scanMethod: 'Manual', source: 'Simulation',
+        eventTypeCode: 'ClockIn', reason: null, scanMethod: 'Manual', source: 'Simulation',
       });
     }, errors));
     inc(await tryAction('clock-out', async () => {
       await apiCall('POST', 'time-tracking/clock-events', token, {
-        eventType: 'ClockOut', reason: null, scanMethod: 'Manual', source: 'Simulation',
+        eventTypeCode: 'ClockOut', reason: null, scanMethod: 'Manual', source: 'Simulation',
       });
     }, errors));
   }

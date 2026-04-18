@@ -123,9 +123,9 @@ export class TrainingModuleDialogComponent implements OnInit {
 
     const v = this.form.getRawValue();
 
-    let contentJsonParsed: unknown;
+    // Validate JSON syntax but send as string — backend expects string ContentJson
     try {
-      contentJsonParsed = JSON.parse(v.contentJson ?? '{}');
+      JSON.parse(v.contentJson ?? '{}');
     } catch {
       this.snackbar.error('Content JSON is not valid JSON');
       this.saving.set(false);
@@ -141,7 +141,7 @@ export class TrainingModuleDialogComponent implements OnInit {
       appRoutes: v.appRoutes ? v.appRoutes.split(',').map((r: string) => r.trim()).filter(Boolean) : [],
       tags: v.tags ? v.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
       isPublished: v.isPublished!,
-      contentJson: contentJsonParsed,
+      contentJson: v.contentJson ?? '{}',
     };
 
     const request$ = this.isEditing

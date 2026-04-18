@@ -21,11 +21,17 @@ import {
   JOB_TITLES, QUOTE_LINE_DESCRIPTIONS,
   EXPENSE_CATEGORIES, EXPENSE_DESCRIPTIONS,
   JOB_COMMENTS, CHAT_MESSAGES_GENERAL,
+  PART_NAMES, VENDOR_NAMES, ASSET_NAMES,
+  STORAGE_LOCATION_NAMES, LOCATION_TYPES,
+  EVENT_TITLES, EVENT_LOCATIONS,
+  TRAINING_MODULE_TITLES, TRAINING_MODULE_SUMMARIES,
+  PART_NUMBERS_PREFIX,
 } from '../data/scenario-data';
 import {
   getOpenLeads, getCustomers, getDraftQuotes, getSentQuotes,
-  getAcceptedQuotes, getActiveJobs, getDefaultTrackType,
-  getUninvoicedJobs, getEngineers,
+  getAcceptedQuotes, getActiveJobs, getDefaultTrackType, getNextStage,
+  getUninvoicedJobs, getEngineers, getTrackTypes,
+  getParts, getVendors, getAssets, getStorageLocations,
 } from '../helpers/entity-query.helper';
 import {
   navigateTo, fillInput, fillTextarea, fillMatSelect, fillDatepicker,
@@ -65,7 +71,8 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
   const inc = (ok: boolean) => { attempted++; if (ok) succeeded++; };
 
   // ── Role pages ─────────────────────────────────────────────────────────────
-  const pmPage      = ctx.pages['pmorris@qbengineer.local'];
+  const adminPage    = ctx.pages['admin@qbengineer.local'];
+  const pmPage       = ctx.pages['pmorris@qbengineer.local'];
   const engineerPage = ctx.pages['akim@qbengineer.local'];
   const managerPage  = ctx.pages['lwilson@qbengineer.local'];
   const officePage   = ctx.pages['cthompson@qbengineer.local'];
@@ -335,13 +342,13 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
   // ── 11. Clock in / clock out via API (Worker — no UI equivalent) ──────────
   inc(await tryAction('clock-in', async () => {
     await apiCall('POST', 'time-tracking/clock-events', worker, {
-      eventType: 'ClockIn', reason: null, scanMethod: 'Manual', source: 'Simulation',
+      eventTypeCode: 'ClockIn', reason: null, scanMethod: 'Manual', source: 'Simulation',
     });
   }, errors));
 
   inc(await tryAction('clock-out', async () => {
     await apiCall('POST', 'time-tracking/clock-events', worker, {
-      eventType: 'ClockOut', reason: null, scanMethod: 'Manual', source: 'Simulation',
+      eventTypeCode: 'ClockOut', reason: null, scanMethod: 'Manual', source: 'Simulation',
     });
   }, errors));
 
@@ -487,9 +494,369 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
   if (pct(w, 900, 25) && activeJobs.length > 0) {
     const job = activeJobs[w % activeJobs.length];
     inc(await tryAction(`hold-job-${job.id}`, async () => {
-      await apiCall('POST', `jobs/${job.id}/holds`, manager, {
+      await apiCall('POST', `status-tracking/job/${job.id}/holds`, manager, {
         holdType: 'WaitingOnMaterial',
         notes: `Waiting on raw stock — ${ctx.weekLabel}`,
+      });
+    }, errors));
+  }
+
+  // ── 20. Advance jobs through stages via UI (Engineer) ────────────────────
+  const trackTypes = await getTrackTypes(engineer);
+  const jobsToAdvance = activeJobs.filter((_, idx) => pct(w, idx + 150, 35)).slice(0, 3);
+
+  for (const job of jobsToAdvance) {
+    const tt = trackTypes.find(t => t.id === job.trackTypeId);
+    if (!tt) continue;
+    const nextStage = getNextStage(tt, job.currentStageId);
+    if (!nextStage) continue;
+
+    inc(await tryAction(`advance-job-${job.id}`, async () => {
+      await apiCall('PATCH', `jobs/${job.id}/stage`, engineer, {
+        stageId: nextStage.id,
+      });
+    }, errors));
+  }
+
+  // ── 21. Create parts via UI (Engineer) ───────────────────────────────────
+  const existingParts = await getParts(engineer);
+  if (pct(w, 1000, 40) || existingParts.length < 5) {
+    const partCount = seededInt(1, 2, w, 20);
+    for (let i = 0; i < partCount; i++) {
+      const partName = pick(PART_NAMES, w, i + 200);
+      const prefix = pick(PART_NUMBERS_PREFIX, w, i + 201);
+      const partNumber = `${prefix}-${1000 + ((w * 7 + i) % 9000)}`;
+
+      inc(await tryAction(`create-part-${i}`, async () => {
+        await navigateTo(engineerPage, '/parts');
+        await clickButton(engineerPage, 'new-part-btn');
+        await waitForDialog(engineerPage);
+
+        // Part number is auto-generated, fill other fields
+        await fillMatSelect(engineerPage, 'part-type', 'Manufactured');
+        await fillInput(engineerPage, 'part-description', partName);
+        await fillInput(engineerPage, 'part-revision', 'A');
+        await fillInput(engineerPage, 'part-material', pick(['6061-T6 Al', '4140 Steel', '303 SS', '7075-T6 Al', '1018 CRS', '316 SS', 'Delrin', 'PEEK'], w, i));
+
+        await clickButton(engineerPage, 'part-save-btn');
+        await waitForDialogClosed(engineerPage);
+      }, errors));
+    }
+  }
+
+  // ── 22. Create vendors via UI (Office Manager) ───────────────────────────
+  const existingVendors = await getVendors(office);
+  if (pct(w, 1100, 25) || existingVendors.length < 5) {
+    const vendorName = pick(VENDOR_NAMES, w, 210);
+    const vendorContact = `${pick(CONTACT_FIRST, w, 211)} ${pick(CONTACT_LAST, w, 212)}`;
+    const vendorEmail = `sales@${vendorName.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+    const vendorPhone = `(555) ${String(200 + (w % 800)).padStart(3, '0')}-${String(1000 + (w * 3) % 9000).padStart(4, '0')}`;
+
+    inc(await tryAction('create-vendor', async () => {
+      await navigateTo(officePage, '/vendors');
+      await clickButton(officePage, 'new-vendor-btn');
+      await waitForDialog(officePage);
+
+      await fillInput(officePage, 'vendor-company', vendorName);
+      await fillInput(officePage, 'vendor-contact', vendorContact);
+      await fillInput(officePage, 'vendor-email', vendorEmail);
+      await fillInput(officePage, 'vendor-phone', vendorPhone);
+      await fillMatSelect(officePage, 'vendor-terms', 'Net 30');
+      await fillTextarea(officePage, 'vendor-notes', `Supplier for ${pick(['raw materials', 'tooling', 'cutting tools', 'fasteners', 'abrasives'], w, 213)}`);
+
+      await clickButton(officePage, 'vendor-save-btn');
+      await waitForDialogClosed(officePage);
+    }, errors));
+  }
+
+  // ── 23. Create assets via UI (Manager) ───────────────────────────────────
+  const existingAssets = await getAssets(manager);
+  if (pct(w, 1200, 15) || existingAssets.length < 3) {
+    const assetData = pick(ASSET_NAMES, w, 220);
+
+    inc(await tryAction('create-asset', async () => {
+      await navigateTo(managerPage, '/assets');
+      await clickButton(managerPage, 'new-asset-btn');
+      await waitForDialog(managerPage);
+
+      await fillInput(managerPage, 'asset-name', assetData.name);
+      await fillMatSelect(managerPage, 'asset-type', assetData.type);
+      await fillInput(managerPage, 'asset-manufacturer', assetData.manufacturer);
+      await fillInput(managerPage, 'asset-model', assetData.model);
+      await fillInput(managerPage, 'asset-serial', `SN-${w}-${seededInt(10000, 99999, w, 221)}`);
+      await fillInput(managerPage, 'asset-location', 'Shop Floor');
+      await fillTextarea(managerPage, 'asset-notes', `Commissioned ${ctx.weekLabel}`);
+
+      await clickButton(managerPage, 'asset-save-btn');
+      await waitForDialogClosed(managerPage);
+    }, errors));
+  }
+
+  // ── 24. Create customers directly via UI (Office Manager) ────────────────
+  if (pct(w, 1300, 20)) {
+    const custCompany = pick(COMPANIES, w, 230);
+    const custFirst = pick(CONTACT_FIRST, w, 231);
+    const custLast = pick(CONTACT_LAST, w, 232);
+    const custEmail = `${custFirst.toLowerCase()}.${custLast.toLowerCase()}@${custCompany.toLowerCase().replace(/[^a-z0-9]/g, '')}.com`;
+    const custPhone = `(555) ${String(300 + (w % 700)).padStart(3, '0')}-${String(2000 + (w * 5) % 8000).padStart(4, '0')}`;
+
+    inc(await tryAction('create-customer', async () => {
+      await navigateTo(officePage, '/customers');
+      await clickButton(officePage, 'new-customer-btn');
+      await waitForDialog(officePage);
+
+      await fillInput(officePage, 'customer-name', `${custLast}, ${custFirst}`);
+      await fillInput(officePage, 'customer-company', custCompany);
+      await fillInput(officePage, 'customer-email', custEmail);
+      await fillInput(officePage, 'customer-phone', custPhone);
+
+      await clickButton(officePage, 'customer-save-btn');
+      await waitForDialogClosed(officePage);
+    }, errors));
+  }
+
+  // ── 25. Create inventory locations via UI (Manager) ──────────────────────
+  const existingLocations = await getStorageLocations(manager);
+  if (pct(w, 1400, 20) || existingLocations.length < 5) {
+    const locName = pick(STORAGE_LOCATION_NAMES, w, 240);
+    const locType = pick(LOCATION_TYPES, w, 241);
+
+    inc(await tryAction('create-location', async () => {
+      await navigateTo(managerPage, '/inventory/locations');
+      await clickButton(managerPage, 'add-location-btn');
+      await waitForDialog(managerPage);
+
+      await fillInput(managerPage, 'location-name', locName);
+      await fillMatSelect(managerPage, 'location-type', locType);
+      await fillInput(managerPage, 'location-description', `${locType} location for ${pick(['raw materials', 'finished goods', 'WIP', 'tooling', 'inspection'], w, 242)}`);
+
+      await clickButton(managerPage, 'location-save-btn');
+      await waitForDialogClosed(managerPage);
+    }, errors));
+  }
+
+  // ── 26. Create events via UI (Admin — events are in admin panel) ─────────
+  if (pct(w, 1500, 30)) {
+    const eventTitle = pick(EVENT_TITLES, w, 250);
+    const eventLocation = pick(EVENT_LOCATIONS, w, 251);
+    const eventType = pick(['Meeting', 'Training', 'Safety', 'Other'], w, 252);
+    const startDate = weekDayDisplay(ctx, seededInt(1, 4, w, 253));
+    const endDate = startDate; // Same-day events
+
+    inc(await tryAction('create-event', async () => {
+      await navigateTo(adminPage, '/admin/events');
+      await clickButton(adminPage, 'new-event-btn');
+      await waitForDialog(adminPage);
+
+      await fillInput(adminPage, 'event-title', eventTitle);
+      await fillMatSelect(adminPage, 'event-type', eventType);
+      await fillInput(adminPage, 'event-location', eventLocation);
+      await fillDatepicker(adminPage, 'event-start-date', startDate);
+      await fillInput(adminPage, 'event-start-time', '09:00');
+      await fillDatepicker(adminPage, 'event-end-date', endDate);
+      await fillInput(adminPage, 'event-end-time', '10:00');
+      await fillTextarea(adminPage, 'event-description', `${eventTitle} — scheduled for ${ctx.weekLabel}`);
+
+      // Set up response listener before save
+      const responsePromise = adminPage.waitForResponse(
+        resp => resp.url().includes('/api/v1/events') && resp.request().method() === 'POST',
+        { timeout: 10000 },
+      ).catch(() => null);
+
+      await clickButton(adminPage, 'event-save-btn');
+
+      const response = await responsePromise;
+      if (response && response.status() >= 400) {
+        const body = await response.text().catch(() => '');
+        console.log(`  [event] POST failed: ${response.status()} ${body.slice(0, 300)}`);
+      }
+
+      const dialogStillOpen = await adminPage.locator('.dialog-backdrop').first()
+        .waitFor({ state: 'hidden', timeout: 10000 })
+        .then(() => false)
+        .catch(() => true);
+
+      if (dialogStillOpen) {
+        await adminPage.keyboard.press('Escape');
+        await adminPage.waitForTimeout(500);
+        // Try escape again in case there's a stacked dialog
+        const stillOpen = await adminPage.locator('.dialog-backdrop').isVisible();
+        if (stillOpen) {
+          await adminPage.keyboard.press('Escape');
+          await adminPage.waitForTimeout(500);
+        }
+        throw new Error('Event dialog did not close after save');
+      }
+    }, errors));
+  }
+
+  // ── 27. Set workflow status on jobs via API ──────────────────────────────
+  if (pct(w, 1600, 30) && activeJobs.length > 0) {
+    const job = activeJobs[(w + 3) % activeJobs.length];
+    const statusCode = pick(['in_production', 'awaiting_material', 'quality_review', 'ready_to_ship'], w, 260);
+
+    inc(await tryAction(`set-status-${job.id}`, async () => {
+      await apiCall('POST', `status-tracking/job/${job.id}/workflow`, manager, {
+        statusCode,
+        notes: `Status update — ${ctx.weekLabel}`,
+      });
+    }, errors));
+  }
+
+  // ── 28. Assign jobs via UI (Manager) ─────────────────────────────────────
+  if (engineers.length > 0) {
+    const unassignedJobs = activeJobs.filter(j => !j.customerId).slice(0, 2);
+    for (const job of unassignedJobs) {
+      if (!pct(w, job.id + 1700, 40)) continue;
+      const assignee = engineers[(w + job.id) % engineers.length];
+
+      inc(await tryAction(`assign-job-${job.id}`, async () => {
+        await apiCall('PATCH', `jobs/${job.id}`, manager, {
+          assigneeId: assignee.id,
+        });
+      }, errors));
+    }
+  }
+
+  // ── 29. Create subtasks on jobs via API (Engineer) ───────────────────────
+  if (pct(w, 1800, 35) && activeJobs.length > 0) {
+    const job = activeJobs[(w + 5) % activeJobs.length];
+    const subtaskTexts = [
+      'Setup fixture and verify alignment',
+      'Run first article and inspect',
+      'Complete production run',
+      'Deburr and clean parts',
+      'Final inspection and packaging',
+    ];
+    const subtaskText = pick(subtaskTexts, w, 270);
+
+    inc(await tryAction(`add-subtask-${job.id}`, async () => {
+      await apiCall('POST', `jobs/${job.id}/subtasks`, engineer, {
+        text: subtaskText,
+      });
+    }, errors));
+  }
+
+  // ── 30. Complete subtasks on jobs via API (Worker) ───────────────────────
+  if (pct(w, 1900, 30) && activeJobs.length > 0) {
+    const job = activeJobs[(w + 7) % activeJobs.length];
+    // Fetch subtasks for this job
+    const subtasks = await apiCall<Array<{ id: number; isCompleted: boolean }>>('GET', `jobs/${job.id}/subtasks`, worker);
+    const openSubtasks = (subtasks ?? []).filter(s => !s.isCompleted);
+    if (openSubtasks.length > 0) {
+      const subtask = openSubtasks[0];
+      inc(await tryAction(`complete-subtask-${subtask.id}`, async () => {
+        await apiCall('PATCH', `jobs/${job.id}/subtasks/${subtask.id}`, worker, {
+          isCompleted: true,
+        });
+      }, errors));
+    }
+  }
+
+  // ── 31. Create estimates via API (PM) ────────────────────────────────────
+  if (pct(w, 2000, 25) && customers.length > 0) {
+    const customer = customers[(w + 11) % customers.length];
+    const amount = seededInt(500, 15000, w, 280);
+
+    inc(await tryAction('create-estimate', async () => {
+      await apiCall('POST', 'estimates', pm, {
+        customerId: customer.id,
+        title: `Estimate for ${customer.name}`,
+        estimatedAmount: amount,
+        notes: `Ballpark estimate for ${ctx.weekLabel}`,
+        validUntil: weekDay(ctx, 60),
+      });
+    }, errors));
+  }
+
+  // ── 32. Sales order fulfillment tracking via API (Office) ────────────────
+  if (pct(w, 2100, 30)) {
+    const openSOs = await apiCall<{ data: Array<{ id: number; status: string }> }>('GET', 'orders?pageSize=20', office);
+    const confirmedSO = (openSOs?.data ?? []).find(s => s.status === 'Confirmed');
+    if (confirmedSO) {
+      // Get SO lines to build shipment lines
+      const soDetail = await apiCall<{ id: number; lines: Array<{ id: number; quantity: number; quantityShipped: number }> }>(
+        'GET', `orders/${confirmedSO.id}`, office,
+      );
+      const unshippedLines = (soDetail?.lines ?? []).filter(l => l.quantityShipped < l.quantity);
+      if (unshippedLines.length > 0) {
+        inc(await tryAction(`fulfill-so-${confirmedSO.id}`, async () => {
+          await apiCall('POST', 'shipments', office, {
+            salesOrderId: confirmedSO.id,
+            carrier: pick(['UPS', 'FedEx', 'USPS', 'Freight'], w, 290),
+            trackingNumber: `TRK${w}${confirmedSO.id}`,
+            notes: `Shipped via ${pick(['ground', 'express', '2-day', 'freight'], w, 291)}`,
+            lines: unshippedLines.map(l => ({
+              salesOrderLineId: l.id,
+              quantityShipped: l.quantity - l.quantityShipped,
+            })),
+          });
+        }, errors));
+      }
+    }
+  }
+
+  // ── 33. Create training module via UI (Admin) — every ~8 weeks ─────────
+  if (w % 8 === 0) {
+    const modTitle = `${pick(TRAINING_MODULE_TITLES, w, 300)} (Sim ${ctx.weekLabel})`;
+    const modSummary = pick(TRAINING_MODULE_SUMMARIES, w, 301);
+    const contentType = pick(['Article', 'Video', 'Walkthrough', 'QuickRef'], w, 302);
+
+    inc(await tryAction('create-training-module', async () => {
+      await navigateTo(adminPage, '/admin/training');
+      await adminPage.waitForTimeout(500);
+      await clickButton(adminPage, 'new-module-btn');
+      await waitForDialog(adminPage);
+
+      await fillInput(adminPage, 'module-title', modTitle);
+      await fillTextarea(adminPage, 'module-summary', modSummary);
+      await fillMatSelect(adminPage, 'module-content-type', contentType);
+      await fillInput(adminPage, 'module-est-minutes', String(seededInt(10, 60, w, 303)));
+      await fillInput(adminPage, 'module-tags', pick(['onboarding', 'safety', 'quality', 'machining', 'inspection'], w, 304));
+
+      // Set up response listener BEFORE clicking save
+      const responsePromise = adminPage.waitForResponse(
+        resp => resp.url().includes('/api/v1/training/modules') && resp.request().method() === 'POST',
+        { timeout: 10000 },
+      ).catch(() => null);
+
+      await clickButton(adminPage, 'module-save-btn');
+
+      const response = await responsePromise;
+      if (response) {
+        const status = response.status();
+        if (status >= 400) {
+          const body = await response.text().catch(() => '');
+          console.log(`  [training-module] POST failed: ${status} ${body.slice(0, 200)}`);
+        }
+      } else {
+        console.log(`  [training-module] No POST request captured — save may not have fired`);
+      }
+
+      // Wait for dialog to close
+      const dialogStillOpen = await adminPage.locator('.dialog-backdrop').first()
+        .waitFor({ state: 'hidden', timeout: 8000 })
+        .then(() => false)
+        .catch(() => true);
+
+      if (dialogStillOpen) {
+        await adminPage.keyboard.press('Escape');
+        await adminPage.waitForTimeout(500);
+        throw new Error('Training module dialog did not close after save');
+      }
+    }, errors));
+  }
+
+  // ── 34. Update job fields via UI (Manager — title, priority, due date) ──
+  if (pct(w, 2200, 25) && activeJobs.length > 0) {
+    const job = activeJobs[(w + 9) % activeJobs.length];
+    const newPriority = pick(['Low', 'Normal', 'High', 'Urgent'], w, 310);
+    const newDueDate = weekDayDisplay(ctx, seededInt(7, 28, w, 311));
+
+    inc(await tryAction(`update-job-${job.id}`, async () => {
+      await apiCall('PATCH', `jobs/${job.id}`, manager, {
+        priority: newPriority,
+        dueDate: weekDay(ctx, seededInt(7, 28, w, 311)),
       });
     }, errors));
   }
