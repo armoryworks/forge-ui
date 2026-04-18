@@ -20,9 +20,9 @@
 
     <!-- Detail Tabs -->
     <div class="detail-tabs">
-      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'info'"
+      <button class="detail-tab" data-testid="part-tab-info" [class.detail-tab--active]="detailTab() === 'info'"
         (click)="detailTab.set('info')">{{ 'parts.info' | translate }}</button>
-      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'bom'"
+      <button class="detail-tab" data-testid="part-tab-bom" [class.detail-tab--active]="detailTab() === 'bom'"
         (click)="detailTab.set('bom')">
         {{ 'parts.bom' | translate }}
         @if (part.bomEntries.length > 0) {
@@ -287,7 +287,7 @@
                   <span class="material-icons-outlined">account_tree</span>
                 </button>
               </div>
-              <button class="action-btn action-btn--primary action-btn--sm" (click)="openAddBom()">
+              <button class="action-btn action-btn--primary action-btn--sm" data-testid="add-bom-btn" (click)="openAddBom()">
                 <span class="material-icons-outlined">add</span>
                 {{ 'common.add' | translate }}
               </button>
@@ -431,24 +431,24 @@
 @if (showBomDialog()) {
   <app-dialog [title]="'parts.addBomEntry' | translate" (closed)="closeBomDialog()">
     <div [formGroup]="bomForm">
-      <app-entity-picker [label]="'parts.childPart' | translate" entityType="parts" displayField="partNumber" formControlName="childPartId" />
+      <app-entity-picker data-testid="bom-child-part" [label]="'parts.childPart' | translate" entityType="parts" displayField="partNumber" formControlName="childPartId" />
 
       <div class="dialog-row">
-        <app-input [label]="'common.quantity' | translate" type="number" formControlName="quantity" />
-        <app-select [label]="'parts.sourceType' | translate" formControlName="sourceType" [options]="sourceTypeOptions" />
+        <app-input data-testid="bom-quantity" [label]="'common.quantity' | translate" type="number" formControlName="quantity" />
+        <app-select data-testid="bom-source-type" [label]="'parts.sourceType' | translate" formControlName="sourceType" [options]="sourceTypeOptions" />
       </div>
 
       <div class="dialog-row">
-        <app-input [label]="'parts.referenceDesignator' | translate" formControlName="referenceDesignator" />
-        <app-input [label]="'parts.leadTimeDays' | translate" type="number" formControlName="leadTimeDays" />
+        <app-input data-testid="bom-ref-designator" [label]="'parts.referenceDesignator' | translate" formControlName="referenceDesignator" />
+        <app-input data-testid="bom-lead-time" [label]="'parts.leadTimeDays' | translate" type="number" formControlName="leadTimeDays" />
       </div>
 
-      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+      <app-textarea data-testid="bom-notes" [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeBomDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="bom-save-btn"
         [appValidationPopover]="bomViolations"
         [disabled]="bomForm.invalid"
         (click)="saveBomEntry()">{{ 'parts.addEntry' | translate }}</button>

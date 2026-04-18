@@ -8,7 +8,7 @@
     [formControl]="typeFilterControl"
     [options]="typeOptions" />
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--primary" (click)="openCreate()">
+  <button class="action-btn action-btn--primary" data-testid="log-interaction-btn" (click)="openCreate()">
     <span class="material-icons-outlined">add</span>
     Log Interaction
   </button>
@@ -51,20 +51,20 @@
   <app-dialog [title]="editingId() ? 'Edit Interaction' : 'Log Interaction'" width="520px" (closed)="closeDialog()">
     <div [formGroup]="form">
       <div class="dialog-row">
-        <app-select label="Type" formControlName="type" [options]="formTypeOptions" [required]="true" />
-        <app-select label="Contact" formControlName="contactId" [options]="contactOptions()" />
+        <app-select data-testid="interaction-type" label="Type" formControlName="type" [options]="formTypeOptions" [required]="true" />
+        <app-select data-testid="interaction-contact" label="Contact" formControlName="contactId" [options]="contactOptions()" />
       </div>
-      <app-input label="Subject" formControlName="subject" [maxlength]="200" [required]="true" />
+      <app-input data-testid="interaction-subject" label="Subject" formControlName="subject" [maxlength]="200" [required]="true" />
       <div class="dialog-row">
-        <app-datepicker label="Date" formControlName="interactionDate" [required]="true" />
-        <app-input label="Duration (minutes)" type="number" formControlName="durationMinutes" />
+        <app-datepicker data-testid="interaction-date" label="Date" formControlName="interactionDate" [required]="true" />
+        <app-input data-testid="interaction-duration" label="Duration (minutes)" type="number" formControlName="durationMinutes" />
       </div>
-      <app-textarea label="Notes" formControlName="body" [rows]="4" />
+      <app-textarea data-testid="interaction-body" label="Notes" formControlName="body" [rows]="4" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="interaction-save-btn"
         [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">

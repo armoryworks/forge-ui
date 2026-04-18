@@ -1,6 +1,6 @@
 <div class="tab-toolbar">
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--primary" (click)="openAdd()" aria-label="Add contact">
+  <button class="action-btn action-btn--primary" data-testid="add-contact-btn" (click)="openAdd()" aria-label="Add contact">
     <span class="material-icons-outlined">add</span>
     Add Contact
   </button>
@@ -61,21 +61,21 @@
   <app-dialog [title]="dialogTitle()" width="520px" (closed)="closeDialog()">
     <div [formGroup]="contactForm">
       <div class="dialog-row">
-        <app-input label="First Name" formControlName="firstName" [required]="true" />
-        <app-input label="Last Name" formControlName="lastName" [required]="true" />
+        <app-input data-testid="contact-first-name" label="First Name" formControlName="firstName" [required]="true" />
+        <app-input data-testid="contact-last-name" label="Last Name" formControlName="lastName" [required]="true" />
       </div>
       <div class="dialog-row">
-        <app-input label="Email" formControlName="email" type="email" />
-        <app-input label="Phone" formControlName="phone" mask="phone" />
+        <app-input data-testid="contact-email" label="Email" formControlName="email" type="email" />
+        <app-input data-testid="contact-phone" label="Phone" formControlName="phone" mask="phone" />
       </div>
       <div class="dialog-row">
-        <app-select label="Role" formControlName="role" [options]="roleOptions()" />
-        <app-toggle label="Primary Contact" formControlName="isPrimary" />
+        <app-select data-testid="contact-role" label="Role" formControlName="role" [options]="roleOptions()" />
+        <app-toggle data-testid="contact-primary" label="Primary Contact" formControlName="isPrimary" />
       </div>
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="contact-save-btn"
         [appValidationPopover]="violations()"
         [disabled]="contactForm.invalid || saving()"
         (click)="saveContact()">Save</button>

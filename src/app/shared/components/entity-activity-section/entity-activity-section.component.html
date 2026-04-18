@@ -5,6 +5,7 @@
       <div class="ea-filter" role="group" aria-label="Activity filter">
         @for (tab of tabs(); track tab) {
           <button class="ea-filter-btn" [class.ea-filter-btn--active]="activeFilter() === tab"
+            [attr.data-testid]="'activity-filter-' + tab"
             (click)="setFilter(tab)" [attr.aria-label]="'Filter by ' + tab">
             @switch (tab) {
               @case ('all') { All }
@@ -28,11 +29,11 @@
   @if (activeFilter() === 'notes') {
     <!-- Notes tab -->
     <div class="ea-note-add">
-      <app-rich-text-editor
+      <app-rich-text-editor data-testid="activity-note-input"
         placeholder="Add a note..."
         [users]="mentionUsers()"
         [formControl]="noteControl" />
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="activity-note-save-btn"
         [disabled]="!noteControl.value?.trim() || isSavingNote()"
         (click)="saveNote()" aria-label="Save note">
         <span class="material-icons-outlined">save</span> Save Note
@@ -67,11 +68,11 @@
     }
   } @else if (activeFilter() === 'comments') {
     <div class="ea-comment-add">
-      <app-rich-text-editor
+      <app-rich-text-editor data-testid="activity-comment-input"
         placeholder="Add a comment..."
         [users]="mentionUsers()"
         [formControl]="commentControl" />
-      <button class="ea-comment-send" (click)="postComment()"
+      <button class="ea-comment-send" data-testid="activity-comment-send-btn" (click)="postComment()"
         [disabled]="!commentControl.value?.trim()"
         aria-label="Post comment"
         matTooltip="Post comment" matTooltipPosition="above">
