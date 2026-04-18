@@ -6,7 +6,7 @@
 .calendar-nav { display: flex; align-items: center; gap: $sp-sm; }
 .month-label { font-weight: 700; font-size: var(--font-size-title); min-width: 180px; text-align: center; }
 
-.calendar-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; }
+.calendar-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 
 .calendar-header {
   display: grid; grid-template-columns: repeat(7, 1fr);
@@ -100,7 +100,7 @@
 }
 
 // Week View
-.week-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; }
+.week-grid { flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 
 .week-header {
   display: grid; grid-template-columns: repeat(7, 1fr); flex-shrink: 0;

@@ -1,5 +1,7 @@
 @use 'styles/variables' as *;
 
+:host { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow-y: auto; }
+
 .mrp__dashboard {
   display: flex;
   flex-direction: column;
