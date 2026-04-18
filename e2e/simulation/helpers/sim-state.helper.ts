@@ -1,6 +1,6 @@
 import { type APIRequestContext, request } from '@playwright/test';
 
-const API_BASE = 'http://localhost:5000/api/v1/';
+const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
 
 export interface SimulationState {
   openLeads: number;
@@ -20,6 +20,7 @@ export interface SimulationState {
 export async function getSimulationState(token: string): Promise<SimulationState> {
   const ctx = await request.newContext({
     baseURL: API_BASE,
+    ignoreHTTPSErrors: true,
     extraHTTPHeaders: { Authorization: `Bearer ${token}` },
   });
   try {

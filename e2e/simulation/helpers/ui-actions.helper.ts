@@ -6,7 +6,7 @@
 
 import type { Page } from '@playwright/test';
 
-export const APP_BASE = 'http://localhost:4200';
+export const APP_BASE = process.env['SIM_APP_BASE'] ?? 'http://localhost:4200';
 
 // ── Loading overlay ───────────────────────────────────────────────────────────
 

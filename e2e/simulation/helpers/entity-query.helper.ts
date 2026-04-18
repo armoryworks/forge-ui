@@ -223,3 +223,147 @@ export async function getOpenInvoices(token: string): Promise<InvoiceListItem[]>
   const result = await apiCall<{ data: InvoiceListItem[] }>('GET', 'invoices?pageSize=100', token);
   return (result?.data ?? []).filter(i => i.status === 'Sent' || i.status === 'Draft');
 }
+
+/** Get all invoices */
+export async function getAllInvoices(token: string): Promise<InvoiceListItem[]> {
+  const result = await apiCall<{ data: InvoiceListItem[] }>('GET', 'invoices?pageSize=200', token);
+  return result?.data ?? [];
+}
+
+/** Get sent invoices (ready for payment) */
+export async function getSentInvoices(token: string): Promise<InvoiceListItem[]> {
+  const result = await apiCall<{ data: InvoiceListItem[] }>('GET', 'invoices?pageSize=100', token);
+  return (result?.data ?? []).filter(i => i.status === 'Sent');
+}
+
+// ── Shipment queries ────────────────────────────────────────────────────────
+
+export interface ShipmentListItem {
+  id: number;
+  shipmentNumber?: string;
+  salesOrderId: number | null;
+  status: string;
+  carrier: string | null;
+  trackingNumber: string | null;
+}
+
+/** Get all shipments */
+export async function getShipments(token: string): Promise<ShipmentListItem[]> {
+  const result = await apiCall<{ data: ShipmentListItem[] }>('GET', 'shipments?pageSize=100', token);
+  return result?.data ?? [];
+}
+
+// ── Purchase Order queries ──────────────────────────────────────────────────
+
+export interface PurchaseOrderListItem {
+  id: number;
+  poNumber: string;
+  vendorId: number;
+  vendorName?: string;
+  status: string;
+  totalAmount: number;
+}
+
+/** Get purchase orders by status */
+export async function getPurchaseOrdersByStatus(token: string, status: string): Promise<PurchaseOrderListItem[]> {
+  const result = await apiCall<{ data: PurchaseOrderListItem[] }>('GET', `purchase-orders?pageSize=50`, token);
+  return (result?.data ?? []).filter(po => po.status === status);
+}
+
+/** Get all purchase orders */
+export async function getAllPurchaseOrders(token: string): Promise<PurchaseOrderListItem[]> {
+  const result = await apiCall<{ data: PurchaseOrderListItem[] }>('GET', 'purchase-orders?pageSize=200', token);
+  return result?.data ?? [];
+}
+
+// ── Sales Order queries ─────────────────────────────────────────────────────
+
+export interface SalesOrderDetail {
+  id: number;
+  status: string;
+  customerId: number;
+  lines: Array<{ id: number; quantity: number; quantityShipped: number; partId: number | null }>;
+}
+
+/** Get confirmed/in-production SOs (ready for shipment) */
+export async function getShippableSalesOrders(token: string): Promise<SalesOrderListItem[]> {
+  const result = await apiCall<{ data: SalesOrderListItem[] }>('GET', 'orders?pageSize=100', token);
+  return (result?.data ?? []).filter(so =>
+    so.status === 'Confirmed' || so.status === 'InProduction' || so.status === 'PartiallyShipped',
+  );
+}
+
+/** Get SO detail with lines */
+export async function getSalesOrderDetail(token: string, soId: number): Promise<SalesOrderDetail | null> {
+  return apiCall<SalesOrderDetail>('GET', `orders/${soId}`, token);
+}
+
+// ── QC queries ──────────────────────────────────────────────────────────────
+
+export interface QcTemplateListItem {
+  id: number;
+  name: string;
+  isActive: boolean;
+}
+
+/** Get active QC templates */
+export async function getQcTemplates(token: string): Promise<QcTemplateListItem[]> {
+  const result = await apiCall<QcTemplateListItem[]>('GET', 'quality/templates', token);
+  return (result ?? []).filter(t => t.isActive);
+}
+
+// ── Lot queries ─────────────────────────────────────────────────────────────
+
+export interface LotListItem {
+  id: number;
+  lotNumber: string;
+  partId: number | null;
+  quantity: number;
+}
+
+/** Get lots */
+export async function getLots(token: string): Promise<LotListItem[]> {
+  const result = await apiCall<{ data: LotListItem[] }>('GET', 'lots?pageSize=50', token);
+  return result?.data ?? [];
+}
+
+// ── Customer return queries ─────────────────────────────────────────────────
+
+export interface CustomerReturnListItem {
+  id: number;
+  customerId: number;
+  status: string;
+  reason: string;
+}
+
+/** Get open customer returns */
+export async function getOpenReturns(token: string): Promise<CustomerReturnListItem[]> {
+  const result = await apiCall<{ data: CustomerReturnListItem[] }>('GET', 'customer-returns?pageSize=50', token);
+  return (result?.data ?? []).filter(r => r.status !== 'Closed' && r.status !== 'Resolved');
+}
+
+// ── User queries ────────────────────────────────────────────────────────────
+
+/** Get all active users (for chat, mentions, assignments) */
+export async function getAllUsers(token: string): Promise<UserListItem[]> {
+  const result = await apiCall<{ data: UserListItem[] }>('GET', 'admin/users?pageSize=50', token);
+  return result?.data ?? [];
+}
+
+// ── Contact queries ─────────────────────────────────────────────────────────
+
+export interface ContactListItem {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string | null;
+  phone: string | null;
+  role: string | null;
+  isPrimary: boolean;
+}
+
+/** Get contacts for a customer */
+export async function getCustomerContacts(token: string, customerId: number): Promise<ContactListItem[]> {
+  const result = await apiCall<ContactListItem[]>('GET', `customers/${customerId}/contacts`, token);
+  return result ?? [];
+}

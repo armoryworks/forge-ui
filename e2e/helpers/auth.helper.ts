@@ -1,6 +1,6 @@
 import { type Page, request } from '@playwright/test';
 
-const API_BASE = 'http://localhost:5000/api/v1/';
+const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
 export const SEED_PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
 
 interface LoginResponse {
@@ -27,7 +27,7 @@ export async function loginViaApi(
   email: string,
   password: string,
 ): Promise<LoginResponse> {
-  const apiContext = await request.newContext({ baseURL: API_BASE });
+  const apiContext = await request.newContext({ baseURL: API_BASE, ignoreHTTPSErrors: true });
   const response = await apiContext.post('auth/login', {
     data: { email, password },
   });
@@ -40,7 +40,7 @@ export async function loginViaApi(
   await apiContext.dispose();
 
   // Navigate to origin so localStorage is scoped correctly
-  await page.goto('http://localhost:4200/', { waitUntil: 'commit' });
+  await page.goto(`${process.env['SIM_APP_BASE'] ?? 'http://localhost:4200'}/`, { waitUntil: 'commit' });
 
   // Seed localStorage with keys that AuthService reads on init
   await page.evaluate(
@@ -58,7 +58,7 @@ export async function loginViaApi(
  * Returns a raw JWT for making authenticated API calls from tests.
  */
 export async function getAuthToken(email: string, password: string): Promise<string> {
-  const apiContext = await request.newContext({ baseURL: API_BASE });
+  const apiContext = await request.newContext({ baseURL: API_BASE, ignoreHTTPSErrors: true });
   const response = await apiContext.post('auth/login', {
     data: { email, password },
   });
@@ -76,7 +76,7 @@ export async function getAuthToken(email: string, password: string): Promise<str
  * Returns the full login response (token + user) for pre-fetching credentials.
  */
 export async function getAuthSession(email: string, password: string): Promise<LoginResponse> {
-  const apiContext = await request.newContext({ baseURL: API_BASE });
+  const apiContext = await request.newContext({ baseURL: API_BASE, ignoreHTTPSErrors: true });
   const response = await apiContext.post('auth/login', {
     data: { email, password },
   });
@@ -98,7 +98,7 @@ export async function seedAuth(
   page: Page,
   session: { token: string; user: LoginResponse['user'] },
 ): Promise<void> {
-  await page.goto('http://localhost:4200/', { waitUntil: 'commit' });
+  await page.goto(`${process.env['SIM_APP_BASE'] ?? 'http://localhost:4200'}/`, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user }) => {
       localStorage.setItem('qbe-token', token);

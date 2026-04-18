@@ -12,8 +12,9 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: 'http://localhost:4200',
+    baseURL: process.env['SIM_APP_BASE'] ?? 'http://localhost:4200',
     headless: true,
+    ignoreHTTPSErrors: true,
     screenshot: 'off',
     trace: 'off',
     video: 'off',

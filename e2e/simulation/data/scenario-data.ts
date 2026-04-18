@@ -672,6 +672,427 @@ export const CUSTOMER_NOTES = [
   'Annual blanket order renewal in Q4.',
 ];
 
+// ── Raw materials (for BOM entries and PO line items) ─────────────────────────
+
+export const RAW_MATERIALS: Array<{ name: string; material: string; unit: string }> = [
+  { name: '6061-T6 Al Bar Stock 1" dia', material: '6061-T6 Aluminum', unit: 'ft' },
+  { name: '6061-T6 Al Plate 0.5" x 12" x 12"', material: '6061-T6 Aluminum', unit: 'ea' },
+  { name: '7075-T6 Al Bar Stock 2" dia', material: '7075-T6 Aluminum', unit: 'ft' },
+  { name: '7075-T6 Al Plate 1" x 6" x 12"', material: '7075-T6 Aluminum', unit: 'ea' },
+  { name: '4140 Steel Rod 0.75" dia', material: '4140 Steel', unit: 'ft' },
+  { name: '4140 Steel Rod 1.5" dia', material: '4140 Steel', unit: 'ft' },
+  { name: '303 SS Bar Stock 1" dia', material: '303 Stainless', unit: 'ft' },
+  { name: '316 SS Bar Stock 0.5" dia', material: '316 Stainless', unit: 'ft' },
+  { name: '316 SS Plate 0.25" x 12" x 24"', material: '316 Stainless', unit: 'ea' },
+  { name: '1018 CRS Flat Bar 0.5" x 2"', material: '1018 Cold Rolled', unit: 'ft' },
+  { name: 'Delrin Rod 2" dia', material: 'Delrin (Acetal)', unit: 'ft' },
+  { name: 'PEEK Rod 1" dia', material: 'PEEK', unit: 'ft' },
+  { name: 'UHMW Sheet 0.5" x 24" x 48"', material: 'UHMW-PE', unit: 'ea' },
+  { name: 'Brass C360 Hex 1" AF', material: 'Brass C360', unit: 'ft' },
+  { name: 'Copper C110 Bar 0.75" dia', material: 'Copper C110', unit: 'ft' },
+  { name: 'Inconel 718 Bar 1" dia', material: 'Inconel 718', unit: 'ft' },
+  { name: 'Titanium 6Al-4V Bar 1.5" dia', material: 'Ti-6Al-4V', unit: 'ft' },
+  { name: 'A2 Tool Steel Flat 1" x 3"', material: 'A2 Tool Steel', unit: 'ft' },
+  { name: 'D2 Tool Steel Plate 0.75" x 6" x 12"', material: 'D2 Tool Steel', unit: 'ea' },
+  { name: 'H13 Tool Steel Block 3" x 4" x 6"', material: 'H13 Tool Steel', unit: 'ea' },
+];
+
+export const PURCHASED_COMPONENTS: Array<{ name: string; partNumber: string }> = [
+  { name: 'SKF 6205 Deep Groove Bearing', partNumber: 'SKF-6205-2RS' },
+  { name: 'SKF 6207 Deep Groove Bearing', partNumber: 'SKF-6207-2Z' },
+  { name: 'Buna-N O-Ring -210', partNumber: 'OR-210-BN70' },
+  { name: 'Viton O-Ring -116', partNumber: 'OR-116-V75' },
+  { name: 'Socket Head Cap Screw M6x20', partNumber: 'SHCS-M6-20-A2' },
+  { name: 'Socket Head Cap Screw M8x30', partNumber: 'SHCS-M8-30-A2' },
+  { name: 'Dowel Pin 6mm x 20mm', partNumber: 'DP-6-20-H6' },
+  { name: 'Retaining Ring N-5100-50', partNumber: 'RR-5100-50' },
+  { name: 'Linear Rail 20mm x 400mm', partNumber: 'LR-20-400-C' },
+  { name: 'Linear Bearing Block 20mm', partNumber: 'LB-20-FL' },
+  { name: 'Timing Belt GT2 200mm', partNumber: 'TB-GT2-200-6' },
+  { name: 'Spring Pin 4mm x 24mm', partNumber: 'SP-4-24-SS' },
+  { name: 'Shaft Seal 25x42x7', partNumber: 'SS-25-42-7-NBR' },
+  { name: 'Keystock 5mm x 5mm x 100mm', partNumber: 'KS-5-5-100' },
+  { name: 'Pneumatic Cylinder 25mm bore x 50mm', partNumber: 'PC-25-50-DB' },
+];
+
+// ── Assembly names (manufactured parts that are built from sub-parts) ─────────
+
+export const ASSEMBLY_NAMES: Array<{ name: string; prefix: string; material: string }> = [
+  { name: 'Hydraulic Manifold Assembly', prefix: 'ASM-HYD', material: '6061-T6 Al' },
+  { name: 'Spindle Housing Assembly', prefix: 'ASM-SPH', material: '4140 Steel' },
+  { name: 'Rotary Union Assembly', prefix: 'ASM-RTU', material: '303 SS' },
+  { name: 'Linear Actuator Assembly', prefix: 'ASM-LNA', material: '7075-T6 Al' },
+  { name: 'Valve Block Assembly', prefix: 'ASM-VLB', material: '316 SS' },
+  { name: 'Bearing Cartridge Assembly', prefix: 'ASM-BCA', material: '4140 Steel' },
+  { name: 'Fixture Plate Assembly', prefix: 'ASM-FPL', material: '6061-T6 Al' },
+  { name: 'Gear Reduction Assembly', prefix: 'ASM-GRA', material: '4140 Steel' },
+  { name: 'Coolant Nozzle Assembly', prefix: 'ASM-CNZ', material: '303 SS' },
+  { name: 'Encoder Mount Assembly', prefix: 'ASM-ENC', material: '7075-T6 Al' },
+  { name: 'Pneumatic Clamp Assembly', prefix: 'ASM-PNC', material: '6061-T6 Al' },
+  { name: 'Probe Holder Assembly', prefix: 'ASM-PRB', material: '303 SS' },
+  { name: 'Motor Bracket Assembly', prefix: 'ASM-MTR', material: '1018 CRS' },
+  { name: 'Test Fixture Assembly', prefix: 'ASM-TST', material: '6061-T6 Al' },
+  { name: 'Heat Exchanger Assembly', prefix: 'ASM-HTX', material: '316 SS' },
+];
+
+// ── Invoice / billing data ────────────────────────────────────────────────────
+
+export const INVOICE_NOTES = [
+  'Standard production run — per PO terms.',
+  'Expedited order — rush surcharge applied.',
+  'Partial shipment invoiced — remainder to follow.',
+  'Tooling amortized over first 500 pieces.',
+  'Net 30 terms per customer agreement.',
+  'First article inspection included.',
+  'Material cert and test report enclosed.',
+  'Packing slip attached — verify quantities.',
+  'Customer blanket order drawdown.',
+  'Annual pricing per contract renewal.',
+];
+
+export const PAYMENT_METHODS = ['Check', 'ACH', 'CreditCard', 'Wire'];
+
+export const PAYMENT_REFERENCES = [
+  'CHK #', 'ACH REF ', 'CC AUTH ', 'WIRE ', 'PMT-', 'TXN-', 'REF-', 'AP-',
+];
+
+// ── Customer returns ──────────────────────────────────────────────────────────
+
+export const RETURN_REASONS = [
+  'Parts out of tolerance — bore diameter oversize',
+  'Surface finish not to spec — Ra too rough',
+  'Wrong quantity shipped — 90 received, 100 ordered',
+  'Damaged in transit — packaging insufficient',
+  'Wrong revision shipped — Rev B sent, Rev C required',
+  'Material cert mismatch — wrong alloy',
+  'Thread gauge fail — pitch diameter out of spec',
+  'Cosmetic defect — tool marks on sealing surface',
+  'Missing hardware — fastener kit incomplete',
+  'Anodize color mismatch — wrong spec called out',
+  'Customer spec change — parts no longer needed',
+  'Duplicate shipment — already received prior batch',
+];
+
+// ── QC / Quality inspection ──────────────────────────────────────────────────
+
+export const QC_NOTES = [
+  'All critical dimensions in spec. CPK > 1.33.',
+  'First article passed — production run approved.',
+  'Minor cosmetic issue on non-critical surface — accepted.',
+  'Thread ring gauge GO/NOGO verified — pass.',
+  'CMM report attached — all features nominal.',
+  'Surface finish Ra 16 measured — spec Ra 32 max — pass.',
+  'Hardness Rc 42-44 measured — spec 40-45 — pass.',
+  'Visual inspection — no burrs, no tool marks on sealing surfaces.',
+  'Concentricity 0.001" TIR measured — spec 0.003" max — pass.',
+  'Flatness 0.0005" measured — spec 0.002" max — pass.',
+  'SPC chart shows process stable — no trends detected.',
+  'Destructive test sample passed pull/shear test.',
+];
+
+// ── Shipment data ─────────────────────────────────────────────────────────────
+
+export const SHIPMENT_CARRIERS = [
+  'UPS Ground', 'UPS 2-Day Air', 'UPS Next Day Air',
+  'FedEx Ground', 'FedEx 2Day', 'FedEx Priority Overnight',
+  'USPS Priority Mail', 'USPS First Class',
+  'Freight — LTL', 'Freight — FTL', 'Will Call / Customer Pickup',
+  'DHL Express', 'Old Dominion Freight', 'YRC Freight',
+];
+
+// ── Chat messages with entity mentions ────────────────────────────────────────
+
+export const CHAT_MESSAGES_WITH_MENTIONS = [
+  'Just finished the first article on {entity} — dimensions look good.',
+  'Hey, can someone check the PO status for {entity}? Customer is asking.',
+  'QC passed on {entity} — ready to ship.',
+  'Need to reorder material for {entity} — stock is low.',
+  '{entity} is running behind schedule. Can we get extra hours on it?',
+  'Customer called about {entity} — wants an ETA update.',
+  'Tool broke during {entity} run. Replacing and restarting.',
+  'Updated the drawing for {entity} — Rev C is now active.',
+  '{entity} is on hold waiting for material from vendor.',
+  'Shipping {entity} today via UPS Ground. Tracking to follow.',
+  'Invoice sent for {entity}. Net 30 terms.',
+  'Great work on {entity} — customer was impressed with the quality.',
+];
+
+// ── Activity / conversation comments for various entity types ─────────────────
+
+export const ENTITY_COMMENTS = {
+  job: [
+    'Setup complete — running first article now.',
+    'Material arrived — ready to start production.',
+    'Changed tooling approach — using carbide insert instead of HSS.',
+    'Halfway through production run. On schedule.',
+    'QC check mid-run — all dimensions holding.',
+    'Completed op 20, moving to op 30.',
+    'Customer approved deviation on non-critical radius.',
+    'Running overnight — should finish by morning.',
+  ],
+  part: [
+    'Updated BOM — added O-ring to assembly.',
+    'Rev C released — added chamfer to bore entry.',
+    'Confirmed material availability with vendor.',
+    'Drawing updated — tolerance tightened on OD.',
+    'Added routing for secondary op — heat treat.',
+    'Customer requested change to surface finish spec.',
+    'Prototype approved — releasing for production.',
+    'Cost estimate updated based on new vendor quote.',
+  ],
+  customer: [
+    'Called to discuss new project requirements.',
+    'Sent updated pricing per annual review.',
+    'Credit application approved — Net 30 terms.',
+    'Scheduled shop tour for next week.',
+    'Customer requested expedited delivery on next order.',
+    'Met at trade show — interested in 5-axis capabilities.',
+    'Reviewed open AR — all current, good payment history.',
+    'New contact added — engineering department.',
+  ],
+  asset: [
+    'Scheduled preventive maintenance — spindle lube.',
+    'Vibration analysis complete — within spec.',
+    'Replaced way lube pump — working normally.',
+    'Annual calibration due next month.',
+    'Coolant system flushed and recharged.',
+    'Updated maintenance schedule per manufacturer bulletin.',
+    'Operator reported intermittent alarm — monitoring.',
+    'Replaced servo drive — machine back online.',
+  ],
+  vendor: [
+    'Negotiated 5% discount on annual volumes.',
+    'Lead time increased to 3 weeks — backlog.',
+    'Material cert issues resolved — approved supplier.',
+    'New contact: inside sales rep changed.',
+    'Requested quote for titanium bar stock.',
+    'Quality issue on last shipment — NCR filed.',
+    'Payment terms updated to Net 45.',
+    'Site audit scheduled for next quarter.',
+  ],
+  invoice: [
+    'Sent via email — customer confirmed receipt.',
+    'Payment received — check deposited.',
+    'Customer requested 30-day extension — approved by manager.',
+    'Partial payment received — balance due.',
+    'Credited $150 for shipping damage.',
+    'Statement sent — all invoices current.',
+  ],
+  quote: [
+    'Customer reviewing — expects response by Friday.',
+    'Revised pricing per customer feedback.',
+    'Added line item for tooling amortization.',
+    'Customer accepted — converting to order.',
+    'Competitive bid situation — adjusted margin.',
+    'Extended validity date per customer request.',
+  ],
+  salesOrder: [
+    'Production scheduled for next week.',
+    'Material ordered — arriving Thursday.',
+    'Partial ship approved by customer.',
+    'Delivery date moved up per customer request.',
+    'Added line for spare parts — customer requested.',
+    'All items shipped — awaiting delivery confirmation.',
+  ],
+  purchaseOrder: [
+    'Vendor confirmed — shipping next week.',
+    'Received partial — remaining items backordered.',
+    'Quality issue found on receipt — contacting vendor.',
+    'Expedite requested — need material by Friday.',
+    'Vendor invoice received — matches PO.',
+    'Returned defective material — replacement en route.',
+  ],
+};
+
+// ── Contact data for adding multiple contacts to customers/leads ──────────────
+
+export const CONTACT_TITLES = [
+  'Engineering Manager', 'Purchasing Agent', 'Quality Engineer',
+  'Production Supervisor', 'Plant Manager', 'VP Operations',
+  'Buyer', 'Program Manager', 'Design Engineer', 'QC Inspector',
+  'Shipping Coordinator', 'Accounts Payable', 'Sales Representative',
+  'Technical Director', 'Maintenance Manager', 'Shop Foreman',
+  'CTO', 'Supply Chain Manager', 'Procurement Specialist', 'CFO',
+];
+
+export const CONTACT_DEPARTMENTS = [
+  'Engineering', 'Purchasing', 'Quality', 'Production', 'Operations',
+  'Finance', 'Sales', 'Shipping', 'Maintenance', 'Management',
+];
+
+// ── Contact Interaction data (for logging calls/emails/meetings) ────────────
+
+export const INTERACTION_SUBJECTS = {
+  Call: [
+    'Discussed delivery timeline for current order',
+    'Follow-up on quality concern from last shipment',
+    'Pricing review for upcoming annual contract',
+    'Expedite request — need parts by end of week',
+    'Capacity planning call for Q{q} requirements',
+    'Reviewed spec changes for new revision',
+    'Payment status check — invoice past due',
+    'Technical consultation on material selection',
+    'New project kickoff discussion',
+    'Production schedule update call',
+  ],
+  Email: [
+    'Sent revised quote per phone discussion',
+    'Drawing package for new part number',
+    'PO confirmation and expected delivery date',
+    'Quality report — dimensional inspection results',
+    'Updated terms and conditions for review',
+    'Material certification documentation',
+    'Invoice copy and payment instructions',
+    'RFQ response — competitive pricing',
+    'Spec deviation request for customer approval',
+    'Shipping notification with tracking info',
+  ],
+  Meeting: [
+    'Quarterly business review — production metrics',
+    'New product introduction planning session',
+    'Shop tour with customer engineering team',
+    'Annual contract negotiation',
+    'Quality system audit preparation',
+    'Capacity and lead time planning meeting',
+    'Process improvement review',
+    'Year-end pricing and forecast meeting',
+  ],
+  Note: [
+    'Customer mentioned potential large order next quarter',
+    'Key contact retiring end of year — transition plan needed',
+    'Competitor pricing lower — may need to adjust',
+    'Customer expanding facility — good opportunity',
+    'Payment history excellent — consider credit line increase',
+    'Customer ISO audit scheduled — prepare documentation',
+    'New program launching — prototype phase starts soon',
+    'Contact requested visit to our facility next month',
+  ],
+};
+
+export const INTERACTION_BODIES = {
+  Call: [
+    'Spoke with {contact} regarding current open orders. All on track for delivery. Will follow up next week with shipping confirmation.',
+    'Called to discuss the quality issue reported on PO #{ref}. Root cause identified — tooling wear. Corrective action implemented.',
+    '{contact} called to request expedited delivery. Checked production schedule — can accommodate with overtime. Will confirm by EOD.',
+    'Discussed annual pricing review. Customer requesting 3% reduction. Will review costs and respond by Friday.',
+    'Follow-up call with {contact}. They are satisfied with recent delivery performance. Planning to increase order volume.',
+  ],
+  Email: [
+    'Sent {contact} the revised quote with updated pricing per our phone conversation. Valid for 30 days.',
+    'Forwarded material certifications for recent shipment per customer quality requirements. All certs on file.',
+    'Responded to RFQ from {contact}. Quoted 3 configurations with volume break pricing. Lead time: 4-6 weeks.',
+    'Sent shipping notification to {contact}. Tracking: {ref}. Expected delivery in 2-3 business days.',
+    'Emailed {contact} updated drawings showing Rev C changes. Awaiting approval before production start.',
+  ],
+  Meeting: [
+    'Met with {contact} and their engineering team for quarterly review. Reviewed KPIs: 98.5% on-time delivery, 0.2% rejection rate. Customer satisfied.',
+    'New product kickoff meeting with {contact}. Reviewed preliminary drawings, discussed tolerances, agreed on prototype schedule. First articles in 3 weeks.',
+    'Shop tour with {contact}. Demonstrated 5-axis capability, CMM inspection process. Customer impressed with quality controls.',
+    'Annual contract negotiation with {contact}. Agreed on 2% price increase effective Q1. Volume commitment of 500 pcs/month minimum.',
+  ],
+  Note: [
+    'Internal note: {contact} mentioned they are evaluating second-source suppliers. Need to ensure competitive pricing and delivery performance.',
+    'Reminder: Send {contact} updated capability statement including new equipment additions.',
+    '{contact} retiring at end of year. Their replacement is starting in 2 months — schedule introductory meeting.',
+    'Customer has been growing 15% annually. May need to discuss capacity reservation for next fiscal year.',
+  ],
+};
+
+export const INTERACTION_TYPES = ['Call', 'Email', 'Meeting', 'Note'] as const;
+
+// ── Entity Notes (for Notes tab — different from conversation comments) ─────
+
+export const ENTITY_NOTES = {
+  purchaseOrder: [
+    'IMPORTANT: Vendor requires 48-hour advance notice for any delivery changes.',
+    'Material spec requires mill cert with heat lot traceability. Verify on receipt.',
+    'This vendor has a history of short-shipping. Count all boxes carefully.',
+    'Pricing locked through Q{q} per annual agreement. Requote before renewal.',
+    'Alternate vendor approved: contact Purchasing if lead time exceeds 6 weeks.',
+    'Quality alert: last 2 shipments had minor surface finish issues. Inspect 100%.',
+  ],
+  salesOrder: [
+    'Customer requires packing slip in each box with lot numbers listed.',
+    'HOLD: Do not ship until customer PO revision is received and confirmed.',
+    'Partial shipments authorized. Customer prefers to receive as completed.',
+    'Special packaging required: VCI wrap per customer spec PKG-203.',
+    'This is a blanket order — releases will come via EDI or email from {contact}.',
+    'Customer inspection required before final shipment. Schedule 48 hours in advance.',
+  ],
+  customerReturn: [
+    'Customer reports out-of-tolerance on bore diameter. CMM inspection pending.',
+    'Return authorized per RMA #{ref}. Credit memo to be issued upon receipt and inspection.',
+    'Root cause: tool wear mid-run. Corrective action: added in-process gauge check every 50 pcs.',
+    'Customer requesting full replacement plus expedited shipping at no charge.',
+    'Visual defect only — functional. Customer returning for aesthetic reasons per contract terms.',
+    'NOTE: This is the second return from this customer this quarter. Review root cause patterns.',
+  ],
+  job: [
+    'SAFETY: This job involves titanium machining — ensure proper chip handling and fire suppression available.',
+    'Customer witness point at Op 30. Schedule inspection 2 days before expected completion.',
+    'Material pre-heated per spec — do not machine cold. See process sheet.',
+    'Tight tolerance on ID bore — use air gauge for in-process checks, not caliper.',
+    'Previous run had chip issues on threading op. Use peck cycle with 0.020 depth of cut max.',
+    'Customer requires first article inspection report (FAIR) per AS9102 before production run.',
+  ],
+  vendor: [
+    'Preferred vendor for 6061-T6 aluminum — best pricing and shortest lead time.',
+    'Credit hold risk: payment terms must be maintained or they revert to prepay.',
+    'This vendor offers emergency/rush service at 25% premium — use for urgent jobs only.',
+    'Annual quality audit due Q{q}. Schedule site visit with QE team.',
+    'Vendor consolidation candidate — overlaps with {alt_vendor} on several material types.',
+    'New vendor — probationary period. 100% incoming inspection required for first 5 orders.',
+  ],
+  asset: [
+    'CRITICAL: Spindle bearing replacement due at 10,000 hours. Current: {hours} hours.',
+    'Oil analysis trending — watch for iron content increase. Next sample due Q{q}.',
+    'Operator qualification required: Level 2 certification minimum for this machine.',
+    'Backup power supply installed. Machine will auto-park during power failure.',
+    'Known issue: Y-axis has 0.0003" backlash compensation programmed. Do not reset.',
+    'Scheduled for CNC control upgrade in Q{q}. Budget approved.',
+  ],
+};
+
+// ── RFQ data ──────────────────────────────────────────────────────────────────
+
+export const RFQ_DESCRIPTIONS = [
+  'Annual requirement — 500 pcs/month, 12 month blanket.',
+  'Prototype qty 5 — tight tolerances, expedited.',
+  'Production run — 1000 pcs, standard lead time.',
+  'Replacement parts — match existing specs exactly.',
+  'New program — engineering samples for qualification.',
+  'Ramp-up order — 100 pcs initial, 500/mo steady state.',
+  'Competitive requote — incumbent pricing expired.',
+  'Material substitution — customer spec change.',
+];
+
+// ── ECO (Engineering Change Order) data ───────────────────────────────────────
+
+export const ECO_DESCRIPTIONS = [
+  'Tighten bore tolerance from ±0.005 to ±0.002 per customer feedback.',
+  'Add chamfer 0.015 x 45° on all sharp edges per safety review.',
+  'Change material from 6061 to 7075 for higher strength application.',
+  'Update surface finish requirement from Ra 63 to Ra 32.',
+  'Add thread relief per ASME B1.1 standard.',
+  'Modify fillet radius from R0.030 to R0.060 for stress relief.',
+  'Add inspection note: 100% check critical bore diameter.',
+  'Update drawing to reflect actual as-built dimensions (within spec).',
+];
+
+export const ECO_CHANGE_TYPES = ['Design', 'Material', 'Process', 'Documentation'];
+
+// ── Recurring expense data ────────────────────────────────────────────────────
+
+export const RECURRING_EXPENSE_DESCRIPTIONS = [
+  'Monthly coolant supply service', 'Quarterly safety equipment inspection',
+  'Annual machine calibration service', 'Monthly janitorial service',
+  'Bi-weekly shop towel/uniform service', 'Monthly waste oil disposal',
+  'Quarterly compressed air system service', 'Annual fire suppression inspection',
+  'Monthly pest control service', 'Quarterly HVAC maintenance',
+];
+
+export const RECURRING_FREQUENCIES = ['Weekly', 'BiWeekly', 'Monthly', 'Quarterly', 'Annually'];
+
 /** Pick an item from a pool deterministically by week and offset */
 export function pick<T>(pool: T[], weekIndex: number, offset = 0): T {
   return pool[(weekIndex + offset) % pool.length];

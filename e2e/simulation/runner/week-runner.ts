@@ -21,7 +21,7 @@ const RESUME    = (process.env['SIM_RESUME'] ?? 'true').toLowerCase() !== 'false
  *   range  — run SIM_START to SIM_END exactly (set both via env vars)
  *   api    — like 'full' but uses API-direct scenario (fast, no browser needed)
  */
-const SIM_MODE = (process.env['SIM_MODE'] ?? 'api') as 'full' | 'resume' | 'gaps' | 'range' | 'api';
+const SIM_MODE = (process.env['SIM_MODE'] ?? 'full') as 'full' | 'resume' | 'gaps' | 'range' | 'api';
 
 /** When true, use API-direct scenario instead of UI-driven */
 const USE_API = SIM_MODE === 'api' || (process.env['SIM_API'] ?? 'false').toLowerCase() === 'true';

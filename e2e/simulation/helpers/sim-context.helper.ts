@@ -32,7 +32,7 @@ export async function createSimContext(
   session?: { token: string; user: { id: number; email: string; firstName: string; lastName: string; initials: string | null; avatarColor: string | null; roles: string[] } },
 ): Promise<SimContext> {
   const creds = ROLE_CREDENTIALS[role];
-  const context = await browser.newContext();
+  const context = await browser.newContext({ ignoreHTTPSErrors: true });
   const page = await context.newPage();
   if (session) {
     await seedAuth(page, session);

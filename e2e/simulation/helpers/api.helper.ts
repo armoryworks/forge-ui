@@ -1,6 +1,6 @@
 import { request } from '@playwright/test';
 
-const API_BASE = 'http://localhost:5000/api/v1/';
+const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
 
 /**
  * Makes an authenticated API call. Returns null on failure (logged to console).
@@ -13,6 +13,7 @@ export async function apiCall<T>(
 ): Promise<T | null> {
   const ctx = await request.newContext({
     baseURL: API_BASE,
+    ignoreHTTPSErrors: true,
     extraHTTPHeaders: { Authorization: `Bearer ${token}` },
   });
   try {
