@@ -2759,7 +2759,12 @@
     "newMessage": "Nuevo Mensaje",
     "noUsersFound": "No se encontraron usuarios",
     "searchUsers": "Buscar usuarios",
+    "searchConversations": "Buscar conversaciones...",
     "selectConversation": "Seleccione una conversación para comenzar a chatear",
+    "openInWindow": "Abrir en ventana",
+    "chatInWindow": "Chat abierto en ventana separada",
+    "focusWindow": "Enfocar ventana",
+    "popoutChat": "Chat emergente",
     "viewImage": "Ver imagen",
     "downloadFile": "Descargar archivo",
     "shareEntity": "Compartir en Chat",
@@ -2889,7 +2894,44 @@
     "sessionTimedOut": "Sesión expirada para {{name}}",
     "maxSessionsReached": "Máximo de sesiones concurrentes alcanzado",
     "sessionActive": "Activo",
-    "sessionIdle": "Inactivo"
+    "sessionIdle": "Inactivo",
+    "shipFlow": {
+      "title": "Enviar Artículos",
+      "selectShipmentLine": "Seleccione una línea de envío para completar",
+      "shippingQuantity": "Cantidad de Envío",
+      "shipAll": "Enviar Todo",
+      "partialShip": "Envío Parcial",
+      "confirmShip": "Confirmar Envío",
+      "shippedSuccess": "Envío procesado exitosamente",
+      "noOpenLines": "No hay líneas de envío abiertas para esta pieza",
+      "shipment": "Envío",
+      "salesOrder": "Orden de Venta",
+      "quantity": "Cantidad"
+    },
+    "inspectFlow": {
+      "qcInspection": "Inspección QC",
+      "inspectionResult": "Resultado de Inspección",
+      "pass": "Aprobado",
+      "fail": "Rechazado",
+      "inspectionNotes": "Notas de Inspección",
+      "submitInspection": "Enviar Inspección",
+      "inspectionSubmitted": "Inspección enviada exitosamente",
+      "templateAssigned": "Plantilla QC asignada a esta pieza"
+    },
+    "jobFlow": {
+      "jobActions": "Acciones del Trabajo",
+      "startTimer": "Iniciar Temporizador",
+      "stopTimer": "Detener Temporizador",
+      "advanceStage": "Avanzar Etapa",
+      "logNote": "Registrar Nota",
+      "confirmAdvanceStage": "¿Avanzar este trabajo a la siguiente etapa?",
+      "noteText": "Texto de Nota",
+      "submitNote": "Enviar Nota",
+      "timerStarted": "Temporizador iniciado",
+      "timerStopped": "Temporizador detenido",
+      "stageAdvanced": "Etapa avanzada",
+      "noteLogged": "Nota registrada"
+    }
   },
   "customerReturns": {
     "allStatuses": "Todos los Estados",

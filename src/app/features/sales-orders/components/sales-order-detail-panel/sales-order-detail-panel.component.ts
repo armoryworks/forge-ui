@@ -150,6 +150,20 @@ export class SalesOrderDetailPanelComponent {
 
   protected switchTab(tab: TabId): void {
     this.activeTab.set(tab);
+    if (tab === 'schedule' && this.scheduleMilestones().length === 0) {
+      this.loadSchedule(this.salesOrderId());
+    }
+  }
+
+  private loadSchedule(id: number): void {
+    this.scheduleLoading.set(true);
+    this.soService.getSchedule(id).subscribe({
+      next: (milestones) => {
+        this.scheduleMilestones.set(milestones);
+        this.scheduleLoading.set(false);
+      },
+      error: () => this.scheduleLoading.set(false),
+    });
   }
 
   protected toggleLineExpand(lineId: number): void {

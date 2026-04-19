@@ -1,0 +1,146 @@
+<div class="scan-ship">
+  <div class="scan-ship__header">
+    <span class="material-icons-outlined scan-ship__icon">local_shipping</span>
+    <h2 class="scan-ship__title">{{ 'shopFloor.shipFlow.title' | translate }}</h2>
+    <span class="scan-ship__part">{{ partNumber() }}</span>
+  </div>
+
+  <!-- Step 1: Select Shipment Line -->
+  @if (step() === 'select-line') {
+    <p class="scan-ship__hint">{{ 'shopFloor.shipFlow.selectShipmentLine' | translate }}</p>
+
+    <div class="scan-ship__list">
+      @for (line of openShipmentLines(); track line.shipmentLineId) {
+        <button class="scan-ship__line-item"
+                (click)="selectLine(line)"
+                [attr.aria-label]="'Select shipment ' + line.shipmentNumber">
+          <div class="scan-ship__line-info">
+            <span class="scan-ship__line-shipment">{{ line.shipmentNumber }}</span>
+            <span class="scan-ship__line-so">SO {{ line.salesOrderNumber }}</span>
+          </div>
+          <span class="scan-ship__line-qty">{{ line.requiredQuantity }} {{ 'common.units' | translate }}</span>
+        </button>
+      } @empty {
+        <div class="scan-ship__empty">
+          <span class="material-icons-outlined">inventory_2</span>
+          <p>{{ 'shopFloor.shipFlow.noOpenLines' | translate }}</p>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 2: Quantity -->
+  @if (step() === 'quantity') {
+    @if (selectedLine(); as line) {
+      <div class="scan-ship__selected">
+        <span class="scan-ship__selected-label">{{ line.shipmentNumber }}</span>
+        <span class="scan-ship__selected-so">SO {{ line.salesOrderNumber }}</span>
+        <span class="scan-ship__selected-qty">{{ line.requiredQuantity }} {{ 'shopFloor.shipFlow.shippingQuantity' | translate }}</span>
+      </div>
+
+      @if (!isPartial()) {
+        <div class="scan-ship__qty-actions">
+          <button class="action-btn action-btn--primary scan-ship__qty-btn"
+                  (click)="shipAll()"
+                  aria-label="Ship all quantity">
+            <span class="material-icons-outlined">check</span>
+            {{ 'shopFloor.shipFlow.shipAll' | translate }} ({{ line.requiredQuantity }})
+          </button>
+          <button class="action-btn scan-ship__qty-btn"
+                  (click)="showPartial()"
+                  aria-label="Enter partial quantity">
+            <span class="material-icons-outlined">edit</span>
+            {{ 'shopFloor.shipFlow.partialShip' | translate }}
+          </button>
+        </div>
+      } @else {
+        <div class="scan-ship__partial">
+          <app-input
+            [label]="'shopFloor.shipFlow.shippingQuantity' | translate"
+            type="number"
+            [formControl]="partialQtyControl"
+            data-testid="ship-partial-qty" />
+          <div class="scan-ship__partial-actions">
+            <button class="action-btn" (click)="isPartial.set(false)" aria-label="Cancel partial">
+              {{ 'common.cancel' | translate }}
+            </button>
+            <button class="action-btn action-btn--primary"
+                    [disabled]="!partialQtyControl.value || partialQtyControl.value! <= 0 || partialQtyControl.value! > line.requiredQuantity"
+                    (click)="confirmPartial()"
+                    aria-label="Confirm partial quantity">
+              {{ 'common.confirm' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+
+      <button class="action-btn scan-ship__back" (click)="backToSelect()" aria-label="Back to line selection">
+        <span class="material-icons-outlined">arrow_back</span>
+        {{ 'common.back' | translate }}
+      </button>
+    }
+  }
+
+  <!-- Step 3: Confirming -->
+  @if (step() === 'confirming') {
+    @if (selectedLine(); as line) {
+      <div class="scan-ship__confirm">
+        <div class="scan-ship__confirm-summary">
+          <div class="scan-ship__confirm-row">
+            <span class="scan-ship__confirm-label">{{ 'shopFloor.shipFlow.shipment' | translate }}</span>
+            <span class="scan-ship__confirm-value">{{ line.shipmentNumber }}</span>
+          </div>
+          <div class="scan-ship__confirm-row">
+            <span class="scan-ship__confirm-label">{{ 'shopFloor.shipFlow.salesOrder' | translate }}</span>
+            <span class="scan-ship__confirm-value">SO {{ line.salesOrderNumber }}</span>
+          </div>
+          <div class="scan-ship__confirm-row">
+            <span class="scan-ship__confirm-label">{{ 'shopFloor.shipFlow.quantity' | translate }}</span>
+            <span class="scan-ship__confirm-value">{{ shippingQty() }}</span>
+          </div>
+        </div>
+
+        @if (error()) {
+          <div class="scan-ship__error">
+            <span class="material-icons-outlined">warning</span>
+            {{ error() }}
+          </div>
+        }
+
+        <div class="scan-ship__confirm-actions">
+          <button class="action-btn" (click)="backToQuantity()" [disabled]="submitting()" aria-label="Back to quantity">
+            <span class="material-icons-outlined">arrow_back</span>
+            {{ 'common.back' | translate }}
+          </button>
+          <button class="action-btn action-btn--primary"
+                  [disabled]="submitting()"
+                  (click)="confirmShip()"
+                  aria-label="Confirm shipment">
+            @if (submitting()) {
+              <span class="material-icons-outlined scan-ship__spinner">sync</span>
+            } @else {
+              <span class="material-icons-outlined">check</span>
+            }
+            {{ 'shopFloor.shipFlow.confirmShip' | translate }}
+          </button>
+        </div>
+      </div>
+    }
+  }
+
+  <!-- Step 4: Done -->
+  @if (step() === 'done') {
+    <div class="scan-ship__done">
+      <span class="material-icons-outlined scan-ship__done-icon">check_circle</span>
+      <p class="scan-ship__done-text">{{ 'shopFloor.shipFlow.shippedSuccess' | translate }}</p>
+    </div>
+  }
+
+  <!-- Cancel button (always visible except done) -->
+  @if (step() !== 'done') {
+    <button class="action-btn scan-ship__cancel" (click)="cancel()" aria-label="Cancel shipping flow">
+      <span class="material-icons-outlined">close</span>
+      {{ 'common.cancel' | translate }}
+    </button>
+  }
+</div>

@@ -2977,7 +2977,12 @@
     "newMessage": "New Message",
     "noUsersFound": "No users found",
     "searchUsers": "Search users",
+    "searchConversations": "Search conversations...",
     "selectConversation": "Select a conversation to start chatting",
+    "openInWindow": "Open in window",
+    "chatInWindow": "Chat opened in separate window",
+    "focusWindow": "Focus window",
+    "popoutChat": "Pop-out chat",
     "viewImage": "View image",
     "downloadFile": "Download file",
     "shareEntity": "Share to Chat",
@@ -3107,7 +3112,44 @@
     "sessionTimedOut": "Session timed out for {{name}}",
     "maxSessionsReached": "Maximum concurrent sessions reached",
     "sessionActive": "Active",
-    "sessionIdle": "Idle"
+    "sessionIdle": "Idle",
+    "shipFlow": {
+      "title": "Ship Items",
+      "selectShipmentLine": "Select a shipment line to fulfill",
+      "shippingQuantity": "Shipping Quantity",
+      "shipAll": "Ship All",
+      "partialShip": "Partial Ship",
+      "confirmShip": "Confirm Shipment",
+      "shippedSuccess": "Shipment processed successfully",
+      "noOpenLines": "No open shipment lines for this part",
+      "shipment": "Shipment",
+      "salesOrder": "Sales Order",
+      "quantity": "Quantity"
+    },
+    "inspectFlow": {
+      "qcInspection": "QC Inspection",
+      "inspectionResult": "Inspection Result",
+      "pass": "Pass",
+      "fail": "Fail",
+      "inspectionNotes": "Inspection Notes",
+      "submitInspection": "Submit Inspection",
+      "inspectionSubmitted": "Inspection submitted successfully",
+      "templateAssigned": "QC template assigned to this part"
+    },
+    "jobFlow": {
+      "jobActions": "Job Actions",
+      "startTimer": "Start Timer",
+      "stopTimer": "Stop Timer",
+      "advanceStage": "Advance Stage",
+      "logNote": "Log Note",
+      "confirmAdvanceStage": "Advance this job to the next stage?",
+      "noteText": "Note Text",
+      "submitNote": "Submit Note",
+      "timerStarted": "Timer started",
+      "timerStopped": "Timer stopped",
+      "stageAdvanced": "Stage advanced",
+      "noteLogged": "Note logged"
+    }
   },
   "customerReturns": {
     "allStatuses": "All Statuses",

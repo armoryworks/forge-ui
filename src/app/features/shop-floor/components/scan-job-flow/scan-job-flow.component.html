@@ -1,0 +1,149 @@
+<div class="scan-job">
+  <div class="scan-job__header">
+    <span class="material-icons-outlined scan-job__icon">work</span>
+    <h2 class="scan-job__title">{{ 'shopFloor.jobFlow.jobActions' | translate }}</h2>
+  </div>
+
+  <!-- Job Info -->
+  <div class="scan-job__info">
+    <div class="scan-job__info-row">
+      <span class="scan-job__info-number">{{ jobNumber() }}</span>
+      <span class="scan-job__info-stage">{{ currentStage() }}</span>
+    </div>
+    <span class="scan-job__info-title">{{ jobTitle() }}</span>
+    @if (assigneeName()) {
+      <span class="scan-job__info-assignee">
+        <span class="material-icons-outlined">person</span>
+        {{ assigneeName() }}
+      </span>
+    }
+  </div>
+
+  <!-- Step 1: Action Buttons -->
+  @if (step() === 'actions') {
+    @if (error()) {
+      <div class="scan-job__error">
+        <span class="material-icons-outlined">warning</span>
+        {{ error() }}
+      </div>
+    }
+
+    <div class="scan-job__action-grid">
+      @if (hasActiveTimer()) {
+        <button class="scan-job__action-btn scan-job__action-btn--stop"
+                (click)="stopTimer()"
+                aria-label="Stop timer">
+          <span class="material-icons-outlined">stop_circle</span>
+          <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.stopTimer' | translate }}</span>
+        </button>
+      } @else {
+        <button class="scan-job__action-btn scan-job__action-btn--start"
+                (click)="startTimer()"
+                aria-label="Start timer">
+          <span class="material-icons-outlined">play_circle</span>
+          <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.startTimer' | translate }}</span>
+        </button>
+      }
+
+      <button class="scan-job__action-btn scan-job__action-btn--advance"
+              (click)="showAdvanceStage()"
+              aria-label="Advance stage">
+        <span class="material-icons-outlined">skip_next</span>
+        <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.advanceStage' | translate }}</span>
+      </button>
+
+      <button class="scan-job__action-btn scan-job__action-btn--note"
+              (click)="showLogNote()"
+              aria-label="Log note">
+        <span class="material-icons-outlined">note_add</span>
+        <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.logNote' | translate }}</span>
+      </button>
+    </div>
+
+    <button class="action-btn scan-job__cancel" (click)="cancel()" aria-label="Cancel job actions">
+      <span class="material-icons-outlined">close</span>
+      {{ 'common.cancel' | translate }}
+    </button>
+  }
+
+  <!-- Step 2a: Confirm Advance Stage -->
+  @if (step() === 'confirm-advance') {
+    <div class="scan-job__confirm">
+      <span class="material-icons-outlined scan-job__confirm-icon">skip_next</span>
+      <p class="scan-job__confirm-text">{{ 'shopFloor.jobFlow.confirmAdvanceStage' | translate }}</p>
+      <p class="scan-job__confirm-detail">{{ jobNumber() }} — {{ currentStage() }}</p>
+
+      <div class="scan-job__confirm-actions">
+        <button class="action-btn" (click)="backToActions()" aria-label="Cancel advance">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'common.back' | translate }}
+        </button>
+        <button class="action-btn action-btn--primary" (click)="confirmAdvanceStage()" aria-label="Confirm advance stage">
+          <span class="material-icons-outlined">check</span>
+          {{ 'common.confirm' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2b: Log Note -->
+  @if (step() === 'log-note') {
+    <div class="scan-job__note">
+      @if (error()) {
+        <div class="scan-job__error">
+          <span class="material-icons-outlined">warning</span>
+          {{ error() }}
+        </div>
+      }
+
+      <app-textarea
+        [label]="'shopFloor.jobFlow.noteText' | translate"
+        [formControl]="noteControl"
+        [rows]="4"
+        data-testid="job-note-text" />
+
+      <div class="scan-job__note-actions">
+        <button class="action-btn" (click)="backToActions()" aria-label="Cancel note">
+          <span class="material-icons-outlined">arrow_back</span>
+          {{ 'common.back' | translate }}
+        </button>
+        <button class="action-btn action-btn--primary"
+                [disabled]="!noteControl.value?.trim()"
+                (click)="submitNote()"
+                aria-label="Submit note">
+          <span class="material-icons-outlined">save</span>
+          {{ 'shopFloor.jobFlow.submitNote' | translate }}
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 3: Processing -->
+  @if (step() === 'processing') {
+    <div class="scan-job__loading">
+      <span class="material-icons-outlined scan-job__spinner">sync</span>
+      <p>{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Step 4: Done -->
+  @if (step() === 'done') {
+    <div class="scan-job__done">
+      <span class="material-icons-outlined scan-job__done-icon">check_circle</span>
+      @switch (completedAction()) {
+        @case ('timer-started') {
+          <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.timerStarted' | translate }}</p>
+        }
+        @case ('timer-stopped') {
+          <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.timerStopped' | translate }}</p>
+        }
+        @case ('stage-advanced') {
+          <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.stageAdvanced' | translate }}</p>
+        }
+        @case ('note-logged') {
+          <p class="scan-job__done-text">{{ 'shopFloor.jobFlow.noteLogged' | translate }}</p>
+        }
+      }
+    </div>
+  }
+</div>

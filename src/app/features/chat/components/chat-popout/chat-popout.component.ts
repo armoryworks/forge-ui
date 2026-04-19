@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { AuthService } from '../../../../shared/services/auth.service';
-import { BroadcastService } from '../../../../shared/services/broadcast.service';
+import { ChatBroadcastService } from '../../services/chat-broadcast.service';
 import { ChatHubService } from '../../../../shared/services/chat-hub.service';
 import { ChatService } from '../../services/chat.service';
 import { ChatConversation } from '../../models/chat-conversation.model';
@@ -28,7 +28,7 @@ import { ChatThreadPanelComponent } from '../chat-thread-panel/chat-thread-panel
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatPopoutComponent implements OnInit, OnDestroy {
-  private readonly broadcast = inject(BroadcastService);
+  private readonly chatBroadcast = inject(ChatBroadcastService);
   private readonly chatService = inject(ChatService);
   private readonly chatHub = inject(ChatHubService);
   private readonly authService = inject(AuthService);
@@ -69,7 +69,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   private hubConnected = false;
 
   ngOnInit(): void {
-    this.broadcast.sendChatEvent({ type: 'chat-window-opened' });
+    this.chatBroadcast.send({ type: 'windowOpened' });
     window.addEventListener('beforeunload', this.onBeforeUnload);
 
     this.loadConversations();
@@ -340,6 +340,6 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
   }
 
   private onBeforeUnload = (): void => {
-    this.broadcast.sendChatEvent({ type: 'chat-window-closed' });
+    this.chatBroadcast.send({ type: 'windowClosed' });
   };
 }

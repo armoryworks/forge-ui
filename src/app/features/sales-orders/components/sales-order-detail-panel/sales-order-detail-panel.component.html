@@ -33,6 +33,16 @@
         <span class="tab__count">{{ so.lines.length }}</span>
       </button>
       <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'schedule'"
+        [attr.aria-selected]="activeTab() === 'schedule'"
+        (click)="switchTab('schedule')"
+        aria-label="Schedule tab">
+        {{ 'salesOrders.schedule.tab' | translate }}
+        @if (scheduleAtRiskCount() > 0) {
+          <span class="material-icons-outlined tab__warning" aria-label="At risk milestones">warning</span>
+        }
+      </button>
+      <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'shipments'"
         [attr.aria-selected]="activeTab() === 'shipments'"
         (click)="switchTab('shipments')"
@@ -327,6 +337,20 @@
             <div class="empty-state">
               <span class="material-icons-outlined empty-state__icon">list_alt</span>
               <span class="empty-state__message">{{ 'salesOrders.noLines' | translate }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Schedule Tab -->
+      @if (activeTab() === 'schedule') {
+        <div class="tab-panel" role="tabpanel" [appLoadingBlock]="scheduleLoading()">
+          @if (scheduleMilestones().length > 0) {
+            <app-schedule-timeline [milestones]="scheduleMilestones()" />
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons-outlined empty-state__icon">event_note</span>
+              <span class="empty-state__message">{{ 'salesOrders.schedule.noSchedule' | translate }}</span>
             </div>
           }
         </div>

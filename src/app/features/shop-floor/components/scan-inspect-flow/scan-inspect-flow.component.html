@@ -1,0 +1,89 @@
+<div class="scan-inspect">
+  <div class="scan-inspect__header">
+    <span class="material-icons-outlined scan-inspect__icon">fact_check</span>
+    <h2 class="scan-inspect__title">{{ 'shopFloor.inspectFlow.qcInspection' | translate }}</h2>
+    <span class="scan-inspect__part">{{ partNumber() }}</span>
+  </div>
+
+  <!-- Step 1: Inspection Form -->
+  @if (step() === 'inspect') {
+    @if (qcTemplateId()) {
+      <div class="scan-inspect__template-info">
+        <span class="material-icons-outlined">description</span>
+        <span>{{ 'shopFloor.inspectFlow.templateAssigned' | translate }}</span>
+      </div>
+    }
+
+    @if (error()) {
+      <div class="scan-inspect__error">
+        <span class="material-icons-outlined">warning</span>
+        {{ error() }}
+      </div>
+    }
+
+    <div class="scan-inspect__result-section">
+      <label class="scan-inspect__result-label">{{ 'shopFloor.inspectFlow.inspectionResult' | translate }}</label>
+      <div class="scan-inspect__result-buttons">
+        <button class="scan-inspect__result-btn scan-inspect__result-btn--pass"
+                [class.scan-inspect__result-btn--selected]="result() === 'Pass'"
+                (click)="setResult('Pass')"
+                aria-label="Mark inspection as pass">
+          <span class="material-icons-outlined">check_circle</span>
+          {{ 'shopFloor.inspectFlow.pass' | translate }}
+        </button>
+        <button class="scan-inspect__result-btn scan-inspect__result-btn--fail"
+                [class.scan-inspect__result-btn--selected]="result() === 'Fail'"
+                (click)="setResult('Fail')"
+                aria-label="Mark inspection as fail">
+          <span class="material-icons-outlined">cancel</span>
+          {{ 'shopFloor.inspectFlow.fail' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <app-textarea
+      [label]="'shopFloor.inspectFlow.inspectionNotes' | translate"
+      [formControl]="notesControl"
+      [rows]="3"
+      data-testid="inspect-notes" />
+
+    <div class="scan-inspect__actions">
+      <button class="action-btn" (click)="cancel()" aria-label="Cancel inspection">
+        <span class="material-icons-outlined">close</span>
+        {{ 'common.cancel' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary"
+              [disabled]="!result()"
+              (click)="submitInspection()"
+              aria-label="Submit inspection">
+        <span class="material-icons-outlined">save</span>
+        {{ 'shopFloor.inspectFlow.submitInspection' | translate }}
+      </button>
+    </div>
+  }
+
+  <!-- Step 2: Submitting -->
+  @if (step() === 'submitting') {
+    <div class="scan-inspect__loading">
+      <span class="material-icons-outlined scan-inspect__spinner">sync</span>
+      <p>{{ 'common.loading' | translate }}</p>
+    </div>
+  }
+
+  <!-- Step 3: Done -->
+  @if (step() === 'done') {
+    <div class="scan-inspect__done">
+      <span class="material-icons-outlined scan-inspect__done-icon"
+            [class.scan-inspect__done-icon--pass]="result() === 'Pass'"
+            [class.scan-inspect__done-icon--fail]="result() === 'Fail'">
+        {{ result() === 'Pass' ? 'check_circle' : 'cancel' }}
+      </span>
+      <p class="scan-inspect__done-text">{{ 'shopFloor.inspectFlow.inspectionSubmitted' | translate }}</p>
+      <p class="scan-inspect__done-result"
+         [class.scan-inspect__done-result--pass]="result() === 'Pass'"
+         [class.scan-inspect__done-result--fail]="result() === 'Fail'">
+        {{ result() === 'Pass' ? ('shopFloor.inspectFlow.pass' | translate) : ('shopFloor.inspectFlow.fail' | translate) }}
+      </p>
+    </div>
+  }
+</div>
