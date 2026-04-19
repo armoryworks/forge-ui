@@ -104,7 +104,7 @@ export class ChatService {
   uploadChatFile(channelId: number, file: File): Observable<ChatFileAttachment> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<ChatFileAttachment>(`/api/v1/chat-rooms/${channelId}/files`, formData);
+    return this.http.post<ChatFileAttachment>(`${this.baseUrl}/channels/${channelId}/upload`, formData);
   }
 
   addRoomMember(roomId: number, userId: number): Observable<void> {

@@ -5,7 +5,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { SalesOrderListItem } from '../models/sales-order-list-item.model';
 import { SalesOrderDetail } from '../models/sales-order-detail.model';
+import { SalesOrderInvoice } from '../models/sales-order-invoice.model';
 import { CreateSalesOrderRequest } from '../models/create-sales-order-request.model';
+import { FileAttachment } from '../../../shared/models/file.model';
 import { ScheduleMilestone } from '../models/schedule-milestone.model';
 
 @Injectable({ providedIn: 'root' })
@@ -55,5 +57,21 @@ export class SalesOrderService {
 
   getSchedule(soId: number): Observable<ScheduleMilestone[]> {
     return this.http.get<ScheduleMilestone[]>(`${this.base}/${soId}/schedule`);
+  }
+
+  getDocuments(orderId: number): Observable<FileAttachment[]> {
+    return this.http.get<FileAttachment[]>(`${this.base}/${orderId}/documents`);
+  }
+
+  getInvoices(orderId: number): Observable<SalesOrderInvoice[]> {
+    return this.http.get<SalesOrderInvoice[]>(`${this.base}/${orderId}/invoices`);
+  }
+
+  deleteFile(fileId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/files/${fileId}`);
+  }
+
+  downloadFileUrl(fileId: number): string {
+    return `${environment.apiUrl}/files/${fileId}/download`;
   }
 }

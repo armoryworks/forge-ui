@@ -2471,6 +2471,19 @@
     "originalJob": "Original Job",
     "reworkJob": "Rework Job",
     "inspectionNotes": "Inspection Notes",
+    "documents": "Documents",
+    "invoices": "Invoices",
+    "noInvoices": "No invoices for this order",
+    "amount": "Amount",
+    "dueDate": "Due Date",
+    "paymentStatus": "Payment Status",
+    "coversShipments": "Covers Shipments",
+    "totalInvoiced": "Total Invoiced",
+    "orderTotal": "Order Total",
+    "deleteFileTitle": "Delete File?",
+    "deleteFileMessage": "Delete \"{{name}}\"? This action cannot be undone.",
+    "fileDeleted": "File deleted.",
+    "fileUploaded": "File uploaded.",
     "schedule": {
       "tab": "Schedule",
       "poOrderBy": "PO Order By",
@@ -2964,7 +2977,15 @@
     "newMessage": "New Message",
     "noUsersFound": "No users found",
     "searchUsers": "Search users",
-    "selectConversation": "Select a conversation to start chatting"
+    "selectConversation": "Select a conversation to start chatting",
+    "viewImage": "View image",
+    "downloadFile": "Download file",
+    "shareEntity": "Share to Chat",
+    "shareDestination": "Send to",
+    "shareMessage": "Add a message (optional)",
+    "cancel": "Cancel",
+    "send": "Send",
+    "entityShared": "Shared to chat"
   },
   "ai": {
     "title": "AI Assistants",
@@ -3078,7 +3099,15 @@
     "selectOrCreateTeam": "Select a team or create a new one.",
     "teamNameRequired": "Team name is required.",
     "createTeamFailed": "Failed to create team.",
-    "saveTerminalFailed": "Failed to save terminal configuration."
+    "saveTerminalFailed": "Failed to save terminal configuration.",
+    "trainingModeActive": "TRAINING MODE — Actions will not be saved",
+    "trainingModeEnabled": "Training mode enabled",
+    "trainingModeDisabled": "Training mode disabled",
+    "switchToSession": "Switch to {{name}}",
+    "sessionTimedOut": "Session timed out for {{name}}",
+    "maxSessionsReached": "Maximum concurrent sessions reached",
+    "sessionActive": "Active",
+    "sessionIdle": "Idle"
   },
   "customerReturns": {
     "allStatuses": "All Statuses",
@@ -3956,6 +3985,49 @@
       "snackbar": {
         "i9Completed": "I-9 Section 2 completed"
       }
+    }
+  },
+  "announcements": {
+    "title": "Announcements",
+    "newAnnouncement": "New Announcement",
+    "sendAnnouncement": "Send Announcement",
+    "newTemplate": "New Template",
+    "createTemplate": "Create Template",
+    "templates": "Templates",
+    "severity": "Severity",
+    "scope": "Scope",
+    "content": "Content",
+    "requireAcknowledgment": "Require Acknowledgment",
+    "expiresAt": "Expires At",
+    "template": "Template",
+    "targetTeams": "Target Teams",
+    "sentBy": "Sent By",
+    "sent": "Sent",
+    "acks": "Acks",
+    "acknowledgments": "Acknowledgments",
+    "acknowledged": "acknowledged",
+    "acknowledgmentRequired": "Acknowledgment required",
+    "noAcknowledgments": "No acknowledgments yet",
+    "noAnnouncements": "No announcements sent yet",
+    "noTemplates": "No templates created yet",
+    "iUnderstand": "I Understand",
+    "dismiss": "Dismiss",
+    "deleteTemplate": "Delete Template?",
+    "deleteTemplateMessage": "Delete this template? This cannot be undone.",
+    "severityInfo": "Info",
+    "severityWarning": "Warning",
+    "severityCritical": "Critical",
+    "scopeCompanyWide": "Company-Wide",
+    "scopeSelectedTeams": "Selected Teams",
+    "scopeIndividualTeam": "Individual Team",
+    "scopeTeamLeadsOnly": "Team Leads Only",
+    "defaultSeverity": "Default Severity",
+    "defaultScope": "Default Scope",
+    "defaultRequiresAcknowledgment": "Require Acknowledgment by Default",
+    "snackbar": {
+      "announcementSent": "Announcement sent",
+      "templateCreated": "Template created",
+      "templateDeleted": "Template deleted"
     }
   }
 }

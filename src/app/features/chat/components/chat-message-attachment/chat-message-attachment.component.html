@@ -1,0 +1,28 @@
+<div class="chat-attachment">
+  @if (isImage()) {
+    <img
+      [src]="attachment().url"
+      [alt]="attachment().fileName"
+      class="chat-attachment__image"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="'chat.viewImage' | translate"
+      (click)="download()"
+      (keydown.enter)="download()" />
+  } @else {
+    <div
+      class="chat-attachment__file"
+      role="button"
+      tabindex="0"
+      [attr.aria-label]="('chat.downloadFile' | translate) + ': ' + attachment().fileName"
+      (click)="download()"
+      (keydown.enter)="download()">
+      <span class="material-icons-outlined chat-attachment__icon">{{ fileIcon() }}</span>
+      <div class="chat-attachment__info">
+        <span class="chat-attachment__name">{{ attachment().fileName }}</span>
+        <span class="chat-attachment__size">{{ formattedSize() }}</span>
+      </div>
+      <span class="material-icons-outlined chat-attachment__download">download</span>
+    </div>
+  }
+</div>

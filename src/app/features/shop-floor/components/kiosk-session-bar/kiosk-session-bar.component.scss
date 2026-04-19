@@ -1,0 +1,53 @@
+@use 'styles/variables' as *;
+
+.session-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-lg;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    padding: $sp-xs $sp-sm;
+    border: $border-width-thin solid var(--border);
+    border-radius: $border-radius;
+    background: transparent;
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+    }
+
+    &--active {
+      border-bottom: $border-width-accent solid var(--primary);
+      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    }
+
+    &--working {
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: $sp-xs;
+        right: $sp-xs;
+        width: $dot-size-sm;
+        height: $dot-size-sm;
+        border-radius: 50%;
+        background: var(--success);
+      }
+    }
+  }
+
+  &__mode {
+    font-size: $font-size-xxs;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+}

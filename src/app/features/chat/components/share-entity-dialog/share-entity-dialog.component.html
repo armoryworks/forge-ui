@@ -1,0 +1,34 @@
+<app-dialog [title]="'chat.shareEntity' | translate" width="420px" (closed)="close()">
+  <div [formGroup]="form">
+    <div class="share-entity__preview">
+      <span class="material-icons-outlined share-entity__preview-icon">{{ entityIcon }}</span>
+      <span class="share-entity__preview-text">{{ data.displayText }}</span>
+    </div>
+
+    <app-select
+      [label]="'chat.shareDestination' | translate"
+      formControlName="channelId"
+      [options]="channelOptions()"
+      [required]="true"
+      data-testid="share-entity-channel" />
+
+    <app-textarea
+      [label]="'chat.shareMessage' | translate"
+      formControlName="message"
+      [rows]="3"
+      data-testid="share-entity-message" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'chat.cancel' | translate }}</button>
+    <button
+      class="action-btn action-btn--primary"
+      [appValidationPopover]="violations"
+      [disabled]="form.invalid || saving()"
+      (click)="save()"
+      data-testid="share-entity-send-btn">
+      <span class="material-icons-outlined">send</span>
+      {{ 'chat.send' | translate }}
+    </button>
+  </div>
+</app-dialog>

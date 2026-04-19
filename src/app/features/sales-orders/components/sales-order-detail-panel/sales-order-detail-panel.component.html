@@ -33,16 +33,6 @@
         <span class="tab__count">{{ so.lines.length }}</span>
       </button>
       <button class="tab" role="tab"
-        [class.tab--active]="activeTab() === 'schedule'"
-        [attr.aria-selected]="activeTab() === 'schedule'"
-        (click)="switchTab('schedule')"
-        aria-label="Schedule tab">
-        {{ 'salesOrders.schedule.tab' | translate }}
-        @if (scheduleAtRiskCount() > 0) {
-          <span class="material-icons-outlined tab__warning" aria-label="Milestones at risk">warning</span>
-        }
-      </button>
-      <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'shipments'"
         [attr.aria-selected]="activeTab() === 'shipments'"
         (click)="switchTab('shipments')"
@@ -63,6 +53,29 @@
         {{ 'salesOrders.returns' | translate }}
         @if (openReturnCount() > 0) {
           <span class="material-icons-outlined tab__warning" aria-label="Open returns">warning</span>
+        }
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'documents'"
+        [attr.aria-selected]="activeTab() === 'documents'"
+        (click)="switchTab('documents')"
+        aria-label="Documents tab">
+        {{ 'salesOrders.documents' | translate }}
+        @if (documentCount() > 0) {
+          <span class="tab__count">{{ documentCount() }}</span>
+        }
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'invoices'"
+        [attr.aria-selected]="activeTab() === 'invoices'"
+        (click)="switchTab('invoices')"
+        aria-label="Invoices tab">
+        {{ 'salesOrders.invoices' | translate }}
+        @if (invoiceCount() > 0) {
+          <span class="tab__count">{{ invoiceCount() }}</span>
+        }
+        @if (hasUninvoicedShipments()) {
+          <span class="material-icons-outlined tab__warning" aria-label="Uninvoiced shipments">warning</span>
         }
       </button>
       <button class="tab" role="tab"
@@ -319,13 +332,6 @@
         </div>
       }
 
-      <!-- Schedule Tab -->
-      @if (activeTab() === 'schedule') {
-        <div class="tab-panel" role="tabpanel" [appLoadingBlock]="scheduleLoading()">
-          <app-schedule-timeline [milestones]="scheduleMilestones()" />
-        </div>
-      }
-
       <!-- Shipments Tab -->
       @if (activeTab() === 'shipments') {
         <div class="tab-panel" role="tabpanel">
@@ -513,6 +519,89 @@
             <div class="empty-state">
               <span class="material-icons-outlined empty-state__icon">assignment_return</span>
               <span class="empty-state__message">{{ 'salesOrders.noReturns' | translate }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Documents Tab -->
+      @if (activeTab() === 'documents') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="so-detail__documents">
+            @if (documents().length > 0) {
+              @for (doc of documents(); track doc.id) {
+                <div class="so-detail__doc-item">
+                  <span class="material-icons-outlined so-detail__doc-icon">{{ getFileIcon(doc.contentType) }}</span>
+                  <div class="so-detail__doc-info">
+                    <span class="so-detail__doc-name">{{ doc.fileName }}</span>
+                    <span class="so-detail__doc-meta">{{ formatFileSize(doc.size) }} · {{ doc.createdAt | date:'MM/dd/yyyy' }}</span>
+                  </div>
+                  <button class="icon-btn" aria-label="Download file" (click)="downloadFile(doc)">
+                    <span class="material-icons-outlined">download</span>
+                  </button>
+                  <button class="icon-btn icon-btn--danger" aria-label="Delete file" (click)="deleteFile(doc)">
+                    <span class="material-icons-outlined">delete</span>
+                  </button>
+                </div>
+              }
+            }
+            <app-file-upload-zone
+              entityType="sales-orders"
+              [entityId]="so.id"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.xls,.xlsx,.csv,.txt,.step,.stl,.dxf"
+              [maxSizeMb]="50"
+              (uploaded)="onFileUploaded($event)" />
+          </div>
+        </div>
+      }
+
+      <!-- Invoices Tab -->
+      @if (activeTab() === 'invoices') {
+        <div class="tab-panel" role="tabpanel">
+          @if (invoices().length === 0) {
+            <app-empty-state icon="receipt_long" message="{{ 'salesOrders.noInvoices' | translate }}" />
+          } @else {
+            @for (invoice of invoices(); track invoice.id) {
+              <div class="so-detail__invoice-card">
+                <div class="so-detail__invoice-header">
+                  <app-entity-link type="invoice" [entityId]="invoice.id">
+                    {{ invoice.invoiceNumber }}
+                  </app-entity-link>
+                  <span [class]="getInvoiceStatusClass(invoice.status)">{{ invoice.status }}</span>
+                </div>
+                <div class="so-detail__invoice-details">
+                  <div class="so-detail__invoice-row">
+                    <span class="so-detail__invoice-label">{{ 'salesOrders.amount' | translate }}</span>
+                    <span class="so-detail__invoice-value">{{ invoice.totalAmount | currency }}</span>
+                  </div>
+                  <div class="so-detail__invoice-row">
+                    <span class="so-detail__invoice-label">{{ 'salesOrders.dueDate' | translate }}</span>
+                    <span class="so-detail__invoice-value">{{ invoice.dueDate | date:'MM/dd/yyyy' }}</span>
+                  </div>
+                  <div class="so-detail__invoice-row">
+                    <span class="so-detail__invoice-label">{{ 'salesOrders.paymentStatus' | translate }}</span>
+                    <span class="so-detail__invoice-value">{{ invoice.paymentStatus }}</span>
+                  </div>
+                </div>
+                @if (invoice.shipmentNumbers.length > 0) {
+                  <div class="so-detail__invoice-shipments">
+                    <span class="so-detail__invoice-label">{{ 'salesOrders.coversShipments' | translate }}</span>
+                    <span class="so-detail__invoice-value so-detail__invoice-value--mono">
+                      {{ invoice.shipmentNumbers.join(', ') }}
+                    </span>
+                  </div>
+                }
+              </div>
+            }
+            <div class="so-detail__invoice-summary">
+              <div class="so-detail__invoice-row">
+                <span class="so-detail__invoice-label">{{ 'salesOrders.totalInvoiced' | translate }}</span>
+                <span class="so-detail__invoice-value so-detail__invoice-value--bold">{{ totalInvoiced() | currency }}</span>
+              </div>
+              <div class="so-detail__invoice-row">
+                <span class="so-detail__invoice-label">{{ 'salesOrders.orderTotal' | translate }}</span>
+                <span class="so-detail__invoice-value">{{ so.total | currency }}</span>
+              </div>
             </div>
           }
         </div>

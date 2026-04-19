@@ -1,0 +1,17 @@
+@if (sessions().length > 0) {
+  <div class="session-bar" role="toolbar" aria-label="Active kiosk sessions">
+    @for (session of sessions(); track session.userId) {
+      <button class="session-bar__item"
+              [class.session-bar__item--active]="session.isForeground"
+              [class.session-bar__item--working]="session.mode !== null"
+              (click)="switchTo(session)"
+              [attr.aria-label]="'Switch to ' + session.userName"
+              [attr.aria-pressed]="session.isForeground">
+        <app-avatar [initials]="session.userInitials" [color]="session.userColor" size="sm" />
+        @if (session.mode) {
+          <span class="session-bar__mode">{{ session.mode | uppercase }}</span>
+        }
+      </button>
+    }
+  </div>
+}

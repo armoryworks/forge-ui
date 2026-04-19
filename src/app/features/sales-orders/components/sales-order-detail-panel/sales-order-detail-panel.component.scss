@@ -274,6 +274,111 @@
   font-size: $font-size-sm;
 }
 
+// --- Documents ---
+.so-detail__documents {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.so-detail__doc-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.so-detail__doc-icon {
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.so-detail__doc-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  flex: 1;
+  min-width: 0;
+}
+
+.so-detail__doc-name {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  @include truncate;
+}
+
+.so-detail__doc-meta {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+// --- Invoices ---
+.so-detail__invoice-card {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.so-detail__invoice-header {
+  @include flex-between;
+  padding: $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+  font-weight: 700;
+  font-size: $font-size-base;
+}
+
+.so-detail__invoice-details {
+  padding: $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.so-detail__invoice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.so-detail__invoice-label {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.so-detail__invoice-value {
+  font-size: $font-size-sm;
+
+  &--mono {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+  }
+
+  &--bold {
+    font-weight: 700;
+  }
+}
+
+.so-detail__invoice-shipments {
+  padding: $sp-sm $sp-md $sp-md;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.so-detail__invoice-summary {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  padding: $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
 // --- Actions ---
 .detail-actions {
   display: flex;

@@ -1,0 +1,27 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.training-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-sm $sp-lg;
+  background: color-mix(in srgb, var(--warning) 15%, var(--surface));
+  border-bottom: $border-width solid var(--warning);
+  min-height: 32px;
+
+  &__icon {
+    font-size: $icon-size-md;
+    color: var(--warning);
+  }
+
+  &__text {
+    font-size: $font-size-sm;
+    font-weight: 700;
+    color: var(--warning);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}

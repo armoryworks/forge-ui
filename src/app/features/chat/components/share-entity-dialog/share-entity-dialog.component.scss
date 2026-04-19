@@ -1,0 +1,25 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.share-entity__preview {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  margin-bottom: $sp-lg;
+}
+
+.share-entity__preview-icon {
+  font-size: $icon-size-xl;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.share-entity__preview-text {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: var(--text);
+  @include truncate;
+}

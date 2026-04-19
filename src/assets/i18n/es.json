@@ -2269,7 +2269,20 @@
     "optional": "Opcional",
     "customerPOLabel": "OC del Cliente",
     "noLinesYet": "Sin líneas aún",
-    "orderDetails": "Detalles de la Orden"
+    "orderDetails": "Detalles de la Orden",
+    "documents": "Documentos",
+    "invoices": "Facturas",
+    "noInvoices": "No hay facturas para esta orden",
+    "amount": "Monto",
+    "dueDate": "Fecha de Vencimiento",
+    "paymentStatus": "Estado de Pago",
+    "coversShipments": "Cubre Envíos",
+    "totalInvoiced": "Total Facturado",
+    "orderTotal": "Total de la Orden",
+    "deleteFileTitle": "¿Eliminar Archivo?",
+    "deleteFileMessage": "¿Eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
+    "fileDeleted": "Archivo eliminado.",
+    "fileUploaded": "Archivo subido."
   },
   "quotes": {
     "title": "Cotizaciones",
@@ -2746,7 +2759,15 @@
     "newMessage": "Nuevo Mensaje",
     "noUsersFound": "No se encontraron usuarios",
     "searchUsers": "Buscar usuarios",
-    "selectConversation": "Seleccione una conversación para comenzar a chatear"
+    "selectConversation": "Seleccione una conversación para comenzar a chatear",
+    "viewImage": "Ver imagen",
+    "downloadFile": "Descargar archivo",
+    "shareEntity": "Compartir en Chat",
+    "shareDestination": "Enviar a",
+    "shareMessage": "Agregar un mensaje (opcional)",
+    "cancel": "Cancelar",
+    "send": "Enviar",
+    "entityShared": "Compartido en chat"
   },
   "ai": {
     "title": "Asistentes IA",
@@ -2860,7 +2881,15 @@
     "selectOrCreateTeam": "Seleccione un equipo o cree uno nuevo.",
     "teamNameRequired": "El nombre del equipo es requerido.",
     "createTeamFailed": "Error al crear equipo.",
-    "saveTerminalFailed": "Error al guardar configuración del terminal."
+    "saveTerminalFailed": "Error al guardar configuración del terminal.",
+    "trainingModeActive": "MODO DE ENTRENAMIENTO — Las acciones no se guardarán",
+    "trainingModeEnabled": "Modo de entrenamiento activado",
+    "trainingModeDisabled": "Modo de entrenamiento desactivado",
+    "switchToSession": "Cambiar a {{name}}",
+    "sessionTimedOut": "Sesión expirada para {{name}}",
+    "maxSessionsReached": "Máximo de sesiones concurrentes alcanzado",
+    "sessionActive": "Activo",
+    "sessionIdle": "Inactivo"
   },
   "customerReturns": {
     "allStatuses": "Todos los Estados",
@@ -3759,6 +3788,49 @@
       "reverificationNote": "Dejar en blanco para ciudadanos estadounidenses, residentes permanentes y documentos sin vencimiento. Cuando se establezca, se enviará un recordatorio 90 días antes del vencimiento.",
       "cancel": "Cancelar",
       "completeSection2": "Completar Sección 2"
+    }
+  },
+  "announcements": {
+    "title": "Anuncios",
+    "newAnnouncement": "Nuevo Anuncio",
+    "sendAnnouncement": "Enviar Anuncio",
+    "newTemplate": "Nueva Plantilla",
+    "createTemplate": "Crear Plantilla",
+    "templates": "Plantillas",
+    "severity": "Severidad",
+    "scope": "Alcance",
+    "content": "Contenido",
+    "requireAcknowledgment": "Requerir Confirmación",
+    "expiresAt": "Expira El",
+    "template": "Plantilla",
+    "targetTeams": "Equipos Objetivo",
+    "sentBy": "Enviado Por",
+    "sent": "Enviado",
+    "acks": "Confirmaciones",
+    "acknowledgments": "Confirmaciones",
+    "acknowledged": "confirmado",
+    "acknowledgmentRequired": "Confirmación requerida",
+    "noAcknowledgments": "Sin confirmaciones aún",
+    "noAnnouncements": "No se han enviado anuncios aún",
+    "noTemplates": "No se han creado plantillas aún",
+    "iUnderstand": "Entendido",
+    "dismiss": "Descartar",
+    "deleteTemplate": "¿Eliminar Plantilla?",
+    "deleteTemplateMessage": "¿Eliminar esta plantilla? Esta acción no se puede deshacer.",
+    "severityInfo": "Información",
+    "severityWarning": "Advertencia",
+    "severityCritical": "Crítico",
+    "scopeCompanyWide": "Toda la Empresa",
+    "scopeSelectedTeams": "Equipos Seleccionados",
+    "scopeIndividualTeam": "Equipo Individual",
+    "scopeTeamLeadsOnly": "Solo Líderes de Equipo",
+    "defaultSeverity": "Severidad Predeterminada",
+    "defaultScope": "Alcance Predeterminado",
+    "defaultRequiresAcknowledgment": "Requerir Confirmación por Defecto",
+    "snackbar": {
+      "announcementSent": "Anuncio enviado",
+      "templateCreated": "Plantilla creada",
+      "templateDeleted": "Plantilla eliminada"
     }
   }
 }
