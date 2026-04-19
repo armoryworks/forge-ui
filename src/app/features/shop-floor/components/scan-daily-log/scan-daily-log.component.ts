@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -43,6 +43,8 @@ const ACTION_TYPE_OPTIONS: SelectOption[] = [
 })
 export class ScanDailyLogComponent implements OnInit {
   private readonly scanActionService = inject(ScanActionService);
+
+  readonly closed = output<void>();
 
   readonly entries = signal<ScanLogEntry[]>([]);
   readonly loading = signal(false);

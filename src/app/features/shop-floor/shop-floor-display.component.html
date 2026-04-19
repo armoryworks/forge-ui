@@ -43,6 +43,16 @@
               [disabled]="fontSizeIndex() === 4" aria-label="Increase font size">
         <span class="material-icons-outlined">text_increase</span>
       </button>
+      <button class="sf-header__control-btn" (click)="showDailyLog.set(!showDailyLog())"
+              [class.sf-header__control-btn--active]="showDailyLog()"
+              aria-label="Toggle scan log">
+        <span class="material-icons-outlined">receipt_long</span>
+      </button>
+      <button class="sf-header__control-btn" (click)="showDevicesPanel.set(!showDevicesPanel())"
+              [class.sf-header__control-btn--active]="showDevicesPanel()"
+              aria-label="Toggle scanner devices panel">
+        <span class="material-icons-outlined">devices</span>
+      </button>
       <button class="sf-header__control-btn" (click)="toggleUndoPanel()"
               [class.sf-header__control-btn--active]="undoPanelOpen()"
               aria-label="Toggle undo panel">
@@ -543,6 +553,36 @@
 
   <!-- ─── Scan Action Overlay ─── -->
   <app-scan-action-overlay />
+
+  <!-- ─── Location View (triggered by scanning a storage location) ─── -->
+  @if (scannedLocationId(); as locId) {
+    <div class="sf-overlay" (click)="closeLocationView()">
+      <div class="sf-location-view-container" (click)="$event.stopPropagation()">
+        <app-scan-location-view
+          [locationId]="locId"
+          [locationName]="scannedLocationName() ?? ''"
+          (closed)="closeLocationView()" />
+      </div>
+    </div>
+  }
+
+  <!-- ─── Daily Log Panel ─── -->
+  @if (showDailyLog()) {
+    <div class="sf-overlay" (click)="showDailyLog.set(false)">
+      <div class="sf-panel-container" (click)="$event.stopPropagation()">
+        <app-scan-daily-log (closed)="showDailyLog.set(false)" />
+      </div>
+    </div>
+  }
+
+  <!-- ─── Devices Panel ─── -->
+  @if (showDevicesPanel()) {
+    <div class="sf-overlay" (click)="showDevicesPanel.set(false)">
+      <div class="sf-panel-container sf-panel-container--narrow" (click)="$event.stopPropagation()">
+        <app-scan-devices-panel (closed)="showDevicesPanel.set(false)" />
+      </div>
+    </div>
+  }
 
   <!-- ─── Undo Panel ─── -->
   @if (undoPanelOpen()) {

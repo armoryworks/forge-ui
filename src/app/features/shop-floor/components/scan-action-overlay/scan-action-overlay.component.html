@@ -126,6 +126,16 @@
           (cancelled)="onFlowCancelled()" />
       }
 
+      <!-- Return Flow -->
+      @if (phase() === 'return' && context()) {
+        <app-scan-return-flow
+          [partId]="context()!.partId"
+          [partNumber]="context()!.partNumber"
+          [recentShipments]="recentShipments()"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
       <!-- Job Flow -->
       @if (phase() === 'job' && jobContext()) {
         <app-scan-job-flow

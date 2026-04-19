@@ -3159,6 +3159,8 @@
     "maxSessionsReached": "Maximum concurrent sessions reached",
     "sessionActive": "Active",
     "sessionIdle": "Idle",
+    "dailyLog": "Scan Log",
+    "devices": "Scanner Devices",
     "shipFlow": {
       "title": "Ship Items",
       "selectShipmentLine": "Select a shipment line to fulfill",

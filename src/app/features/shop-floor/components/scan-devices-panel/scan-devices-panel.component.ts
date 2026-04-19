@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,6 +22,8 @@ export class ScanDevicesPanelComponent implements OnInit {
   private readonly scanActionService = inject(ScanActionService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+
+  readonly closed = output<void>();
 
   readonly devices = signal<ScanDevice[]>([]);
   readonly loading = signal(false);

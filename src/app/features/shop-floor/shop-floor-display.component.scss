@@ -1449,6 +1449,20 @@ $grid-columns: 5;
   background: rgba(255, 255, 255, 0.2);
 }
 
+// ─── Panel Overlays ───
+.sf-panel-container,
+.sf-location-view-container {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 90%;
+  max-height: 85vh;
+  overflow: auto;
+}
+
+.sf-panel-container { max-width: 900px; }
+.sf-panel-container--narrow { max-width: 480px; }
+.sf-location-view-container { max-width: 600px; }
+
 // ─── Undo Panel Slide-Out ───
 .sf-undo-panel-container {
   position: fixed;

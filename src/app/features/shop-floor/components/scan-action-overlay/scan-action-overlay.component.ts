@@ -14,8 +14,9 @@ import { ScanIssueFlowComponent } from '../scan-issue-flow/scan-issue-flow.compo
 import { ScanShipFlowComponent, ShipmentLineItem } from '../scan-ship-flow/scan-ship-flow.component';
 import { ScanInspectFlowComponent } from '../scan-inspect-flow/scan-inspect-flow.component';
 import { ScanJobFlowComponent } from '../scan-job-flow/scan-job-flow.component';
+import { ScanReturnFlowComponent, RecentShipmentItem } from '../scan-return-flow/scan-return-flow.component';
 
-type OverlayPhase = 'idle' | 'loading' | 'actions' | 'move' | 'count' | 'receive' | 'issue' | 'ship' | 'inspect' | 'job';
+type OverlayPhase = 'idle' | 'loading' | 'actions' | 'move' | 'count' | 'receive' | 'issue' | 'ship' | 'inspect' | 'job' | 'return';
 
 interface JobActionContext {
   jobId: number;
@@ -60,6 +61,7 @@ const ACTION_COLORS: Record<string, string> = {
     ScanShipFlowComponent,
     ScanInspectFlowComponent,
     ScanJobFlowComponent,
+    ScanReturnFlowComponent,
   ],
   templateUrl: './scan-action-overlay.component.html',
   styleUrl: './scan-action-overlay.component.scss',
@@ -119,6 +121,15 @@ export class ScanActionOverlayComponent {
     const inspectAction = ctx.availableActions.find(a => a.action === 'Inspect');
     const actionCtx = inspectAction?.context as { qcTemplateId?: number } | undefined;
     return actionCtx?.qcTemplateId ?? null;
+  });
+
+  /** Extract recent shipments from the Return action context. */
+  protected readonly recentShipments = computed<RecentShipmentItem[]>(() => {
+    const ctx = this.context();
+    if (!ctx) return [];
+    const returnAction = ctx.availableActions.find(a => a.action === 'Return');
+    const actionCtx = returnAction?.context as { recentShipments?: RecentShipmentItem[] } | undefined;
+    return actionCtx?.recentShipments ?? [];
   });
 
   /** Extract job details from the Job action context (when scanning a job barcode). */
@@ -190,6 +201,9 @@ export class ScanActionOverlayComponent {
       case 'Job':
         this.startJob();
         break;
+      case 'Return':
+        this.startReturn();
+        break;
       default:
         this.snackbar.info(`${actionId} is not yet implemented`);
     }
@@ -215,6 +229,15 @@ export class ScanActionOverlayComponent {
       return;
     }
     this.phase.set('job');
+  }
+
+  protected startReturn(): void {
+    const shipments = this.recentShipments();
+    if (shipments.length === 0) {
+      this.snackbar.info('No recent shipments found for this part');
+      return;
+    }
+    this.phase.set('return');
   }
 
   protected onFlowCompleted(): void {

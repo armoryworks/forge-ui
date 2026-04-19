@@ -33,6 +33,9 @@ import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { ScanUndoListComponent } from './components/scan-undo-list/scan-undo-list.component';
 import { ScanActionOverlayComponent } from './components/scan-action-overlay/scan-action-overlay.component';
+import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-log.component';
+import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
+import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20] as const;
 type FontSizeStep = typeof FONT_SIZES[number];
@@ -47,7 +50,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -171,6 +174,16 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // Undo panel
   protected readonly undoPanelOpen = signal(false);
 
+  // Daily log panel
+  protected readonly showDailyLog = signal(false);
+
+  // Devices panel
+  protected readonly showDevicesPanel = signal(false);
+
+  // Location scan state
+  protected readonly scannedLocationId = signal<number | null>(null);
+  protected readonly scannedLocationName = signal<string | null>(null);
+
   // Scan feedback
   protected readonly scanFeedback = signal<string | null>(null);
 
@@ -248,6 +261,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           }
         } else if (result.scanType === 'job') {
           this.showScanFeedback(`Job ${result.entityNumber} — ${result.entityTitle}`);
+        } else if (result.scanType === 'storage-location') {
+          this.scannedLocationId.set(result.entityId ?? null);
+          this.scannedLocationName.set(result.entityTitle ?? result.entityNumber ?? 'Unknown');
         } else if (result.scanType === 'sales-order') {
           this.showScanFeedback(`Sales Order ${result.entityNumber} — tap your badge to ship`);
         } else {
@@ -680,6 +696,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected toggleUndoPanel(): void {
     this.undoPanelOpen.update(v => !v);
+  }
+
+  protected closeLocationView(): void {
+    this.scannedLocationId.set(null);
+    this.scannedLocationName.set(null);
   }
 
   protected toggleTheme(): void {
