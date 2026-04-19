@@ -2521,7 +2521,15 @@
       "upcoming": "Upcoming",
       "noSchedule": "No schedule milestones available",
       "timelineLabel": "Schedule timeline"
-    }
+    },
+    "lineItemsNoJobWarning": "Some line items have no associated jobs",
+    "lineItemsJobNumber": "Job #",
+    "lineItemsStage": "Stage",
+    "lineItemsAssignee": "Assignee",
+    "lineItemsPriority": "Priority",
+    "lineItemsDueDate": "Due Date",
+    "lineItemsExpandLine": "Expand line item jobs",
+    "lineItemsCollapseLine": "Collapse line item jobs"
   },
   "quotes": {
     "title": "Quotes",
@@ -3222,6 +3230,14 @@
       "scansToday": "scans today",
       "exportCsv": "Export CSV",
       "noScans": "No scans recorded for this date."
+    },
+    "kioskSession": {
+      "activeSession": "Active Sessions",
+      "idleSince": "Idle for {{time}}",
+      "switchSession": "Switch Session",
+      "maxSessions": "Maximum sessions reached (5)",
+      "trainingMode": "TRAINING MODE",
+      "trainingModeHint": "Actions will not be saved"
     }
   },
   "customerReturns": {

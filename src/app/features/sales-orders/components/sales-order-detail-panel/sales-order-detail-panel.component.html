@@ -31,6 +31,9 @@
         aria-label="Line items tab">
         {{ 'salesOrders.lineItems' | translate }}
         <span class="tab__count">{{ so.lines.length }}</span>
+        @if (linesWithNoJobs().length > 0) {
+          <span class="material-icons-outlined tab__warning" [attr.aria-label]="'salesOrders.lineItemsNoJobWarning' | translate">warning</span>
+        }
       </button>
       <button class="tab" role="tab"
         [class.tab--active]="activeTab() === 'schedule'"
@@ -255,7 +258,7 @@
                   <tr [class.line-row--warning]="isLineWarning(line)">
                     <td class="lines-table__narrow">
                       @if (line.jobs.length > 0) {
-                        <button class="icon-btn" [attr.aria-label]="'Toggle jobs for line ' + line.lineNumber" (click)="toggleLineExpand(line.id)">
+                        <button class="icon-btn" [attr.aria-label]="(isLineExpanded(line.id) ? ('salesOrders.lineItemsCollapseLine' | translate) : ('salesOrders.lineItemsExpandLine' | translate)) + ' ' + line.lineNumber" (click)="toggleLineExpand(line.id)">
                           <span class="material-icons-outlined expand-icon" [class.expand-icon--open]="isLineExpanded(line.id)">expand_more</span>
                         </button>
                       }

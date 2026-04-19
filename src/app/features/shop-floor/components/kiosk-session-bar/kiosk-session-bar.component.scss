@@ -1,53 +1,121 @@
 @use 'styles/variables' as *;
+@use 'styles/mixins' as *;
 
 .session-bar {
   display: flex;
   align-items: center;
-  gap: $sp-sm;
+  gap: $sp-md;
   padding: $sp-sm $sp-lg;
   background: var(--surface);
   border-bottom: $border-width-thin solid var(--border);
+  overflow-x: auto;
+  flex-shrink: 0;
 
-  &__item {
-    display: flex;
-    align-items: center;
-    gap: $sp-xs;
-    padding: $sp-xs $sp-sm;
-    border: $border-width-thin solid var(--border);
-    border-radius: $border-radius;
-    background: transparent;
-    cursor: pointer;
-    transition: border-color $transition-fast, background $transition-fast;
+  @include custom-scrollbar(4px);
+}
+
+.session-bar__item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border: $border-width solid transparent;
+  background: var(--bg);
+  cursor: pointer;
+  transition: border-color $transition-fast, opacity $transition-fast;
+  min-width: 0;
+  flex-shrink: 0;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+
+  &--foreground {
+    border-color: var(--primary);
+    background: var(--surface);
+  }
+
+  &--background {
+    opacity: 0.6;
 
     &:hover {
-      background: color-mix(in srgb, var(--primary) 5%, var(--surface));
-    }
-
-    &--active {
-      border-bottom: $border-width-accent solid var(--primary);
-      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-    }
-
-    &--working {
-      position: relative;
-
-      &::after {
-        content: '';
-        position: absolute;
-        top: $sp-xs;
-        right: $sp-xs;
-        width: $dot-size-sm;
-        height: $dot-size-sm;
-        border-radius: 50%;
-        background: var(--success);
-      }
+      opacity: 0.85;
     }
   }
 
-  &__mode {
-    font-size: $font-size-xxs;
-    font-weight: 700;
-    color: var(--text-muted);
-    letter-spacing: 0.5px;
+  &:hover {
+    border-color: var(--primary-light);
+  }
+
+  &:focus-visible {
+    outline: $border-width solid var(--primary);
+    outline-offset: $sp-xxs;
+  }
+}
+
+.session-bar__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.session-bar__name {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  @include truncate;
+  max-width: 140px;
+}
+
+.session-bar__meta {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+.session-bar__mode-icon {
+  font-size: $icon-size-xs;
+}
+
+.session-bar__mode {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+}
+
+.session-bar__idle {
+  color: var(--text-muted);
+  font-family: $font-family-mono;
+  font-size: $font-size-xxs;
+
+  &::before {
+    content: '\00b7\00a0';
+  }
+}
+
+.session-bar__dismiss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: $btn-icon-size;
+  height: $btn-icon-size;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--error);
+  }
+
+  &:focus-visible {
+    outline: $border-width solid var(--primary);
+    outline-offset: $sp-xxs;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
   }
 }

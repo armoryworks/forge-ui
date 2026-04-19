@@ -1,6 +1,7 @@
 @if (visible()) {
-  <div class="training-banner" role="status" aria-live="polite">
+  <div class="training-banner" role="alert">
     <span class="material-icons-outlined training-banner__icon">school</span>
-    <span class="training-banner__text">{{ 'shopFloor.trainingModeActive' | translate }}</span>
+    <span class="training-banner__text">{{ 'shopFloor.kioskSession.trainingMode' | translate }}</span>
+    <span class="training-banner__hint">{{ 'shopFloor.kioskSession.trainingModeHint' | translate }}</span>
   </div>
 }

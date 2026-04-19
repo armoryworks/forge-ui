@@ -4,6 +4,8 @@
     <p>{{ error() }}</p>
   </div>
 } @else {
+  <app-training-mode-banner [visible]="trainingMode()" />
+  <app-kiosk-session-bar />
   <header class="sf-header">
     <h1 class="sf-header__title">Shop Floor</h1>
     <app-kiosk-search-bar />

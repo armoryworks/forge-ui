@@ -1,27 +1,33 @@
 @use 'styles/variables' as *;
-@use 'styles/mixins' as *;
 
 .training-banner {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: $sp-md;
-  width: 100%;
   padding: $sp-sm $sp-lg;
-  background: color-mix(in srgb, var(--warning) 15%, var(--surface));
-  border-bottom: $border-width solid var(--warning);
-  min-height: 32px;
+  background: var(--warning);
+  color: #000;
+  font-family: $font-family-primary;
+  font-size: $font-size-base;
+  font-weight: 600;
+  flex-shrink: 0;
+  z-index: $z-sticky;
+}
 
-  &__icon {
-    font-size: $icon-size-md;
-    color: var(--warning);
-  }
+.training-banner__icon {
+  font-size: $icon-size-md;
+}
 
-  &__text {
-    font-size: $font-size-sm;
-    font-weight: 700;
-    color: var(--warning);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
+.training-banner__text {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+  font-size: $font-size-sm;
+}
+
+.training-banner__hint {
+  font-weight: 400;
+  font-size: $font-size-xs;
+  opacity: 0.8;
 }

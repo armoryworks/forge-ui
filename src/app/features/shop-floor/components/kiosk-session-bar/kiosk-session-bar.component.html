@@ -1,16 +1,27 @@
 @if (sessions().length > 0) {
-  <div class="session-bar" role="toolbar" aria-label="Active kiosk sessions">
+  <div class="session-bar" role="toolbar" aria-label="{{ 'shopFloor.kioskSession.activeSession' | translate }}">
     @for (session of sessions(); track session.userId) {
       <button class="session-bar__item"
-              [class.session-bar__item--active]="session.isForeground"
-              [class.session-bar__item--working]="session.mode !== null"
+              [class.session-bar__item--foreground]="isForeground(session)"
+              [class.session-bar__item--background]="!isForeground(session)"
               (click)="switchTo(session)"
-              [attr.aria-label]="'Switch to ' + session.userName"
-              [attr.aria-pressed]="session.isForeground">
+              [attr.aria-label]="('shopFloor.kioskSession.switchSession' | translate) + ': ' + session.userName">
         <app-avatar [initials]="session.userInitials" [color]="session.userColor" size="sm" />
-        @if (session.mode) {
-          <span class="session-bar__mode">{{ session.mode | uppercase }}</span>
-        }
+        <div class="session-bar__info">
+          <span class="session-bar__name">{{ session.userName }}</span>
+          <div class="session-bar__meta">
+            <span class="material-icons-outlined session-bar__mode-icon">{{ getModeIcon(session.mode) }}</span>
+            <span class="session-bar__mode">{{ getModeLabel(session.mode) }}</span>
+            @if (!isForeground(session)) {
+              <span class="session-bar__idle">{{ getIdleDisplay(session) }}</span>
+            }
+          </div>
+        </div>
+        <button class="session-bar__dismiss"
+                (click)="dismiss($event, session)"
+                [attr.aria-label]="'Close session for ' + session.userName">
+          <span class="material-icons-outlined">close</span>
+        </button>
       </button>
     }
   </div>

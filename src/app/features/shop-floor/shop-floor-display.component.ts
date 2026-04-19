@@ -11,6 +11,9 @@ import { environment } from '../../../environments/environment';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
+import { KioskSessionBarComponent } from './components/kiosk-session-bar/kiosk-session-bar.component';
+import { TrainingModeBannerComponent } from './components/training-mode-banner/training-mode-banner.component';
+import { KioskSessionService } from '../../shared/services/kiosk-session.service';
 import { ShopFloorService } from './services/shop-floor.service';
 import { ClockEventTypeService } from '../../shared/services/clock-event-type.service';
 import { EventsService } from '../events/services/events.service';
@@ -44,7 +47,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, ScanUndoListComponent, ScanActionOverlayComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +78,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private readonly eventsService = inject(EventsService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
+  protected readonly kioskSession = inject(KioskSessionService);
+
+  // Training mode — when enabled, actions are simulated (no backend calls)
+  protected readonly trainingMode = signal(false);
 
   // Data
   protected readonly overview = signal<ShopFloorOverview | null>(null);
