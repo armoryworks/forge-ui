@@ -1,0 +1,169 @@
+<div class="return-flow">
+  <div class="return-flow__header">
+    <span class="material-icons-outlined return-flow__header-icon">assignment_return</span>
+    <h2 class="return-flow__title">{{ 'shopFloor.returnFlow.title' | translate }}</h2>
+    <span class="return-flow__part">{{ partNumber() }}</span>
+  </div>
+
+  <!-- Step 1: Select Shipment -->
+  @if (step() === 'select-shipment') {
+    <p class="return-flow__hint">{{ 'shopFloor.returnFlow.selectShipment' | translate }}</p>
+
+    @if (recentShipments().length === 0) {
+      <div class="return-flow__empty">
+        <span class="material-icons-outlined return-flow__empty-icon">inventory_2</span>
+        <p>{{ 'shopFloor.returnFlow.noRecentShipments' | translate }}</p>
+      </div>
+    } @else {
+      <div class="return-flow__list">
+        @for (shipment of recentShipments(); track shipment.shipmentLineId) {
+          <button class="return-flow__shipment-item"
+                  (click)="selectShipment(shipment)"
+                  [attr.aria-label]="'Select shipment ' + shipment.shipmentNumber"
+                  data-testid="return-shipment-item">
+            <div class="return-flow__shipment-info">
+              <span class="return-flow__shipment-number">{{ shipment.shipmentNumber }}</span>
+              <span class="return-flow__shipment-date">{{ shipment.shippedDate }}</span>
+            </div>
+            <span class="return-flow__shipment-qty">x{{ shipment.quantity }}</span>
+          </button>
+        }
+      </div>
+    }
+  }
+
+  <!-- Step 2: Quantity -->
+  @if (step() === 'quantity') {
+    <p class="return-flow__hint">{{ 'shopFloor.returnFlow.returnQuantity' | translate }}</p>
+
+    <div class="return-flow__shipment-summary">
+      <span class="return-flow__shipment-number">{{ selectedShipment()!.shipmentNumber }}</span>
+      <span class="return-flow__shipment-qty">x{{ selectedShipment()!.quantity }}</span>
+    </div>
+
+    @if (!isPartialReturn()) {
+      <div class="return-flow__qty-actions">
+        <button class="action-btn action-btn--primary return-flow__qty-btn"
+                (click)="returnAll()"
+                aria-label="{{ 'shopFloor.returnFlow.returnAll' | translate }}"
+                data-testid="return-all-btn">
+          <span class="material-icons-outlined">select_all</span>
+          {{ 'shopFloor.returnFlow.returnAll' | translate }} ({{ selectedShipment()!.quantity }})
+        </button>
+        <button class="action-btn return-flow__qty-btn"
+                (click)="startPartial()"
+                aria-label="{{ 'shopFloor.returnFlow.partialReturn' | translate }}"
+                data-testid="return-partial-btn">
+          <span class="material-icons-outlined">filter_list</span>
+          {{ 'shopFloor.returnFlow.partialReturn' | translate }}
+        </button>
+      </div>
+    } @else {
+      <div class="return-flow__partial-input">
+        <div class="return-flow__qty-control">
+          <button class="sf-qty-btn"
+                  (click)="partialQtyControl.setValue((partialQtyControl.value ?? 1) - 1)"
+                  [disabled]="(partialQtyControl.value ?? 1) <= 1"
+                  aria-label="Decrease quantity">-</button>
+          <span class="return-flow__qty-value">{{ partialQtyControl.value }}</span>
+          <button class="sf-qty-btn"
+                  (click)="partialQtyControl.setValue((partialQtyControl.value ?? 1) + 1)"
+                  [disabled]="(partialQtyControl.value ?? 1) >= selectedShipment()!.quantity"
+                  aria-label="Increase quantity">+</button>
+        </div>
+        <span class="return-flow__qty-max">/ {{ selectedShipment()!.quantity }}</span>
+      </div>
+      <button class="action-btn action-btn--primary"
+              [disabled]="partialQtyControl.invalid"
+              (click)="confirmPartialQty()"
+              aria-label="Confirm quantity"
+              data-testid="return-confirm-qty-btn">
+        <span class="material-icons-outlined">check</span>
+        {{ 'common.confirm' | translate }}
+      </button>
+    }
+  }
+
+  <!-- Step 3: Reason -->
+  @if (step() === 'reason') {
+    <div class="return-flow__reason-summary">
+      <span>{{ selectedShipment()!.shipmentNumber }}</span>
+      <span class="return-flow__reason-qty">{{ 'shopFloor.returnFlow.returnQuantity' | translate }}: {{ returnQuantity() }}</span>
+    </div>
+
+    <div class="return-flow__reason-form">
+      <app-select label="{{ 'shopFloor.returnFlow.reason' | translate }}"
+                  [formControl]="reasonControl"
+                  [options]="reasonOptions"
+                  [required]="true"
+                  data-testid="return-reason" />
+
+      <app-textarea label="{{ 'shopFloor.returnFlow.notes' | translate }}"
+                    [formControl]="notesControl"
+                    [rows]="3"
+                    data-testid="return-notes" />
+    </div>
+
+    <button class="action-btn action-btn--primary"
+            [disabled]="reasonControl.invalid"
+            (click)="confirmReason()"
+            aria-label="Continue to confirmation"
+            data-testid="return-continue-btn">
+      <span class="material-icons-outlined">arrow_forward</span>
+      {{ 'common.next' | translate }}
+    </button>
+  }
+
+  <!-- Step 4: Confirm -->
+  @if (step() === 'confirm') {
+    <div class="return-flow__confirm-details">
+      <div class="return-flow__confirm-row">
+        <span class="return-flow__confirm-label">{{ 'shopFloor.returnFlow.selectShipment' | translate }}</span>
+        <span class="return-flow__confirm-value">{{ selectedShipment()!.shipmentNumber }}</span>
+      </div>
+      <div class="return-flow__confirm-row">
+        <span class="return-flow__confirm-label">{{ 'shopFloor.returnFlow.returnQuantity' | translate }}</span>
+        <span class="return-flow__confirm-value">{{ returnQuantity() }}</span>
+      </div>
+      <div class="return-flow__confirm-row">
+        <span class="return-flow__confirm-label">{{ 'shopFloor.returnFlow.reason' | translate }}</span>
+        <span class="return-flow__confirm-value">{{ reasonControl.value }}</span>
+      </div>
+      @if (notesControl.value) {
+        <div class="return-flow__confirm-row">
+          <span class="return-flow__confirm-label">{{ 'shopFloor.returnFlow.notes' | translate }}</span>
+          <span class="return-flow__confirm-value">{{ notesControl.value }}</span>
+        </div>
+      }
+    </div>
+
+    <button class="action-btn action-btn--primary"
+            [disabled]="submitting()"
+            (click)="confirmReturn()"
+            aria-label="{{ 'shopFloor.returnFlow.confirmReturn' | translate }}"
+            data-testid="return-submit-btn">
+      @if (submitting()) {
+        <span class="material-icons-outlined return-flow__spinner">sync</span>
+      } @else {
+        <span class="material-icons-outlined">check</span>
+      }
+      {{ 'shopFloor.returnFlow.confirmReturn' | translate }}
+    </button>
+  }
+
+  <!-- Navigation -->
+  <div class="return-flow__nav">
+    <button class="action-btn" (click)="goBack()"
+            aria-label="{{ 'common.back' | translate }}"
+            data-testid="return-back-btn">
+      <span class="material-icons-outlined">arrow_back</span>
+      {{ 'common.back' | translate }}
+    </button>
+    <button class="action-btn" (click)="cancel()"
+            aria-label="{{ 'common.cancel' | translate }}"
+            data-testid="return-cancel-btn">
+      <span class="material-icons-outlined">close</span>
+      {{ 'common.cancel' | translate }}
+    </button>
+  </div>
+</div>

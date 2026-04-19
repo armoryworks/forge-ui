@@ -1029,7 +1029,8 @@
       "events": "Eventos",
       "announcements": "Anuncios",
       "edi": "EDI",
-      "mfa": "Política MFA"
+      "mfa": "Política MFA",
+      "autoPo": "Auto-PO"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -1438,7 +1439,17 @@
     "formReadyToSign": "Formulario Listo para Firmar",
     "identityDocNeedListB": "Necesita un documento de la Lista B (identidad)",
     "identityDocNeedListC": "Necesita un documento de la Lista C (autorización de empleo)",
-    "identityDocRequired": "Se requieren documentos de identidad para la verificación I-9"
+    "identityDocRequired": "Se requieren documentos de identidad para la verificación I-9",
+    "chatNotifications": "Notificaciones de Chat",
+    "chatNotificationsHint": "Controle el sonido, la vibración y las ventanas emergentes de mensajes de chat entrantes.",
+    "chatSound": "Sonido de notificación",
+    "chatVibrate": "Vibración (móvil)",
+    "previewPopups": "Ventanas emergentes de escritorio",
+    "notificationSound": "Sonido de Notificación",
+    "soundDefault": "Predeterminado",
+    "soundChime": "Campanilla",
+    "soundBell": "Campana",
+    "soundPop": "Pop"
   },
   "errors": {
     "generic": "Ocurrió un error. Intente de nuevo.",
@@ -2931,6 +2942,58 @@
       "timerStopped": "Temporizador detenido",
       "stageAdvanced": "Etapa avanzada",
       "noteLogged": "Nota registrada"
+    },
+    "returnFlow": {
+      "title": "Devolver Artículos",
+      "selectShipment": "Seleccionar Envío",
+      "returnQuantity": "Cantidad a Devolver",
+      "returnAll": "Devolver Todo",
+      "partialReturn": "Devolución Parcial",
+      "reason": "Motivo",
+      "reasonDefective": "Defectuoso",
+      "reasonWrongItem": "Artículo Incorrecto",
+      "reasonDamaged": "Dañado",
+      "reasonOverShipped": "Exceso de Envío",
+      "reasonOther": "Otro",
+      "notes": "Notas",
+      "confirmReturn": "Confirmar Devolución",
+      "returnSuccess": "Devolución creada exitosamente",
+      "noRecentShipments": "No se encontraron envíos recientes para esta pieza"
+    },
+    "undoList": {
+      "title": "Acciones Recientes",
+      "noEntries": "No hay acciones recientes para deshacer",
+      "enterPin": "Ingrese PIN para Revertir",
+      "invalidPin": "PIN Inválido",
+      "confirmReverse": "¿Revertir Esta Acción?",
+      "reverseSuccess": "Acción revertida exitosamente",
+      "reversed": "Revertido"
+    },
+    "scanDevices": {
+      "title": "Dispositivos de Escaneo",
+      "pairScanner": "Emparejar Escáner",
+      "unpair": "Desemparejar",
+      "selfPair": "Auto-Emparejar",
+      "scanBadge": "Escanee su credencial con el escáner inalámbrico para vincularlo a su cuenta durante este turno",
+      "deviceId": "ID del Dispositivo",
+      "pairedTo": "Emparejado Con",
+      "lastActivity": "Última Actividad",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "paired": "Emparejado",
+      "unpaired": "No hay escáneres emparejados",
+      "pairSuccess": "Escáner emparejado exitosamente",
+      "unpairSuccess": "Escáner desemparejado"
+    },
+    "dailyLog": {
+      "title": "Registro Diario de Escaneos",
+      "filterByDate": "Fecha",
+      "filterByAction": "Tipo de Acción",
+      "allActions": "Todas las Acciones",
+      "summaryStats": "Resumen",
+      "scansToday": "escaneos hoy",
+      "exportCsv": "Exportar CSV",
+      "noScans": "No se registraron escaneos para esta fecha."
     }
   },
   "customerReturns": {
@@ -3874,5 +3937,33 @@
       "templateCreated": "Plantilla creada",
       "templateDeleted": "Plantilla eliminada"
     }
+  },
+  "autoPo": {
+    "autoPoSuggestions": "Sugerencias Auto-OC",
+    "pendingSuggestions": "sugerencias pendientes",
+    "convertToPo": "Convertir a OC",
+    "dismiss": "Descartar",
+    "suggestedQty": "Cant. Sugerida",
+    "neededBy": "Necesario Para",
+    "sourceSalesOrders": "OV Origen",
+    "noSuggestions": "No hay sugerencias de auto-OC",
+    "statusPending": "Pendiente",
+    "statusConverted": "Convertida",
+    "statusDismissed": "Descartada",
+    "convertSuccess": "Sugerencia convertida a orden de compra.",
+    "dismissSuccess": "Sugerencia descartada.",
+    "convertTitle": "¿Convertir a Orden de Compra?",
+    "convertMessage": "¿Crear un borrador de OC para {{partNumber}} (cant: {{qty}})?",
+    "dismissTitle": "¿Descartar Sugerencia?",
+    "dismissMessage": "¿Descartar la sugerencia de auto-OC para {{partNumber}}?",
+    "autoPoSettings": "Configuración Auto-OC",
+    "enableAutoPo": "Habilitar Auto-OC",
+    "autoPoMode": "Modo Auto-OC",
+    "modeSuggest": "Sugerir",
+    "modeDraft": "Borrador",
+    "modeAutomatic": "Automático",
+    "bufferDays": "Días de Margen",
+    "notifyChat": "Enviar Notificaciones por Chat",
+    "settingsSaved": "Configuración de auto-OC guardada."
   }
 }

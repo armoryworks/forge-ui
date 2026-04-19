@@ -1,0 +1,257 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.return-flow {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  padding: $sp-3xl;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 100%;
+  max-width: 520px;
+  max-height: 85vh;
+  overflow-y: auto;
+  @include custom-scrollbar(4px);
+}
+
+.return-flow__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.return-flow__header-icon {
+  font-size: $icon-size-xl;
+  color: var(--primary);
+}
+
+.return-flow__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+
+.return-flow__part {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.return-flow__hint {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+// ─── Shipment List ───
+.return-flow__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.return-flow__shipment-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  color: var(--text);
+  text-align: left;
+  width: 100%;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+  }
+}
+
+.return-flow__shipment-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.return-flow__shipment-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.return-flow__shipment-date {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.return-flow__shipment-qty {
+  font-family: $font-family-mono;
+  font-size: $font-size-md;
+  font-weight: 700;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+// ─── Empty State ───
+.return-flow__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-3xl;
+  color: var(--text-muted);
+}
+
+.return-flow__empty-icon {
+  font-size: $icon-size-hero;
+  opacity: 0.5;
+}
+
+// ─── Quantity Step ───
+.return-flow__shipment-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+}
+
+.return-flow__qty-actions {
+  display: flex;
+  gap: $sp-md;
+}
+
+.return-flow__qty-btn {
+  flex: 1;
+}
+
+.return-flow__partial-input {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  justify-content: center;
+}
+
+.return-flow__qty-control {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.return-flow__qty-value {
+  font-family: $font-family-mono;
+  font-size: $font-size-kpi;
+  font-weight: 700;
+  min-width: 48px;
+  text-align: center;
+}
+
+.return-flow__qty-max {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
+
+// Reuse the sf-qty-btn style from parent
+:host ::ng-deep .sf-qty-btn,
+.sf-qty-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: var(--text);
+  transition: border-color $transition-fast;
+
+  &:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+}
+
+// ─── Reason Step ───
+.return-flow__reason-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+}
+
+.return-flow__reason-qty {
+  font-family: $font-family-mono;
+  font-weight: 600;
+}
+
+.return-flow__reason-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+// ─── Confirm Step ───
+.return-flow__confirm-details {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+}
+
+.return-flow__confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.return-flow__confirm-label {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.return-flow__confirm-value {
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+// ─── Navigation ───
+.return-flow__nav {
+  display: flex;
+  gap: $sp-md;
+  margin-top: $sp-md;
+
+  .action-btn {
+    flex: 1;
+  }
+}
+
+// ─── Spinner ───
+.return-flow__spinner {
+  animation: spin 1s linear infinite;
+}

@@ -1,15 +1,16 @@
+export type AutoPoSuggestionStatus = 'Pending' | 'Converted' | 'Dismissed';
+
 export interface AutoPoSuggestion {
   id: number;
   partId: number;
   partNumber: string;
-  partDescription: string | null;
+  partDescription: string;
   vendorId: number;
   vendorName: string;
   suggestedQty: number;
   neededByDate: string;
+  sourceSalesOrderIds: number[];
   status: AutoPoSuggestionStatus;
-  sourceSalesOrderNumbers: string[] | null;
+  convertedPurchaseOrderId: number | null;
   createdAt: string;
 }
-
-export type AutoPoSuggestionStatus = 'Pending' | 'Converted' | 'Dismissed';

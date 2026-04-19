@@ -1,0 +1,64 @@
+<div class="suggestions-header">
+  <div class="suggestions-header__left">
+    <span class="panel-header__count">
+      {{ 'autoPo.autoPoSuggestions' | translate }}
+    </span>
+    @if (pendingCount() > 0) {
+      <span class="suggestions-badge" [attr.aria-label]="pendingCount() + ' ' + ('autoPo.pendingSuggestions' | translate)">
+        {{ pendingCount() }}
+      </span>
+    }
+  </div>
+  <div class="suggestions-header__right">
+    <app-select
+      [label]="'common.status' | translate"
+      [formControl]="statusFilterControl"
+      [options]="statusOptions"
+      (selectionChange)="applyFilter()" />
+  </div>
+</div>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="auto-po-suggestions"
+    [columns]="columns"
+    [data]="suggestions()"
+    emptyIcon="inventory_2"
+    [emptyMessage]="'autoPo.noSuggestions' | translate">
+
+    <ng-template appColumnCell="partNumber" let-row>
+      <span class="part-number">{{ row.partNumber }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="neededByDate" let-row>
+      <span class="text-muted">{{ row.neededByDate | date:'MM/dd/yyyy' }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="sourceSalesOrderIds" let-row>
+      <span class="text-muted">{{ row.sourceSalesOrderIds?.join(', ') ?? '—' }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="status" let-row>
+      <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      @if (row.status === 'Pending') {
+        <div class="table-actions">
+          <button class="icon-btn"
+            (click)="convertToPo(row); $event.stopPropagation()"
+            [attr.aria-label]="'autoPo.convertToPo' | translate"
+            [matTooltip]="'autoPo.convertToPo' | translate" matTooltipPosition="above">
+            <span class="material-icons-outlined">add_shopping_cart</span>
+          </button>
+          <button class="icon-btn icon-btn--danger"
+            (click)="dismiss(row); $event.stopPropagation()"
+            [attr.aria-label]="'autoPo.dismiss' | translate"
+            [matTooltip]="'autoPo.dismiss' | translate" matTooltipPosition="above">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

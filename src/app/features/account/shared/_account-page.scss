@@ -90,4 +90,8 @@
   &:first-child {
     margin-top: 0;
   }
+
+  &--sub {
+    margin-top: $sp-lg;
+  }
 }

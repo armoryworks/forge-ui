@@ -56,20 +56,51 @@
 
   <!-- Chat Notifications -->
   <div class="account-page__card">
-    <span class="account-page__section-label">Chat Notifications</span>
-    <p class="customization__hint">Control sound and vibration when receiving chat messages.</p>
+    <span class="account-page__section-label">{{ 'account.chatNotifications' | translate }}</span>
+    <p class="customization__hint">{{ 'account.chatNotificationsHint' | translate }}</p>
 
     <div class="toggle-list">
-      <button class="toggle-option" [class.toggle-option--active]="chatSoundEnabled()" (click)="toggleChatSound()" [attr.aria-pressed]="chatSoundEnabled()">
+      <button class="toggle-option"
+        [class.toggle-option--active]="chatSoundEnabled()"
+        (click)="toggleChatSound()"
+        [attr.aria-pressed]="chatSoundEnabled()"
+        aria-label="Toggle chat notification sound">
         <span class="material-icons-outlined toggle-option__icon">volume_up</span>
-        <span class="toggle-option__label">Notification sound</span>
+        <span class="toggle-option__label">{{ 'account.chatSound' | translate }}</span>
         <span class="toggle-option__status">{{ chatSoundEnabled() ? 'On' : 'Off' }}</span>
       </button>
-      <button class="toggle-option" [class.toggle-option--active]="chatVibrateEnabled()" (click)="toggleChatVibrate()" [attr.aria-pressed]="chatVibrateEnabled()">
+      <button class="toggle-option"
+        [class.toggle-option--active]="chatVibrateEnabled()"
+        (click)="toggleChatVibrate()"
+        [attr.aria-pressed]="chatVibrateEnabled()"
+        aria-label="Toggle chat vibration">
         <span class="material-icons-outlined toggle-option__icon">vibration</span>
-        <span class="toggle-option__label">Vibration (mobile)</span>
+        <span class="toggle-option__label">{{ 'account.chatVibrate' | translate }}</span>
         <span class="toggle-option__status">{{ chatVibrateEnabled() ? 'On' : 'Off' }}</span>
       </button>
+      <button class="toggle-option"
+        [class.toggle-option--active]="chatPreviewPopupEnabled()"
+        (click)="toggleChatPreviewPopup()"
+        [attr.aria-pressed]="chatPreviewPopupEnabled()"
+        aria-label="Toggle desktop preview popups">
+        <span class="material-icons-outlined toggle-option__icon">picture_in_picture</span>
+        <span class="toggle-option__label">{{ 'account.previewPopups' | translate }}</span>
+        <span class="toggle-option__status">{{ chatPreviewPopupEnabled() ? 'On' : 'Off' }}</span>
+      </button>
+    </div>
+
+    <span class="account-page__section-label account-page__section-label--sub">{{ 'account.notificationSound' | translate }}</span>
+    <div class="font-scale-picker">
+      @for (opt of soundTypeOptions; track opt.value) {
+        <button
+          class="font-scale-option"
+          [class.font-scale-option--active]="chatSoundType() === opt.value"
+          (click)="setChatSoundType(opt.value)"
+          [attr.aria-pressed]="chatSoundType() === opt.value"
+          [attr.aria-label]="'Select notification sound: ' + opt.value">
+          <span class="font-scale-option__label">{{ opt.labelKey | translate }}</span>
+        </button>
+      }
     </div>
   </div>
 

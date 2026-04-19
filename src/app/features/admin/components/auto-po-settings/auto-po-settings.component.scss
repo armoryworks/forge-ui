@@ -1,0 +1,14 @@
+@use 'styles/variables' as *;
+
+.auto-po-settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  max-width: 480px;
+}
+
+.settings-row {
+  display: flex;
+  flex-direction: column;
+}

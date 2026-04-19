@@ -1033,7 +1033,8 @@
       "announcements": "Announcements",
       "edi": "EDI",
       "mfa": "MFA Policy",
-      "automations": "Automations"
+      "automations": "Automations",
+      "autoPo": "Auto-PO"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -1377,10 +1378,20 @@
       "alienDesc": "Provide your A-Number, Form I-94 Admission Number, or foreign passport details as applicable.",
       "docsHeader": "Documents you must present to your employer on your first day",
       "listATitle": "List A (any one)",
-      "listAItems": ["U.S. Passport or Passport Card", "Permanent Resident Card (Form I-551)", "Employment Authorization Document (Form I-766)", "Foreign Passport with I-94 or I-551 stamp"],
+      "listAItems": [
+        "U.S. Passport or Passport Card",
+        "Permanent Resident Card (Form I-551)",
+        "Employment Authorization Document (Form I-766)",
+        "Foreign Passport with I-94 or I-551 stamp"
+      ],
       "or": "OR",
       "listBCTitle": "List B + List C (one each)",
-      "listBCItems": ["B: Driver's license / State ID card", "B: School ID with photograph", "C: U.S. Social Security card", "C: Birth certificate (certified copy)"],
+      "listBCItems": [
+        "B: Driver's license / State ID card",
+        "B: School ID with photograph",
+        "C: U.S. Social Security card",
+        "C: Birth certificate (certified copy)"
+      ],
       "citizenshipLabel": "I am (citizenship / immigration status)",
       "alienRegNumber": "Alien Registration Number (A-Number)",
       "alienRegPlaceholder": "A000000000",
@@ -1620,7 +1631,17 @@
     "formReadyToSign": "Form Ready to Sign",
     "identityDocNeedListB": "You need a document from List B (identity)",
     "identityDocNeedListC": "You need a document from List C (employment authorization)",
-    "identityDocRequired": "Identity documents are required for I-9 verification"
+    "identityDocRequired": "Identity documents are required for I-9 verification",
+    "chatNotifications": "Chat Notifications",
+    "chatNotificationsHint": "Control sound, vibration, and popup behavior for incoming chat messages.",
+    "chatSound": "Notification sound",
+    "chatVibrate": "Vibration (mobile)",
+    "previewPopups": "Desktop preview popups",
+    "notificationSound": "Notification Sound",
+    "soundDefault": "Default",
+    "soundChime": "Chime",
+    "soundBell": "Bell",
+    "soundPop": "Pop"
   },
   "errors": {
     "generic": "An error occurred. Please try again.",
@@ -3149,6 +3170,58 @@
       "timerStopped": "Timer stopped",
       "stageAdvanced": "Stage advanced",
       "noteLogged": "Note logged"
+    },
+    "returnFlow": {
+      "title": "Return Items",
+      "selectShipment": "Select Shipment",
+      "returnQuantity": "Return Quantity",
+      "returnAll": "Return All",
+      "partialReturn": "Partial Return",
+      "reason": "Reason",
+      "reasonDefective": "Defective",
+      "reasonWrongItem": "Wrong Item",
+      "reasonDamaged": "Damaged",
+      "reasonOverShipped": "Over-Shipped",
+      "reasonOther": "Other",
+      "notes": "Notes",
+      "confirmReturn": "Confirm Return",
+      "returnSuccess": "Return created successfully",
+      "noRecentShipments": "No recent shipments found for this part"
+    },
+    "undoList": {
+      "title": "Recent Actions",
+      "noEntries": "No recent actions to undo",
+      "enterPin": "Enter PIN to Reverse",
+      "invalidPin": "Invalid PIN",
+      "confirmReverse": "Reverse This Action?",
+      "reverseSuccess": "Action reversed successfully",
+      "reversed": "Reversed"
+    },
+    "scanDevices": {
+      "title": "Scan Devices",
+      "pairScanner": "Pair Scanner",
+      "unpair": "Unpair",
+      "selfPair": "Self-Pair",
+      "scanBadge": "Scan your badge with the wireless scanner to pair it to your account for this shift",
+      "deviceId": "Device ID",
+      "pairedTo": "Paired To",
+      "lastActivity": "Last Activity",
+      "active": "Active",
+      "inactive": "Inactive",
+      "paired": "Paired",
+      "unpaired": "No scanners paired",
+      "pairSuccess": "Scanner paired successfully",
+      "unpairSuccess": "Scanner unpaired"
+    },
+    "dailyLog": {
+      "title": "Scan Daily Log",
+      "filterByDate": "Date",
+      "filterByAction": "Action Type",
+      "allActions": "All Actions",
+      "summaryStats": "Summary",
+      "scansToday": "scans today",
+      "exportCsv": "Export CSV",
+      "noScans": "No scans recorded for this date."
     }
   },
   "customerReturns": {
@@ -4071,5 +4144,33 @@
       "templateCreated": "Template created",
       "templateDeleted": "Template deleted"
     }
+  },
+  "autoPo": {
+    "autoPoSuggestions": "Auto-PO Suggestions",
+    "pendingSuggestions": "pending suggestions",
+    "convertToPo": "Convert to PO",
+    "dismiss": "Dismiss",
+    "suggestedQty": "Suggested Qty",
+    "neededBy": "Needed By",
+    "sourceSalesOrders": "Source SOs",
+    "noSuggestions": "No auto-PO suggestions",
+    "statusPending": "Pending",
+    "statusConverted": "Converted",
+    "statusDismissed": "Dismissed",
+    "convertSuccess": "Suggestion converted to purchase order.",
+    "dismissSuccess": "Suggestion dismissed.",
+    "convertTitle": "Convert to Purchase Order?",
+    "convertMessage": "Create a draft PO for {{partNumber}} (qty: {{qty}})?",
+    "dismissTitle": "Dismiss Suggestion?",
+    "dismissMessage": "Dismiss the auto-PO suggestion for {{partNumber}}?",
+    "autoPoSettings": "Auto-PO Settings",
+    "enableAutoPo": "Enable Auto-PO",
+    "autoPoMode": "Auto-PO Mode",
+    "modeSuggest": "Suggest",
+    "modeDraft": "Draft",
+    "modeAutomatic": "Automatic",
+    "bufferDays": "Buffer Days",
+    "notifyChat": "Send Chat Notifications",
+    "settingsSaved": "Auto-PO settings saved."
   }
 }

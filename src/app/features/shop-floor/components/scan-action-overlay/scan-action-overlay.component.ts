@@ -11,8 +11,20 @@ import { ScanMoveFlowComponent } from '../scan-move-flow/scan-move-flow.componen
 import { ScanCountFlowComponent } from '../scan-count-flow/scan-count-flow.component';
 import { ScanReceiveFlowComponent } from '../scan-receive-flow/scan-receive-flow.component';
 import { ScanIssueFlowComponent } from '../scan-issue-flow/scan-issue-flow.component';
+import { ScanShipFlowComponent, ShipmentLineItem } from '../scan-ship-flow/scan-ship-flow.component';
+import { ScanInspectFlowComponent } from '../scan-inspect-flow/scan-inspect-flow.component';
+import { ScanJobFlowComponent } from '../scan-job-flow/scan-job-flow.component';
 
-type OverlayPhase = 'idle' | 'loading' | 'actions' | 'move' | 'count' | 'receive' | 'issue';
+type OverlayPhase = 'idle' | 'loading' | 'actions' | 'move' | 'count' | 'receive' | 'issue' | 'ship' | 'inspect' | 'job';
+
+interface JobActionContext {
+  jobId: number;
+  jobNumber: string;
+  jobTitle: string;
+  currentStage: string;
+  assigneeName: string | null;
+  hasActiveTimer: boolean;
+}
 
 const ACTION_ICONS: Record<string, string> = {
   Move: 'swap_horiz',
@@ -22,6 +34,7 @@ const ACTION_ICONS: Record<string, string> = {
   Issue: 'output',
   Inspect: 'fact_check',
   Return: 'assignment_return',
+  Job: 'engineering',
 };
 
 const ACTION_COLORS: Record<string, string> = {
@@ -32,6 +45,7 @@ const ACTION_COLORS: Record<string, string> = {
   Issue: 'var(--warning)',
   Inspect: 'var(--primary)',
   Return: 'var(--error)',
+  Job: 'var(--info)',
 };
 
 @Component({
@@ -43,6 +57,9 @@ const ACTION_COLORS: Record<string, string> = {
     ScanCountFlowComponent,
     ScanReceiveFlowComponent,
     ScanIssueFlowComponent,
+    ScanShipFlowComponent,
+    ScanInspectFlowComponent,
+    ScanJobFlowComponent,
   ],
   templateUrl: './scan-action-overlay.component.html',
   styleUrl: './scan-action-overlay.component.scss',
@@ -84,6 +101,34 @@ export class ScanActionOverlayComponent {
       }
     }
     return map;
+  });
+
+  /** Extract open shipment lines from the Ship action context. */
+  protected readonly openShipmentLines = computed<ShipmentLineItem[]>(() => {
+    const ctx = this.context();
+    if (!ctx) return [];
+    const shipAction = ctx.availableActions.find(a => a.action === 'Ship');
+    const actionCtx = shipAction?.context as { openShipmentLines?: ShipmentLineItem[] } | undefined;
+    return actionCtx?.openShipmentLines ?? [];
+  });
+
+  /** Extract QC template ID from the Inspect action context. */
+  protected readonly qcTemplateId = computed<number | null>(() => {
+    const ctx = this.context();
+    if (!ctx) return null;
+    const inspectAction = ctx.availableActions.find(a => a.action === 'Inspect');
+    const actionCtx = inspectAction?.context as { qcTemplateId?: number } | undefined;
+    return actionCtx?.qcTemplateId ?? null;
+  });
+
+  /** Extract job details from the Job action context (when scanning a job barcode). */
+  protected readonly jobContext = computed<JobActionContext | null>(() => {
+    const ctx = this.context();
+    if (!ctx) return null;
+    const jobAction = ctx.availableActions.find(a => a.action === 'Job');
+    if (!jobAction?.context) return null;
+    const actionCtx = jobAction.context as JobActionContext;
+    return actionCtx;
   });
 
   // Listen for scans in inventory context
@@ -136,9 +181,40 @@ export class ScanActionOverlayComponent {
       case 'Issue':
         this.phase.set('issue');
         break;
+      case 'Ship':
+        this.startShip();
+        break;
+      case 'Inspect':
+        this.startInspect();
+        break;
+      case 'Job':
+        this.startJob();
+        break;
       default:
         this.snackbar.info(`${actionId} is not yet implemented`);
     }
+  }
+
+  protected startShip(): void {
+    const lines = this.openShipmentLines();
+    if (lines.length === 0) {
+      this.snackbar.info('No open shipment lines for this part');
+      return;
+    }
+    this.phase.set('ship');
+  }
+
+  protected startInspect(): void {
+    this.phase.set('inspect');
+  }
+
+  protected startJob(): void {
+    const job = this.jobContext();
+    if (!job) {
+      this.snackbar.info('No job context available');
+      return;
+    }
+    this.phase.set('job');
   }
 
   protected onFlowCompleted(): void {

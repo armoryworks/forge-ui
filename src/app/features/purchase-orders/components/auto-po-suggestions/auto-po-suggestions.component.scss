@@ -1,0 +1,47 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.suggestions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+}
+
+.suggestions-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-sm;
+  border-radius: 999px;
+  background: var(--warning);
+  color: var(--text);
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.part-number {
+  font-family: $font-family-mono;
+  font-weight: 600;
+}

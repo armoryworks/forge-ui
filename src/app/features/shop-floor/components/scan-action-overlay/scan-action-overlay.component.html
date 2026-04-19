@@ -106,6 +106,39 @@
           (cancelled)="onFlowCancelled()" />
       }
 
+      <!-- Ship Flow -->
+      @if (phase() === 'ship' && context()) {
+        <app-scan-ship-flow
+          [partId]="context()!.partId"
+          [partNumber]="context()!.partNumber"
+          [openShipmentLines]="openShipmentLines()"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
+      <!-- Inspect Flow -->
+      @if (phase() === 'inspect' && context()) {
+        <app-scan-inspect-flow
+          [partId]="context()!.partId"
+          [partNumber]="context()!.partNumber"
+          [qcTemplateId]="qcTemplateId()"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
+      <!-- Job Flow -->
+      @if (phase() === 'job' && jobContext()) {
+        <app-scan-job-flow
+          [jobId]="jobContext()!.jobId"
+          [jobNumber]="jobContext()!.jobNumber"
+          [jobTitle]="jobContext()!.jobTitle"
+          [currentStage]="jobContext()!.currentStage"
+          [assigneeName]="jobContext()!.assigneeName"
+          [hasActiveTimer]="jobContext()!.hasActiveTimer"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
     </div>
   </div>
 }

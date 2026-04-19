@@ -455,6 +455,13 @@
       </div>
     }
 
+    <!-- Auto-PO Settings Tab -->
+    @if (activeTab() === 'auto-po') {
+      <div class="tab-panel">
+        <app-auto-po-settings />
+      </div>
+    }
+
     <!-- Compliance Tab -->
     @if (activeTab() === 'compliance') {
       <div class="tab-panel">
