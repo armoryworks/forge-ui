@@ -19,6 +19,9 @@
         </button>
         <span class="material-icons-outlined chat-panel__channel-icon">{{ getChannelIcon(selectedChannel()!) }}</span>
         <span class="chat-panel__header-name">{{ selectedChannel()!.name }}</span>
+        <button class="icon-btn" (click)="openChannelSettings()" aria-label="Channel settings" matTooltip="Channel settings" matTooltipPosition="above">
+          <span class="material-icons-outlined">settings</span>
+        </button>
       } @else {
         <span class="chat-panel__header-title">{{ 'chat.title' | translate }}</span>
       }
@@ -93,11 +96,21 @@
                 <button class="channel-item" (click)="selectChannel(channel)">
                   <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
                   <span class="channel-item__name">{{ channel.name }}</span>
+                  @if (isChannelMuted(channel)) {
+                    <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                  }
                   @if (channel.unreadCount > 0) {
                     <span class="conversation__badge">{{ channel.unreadCount }}</span>
                   }
+                  <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+                    <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
+                  </button>
                 </button>
               }
+              <button class="channel-item channel-item--browse" (click)="openBrowseChannels()" aria-label="Browse channels">
+                <span class="material-icons-outlined channel-item__icon">explore</span>
+                <span class="channel-item__name">Browse Channels</span>
+              </button>
             </div>
           }
         </div>
@@ -115,9 +128,15 @@
                   <button class="channel-item" (click)="selectChannel(channel)">
                     <span class="material-icons-outlined channel-item__icon">{{ getChannelIcon(channel) }}</span>
                     <span class="channel-item__name">{{ channel.name }}</span>
+                    @if (isChannelMuted(channel)) {
+                      <span class="material-icons-outlined channel-item__muted" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                    }
                     @if (channel.unreadCount > 0) {
                       <span class="conversation__badge">{{ channel.unreadCount }}</span>
                     }
+                    <button class="icon-btn channel-item__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+                      <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
+                    </button>
                   </button>
                 }
               </div>

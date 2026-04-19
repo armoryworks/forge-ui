@@ -27,12 +27,50 @@
 .detail-header__actions { display: flex; gap: $sp-sm; }
 .detail-icon { font-size: $icon-size-xl; color: var(--text-muted); }
 .detail-name { font-weight: 700; }
-.detail-customer { font-size: var(--font-size-xs); color: var(--text-muted); }
+.detail-customer { font-size: $font-size-xs; color: var(--text-muted); }
 
+// --- Tab Bar ---
+.tab-bar {
+  flex-shrink: 0;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.tab__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-sm;
+  height: $badge-size-sm;
+  padding: 0 $sp-sm;
+  border-radius: 7px;
+  background: var(--border);
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.tab--active .tab__count {
+  background: var(--primary);
+  color: #fff;
+}
+
+.tab__warning {
+  font-size: $icon-size-xs;
+  color: var(--warning);
+}
+
+// --- Detail Body ---
 .detail-body {
   flex: 1;
   overflow: auto;
   padding: $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  @include custom-scrollbar;
+}
+
+.tab-panel {
   display: flex;
   flex-direction: column;
   gap: $sp-lg;
@@ -45,13 +83,14 @@
 }
 
 .info-item { display: flex; flex-direction: column; gap: $sp-xs; }
-.info-label { @include uppercase-label(var(--font-size-xxs), 0.5px, 700); color: var(--text-muted); }
-.info-value { font-size: var(--font-size-sm); }
+.info-label { @include uppercase-label($font-size-xxs, 0.5px, 700); color: var(--text-muted); }
+.info-value { font-size: $font-size-sm; }
 .info-value--bold { font-weight: 700; }
+.info-value--mono { font-family: $font-family-mono; font-size: $font-size-xs; }
 .info-section { display: flex; flex-direction: column; gap: $sp-md; }
 
 .info-notes {
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
   color: var(--text-secondary);
   white-space: pre-wrap;
 }
@@ -59,17 +98,39 @@
 .text-success { color: var(--success); }
 .text-warning { color: var(--warning); }
 
-// --- Lines Table ---
-.lines-section {
+// --- Fulfillment Summary ---
+.fulfillment-summary {
   display: flex;
   flex-direction: column;
-  gap: $sp-md;
+  gap: $sp-sm;
 }
 
+.fulfillment-summary__items {
+  display: flex;
+  gap: $sp-lg;
+}
+
+.fulfillment-stat {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.fulfillment-stat__value {
+  font-size: $font-size-md;
+  font-weight: 700;
+}
+
+.fulfillment-stat__label {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+// --- Lines Table ---
 .lines-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--font-size-sm);
+  font-size: $font-size-sm;
 
   th, td {
     padding: $sp-sm $sp-md;
@@ -78,12 +139,139 @@
   }
 
   th {
-    @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
     color: var(--text-muted);
   }
 
   &__right { text-align: right; }
-  &__mono { font-family: $font-family-mono; font-size: var(--font-size-xs); }
+  &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+  &__narrow { width: $btn-icon-size; padding: $sp-sm $sp-xs; }
+}
+
+.expand-icon {
+  font-size: $icon-size-sm;
+  transition: transform $transition-fast;
+}
+
+.expand-icon--open {
+  transform: rotate(180deg);
+}
+
+.line-row--warning {
+  background: color-mix(in srgb, var(--warning) 8%, transparent);
+}
+
+.line-warning-row {
+  td {
+    padding: $sp-xs $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    color: var(--warning);
+    font-size: $font-size-xs;
+  }
+}
+
+.line-warning-icon {
+  font-size: $icon-size-xs;
+  vertical-align: middle;
+  margin-right: $sp-xs;
+}
+
+// --- Job Rows ---
+.job-row {
+  background: color-mix(in srgb, var(--primary) 4%, transparent);
+
+  td {
+    padding: $sp-xs $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    font-size: $font-size-xs;
+  }
+}
+
+.job-row__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+}
+
+.job-row__title {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  @include truncate;
+  max-width: 160px;
+}
+
+.job-row__assignee {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+}
+
+// --- Card (Shipments / Returns) ---
+.card {
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.card__header {
+  @include flex-between;
+  padding: $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.card__title {
+  font-weight: 700;
+  font-size: $font-size-base;
+}
+
+.card__body {
+  padding: $sp-md;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.card__section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+// --- Nested Table ---
+.nested-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: $font-size-xs;
+
+  th, td {
+    padding: $sp-xs $sp-md;
+    text-align: left;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  th {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__right { text-align: right; }
+}
+
+// --- Empty State ---
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-3xl $sp-lg;
+  color: var(--text-muted);
+}
+
+.empty-state__icon {
+  font-size: $icon-size-hero;
+  opacity: 0.4;
+}
+
+.empty-state__message {
+  font-size: $font-size-sm;
 }
 
 // --- Actions ---

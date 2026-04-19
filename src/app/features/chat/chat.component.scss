@@ -190,6 +190,51 @@
     font-size: $font-size-base;
     @include truncate;
   }
+
+  &__muted {
+    font-size: $icon-size-xs;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  &__mute-btn {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+
+    &:hover {
+      color: var(--primary);
+    }
+  }
+
+  &:hover &__mute-btn {
+    display: flex;
+  }
+
+  &--browse {
+    color: var(--primary);
+    font-size: $font-size-sm;
+
+    .channel-item__icon {
+      color: var(--primary);
+    }
+
+    &:hover {
+      background: var(--primary-light);
+    }
+  }
 }
 
 .chat-panel__user-picker {

@@ -1,0 +1,48 @@
+<app-dialog title="Browse Channels" width="520px" (closed)="close()">
+  <div class="browser">
+    <app-input label="Search channels" [formControl]="searchControl" prefix="search" data-testid="channel-search" />
+
+    <div class="browser__list">
+      @if (loading()) {
+        <div class="browser__loading">
+          <span class="material-icons-outlined spin">sync</span>
+          <span>Loading channels...</span>
+        </div>
+      } @else if (filteredChannels().length === 0) {
+        <div class="browser__empty">
+          <span class="material-icons-outlined browser__empty-icon">forum</span>
+          <span class="browser__empty-text">No channels found</span>
+        </div>
+      } @else {
+        @for (channel of filteredChannels(); track channel.id) {
+          <div class="browser__channel">
+            <span class="material-icons-outlined browser__channel-icon">{{ getChannelIcon(channel) }}</span>
+            <div class="browser__channel-info">
+              <span class="browser__channel-name">{{ channel.name }}</span>
+              @if (channel.description) {
+                <span class="browser__channel-desc">{{ channel.description }}</span>
+              }
+              <span class="browser__channel-meta">{{ channel.members.length }} {{ channel.members.length === 1 ? 'member' : 'members' }}</span>
+            </div>
+            <button
+              class="action-btn action-btn--sm action-btn--primary"
+              [disabled]="joiningId() === channel.id"
+              (click)="joinChannel(channel)"
+              [attr.aria-label]="'Join ' + channel.name"
+              data-testid="channel-join-btn">
+              @if (joiningId() === channel.id) {
+                <span class="material-icons-outlined spin">sync</span>
+              } @else {
+                Join
+              }
+            </button>
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">Close</button>
+  </div>
+</app-dialog>

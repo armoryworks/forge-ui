@@ -64,6 +64,10 @@
               }
             </button>
           }
+          <button class="mobile-chat__channel-item mobile-chat__channel-item--browse" (click)="openBrowseChannels()" aria-label="Browse channels">
+            <span class="material-icons-outlined mobile-chat__channel-icon mobile-chat__channel-icon--primary">explore</span>
+            <span class="mobile-chat__conv-name mobile-chat__conv-name--primary">Browse Channels</span>
+          </button>
         }
       </div>
 
@@ -138,6 +142,10 @@
       } @else if (view() === 'channel' && selectedChannel()) {
         <span class="material-icons-outlined mobile-chat__channel-icon">{{ getChannelIcon(selectedChannel()!) }}</span>
         <span class="mobile-chat__conv-name">{{ selectedChannel()!.name }}</span>
+        <span class="mobile-chat__header-spacer"></span>
+        <button class="icon-btn" (click)="openChannelSettings()" aria-label="Channel settings">
+          <span class="material-icons-outlined">settings</span>
+        </button>
       }
     </div>
 

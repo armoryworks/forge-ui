@@ -1,3 +1,5 @@
+import { SalesOrderLineJob } from './sales-order-line-job.model';
+
 export interface SalesOrderLine {
   id: number;
   partId: number | null;
@@ -11,4 +13,5 @@ export interface SalesOrderLine {
   remainingQuantity: number;
   isFullyShipped: boolean;
   notes: string | null;
+  jobs: SalesOrderLineJob[];
 }

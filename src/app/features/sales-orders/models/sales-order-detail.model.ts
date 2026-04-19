@@ -1,4 +1,6 @@
 import { SalesOrderLine } from './sales-order-line.model';
+import { SalesOrderShipment } from './sales-order-shipment.model';
+import { SalesOrderReturn } from './sales-order-return.model';
 
 export interface SalesOrderDetail {
   id: number;
@@ -20,6 +22,8 @@ export interface SalesOrderDetail {
   taxAmount: number;
   total: number;
   lines: SalesOrderLine[];
+  shipments: SalesOrderShipment[];
+  returns: SalesOrderReturn[];
   createdAt: Date;
   updatedAt: Date;
 }

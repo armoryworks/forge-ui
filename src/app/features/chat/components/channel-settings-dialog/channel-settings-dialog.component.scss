@@ -1,0 +1,98 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.settings {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.settings__description {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.settings__label {
+  @include uppercase-label($font-size-xxs, 0.08em, 600);
+  color: var(--text-muted);
+}
+
+.settings__value {
+  font-size: $font-size-base;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.settings__members {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.settings__member-list {
+  max-height: 240px;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
+  display: flex;
+  flex-direction: column;
+}
+
+.settings__member {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+
+  &:hover {
+    background: var(--bg);
+  }
+}
+
+.settings__member-name {
+  flex: 1;
+  font-size: $font-size-base;
+  @include truncate;
+}
+
+.settings__muted-icon {
+  font-size: $icon-size-sm;
+  color: var(--text-muted);
+}
+
+.role-badge {
+  font-size: $font-size-xxs;
+  font-weight: 600;
+  padding: $sp-xxs $sp-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  color: var(--text-muted);
+
+  &--owner {
+    background: var(--warning-light);
+    border-color: var(--warning);
+    color: var(--warning);
+  }
+
+  &--admin {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+}
+
+.dialog-footer__spacer {
+  flex: 1;
+}
+
+// Danger button style
+:host ::ng-deep .action-btn--danger {
+  color: var(--error);
+  border-color: var(--error);
+
+  &:hover:not(:disabled) {
+    background: var(--error-light);
+  }
+}

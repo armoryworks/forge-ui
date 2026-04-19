@@ -1,0 +1,66 @@
+<app-dialog [title]="channel().name" width="520px" (closed)="close()">
+  <div class="settings">
+    @if (canEdit()) {
+      <div [formGroup]="form">
+        <app-input label="Channel Name" formControlName="name" [required]="true" data-testid="settings-channel-name" />
+        <app-textarea label="Description" formControlName="description" [rows]="2" data-testid="settings-channel-desc" />
+        <app-input label="Icon Name" formControlName="iconName" placeholder="e.g. forum, campaign, tag" data-testid="settings-channel-icon" />
+      </div>
+    } @else {
+      @if (channel().description) {
+        <div class="settings__description">
+          <span class="settings__label">Description</span>
+          <span class="settings__value">{{ channel().description }}</span>
+        </div>
+      }
+    }
+
+    <div class="settings__members">
+      <span class="settings__label">Members ({{ channel().members.length }})</span>
+      <div class="settings__member-list">
+        @for (member of sortedMembers(); track member.userId) {
+          <div class="settings__member">
+            <app-avatar [initials]="member.initials" [color]="member.color" size="sm" />
+            <span class="settings__member-name">{{ member.displayName }}</span>
+            @if (member.role !== 'Member') {
+              <span class="role-badge" [class]="getRoleBadgeClass(member.role)">{{ member.role }}</span>
+            }
+            @if (member.isMuted) {
+              <span class="material-icons-outlined settings__muted-icon" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    @if (canLeave()) {
+      <button
+        class="action-btn action-btn--danger"
+        [disabled]="leaving()"
+        (click)="leaveChannel()"
+        aria-label="Leave channel"
+        data-testid="settings-leave-btn">
+        @if (leaving()) {
+          <span class="material-icons-outlined spin">sync</span>
+        } @else {
+          <span class="material-icons-outlined">logout</span>
+        }
+        Leave
+      </button>
+    }
+    <span class="dialog-footer__spacer"></span>
+    <button class="action-btn" (click)="close()">Cancel</button>
+    @if (canEdit()) {
+      <button
+        class="action-btn action-btn--primary"
+        [appValidationPopover]="violations"
+        [disabled]="form.invalid || saving()"
+        (click)="save()"
+        data-testid="settings-save-btn">
+        {{ saving() ? 'Saving...' : 'Save' }}
+      </button>
+    }
+  </div>
+</app-dialog>

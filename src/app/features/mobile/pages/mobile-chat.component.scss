@@ -339,6 +339,24 @@
   font-size: $icon-size-md;
   color: var(--text-muted);
   flex-shrink: 0;
+
+  &--primary {
+    color: var(--primary);
+  }
+}
+
+.mobile-chat__conv-name--primary {
+  color: var(--primary);
+}
+
+.mobile-chat__channel-item--browse {
+  &:active {
+    background: var(--primary-light);
+  }
+}
+
+.mobile-chat__header-spacer {
+  flex: 1;
 }
 
 .mobile-chat__empty-inline {

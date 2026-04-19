@@ -15,156 +15,498 @@
       </div>
     </div>
 
+    <!-- Tab Bar -->
+    <div class="tab-bar" role="tablist" aria-label="Sales order detail tabs">
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'overview'"
+        [attr.aria-selected]="activeTab() === 'overview'"
+        (click)="switchTab('overview')"
+        aria-label="Overview tab">
+        {{ 'common.overview' | translate }}
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'lines'"
+        [attr.aria-selected]="activeTab() === 'lines'"
+        (click)="switchTab('lines')"
+        aria-label="Line items tab">
+        {{ 'salesOrders.lineItems' | translate }}
+        <span class="tab__count">{{ so.lines.length }}</span>
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'shipments'"
+        [attr.aria-selected]="activeTab() === 'shipments'"
+        (click)="switchTab('shipments')"
+        aria-label="Shipments tab">
+        {{ 'salesOrders.shipments' | translate }}
+        @if (shipmentCount() > 0) {
+          <span class="tab__count">{{ shipmentCount() }}</span>
+        }
+        @if (hasShipmentWarning()) {
+          <span class="material-icons-outlined tab__warning" aria-label="Partially shipped">warning</span>
+        }
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'returns'"
+        [attr.aria-selected]="activeTab() === 'returns'"
+        (click)="switchTab('returns')"
+        aria-label="Returns tab">
+        {{ 'salesOrders.returns' | translate }}
+        @if (openReturnCount() > 0) {
+          <span class="material-icons-outlined tab__warning" aria-label="Open returns">warning</span>
+        }
+      </button>
+      <button class="tab" role="tab"
+        [class.tab--active]="activeTab() === 'activity'"
+        [attr.aria-selected]="activeTab() === 'activity'"
+        (click)="switchTab('activity')"
+        aria-label="Activity tab">
+        {{ 'common.activity' | translate }}
+      </button>
+    </div>
+
+    <!-- Tab Content -->
     <div class="detail-body">
-      <!-- Status & Info -->
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">{{ 'common.status' | translate }}</span>
-          <span class="info-value">
-            <span [class]="getStatusClass(so.status)">{{ getStatusLabel(so.status) }}</span>
-          </span>
-        </div>
-        @if (so.customerPO) {
-          <div class="info-item">
-            <span class="info-label">{{ 'salesOrders.customerPo' | translate }}</span>
-            <span class="info-value">{{ so.customerPO }}</span>
+      <!-- Overview Tab -->
+      @if (activeTab() === 'overview') {
+        <div class="tab-panel" role="tabpanel">
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">{{ 'common.status' | translate }}</span>
+              <span class="info-value">
+                <span [class]="getStatusClass(so.status)">{{ getStatusLabel(so.status) }}</span>
+              </span>
+            </div>
+            @if (so.customerPO) {
+              <div class="info-item">
+                <span class="info-label">{{ 'salesOrders.customerPo' | translate }}</span>
+                <span class="info-value">{{ so.customerPO }}</span>
+              </div>
+            }
+            @if (so.quoteNumber) {
+              <div class="info-item">
+                <span class="info-label">{{ 'salesOrders.quote' | translate }}</span>
+                <span class="info-value">
+                  @if (so.quoteId) {
+                    <app-entity-link type="quote" [entityId]="so.quoteId">{{ so.quoteNumber }}</app-entity-link>
+                  } @else {
+                    {{ so.quoteNumber }}
+                  }
+                </span>
+              </div>
+            }
+            @if (so.creditTerms) {
+              <div class="info-item">
+                <span class="info-label">{{ 'salesOrders.creditTerms' | translate }}</span>
+                <span class="info-value">{{ so.creditTerms }}</span>
+              </div>
+            }
+            @if (so.requestedDeliveryDate) {
+              <div class="info-item">
+                <span class="info-label">{{ 'salesOrders.requestedDelivery' | translate }}</span>
+                <span class="info-value">{{ so.requestedDeliveryDate | date:'MM/dd/yyyy' }}</span>
+              </div>
+            }
+            @if (so.confirmedDate) {
+              <div class="info-item">
+                <span class="info-label">{{ 'salesOrders.confirmed' | translate }}</span>
+                <span class="info-value">{{ so.confirmedDate | date:'MM/dd/yyyy' }}</span>
+              </div>
+            }
           </div>
-        }
-        @if (so.quoteNumber) {
-          <div class="info-item">
-            <span class="info-label">{{ 'salesOrders.quote' | translate }}</span>
-            <span class="info-value">
-              @if (so.quoteId) {
-                <app-entity-link type="quote" [entityId]="so.quoteId">{{ so.quoteNumber }}</app-entity-link>
-              } @else {
-                {{ so.quoteNumber }}
-              }
-            </span>
-          </div>
-        }
-        @if (so.creditTerms) {
-          <div class="info-item">
-            <span class="info-label">{{ 'salesOrders.creditTerms' | translate }}</span>
-            <span class="info-value">{{ so.creditTerms }}</span>
-          </div>
-        }
-        @if (so.requestedDeliveryDate) {
-          <div class="info-item">
-            <span class="info-label">{{ 'salesOrders.requestedDelivery' | translate }}</span>
-            <span class="info-value">{{ so.requestedDeliveryDate | date:'MM/dd/yyyy' }}</span>
-          </div>
-        }
-        @if (so.confirmedDate) {
-          <div class="info-item">
-            <span class="info-label">{{ 'salesOrders.confirmed' | translate }}</span>
-            <span class="info-value">{{ so.confirmedDate | date:'MM/dd/yyyy' }}</span>
-          </div>
-        }
-      </div>
 
-      <app-barcode-info
-        entityType="SalesOrder"
-        [entityId]="so.id"
-        [entityLabel]="so.orderNumber"
-        [naturalIdentifier]="so.orderNumber"
-        [compact]="true" />
+          <!-- Fulfillment Summary -->
+          @if (fulfillmentSummary(); as fs) {
+            <div class="fulfillment-summary">
+              <span class="info-label">{{ 'salesOrders.fulfillment' | translate }}</span>
+              <div class="fulfillment-summary__items">
+                <span class="fulfillment-stat">
+                  <span class="fulfillment-stat__value">{{ fs.linesWithJobs }}/{{ fs.totalLines }}</span>
+                  <span class="fulfillment-stat__label">{{ 'salesOrders.linesWithJobs' | translate }}</span>
+                </span>
+                <span class="fulfillment-stat">
+                  <span class="fulfillment-stat__value">{{ fs.linesShipped }}/{{ fs.totalLines }}</span>
+                  <span class="fulfillment-stat__label">{{ 'salesOrders.linesShipped' | translate }}</span>
+                </span>
+                <span class="fulfillment-stat">
+                  <span class="fulfillment-stat__value">{{ fs.shipmentCount }}</span>
+                  <span class="fulfillment-stat__label">{{ 'salesOrders.shipments' | translate }}</span>
+                </span>
+              </div>
+            </div>
+          }
 
-      <!-- Totals -->
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">{{ 'salesOrders.subtotal' | translate }}</span>
-          <span class="info-value">{{ so.subtotal | currency }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ so.taxRate }}%)</span>
-          <span class="info-value">{{ so.taxAmount | currency }}</span>
-        </div>
-        <div class="info-item">
-          <span class="info-label">{{ 'common.total' | translate }}</span>
-          <span class="info-value info-value--bold">{{ so.total | currency }}</span>
-        </div>
-      </div>
+          <!-- Totals -->
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">{{ 'salesOrders.subtotal' | translate }}</span>
+              <span class="info-value">{{ so.subtotal | currency }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ so.taxRate }}%)</span>
+              <span class="info-value">{{ so.taxAmount | currency }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{{ 'common.total' | translate }}</span>
+              <span class="info-value info-value--bold">{{ so.total | currency }}</span>
+            </div>
+          </div>
 
-      @if (so.notes) {
-        <div class="info-section">
-          <span class="info-label">{{ 'common.notes' | translate }}</span>
-          <div class="info-notes">{{ so.notes }}</div>
+          @if (so.notes) {
+            <div class="info-section">
+              <span class="info-label">{{ 'common.notes' | translate }}</span>
+              <div class="info-notes">{{ so.notes }}</div>
+            </div>
+          }
+
+          <app-barcode-info
+            entityType="SalesOrder"
+            [entityId]="so.id"
+            [entityLabel]="so.orderNumber"
+            [naturalIdentifier]="so.orderNumber"
+            [compact]="true" />
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">{{ 'common.created' | translate }}</span>
+              <span class="info-value">{{ so.createdAt | date:'MM/dd/yyyy' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{{ 'common.updated' | translate }}</span>
+              <span class="info-value">{{ so.updatedAt | date:'MM/dd/yyyy' }}</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="detail-actions">
+            @if (canConfirm(so.status)) {
+              <button class="action-btn action-btn--primary" (click)="confirmSo()">
+                <span class="material-icons-outlined">check_circle</span>
+                {{ 'salesOrders.confirm' | translate }}
+              </button>
+            }
+            @if (canCancel(so.status)) {
+              <button class="action-btn" (click)="cancelSo()">
+                <span class="material-icons-outlined">block</span>
+                {{ 'common.cancel' | translate }}
+              </button>
+            }
+            @if (canDelete(so.status)) {
+              <button class="action-btn action-btn--danger" (click)="deleteSo()">
+                <span class="material-icons-outlined">delete</span>
+                {{ 'common.delete' | translate }}
+              </button>
+            }
+          </div>
         </div>
       }
 
-      <!-- Line Items -->
-      <div class="lines-section">
-        <span class="info-label">{{ 'salesOrders.lineItems' | translate }} ({{ so.lines.length }})</span>
-        @if (so.lines.length > 0) {
-          <table class="lines-table" aria-label="Sales order line items">
-            <thead>
-              <tr>
-                <th scope="col">{{ 'salesOrders.partNumber' | translate }}</th>
-                <th scope="col">{{ 'common.description' | translate }}</th>
-                <th scope="col" class="lines-table__right">{{ 'salesOrders.qty' | translate }}</th>
-                <th scope="col" class="lines-table__right">{{ 'salesOrders.shipped' | translate }}</th>
-                <th scope="col" class="lines-table__right">{{ 'salesOrders.remaining' | translate }}</th>
-                <th scope="col" class="lines-table__right">{{ 'salesOrders.unitPrice' | translate }}</th>
-                <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (line of so.lines; track line.id) {
+      <!-- Line Items Tab -->
+      @if (activeTab() === 'lines') {
+        <div class="tab-panel" role="tabpanel">
+          @if (so.lines.length > 0) {
+            <table class="lines-table" aria-label="Sales order line items">
+              <thead>
                 <tr>
-                  <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
-                  <td>{{ line.description }}</td>
-                  <td class="lines-table__right">{{ line.quantity }}</td>
-                  <td class="lines-table__right">
-                    <span [class.text-success]="line.isFullyShipped"
-                          [class.text-warning]="line.shippedQuantity > 0 && !line.isFullyShipped">
-                      {{ line.shippedQuantity }}
-                    </span>
-                  </td>
-                  <td class="lines-table__right">{{ line.remainingQuantity }}</td>
-                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-                  <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  <th scope="col" class="lines-table__narrow"></th>
+                  <th scope="col">#</th>
+                  <th scope="col">{{ 'salesOrders.partNumber' | translate }}</th>
+                  <th scope="col">{{ 'common.description' | translate }}</th>
+                  <th scope="col" class="lines-table__right">{{ 'salesOrders.qty' | translate }}</th>
+                  <th scope="col" class="lines-table__right">{{ 'salesOrders.shipped' | translate }}/{{ 'salesOrders.remaining' | translate }}</th>
+                  <th scope="col" class="lines-table__right">{{ 'salesOrders.unitPrice' | translate }}</th>
+                  <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
                 </tr>
-              }
-            </tbody>
-          </table>
-        }
-      </div>
-
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">{{ 'common.created' | translate }}</span>
-          <span class="info-value">{{ so.createdAt | date:'MM/dd/yyyy' }}</span>
+              </thead>
+              <tbody>
+                @for (line of so.lines; track line.id) {
+                  <tr [class.line-row--warning]="isLineWarning(line)">
+                    <td class="lines-table__narrow">
+                      @if (line.jobs.length > 0) {
+                        <button class="icon-btn" [attr.aria-label]="'Toggle jobs for line ' + line.lineNumber" (click)="toggleLineExpand(line.id)">
+                          <span class="material-icons-outlined expand-icon" [class.expand-icon--open]="isLineExpanded(line.id)">expand_more</span>
+                        </button>
+                      }
+                    </td>
+                    <td>{{ line.lineNumber }}</td>
+                    <td class="lines-table__mono">
+                      @if (line.partId) {
+                        <app-entity-link type="part" [entityId]="line.partId">{{ line.partNumber }}</app-entity-link>
+                      } @else {
+                        —
+                      }
+                    </td>
+                    <td>{{ line.description }}</td>
+                    <td class="lines-table__right">{{ line.quantity }}</td>
+                    <td class="lines-table__right">
+                      <span [class.text-success]="line.isFullyShipped"
+                            [class.text-warning]="line.shippedQuantity > 0 && !line.isFullyShipped">
+                        {{ line.shippedQuantity }}
+                      </span>
+                      / {{ line.remainingQuantity }}
+                    </td>
+                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  </tr>
+                  <!-- Warning row for no jobs -->
+                  @if (isLineWarning(line)) {
+                    <tr class="line-warning-row">
+                      <td colspan="8">
+                        <span class="material-icons-outlined line-warning-icon">warning</span>
+                        {{ 'salesOrders.noJobCreated' | translate }}
+                      </td>
+                    </tr>
+                  }
+                  <!-- Expanded jobs -->
+                  @if (isLineExpanded(line.id)) {
+                    @for (job of line.jobs; track job.id) {
+                      <tr class="job-row">
+                        <td></td>
+                        <td colspan="2">
+                          <div class="job-row__info">
+                            <app-entity-link type="job" [entityId]="job.id">{{ job.jobNumber }}</app-entity-link>
+                            @if (job.title) {
+                              <span class="job-row__title">{{ job.title }}</span>
+                            }
+                          </div>
+                        </td>
+                        <td>
+                          @if (job.stageName) {
+                            <span [class]="getStatusClass(job.stageName)">{{ job.stageName }}</span>
+                          }
+                        </td>
+                        <td>
+                          @if (job.assigneeName) {
+                            <span class="job-row__assignee">{{ job.assigneeName }}</span>
+                          }
+                        </td>
+                        <td>
+                          @if (job.priority) {
+                            <span [class]="getPriorityClass(job.priority)">{{ job.priority }}</span>
+                          }
+                        </td>
+                        <td class="lines-table__right">
+                          @if (job.dueDate) {
+                            {{ job.dueDate | date:'MM/dd/yyyy' }}
+                          }
+                        </td>
+                        <td>
+                          @if (job.isArchived) {
+                            <span class="chip chip--muted">{{ 'common.archived' | translate }}</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  }
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons-outlined empty-state__icon">list_alt</span>
+              <span class="empty-state__message">{{ 'salesOrders.noLines' | translate }}</span>
+            </div>
+          }
         </div>
-        <div class="info-item">
-          <span class="info-label">{{ 'common.updated' | translate }}</span>
-          <span class="info-value">{{ so.updatedAt | date:'MM/dd/yyyy' }}</span>
+      }
+
+      <!-- Shipments Tab -->
+      @if (activeTab() === 'shipments') {
+        <div class="tab-panel" role="tabpanel">
+          @if (so.shipments && so.shipments.length > 0) {
+            @for (shipment of so.shipments; track shipment.id) {
+              <div class="card">
+                <div class="card__header">
+                  <div class="card__title">
+                    <app-entity-link type="shipment" [entityId]="shipment.id">{{ shipment.shipmentNumber }}</app-entity-link>
+                  </div>
+                  <span [class]="getStatusClass(shipment.status)">{{ shipment.status }}</span>
+                </div>
+
+                <div class="card__body">
+                  <div class="info-grid">
+                    @if (shipment.carrier) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.carrier' | translate }}</span>
+                        <span class="info-value">{{ shipment.carrier }}</span>
+                      </div>
+                    }
+                    @if (shipment.trackingNumber) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.tracking' | translate }}</span>
+                        <span class="info-value info-value--mono">{{ shipment.trackingNumber }}</span>
+                      </div>
+                    }
+                    @if (shipment.shippedDate) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.shippedDate' | translate }}</span>
+                        <span class="info-value">{{ shipment.shippedDate | date:'MM/dd/yyyy' }}</span>
+                      </div>
+                    }
+                    @if (shipment.deliveredDate) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.deliveredDate' | translate }}</span>
+                        <span class="info-value">{{ shipment.deliveredDate | date:'MM/dd/yyyy' }}</span>
+                      </div>
+                    }
+                    <div class="info-item">
+                      <span class="info-label">{{ 'salesOrders.shippingCost' | translate }}</span>
+                      <span class="info-value">{{ shipment.shippingCost | currency }}</span>
+                    </div>
+                    @if (shipment.weight) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.weight' | translate }}</span>
+                        <span class="info-value">{{ shipment.weight }} lbs</span>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Shipment Lines -->
+                  @if (shipment.lines.length > 0) {
+                    <div class="card__section">
+                      <span class="info-label">{{ 'salesOrders.lineItems' | translate }}</span>
+                      <table class="nested-table" aria-label="Shipment line items">
+                        <thead>
+                          <tr>
+                            <th scope="col">{{ 'salesOrders.partNumber' | translate }}</th>
+                            <th scope="col" class="nested-table__right">{{ 'salesOrders.qty' | translate }}</th>
+                            <th scope="col">{{ 'common.notes' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (sl of shipment.lines; track sl.id) {
+                            <tr>
+                              <td class="lines-table__mono">
+                                @if (sl.partId) {
+                                  <app-entity-link type="part" [entityId]="sl.partId">{{ sl.partNumber }}</app-entity-link>
+                                } @else {
+                                  —
+                                }
+                              </td>
+                              <td class="nested-table__right">{{ sl.quantity }}</td>
+                              <td>{{ sl.notes ?? '' }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+
+                  <!-- Packages -->
+                  @if (shipment.packages.length > 0) {
+                    <div class="card__section">
+                      <span class="info-label">{{ 'salesOrders.packages' | translate }}</span>
+                      <table class="nested-table" aria-label="Shipment packages">
+                        <thead>
+                          <tr>
+                            <th scope="col">{{ 'salesOrders.tracking' | translate }}</th>
+                            <th scope="col">{{ 'salesOrders.carrier' | translate }}</th>
+                            <th scope="col" class="nested-table__right">{{ 'salesOrders.weight' | translate }}</th>
+                            <th scope="col">{{ 'common.status' | translate }}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (pkg of shipment.packages; track pkg.id) {
+                            <tr>
+                              <td class="lines-table__mono">{{ pkg.trackingNumber ?? '—' }}</td>
+                              <td>{{ pkg.carrier ?? '—' }}</td>
+                              <td class="nested-table__right">{{ pkg.weight ?? '—' }}</td>
+                              <td>
+                                @if (pkg.status) {
+                                  <span [class]="getStatusClass(pkg.status)">{{ pkg.status }}</span>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  }
+
+                  @if (shipment.notes) {
+                    <div class="card__section">
+                      <span class="info-label">{{ 'common.notes' | translate }}</span>
+                      <div class="info-notes">{{ shipment.notes }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons-outlined empty-state__icon">local_shipping</span>
+              <span class="empty-state__message">{{ 'salesOrders.noShipments' | translate }}</span>
+            </div>
+          }
         </div>
-      </div>
+      }
 
-      <!-- Actions -->
-      <div class="detail-actions">
-        @if (canConfirm(so.status)) {
-          <button class="action-btn action-btn--primary" (click)="confirmSo()">
-            <span class="material-icons-outlined">check_circle</span>
-            {{ 'salesOrders.confirm' | translate }}
-          </button>
-        }
-        @if (canCancel(so.status)) {
-          <button class="action-btn" (click)="cancelSo()">
-            <span class="material-icons-outlined">block</span>
-            {{ 'common.cancel' | translate }}
-          </button>
-        }
-        @if (canDelete(so.status)) {
-          <button class="action-btn action-btn--danger" (click)="deleteSo()">
-            <span class="material-icons-outlined">delete</span>
-            {{ 'common.delete' | translate }}
-          </button>
-        }
-      </div>
+      <!-- Returns Tab -->
+      @if (activeTab() === 'returns') {
+        <div class="tab-panel" role="tabpanel">
+          @if (so.returns && so.returns.length > 0) {
+            @for (ret of so.returns; track ret.id) {
+              <div class="card">
+                <div class="card__header">
+                  <div class="card__title">{{ ret.returnNumber }}</div>
+                  <span [class]="getStatusClass(ret.status)">{{ ret.status }}</span>
+                </div>
 
-      <!-- Activity -->
-      <app-entity-activity-section entityType="SalesOrder" [entityId]="so.id" />
+                <div class="card__body">
+                  <div class="info-grid">
+                    @if (ret.reason) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.reason' | translate }}</span>
+                        <span class="info-value">{{ ret.reason }}</span>
+                      </div>
+                    }
+                    @if (ret.returnDate) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.returnDate' | translate }}</span>
+                        <span class="info-value">{{ ret.returnDate | date:'MM/dd/yyyy' }}</span>
+                      </div>
+                    }
+                    @if (ret.originalJobId) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.originalJob' | translate }}</span>
+                        <span class="info-value">
+                          <app-entity-link type="job" [entityId]="ret.originalJobId">{{ ret.originalJobNumber }}</app-entity-link>
+                        </span>
+                      </div>
+                    }
+                    @if (ret.reworkJobId) {
+                      <div class="info-item">
+                        <span class="info-label">{{ 'salesOrders.reworkJob' | translate }}</span>
+                        <span class="info-value">
+                          <app-entity-link type="job" [entityId]="ret.reworkJobId">{{ ret.reworkJobNumber }}</app-entity-link>
+                        </span>
+                      </div>
+                    }
+                  </div>
+
+                  @if (ret.inspectionNotes) {
+                    <div class="card__section">
+                      <span class="info-label">{{ 'salesOrders.inspectionNotes' | translate }}</span>
+                      <div class="info-notes">{{ ret.inspectionNotes }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          } @else {
+            <div class="empty-state">
+              <span class="material-icons-outlined empty-state__icon">assignment_return</span>
+              <span class="empty-state__message">{{ 'salesOrders.noReturns' | translate }}</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Activity Tab -->
+      @if (activeTab() === 'activity') {
+        <div class="tab-panel" role="tabpanel">
+          <app-entity-activity-section entityType="SalesOrder" [entityId]="so.id" />
+        </div>
+      }
     </div>
   }
 </div>

@@ -17,6 +17,8 @@ import { ChatMessage } from './models/chat-message.model';
 import { ChatMessageEvent } from './models/chat-message-event.model';
 import { ChatRoom, ChannelType } from './models/chat-room.model';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
+import { ChannelBrowserDialogComponent } from './components/channel-browser-dialog/channel-browser-dialog.component';
+import { ChannelSettingsDialogComponent, ChannelSettingsDialogData, ChannelSettingsDialogResult } from './components/channel-settings-dialog/channel-settings-dialog.component';
 import { MentionRenderPipe } from './pipes/mention-render.pipe';
 
 interface UserListItem {
@@ -195,6 +197,46 @@ export class ChatComponent implements OnInit, OnDestroy {
           this.selectChannel(result);
         }
       });
+  }
+
+  protected openBrowseChannels(): void {
+    this.dialog.open(ChannelBrowserDialogComponent, { width: '520px' })
+      .afterClosed().subscribe((result: ChatRoom | undefined) => {
+        if (result) {
+          this.loadChannels();
+          this.selectChannel(result);
+        }
+      });
+  }
+
+  protected openChannelSettings(): void {
+    const channel = this.selectedChannel();
+    if (!channel) return;
+
+    this.dialog.open(ChannelSettingsDialogComponent, {
+      width: '520px',
+      data: { channel } satisfies ChannelSettingsDialogData,
+    }).afterClosed().subscribe((result: ChannelSettingsDialogResult) => {
+      if (result === 'left') {
+        this.backToList();
+      } else if (result === 'updated') {
+        this.loadChannels();
+      }
+    });
+  }
+
+  protected toggleMuteChannel(channel: ChatRoom, event: Event): void {
+    event.stopPropagation();
+    const currentMember = channel.members.find(m => m.userId === this.authService.user()?.id);
+    const isMuted = currentMember?.isMuted ?? false;
+    this.chatService.muteChannel(channel.id, !isMuted).subscribe(() => {
+      this.loadChannels();
+    });
+  }
+
+  protected isChannelMuted(channel: ChatRoom): boolean {
+    const currentMember = channel.members.find(m => m.userId === this.authService.user()?.id);
+    return currentMember?.isMuted ?? false;
   }
 
   protected toggleSection(section: string): void {

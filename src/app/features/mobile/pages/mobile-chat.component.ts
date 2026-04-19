@@ -14,6 +14,8 @@ import { ChatMessage } from '../../chat/models/chat-message.model';
 import { ChatMessageEvent } from '../../chat/models/chat-message-event.model';
 import { ChatRoom } from '../../chat/models/chat-room.model';
 import { CreateChannelDialogComponent } from '../../chat/components/create-channel-dialog/create-channel-dialog.component';
+import { ChannelBrowserDialogComponent } from '../../chat/components/channel-browser-dialog/channel-browser-dialog.component';
+import { ChannelSettingsDialogComponent, ChannelSettingsDialogData, ChannelSettingsDialogResult } from '../../chat/components/channel-settings-dialog/channel-settings-dialog.component';
 import { MentionRenderPipe } from '../../chat/pipes/mention-render.pipe';
 import { formatDate } from '../../../shared/utils/date.utils';
 
@@ -153,6 +155,32 @@ export class MobileChatComponent implements OnDestroy {
           this.selectChannel(result);
         }
       });
+  }
+
+  protected openBrowseChannels(): void {
+    this.dialog.open(ChannelBrowserDialogComponent, { width: '520px' })
+      .afterClosed().subscribe((result: ChatRoom | undefined) => {
+        if (result) {
+          this.loadChannels();
+          this.selectChannel(result);
+        }
+      });
+  }
+
+  protected openChannelSettings(): void {
+    const channel = this.selectedChannel();
+    if (!channel) return;
+
+    this.dialog.open(ChannelSettingsDialogComponent, {
+      width: '520px',
+      data: { channel } satisfies ChannelSettingsDialogData,
+    }).afterClosed().subscribe((result: ChannelSettingsDialogResult) => {
+      if (result === 'left') {
+        this.backToList();
+      } else if (result === 'updated') {
+        this.loadChannels();
+      }
+    });
   }
 
   protected toggleSection(section: string): void {
