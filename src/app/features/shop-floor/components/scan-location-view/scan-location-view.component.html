@@ -1,0 +1,54 @@
+<div class="scan-location">
+  <div class="scan-location__header">
+    <div class="scan-location__title-row">
+      <span class="material-icons-outlined scan-location__icon">warehouse</span>
+      <h3 class="scan-location__title">{{ locationName() }}</h3>
+    </div>
+    <button
+      class="icon-btn"
+      (click)="onClose()"
+      aria-label="Close location view">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="scan-location__loading">
+      <span class="material-icons-outlined scan-location__spinner">sync</span>
+      <span>{{ 'common.loading' | translate }}</span>
+    </div>
+  } @else if (error()) {
+    <div class="scan-location__error">
+      <span class="material-icons-outlined">error_outline</span>
+      <span>{{ error() }}</span>
+    </div>
+  } @else if (!hasContents()) {
+    <div class="scan-location__empty">
+      <span class="material-icons-outlined scan-location__empty-icon">inventory_2</span>
+      <span>{{ 'shopFloor.locationEmpty' | translate }}</span>
+    </div>
+  } @else {
+    <div class="scan-location__list" role="list" aria-label="Location contents">
+      @for (item of contents(); track item.id) {
+        <div class="scan-location__row" role="listitem">
+          <div class="scan-location__part-info">
+            <span class="scan-location__part-name">{{ item.entityName }}</span>
+            @if (item.lotNumber) {
+              <span class="scan-location__lot">{{ 'shopFloor.lot' | translate }}: {{ item.lotNumber }}</span>
+            }
+          </div>
+          <div class="scan-location__qty">
+            {{ item.quantity }}
+          </div>
+          <button
+            class="action-btn action-btn--sm"
+            (click)="onScanPart(item)"
+            [attr.aria-label]="'Scan ' + item.entityName">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            {{ 'shopFloor.scan' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

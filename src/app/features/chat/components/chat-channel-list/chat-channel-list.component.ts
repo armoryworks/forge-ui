@@ -1,134 +1,128 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { AuthService } from '../../../../shared/services/auth.service';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { formatDate } from '../../../../shared/utils/date.utils';
 import { ChatConversation } from '../../models/chat-conversation.model';
 import { ChatRoom } from '../../models/chat-room.model';
-import { formatDate } from '../../../../shared/utils/date.utils';
-import { TranslateService } from '@ngx-translate/core';
-
-interface UserListItem {
-  id: number;
-  initials: string;
-  name: string;
-  color: string;
-}
 
 export interface ChannelSelection {
   type: 'dm' | 'channel';
-  conversationUserId?: number;
   channelId?: number;
+  conversationUserId?: number;
 }
 
 @Component({
   selector: 'app-chat-channel-list',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, TranslatePipe, AvatarComponent, InputComponent],
   templateUrl: './chat-channel-list.component.html',
   styleUrl: './chat-channel-list.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChatChannelListComponent {
-  private readonly authService = inject(AuthService);
-  private readonly http = inject(HttpClient);
   private readonly translate = inject(TranslateService);
 
+  // Inputs
   readonly conversations = input<ChatConversation[]>([]);
-  readonly channels = input<ChatRoom[]>([]);
+  readonly rooms = input<ChatRoom[]>([]);
+  readonly channels = input<ChatRoom[]>([]); // alias for rooms
+  readonly selectedId = input<number | null>(null);
+  readonly selectedType = input<'dm' | 'channel' | null>(null);
   readonly selectedChannelId = input<number | null>(null);
   readonly selectedUserId = input<number | null>(null);
-  readonly compact = input(false);
+  readonly searchTerm = input<string>('');
+  readonly mutedChannelIds = input<Set<number>>(new Set());
 
+  // Outputs
+  readonly conversationSelected = output<ChatConversation>();
+  readonly roomSelected = output<ChatRoom>();
   readonly channelSelected = output<ChannelSelection>();
-  readonly newMessage = output<void>();
-  readonly newGroup = output<void>();
-  readonly browseChannels = output<void>();
+  readonly newMessageClicked = output<void>();
+  readonly newGroupClicked = output<void>();
+  readonly newGroup = output<void>(); // alias
+  readonly browseChannelsClicked = output<void>();
+  readonly browseChannels = output<void>(); // alias
   readonly muteToggled = output<{ channel: ChatRoom; mute: boolean }>();
+  readonly searchChanged = output<string>();
 
-  protected readonly view = signal<'list' | 'userPicker'>('list');
-  protected readonly channelSectionsExpanded = signal<Record<string, boolean>>({
+  // Internal state
+  readonly searchControl = new FormControl('');
+  protected readonly sectionsExpanded = signal<Record<string, boolean>>({
     dms: true,
     channels: true,
     teams: true,
   });
 
-  // User picker state
-  protected readonly allUsers = signal<UserListItem[]>([]);
-  protected readonly userSearchControl = new FormControl('');
-  protected readonly userSearchTerm = signal('');
-  protected readonly filteredUsers = computed(() => {
-    const term = this.userSearchTerm().toLowerCase();
-    const currentUserId = this.authService.user()?.id;
-    const existingUserIds = new Set(this.conversations().map(c => c.userId));
-    return this.allUsers()
-      .filter(u => u.id !== currentUserId)
-      .filter(u => !term || u.name.toLowerCase().includes(term))
-      .filter(u => !existingUserIds.has(u.id));
+  // Merge rooms + channels inputs
+  private readonly allRooms = computed(() => {
+    const r = this.rooms();
+    const c = this.channels();
+    return r.length > 0 ? r : c;
   });
 
   // Computed channel groups
   protected readonly groupChannels = computed(() =>
-    this.channels().filter(c => c.channelType === 'Group' || c.channelType === 'Custom' || c.channelType === 'System' || c.channelType === 'Broadcast'));
+    this.allRooms().filter(c =>
+      c.channelType === 'Group' || c.channelType === 'Custom' || c.channelType === 'System' || c.channelType === 'Broadcast',
+    ),
+  );
+
   protected readonly teamChannels = computed(() =>
-    this.channels().filter(c => c.channelType === 'TeamAuto'));
+    this.allRooms().filter(c => c.channelType === 'TeamAuto'),
+  );
+
+  // Filtered lists based on search
+  protected readonly filteredConversations = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.conversations();
+    return this.conversations().filter(c => c.userName.toLowerCase().includes(term));
+  });
+
+  protected readonly filteredGroupChannels = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.groupChannels();
+    return this.groupChannels().filter(c => c.name.toLowerCase().includes(term));
+  });
+
+  protected readonly filteredTeamChannels = computed(() => {
+    const term = this.searchTerm().toLowerCase();
+    if (!term) return this.teamChannels();
+    return this.teamChannels().filter(c => c.name.toLowerCase().includes(term));
+  });
+
+  protected readonly hasResults = computed(() =>
+    this.filteredConversations().length > 0
+    || this.filteredGroupChannels().length > 0
+    || this.filteredTeamChannels().length > 0,
+  );
+
+  constructor() {
+    this.searchControl.valueChanges.subscribe(v => {
+      this.searchChanged.emit(v ?? '');
+    });
+  }
 
   protected toggleSection(section: string): void {
-    this.channelSectionsExpanded.update(s => ({ ...s, [section]: !s[section] }));
+    this.sectionsExpanded.update(s => ({ ...s, [section]: !s[section] }));
   }
 
-  protected selectConversation(conv: ChatConversation): void {
-    this.channelSelected.emit({ type: 'dm', conversationUserId: conv.userId });
-  }
-
-  protected selectChannel(channel: ChatRoom): void {
-    this.channelSelected.emit({ type: 'channel', channelId: channel.id });
-  }
-
-  protected openUserPicker(): void {
-    this.view.set('userPicker');
-    this.userSearchControl.setValue('');
-    this.userSearchTerm.set('');
-    if (this.allUsers().length === 0) {
-      this.http.get<UserListItem[]>('/api/v1/users').subscribe(users => {
-        this.allUsers.set(users);
-      });
-    }
-    this.userSearchControl.valueChanges.subscribe(v => this.userSearchTerm.set(v ?? ''));
-  }
-
-  protected selectUser(user: UserListItem): void {
-    this.view.set('list');
-    this.channelSelected.emit({ type: 'dm', conversationUserId: user.id });
-    this.newMessage.emit();
-  }
-
-  protected cancelUserPicker(): void {
-    this.view.set('list');
-  }
-
-  protected onNewGroup(): void {
-    this.newGroup.emit();
-  }
-
-  protected onBrowseChannels(): void {
-    this.browseChannels.emit();
-  }
-
-  protected toggleMuteChannel(channel: ChatRoom, event: Event): void {
-    event.stopPropagation();
-    const currentMember = channel.members.find(m => m.userId === this.authService.user()?.id);
-    const isMuted = currentMember?.isMuted ?? false;
-    this.muteToggled.emit({ channel, mute: !isMuted });
+  protected isActive(type: 'dm' | 'channel', id: number): boolean {
+    return this.selectedType() === type && this.selectedId() === id;
   }
 
   protected isChannelMuted(channel: ChatRoom): boolean {
-    const currentMember = channel.members.find(m => m.userId === this.authService.user()?.id);
-    return currentMember?.isMuted ?? false;
+    return this.mutedChannelIds().has(channel.id);
+  }
+
+  protected onMuteToggle(channel: ChatRoom, event: Event): void {
+    event.stopPropagation();
+    this.muteToggled.emit({ channel, mute: !this.isChannelMuted(channel) });
   }
 
   protected getChannelIcon(channel: ChatRoom): string {
@@ -142,7 +136,7 @@ export class ChatChannelListComponent {
     }
   }
 
-  protected formatDate(date: Date | string | null): string {
+  protected formatTimestamp(date: Date | string | null): string {
     if (!date) return '';
     const d = typeof date === 'string' ? new Date(date) : date;
     const now = new Date();

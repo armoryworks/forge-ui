@@ -1,0 +1,126 @@
+@use 'styles/variables' as *;
+
+.scan-location {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__icon {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    padding: $sp-xl;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+
+  &__spinner {
+    animation: spin 1s linear infinite;
+    font-size: $icon-size-md;
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    padding: $sp-xl;
+    color: var(--error);
+    font-size: $font-size-sm;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-xl;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+
+  &__empty-icon {
+    font-size: $icon-size-xxl;
+    opacity: 0.5;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+    border: $border-width-thin solid var(--border);
+    transition: background $transition-fast;
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 5%, transparent);
+    }
+  }
+
+  &__part-info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__part-name {
+    font-size: $font-size-base;
+    font-weight: 500;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__lot {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__qty {
+    font-size: $font-size-md;
+    font-weight: 600;
+    font-family: $font-family-mono;
+    color: var(--text);
+    min-width: 48px;
+    text-align: right;
+  }
+}

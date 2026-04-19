@@ -3019,7 +3019,24 @@
     "shareMessage": "Add a message (optional)",
     "cancel": "Cancel",
     "send": "Send",
-    "entityShared": "Shared to chat"
+    "entityShared": "Shared to chat",
+    "channelList": {
+      "directMessages": "Direct Messages",
+      "groupChats": "Group Chats",
+      "newMessage": "New Message",
+      "newGroup": "New Group",
+      "searchConversations": "Search conversations",
+      "noConversations": "No conversations yet",
+      "noResults": "No results found"
+    },
+    "thread": {
+      "replies": "Thread",
+      "replyPlaceholder": "Reply in thread...",
+      "noReplies": "No replies yet. Start the conversation!",
+      "backToChat": "Back to chat",
+      "replyCount_one": "{{count}} reply",
+      "replyCount_other": "{{count}} replies"
+    }
   },
   "ai": {
     "title": "AI Assistants",

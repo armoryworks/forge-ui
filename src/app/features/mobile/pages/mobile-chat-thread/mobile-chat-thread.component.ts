@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, ElementRef, inject, input, OnInit, output, signal, viewChild } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
-import { TranslatePipe } from '@ngx-translate/core';
-import { MentionRenderPipe } from '../../../chat/pipes/mention-render.pipe';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ChatService } from '../../../chat/services/chat.service';
 import { ChatMessage } from '../../../chat/models/chat-message.model';
-import { AuthService } from '../../../../shared/services/auth.service';
+import { MentionRenderPipe } from '../../../chat/pipes/mention-render.pipe';
 
 @Component({
   selector: 'app-mobile-chat-thread',
@@ -20,26 +20,43 @@ import { AuthService } from '../../../../shared/services/auth.service';
 export class MobileChatThreadComponent implements OnInit {
   private readonly chatService = inject(ChatService);
   private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
 
-  protected readonly parentMessage = signal<ChatMessage | null>(null);
+  private readonly repliesContainer = viewChild<ElementRef<HTMLElement>>('repliesContainer');
+
+  readonly parentMessage = input.required<ChatMessage>();
+  readonly closed = output<void>();
+  readonly replyAdded = output<{ parentMessageId: number; replyCount: number }>();
+
   protected readonly replies = signal<ChatMessage[]>([]);
-  protected readonly loading = signal(false);
   protected readonly replyControl = new FormControl('');
+  protected readonly loading = signal(true);
   protected readonly sending = signal(false);
 
-  ngOnInit(): void {
-    const messageId = Number(this.route.snapshot.paramMap.get('messageId'));
-    if (!messageId) {
-      this.goBack();
-      return;
-    }
-    this.loadThread(messageId);
-  }
+  protected readonly replyCount = computed(() => this.replies().length);
 
-  protected goBack(): void {
-    this.router.navigate(['../../chat'], { relativeTo: this.route });
+  protected readonly uniqueParticipants = computed(() => {
+    const parent = this.parentMessage();
+    const participantMap = new Map<number, { initials: string; color: string }>();
+
+    participantMap.set(parent.senderId, {
+      initials: parent.senderInitials,
+      color: parent.senderColor,
+    });
+
+    for (const reply of this.replies()) {
+      if (!participantMap.has(reply.senderId)) {
+        participantMap.set(reply.senderId, {
+          initials: reply.senderInitials,
+          color: reply.senderColor,
+        });
+      }
+    }
+
+    return Array.from(participantMap.values());
+  });
+
+  ngOnInit(): void {
+    this.loadReplies();
   }
 
   protected isOwnMessage(msg: ChatMessage): boolean {
@@ -51,20 +68,9 @@ export class MobileChatThreadComponent implements OnInit {
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
 
-  protected sendReply(): void {
-    const content = this.replyControl.value?.trim();
-    const parent = this.parentMessage();
-    if (!content || !parent) return;
-
-    this.sending.set(true);
-    this.chatService.replyInThread(parent.id, content).subscribe({
-      next: (reply) => {
-        this.replies.update(r => [...r, reply]);
-        this.replyControl.setValue('');
-        this.sending.set(false);
-      },
-      error: () => this.sending.set(false),
-    });
+  protected formatDate(date: Date | string): string {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -74,46 +80,62 @@ export class MobileChatThreadComponent implements OnInit {
     }
   }
 
-  protected getFileIcon(contentType: string): string {
-    if (contentType.startsWith('image/')) return 'image';
-    if (contentType === 'application/pdf') return 'picture_as_pdf';
-    return 'attach_file';
+  protected sendReply(): void {
+    const content = this.replyControl.value?.trim();
+    if (!content || this.sending()) return;
+
+    this.sending.set(true);
+    this.chatService.replyInThread(this.parentMessage().id, content).subscribe({
+      next: (reply) => {
+        this.replies.update(r => [...r, reply]);
+        this.replyControl.setValue('');
+        this.sending.set(false);
+        this.replyAdded.emit({
+          parentMessageId: this.parentMessage().id,
+          replyCount: this.replies().length,
+        });
+        this.scrollToBottom();
+      },
+      error: () => {
+        this.sending.set(false);
+      },
+    });
   }
 
-  protected formatFileSize(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  protected onBack(): void {
+    this.closed.emit();
   }
 
-  private loadThread(messageId: number): void {
+  private loadReplies(): void {
     this.loading.set(true);
-    this.chatService.getThread(messageId).subscribe({
+    this.chatService.getThread(this.parentMessage().id).subscribe({
       next: (replies) => {
-        if (replies.length > 0) {
-          // The first element may be the parent or all replies
-          // We try to find the parent from the replies context
-          this.replies.set(replies);
-        }
+        this.replies.set(replies);
         this.loading.set(false);
+        this.scrollToBottom();
       },
       error: () => {
         this.loading.set(false);
-        this.goBack();
       },
     });
+  }
 
-    // Load parent message by fetching thread — the parent info is passed via state
-    const nav = this.router.getCurrentNavigation();
-    const parentMsg = nav?.extras?.state?.['parentMessage'] as ChatMessage | undefined;
-    if (parentMsg) {
-      this.parentMessage.set(parentMsg);
-    } else {
-      // Fallback: get from history state
-      const state = history.state?.parentMessage as ChatMessage | undefined;
-      if (state) {
-        this.parentMessage.set(state);
+  /** Called by parent when a SignalR thread reply arrives for this thread. */
+  addReply(reply: ChatMessage): void {
+    this.replies.update(r => [...r, reply]);
+    this.replyAdded.emit({
+      parentMessageId: this.parentMessage().id,
+      replyCount: this.replies().length,
+    });
+    this.scrollToBottom();
+  }
+
+  private scrollToBottom(): void {
+    setTimeout(() => {
+      const container = this.repliesContainer()?.nativeElement;
+      if (container) {
+        container.scrollTop = container.scrollHeight;
       }
-    }
+    });
   }
 }

@@ -2812,7 +2812,24 @@
     "shareMessage": "Agregar un mensaje (opcional)",
     "cancel": "Cancelar",
     "send": "Enviar",
-    "entityShared": "Compartido en chat"
+    "entityShared": "Compartido en chat",
+    "channelList": {
+      "directMessages": "Mensajes Directos",
+      "groupChats": "Chats de Grupo",
+      "newMessage": "Nuevo Mensaje",
+      "newGroup": "Nuevo Grupo",
+      "searchConversations": "Buscar conversaciones",
+      "noConversations": "Sin conversaciones aún",
+      "noResults": "No se encontraron resultados"
+    },
+    "thread": {
+      "replies": "Hilo",
+      "replyPlaceholder": "Responder en el hilo...",
+      "noReplies": "Sin respuestas aun. Inicia la conversacion!",
+      "backToChat": "Volver al chat",
+      "replyCount_one": "{{count}} respuesta",
+      "replyCount_other": "{{count}} respuestas"
+    }
   },
   "ai": {
     "title": "Asistentes IA",

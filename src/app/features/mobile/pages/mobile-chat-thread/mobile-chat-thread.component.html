@@ -1,115 +1,125 @@
-<div class="mobile-thread">
-  <div class="mobile-thread__header">
-    <button class="icon-btn" (click)="goBack()" aria-label="Back to messages">
+<div class="chat-thread">
+  <!-- Header -->
+  <div class="chat-thread__header">
+    <button class="icon-btn" (click)="onBack()" [attr.aria-label]="'chat.thread.backToChat' | translate">
       <span class="material-icons-outlined">arrow_back</span>
     </button>
-    <span class="mobile-thread__title">{{ 'chat.thread' | translate }}</span>
+    <div class="chat-thread__header-info">
+      <span class="chat-thread__header-title">{{ 'chat.thread.replies' | translate }}</span>
+      <span class="chat-thread__header-count">
+        {{ replyCount() }} {{ (replyCount() === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replyCount() } }}
+      </span>
+    </div>
+    <div class="chat-thread__participants">
+      @for (participant of uniqueParticipants(); track $index) {
+        @if ($index < 5) {
+          <app-avatar
+            [initials]="participant.initials"
+            [color]="participant.color"
+            size="sm"
+            [attr.aria-label]="participant.initials" />
+        }
+      }
+      @if (uniqueParticipants().length > 5) {
+        <span class="chat-thread__participant-overflow">+{{ uniqueParticipants().length - 5 }}</span>
+      }
+    </div>
   </div>
 
-  <div class="mobile-thread__messages">
-    <!-- Parent message -->
-    @if (parentMessage(); as parent) {
-      <div class="mobile-thread__parent">
-        <div class="mobile-thread__parent-row">
-          <app-avatar [initials]="parent.senderInitials" [color]="parent.senderColor" size="sm" />
-          <div class="mobile-thread__parent-meta">
-            <span class="mobile-thread__parent-name">{{ parent.senderName }}</span>
-            <span class="mobile-thread__parent-time">{{ formatTime(parent.createdAt) }}</span>
+  <!-- Messages area -->
+  <div class="chat-thread__messages" #repliesContainer>
+    <!-- Parent message (highlighted) -->
+    <div class="chat-thread__parent">
+      <div class="chat-thread__parent-msg">
+        <app-avatar [initials]="parentMessage().senderInitials" [color]="parentMessage().senderColor" size="sm" />
+        <div class="chat-thread__parent-content">
+          <div class="chat-thread__parent-meta">
+            <span class="chat-thread__parent-sender">{{ parentMessage().senderName }}</span>
+            <span class="chat-thread__parent-time">{{ formatDate(parentMessage().createdAt) }} {{ formatTime(parentMessage().createdAt) }}</span>
           </div>
+          @if (parentMessage().fileAttachment) {
+            <div class="chat-thread__attachment">
+              <span class="material-icons-outlined">attach_file</span>
+              <a [href]="'/api/v1/files/' + parentMessage().fileAttachment!.id + '/download'" target="_blank" rel="noopener">
+                {{ parentMessage().fileAttachment!.fileName }}
+              </a>
+            </div>
+          }
+          @if (parentMessage().content) {
+            <span class="chat-thread__parent-text" [innerHTML]="parentMessage().content | mentionRender"></span>
+          }
         </div>
-        @if (parent.fileAttachment) {
-          <div class="mobile-thread__attachment">
-            @if (parent.fileAttachment.contentType.startsWith('image/')) {
-              <img
-                class="mobile-thread__attachment-img"
-                [src]="'/api/v1/files/' + parent.fileAttachment.id + '/download'"
-                [alt]="parent.fileAttachment.fileName"
-                loading="lazy" />
-            } @else {
-              <div class="mobile-thread__attachment-file">
-                <span class="material-icons-outlined">{{ getFileIcon(parent.fileAttachment.contentType) }}</span>
-                <a [href]="'/api/v1/files/' + parent.fileAttachment.id + '/download'" target="_blank" rel="noopener">
-                  {{ parent.fileAttachment.fileName }}
-                </a>
-                <span class="mobile-thread__attachment-size">{{ formatFileSize(parent.fileAttachment.size) }}</span>
-              </div>
-            }
-          </div>
-        }
-        @if (parent.content) {
-          <div class="mobile-thread__parent-text" [innerHTML]="parent.content | mentionRender"></div>
-        }
       </div>
+    </div>
 
-      <!-- Replies separator -->
-      @if (replies().length > 0) {
-        <div class="mobile-thread__separator">
-          <span class="mobile-thread__separator-line"></span>
-          <span class="mobile-thread__separator-label">
-            {{ replies().length }} {{ replies().length === 1 ? 'reply' : 'replies' }}
-          </span>
-          <span class="mobile-thread__separator-line"></span>
-        </div>
-      }
+    <!-- Separator -->
+    @if (replyCount() > 0) {
+      <div class="chat-thread__separator">
+        <span class="chat-thread__separator-line"></span>
+        <span class="chat-thread__separator-label">
+          {{ replyCount() }} {{ (replyCount() === 1 ? 'chat.thread.replyCount_one' : 'chat.thread.replyCount_other') | translate: { count: replyCount() } }}
+        </span>
+        <span class="chat-thread__separator-line"></span>
+      </div>
     }
 
     <!-- Loading state -->
     @if (loading()) {
-      <div class="mobile-thread__loading">
-        <span class="material-icons-outlined mobile-thread__spinner">sync</span>
+      <div class="chat-thread__loading">
+        <span class="material-icons-outlined chat-thread__spinner">sync</span>
       </div>
     }
 
-    <!-- Thread replies -->
+    <!-- Empty state -->
+    @if (!loading() && replyCount() === 0) {
+      <div class="chat-thread__empty">
+        <span class="material-icons-outlined chat-thread__empty-icon">forum</span>
+        <span class="chat-thread__empty-text">{{ 'chat.thread.noReplies' | translate }}</span>
+      </div>
+    }
+
+    <!-- Replies -->
     @for (reply of replies(); track reply.id) {
-      <div class="mobile-thread__reply" [class.mobile-thread__reply--own]="isOwnMessage(reply)">
+      <div class="chat-thread__reply" [class.chat-thread__reply--own]="isOwnMessage(reply)">
         @if (!isOwnMessage(reply)) {
           <app-avatar [initials]="reply.senderInitials" [color]="reply.senderColor" size="sm" />
         }
-        <div class="mobile-thread__reply-bubble">
+        <div class="chat-thread__reply-bubble">
           @if (!isOwnMessage(reply)) {
-            <span class="mobile-thread__reply-sender">{{ reply.senderName }}</span>
+            <span class="chat-thread__reply-sender">{{ reply.senderName }}</span>
           }
           @if (reply.fileAttachment) {
-            <div class="mobile-thread__attachment">
-              @if (reply.fileAttachment.contentType.startsWith('image/')) {
-                <img
-                  class="mobile-thread__attachment-img"
-                  [src]="'/api/v1/files/' + reply.fileAttachment.id + '/download'"
-                  [alt]="reply.fileAttachment.fileName"
-                  loading="lazy" />
-              } @else {
-                <div class="mobile-thread__attachment-file">
-                  <span class="material-icons-outlined">{{ getFileIcon(reply.fileAttachment.contentType) }}</span>
-                  <a [href]="'/api/v1/files/' + reply.fileAttachment.id + '/download'" target="_blank" rel="noopener">
-                    {{ reply.fileAttachment.fileName }}
-                  </a>
-                  <span class="mobile-thread__attachment-size">{{ formatFileSize(reply.fileAttachment.size) }}</span>
-                </div>
-              }
+            <div class="chat-thread__attachment">
+              <span class="material-icons-outlined">attach_file</span>
+              <a [href]="'/api/v1/files/' + reply.fileAttachment!.id + '/download'" target="_blank" rel="noopener">
+                {{ reply.fileAttachment!.fileName }}
+              </a>
             </div>
           }
           @if (reply.content) {
-            <span class="mobile-thread__reply-text" [innerHTML]="reply.content | mentionRender"></span>
+            <span class="chat-thread__reply-text" [innerHTML]="reply.content | mentionRender"></span>
           }
-          <span class="mobile-thread__reply-time">{{ formatTime(reply.createdAt) }}</span>
+          <span class="chat-thread__reply-time">{{ formatTime(reply.createdAt) }}</span>
         </div>
       </div>
     }
   </div>
 
-  <div class="mobile-thread__input">
+  <!-- Reply input -->
+  <div class="chat-thread__input">
     <input
-      class="mobile-thread__input-field"
+      class="chat-thread__input-field"
       type="text"
-      [placeholder]="'chat.replyInThread' | translate"
+      [placeholder]="'chat.thread.replyPlaceholder' | translate"
       [formControl]="replyControl"
-      (keydown)="onKeydown($event)" />
+      (keydown)="onKeydown($event)"
+      data-testid="thread-reply-input" />
     <button
-      class="icon-btn mobile-thread__send"
+      class="icon-btn chat-thread__send"
       [disabled]="!replyControl.value?.trim() || sending()"
       (click)="sendReply()"
-      aria-label="Send thread reply">
+      [attr.aria-label]="'chat.sendMessage' | translate"
+      data-testid="thread-send-btn">
       <span class="material-icons-outlined">send</span>
     </button>
   </div>
