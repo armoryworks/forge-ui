@@ -1,0 +1,290 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+// ── Messages container ──
+.message-area__messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: $sp-md $sp-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  @include custom-scrollbar(6px);
+}
+
+// ── Date separator ──
+.message-area__date-separator {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm 0;
+  align-self: stretch;
+}
+
+.message-area__date-line {
+  flex: 1;
+  height: $border-width-thin;
+  background: var(--border);
+}
+
+.message-area__date-label {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+// ── Message bubbles ──
+.message-area__msg {
+  display: flex;
+  align-items: flex-end;
+  gap: $sp-sm;
+  max-width: 85%;
+
+  &--own {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+}
+
+.message-area__bubble {
+  padding: $sp-md $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  .message-area__msg--own & {
+    background: var(--primary-light);
+    border-color: var(--primary);
+  }
+}
+
+.message-area__sender {
+  font-size: $font-size-xxs;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.message-area__text {
+  font-size: $font-size-base;
+  color: var(--text);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-area__time {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  align-self: flex-end;
+}
+
+// ── File attachment in messages ──
+.message-area__attachment {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  margin-bottom: $sp-xs;
+}
+
+.message-area__attachment-icon {
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+}
+
+.message-area__attachment-name {
+  flex: 1;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: var(--primary);
+  text-decoration: none;
+  @include truncate;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.message-area__attachment-size {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+// ── Thread link + reply button ──
+.message-area__thread-link {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  padding: $sp-xs $sp-sm;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  font-size: $font-size-xxs;
+  font-family: $font-family-primary;
+  cursor: pointer;
+  align-self: flex-start;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+  }
+}
+
+.message-area__reply-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  align-self: flex-end;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+  }
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
+.message-area__msg:hover .message-area__reply-btn {
+  display: flex;
+}
+
+// ── Input area ──
+.message-area__input-area {
+  flex-shrink: 0;
+}
+
+.message-area__input {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.message-area__file-input {
+  display: none;
+}
+
+.message-area__input-field {
+  flex: 1;
+  height: $input-height;
+  padding: 0 $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-size: $font-size-base;
+  font-family: $font-family-primary;
+  outline: none;
+  border-radius: $border-radius;
+
+  &:focus {
+    border-color: var(--primary);
+  }
+
+  &::placeholder {
+    color: var(--text-muted);
+  }
+}
+
+.message-area__send {
+  width: $btn-icon-size;
+  height: $btn-icon-size;
+  border: none;
+  background: transparent;
+  color: var(--primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: $border-radius;
+
+  &:hover:not(:disabled) {
+    background: var(--bg);
+  }
+
+  &:disabled {
+    color: var(--text-muted);
+    cursor: default;
+  }
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.message-area__readonly {
+  flex: 1;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  padding: $sp-sm 0;
+}
+
+// ── Pending file ──
+.message-area__pending-file {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-lg;
+  background: var(--bg);
+  border-top: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+  }
+}
+
+.message-area__pending-file-name {
+  flex: 1;
+  @include truncate;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.message-area__pending-file-size {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+// ── Mention chips ──
+:host ::ng-deep .mention-chip {
+  display: inline;
+  padding: $sp-xxs $sp-sm;
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: $font-size-sm;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

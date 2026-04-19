@@ -1,0 +1,210 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.scan-overlay {
+  position: fixed;
+  inset: 0;
+  background: $backdrop-color;
+  z-index: $z-dialog;
+  @include flex-center;
+  animation: fadeIn 150ms ease;
+}
+
+.scan-overlay__card {
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  width: 540px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
+  animation: slideUp 200ms ease;
+}
+
+// ─── Header ───
+.scan-overlay__header {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-xl;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.scan-overlay__part-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.scan-overlay__part-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-xl;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.scan-overlay__part-desc {
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+}
+
+.scan-overlay__stock-info {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+}
+
+.scan-overlay__stock-badge {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: color-mix(in srgb, var(--success) 10%, transparent);
+  border: $border-width-thin solid var(--success);
+  font-family: $font-family-mono;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+    color: var(--success);
+  }
+}
+
+.scan-overlay__stock-qty {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.scan-overlay__stock-label {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.scan-overlay__location {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
+// ─── Actions ───
+.scan-overlay__actions {
+  padding: $sp-md 0;
+}
+
+.scan-overlay__disabled-hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-xl;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-xs;
+    color: var(--warning);
+  }
+
+  strong {
+    color: var(--text-secondary);
+  }
+}
+
+// ─── Footer ───
+.scan-overlay__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-md $sp-xl;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.scan-overlay__multi-scan-btn {
+  @include flex-center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  color: var(--text-secondary);
+  font-family: $font-family-primary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  transition: all $transition-fast;
+  min-height: 36px;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+
+  &:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &--active {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+  }
+}
+
+// ─── Loading ───
+.scan-overlay__loading {
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-3xl;
+}
+
+.scan-overlay__spinner {
+  font-size: 48px;
+  color: var(--primary);
+  animation: spin 1s linear infinite;
+}
+
+.scan-overlay__loading-text {
+  font-size: $font-size-md;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+// ─── Error ───
+.scan-overlay__error {
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-3xl;
+  color: var(--error);
+
+  .material-icons-outlined {
+    font-size: 48px;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-md;
+  }
+}
+
+// ─── Animations ───
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

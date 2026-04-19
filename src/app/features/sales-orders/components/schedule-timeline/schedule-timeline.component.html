@@ -1,0 +1,82 @@
+@if (lineSchedules().length > 0) {
+  @for (line of lineSchedules(); track line.salesOrderLineId) {
+    <div class="schedule-line" [class.schedule-line--at-risk]="line.isAtRisk">
+      <!-- Line Header -->
+      <div class="schedule-line__header">
+        <div class="schedule-line__part">
+          @if (line.partNumber) {
+            <span class="schedule-line__part-number">{{ line.partNumber }}</span>
+          }
+          @if (line.partDescription) {
+            <span class="schedule-line__part-desc">{{ line.partDescription }}</span>
+          }
+        </div>
+        @if (line.isAtRisk) {
+          <span class="chip chip--error">
+            <span class="material-icons-outlined chip__icon">warning</span>
+            {{ 'salesOrders.schedule.atRisk' | translate }}
+          </span>
+        } @else {
+          <span class="chip chip--success">
+            {{ 'salesOrders.schedule.onTrack' | translate }}
+          </span>
+        }
+      </div>
+
+      <!-- Visual Timeline Bar -->
+      @if (line.timelineSegments.length > 0) {
+        <div class="timeline-bar" role="img" [attr.aria-label]="'salesOrders.schedule.timelineLabel' | translate">
+          @for (seg of line.timelineSegments; track $index) {
+            <div class="timeline-bar__segment timeline-bar__segment--{{ seg.status }}"
+                 [style.left.%]="seg.left"
+                 [style.width.%]="seg.width">
+            </div>
+          }
+          <!-- Milestone dots -->
+          @for (item of line.items; track item.key; let i = $index) {
+            @if (item.date) {
+              <div class="timeline-bar__dot timeline-bar__dot--{{ item.status }}"
+                   [style.left.%]="getDotPosition(line, i)"
+                   [attr.aria-label]="(item.label | translate) + ': ' + (item.date | date:'MM/dd/yyyy')">
+              </div>
+            }
+          }
+        </div>
+      }
+
+      <!-- Milestone Cards -->
+      <div class="milestone-list">
+        @for (item of line.items; track item.key) {
+          <div class="milestone" [class.milestone--completed]="item.status === 'completed'"
+               [class.milestone--overdue]="item.status === 'overdue'">
+            <span class="material-icons-outlined milestone__icon">{{ item.icon }}</span>
+            <div class="milestone__info">
+              <span class="milestone__label">{{ item.label | translate }}</span>
+              <span class="milestone__date">
+                @if (item.date) {
+                  {{ item.date | date:'MM/dd/yyyy' }}
+                } @else {
+                  --
+                }
+              </span>
+            </div>
+            <span class="milestone__status">
+              @if (item.status === 'completed') {
+                <span class="chip chip--success">{{ 'salesOrders.schedule.done' | translate }}</span>
+              } @else if (item.status === 'overdue') {
+                <span class="chip chip--error">{{ 'salesOrders.schedule.overdue' | translate }}</span>
+              } @else {
+                <span class="chip chip--muted">{{ 'salesOrders.schedule.upcoming' | translate }}</span>
+              }
+            </span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+} @else {
+  <div class="empty-state">
+    <span class="material-icons-outlined empty-state__icon">event_busy</span>
+    <span class="empty-state__message">{{ 'salesOrders.schedule.noSchedule' | translate }}</span>
+  </div>
+}

@@ -1,0 +1,188 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.schedule-line {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+}
+
+.schedule-line--at-risk {
+  border-left: $border-width-accent solid var(--error);
+}
+
+.schedule-line__header {
+  @include flex-between;
+  gap: $sp-md;
+}
+
+.schedule-line__part {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.schedule-line__part-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 700;
+}
+
+.schedule-line__part-desc {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  @include truncate;
+}
+
+// --- Visual Timeline Bar ---
+.timeline-bar {
+  position: relative;
+  height: 20px;
+  margin: $sp-sm 12px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.timeline-bar__segment {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 2px;
+
+  &--completed {
+    background: var(--success);
+    opacity: 0.6;
+  }
+
+  &--active {
+    background: var(--primary);
+    opacity: 0.7;
+  }
+
+  &--upcoming {
+    background: var(--border);
+  }
+}
+
+.timeline-bar__dot {
+  position: absolute;
+  top: 50%;
+  width: $dot-size-sm;
+  height: $dot-size-sm;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  border: $border-width-thin solid var(--surface);
+  z-index: 1;
+
+  &--completed {
+    background: var(--success);
+  }
+
+  &--overdue {
+    background: var(--error);
+  }
+
+  &--upcoming {
+    background: var(--text-muted);
+  }
+}
+
+// --- Milestone List ---
+.milestone-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.milestone {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border-left: $border-width solid transparent;
+  transition: background $transition-fast;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 4%, transparent);
+  }
+}
+
+.milestone--completed {
+  border-left-color: var(--success);
+
+  .milestone__icon {
+    color: var(--success);
+  }
+}
+
+.milestone--overdue {
+  border-left-color: var(--error);
+  background: color-mix(in srgb, var(--error) 5%, transparent);
+
+  .milestone__icon {
+    color: var(--error);
+  }
+}
+
+.milestone__icon {
+  font-size: $icon-size-md;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.milestone__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  flex: 1;
+  min-width: 0;
+}
+
+.milestone__label {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.milestone__date {
+  font-size: $font-size-sm;
+  font-family: $font-family-mono;
+}
+
+.milestone__status {
+  flex-shrink: 0;
+}
+
+.chip__icon {
+  font-size: $icon-size-xs;
+  vertical-align: middle;
+  margin-right: $sp-xxs;
+}
+
+// --- Empty State ---
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-3xl $sp-lg;
+  color: var(--text-muted);
+}
+
+.empty-state__icon {
+  font-size: $icon-size-hero;
+  opacity: 0.4;
+}
+
+.empty-state__message {
+  font-size: $font-size-sm;
+}

@@ -1,0 +1,51 @@
+<div class="thread-panel__header">
+  <span class="thread-panel__title">Thread</span>
+  <button class="icon-btn" (click)="onClose()" aria-label="Close thread">
+    <span class="material-icons-outlined">close</span>
+  </button>
+</div>
+<div class="thread-panel__messages">
+  <!-- Parent message -->
+  <div class="thread-panel__msg">
+    <app-avatar [initials]="parentMessage().senderInitials" [color]="parentMessage().senderColor" size="sm" />
+    <div class="thread-panel__bubble">
+      <span class="thread-panel__sender">{{ parentMessage().senderName }}</span>
+      <span class="thread-panel__text" [innerHTML]="parentMessage().content | mentionRender"></span>
+      <span class="thread-panel__time">{{ formatTime(parentMessage().createdAt) }}</span>
+    </div>
+  </div>
+  @if (replies().length > 0) {
+    <div class="thread-panel__divider">
+      <span class="thread-panel__divider-text">{{ replies().length }} {{ replies().length === 1 ? 'reply' : 'replies' }}</span>
+    </div>
+  }
+  @for (reply of replies(); track reply.id) {
+    <div class="thread-panel__msg" [class.thread-panel__msg--own]="isOwnMessage(reply)">
+      @if (!isOwnMessage(reply)) {
+        <app-avatar [initials]="reply.senderInitials" [color]="reply.senderColor" size="sm" />
+      }
+      <div class="thread-panel__bubble">
+        @if (!isOwnMessage(reply)) {
+          <span class="thread-panel__sender">{{ reply.senderName }}</span>
+        }
+        <span class="thread-panel__text" [innerHTML]="reply.content | mentionRender"></span>
+        <span class="thread-panel__time">{{ formatTime(reply.createdAt) }}</span>
+      </div>
+    </div>
+  }
+</div>
+<div class="thread-panel__input">
+  <input
+    class="thread-panel__input-field"
+    type="text"
+    placeholder="Reply in thread..."
+    [formControl]="replyControl"
+    (keydown)="onKeydown($event)" />
+  <button
+    class="icon-btn thread-panel__send"
+    [disabled]="!replyControl.value?.trim()"
+    (click)="sendReply()"
+    aria-label="Send thread reply">
+    <span class="material-icons-outlined">send</span>
+  </button>
+</div>

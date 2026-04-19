@@ -1,0 +1,116 @@
+<div class="mobile-thread">
+  <div class="mobile-thread__header">
+    <button class="icon-btn" (click)="goBack()" aria-label="Back to messages">
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    <span class="mobile-thread__title">{{ 'chat.thread' | translate }}</span>
+  </div>
+
+  <div class="mobile-thread__messages">
+    <!-- Parent message -->
+    @if (parentMessage(); as parent) {
+      <div class="mobile-thread__parent">
+        <div class="mobile-thread__parent-row">
+          <app-avatar [initials]="parent.senderInitials" [color]="parent.senderColor" size="sm" />
+          <div class="mobile-thread__parent-meta">
+            <span class="mobile-thread__parent-name">{{ parent.senderName }}</span>
+            <span class="mobile-thread__parent-time">{{ formatTime(parent.createdAt) }}</span>
+          </div>
+        </div>
+        @if (parent.fileAttachment) {
+          <div class="mobile-thread__attachment">
+            @if (parent.fileAttachment.contentType.startsWith('image/')) {
+              <img
+                class="mobile-thread__attachment-img"
+                [src]="'/api/v1/files/' + parent.fileAttachment.id + '/download'"
+                [alt]="parent.fileAttachment.fileName"
+                loading="lazy" />
+            } @else {
+              <div class="mobile-thread__attachment-file">
+                <span class="material-icons-outlined">{{ getFileIcon(parent.fileAttachment.contentType) }}</span>
+                <a [href]="'/api/v1/files/' + parent.fileAttachment.id + '/download'" target="_blank" rel="noopener">
+                  {{ parent.fileAttachment.fileName }}
+                </a>
+                <span class="mobile-thread__attachment-size">{{ formatFileSize(parent.fileAttachment.size) }}</span>
+              </div>
+            }
+          </div>
+        }
+        @if (parent.content) {
+          <div class="mobile-thread__parent-text" [innerHTML]="parent.content | mentionRender"></div>
+        }
+      </div>
+
+      <!-- Replies separator -->
+      @if (replies().length > 0) {
+        <div class="mobile-thread__separator">
+          <span class="mobile-thread__separator-line"></span>
+          <span class="mobile-thread__separator-label">
+            {{ replies().length }} {{ replies().length === 1 ? 'reply' : 'replies' }}
+          </span>
+          <span class="mobile-thread__separator-line"></span>
+        </div>
+      }
+    }
+
+    <!-- Loading state -->
+    @if (loading()) {
+      <div class="mobile-thread__loading">
+        <span class="material-icons-outlined mobile-thread__spinner">sync</span>
+      </div>
+    }
+
+    <!-- Thread replies -->
+    @for (reply of replies(); track reply.id) {
+      <div class="mobile-thread__reply" [class.mobile-thread__reply--own]="isOwnMessage(reply)">
+        @if (!isOwnMessage(reply)) {
+          <app-avatar [initials]="reply.senderInitials" [color]="reply.senderColor" size="sm" />
+        }
+        <div class="mobile-thread__reply-bubble">
+          @if (!isOwnMessage(reply)) {
+            <span class="mobile-thread__reply-sender">{{ reply.senderName }}</span>
+          }
+          @if (reply.fileAttachment) {
+            <div class="mobile-thread__attachment">
+              @if (reply.fileAttachment.contentType.startsWith('image/')) {
+                <img
+                  class="mobile-thread__attachment-img"
+                  [src]="'/api/v1/files/' + reply.fileAttachment.id + '/download'"
+                  [alt]="reply.fileAttachment.fileName"
+                  loading="lazy" />
+              } @else {
+                <div class="mobile-thread__attachment-file">
+                  <span class="material-icons-outlined">{{ getFileIcon(reply.fileAttachment.contentType) }}</span>
+                  <a [href]="'/api/v1/files/' + reply.fileAttachment.id + '/download'" target="_blank" rel="noopener">
+                    {{ reply.fileAttachment.fileName }}
+                  </a>
+                  <span class="mobile-thread__attachment-size">{{ formatFileSize(reply.fileAttachment.size) }}</span>
+                </div>
+              }
+            </div>
+          }
+          @if (reply.content) {
+            <span class="mobile-thread__reply-text" [innerHTML]="reply.content | mentionRender"></span>
+          }
+          <span class="mobile-thread__reply-time">{{ formatTime(reply.createdAt) }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <div class="mobile-thread__input">
+    <input
+      class="mobile-thread__input-field"
+      type="text"
+      [placeholder]="'chat.replyInThread' | translate"
+      [formControl]="replyControl"
+      (keydown)="onKeydown($event)" />
+    <button
+      class="icon-btn mobile-thread__send"
+      [disabled]="!replyControl.value?.trim() || sending()"
+      (click)="sendReply()"
+      aria-label="Send thread reply">
+      <span class="material-icons-outlined">send</span>
+    </button>
+  </div>
+</div>

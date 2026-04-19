@@ -14,8 +14,10 @@ import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { ScheduleTimelineComponent } from '../schedule-timeline/schedule-timeline.component';
+import { ScheduleMilestone } from '../../models/schedule-milestone.model';
 
-type TabId = 'overview' | 'lines' | 'shipments' | 'returns' | 'activity';
+type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'activity';
 
 @Component({
   selector: 'app-sales-order-detail-panel',
@@ -24,7 +26,7 @@ type TabId = 'overview' | 'lines' | 'shipments' | 'returns' | 'activity';
     DatePipe, CurrencyPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
-    EntityLinkComponent,
+    EntityLinkComponent, ScheduleTimelineComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
   styleUrl: './sales-order-detail-panel.component.scss',
@@ -45,8 +47,14 @@ export class SalesOrderDetailPanelComponent {
   protected readonly loading = signal(false);
   protected readonly activeTab = signal<TabId>('overview');
   protected readonly expandedLines = signal<Set<number>>(new Set());
+  protected readonly scheduleMilestones = signal<ScheduleMilestone[]>([]);
+  protected readonly scheduleLoading = signal(false);
 
   protected readonly hasData = computed(() => this.so() !== null);
+
+  protected readonly scheduleAtRiskCount = computed(() =>
+    this.scheduleMilestones().filter(m => m.isAtRisk).length
+  );
 
   protected readonly shipmentCount = computed(() => this.so()?.shipments?.length ?? 0);
 

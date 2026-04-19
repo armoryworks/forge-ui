@@ -41,6 +41,11 @@
               [disabled]="fontSizeIndex() === 4" aria-label="Increase font size">
         <span class="material-icons-outlined">text_increase</span>
       </button>
+      <button class="sf-header__control-btn" (click)="toggleUndoPanel()"
+              [class.sf-header__control-btn--active]="undoPanelOpen()"
+              aria-label="Toggle undo panel">
+        <span class="material-icons-outlined">undo</span>
+      </button>
       <button class="sf-header__control-btn" (click)="toggleTheme()"
               [attr.aria-label]="theme() === 'light' ? 'Switch to dark theme' : 'Switch to light theme'">
         <span class="material-icons-outlined">{{ theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
@@ -531,6 +536,16 @@
           <span class="material-icons-outlined">close</span> Cancel
         </button>
       </div>
+    </div>
+  }
+
+  <!-- ─── Scan Action Overlay ─── -->
+  <app-scan-action-overlay />
+
+  <!-- ─── Undo Panel ─── -->
+  @if (undoPanelOpen()) {
+    <div class="sf-undo-panel-container">
+      <app-scan-undo-list (closed)="toggleUndoPanel()" />
     </div>
   }
 

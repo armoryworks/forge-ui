@@ -1,0 +1,185 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.undo-panel {
+  display: flex;
+  flex-direction: column;
+  width: $detail-panel-width;
+  max-height: 100%;
+  background: var(--surface);
+  border-left: $border-width solid var(--border);
+  overflow: hidden;
+}
+
+.undo-panel__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.undo-panel__title-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+}
+
+.undo-panel__title {
+  font-size: $font-size-md;
+  font-weight: 700;
+  margin: 0;
+}
+
+.undo-panel__summary {
+  flex: 1;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+}
+
+.undo-panel__loading {
+  @include flex-center;
+  gap: $sp-md;
+  padding: $sp-2xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.undo-panel__spinner {
+  animation: spin 1s linear infinite;
+}
+
+.undo-panel__empty {
+  @include flex-center;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-2xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xxl;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.undo-panel__list {
+  flex: 1;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
+}
+
+// ─── Entry ───
+
+.undo-entry {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  transition: background $transition-fast;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+  }
+}
+
+.undo-entry--reversed {
+  opacity: 0.5;
+
+  &:hover {
+    background: transparent;
+  }
+}
+
+.undo-entry__main {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.undo-entry__time {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.undo-entry__user {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  @include truncate;
+  flex: 1;
+}
+
+.undo-entry__action {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.undo-entry__detail {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding-left: 48px;
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  flex-wrap: wrap;
+}
+
+.undo-entry__qty {
+  font-family: $font-family-mono;
+  font-weight: 600;
+}
+
+.undo-entry__part {
+  font-family: $font-family-mono;
+}
+
+.undo-entry__locations {
+  display: flex;
+  align-items: center;
+  gap: $sp-xs;
+}
+
+.undo-entry__arrow {
+  font-size: $icon-size-xs;
+}
+
+.undo-entry__related {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.undo-entry__actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-left: 48px;
+}
+
+.undo-entry__reversed-label {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--error);
+}
+
+.undo-entry__reverse-btn {
+  min-height: 32px;
+  font-size: $font-size-xs;
+}
+
+.undo-entry__spinner {
+  animation: spin 1s linear infinite;
+  font-size: $icon-size-sm;
+}

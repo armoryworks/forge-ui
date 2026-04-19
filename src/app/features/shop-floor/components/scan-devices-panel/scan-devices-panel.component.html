@@ -1,0 +1,70 @@
+<div class="devices-panel">
+  <div class="devices-panel__header">
+    <div class="devices-panel__title-row">
+      <span class="material-icons-outlined">devices</span>
+      <h3 class="devices-panel__title">Paired Scanners</h3>
+    </div>
+    <button class="action-btn action-btn--sm" (click)="togglePairForm()"
+            aria-label="Pair new device">
+      <span class="material-icons-outlined">{{ showPairForm() ? 'close' : 'add' }}</span>
+      {{ showPairForm() ? 'Cancel' : 'Pair New' }}
+    </button>
+  </div>
+
+  @if (showPairForm()) {
+    <div class="devices-panel__pair-form">
+      <app-input label="Device ID" [formControl]="deviceIdControl" [required]="true"
+                 placeholder="Scan or enter device ID" />
+      <app-input label="Device Name" [formControl]="deviceNameControl"
+                 placeholder="Optional display name" />
+      <button class="action-btn action-btn--primary"
+              [disabled]="deviceIdControl.invalid || pairing()"
+              (click)="pairDevice()"
+              aria-label="Confirm pair device">
+        @if (pairing()) {
+          <span class="material-icons-outlined devices-panel__spinner">sync</span>
+        } @else {
+          <span class="material-icons-outlined">link</span>
+        }
+        Pair Device
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="devices-panel__loading">
+      <span class="material-icons-outlined devices-panel__spinner">sync</span>
+      Loading devices...
+    </div>
+  } @else if (devices().length === 0) {
+    <app-empty-state icon="devices" message="No paired devices" />
+  } @else {
+    <div class="devices-panel__list">
+      @for (device of devices(); track device.id) {
+        <div class="device-item" [class.device-item--inactive]="!device.isActive">
+          <div class="device-item__icon">
+            <span class="material-icons-outlined">{{ device.isActive ? 'bluetooth_connected' : 'bluetooth_disabled' }}</span>
+          </div>
+          <div class="device-item__info">
+            <span class="device-item__name">{{ device.deviceName || device.deviceId }}</span>
+            @if (device.deviceName) {
+              <span class="device-item__id">{{ device.deviceId }}</span>
+            }
+            <span class="device-item__paired">Paired {{ device.pairedAt | date:'MM/dd/yyyy' }}</span>
+          </div>
+          <div class="device-item__status">
+            @if (device.isActive) {
+              <span class="device-item__active-badge">Active</span>
+            } @else {
+              <span class="device-item__inactive-badge">Inactive</span>
+            }
+          </div>
+          <button class="icon-btn icon-btn--danger" (click)="unpairDevice(device)"
+                  aria-label="Unpair device {{ device.deviceName || device.deviceId }}">
+            <span class="material-icons-outlined">link_off</span>
+          </button>
+        </div>
+      }
+    </div>
+  }
+</div>

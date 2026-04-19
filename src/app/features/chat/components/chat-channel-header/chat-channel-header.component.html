@@ -1,0 +1,40 @@
+<div class="channel-header">
+  @if (showBack()) {
+    <button class="icon-btn channel-header__back" (click)="onBack()" [attr.aria-label]="'chat.backToConversations' | translate" [matTooltip]="'chat.backToConversations' | translate" matTooltipPosition="above">
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+  }
+
+  @if (conversation(); as conv) {
+    <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="sm" />
+    <span class="channel-header__name">{{ conv.userName }}</span>
+  }
+
+  @if (channel(); as ch) {
+    <span class="material-icons-outlined channel-header__icon">{{ getChannelIcon(ch) }}</span>
+    <span class="channel-header__name">{{ ch.name }}</span>
+    @if (memberCount > 0) {
+      <span class="channel-header__members">{{ memberCount }}</span>
+    }
+
+    <button class="icon-btn" (click)="onMuteToggle()" [attr.aria-label]="isChannelMuted ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+      <span class="material-icons-outlined">{{ isChannelMuted ? 'notifications_off' : 'notifications_active' }}</span>
+    </button>
+    <button class="icon-btn" (click)="onSettings()" aria-label="Channel settings" matTooltip="Channel settings" matTooltipPosition="above">
+      <span class="material-icons-outlined">settings</span>
+    </button>
+  }
+
+  <span class="channel-header__spacer"></span>
+
+  @if (showPopout()) {
+    <button class="icon-btn" (click)="onPopout()" aria-label="Pop out chat" matTooltip="Pop out" matTooltipPosition="above">
+      <span class="material-icons-outlined">open_in_new</span>
+    </button>
+  }
+  @if (showClose()) {
+    <button class="icon-btn" (click)="onClose()" [attr.aria-label]="'chat.closeChat' | translate" [matTooltip]="'chat.closeChat' | translate" matTooltipPosition="above">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  }
+</div>

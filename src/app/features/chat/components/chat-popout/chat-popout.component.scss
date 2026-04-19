@@ -1,3 +1,6 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
 :host {
   display: block;
   height: 100vh;
@@ -9,5 +12,71 @@
   height: 100%;
   width: 100%;
   display: flex;
+  background: var(--surface);
+}
+
+// ── Sidebar (channel list) ──
+.popout__sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
   flex-direction: column;
+  border-right: $border-width-thin solid var(--border);
+  background: var(--bg);
+}
+
+.popout__sidebar-header {
+  height: $header-height;
+  padding: 0 $sp-lg;
+  display: flex;
+  align-items: center;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.popout__sidebar-title {
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: var(--text);
+}
+
+// ── Main content area ──
+.popout__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.popout__content {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+
+  &--threaded {
+    app-chat-message-area {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}
+
+// ── Empty state ──
+.popout__empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-lg;
+}
+
+.popout__empty-icon {
+  font-size: $icon-size-hero;
+  color: var(--text-muted);
+}
+
+.popout__empty-text {
+  font-size: $font-size-base;
+  color: var(--text-muted);
 }

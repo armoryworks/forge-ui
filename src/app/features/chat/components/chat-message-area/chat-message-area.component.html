@@ -1,0 +1,88 @@
+<div class="message-area__messages" #messagesContainer>
+  @for (msg of topLevelMessages(); track msg.id; let i = $index) {
+    @if (dateSeparator(i); as label) {
+      <div class="message-area__date-separator">
+        <span class="message-area__date-line"></span>
+        <span class="message-area__date-label">{{ label }}</span>
+        <span class="message-area__date-line"></span>
+      </div>
+    }
+    <div class="message-area__msg" [class.message-area__msg--own]="isOwnMessage(msg)">
+      @if (!isOwnMessage(msg)) {
+        <app-avatar [initials]="msg.senderInitials" [color]="msg.senderColor" size="sm" />
+      }
+      <div class="message-area__bubble">
+        @if (isChannel() && !isOwnMessage(msg)) {
+          <span class="message-area__sender">{{ msg.senderName }}</span>
+        }
+        @if (msg.fileAttachment) {
+          <div class="message-area__attachment">
+            <span class="material-icons-outlined message-area__attachment-icon">{{ getFileIcon(msg.fileAttachment.contentType) }}</span>
+            <a class="message-area__attachment-name" [href]="'/api/v1/files/' + msg.fileAttachment.id + '/download'" target="_blank" rel="noopener">
+              {{ msg.fileAttachment.fileName }}
+            </a>
+            <span class="message-area__attachment-size">{{ formatFileSize(msg.fileAttachment.size) }}</span>
+          </div>
+        }
+        @if (msg.content) {
+          <span class="message-area__text" [innerHTML]="msg.content | mentionRender"></span>
+        }
+        <span class="message-area__time">{{ formatTime(msg.createdAt) }}</span>
+      </div>
+      @if (msg.threadReplyCount > 0) {
+        <button class="message-area__thread-link" (click)="openThread(msg)" aria-label="View thread replies">
+          <span class="material-icons-outlined">forum</span>
+          {{ msg.threadReplyCount }} {{ msg.threadReplyCount === 1 ? 'reply' : 'replies' }}
+        </button>
+      }
+      <button class="message-area__reply-btn" (click)="openThread(msg)" aria-label="Reply in thread" matTooltip="Reply in thread" matTooltipPosition="above">
+        <span class="material-icons-outlined">reply</span>
+      </button>
+    </div>
+  }
+</div>
+
+<div class="message-area__input-area">
+  @if (pendingFile()) {
+    <div class="message-area__pending-file">
+      <span class="material-icons-outlined">attach_file</span>
+      <span class="message-area__pending-file-name">{{ pendingFile()!.name }}</span>
+      <span class="message-area__pending-file-size">{{ formatFileSize(pendingFile()!.size) }}</span>
+      @if (isUploading()) {
+        <span class="material-icons-outlined spin">sync</span>
+      }
+      <button class="icon-btn" (click)="clearPendingFile()" aria-label="Remove file">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+  }
+  <div class="message-area__input">
+    @if (isReadOnly()) {
+      <span class="message-area__readonly">This channel is read-only</span>
+    } @else {
+      @if (showFileAttach()) {
+        <input type="file" #fileInput class="message-area__file-input" (change)="onFileSelected($event)"
+          accept=".pdf,.jpg,.jpeg,.png,.gif,.doc,.docx,.xls,.xlsx,.csv,.txt,.step,.stl,.dxf" />
+        <button class="icon-btn" (click)="fileInput.click()" aria-label="Attach file" matTooltip="Attach file" matTooltipPosition="above">
+          <span class="material-icons-outlined">attach_file</span>
+        </button>
+      }
+      <input
+        data-testid="chat-message-input"
+        class="message-area__input-field"
+        type="text"
+        [placeholder]="'chat.typeMessage' | translate"
+        [formControl]="messageControl"
+        (keydown)="onKeydown($event)" />
+      <button
+        data-testid="chat-send-btn"
+        class="icon-btn message-area__send"
+        [disabled]="(!messageControl.value?.trim() && !pendingFileAttachmentId()) || isUploading()"
+        (click)="sendMessage()"
+        [attr.aria-label]="'chat.sendMessage' | translate"
+        [matTooltip]="'chat.sendMessage' | translate" matTooltipPosition="above">
+        <span class="material-icons-outlined">send</span>
+      </button>
+    }
+  </div>
+</div>

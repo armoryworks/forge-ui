@@ -1,0 +1,57 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.channel-header {
+  height: $header-height;
+  padding: 0 $sp-md;
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+
+  .icon-btn {
+    width: $btn-icon-size;
+    height: $btn-icon-size;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius;
+
+    &:hover {
+      background: var(--bg);
+    }
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+    }
+  }
+}
+
+.channel-header__name {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: var(--text);
+  @include truncate;
+}
+
+.channel-header__icon {
+  font-size: $icon-size-md;
+  color: var(--text-muted);
+}
+
+.channel-header__members {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  padding: $sp-xxs $sp-sm;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+}
+
+.channel-header__spacer {
+  flex: 1;
+}

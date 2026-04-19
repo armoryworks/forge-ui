@@ -1,0 +1,46 @@
+<div class="inv-scan">
+  <header class="inv-scan__header">
+    <span class="material-icons-outlined inv-scan__header-icon">qr_code_scanner</span>
+    <h1 class="inv-scan__title">Inventory Scan Mode</h1>
+    <div class="inv-scan__stats">
+      <span class="inv-scan__stat">
+        <span class="inv-scan__stat-value">{{ scanCount() }}</span>
+        <span class="inv-scan__stat-label">Scanned</span>
+      </span>
+    </div>
+  </header>
+
+  <div class="inv-scan__body">
+    <div class="inv-scan__cta">
+      <span class="material-icons-outlined inv-scan__cta-icon">contactless</span>
+      <p class="inv-scan__cta-text">Scan a part barcode to begin</p>
+    </div>
+
+    <div class="inv-scan__input-area">
+      <app-barcode-scan-input
+        label="Scan Part Barcode"
+        placeholder="Scan or type part number..."
+        [autoFocus]="true"
+        (scanned)="onManualScan($event)" />
+    </div>
+
+    <!-- Recent Scans Log -->
+    @if (recentScans().length > 0) {
+      <section class="inv-scan__recent">
+        <h3 class="inv-scan__recent-title">Recent Scans</h3>
+        <div class="inv-scan__recent-list">
+          @for (scan of recentScans(); track scan.partId) {
+            <div class="inv-scan__recent-item">
+              <span class="inv-scan__recent-part">{{ scan.partNumber }}</span>
+              <span class="inv-scan__recent-desc">{{ scan.description }}</span>
+              <span class="inv-scan__recent-stock">{{ scan.currentStock }} in stock</span>
+            </div>
+          }
+        </div>
+      </section>
+    }
+  </div>
+
+  <!-- Overlay handles scan actions -->
+  <app-scan-action-overlay (dismissed)="onOverlayDismissed()" />
+</div>

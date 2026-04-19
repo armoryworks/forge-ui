@@ -1,0 +1,111 @@
+@if (isVisible()) {
+  <div class="scan-overlay" (click)="close()">
+    <div class="scan-overlay__card" (click)="$event.stopPropagation()">
+
+      <!-- Loading -->
+      @if (phase() === 'loading') {
+        <div class="scan-overlay__loading">
+          <span class="material-icons-outlined scan-overlay__spinner">sync</span>
+          <p class="scan-overlay__loading-text">Looking up part...</p>
+        </div>
+      }
+
+      <!-- Error -->
+      @if (error()) {
+        <div class="scan-overlay__error">
+          <span class="material-icons-outlined">error_outline</span>
+          <p>{{ error() }}</p>
+        </div>
+      }
+
+      <!-- Action Selection -->
+      @if (phase() === 'actions' && context()) {
+        <div class="scan-overlay__header">
+          <div class="scan-overlay__part-info">
+            <span class="scan-overlay__part-number">{{ context()!.partNumber }}</span>
+            @if (context()!.description) {
+              <span class="scan-overlay__part-desc">{{ context()!.description }}</span>
+            }
+          </div>
+          <div class="scan-overlay__stock-info">
+            <div class="scan-overlay__stock-badge">
+              <span class="material-icons-outlined">inventory_2</span>
+              <span class="scan-overlay__stock-qty">{{ context()!.currentStock }}</span>
+              <span class="scan-overlay__stock-label">in stock</span>
+            </div>
+            @if (context()!.currentLocationName) {
+              <div class="scan-overlay__location">
+                <span class="material-icons-outlined">place</span>
+                {{ context()!.currentLocationName }}
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="scan-overlay__actions">
+          <app-quick-action-panel
+            [actions]="quickActions()"
+            [columns]="4"
+            (actionClick)="onActionClick($event)" />
+        </div>
+
+        <!-- Disabled reason tooltips -->
+        @for (action of context()!.availableActions; track action.action) {
+          @if (!action.enabled && action.disabledReason) {
+            <div class="scan-overlay__disabled-hint">
+              <span class="material-icons-outlined">info_outline</span>
+              <strong>{{ action.action }}:</strong> {{ action.disabledReason }}
+            </div>
+          }
+        }
+
+        <div class="scan-overlay__footer">
+          <button class="scan-overlay__multi-scan-btn"
+                  [class.scan-overlay__multi-scan-btn--active]="multiScanMode()"
+                  (click)="toggleMultiScan()"
+                  aria-label="Toggle multi-scan mode">
+            <span class="material-icons-outlined">repeat</span>
+            Multi-Scan
+          </button>
+          <button class="action-btn" (click)="close()" aria-label="Close scan overlay">
+            <span class="material-icons-outlined">close</span>
+            Done
+          </button>
+        </div>
+      }
+
+      <!-- Move Flow -->
+      @if (phase() === 'move' && context()) {
+        <app-scan-move-flow
+          [context]="context()!"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
+      <!-- Count Flow -->
+      @if (phase() === 'count' && context()) {
+        <app-scan-count-flow
+          [context]="context()!"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
+      <!-- Receive Flow -->
+      @if (phase() === 'receive' && context()) {
+        <app-scan-receive-flow
+          [context]="context()!"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
+      <!-- Issue Flow -->
+      @if (phase() === 'issue' && context()) {
+        <app-scan-issue-flow
+          [context]="context()!"
+          (completed)="onFlowCompleted()"
+          (cancelled)="onFlowCancelled()" />
+      }
+
+    </div>
+  </div>
+}

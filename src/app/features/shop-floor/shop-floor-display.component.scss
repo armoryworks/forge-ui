@@ -1443,3 +1443,28 @@ $grid-columns: 5;
   font-size: $icon-size-hero;
   color: var(--error);
 }
+
+// ─── Header control active state ───
+.sf-header__control-btn--active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+// ─── Undo Panel Slide-Out ───
+.sf-undo-panel-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $z-sidebar;
+  animation: slideInRight $transition-normal;
+  box-shadow: $shadow-panel;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

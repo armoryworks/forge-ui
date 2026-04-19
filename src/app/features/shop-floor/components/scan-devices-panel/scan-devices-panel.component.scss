@@ -1,0 +1,130 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.devices-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.devices-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $sp-md;
+}
+
+.devices-panel__title-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+}
+
+.devices-panel__title {
+  font-size: $font-size-md;
+  font-weight: 700;
+  margin: 0;
+}
+
+.devices-panel__pair-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  background: var(--bg);
+  border: $border-width-thin solid var(--border);
+}
+
+.devices-panel__loading {
+  @include flex-center;
+  gap: $sp-md;
+  padding: $sp-xl;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+}
+
+.devices-panel__spinner {
+  animation: spin 1s linear infinite;
+}
+
+.devices-panel__list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+// ─── Device Item ───
+
+.device-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  transition: background $transition-fast;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 5%, transparent);
+  }
+}
+
+.device-item--inactive {
+  opacity: 0.6;
+}
+
+.device-item__icon {
+  flex-shrink: 0;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+}
+
+.device-item--inactive .device-item__icon .material-icons-outlined {
+  color: var(--text-muted);
+}
+
+.device-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  flex: 1;
+  min-width: 0;
+}
+
+.device-item__name {
+  font-size: $font-size-sm;
+  font-weight: 600;
+  @include truncate;
+}
+
+.device-item__id {
+  font-family: $font-family-mono;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+.device-item__paired {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+.device-item__status {
+  flex-shrink: 0;
+}
+
+.device-item__active-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--success);
+}
+
+.device-item__inactive-badge {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--text-muted);
+}

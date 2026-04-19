@@ -1,0 +1,76 @@
+<div class="channel-info">
+  <div class="channel-info__header">
+    <button class="icon-btn" (click)="goBack()" aria-label="Back to messages">
+      <span class="material-icons-outlined">arrow_back</span>
+    </button>
+    <span class="channel-info__title">{{ 'chat.channelInfo' | translate }}</span>
+  </div>
+
+  @if (loading()) {
+    <div class="channel-info__loading">
+      <span class="material-icons-outlined channel-info__spinner">sync</span>
+    </div>
+  } @else if (channel(); as ch) {
+    <div class="channel-info__body">
+      <!-- Channel icon + name -->
+      <div class="channel-info__hero">
+        <div class="channel-info__icon-wrapper">
+          <span class="material-icons-outlined channel-info__icon">{{ getChannelIcon(ch) }}</span>
+        </div>
+        <h2 class="channel-info__name">{{ ch.name }}</h2>
+        <span class="channel-info__type">{{ getChannelTypeLabel(ch) }}</span>
+      </div>
+
+      <!-- Description -->
+      @if (ch.description) {
+        <div class="channel-info__section">
+          <span class="channel-info__section-label">Description</span>
+          <p class="channel-info__description">{{ ch.description }}</p>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="channel-info__actions">
+        <button class="channel-info__action-btn" (click)="toggleMute()" aria-label="Toggle mute">
+          <span class="material-icons-outlined">{{ isMuted() ? 'notifications_off' : 'notifications_active' }}</span>
+          <span>{{ isMuted() ? 'Unmute' : 'Mute' }}</span>
+        </button>
+        @if (ch.channelType !== 'System' && ch.channelType !== 'Broadcast') {
+          <button class="channel-info__action-btn channel-info__action-btn--danger" (click)="leaveChannel()" aria-label="Leave channel">
+            <span class="material-icons-outlined">logout</span>
+            <span>Leave Channel</span>
+          </button>
+        }
+      </div>
+
+      <!-- Members -->
+      <div class="channel-info__section">
+        <span class="channel-info__section-label">Members ({{ ch.members.length }})</span>
+        <div class="channel-info__members">
+          @for (member of ch.members; track member.userId) {
+            <div class="channel-info__member" [class.channel-info__member--self]="isOwnMember(member)">
+              <app-avatar [initials]="member.initials" [color]="member.color" size="md" />
+              <div class="channel-info__member-info">
+                <span class="channel-info__member-name">
+                  {{ member.displayName }}
+                  @if (isOwnMember(member)) {
+                    <span class="channel-info__member-you">(you)</span>
+                  }
+                </span>
+                @if (getRoleBadge(member.role); as badge) {
+                  <span class="channel-info__member-role">{{ badge }}</span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Created info -->
+      <div class="channel-info__section">
+        <span class="channel-info__section-label">Created</span>
+        <span class="channel-info__meta">{{ ch.createdAt | date:'MM/dd/yyyy' }}</span>
+      </div>
+    </div>
+  }
+</div>

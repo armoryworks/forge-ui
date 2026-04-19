@@ -28,6 +28,8 @@ import { ShipmentService } from '../shipments/services/shipment.service';
 import { ShipmentListItem } from '../shipments/models/shipment-list-item.model';
 import { ShipmentDetail } from '../shipments/models/shipment-detail.model';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { ScanUndoListComponent } from './components/scan-undo-list/scan-undo-list.component';
+import { ScanActionOverlayComponent } from './components/scan-action-overlay/scan-action-overlay.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20] as const;
 type FontSizeStep = typeof FONT_SIZES[number];
@@ -42,7 +44,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, ScanUndoListComponent, ScanActionOverlayComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -158,6 +160,9 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     const worker = this.selectedWorker();
     return worker ? this.SHIP_ROLES.has(worker.role) && this.clockTypes.isActive(worker.status) : false;
   });
+
+  // Undo panel
+  protected readonly undoPanelOpen = signal(false);
 
   // Scan feedback
   protected readonly scanFeedback = signal<string | null>(null);
@@ -664,6 +669,10 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected feedbackSuccess(workerId: number): boolean {
     const fb = this.actionFeedback();
     return fb?.workerId === workerId && fb.success;
+  }
+
+  protected toggleUndoPanel(): void {
+    this.undoPanelOpen.update(v => !v);
   }
 
   protected toggleTheme(): void {

@@ -1,0 +1,138 @@
+@if (view() === 'userPicker') {
+  <div class="channel-list__user-picker">
+    <div class="channel-list__picker-search">
+      <span class="material-icons-outlined">search</span>
+      <input
+        class="channel-list__picker-input"
+        type="text"
+        [placeholder]="'chat.searchUsers' | translate"
+        [formControl]="userSearchControl"
+        autofocus />
+      <button class="icon-btn" (click)="cancelUserPicker()" aria-label="Cancel">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+    <div class="channel-list__picker-list">
+      @for (user of filteredUsers(); track user.id) {
+        <button class="channel-list__conv" (click)="selectUser(user)">
+          <app-avatar [initials]="user.initials" [color]="user.color" size="sm" />
+          <div class="channel-list__conv-content">
+            <span class="channel-list__conv-name">{{ user.name }}</span>
+          </div>
+        </button>
+      }
+      @if (filteredUsers().length === 0) {
+        <div class="channel-list__empty">
+          <span class="channel-list__empty-text">{{ 'chat.noUsersFound' | translate }}</span>
+        </div>
+      }
+    </div>
+  </div>
+} @else {
+  <div class="channel-list">
+    <!-- Direct Messages section -->
+    <div class="channel-section">
+      <button class="channel-section__header" (click)="toggleSection('dms')" aria-label="Toggle direct messages">
+        <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['dms']">expand_more</span>
+        <span class="channel-section__title">Direct Messages</span>
+        <span class="channel-section__spacer"></span>
+        <button class="icon-btn channel-section__action" (click)="openUserPicker(); $event.stopPropagation()" aria-label="New message" [matTooltip]="'chat.newMessage' | translate" matTooltipPosition="above">
+          <span class="material-icons-outlined">add</span>
+        </button>
+      </button>
+      @if (channelSectionsExpanded()['dms']) {
+        <div class="channel-section__items">
+          @if (conversations().length === 0) {
+            <div class="channel-section__empty">No conversations yet</div>
+          }
+          @for (conv of conversations(); track conv.userId) {
+            <button class="channel-list__conv" [class.channel-list__conv--selected]="selectedUserId() === conv.userId" (click)="selectConversation(conv)">
+              <app-avatar [initials]="conv.userInitials" [color]="conv.userColor" size="sm" />
+              <div class="channel-list__conv-content">
+                <div class="channel-list__conv-top">
+                  <span class="channel-list__conv-name">{{ conv.userName }}</span>
+                  @if (conv.lastMessageAt) {
+                    <span class="channel-list__conv-time">{{ formatDate(conv.lastMessageAt) }}</span>
+                  }
+                </div>
+                @if (conv.lastMessage) {
+                  <span class="channel-list__conv-preview">{{ conv.lastMessage }}</span>
+                }
+              </div>
+              @if (conv.unreadCount > 0) {
+                <span class="channel-list__badge">{{ conv.unreadCount }}</span>
+              }
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Channels section -->
+    <div class="channel-section">
+      <button class="channel-section__header" (click)="toggleSection('channels')" aria-label="Toggle channels">
+        <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['channels']">expand_more</span>
+        <span class="channel-section__title">Channels</span>
+        <span class="channel-section__spacer"></span>
+        <button class="icon-btn channel-section__action" (click)="onNewGroup(); $event.stopPropagation()" aria-label="New channel" matTooltip="New Channel" matTooltipPosition="above">
+          <span class="material-icons-outlined">add</span>
+        </button>
+      </button>
+      @if (channelSectionsExpanded()['channels']) {
+        <div class="channel-section__items">
+          @if (groupChannels().length === 0) {
+            <div class="channel-section__empty">No channels</div>
+          }
+          @for (channel of groupChannels(); track channel.id) {
+            <button class="channel-list__channel-item" [class.channel-list__channel-item--selected]="selectedChannelId() === channel.id" (click)="selectChannel(channel)">
+              <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
+              <span class="channel-list__channel-name">{{ channel.name }}</span>
+              @if (isChannelMuted(channel)) {
+                <span class="material-icons-outlined channel-list__muted-icon" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+              }
+              @if (channel.unreadCount > 0) {
+                <span class="channel-list__badge">{{ channel.unreadCount }}</span>
+              }
+              <button class="icon-btn channel-list__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+                <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
+              </button>
+            </button>
+          }
+          <button class="channel-list__channel-item channel-list__channel-item--browse" (click)="onBrowseChannels()" aria-label="Browse channels">
+            <span class="material-icons-outlined channel-list__channel-icon">explore</span>
+            <span class="channel-list__channel-name">Browse Channels</span>
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Teams section -->
+    @if (teamChannels().length > 0) {
+      <div class="channel-section">
+        <button class="channel-section__header" (click)="toggleSection('teams')" aria-label="Toggle teams">
+          <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['teams']">expand_more</span>
+          <span class="channel-section__title">Teams</span>
+        </button>
+        @if (channelSectionsExpanded()['teams']) {
+          <div class="channel-section__items">
+            @for (channel of teamChannels(); track channel.id) {
+              <button class="channel-list__channel-item" [class.channel-list__channel-item--selected]="selectedChannelId() === channel.id" (click)="selectChannel(channel)">
+                <span class="material-icons-outlined channel-list__channel-icon">{{ getChannelIcon(channel) }}</span>
+                <span class="channel-list__channel-name">{{ channel.name }}</span>
+                @if (isChannelMuted(channel)) {
+                  <span class="material-icons-outlined channel-list__muted-icon" matTooltip="Muted" matTooltipPosition="above">notifications_off</span>
+                }
+                @if (channel.unreadCount > 0) {
+                  <span class="channel-list__badge">{{ channel.unreadCount }}</span>
+                }
+                <button class="icon-btn channel-list__mute-btn" (click)="toggleMuteChannel(channel, $event)" [attr.aria-label]="isChannelMuted(channel) ? 'Unmute channel' : 'Mute channel'" [matTooltip]="isChannelMuted(channel) ? 'Unmute' : 'Mute'" matTooltipPosition="above">
+                  <span class="material-icons-outlined">{{ isChannelMuted(channel) ? 'notifications_active' : 'notifications_off' }}</span>
+                </button>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+}

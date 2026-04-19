@@ -1,0 +1,76 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.pin-dialog {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-xl;
+  padding: $sp-2xl;
+  min-width: 320px;
+}
+
+.pin-dialog__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.pin-dialog__icon {
+  font-size: $icon-size-hero;
+  color: var(--primary);
+}
+
+.pin-dialog__title {
+  font-size: $font-size-xl;
+  font-weight: 700;
+  margin: 0;
+}
+
+.pin-dialog__error {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  color: var(--error);
+  font-size: $font-size-sm;
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}
+
+.pin-dialog__field {
+  width: 100%;
+}
+
+.pin-dialog__input {
+  width: 100%;
+  padding: $sp-lg;
+  font-size: $font-size-xl;
+  font-family: $font-family-mono;
+  text-align: center;
+  letter-spacing: 8px;
+  border: $border-width solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+
+  &:focus {
+    border-color: var(--primary);
+  }
+}
+
+.pin-dialog__actions {
+  display: flex;
+  gap: $sp-lg;
+  width: 100%;
+}
+
+.pin-dialog__btn {
+  flex: 1;
+  min-height: 56px;
+  font-size: $font-size-md;
+  gap: $sp-md;
+}

@@ -1,0 +1,197 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.channel-info {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.channel-info__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.channel-info__title {
+  font-size: $font-size-md;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.channel-info__body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+// ── Hero ──
+.channel-info__hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xl $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.channel-info__icon-wrapper {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+  border: $border-width solid var(--primary);
+}
+
+.channel-info__icon {
+  font-size: $icon-size-xxl;
+  color: var(--primary);
+}
+
+.channel-info__name {
+  font-size: $font-size-lg;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  text-align: center;
+}
+
+.channel-info__type {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  @include uppercase-label($font-size-xxs, 0.08em, 600);
+}
+
+// ── Sections ──
+.channel-info__section {
+  padding: $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.channel-info__section-label {
+  @include uppercase-label($font-size-xxs, 0.08em, 600);
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: $sp-md;
+}
+
+.channel-info__description {
+  font-size: $font-size-base;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.channel-info__meta {
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+}
+
+// ── Actions ──
+.channel-info__actions {
+  display: flex;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.channel-info__action-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-lg $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: $font-family-primary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+  min-height: 44px;
+
+  .material-icons-outlined {
+    font-size: $icon-size-xl;
+    color: var(--text-secondary);
+  }
+
+  &:active {
+    background: var(--bg);
+  }
+
+  &--danger {
+    color: var(--error);
+
+    .material-icons-outlined {
+      color: var(--error);
+    }
+
+    &:active {
+      background: var(--error-light);
+    }
+  }
+}
+
+// ── Members ──
+.channel-info__members {
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-info__member {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md 0;
+  border-bottom: $border-width-thin solid var(--border);
+  min-height: 48px;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.channel-info__member-info {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xxs;
+  min-width: 0;
+}
+
+.channel-info__member-name {
+  font-size: $font-size-base;
+  font-weight: 500;
+  color: var(--text);
+  @include truncate;
+}
+
+.channel-info__member-you {
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.channel-info__member-role {
+  font-size: $font-size-xxs;
+  color: var(--primary);
+  font-weight: 600;
+  @include uppercase-label($font-size-xxs, 0.06em, 600);
+}
+
+// ── Loading ──
+.channel-info__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $sp-3xl;
+}
+
+.channel-info__spinner {
+  font-size: $icon-size-xl;
+  color: var(--text-muted);
+  animation: spin 1s linear infinite;
+}

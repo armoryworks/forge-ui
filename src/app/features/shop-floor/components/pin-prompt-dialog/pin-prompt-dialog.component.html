@@ -1,0 +1,40 @@
+<div class="pin-dialog">
+  <div class="pin-dialog__header">
+    <span class="material-icons-outlined pin-dialog__icon">lock</span>
+    <h2 class="pin-dialog__title">{{ title }}</h2>
+  </div>
+
+  @if (error(); as err) {
+    <div class="pin-dialog__error">
+      <span class="material-icons-outlined">warning</span>
+      {{ err }}
+    </div>
+  }
+
+  <div class="pin-dialog__field" (keydown.enter)="confirm()">
+    <input
+      type="password"
+      inputmode="numeric"
+      pattern="[0-9]*"
+      maxlength="6"
+      [formControl]="pinControl"
+      placeholder="Enter PIN"
+      class="pin-dialog__input"
+      aria-label="PIN"
+      autofocus />
+  </div>
+
+  <div class="pin-dialog__actions">
+    <button class="action-btn pin-dialog__btn" (click)="cancel()" aria-label="Cancel">
+      <span class="material-icons-outlined">close</span>
+      Cancel
+    </button>
+    <button class="action-btn action-btn--primary pin-dialog__btn"
+            [disabled]="pinControl.invalid"
+            (click)="confirm()"
+            aria-label="Confirm PIN">
+      <span class="material-icons-outlined">check</span>
+      Confirm
+    </button>
+  </div>
+</div>

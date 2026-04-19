@@ -1,0 +1,91 @@
+<div class="scan-flow">
+  <div class="scan-flow__header">
+    <span class="material-icons-outlined scan-flow__icon" style="color: var(--info)">inventory</span>
+    <h3 class="scan-flow__title">Cycle Count</h3>
+    <span class="scan-flow__part">{{ context().partNumber }}</span>
+  </div>
+
+  <!-- Step 1: Enter Count -->
+  @if (step() === 'enter') {
+    <div class="scan-flow__body">
+      <div class="scan-flow__info-row">
+        <span class="scan-flow__info-label">Location</span>
+        <span class="scan-flow__info-value">{{ context().currentLocationName ?? 'No location' }}</span>
+      </div>
+      <div class="scan-flow__info-row">
+        <span class="scan-flow__info-label">Recorded Qty</span>
+        <span class="scan-flow__info-value scan-flow__info-value--mono">{{ context().currentStock }}</span>
+      </div>
+
+      <div class="count-flow__input">
+        <p class="scan-flow__prompt">Enter actual count</p>
+        <app-input label="Actual Count" type="number" [formControl]="countControl" />
+      </div>
+
+      <div class="scan-flow__action-row">
+        <button class="action-btn" (click)="cancelled.emit()" aria-label="Cancel count">
+          <span class="material-icons-outlined">close</span>
+          Cancel
+        </button>
+        <button class="action-btn action-btn--primary"
+                [disabled]="countControl.value === null"
+                (click)="confirmCount()"
+                aria-label="Submit count">
+          <span class="material-icons-outlined">check</span>
+          Submit Count
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2: Confirm Discrepancy -->
+  @if (step() === 'confirm') {
+    <div class="scan-flow__body">
+      <div class="count-flow__discrepancy">
+        <div class="count-flow__discrepancy-row">
+          <span class="count-flow__discrepancy-label">Recorded</span>
+          <span class="count-flow__discrepancy-value">{{ context().currentStock }}</span>
+        </div>
+        <div class="count-flow__discrepancy-arrow">
+          <span class="material-icons-outlined">arrow_forward</span>
+        </div>
+        <div class="count-flow__discrepancy-row">
+          <span class="count-flow__discrepancy-label">Counted</span>
+          <span class="count-flow__discrepancy-value count-flow__discrepancy-value--highlight">
+            {{ countControl.value }}
+          </span>
+        </div>
+      </div>
+
+      <div class="count-flow__diff-badge"
+           [class.count-flow__diff-badge--positive]="difference() > 0"
+           [class.count-flow__diff-badge--negative]="difference() < 0">
+        <span class="material-icons-outlined">
+          {{ difference() > 0 ? 'trending_up' : 'trending_down' }}
+        </span>
+        {{ difference() > 0 ? '+' : '' }}{{ difference() }}
+      </div>
+
+      <p class="scan-flow__prompt">Adjust inventory to match count?</p>
+
+      <div class="scan-flow__action-row">
+        <button class="action-btn" (click)="recount()" aria-label="Recount">
+          <span class="material-icons-outlined">refresh</span>
+          Recount
+        </button>
+        <button class="action-btn action-btn--primary"
+                [disabled]="submitting()"
+                (click)="submit()"
+                aria-label="Confirm adjustment">
+          @if (submitting()) {
+            <span class="material-icons-outlined scan-flow__spinner">sync</span>
+            Adjusting...
+          } @else {
+            <span class="material-icons-outlined">check</span>
+            Yes, Adjust
+          }
+        </button>
+      </div>
+    </div>
+  }
+</div>

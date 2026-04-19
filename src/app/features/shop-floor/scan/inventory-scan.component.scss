@@ -1,0 +1,144 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+}
+
+.inv-scan__header {
+  display: flex;
+  align-items: center;
+  gap: $sp-xl;
+  padding: $sp-md $sp-xl;
+  background: var(--header);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.inv-scan__header-icon {
+  font-size: $icon-size-xl;
+}
+
+.inv-scan__title {
+  font-family: $font-family-primary;
+  font-size: $font-size-lg;
+  font-weight: 700;
+  margin: 0;
+  flex: 1;
+}
+
+.inv-scan__stats {
+  display: flex;
+  gap: $sp-md;
+}
+
+.inv-scan__stat {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-xs $sp-md;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.inv-scan__stat-value {
+  font-family: $font-family-mono;
+  font-size: $font-size-md;
+  font-weight: 700;
+}
+
+.inv-scan__stat-label {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.8;
+}
+
+.inv-scan__body {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+  padding: $sp-xl;
+  flex: 1;
+  overflow-y: auto;
+  @include custom-scrollbar(6px);
+}
+
+.inv-scan__cta {
+  @include flex-center;
+  gap: $sp-lg;
+  padding: $sp-xl;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+.inv-scan__cta-icon {
+  font-size: 48px;
+  color: var(--primary);
+}
+
+.inv-scan__cta-text {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  margin: 0;
+}
+
+.inv-scan__input-area {
+  max-width: 480px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.inv-scan__recent {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.inv-scan__recent-title {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+  margin: 0 0 $sp-md 0;
+}
+
+.inv-scan__recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.inv-scan__recent-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.inv-scan__recent-part {
+  font-family: $font-family-mono;
+  font-size: $font-size-base;
+  font-weight: 700;
+  color: var(--primary);
+  min-width: 120px;
+}
+
+.inv-scan__recent-desc {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  flex: 1;
+  @include truncate;
+}
+
+.inv-scan__recent-stock {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  color: var(--success);
+  font-weight: 600;
+  white-space: nowrap;
+}

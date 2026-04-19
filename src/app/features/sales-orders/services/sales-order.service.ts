@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { SalesOrderListItem } from '../models/sales-order-list-item.model';
 import { SalesOrderDetail } from '../models/sales-order-detail.model';
 import { CreateSalesOrderRequest } from '../models/create-sales-order-request.model';
+import { ScheduleMilestone } from '../models/schedule-milestone.model';
 
 @Injectable({ providedIn: 'root' })
 export class SalesOrderService {
@@ -50,5 +51,9 @@ export class SalesOrderService {
 
   deleteSalesOrder(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  getSchedule(soId: number): Observable<ScheduleMilestone[]> {
+    return this.http.get<ScheduleMilestone[]>(`${this.base}/${soId}/schedule`);
   }
 }

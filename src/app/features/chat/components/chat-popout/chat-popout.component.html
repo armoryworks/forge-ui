@@ -1,3 +1,57 @@
 <div class="popout">
-  <app-chat />
+  <div class="popout__sidebar">
+    <div class="popout__sidebar-header">
+      <span class="popout__sidebar-title">{{ 'chat.title' | translate }}</span>
+    </div>
+    <app-chat-channel-list
+      [conversations]="conversations()"
+      [channels]="channels()"
+      [selectedChannelId]="selectedChannelId()"
+      [selectedUserId]="selectedUserId()"
+      (channelSelected)="onChannelSelected($event)"
+      (newGroup)="openCreateChannel()"
+      (browseChannels)="openBrowseChannels()"
+      (muteToggled)="onMuteToggled($event)" />
+  </div>
+
+  <div class="popout__main">
+    @if (hasSelection()) {
+      <app-chat-channel-header
+        [conversation]="selectedConversation()"
+        [channel]="selectedChannel()"
+        [showBack]="false"
+        (settingsClicked)="openChannelSettings()"
+        (muteToggled)="onHeaderMuteToggled($event)" />
+
+      <div class="popout__content" [class.popout__content--threaded]="threadParentMessage()">
+        <app-chat-message-area
+          #messageArea
+          [messages]="messages()"
+          [currentUserId]="currentUserId()"
+          [isChannel]="isChannel()"
+          [isReadOnly]="isReadOnly()"
+          [showFileAttach]="isChannel()"
+          [pendingFile]="pendingFile()"
+          [pendingFileAttachmentId]="pendingFileAttachmentId()"
+          [isUploading]="isUploading()"
+          (messageSent)="onMessageSent($event)"
+          (threadOpened)="onThreadOpened($event)"
+          (fileSelected)="onFileSelected($event)"
+          (fileCancelled)="onFileCancelled()" />
+
+        @if (threadParentMessage(); as parent) {
+          <app-chat-thread-panel
+            [parentMessage]="parent"
+            [replies]="threadReplies()"
+            (replySent)="onThreadReplySent($event)"
+            (closed)="closeThread()" />
+        }
+      </div>
+    } @else {
+      <div class="popout__empty">
+        <span class="material-icons-outlined popout__empty-icon">chat</span>
+        <span class="popout__empty-text">{{ 'chat.selectConversation' | translate }}</span>
+      </div>
+    }
+  </div>
 </div>

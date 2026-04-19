@@ -1,0 +1,77 @@
+<app-page-layout pageTitle="Scan Log">
+  <ng-container toolbar>
+    <app-toolbar>
+      <app-datepicker label="Date" [formControl]="dateControl"
+                      (dateChange)="onDateChange()" />
+      <app-select label="Action Type" [formControl]="actionTypeControl"
+                  [options]="actionTypeOptions"
+                  (selectionChange)="onActionTypeChange()" />
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    @if (totalCount() > 0) {
+      <div class="scan-log__summary">
+        <span class="scan-log__summary-total">{{ totalCount() }} scans today</span>
+        @if (summaryText()) {
+          <span class="scan-log__summary-breakdown"> &mdash; {{ summaryText() }}</span>
+        }
+      </div>
+    }
+
+    <app-data-table
+      tableId="scan-daily-log"
+      [columns]="columns"
+      [data]="entries()"
+      [loading]="loading()"
+      emptyIcon="history"
+      emptyMessage="No scan activity for this date">
+
+      <ng-template appColumnCell="createdAt" let-row>
+        {{ row.createdAt | date:'HH:mm:ss' }}
+      </ng-template>
+
+      <ng-template appColumnCell="actionType" let-row>
+        <span class="scan-log__action-chip">{{ row.actionType }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="partNumber" let-row>
+        @if (row.partNumber) {
+          <span class="scan-log__mono">{{ row.partNumber }}</span>
+        } @else {
+          <span class="scan-log__na">&mdash;</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="fromLocation" let-row>
+        @if (row.fromLocation) {
+          {{ row.fromLocation }}
+        } @else {
+          <span class="scan-log__na">&mdash;</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="toLocation" let-row>
+        @if (row.toLocation) {
+          {{ row.toLocation }}
+        } @else {
+          <span class="scan-log__na">&mdash;</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="relatedEntity" let-row>
+        @if (row.relatedEntity) {
+          {{ row.relatedEntity }}
+        } @else {
+          <span class="scan-log__na">&mdash;</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="status" let-row>
+        @if (row.isReversed) {
+          <span class="chip chip--error">Reversed</span>
+        }
+      </ng-template>
+    </app-data-table>
+  </ng-container>
+</app-page-layout>

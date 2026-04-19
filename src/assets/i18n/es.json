@@ -2745,7 +2745,8 @@
     "justNow": "Ahora mismo",
     "newMessage": "Nuevo Mensaje",
     "noUsersFound": "No se encontraron usuarios",
-    "searchUsers": "Buscar usuarios"
+    "searchUsers": "Buscar usuarios",
+    "selectConversation": "Seleccione una conversación para comenzar a chatear"
   },
   "ai": {
     "title": "Asistentes IA",

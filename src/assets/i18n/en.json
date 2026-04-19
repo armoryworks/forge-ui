@@ -2470,7 +2470,24 @@
     "returnDate": "Return Date",
     "originalJob": "Original Job",
     "reworkJob": "Rework Job",
-    "inspectionNotes": "Inspection Notes"
+    "inspectionNotes": "Inspection Notes",
+    "schedule": {
+      "tab": "Schedule",
+      "poOrderBy": "PO Order By",
+      "materialsNeeded": "Materials Needed",
+      "productionStart": "Production Start",
+      "productionComplete": "Production Complete",
+      "qcComplete": "QC Complete",
+      "shipBy": "Ship By",
+      "delivery": "Delivery",
+      "atRisk": "At Risk",
+      "onTrack": "On Track",
+      "done": "Done",
+      "overdue": "Overdue",
+      "upcoming": "Upcoming",
+      "noSchedule": "No schedule milestones available",
+      "timelineLabel": "Schedule timeline"
+    }
   },
   "quotes": {
     "title": "Quotes",
@@ -2946,7 +2963,8 @@
     "justNow": "Just now",
     "newMessage": "New Message",
     "noUsersFound": "No users found",
-    "searchUsers": "Search users"
+    "searchUsers": "Search users",
+    "selectConversation": "Select a conversation to start chatting"
   },
   "ai": {
     "title": "AI Assistants",

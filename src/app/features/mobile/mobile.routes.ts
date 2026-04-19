@@ -33,6 +33,14 @@ export const MOBILE_ROUTES: Routes = [
         loadComponent: () => import('./pages/mobile-chat.component').then(m => m.MobileChatComponent),
       },
       {
+        path: 'chat/thread/:messageId',
+        loadComponent: () => import('./pages/mobile-chat-thread/mobile-chat-thread.component').then(m => m.MobileChatThreadComponent),
+      },
+      {
+        path: 'chat/channel-info/:channelId',
+        loadComponent: () => import('./pages/mobile-chat-channel-info/mobile-chat-channel-info.component').then(m => m.MobileChatChannelInfoComponent),
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./pages/mobile-notifications.component').then(m => m.MobileNotificationsComponent),
       },

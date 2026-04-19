@@ -1,0 +1,32 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.scan-log__summary {
+  padding: $sp-md $sp-lg;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.scan-log__summary-total {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.scan-log__summary-breakdown {
+  color: var(--text-muted);
+}
+
+.scan-log__action-chip {
+  @include uppercase-label($font-size-xxs, 0.5px, 700);
+  color: var(--primary);
+}
+
+.scan-log__mono {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+.scan-log__na {
+  color: var(--text-muted);
+}
