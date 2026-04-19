@@ -173,7 +173,7 @@ export class SoDialogComponent {
       requestedDeliveryDate: toIsoDate(f.requestedDeliveryDate) || undefined,
       customerPO: f.customerPO || undefined,
       notes: f.notes || undefined,
-      taxRate: f.taxRate ?? 0,
+      taxRate: (f.taxRate ?? 0) / 100,
       lines: lineRequests,
     }).subscribe({
       next: () => {

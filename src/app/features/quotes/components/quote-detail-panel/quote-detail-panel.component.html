@@ -97,7 +97,7 @@
           <span class="totals-value">{{ quote.subtotal | currency }}</span>
         </div>
         <div class="totals-row">
-          <span class="info-label">{{ 'quotes.tax' | translate }} ({{ quote.taxRate }}%)</span>
+          <span class="info-label">{{ 'quotes.tax' | translate }} ({{ quote.taxRate * 100 }}%)</span>
           <span class="totals-value">{{ quote.taxAmount | currency }}</span>
         </div>
         <div class="totals-row totals-row--total">

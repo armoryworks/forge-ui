@@ -165,7 +165,7 @@ export class InvoiceDialogComponent {
       invoiceDate: toIsoDate(f.invoiceDate!)!,
       dueDate: toIsoDate(f.dueDate!)!,
       creditTerms: f.creditTerms ?? undefined,
-      taxRate: f.taxRate!,
+      taxRate: (f.taxRate ?? 0) / 100,
       notes: f.notes || undefined,
       lines: lineRequests,
     }).subscribe({
