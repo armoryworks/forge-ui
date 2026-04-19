@@ -1032,7 +1032,8 @@
       "events": "Events",
       "announcements": "Announcements",
       "edi": "EDI",
-      "mfa": "MFA Policy"
+      "mfa": "MFA Policy",
+      "automations": "Automations"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -3782,6 +3783,34 @@
       },
       "snackbar": {
         "policyUpdated": "MFA policy updated"
+      }
+    },
+    "domainEventFailures": {
+      "failures": "failures",
+      "filterStatus": "Status",
+      "allStatuses": "All Statuses",
+      "statusFailed": "Failed",
+      "statusRetrying": "Retrying",
+      "statusResolved": "Resolved",
+      "noFailures": "No domain event failures",
+      "retry": "Retry",
+      "resolve": "Resolve",
+      "retryTitle": "Retry Event Handler?",
+      "retryMessage": "This will re-queue the handler \"{{handler}}\" for execution.",
+      "retryQueued": "Event handler retry queued",
+      "resolveTitle": "Resolve Failure?",
+      "resolveMessage": "This will mark the handler \"{{handler}}\" as resolved without retrying.",
+      "resolved": "Event failure resolved",
+      "errorMessageLabel": "Error Message",
+      "eventPayload": "Event Payload",
+      "cols": {
+        "eventType": "Event Type",
+        "handler": "Handler",
+        "error": "Error",
+        "status": "Status",
+        "retries": "Retries",
+        "failedAt": "Failed At",
+        "lastRetry": "Last Retry"
       }
     },
     "timeCorrections": {

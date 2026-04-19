@@ -1,4 +1,4 @@
-import { DashboardWidgetConfig } from './dashboard-widget-config.model';
+import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
 
 export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
   // ─── Row 0: primary operational widgets (3 × 33%) ───
@@ -107,6 +107,19 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     component: 'eod-prompt',
     defaultX: 8,
     defaultY: 8,
+    defaultW: 4,
+    defaultH: 4,
+    minW: 2,
+    minH: 2,
+  },
+  // ─── Row 3: action items (follow-up tasks) ───
+  {
+    id: 'action-items',
+    title: 'Action Items',
+    icon: 'task_alt',
+    component: 'action-items',
+    defaultX: 0,
+    defaultY: 12,
     defaultW: 4,
     defaultH: 4,
     minW: 2,

@@ -448,6 +448,13 @@
       </div>
     }
 
+    <!-- Automations Tab -->
+    @if (activeTab() === 'automations') {
+      <div class="tab-panel">
+        <app-domain-event-failures-panel />
+      </div>
+    }
+
     <!-- Compliance Tab -->
     @if (activeTab() === 'compliance') {
       <div class="tab-panel">

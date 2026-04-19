@@ -447,6 +447,7 @@
 }
 
 .chat-panel__input {
+  position: relative;
   display: flex;
   align-items: center;
   gap: $sp-sm;

@@ -1,0 +1,43 @@
+<div class="auto-po-settings" [appLoadingBlock]="loading()">
+  <div class="auto-po-settings__card">
+    <h3 class="auto-po-settings__title">{{ 'autoPo.settingsTitle' | translate }}</h3>
+
+    <div class="auto-po-settings__form" [formGroup]="form">
+      <app-toggle
+        [label]="'autoPo.enableAutoPo' | translate"
+        formControlName="enabled"
+        data-testid="auto-po-enabled" />
+
+      <app-select
+        [label]="'autoPo.defaultMode' | translate"
+        formControlName="defaultMode"
+        [options]="modeOptions"
+        [required]="true"
+        data-testid="auto-po-mode" />
+
+      <app-input
+        [label]="'autoPo.bufferDays' | translate"
+        type="number"
+        formControlName="bufferDays"
+        [required]="true"
+        data-testid="auto-po-buffer-days" />
+
+      <app-toggle
+        [label]="'autoPo.notifyChat' | translate"
+        formControlName="notifyChat"
+        data-testid="auto-po-notify-chat" />
+
+      <div class="auto-po-settings__actions">
+        <button class="action-btn action-btn--primary"
+          [appValidationPopover]="violations"
+          [disabled]="form.invalid || form.pristine || saving()"
+          (click)="save()"
+          data-testid="auto-po-settings-save-btn"
+          aria-label="Save auto-PO settings">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -8,11 +8,14 @@ import { PurchaseOrderDetail } from '../models/purchase-order-detail.model';
 import { CreatePurchaseOrderRequest } from '../models/create-purchase-order-request.model';
 import { ReceiveItemsRequest } from '../models/receive-items-request.model';
 import { PurchaseOrderRelease, CreatePurchaseOrderReleaseRequest, UpdatePurchaseOrderReleaseRequest } from '../models/purchase-order-release.model';
+import { AutoPoSuggestion } from '../models/auto-po-suggestion.model';
+import { AutoPoSettings, UpdateAutoPoSettingsRequest } from '../models/auto-po-settings.model';
 
 @Injectable({ providedIn: 'root' })
 export class PurchaseOrderService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/purchase-orders`;
+  private readonly autoPoBase = `${environment.apiUrl}/auto-po`;
 
   getPurchaseOrders(vendorId?: number, jobId?: number, status?: string, search?: string): Observable<PurchaseOrderListItem[]> {
     let params = new HttpParams();
@@ -71,5 +74,37 @@ export class PurchaseOrderService {
 
   updateRelease(poId: number, releaseNum: number, request: UpdatePurchaseOrderReleaseRequest): Observable<void> {
     return this.http.patch<void>(`${this.base}/${poId}/releases/${releaseNum}`, request);
+  }
+
+  // ── Auto-PO ──
+
+  getAutoPoSuggestions(status?: string): Observable<AutoPoSuggestion[]> {
+    let params = new HttpParams();
+    if (status) params = params.set('status', status);
+    return this.http.get<AutoPoSuggestion[]>(`${this.autoPoBase}/suggestions`, { params });
+  }
+
+  convertSuggestion(id: number): Observable<number> {
+    return this.http.post<number>(`${this.autoPoBase}/suggestions/${id}/convert`, {});
+  }
+
+  dismissSuggestion(id: number): Observable<void> {
+    return this.http.post<void>(`${this.autoPoBase}/suggestions/${id}/dismiss`, {});
+  }
+
+  bulkConvertSuggestions(ids: number[]): Observable<number[]> {
+    return this.http.post<number[]>(`${this.autoPoBase}/suggestions/bulk-convert`, ids);
+  }
+
+  triggerAutoPoRun(): Observable<void> {
+    return this.http.post<void>(`${this.autoPoBase}/run`, {});
+  }
+
+  getAutoPoSettings(): Observable<AutoPoSettings> {
+    return this.http.get<AutoPoSettings>(`${this.autoPoBase}/settings`);
+  }
+
+  updateAutoPoSettings(settings: UpdateAutoPoSettingsRequest): Observable<AutoPoSettings> {
+    return this.http.patch<AutoPoSettings>(`${this.autoPoBase}/settings`, settings);
   }
 }

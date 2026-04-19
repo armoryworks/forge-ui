@@ -19,6 +19,8 @@ import { ChatRoom, ChannelType } from './models/chat-room.model';
 import { CreateChannelDialogComponent } from './components/create-channel-dialog/create-channel-dialog.component';
 import { ChannelBrowserDialogComponent } from './components/channel-browser-dialog/channel-browser-dialog.component';
 import { ChannelSettingsDialogComponent, ChannelSettingsDialogData, ChannelSettingsDialogResult } from './components/channel-settings-dialog/channel-settings-dialog.component';
+import { EntityMentionPopoverComponent } from './components/entity-mention-popover/entity-mention-popover.component';
+import { ThreadPanelComponent } from './components/thread-panel/thread-panel.component';
 import { MentionRenderPipe } from './pipes/mention-render.pipe';
 
 interface UserListItem {
@@ -33,7 +35,7 @@ type ChatView = 'list' | 'dm' | 'channel' | 'userPicker';
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe, MentionRenderPipe],
+  imports: [ReactiveFormsModule, MatTooltipModule, AvatarComponent, TranslatePipe, MentionRenderPipe, EntityMentionPopoverComponent, ThreadPanelComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -72,8 +74,13 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // Thread state
   protected readonly threadParentMessage = signal<ChatMessage | null>(null);
-  protected readonly threadReplies = signal<ChatMessage[]>([]);
-  protected readonly threadReplyControl = new FormControl('');
+  protected readonly threadOpen = computed(() => this.threadParentMessage() !== null);
+
+  // Mention popover state
+  protected readonly mentionPopoverVisible = signal(false);
+  private mentionStartIndex = -1;
+  private readonly mentionPopover = viewChild<EntityMentionPopoverComponent>('mentionPopover');
+  private readonly messageInput = viewChild<ElementRef<HTMLInputElement>>('messageInputField');
 
   // New conversation state
   protected readonly allUsers = signal<UserListItem[]>([]);
@@ -266,6 +273,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   }
 
   onKeydown(event: KeyboardEvent): void {
+    // Let mention popover handle keyboard events first
+    if (this.mentionPopoverVisible()) {
+      const handled = this.mentionPopover()?.onKeydown(event);
+      if (handled) return;
+    }
+
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       this.sendMessage();
@@ -325,39 +338,77 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   protected openThread(msg: ChatMessage): void {
     this.threadParentMessage.set(msg);
-    this.threadReplies.set([]);
-    this.threadReplyControl.setValue('');
-    this.chatService.getThread(msg.id).subscribe(replies => {
-      this.threadReplies.set(replies);
-    });
   }
 
   protected closeThread(): void {
     this.threadParentMessage.set(null);
-    this.threadReplies.set([]);
   }
 
-  protected sendThreadReply(): void {
-    const content = this.threadReplyControl.value?.trim();
+  protected onThreadReplySent(): void {
     const parent = this.threadParentMessage();
-    if (!content || !parent) return;
+    if (!parent) return;
+    // Update parent's reply count in main messages list
+    this.messages.update(msgs => msgs.map(m =>
+      m.id === parent.id ? { ...m, threadReplyCount: m.threadReplyCount + 1, threadLastReplyAt: new Date() } : m,
+    ));
+    this.threadParentMessage.update(p => p ? { ...p, threadReplyCount: p.threadReplyCount + 1 } : p);
+  }
 
-    this.chatService.replyInThread(parent.id, content).subscribe(reply => {
-      this.threadReplies.update(r => [...r, reply]);
-      this.threadReplyControl.setValue('');
-      // Update parent's reply count in main messages list
-      this.messages.update(msgs => msgs.map(m =>
-        m.id === parent.id ? { ...m, threadReplyCount: m.threadReplyCount + 1, threadLastReplyAt: new Date() } : m,
-      ));
-      this.threadParentMessage.update(p => p ? { ...p, threadReplyCount: p.threadReplyCount + 1 } : p);
+  // ── Mention popover ──
+
+  protected onMessageInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    const cursorPos = input.selectionStart ?? 0;
+
+    // Find the last @ before cursor
+    const textBeforeCursor = value.substring(0, cursorPos);
+    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+
+    if (lastAtIndex >= 0) {
+      // Check no space between @ and the text before the next space
+      const query = textBeforeCursor.substring(lastAtIndex + 1);
+      // Close if there's a ] after the @ (completed mention) or if cursor moved before @
+      if (query.includes(']') || query.includes('\n')) {
+        this.closeMentionPopover();
+        return;
+      }
+      this.mentionStartIndex = lastAtIndex;
+      this.mentionPopoverVisible.set(true);
+      this.mentionPopover()?.updateQuery(query);
+    } else {
+      this.closeMentionPopover();
+    }
+  }
+
+  protected onMentionSelected(mention: { entityType: string; entityId: number; displayText: string }): void {
+    const input = this.messageInput()?.nativeElement;
+    if (!input) return;
+
+    const value = this.messageControl.value ?? '';
+    const marker = `@[${mention.entityType}:${mention.entityId}:${mention.displayText}]`;
+    const before = value.substring(0, this.mentionStartIndex);
+    const cursorPos = input.selectionStart ?? value.length;
+    const after = value.substring(cursorPos);
+
+    this.messageControl.setValue(before + marker + ' ' + after);
+    this.closeMentionPopover();
+
+    // Focus back on input and set cursor after inserted mention
+    setTimeout(() => {
+      const newPos = before.length + marker.length + 1;
+      input.focus();
+      input.setSelectionRange(newPos, newPos);
     });
   }
 
-  protected onThreadKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      this.sendThreadReply();
-    }
+  protected onMentionClosed(): void {
+    this.closeMentionPopover();
+  }
+
+  private closeMentionPopover(): void {
+    this.mentionPopoverVisible.set(false);
+    this.mentionStartIndex = -1;
   }
 
   // Filter out thread replies from main message list

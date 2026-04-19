@@ -26,6 +26,7 @@ import { AdminTeam, TeamMember, KioskTerminal } from '../models/admin-team.model
 import { ComplianceFormTemplate, ComplianceFormSubmission, UserComplianceDetail } from '../../account/models/compliance-form.model';
 import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
 import { IntegrationSettingsResult, IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
+import { DomainEventFailure } from '../models/domain-event-failure.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -383,6 +384,21 @@ export class AdminService {
   // User Work Location
   updateUserWorkLocation(userId: number, workLocationId: number | null): Observable<void> {
     return this.http.patch<void>(`${environment.apiUrl}/admin/users/${userId}/work-location`, { workLocationId });
+  }
+
+  // Domain Event Failures
+  private readonly domainEventFailuresBase = `${environment.apiUrl}/admin/domain-event-failures`;
+
+  getDomainEventFailures(): Observable<DomainEventFailure[]> {
+    return this.http.get<DomainEventFailure[]>(this.domainEventFailuresBase);
+  }
+
+  retryDomainEventFailure(id: number): Observable<void> {
+    return this.http.post<void>(`${this.domainEventFailuresBase}/${id}/retry`, {});
+  }
+
+  resolveDomainEventFailure(id: number): Observable<void> {
+    return this.http.post<void>(`${this.domainEventFailuresBase}/${id}/resolve`, {});
   }
 
   // Integrations

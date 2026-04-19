@@ -176,7 +176,7 @@
       </div>
     } @else {
       <!-- DM or Channel message view -->
-      <div class="chat-panel__content-area" [class.chat-panel__content-area--threaded]="threadParentMessage()">
+      <div class="chat-panel__content-area" [class.chat-panel__content-area--threaded]="threadOpen()">
         <div class="chat-panel__messages" #messagesContainer>
           @for (msg of topLevelMessages(); track msg.id; let i = $index) {
             @if (dateSeparator(i); as label) {
@@ -221,64 +221,13 @@
           }
         </div>
 
-        <!-- Thread side panel -->
-        @if (threadParentMessage(); as parent) {
-          <div class="thread-panel">
-            <div class="thread-panel__header">
-              <span class="thread-panel__title">Thread</span>
-              <button class="icon-btn" (click)="closeThread()" aria-label="Close thread">
-                <span class="material-icons-outlined">close</span>
-              </button>
-            </div>
-            <div class="thread-panel__messages">
-              <!-- Parent message -->
-              <div class="message">
-                <app-avatar [initials]="parent.senderInitials" [color]="parent.senderColor" size="sm" />
-                <div class="message__bubble">
-                  <span class="message__sender">{{ parent.senderName }}</span>
-                  <span class="message__text" [innerHTML]="parent.content | mentionRender"></span>
-                  <span class="message__time">{{ formatTime(parent.createdAt) }}</span>
-                </div>
-              </div>
-              @if (threadReplies().length > 0) {
-                <div class="thread-panel__divider">
-                  <span class="thread-panel__divider-text">{{ threadReplies().length }} {{ threadReplies().length === 1 ? 'reply' : 'replies' }}</span>
-                </div>
-              }
-              @for (reply of threadReplies(); track reply.id) {
-                <div class="message" [class.message--own]="isOwnMessage(reply)">
-                  @if (!isOwnMessage(reply)) {
-                    <app-avatar [initials]="reply.senderInitials" [color]="reply.senderColor" size="sm" />
-                  }
-                  <div class="message__bubble">
-                    @if (!isOwnMessage(reply)) {
-                      <span class="message__sender">{{ reply.senderName }}</span>
-                    }
-                    <span class="message__text" [innerHTML]="reply.content | mentionRender"></span>
-                    <span class="message__time">{{ formatTime(reply.createdAt) }}</span>
-                  </div>
-                </div>
-              }
-            </div>
-            <div class="chat-panel__input">
-              <input
-                class="chat-panel__input-field"
-                type="text"
-                placeholder="Reply in thread..."
-                [formControl]="threadReplyControl"
-                (keydown)="onThreadKeydown($event)" />
-              <button
-                class="icon-btn chat-panel__send"
-                [disabled]="!threadReplyControl.value?.trim()"
-                (click)="sendThreadReply()"
-                aria-label="Send thread reply">
-                <span class="material-icons-outlined">send</span>
-              </button>
-            </div>
-          </div>
-        }
+        <app-thread-panel
+          [parentMessage]="threadParentMessage()"
+          [open]="threadOpen()"
+          (closed)="closeThread()"
+          (replySent)="onThreadReplySent()" />
       </div>
-      <div class="chat-panel__input-area" [class.chat-panel__input-area--hidden]="threadParentMessage()">
+      <div class="chat-panel__input-area" [class.chat-panel__input-area--hidden]="threadOpen()">
         @if (pendingFile()) {
           <div class="chat-panel__pending-file">
             <span class="material-icons-outlined">attach_file</span>
@@ -292,7 +241,12 @@
             </button>
           </div>
         }
-        <div class="chat-panel__input" >
+        <div class="chat-panel__input">
+          <app-entity-mention-popover
+            #mentionPopover
+            [visible]="mentionPopoverVisible()"
+            (selected)="onMentionSelected($event)"
+            (closed)="onMentionClosed()" />
           @if (isInputDisabled()) {
             <span class="chat-panel__readonly">This channel is read-only</span>
           } @else {
@@ -302,12 +256,14 @@
               <span class="material-icons-outlined">attach_file</span>
             </button>
             <input
+              #messageInputField
               data-testid="chat-message-input"
               class="chat-panel__input-field"
               type="text"
               [placeholder]="'chat.typeMessage' | translate"
               [formControl]="messageControl"
-              (keydown)="onKeydown($event)" />
+              (keydown)="onKeydown($event)"
+              (input)="onMessageInput($event)" />
             <button
               data-testid="chat-send-btn"
               class="icon-btn chat-panel__send"

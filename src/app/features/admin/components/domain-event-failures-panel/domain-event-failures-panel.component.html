@@ -1,0 +1,112 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ filteredFailures().length }} {{ 'adminPanels.domainEventFailures.failures' | translate }}</span>
+  <div class="panel-header__actions">
+    <app-select [label]="'adminPanels.domainEventFailures.filterStatus' | translate" [formControl]="statusControl" [options]="statusOptions" />
+    <button class="action-btn action-btn--sm" (click)="load()" [attr.aria-label]="'common.refresh' | translate">
+      <span class="material-icons-outlined">refresh</span>
+      {{ 'common.refresh' | translate }}
+    </button>
+  </div>
+</div>
+
+<div [appLoadingBlock]="isLoading()">
+  <app-data-table
+    tableId="admin-domain-event-failures"
+    [columns]="columns"
+    [data]="filteredFailures()"
+    [clickableRows]="true"
+    emptyIcon="check_circle"
+    [emptyMessage]="'adminPanels.domainEventFailures.noFailures' | translate"
+    (rowClick)="toggleDetail($any($event))">
+
+    <ng-template appColumnCell="errorMessage" let-row>
+      <span class="error-message" [title]="row.errorMessage">{{ truncate(row.errorMessage, 80) }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="failedAt" let-row>
+      {{ row.failedAt | date:'MM/dd/yyyy hh:mm' }}
+    </ng-template>
+
+    <ng-template appColumnCell="lastRetryAt" let-row>
+      @if (row.lastRetryAt) {
+        {{ row.lastRetryAt | date:'MM/dd/yyyy hh:mm' }}
+      } @else {
+        <span class="text-muted">&mdash;</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="action-cell">
+        @if (row.status === 'Failed') {
+          <button class="icon-btn"
+            [matTooltip]="'adminPanels.domainEventFailures.retry' | translate"
+            matTooltipPosition="above"
+            [attr.aria-label]="'adminPanels.domainEventFailures.retry' | translate"
+            (click)="retryFailure(row, $event)">
+            <span class="material-icons-outlined">replay</span>
+          </button>
+        }
+        @if (row.status === 'Failed' || row.status === 'Retrying') {
+          <button class="icon-btn"
+            [matTooltip]="'adminPanels.domainEventFailures.resolve' | translate"
+            matTooltipPosition="above"
+            [attr.aria-label]="'adminPanels.domainEventFailures.resolve' | translate"
+            (click)="resolveFailure(row, $event)">
+            <span class="material-icons-outlined">check_circle</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (expandedId(); as expandedFailureId) {
+  @for (failure of filteredFailures(); track failure.id) {
+    @if (failure.id === expandedFailureId) {
+      <div class="failure-detail">
+        <div class="failure-detail__header">
+          <h4 class="failure-detail__title">
+            <span class="material-icons-outlined">bug_report</span>
+            {{ failure.eventType }} &mdash; {{ failure.handlerName }}
+          </h4>
+          <button class="icon-btn" [attr.aria-label]="'common.close' | translate" (click)="expandedId.set(null)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="failure-detail__section">
+          <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.errorMessageLabel' | translate }}</span>
+          <p class="failure-detail__error">{{ failure.errorMessage }}</p>
+        </div>
+
+        <div class="failure-detail__section">
+          <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.eventPayload' | translate }}</span>
+          <pre class="failure-detail__payload">{{ formatPayload(failure.eventPayload) }}</pre>
+        </div>
+
+        <div class="failure-detail__meta">
+          <div class="failure-detail__meta-item">
+            <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.cols.status' | translate }}</span>
+            <span class="chip" [class]="getStatusClass(failure.status)">{{ failure.status }}</span>
+          </div>
+          <div class="failure-detail__meta-item">
+            <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.cols.retries' | translate }}</span>
+            <span>{{ failure.retryCount }}</span>
+          </div>
+          <div class="failure-detail__meta-item">
+            <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.cols.failedAt' | translate }}</span>
+            <span>{{ failure.failedAt | date:'MM/dd/yyyy hh:mm' }}</span>
+          </div>
+          <div class="failure-detail__meta-item">
+            <span class="failure-detail__label">{{ 'adminPanels.domainEventFailures.cols.lastRetry' | translate }}</span>
+            <span>{{ failure.lastRetryAt ? (failure.lastRetryAt | date:'MM/dd/yyyy hh:mm') : '&mdash;' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  }
+}

@@ -1,0 +1,47 @@
+@if (visibleTasks().length === 0 && !loading()) {
+  <app-empty-state icon="task_alt" [message]="'dashboard.noActionItems' | translate" />
+} @else {
+  <div class="action-items">
+    @for (task of visibleTasks(); track task.id) {
+      <div class="action-item" [class.action-item--overdue]="isOverdue(task.dueDate)">
+        <span class="material-icons-outlined action-item__icon">{{ getIcon(task.triggerType) }}</span>
+        <div class="action-item__content">
+          <span class="action-item__title">{{ task.title }}</span>
+          <div class="action-item__meta">
+            @if (task.dueDate) {
+              <span class="action-item__date" [class.action-item__date--overdue]="isOverdue(task.dueDate)">
+                {{ formatDate(task.dueDate) }}
+              </span>
+            }
+            @if (task.sourceEntityType && task.sourceEntityId) {
+              <app-entity-link [type]="getEntityType(task.sourceEntityType)" [entityId]="task.sourceEntityId">
+                {{ task.sourceEntityType }}#{{ task.sourceEntityId }}
+              </app-entity-link>
+            }
+          </div>
+        </div>
+        <div class="action-item__actions">
+          <button
+            class="icon-btn"
+            (click)="completeTask(task, $event)"
+            [attr.aria-label]="'dashboard.completeTask' | translate">
+            <span class="material-icons-outlined">check</span>
+          </button>
+          <button
+            class="icon-btn"
+            (click)="dismissTask(task, $event)"
+            [attr.aria-label]="'dashboard.dismissTask' | translate">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      </div>
+    }
+    @if (hasMore()) {
+      <div class="action-items__footer">
+        <span class="action-items__more">
+          {{ totalCount() }} {{ 'dashboard.totalItems' | translate }}
+        </span>
+      </div>
+    }
+  </div>
+}

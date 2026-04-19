@@ -1,0 +1,77 @@
+<div class="auto-po-panel">
+  <div class="auto-po-panel__toolbar">
+    <app-select
+      [label]="'common.status' | translate"
+      [formControl]="statusFilterControl"
+      [options]="statusFilterOptions"
+      (selectionChange)="onStatusFilterChange()"
+      data-testid="auto-po-status-filter" />
+
+    <span class="auto-po-panel__spacer"></span>
+
+    @if (hasSelection()) {
+      <button class="action-btn" [disabled]="converting()" (click)="dismissSelected()"
+        data-testid="auto-po-dismiss-btn" aria-label="Dismiss selected suggestions">
+        <span class="material-icons-outlined">close</span>
+        {{ 'autoPo.dismiss' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary" [disabled]="converting()" (click)="convertSelected()"
+        data-testid="auto-po-convert-btn" aria-label="Convert selected suggestions to purchase orders">
+        <span class="material-icons-outlined">shopping_cart</span>
+        {{ 'autoPo.convertToPo' | translate }}
+      </button>
+    }
+
+    @if (isAdmin) {
+      <button class="action-btn" (click)="triggerRun()" data-testid="auto-po-run-btn"
+        aria-label="Run auto-PO analysis now">
+        <span class="material-icons-outlined">play_arrow</span>
+        {{ 'autoPo.runAnalysis' | translate }}
+      </button>
+    }
+  </div>
+
+  <div [appLoadingBlock]="loading()">
+    <app-data-table
+      tableId="auto-po-suggestions"
+      [columns]="columns"
+      [data]="suggestions()"
+      [selectable]="true"
+      emptyIcon="auto_awesome"
+      [emptyMessage]="'autoPo.noSuggestions' | translate"
+      (selectionChange)="onSelectionChange($event)">
+
+      <ng-template appColumnCell="partNumber" let-row>
+        <app-entity-link type="part" [entityId]="row.partId">{{ row.partNumber }}</app-entity-link>
+      </ng-template>
+
+      <ng-template appColumnCell="partDescription" let-row>
+        <span>{{ row.partDescription ?? '—' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="vendorName" let-row>
+        <app-entity-link type="vendor" [entityId]="row.vendorId">{{ row.vendorName }}</app-entity-link>
+      </ng-template>
+
+      <ng-template appColumnCell="neededByDate" let-row>
+        <span class="text-muted">{{ row.neededByDate | date:'MM/dd/yyyy' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="sourceSalesOrderNumbers" let-row>
+        @if (row.sourceSalesOrderNumbers?.length) {
+          <span class="so-list">{{ row.sourceSalesOrderNumbers.join(', ') }}</span>
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="status" let-row>
+        <span [class]="getStatusClass(row.status)">{{ row.status }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="createdAt" let-row>
+        <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

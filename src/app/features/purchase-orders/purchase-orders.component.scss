@@ -9,6 +9,14 @@
   overflow: hidden;
 }
 
+.po-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .po-layout {
   flex: 1;
   display: flex;
@@ -32,6 +40,22 @@
   padding: $sp-md $sp-lg;
   border-bottom: $border-width-thin solid var(--border);
   flex-shrink: 0;
+}
+
+// --- Tab Badge ---
+.tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: $badge-size-md;
+  height: $badge-size-md;
+  padding: 0 $sp-sm;
+  border-radius: 99px;
+  background: var(--warning);
+  color: var(--text);
+  font-size: $font-size-xxs;
+  font-weight: 700;
+  margin-left: $sp-sm;
 }
 
 // --- Cell Styles ---

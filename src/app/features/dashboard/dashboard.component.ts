@@ -32,13 +32,14 @@ import { CycleProgressWidgetComponent } from './components/cycle-progress-widget
 import { OpenOrdersWidgetComponent } from './components/open-orders-widget.component';
 import { EodPromptWidgetComponent } from './components/eod-prompt-widget.component';
 import { MarginSummaryWidgetComponent } from './widgets/margin-summary-widget/margin-summary-widget.component';
+import { ActionItemsWidgetComponent } from './components/action-items-widget.component';
 import { AmbientModeComponent } from './components/ambient-mode.component';
 import { FocusModeComponent } from './components/focus-mode.component';
 import { GettingStartedBannerComponent } from './components/getting-started-banner.component';
 import { DashboardData } from './models/dashboard-data.model';
 import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
 import { DashboardSavedLayout, DashboardWidgetLayout } from './models/dashboard-widget-layout.model';
-import { WIDGET_REGISTRY } from './models/widget-registry';
+import { WIDGET_REGISTRY } from './widget-registry';
 import { DashboardService } from './services/dashboard.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
@@ -51,6 +52,7 @@ const LAYOUT_PREF_KEY = 'dashboard:layout:v5';
   selector: 'app-dashboard',
   standalone: true,
   imports: [
+    ActionItemsWidgetComponent,
     DashboardWidgetComponent,
     KpiChipComponent,
     TodaysTasksWidgetComponent,

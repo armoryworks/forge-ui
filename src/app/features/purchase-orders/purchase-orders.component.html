@@ -1,44 +1,80 @@
 <app-page-header [title]="'purchaseOrders.title' | translate" [subtitle]="'purchaseOrders.subtitle' | translate">
-  <button data-testid="new-po-btn" class="action-btn action-btn--primary" (click)="openCreatePo()">
-    <span class="material-icons-outlined">add</span>
-    {{ 'purchaseOrders.newPo' | translate }}
-  </button>
+  @if (activeTab() === 'orders') {
+    <button data-testid="new-po-btn" class="action-btn action-btn--primary" (click)="openCreatePo()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'purchaseOrders.newPo' | translate }}
+    </button>
+  }
 </app-page-header>
 
-<div class="po-layout">
-  <div class="po-list-panel">
-    <div class="filters-bar">
-      <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'purchaseOrders.searchPlaceholder' | translate"
-        (keyup.enter)="applyFilters()" />
-      <app-select [label]="'purchaseOrders.vendor' | translate" [formControl]="vendorFilterControl" [options]="vendorOptions()" />
-      <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
-    </div>
-
-    <div [appLoadingBlock]="loading()">
-      <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
-        emptyIcon="description" [emptyMessage]="'purchaseOrders.noPosFound' | translate"
-        [clickableRows]="true" (rowClick)="openPurchaseOrderDetail($any($event))">
-        <ng-template appColumnCell="poNumber" let-row>
-          <span class="po-number">{{ row.poNumber }}</span>
-        </ng-template>
-        <ng-template appColumnCell="vendorName" let-row>
-          <span>{{ row.vendorName }}</span>
-        </ng-template>
-        <ng-template appColumnCell="jobNumber" let-row>
-          <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="status" let-row>
-          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
-        </ng-template>
-        <ng-template appColumnCell="expectedDeliveryDate" let-row>
-          <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
-        </ng-template>
-        <ng-template appColumnCell="createdAt" let-row>
-          <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
-        </ng-template>
-      </app-data-table>
-    </div>
+<div class="po-content">
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="activeTab() === 'orders'" (click)="switchTab('orders')">
+      <span class="material-icons-outlined">description</span>
+      {{ 'purchaseOrders.tabOrders' | translate }}
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'suggestions'" (click)="switchTab('suggestions')">
+      <span class="material-icons-outlined">auto_awesome</span>
+      {{ 'autoPo.tabSuggestions' | translate }}
+      @if (pendingSuggestionCount() > 0) {
+        <span class="tab__badge">{{ pendingSuggestionCount() }}</span>
+      }
+    </button>
+    @if (isAdmin) {
+      <button class="tab" [class.tab--active]="activeTab() === 'settings'" (click)="switchTab('settings')">
+        <span class="material-icons-outlined">settings</span>
+        {{ 'autoPo.tabSettings' | translate }}
+      </button>
+    }
   </div>
+
+  <!-- Tab Panels -->
+  @if (activeTab() === 'orders') {
+    <div class="po-layout">
+      <div class="po-list-panel">
+        <div class="filters-bar">
+          <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'purchaseOrders.searchPlaceholder' | translate"
+            (keyup.enter)="applyFilters()" />
+          <app-select [label]="'purchaseOrders.vendor' | translate" [formControl]="vendorFilterControl" [options]="vendorOptions()" />
+          <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
+        </div>
+
+        <div [appLoadingBlock]="loading()">
+          <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
+            emptyIcon="description" [emptyMessage]="'purchaseOrders.noPosFound' | translate"
+            [clickableRows]="true" (rowClick)="openPurchaseOrderDetail($any($event))">
+            <ng-template appColumnCell="poNumber" let-row>
+              <span class="po-number">{{ row.poNumber }}</span>
+            </ng-template>
+            <ng-template appColumnCell="vendorName" let-row>
+              <span>{{ row.vendorName }}</span>
+            </ng-template>
+            <ng-template appColumnCell="jobNumber" let-row>
+              <span class="text-muted">{{ row.jobNumber ?? '—' }}</span>
+            </ng-template>
+            <ng-template appColumnCell="status" let-row>
+              <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+            </ng-template>
+            <ng-template appColumnCell="expectedDeliveryDate" let-row>
+              <span class="text-muted">{{ row.expectedDeliveryDate ? (row.expectedDeliveryDate | date:'MM/dd/yyyy') : '—' }}</span>
+            </ng-template>
+            <ng-template appColumnCell="createdAt" let-row>
+              <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+            </ng-template>
+          </app-data-table>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (activeTab() === 'suggestions') {
+    <app-auto-po-panel />
+  }
+
+  @if (activeTab() === 'settings') {
+    <app-auto-po-settings-panel />
+  }
 </div>
 
 <!-- Create PO Dialog -->

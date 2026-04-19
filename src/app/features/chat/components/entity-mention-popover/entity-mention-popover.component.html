@@ -1,0 +1,41 @@
+@if (visible() && (flatResults().length > 0 || isLoading() || query().length >= 2)) {
+  <div class="mention-popover" role="listbox" aria-label="Entity mention suggestions">
+    @if (isLoading()) {
+      <div class="mention-popover__loading">
+        <span class="material-icons-outlined spin">sync</span>
+        <span>{{ 'chat.searching' | translate }}</span>
+      </div>
+    } @else if (flatResults().length === 0 && query().length >= 2) {
+      <div class="mention-popover__empty">
+        <span class="material-icons-outlined">search_off</span>
+        <span>{{ 'chat.noMentionResults' | translate }}</span>
+      </div>
+    } @else {
+      @for (group of groupedResults(); track group.type) {
+        <div class="mention-popover__group">
+          <div class="mention-popover__group-header">
+            <span class="material-icons-outlined mention-popover__group-icon">{{ group.icon }}</span>
+            <span class="mention-popover__group-label">{{ group.label }}</span>
+          </div>
+          @for (result of group.results; track result.entityId) {
+            <button
+              class="mention-popover__item"
+              [class.mention-popover__item--active]="isActive(result)"
+              role="option"
+              [attr.aria-selected]="isActive(result)"
+              (click)="selectResult(result)"
+              (mouseenter)="activeIndex.set(flatResults().indexOf(result))">
+              <span class="material-icons-outlined mention-popover__item-icon">{{ result.icon }}</span>
+              <div class="mention-popover__item-content">
+                <span class="mention-popover__item-title">{{ result.title }}</span>
+                @if (result.subtitle) {
+                  <span class="mention-popover__item-subtitle">{{ result.subtitle }}</span>
+                }
+              </div>
+            </button>
+          }
+        </div>
+      }
+    }
+  </div>
+}

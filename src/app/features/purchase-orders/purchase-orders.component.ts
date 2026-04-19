@@ -1,8 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, computed, untracked } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { map, startWith } from 'rxjs';
+
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PurchaseOrderService } from './services/purchase-order.service';
 import { PurchaseOrderListItem } from './models/purchase-order-list-item.model';
@@ -10,6 +13,8 @@ import { VendorService } from '../vendors/services/vendor.service';
 import { VendorResponse } from '../vendors/models/vendor-response.model';
 import { PoDialogComponent } from './components/po-dialog/po-dialog.component';
 import { PoDetailDialogComponent, PoDetailDialogData } from './components/po-detail-dialog/po-detail-dialog.component';
+import { AutoPoPanelComponent } from './components/auto-po-panel/auto-po-panel.component';
+import { AutoPoSettingsPanelComponent } from './components/auto-po-settings-panel/auto-po-settings-panel.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -18,7 +23,9 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { AuthService } from '../../shared/services/auth.service';
+
+type PoTab = 'orders' | 'suggestions' | 'settings';
 
 @Component({
   selector: 'app-purchase-orders',
@@ -28,6 +35,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective,
     PoDialogComponent, LoadingBlockDirective,
+    AutoPoPanelComponent, AutoPoSettingsPanelComponent,
   ],
   templateUrl: './purchase-orders.component.html',
   styleUrl: './purchase-orders.component.scss',
@@ -38,10 +46,26 @@ export class PurchaseOrdersComponent {
   private readonly vendorService = inject(VendorService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly auth = inject(AuthService);
+
+  private static readonly VALID_TABS: PoTab[] = ['orders', 'suggestions', 'settings'];
+
+  protected readonly isAdmin = this.auth.hasRole('Admin');
+
+  protected readonly activeTab = toSignal(
+    this.route.paramMap.pipe(map(p => {
+      const tab = p.get('tab') as PoTab;
+      return PurchaseOrdersComponent.VALID_TABS.includes(tab) ? tab : 'orders';
+    })),
+    { initialValue: 'orders' },
+  );
 
   protected readonly loading = signal(false);
   protected readonly purchaseOrders = signal<PurchaseOrderListItem[]>([]);
   protected readonly vendors = signal<VendorResponse[]>([]);
+  protected readonly pendingSuggestionCount = signal(0);
 
   // Dialogs
   protected readonly showCreateDialog = signal(false);
@@ -82,10 +106,24 @@ export class PurchaseOrdersComponent {
   ];
 
   constructor() {
-    this.loadPurchaseOrders();
     this.vendorService.getVendorDropdown().subscribe({
       next: (list) => this.vendors.set(list),
     });
+
+    this.loadPendingSuggestionCount();
+
+    effect(() => {
+      const tab = this.activeTab();
+      untracked(() => {
+        if (tab === 'orders') {
+          this.loadPurchaseOrders();
+        }
+      });
+    });
+  }
+
+  protected switchTab(tab: PoTab): void {
+    this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
   protected loadPurchaseOrders(): void {
@@ -103,6 +141,12 @@ export class PurchaseOrdersComponent {
         }
       },
       error: () => this.loading.set(false),
+    });
+  }
+
+  private loadPendingSuggestionCount(): void {
+    this.poService.getAutoPoSuggestions('Pending').subscribe({
+      next: (data) => this.pendingSuggestionCount.set(data.length),
     });
   }
 

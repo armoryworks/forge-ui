@@ -112,6 +112,7 @@ export class SidebarComponent {
           { icon: 'campaign', label: 'Announcements', i18nKey: 'admin.tabs.announcements', route: '/admin/announcements', allowedRoles: ['Admin', 'Manager'] },
           { icon: 'swap_horiz', label: 'EDI', i18nKey: 'admin.tabs.edi', route: '/admin/edi', allowedRoles: ['Admin'] },
           { icon: 'verified_user', label: 'MFA Policy', i18nKey: 'admin.tabs.mfa', route: '/admin/mfa', allowedRoles: ['Admin'] },
+          { icon: 'auto_fix_high', label: 'Automations', i18nKey: 'admin.tabs.automations', route: '/admin/automations', allowedRoles: ['Admin'] },
           { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
           { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         ],

@@ -1,0 +1,35 @@
+@use 'styles/variables' as *;
+
+.auto-po-settings {
+  display: flex;
+  flex-direction: column;
+  padding: $sp-lg;
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+
+  &__card {
+    max-width: 520px;
+    border: $border-width-thin solid var(--border);
+    padding: $sp-lg;
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+    margin: 0 0 $sp-lg;
+    color: var(--text);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: $sp-md;
+  }
+}

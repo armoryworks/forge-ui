@@ -1,0 +1,71 @@
+@if (open() && parentMessage(); as parent) {
+  <div class="thread-panel" role="complementary" aria-label="Thread replies">
+    <div class="thread-panel__header">
+      <span class="thread-panel__title">{{ 'chat.thread' | translate }}</span>
+      <button class="icon-btn" (click)="close()" aria-label="Close thread">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
+
+    <div class="thread-panel__messages" #repliesContainer>
+      <!-- Parent message -->
+      <div class="thread-panel__parent">
+        <app-avatar [initials]="parent.senderInitials" [color]="parent.senderColor" size="sm" />
+        <div class="thread-panel__parent-content">
+          <div class="thread-panel__parent-header">
+            <span class="thread-panel__parent-name">{{ parent.senderName }}</span>
+            <span class="thread-panel__parent-time">{{ formatTime(parent.createdAt) }}</span>
+          </div>
+          <span class="thread-panel__parent-text" [innerHTML]="parent.content | mentionRender"></span>
+        </div>
+      </div>
+
+      @if (replies().length > 0) {
+        <div class="thread-panel__divider">
+          <span class="thread-panel__divider-line"></span>
+          <span class="thread-panel__divider-text">{{ replies().length }} {{ replies().length === 1 ? ('chat.reply' | translate) : ('chat.replies' | translate) }}</span>
+          <span class="thread-panel__divider-line"></span>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <div class="thread-panel__loading">
+          <span class="material-icons-outlined spin">sync</span>
+        </div>
+      } @else {
+        @for (reply of replies(); track reply.id) {
+          <div class="thread-panel__reply" [class.thread-panel__reply--own]="isOwnMessage(reply)">
+            @if (!isOwnMessage(reply)) {
+              <app-avatar [initials]="reply.senderInitials" [color]="reply.senderColor" size="sm" />
+            }
+            <div class="thread-panel__reply-bubble">
+              @if (!isOwnMessage(reply)) {
+                <span class="thread-panel__reply-sender">{{ reply.senderName }}</span>
+              }
+              <span class="thread-panel__reply-text" [innerHTML]="reply.content | mentionRender"></span>
+              <span class="thread-panel__reply-time">{{ formatTime(reply.createdAt) }}</span>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+    <div class="thread-panel__input">
+      <input
+        class="thread-panel__input-field"
+        type="text"
+        data-testid="thread-reply-input"
+        [placeholder]="'chat.replyInThread' | translate"
+        [formControl]="replyControl"
+        (keydown)="onKeydown($event)" />
+      <button
+        class="icon-btn thread-panel__send"
+        data-testid="thread-send-btn"
+        [disabled]="!replyControl.value?.trim()"
+        (click)="sendReply()"
+        aria-label="Send thread reply">
+        <span class="material-icons-outlined">send</span>
+      </button>
+    </div>
+  </div>
+}

@@ -1,0 +1,27 @@
+@use 'styles/variables' as *;
+
+.auto-po-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+    flex-shrink: 0;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+}
+
+.so-list {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+}
