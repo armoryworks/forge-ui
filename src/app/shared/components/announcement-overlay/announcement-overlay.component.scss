@@ -65,6 +65,17 @@
     font-size: $font-size-base;
     font-weight: 600;
     color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__count {
+    font-size: $font-size-xs;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 0 $sp-xs;
+    border: $border-width-thin solid var(--border);
   }
 
   &__message {

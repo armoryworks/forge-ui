@@ -53,7 +53,8 @@ export class AnnouncementService {
   }
 
   pushAnnouncement(announcement: Announcement): void {
-    this.activeAnnouncements.update(list => [announcement, ...list]);
+    this.activeAnnouncements.update(list =>
+      list.some(a => a.id === announcement.id) ? list : [announcement, ...list]);
   }
 
   markAcknowledged(id: number): void {
