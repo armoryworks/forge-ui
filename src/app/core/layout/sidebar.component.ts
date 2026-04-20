@@ -115,6 +115,7 @@ export class SidebarComponent {
           { icon: 'auto_fix_high', label: 'Automations', i18nKey: 'admin.tabs.automations', route: '/admin/automations', allowedRoles: ['Admin'] },
           { icon: 'outbox', label: 'Integration Outbox', i18nKey: 'admin.tabs.integrationOutbox', route: '/admin/integration-outbox', allowedRoles: ['Admin'] },
           { icon: 'auto_awesome', label: 'Auto-PO', i18nKey: 'admin.tabs.autoPo', route: '/admin/auto-po', allowedRoles: ['Admin'] },
+          { icon: 'receipt_long', label: 'Expense Policy', i18nKey: 'admin.tabs.expenses', route: '/admin/expenses', allowedRoles: ['Admin'] },
           { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
           { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         ],

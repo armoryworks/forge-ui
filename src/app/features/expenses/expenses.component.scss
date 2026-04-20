@@ -36,3 +36,68 @@
 .col-actions { width: 80px; text-align: right; }
 .amount-cell { font-weight: 600; font-variant-numeric: tabular-nums; }
 .icon-btn--success:hover { color: var(--success); }
+
+// ─── Revision Note (resubmit dialog) ───
+.revision-note {
+  display: flex;
+  gap: $sp-md;
+  align-items: flex-start;
+  padding: $sp-md;
+  background: var(--warning-light);
+  border-left: $border-width-accent solid var(--warning);
+
+  .material-icons-outlined { color: var(--warning); }
+}
+
+.revision-note__label {
+  @include uppercase-label(var(--font-size-xs), 0.5px, 700);
+  color: var(--warning);
+  margin-bottom: $sp-xs;
+}
+
+.revision-note__body {
+  font-size: var(--font-size-base);
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+// ─── Receipt upload row ───
+.receipt-row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.receipt-row__label {
+  @include uppercase-label($font-size-xxs, 0.5px, 600);
+  color: var(--text-muted);
+}
+
+.receipt-row__required {
+  color: var(--error);
+  margin-left: $sp-xs;
+}
+
+.receipt-row__uploaded {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  background: var(--surface-alt, var(--surface));
+  border: $border-width-thin solid var(--border);
+}
+
+.receipt-row__name {
+  flex: 1;
+  font-size: $font-size-sm;
+  color: var(--text);
+  @include truncate;
+}
+
+.receipt-row__upload {
+  align-self: flex-start;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+}

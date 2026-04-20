@@ -5359,6 +5359,24 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
     }, errors));
   }
 
+  // ── 230. Drain approvals inbox — approve up to 3 pending items (Manager) ──
+  // Runs every week. The /approvals/inbox table renders inline approve buttons
+  // per row; no detail-click needed. Covers whatever source entity is queued
+  // (PurchaseOrder, Expense, etc.) and keeps the inbox from growing unbounded.
+  if (pct(w, 23000, 100)) {
+    inc(await tryAction('drain-approvals-inbox', async () => {
+      await navigateTo(managerPage, '/approvals/inbox');
+      await managerPage.waitForTimeout(1200);
+
+      for (let i = 0; i < 3; i += 1) {
+        const approveBtn = managerPage.locator('[data-testid="approval-approve-btn"]').first();
+        if (!(await approveBtn.isVisible({ timeout: 1500 }).catch(() => false))) break;
+        await approveBtn.click();
+        await managerPage.waitForTimeout(1200);
+      }
+    }, errors));
+  }
+
   return {
     weekLabel: ctx.weekLabel,
     weekStart: ctx.weekStart.toISOString(),

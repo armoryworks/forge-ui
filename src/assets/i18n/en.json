@@ -168,7 +168,8 @@
     "summary": "Summary",
     "overview": "Overview",
     "activity": "Activity",
-    "archived": "Archived"
+    "archived": "Archived",
+    "units": "units"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -227,7 +228,11 @@
     "loadFailed": "Failed to load dashboard data",
     "enterFocusMode": "Enter Focus Mode",
     "exitFocusMode": "Exit Focus Mode",
-    "focusMode": "Focus Mode"
+    "focusMode": "Focus Mode",
+    "completeTask": "Complete Task",
+    "dismissTask": "Dismiss Task",
+    "noActionItems": "No action items",
+    "totalItems": "Total Items"
   },
   "kanban": {
     "title": "Board",
@@ -824,6 +829,8 @@
     "noExpensesFound": "No expenses found",
     "noExpensesHelp": "Log business expenses here. Attach receipts and link to jobs for accurate cost tracking.",
     "newExpenseTitle": "New Expense",
+    "resubmitTitle": "Revise & Resubmit Expense",
+    "reviewerFeedback": "Reviewer Feedback",
     "selfApproved": "Self-Approved",
     "allStatuses": "All Statuses",
     "deleteTitle": "Delete Expense?",
@@ -861,6 +868,14 @@
     "submittedBy": "Submitted By",
     "job": "Job",
     "approvalNotesOptional": "Approval Notes (optional)",
+    "reviewNoteLabel": "Notes",
+    "declineNoteHint": "Note required for Reject / Request Revision — minimum {{ min }} chars ({{ len }}).",
+    "declineNoteRequiredTooltip": "A note of at least {{ min }} characters is required to reject or request revision.",
+    "requestRevision": "Needs Revision",
+    "needsRevision": "Needs Revision",
+    "expenseRevisionRequested": "Revision requested.",
+    "resubmit": "Resubmit",
+    "expenseResubmitted": "Expense resubmitted.",
     "ledgerTitle": "Expense Ledger",
     "newRecurring": "New Recurring",
     "upcomingTab": "Upcoming (90 Days)",
@@ -2077,7 +2092,9 @@
     "holdReleased": "Hold released.",
     "releaseHoldTitle": "Release Hold?",
     "releaseHoldMessage": "Release the \"{{label}}\" hold?",
-    "release": "Release"
+    "release": "Release",
+    "cancel": "Cancel",
+    "send": "Send"
   },
   "addressForm": {
     "streetAddress": "Street Address",
@@ -2419,7 +2436,8 @@
     "itemsReceived": "Items received.",
     "newPoTitle": "New Purchase Order",
     "noLinesYet": "No lines yet",
-    "orderDetails": "Order Details"
+    "orderDetails": "Order Details",
+    "tabOrders": "Orders"
   },
   "salesOrders": {
     "title": "Sales Orders",
@@ -3039,7 +3057,13 @@
       "backToChat": "Back to chat",
       "replyCount_one": "{{count}} reply",
       "replyCount_other": "{{count}} replies"
-    }
+    },
+    "channelInfo": "Channel Info",
+    "noMentionResults": "No results",
+    "replies": "Replies",
+    "reply": "Reply",
+    "replyInThread": "Reply in thread",
+    "searching": "Searching…"
   },
   "ai": {
     "title": "AI Assistants",
@@ -3162,7 +3186,16 @@
     "maxSessionsReached": "Maximum concurrent sessions reached",
     "sessionActive": "Active",
     "sessionIdle": "Idle",
-    "dailyLog": "Scan Log",
+    "dailyLog": {
+      "title": "Scan Daily Log",
+      "filterByDate": "Date",
+      "filterByAction": "Action Type",
+      "allActions": "All Actions",
+      "summaryStats": "Summary",
+      "scansToday": "scans today",
+      "exportCsv": "Export CSV",
+      "noScans": "No scans recorded for this date."
+    },
     "devices": "Scanner Devices",
     "shipFlow": {
       "title": "Ship Items",
@@ -3243,16 +3276,6 @@
       "pairSuccess": "Scanner paired successfully",
       "unpairSuccess": "Scanner unpaired"
     },
-    "dailyLog": {
-      "title": "Scan Daily Log",
-      "filterByDate": "Date",
-      "filterByAction": "Action Type",
-      "allActions": "All Actions",
-      "summaryStats": "Summary",
-      "scansToday": "scans today",
-      "exportCsv": "Export CSV",
-      "noScans": "No scans recorded for this date."
-    },
     "kioskSession": {
       "activeSession": "Active Sessions",
       "idleSince": "Idle for {{time}}",
@@ -3260,7 +3283,10 @@
       "maxSessions": "Maximum sessions reached (5)",
       "trainingMode": "TRAINING MODE",
       "trainingModeHint": "Actions will not be saved"
-    }
+    },
+    "locationEmpty": "Location Empty",
+    "lot": "Lot",
+    "scan": "Scan"
   },
   "customerReturns": {
     "allStatuses": "All Statuses",
@@ -3462,7 +3488,8 @@
       "dispatchList": "Dispatch List",
       "workCenters": "Work Centers",
       "shifts": "Shifts",
-      "runHistory": "Run History"
+      "runHistory": "Run History",
+      "dispatch": "Dispatch"
     },
     "runScheduler": "Run Scheduler",
     "noScheduledOps": "No scheduled operations. Run the scheduler to generate a schedule.",
@@ -3506,7 +3533,9 @@
       "setupHrs": "Setup (hrs)",
       "runHrs": "Run (hrs)",
       "priority": "Priority",
-      "dueDate": "Due Date"
+      "dueDate": "Due Date",
+      "endTime": "End Time",
+      "startTime": "Start Time"
     },
     "statuses": {
       "scheduled": "Scheduled",
@@ -3524,7 +3553,23 @@
     "snackbar": {
       "scheduled": "Scheduled",
       "operationLocked": "Operation locked",
-      "operationUnlocked": "Operation unlocked"
+      "operationUnlocked": "Operation unlocked",
+      "locked": "Schedule locked",
+      "operations": "Operations scheduled",
+      "unlocked": "Schedule unlocked"
+    },
+    "load": "Load",
+    "noDispatch": "No dispatch items",
+    "noDispatchTable": "No dispatch items",
+    "noOps": "No operations",
+    "noOpsTable": "No operations",
+    "noRunsTable": "No runs",
+    "noShiftsTable": "No shifts",
+    "noWorkCentersTable": "No work centers",
+    "priorityRules": {
+      "dueDate": "Due Date",
+      "fifo": "FIFO",
+      "priority": "Priority"
     }
   },
   "oee": {
@@ -3565,7 +3610,18 @@
       "reducedSpeed": "Reduced Speed",
       "processDefects": "Process Defects",
       "reducedYield": "Reduced Yield"
-    }
+    },
+    "granularities": {
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "weekly": "Weekly"
+    },
+    "hrs": "hrs",
+    "lossesChartLabel": "Six Big Losses",
+    "min": "min",
+    "noWorkCenters": "No work centers",
+    "trendChartLabel": "OEE Trend",
+    "worldClassBadge": "World-Class"
   },
   "purchasing": {
     "title": "RFQs",
@@ -3585,7 +3641,13 @@
       "received": "Received",
       "required": "Required",
       "deadline": "Deadline",
-      "created": "Created"
+      "created": "Created",
+      "leadTime": "Lead Time",
+      "moq": "MOQ",
+      "tooling": "Tooling",
+      "unitPrice": "Unit Price",
+      "validUntil": "Valid Until",
+      "vendor": "Vendor"
     },
     "statuses": {
       "draft": "Draft",
@@ -3646,11 +3708,46 @@
       "rfqCreated": "RFQ created",
       "sentToVendors": "RFQ sent to vendors",
       "responseRecorded": "Vendor response recorded",
-      "awardedPo": "RFQ awarded. PO created."
+      "awardedPo": "RFQ awarded. PO created.",
+      "rfqAwarded": "RFQ awarded",
+      "rfqSent": "RFQ sent to vendors"
     },
     "confirm": {
       "awardTitle": "Award RFQ?"
-    }
+    },
+    "allStatuses": "All Statuses",
+    "award": "Award",
+    "awardRfqMessage": "Award this RFQ to the selected vendor?",
+    "awardRfqTitle": "Award RFQ",
+    "awarded": "Awarded",
+    "awardedAt": "Awarded At",
+    "cancel": "Cancel",
+    "close": "Close",
+    "description": "Description",
+    "generatedPo": "Generated PO",
+    "leadTime": "Lead Time",
+    "leadTimeDays": "Lead Time (days)",
+    "moq": "MOQ",
+    "noRfqs": "No RFQs",
+    "noVendorResponses": "No vendor responses",
+    "notes": "Notes",
+    "part": "Part",
+    "quantity": "Quantity",
+    "quoteValidUntil": "Quote Valid Until",
+    "record": "Record",
+    "recordResponse": "Record Response",
+    "recordVendorResponse": "Record Vendor Response",
+    "requiredDate": "Required Date",
+    "responseDeadline": "Response Deadline",
+    "selectPart": "Select Part",
+    "send": "Send",
+    "sendToVendors": "Send to Vendors",
+    "sentAt": "Sent At",
+    "specialInstructions": "Special Instructions",
+    "toolingCost": "Tooling Cost",
+    "unitPrice": "Unit Price",
+    "vendorResponses": "Vendor Responses",
+    "vendors": "Vendors"
   },
   "approvals": {
     "title": "Approvals",
@@ -3717,13 +3814,39 @@
     "approverTypes": {
       "specificUser": "Specific User",
       "role": "Role",
-      "directManager": "Direct Manager"
+      "directManager": "Direct Manager",
+      "manager": "Manager"
     },
     "roles": {
       "admin": "Admin",
       "manager": "Manager",
       "officeManager": "Office Manager",
       "pm": "PM"
+    },
+    "inbox": {
+      "approve": "Approve",
+      "cancel": "Cancel",
+      "noPending": "No pending approvals",
+      "reasonLabel": "Reason",
+      "reject": "Reject",
+      "rejectTitle": "Reject Approval"
+    },
+    "workflows": {
+      "addStep": "Add Step",
+      "amountPlaceholder": "e.g. 1000",
+      "amountThreshold": "Amount Threshold",
+      "approvalSteps": "Approval Steps",
+      "approverType": "Approver Type",
+      "autoApproveBelow": "Auto-approve below",
+      "cancel": "Cancel",
+      "description": "Description",
+      "entityType": "Entity Type",
+      "escalateAfter": "Escalate After (hours)",
+      "newWorkflow": "New Workflow",
+      "noWorkflows": "No workflows defined",
+      "role": "Role",
+      "stepName": "Step Name",
+      "workflowName": "Workflow Name"
     }
   },
   "employees": {
@@ -3945,7 +4068,8 @@
         "meeting": "Meeting",
         "training": "Training",
         "safety": "Safety",
-        "other": "Other"
+        "other": "Other",
+        "all": "All Types"
       },
       "cols": {
         "title": "Title",
@@ -3959,7 +4083,8 @@
       "snackbar": {
         "eventUpdated": "Event updated",
         "eventCreated": "Event created",
-        "eventCancelled": "Event cancelled"
+        "eventCancelled": "Event cancelled",
+        "eventDeleted": "Event deleted"
       }
     },
     "mfa": {
@@ -3982,8 +4107,13 @@
         "enforced": "Enforced"
       },
       "snackbar": {
-        "policyUpdated": "MFA policy updated"
-      }
+        "policyUpdated": "MFA policy updated",
+        "policyReset": "MFA policy reset",
+        "policySaved": "MFA policy saved"
+      },
+      "requiredForRoles": "Required for Roles",
+      "save": "Save",
+      "selectRoles": "Select roles"
     },
     "domainEventFailures": {
       "failures": "failures",
@@ -4051,11 +4181,16 @@
         "origStart": "Orig. Start",
         "origEnd": "Orig. End",
         "origDuration": "Orig. Duration",
-        "reason": "Reason"
+        "reason": "Reason",
+        "correctedAt": "Corrected At",
+        "newValue": "New Value",
+        "originalValue": "Original Value"
       },
       "snackbar": {
-        "corrected": "Time entry corrected"
-      }
+        "corrected": "Time entry corrected",
+        "correctionSaved": "Time correction saved"
+      },
+      "allEmployees": "All Employees"
     },
     "training": {
       "tabs": {
@@ -4209,6 +4344,21 @@
     "modeAutomatic": "Automatic",
     "bufferDays": "Buffer Days",
     "notifyChat": "Send Chat Notifications",
-    "settingsSaved": "Auto-PO settings saved."
+    "settingsSaved": "Auto-PO settings saved.",
+    "bulkConvertedSuccess": "Suggestions converted to POs",
+    "convertedSuccess": "Suggestion converted to PO",
+    "defaultMode": "Default Mode",
+    "description": "Description",
+    "dismissedPartial": "Some suggestions dismissed",
+    "dismissedSuccess": "Suggestion dismissed",
+    "partNumber": "Part Number",
+    "qty": "Qty",
+    "runAnalysis": "Run Analysis",
+    "runTriggered": "Analysis started",
+    "settingsTitle": "Auto-PO Settings",
+    "sourceSOs": "Source SOs",
+    "tabSettings": "Settings",
+    "tabSuggestions": "Suggestions",
+    "vendor": "Vendor"
   }
 }

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { ExpenseItem } from '../models/expense-item.model';
 import { CreateExpenseRequest } from '../models/create-expense-request.model';
+import { UpdateExpenseRequest } from '../models/update-expense-request.model';
 import { UpdateExpenseStatusRequest } from '../models/update-expense-status-request.model';
 import { ExpenseStatus } from '../models/expense-status.type';
 import { ExpenseSettings } from '../models/expense-settings.model';
@@ -28,12 +29,22 @@ export class ExpensesService {
     return this.http.post<ExpenseItem>(this.base, request);
   }
 
+  updateExpense(id: number, request: UpdateExpenseRequest): Observable<ExpenseItem> {
+    return this.http.put<ExpenseItem>(`${this.base}/${id}`, request);
+  }
+
   updateExpenseStatus(id: number, request: UpdateExpenseStatusRequest): Observable<ExpenseItem> {
     return this.http.patch<ExpenseItem>(`${this.base}/${id}/status`, request);
   }
 
   deleteExpense(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  uploadReceipt(file: File): Observable<{ id: string; fileName: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ id: string; fileName: string }>(`${this.base}/receipts`, formData);
   }
 
   getSettings(): Observable<ExpenseSettings> {

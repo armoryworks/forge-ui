@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, ViewChild } from '@angular/core';
 
 import { DatePipe, CurrencyPipe } from '@angular/common';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { ExpenseSettings } from './models/expense-settings.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { ExpensesService } from './services/expenses.service';
@@ -65,11 +66,21 @@ export class ExpensesComponent {
 
   // Dialog
   protected readonly showDialog = signal(false);
+  protected readonly editingExpense = signal<ExpenseItem | null>(null);
+  protected readonly settings = signal<ExpenseSettings | null>(null);
+  protected readonly receiptFileId = signal<string | null>(null);
+  protected readonly receiptFileName = signal<string | null>(null);
+  protected readonly uploadingReceipt = signal(false);
   protected readonly expenseForm = new FormGroup({
     amount: new FormControl<number>(0, [Validators.required, Validators.min(0.01)]),
     expenseDate: new FormControl<Date | null>(new Date(), [Validators.required]),
     category: new FormControl('', [Validators.required]),
     description: new FormControl(''),
+  });
+
+  protected readonly receiptMissing = computed(() => {
+    const s = this.settings();
+    return !!s?.requireReceipt && !this.receiptFileId();
   });
 
   protected readonly expenseViolations = FormValidationService.getViolations(this.expenseForm, {
@@ -89,22 +100,47 @@ export class ExpensesComponent {
     { field: 'status', header: this.translate.instant('expenses.colStatus'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Pending', label: this.translate.instant('common.pending') }, { value: 'Approved', label: this.translate.instant('expenses.approved') },
       { value: 'Rejected', label: this.translate.instant('expenses.rejected') }, { value: 'SelfApproved', label: this.translate.instant('expenses.selfApproved') },
+      { value: 'NeedsRevision', label: this.translate.instant('expenses.needsRevision') },
     ]},
     { field: 'actions', header: this.translate.instant('expenses.colActions'), width: '80px', align: 'right' },
   ];
 
-  protected readonly statuses: ExpenseStatus[] = ['Pending', 'Approved', 'Rejected', 'SelfApproved'];
+  protected readonly statuses: ExpenseStatus[] = ['Pending', 'Approved', 'Rejected', 'SelfApproved', 'NeedsRevision'];
 
   protected readonly statusOptions: SelectOption[] = [
     { value: '', label: this.translate.instant('expenses.allStatuses') },
-    ...this.statuses.map(s => ({ value: s, label: s === 'SelfApproved' ? this.translate.instant('expenses.selfApproved') : this.translate.instant(`expenses.${s.toLowerCase()}`) })),
+    ...this.statuses.map(s => ({
+      value: s,
+      label: s === 'SelfApproved' ? this.translate.instant('expenses.selfApproved')
+        : s === 'NeedsRevision' ? this.translate.instant('expenses.needsRevision')
+        : this.translate.instant(`expenses.${s.toLowerCase()}`),
+    })),
   ];
 
   protected readonly categoryOptions = signal<SelectOption[]>([]);
 
   constructor() {
     this.refDataService.getAsOptions('expense_category', { valueField: 'label' }).subscribe(opts => this.categoryOptions.set(opts));
+    this.expensesService.getSettings().subscribe({
+      next: (s) => this.settings.set(s),
+      error: () => this.settings.set(null),
+    });
     this.loadExpenses();
+  }
+
+  private applyPolicyValidators(): void {
+    const s = this.settings();
+    const amountValidators: ValidatorFn[] = [Validators.required, Validators.min(0.01)];
+    if (s?.maxAmount && s.maxAmount > 0) amountValidators.push(Validators.max(s.maxAmount));
+    this.expenseForm.controls.amount.setValidators(amountValidators);
+    this.expenseForm.controls.amount.updateValueAndValidity({ emitEvent: false });
+
+    const descValidators: ValidatorFn[] = [];
+    if (s && s.minDescriptionLength > 0) {
+      descValidators.push(Validators.required, Validators.minLength(s.minDescriptionLength));
+    }
+    this.expenseForm.controls.description.setValidators(descValidators);
+    this.expenseForm.controls.description.updateValueAndValidity({ emitEvent: false });
   }
 
   protected loadExpenses(): void {
@@ -121,6 +157,10 @@ export class ExpensesComponent {
   protected clearSearch(): void { this.searchControl.setValue(''); this.loadExpenses(); }
 
   protected openCreateExpense(): void {
+    this.editingExpense.set(null);
+    this.receiptFileId.set(null);
+    this.receiptFileName.set(null);
+    this.applyPolicyValidators();
     this.expenseForm.reset({
       amount: 0,
       expenseDate: new Date(),
@@ -130,27 +170,80 @@ export class ExpensesComponent {
     this.showDialog.set(true);
   }
 
+  protected openEditExpense(expense: ExpenseItem): void {
+    this.editingExpense.set(expense);
+    this.receiptFileId.set(expense.receiptFileId ?? null);
+    this.receiptFileName.set(expense.receiptFileId ? this.translate.instant('expenses.existingReceipt') : null);
+    this.applyPolicyValidators();
+    this.expenseForm.reset({
+      amount: expense.amount,
+      expenseDate: new Date(expense.expenseDate),
+      category: expense.category,
+      description: expense.description ?? '',
+    });
+    this.showDialog.set(true);
+  }
+
   protected closeDialog(): void {
     this.showDialog.set(false);
+    this.editingExpense.set(null);
+    this.receiptFileId.set(null);
+    this.receiptFileName.set(null);
+  }
+
+  protected onReceiptFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.uploadingReceipt.set(true);
+    this.expensesService.uploadReceipt(file).subscribe({
+      next: (attachment) => {
+        this.receiptFileId.set(attachment.id);
+        this.receiptFileName.set(attachment.fileName);
+        this.uploadingReceipt.set(false);
+        input.value = '';
+      },
+      error: () => {
+        this.uploadingReceipt.set(false);
+        input.value = '';
+      },
+    });
+  }
+
+  protected removeReceipt(): void {
+    this.receiptFileId.set(null);
+    this.receiptFileName.set(null);
   }
 
   protected saveExpense(): void {
-    if (this.expenseForm.invalid) return;
+    if (this.expenseForm.invalid || this.receiptMissing()) return;
 
     this.saving.set(true);
     const form = this.expenseForm.getRawValue();
-    this.expensesService.createExpense({
+    const payload = {
       amount: form.amount!,
       category: form.category!,
       description: form.description ?? '',
       expenseDate: toIsoDate(form.expenseDate) ?? new Date().toISOString().split('T')[0],
-    }).subscribe({
+      receiptFileId: this.receiptFileId() ?? undefined,
+    };
+
+    const editing = this.editingExpense();
+    const request$ = editing
+      ? this.expensesService.updateExpense(editing.id, payload)
+      : this.expensesService.createExpense(payload);
+    const successKey = editing?.status === 'NeedsRevision'
+      ? 'expenses.expenseResubmitted'
+      : 'expenses.expenseSubmitted';
+
+    request$.subscribe({
       next: () => {
         this.saving.set(false);
         this.dialogRef.clearDraft();
         this.closeDialog();
         this.loadExpenses();
-        this.snackbar.success(this.translate.instant('expenses.expenseSubmitted'));
+        this.snackbar.success(this.translate.instant(successKey));
       },
       error: () => this.saving.set(false),
     });
@@ -172,12 +265,14 @@ export class ExpensesComponent {
     const map: Record<string, string> = {
       Pending: 'chip--warning', Approved: 'chip--success',
       Rejected: 'chip--error', SelfApproved: 'chip--success',
+      NeedsRevision: 'chip--warning',
     };
     return `chip ${map[status] ?? ''}`.trim();
   }
 
   protected getStatusLabel(status: string): string {
     if (status === 'SelfApproved') return this.translate.instant('expenses.selfApproved');
+    if (status === 'NeedsRevision') return this.translate.instant('expenses.needsRevision');
     const key = `expenses.${status.toLowerCase()}`;
     return this.translate.instant(key);
   }

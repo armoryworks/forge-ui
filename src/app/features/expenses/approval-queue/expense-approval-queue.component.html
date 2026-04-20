@@ -77,14 +77,23 @@
         </div>
       }
 
-      <app-textarea [label]="'expenses.approvalNotesOptional' | translate" [formControl]="notesControl" [rows]="3" />
+      <app-textarea [label]="'expenses.reviewNoteLabel' | translate" [formControl]="notesControl" [rows]="3" />
+      <div class="review-detail__note-hint" [class.review-detail__note-hint--valid]="declineNoteValid()">
+        {{ 'expenses.declineNoteHint' | translate:{ min: DECLINE_NOTE_MIN, len: noteLength() } }}
+      </div>
     </div>
 
     <div dialog-footer>
       <button class="action-btn action-btn--danger"
         data-testid="expense-reject-btn"
-        [disabled]="processing()"
+        [disabled]="processing() || !declineNoteValid()"
+        [matTooltip]="declineNoteValid() ? '' : ('expenses.declineNoteRequiredTooltip' | translate:{ min: DECLINE_NOTE_MIN })"
         (click)="reject()">{{ 'expenses.reject' | translate }}</button>
+      <button class="action-btn action-btn--warn"
+        data-testid="expense-request-revision-btn"
+        [disabled]="processing() || !declineNoteValid()"
+        [matTooltip]="declineNoteValid() ? '' : ('expenses.declineNoteRequiredTooltip' | translate:{ min: DECLINE_NOTE_MIN })"
+        (click)="requestRevision()">{{ 'expenses.requestRevision' | translate }}</button>
       <button class="action-btn action-btn--primary"
         data-testid="expense-approve-btn"
         [disabled]="processing()"

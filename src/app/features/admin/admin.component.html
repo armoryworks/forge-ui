@@ -469,6 +469,13 @@
       </div>
     }
 
+    <!-- Expense Policy Settings Tab -->
+    @if (activeTab() === 'expenses') {
+      <div class="tab-panel">
+        <app-expense-settings-panel />
+      </div>
+    }
+
     <!-- Compliance Tab -->
     @if (activeTab() === 'compliance') {
       <div class="tab-panel">

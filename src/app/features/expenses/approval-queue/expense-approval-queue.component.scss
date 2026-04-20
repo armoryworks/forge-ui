@@ -60,6 +60,16 @@
   font-size: var(--font-size-md);
 }
 
+.review-detail__note-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: -#{$sp-xs};
+
+  &--valid {
+    color: var(--success);
+  }
+}
+
 .icon-btn--success:hover {
   color: var(--success);
 }

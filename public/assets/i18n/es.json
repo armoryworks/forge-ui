@@ -112,6 +112,7 @@
     "print": "Imprimir",
     "download": "Descargar",
     "upload": "Subir",
+    "uploading": "Subiendo...",
     "view": "Ver",
     "details": "Detalles",
     "type": "Tipo",
@@ -165,7 +166,8 @@
     "customer": "Cliente",
     "part": "Parte",
     "settings": "Configuración",
-    "summary": "Resumen"
+    "summary": "Resumen",
+    "units": "units"
   },
   "dashboard": {
     "title": "Panel",
@@ -224,7 +226,11 @@
     "loadFailed": "Error al cargar datos del panel",
     "enterFocusMode": "Entrar en Modo Enfoque",
     "exitFocusMode": "Salir del Modo Enfoque",
-    "focusMode": "Modo Enfoque"
+    "focusMode": "Modo Enfoque",
+    "completeTask": "Complete Task",
+    "dismissTask": "Dismiss Task",
+    "noActionItems": "No action items",
+    "totalItems": "Total Items"
   },
   "kanban": {
     "title": "Tablero",
@@ -348,7 +354,9 @@
     "stopTimer": "Detener Temporizador",
     "timerStarted": "Temporizador iniciado",
     "timerStopped": "Temporizador detenido",
-    "uploadNewImage": "Subir Nueva Imagen"
+    "uploadNewImage": "Subir Nueva Imagen",
+    "moveToStage": "Mover a etapa",
+    "movedToStage": "Movido a {{stage}}"
   },
   "backlog": {
     "title": "Pendientes",
@@ -819,6 +827,8 @@
     "noExpensesFound": "No se encontraron gastos",
     "noExpensesHelp": "Registre gastos empresariales aquí. Adjunte recibos y vincule a trabajos para un seguimiento preciso de costos.",
     "newExpenseTitle": "Nuevo Gasto",
+    "resubmitTitle": "Revisar y Reenviar Gasto",
+    "reviewerFeedback": "Comentarios del Revisor",
     "selfApproved": "Auto-aprobado",
     "allStatuses": "Todos los Estados",
     "deleteTitle": "¿Eliminar Gasto?",
@@ -856,6 +866,18 @@
     "submittedBy": "Enviado Por",
     "job": "Trabajo",
     "approvalNotesOptional": "Notas de Aprobación (opcional)",
+    "reviewNoteLabel": "Notas",
+    "declineNoteHint": "Se requiere una nota para Rechazar / Solicitar Revisión — mínimo {{ min }} caracteres ({{ len }}).",
+    "declineNoteRequiredTooltip": "Se requiere una nota de al menos {{ min }} caracteres para rechazar o solicitar una revisión.",
+    "requestRevision": "Necesita Revisión",
+    "needsRevision": "Necesita Revisión",
+    "expenseRevisionRequested": "Revisión solicitada.",
+    "resubmit": "Reenviar",
+    "expenseResubmitted": "Gasto reenviado.",
+    "receipt": "Recibo",
+    "uploadReceipt": "Cargar recibo",
+    "existingReceipt": "Recibo archivado",
+    "receiptRequiredHint": "La política de la empresa requiere un recibo.",
     "ledgerTitle": "Libro de Gastos",
     "newRecurring": "Nuevo Recurrente",
     "upcomingTab": "Próximos (90 Días)",
@@ -1030,7 +1052,8 @@
       "announcements": "Anuncios",
       "edi": "EDI",
       "mfa": "Política MFA",
-      "autoPo": "Auto-PO"
+      "autoPo": "Auto-PO",
+      "expenses": "Política de Gastos"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -2226,7 +2249,8 @@
     "expected": "Esperada",
     "newPoTitle": "Nueva Orden de Compra",
     "noLinesYet": "Sin líneas aún",
-    "orderDetails": "Detalles de la Orden"
+    "orderDetails": "Detalles de la Orden",
+    "tabOrders": "Orders"
   },
   "salesOrders": {
     "title": "Órdenes de Venta",
@@ -2293,7 +2317,36 @@
     "deleteFileTitle": "¿Eliminar Archivo?",
     "deleteFileMessage": "¿Eliminar \"{{name}}\"? Esta acción no se puede deshacer.",
     "fileDeleted": "Archivo eliminado.",
-    "fileUploaded": "Archivo subido."
+    "fileUploaded": "Archivo subido.",
+    "shipments": "Envíos",
+    "returns": "Devoluciones",
+    "fulfillment": "Cumplimiento",
+    "linesWithJobs": "Líneas con Trabajos",
+    "linesShipped": "Líneas Enviadas",
+    "noJobCreated": "No se ha creado un trabajo para esta línea",
+    "lineItemsNoJobWarning": "Algunas líneas no tienen trabajos asociados",
+    "lineItemsJobNumber": "Trabajo #",
+    "lineItemsStage": "Etapa",
+    "lineItemsAssignee": "Asignado",
+    "lineItemsPriority": "Prioridad",
+    "lineItemsDueDate": "Fecha de Vencimiento",
+    "lineItemsExpandLine": "Expandir trabajos de la línea",
+    "lineItemsCollapseLine": "Contraer trabajos de la línea",
+    "noLines": "Sin líneas de artículo",
+    "noShipments": "Sin envíos aún",
+    "noReturns": "Sin devoluciones",
+    "carrier": "Transportista",
+    "tracking": "Rastreo",
+    "shippedDate": "Enviado",
+    "deliveredDate": "Entregado",
+    "shippingCost": "Costo de Envío",
+    "weight": "Peso",
+    "packages": "Paquetes",
+    "reason": "Razón",
+    "returnDate": "Fecha de Devolución",
+    "originalJob": "Trabajo Original",
+    "reworkJob": "Trabajo de Retrabajo",
+    "inspectionNotes": "Notas de Inspección"
   },
   "quotes": {
     "title": "Cotizaciones",
@@ -2783,7 +2836,30 @@
     "shareMessage": "Agregar un mensaje (opcional)",
     "cancel": "Cancelar",
     "send": "Enviar",
-    "entityShared": "Compartido en chat"
+    "entityShared": "Compartido en chat",
+    "channelList": {
+      "directMessages": "Mensajes Directos",
+      "groupChats": "Chats de Grupo",
+      "newMessage": "Nuevo Mensaje",
+      "newGroup": "Nuevo Grupo",
+      "searchConversations": "Buscar conversaciones",
+      "noConversations": "Sin conversaciones aún",
+      "noResults": "No se encontraron resultados"
+    },
+    "thread": {
+      "replies": "Hilo",
+      "replyPlaceholder": "Responder en el hilo...",
+      "noReplies": "Sin respuestas aun. Inicia la conversacion!",
+      "backToChat": "Volver al chat",
+      "replyCount_one": "{{count}} respuesta",
+      "replyCount_other": "{{count}} respuestas"
+    },
+    "channelInfo": "Channel Info",
+    "noMentionResults": "No results",
+    "replies": "Replies",
+    "reply": "Reply",
+    "replyInThread": "Reply in thread",
+    "searching": "Searching…"
   },
   "ai": {
     "title": "Asistentes IA",
@@ -2994,7 +3070,18 @@
       "scansToday": "escaneos hoy",
       "exportCsv": "Exportar CSV",
       "noScans": "No se registraron escaneos para esta fecha."
-    }
+    },
+    "kioskSession": {
+      "activeSession": "Sesiones Activas",
+      "idleSince": "Inactivo por {{time}}",
+      "switchSession": "Cambiar Sesión",
+      "maxSessions": "Sesiones máximas alcanzadas (5)",
+      "trainingMode": "MODO DE ENTRENAMIENTO",
+      "trainingModeHint": "Las acciones no se guardarán"
+    },
+    "locationEmpty": "Location Empty",
+    "lot": "Lot",
+    "scan": "Scan"
   },
   "customerReturns": {
     "allStatuses": "Todos los Estados",
@@ -3247,7 +3334,9 @@
       "setupHrs": "Prep. (hrs)",
       "runHrs": "Ejec. (hrs)",
       "priority": "Prioridad",
-      "dueDate": "Fecha Venc."
+      "dueDate": "Fecha Venc.",
+      "endTime": "End Time",
+      "startTime": "Start Time"
     },
     "statuses": {
       "scheduled": "Programado",
@@ -3265,7 +3354,15 @@
     "snackbar": {
       "scheduled": "Programado",
       "operationLocked": "Operación bloqueada",
-      "operationUnlocked": "Operación desbloqueada"
+      "operationUnlocked": "Operación desbloqueada",
+      "locked": "Schedule locked",
+      "operations": "Operations scheduled",
+      "unlocked": "Schedule unlocked"
+    },
+    "priorityRules": {
+      "dueDate": "Due Date",
+      "fifo": "FIFO",
+      "priority": "Priority"
     }
   },
   "oee": {
@@ -3312,6 +3409,11 @@
       "reducedSpeed": "Velocidad Reducida",
       "processDefects": "Defectos de Proceso",
       "reducedYield": "Rendimiento Reducido"
+    },
+    "granularities": {
+      "daily": "Daily",
+      "monthly": "Monthly",
+      "weekly": "Weekly"
     }
   },
   "purchasing": {
@@ -3361,7 +3463,12 @@
       "received": "Recibidas",
       "required": "Requerida",
       "deadline": "Límite",
-      "created": "Creada"
+      "created": "Creada",
+      "leadTime": "Lead Time",
+      "moq": "MOQ",
+      "tooling": "Tooling",
+      "unitPrice": "Unit Price",
+      "validUntil": "Valid Until"
     },
     "statuses": {
       "draft": "Borrador",
@@ -3422,11 +3529,18 @@
       "rfqCreated": "Solicitud creada",
       "sentToVendors": "Solicitud enviada a proveedores",
       "responseRecorded": "Respuesta de proveedor registrada",
-      "awardedPo": "Solicitud adjudicada. OC creada."
+      "awardedPo": "Solicitud adjudicada. OC creada.",
+      "rfqAwarded": "RFQ awarded",
+      "rfqSent": "RFQ sent to vendors"
     },
     "confirm": {
       "awardTitle": "¿Adjudicar solicitud?"
-    }
+    },
+    "allStatuses": "All Statuses",
+    "awardRfqMessage": "Award this RFQ to the selected vendor?",
+    "awardRfqTitle": "Award RFQ",
+    "leadTime": "Lead Time",
+    "selectPart": "Select Part"
   },
   "approvals": {
     "title": "Aprobaciones",
@@ -3522,7 +3636,8 @@
     "approverTypes": {
       "specificUser": "Usuario Específico",
       "role": "Rol",
-      "directManager": "Gerente Directo"
+      "directManager": "Gerente Directo",
+      "manager": "Manager"
     },
     "roles": {
       "admin": "Administrador",
@@ -3750,7 +3865,8 @@
         "meeting": "Reunión",
         "training": "Capacitación",
         "safety": "Seguridad",
-        "other": "Otro"
+        "other": "Otro",
+        "all": "All Types"
       },
       "cols": {
         "title": "Título",
@@ -3764,7 +3880,8 @@
       "snackbar": {
         "eventUpdated": "Evento actualizado",
         "eventCreated": "Evento creado",
-        "eventCancelled": "Evento cancelado"
+        "eventCancelled": "Evento cancelado",
+        "eventDeleted": "Event deleted"
       }
     },
     "mfa": {
@@ -3787,8 +3904,13 @@
         "enforced": "Obligatorio"
       },
       "snackbar": {
-        "policyUpdated": "Política MFA actualizada"
-      }
+        "policyUpdated": "Política MFA actualizada",
+        "policyReset": "MFA policy reset",
+        "policySaved": "MFA policy saved"
+      },
+      "requiredForRoles": "Required for Roles",
+      "save": "Save",
+      "selectRoles": "Select roles"
     },
     "timeCorrections": {
       "employee": "Empleado",
@@ -3828,11 +3950,16 @@
         "origStart": "Inicio Orig.",
         "origEnd": "Fin Orig.",
         "origDuration": "Duración Orig.",
-        "reason": "Motivo"
+        "reason": "Motivo",
+        "correctedAt": "Corrected At",
+        "newValue": "New Value",
+        "originalValue": "Original Value"
       },
       "snackbar": {
-        "corrected": "Entrada de tiempo corregida"
-      }
+        "corrected": "Entrada de tiempo corregida",
+        "correctionSaved": "Time correction saved"
+      },
+      "allEmployees": "All Employees"
     },
     "training": {
       "tabs": {
@@ -3938,6 +4065,24 @@
       "templateDeleted": "Plantilla eliminada"
     }
   },
+  "expenseSettings": {
+    "title": "Política de Gastos",
+    "intro": "Las reglas se aplican tanto en el servidor como en el cliente. Los cambios se aplican a la próxima presentación de gastos.",
+    "allowSelfApproval": "Permitir Auto-Aprobación",
+    "allowSelfApprovalHint": "Cuando está activado, los gastos por debajo del umbral de auto-aprobación se aprueban automáticamente.",
+    "autoApproveThreshold": "Umbral de Auto-Aprobación",
+    "autoApproveThresholdHint": "Los gastos por debajo de este monto se aprueban automáticamente. Déjelo en blanco para requerir revisión manual.",
+    "noAutoApprove": "Sin auto-aprobación",
+    "maxAmount": "Monto Máximo de Gasto",
+    "maxAmountHint": "Límite máximo para un gasto individual. Déjelo en blanco para no tener límite.",
+    "noLimit": "Sin límite",
+    "requireReceipt": "Requerir Adjunto de Recibo",
+    "requireReceiptHint": "Cuando está activado, cada gasto debe tener un archivo de recibo adjunto antes de enviarse.",
+    "minDescriptionLength": "Longitud Mínima de Descripción",
+    "minDescriptionLengthHint": "Obliga a los usuarios a describir el gasto (0 = sin mínimo, máximo 500 caracteres).",
+    "saved": "Política de gastos guardada.",
+    "thresholdExceedsMax": "El umbral de auto-aprobación no puede exceder el monto máximo del gasto."
+  },
   "autoPo": {
     "autoPoSuggestions": "Sugerencias Auto-OC",
     "pendingSuggestions": "sugerencias pendientes",
@@ -3964,6 +4109,21 @@
     "modeAutomatic": "Automático",
     "bufferDays": "Días de Margen",
     "notifyChat": "Enviar Notificaciones por Chat",
-    "settingsSaved": "Configuración de auto-OC guardada."
+    "settingsSaved": "Configuración de auto-OC guardada.",
+    "bulkConvertedSuccess": "Suggestions converted to POs",
+    "convertedSuccess": "Suggestion converted to PO",
+    "defaultMode": "Default Mode",
+    "description": "Description",
+    "dismissedPartial": "Some suggestions dismissed",
+    "dismissedSuccess": "Suggestion dismissed",
+    "partNumber": "Part Number",
+    "qty": "Qty",
+    "runAnalysis": "Run Analysis",
+    "runTriggered": "Analysis started",
+    "settingsTitle": "Auto-PO Settings",
+    "sourceSOs": "Source SOs",
+    "tabSettings": "Settings",
+    "tabSuggestions": "Suggestions",
+    "vendor": "Vendor"
   }
 }

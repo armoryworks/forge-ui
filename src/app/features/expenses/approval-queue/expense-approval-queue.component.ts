@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { ExpensesService } from '../services/expenses.service';
 import { ExpenseItem } from '../models/expense-item.model';
+import { ExpenseStatus } from '../models/expense-status.type';
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
 import { DataTableComponent } from '../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
@@ -46,6 +47,10 @@ export class ExpenseApprovalQueueComponent {
   protected readonly notesControl = new FormControl('');
   protected readonly processing = signal(false);
 
+  protected readonly DECLINE_NOTE_MIN = 10;
+  protected readonly noteLength = signal(0);
+  protected readonly declineNoteValid = signal(false);
+
   protected readonly columns: ColumnDef[] = [
     { field: 'expenseDate', header: this.translate.instant('expenses.colDate'), sortable: true, type: 'date', width: '110px' },
     { field: 'userName', header: this.translate.instant('expenses.colSubmittedBy'), sortable: true, width: '160px' },
@@ -58,6 +63,11 @@ export class ExpenseApprovalQueueComponent {
 
   constructor() {
     this.loadPending();
+    this.notesControl.valueChanges.subscribe(value => {
+      const len = (value ?? '').trim().length;
+      this.noteLength.set(len);
+      this.declineNoteValid.set(len >= this.DECLINE_NOTE_MIN);
+    });
   }
 
   protected loadPending(): void {
@@ -72,6 +82,8 @@ export class ExpenseApprovalQueueComponent {
   protected openReview(expense: ExpenseItem): void {
     this.reviewExpense.set(expense);
     this.notesControl.setValue('');
+    this.noteLength.set(0);
+    this.declineNoteValid.set(false);
   }
 
   protected closeReview(): void {
@@ -98,19 +110,28 @@ export class ExpenseApprovalQueueComponent {
   }
 
   protected reject(): void {
+    this.updateStatus('Rejected', 'expenses.expenseRejected');
+  }
+
+  protected requestRevision(): void {
+    this.updateStatus('NeedsRevision', 'expenses.expenseRevisionRequested');
+  }
+
+  private updateStatus(status: ExpenseStatus, successKey: string): void {
     const expense = this.reviewExpense();
     if (!expense) return;
+    if (!this.declineNoteValid()) return;
 
     this.processing.set(true);
     this.expensesService.updateExpenseStatus(expense.id, {
-      status: 'Rejected',
+      status,
       approvalNotes: this.notesControl.value?.trim() || undefined,
     }).subscribe({
       next: () => {
         this.processing.set(false);
         this.closeReview();
         this.loadPending();
-        this.snackbar.success(this.translate.instant('expenses.expenseRejected'));
+        this.snackbar.success(this.translate.instant(successKey));
       },
       error: () => this.processing.set(false),
     });

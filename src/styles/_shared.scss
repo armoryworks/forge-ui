@@ -94,6 +94,15 @@
     }
   }
 
+  &--warn {
+    color: var(--warning);
+    border-color: var(--warning);
+
+    &:hover {
+      background: var(--warning-light);
+    }
+  }
+
   &--sm {
     min-width: auto;
     padding: $sp-xs $sp-md;

@@ -41,6 +41,12 @@
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
+        } @else if (expense.status === 'NeedsRevision') {
+          <div class="action-cell">
+            <button data-testid="resubmit-expense-btn" class="icon-btn" [matTooltip]="'expenses.resubmit' | translate" matTooltipPosition="above" (click)="openEditExpense(expense); $event.stopPropagation()">
+              <span class="material-icons-outlined">edit</span>
+            </button>
+          </div>
         }
       </ng-template>
     </app-data-table>
@@ -49,9 +55,18 @@
 
 <!-- Expense Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="'expenses.newExpenseTitle' | translate" [draftConfig]="draftConfig" [draftFormGroup]="expenseForm" (closed)="closeDialog()">
+  <app-dialog [title]="(editingExpense() ? 'expenses.resubmitTitle' : 'expenses.newExpenseTitle') | translate" [draftConfig]="draftConfig" [draftFormGroup]="expenseForm" (closed)="closeDialog()">
 
     <div [formGroup]="expenseForm">
+      @if (editingExpense()?.status === 'NeedsRevision' && editingExpense()?.approvalNotes) {
+        <div class="revision-note">
+          <span class="material-icons-outlined">feedback</span>
+          <div>
+            <div class="revision-note__label">{{ 'expenses.reviewerFeedback' | translate }}</div>
+            <div class="revision-note__body">{{ editingExpense()?.approvalNotes }}</div>
+          </div>
+        </div>
+      }
       <div class="dialog-row">
         <app-input data-testid="expense-amount" [label]="'expenses.amount' | translate" formControlName="amount" mask="currency" prefix="$" />
         <app-datepicker data-testid="expense-date" [label]="'expenses.date' | translate" formControlName="expenseDate" />
@@ -60,15 +75,41 @@
       <app-select data-testid="expense-category" [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions()" />
 
       <app-textarea data-testid="expense-description" [label]="'common.description' | translate" formControlName="description" />
+
+      <div class="receipt-row">
+        <div class="receipt-row__label">
+          {{ 'expenses.receipt' | translate }}
+          @if (settings()?.requireReceipt) { <span class="receipt-row__required">*</span> }
+        </div>
+        @if (receiptFileName()) {
+          <div class="receipt-row__uploaded">
+            <span class="material-icons-outlined">attach_file</span>
+            <span class="receipt-row__name">{{ receiptFileName() }}</span>
+            <button type="button" class="icon-btn icon-btn--danger" [attr.aria-label]="'common.remove' | translate"
+              (click)="removeReceipt()">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+        } @else {
+          <label class="action-btn action-btn--sm receipt-row__upload">
+            <input type="file" data-testid="expense-receipt-input" accept="image/*,.pdf"
+              (change)="onReceiptFileSelected($event)" [disabled]="uploadingReceipt()" hidden />
+            <span class="material-icons-outlined">upload_file</span>
+            {{ (uploadingReceipt() ? 'common.uploading' : 'expenses.uploadReceipt') | translate }}
+          </label>
+        }
+      </div>
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <button data-testid="expense-save-btn" class="action-btn action-btn--primary"
         [appValidationPopover]="expenseViolations"
-        [disabled]="expenseForm.invalid || saving()"
+        [disabled]="expenseForm.invalid || saving() || uploadingReceipt() || receiptMissing()"
+        [matTooltip]="receiptMissing() ? ('expenses.receiptRequiredHint' | translate) : ''"
         (click)="saveExpense()">
-        <span class="material-icons-outlined">save</span> {{ 'expenses.submitExpense' | translate }}
+        <span class="material-icons-outlined">save</span>
+        {{ (editingExpense() ? 'expenses.resubmit' : 'expenses.submitExpense') | translate }}
       </button>
     </div>
   </app-dialog>
