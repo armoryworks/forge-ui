@@ -42,21 +42,33 @@ const ROLE_EMAILS: Record<SimRole, string> = {
 };
 
 /**
- * Background seed users — seeded workforce that appears in the admin list and participates
- * in org charts / board assignments but never drives the simulation directly. They still
- * need an "onboarded" compliance state so the admin view doesn't show most of the workforce
- * at 0/8. We click the "Skip onboarding" banner button for each (a legitimate production
- * feature — mirrors an employee onboarded off-platform).
+ * Discover background seed users dynamically from the admin roster.
+ *
+ * Why dynamic: the DB can grow between runs (admin-created users, imports, new seed rows).
+ * Any user who can log in (has a password) and isn't one of the 6 core simulation drivers
+ * should have their onboarding bypassed so the admin compliance view reads 8/8 across
+ * the workforce — otherwise most of the list sits at 0/8 with no real signal.
+ *
+ * Filters applied:
+ *   • Skip core role emails (they drive the full wizard)
+ *   • Skip users without passwords (pending setup tokens → login would 401)
+ *   • Skip inactive users (soft-deleted or disabled)
  */
-const BACKGROUND_USERS: string[] = [
-  'alpha1@qbengineer.local', 'alpha2@qbengineer.local', 'alpha3@qbengineer.local',
-  'alpha4@qbengineer.local', 'alpha5@qbengineer.local', 'alpha6@qbengineer.local',
-  'bravo1@qbengineer.local', 'bravo2@qbengineer.local', 'bravo3@qbengineer.local',
-  'bravo4@qbengineer.local', 'bravo5@qbengineer.local', 'bravo6@qbengineer.local',
-  'bravo7@qbengineer.local',
-  'dhart@qbengineer.local', 'jsilva@qbengineer.local',
-  'mreyes@qbengineer.local', 'rchavez@qbengineer.local',
-];
+async function discoverBackgroundUsers(adminToken: string): Promise<string[]> {
+  const { apiCall } = await import('../helpers/api.helper');
+  const users = await apiCall<Array<{
+    email: string;
+    isActive: boolean;
+    hasPassword: boolean;
+    hasPendingSetupToken: boolean;
+  }>>('GET', 'admin/users', adminToken);
+  if (!users) return [];
+  const coreEmails = new Set(Object.values(ROLE_EMAILS));
+  return users
+    .filter(u => u.isActive && u.hasPassword && !coreEmails.has(u.email))
+    .map(u => u.email)
+    .sort();
+}
 
 // ── Resume / gap detection ──────────────────────────────────────────────────
 /**
@@ -282,8 +294,9 @@ export async function runSimulation(): Promise<SimulationReport> {
     // ── Background users: bypass onboarding via UI ──────────────────────────
     // Each user gets a short-lived browser context: login via API + seed localStorage,
     // navigate to /dashboard, click "Skip onboarding" + confirm, close context.
-    console.log(`Bypassing onboarding for ${BACKGROUND_USERS.length} background seed users...`);
-    for (const bgEmail of BACKGROUND_USERS) {
+    const backgroundUsers = await discoverBackgroundUsers(tokens[ROLE_EMAILS.admin]);
+    console.log(`Bypassing onboarding for ${backgroundUsers.length} background seed users...`);
+    for (const bgEmail of backgroundUsers) {
       try {
         const session = await getAuthSession(bgEmail, SEED_PASSWORD);
         const bgContext = await browser.newContext({ ignoreHTTPSErrors: true });
