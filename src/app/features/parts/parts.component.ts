@@ -271,6 +271,9 @@ export class PartsComponent {
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partUpdated'));
         },
+        error: () => {
+          this.closePartDialog();
+        },
       });
     } else {
       this.partsService.createPart({
@@ -293,6 +296,9 @@ export class PartsComponent {
           this.snackbar.success(this.translate.instant('parts.partCreated'));
           // Open the newly created part's detail dialog
           this.openPartDetail(detail.id);
+        },
+        error: () => {
+          this.closePartDialog();
         },
       });
     }

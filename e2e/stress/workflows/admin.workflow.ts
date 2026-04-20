@@ -95,7 +95,7 @@ const VENDOR_PHONES = ['(555) 234-5678', '(555) 345-6789', '(555) 456-7890', '(5
 const CUSTOMER_NAMES = ['Atlas Defense', 'Pinnacle Medical', 'Sterling Aerospace', 'Nova Electronics'];
 const CUSTOMER_PHONES = ['(555) 678-9012', '(555) 789-0123', '(555) 890-1234', '(555) 901-2345'];
 
-const PART_TYPES = ['Component', 'Assembly', 'Raw Material'];
+const PART_TYPES = ['Part', 'Assembly', 'Raw Material'];
 const PART_DESCRIPTIONS = ['Precision bearing housing', 'CNC machined bracket', 'Aluminum mounting plate', 'Stainless dowel pin'];
 const PART_MATERIALS = ['6061-T6 Aluminum', '304 Stainless Steel', '4140 Steel', 'Delrin'];
 

@@ -469,7 +469,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await navigateTo(engineerPage, '/parts');
         await clickButton(engineerPage, 'new-part-btn');
         await waitForDialog(engineerPage);
-        await fillMatSelect(engineerPage, 'part-type', 'Manufactured');
+        await fillMatSelect(engineerPage, 'part-type', 'Part');
         await fillInput(engineerPage, 'part-description', partName);
         await fillInput(engineerPage, 'part-revision', 'A');
         await fillInput(engineerPage, 'part-material', material);
@@ -486,7 +486,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await navigateTo(engineerPage, '/parts');
       await clickButton(engineerPage, 'new-part-btn');
       await waitForDialog(engineerPage);
-      await fillMatSelect(engineerPage, 'part-type', 'RawMaterial');
+      await fillMatSelect(engineerPage, 'part-type', 'Raw Material');
       await fillInput(engineerPage, 'part-description', rawMat.name);
       await fillInput(engineerPage, 'part-revision', 'A');
       await fillInput(engineerPage, 'part-material', rawMat.material);
@@ -506,7 +506,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
       await navigateTo(engineerPage, '/parts');
       await clickButton(engineerPage, 'new-part-btn');
       await waitForDialog(engineerPage);
-      await fillMatSelect(engineerPage, 'part-type', 'Manufactured');
+      await fillMatSelect(engineerPage, 'part-type', 'Assembly');
       await fillInput(engineerPage, 'part-description', asm.name);
       await fillInput(engineerPage, 'part-revision', 'A');
       await fillInput(engineerPage, 'part-material', asm.material);

@@ -551,7 +551,7 @@ export function getEngineerWorkflow(): Workflow {
             await clickByTestId(page, 'new-part-btn');
             await page.waitForTimeout(randomDelay(500, 1000));
 
-            const partType = randomPick(['Component', 'Assembly', 'Raw Material']);
+            const partType = randomPick(['Part', 'Assembly', 'Raw Material']);
             await selectByTestId(page, 'part-type', partType);
             await page.waitForTimeout(randomDelay(200, 400));
 
