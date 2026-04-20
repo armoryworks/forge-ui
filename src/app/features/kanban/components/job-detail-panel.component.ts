@@ -31,6 +31,7 @@ import { JobPart } from '../models/job-part.model';
 import { EntityLinkComponent } from '../../../shared/components/entity-link/entity-link.component';
 import { PartSearchResult } from '../models/part-search-result.model';
 import { ChildJob } from '../models/child-job.model';
+import { Stage } from '../../../shared/models/stage.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { StatusTimelineComponent } from '../../../shared/components/status-timeline/status-timeline.component';
 import { BarcodeInfoComponent } from '../../../shared/components/barcode-info/barcode-info.component';
@@ -88,6 +89,9 @@ export class JobDetailPanelComponent implements OnInit {
 
   // Activity (delegated to shared EntityActivitySectionComponent)
 
+  // Stage move
+  protected readonly availableStages = signal<Stage[]>([]);
+
   protected readonly isTimerLoading = signal(false);
 
   protected readonly hasActiveTimer = computed(() =>
@@ -115,6 +119,13 @@ export class JobDetailPanelComponent implements OnInit {
       if (detail.childJobCount > 0) {
         this.kanbanService.getChildJobs(id).subscribe(children => this.childJobs.set(children));
       }
+      // Load available stages for this track type
+      this.kanbanService.getTrackTypes().subscribe(types => {
+        const tt = types.find(t => t.id === detail.trackTypeId);
+        if (tt) {
+          this.availableStages.set([...tt.stages].sort((a, b) => a.sortOrder - b.sortOrder));
+        }
+      });
     });
     this.kanbanService.getSubtasks(id).subscribe(s => this.subtasks.set(s));
     this.kanbanService.getJobLinks(id).subscribe(l => this.links.set(l));
@@ -350,6 +361,15 @@ export class JobDetailPanelComponent implements OnInit {
         this.snackbar.success(user ? this.translate.instant('kanban.assignedTo', { name: user.name }) : this.translate.instant('kanban.unassignedSuccess'));
       },
       error: () => this.snackbar.error(this.translate.instant('kanban.assignFailed')),
+    });
+  }
+
+  protected moveToStage(stage: Stage): void {
+    const j = this.job();
+    if (!j || stage.id === j.currentStageId) return;
+    this.kanbanService.moveJobStage(j.id, stage.id).subscribe(() => {
+      this.job.set({ ...j, currentStageId: stage.id, stageName: stage.name, stageColor: stage.color });
+      this.snackbar.success(this.translate.instant('kanban.movedToStage', { stage: stage.name }));
     });
   }
 

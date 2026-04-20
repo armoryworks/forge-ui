@@ -29,6 +29,16 @@
   gap: $sp-sm;
 }
 .panel__header-left { display: flex; align-items: center; gap: $sp-md; }
+
+.chip--clickable {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border: none;
+  font: inherit;
+
+  &:hover { filter: brightness(0.92); }
+}
 .panel__job-number { @include uppercase-label(var(--font-size-sm), 1px, 700); color: var(--text); }
 .panel__header-actions {
   display: flex;

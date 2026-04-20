@@ -9,7 +9,20 @@
   <div class="panel__header">
     <div class="panel__header-left">
       <span class="panel__job-number">{{ j.jobNumber }}</span>
-      <span class="chip" [style.--chip-color]="j.stageColor">{{ j.stageName }}</span>
+      <button class="chip chip--clickable" [style.--chip-color]="j.stageColor" [matMenuTriggerFor]="stageMenu"
+              data-testid="job-stage-chip" [attr.aria-label]="'kanban.moveToStage' | translate">
+        {{ j.stageName }}
+        <span class="material-icons-outlined" style="font-size: 14px; margin-left: 2px;">expand_more</span>
+      </button>
+      <mat-menu #stageMenu="matMenu">
+        @for (stage of availableStages(); track stage.id) {
+          <button mat-menu-item [disabled]="stage.id === j.currentStageId" data-testid="stage-option"
+                  (click)="moveToStage(stage)">
+            <span class="bulk-bar__stage-dot" [style.background]="stage.color"></span>
+            {{ stage.name }}
+          </button>
+        }
+      </mat-menu>
     </div>
     <div class="panel__header-actions">
       @if (hasActiveTimer()) {
