@@ -10,7 +10,7 @@
       }
     </div>
     @if (unreadCount() > 0) {
-      <button class="icon-btn notification-panel__action" [attr.aria-label]="'notifications.markAllRead' | translate" [matTooltip]="'notifications.markAllRead' | translate" matTooltipPosition="above" (click)="markAllRead()">
+      <button class="icon-btn notification-panel__action" data-testid="notification-mark-all-read-btn" [attr.aria-label]="'notifications.markAllRead' | translate" [matTooltip]="'notifications.markAllRead' | translate" matTooltipPosition="above" (click)="markAllRead()">
         <span class="material-icons-outlined">done_all</span>
       </button>
     }

@@ -1,18 +1,18 @@
 <app-dialog [title]="'Send Announcement'" width="520px" (closed)="close()">
   <div [formGroup]="form">
     <app-select label="Template" formControlName="templateId" [options]="templateOptions()" />
-    <app-input label="Title" formControlName="title" [required]="true" [maxlength]="200" />
-    <app-textarea label="Content" formControlName="content" [required]="true" [rows]="4" [maxlength]="5000" />
+    <app-input label="Title" formControlName="title" [required]="true" [maxlength]="200" data-testid="announcement-title" />
+    <app-textarea label="Content" formControlName="content" [required]="true" [rows]="4" [maxlength]="5000" data-testid="announcement-content" />
     <div class="dialog-row">
-      <app-select label="Severity" formControlName="severity" [options]="severityOptions" [required]="true" />
-      <app-select label="Scope" formControlName="scope" [options]="scopeOptions" [required]="true" />
+      <app-select label="Severity" formControlName="severity" [options]="severityOptions" [required]="true" data-testid="announcement-severity" />
+      <app-select label="Scope" formControlName="scope" [options]="scopeOptions" [required]="true" data-testid="announcement-scope" />
     </div>
     @if (showTeamSelector()) {
       <app-select label="Target Teams" formControlName="targetTeamIds" [options]="teamOptions()" [multiple]="true" [required]="true" />
     }
     <div class="dialog-row">
       <app-datepicker label="Expires At" formControlName="expiresAt" />
-      <app-toggle label="Require Acknowledgment" formControlName="requiresAcknowledgment" />
+      <app-toggle label="Require Acknowledgment" formControlName="requiresAcknowledgment" data-testid="announcement-require-ack" />
     </div>
   </div>
 
@@ -21,6 +21,7 @@
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
+      data-testid="announcement-send-btn"
       (click)="save()">
       <span class="material-icons-outlined">campaign</span>
       {{ 'shared.send' | translate }}

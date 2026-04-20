@@ -13,7 +13,8 @@
               [style.--btn-color]="action.color"
               [disabled]="submitting()"
               (click)="submitClock(action)"
-              [attr.aria-label]="action.label">
+              [attr.aria-label]="action.label"
+              [attr.data-testid]="'clock-action-' + action.code">
         <span class="material-icons-outlined clock-btn__icon">{{ action.icon }}</span>
         <span class="clock-btn__label">{{ action.label }}</span>
       </button>

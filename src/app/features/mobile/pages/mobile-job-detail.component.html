@@ -1,7 +1,7 @@
 <div class="mobile-job-detail" [appLoadingBlock]="loading()">
   <!-- Header -->
   <div class="detail-header">
-    <button class="detail-header__back" (click)="goBack()" aria-label="Back to jobs">
+    <button class="detail-header__back" (click)="goBack()" aria-label="Back to jobs" data-testid="mjob-back-btn">
       <span class="material-icons-outlined">arrow_back</span>
     </button>
     @if (job(); as j) {
@@ -54,7 +54,8 @@
               [class.timer-btn--active]="j.hasActiveTimer"
               [disabled]="submitting()"
               (click)="toggleTimer()"
-              [attr.aria-label]="j.hasActiveTimer ? 'Stop timer' : 'Start timer'">
+              [attr.aria-label]="j.hasActiveTimer ? 'Stop timer' : 'Start timer'"
+              data-testid="mjob-timer-btn">
         <span class="material-icons-outlined timer-btn__icon">
           {{ j.hasActiveTimer ? 'stop' : 'play_arrow' }}
         </span>
@@ -84,10 +85,12 @@
                   rows="3"
                   [value]="noteText()"
                   (input)="onNoteInput($event)"
-                  aria-label="Job note"></textarea>
+                  aria-label="Job note"
+                  data-testid="mjob-note-input"></textarea>
         <button class="action-btn action-btn--primary note-input__submit"
                 [disabled]="!noteText().trim() || submitting()"
-                (click)="addNote()">
+                (click)="addNote()"
+                data-testid="mjob-note-send-btn">
           <span class="material-icons-outlined">send</span>
           Add Note
         </button>

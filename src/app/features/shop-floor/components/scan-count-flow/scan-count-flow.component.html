@@ -19,7 +19,7 @@
 
       <div class="count-flow__input">
         <p class="scan-flow__prompt">Enter actual count</p>
-        <app-input label="Actual Count" type="number" [formControl]="countControl" />
+        <app-input label="Actual Count" type="number" [formControl]="countControl" data-testid="count-qty" />
       </div>
 
       <div class="scan-flow__action-row">
@@ -30,7 +30,8 @@
         <button class="action-btn action-btn--primary"
                 [disabled]="countControl.value === null"
                 (click)="confirmCount()"
-                aria-label="Submit count">
+                aria-label="Submit count"
+                data-testid="count-submit-btn">
           <span class="material-icons-outlined">check</span>
           Submit Count
         </button>
@@ -76,7 +77,8 @@
         <button class="action-btn action-btn--primary"
                 [disabled]="submitting()"
                 (click)="submit()"
-                aria-label="Confirm adjustment">
+                aria-label="Confirm adjustment"
+                data-testid="count-confirm-btn">
           @if (submitting()) {
             <span class="material-icons-outlined scan-flow__spinner">sync</span>
             Adjusting...

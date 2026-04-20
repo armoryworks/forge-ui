@@ -1,14 +1,14 @@
 <app-dialog [title]="dialogTitle()" width="520px" [draftConfig]="draftConfig()" [draftFormGroup]="formGroup" (closed)="close()">
 
   <div [formGroup]="formGroup">
-    <app-input [label]="'planning.cycleName' | translate" formControlName="name" [placeholder]="'planning.cycleNamePlaceholder' | translate" />
+    <app-input [label]="'planning.cycleName' | translate" formControlName="name" data-testid="cycle-name" [placeholder]="'planning.cycleNamePlaceholder' | translate" />
 
     <div class="dialog-row">
-      <app-datepicker [label]="'common.startDate' | translate" formControlName="startDate" />
-      <app-datepicker [label]="'common.endDate' | translate" formControlName="endDate" />
+      <app-datepicker [label]="'common.startDate' | translate" formControlName="startDate" data-testid="cycle-start-date" />
+      <app-datepicker [label]="'common.endDate' | translate" formControlName="endDate" data-testid="cycle-end-date" />
     </div>
 
-    <app-textarea [label]="'planning.goals' | translate" formControlName="goals" [rows]="3" />
+    <app-textarea [label]="'planning.goals' | translate" formControlName="goals" data-testid="cycle-goals" [rows]="3" />
   </div>
 
   <div dialog-footer>
@@ -16,7 +16,7 @@
     <button class="action-btn action-btn--primary"
       [appValidationPopover]="violations"
       [disabled]="formGroup.invalid || saving()"
-      (click)="save()">
+      data-testid="cycle-save-btn" (click)="save()">
       @if (saving()) {
         <span class="material-icons-outlined spin">sync</span>
       } @else {

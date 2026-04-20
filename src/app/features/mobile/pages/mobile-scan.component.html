@@ -52,7 +52,7 @@
           </p>
         }
       }
-      <button class="action-btn action-btn--primary scanner-fallback__retry" (click)="retryCamera()" aria-label="Try camera again">
+      <button class="action-btn action-btn--primary scanner-fallback__retry" (click)="retryCamera()" aria-label="Try camera again" data-testid="scan-retry-btn">
         <span class="material-icons-outlined">refresh</span>
         Try Again
       </button>
@@ -78,14 +78,14 @@
       </div>
       <div class="scan-result__actions">
         @if (result.route) {
-          <button class="action-btn action-btn--primary" (click)="navigateToResult()" aria-label="Go to scanned entity">
+          <button class="action-btn action-btn--primary" (click)="navigateToResult()" aria-label="Go to scanned entity" data-testid="scan-open-btn">
             <span class="material-icons-outlined">open_in_new</span>
             Open
           </button>
         } @else {
           <span class="scan-result__no-match">No matching entity</span>
         }
-        <button class="action-btn" (click)="resumeScanning()" aria-label="Scan again">
+        <button class="action-btn" (click)="resumeScanning()" aria-label="Scan again" data-testid="scan-again-btn">
           <span class="material-icons-outlined">refresh</span>
           Scan Again
         </button>
@@ -94,7 +94,7 @@
   }
 
   <!-- Manual Entry -->
-  <button class="manual-toggle" (click)="toggleManual()" aria-label="Toggle manual entry">
+  <button class="manual-toggle" (click)="toggleManual()" aria-label="Toggle manual entry" data-testid="scan-manual-toggle">
     <span class="material-icons-outlined">keyboard</span>
     {{ showManual() ? 'Hide' : 'Manual Entry' }}
   </button>
@@ -109,12 +109,14 @@
           [value]="manualValue()"
           (input)="onManualInput($event)"
           (keydown)="onManualKeydown($event)"
-          aria-label="Manual barcode entry" />
+          aria-label="Manual barcode entry"
+          data-testid="scan-manual-input" />
         <button
           class="action-btn action-btn--primary"
           [disabled]="!manualValue().trim()"
           (click)="submitManual()"
-          aria-label="Submit manual entry">
+          aria-label="Submit manual entry"
+          data-testid="scan-manual-submit">
           <span class="material-icons-outlined">search</span>
         </button>
       </div>

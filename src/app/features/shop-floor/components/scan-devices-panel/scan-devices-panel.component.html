@@ -13,6 +13,48 @@
 
   @if (showPairForm()) {
     <div class="devices-panel__pair-form">
+      <div class="pair-instructions">
+        <div class="pair-instructions__intro">
+          Focus the <strong>Device ID</strong> field, then follow the steps for your hardware. The scan auto-fills the field — Enter submits.
+        </div>
+
+        <div class="pair-instructions__type">
+          <div class="pair-instructions__heading">
+            <span class="material-icons-outlined">qr_code_scanner</span>
+            <span>USB Barcode Scanner (keyboard wedge)</span>
+          </div>
+          <ol class="pair-instructions__steps">
+            <li>Plug the scanner into any USB port on the kiosk.</li>
+            <li>Click the Device ID field to give it focus.</li>
+            <li>Scan the <em>device serial barcode</em> on the scanner body (or any unique test barcode reserved for this unit).</li>
+          </ol>
+        </div>
+
+        <div class="pair-instructions__type">
+          <div class="pair-instructions__heading">
+            <span class="material-icons-outlined">contactless</span>
+            <span>NFC Reader (ACR122U + NTAG215)</span>
+          </div>
+          <ol class="pair-instructions__steps">
+            <li>Plug the ACR122U reader into USB — wait for the solid green LED.</li>
+            <li>Click the Device ID field to give it focus.</li>
+            <li>Tap a dedicated NTAG215 sticker (one per reader, not a user badge) onto the reader. The UID populates the field.</li>
+          </ol>
+        </div>
+
+        <div class="pair-instructions__type">
+          <div class="pair-instructions__heading">
+            <span class="material-icons-outlined">bluetooth</span>
+            <span>Wireless / Bluetooth Scanner</span>
+          </div>
+          <ol class="pair-instructions__steps">
+            <li>Pair the scanner to the kiosk via the OS Bluetooth settings first (HID mode).</li>
+            <li>Return here and click the Device ID field to give it focus.</li>
+            <li>Scan the <em>device serial barcode</em> on the scanner to capture its ID, then give it a friendly Device Name (e.g. "Receiving Cart 2").</li>
+          </ol>
+        </div>
+      </div>
+
       <app-input label="Device ID" [formControl]="deviceIdControl" [required]="true"
                  placeholder="Scan or enter device ID" />
       <app-input label="Device Name" [formControl]="deviceNameControl"

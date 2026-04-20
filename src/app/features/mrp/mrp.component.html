@@ -21,10 +21,10 @@
     </div>
 
     <div class="mrp__actions">
-      <button class="action-btn action-btn--primary" [disabled]="executingRun()" (click)="executeRun(false)">
+      <button class="action-btn action-btn--primary" [disabled]="executingRun()" (click)="executeRun(false)" data-testid="mrp-run-btn">
         <span class="material-icons-outlined">play_arrow</span> {{ 'mrp.runMrp' | translate }}
       </button>
-      <button class="action-btn" [disabled]="executingRun()" (click)="executeRun(true)">
+      <button class="action-btn" [disabled]="executingRun()" (click)="executeRun(true)" data-testid="mrp-simulate-btn">
         <span class="material-icons-outlined">science</span> {{ 'mrp.simulate' | translate }}
       </button>
     </div>

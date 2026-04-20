@@ -6,6 +6,7 @@
         Mark yourself as onboarded? Your pending paperwork won't be completed — HR may still require it.
       </span>
       <button class="action-btn action-btn--sm onboarding-banner__action"
+              data-testid="onboarding-skip-confirm-btn"
               [disabled]="bypassing()"
               (click)="confirmBypass()"
               aria-label="Confirm mark as onboarded">
@@ -31,6 +32,7 @@
         {{ 'onboarding.completeNow' | translate }}
       </button>
       <button class="action-btn action-btn--sm onboarding-banner__action--bypass"
+              data-testid="onboarding-skip-btn"
               (click)="promptBypass()"
               matTooltip="Skip the onboarding wizard and mark yourself as complete"
               matTooltipPosition="above"

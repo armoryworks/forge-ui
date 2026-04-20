@@ -1286,6 +1286,89 @@ export function getProductionBravoWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
+      // pb-34: Browse shop floor display
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-34',
+        name: 'Browse shop floor display',
+        category: 'browse',
+        tags: ['shop-floor'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/display/shop-floor', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(1_500, 3_000));
+
+            const content = page.locator('.shop-floor, [class*="shop-floor"], .worker-grid, .kiosk').first();
+            if (await content.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await content.evaluate((el) => el.scrollBy(0, 400));
+              await page.waitForTimeout(randomDelay(800, 1_500));
+            }
+          } catch {
+            // Shop floor display may not be accessible
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-35: Browse inventory cycle counts
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-35',
+        name: 'Browse inventory cycle counts',
+        category: 'browse',
+        tags: ['inventory'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/inventory/cycle-counts', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state, .page-header', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+          } catch {
+            // Cycle counts route may not exist — try stock tab
+            try {
+              await page.goto('/inventory/stock', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+              await page.waitForTimeout(randomDelay(800, 1_500));
+            } catch {
+              // Non-critical
+            }
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // pb-36: View asset maintenance schedule
+      // ------------------------------------------------------------------
+      {
+        id: 'pb-36',
+        name: 'View asset maintenance schedule',
+        category: 'browse',
+        tags: ['assets'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/assets', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Click an asset row
+            const rows = page.locator('app-data-table tbody tr');
+            const count = await rows.count();
+            if (count > 0) {
+              await rows.nth(randomInt(0, Math.min(count - 1, 4))).click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Browse maintenance tab if available
+              const maintenanceTab = page.locator('[role="tab"], .tab', { hasText: /maintenance|schedule/i }).first();
+              if (await maintenanceTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await maintenanceTab.click();
+                await page.waitForTimeout(randomDelay(800, 1_500));
+              }
+            }
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
       // pb-33: Return to dashboard — end of shift review
       // ------------------------------------------------------------------
       {

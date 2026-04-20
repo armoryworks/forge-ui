@@ -21,7 +21,7 @@
   @if (!layout.isOnboardingRoute()) {
   <div class="app-header__search hide-tablet" [class.app-header__search--focused]="searchFocused()">
     <span class="material-icons-outlined search-icon">search</span>
-    <input class="search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
+    <input class="search-input" data-testid="header-search-input" type="text" [placeholder]="'header.searchPlaceholder' | translate"
            [formControl]="searchControl" (focus)="onSearchFocus()" (blur)="onSearchBlur()" />
     <kbd>Ctrl+K</kbd>
 
@@ -33,7 +33,7 @@
             {{ 'header.results' | translate }}
           </div>
           @for (result of searchResults(); track result.entityId + result.entityType) {
-            <button class="search-result" (mousedown)="navigateToResult(result)">
+            <button class="search-result" data-testid="search-result-item" (mousedown)="navigateToResult(result)">
               <span class="material-icons-outlined search-result__icon">{{ result.icon }}</span>
               <div class="search-result__content">
                 <span class="search-result__title">{{ result.title }}</span>
@@ -113,7 +113,7 @@
               (click)="toggleTrainingPanel()">
         <span class="material-icons-outlined">school</span>
       </button>
-      <button class="icon-btn" [matTooltip]="'header.notifications' | translate" matTooltipPosition="above" [attr.aria-label]="'header.notifications' | translate" (click)="toggleNotifications()">
+      <button class="icon-btn" data-testid="header-notifications-btn" [matTooltip]="'header.notifications' | translate" matTooltipPosition="above" [attr.aria-label]="'header.notifications' | translate" (click)="toggleNotifications()">
         <span class="material-icons-outlined">notifications_none</span>
         @if (unreadCount() > 0) {
           <span class="badge">{{ unreadCount() }}</span>

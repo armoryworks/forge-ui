@@ -1093,6 +1093,177 @@ export const RECURRING_EXPENSE_DESCRIPTIONS = [
 
 export const RECURRING_FREQUENCIES = ['Weekly', 'BiWeekly', 'Monthly', 'Quarterly', 'Annually'];
 
+// ── Announcement data ────────────────────────────────────────────────────────
+
+export const ANNOUNCEMENT_TITLES = [
+  'Holiday Schedule Update', 'Safety Reminder — PPE Required in All Machining Areas',
+  'New Quality Procedure Effective Monday', 'Parking Lot Repaving — Temporary Relocation',
+  'Quarterly Profit Sharing Update', 'Equipment Lockout/Tagout Procedure Change',
+  'Insurance Open Enrollment Reminder', 'Holiday Party — Save the Date',
+  'New Employee Welcome', 'Shop Floor Temperature Advisory',
+  'Overtime Opportunity — Weekend Production Run', 'ISO Audit Preparation Checklist',
+  'Updated Emergency Exit Routes', 'Company Picnic Registration',
+  'Health & Wellness Fair Announcement', 'Tool Crib Inventory — Missing Items',
+];
+
+export const ANNOUNCEMENT_CONTENTS = [
+  'Please review the updated schedule posted in the break room. All PTO requests for this period must be submitted by end of week.',
+  'Effective immediately, safety glasses and hearing protection are required in all areas past the yellow line. No exceptions.',
+  'The new incoming inspection checklist has been uploaded to the quality drive. All incoming material must be processed using the new form.',
+  'The north parking lot will be repaved starting Monday. Please park in the overflow lot until further notice.',
+  'Q{q} profit sharing results are in. Details will be shared at the all-hands meeting this Friday.',
+  'LOTO procedure has been updated per OSHA feedback. Refresher training is mandatory before end of month.',
+  'Open enrollment for 2026 benefits runs through the 15th. See HR for assistance with plan selection.',
+  'Annual holiday party is scheduled for December 15th. RSVP to Carol by December 1st.',
+  'Please join us in welcoming our newest team member! They start next Monday in the machine shop.',
+  'Shop floor temps are running high. Extra water stations have been set up. Take breaks as needed.',
+];
+
+export const ANNOUNCEMENT_SEVERITIES = ['Info', 'Warning', 'Critical'];
+
+export const ANNOUNCEMENT_SCOPES = ['Company-Wide', 'Team Leads Only'];
+
+// ── Search terms (for simulating header search usage) ────────────────────────
+
+export const SEARCH_TERMS = [
+  'bracket', 'shaft', 'housing', 'manifold', 'flange', 'valve', 'bearing',
+  'aluminum', 'steel', 'overdue', 'urgent', 'inspection', 'pending',
+  'invoice', 'payment', 'shipment', 'purchase order', 'quality',
+  'maintenance', 'calibration', 'tolerance', 'surface finish',
+];
+
+// ── Report entity sources (for selecting in report builder) ──────────────────
+
+export const REPORT_ENTITY_SOURCES = [
+  'Jobs', 'Parts', 'Customers', 'Invoices', 'Expenses', 'PurchaseOrders',
+  'SalesOrders', 'Quotes', 'TimeEntries', 'Shipments', 'Assets', 'Leads',
+  'Vendors', 'QcInspections', 'CustomerReturns', 'Lots',
+];
+
+// ── Planning cycle names ─────────────────────────────────────────────────────
+
+export const PLANNING_CYCLE_NAMES = [
+  'Sprint {n}', 'Production Cycle {n}', 'Week {n} Plan',
+  'Bi-Weekly {n}', 'Period {n}', 'Cycle {n}',
+];
+
+export const PLANNING_GOALS = [
+  'Clear backlog of overdue jobs. Focus on customer-facing deliverables.',
+  'Complete all aerospace orders. Zero defect target.',
+  'Catch up on PO receiving and inventory reconciliation.',
+  'Focus on prototype runs — 3 new customer qualifications.',
+  'Maintenance week — schedule PM on all CNC machines.',
+  'End of quarter push — ship all completed orders.',
+  'Tooling rebuild and fixture verification cycle.',
+  'Cross-training week — rotate operators through all machines.',
+];
+
+// ── Estimate data (for creating estimates via customer detail) ───────────────
+
+export const ESTIMATE_DESCRIPTIONS = [
+  'Ballpark estimate for CNC bracket assemblies — 500 pcs/year',
+  'Rough estimate for custom manifold machining',
+  'Budget pricing for prototype enclosure — 5 pcs',
+  'Preliminary quote for aerospace housing machining',
+  'Cost estimate for tooling fabrication',
+  'ROM for stainless weld assembly — 100 annual units',
+  'Budget estimate for gear housing production run',
+  'Preliminary pricing for medical device components',
+];
+
+// ── Onboarding / Employee data ────────────────────────────────────────────────
+
+export const ONBOARDING_FIRST_NAMES = [
+  'Marcus', 'Elena', 'Terrence', 'Sofia', 'Dwayne', 'Ingrid', 'Hector', 'Naomi',
+  'Garrett', 'Priya', 'Leonard', 'Camille', 'Rodney', 'Yumi', 'Vincent', 'Alicia',
+  'Franklin', 'Meredith', 'Omar', 'Josephine', 'Curtis', 'Bianca', 'Roland', 'Tamara',
+];
+
+export const ONBOARDING_LAST_NAMES = [
+  'Thornton', 'Vasquez', 'Blackwood', 'Petrov', 'Nakamura', 'Sullivan', 'DeLuca',
+  'Okonkwo', 'Hartmann', 'Reyes', 'Lindstrom', 'Chowdhury', 'Moreau', 'Kessler',
+  'Yamamoto', 'Fitzpatrick', 'Novak', 'Castillo', 'Johansson', 'Mbeki',
+];
+
+export const ONBOARDING_EMAILS_DOMAIN = 'qbengineer.local';
+
+export const BANK_NAMES = [
+  'Chase Bank', 'Bank of America', 'Wells Fargo', 'US Bank', 'PNC Financial',
+  'Capital One', 'TD Bank', 'Citizens Financial', 'Fifth Third Bank', 'KeyBank',
+  'Huntington National', 'Regions Financial', 'M&T Bank', 'Ally Financial',
+  'First Republic Bank', 'BMO Harris', 'HSBC Bank USA', 'Comerica',
+];
+
+export const ROUTING_NUMBERS = [
+  '021000021', '026009593', '121000248', '071000013', '083000108',
+  '056073502', '031100157', '211070175', '042000314', '041001039',
+  '044000037', '062000019', '022000046', '124003116', '091000019',
+];
+
+export const ONBOARDING_ROLES = [
+  'Engineer', 'ProductionWorker', 'Manager', 'OfficeManager', 'PM',
+];
+
+export const I9_LIST_A_DOC_TYPES = [
+  'U.S. Passport', 'U.S. Passport Card', 'Permanent Resident Card (I-551)',
+  'Employment Authorization Document (I-766)',
+];
+
+export const I9_LIST_B_DOC_TYPES = [
+  "Driver's License", 'State ID Card', 'Military ID',
+];
+
+export const I9_LIST_C_DOC_TYPES = [
+  'Social Security Card', 'Birth Certificate', 'U.S. Citizen ID Card (I-197)',
+];
+
+export const US_STATES_COMMON = [
+  'AL', 'AZ', 'CA', 'CO', 'CT', 'FL', 'GA', 'IL', 'IN', 'IA',
+  'KS', 'KY', 'LA', 'MA', 'MD', 'MI', 'MN', 'MO', 'NC', 'NJ',
+  'NM', 'NY', 'OH', 'OK', 'OR', 'PA', 'SC', 'TN', 'TX', 'UT',
+  'VA', 'WA', 'WI',
+];
+
+export const STREET_ADDRESSES = [
+  '142 Industrial Parkway', '987 Elm Street', '2305 Commerce Drive',
+  '450 Oak Avenue, Suite B', '1120 River Road', '33 Maple Court',
+  '789 Factory Lane', '5501 Ridgeview Blvd', '220 Harbor Way',
+  '1664 Prospect Ave', '88 Mill Street', '3400 Lakeshore Drive',
+  '1901 Washington Blvd', '672 Pine Ridge Road', '100 Enterprise Way',
+];
+
+export const CITY_NAMES = [
+  'Springfield', 'Georgetown', 'Madison', 'Franklin', 'Clinton',
+  'Greenville', 'Bristol', 'Fairview', 'Salem', 'Manchester',
+  'Riverside', 'Arlington', 'Lakewood', 'Burlington', 'Centerville',
+];
+
+export const DOC_NUMBERS = [
+  'C04193827', 'P12345678', 'EAD987654', 'A12345678', 'DL-456-789',
+  'SSN-CARD-001', 'BC-2020-1234', 'MIL-ID-9876', 'I551-456789',
+  'PRC-123456', 'PA-007-2019', 'SC-333-222', 'TP-2021-5555',
+];
+
+export const DOC_AUTHORITIES = [
+  'U.S. Department of State', 'USCIS', 'Social Security Administration',
+  'Department of Motor Vehicles', 'Department of Defense',
+  'County Clerk', 'State of California', 'State of New York',
+  'State of Texas', 'State of Ohio',
+];
+
+// ── Mobile/Shop Floor simulation data ─────────────────────────────────────────
+
+export const JOB_NOTES_MOBILE = [
+  'Checked tolerances on first article — within spec.',
+  'Material surface finish needs polishing before next op.',
+  'Setup complete, starting production run.',
+  'Fixture alignment verified, proceeding with batch.',
+  'Tool wear noticed, replacing insert before next cycle.',
+  'Part dimensions confirmed per blueprint rev C.',
+  'Coolant flow adjusted for better chip evacuation.',
+  'Operator training complete for this operation.',
+];
+
 /** Pick an item from a pool deterministically by week and offset */
 export function pick<T>(pool: T[], weekIndex: number, offset = 0): T {
   return pool[(weekIndex + offset) % pool.length];

@@ -1,13 +1,13 @@
 <app-page-layout [pageTitle]="'reports.builderTitle' | translate">
   <ng-container toolbar>
-    <app-select [label]="'reports.savedReports' | translate" [options]="savedReportOptions()" [formControl]="savedReportControl" />
+    <app-select [label]="'reports.savedReports' | translate" [options]="savedReportOptions()" [formControl]="savedReportControl" data-testid="report-saved-select" />
     @if (editingReport()) {
       <button class="icon-btn icon-btn--danger" (click)="deleteSelectedReport()" [attr.aria-label]="'reports.deleteReport' | translate" [matTooltip]="'reports.deleteReport' | translate" matTooltipPosition="above">
         <span class="material-icons-outlined">delete</span>
       </button>
     }
     <span appSpacer></span>
-    <button class="action-btn" (click)="newReport()">
+    <button class="action-btn" data-testid="report-new-btn" (click)="newReport()">
       <span class="material-icons-outlined">add</span> {{ 'reports.newReport' | translate }}
     </button>
   </ng-container>
@@ -18,7 +18,7 @@
         <!-- Step 1: Entity source -->
         <div class="builder__section">
           <h3 class="builder__section-title">{{ 'reports.dataSource' | translate }}</h3>
-          <app-select [label]="'reports.entity' | translate" [options]="entityOptions()" [formControl]="entityControl" />
+          <app-select [label]="'reports.entity' | translate" [options]="entityOptions()" [formControl]="entityControl" data-testid="report-entity-select" />
         </div>
 
         <!-- Step 2: Columns (multi-select checkboxes) -->
@@ -78,7 +78,7 @@
 
         <!-- Actions -->
         <div class="builder__actions">
-          <button class="action-btn action-btn--primary"
+          <button class="action-btn action-btn--primary" data-testid="report-run-btn"
                   [disabled]="!canRun()"
                   (click)="runReport()">
             <span class="material-icons-outlined">play_arrow</span> {{ 'reports.runReport' | translate }}

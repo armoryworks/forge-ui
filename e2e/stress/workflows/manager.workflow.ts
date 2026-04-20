@@ -57,6 +57,31 @@ const TIME_ENTRY_NOTES = [
 
 const TRACK_TYPES = ['Production', 'R&D/Tooling', 'Maintenance'];
 
+const ANNOUNCEMENT_TITLES = [
+  'Production schedule update for the week',
+  'Safety reminder: PPE required in all shop areas',
+  'Holiday schedule — plant closed Friday',
+  'Quarterly review meeting this Thursday',
+  'New supplier onboarded — updated vendor list',
+  'Maintenance window Saturday 6 AM–12 PM',
+];
+const ANNOUNCEMENT_CONTENT = [
+  'Please review the updated production schedule on the kanban board. Priority jobs are highlighted in red.',
+  'All personnel must wear safety glasses and steel-toed boots in production areas. No exceptions.',
+  'The plant will be closed this Friday for the holiday. Please plan your work accordingly.',
+  'Quarterly review meeting at 2 PM in the conference room. All department leads required.',
+  'We have onboarded a new fastener supplier. Check the vendor list for updated contacts.',
+  'Scheduled maintenance this weekend. All machines will be offline Saturday morning.',
+];
+const INTERACTION_TYPES = ['Call', 'Email', 'Meeting', 'Note'];
+const INTERACTION_SUBJECTS = [
+  'Follow-up on production schedule',
+  'Delivery schedule check',
+  'Pricing discussion for renewal',
+  'Quality concern review',
+  'Capacity planning for next quarter',
+];
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -88,7 +113,7 @@ async function randomScroll(page: Page): Promise<void> {
 /**
  * Manager workflow — simulates a production manager's full daily review loop.
  *
- * 44 steps covering every page a manager would visit: dashboard, kanban,
+ * 52 steps covering every page a manager would visit: dashboard, kanban,
  * backlog, leads, expenses, time tracking, reports, planning, customers,
  * sales orders, quotes, purchase orders, invoices, payments, shipments,
  * vendors, chat, assets, quality, training, events, calendar, notifications,
@@ -1626,6 +1651,314 @@ export function getManagerWorkflow(): Workflow {
           }
 
           return 'customer';
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-46 — Review sales orders list
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-46',
+        name: 'Review sales orders list',
+        category: 'browse',
+        tags: ['sales-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/sales-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            await browseTableRows(page);
+            await randomScroll(page);
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-47 — Confirm a draft sales order
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-47',
+        name: 'Confirm a draft sales order',
+        category: 'create',
+        tags: ['sales-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/sales-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const draftRow = page.locator('app-data-table tbody tr', { hasText: /draft/i }).first();
+            if (await draftRow.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await draftRow.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              const confirmBtn = page.locator('[data-testid="so-confirm-btn"]').first();
+              if (await confirmBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="so-confirm-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+
+                // Handle confirm dialog
+                const dialog = page.locator('.confirm-dialog button, .mat-mdc-dialog-container button', { hasText: /confirm|yes/i }).first();
+                if (await dialog.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                  await dialog.click();
+                  await page.waitForTimeout(1_500);
+                }
+
+                await waitForAnySnackbar(page).catch(() => {});
+                await dismissSnackbar(page).catch(() => {});
+                return 'sales-order-confirmed';
+              }
+            }
+          } catch {
+            // No draft SO available — non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-48 — Approve/review expense
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-48',
+        name: 'Approve expense in approval queue',
+        category: 'admin',
+        tags: ['approvals'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses/approval-queue', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Click first pending expense row to open review dialog
+            const row = page.locator('app-data-table tbody tr').first();
+            if (await row.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await row.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Click approve button in review dialog
+              const approveBtn = page.locator('[data-testid="expense-approve-btn"]').first();
+              if (await approveBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="expense-approve-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+                await waitForAnySnackbar(page).catch(() => {});
+                await dismissSnackbar(page).catch(() => {});
+                return 'expense-approved';
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-49 — Create announcement
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-49',
+        name: 'Create announcement',
+        category: 'create',
+        tags: ['announcements'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Click announcements / create announcement button
+            const announcementBtn = page.locator('button, a', { hasText: /announcement/i }).first();
+            if (await announcementBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await announcementBtn.click();
+              await page.waitForTimeout(randomDelay(600, 1_200));
+
+              // Fill announcement form
+              try { await fillByTestId(page, 'announcement-title', randomPick(ANNOUNCEMENT_TITLES)); } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              try {
+                const contentWrapper = page.locator('[data-testid="announcement-content"]');
+                const textarea = contentWrapper.locator('textarea').first();
+                if (await textarea.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                  await textarea.click();
+                  await textarea.fill(randomPick(ANNOUNCEMENT_CONTENT));
+                } else {
+                  await fillByTestId(page, 'announcement-content', randomPick(ANNOUNCEMENT_CONTENT));
+                }
+              } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              try { await selectNthByTestId(page, 'announcement-severity', randomInt(0, 2)); } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+              try { await selectNthByTestId(page, 'announcement-scope', 0); } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              // Click send
+              const sendBtn = page.locator('[data-testid="announcement-send-btn"]').first();
+              if (await sendBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="announcement-send-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+                await waitForAnySnackbar(page).catch(() => {});
+                await dismissSnackbar(page).catch(() => {});
+                return 'announcement';
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-50 — Browse customer returns
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-50',
+        name: 'Browse customer returns',
+        category: 'browse',
+        tags: ['customer-returns'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customer-returns', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            await browseTableRows(page);
+            await randomScroll(page);
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-51 — Review auto-PO suggestions
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-51',
+        name: 'Review auto-PO suggestions',
+        category: 'browse',
+        tags: ['auto-po'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/admin/auto-po', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Browse suggestion list if any
+            await page.waitForSelector('app-data-table, app-empty-state, .auto-po', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await browseTableRows(page);
+            await randomScroll(page);
+          } catch {
+            // Admin route may not be accessible for all manager roles
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-52 — Browse customer detail interactions
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-52',
+        name: 'Browse customer interactions',
+        category: 'browse',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Click first customer row
+            const rows = page.locator('app-data-table tbody tr');
+            const count = await rows.count();
+            if (count > 0) {
+              await rows.nth(randomInt(0, Math.min(count - 1, 4))).click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Navigate to interactions tab
+              const tab = page.locator('[role="tab"], .tab', { hasText: /interaction|activity/i }).first();
+              if (await tab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await tab.click();
+                await page.waitForTimeout(randomDelay(800, 1_500));
+                await randomScroll(page);
+              }
+            }
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // mgr-53 — Log customer interaction (manager)
+      // ---------------------------------------------------------------
+      {
+        id: 'mgr-53',
+        name: 'Log customer interaction',
+        category: 'create',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const rows = page.locator('app-data-table tbody tr');
+            const count = await rows.count();
+            if (count > 0) {
+              await rows.nth(0).click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Navigate to interactions tab
+              const tab = page.locator('[role="tab"], .tab', { hasText: /interaction|activity/i }).first();
+              if (await tab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await tab.click();
+                await page.waitForTimeout(randomDelay(600, 1_200));
+              }
+
+              // Click log interaction button
+              const logBtn = page.locator('[data-testid="log-interaction-btn"]').first();
+              if (await logBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await logBtn.click();
+                await page.waitForTimeout(randomDelay(600, 1_200));
+
+                try {
+                  await selectNthByTestId(page, 'interaction-type', randomInt(0, 3));
+                } catch { /* */ }
+                await page.waitForTimeout(randomDelay(200, 400));
+
+                try { await fillByTestId(page, 'interaction-subject', randomPick(INTERACTION_SUBJECTS)); } catch { /* */ }
+                await page.waitForTimeout(randomDelay(200, 400));
+
+                try {
+                  const bodyWrapper = page.locator('[data-testid="interaction-body"]');
+                  const textarea = bodyWrapper.locator('textarea').first();
+                  if (await textarea.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                    await textarea.click();
+                    await textarea.fill(`Manager follow-up: ${randomPick(INTERACTION_SUBJECTS).toLowerCase()}.`);
+                  }
+                } catch { /* */ }
+                await page.waitForTimeout(randomDelay(200, 400));
+
+                await clickByTestId(page, 'interaction-save-btn');
+                await page.waitForTimeout(2_000);
+                await waitForAnySnackbar(page).catch(() => {});
+                await dismissSnackbar(page).catch(() => {});
+                return 'contact-interaction';
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
         },
       },
 

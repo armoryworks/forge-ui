@@ -1364,6 +1364,83 @@ export function getProductionAlphaWorkflow(): Workflow {
       },
 
       // ------------------------------------------------------------------
+      // 31. Browse shop floor display
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-31',
+        name: 'Browse shop floor display',
+        category: 'browse',
+        tags: ['shop-floor'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/display/shop-floor', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(1_500, 3_000));
+
+            // Scroll through worker grid / job cards
+            const content = page.locator('.shop-floor, [class*="shop-floor"], .worker-grid, .kiosk').first();
+            if (await content.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await content.evaluate((el) => el.scrollBy(0, 400));
+              await page.waitForTimeout(randomDelay(800, 1_500));
+            }
+          } catch {
+            // Shop floor display may not be accessible
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 32. Inventory stock view
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-32',
+        name: 'Browse inventory stock',
+        category: 'browse',
+        tags: ['inventory'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/inventory/stock', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Click a row to expand and see bin locations
+            const rows = page.locator('app-data-table tbody tr');
+            const count = await rows.count();
+            if (count > 0) {
+              await rows.nth(randomInt(0, Math.min(count - 1, 4))).click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+            }
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
+      // 33. Browse inventory movements
+      // ------------------------------------------------------------------
+      {
+        id: 'pa-33',
+        name: 'Browse inventory movements',
+        category: 'browse',
+        tags: ['inventory'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/inventory/movements', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            const content = page.locator('app-data-table .data-table__scroll');
+            if (await content.isVisible({ timeout: 2_000 }).catch(() => false)) {
+              await content.evaluate((el) => el.scrollBy(0, 300));
+              await page.waitForTimeout(randomDelay(500, 1_000));
+            }
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ------------------------------------------------------------------
       // 30. Return to dashboard — end of shift cycle review
       // ------------------------------------------------------------------
       {

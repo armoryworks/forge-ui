@@ -1,6 +1,6 @@
 import type { Page } from 'playwright';
 import type { Workflow } from '../orchestrator';
-import { fillByTestId, selectByTestId, fillDateByTestId, clickByTestId, fillEntityPickerByTestId } from '../../lib/form.lib';
+import { fillByTestId, selectByTestId, selectNthByTestId, fillDateByTestId, clickByTestId, fillEntityPickerByTestId } from '../../lib/form.lib';
 import { waitForAnySnackbar, dismissSnackbar } from '../../lib/snackbar.lib';
 import { waitForTable, sortByColumn } from '../../lib/data-table.lib';
 import { randomDelay, testId, maybe, randomPick, randomInt, randomDate, randomAmount } from '../../lib/random.lib';
@@ -111,6 +111,19 @@ const ECO_REASONS = [
   'Customer feedback — field failure analysis traced to dimension drift',
   'Supply chain disruption — current material unavailable for 12 weeks',
   'Assembly line improvement — reduces manual deburring step by 3 minutes per unit',
+];
+
+const ANNOUNCEMENT_TITLES = [
+  'System maintenance window this weekend',
+  'Updated safety procedures effective Monday',
+  'New QC template deployed — review required',
+  'Holiday schedule reminder',
+];
+const ANNOUNCEMENT_CONTENT = [
+  'Scheduled database maintenance Saturday 2 AM–6 AM. System may be briefly unavailable.',
+  'Updated lock-out/tag-out procedures now in effect. All shop floor personnel must review.',
+  'New inspection template added for incoming material checks. Please familiarize.',
+  'Plant closed next Friday. Submit all timesheets by Thursday EOD.',
 ];
 
 const TIME_ENTRY_NOTES = [
@@ -2205,6 +2218,229 @@ export function getAdminWorkflow(): Workflow {
           } catch {
             await page.keyboard.press('Escape');
             await page.waitForTimeout(randomDelay(300, 600));
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 66. Configure auto-PO settings
+      // ---------------------------------------------------------------
+      {
+        id: 'adm-66',
+        name: 'Configure auto-PO settings',
+        category: 'admin',
+        tags: ['auto-po'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/admin/auto-po', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Toggle auto-PO enabled if visible
+            const enabledToggle = page.locator('[data-testid="auto-po-enabled"]').first();
+            if (await enabledToggle.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await page.waitForTimeout(randomDelay(300, 600));
+              // Browse settings without changing — just verify they load
+              await randomScroll(page);
+            }
+          } catch {
+            // Route may not exist yet — non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 67. Create announcement (admin)
+      // ---------------------------------------------------------------
+      {
+        id: 'adm-67',
+        name: 'Create announcement (admin)',
+        category: 'create',
+        tags: ['announcements'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/chat', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            const announcementBtn = page.locator('button, a', { hasText: /announcement/i }).first();
+            if (await announcementBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await announcementBtn.click();
+              await page.waitForTimeout(randomDelay(600, 1_200));
+
+              try { await fillByTestId(page, 'announcement-title', randomPick(ANNOUNCEMENT_TITLES)); } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              try {
+                const contentWrapper = page.locator('[data-testid="announcement-content"]');
+                const textarea = contentWrapper.locator('textarea').first();
+                if (await textarea.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                  await textarea.click();
+                  await textarea.fill(randomPick(ANNOUNCEMENT_CONTENT));
+                } else {
+                  await fillByTestId(page, 'announcement-content', randomPick(ANNOUNCEMENT_CONTENT));
+                }
+              } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              // Select Critical or Warning severity
+              try { await selectByTestId(page, 'announcement-severity', randomPick(['Critical', 'Warning'])); } catch {
+                try { await selectNthByTestId(page, 'announcement-severity', randomInt(0, 1)); } catch { /* */ }
+              }
+              await page.waitForTimeout(randomDelay(200, 400));
+              try { await selectNthByTestId(page, 'announcement-scope', 0); } catch { /* */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              const sendBtn = page.locator('[data-testid="announcement-send-btn"]').first();
+              if (await sendBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="announcement-send-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+                await waitForAnySnackbar(page).catch(() => {});
+                await dismissSnackbar(page).catch(() => {});
+                return 'announcement';
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 68. Browse customer returns
+      // ---------------------------------------------------------------
+      {
+        id: 'adm-68',
+        name: 'Browse customer returns',
+        category: 'browse',
+        tags: ['customer-returns'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customer-returns', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await browseTablePage(page, 'Date');
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 69. Review and confirm sales order
+      // ---------------------------------------------------------------
+      {
+        id: 'adm-69',
+        name: 'Review and confirm sales order',
+        category: 'create',
+        tags: ['sales-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/sales-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const draftRow = page.locator('app-data-table tbody tr', { hasText: /draft/i }).first();
+            if (await draftRow.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await draftRow.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              const confirmBtn = page.locator('[data-testid="so-confirm-btn"]').first();
+              if (await confirmBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="so-confirm-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+
+                const dialog = page.locator('.confirm-dialog button, .mat-mdc-dialog-container button', { hasText: /confirm|yes/i }).first();
+                if (await dialog.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                  await dialog.click();
+                  await page.waitForTimeout(1_500);
+                }
+
+                await waitForAnySnackbar(page).catch(() => {});
+                await dismissSnackbar(page).catch(() => {});
+                return 'sales-order-confirmed';
+              }
+            }
+            await randomScroll(page);
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 70. PO receiving workflow
+      // ---------------------------------------------------------------
+      {
+        id: 'adm-70',
+        name: 'PO receiving workflow',
+        category: 'create',
+        tags: ['purchase-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/purchase-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Click a PO row
+            const row = page.locator('app-data-table tbody tr').first();
+            if (await row.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await row.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Click receive button
+              const receiveBtn = page.locator('[data-testid="po-receive-btn"]').first();
+              if (await receiveBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="po-receive-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(randomDelay(800, 1_500));
+
+                // Click receive all
+                const receiveAll = page.locator('[data-testid="receive-all-btn"]').first();
+                if (await receiveAll.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                  await receiveAll.click();
+                  await page.waitForTimeout(randomDelay(500, 1_000));
+                }
+
+                // Save receiving
+                const saveBtn = page.locator('[data-testid="receive-save-btn"]').first();
+                if (await saveBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                  await page.evaluate(() => {
+                    const btn = document.querySelector('[data-testid="receive-save-btn"]') as HTMLButtonElement;
+                    if (btn && !btn.disabled) btn.click();
+                  });
+                  await page.waitForTimeout(2_000);
+                  await waitForAnySnackbar(page).catch(() => {});
+                  await dismissSnackbar(page).catch(() => {});
+                  return 'po-received';
+                }
+              }
+            }
+          } catch {
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 71. Browse automations / domain event failures
+      // ---------------------------------------------------------------
+      {
+        id: 'adm-71',
+        name: 'Browse automations panel',
+        category: 'admin',
+        tags: ['automations'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/admin/scheduled-tasks', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+            await browseTablePage(page);
+          } catch {
+            // Route may not exist — non-critical
           }
         },
       },

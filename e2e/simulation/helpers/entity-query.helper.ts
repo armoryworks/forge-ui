@@ -334,6 +334,7 @@ export interface CustomerReturnListItem {
   customerId: number;
   status: string;
   reason: string;
+  returnNumber?: string;
 }
 
 /** Get open customer returns */
@@ -366,4 +367,74 @@ export interface ContactListItem {
 export async function getCustomerContacts(token: string, customerId: number): Promise<ContactListItem[]> {
   const result = await apiCall<ContactListItem[]>('GET', `customers/${customerId}/contacts`, token);
   return result ?? [];
+}
+
+// ── Draft sales orders (ready to confirm) ──────────────────────────────────
+
+/** Get draft sales orders */
+export async function getDraftSalesOrders(token: string): Promise<SalesOrderListItem[]> {
+  const result = await apiCall<{ data: SalesOrderListItem[] }>('GET', 'orders?pageSize=100', token);
+  return (result?.data ?? []).filter(so => so.status === 'Draft');
+}
+
+// ── Shipments by status ─────────────────────────────────────────────────────
+
+/** Get shipments by status */
+export async function getShipmentsByStatus(token: string, status: string): Promise<ShipmentListItem[]> {
+  const all = await getShipments(token);
+  return all.filter(s => s.status === status);
+}
+
+// ── Pending expenses (for approval queue) ───────────────────────────────────
+
+export interface ExpenseListItem {
+  id: number;
+  amount: number;
+  status: string;
+  category: string;
+  description: string;
+}
+
+/** Get pending expenses */
+export async function getPendingExpenses(token: string): Promise<ExpenseListItem[]> {
+  const result = await apiCall<{ data: ExpenseListItem[] }>('GET', 'expenses?pageSize=100', token);
+  return (result?.data ?? []).filter(e => e.status === 'Pending');
+}
+
+// ── Resolved returns (ready to close) ───────────────────────────────────────
+
+/** Get resolved returns (ready to close) */
+export async function getResolvedReturns(token: string): Promise<CustomerReturnListItem[]> {
+  const result = await apiCall<{ data: CustomerReturnListItem[] }>('GET', 'customer-returns?pageSize=50', token);
+  return (result?.data ?? []).filter(r => r.status === 'Resolved');
+}
+
+// ── Saved reports ─────────────────────────────────────────────────────────────
+
+export interface SavedReportListItem {
+  id: number;
+  name: string;
+  entitySource: string;
+}
+
+/** Get saved reports */
+export async function getSavedReports(token: string): Promise<SavedReportListItem[]> {
+  const result = await apiCall<SavedReportListItem[]>('GET', 'report-builder/saved', token);
+  return result ?? [];
+}
+
+// ── Planning cycles ──────────────────────────────────────────────────────────
+
+export interface PlanningCycleListItem {
+  id: number;
+  name: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+}
+
+/** Get planning cycles */
+export async function getPlanningCycles(token: string): Promise<PlanningCycleListItem[]> {
+  const result = await apiCall<{ data: PlanningCycleListItem[] }>('GET', 'planning-cycles?pageSize=50', token);
+  return result?.data ?? [];
 }

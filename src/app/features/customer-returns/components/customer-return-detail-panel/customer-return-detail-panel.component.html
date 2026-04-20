@@ -61,14 +61,14 @@
 
       <div class="detail-panel__actions">
         @if (r.status === 'Received' || r.status === 'ReworkOrdered' || r.status === 'InInspection') {
-          <button class="action-btn action-btn--primary" (click)="openResolve()"
+          <button class="action-btn action-btn--primary" data-testid="return-resolve-btn" (click)="openResolve()"
             [attr.aria-label]="'customerReturns.resolve' | translate">
             <span class="material-icons-outlined">check_circle</span>
             {{ 'customerReturns.resolve' | translate }}
           </button>
         }
         @if (r.status === 'Resolved') {
-          <button class="action-btn" (click)="closeReturn(r)"
+          <button class="action-btn" data-testid="return-close-btn" (click)="closeReturn(r)"
             [attr.aria-label]="'customerReturns.close' | translate">
             <span class="material-icons-outlined">lock</span>
             {{ 'customerReturns.close' | translate }}
@@ -92,13 +92,14 @@
       <app-textarea
         label="Inspection Notes (optional)"
         formControlName="inspectionNotes"
+        data-testid="return-inspection-notes"
         [rows]="4"
         [attr.aria-label]="'customerReturns.inspectionNotes' | translate" />
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeResolveDialog()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary"
+      <button class="action-btn action-btn--primary" data-testid="return-resolve-confirm-btn"
         [disabled]="resolveSaving()"
         (click)="resolve()">
         @if (resolveSaving()) {

@@ -13,7 +13,7 @@ import { randomDelay, maybe, randomPick, randomInt, randomDate, randomAmount } f
  * time tracking, chat, reports, parts catalog, inventory, kanban,
  * calendar, training, notifications, and account settings.
  *
- * 44 steps, with quote creation and PO creation as the star steps.
+ * 56 steps, with quote creation and PO creation as the star steps.
  */
 
 const NAV_TIMEOUT = 15_000;
@@ -146,6 +146,21 @@ const TIME_ENTRY_NOTES = [
   'RFQ processing — sourced materials from three vendors',
   'Shipping coordination — arranged LTL pickup for outbound orders',
 ];
+
+const CONTACT_FIRST_NAMES = ['Mike', 'Sarah', 'James', 'Lisa', 'Tom', 'Rachel', 'Chris', 'Amanda'];
+const CONTACT_LAST_NAMES = ['Reynolds', 'Chen', 'Peterson', 'Martinez', 'Anderson', 'Kim', 'Davis', 'Williams'];
+const CONTACT_ROLES = ['Purchasing Manager', 'Engineering Lead', 'Quality Manager', 'Shipping Coordinator', 'Account Manager', 'Plant Manager'];
+const INTERACTION_SUBJECTS = [
+  'Follow-up on quote QT-2024-001',
+  'Delivery schedule check for open orders',
+  'Discussed pricing for annual contract renewal',
+  'Quality concern on recent shipment',
+  'New project requirements review',
+  'Payment terms negotiation',
+  'Tooling return coordination',
+  'Production capacity discussion for Q3',
+];
+const INTERACTION_TYPES = ['Call', 'Email', 'Meeting', 'Note'];
 
 const CHAT_MESSAGES = [
   'Office update: reviewed customer pipeline, quotes and orders status check complete.',
@@ -2148,6 +2163,495 @@ export function getOfficeWorkflow(): Workflow {
             console.log(`[office] ofc-47 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
             await page.screenshot({ path: 'e2e/stress/errors/ofc-47-fail.png' }).catch(() => {});
             await safeCloseDialog(page);
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-48  Confirm a sales order (click Draft SO → detail → confirm)
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-48',
+        name: 'Confirm a draft sales order',
+        category: 'create',
+        tags: ['sales-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/sales-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Try to find a Draft SO row and click it
+            const draftRow = page.locator('app-data-table tbody tr', { hasText: /draft/i }).first();
+            if (await draftRow.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await draftRow.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Click confirm button in detail panel
+              const confirmBtn = page.locator('[data-testid="so-confirm-btn"]').first();
+              if (await confirmBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="so-confirm-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+
+                // Handle confirmation dialog if it appears
+                const confirmDialog = page.locator('.confirm-dialog button, .mat-mdc-dialog-container button', { hasText: /confirm|yes/i }).first();
+                if (await confirmDialog.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                  await confirmDialog.click();
+                  await page.waitForTimeout(1_500);
+                }
+
+                await waitForSnackbarSafe(page);
+                return 'sales-order-confirmed';
+              }
+            }
+            // No Draft SO found — just browse
+            await scrollTable(page);
+          } catch (err) {
+            const url = page.url();
+            console.log(`[office] ofc-48 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/ofc-48-fail.png' }).catch(() => {});
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-49  Create shipment for a sales order
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-49',
+        name: 'Create shipment for SO',
+        category: 'create',
+        tags: ['shipments'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/shipments', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const newBtn = page.locator('[data-testid="new-shipment-btn"]').first();
+            await newBtn.waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+            await newBtn.click();
+            await page.waitForTimeout(randomDelay(600, 1_200));
+
+            // Wait for dialog
+            await page.locator('[data-testid="shipment-so"], [data-testid="shipment-carrier"]').first()
+              .waitFor({ state: 'visible', timeout: ELEMENT_TIMEOUT });
+
+            // Select SO via entity picker
+            let foundSO = await fillEntityPickerByTestId(page, 'shipment-so', 'SO-');
+            if (!foundSO) foundSO = await fillEntityPickerByTestId(page, 'shipment-so', '20');
+            if (!foundSO) {
+              console.log('[office] ofc-49 no SOs found for entity-picker — skipping shipment creation');
+              await safeCloseDialog(page);
+              return;
+            }
+            await page.waitForTimeout(randomDelay(300, 600));
+
+            // Fill carrier
+            try {
+              await fillByTestId(page, 'shipment-carrier', randomPick(SHIPMENT_CARRIERS));
+            } catch { /* optional */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill tracking number
+            try {
+              await fillByTestId(page, 'shipment-tracking', `1Z${randomInt(100000, 999999)}${randomInt(1000, 9999)}`);
+            } catch { /* optional */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill weight
+            try {
+              await fillByTestId(page, 'shipment-weight', String(randomInt(5, 200)));
+            } catch { /* optional */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill notes
+            try {
+              const notesWrapper = page.locator('[data-testid="shipment-notes"]');
+              const textarea = notesWrapper.locator('textarea').first();
+              if (await textarea.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                await textarea.click();
+                await textarea.fill(randomPick(SHIPMENT_NOTES));
+              }
+            } catch { /* optional */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Save
+            await clickSaveButton(page, 'shipment-save-btn');
+            return 'shipment';
+          } catch (err) {
+            const url = page.url();
+            console.log(`[office] ofc-49 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/ofc-49-fail.png' }).catch(() => {});
+            await safeCloseDialog(page);
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-50  Mark shipment shipped (click row → detail → mark shipped)
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-50',
+        name: 'Mark shipment shipped',
+        category: 'create',
+        tags: ['shipments'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/shipments', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Find a Pending shipment row
+            const pendingRow = page.locator('app-data-table tbody tr', { hasText: /pending/i }).first();
+            if (await pendingRow.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await pendingRow.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              const shipBtn = page.locator('[data-testid="shipment-mark-shipped-btn"]').first();
+              if (await shipBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="shipment-mark-shipped-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+                await waitForSnackbarSafe(page);
+                return 'shipment-shipped';
+              }
+            }
+            await scrollTable(page);
+          } catch (err) {
+            const url = page.url();
+            console.log(`[office] ofc-50 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/ofc-50-fail.png' }).catch(() => {});
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-51  Mark shipment delivered
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-51',
+        name: 'Mark shipment delivered',
+        category: 'create',
+        tags: ['shipments'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/shipments', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT });
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Find a Shipped shipment row
+            const shippedRow = page.locator('app-data-table tbody tr', { hasText: /shipped/i }).first();
+            if (await shippedRow.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await shippedRow.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              const deliverBtn = page.locator('[data-testid="shipment-mark-delivered-btn"]').first();
+              if (await deliverBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+                await page.evaluate(() => {
+                  const btn = document.querySelector('[data-testid="shipment-mark-delivered-btn"]') as HTMLButtonElement;
+                  if (btn && !btn.disabled) btn.click();
+                });
+                await page.waitForTimeout(2_000);
+                await waitForSnackbarSafe(page);
+                return 'shipment-delivered';
+              }
+            }
+            await scrollTable(page);
+          } catch (err) {
+            const url = page.url();
+            console.log(`[office] ofc-51 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/ofc-51-fail.png' }).catch(() => {});
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-52  Browse customer detail — contacts tab
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-52',
+        name: 'Browse customer contacts tab',
+        category: 'browse',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const opened = await clickFirstTableRow(page);
+            if (!opened) return;
+
+            // Navigate to contacts tab
+            const contactsTab = page.locator('[role="tab"], .tab', { hasText: /contacts/i }).first();
+            if (await contactsTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await contactsTab.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+              await scrollTable(page);
+            }
+          } catch {
+            // Non-critical browsing
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-53  Add customer contact
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-53',
+        name: 'Add customer contact',
+        category: 'create',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const opened = await clickFirstTableRow(page);
+            if (!opened) return;
+
+            // Navigate to contacts tab
+            const contactsTab = page.locator('[role="tab"], .tab', { hasText: /contacts/i }).first();
+            if (await contactsTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await contactsTab.click();
+              await page.waitForTimeout(randomDelay(600, 1_200));
+            }
+
+            // Click add contact button
+            const addBtn = page.locator('[data-testid="add-contact-btn"]').first();
+            if (await addBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await addBtn.click();
+              await page.waitForTimeout(randomDelay(600, 1_200));
+
+              // Fill contact form
+              try { await fillByTestId(page, 'contact-first-name', randomPick(CONTACT_FIRST_NAMES)); } catch { /* required */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+              try { await fillByTestId(page, 'contact-last-name', randomPick(CONTACT_LAST_NAMES)); } catch { /* required */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+              try { await fillByTestId(page, 'contact-email', `${randomPick(CONTACT_FIRST_NAMES).toLowerCase()}${randomInt(1, 99)}@example.com`); } catch { /* optional */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+              try { await fillByTestId(page, 'contact-phone', `(${randomInt(200, 999)}) ${randomInt(200, 999)}-${randomInt(1000, 9999)}`); } catch { /* optional */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+              try { await fillByTestId(page, 'contact-role', randomPick(CONTACT_ROLES)); } catch { /* optional */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              // Save
+              await clickSaveButton(page, 'contact-save-btn');
+              return 'contact';
+            }
+          } catch (err) {
+            const url = page.url();
+            console.log(`[office] ofc-53 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/ofc-53-fail.png' }).catch(() => {});
+            await safeCloseDialog(page);
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-54  Log customer interaction
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-54',
+        name: 'Log customer interaction',
+        category: 'create',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const opened = await clickFirstTableRow(page);
+            if (!opened) return;
+
+            // Navigate to interactions tab (may be called Activity or Interactions)
+            const tab = page.locator('[role="tab"], .tab', { hasText: /interaction|activity/i }).first();
+            if (await tab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await tab.click();
+              await page.waitForTimeout(randomDelay(600, 1_200));
+            }
+
+            // Click log interaction button
+            const logBtn = page.locator('[data-testid="log-interaction-btn"]').first();
+            if (await logBtn.isVisible({ timeout: 5_000 }).catch(() => false)) {
+              await logBtn.click();
+              await page.waitForTimeout(randomDelay(600, 1_200));
+
+              // Fill interaction form
+              try {
+                await selectByTestId(page, 'interaction-type', randomPick(INTERACTION_TYPES));
+              } catch {
+                try { await selectNthByTestId(page, 'interaction-type', randomInt(0, 3)); } catch { /* */ }
+              }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              try { await fillByTestId(page, 'interaction-subject', randomPick(INTERACTION_SUBJECTS)); } catch { /* optional */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              const today = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+              try { await fillDateByTestId(page, 'interaction-date', today); } catch { /* may be pre-filled */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              try {
+                const bodyWrapper = page.locator('[data-testid="interaction-body"]');
+                const textarea = bodyWrapper.locator('textarea').first();
+                if (await textarea.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                  await textarea.click();
+                  await textarea.fill(`Discussed ${randomPick(INTERACTION_SUBJECTS).toLowerCase()}. Follow-up scheduled.`);
+                }
+              } catch { /* optional */ }
+              await page.waitForTimeout(randomDelay(200, 400));
+
+              // Save
+              await clickSaveButton(page, 'interaction-save-btn');
+              return 'contact-interaction';
+            }
+          } catch (err) {
+            const url = page.url();
+            console.log(`[office] ofc-54 FAILED (url=${url}): ${err instanceof Error ? err.message.slice(0, 120) : err}`);
+            await page.screenshot({ path: 'e2e/stress/errors/ofc-54-fail.png' }).catch(() => {});
+            await safeCloseDialog(page);
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-55  Browse customer addresses tab
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-55',
+        name: 'Browse customer addresses',
+        category: 'browse',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const opened = await clickFirstTableRow(page);
+            if (!opened) return;
+
+            const addressTab = page.locator('[role="tab"], .tab', { hasText: /address/i }).first();
+            if (await addressTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await addressTab.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+            }
+          } catch {
+            // Non-critical browsing
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-56  Browse customer orders tab
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-56',
+        name: 'Browse customer orders',
+        category: 'browse',
+        tags: ['customers'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customers', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            const opened = await clickFirstTableRow(page);
+            if (!opened) return;
+
+            const ordersTab = page.locator('[role="tab"], .tab', { hasText: /orders/i }).first();
+            if (await ordersTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await ordersTab.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+              await scrollTable(page);
+            }
+          } catch {
+            // Non-critical browsing
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-57  Browse approvals inbox
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-57',
+        name: 'Browse approvals inbox',
+        category: 'browse',
+        tags: ['approvals'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/expenses/approval-queue', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Wait for table or empty state
+            const hasTable = await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => null);
+            if (hasTable) {
+              await scrollTable(page);
+              await sortRandomColumn(page);
+            }
+          } catch {
+            // Non-critical browsing
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-58  Browse customer returns list
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-58',
+        name: 'Browse customer returns',
+        category: 'browse',
+        tags: ['customer-returns'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customer-returns', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            await sortRandomColumn(page);
+            await scrollTable(page);
+          } catch {
+            // Non-critical browsing
+          }
+        },
+      },
+
+      // -----------------------------------------------------------------
+      // ofc-59  Browse shipments list — sort and scroll
+      // -----------------------------------------------------------------
+      {
+        id: 'ofc-59',
+        name: 'Browse shipments list',
+        category: 'browse',
+        tags: ['shipments'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/shipments', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            await sortRandomColumn(page);
+            await scrollTable(page);
+
+            // Click a row to view detail
+            const opened = await clickFirstTableRow(page);
+            if (opened) {
+              await page.waitForTimeout(randomDelay(800, 1_500));
+              await closeDetailOrDialog(page);
+            }
+          } catch {
+            // Non-critical browsing
           }
         },
       },

@@ -69,6 +69,7 @@ export class LoadingBlockDirective {
     if (!this.overlay) return;
 
     const overlay = this.overlay;
+    this.renderer.setStyle(overlay, 'pointer-events', 'none');
     this.renderer.setStyle(overlay, 'opacity', '0');
 
     setTimeout(() => {

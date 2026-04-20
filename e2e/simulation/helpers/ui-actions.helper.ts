@@ -18,7 +18,7 @@ export const APP_BASE = process.env['SIM_APP_BASE'] ?? 'http://localhost:4200';
  * Note: in some configurations (e.g. CI clock manipulation), the overlay may persist
  * indefinitely due to a stuck LoadingService cause; callers must not depend on this.
  */
-export async function waitForIdle(page: Page, timeout = 8000): Promise<void> {
+export async function waitForIdle(page: Page, timeout = 3000): Promise<void> {
   await page.waitForFunction(
     () => !document.querySelector('.loading-overlay'),
     { timeout, polling: 100 },
@@ -42,6 +42,71 @@ export async function navigateTo(page: Page, path: string): Promise<void> {
 
   // Brief wait for Angular change detection + route loading overlay to clear
   await waitForIdle(page);
+
+  // Dismiss any draft-recovery prompt that appeared on auth (blocks all clicks)
+  await dismissDraftRecoveryPrompt(page);
+
+  // Dismiss any announcement overlays that may block page interactions
+  await dismissAnnouncementOverlays(page);
+}
+
+/**
+ * Dismiss the draft-recovery-prompt dialog if it appeared on login. The prompt is
+ * a `.dialog-backdrop` with `aria-label="Dismiss"` that shows when saved drafts
+ * exist for the user. In simulation, residue drafts from prior runs trigger this
+ * on every context, blocking the first click on every page. Click the "Review
+ * Later" footer button (primary action), which dismisses without discarding.
+ */
+async function dismissDraftRecoveryPrompt(page: Page): Promise<void> {
+  // Try up to 3 times — the prompt is opened via MatDialog which is async,
+  // may appear slightly after networkidle and initial waitForIdle.
+  for (let i = 0; i < 3; i++) {
+    const promptBackdrop = page.locator('.dialog-backdrop[aria-label="Dismiss"]').first();
+    const visible = await promptBackdrop.isVisible({ timeout: 500 }).catch(() => false);
+    if (!visible) {
+      if (i === 0) return; // First check passed — nothing to dismiss
+      break;
+    }
+    // Prefer the "Review Later" primary button — doesn't delete drafts, just closes.
+    const reviewLater = promptBackdrop.locator('button.action-btn--primary').first();
+    if (await reviewLater.isVisible({ timeout: 300 }).catch(() => false)) {
+      await reviewLater.click({ force: true, timeout: 3_000 }).catch(() => {});
+    } else {
+      // Fallback: discard-all button
+      const discardAll = promptBackdrop.locator('button:has-text("Discard All")').first();
+      if (await discardAll.isVisible({ timeout: 300 }).catch(() => false)) {
+        await discardAll.click({ force: true, timeout: 3_000 }).catch(() => {});
+      } else {
+        // Last resort: click backdrop
+        await promptBackdrop.click({ force: true, position: { x: 10, y: 10 }, timeout: 3_000 }).catch(() => {});
+      }
+    }
+    await page.waitForTimeout(400);
+  }
+}
+
+/**
+ * Dismiss any visible announcement overlays on a page.
+ * Announcements sit on top of the page and block all clicks.
+ * Uses force:true + short timeouts so a single stuck announcement doesn't
+ * consume Playwright's 8-second default click timeout (which would then
+ * fail the entire simulation action).
+ */
+async function dismissAnnouncementOverlays(page: Page): Promise<void> {
+  for (let i = 0; i < 10; i++) {
+    const ackBtn = page.locator('.announcement__ack-btn').first();
+    const dismissBtn = page.locator('.announcement__dismiss').first();
+
+    if (await ackBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+      await ackBtn.click({ force: true, timeout: 2_000 }).catch(() => {});
+      await page.waitForTimeout(200);
+    } else if (await dismissBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+      await dismissBtn.click({ force: true, timeout: 2_000 }).catch(() => {});
+      await page.waitForTimeout(200);
+    } else {
+      break;
+    }
+  }
 }
 
 // ── Inputs ────────────────────────────────────────────────────────────────────
@@ -326,13 +391,32 @@ export async function fillMatSelect(page: Page, testid: string, optionText: stri
 /**
  * Fill an Angular Material datepicker `<app-datepicker>` wrapper.
  * Expects `dateStr` in MM/DD/YYYY format (Material default locale).
+ *
+ * MatDatepicker parses the input on `blur`, firing `dateChange` which writes
+ * through to the underlying `FormControl`. Playwright's `.fill()` replaces
+ * value without firing the keystroke sequence MatDatepickerInput uses, so we
+ * rely on focus → fill → tab-blur. After blur, verify the value was parsed by
+ * checking the input still reflects the date — if it's empty, the parse
+ * failed (likely format) and we fall back to `pressSequentially`.
  */
 export async function fillDatepicker(page: Page, testid: string, dateStr: string): Promise<void> {
   const loc = page.locator(`[data-testid="${testid}"] input`).first();
   await loc.waitFor({ state: 'visible', timeout: 5000 });
+  await loc.click({ force: true, timeout: 3_000 });
   await loc.clear();
   await loc.fill(dateStr);
-  await loc.press('Tab');
+  await loc.blur();
+  await page.waitForTimeout(150);
+  // Verify: MatDatepicker parses on blur and rewrites in display format
+  const val = await loc.inputValue().catch(() => '');
+  if (!val) {
+    // Fallback: simulate actual keystrokes which MatDatepicker listens for
+    await loc.click({ force: true, timeout: 3_000 });
+    await loc.clear();
+    await loc.pressSequentially(dateStr, { delay: 30 });
+    await loc.press('Tab');
+    await page.waitForTimeout(150);
+  }
 }
 
 /**

@@ -44,6 +44,7 @@ __screenshots__/
 /e2e/playwright-report/
 /e2e/screenshots/
 /e2e/uat-results/
+/e2e/stress/last-run.log
 /test-results/
 
 # Generated at build time

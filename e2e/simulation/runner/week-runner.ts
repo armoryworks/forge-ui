@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { chromium, type Browser, type Page } from '@playwright/test';
 import { setSimulatedClock, resetClock } from '../helpers/clock.helper';
-import { type SimRole, createSimContext } from '../helpers/sim-context.helper';
+import { type SimRole, createSimContext, ensureUserOnboarded, bypassOnboardingViaUI, logProgress } from '../helpers/sim-context.helper';
 import { getAuthSession } from '../../helpers/auth.helper';
 import type { WeekContext, WeekResult, SimulationReport } from '../types/simulation.types';
 import { runWeek } from '../scenarios/week-scenario';
@@ -40,6 +40,23 @@ const ROLE_EMAILS: Record<SimRole, string> = {
   office:   'cthompson@qbengineer.local',
   worker:   'bkelly@qbengineer.local',
 };
+
+/**
+ * Background seed users — seeded workforce that appears in the admin list and participates
+ * in org charts / board assignments but never drives the simulation directly. They still
+ * need an "onboarded" compliance state so the admin view doesn't show most of the workforce
+ * at 0/8. We click the "Skip onboarding" banner button for each (a legitimate production
+ * feature — mirrors an employee onboarded off-platform).
+ */
+const BACKGROUND_USERS: string[] = [
+  'alpha1@qbengineer.local', 'alpha2@qbengineer.local', 'alpha3@qbengineer.local',
+  'alpha4@qbengineer.local', 'alpha5@qbengineer.local', 'alpha6@qbengineer.local',
+  'bravo1@qbengineer.local', 'bravo2@qbengineer.local', 'bravo3@qbengineer.local',
+  'bravo4@qbengineer.local', 'bravo5@qbengineer.local', 'bravo6@qbengineer.local',
+  'bravo7@qbengineer.local',
+  'dhart@qbengineer.local', 'jsilva@qbengineer.local',
+  'mreyes@qbengineer.local', 'rchavez@qbengineer.local',
+];
 
 // ── Resume / gap detection ──────────────────────────────────────────────────
 /**
@@ -240,21 +257,78 @@ export async function runSimulation(): Promise<SimulationReport> {
       }
     }
     console.log('');
+
+    // One-time per-user compliance: drive each seeded user through the full 7-step
+    // onboarding wizard UI (Personal → Address → W-4 → State → I-9 w/ file upload →
+    // Direct Deposit w/ file upload → Acknowledgments → Submit), then surrogate the
+    // DocuSeal signing completion via POST /employee-profile/acknowledge/{formType}
+    // for W-4/I-9/State (mirrors what HandleDocuSealWebhook does in production).
+    // Emergency contact is set via PUT /employee-profile afterward. Idempotent.
+    console.log('Driving each user through the full onboarding wizard...');
+    for (const role of ROLES) {
+      const email = ROLE_EMAILS[role];
+      const page = pages[email];
+      const token = tokens[email];
+      if (!page || !token) continue;
+      try {
+        const ok = await ensureUserOnboarded(page, token);
+        console.log(`  ${ok ? '✓' : '✗'} onboarded: ${role}`);
+      } catch (err) {
+        console.error(`  ✗ onboarding ${role}: ${err}`);
+      }
+    }
+    console.log('');
+
+    // ── Background users: bypass onboarding via UI ──────────────────────────
+    // Each user gets a short-lived browser context: login via API + seed localStorage,
+    // navigate to /dashboard, click "Skip onboarding" + confirm, close context.
+    console.log(`Bypassing onboarding for ${BACKGROUND_USERS.length} background seed users...`);
+    for (const bgEmail of BACKGROUND_USERS) {
+      try {
+        const session = await getAuthSession(bgEmail, SEED_PASSWORD);
+        const bgContext = await browser.newContext({ ignoreHTTPSErrors: true });
+        const bgPage = await bgContext.newPage();
+        const { seedAuth } = await import('../../helpers/auth.helper');
+        await seedAuth(bgPage, session);
+        const ok = await bypassOnboardingViaUI(bgPage, session.token, bgEmail);
+        console.log(`  ${ok ? '✓' : '✗'} bypassed: ${bgEmail.split('@')[0]}`);
+        await bgContext.close().catch(() => { /* ignore */ });
+      } catch (err) {
+        console.error(`  ✗ bypass ${bgEmail}: ${err}`);
+      }
+    }
+    console.log('');
   } else {
     console.log('API-direct mode — skipping browser launch\n');
   }
 
   // ── Token refresh helper ──────────────────────────────────────────────────
-  const TOKEN_REFRESH_INTERVAL = 50; // Re-authenticate every 50 weeks
+  // Re-authenticate every week. seedAuth() only stores the access token in
+  // localStorage (no refresh token), so if the interceptor ever hits a 401 and
+  // tries /auth/refresh, it will fail → clearAuth() → redirect to /login.
+  // Keeping tokens freshly minted each week prevents that failure mode entirely.
+  const TOKEN_REFRESH_INTERVAL = 1;
   let weeksSinceRefresh = 0;
 
   async function refreshTokens(): Promise<void> {
+    const { seedAuth } = await import('../../helpers/auth.helper');
     console.log('  Refreshing auth tokens...');
     for (const role of ROLES) {
       try {
         const session = await getAuthSession(ROLE_EMAILS[role], ROLE_PASSWORDS[role]);
         tokens[ROLE_EMAILS[role]] = session.token;
         sessions[role] = session;
+        // Re-seed browser localStorage so UI pages use the fresh token.
+        // Without this, UI pages are stuck with the token from initial context
+        // creation — which is why workers were getting logged out mid-sim.
+        const page = pages[ROLE_EMAILS[role]];
+        if (page && !page.isClosed()) {
+          try {
+            await seedAuth(page, session);
+          } catch (seedErr) {
+            console.error(`  ✗ re-seed ${role}: ${seedErr}`);
+          }
+        }
       } catch (err) {
         console.error(`  ✗ token refresh for ${role}: ${err}`);
       }
@@ -266,6 +340,7 @@ export async function runSimulation(): Promise<SimulationReport> {
   for (const week of weeks) {
     const weekStart = Date.now();
     console.log(`\n─── ${week.label} (${week.start.toISOString().slice(0, 10)}) ───`);
+    logProgress(`\n─── ${week.label} (${week.start.toISOString().slice(0, 10)}) ───`);
 
     // Refresh tokens periodically to prevent JWT expiry during long runs
     if (weeksSinceRefresh >= TOKEN_REFRESH_INTERVAL) {
@@ -298,8 +373,14 @@ export async function runSimulation(): Promise<SimulationReport> {
     };
 
     let result: WeekResult;
+    const WEEK_TIMEOUT_MS = 30 * 60_000; // 30 minutes max per week
     try {
-      result = USE_API ? await runWeekApi(ctx) : await runWeek(ctx);
+      result = await Promise.race([
+        USE_API ? runWeekApi(ctx) : runWeek(ctx),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`Week timed out after ${WEEK_TIMEOUT_MS / 1000}s`)), WEEK_TIMEOUT_MS),
+        ),
+      ]);
     } catch (err) {
       result = {
         weekLabel: week.label,
@@ -316,7 +397,9 @@ export async function runSimulation(): Promise<SimulationReport> {
     report.totalActions += result.actionsAttempted;
     report.totalErrors += result.errors.length;
 
-    console.log(`  Actions: ${result.actionsSucceeded}/${result.actionsAttempted} succeeded, ${result.errors.length} errors (${result.durationMs}ms)`);
+    const summary = `  Actions: ${result.actionsSucceeded}/${result.actionsAttempted} succeeded, ${result.errors.length} errors (${result.durationMs}ms)`;
+    console.log(summary);
+    logProgress(summary);
   }
 
   // ── Teardown ──────────────────────────────────────────────────────────────

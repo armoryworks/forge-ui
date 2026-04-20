@@ -1,19 +1,19 @@
 <app-page-layout [pageTitle]="'training.title' | translate">
   <ng-container toolbar>
     <div class="training-tabs" role="tablist" aria-label="Training sections">
-      <button class="tab" [class.tab--active]="activeTab() === 'my-learning'"
+      <button class="tab" data-testid="training-tab-my-learning" [class.tab--active]="activeTab() === 'my-learning'"
               role="tab" [attr.aria-selected]="activeTab() === 'my-learning'"
               (click)="switchTab('my-learning')">
         <span class="material-icons-outlined" aria-hidden="true">school</span>
         {{ 'trainingPage.tabs.myLearning' | translate }}
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'paths'"
+      <button class="tab" data-testid="training-tab-paths" [class.tab--active]="activeTab() === 'paths'"
               role="tab" [attr.aria-selected]="activeTab() === 'paths'"
               (click)="switchTab('paths')">
         <span class="material-icons-outlined" aria-hidden="true">route</span>
         {{ 'trainingPage.tabs.learningPaths' | translate }}
       </button>
-      <button class="tab" [class.tab--active]="activeTab() === 'all-modules'"
+      <button class="tab" data-testid="training-tab-all-modules" [class.tab--active]="activeTab() === 'all-modules'"
               role="tab" [attr.aria-selected]="activeTab() === 'all-modules'"
               (click)="switchTab('all-modules')">
         <span class="material-icons-outlined" aria-hidden="true">menu_book</span>
@@ -35,7 +35,7 @@
         } @else {
           <div class="training-grid">
             @for (module of modules(); track module.id) {
-              <div class="training-card"
+              <div class="training-card" data-testid="training-module-card"
                    [class.training-card--completed]="module.myStatus === 'Completed'"
                    [class.training-card--in-progress]="module.myStatus === 'InProgress'"
                    [attr.data-content-type]="module.contentType"

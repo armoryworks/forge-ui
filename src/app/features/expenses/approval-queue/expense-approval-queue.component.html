@@ -82,9 +82,11 @@
 
     <div dialog-footer>
       <button class="action-btn action-btn--danger"
+        data-testid="expense-reject-btn"
         [disabled]="processing()"
         (click)="reject()">{{ 'expenses.reject' | translate }}</button>
       <button class="action-btn action-btn--primary"
+        data-testid="expense-approve-btn"
         [disabled]="processing()"
         (click)="approve()">{{ 'expenses.approve' | translate }}</button>
     </div>

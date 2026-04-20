@@ -21,7 +21,7 @@
   @if (activeTab() === 'gantt') {
     <div class="tab-panel" [appLoadingBlock]="loading()">
       <app-toolbar>
-        <button class="action-btn action-btn--primary" (click)="executeSchedule()" aria-label="Run scheduler">
+        <button class="action-btn action-btn--primary" (click)="executeSchedule()" data-testid="scheduling-run-btn" aria-label="Run scheduler">
           <span class="material-icons-outlined">play_arrow</span> {{ 'scheduling.runScheduler' | translate }}
         </button>
       </app-toolbar>

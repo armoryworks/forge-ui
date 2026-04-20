@@ -13,7 +13,8 @@
       @for (line of openShipmentLines(); track line.shipmentLineId) {
         <button class="scan-ship__line-item"
                 (click)="selectLine(line)"
-                [attr.aria-label]="'Select shipment ' + line.shipmentNumber">
+                [attr.aria-label]="'Select shipment ' + line.shipmentNumber"
+                data-testid="ship-line-item">
           <div class="scan-ship__line-info">
             <span class="scan-ship__line-shipment">{{ line.shipmentNumber }}</span>
             <span class="scan-ship__line-so">SO {{ line.salesOrderNumber }}</span>
@@ -42,7 +43,8 @@
         <div class="scan-ship__qty-actions">
           <button class="action-btn action-btn--primary scan-ship__qty-btn"
                   (click)="shipAll()"
-                  aria-label="Ship all quantity">
+                  aria-label="Ship all quantity"
+                  data-testid="ship-all-btn">
             <span class="material-icons-outlined">check</span>
             {{ 'shopFloor.shipFlow.shipAll' | translate }} ({{ line.requiredQuantity }})
           </button>
@@ -115,7 +117,8 @@
           <button class="action-btn action-btn--primary"
                   [disabled]="submitting()"
                   (click)="confirmShip()"
-                  aria-label="Confirm shipment">
+                  aria-label="Confirm shipment"
+                  data-testid="ship-confirm-btn">
             @if (submitting()) {
               <span class="material-icons-outlined scan-ship__spinner">sync</span>
             } @else {

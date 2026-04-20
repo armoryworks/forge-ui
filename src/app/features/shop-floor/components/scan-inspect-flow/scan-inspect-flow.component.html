@@ -27,14 +27,16 @@
         <button class="scan-inspect__result-btn scan-inspect__result-btn--pass"
                 [class.scan-inspect__result-btn--selected]="result() === 'Pass'"
                 (click)="setResult('Pass')"
-                aria-label="Mark inspection as pass">
+                aria-label="Mark inspection as pass"
+                data-testid="inspect-pass-btn">
           <span class="material-icons-outlined">check_circle</span>
           {{ 'shopFloor.inspectFlow.pass' | translate }}
         </button>
         <button class="scan-inspect__result-btn scan-inspect__result-btn--fail"
                 [class.scan-inspect__result-btn--selected]="result() === 'Fail'"
                 (click)="setResult('Fail')"
-                aria-label="Mark inspection as fail">
+                aria-label="Mark inspection as fail"
+                data-testid="inspect-fail-btn">
           <span class="material-icons-outlined">cancel</span>
           {{ 'shopFloor.inspectFlow.fail' | translate }}
         </button>
@@ -55,7 +57,8 @@
       <button class="action-btn action-btn--primary"
               [disabled]="!result()"
               (click)="submitInspection()"
-              aria-label="Submit inspection">
+              aria-label="Submit inspection"
+              data-testid="inspect-submit-btn">
         <span class="material-icons-outlined">save</span>
         {{ 'shopFloor.inspectFlow.submitInspection' | translate }}
       </button>

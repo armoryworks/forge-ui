@@ -32,14 +32,16 @@
       @if (hasActiveTimer()) {
         <button class="scan-job__action-btn scan-job__action-btn--stop"
                 (click)="stopTimer()"
-                aria-label="Stop timer">
+                aria-label="Stop timer"
+                data-testid="job-stop-timer-btn">
           <span class="material-icons-outlined">stop_circle</span>
           <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.stopTimer' | translate }}</span>
         </button>
       } @else {
         <button class="scan-job__action-btn scan-job__action-btn--start"
                 (click)="startTimer()"
-                aria-label="Start timer">
+                aria-label="Start timer"
+                data-testid="job-start-timer-btn">
           <span class="material-icons-outlined">play_circle</span>
           <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.startTimer' | translate }}</span>
         </button>
@@ -47,14 +49,16 @@
 
       <button class="scan-job__action-btn scan-job__action-btn--advance"
               (click)="showAdvanceStage()"
-              aria-label="Advance stage">
+              aria-label="Advance stage"
+              data-testid="job-advance-btn">
         <span class="material-icons-outlined">skip_next</span>
         <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.advanceStage' | translate }}</span>
       </button>
 
       <button class="scan-job__action-btn scan-job__action-btn--note"
               (click)="showLogNote()"
-              aria-label="Log note">
+              aria-label="Log note"
+              data-testid="job-log-note-btn">
         <span class="material-icons-outlined">note_add</span>
         <span class="scan-job__action-label">{{ 'shopFloor.jobFlow.logNote' | translate }}</span>
       </button>
@@ -78,7 +82,8 @@
           <span class="material-icons-outlined">arrow_back</span>
           {{ 'common.back' | translate }}
         </button>
-        <button class="action-btn action-btn--primary" (click)="confirmAdvanceStage()" aria-label="Confirm advance stage">
+        <button class="action-btn action-btn--primary" (click)="confirmAdvanceStage()" aria-label="Confirm advance stage"
+                data-testid="job-confirm-advance-btn">
           <span class="material-icons-outlined">check</span>
           {{ 'common.confirm' | translate }}
         </button>
@@ -110,7 +115,8 @@
         <button class="action-btn action-btn--primary"
                 [disabled]="!noteControl.value?.trim()"
                 (click)="submitNote()"
-                aria-label="Submit note">
+                aria-label="Submit note"
+                data-testid="job-submit-note-btn">
           <span class="material-icons-outlined">save</span>
           {{ 'shopFloor.jobFlow.submitNote' | translate }}
         </button>

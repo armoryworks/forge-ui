@@ -1,5 +1,5 @@
 @if (isVisible()) {
-  <div class="scan-overlay" (click)="close()">
+  <div class="scan-overlay" data-testid="scan-overlay" (click)="close()">
     <div class="scan-overlay__card" (click)="$event.stopPropagation()">
 
       <!-- Loading -->
@@ -63,11 +63,12 @@
           <button class="scan-overlay__multi-scan-btn"
                   [class.scan-overlay__multi-scan-btn--active]="multiScanMode()"
                   (click)="toggleMultiScan()"
+                  data-testid="scan-multi-scan-btn"
                   aria-label="Toggle multi-scan mode">
             <span class="material-icons-outlined">repeat</span>
             Multi-Scan
           </button>
-          <button class="action-btn" (click)="close()" aria-label="Close scan overlay">
+          <button class="action-btn" (click)="close()" data-testid="scan-overlay-done" aria-label="Close scan overlay">
             <span class="material-icons-outlined">close</span>
             Done
           </button>

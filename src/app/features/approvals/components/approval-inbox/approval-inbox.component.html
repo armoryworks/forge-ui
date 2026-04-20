@@ -20,12 +20,14 @@
         <button class="action-btn action-btn--sm action-btn--primary"
           [disabled]="saving()"
           (click)="approve(row)"
+          data-testid="approval-approve-btn"
           aria-label="Approve request">
           <span class="material-icons-outlined">check</span> {{ 'approvals.inbox.approve' | translate }}
         </button>
         <button class="icon-btn icon-btn--danger"
           [disabled]="saving()"
           (click)="openReject(row)"
+          data-testid="approval-reject-btn"
           aria-label="Reject request">
           <span class="material-icons-outlined">close</span>
         </button>

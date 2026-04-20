@@ -5,6 +5,7 @@
       [class.quick-actions__btn--disabled]="action.disabled"
       [style.--action-color]="action.color ?? 'var(--primary)'"
       [disabled]="action.disabled ?? false"
+      [attr.data-testid]="'quick-action-' + action.id"
       (click)="onAction(action)">
       <span class="material-icons-outlined quick-actions__icon">{{ action.icon }}</span>
       <span class="quick-actions__label">{{ action.label }}</span>

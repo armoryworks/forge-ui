@@ -1,7 +1,7 @@
 <div [appLoadingBlock]="loading()">
   <app-page-header [title]="'planning.title' | translate" [subtitle]="'planning.subtitle' | translate" helpTourId="planning">
     <app-select [label]="'planning.cycle' | translate" [formControl]="cycleControl" [options]="cycleOptions()" />
-    <button class="action-btn action-btn--primary" (click)="openCreateCycleDialog()">
+    <button class="action-btn action-btn--primary" data-testid="planning-new-cycle-btn" (click)="openCreateCycleDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'planning.newCycle' | translate }}
     </button>

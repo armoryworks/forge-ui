@@ -142,23 +142,23 @@
       <!-- Actions -->
       <div class="detail-actions">
         @if (canShip(shipment.status)) {
-          <button class="action-btn" (click)="openRatesDialog()">
+          <button class="action-btn" data-testid="shipment-get-rates-btn" (click)="openRatesDialog()">
             <span class="material-icons-outlined">request_quote</span>
             {{ 'shipments.getRates' | translate }}
           </button>
-          <button class="action-btn action-btn--primary" (click)="markShipped()">
+          <button class="action-btn action-btn--primary" data-testid="shipment-mark-shipped-btn" (click)="markShipped()">
             <span class="material-icons-outlined">local_shipping</span>
             {{ 'shipments.markShipped' | translate }}
           </button>
         }
         @if (shipment.trackingNumber && !trackingData()) {
-          <button class="action-btn" (click)="loadTracking()">
+          <button class="action-btn" data-testid="shipment-load-tracking-btn" (click)="loadTracking()">
             <span class="material-icons-outlined">location_searching</span>
             {{ 'shipments.track' | translate }}
           </button>
         }
         @if (canDeliver(shipment.status)) {
-          <button class="action-btn action-btn--primary" (click)="markDelivered()">
+          <button class="action-btn action-btn--primary" data-testid="shipment-mark-delivered-btn" (click)="markDelivered()">
             <span class="material-icons-outlined">check_circle</span>
             {{ 'shipments.markDelivered' | translate }}
           </button>

@@ -40,6 +40,61 @@
   border: $border-width-thin solid var(--border);
 }
 
+// ─── Pair Instructions ───
+
+.pair-instructions {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  background: color-mix(in srgb, var(--info) 8%, transparent);
+  border-left: $border-width-accent solid var(--info);
+}
+
+.pair-instructions__intro {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.pair-instructions__type {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.pair-instructions__heading {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-sm;
+  font-weight: 700;
+  color: var(--text);
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+    color: var(--info);
+  }
+}
+
+.pair-instructions__steps {
+  margin: 0;
+  padding-left: $sp-xl;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  line-height: 1.5;
+
+  li + li {
+    margin-top: $sp-xxs;
+  }
+
+  em {
+    font-style: normal;
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
 .devices-panel__loading {
   @include flex-center;
   gap: $sp-md;

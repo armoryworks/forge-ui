@@ -1559,6 +1559,151 @@ export function getEngineerWorkflow(): Workflow {
       },
 
       // ---------------------------------------------------------------
+      // 41. Create QC inspection with result
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-41',
+        name: 'Create QC inspection with result',
+        category: 'create',
+        tags: ['quality'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/quality/inspections', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            await clickByTestId(page, 'new-inspection-btn');
+            await page.waitForTimeout(randomDelay(600, 1_200));
+
+            // Select first template
+            try { await selectNthByTestId(page, 'inspection-template', 0); } catch { /* */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Select job via entity picker
+            try {
+              const jobWrapper = page.locator('[data-testid="inspection-job"]');
+              const jobInput = jobWrapper.locator('input').first();
+              if (await jobInput.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await jobInput.click();
+                await jobInput.fill('JOB');
+                await page.waitForTimeout(800);
+                const option = page.locator('.cdk-overlay-container mat-option').first();
+                if (await option.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                  await option.click();
+                  await page.waitForTimeout(300);
+                }
+              }
+            } catch { /* */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            // Fill notes with pass/fail language
+            try {
+              const notesWrapper = page.locator('[data-testid="inspection-notes"]');
+              const textarea = notesWrapper.locator('textarea').first();
+              if (await textarea.isVisible({ timeout: 2_000 }).catch(() => false)) {
+                await textarea.click();
+                const result = randomPick(['PASS — all dimensions within tolerance', 'FAIL — bore diameter out of spec by 0.003"', 'PASS — surface finish meets Ra 32 requirement', 'CONDITIONAL PASS — minor cosmetic defect, functionally acceptable']);
+                await textarea.fill(result);
+              }
+            } catch { /* */ }
+            await page.waitForTimeout(randomDelay(200, 400));
+
+            await clickByTestId(page, 'inspection-save-btn');
+            await page.waitForTimeout(2_000);
+            await waitForAnySnackbar(page).catch(() => {});
+            await dismissSnackbar(page).catch(() => {});
+            return 'qc-inspection';
+          } catch (err) {
+            console.log(`[engineer] eng-41 create inspection: ${err instanceof Error ? err.message : err}`);
+            await page.keyboard.press('Escape').catch(() => {});
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 42. Browse customer returns
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-42',
+        name: 'Browse customer returns',
+        category: 'browse',
+        tags: ['customer-returns'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/customer-returns', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+            await page.mouse.wheel(0, 300);
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 43. Browse sales order detail (engineering review)
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-43',
+        name: 'Browse sales order detail',
+        category: 'browse',
+        tags: ['sales-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/sales-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(500, 1_000));
+
+            // Click first row
+            const rows = page.locator('app-data-table tbody tr');
+            const count = await rows.count();
+            if (count > 0) {
+              await rows.nth(randomInt(0, Math.min(count - 1, 4))).click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+
+              // Switch to lines tab to review job associations
+              const linesTab = page.locator('[role="tab"], .tab', { hasText: /line/i }).first();
+              if (await linesTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+                await linesTab.click();
+                await page.waitForTimeout(randomDelay(800, 1_500));
+              }
+              await page.keyboard.press('Escape').catch(() => {});
+            }
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
+      // 44. View PO receiving status
+      // ---------------------------------------------------------------
+      {
+        id: 'eng-44',
+        name: 'View PO receiving status',
+        category: 'browse',
+        tags: ['purchase-orders'],
+        execute: async (page: Page) => {
+          try {
+            await page.goto('/purchase-orders', { waitUntil: 'load', timeout: NAV_TIMEOUT });
+            await page.waitForSelector('app-data-table, app-empty-state', { timeout: ELEMENT_TIMEOUT }).catch(() => {});
+            await page.waitForTimeout(randomDelay(800, 1_500));
+
+            // Try receiving tab if it exists
+            const receivingTab = page.locator('[role="tab"], .tab', { hasText: /receiv/i }).first();
+            if (await receivingTab.isVisible({ timeout: 3_000 }).catch(() => false)) {
+              await receivingTab.click();
+              await page.waitForTimeout(randomDelay(800, 1_500));
+            }
+            await page.mouse.wheel(0, 300);
+            await page.waitForTimeout(randomDelay(300, 600));
+          } catch {
+            // Non-critical
+          }
+        },
+      },
+
+      // ---------------------------------------------------------------
       // 40. Return to dashboard — end of shift
       // ---------------------------------------------------------------
       {

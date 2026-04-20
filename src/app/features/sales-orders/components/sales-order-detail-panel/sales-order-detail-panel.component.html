@@ -215,19 +215,19 @@
           <!-- Actions -->
           <div class="detail-actions">
             @if (canConfirm(so.status)) {
-              <button class="action-btn action-btn--primary" (click)="confirmSo()">
+              <button class="action-btn action-btn--primary" data-testid="so-confirm-btn" (click)="confirmSo()">
                 <span class="material-icons-outlined">check_circle</span>
                 {{ 'salesOrders.confirm' | translate }}
               </button>
             }
             @if (canCancel(so.status)) {
-              <button class="action-btn" (click)="cancelSo()">
+              <button class="action-btn" data-testid="so-cancel-btn" (click)="cancelSo()">
                 <span class="material-icons-outlined">block</span>
                 {{ 'common.cancel' | translate }}
               </button>
             }
             @if (canDelete(so.status)) {
-              <button class="action-btn action-btn--danger" (click)="deleteSo()">
+              <button class="action-btn action-btn--danger" data-testid="so-delete-btn" (click)="deleteSo()">
                 <span class="material-icons-outlined">delete</span>
                 {{ 'common.delete' | translate }}
               </button>

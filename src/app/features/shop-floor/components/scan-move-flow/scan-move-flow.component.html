@@ -22,7 +22,8 @@
       <div class="scan-flow__choice-row">
         <button class="scan-flow__choice-btn scan-flow__choice-btn--primary"
                 (click)="selectAll()"
-                aria-label="Move all quantity">
+                aria-label="Move all quantity"
+                data-testid="move-all-btn">
           <span class="material-icons-outlined">select_all</span>
           Yes, All {{ context().currentStock }}
         </button>
@@ -90,7 +91,8 @@
         <button class="action-btn action-btn--primary"
                 [disabled]="!toLocationId.value"
                 (click)="confirmDestination()"
-                aria-label="Confirm destination">
+                aria-label="Confirm destination"
+                data-testid="move-dest-next-btn">
           <span class="material-icons-outlined">check</span>
           Next
         </button>
@@ -128,7 +130,8 @@
         <button class="action-btn action-btn--primary"
                 [disabled]="submitting()"
                 (click)="submit()"
-                aria-label="Confirm move">
+                aria-label="Confirm move"
+                data-testid="move-confirm-btn">
           @if (submitting()) {
             <span class="material-icons-outlined scan-flow__spinner">sync</span>
             Moving...
