@@ -15,7 +15,7 @@
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
-    <div [appLoadingBlock]="loading()">
+    <div [appLoadingBlock]="loading()" class="so-list-content">
       <app-data-table tableId="sales-orders" [columns]="soColumns" [data]="salesOrders()"
         [rowClass]="soRowClass" emptyIcon="receipt_long" [emptyMessage]="'salesOrders.noOrdersFound' | translate"
         [clickableRows]="true"
