@@ -93,6 +93,12 @@ export async function getAuthSession(email: string, password: string): Promise<L
 /**
  * Seeds localStorage from a pre-fetched token+user (no API call).
  * Use with getAuthSession() to avoid duplicate login requests.
+ *
+ * Navigates to '/' with waitUntil:'commit' to ensure the Angular app picks up
+ * the new token — AuthService reads localStorage once at construction into an
+ * in-memory signal, so a reload is required. On weekly token refresh this
+ * forces a cold-start of Angular; the next action must be tolerant of bundle
+ * parse + auth init + data fetch (see clickButton visibility timeout).
  */
 export async function seedAuth(
   page: Page,

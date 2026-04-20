@@ -446,10 +446,16 @@ export async function fillAutocomplete(
  * the click event — Angular's (click) handler applies its own validity guards internally.
  * This is needed because Angular's OnPush + zoneless may not clear the [disabled] binding
  * before we reach the save click, even if the form is actually valid.
+ *
+ * 15s visibility timeout (not 5s) so the first click after a weekly token refresh
+ * doesn't race Angular's cold-start (bundle parse + auth init + route activation +
+ * initial data fetch) on dev-mode hot-reloaded pages. A too-tight wait here
+ * consumed ~9 actions across a 10-week simulation run (all first-of-week clicks
+ * on page-header buttons like new-part-btn, new-lead-btn, new-expense-btn).
  */
 export async function clickButton(page: Page, testid: string): Promise<void> {
   const loc = page.locator(`[data-testid="${testid}"]`);
-  await loc.waitFor({ state: 'visible', timeout: 5000 });
+  await loc.waitFor({ state: 'visible', timeout: 15000 });
   await page.evaluate((sel) => {
     const el = document.querySelector(sel) as HTMLElement;
     if (el) {
