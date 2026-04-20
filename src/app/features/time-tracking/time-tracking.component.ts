@@ -139,7 +139,7 @@ export class TimeTrackingComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.timerHub.disconnect();
+    this.timerHub.clearCallbacks();
   }
 
   private async initTimerHub(): Promise<void> {

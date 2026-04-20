@@ -408,9 +408,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   );
 
   ngOnDestroy(): void {
-    if (this.hubConnected) {
-      this.chatHub.disconnect();
-    }
+    this.chatHub.clearMessageCallbacks();
   }
 
   protected getChannelIcon(channel: ChatRoom): string {

@@ -9,6 +9,8 @@ import {
   CreateAnnouncementTemplateRequest,
 } from '../models/announcement.model';
 
+type AnnouncementListener = (announcement: Announcement) => void;
+
 @Injectable({ providedIn: 'root' })
 export class AnnouncementService {
   private readonly http = inject(HttpClient);
@@ -17,6 +19,14 @@ export class AnnouncementService {
   readonly pendingAnnouncements = computed(() =>
     this.activeAnnouncements().filter(a => a.requiresAcknowledgment && !a.isAcknowledgedByCurrentUser));
   readonly unacknowledgedCount = computed(() => this.pendingAnnouncements().length);
+
+  private readonly createdListeners = new Set<AnnouncementListener>();
+
+  /** Subscribe to real-time announcement-received events. Returns an unsubscribe function. */
+  onAnnouncementCreated(listener: AnnouncementListener): () => void {
+    this.createdListeners.add(listener);
+    return () => this.createdListeners.delete(listener);
+  }
 
   loadActive(): void {
     this.http.get<Announcement[]>('/api/v1/announcements').subscribe(announcements => {
@@ -55,6 +65,7 @@ export class AnnouncementService {
   pushAnnouncement(announcement: Announcement): void {
     this.activeAnnouncements.update(list =>
       list.some(a => a.id === announcement.id) ? list : [announcement, ...list]);
+    for (const listener of this.createdListeners) listener(announcement);
   }
 
   markAcknowledged(id: number): void {

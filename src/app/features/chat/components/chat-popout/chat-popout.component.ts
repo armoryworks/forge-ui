@@ -79,9 +79,7 @@ export class ChatPopoutComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     window.removeEventListener('beforeunload', this.onBeforeUnload);
-    if (this.hubConnected) {
-      this.chatHub.disconnect();
-    }
+    this.chatHub.clearMessageCallbacks();
   }
 
   protected onChannelSelected(selection: ChannelSelection): void {

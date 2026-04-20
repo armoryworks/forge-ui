@@ -317,9 +317,7 @@ export class MobileChatComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.hubConnected) {
-      this.chatHub.disconnect();
-    }
+    this.chatHub.clearMessageCallbacks();
   }
 
   // ── Private ──

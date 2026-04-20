@@ -44,6 +44,17 @@ export class ChatHubService {
     this.onRoomMessage = callback;
   }
 
+  /**
+   * Clear feature-level callbacks without stopping the hub. Feature components
+   * should call this in ngOnDestroy instead of disconnect() — the hub is a
+   * singleton owned by AppComponent and must stay connected for global events
+   * (announcements, room notifications) to reach every page.
+   */
+  clearMessageCallbacks(): void {
+    this.onMessage = null;
+    this.onRoomMessage = null;
+  }
+
   async joinChannel(channelId: number): Promise<void> {
     if (!this.connection) return;
     await this.connection.invoke('JoinChannel', channelId);

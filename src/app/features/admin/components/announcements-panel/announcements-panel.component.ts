@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { FormControl } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -48,6 +48,7 @@ export class AnnouncementsPanelComponent implements OnInit {
   private readonly announcementService = inject(AnnouncementService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isLoading = signal(false);
   protected readonly announcements = signal<Announcement[]>([]);
@@ -120,6 +121,15 @@ export class AnnouncementsPanelComponent implements OnInit {
   ];
 
   ngOnInit(): void {
+    // Subscribe to real-time announcement pushes BEFORE the initial fetch so we
+    // don't miss any that arrive during the round-trip. Prepend incoming payloads
+    // directly — no HTTP re-fetch needed.
+    const unsubscribe = this.announcementService.onAnnouncementCreated((announcement) => {
+      this.announcements.update(list =>
+        list.some(a => a.id === announcement.id) ? list : [announcement, ...list]);
+    });
+    this.destroyRef.onDestroy(unsubscribe);
+
     this.loadAnnouncements();
     this.loadTemplates();
   }

@@ -62,6 +62,12 @@ export class TimerHubService {
     this.onTimerStopped = callback;
   }
 
+  /** Clears feature-level event callbacks without tearing down the singleton connection. */
+  clearCallbacks(): void {
+    this.onTimerStarted = null;
+    this.onTimerStopped = null;
+  }
+
   private registerHandlers(): void {
     if (!this.connection) return;
     this.unregisterHandlers();
