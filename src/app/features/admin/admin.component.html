@@ -7,7 +7,7 @@
       <div class="tab-panel">
         <div class="panel-header">
           <span class="panel-header__count">{{ users().length }} {{ 'admin.users' | translate | lowercase }}</span>
-          <button class="action-btn action-btn--primary" (click)="openCreateUser()">
+          <button class="action-btn action-btn--primary" (click)="openCreateUser()" data-testid="new-user-btn">
             <span class="material-icons-outlined">add</span>
             {{ 'admin.addUser' | translate }}
           </button>
@@ -455,6 +455,13 @@
       </div>
     }
 
+    <!-- Integration Outbox Tab -->
+    @if (activeTab() === 'integration-outbox') {
+      <div class="tab-panel">
+        <app-integration-outbox-panel />
+      </div>
+    }
+
     <!-- Auto-PO Settings Tab -->
     @if (activeTab() === 'auto-po') {
       <div class="tab-panel">
@@ -546,17 +553,17 @@
   <app-dialog [title]="editingUser() ? ('admin.editUser' | translate) : ('admin.addUser' | translate)" width="520px" (closed)="closeUserDialog()">
     <div [formGroup]="userForm">
       <div class="dialog-row">
-        <app-input [label]="'admin.firstName' | translate" formControlName="firstName" [maxlength]="100" [required]="true" />
-        <app-input [label]="'admin.lastName' | translate" formControlName="lastName" [maxlength]="100" [required]="true" />
+        <app-input [label]="'admin.firstName' | translate" formControlName="firstName" [maxlength]="100" [required]="true" data-testid="user-first-name" />
+        <app-input [label]="'admin.lastName' | translate" formControlName="lastName" [maxlength]="100" [required]="true" data-testid="user-last-name" />
       </div>
 
       @if (!editingUser()) {
-        <app-input [label]="'common.email' | translate" type="email" formControlName="email" [maxlength]="256" [required]="true" />
+        <app-input [label]="'common.email' | translate" type="email" formControlName="email" [maxlength]="256" [required]="true" data-testid="user-email" />
       }
 
       <div class="dialog-row">
-        <app-input [label]="'admin.initials' | translate" formControlName="initials" [maxlength]="3" />
-        <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions()" [required]="true" />
+        <app-input [label]="'admin.initials' | translate" formControlName="initials" [maxlength]="3" data-testid="user-initials" />
+        <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions()" [required]="true" data-testid="user-role" />
       </div>
 
       @if (editingUser() && locationOptions().length > 1) {
@@ -673,7 +680,7 @@
         <span class="material-icons-outlined setup-code-banner__icon">vpn_key</span>
         <div class="setup-code-banner__content">
           <span class="setup-code-banner__label">{{ 'admin.setupCode' | translate }}</span>
-          <span class="setup-code-banner__code">{{ setupToken() }}</span>
+          <span class="setup-code-banner__code" data-testid="user-setup-token">{{ setupToken() }}</span>
           <span class="setup-code-banner__hint">
             {{ 'admin.setupCodeHint' | translate }}
             @if (setupTokenExpiresAt()) {
@@ -711,7 +718,8 @@
         <button class="action-btn action-btn--primary"
           [appValidationPopover]="userViolations"
           [disabled]="userForm.invalid || saving()"
-          (click)="saveUser()">
+          (click)="saveUser()"
+          data-testid="user-save-btn">
           <span class="material-icons-outlined">save</span>
           {{ editingUser() ? ('common.saveChanges' | translate) : ('admin.createUser' | translate) }}
         </button>

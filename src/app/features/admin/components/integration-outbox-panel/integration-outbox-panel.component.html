@@ -1,0 +1,124 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ filtered().length }} entries</span>
+  <div class="panel-header__actions">
+    <app-select label="Status" [formControl]="statusControl" [options]="statusOptions" />
+    <app-select label="Provider" [formControl]="providerControl" [options]="providerOptions" />
+    <button class="action-btn action-btn--sm" (click)="load()" aria-label="Refresh">
+      <span class="material-icons-outlined">refresh</span>
+      Refresh
+    </button>
+  </div>
+</div>
+
+<div [appLoadingBlock]="isLoading()">
+  <app-data-table
+    tableId="admin-integration-outbox"
+    [columns]="columns"
+    [data]="filtered()"
+    [clickableRows]="true"
+    emptyIcon="outbox"
+    emptyMessage="No outbox entries"
+    (rowClick)="toggleDetail($any($event))">
+
+    <ng-template appColumnCell="status" let-row>
+      <span class="chip" [class]="statusClass(row.status)">{{ row.status }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="attemptCount" let-row>
+      {{ row.attemptCount }}/{{ row.maxAttempts }}
+    </ng-template>
+
+    <ng-template appColumnCell="nextAttemptAt" let-row>
+      @if (row.nextAttemptAt) {
+        {{ row.nextAttemptAt | date:'MM/dd/yyyy hh:mm' }}
+      } @else {
+        <span class="text-muted">&mdash;</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="sentAt" let-row>
+      @if (row.sentAt) {
+        {{ row.sentAt | date:'MM/dd/yyyy hh:mm' }}
+      } @else {
+        <span class="text-muted">&mdash;</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="lastError" let-row>
+      <span class="error-message" [title]="row.lastError">{{ truncate(row.lastError, 80) }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="action-cell">
+        @if (row.status !== 'Sent') {
+          <button class="icon-btn"
+            matTooltip="Retry now"
+            matTooltipPosition="above"
+            aria-label="Retry"
+            (click)="retry(row, $event)">
+            <span class="material-icons-outlined">replay</span>
+          </button>
+          <button class="icon-btn icon-btn--danger"
+            matTooltip="Discard (dead-letter)"
+            matTooltipPosition="above"
+            aria-label="Discard"
+            (click)="discard(row, $event)">
+            <span class="material-icons-outlined">cancel</span>
+          </button>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (expandedId(); as expandedRowId) {
+  @for (entry of filtered(); track entry.id) {
+    @if (entry.id === expandedRowId) {
+      <div class="outbox-detail">
+        <div class="outbox-detail__header">
+          <h4 class="outbox-detail__title">
+            <span class="material-icons-outlined">outbox</span>
+            {{ entry.provider }} &mdash; {{ entry.operationKey }}
+          </h4>
+          <button class="icon-btn" aria-label="Close" (click)="expandedId.set(null)">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+
+        @if (entry.lastError) {
+          <div class="outbox-detail__section">
+            <span class="outbox-detail__label">Last error</span>
+            <p class="outbox-detail__error">{{ entry.lastError }}</p>
+          </div>
+        }
+
+        <div class="outbox-detail__meta">
+          <div class="outbox-detail__meta-item">
+            <span class="outbox-detail__label">Status</span>
+            <span class="chip" [class]="statusClass(entry.status)">{{ entry.status }}</span>
+          </div>
+          <div class="outbox-detail__meta-item">
+            <span class="outbox-detail__label">Attempts</span>
+            <span>{{ entry.attemptCount }} / {{ entry.maxAttempts }}</span>
+          </div>
+          <div class="outbox-detail__meta-item">
+            <span class="outbox-detail__label">Entity</span>
+            <span>{{ entry.entityType ? entry.entityType + ' #' + entry.entityId : '—' }}</span>
+          </div>
+          <div class="outbox-detail__meta-item">
+            <span class="outbox-detail__label">Created</span>
+            <span>{{ entry.createdAt | date:'MM/dd/yyyy hh:mm' }}</span>
+          </div>
+          <div class="outbox-detail__meta-item">
+            <span class="outbox-detail__label">Last attempt</span>
+            <span>{{ entry.lastAttemptAt ? (entry.lastAttemptAt | date:'MM/dd/yyyy hh:mm') : '—' }}</span>
+          </div>
+          <div class="outbox-detail__meta-item">
+            <span class="outbox-detail__label">Sent at</span>
+            <span>{{ entry.sentAt ? (entry.sentAt | date:'MM/dd/yyyy hh:mm') : '—' }}</span>
+          </div>
+        </div>
+      </div>
+    }
+  }
+}

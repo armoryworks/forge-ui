@@ -348,7 +348,9 @@
     "stopTimer": "Detener Temporizador",
     "timerStarted": "Temporizador iniciado",
     "timerStopped": "Temporizador detenido",
-    "uploadNewImage": "Subir Nueva Imagen"
+    "uploadNewImage": "Subir Nueva Imagen",
+    "moveToStage": "Mover a etapa",
+    "movedToStage": "Movido a {{stage}}"
   },
   "backlog": {
     "title": "Pendientes",

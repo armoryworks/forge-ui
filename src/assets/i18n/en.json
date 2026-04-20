@@ -351,7 +351,9 @@
     "stopTimer": "Stop Timer",
     "timerStarted": "Timer started",
     "timerStopped": "Timer stopped",
-    "uploadNewImage": "Upload New Image"
+    "uploadNewImage": "Upload New Image",
+    "moveToStage": "Move to stage",
+    "movedToStage": "Moved to {{stage}}"
   },
   "backlog": {
     "title": "Backlog",
@@ -1034,6 +1036,7 @@
       "edi": "EDI",
       "mfa": "MFA Policy",
       "automations": "Automations",
+      "integrationOutbox": "Integration Outbox",
       "autoPo": "Auto-PO"
     },
     "users": "Users",

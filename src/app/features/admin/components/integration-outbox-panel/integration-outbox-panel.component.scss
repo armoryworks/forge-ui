@@ -1,0 +1,85 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $sp-sm $sp-lg;
+  min-height: 48px;
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+}
+
+.error-message {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.action-cell {
+  display: flex;
+  gap: $sp-sm;
+}
+
+.outbox-detail {
+  border: $border-width-thin solid var(--border);
+  margin: $sp-md $sp-lg;
+  padding: $sp-lg;
+  background: var(--surface);
+
+  &__header {
+    @include flex-between;
+    margin-bottom: $sp-md;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      color: var(--info);
+    }
+  }
+
+  &__section {
+    margin-bottom: $sp-md;
+  }
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.5px);
+    color: var(--text-muted);
+    display: block;
+    margin-bottom: $sp-xs;
+  }
+
+  &__error {
+    font-size: $font-size-sm;
+    color: var(--error);
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  &__meta {
+    display: flex;
+    gap: $sp-xl;
+    flex-wrap: wrap;
+  }
+
+  &__meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    font-size: $font-size-sm;
+  }
+}

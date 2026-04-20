@@ -14,8 +14,13 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService);
   const translate = inject(TranslateService);
 
+  const isExternal = /^https?:\/\//i.test(req.url) && !req.url.startsWith(window.location.origin);
+
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      if (isExternal) {
+        return throwError(() => error);
+      }
       switch (error.status) {
         case 401:
           // Auth interceptor handles 401 → login redirect.

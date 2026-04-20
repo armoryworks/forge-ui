@@ -27,6 +27,7 @@ import { ComplianceFormTemplate, ComplianceFormSubmission, UserComplianceDetail 
 import { CompanyLocation, CompanyProfile } from '../models/company-location.model';
 import { IntegrationSettingsResult, IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
 import { DomainEventFailure } from '../models/domain-event-failure.model';
+import { OutboxEntry, OutboxProvider, OutboxStatus } from '../models/outbox-entry.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -399,6 +400,25 @@ export class AdminService {
 
   resolveDomainEventFailure(id: number): Observable<void> {
     return this.http.post<void>(`${this.domainEventFailuresBase}/${id}/resolve`, {});
+  }
+
+  // Integration Outbox
+  private readonly outboxBase = `${environment.apiUrl}/admin/integration-outbox`;
+
+  getOutboxEntries(filter?: { status?: OutboxStatus; provider?: OutboxProvider; take?: number }): Observable<OutboxEntry[]> {
+    const params: Record<string, string> = {};
+    if (filter?.status) params['status'] = filter.status;
+    if (filter?.provider) params['provider'] = filter.provider;
+    if (filter?.take) params['take'] = String(filter.take);
+    return this.http.get<OutboxEntry[]>(this.outboxBase, { params });
+  }
+
+  retryOutboxEntry(id: number): Observable<void> {
+    return this.http.post<void>(`${this.outboxBase}/${id}/retry`, {});
+  }
+
+  discardOutboxEntry(id: number): Observable<void> {
+    return this.http.post<void>(`${this.outboxBase}/${id}/discard`, {});
   }
 
   // Integrations
