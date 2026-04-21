@@ -47,8 +47,7 @@ export class KioskSetupComponent implements OnInit {
   protected readonly teamOptions = signal<{ value: unknown; label: string }[]>([]);
 
   ngOnInit(): void {
-    // Try loading teams without auth first (endpoint is AllowAnonymous)
-    this.loadTeams();
+    // Teams list is gated — load after admin login in onLoginSubmit().
   }
 
   protected onLoginSubmit(): void {
