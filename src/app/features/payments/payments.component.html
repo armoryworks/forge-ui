@@ -19,7 +19,7 @@
       <app-select [label]="'payments.method' | translate" [formControl]="methodFilterControl" [options]="methodOptions" />
     </div>
 
-    <div [appLoadingBlock]="loading()">
+    <div [appLoadingBlock]="loading()" class="pmt-list-content">
       <app-data-table tableId="payments" [columns]="paymentColumns" [data]="filteredPayments()"
         emptyIcon="payments" [emptyMessage]="'payments.noPaymentsFound' | translate"
         [clickableRows]="true" (rowClick)="openPaymentDetail($any($event))">

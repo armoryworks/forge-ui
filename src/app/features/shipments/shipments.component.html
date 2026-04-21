@@ -13,7 +13,7 @@
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
-    <div [appLoadingBlock]="loading()">
+    <div [appLoadingBlock]="loading()" class="sh-list-content">
       <app-data-table tableId="shipments" [columns]="shipmentColumns" [data]="shipments()"
         emptyIcon="local_shipping" [emptyMessage]="'shipments.noShipmentsFound' | translate"
         [clickableRows]="true"

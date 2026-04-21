@@ -37,7 +37,7 @@
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
     </div>
 
-    <div [appLoadingBlock]="loading()">
+    <div [appLoadingBlock]="loading()" class="inv-list-content">
       <app-data-table tableId="invoices" [columns]="invoiceColumns" [data]="invoices()"
         emptyIcon="receipt_long" [emptyMessage]="'invoices.noInvoicesFound' | translate"
         [clickableRows]="true"

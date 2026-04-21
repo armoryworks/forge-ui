@@ -13,7 +13,7 @@
       <app-select [label]="'common.status' | translate" [formControl]="activeFilterControl" [options]="activeOptions" />
     </div>
 
-    <div [appLoadingBlock]="loading()">
+    <div [appLoadingBlock]="loading()" class="vendors-list-content">
       <app-data-table tableId="vendors" [columns]="vendorColumns" [data]="vendors()"
         emptyIcon="store" [emptyMessage]="'vendors.noVendorsFound' | translate"
         [clickableRows]="true"

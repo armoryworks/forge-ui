@@ -40,7 +40,7 @@
           <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusOptions" />
         </div>
 
-        <div [appLoadingBlock]="loading()">
+        <div [appLoadingBlock]="loading()" class="po-list-content">
           <app-data-table tableId="purchase-orders" [columns]="poColumns" [data]="purchaseOrders()"
             emptyIcon="description" [emptyMessage]="'purchaseOrders.noPosFound' | translate"
             [clickableRows]="true" (rowClick)="openPurchaseOrderDetail($any($event))">

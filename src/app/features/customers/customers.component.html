@@ -13,7 +13,7 @@
     <app-select [label]="'common.status' | translate" [formControl]="activeFilterControl" [options]="activeOptions" />
   </div>
 
-  <div [appLoadingBlock]="loading()">
+  <div [appLoadingBlock]="loading()" class="customers-list-content">
     <app-data-table
       tableId="customers"
       [columns]="customerColumns"
