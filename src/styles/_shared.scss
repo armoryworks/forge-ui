@@ -65,6 +65,7 @@
     cursor: not-allowed;
   }
 
+  // Filled teal — Save / Submit / Continue. The "commit work" button.
   &--primary {
     background: var(--primary);
     border-color: var(--primary);
@@ -85,6 +86,48 @@
     }
   }
 
+  // Filled green — New / Add / Create. The primary creation action on a page.
+  &--create {
+    background: var(--action-create);
+    border-color: var(--action-create);
+    color: #ffffff;
+    min-width: 140px;
+
+    &:hover {
+      background: var(--action-create-hover);
+      border-color: var(--action-create-hover);
+    }
+
+    &:disabled,
+    &[disabled] {
+      background: var(--text-muted);
+      border-color: var(--text-muted);
+      color: #ffffff;
+      opacity: 0.5;
+    }
+  }
+
+  // Filled red — Delete / Archive / Block. The primary destructive action in a confirm dialog.
+  &--destructive {
+    background: var(--action-destructive);
+    border-color: var(--action-destructive);
+    color: #ffffff;
+
+    &:hover {
+      background: var(--action-destructive-hover);
+      border-color: var(--action-destructive-hover);
+    }
+
+    &:disabled,
+    &[disabled] {
+      background: var(--text-muted);
+      border-color: var(--text-muted);
+      color: #ffffff;
+      opacity: 0.5;
+    }
+  }
+
+  // Outlined red — low-risk destructive signal (e.g. row-level delete icon button's text twin).
   &--danger {
     color: var(--error);
     border-color: var(--error);
@@ -94,12 +137,28 @@
     }
   }
 
+  // Outlined amber — cautionary, non-destructive (e.g. Put on Hold, Flag).
   &--warn {
     color: var(--warning);
     border-color: var(--warning);
 
     &:hover {
       background: var(--warning-light);
+    }
+  }
+
+  // Tertiary / text-only — quiet action embedded in content (e.g. "Forgot password?").
+  &--link {
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    min-width: auto;
+    padding: 0 $sp-sm;
+
+    &:hover {
+      background: transparent;
+      color: var(--primary-dark);
+      text-decoration: underline;
     }
   }
 

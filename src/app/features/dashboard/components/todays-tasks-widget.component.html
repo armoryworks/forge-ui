@@ -9,7 +9,7 @@
     </div>
   }
 
-  @for (task of priorityTasks(); track task.jobNumber + task.time) {
+  @for (task of visibleTasks(); track task.jobNumber + task.time) {
     <div class="task-item" [class.task-item--overdue]="task.statusColor === 'overdue'">
       <span class="task-item__time">{{ task.time }}</span>
       <span class="task-item__bar" [style.background]="task.barColor"></span>

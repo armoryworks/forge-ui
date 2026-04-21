@@ -115,7 +115,12 @@
                 </button>
               }
 
-              <app-dashboard-widget [title]="widget.title" [icon]="widget.icon" [widgetKey]="widget.id">
+              <app-dashboard-widget
+                [title]="widget.title"
+                [icon]="widget.icon"
+                [widgetKey]="widget.id"
+                [viewAllLink]="widget.viewAllLink ?? null"
+                [viewAllLabel]="widget.viewAllLabel ?? 'View all'">
                 @switch (widget.component) {
                   @case ('todays-tasks') {
                     <app-todays-tasks-widget [tasks]="d.tasks" />

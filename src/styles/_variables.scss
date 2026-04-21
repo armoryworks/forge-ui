@@ -45,6 +45,11 @@
   --text: #1e293b;
   --text-secondary: #64748b;
   --text-muted: #6b7280;
+  // Action colors — high-contrast signals for primary page actions (WCAG AA verified)
+  --action-create: #16a34a;
+  --action-create-hover: #15803d;
+  --action-destructive: #dc2626;
+  --action-destructive-hover: #b91c1c;
 }
 
 [data-theme='dark'] {
@@ -70,6 +75,11 @@
   --text: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
+  // Action colors — lighter for contrast against dark backgrounds
+  --action-create: #22c55e;
+  --action-create-hover: #16a34a;
+  --action-destructive: #ef4444;
+  --action-destructive-hover: #dc2626;
 }
 
 // ─── Spacing Scale ───

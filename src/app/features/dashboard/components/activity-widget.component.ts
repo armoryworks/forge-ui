@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { RichTextPipe } from '../../../shared/pipes/rich-text.pipe';
 import { ActivityEntry } from '../models/activity-entry.model';
+
+const MAX_VISIBLE = 6;
 
 @Component({
   selector: 'app-activity-widget',
@@ -13,4 +15,8 @@ import { ActivityEntry } from '../models/activity-entry.model';
 })
 export class ActivityWidgetComponent {
   readonly entries = input.required<ActivityEntry[]>();
+
+  protected readonly visibleEntries = computed(() =>
+    this.entries().slice(0, MAX_VISIBLE),
+  );
 }

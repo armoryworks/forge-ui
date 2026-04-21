@@ -47,6 +47,8 @@ export class TodaysTasksWidgetComponent {
     });
   });
 
+  protected readonly visibleTasks = computed(() => this.priorityTasks().slice(0, 6));
+
   protected readonly top3Tomorrow = computed(() => {
     return this.userPreferences.get<string[]>(TOP3_PREF_KEY) ?? [];
   });

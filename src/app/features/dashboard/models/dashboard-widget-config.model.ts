@@ -9,4 +9,6 @@ export interface DashboardWidgetConfig {
   defaultH: number;
   minW?: number;
   minH?: number;
+  viewAllLink?: string;
+  viewAllLabel?: string;
 }

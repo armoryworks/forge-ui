@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { TruncationTooltipDirective } from '../../../shared/directives/truncation-tooltip.directive';
 import { DeadlineEntry } from '../models/deadline-entry.model';
+
+const MAX_VISIBLE = 6;
 
 @Component({
   selector: 'app-deadlines-widget',
@@ -13,4 +15,8 @@ import { DeadlineEntry } from '../models/deadline-entry.model';
 })
 export class DeadlinesWidgetComponent {
   readonly deadlines = input.required<DeadlineEntry[]>();
+
+  protected readonly visibleDeadlines = computed(() =>
+    this.deadlines().slice(0, MAX_VISIBLE),
+  );
 }

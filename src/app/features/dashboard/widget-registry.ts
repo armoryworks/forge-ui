@@ -13,6 +13,8 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     defaultH: 4,
     minW: 2,
     minH: 2,
+    viewAllLink: '/kanban',
+    viewAllLabel: 'View board',
   },
   {
     id: 'jobs-by-stage',
@@ -25,6 +27,8 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     defaultH: 4,
     minW: 2,
     minH: 3,
+    viewAllLink: '/kanban',
+    viewAllLabel: 'View board',
   },
   {
     id: 'team-load',
@@ -37,6 +41,8 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     defaultH: 4,
     minW: 2,
     minH: 3,
+    viewAllLink: '/time-tracking',
+    viewAllLabel: 'Time tracking',
   },
   // ─── Row 1: deadlines + activity + margin (3 × 33%) ───
   {
@@ -50,6 +56,8 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     defaultH: 4,
     minW: 2,
     minH: 2,
+    viewAllLink: '/calendar',
+    viewAllLabel: 'View calendar',
   },
   {
     id: 'activity',
@@ -87,6 +95,8 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     defaultH: 4,
     minW: 2,
     minH: 2,
+    viewAllLink: '/planning',
+    viewAllLabel: 'Planning cycles',
   },
   {
     id: 'open-orders',
@@ -99,6 +109,8 @@ export const WIDGET_REGISTRY: DashboardWidgetConfig[] = [
     defaultH: 4,
     minW: 2,
     minH: 2,
+    viewAllLink: '/sales-orders',
+    viewAllLabel: 'All orders',
   },
   {
     id: 'eod-prompt',

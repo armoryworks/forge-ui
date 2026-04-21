@@ -9,19 +9,14 @@
         <span class="widget__count">{{ count() }}</span>
       }
     </span>
-    <div class="widget__actions">
-      <button class="widget__action-btn" title="Filter">
-        <span class="material-icons-outlined">filter_list</span>
-      </button>
-      <button class="widget__action-btn" title="Sort">
-        <span class="material-icons-outlined">swap_vert</span>
-      </button>
-      <button class="widget__action-btn" title="Customize">
-        <span class="material-icons-outlined">tune</span>
-      </button>
-    </div>
   </div>
   <div class="widget__body">
     <ng-content />
   </div>
+  @if (viewAllLink()) {
+    <a class="widget__view-all" [routerLink]="viewAllLink()">
+      {{ viewAllLabel() }}
+      <span class="material-icons-outlined">chevron_right</span>
+    </a>
+  }
 </div>

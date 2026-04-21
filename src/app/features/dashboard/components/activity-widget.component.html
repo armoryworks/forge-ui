@@ -1,4 +1,4 @@
-@for (entry of entries(); track $index) {
+@for (entry of visibleEntries(); track $index) {
   <div class="activity-item">
     <span class="material-icons-outlined activity-item__icon" [style.color]="entry.iconColor">
       {{ entry.icon }}
