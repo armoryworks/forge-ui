@@ -1,4 +1,6 @@
-@if (error()) {
+@if (isUnpaired()) {
+  <app-kiosk-setup (configured)="onTerminalConfigured()" />
+} @else if (error()) {
   <div class="sf-error">
     <span class="material-icons-outlined sf-error__icon">error_outline</span>
     <p>{{ error() }}</p>

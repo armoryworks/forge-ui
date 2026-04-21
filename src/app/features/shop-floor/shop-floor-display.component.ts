@@ -4,6 +4,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, forkJoin, interval, of } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -12,6 +13,7 @@ import { AvatarComponent } from '../../shared/components/avatar/avatar.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { KioskSearchBarComponent } from './components/kiosk-search-bar/kiosk-search-bar.component';
 import { KioskSessionBarComponent } from './components/kiosk-session-bar/kiosk-session-bar.component';
+import { KioskSetupComponent } from './components/kiosk-setup/kiosk-setup.component';
 import { TrainingModeBannerComponent } from './components/training-mode-banner/training-mode-banner.component';
 import { KioskSessionService } from '../../shared/services/kiosk-session.service';
 import { ShopFloorService } from './services/shop-floor.service';
@@ -50,7 +52,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -92,6 +94,11 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   protected readonly workers = signal<ClockWorker[]>([]);
   protected readonly error = signal<string | null>(null);
   protected readonly clockDisplay = signal('');
+
+  // Pairing gate — true when this device has no kiosk device token (or the
+  // token was revoked). Shows the admin setup flow instead of attempting to
+  // load shop-floor data (which would 401).
+  protected readonly isUnpaired = signal(!localStorage.getItem('qbe-kiosk-device-token'));
 
   // Live elapsed times — recomputed every second via tick signal
   private readonly tick = signal(0);
@@ -216,9 +223,14 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.authService.clearAuth();
-    this.clockTypes.load();
-    this.loadData();
     this.updateClock();
+
+    // If this device isn't paired yet, skip all data loads — the template
+    // renders the kiosk-setup gate instead. loadData() would 401 anyway.
+    if (!this.isUnpaired()) {
+      this.clockTypes.load();
+      this.loadData();
+    }
 
     // Apply persisted font size zoom
     if (this.fontSizeIndex() > 0) {
@@ -234,7 +246,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     interval(REFRESH_INTERVAL_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        if (this.phase() === 'main') this.loadData();
+        if (this.phase() === 'main' && !this.isUnpaired()) this.loadData();
       });
 
     interval(1000)
@@ -812,8 +824,26 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
           if (updated) this.selectedWorker.set(updated);
         }
       },
-      error: () => this.error.set(this.translate.instant('shopFloor.loadFailed')),
+      error: (err: HttpErrorResponse) => {
+        // 401 = kiosk token missing/revoked — flip to the pairing gate rather
+        // than showing a generic "failed to load" error.
+        if (err?.status === 401) {
+          localStorage.removeItem('qbe-kiosk-device-token');
+          localStorage.removeItem('qbe-kiosk-terminal');
+          this.isUnpaired.set(true);
+          this.error.set(null);
+          return;
+        }
+        this.error.set(this.translate.instant('shopFloor.loadFailed'));
+      },
     });
+  }
+
+  protected onTerminalConfigured(): void {
+    this.isUnpaired.set(false);
+    this.error.set(null);
+    this.clockTypes.load();
+    this.loadData();
   }
 
   private updateClock(): void {
