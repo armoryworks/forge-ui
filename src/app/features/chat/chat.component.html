@@ -58,14 +58,17 @@
       <div class="chat-panel__channel-list">
         <!-- Direct Messages section -->
         <div class="channel-section">
-          <button class="channel-section__header" (click)="toggleSection('dms')" aria-label="Toggle direct messages">
-            <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['dms']">expand_more</span>
-            <span class="channel-section__title">Direct Messages</span>
-            <span class="channel-section__spacer"></span>
-            <button class="icon-btn channel-section__action" (click)="openUserPicker(); $event.stopPropagation()" aria-label="New message" [matTooltip]="'chat.newMessage' | translate" matTooltipPosition="above">
-              <span class="material-icons-outlined">add</span>
+          <div class="channel-section__header">
+            <button class="channel-section__toggle" (click)="toggleSection('dms')" aria-label="Toggle direct messages">
+              <span class="material-icons-outlined channel-section__chevron" [class.channel-section__chevron--collapsed]="!channelSectionsExpanded()['dms']">expand_more</span>
+              <span class="channel-section__title">Direct Messages</span>
             </button>
-          </button>
+            <span class="channel-section__spacer"></span>
+            <button class="action-btn action-btn--create action-btn--sm" (click)="openUserPicker()" [attr.aria-label]="'chat.newMessage' | translate" [matTooltip]="'chat.newMessage' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">add</span>
+              <span>{{ 'chat.newMessage' | translate }}</span>
+            </button>
+          </div>
           @if (channelSectionsExpanded()['dms']) {
             <div class="channel-section__items">
               @if (dmConversations().length === 0) {

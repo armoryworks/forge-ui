@@ -23,19 +23,22 @@
   } @else {
     <!-- Direct Messages section -->
     <div class="channel-list__section">
-      <button class="channel-list__section-header" (click)="toggleSection('dms')" [attr.aria-label]="'chat.channelList.directMessages' | translate">
-        <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['dms']">expand_more</span>
-        <span class="channel-list__section-title">{{ 'chat.channelList.directMessages' | translate }}</span>
+      <div class="channel-list__section-header">
+        <button class="channel-list__section-toggle" (click)="toggleSection('dms')" [attr.aria-label]="'chat.channelList.directMessages' | translate">
+          <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['dms']">expand_more</span>
+          <span class="channel-list__section-title">{{ 'chat.channelList.directMessages' | translate }}</span>
+        </button>
         <span class="channel-list__spacer"></span>
         <button
-          class="icon-btn channel-list__section-action"
-          (click)="newMessageClicked.emit(); $event.stopPropagation()"
+          class="action-btn action-btn--create action-btn--sm"
+          (click)="newMessageClicked.emit()"
           [attr.aria-label]="'chat.channelList.newMessage' | translate"
           [matTooltip]="'chat.channelList.newMessage' | translate"
           matTooltipPosition="above">
           <span class="material-icons-outlined">add</span>
+          <span>{{ 'chat.channelList.newMessage' | translate }}</span>
         </button>
-      </button>
+      </div>
       @if (sectionsExpanded()['dms']) {
         <div class="channel-list__items" role="listbox" [attr.aria-label]="'chat.channelList.directMessages' | translate">
           @if (filteredConversations().length === 0) {
@@ -72,19 +75,22 @@
 
     <!-- Channels section -->
     <div class="channel-list__section">
-      <button class="channel-list__section-header" (click)="toggleSection('channels')" [attr.aria-label]="'chat.channelList.groupChats' | translate">
-        <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['channels']">expand_more</span>
-        <span class="channel-list__section-title">{{ 'chat.channelList.groupChats' | translate }}</span>
+      <div class="channel-list__section-header">
+        <button class="channel-list__section-toggle" (click)="toggleSection('channels')" [attr.aria-label]="'chat.channelList.groupChats' | translate">
+          <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['channels']">expand_more</span>
+          <span class="channel-list__section-title">{{ 'chat.channelList.groupChats' | translate }}</span>
+        </button>
         <span class="channel-list__spacer"></span>
         <button
-          class="icon-btn channel-list__section-action"
-          (click)="newGroupClicked.emit(); $event.stopPropagation()"
+          class="action-btn action-btn--create action-btn--sm"
+          (click)="newGroupClicked.emit()"
           [attr.aria-label]="'chat.channelList.newGroup' | translate"
           [matTooltip]="'chat.channelList.newGroup' | translate"
           matTooltipPosition="above">
           <span class="material-icons-outlined">add</span>
+          <span>{{ 'chat.channelList.newGroup' | translate }}</span>
         </button>
-      </button>
+      </div>
       @if (sectionsExpanded()['channels']) {
         <div class="channel-list__items" role="listbox" [attr.aria-label]="'chat.channelList.groupChats' | translate">
           @if (filteredGroupChannels().length === 0) {
@@ -140,10 +146,12 @@
     <!-- Teams section -->
     @if (filteredTeamChannels().length > 0) {
       <div class="channel-list__section">
-        <button class="channel-list__section-header" (click)="toggleSection('teams')" aria-label="Toggle teams">
-          <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['teams']">expand_more</span>
-          <span class="channel-list__section-title">Teams</span>
-        </button>
+        <div class="channel-list__section-header">
+          <button class="channel-list__section-toggle" (click)="toggleSection('teams')" aria-label="Toggle teams">
+            <span class="material-icons-outlined channel-list__chevron" [class.channel-list__chevron--collapsed]="!sectionsExpanded()['teams']">expand_more</span>
+            <span class="channel-list__section-title">Teams</span>
+          </button>
+        </div>
         @if (sectionsExpanded()['teams']) {
           <div class="channel-list__items" role="listbox" aria-label="Teams">
             @for (channel of filteredTeamChannels(); track channel.id) {

@@ -100,14 +100,22 @@
     gap: $sp-sm;
     width: 100%;
     padding: $sp-md $sp-lg;
+    color: var(--text-muted);
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
     border: none;
     background: transparent;
-    color: var(--text-muted);
+    color: inherit;
     cursor: pointer;
     font-family: $font-family-primary;
+    padding: 0;
 
     &:hover {
-      background: var(--bg);
+      color: var(--text);
     }
   }
 
@@ -127,27 +135,6 @@
 
   &__spacer {
     flex: 1;
-  }
-
-  &__action {
-    width: $btn-icon-size;
-    height: $btn-icon-size;
-    border: $border-width-thin solid var(--border);
-    background: var(--surface);
-    color: var(--primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .material-icons-outlined {
-      font-size: $icon-size-sm;
-    }
-
-    &:hover {
-      background: var(--primary-light);
-      color: var(--primary-dark);
-    }
   }
 
   &__items {
