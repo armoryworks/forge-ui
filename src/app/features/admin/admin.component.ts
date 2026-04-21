@@ -199,7 +199,7 @@ export class AdminComponent {
   protected readonly editingLocation = signal<CompanyLocation | null>(null);
   protected readonly locationColumns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('admin.colName'), sortable: true },
-    { field: 'address', header: this.translate.instant('admin.colAddress'), sortable: true },
+    { field: 'address', header: this.translate.instant('admin.colAddress'), sortable: true, sortField: 'line1' },
     { field: 'state', header: this.translate.instant('admin.colState'), sortable: true, width: '80px' },
     { field: 'phone', header: this.translate.instant('admin.colPhone'), width: '140px' },
     { field: 'default', header: this.translate.instant('admin.colDefault'), width: '80px', align: 'center' },
@@ -234,13 +234,23 @@ export class AdminComponent {
 
   protected readonly userColumns = computed<ColumnDef[]>(() => [
     { field: 'avatar', header: '', width: '36px' },
-    { field: 'name', header: this.translate.instant('admin.colName'), sortable: true },
+    { field: 'name', header: this.translate.instant('admin.colName'), sortable: true, sortField: 'lastName' },
     { field: 'email', header: this.translate.instant('admin.colEmail'), sortable: true },
     { field: 'role', header: this.translate.instant('admin.colRole'), sortable: true, filterable: true, type: 'enum' as const,
-      filterOptions: this.roleOptions() },
+      filterOptions: this.roleOptions(),
+      sortValue: (row) => (row as AdminUser).roles[0] ?? '' },
     { field: 'workLocationName', header: this.translate.instant('admin.colLocation'), sortable: true, filterable: true, type: 'text' as const, width: '150px' },
-    { field: 'compliance', header: this.translate.instant('admin.colCompliance'), sortable: true, width: '130px' },
-    { field: 'status', header: this.translate.instant('admin.colStatus'), sortable: true },
+    { field: 'compliance', header: this.translate.instant('admin.colCompliance'), sortable: true, width: '130px',
+      sortValue: (row) => {
+        const u = row as AdminUser;
+        return u.complianceTotalItems > 0 ? u.complianceCompletedItems / u.complianceTotalItems : 1;
+      } },
+    { field: 'status', header: this.translate.instant('admin.colStatus'), sortable: true,
+      sortValue: (row) => {
+        const u = row as AdminUser;
+        if (!u.hasPassword) return 0; // Pending Setup
+        return u.isActive ? 2 : 1;    // Inactive < Active
+      } },
     { field: 'actions', header: this.translate.instant('admin.colActions'), width: '140px', align: 'right' },
   ]);
   protected readonly avatarColors = [

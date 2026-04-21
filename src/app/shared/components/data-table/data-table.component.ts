@@ -178,16 +178,31 @@ export class DataTableComponent implements OnInit {
     const sorts = this.sortStates();
     if (!sorts.length) return data;
 
-    return data.sort((a: any, b: any) => {
+    const columns = this.columns();
+    const resolvers = new Map<string, (row: unknown) => unknown>();
+    for (const sort of sorts) {
+      const col = columns.find(c => c.field === sort.field);
+      if (col?.sortValue) {
+        resolvers.set(sort.field, col.sortValue);
+      } else if (col?.sortField) {
+        const key = col.sortField;
+        resolvers.set(sort.field, row => (row as Record<string, unknown>)[key]);
+      } else {
+        resolvers.set(sort.field, row => (row as Record<string, unknown>)[sort.field]);
+      }
+    }
+
+    return data.sort((a, b) => {
       for (const sort of sorts) {
-        const valA = a[sort.field];
-        const valB = b[sort.field];
+        const resolve = resolvers.get(sort.field)!;
+        const valA = resolve(a);
+        const valB = resolve(b);
 
         let comparison: number;
         if (valA == null && valB == null) comparison = 0;
         else if (valA == null) comparison = -1;
         else if (valB == null) comparison = 1;
-        else if (typeof valA === 'string') comparison = valA.localeCompare(valB);
+        else if (typeof valA === 'string' && typeof valB === 'string') comparison = valA.localeCompare(valB);
         else comparison = valA < valB ? -1 : valA > valB ? 1 : 0;
 
         if (comparison !== 0) {
