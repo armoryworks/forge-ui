@@ -11,7 +11,7 @@ import {
 } from '@danielhokanson/ng-dynamic-forms-core';
 
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { DynamicQbFormControlComponent } from '../../../../shared/components/dynamic-form/dynamic-qb-form-control.component';
 import {
   complianceDefinitionToModels,
@@ -32,7 +32,7 @@ import {
   imports: [
     NgStyle,
     ReactiveFormsModule,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     DynamicQbFormControlComponent,
   ],
   templateUrl: './compliance-form-renderer.component.html',

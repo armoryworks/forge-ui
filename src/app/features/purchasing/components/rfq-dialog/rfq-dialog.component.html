@@ -12,12 +12,13 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'purchasing.dialog.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button data-testid="rfq-save-btn" class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>
       {{ (isEdit ? 'purchasing.dialog.update' : 'purchasing.dialog.createRfq') | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

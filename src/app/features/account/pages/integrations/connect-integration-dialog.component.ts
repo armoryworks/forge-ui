@@ -6,7 +6,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { UserIntegrationService } from '../../services/user-integration.service';
@@ -24,7 +24,7 @@ export interface ConnectIntegrationDialogData {
     DialogComponent,
     InputComponent,
     TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
   ],
   templateUrl: './connect-integration-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

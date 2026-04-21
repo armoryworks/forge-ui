@@ -1,6 +1,6 @@
 <app-page-header [title]="'purchaseOrders.title' | translate" [subtitle]="'purchaseOrders.subtitle' | translate">
   @if (activeTab() === 'orders') {
-    <button data-testid="new-po-btn" class="action-btn action-btn--primary" (click)="openCreatePo()">
+    <button data-testid="new-po-btn" class="action-btn action-btn--create" (click)="openCreatePo()">
       <span class="material-icons-outlined">add</span>
       {{ 'purchaseOrders.newPo' | translate }}
     </button>

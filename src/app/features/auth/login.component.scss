@@ -33,8 +33,8 @@
     font-size: var(--font-size-sm);
   }
 
-  // form-stack class handles gap; button fills width
-  &__form button[mat-flat-button] {
+  // form-stack class handles gap; submit button fills width
+  &__form .action-btn {
     width: 100%;
   }
 

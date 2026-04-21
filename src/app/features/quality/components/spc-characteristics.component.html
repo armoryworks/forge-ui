@@ -69,10 +69,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">{{ editingId() ? 'Update' : 'Create' }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

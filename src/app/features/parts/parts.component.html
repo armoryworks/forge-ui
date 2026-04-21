@@ -1,5 +1,5 @@
 <app-page-header [title]="'parts.title' | translate" [subtitle]="'parts.subtitle' | translate" helpTourId="parts">
-  <button class="action-btn action-btn--primary" data-testid="new-part-btn" (click)="openCreatePart()">
+  <button class="action-btn action-btn--create" data-testid="new-part-btn" (click)="openCreatePart()">
     <span class="material-icons-outlined">add</span>
     {{ 'parts.createPart' | translate }}
   </button>
@@ -114,14 +114,15 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closePartDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="partViolations">
       <button class="action-btn action-btn--primary"
         data-testid="part-save-btn"
-        [appValidationPopover]="partViolations"
         [disabled]="partForm.invalid"
         (click)="savePart()">
         <span class="material-icons-outlined">save</span>
         {{ editingPart() ? ('parts.saveChanges' | translate) : ('parts.createPart' | translate) }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

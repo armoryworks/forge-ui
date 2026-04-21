@@ -8,7 +8,7 @@ import { AddressFormComponent } from '../../../../shared/components/address-form
 import { Address } from '../../../../shared/models/address.model';
 import { toAddress, fromAddressToProfile } from '../../../../shared/utils/address.utils';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
@@ -16,7 +16,7 @@ import { EmployeeProfileService } from '../../services/employee-profile.service'
 @Component({
   selector: 'app-account-contact',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, AddressFormComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, AddressFormComponent, ValidationButtonComponent],
   templateUrl: './account-contact.component.html',
   styleUrl: './account-contact.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

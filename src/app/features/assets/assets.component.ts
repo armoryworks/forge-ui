@@ -15,7 +15,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -27,7 +27,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
 @Component({
   selector: 'app-assets',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent, DataTableComponent, ColumnCellDirective, ValidationButtonComponent],
   templateUrl: './assets.component.html',
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

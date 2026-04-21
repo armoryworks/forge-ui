@@ -16,7 +16,7 @@ import { EntityPickerComponent } from '../../../../shared/components/entity-pick
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { ActivityTimelineComponent } from '../../../../shared/components/activity-timeline/activity-timeline.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
@@ -42,7 +42,7 @@ export interface OperationDialogData {
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     ToggleComponent, EntityPickerComponent, FileUploadZoneComponent,
     ActivityTimelineComponent, EmptyStateComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './operation-dialog.component.html',

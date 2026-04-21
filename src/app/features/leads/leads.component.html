@@ -19,7 +19,7 @@
     </button>
   </div>
 
-  <button data-testid="new-lead-btn" class="action-btn action-btn--primary" (click)="openCreateLead()">
+  <button data-testid="new-lead-btn" class="action-btn action-btn--create" (click)="openCreateLead()">
     <span class="material-icons-outlined">add</span>
     {{ 'leads.createLead' | translate }}
   </button>
@@ -184,13 +184,14 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="leadViolations" [loading]="saving()">
       <button data-testid="lead-save-btn" class="action-btn action-btn--primary"
-        [appValidationPopover]="leadViolations"
         [disabled]="leadForm.invalid || saving()"
         (click)="saveLead()">
         <span class="material-icons-outlined">save</span>
         {{ editingLead() ? ('common.saveChanges' | translate) : ('leads.createLead' | translate) }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

@@ -20,7 +20,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
@@ -39,7 +39,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    AutocompleteComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',

@@ -287,7 +287,7 @@
                   <span class="material-icons-outlined">account_tree</span>
                 </button>
               </div>
-              <button class="action-btn action-btn--primary action-btn--sm" data-testid="add-bom-btn" (click)="openAddBom()">
+              <button class="action-btn action-btn--create action-btn--sm" data-testid="add-bom-btn" (click)="openAddBom()">
                 <span class="material-icons-outlined">add</span>
                 {{ 'common.add' | translate }}
               </button>
@@ -448,10 +448,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeBomDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="bomViolations">
       <button class="action-btn action-btn--primary" data-testid="bom-save-btn"
-        [appValidationPopover]="bomViolations"
         [disabled]="bomForm.invalid"
         (click)="saveBomEntry()">{{ 'parts.addEntry' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

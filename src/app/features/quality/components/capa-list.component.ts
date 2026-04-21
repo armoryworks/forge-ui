@@ -17,7 +17,7 @@ import { DialogComponent } from '../../../shared/components/dialog/dialog.compon
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 
 @Component({
   selector: 'app-capa-list',
@@ -27,7 +27,7 @@ import { ValidationPopoverDirective } from '../../../shared/directives/validatio
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, LoadingBlockDirective,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
   ],
   templateUrl: './capa-list.component.html',
   styleUrl: './capa-list.component.scss',

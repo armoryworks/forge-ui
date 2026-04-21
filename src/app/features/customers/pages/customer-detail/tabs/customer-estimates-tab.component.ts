@@ -16,7 +16,7 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
 import { TextareaComponent } from '../../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../../shared/components/datepicker/datepicker.component';
 import { DialogComponent } from '../../../../../shared/components/dialog/dialog.component';
-import { ValidationPopoverDirective } from '../../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectOption } from '../../../../../shared/components/select/select.component';
 import { toIsoDate } from '../../../../../shared/utils/date.utils';
@@ -36,7 +36,7 @@ const STATUS_OPTIONS: SelectOption[] = [
     CurrencyPipe, DatePipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DialogComponent, ValidationPopoverDirective,
+    DialogComponent, ValidationButtonComponent,
   ],
   templateUrl: './customer-estimates-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',

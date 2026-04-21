@@ -5,7 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { phoneValidator } from '../../../../shared/validators/phone.validator';
@@ -16,7 +16,7 @@ import { EmployeeProfileService } from '../../services/employee-profile.service'
 @Component({
   selector: 'app-account-emergency',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, SelectComponent, ValidationButtonComponent],
   templateUrl: './account-emergency.component.html',
   styleUrl: './account-emergency.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

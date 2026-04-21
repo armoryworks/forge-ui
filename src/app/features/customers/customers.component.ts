@@ -17,7 +17,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
@@ -29,7 +29,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective,
+    DataTableComponent, ColumnCellDirective, ValidationButtonComponent,
     LoadingBlockDirective,
   ],
   templateUrl: './customers.component.html',

@@ -11,7 +11,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { FileUploadZoneComponent } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { AdminService } from '../../services/admin.service';
@@ -26,7 +26,7 @@ const SYSTEM_FORM_TYPES: Set<ComplianceFormType> = new Set([
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent,
-    ToggleComponent, TextareaComponent, FileUploadZoneComponent, ValidationPopoverDirective,
+    ToggleComponent, TextareaComponent, FileUploadZoneComponent, ValidationButtonComponent,
   ],
   templateUrl: './compliance-template-dialog.component.html',
   styleUrl: './compliance-template-dialog.component.scss',

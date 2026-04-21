@@ -13,7 +13,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 
@@ -26,7 +26,7 @@ export interface AiAssistantDialogData {
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, SelectComponent,
-    TextareaComponent, ToggleComponent, ValidationPopoverDirective, MatTooltipModule,
+    TextareaComponent, ToggleComponent, ValidationButtonComponent, MatTooltipModule,
   ],
   templateUrl: './ai-assistant-dialog.component.html',
   styleUrl: './ai-assistant-dialog.component.scss',

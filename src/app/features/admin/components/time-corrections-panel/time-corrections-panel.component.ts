@@ -18,7 +18,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -38,7 +38,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     TextareaComponent,
     DialogComponent,
     LoadingBlockDirective,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './time-corrections-panel.component.html',

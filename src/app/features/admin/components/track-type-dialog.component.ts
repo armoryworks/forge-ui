@@ -6,7 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
 import { StageRequest } from '../models/stage-request.model';
@@ -20,7 +20,7 @@ const STAGE_COLORS = [
 @Component({
   selector: 'app-track-type-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ValidationPopoverDirective, EmptyStateComponent, MatTooltipModule],
+  imports: [ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ValidationButtonComponent, EmptyStateComponent, MatTooltipModule],
   templateUrl: './track-type-dialog.component.html',
   styleUrl: './track-type-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

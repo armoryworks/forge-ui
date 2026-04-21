@@ -112,12 +112,13 @@
           <app-textarea [label]="'purchasing.notes' | translate" formControlName="notes" [rows]="2" />
           <div class="form-actions">
             <button class="action-btn action-btn--sm" (click)="toggleResponseForm()">{{ 'purchasing.cancel' | translate }}</button>
+            <app-validation-button [violations]="responseViolations" [loading]="saving()">
             <button class="action-btn action-btn--sm action-btn--primary"
-              [appValidationPopover]="responseViolations"
               [disabled]="responseForm.invalid || saving()"
               (click)="recordResponse()">
               <span class="material-icons-outlined">save</span> {{ 'purchasing.record' | translate }}
             </button>
+            </app-validation-button>
           </div>
         </div>
       }

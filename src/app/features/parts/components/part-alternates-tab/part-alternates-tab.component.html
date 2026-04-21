@@ -1,6 +1,6 @@
 <div [appLoadingBlock]="loading()">
   <div class="alternates-header">
-    <button class="action-btn action-btn--sm action-btn--primary" (click)="openAdd()" aria-label="Add alternate part">
+    <button class="action-btn action-btn--sm action-btn--create" (click)="openAdd()" aria-label="Add alternate part">
       <span class="material-icons-outlined">add</span> Add Alternate
     </button>
   </div>
@@ -64,10 +64,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">Save</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

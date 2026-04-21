@@ -21,7 +21,7 @@ import { EntityPickerComponent } from '../../shared/components/entity-picker/ent
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -39,7 +39,7 @@ type ViewMode = 'table' | 'cards';
     ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent,
-    DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationPopoverDirective,
+    DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationButtonComponent,
     LoadingBlockDirective, MatTooltipModule,
     PartsCardGridComponent,
   ],

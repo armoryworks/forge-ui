@@ -49,10 +49,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="createViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="createViolations"
         [disabled]="createForm.invalid || saving()"
         (click)="saveCapa()">Create</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

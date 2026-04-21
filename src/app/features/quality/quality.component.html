@@ -1,42 +1,42 @@
 <app-page-header [title]="'quality.title' | translate" [subtitle]="'quality.subtitle' | translate">
   @if (activeTab() === 'inspections') {
-    <button class="action-btn action-btn--primary" data-testid="new-inspection-btn" (click)="openCreateInspection()">
+    <button class="action-btn action-btn--create" data-testid="new-inspection-btn" (click)="openCreateInspection()">
       <span class="material-icons-outlined">add</span>
       {{ 'quality.newInspection' | translate }}
     </button>
   }
   @if (activeTab() === 'lots') {
-    <button class="action-btn action-btn--primary" (click)="openCreateLot()">
+    <button class="action-btn action-btn--create" (click)="openCreateLot()">
       <span class="material-icons-outlined">add</span>
       {{ 'quality.newLot' | translate }}
     </button>
   }
   @if (activeTab() === 'spc-charts' || activeTab() === 'spc-data') {
-    <button class="action-btn action-btn--primary" (click)="spcCharsComponent?.openCreate()">
+    <button class="action-btn action-btn--create" (click)="spcCharsComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       New Characteristic
     </button>
   }
   @if (activeTab() === 'ncrs') {
-    <button class="action-btn action-btn--primary" (click)="ncrListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" (click)="ncrListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       New NCR
     </button>
   }
   @if (activeTab() === 'capas') {
-    <button class="action-btn action-btn--primary" (click)="capaListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" (click)="capaListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       New CAPA
     </button>
   }
   @if (activeTab() === 'ecos') {
-    <button class="action-btn action-btn--primary" (click)="ecoListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" (click)="ecoListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       New ECO
     </button>
   }
   @if (activeTab() === 'gages') {
-    <button class="action-btn action-btn--primary" data-testid="new-gage-btn" (click)="gageListComponent?.openCreate()">
+    <button class="action-btn action-btn--create" data-testid="new-gage-btn" (click)="gageListComponent?.openCreate()">
       <span class="material-icons-outlined">add</span>
       New Gage
     </button>
@@ -224,11 +224,12 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeInspectionDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="inspectionViolations">
       <button class="action-btn action-btn--primary"
         data-testid="inspection-save-btn"
-        [appValidationPopover]="inspectionViolations"
         [disabled]="saving()"
         (click)="saveInspection()">{{ 'quality.createInspection' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -254,10 +255,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeLotDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="lotViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="lotViolations"
         [disabled]="lotForm.invalid || saving()"
         (click)="saveLot()">{{ 'quality.createLot' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

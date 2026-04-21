@@ -19,7 +19,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -36,7 +36,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective,
+    DataTableComponent, ColumnCellDirective, ValidationButtonComponent, LoadingBlockDirective,
     TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './expenses.component.html',

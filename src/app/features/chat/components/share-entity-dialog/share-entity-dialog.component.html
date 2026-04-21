@@ -21,14 +21,15 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'chat.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button
       class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()"
       data-testid="share-entity-send-btn">
       <span class="material-icons-outlined">send</span>
       {{ 'chat.send' | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

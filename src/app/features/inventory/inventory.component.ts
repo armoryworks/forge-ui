@@ -32,7 +32,7 @@ import { TextareaComponent } from '../../shared/components/textarea/textarea.com
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { RowExpandDirective } from '../../shared/directives/row-expand.directive';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
@@ -47,7 +47,7 @@ type InventoryTab = 'stock' | 'locations' | 'movements' | 'receiving' | 'stockOp
 @Component({
   selector: 'app-inventory',
   standalone: true,
-  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationPopoverDirective, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, DatePipe, DecimalPipe, TranslatePipe, PageHeaderComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent, DataTableComponent, ColumnCellDirective, RowExpandDirective, ValidationButtonComponent, EmptyStateComponent, LoadingBlockDirective, BarcodeInfoComponent, MatTooltipModule, UomManagementComponent],
   templateUrl: './inventory.component.html',
   styleUrl: './inventory.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

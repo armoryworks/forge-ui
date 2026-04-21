@@ -13,8 +13,8 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="formGroup.invalid || saving()"
       data-testid="cycle-save-btn" (click)="save()">
       @if (saving()) {
@@ -24,5 +24,6 @@
       }
       {{ isEditMode() ? ('planning.update' | translate) : ('common.create' | translate) }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

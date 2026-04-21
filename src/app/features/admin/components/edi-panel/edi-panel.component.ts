@@ -22,7 +22,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 
 @Component({
   selector: 'app-edi-panel',
@@ -31,7 +31,7 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
     DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, ToggleComponent,
-    DialogComponent, LoadingBlockDirective, ValidationPopoverDirective,
+    DialogComponent, LoadingBlockDirective, ValidationButtonComponent,
   ],
   templateUrl: './edi-panel.component.html',
   styleUrl: './edi-panel.component.scss',

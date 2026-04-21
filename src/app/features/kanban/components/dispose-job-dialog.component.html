@@ -7,9 +7,10 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="matDialogRef.close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="formGroup.invalid || saving()"
       (click)="save()">{{ 'kanban.dispose' | translate }}</button>
+    </app-validation-button>
   </div>
 </app-dialog>

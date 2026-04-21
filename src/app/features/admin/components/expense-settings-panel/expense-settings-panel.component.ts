@@ -8,7 +8,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 
 @Component({
@@ -16,7 +16,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, ToggleComponent, LoadingBlockDirective, ValidationPopoverDirective,
+    InputComponent, ToggleComponent, LoadingBlockDirective, ValidationButtonComponent,
   ],
   templateUrl: './expense-settings-panel.component.html',
   styleUrl: './expense-settings-panel.component.scss',

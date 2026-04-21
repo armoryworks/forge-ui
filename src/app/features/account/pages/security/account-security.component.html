@@ -22,8 +22,8 @@
       </div>
 
       <div class="account-page__actions">
+        <app-validation-button [violations]="passwordViolations" [loading]="passwordMismatch()">
         <button class="action-btn action-btn--primary"
-          [appValidationPopover]="passwordViolations"
           [disabled]="passwordForm.invalid || savingPassword() || passwordMismatch()"
           (click)="changePassword()">
           @if (savingPassword()) {
@@ -34,6 +34,7 @@
             {{ 'account.changePassword' | translate }}
           }
         </button>
+        </app-validation-button>
       </div>
     </div>
 

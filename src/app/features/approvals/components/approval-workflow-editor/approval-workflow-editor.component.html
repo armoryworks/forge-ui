@@ -1,6 +1,6 @@
 <div class="workflow-editor">
   <div class="workflow-editor__header">
-    <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreate()">
+    <button class="action-btn action-btn--create action-btn--sm" (click)="openCreate()">
       <span class="material-icons-outlined">add</span> {{ 'approvals.workflows.newWorkflow' | translate }}
     </button>
   </div>
@@ -81,13 +81,14 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="showDialog.set(false)">{{ 'approvals.workflows.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations"
         [disabled]="workflowForm.invalid || stepsArray.length === 0 || saving()"
         (click)="save()">
         <span class="material-icons-outlined">save</span>
         {{ (editingWorkflow() ? 'approvals.workflows.update' : 'approvals.workflows.create') | translate }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

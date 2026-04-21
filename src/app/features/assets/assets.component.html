@@ -2,7 +2,7 @@
   <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'assets.searchPlaceholder' | translate"  />
   <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
   <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
-  <button class="action-btn action-btn--primary" data-testid="new-asset-btn" (click)="openCreateAsset()">
+  <button class="action-btn action-btn--create" data-testid="new-asset-btn" (click)="openCreateAsset()">
     <span class="material-icons-outlined">add</span>
     {{ 'assets.addAsset' | translate }}
   </button>
@@ -77,14 +77,15 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="assetViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="asset-save-btn"
-        [appValidationPopover]="assetViolations"
         [disabled]="assetForm.invalid || saving()"
         (click)="saveAsset()">
         <span class="material-icons-outlined">save</span>
         {{ editingAsset() ? ('assets.saveChanges' | translate) : ('assets.createAsset' | translate) }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

@@ -3,7 +3,7 @@
     <app-select label="Status" [formControl]="statusFilter" [options]="statusOptions"
       (selectionChange)="applyStatusFilter()" />
     <span class="serial-tab__spacer"></span>
-    <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreate()">
+    <button class="action-btn action-btn--create action-btn--sm" (click)="openCreate()">
       <span class="material-icons-outlined">add</span> New Serial
     </button>
   </div>
@@ -42,11 +42,12 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeCreate()">Cancel</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations"
         [disabled]="createForm.invalid || saving()"
         (click)="saveSerial()"
         data-testid="serial-save-btn">Save</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

@@ -8,7 +8,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { PlanningCycleDetail } from '../../models/planning-cycle-detail.model';
@@ -22,7 +22,7 @@ import { UpdatePlanningCycleRequest } from '../../models/update-planning-cycle-r
     ReactiveFormsModule,
     TranslatePipe,
     DialogComponent, InputComponent, DatepickerComponent, TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
   ],
   templateUrl: './cycle-dialog.component.html',
   styleUrl: './cycle-dialog.component.scss',

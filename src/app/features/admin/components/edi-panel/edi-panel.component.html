@@ -12,7 +12,7 @@
 
   @if (subTab() === 'partners') {
     <div class="edi-panel__toolbar">
-      <button class="action-btn action-btn--primary" (click)="openCreatePartner()">
+      <button class="action-btn action-btn--create" (click)="openCreatePartner()">
         <span class="material-icons-outlined">add</span>
         {{ 'adminPanels.edi.newPartner' | translate }}
       </button>
@@ -111,10 +111,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showPartnerDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="partnerViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="partnerViolations"
         [disabled]="partnerForm.invalid || saving()"
         (click)="savePartner()">{{ editingPartner() ? 'Save' : 'Create' }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

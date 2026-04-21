@@ -13,7 +13,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -26,7 +26,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
     ReactiveFormsModule, DatePipe, TranslatePipe,
     DataTableComponent, ColumnCellDirective, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
-    ValidationPopoverDirective, LoadingBlockDirective,
+    ValidationButtonComponent, LoadingBlockDirective,
   ],
   templateUrl: './approval-workflow-editor.component.html',
   styleUrl: './approval-workflow-editor.component.scss',

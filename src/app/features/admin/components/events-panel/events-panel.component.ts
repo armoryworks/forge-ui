@@ -19,7 +19,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
@@ -38,7 +38,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     DatepickerComponent,
     ToggleComponent,
     DialogComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     LoadingBlockDirective,
     TranslatePipe,
   ],

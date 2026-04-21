@@ -23,7 +23,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -141,7 +141,7 @@ interface I9Attachment {
     SelectComponent,
     DatepickerComponent,
     ToggleComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './onboarding-wizard.component.html',

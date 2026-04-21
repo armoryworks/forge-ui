@@ -52,12 +52,13 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeCreate()">Cancel</button>
+      <app-validation-button [violations]="createViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="createViolations"
         [disabled]="createForm.invalid || saving()"
         (click)="saveGage()">
         <span class="material-icons-outlined">save</span> Create
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -203,12 +204,13 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeCalDialog()">Cancel</button>
+      <app-validation-button [violations]="calViolations" [loading]="calSaving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="calViolations"
         [disabled]="calForm.invalid || calSaving()"
         (click)="saveCalibration()">
         <span class="material-icons-outlined">save</span> Save
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

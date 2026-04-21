@@ -17,7 +17,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 interface LineEntry {
@@ -34,7 +34,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    AutocompleteComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './po-dialog.component.html',
   styleUrl: './po-dialog.component.scss',

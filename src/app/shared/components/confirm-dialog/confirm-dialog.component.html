@@ -16,7 +16,7 @@
       class="action-btn"
       [class.action-btn--primary]="severity === 'info'"
       [class.action-btn--warn]="severity === 'warn'"
-      [class.action-btn--danger]="severity === 'danger'"
+      [class.action-btn--destructive]="severity === 'danger'"
       (click)="confirm()">
       {{ confirmLabel }}
     </button>

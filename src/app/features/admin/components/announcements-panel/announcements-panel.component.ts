@@ -15,7 +15,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { Announcement, AnnouncementAcknowledgment, AnnouncementTemplate, CreateAnnouncementTemplateRequest } from '../../../../shared/models/announcement.model';
 import { CreateAnnouncementDialogComponent } from '../../../chat/components/create-announcement-dialog/create-announcement-dialog.component';
@@ -37,7 +37,7 @@ import { FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
     InputComponent,
     TextareaComponent,
     ToggleComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './announcements-panel.component.html',

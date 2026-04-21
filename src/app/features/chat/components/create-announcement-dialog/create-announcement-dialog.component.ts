@@ -10,7 +10,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AnnouncementService } from '../../../../shared/services/announcement.service';
@@ -29,7 +29,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
     TextareaComponent,
     ToggleComponent,
     DatepickerComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './create-announcement-dialog.component.html',

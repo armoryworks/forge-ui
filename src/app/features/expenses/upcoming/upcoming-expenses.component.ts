@@ -22,7 +22,7 @@ import { DataTableComponent } from '../../../shared/components/data-table/data-t
 import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../shared/models/column-def.model';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 import { MatDialog } from '@angular/material/dialog';
@@ -39,7 +39,7 @@ type LedgerTab = 'upcoming' | 'recurring';
     ReactiveFormsModule, CurrencyPipe, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, DatepickerComponent, ToggleComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, LoadingBlockDirective, MatTooltipModule,
+    DataTableComponent, ColumnCellDirective, ValidationButtonComponent, LoadingBlockDirective, MatTooltipModule,
   ],
   templateUrl: './upcoming-expenses.component.html',
   styleUrl: './upcoming-expenses.component.scss',

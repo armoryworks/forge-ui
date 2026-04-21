@@ -8,7 +8,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, SetupTokenInfo } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -18,7 +18,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-token-setup',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, TranslatePipe, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, TranslatePipe, InputComponent, ValidationButtonComponent],
   templateUrl: './token-setup.component.html',
   styleUrl: './token-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

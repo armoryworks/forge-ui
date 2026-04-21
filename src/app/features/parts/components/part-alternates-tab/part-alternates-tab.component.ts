@@ -20,7 +20,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -34,7 +34,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
     DataTableComponent, ColumnCellDirective,
     EmptyStateComponent, LoadingBlockDirective,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
-    EntityPickerComponent, ValidationPopoverDirective,
+    EntityPickerComponent, ValidationButtonComponent,
   ],
   templateUrl: './part-alternates-tab.component.html',
   styleUrl: './part-alternates-tab.component.scss',

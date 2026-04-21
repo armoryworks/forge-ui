@@ -13,7 +13,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
@@ -24,7 +24,7 @@ import { CreateRfqRequest, RfqListItem } from '../../models/rfq.model';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    DatepickerComponent, ValidationPopoverDirective,
+    DatepickerComponent, ValidationButtonComponent,
   ],
   templateUrl: './rfq-dialog.component.html',
   styleUrl: './rfq-dialog.component.scss',

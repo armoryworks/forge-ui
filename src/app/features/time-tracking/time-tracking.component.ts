@@ -14,7 +14,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import { TimerHubService } from '../../shared/services/timer-hub.service';
@@ -37,7 +37,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
     DatepickerComponent,
     DataTableComponent,
     ColumnCellDirective,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
     MatTooltipModule,
   ],

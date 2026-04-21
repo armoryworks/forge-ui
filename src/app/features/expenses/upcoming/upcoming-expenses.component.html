@@ -1,5 +1,5 @@
 <app-page-header [title]="'expenses.ledgerTitle' | translate">
-  <button class="action-btn action-btn--primary" data-testid="new-recurring-btn" (click)="openCreateDialog()">
+  <button class="action-btn action-btn--create" data-testid="new-recurring-btn" (click)="openCreateDialog()">
     <span class="material-icons-outlined">add</span> {{ 'expenses.newRecurring' | translate }}
   </button>
 </app-page-header>
@@ -137,11 +137,12 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="recurring-save-btn"
-        [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">{{ 'common.create' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

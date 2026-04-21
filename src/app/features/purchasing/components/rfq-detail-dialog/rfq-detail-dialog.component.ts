@@ -19,7 +19,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -36,7 +36,7 @@ export interface RfqDetailDialogData {
     CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
-    LoadingBlockDirective, ValidationPopoverDirective, EntityLinkComponent,
+    LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,
   ],
   templateUrl: './rfq-detail-dialog.component.html',
   styleUrl: './rfq-detail-dialog.component.scss',

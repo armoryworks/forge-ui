@@ -49,9 +49,9 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
       data-testid="return-save-btn"
-      [appValidationPopover]="violations"
       [disabled]="returnForm.invalid || saving()"
       (click)="save()">
       @if (saving()) {
@@ -61,5 +61,6 @@
       }
       {{ 'common.save' | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

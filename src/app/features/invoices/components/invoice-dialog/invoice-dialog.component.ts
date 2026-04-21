@@ -17,7 +17,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
@@ -38,7 +38,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ValidationPopoverDirective, MatTooltipModule,
+    ValidationButtonComponent, MatTooltipModule,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrl: './invoice-dialog.component.scss',

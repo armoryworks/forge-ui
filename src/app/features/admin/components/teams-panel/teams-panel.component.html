@@ -9,7 +9,7 @@
       <span class="material-icons-outlined">access_time</span>
       {{ 'teamsPanel.kiosk' | translate }}
     </button>
-    <button class="action-btn action-btn--primary" (click)="openCreateTeam()">
+    <button class="action-btn action-btn--create" (click)="openCreateTeam()">
       <span class="material-icons-outlined">add</span>
       {{ 'teamsPanel.newTeam' | translate }}
     </button>
@@ -113,13 +113,14 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeTeamDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="teamViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="teamViolations"
         [disabled]="teamForm.invalid || saving()"
         (click)="saveTeam()">
         <span class="material-icons-outlined">save</span>
         {{ editingTeam() ? ('common.saveChanges' | translate) : ('teamsPanel.createTeam' | translate) }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

@@ -7,7 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ChatService } from '../../services/chat.service';
@@ -44,7 +44,7 @@ const ENTITY_ICONS: Record<string, string> = {
     DialogComponent,
     SelectComponent,
     TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './share-entity-dialog.component.html',

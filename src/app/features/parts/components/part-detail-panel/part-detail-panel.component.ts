@@ -27,7 +27,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { StlViewerComponent } from '../../../../shared/components/stl-viewer/stl-viewer.component';
 import { FileUploadZoneComponent } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
@@ -51,7 +51,7 @@ type BomViewMode = 'table' | 'tree';
     CurrencyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
     MatTooltipModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    EntityPickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationPopoverDirective,
+    EntityPickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent,
     StlViewerComponent, FileUploadZoneComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,
     RoutingComponent, BomTreeComponent, EntityActivitySectionComponent, PartAlternatesTabComponent,

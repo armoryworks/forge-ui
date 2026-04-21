@@ -31,8 +31,8 @@
           </div>
         }
 
+        <app-validation-button [violations]="codeViolations" [loading]="verifying()">
         <button class="action-btn action-btn--primary mfa-challenge__submit" type="submit"
-          [appValidationPopover]="codeViolations"
           [disabled]="codeForm.invalid || verifying()"
           data-testid="mfa-submit">
           @if (verifying()) {
@@ -42,6 +42,7 @@
             Verify
           }
         </button>
+        </app-validation-button>
       </form>
 
       <button class="mfa-challenge__alt-link" (click)="showRecovery.set(true)" type="button">

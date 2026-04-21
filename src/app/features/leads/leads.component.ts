@@ -21,7 +21,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
@@ -40,7 +40,7 @@ const VIEW_MODE_KEY = 'leads-view-mode';
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DataTableComponent, ColumnCellDirective, ValidationPopoverDirective, MatTooltipModule,
+    DataTableComponent, ColumnCellDirective, ValidationButtonComponent, MatTooltipModule,
     CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview,
     AvatarComponent,
   ],

@@ -8,7 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../shared/components/address-form/address-form.component';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -20,7 +20,7 @@ import { ToastService } from '../../shared/services/toast.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, MatCardModule, MatButtonModule, TranslatePipe,
-    InputComponent, AddressFormComponent, ValidationPopoverDirective,
+    InputComponent, AddressFormComponent, ValidationButtonComponent,
   ],
   templateUrl: './setup.component.html',
   styleUrl: './setup.component.scss',

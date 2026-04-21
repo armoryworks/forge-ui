@@ -47,13 +47,14 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">Cancel</button>
+    <app-validation-button [violations]="violations">
     <button
       class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || saving() || selectedMembers().length === 0"
       (click)="save()"
       data-testid="channel-save-btn">
       {{ saving() ? 'Creating...' : 'Create Channel' }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

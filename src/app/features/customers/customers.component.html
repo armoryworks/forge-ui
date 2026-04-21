@@ -1,5 +1,5 @@
 <app-page-header [title]="'customers.title' | translate" [subtitle]="'customers.subtitle' | translate">
-  <button class="action-btn action-btn--primary" data-testid="new-customer-btn" (click)="openCreateCustomer()">
+  <button class="action-btn action-btn--create" data-testid="new-customer-btn" (click)="openCreateCustomer()">
     <span class="material-icons-outlined">add</span>
     {{ 'customers.createCustomer' | translate }}
   </button>
@@ -61,14 +61,15 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="customerViolations()" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="customer-save-btn"
-        [appValidationPopover]="customerViolations()"
         [disabled]="customerForm.invalid || saving()"
         (click)="saveCustomer()">
         <span class="material-icons-outlined">save</span>
         {{ 'customers.createCustomer' | translate }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

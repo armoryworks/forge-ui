@@ -14,7 +14,7 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { ColumnCellDirective } from '../../../shared/directives/column-cell.directive';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
@@ -26,7 +26,7 @@ import { toIsoDate } from '../../../shared/utils/date.utils';
   imports: [
     DatePipe, ReactiveFormsModule,
     DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    DatepickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationPopoverDirective,
+    DatepickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent,
     ColumnCellDirective,
   ],
   templateUrl: './gage-list.component.html',

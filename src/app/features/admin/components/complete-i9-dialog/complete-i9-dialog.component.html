@@ -59,8 +59,8 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'adminPanels.completeI9.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       @if (saving()) {
@@ -70,5 +70,6 @@
       }
       {{ 'adminPanels.completeI9.completeSection2' | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

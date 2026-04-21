@@ -32,7 +32,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TrainingPanelComponent } from './components/training-panel/training-panel.component';
@@ -66,7 +66,7 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
   imports: [
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
-    ColumnCellDirective, ValidationPopoverDirective, TrackTypeDialogComponent,
+    ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
     EmptyStateComponent, LoadingBlockDirective, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',

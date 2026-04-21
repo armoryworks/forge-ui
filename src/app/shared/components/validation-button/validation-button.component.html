@@ -1,0 +1,46 @@
+<ng-content />
+
+<span class="validation-button__anchor" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+  @if (showTrigger()) {
+    <button
+      type="button"
+      class="validation-button__trigger"
+      [attr.aria-label]="count() + ' validation issue' + (count() === 1 ? '' : 's') + '. Click to view.'"
+      [attr.aria-expanded]="open()"
+      matTooltip="Show validation errors"
+      matTooltipPosition="above"
+      (click)="toggle()">
+      <span class="material-icons-outlined validation-button__icon">warning</span>
+      <span class="validation-button__count">{{ count() }}</span>
+    </button>
+  }
+</span>
+
+<ng-template
+  cdkConnectedOverlay
+  [cdkConnectedOverlayOrigin]="trigger"
+  [cdkConnectedOverlayOpen]="open()"
+  [cdkConnectedOverlayPositions]="positions"
+  [cdkConnectedOverlayPush]="true"
+  [cdkConnectedOverlayHasBackdrop]="false"
+  (overlayOutsideClick)="onOutsideClick()"
+  (detach)="close()">
+  <div
+    class="validation-popover"
+    role="alertdialog"
+    aria-label="Validation errors"
+    (keydown.escape)="close()">
+    @if (count() > 0) {
+      <ul class="validation-popover__list">
+        @for (msg of violationList(); track msg) {
+          <li>{{ msg }}</li>
+        }
+      </ul>
+    } @else {
+      <div class="validation-popover__cleared">
+        <span class="material-icons-outlined">check_circle</span>
+        All issues resolved
+      </div>
+    }
+  </div>
+</ng-template>

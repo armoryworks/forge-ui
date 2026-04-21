@@ -8,7 +8,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { AdminService } from '../../services/admin.service';
@@ -27,7 +27,7 @@ export interface CompleteI9DialogData {
     InputComponent,
     SelectComponent,
     DatepickerComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './complete-i9-dialog.component.html',

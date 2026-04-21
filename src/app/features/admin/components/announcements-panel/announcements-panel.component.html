@@ -10,12 +10,12 @@
     </div>
     <span class="announcements-panel__spacer"></span>
     @if (activeView() === 'announcements') {
-      <button class="action-btn action-btn--primary" data-testid="new-announcement-btn" (click)="openCreateAnnouncement()">
+      <button class="action-btn action-btn--create" data-testid="new-announcement-btn" (click)="openCreateAnnouncement()">
         <span class="material-icons-outlined">campaign</span>
         New Announcement
       </button>
     } @else {
-      <button class="action-btn action-btn--primary" data-testid="new-template-btn" (click)="openCreateTemplate()">
+      <button class="action-btn action-btn--create" data-testid="new-template-btn" (click)="openCreateTemplate()">
         <span class="material-icons-outlined">add</span>
         New Template
       </button>
@@ -112,14 +112,15 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeTemplateDialog()">Cancel</button>
+      <app-validation-button [violations]="templateViolations" [loading]="savingTemplate()">
       <button class="action-btn action-btn--primary"
         data-testid="template-save-btn"
-        [appValidationPopover]="templateViolations"
         [disabled]="templateForm.invalid || savingTemplate()"
         (click)="saveTemplate()">
         <span class="material-icons-outlined">save</span>
         Create Template
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

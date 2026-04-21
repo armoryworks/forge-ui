@@ -9,7 +9,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
@@ -32,7 +32,7 @@ interface UserListItem {
     InputComponent,
     SelectComponent,
     TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     AvatarComponent,
     TranslatePipe,
   ],

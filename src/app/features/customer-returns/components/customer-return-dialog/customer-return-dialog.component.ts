@@ -12,7 +12,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
@@ -22,7 +22,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, TextareaComponent, DatepickerComponent,
-    EntityPickerComponent, ValidationPopoverDirective, TranslatePipe,
+    EntityPickerComponent, ValidationButtonComponent, TranslatePipe,
   ],
   templateUrl: './customer-return-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

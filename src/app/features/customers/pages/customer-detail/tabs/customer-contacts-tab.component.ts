@@ -13,7 +13,7 @@ import { InputComponent } from '../../../../../shared/components/input/input.com
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../../shared/components/toggle/toggle.component';
 import { DialogComponent } from '../../../../../shared/components/dialog/dialog.component';
-import { ValidationPopoverDirective } from '../../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
 
 interface Contact {
   id: number;
@@ -32,7 +32,7 @@ interface Contact {
   imports: [
     ReactiveFormsModule,
     AvatarComponent, InputComponent, SelectComponent, ToggleComponent,
-    DialogComponent, ValidationPopoverDirective,
+    DialogComponent, ValidationButtonComponent,
   ],
   templateUrl: './customer-contacts-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',

@@ -7,7 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
@@ -23,7 +23,7 @@ export interface DisposeJobDialogData {
 @Component({
   selector: 'app-dispose-job-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationPopoverDirective, TranslatePipe],
+  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationButtonComponent, TranslatePipe],
   templateUrl: './dispose-job-dialog.component.html',
   styleUrl: './dispose-job-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { AuthService } from '../../../../shared/services/auth.service';
@@ -29,7 +29,7 @@ export type ChannelSettingsDialogResult = 'left' | 'updated' | undefined;
     DialogComponent,
     InputComponent,
     TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     AvatarComponent,
   ],
   templateUrl: './channel-settings-dialog.component.html',

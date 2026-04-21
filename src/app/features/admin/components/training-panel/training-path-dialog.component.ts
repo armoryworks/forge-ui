@@ -8,7 +8,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { TrainingPathRow } from './training-panel.component';
 
@@ -26,7 +26,7 @@ interface TrainingPathDetail extends TrainingPathRow {
     InputComponent,
     TextareaComponent,
     ToggleComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
   ],
   templateUrl: './training-path-dialog.component.html',
   styleUrl: './training-path-dialog.component.scss',

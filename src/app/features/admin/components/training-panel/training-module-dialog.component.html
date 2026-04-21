@@ -32,12 +32,13 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="cancel()">Cancel</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary" data-testid="module-save-btn"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span>
       {{ isEditing ? 'Save Changes' : 'Create Module' }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

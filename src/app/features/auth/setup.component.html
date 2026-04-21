@@ -24,11 +24,12 @@
           autocomplete="new-password" [required]="true"
           [info]="'auth.passwordHint' | translate" />
 
+        <app-validation-button [violations]="accountViolations">
         <button mat-flat-button color="primary" type="submit"
-          [appValidationPopover]="accountViolations"
           [disabled]="accountForm.invalid">
           {{ 'common.next' | translate }}
         </button>
+        </app-validation-button>
       </form>
     } @else {
       <form class="auth-card__form" [formGroup]="companyForm" (ngSubmit)="onSubmit()">
@@ -56,8 +57,8 @@
 
         <div class="auth-card__buttons">
           <button mat-stroked-button type="button" (click)="prevStep()">{{ 'common.back' | translate }}</button>
+          <app-validation-button [violations]="companyViolations" [loading]="loading()">
           <button mat-flat-button color="primary" type="submit"
-            [appValidationPopover]="companyViolations"
             [disabled]="companyForm.invalid || loading()">
             @if (loading()) {
               {{ 'auth.settingUp' | translate }}
@@ -65,6 +66,7 @@
               {{ 'auth.completeSetup' | translate }}
             }
           </button>
+          </app-validation-button>
         </div>
       </form>
     }

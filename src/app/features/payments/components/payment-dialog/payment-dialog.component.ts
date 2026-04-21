@@ -13,7 +13,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -32,7 +32,7 @@ interface ApplicationEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './payment-dialog.component.html',
   styleUrl: './payment-dialog.component.scss',

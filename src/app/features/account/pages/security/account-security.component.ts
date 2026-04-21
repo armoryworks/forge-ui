@@ -6,7 +6,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -20,7 +20,7 @@ import { MfaStatus, MfaDeviceSummary } from '../../models/mfa.model';
 @Component({
   selector: 'app-account-security',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, ValidationPopoverDirective, DatePipe],
+  imports: [ReactiveFormsModule, TranslatePipe, InputComponent, ValidationButtonComponent, DatePipe],
   templateUrl: './account-security.component.html',
   styleUrl: './account-security.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

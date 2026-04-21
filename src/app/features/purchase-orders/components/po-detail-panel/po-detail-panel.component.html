@@ -259,10 +259,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showCreateReleaseDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="releaseViolations" [loading]="releaseSaving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="releaseViolations"
         [disabled]="releaseForm.invalid || releaseSaving()"
         (click)="saveRelease()">Create</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

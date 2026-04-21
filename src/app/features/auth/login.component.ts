@@ -2,14 +2,13 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } 
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AuthService } from '../../shared/services/auth.service';
 import { InputComponent } from '../../shared/components/input/input.component';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
 import { LoadingService } from '../../shared/services/loading.service';
@@ -22,7 +21,7 @@ import { MfaValidateResponse } from '../account/models/mfa.model';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, MatDividerModule, TranslatePipe, InputComponent, ValidationPopoverDirective, MfaChallengeComponent],
+  imports: [ReactiveFormsModule, MatCardModule, MatDividerModule, TranslatePipe, InputComponent, ValidationButtonComponent, MfaChallengeComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,0 +1,98 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  align-items: stretch;
+  gap: $sp-sm;
+  flex: 1;
+  min-width: 0;
+}
+
+:host ::ng-deep > .action-btn,
+:host ::ng-deep > button {
+  flex: 1;
+  min-width: 0;
+}
+
+.validation-button__anchor {
+  display: contents;
+}
+
+.validation-button__anchor:has(> .validation-button__trigger) {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.validation-button__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-xs;
+  flex: 0 0 auto;
+  height: $input-height;
+  padding: 0 $sp-sm;
+  border: $border-width solid var(--error);
+  background: var(--surface);
+  color: var(--error);
+  cursor: pointer;
+  font-family: $font-family-primary;
+  font-weight: 700;
+  line-height: 1;
+
+  &:hover {
+    background: var(--error-light);
+  }
+
+  &:focus-visible {
+    outline: $border-width-accent solid var(--error);
+    outline-offset: $sp-xxs;
+  }
+}
+
+.validation-button__icon {
+  font-size: $icon-size-sm;
+}
+
+.validation-button__count {
+  font-size: $font-size-xs;
+  min-width: 12px;
+  text-align: center;
+}
+
+.validation-popover {
+  background: var(--surface);
+  border: $border-width solid var(--error);
+  padding: $sp-md $sp-lg;
+  max-width: 320px;
+  font-size: $font-size-sm;
+  color: var(--text);
+  box-shadow: $shadow-dropdown;
+}
+
+.validation-popover__list {
+  margin: 0;
+  padding: 0 0 0 $sp-lg;
+  list-style: disc;
+  color: var(--error);
+
+  li {
+    line-height: 1.6;
+    color: var(--text);
+
+    &::marker {
+      color: var(--error);
+    }
+  }
+}
+
+.validation-popover__cleared {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  color: var(--success);
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-md;
+  }
+}

@@ -13,7 +13,7 @@ import { SelectComponent, SelectOption } from '../../../shared/components/select
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
 
@@ -25,7 +25,7 @@ import { LoadingBlockDirective } from '../../../shared/directives/loading-block.
     DataTableComponent, ColumnCellDirective,
     DialogComponent, InputComponent, SelectComponent,
     TextareaComponent, ToggleComponent,
-    ValidationPopoverDirective, LoadingBlockDirective,
+    ValidationButtonComponent, LoadingBlockDirective,
   ],
   templateUrl: './spc-characteristics.component.html',
   styleUrl: './spc-characteristics.component.scss',

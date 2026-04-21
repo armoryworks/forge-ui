@@ -16,7 +16,7 @@ import { TextareaComponent } from '../../../shared/components/textarea/textarea.
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../../shared/models/draft-config.model';
 import { toIsoDate } from '../../../shared/utils/date.utils';
 import { PRIORITIES, PRIORITY_OPTIONS } from '../../../shared/models/priority.const';
@@ -33,7 +33,7 @@ export type DialogMode = 'create' | 'edit';
     SelectComponent,
     TextareaComponent,
     DatepickerComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     TranslatePipe,
   ],
   templateUrl: './job-dialog.component.html',

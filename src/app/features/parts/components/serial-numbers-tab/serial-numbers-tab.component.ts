@@ -13,7 +13,7 @@ import { SelectComponent } from '../../../../shared/components/select/select.com
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -24,7 +24,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   imports: [
     DatePipe, NgTemplateOutlet, ReactiveFormsModule,
     DataTableComponent, DialogComponent, InputComponent, SelectComponent, TextareaComponent,
-    EmptyStateComponent, LoadingBlockDirective, ValidationPopoverDirective, ColumnCellDirective,
+    EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent, ColumnCellDirective,
   ],
   templateUrl: './serial-numbers-tab.component.html',
   styleUrl: './serial-numbers-tab.component.scss',

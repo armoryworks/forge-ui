@@ -21,7 +21,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -37,7 +37,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
     BarcodeInfoComponent, EntityActivitySectionComponent,
     ReceiveDialogComponent, LoadingBlockDirective,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
     EntityLinkComponent,
     DataTableComponent, ColumnCellDirective,
   ],

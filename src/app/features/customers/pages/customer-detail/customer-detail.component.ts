@@ -16,7 +16,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../shared/components/select/select.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
 import { CustomerContactsTabComponent } from './tabs/customer-contacts-tab.component';
 import { CustomerAddressesTabComponent } from './tabs/customer-addresses-tab.component';
@@ -36,7 +36,7 @@ type CustomerTab = typeof TABS[number];
   standalone: true,
   imports: [
     CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe, RouterLink, MatTooltipModule,
-    InputComponent, SelectComponent, DialogComponent, ValidationPopoverDirective,
+    InputComponent, SelectComponent, DialogComponent, ValidationButtonComponent,
     CustomerOverviewTabComponent, CustomerContactsTabComponent, CustomerAddressesTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
     CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent, CustomerInteractionsTabComponent,

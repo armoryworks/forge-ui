@@ -53,14 +53,15 @@
     <span class="dialog-footer__spacer"></span>
     <button class="action-btn" (click)="close()">Cancel</button>
     @if (canEdit()) {
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button
         class="action-btn action-btn--primary"
-        [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()"
         data-testid="settings-save-btn">
         {{ saving() ? 'Saving...' : 'Save' }}
       </button>
+      </app-validation-button>
     }
   </div>
 </app-dialog>

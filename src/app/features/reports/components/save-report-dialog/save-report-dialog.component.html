@@ -7,11 +7,12 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
     <button class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid"
       (click)="save()">
       {{ 'reports.saveReport' | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

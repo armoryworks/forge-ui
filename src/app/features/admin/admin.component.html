@@ -7,7 +7,7 @@
       <div class="tab-panel">
         <div class="panel-header">
           <span class="panel-header__count">{{ users().length }} {{ 'admin.users' | translate | lowercase }}</span>
-          <button class="action-btn action-btn--primary" (click)="openCreateUser()" data-testid="new-user-btn">
+          <button class="action-btn action-btn--create" (click)="openCreateUser()" data-testid="new-user-btn">
             <span class="material-icons-outlined">add</span>
             {{ 'admin.addUser' | translate }}
           </button>
@@ -83,7 +83,7 @@
       <div class="tab-panel">
         <div class="panel-header">
           <span class="panel-header__count">{{ trackTypes().length }} {{ 'admin.trackTypes' | translate | lowercase }}</span>
-          <button class="action-btn action-btn--primary" (click)="openCreateTrackType()">
+          <button class="action-btn action-btn--create" (click)="openCreateTrackType()">
             <span class="material-icons-outlined">add</span>
             {{ 'admin.newTrackType' | translate }}
           </button>
@@ -245,7 +245,7 @@
               <span class="material-icons-outlined">location_on</span>
               {{ 'admin.locations' | translate }}
             </h3>
-            <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateLocation()">
+            <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateLocation()">
               <span class="material-icons-outlined">add</span>
               {{ 'admin.newLocation' | translate }}
             </button>
@@ -722,14 +722,15 @@
         <button class="action-btn action-btn--primary" (click)="closeUserDialog()">{{ 'common.done' | translate }}</button>
       } @else {
         <button class="action-btn" (click)="closeUserDialog()">{{ 'common.cancel' | translate }}</button>
+        <app-validation-button [violations]="userViolations" [loading]="saving()">
         <button class="action-btn action-btn--primary"
-          [appValidationPopover]="userViolations"
           [disabled]="userForm.invalid || saving()"
           (click)="saveUser()"
           data-testid="user-save-btn">
           <span class="material-icons-outlined">save</span>
           {{ editingUser() ? ('common.saveChanges' | translate) : ('admin.createUser' | translate) }}
         </button>
+        </app-validation-button>
       }
     </div>
   </app-dialog>

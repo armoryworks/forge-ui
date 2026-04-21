@@ -1,6 +1,6 @@
 <div class="tab-toolbar">
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--primary" (click)="openCreate()" aria-label="New estimate">
+  <button class="action-btn action-btn--create" (click)="openCreate()" aria-label="New estimate">
     <span class="material-icons-outlined">add</span>
     New Estimate
   </button>
@@ -66,10 +66,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations()" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations()"
         [disabled]="estimateForm.invalid || saving()"
         (click)="saveEstimate()">Save</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

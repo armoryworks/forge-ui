@@ -1,6 +1,6 @@
 <div class="tab-toolbar">
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--primary" data-testid="add-contact-btn" (click)="openAdd()" aria-label="Add contact">
+  <button class="action-btn action-btn--create" data-testid="add-contact-btn" (click)="openAdd()" aria-label="Add contact">
     <span class="material-icons-outlined">add</span>
     Add Contact
   </button>
@@ -15,7 +15,7 @@
     <div class="tab-empty">
       <span class="material-icons-outlined">person_off</span>
       <p>No contacts yet</p>
-      <button class="action-btn action-btn--primary" (click)="openAdd()">Add First Contact</button>
+      <button class="action-btn action-btn--create" (click)="openAdd()">Add First Contact</button>
     </div>
   } @else {
     <div class="contacts-grid">
@@ -75,10 +75,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations()" [loading]="saving()">
       <button class="action-btn action-btn--primary" data-testid="contact-save-btn"
-        [appValidationPopover]="violations()"
         [disabled]="contactForm.invalid || saving()"
         (click)="saveContact()">Save</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

@@ -149,10 +149,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeEdit()">Cancel</button>
+      <app-validation-button [violations]="violations()" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations()"
         [disabled]="editForm.invalid || saving()"
         (click)="saveEdit()">Save</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

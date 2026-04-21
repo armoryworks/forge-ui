@@ -31,13 +31,14 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">Cancel</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
-            [appValidationPopover]="violations"
             [disabled]="form.invalid || saving()"
             (click)="save()"
             data-testid="integration-save-btn">
       <span class="material-icons-outlined">{{ saving() ? 'sync' : 'link' }}</span>
       {{ saving() ? 'Connecting...' : 'Connect' }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

@@ -6,7 +6,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { AddressFormComponent } from '../../../../shared/components/address-form/address-form.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CompanyLocation } from '../../models/company-location.model';
@@ -17,7 +17,7 @@ import { Address } from '../../../../shared/models/address.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, DialogComponent, InputComponent, ToggleComponent,
-    AddressFormComponent, ValidationPopoverDirective,
+    AddressFormComponent, ValidationButtonComponent,
   ],
   templateUrl: './company-location-dialog.component.html',
   styleUrl: './company-location-dialog.component.scss',

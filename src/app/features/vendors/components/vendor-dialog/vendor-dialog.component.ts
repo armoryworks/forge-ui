@@ -15,7 +15,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { PAYMENT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 import { toAddress, fromAddressToVendor } from '../../../../shared/utils/address.utils';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 @Component({
@@ -24,7 +24,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, ToggleComponent,
-    AddressFormComponent, ValidationPopoverDirective, TranslatePipe,
+    AddressFormComponent, ValidationButtonComponent, TranslatePipe,
   ],
   templateUrl: './vendor-dialog.component.html',
   styleUrl: './vendor-dialog.component.scss',

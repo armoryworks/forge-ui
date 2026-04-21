@@ -7,7 +7,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { DialogComponent } from '../dialog/dialog.component';
 import { SelectComponent, SelectOption } from '../select/select.component';
 import { TextareaComponent } from '../textarea/textarea.component';
-import { ValidationPopoverDirective } from '../../directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../components/validation-button/validation-button.component';
 import { FormValidationService } from '../../services/form-validation.service';
 import { SnackbarService } from '../../services/snackbar.service';
 import { StatusTrackingService } from '../../services/status-tracking.service';
@@ -21,7 +21,7 @@ export interface AddHoldDialogData {
 @Component({
   selector: 'app-add-hold-dialog',
   standalone: true,
-  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationPopoverDirective, TranslatePipe],
+  imports: [ReactiveFormsModule, DialogComponent, SelectComponent, TextareaComponent, ValidationButtonComponent, TranslatePipe],
   templateUrl: './add-hold-dialog.component.html',
   styleUrl: './add-hold-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

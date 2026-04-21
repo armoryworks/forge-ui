@@ -11,7 +11,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -24,7 +24,7 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
   imports: [
     ReactiveFormsModule, DataTableComponent, ColumnCellDirective,
     DialogComponent, InputComponent, SelectComponent, ToggleComponent,
-    ValidationPopoverDirective, LoadingBlockDirective, EmptyStateComponent,
+    ValidationButtonComponent, LoadingBlockDirective, EmptyStateComponent,
   ],
   templateUrl: './uom-management.component.html',
   styleUrl: './uom-management.component.scss',

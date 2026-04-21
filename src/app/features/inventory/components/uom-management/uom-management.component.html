@@ -10,7 +10,7 @@
 
   @if (activeSection() === 'uoms') {
     <div class="uom-management__header">
-      <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateUom()">
+      <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateUom()">
         <span class="material-icons-outlined">add</span> New UOM
       </button>
     </div>
@@ -40,7 +40,7 @@
 
   @if (activeSection() === 'conversions') {
     <div class="uom-management__header">
-      <button class="action-btn action-btn--primary action-btn--sm" (click)="openCreateConversion()">
+      <button class="action-btn action-btn--create action-btn--sm" (click)="openCreateConversion()">
         <span class="material-icons-outlined">add</span> New Conversion
       </button>
     </div>
@@ -83,13 +83,14 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="showUomDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="uomViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="uomViolations"
         [disabled]="uomForm.invalid || saving()"
         (click)="saveUom()">
         <span class="material-icons-outlined">save</span>
         {{ editingUom() ? 'Update' : 'Create' }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -109,12 +110,13 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="showConversionDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="conversionViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="conversionViolations"
         [disabled]="conversionForm.invalid || saving()"
         (click)="saveConversion()">
         <span class="material-icons-outlined">save</span> Create
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

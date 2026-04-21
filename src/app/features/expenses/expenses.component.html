@@ -1,5 +1,5 @@
 <app-page-header [title]="'expenses.title' | translate" [subtitle]="'expenses.subtitle' | translate" helpTourId="expenses">
-  <button data-testid="new-expense-btn" class="action-btn action-btn--primary" (click)="openCreateExpense()">
+  <button data-testid="new-expense-btn" class="action-btn action-btn--create" (click)="openCreateExpense()">
     <span class="material-icons-outlined">add</span>
     {{ 'expenses.createExpense' | translate }}
   </button>
@@ -103,14 +103,15 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="expenseViolations" [loading]="receiptMissing()">
       <button data-testid="expense-save-btn" class="action-btn action-btn--primary"
-        [appValidationPopover]="expenseViolations"
         [disabled]="expenseForm.invalid || saving() || uploadingReceipt() || receiptMissing()"
         [matTooltip]="receiptMissing() ? ('expenses.receiptRequiredHint' | translate) : ''"
         (click)="saveExpense()">
         <span class="material-icons-outlined">save</span>
         {{ (editingExpense() ? 'expenses.resubmit' : 'expenses.submitExpense') | translate }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

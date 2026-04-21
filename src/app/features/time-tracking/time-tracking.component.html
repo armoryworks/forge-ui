@@ -105,12 +105,13 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="entryViolations" [loading]="saving()">
       <button data-testid="time-entry-save-btn" class="action-btn action-btn--primary"
-        [appValidationPopover]="entryViolations"
         [disabled]="entryForm.invalid || saving()"
         (click)="saveEntry()">
         <span class="material-icons-outlined">save</span> {{ 'timeTracking.logEntry' | translate }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

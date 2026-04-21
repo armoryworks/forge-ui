@@ -717,16 +717,17 @@
         </button>
       }
       @if (currentStepIndex() < 6) {
+        <app-validation-button [violations]="currentViolations">
         <button class="action-btn action-btn--primary"
-          [appValidationPopover]="currentViolations"
           [disabled]="currentFormInvalid()"
           (click)="nextStep()"
           data-testid="onboarding-continue-btn">
           {{ 'onboarding.actions.continue' | translate }} <span class="material-icons-outlined">arrow_forward</span>
         </button>
+        </app-validation-button>
       } @else {
+        <app-validation-button [violations]="ackViolations">
         <button class="action-btn action-btn--primary"
-          [appValidationPopover]="ackViolations"
           [disabled]="currentFormInvalid()"
           (click)="submit()"
           data-testid="onboarding-submit-btn">
@@ -738,6 +739,7 @@
             {{ 'onboarding.actions.submitAndSign' | translate }}
           }
         </button>
+        </app-validation-button>
       }
     </div>
   }

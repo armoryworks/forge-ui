@@ -21,7 +21,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
@@ -39,7 +39,7 @@ interface LineEntry {
   imports: [
     ReactiveFormsModule, CurrencyPipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    AutocompleteComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',

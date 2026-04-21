@@ -28,11 +28,11 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="cancel()" [disabled]="saving()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
     <button
       data-testid="job-save-btn"
       class="action-btn action-btn--primary"
       (click)="onSubmit()"
-      [appValidationPopover]="violations"
       [disabled]="saving() || loadingRefs() || jobForm.invalid">
       @if (saving()) {
         <span class="material-icons-outlined btn-spinner">refresh</span>
@@ -41,5 +41,6 @@
       }
       {{ mode() === 'create' ? ('kanban.createJob' | translate) : ('common.saveChanges' | translate) }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

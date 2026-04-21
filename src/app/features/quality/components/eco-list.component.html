@@ -42,10 +42,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showCreateDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="createViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="createViolations"
         [disabled]="createForm.invalid || saving()"
         (click)="saveEco()" data-testid="eco-save-btn">Create</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -179,10 +180,11 @@
     </div>
     <div dialog-footer>
       <button class="action-btn" (click)="showAddItemDialog.set(false)">Cancel</button>
+      <app-validation-button [violations]="addItemViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="addItemViolations"
         [disabled]="addItemForm.invalid || saving()"
         (click)="saveAffectedItem()">Add</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

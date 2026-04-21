@@ -149,9 +149,9 @@
   <div dialog-footer>
     <button class="action-btn" (click)="matDialogRef.close()">{{ 'common.cancel' | translate }}</button>
     @if (activeTab() === 'details') {
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="op-save-btn"
-        [appValidationPopover]="violations"
         [disabled]="formGroup.invalid || saving()"
         (click)="save()">
         @if (saving()) {
@@ -159,6 +159,7 @@
         }
         {{ data.operation ? ('common.saveChanges' | translate) : ('common.add' | translate) }}
       </button>
+      </app-validation-button>
     }
   </div>
 </app-dialog>

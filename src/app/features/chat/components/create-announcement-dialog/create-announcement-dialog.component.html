@@ -18,13 +18,14 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'shared.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || saving()"
       data-testid="announcement-send-btn"
       (click)="save()">
       <span class="material-icons-outlined">campaign</span>
       {{ 'shared.send' | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

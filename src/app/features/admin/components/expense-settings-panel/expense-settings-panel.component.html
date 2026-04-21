@@ -1,13 +1,14 @@
 <div class="panel-header">
   <span class="panel-header__count">{{ 'expenseSettings.title' | translate }}</span>
+  <app-validation-button [violations]="violations" [loading]="saving()">
   <button data-testid="expense-settings-save-btn" class="action-btn action-btn--primary action-btn--sm"
-    [appValidationPopover]="violations"
     [disabled]="form.invalid || saving()"
     (click)="saveSettings()"
     aria-label="Save expense policy settings">
     <span class="material-icons-outlined">save</span>
     {{ 'common.save' | translate }}
   </button>
+  </app-validation-button>
 </div>
 
 <div class="expense-settings" [appLoadingBlock]="loading()" [formGroup]="form">

@@ -15,11 +15,11 @@
       </div>
 
       <div class="auth-card__session-actions">
-        <button mat-flat-button color="primary" (click)="goToDashboard()">
+        <button class="action-btn action-btn--primary" (click)="goToDashboard()">
           <span class="material-icons-outlined">dashboard</span>
           {{ 'auth.goToDashboard' | translate }}
         </button>
-        <button mat-stroked-button (click)="switchAccount()">
+        <button class="action-btn" (click)="switchAccount()">
           <span class="material-icons-outlined">logout</span>
           {{ 'auth.signOutSwitch' | translate }}
         </button>
@@ -45,15 +45,17 @@
         <app-input data-testid="login-email" [label]="'auth.email' | translate" type="email" formControlName="email" autocomplete="email" [required]="true" />
         <app-input data-testid="login-password" [label]="'auth.password' | translate" type="password" formControlName="password" autocomplete="current-password" [required]="true" />
 
-        <button data-testid="login-submit" mat-flat-button color="primary" type="submit"
-          [appValidationPopover]="violations"
-          [disabled]="form.invalid || loading()">
-          @if (loading()) {
-            {{ 'auth.signingIn' | translate }}
-          } @else {
-            {{ 'auth.signIn' | translate }}
-          }
-        </button>
+        <app-validation-button [violations]="violations" [loading]="loading()">
+          <button data-testid="login-submit" class="action-btn action-btn--primary" type="submit"
+            [disabled]="form.invalid || loading()">
+            @if (loading()) {
+              <span class="material-icons-outlined spin">sync</span>
+              {{ 'auth.signingIn' | translate }}
+            } @else {
+              {{ 'auth.signIn' | translate }}
+            }
+          </button>
+        </app-validation-button>
       </form>
 
       <div class="auth-card__setup">
@@ -61,8 +63,8 @@
           <div class="setup-code-entry">
             <app-input [label]="'auth.setupCode' | translate" [formControl]="setupCodeControl" [placeholder]="'auth.setupCodePlaceholder' | translate" autocomplete="off" />
             <div class="setup-code-entry__actions">
-              <button mat-stroked-button (click)="showSetupCode.set(false)">{{ 'common.cancel' | translate }}</button>
-              <button mat-flat-button color="primary"
+              <button class="action-btn" (click)="showSetupCode.set(false)">{{ 'common.cancel' | translate }}</button>
+              <button class="action-btn action-btn--primary"
                 [disabled]="!setupCodeControl.value?.trim()"
                 (click)="goToSetup()">
                 {{ 'auth.continue' | translate }}
@@ -70,7 +72,7 @@
             </div>
           </div>
         } @else {
-          <button mat-button class="auth-card__setup-link" (click)="showSetupCode.set(true)">
+          <button class="action-btn action-btn--sm auth-card__setup-link" (click)="showSetupCode.set(true)">
             <span class="material-icons-outlined">vpn_key</span>
             {{ 'auth.haveSetupCode' | translate }}
           </button>
@@ -87,7 +89,7 @@
 
           <div class="auth-card__sso-buttons">
             @for (provider of ssoProviders(); track provider.id) {
-              <button mat-stroked-button class="auth-card__sso-btn" (click)="ssoLogin(provider)"
+              <button class="action-btn auth-card__sso-btn" (click)="ssoLogin(provider)"
                 [disabled]="loading()">
                 <span class="material-icons-outlined">{{ getSsoIcon(provider.id) }}</span>
                 {{ provider.name }}

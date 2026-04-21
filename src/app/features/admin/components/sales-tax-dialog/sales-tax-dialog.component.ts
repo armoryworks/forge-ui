@@ -12,7 +12,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
@@ -23,7 +23,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
   imports: [
     ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent,
-    ToggleComponent, TextareaComponent, ValidationPopoverDirective, TranslatePipe,
+    ToggleComponent, TextareaComponent, ValidationButtonComponent, TranslatePipe,
   ],
   templateUrl: './sales-tax-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

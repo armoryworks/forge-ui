@@ -90,11 +90,12 @@
 
   <div dialog-footer>
     <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
     <button data-testid="po-save-btn" class="action-btn action-btn--primary"
-      [appValidationPopover]="violations"
       [disabled]="form.invalid || lines().length === 0 || saving()"
       (click)="save()">
       <span class="material-icons-outlined">save</span> {{ 'purchaseOrders.createPo' | translate }}
     </button>
+    </app-validation-button>
   </div>
 </app-dialog>

@@ -1,18 +1,18 @@
 <app-page-header [title]="'inventory.title' | translate" [subtitle]="'inventory.subtitle' | translate" helpTourId="inventory">
   @if (activeTab() === 'locations') {
-    <button class="action-btn action-btn--primary" data-testid="add-location-btn" (click)="openCreateLocation()">
+    <button class="action-btn action-btn--create" data-testid="add-location-btn" (click)="openCreateLocation()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.addLocation' | translate }}
     </button>
   }
   @if (activeTab() === 'reservations') {
-    <button class="action-btn action-btn--primary" (click)="openReservationDialog()">
+    <button class="action-btn action-btn--create" (click)="openReservationDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.reserveStock' | translate }}
     </button>
   }
   @if (activeTab() === 'receiving') {
-    <button class="action-btn action-btn--primary" data-testid="receive-goods-btn" (click)="openReceiveDialog()">
+    <button class="action-btn action-btn--create" data-testid="receive-goods-btn" (click)="openReceiveDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.receiveGoods' | translate }}
     </button>
@@ -28,7 +28,7 @@
     </button>
   }
   @if (activeTab() === 'cycleCounts') {
-    <button class="action-btn action-btn--primary" (click)="openCreateCycleCountDialog()">
+    <button class="action-btn action-btn--create" (click)="openCreateCycleCountDialog()">
       <span class="material-icons-outlined">add</span>
       {{ 'inventory.newCount' | translate }}
     </button>
@@ -290,7 +290,7 @@
                 <div class="detail-name">{{ loc.name }}</div>
                 <div class="detail-path">{{ loc.locationPath }}</div>
               </div>
-              <button class="action-btn action-btn--primary action-btn--sm detail-header__add-child"
+              <button class="action-btn action-btn--create action-btn--sm detail-header__add-child"
                 (click)="openCreateLocation(loc.id)">
                 <span class="material-icons-outlined">add</span>
                 {{ 'inventory.addChild' | translate }}
@@ -519,10 +519,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeReservationDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="reservationViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="reservationViolations"
         [disabled]="reservationForm.invalid || saving()"
         (click)="submitReservation()">{{ 'inventory.dialogs.reserve' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -544,10 +545,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeLocationDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="locationViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary" data-testid="location-save-btn"
-        [appValidationPopover]="locationViolations"
         [disabled]="locationForm.invalid || saving()"
         (click)="saveLocation()">{{ 'inventory.dialogs.createLocation' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -565,10 +567,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeReceiveDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="receiveViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="receiveViolations"
         [disabled]="receiveForm.invalid || saving()"
         (click)="submitReceive()">{{ 'inventory.dialogs.receive' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -585,10 +588,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeTransferDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="transferViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="transferViolations"
         [disabled]="transferForm.invalid || saving()"
         (click)="submitTransfer()">{{ 'inventory.transfer' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -605,10 +609,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeAdjustDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="adjustViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary" data-testid="adjust-save-btn"
-        [appValidationPopover]="adjustViolations"
         [disabled]="adjustForm.invalid || saving()"
         (click)="submitAdjust()">{{ 'inventory.adjust' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }
@@ -623,10 +628,11 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeCreateCycleCountDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="createCycleCountViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="createCycleCountViolations"
         [disabled]="createCycleCountForm.invalid || saving()"
         (click)="submitCreateCycleCount()">{{ 'common.create' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

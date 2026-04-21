@@ -103,13 +103,14 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
-        [appValidationPopover]="violations"
         [disabled]="correctionForm.invalid || saving()"
         (click)="saveCorrection()">
         <span class="material-icons-outlined">save</span>
         Save Correction
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

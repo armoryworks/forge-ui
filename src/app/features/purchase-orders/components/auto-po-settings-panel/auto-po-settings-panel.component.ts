@@ -8,7 +8,7 @@ import { AutoPoSettings, UpdateAutoPoSettingsRequest } from '../../models/auto-p
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -19,7 +19,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     InputComponent, SelectComponent, ToggleComponent,
-    ValidationPopoverDirective, LoadingBlockDirective,
+    ValidationButtonComponent, LoadingBlockDirective,
   ],
   templateUrl: './auto-po-settings-panel.component.html',
   styleUrl: './auto-po-settings-panel.component.scss',

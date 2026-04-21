@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output, signal, OnIn
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 
 import { InputComponent } from '../../shared/components/input/input.component';
-import { ValidationPopoverDirective } from '../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { MfaService } from '../account/services/mfa.service';
@@ -11,7 +11,7 @@ import { MfaChallengeResponse, MfaValidateResponse } from '../account/models/mfa
 @Component({
   selector: 'app-mfa-challenge',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, ValidationPopoverDirective],
+  imports: [ReactiveFormsModule, InputComponent, ValidationButtonComponent],
   templateUrl: './mfa-challenge.component.html',
   styleUrl: './mfa-challenge.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -9,7 +9,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { TrainingModuleRow } from './training-panel.component';
@@ -30,7 +30,7 @@ interface TrainingModuleDetail extends TrainingModuleRow {
     SelectComponent,
     TextareaComponent,
     ToggleComponent,
-    ValidationPopoverDirective,
+    ValidationButtonComponent,
   ],
   templateUrl: './training-module-dialog.component.html',
   styleUrl: './training-module-dialog.component.scss',

@@ -28,13 +28,14 @@
 
     @if (!error()) {
       <mat-card-actions>
+        <app-validation-button [violations]="violations" [loading]="loading()">
         <button mat-flat-button color="primary"
-          [appValidationPopover]="violations"
           [disabled]="form.invalid || loading()"
           (click)="onSubmit()"
           data-testid="setup-submit-btn">
           {{ 'auth.completeSetup' | translate }}
         </button>
+        </app-validation-button>
       </mat-card-actions>
     }
   </mat-card>

@@ -8,7 +8,7 @@
     [formControl]="typeFilterControl"
     [options]="typeOptions" />
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--primary" data-testid="log-interaction-btn" (click)="openCreate()">
+  <button class="action-btn action-btn--create" data-testid="log-interaction-btn" (click)="openCreate()">
     <span class="material-icons-outlined">add</span>
     Log Interaction
   </button>
@@ -64,13 +64,14 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary" data-testid="interaction-save-btn"
-        [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">
         <span class="material-icons-outlined">save</span>
         {{ editingId() ? 'Save Changes' : 'Log Interaction' }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

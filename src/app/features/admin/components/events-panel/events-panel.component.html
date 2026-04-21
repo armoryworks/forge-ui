@@ -6,7 +6,7 @@
       [formControl]="typeFilterControl"
       [options]="typeOptions" />
     <span class="events-panel__spacer"></span>
-    <button class="action-btn action-btn--primary" data-testid="new-event-btn" (click)="openCreate()">
+    <button class="action-btn action-btn--create" data-testid="new-event-btn" (click)="openCreate()">
       <span class="material-icons-outlined">add</span>
       {{ 'adminPanels.events.newEvent' | translate }}
     </button>
@@ -86,14 +86,15 @@
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="event-save-btn"
-        [appValidationPopover]="violations"
         [disabled]="form.invalid || saving()"
         (click)="save()">
         <span class="material-icons-outlined">save</span>
         {{ editingEvent() ? ('adminPanels.events.saveChanges' | translate) : ('adminPanels.events.createEvent' | translate) }}
       </button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

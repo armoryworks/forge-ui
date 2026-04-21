@@ -21,7 +21,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
-import { ValidationPopoverDirective } from '../../../../shared/directives/validation-popover.directive';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 
 @Component({
   selector: 'app-teams-panel',
@@ -29,7 +29,7 @@ import { ValidationPopoverDirective } from '../../../../shared/directives/valida
   imports: [
     ReactiveFormsModule, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, DialogComponent, InputComponent,
-    TextareaComponent, ToggleComponent, AvatarComponent, ValidationPopoverDirective, TranslatePipe, MatTooltipModule,
+    TextareaComponent, ToggleComponent, AvatarComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './teams-panel.component.html',
   styleUrl: './teams-panel.component.scss',
