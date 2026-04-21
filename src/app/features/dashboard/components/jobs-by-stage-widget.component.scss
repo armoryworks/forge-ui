@@ -8,7 +8,7 @@
 }
 
 .bar-row__label {
-  width: 80px;
+  width: 140px;
   flex-shrink: 0;
   font-size: var(--font-size-xs);
   font-weight: 600;
@@ -16,6 +16,7 @@
   text-align: right;
   text-transform: uppercase;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .bar-row__track {
