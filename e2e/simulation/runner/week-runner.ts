@@ -361,12 +361,28 @@ export async function runSimulation(): Promise<SimulationReport> {
     }
     weeksSinceRefresh++;
 
-    // Set server clock to start of this week
+    // Set server clock to start of this week. If 401, heal by re-logging in once
+    // (server restart / session store cleared mid-run) and retry.
     try {
-      await setSimulatedClock(week.start);
+      await setSimulatedClock(week.start, tokens['admin@qbengineer.local']);
     } catch (err) {
-      console.error(`  Failed to set clock: ${err} — skipping week`);
-      continue;
+      const msg = String(err);
+      if (msg.includes('401')) {
+        console.warn('  setClock 401 — attempting session heal (re-login admin)');
+        try {
+          const session = await getAuthSession(ROLE_EMAILS['admin'], ROLE_PASSWORDS['admin']);
+          tokens[ROLE_EMAILS['admin']] = session.token;
+          sessions['admin'] = session;
+          await setSimulatedClock(week.start, tokens['admin@qbengineer.local']);
+          console.log('  ✓ session healed');
+        } catch (retryErr) {
+          console.error(`  Failed to set clock after heal: ${retryErr} — skipping week`);
+          continue;
+        }
+      } else {
+        console.error(`  Failed to set clock: ${err} — skipping week`);
+        continue;
+      }
     }
 
     // Recover any crashed pages before starting the week (UI mode only)
@@ -416,7 +432,7 @@ export async function runSimulation(): Promise<SimulationReport> {
   }
 
   // ── Teardown ──────────────────────────────────────────────────────────────
-  try { await resetClock(); } catch { /* ignore */ }
+  try { await resetClock(tokens['admin@qbengineer.local']); } catch { /* ignore */ }
   if (browser) await browser.close();
 
   report.completedAt = new Date().toISOString();
