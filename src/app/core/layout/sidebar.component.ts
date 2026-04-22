@@ -1,14 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { filter, map } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { AuthService } from '../../shared/services/auth.service';
 import { LayoutService } from '../../shared/services/layout.service';
-import { NavGroup } from '../../shared/models/nav-group.model';
+import { NavTreeService } from '../../shared/services/nav-tree.service';
 import { NavItem } from '../../shared/models/nav-item.model';
 
 @Component({
@@ -20,145 +17,78 @@ import { NavItem } from '../../shared/models/nav-item.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarComponent {
-  private readonly auth = inject(AuthService);
   protected readonly layout = inject(LayoutService);
-  private readonly router = inject(Router);
+  private readonly navTree = inject(NavTreeService);
 
   protected readonly collapsed = computed(() => !this.layout.sidebarExpanded());
+  protected readonly mainTree = this.navTree.mainTree;
+  protected readonly bottomTree = this.navTree.bottomTree;
 
-  protected readonly isAdminRoute = toSignal(
-    this.router.events.pipe(
-      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
-      map(() => this.router.url.startsWith('/admin')),
-    ),
-    { initialValue: this.router.url.startsWith('/admin') },
-  );
+  private readonly drillOverride = signal<NavItem[] | null>(null);
+  protected readonly slideDirection = signal<'forward' | 'back'>('forward');
 
-  private readonly allNavGroups: NavGroup[] = [
-    {
-      label: 'Operations',
-      i18nKey: 'navGroups.operations',
-      items: [
-        { icon: 'dashboard', label: 'Dashboard', i18nKey: 'nav.dashboard', route: '/dashboard', shortcut: ['Q', 'D'] },
-        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
-        { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
-        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar' },
-      ],
-    },
-    {
-      label: 'Sales',
-      i18nKey: 'navGroups.sales',
-      items: [
-        { icon: 'people', label: 'Customers', i18nKey: 'nav.customers', route: '/customers', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'people_outline', label: 'Leads', i18nKey: 'nav.leads', route: '/leads', allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-      ],
-    },
-    {
-      label: 'Supply',
-      i18nKey: 'navGroups.supply',
-      items: [
-        { icon: 'precision_manufacturing', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM'] },
-        { icon: 'inventory_2', label: 'Inventory', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
-        { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
-        { icon: 'local_shipping', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'request_quote', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'event_note', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', allowedRoles: ['Admin', 'Manager'] },
-      ],
-    },
-    {
-      label: 'Resources',
-      i18nKey: 'navGroups.resources',
-      items: [
-        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'] },
-        { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
-        { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai' },
-        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
-      ],
-    },
-  ];
-
-  private readonly allBottomItems: NavGroup = {
-    items: [
-      { icon: 'storefront', label: 'Shop Floor', i18nKey: 'nav.shopFloor', route: '/display/shop-floor', allowedRoles: ['Admin', 'Manager'] },
-      {
-        icon: 'settings', label: 'Admin', i18nKey: 'nav.admin', route: '/admin', allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
-        children: [
-          { icon: 'people', label: 'Users', i18nKey: 'admin.tabs.users', route: '/admin/users', allowedRoles: ['Admin'] },
-          { icon: 'route', label: 'Track Types', i18nKey: 'admin.tabs.trackTypes', route: '/admin/track-types', allowedRoles: ['Admin'] },
-          { icon: 'dataset', label: 'Ref Data', i18nKey: 'admin.tabs.referenceData', route: '/admin/reference-data', allowedRoles: ['Admin'] },
-          { icon: 'translate', label: 'Terminology', i18nKey: 'admin.tabs.terminology', route: '/admin/terminology', allowedRoles: ['Admin'] },
-          { icon: 'settings', label: 'Settings', i18nKey: 'admin.tabs.settings', route: '/admin/settings', allowedRoles: ['Admin'] },
-          { icon: 'hub', label: 'Integrations', i18nKey: 'admin.tabs.integrations', route: '/admin/integrations', allowedRoles: ['Admin'] },
-          { icon: 'smart_toy', label: 'AI Assistants', i18nKey: 'admin.tabs.aiAssistants', route: '/admin/ai-assistants', allowedRoles: ['Admin'] },
-          { icon: 'groups', label: 'Teams', i18nKey: 'admin.tabs.teams', route: '/admin/teams', allowedRoles: ['Admin'] },
-          { icon: 'percent', label: 'Sales Tax', i18nKey: 'admin.tabs.salesTax', route: '/admin/sales-tax', allowedRoles: ['Admin'] },
-          { icon: 'manage_search', label: 'Audit Log', i18nKey: 'admin.tabs.auditLog', route: '/admin/audit-log', allowedRoles: ['Admin'] },
-          { icon: 'edit_note', label: 'Time Corrections', i18nKey: 'admin.tabs.timeCorrections', route: '/admin/time-corrections', allowedRoles: ['Admin', 'Manager'] },
-          { icon: 'event', label: 'Events', i18nKey: 'admin.tabs.events', route: '/admin/events', allowedRoles: ['Admin', 'Manager'] },
-          { icon: 'campaign', label: 'Announcements', i18nKey: 'admin.tabs.announcements', route: '/admin/announcements', allowedRoles: ['Admin', 'Manager'] },
-          { icon: 'swap_horiz', label: 'EDI', i18nKey: 'admin.tabs.edi', route: '/admin/edi', allowedRoles: ['Admin'] },
-          { icon: 'verified_user', label: 'MFA Policy', i18nKey: 'admin.tabs.mfa', route: '/admin/mfa', allowedRoles: ['Admin'] },
-          { icon: 'auto_fix_high', label: 'Automations', i18nKey: 'admin.tabs.automations', route: '/admin/automations', allowedRoles: ['Admin'] },
-          { icon: 'outbox', label: 'Integration Outbox', i18nKey: 'admin.tabs.integrationOutbox', route: '/admin/integration-outbox', allowedRoles: ['Admin'] },
-          { icon: 'auto_awesome', label: 'Auto-PO', i18nKey: 'admin.tabs.autoPo', route: '/admin/auto-po', allowedRoles: ['Admin'] },
-          { icon: 'receipt_long', label: 'Expense Policy', i18nKey: 'admin.tabs.expenses', route: '/admin/expenses', allowedRoles: ['Admin'] },
-          { icon: 'school', label: 'Training', i18nKey: 'admin.tabs.training', route: '/admin/training', allowedRoles: ['Admin', 'Manager'] },
-          { icon: 'fact_check', label: 'Compliance', i18nKey: 'admin.tabs.compliance', route: '/admin/compliance', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        ],
-      },
-    ],
-  };
-
-  protected readonly adminChildren = computed(() => {
-    const admin = this.allBottomItems.items.find(i => i.route === '/admin');
-    if (!admin?.children) return [];
-    return admin.children.filter(c => this.isAllowed(c));
+  protected readonly drillPath = computed(() => {
+    const override = this.drillOverride();
+    if (override !== null) return override;
+    const trail = this.navTree.drillTrail();
+    if (trail.length > 0 && !trail[trail.length - 1].children?.length) {
+      return trail.slice(0, -1);
+    }
+    return trail;
   });
 
-  protected readonly navGroups = computed(() => this.filterGroups(this.allNavGroups));
-  protected readonly bottomItems = computed(() => this.filterGroup(this.allBottomItems));
+  protected readonly currentItems = computed(() => {
+    const path = this.drillPath();
+    if (path.length === 0) return null;
+    return path[path.length - 1].children ?? [];
+  });
+
+  protected readonly drillHeader = computed(() => {
+    const path = this.drillPath();
+    return path.length === 0 ? null : path[path.length - 1];
+  });
+
+  protected readonly drillKey = computed(() =>
+    this.drillPath().map(i => i.label).join('/') || '__root__',
+  );
+
+  constructor() {
+    effect(() => {
+      this.navTree.drillTrail();
+      this.drillOverride.set(null);
+    });
+  }
 
   protected toggleCollapse(): void {
     this.layout.toggleSidebar();
   }
 
-  protected onNavClick(): void {
+  protected onGroupClick(item: NavItem): void {
+    this.slideDirection.set('forward');
+    const current = this.drillPath();
+    this.drillOverride.set([...current, item]);
+    if (this.collapsed() && !this.layout.isMobile()) {
+      this.layout.expandSidebar();
+    }
+  }
+
+  protected onBackClick(): void {
+    this.slideDirection.set('back');
+    const current = this.drillPath();
+    this.drillOverride.set(current.slice(0, -1));
+  }
+
+  protected onLeafClick(): void {
     if (this.layout.isMobile()) {
       this.layout.closeMobileMenu();
     }
   }
 
-  private filterGroups(groups: NavGroup[]): NavGroup[] {
-    return groups
-      .map(g => this.filterGroup(g))
-      .filter(g => g.items.length > 0);
+  protected isInActiveTrail(item: NavItem): boolean {
+    return this.navTree.breadcrumbTrail().includes(item);
   }
 
-  private filterGroup(group: NavGroup): NavGroup {
-    return {
-      label: group.label,
-      i18nKey: group.i18nKey,
-      items: group.items.filter(item => this.isAllowed(item)),
-    };
+  protected isGroup(item: NavItem): boolean {
+    return !!item.children?.length;
   }
-
-  private isAllowed(item: NavItem): boolean {
-    if (!item.allowedRoles) return true;
-    return this.auth.hasAnyRole(item.allowedRoles);
-  }
-
 }

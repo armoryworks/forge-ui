@@ -35,13 +35,24 @@
     "mrp": "MRP",
     "scheduling": "Scheduling",
     "oee": "OEE",
-    "approvals": "Approvals"
+    "approvals": "Approvals",
+    "back": "Back"
   },
   "navGroups": {
     "operations": "Operations",
     "sales": "Sales",
-    "supply": "Supply",
-    "resources": "Resources"
+    "production": "Production",
+    "inventory": "Inventory",
+    "purchasing": "Purchasing",
+    "people": "People",
+    "insights": "Insights"
+  },
+  "adminGroups": {
+    "usersAccess": "Users & Access",
+    "masterData": "Master Data",
+    "integrations": "Integrations",
+    "workflow": "Workflow",
+    "system": "System"
   },
   "header": {
     "home": "Home",

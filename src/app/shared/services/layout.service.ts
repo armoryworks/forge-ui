@@ -30,8 +30,6 @@ export class LayoutService {
   private readonly _isAccountRoute = signal(this.checkAccountRoute(window.location.pathname));
   private readonly _isAuthRoute = signal(this.checkAuthRoute(window.location.pathname));
   private readonly _isOnboardingRoute = signal(this.checkOnboardingRoute(window.location.pathname));
-  private readonly _breadcrumbLabel = signal(this.routeToLabel(window.location.pathname));
-  private readonly _breadcrumbRoute = signal(this.routeToPath(window.location.pathname));
 
   readonly sidebarCollapsed = this._sidebarCollapsed.asReadonly();
   readonly mobileMenuOpen = this._mobileMenuOpen.asReadonly();
@@ -40,8 +38,6 @@ export class LayoutService {
   readonly isAccountRoute = this._isAccountRoute.asReadonly();
   readonly isAuthRoute = this._isAuthRoute.asReadonly();
   readonly isOnboardingRoute = this._isOnboardingRoute.asReadonly();
-  readonly breadcrumbLabel = this._breadcrumbLabel.asReadonly();
-  readonly breadcrumbRoute = this._breadcrumbRoute.asReadonly();
 
   readonly sidebarVisible = computed(() => {
     if (this._isDisplayRoute()) return false;
@@ -69,8 +65,6 @@ export class LayoutService {
       this._isAccountRoute.set(this.checkAccountRoute(e.urlAfterRedirects));
       this._isAuthRoute.set(this.checkAuthRoute(e.urlAfterRedirects));
       this._isOnboardingRoute.set(this.checkOnboardingRoute(e.urlAfterRedirects));
-      this._breadcrumbLabel.set(this.routeToLabel(e.urlAfterRedirects));
-      this._breadcrumbRoute.set(this.routeToPath(e.urlAfterRedirects));
     });
 
     this.ngZone.runOutsideAngular(() => {
@@ -101,6 +95,15 @@ export class LayoutService {
     }
   }
 
+  expandSidebar(): void {
+    if (this._isMobile()) {
+      this._mobileMenuOpen.set(true);
+    } else if (this._sidebarCollapsed()) {
+      this._sidebarCollapsed.set(false);
+      localStorage.setItem('qbe-sidebar-collapsed', 'false');
+    }
+  }
+
   closeMobileMenu(): void {
     this._mobileMenuOpen.set(false);
   }
@@ -123,47 +126,6 @@ export class LayoutService {
 
   private checkOnboardingRoute(url: string): boolean {
     return url.startsWith('/onboarding');
-  }
-
-  private routeToPath(url: string): string {
-    const pathname = url.split('?')[0];
-    const segment = pathname.split('/').filter(Boolean)[0] ?? 'dashboard';
-    return `/${segment}`;
-  }
-
-  private routeToLabel(url: string): string {
-    const labels: Record<string, string> = {
-      dashboard: 'Dashboard',
-      kanban: 'Kanban Board',
-      backlog: 'Backlog',
-      planning: 'Planning',
-      calendar: 'Calendar',
-      parts: 'Parts Catalog',
-      inventory: 'Inventory',
-      customers: 'Customers',
-      vendors: 'Vendors',
-      quotes: 'Quotes',
-      'sales-orders': 'Sales Orders',
-      'purchase-orders': 'Purchase Orders',
-      shipments: 'Shipments',
-      invoices: 'Invoices',
-      payments: 'Payments',
-      leads: 'Leads',
-      expenses: 'Expenses',
-      assets: 'Assets',
-      'time-tracking': 'Time Tracking',
-      quality: 'Quality',
-      reports: 'Reports',
-      admin: 'Admin',
-      account: 'Account',
-      ai: 'AI Assistants',
-      chat: 'Chat',
-      notifications: 'Notifications',
-    };
-    // Strip query params, then extract first path segment: "/parts/42?detail=part:1" → "parts"
-    const pathname = url.split('?')[0];
-    const segment = pathname.split('/').filter(Boolean)[0] ?? 'dashboard';
-    return labels[segment] ?? segment.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
   }
 
   /**

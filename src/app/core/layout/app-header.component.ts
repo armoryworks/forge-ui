@@ -11,6 +11,7 @@ import { ThemeService } from '../../shared/services/theme.service';
 import { NotificationService } from '../../shared/services/notification.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { LayoutService } from '../../shared/services/layout.service';
+import { NavTreeService } from '../../shared/services/nav-tree.service';
 import { SearchService } from '../../shared/services/search.service';
 import { AiService, AiSearchSuggestion } from '../../shared/services/ai.service';
 import { LanguageService, SupportedLanguage } from '../../shared/services/language.service';
@@ -36,6 +37,7 @@ export class AppHeaderComponent implements OnInit {
   private readonly notificationService = inject(NotificationService);
   private readonly authService = inject(AuthService);
   protected readonly layout = inject(LayoutService);
+  protected readonly navTree = inject(NavTreeService);
   private readonly searchService = inject(SearchService);
   private readonly destroyRef = inject(DestroyRef);
   protected readonly aiService = inject(AiService);

@@ -13,14 +13,40 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   transition: width $transition-sidebar;
   padding: $sp-md 0;
 
   &--expanded {
     width: $sidebar-width-expanded;
   }
+}
+
+.sidebar__panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  &--forward {
+    animation: sidebar-slide-forward 180ms ease;
+  }
+
+  &--back {
+    animation: sidebar-slide-back 180ms ease;
+  }
+}
+
+@keyframes sidebar-slide-forward {
+  from { transform: translateX(16px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes sidebar-slide-back {
+  from { transform: translateX(-16px); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
 }
 
 .nav-item {
@@ -75,11 +101,50 @@
   &--toggle {
     margin-bottom: $sp-sm;
   }
+
+  &--back {
+    color: var(--text);
+    background: var(--bg);
+    margin-bottom: $sp-xs;
+
+    &:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+  }
+
+  &--group {
+    text-align: left;
+  }
 }
 
 .nav-item__label {
   @include uppercase-label(var(--font-size-sm), 0.5px, 600);
   @include truncate;
+
+  &--header {
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 700;
+    font-size: var(--font-size-title);
+    color: var(--text);
+  }
+}
+
+.nav-item__chevron {
+  margin-left: auto;
+  font-size: $icon-size-sm !important;
+  opacity: 0.5;
+  flex-shrink: 0;
+
+  .nav-item:hover & {
+    opacity: 1;
+  }
+
+  .nav-item--active & {
+    color: var(--primary);
+    opacity: 1;
+  }
 }
 
 .nav-item__badge {
@@ -131,18 +196,6 @@
   }
 }
 
-.sidebar__section-label {
-  font-size: var(--font-size-xxs);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-muted);
-  padding: $sp-xs $sp-lg;
-  margin-top: $sp-xs;
-  flex-shrink: 0;
-  @include truncate;
-}
-
 .sidebar__divider {
   height: $border-width;
   background: var(--border);
@@ -152,21 +205,4 @@
 
 .sidebar__spacer {
   flex: 1;
-}
-
-.nav-item--sub {
-  .sidebar--expanded & {
-    padding-left: $sp-2xl;
-    height: 30px;
-    min-height: 30px;
-  }
-
-  .material-icons-outlined {
-    font-size: $icon-size-xs;
-    color: var(--text-muted);
-  }
-
-  &.nav-item--active .material-icons-outlined {
-    color: var(--primary);
-  }
 }

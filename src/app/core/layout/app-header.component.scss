@@ -75,6 +75,12 @@
   opacity: 1;
 }
 
+.breadcrumb__group {
+  color: inherit;
+  opacity: 0.7;
+  cursor: default;
+}
+
 .app-header__search {
   flex: 1;
   background: var(--bg);

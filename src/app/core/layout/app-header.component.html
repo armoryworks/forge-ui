@@ -14,8 +14,16 @@
   <div class="header-sep hide-tablet"></div>
   <nav class="breadcrumb hide-tablet" aria-label="Breadcrumb">
     <a routerLink="/dashboard" class="breadcrumb__link">{{ 'header.home' | translate }}</a>
-    <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
-    <a [routerLink]="layout.breadcrumbRoute()" class="breadcrumb__link breadcrumb__current">{{ layout.breadcrumbLabel() }}</a>
+    @for (crumb of navTree.breadcrumbTrail(); track crumb.label; let last = $last) {
+      <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
+      @if (crumb.route && last) {
+        <a [routerLink]="crumb.route" class="breadcrumb__link breadcrumb__current">{{ crumb.i18nKey! | translate }}</a>
+      } @else if (crumb.route) {
+        <a [routerLink]="crumb.route" class="breadcrumb__link">{{ crumb.i18nKey! | translate }}</a>
+      } @else {
+        <span class="breadcrumb__link breadcrumb__group">{{ crumb.i18nKey! | translate }}</span>
+      }
+    }
   </nav>
 
   @if (!layout.isOnboardingRoute()) {
