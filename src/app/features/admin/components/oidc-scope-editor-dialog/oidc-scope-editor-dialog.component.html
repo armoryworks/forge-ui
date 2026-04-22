@@ -2,7 +2,8 @@
   <form [formGroup]="form">
     <p class="dialog-lead">
       Custom scopes let you expose domain-specific claims (permissions, company IDs, feature flags) to OIDC clients.
-      Map each scope to a JSON object whose keys become claim names in the <code>id_token</code> / <code>userinfo</code> response.
+      Map each scope to a JSON array of rules. Each rule emits one or more claims into the
+      <code>id_token</code> / <code>userinfo</code> response.
     </p>
 
     @if (isSystem()) {
@@ -34,14 +35,15 @@
     <app-textarea
       label="Claim mappings (JSON)"
       formControlName="claimMappingsJson"
-      placeholder='{ "qb_company_id": "CompanyId", "qb_permissions": "Permissions" }'
+      placeholder='[{"claimType":"qb_permissions","source":"role","value":"*"}]'
       [rows]="5"
       [required]="true" />
 
     <p class="scope-editor__hint">
-      Keys are claim names emitted in tokens. Values are either literal strings or <code>{{'{PropertyName}'}}</code> refs
-      into the user profile (CompanyId, Permissions, Department, etc.). Empty object <code>{{'{}'}}</code> means the scope
-      is a marker with no claims.
+      Each rule has <code>claimType</code> (emitted claim name), <code>source</code>
+      (<code>role</code> | <code>profile</code> | <code>static</code> | <code>expression</code>),
+      <code>value</code> (source-specific selector — role name, profile property, literal), and optional
+      <code>emittedValue</code> override. Empty array <code>[]</code> means the scope is a marker with no claims.
     </p>
 
     <app-input

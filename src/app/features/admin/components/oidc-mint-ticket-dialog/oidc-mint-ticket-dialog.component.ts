@@ -82,7 +82,7 @@ export class OidcMintTicketDialogComponent {
     ttlHours: 'Ticket lifetime',
   });
 
-  protected readonly canSubmit = computed(() => this.form.valid && !this.saving() && !this.result());
+  protected readonly canSubmit = computed(() => this.violations().length === 0 && !this.saving() && !this.result());
 
   protected close(): void {
     this.closed.emit();

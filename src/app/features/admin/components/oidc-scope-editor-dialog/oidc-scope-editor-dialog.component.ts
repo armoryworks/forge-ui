@@ -11,12 +11,12 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { OidcAdminService } from '../../services/oidc-admin.service';
 import { OidcScopeListItem } from '../../models/oidc-scope-list-item.model';
 
-function jsonObjectValidator(ctrl: AbstractControl): ValidationErrors | null {
+function jsonArrayValidator(ctrl: AbstractControl): ValidationErrors | null {
   const v = ctrl.value;
   if (!v) return null;
   try {
     const parsed = JSON.parse(v);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    if (!Array.isArray(parsed)) {
       return { invalidJson: true };
     }
     return null;
@@ -58,7 +58,7 @@ export class OidcScopeEditorDialogComponent {
     ]),
     displayName: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     description: new FormControl('', [Validators.required, Validators.maxLength(500)]),
-    claimMappingsJson: new FormControl('{}', [Validators.required, jsonObjectValidator]),
+    claimMappingsJson: new FormControl('[]', [Validators.required, jsonArrayValidator]),
     resourcesCsv: new FormControl(''),
     isActive: new FormControl(true),
   });
@@ -78,7 +78,7 @@ export class OidcScopeEditorDialogComponent {
           name: s.name,
           displayName: s.displayName,
           description: s.description,
-          claimMappingsJson: s.claimMappingsJson || '{}',
+          claimMappingsJson: s.claimMappingsJson || '[]',
           resourcesCsv: s.resourcesCsv ?? '',
           isActive: s.isActive,
         });
