@@ -1,0 +1,62 @@
+@use 'styles/variables' as *;
+
+.dialog-lead {
+  margin: 0 0 $sp-md;
+  color: var(--text-secondary);
+  font-size: $font-size-sm;
+  line-height: 1.5;
+
+  code {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    padding: 1px 5px;
+    color: var(--text);
+  }
+}
+
+.scope-editor {
+  &__system-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: var(--info-light);
+    border-left: $border-width-accent solid var(--info);
+    font-size: $font-size-sm;
+    line-height: 1.4;
+    color: var(--text);
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      color: var(--info);
+      flex-shrink: 0;
+    }
+
+    code {
+      font-family: $font-family-mono;
+      font-size: $font-size-xs;
+      background: var(--bg);
+      border: $border-width-thin solid var(--border);
+      padding: 1px 5px;
+    }
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    line-height: 1.4;
+
+    code {
+      font-family: $font-family-mono;
+      font-size: $font-size-xxs;
+      background: var(--surface);
+      border: $border-width-thin solid var(--border);
+      padding: 1px 4px;
+    }
+  }
+}
+
+.footer-spacer { flex: 1; }

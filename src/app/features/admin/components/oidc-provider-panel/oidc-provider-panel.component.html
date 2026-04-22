@@ -1,0 +1,387 @@
+<div class="oidc-panel">
+  <header class="oidc-panel__header">
+    <div class="oidc-panel__title">
+      <span class="material-icons-outlined" aria-hidden="true">shield_lock</span>
+      <div>
+        <h3>OIDC Provider</h3>
+        <p>Let other applications sign in via qb-engineer. Issue tickets, approve clients, manage scopes, review activity.</p>
+      </div>
+    </div>
+    <div class="oidc-panel__actions">
+      <button class="action-btn action-btn--sm" (click)="refreshActive()" aria-label="Refresh">
+        <span class="material-icons-outlined">refresh</span> Refresh
+      </button>
+      <button class="action-btn action-btn--sm action-btn--create" (click)="openMintTicket()" aria-label="Mint registration ticket">
+        <span class="material-icons-outlined">add</span> Mint ticket
+      </button>
+    </div>
+  </header>
+
+  <mat-tab-group [selectedIndex]="sectionIndex()" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs="false" animationDuration="0ms">
+    <mat-tab label="Clients">
+      <div class="oidc-panel__tab">
+        @if (clients().length === 0 && !loadingClients()) {
+          <div class="oidc-panel__empty-guide">
+            <span class="material-icons-outlined">shield_lock</span>
+            <div>
+              <strong>No OIDC clients yet.</strong>
+              <p>A <em>client</em> is an external application that wants qb-engineer users to be able to sign into it. To onboard one:</p>
+              <ol>
+                <li>Click <strong>Mint ticket</strong> (top-right) to create a one-time registration code.</li>
+                <li>Share that code with the client developer over a secure channel.</li>
+                <li>They self-register; a <em>Pending</em> row appears here for you to approve.</li>
+              </ol>
+              <p class="oidc-panel__empty-hint">See the <strong>Docs</strong> tab for the full lifecycle, secret rotation, and security model.</p>
+            </div>
+          </div>
+        }
+        <app-data-table
+          tableId="oidc-clients"
+          [columns]="clientColumns"
+          [data]="clients()"
+          [loading]="loadingClients()"
+          [clickableRows]="true"
+          emptyIcon="shield_lock"
+          emptyMessage="No OIDC clients yet. Mint a ticket to let a client register."
+          (rowClick)="openClientDetail($event)">
+          <ng-template appColumnCell="status" let-row>
+            <span [class]="statusClass(row.status)">{{ row.status }}</span>
+          </ng-template>
+          <ng-template appColumnCell="isFirstParty" let-row>
+            @if (row.isFirstParty) {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--yes" aria-label="First-party">verified</span>
+            } @else {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--no" aria-label="Third-party">public</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="requireConsent" let-row>
+            @if (row.requireConsent) {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--yes" aria-label="Consent required">task_alt</span>
+            } @else {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--muted" aria-label="Auto-granted">flash_on</span>
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Tickets">
+      <div class="oidc-panel__tab">
+        @if (tickets().length === 0 && !loadingTickets()) {
+          <div class="oidc-panel__empty-guide">
+            <span class="material-icons-outlined">confirmation_number</span>
+            <div>
+              <strong>No registration tickets.</strong>
+              <p>Tickets are single-use codes you share with an external client developer. When they POST to <code>/connect/register</code> with the code, the ticket is consumed and a <em>Pending</em> client appears on the Clients tab.</p>
+              <p class="oidc-panel__empty-hint">Tickets expire automatically (default 48 hours) and can be revoked from this list if they leak.</p>
+            </div>
+          </div>
+        }
+        <app-data-table
+          tableId="oidc-tickets"
+          [columns]="ticketColumns"
+          [data]="tickets()"
+          [loading]="loadingTickets()"
+          emptyIcon="confirmation_number"
+          emptyMessage="No registration tickets. Mint one to onboard a new client.">
+          <ng-template appColumnCell="status" let-row>
+            <span [class]="statusClass(row.status)">{{ row.status }}</span>
+          </ng-template>
+        </app-data-table>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Scopes">
+      <div class="oidc-panel__tab">
+        <div class="oidc-panel__subactions">
+          <button class="action-btn action-btn--sm action-btn--create" (click)="openCreateScope()" aria-label="Create custom scope">
+            <span class="material-icons-outlined">add</span> New scope
+          </button>
+        </div>
+        @if (scopes().length === 0 && !loadingScopes()) {
+          <div class="oidc-panel__empty-guide">
+            <span class="material-icons-outlined">extension</span>
+            <div>
+              <strong>No custom scopes defined.</strong>
+              <p>Custom scopes let you expose domain-specific claims to clients (company ID, permissions, department, feature flags). Built-in OIDC scopes (<code>openid</code>, <code>profile</code>, <code>email</code>, <code>roles</code>, <code>offline_access</code>) are always available without needing to list them here.</p>
+              <p class="oidc-panel__empty-hint">Typical use: <code>qb.parts.read</code> exposing <code>&#123;"qb_permissions":"Permissions"&#125;</code> so a reporting app can enforce the same RBAC the UI uses.</p>
+            </div>
+          </div>
+        }
+        <app-data-table
+          tableId="oidc-scopes"
+          [columns]="scopeColumns"
+          [data]="scopes()"
+          [loading]="loadingScopes()"
+          [clickableRows]="true"
+          emptyIcon="extension"
+          emptyMessage="No scopes defined. OpenID Connect system scopes are always available."
+          (rowClick)="openEditScope($event)">
+          <ng-template appColumnCell="isSystem" let-row>
+            @if (row.isSystem) {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--muted" aria-label="System">lock</span>
+            } @else {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--yes" aria-label="Custom">extension</span>
+            }
+          </ng-template>
+          <ng-template appColumnCell="isActive" let-row>
+            @if (row.isActive) {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--yes" aria-label="Active">check_circle</span>
+            } @else {
+              <span class="material-icons-outlined oidc-panel__bool oidc-panel__bool--no" aria-label="Inactive">cancel</span>
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Audit">
+      <div class="oidc-panel__tab">
+        <app-toolbar>
+          <app-select
+            label="Event type"
+            [formControl]="auditEventTypeControl"
+            [options]="auditEventOptions" />
+          <app-input
+            label="Client ID contains"
+            placeholder="qb-external-xyz"
+            [formControl]="auditClientIdControl" />
+          <app-input
+            label="Actor user ID"
+            placeholder="e.g. 42"
+            [formControl]="auditActorUserIdControl" />
+          <app-date-range-picker
+            label="Date range"
+            [presets]="['Today', 'This Week', 'This Month', 'Last 30 Days']"
+            [formControl]="auditDateRangeControl" />
+          <span appSpacer></span>
+          <button class="action-btn action-btn--sm" [disabled]="!hasAuditFilters()" (click)="clearAuditFilters()" aria-label="Clear filters">
+            <span class="material-icons-outlined">filter_alt_off</span> Clear
+          </button>
+          <button class="action-btn action-btn--sm action-btn--primary" (click)="applyAuditFilters()" aria-label="Apply filters">
+            <span class="material-icons-outlined">search</span> Apply
+          </button>
+        </app-toolbar>
+        <app-data-table
+          tableId="oidc-audit"
+          [columns]="auditColumns"
+          [data]="audit()"
+          [loading]="loadingAudit()"
+          [clickableRows]="true"
+          emptyIcon="history"
+          emptyMessage="No audit events match the current filters."
+          (rowClick)="openAuditDetail($event)">
+        </app-data-table>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Docs">
+      <div class="oidc-panel__tab oidc-panel__docs">
+        <section>
+          <h4>What is this?</h4>
+          <p>
+            qb-engineer can act as an <strong>OpenID Connect (OIDC) Identity Provider</strong> for other applications.
+            Employees sign in to qb-engineer once and can reach authorized third-party apps without separate passwords.
+            This panel is where you onboard those apps, approve them, and monitor their activity.
+          </p>
+          <div class="oidc-panel__callout oidc-panel__callout--info">
+            <span class="material-icons-outlined">info</span>
+            <div>
+              <strong>When to use this:</strong> you have an external app (internal tool, vendor portal, reporting dashboard, etc.)
+              that needs to know who the signed-in qb-engineer user is. Instead of managing a second set of passwords,
+              let that app delegate authentication here. You stay in control of who can access it via role gates and consent screens.
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h4>The three-step onboarding flow</h4>
+          <ol class="oidc-panel__steps">
+            <li>
+              <strong>Mint a registration ticket</strong> — click <em>Mint ticket</em> in the top-right.
+              Enter the expected client name (human identifier), the redirect URI prefix the client will use (e.g.
+              <code>https://reports.mycorp.com/auth/</code>), the scopes you want to allow, and an expiration (default 48 hours).
+              You'll get a one-time code that looks like <code>qbetkt_&lt;prefix&gt;_&lt;random&gt;</code> — copy it once; it won't display again.
+            </li>
+            <li>
+              <strong>Share the ticket out-of-band</strong> — send the code to the client developer via a secure channel
+              (encrypted chat, password manager share, signed email). The ticket is single-use; redeeming it once invalidates it.
+            </li>
+            <li>
+              <strong>Client self-registers, then you approve</strong> — the client's server POSTs to
+              <code>/connect/register</code> (RFC 7591) with the ticket plus its metadata (display name, logo, redirect URIs
+              inside the allowed prefix, optional signed software statement). qb-engineer creates a <em>Pending</em> client
+              and shows it on the <em>Clients</em> tab. Click the client to review what was submitted, then choose
+              first-party vs. third-party, auto-grant vs. consent-required, which roles may authenticate, and which custom
+              scopes they may request. Approving flips the status to <em>Active</em> and the client can begin using
+              <code>/connect/authorize</code> immediately.
+            </li>
+          </ol>
+        </section>
+
+        <section>
+          <h4>First-party vs. third-party (what you're choosing on approval)</h4>
+          <div class="oidc-panel__compare">
+            <div class="oidc-panel__compare-card">
+              <strong>First-party</strong>
+              <p>
+                Apps your org owns — employee tools, internal dashboards, custom software.
+                Default to <em>auto-grant consent</em> because users shouldn't be asked to approve internal apps every login.
+              </p>
+              <p class="oidc-panel__hint">Typical icon: your company's own logo. Recommend role-gating to employees only.</p>
+            </div>
+            <div class="oidc-panel__compare-card">
+              <strong>Third-party</strong>
+              <p>
+                Apps external vendors own that want to sign users in via qb-engineer.
+                Default to <em>require consent</em> — the user sees a screen listing exactly what data the app will receive.
+              </p>
+              <p class="oidc-panel__hint">Users can revoke third-party apps from Account &rsaquo; Connected Apps at any time.</p>
+            </div>
+          </div>
+        </section>
+
+        <section>
+          <h4>The three-tier rotation model</h4>
+          <p>There are three distinct secrets in this system. Each rotates at a different moment, and you never need to touch two at once.</p>
+          <table class="oidc-panel__table">
+            <thead>
+              <tr><th>Secret</th><th>Who holds it</th><th>When it rotates</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Registration ticket</strong><br><code>qbetkt_&hellip;</code></td>
+                <td>Admin → shared once with client developer</td>
+                <td>Consumed on first <code>/connect/register</code> call, then invalid forever</td>
+              </tr>
+              <tr>
+                <td><strong>Client secret</strong><br><code>qbecs_&hellip;</code></td>
+                <td>Client server (stored in client's config)</td>
+                <td>Rotated from client detail dialog → <em>Rotate secret</em>. Old secret invalid on rotation.</td>
+              </tr>
+              <tr>
+                <td><strong>Registration access token</strong><br><code>qberat_&hellip;</code></td>
+                <td>Client server (used for self-service metadata updates)</td>
+                <td>Automatically rotated each time the client PATCHes its own <code>/connect/register/&#123;client_id&#125;</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h4>Scopes — what claims the client receives</h4>
+          <p>
+            Scopes are named permissions the client requests at <code>/connect/authorize</code>. Built-in scopes follow the OpenID Connect spec:
+          </p>
+          <ul class="oidc-panel__scope-list">
+            <li><code>openid</code> — required; subject identifier (user ID)</li>
+            <li><code>profile</code> — name, picture, locale</li>
+            <li><code>email</code> — email + email_verified</li>
+            <li><code>roles</code> — qb-engineer roles array</li>
+            <li><code>offline_access</code> — refresh token (client can renew tokens without user present)</li>
+          </ul>
+          <p>
+            Custom scopes live on the <em>Scopes</em> tab. Each custom scope maps a JSON object into token claims — e.g.
+            <code>&#123;"qb_company_id":"CompanyId","qb_permissions":"Permissions"&#125;</code> adds those fields to the
+            <code>id_token</code> and <code>/connect/userinfo</code> response. Keys are claim names; values are either literal
+            strings or <code>&#123;PropertyName&#125;</code> refs into the user profile.
+          </p>
+        </section>
+
+        <section>
+          <h4>Endpoints (for the client developer)</h4>
+          <ul class="oidc-panel__endpoints">
+            <li><code>/.well-known/openid-configuration</code> — discovery document; point the client library here and it auto-configures.</li>
+            <li><code>/.well-known/jwks</code> — signing keys (JWKS). Clients fetch this to verify JWT signatures.</li>
+            <li><code>/connect/register</code> — RFC 7591 dynamic client registration (POST with ticket).</li>
+            <li><code>/connect/register/&#123;client_id&#125;</code> — client reads/updates its own metadata using the registration access token.</li>
+            <li><code>/connect/authorize</code> — interactive login + consent screen (GET; redirects back to client with <code>code</code>).</li>
+            <li><code>/connect/token</code> — code exchange + refresh token grant (POST).</li>
+            <li><code>/connect/userinfo</code> — claims for the signed-in user (GET with bearer token).</li>
+            <li><code>/connect/logout</code> — end-session endpoint; clears qb-engineer session and redirects back to client.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Security controls in place</h4>
+          <ul class="oidc-panel__security">
+            <li><strong>Authorization Code + PKCE only.</strong> Implicit flow is not supported; it's deprecated for good reason.</li>
+            <li><strong>Three-tier secret rotation.</strong> See above. Compromised client? Rotate the client secret; no user or ticket impact.</li>
+            <li><strong>Optional signed software statements.</strong> Add a publisher's JWKS URL to the ticket and the client must present a signed statement — prevents ticket theft from being useful without the publisher's private key.</li>
+            <li><strong>Role gates per client.</strong> Only users whose role is on the client's allow-list can sign in. A denied attempt is logged in the audit trail with event <code>RoleGateDenied</code>.</li>
+            <li><strong>Per-client consent screens.</strong> Third-party apps get an explicit consent UI; users can revoke from Account &rsaquo; Connected Apps. The grant is persisted per user per client.</li>
+            <li><strong>Redirect URI strict-prefix matching.</strong> The client must redirect to a URL matching the prefix you set on the ticket; any mismatch is rejected and logged as <code>RedirectUriMismatch</code>.</li>
+            <li><strong>Full audit log</strong> covers every admin action (ticket mint, client approve/suspend/revoke, secret rotate, scope changes) and every runtime event (tokens issued, consent granted/denied, security violations).</li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Common mistakes to avoid</h4>
+          <ul class="oidc-panel__mistakes">
+            <li>
+              <strong>Sharing the ticket over email.</strong> Plain email is not secure. Use an encrypted chat or a password manager share. If a ticket leaks, revoke it from the Tickets tab.
+            </li>
+            <li>
+              <strong>Making every client first-party.</strong> First-party auto-grants consent. If the app is not yours, users deserve a chance to see what it's taking. Default to third-party unless you control the codebase.
+            </li>
+            <li>
+              <strong>Leaving redirect prefix too broad.</strong> <code>https://</code> matches any HTTPS URL. Narrow it to the app's actual host + path: <code>https://reports.mycorp.com/auth/</code>.
+            </li>
+            <li>
+              <strong>Rotating the client secret while the client is live.</strong> The old secret invalidates immediately on rotation; coordinate with the client developer. Existing user sessions continue (they don't use the secret), but the client can't exchange new codes until it has the new secret.
+            </li>
+            <li>
+              <strong>Revoking instead of suspending.</strong> Revoke is terminal — you cannot un-revoke. For a temporary issue (compromise suspicion, payment lapse, maintenance window), suspend. Suspend → Approve restores the client with the same client_id and secret.
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h4>Troubleshooting</h4>
+          <dl class="oidc-panel__troubleshoot">
+            <dt>Client says "ticket invalid or expired"</dt>
+            <dd>Tickets are single-use and time-boxed. Check the Tickets tab — if the status is <em>Expired</em>, mint a new one. If <em>Redeemed</em>, the client already registered; look on the Clients tab.</dd>
+
+            <dt>User sees "access denied" at /connect/authorize</dt>
+            <dd>Role gate. Check the client detail dialog → Allowed roles. If the user is not in one of those roles, either add their role to the client or grant them the role. The audit trail will have a <code>RoleGateDenied</code> event.</dd>
+
+            <dt>Client says "redirect_uri mismatch"</dt>
+            <dd>The client's actual redirect URI must start with the prefix recorded when they registered. Check <code>RedirectUriMismatch</code> events in the audit trail — the attempted URI is in the payload.</dd>
+
+            <dt>Consent screen appears every login for a first-party app</dt>
+            <dd>Open the client detail, flip <em>Require consent</em> off. First-party apps typically auto-grant.</dd>
+
+            <dt>Custom claims aren't showing up in the token</dt>
+            <dd>Confirm three things: (1) the scope is marked <em>Active</em>, (2) the client's Allowed custom scopes includes it, (3) the user's profile actually has the property referenced in the mapping. Empty properties become <code>null</code> claims.</dd>
+          </dl>
+        </section>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
+
+@if (showMintDialog()) {
+  <app-oidc-mint-ticket-dialog
+    (closed)="onMintDialogClosed()"
+    (minted)="onTicketMinted()" />
+}
+
+@if (selectedClientId(); as cid) {
+  <app-oidc-client-detail-dialog
+    [clientId]="cid"
+    (closed)="onClientDetailClosed()"
+    (changed)="onClientChanged()" />
+}
+
+@if (scopeEditorOpen()) {
+  <app-oidc-scope-editor-dialog
+    [scope]="scopeBeingEdited()"
+    (closed)="onScopeEditorClosed()"
+    (saved)="onScopeSaved()" />
+}
+
+@if (selectedAuditEvent(); as evt) {
+  <app-oidc-audit-detail-dialog
+    [event]="evt"
+    (closed)="onAuditDetailClosed()" />
+}

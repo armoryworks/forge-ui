@@ -1,0 +1,66 @@
+<app-dialog [title]="'Audit event'" width="640px" (closed)="close()">
+  <div class="audit-detail">
+    <div class="audit-detail__header">
+      <span [class]="categoryClass()">{{ meta().category }}</span>
+      <h4>{{ meta().label }}</h4>
+      <p class="audit-detail__event-code"><code>{{ event().eventType }}</code></p>
+    </div>
+
+    <dl class="audit-detail__meta">
+      <dt>When</dt>
+      <dd>{{ event().createdAt | date:'MM/dd/yyyy hh:mm:ss a' }}</dd>
+
+      <dt>Actor user</dt>
+      <dd>{{ event().actorUserId ?? '— (system or anonymous)' }}</dd>
+
+      <dt>IP address</dt>
+      <dd>
+        @if (event().actorIpAddress) {
+          <code>{{ event().actorIpAddress }}</code>
+        } @else {
+          <span class="audit-detail__empty">—</span>
+        }
+      </dd>
+
+      <dt>Client</dt>
+      <dd>
+        @if (event().clientId) {
+          <code>{{ event().clientId }}</code>
+        } @else {
+          <span class="audit-detail__empty">—</span>
+        }
+      </dd>
+
+      <dt>Ticket</dt>
+      <dd>
+        @if (event().ticketId !== null) {
+          <code>#{{ event().ticketId }}</code>
+        } @else {
+          <span class="audit-detail__empty">—</span>
+        }
+      </dd>
+
+      <dt>Scope</dt>
+      <dd>
+        @if (event().scopeName) {
+          <code>{{ event().scopeName }}</code>
+        } @else {
+          <span class="audit-detail__empty">—</span>
+        }
+      </dd>
+    </dl>
+
+    @if (prettyJson(); as json) {
+      <div class="audit-detail__payload">
+        <span class="audit-detail__payload-label">Event payload</span>
+        <pre class="audit-detail__json"><code>{{ json }}</code></pre>
+      </div>
+    } @else {
+      <p class="audit-detail__no-payload">This event has no structured payload.</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button type="button" class="action-btn" (click)="close()">Close</button>
+  </div>
+</app-dialog>

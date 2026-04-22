@@ -11,6 +11,10 @@ import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.gu
 export const routes: Routes = [
   { path: 'login', canActivate: [setupCompleteGuard], component: LoginComponent },
   { path: 'sso/callback', loadComponent: () => import('./features/auth/sso-callback.component').then(m => m.SsoCallbackComponent) },
+  {
+    path: 'oidc',
+    loadChildren: () => import('./features/oidc/oidc.routes').then(m => m.OIDC_ROUTES),
+  },
   { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
   { path: 'setup/:token', component: TokenSetupComponent },
   {

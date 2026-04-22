@@ -1,5 +1,22 @@
 @use 'styles/variables' as *;
 
+.integrations-tabs {
+  &__body {
+    padding: $sp-lg 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-lg;
+  }
+
+  &__lead {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
+
+    strong { color: var(--text); font-weight: 600; }
+  }
+}
+
 .link-btn {
   background: none;
   border: none;

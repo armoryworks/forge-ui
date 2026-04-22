@@ -1,0 +1,76 @@
+<app-dialog [title]="isEdit() ? (isSystem() ? 'System scope (read-only)' : 'Edit custom scope') : 'New custom scope'" width="560px" [dirty]="form.dirty" (closed)="close()">
+  <form [formGroup]="form">
+    <p class="dialog-lead">
+      Custom scopes let you expose domain-specific claims (permissions, company IDs, feature flags) to OIDC clients.
+      Map each scope to a JSON object whose keys become claim names in the <code>id_token</code> / <code>userinfo</code> response.
+    </p>
+
+    @if (isSystem()) {
+      <div class="scope-editor__system-warning">
+        <span class="material-icons-outlined">lock</span>
+        <span>System scopes (<code>openid</code>, <code>profile</code>, <code>email</code>, <code>roles</code>, <code>offline_access</code>) are built into the OpenID Connect spec and cannot be modified.</span>
+      </div>
+    }
+
+    <app-input
+      label="Scope name (URL-safe, immutable)"
+      formControlName="name"
+      placeholder="qb.parts.read"
+      [required]="true" />
+
+    <app-input
+      label="Display name"
+      formControlName="displayName"
+      placeholder="Read parts catalog"
+      [required]="true" />
+
+    <app-textarea
+      label="Description"
+      formControlName="description"
+      placeholder="Shown on the consent screen. Explain what this scope grants."
+      [rows]="2"
+      [required]="true" />
+
+    <app-textarea
+      label="Claim mappings (JSON)"
+      formControlName="claimMappingsJson"
+      placeholder='{ "qb_company_id": "CompanyId", "qb_permissions": "Permissions" }'
+      [rows]="5"
+      [required]="true" />
+
+    <p class="scope-editor__hint">
+      Keys are claim names emitted in tokens. Values are either literal strings or <code>{{'{PropertyName}'}}</code> refs
+      into the user profile (CompanyId, Permissions, Department, etc.). Empty object <code>{{'{}'}}</code> means the scope
+      is a marker with no claims.
+    </p>
+
+    <app-input
+      label="Resources (CSV, optional)"
+      formControlName="resourcesCsv"
+      placeholder="qb-api, reports-api" />
+
+    @if (isEdit() && !isSystem()) {
+      <app-toggle label="Active (clients can request this scope)" formControlName="isActive" />
+    }
+  </form>
+
+  <div dialog-footer>
+    @if (isEdit() && !isSystem()) {
+      <button type="button" class="action-btn action-btn--danger" [disabled]="deleting()" (click)="delete()" aria-label="Delete scope">
+        <span class="material-icons-outlined">delete</span> Delete
+      </button>
+      <span class="footer-spacer"></span>
+    }
+    <button type="button" class="action-btn" (click)="close()">Cancel</button>
+    @if (!isSystem()) {
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button type="button"
+                class="action-btn action-btn--primary"
+                [disabled]="form.invalid || saving()"
+                (click)="save()">
+          {{ isEdit() ? 'Save changes' : 'Create scope' }}
+        </button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>
