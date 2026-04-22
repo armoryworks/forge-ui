@@ -275,6 +275,10 @@ export class AdminService {
     return this.http.get<KioskTerminal[]>(`${this.shopFloorBase}/terminals`);
   }
 
+  deleteKioskTerminal(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.shopFloorBase}/terminals/${id}`);
+  }
+
   // State Withholding Reference Data
   getStateWithholdingData(): Observable<ReferenceDataEntry[]> {
     return this.http.get<ReferenceDataEntry[]>(`${environment.apiUrl}/reference-data/state_withholding`);

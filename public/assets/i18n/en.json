@@ -1264,7 +1264,13 @@
     "openKiosk": "Open kiosk clock",
     "selectColor": "Select color",
     "removeMember": "Remove",
-    "addMember": "Add"
+    "addMember": "Add",
+    "remove": "Remove",
+    "removeTerminal": "Remove kiosk",
+    "removeTerminalTitle": "Remove Kiosk Terminal?",
+    "removeTerminalConfirm": "This will unpair \"{{name}}\" and require the kiosk to be set up again from the device. Continue?",
+    "terminalRemoved": "Kiosk terminal removed",
+    "terminalRemoveFailed": "Failed to remove terminal"
   },
   "onboarding": {
     "completeProfile": "Complete your employee profile",

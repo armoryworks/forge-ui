@@ -1259,7 +1259,13 @@
     "openKiosk": "Abrir reloj de kiosco",
     "selectColor": "Seleccionar color",
     "removeMember": "Quitar",
-    "addMember": "Agregar"
+    "addMember": "Agregar",
+    "remove": "Quitar",
+    "removeTerminal": "Quitar kiosco",
+    "removeTerminalTitle": "¿Quitar terminal de kiosco?",
+    "removeTerminalConfirm": "Esto desvinculará \"{{name}}\" y requerirá reconfigurar el kiosco desde el dispositivo. ¿Continuar?",
+    "terminalRemoved": "Terminal de kiosco eliminada",
+    "terminalRemoveFailed": "Error al eliminar la terminal"
   },
   "onboarding": {
     "completeProfile": "Complete su perfil de empleado",

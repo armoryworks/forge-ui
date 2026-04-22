@@ -81,6 +81,16 @@
       <ng-template appColumnCell="deviceToken" let-terminal>
         <code class="device-token">{{ terminal.deviceToken }}</code>
       </ng-template>
+
+      <ng-template appColumnCell="actions" let-terminal>
+        <button class="icon-btn icon-btn--danger"
+          [matTooltip]="'teamsPanel.removeTerminal' | translate"
+          matTooltipPosition="above"
+          (click)="removeTerminal(terminal); $event.stopPropagation()"
+          [attr.aria-label]="'teamsPanel.removeTerminal' | translate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
     </app-data-table>
   </div>
 }

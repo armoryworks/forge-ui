@@ -84,6 +84,7 @@ export class TeamsPanelComponent implements OnInit {
     { field: 'name', header: 'Terminal Name', sortable: true },
     { field: 'teamName', header: 'Team', sortable: true },
     { field: 'deviceToken', header: 'Device Token', sortable: true, width: '200px' },
+    { field: 'actions', header: '', width: '60px', align: 'right' },
   ];
 
   ngOnInit(): void {
@@ -248,5 +249,26 @@ export class TeamsPanelComponent implements OnInit {
 
   protected openKioskDisplay(): void {
     window.open('/display/shop-floor', '_blank');
+  }
+
+  protected removeTerminal(terminal: KioskTerminal): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('teamsPanel.removeTerminalTitle'),
+        message: this.translate.instant('teamsPanel.removeTerminalConfirm', { name: terminal.name }),
+        confirmLabel: this.translate.instant('teamsPanel.remove'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.adminService.deleteKioskTerminal(terminal.id).subscribe({
+        next: () => {
+          this.load();
+          this.snackbar.success(this.translate.instant('teamsPanel.terminalRemoved'));
+        },
+        error: () => this.snackbar.error(this.translate.instant('teamsPanel.terminalRemoveFailed')),
+      });
+    });
   }
 }
