@@ -246,5 +246,23 @@
     "deletedAt": null,
     "deletedBy": null,
     "id": 8
+  },
+  {
+    "id": 100008,
+    "name": "Acme Demo Industries",
+    "companyName": "Acme Demo Industries",
+    "email": "contact@acme-demo.example",
+    "phone": "(555) 555-0100",
+    "isActive": true,
+    "creditLimit": 0,
+    "isOnCreditHold": false,
+    "creditHoldReason": null,
+    "creditHoldAt": null,
+    "creditHoldById": null,
+    "lastCreditReviewDate": null,
+    "creditRating": null,
+    "creditTerms": null,
+    "createdAt": "2026-04-23T08:12:25.037451Z",
+    "updatedAt": "2026-04-23T08:12:25.037451Z"
   }
 ]

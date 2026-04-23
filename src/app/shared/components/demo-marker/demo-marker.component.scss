@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+// Obvious marker — small amber pill, fixed top-right. Never blocks clicks.
+.demo-chip {
+  position: fixed;
+  top: $sp-md;
+  right: $sp-md;
+  z-index: $z-toast;
+  pointer-events: none;
+  user-select: none;
+
+  padding: $sp-xxs $sp-sm;
+  font-family: $font-family-mono;
+  font-size: $font-size-xxs;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #7a4a00;
+  background: rgba(255, 193, 7, 0.92);
+  border: $border-width-thin solid rgba(122, 74, 0, 0.35);
+  text-transform: uppercase;
+}
+
+// Subtle marker — diagonal repeating "demo" watermark across the viewport.
+// pointer-events: none + very low opacity so it never interferes with
+// reading, clicking, or screen readers. High enough resolution that it
+// survives screenshots / crops / resizes as a steganographic tell.
+.demo-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.03;
+  background-repeat: repeat;
+  background-size: 320px 320px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><text x='20' y='180' fill='%23000' font-family='monospace' font-size='44' font-weight='700' transform='rotate(-30 160 160)' letter-spacing='8'>qb-demo</text></svg>");
+
+  @media (prefers-color-scheme: dark) {
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><text x='20' y='180' fill='%23fff' font-family='monospace' font-size='44' font-weight='700' transform='rotate(-30 160 160)' letter-spacing='8'>qb-demo</text></svg>");
+  }
+}

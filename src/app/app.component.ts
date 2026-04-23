@@ -15,6 +15,8 @@ import { ChatPreviewPopupComponent } from './shared/components/chat-preview-popu
 import { OfflineBannerComponent } from './shared/components/offline-banner/offline-banner.component';
 import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
 import { KeyboardShortcutsHelpComponent } from './shared/components/keyboard-shortcuts-help/keyboard-shortcuts-help.component';
+import { DemoMarkerComponent } from './shared/components/demo-marker/demo-marker.component';
+import { initDemoMode } from './shared/utils/demo-mode.utils';
 import { SyncConflictDialogComponent, SyncConflictDialogData } from './shared/components/sync-conflict-dialog/sync-conflict-dialog.component';
 import { SyncConflict, SyncConflictResolution } from './shared/models/sync-conflict.model';
 import { AuthService } from './shared/services/auth.service';
@@ -55,7 +57,7 @@ import { PLANNING_TOUR } from './shared/tours/planning-tour';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent],
+  imports: [RouterOutlet, TranslatePipe, AppHeaderComponent, SidebarComponent, ToastContainerComponent, ConnectionBannerComponent, AnnouncementOverlayComponent, OnboardingBannerComponent, OfflineBannerComponent, LoadingOverlayComponent, KeyboardShortcutsHelpComponent, ChatPreviewPopupComponent, DemoMarkerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -132,6 +134,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    initDemoMode();
     this.routeLoading.initialize();
     this.broadcast.initialize();
     this.draftBroadcast.initialize();

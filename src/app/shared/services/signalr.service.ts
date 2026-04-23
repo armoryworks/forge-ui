@@ -21,6 +21,16 @@ export class SignalrService {
     const existing = this.connections.get(hubPath);
     if (existing) return existing;
 
+    // Demo mode: no backend exists. Hand out an inert stub that silently
+    // accepts start/stop/on calls so feature code can run unchanged.
+    if (environment.demoMode) {
+      const stub = createStubHubConnection();
+      this.connections.set(hubPath, stub);
+      this._hasEverConnected.set(true);
+      this._connectionState.set('connected');
+      return stub;
+    }
+
     const connection = new HubConnectionBuilder()
       .withUrl(`${environment.hubUrl}/${hubPath}`, {
         accessTokenFactory: () => this.authService.token() ?? '',
@@ -165,4 +175,25 @@ export class SignalrService {
     }
     return false;
   }
+}
+
+function createStubHubConnection(): HubConnection {
+  const noop = (): void => { /* noop */ };
+  const asyncNoop = (): Promise<void> => Promise.resolve();
+  const stub = {
+    state: HubConnectionState.Connected,
+    connectionId: 'demo',
+    start: asyncNoop,
+    stop: asyncNoop,
+    invoke: <T = unknown>(): Promise<T> => Promise.resolve(undefined as unknown as T),
+    send: asyncNoop,
+    on: noop,
+    off: noop,
+    onclose: noop,
+    onreconnecting: noop,
+    onreconnected: noop,
+    stream: () => ({ subscribe: () => ({ dispose: noop }) }),
+    baseUrl: '',
+  };
+  return stub as unknown as HubConnection;
 }
