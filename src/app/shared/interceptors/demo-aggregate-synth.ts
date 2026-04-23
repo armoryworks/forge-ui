@@ -43,6 +43,23 @@ export async function synthesizeAggregate(
     }
   }
 
+  // Sales orders live under /orders (not /sales-orders). Need list enrichment
+  // (customerName, lineCount, total) and a detail shape with lines nested.
+  if (head === 'orders') {
+    if (method === 'GET' && !sub) return synthesizeSalesOrderList(store, query);
+    if (method === 'GET' && sub && /^\d+$/.test(sub)) {
+      const tail = segs[2];
+      if (!tail) return synthesizeSalesOrderDetail(store, Number(sub));
+      // Sub-resources: /orders/{id}/schedule|documents|invoices|shipments|returns.
+      return [];
+    }
+    if (method === 'POST' && sub && /^\d+$/.test(sub)) {
+      // /orders/{id}/confirm, /cancel — echo success.
+      return { success: true };
+    }
+    return undefined;
+  }
+
   if (head === 'dashboard') {
     if (method !== 'GET') return {};
     if (!sub) return synthesizeDashboard(store);
@@ -360,4 +377,125 @@ async function synthesizeKanbanJobs(
         coverPhotoUrl: null,
       };
     });
+}
+
+async function synthesizeSalesOrderList(store: DemoDataStore, query: URLSearchParams): Promise<unknown[]> {
+  const [orders, customers, lines] = await Promise.all([
+    store.load('sales-order'),
+    store.load('customer'),
+    store.load('sales-order-line'),
+  ]);
+
+  const customerById = new Map(customers.map(c => [String(c['id']), c]));
+  const linesByOrder = new Map<string, Row[]>();
+  for (const l of lines) {
+    const key = String(l['salesOrderId']);
+    const list = linesByOrder.get(key) ?? [];
+    list.push(l);
+    linesByOrder.set(key, list);
+  }
+
+  const customerFilter = query.get('customerId');
+  const statusFilter = query.get('status');
+  const search = (query.get('search') ?? '').trim().toLowerCase();
+
+  return orders
+    .filter(o => !customerFilter || String(o['customerId']) === String(customerFilter))
+    .filter(o => !statusFilter || String(o['status']) === statusFilter)
+    .filter(o => {
+      if (!search) return true;
+      const orderNumber = String(o['orderNumber'] ?? '').toLowerCase();
+      const customerPO = String(o['customerPO'] ?? '').toLowerCase();
+      const customer = customerById.get(String(o['customerId']));
+      const customerName = String(customer?.['name'] ?? '').toLowerCase();
+      return orderNumber.includes(search) || customerPO.includes(search) || customerName.includes(search);
+    })
+    .map(o => {
+      const customer = customerById.get(String(o['customerId']));
+      const orderLines = linesByOrder.get(String(o['id'])) ?? [];
+      const total = orderLines.reduce((sum, l) => sum + Number(l['quantity'] ?? 0) * Number(l['unitPrice'] ?? 0), 0);
+      return {
+        id: o['id'],
+        orderNumber: o['orderNumber'],
+        customerId: o['customerId'],
+        customerName: customer ? String(customer['name']) : '',
+        status: o['status'],
+        customerPO: o['customerPO'] ?? null,
+        lineCount: orderLines.length,
+        total,
+        requestedDeliveryDate: o['requestedDeliveryDate'] ?? null,
+        createdAt: o['createdAt'] ?? null,
+      };
+    });
+}
+
+async function synthesizeSalesOrderDetail(store: DemoDataStore, id: number): Promise<unknown | null> {
+  const [orders, customers, lines, quotes, parts] = await Promise.all([
+    store.load('sales-order'),
+    store.load('customer'),
+    store.load('sales-order-line'),
+    store.load('quote'),
+    store.load('part'),
+  ]);
+
+  const order = orders.find(o => String(o['id']) === String(id));
+  if (!order) return null;
+
+  const customer = customers.find(c => String(c['id']) === String(order['customerId']));
+  const quote = order['quoteId'] != null ? quotes.find(q => String(q['id']) === String(order['quoteId'])) : undefined;
+  const partById = new Map(parts.map(p => [String(p['id']), p]));
+
+  const orderLines = lines
+    .filter(l => String(l['salesOrderId']) === String(id))
+    .map(l => {
+      const part = l['partId'] != null ? partById.get(String(l['partId'])) : undefined;
+      const qty = Number(l['quantity'] ?? 0);
+      const unitPrice = Number(l['unitPrice'] ?? 0);
+      const shipped = Number(l['shippedQuantity'] ?? 0);
+      return {
+        id: l['id'],
+        partId: l['partId'] ?? null,
+        partNumber: part ? String(part['partNumber'] ?? '') : null,
+        description: l['description'] ?? '',
+        quantity: qty,
+        unitPrice,
+        lineTotal: qty * unitPrice,
+        lineNumber: l['lineNumber'] ?? 0,
+        shippedQuantity: shipped,
+        remainingQuantity: Math.max(0, qty - shipped),
+        isFullyShipped: shipped >= qty && qty > 0,
+        notes: l['notes'] ?? null,
+        jobs: [],
+      };
+    });
+
+  const subtotal = orderLines.reduce((sum, l) => sum + l.lineTotal, 0);
+  const taxRate = Number(order['taxRate'] ?? 0);
+  const taxAmount = subtotal * taxRate;
+
+  return {
+    id: order['id'],
+    orderNumber: order['orderNumber'],
+    customerId: order['customerId'],
+    customerName: customer ? String(customer['name']) : '',
+    quoteId: order['quoteId'] ?? null,
+    quoteNumber: quote ? String(quote['quoteNumber'] ?? '') : null,
+    shippingAddressId: order['shippingAddressId'] ?? null,
+    billingAddressId: order['billingAddressId'] ?? null,
+    status: order['status'],
+    creditTerms: order['creditTerms'] ?? null,
+    confirmedDate: order['confirmedDate'] ?? null,
+    requestedDeliveryDate: order['requestedDeliveryDate'] ?? null,
+    customerPO: order['customerPO'] ?? null,
+    notes: order['notes'] ?? null,
+    taxRate,
+    subtotal,
+    taxAmount,
+    total: subtotal + taxAmount,
+    lines: orderLines,
+    shipments: [],
+    returns: [],
+    createdAt: order['createdAt'] ?? null,
+    updatedAt: order['updatedAt'] ?? null,
+  };
 }
