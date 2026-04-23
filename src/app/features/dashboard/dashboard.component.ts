@@ -119,12 +119,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly showAddMenu = signal(false);
 
   constructor() {
-    // Init GridStack when the container appears (after data loads and @if renders)
-    effect(() => {
+    // Init GridStack when the container appears (after data loads and @if renders).
+    // Destroy on cleanup so focus/ambient mode toggles (which unmount the container via @if)
+    // re-init a fresh grid on remount instead of reusing a grid bound to a stale DOM node.
+    effect((onCleanup) => {
       const container = this.gridContainer()?.nativeElement;
       if (container && !this.grid) {
         this.initGrid(container);
       }
+      onCleanup(() => {
+        if (this.grid) {
+          this.resizeObserver?.disconnect();
+          this.resizeObserver = null;
+          this.grid.destroy(false);
+          this.grid = null;
+          this.gridReady.set(false);
+        }
+      });
     });
   }
 
