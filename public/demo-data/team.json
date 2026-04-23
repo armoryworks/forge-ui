@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Day Shift — Machining",
+    "color": "#2563eb",
+    "description": "CNC operators covering Haas + Okuma day shift.",
+    "memberCount": 4
+  },
+  {
+    "id": 2,
+    "name": "Night Shift — Molding",
+    "color": "#7c3aed",
+    "description": "Injection molding 2nd shift team (Arburg cells).",
+    "memberCount": 3
+  },
+  {
+    "id": 3,
+    "name": "Quality Lab",
+    "color": "#059669",
+    "description": "CMM operators, first-article + final inspection.",
+    "memberCount": 2
+  },
+  {
+    "id": 4,
+    "name": "Assembly / Packaging",
+    "color": "#ea580c",
+    "description": "Manual assembly cell and outbound packaging.",
+    "memberCount": 3
+  },
+  {
+    "id": 5,
+    "name": "Front Office",
+    "color": "#dc2626",
+    "description": "PMs, schedulers, and customer service.",
+    "memberCount": 2
+  }
+]

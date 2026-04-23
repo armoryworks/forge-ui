@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Day Shift",
+    "code": "D",
+    "startTime": "06:00",
+    "endTime": "14:30",
+    "breakMinutes": 30,
+    "isActive": true,
+    "description": "First shift — Mon–Fri."
+  },
+  {
+    "id": 2,
+    "name": "Evening Shift",
+    "code": "E",
+    "startTime": "14:30",
+    "endTime": "23:00",
+    "breakMinutes": 30,
+    "isActive": true,
+    "description": "Second shift — Mon–Fri."
+  },
+  {
+    "id": 3,
+    "name": "Night Shift",
+    "code": "N",
+    "startTime": "23:00",
+    "endTime": "06:00",
+    "breakMinutes": 30,
+    "isActive": true,
+    "description": "Third shift — molding cells only."
+  },
+  {
+    "id": 4,
+    "name": "Office Hours",
+    "code": "O",
+    "startTime": "08:00",
+    "endTime": "17:00",
+    "breakMinutes": 60,
+    "isActive": true,
+    "description": "Front office + PMs."
+  }
+]

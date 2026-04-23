@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "id": 1,
+    "templateName": "MedSafe Monthly GHS Housings",
+    "customerId": 12,
+    "customerName": "MedSafe Systems, Inc.",
+    "cadence": "Monthly",
+    "nextRunDate": "2026-05-01T00:00:00Z",
+    "lastRunDate": "2026-04-01T00:00:00Z",
+    "quantityPerOrder": 40,
+    "status": "Active",
+    "partCount": 1,
+    "notes": "Blanket — ship every 1st."
+  },
+  {
+    "id": 2,
+    "templateName": "Aerospace Partners Shaft Kit",
+    "customerId": 7,
+    "customerName": "Aerospace Partners LLC",
+    "cadence": "BiWeekly",
+    "nextRunDate": "2026-05-04T00:00:00Z",
+    "lastRunDate": "2026-04-20T00:00:00Z",
+    "quantityPerOrder": 25,
+    "status": "Active",
+    "partCount": 2,
+    "notes": null
+  },
+  {
+    "id": 3,
+    "templateName": "Field Repair Kits (Q2 2026)",
+    "customerId": 15,
+    "customerName": "FieldOps Industrial",
+    "cadence": "Quarterly",
+    "nextRunDate": "2026-07-01T00:00:00Z",
+    "lastRunDate": "2026-04-01T00:00:00Z",
+    "quantityPerOrder": 100,
+    "status": "Paused",
+    "partCount": 4,
+    "notes": "Paused pending customer revision to BOM."
+  }
+]

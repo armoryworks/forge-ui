@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Weekly Shop Floor Inspection",
+    "description": "Walk the floor, note safety/cleanliness issues, log findings.",
+    "trackTypeId": 1,
+    "trackTypeName": "Maintenance",
+    "internalProjectTypeId": null,
+    "assigneeId": 4,
+    "cronExpression": "0 8 * * 1",
+    "isActive": true,
+    "lastRunAt": "2026-04-20T08:00:00Z",
+    "nextRunAt": "2026-04-27T08:00:00Z",
+    "createdAt": "2025-09-12T10:00:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Monthly CMM Calibration Verify",
+    "description": "Verify Mitutoyo CMM calibration against check block.",
+    "trackTypeId": 2,
+    "trackTypeName": "QC",
+    "internalProjectTypeId": null,
+    "assigneeId": 5,
+    "cronExpression": "0 14 1 * *",
+    "isActive": true,
+    "lastRunAt": "2026-04-01T14:00:00Z",
+    "nextRunAt": "2026-05-01T14:00:00Z",
+    "createdAt": "2024-12-18T13:30:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Quarterly Air Compressor PM",
+    "description": "Oil change, filter check, leak detection.",
+    "trackTypeId": 1,
+    "trackTypeName": "Maintenance",
+    "internalProjectTypeId": null,
+    "assigneeId": 4,
+    "cronExpression": "0 6 1 */3 *",
+    "isActive": true,
+    "lastRunAt": "2026-04-01T06:00:00Z",
+    "nextRunAt": "2026-07-01T06:00:00Z",
+    "createdAt": "2024-06-10T09:00:00Z"
+  },
+  {
+    "id": 4,
+    "name": "Daily Backup Verification",
+    "description": "Verify nightly MinIO/DB backup completed successfully.",
+    "trackTypeId": 3,
+    "trackTypeName": "Admin",
+    "internalProjectTypeId": null,
+    "assigneeId": 1,
+    "cronExpression": "0 7 * * *",
+    "isActive": true,
+    "lastRunAt": "2026-04-22T07:00:00Z",
+    "nextRunAt": "2026-04-23T07:00:00Z",
+    "createdAt": "2023-05-14T12:00:00Z"
+  },
+  {
+    "id": 5,
+    "name": "Annual Forklift Inspection",
+    "description": "Certified operator inspection + OSHA paperwork.",
+    "trackTypeId": 1,
+    "trackTypeName": "Maintenance",
+    "internalProjectTypeId": null,
+    "assigneeId": 4,
+    "cronExpression": "0 10 1 1 *",
+    "isActive": false,
+    "lastRunAt": "2026-01-02T10:00:00Z",
+    "nextRunAt": "2027-01-01T10:00:00Z",
+    "createdAt": "2023-01-05T11:00:00Z"
+  }
+]

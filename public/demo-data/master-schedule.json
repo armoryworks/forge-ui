@@ -1,1 +1,57 @@
-[]
+[
+  {
+    "id": 1,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "weekStarting": "2026-04-20T00:00:00Z",
+    "forecastQuantity": 240,
+    "committedQuantity": 240,
+    "inventoryOnHand": 485,
+    "plannedProduction": 0,
+    "projectedAvailable": 245
+  },
+  {
+    "id": 2,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "weekStarting": "2026-04-27T00:00:00Z",
+    "forecastQuantity": 260,
+    "committedQuantity": 180,
+    "inventoryOnHand": 245,
+    "plannedProduction": 500,
+    "projectedAvailable": 485
+  },
+  {
+    "id": 3,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "weekStarting": "2026-04-20T00:00:00Z",
+    "forecastQuantity": 16,
+    "committedQuantity": 16,
+    "inventoryOnHand": 24,
+    "plannedProduction": 0,
+    "projectedAvailable": 8
+  },
+  {
+    "id": 4,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "weekStarting": "2026-04-27T00:00:00Z",
+    "forecastQuantity": 40,
+    "committedQuantity": 32,
+    "inventoryOnHand": 8,
+    "plannedProduction": 240,
+    "projectedAvailable": 208
+  },
+  {
+    "id": 5,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "weekStarting": "2026-04-20T00:00:00Z",
+    "forecastQuantity": 50,
+    "committedQuantity": 50,
+    "inventoryOnHand": 12,
+    "plannedProduction": 50,
+    "projectedAvailable": 12
+  }
+]

@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Standard 2026",
+    "customerId": null,
+    "customerName": null,
+    "currency": "USD",
+    "effectiveDate": "2026-01-01T00:00:00Z",
+    "expirationDate": "2026-12-31T00:00:00Z",
+    "isActive": true,
+    "entryCount": 42,
+    "description": "Default list for all non-contract customers."
+  },
+  {
+    "id": 2,
+    "name": "MedSafe Systems Contract",
+    "customerId": 12,
+    "customerName": "MedSafe Systems, Inc.",
+    "currency": "USD",
+    "effectiveDate": "2026-03-01T00:00:00Z",
+    "expirationDate": "2027-02-28T00:00:00Z",
+    "isActive": true,
+    "entryCount": 8,
+    "description": "Annual blanket agreement."
+  },
+  {
+    "id": 3,
+    "name": "Aerospace Partners Q2",
+    "customerId": 7,
+    "customerName": "Aerospace Partners LLC",
+    "currency": "USD",
+    "effectiveDate": "2026-04-01T00:00:00Z",
+    "expirationDate": "2026-06-30T00:00:00Z",
+    "isActive": true,
+    "entryCount": 5,
+    "description": "Quarterly pricing commitment."
+  }
+]

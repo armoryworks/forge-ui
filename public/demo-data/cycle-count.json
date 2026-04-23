@@ -1,1 +1,50 @@
-[]
+[
+  {
+    "id": 1,
+    "locationId": 4,
+    "locationName": "Bin A1-01",
+    "locationPath": "Main Warehouse / Rack A / Shelf A1 / Bin A1-01",
+    "status": "Completed",
+    "scheduledDate": "2026-04-15T00:00:00Z",
+    "completedDate": "2026-04-15T14:30:00Z",
+    "createdById": 4,
+    "createdByName": "Reeves, Sam",
+    "approvedById": 1,
+    "approvedByName": "Hayes, Morgan",
+    "notes": "Quarterly count — no variances.",
+    "totalLines": 2,
+    "variancesCount": 0
+  },
+  {
+    "id": 2,
+    "locationId": 5,
+    "locationName": "Bin A1-02",
+    "locationPath": "Main Warehouse / Rack A / Shelf A1 / Bin A1-02",
+    "status": "PendingApproval",
+    "scheduledDate": "2026-04-22T00:00:00Z",
+    "completedDate": "2026-04-22T15:45:00Z",
+    "createdById": 4,
+    "createdByName": "Reeves, Sam",
+    "approvedById": null,
+    "approvedByName": null,
+    "notes": "Variance on ST-1018 — -2 count. Confirmed physical.",
+    "totalLines": 2,
+    "variancesCount": 1
+  },
+  {
+    "id": 3,
+    "locationId": 8,
+    "locationName": "Bin B1-01",
+    "locationPath": "Main Warehouse / Rack B / Shelf B1 / Bin B1-01",
+    "status": "Scheduled",
+    "scheduledDate": "2026-04-28T00:00:00Z",
+    "completedDate": null,
+    "createdById": 1,
+    "createdByName": "Hayes, Morgan",
+    "approvedById": null,
+    "approvedByName": null,
+    "notes": "Weekly FG bin count.",
+    "totalLines": 0,
+    "variancesCount": 0
+  }
+]

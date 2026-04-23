@@ -1,1 +1,59 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "First-Article Inspection (General Machined)",
+    "category": "Incoming",
+    "revision": "C",
+    "isActive": true,
+    "itemCount": 12,
+    "lastUpdated": "2026-02-10T15:00:00Z",
+    "description": "Standard first-article check for machined parts.",
+    "items": [
+      { "sequence": 1, "description": "Overall length vs. print" },
+      { "sequence": 2, "description": "Diameter spec with micrometer" },
+      { "sequence": 3, "description": "Surface finish visual + Ra" },
+      { "sequence": 4, "description": "Thread gauge fit" }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Molding Process Validation",
+    "category": "InProcess",
+    "revision": "B",
+    "isActive": true,
+    "itemCount": 9,
+    "lastUpdated": "2026-03-02T11:15:00Z",
+    "description": "In-process checks for Arburg cells.",
+    "items": [
+      { "sequence": 1, "description": "Shot weight" },
+      { "sequence": 2, "description": "Cosmetic (short shots, flash)" }
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Final Packaging Audit",
+    "category": "Final",
+    "revision": "A",
+    "isActive": true,
+    "itemCount": 6,
+    "lastUpdated": "2026-01-08T09:30:00Z",
+    "description": "Outbound packaging + labeling check.",
+    "items": [
+      { "sequence": 1, "description": "Quantity match to SO line" },
+      { "sequence": 2, "description": "Label applied / legible" }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Medical Device Lot Traceability",
+    "category": "Final",
+    "revision": "D",
+    "isActive": true,
+    "itemCount": 15,
+    "lastUpdated": "2026-03-18T14:00:00Z",
+    "description": "FDA 21 CFR 820 traceability checklist (MedSafe Systems).",
+    "items": [
+      { "sequence": 1, "description": "Lot # recorded on every unit" }
+    ]
+  }
+]

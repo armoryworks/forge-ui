@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": 1,
+    "jobId": 1042,
+    "linkedJobId": 1055,
+    "linkedJobNumber": "J-1055",
+    "linkedJobTitle": "MM-GHS-1142 Batch #19",
+    "linkType": "Related",
+    "notes": "Shared tool change window — plan sequentially.",
+    "createdAt": "2026-04-19T13:00:00Z"
+  },
+  {
+    "id": 2,
+    "jobId": 1056,
+    "linkedJobId": 1042,
+    "linkedJobNumber": "J-1042",
+    "linkedJobTitle": "AR-BRKT-0087 Run 240",
+    "linkType": "Precedes",
+    "notes": "Material from the same lot — run after.",
+    "createdAt": "2026-04-21T08:45:00Z"
+  },
+  {
+    "id": 3,
+    "jobId": 1018,
+    "linkedJobId": 1042,
+    "linkedJobNumber": "J-1042",
+    "linkType": "Duplicates",
+    "linkedJobTitle": "AR-BRKT-0087 Run 240",
+    "notes": "Same part — different customer.",
+    "createdAt": "2026-04-16T11:00:00Z"
+  }
+]

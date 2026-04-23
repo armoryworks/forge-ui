@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Haas VF-2SS",
+    "code": "WC-VF2SS",
+    "workCenterType": "Machining",
+    "capacityHoursPerDay": 16,
+    "setupTimeMinutes": 30,
+    "hourlyRate": 125.00,
+    "assetId": 1,
+    "isActive": true,
+    "description": "Primary 3-axis CNC mill. 2-shift operation."
+  },
+  {
+    "id": 2,
+    "name": "Arburg 320C",
+    "code": "WC-ARB320C",
+    "workCenterType": "Molding",
+    "capacityHoursPerDay": 20,
+    "setupTimeMinutes": 45,
+    "hourlyRate": 95.00,
+    "assetId": 2,
+    "isActive": true,
+    "description": "60-ton injection molding. 24/5 capacity available."
+  },
+  {
+    "id": 3,
+    "name": "Okuma Lathe",
+    "code": "WC-OKUMA",
+    "workCenterType": "Turning",
+    "capacityHoursPerDay": 16,
+    "setupTimeMinutes": 25,
+    "hourlyRate": 110.00,
+    "assetId": 9,
+    "isActive": true,
+    "description": "CNC lathe. 8-position turret."
+  },
+  {
+    "id": 4,
+    "name": "QC Lab",
+    "code": "WC-QC",
+    "workCenterType": "Inspection",
+    "capacityHoursPerDay": 8,
+    "setupTimeMinutes": 10,
+    "hourlyRate": 85.00,
+    "assetId": 5,
+    "isActive": true,
+    "description": "CMM + granite plate. First-article and final inspection."
+  },
+  {
+    "id": 5,
+    "name": "Assembly Cell",
+    "code": "WC-ASM",
+    "workCenterType": "Assembly",
+    "capacityHoursPerDay": 16,
+    "setupTimeMinutes": 15,
+    "hourlyRate": 75.00,
+    "assetId": null,
+    "isActive": true,
+    "description": "Manual assembly + packaging."
+  }
+]

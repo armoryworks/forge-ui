@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": 1,
+    "partId": 201,
+    "partNumber": "AL-6061-BAR-1.5IN",
+    "alternatePartNumber": "AL-6061-BAR-1.5IN-T6511",
+    "alternateDescription": "T6511 temper (preferred for high-stress apps)",
+    "vendorId": 1,
+    "vendorName": "Acme Metals Supply",
+    "priority": 1,
+    "isApproved": true,
+    "notes": "Engineering-approved 2024-11."
+  },
+  {
+    "id": 2,
+    "partId": 215,
+    "partNumber": "ST-1018-ROD-0.75IN",
+    "alternatePartNumber": "ST-12L14-ROD-0.75IN",
+    "alternateDescription": "12L14 leaded — use when rapid machining required",
+    "vendorId": 2,
+    "vendorName": "Midwest Steel Co",
+    "priority": 2,
+    "isApproved": true,
+    "notes": "Substitute only with PM approval."
+  },
+  {
+    "id": 3,
+    "partId": 405,
+    "partNumber": "CUTTING-FLUID-5GAL",
+    "alternatePartNumber": "CUTTING-FLUID-5GAL-GEN",
+    "alternateDescription": "Generic house brand equivalent",
+    "vendorId": 5,
+    "vendorName": "Grainger Industrial",
+    "priority": 3,
+    "isApproved": false,
+    "notes": "Pending approval after trial batch."
+  }
+]

@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Cycle 2026-08",
+    "startDate": "2026-04-20T00:00:00Z",
+    "endDate": "2026-05-03T00:00:00Z",
+    "status": "Active",
+    "durationWeeks": 2,
+    "committedItemCount": 14,
+    "completedItemCount": 6,
+    "createdById": 1,
+    "createdByName": "Hayes, Morgan",
+    "createdAt": "2026-04-18T16:30:00Z"
+  },
+  {
+    "id": 2,
+    "name": "Cycle 2026-07",
+    "startDate": "2026-04-06T00:00:00Z",
+    "endDate": "2026-04-19T00:00:00Z",
+    "status": "Completed",
+    "durationWeeks": 2,
+    "committedItemCount": 18,
+    "completedItemCount": 16,
+    "createdById": 1,
+    "createdByName": "Hayes, Morgan",
+    "createdAt": "2026-04-04T15:00:00Z"
+  },
+  {
+    "id": 3,
+    "name": "Cycle 2026-06",
+    "startDate": "2026-03-23T00:00:00Z",
+    "endDate": "2026-04-05T00:00:00Z",
+    "status": "Completed",
+    "durationWeeks": 2,
+    "committedItemCount": 21,
+    "completedItemCount": 19,
+    "createdById": 1,
+    "createdByName": "Hayes, Morgan",
+    "createdAt": "2026-03-21T14:00:00Z"
+  }
+]

@@ -1,1 +1,14 @@
-[]
+[
+  { "id": 1, "eventId": 1, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-19T08:45:00Z" },
+  { "id": 2, "eventId": 1, "userId": 2, "userName": "Kim, Alex", "status": "Accepted", "respondedAt": "2026-04-19T08:50:00Z" },
+  { "id": 3, "eventId": 1, "userId": 3, "userName": "Torres, Jamie", "status": "Accepted", "respondedAt": "2026-04-19T09:00:00Z" },
+  { "id": 4, "eventId": 2, "userId": 2, "userName": "Kim, Alex", "status": "Accepted", "respondedAt": "2026-04-18T16:00:00Z" },
+  { "id": 5, "eventId": 2, "userId": 5, "userName": "Shah, Priya", "status": "Invited", "respondedAt": null },
+  { "id": 6, "eventId": 2, "userId": 6, "userName": "Liu, Jordan", "status": "Accepted", "respondedAt": "2026-04-18T17:30:00Z" },
+  { "id": 7, "eventId": 3, "userId": 4, "userName": "Reeves, Sam", "status": "Accepted", "respondedAt": "2026-04-16T10:00:00Z" },
+  { "id": 8, "eventId": 3, "userId": 2, "userName": "Kim, Alex", "status": "Declined", "respondedAt": "2026-04-17T14:00:00Z" },
+  { "id": 9, "eventId": 4, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-21T09:00:00Z" },
+  { "id": 10, "eventId": 4, "userId": 7, "userName": "Patel, Ravi", "status": "Accepted", "respondedAt": "2026-04-21T09:10:00Z" },
+  { "id": 11, "eventId": 5, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-15T11:00:00Z" },
+  { "id": 12, "eventId": 5, "userId": 2, "userName": "Kim, Alex", "status": "Accepted", "respondedAt": "2026-04-15T11:15:00Z" }
+]

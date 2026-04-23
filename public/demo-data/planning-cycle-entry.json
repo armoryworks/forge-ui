@@ -1,1 +1,77 @@
-[]
+[
+  {
+    "id": 1,
+    "planningCycleId": 1,
+    "jobId": 1042,
+    "jobNumber": "J-1042",
+    "jobTitle": "AR-BRKT-0087 Run 240",
+    "committedDate": "2026-04-18T00:00:00Z",
+    "estimatedHours": 8,
+    "assignedUserId": 2,
+    "assignedUserName": "Kim, Alex",
+    "status": "Completed",
+    "completedAt": "2026-04-22T14:30:00Z",
+    "priority": "Normal",
+    "position": 1
+  },
+  {
+    "id": 2,
+    "planningCycleId": 1,
+    "jobId": 1055,
+    "jobNumber": "J-1055",
+    "jobTitle": "MM-GHS-1142 Batch #19",
+    "committedDate": "2026-04-20T00:00:00Z",
+    "estimatedHours": 4,
+    "assignedUserId": 5,
+    "assignedUserName": "Shah, Priya",
+    "status": "OnHold",
+    "completedAt": null,
+    "priority": "High",
+    "position": 2
+  },
+  {
+    "id": 3,
+    "planningCycleId": 1,
+    "jobId": 1056,
+    "jobNumber": "J-1056",
+    "jobTitle": "AS-SHAFT-0554 Run 50",
+    "committedDate": "2026-04-23T00:00:00Z",
+    "estimatedHours": 12,
+    "assignedUserId": 2,
+    "assignedUserName": "Kim, Alex",
+    "status": "InProgress",
+    "completedAt": null,
+    "priority": "Normal",
+    "position": 3
+  },
+  {
+    "id": 4,
+    "planningCycleId": 1,
+    "jobId": 1059,
+    "jobNumber": "J-1059",
+    "jobTitle": "Customer Training Fixture",
+    "committedDate": "2026-04-27T00:00:00Z",
+    "estimatedHours": 6,
+    "assignedUserId": 6,
+    "assignedUserName": "Liu, Jordan",
+    "status": "Planned",
+    "completedAt": null,
+    "priority": "Low",
+    "position": 4
+  },
+  {
+    "id": 5,
+    "planningCycleId": 1,
+    "jobId": 1061,
+    "jobNumber": "J-1061",
+    "jobTitle": "AR-BRKT Tool Change (Bushing Replace)",
+    "committedDate": "2026-04-28T00:00:00Z",
+    "estimatedHours": 3,
+    "assignedUserId": 4,
+    "assignedUserName": "Reeves, Sam",
+    "status": "Planned",
+    "completedAt": null,
+    "priority": "High",
+    "position": 5
+  }
+]

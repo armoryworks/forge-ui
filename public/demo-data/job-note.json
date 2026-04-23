@@ -1,1 +1,52 @@
-[]
+[
+  {
+    "id": 1,
+    "jobId": 1042,
+    "content": "First-article cleared — releasing remainder of run.",
+    "authorId": 6,
+    "authorName": "Liu, Jordan",
+    "authorInitials": "LJ",
+    "authorColor": "#059669",
+    "createdAt": "2026-04-18T15:30:00Z"
+  },
+  {
+    "id": 2,
+    "jobId": 1042,
+    "content": "Customer asked about cosmetic gate mark — confirmed acceptable per NCR-2026-013.",
+    "authorId": 7,
+    "authorName": "Patel, Ravi",
+    "authorInitials": "PR",
+    "authorColor": "#ea580c",
+    "createdAt": "2026-04-19T10:00:00Z"
+  },
+  {
+    "id": 3,
+    "jobId": 1055,
+    "content": "Hold placed pending NCR-2026-014 disposition. 3 pcs oversized bore.",
+    "authorId": 6,
+    "authorName": "Liu, Jordan",
+    "authorInitials": "LJ",
+    "authorColor": "#059669",
+    "createdAt": "2026-04-20T15:10:00Z"
+  },
+  {
+    "id": 4,
+    "jobId": 1056,
+    "content": "Fixture plate ready. Op 10 scheduled to start 4/23 AM.",
+    "authorId": 2,
+    "authorName": "Kim, Alex",
+    "authorInitials": "KA",
+    "authorColor": "#2563eb",
+    "createdAt": "2026-04-22T16:00:00Z"
+  },
+  {
+    "id": 5,
+    "jobId": 1018,
+    "content": "Customer requested delivery move forward to 05/10. Reviewing capacity.",
+    "authorId": 1,
+    "authorName": "Hayes, Morgan",
+    "authorInitials": "HM",
+    "authorColor": "#7c3aed",
+    "createdAt": "2026-04-17T10:20:00Z"
+  }
+]

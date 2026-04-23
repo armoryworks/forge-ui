@@ -1,1 +1,74 @@
-[]
+[
+  {
+    "id": 1,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "priceListId": 1,
+    "priceListName": "Standard 2026",
+    "quantityBreak": 1,
+    "unitPrice": 8.45,
+    "effectiveDate": "2026-01-01T00:00:00Z",
+    "expirationDate": null,
+    "currency": "USD"
+  },
+  {
+    "id": 2,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "priceListId": 1,
+    "priceListName": "Standard 2026",
+    "quantityBreak": 250,
+    "unitPrice": 7.80,
+    "effectiveDate": "2026-01-01T00:00:00Z",
+    "expirationDate": null,
+    "currency": "USD"
+  },
+  {
+    "id": 3,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "priceListId": 1,
+    "priceListName": "Standard 2026",
+    "quantityBreak": 1000,
+    "unitPrice": 7.25,
+    "effectiveDate": "2026-01-01T00:00:00Z",
+    "expirationDate": null,
+    "currency": "USD"
+  },
+  {
+    "id": 4,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "priceListId": 1,
+    "priceListName": "Standard 2026",
+    "quantityBreak": 1,
+    "unitPrice": 42.50,
+    "effectiveDate": "2026-01-01T00:00:00Z",
+    "expirationDate": null,
+    "currency": "USD"
+  },
+  {
+    "id": 5,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "priceListId": 1,
+    "priceListName": "Standard 2026",
+    "quantityBreak": 1,
+    "unitPrice": 22.00,
+    "effectiveDate": "2026-01-01T00:00:00Z",
+    "expirationDate": null,
+    "currency": "USD"
+  },
+  {
+    "id": 6,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "priceListId": 2,
+    "priceListName": "MedSafe Systems Contract",
+    "quantityBreak": 1,
+    "unitPrice": 19.50,
+    "effectiveDate": "2026-03-01T00:00:00Z",
+    "expirationDate": "2027-02-28T00:00:00Z",
+    "currency": "USD"
+  }
+]

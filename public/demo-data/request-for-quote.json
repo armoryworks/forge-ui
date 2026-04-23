@@ -1,1 +1,56 @@
-[]
+[
+  {
+    "id": 1,
+    "rfqNumber": "RFQ-2026-0027",
+    "partId": 201,
+    "partNumber": "AL-6061-BAR-1.5IN",
+    "description": "Aluminum 6061 bar, 1.5\" x 12 ft",
+    "requestedQuantity": 60,
+    "status": "Awarded",
+    "vendorCount": 3,
+    "awardedVendorId": 1,
+    "awardedVendorName": "Acme Metals Supply",
+    "generatedPurchaseOrderId": 2314,
+    "requestedById": 3,
+    "requestedByName": "Torres, Jamie",
+    "requestedAt": "2026-04-16T09:30:00Z",
+    "dueDate": "2026-04-22T00:00:00Z",
+    "awardedAt": "2026-04-22T09:00:00Z"
+  },
+  {
+    "id": 2,
+    "rfqNumber": "RFQ-2026-0026",
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "description": "Secondary labels, 4-color",
+    "requestedQuantity": 2500,
+    "status": "AwaitingQuotes",
+    "vendorCount": 4,
+    "awardedVendorId": null,
+    "awardedVendorName": null,
+    "generatedPurchaseOrderId": null,
+    "requestedById": 3,
+    "requestedByName": "Torres, Jamie",
+    "requestedAt": "2026-04-19T14:00:00Z",
+    "dueDate": "2026-04-26T00:00:00Z",
+    "awardedAt": null
+  },
+  {
+    "id": 3,
+    "rfqNumber": "RFQ-2026-0025",
+    "partId": 405,
+    "partNumber": "CUTTING-FLUID-5GAL",
+    "description": "Cutting fluid 5-gal pails (annual blanket)",
+    "requestedQuantity": 48,
+    "status": "QuotesReceived",
+    "vendorCount": 3,
+    "awardedVendorId": null,
+    "awardedVendorName": null,
+    "generatedPurchaseOrderId": null,
+    "requestedById": 3,
+    "requestedByName": "Torres, Jamie",
+    "requestedAt": "2026-04-14T11:00:00Z",
+    "dueDate": "2026-04-21T00:00:00Z",
+    "awardedAt": null
+  }
+]

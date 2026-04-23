@@ -1,1 +1,65 @@
-[]
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "payPeriodStart": "2026-04-06T00:00:00Z",
+    "payPeriodEnd": "2026-04-19T00:00:00Z",
+    "payDate": "2026-04-24T00:00:00Z",
+    "grossPay": 3461.54,
+    "netPay": 2512.88,
+    "totalDeductions": 340.12,
+    "totalTaxes": 608.54,
+    "fileAttachmentId": null,
+    "source": "QbPayroll",
+    "externalId": "QBP-2026-08-0001",
+    "deductions": [
+      { "id": 1, "category": "Tax", "description": "Federal Withholding", "amount": 384.20 },
+      { "id": 2, "category": "Tax", "description": "FICA", "amount": 214.62 },
+      { "id": 3, "category": "Tax", "description": "Ohio State Withholding", "amount": 9.72 },
+      { "id": 4, "category": "Benefit", "description": "Health Insurance", "amount": 210.00 },
+      { "id": 5, "category": "Retirement", "description": "401(k) 4%", "amount": 130.12 }
+    ]
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "payPeriodStart": "2026-03-23T00:00:00Z",
+    "payPeriodEnd": "2026-04-05T00:00:00Z",
+    "payDate": "2026-04-10T00:00:00Z",
+    "grossPay": 3461.54,
+    "netPay": 2498.02,
+    "totalDeductions": 340.12,
+    "totalTaxes": 623.40,
+    "fileAttachmentId": null,
+    "source": "QbPayroll",
+    "externalId": "QBP-2026-07-0001",
+    "deductions": [
+      { "id": 6, "category": "Tax", "description": "Federal Withholding", "amount": 399.06 },
+      { "id": 7, "category": "Tax", "description": "FICA", "amount": 214.62 },
+      { "id": 8, "category": "Tax", "description": "Ohio State Withholding", "amount": 9.72 },
+      { "id": 9, "category": "Benefit", "description": "Health Insurance", "amount": 210.00 },
+      { "id": 10, "category": "Retirement", "description": "401(k) 4%", "amount": 130.12 }
+    ]
+  },
+  {
+    "id": 3,
+    "userId": 1,
+    "payPeriodStart": "2026-03-09T00:00:00Z",
+    "payPeriodEnd": "2026-03-22T00:00:00Z",
+    "payDate": "2026-03-27T00:00:00Z",
+    "grossPay": 3461.54,
+    "netPay": 2502.66,
+    "totalDeductions": 340.12,
+    "totalTaxes": 618.76,
+    "fileAttachmentId": null,
+    "source": "QbPayroll",
+    "externalId": "QBP-2026-06-0001",
+    "deductions": [
+      { "id": 11, "category": "Tax", "description": "Federal Withholding", "amount": 394.42 },
+      { "id": 12, "category": "Tax", "description": "FICA", "amount": 214.62 },
+      { "id": 13, "category": "Tax", "description": "Ohio State Withholding", "amount": 9.72 },
+      { "id": 14, "category": "Benefit", "description": "Health Insurance", "amount": 210.00 },
+      { "id": 15, "category": "Retirement", "description": "401(k) 4%", "amount": 130.12 }
+    ]
+  }
+]

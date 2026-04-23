@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "id": 1,
+    "vendorId": 1,
+    "vendorName": "Acme Metals Supply",
+    "periodStart": "2026-01-01T00:00:00Z",
+    "periodEnd": "2026-03-31T00:00:00Z",
+    "onTimeDeliveryPct": 0.94,
+    "qualityAcceptancePct": 0.98,
+    "priceIndex": 1.02,
+    "openOrderCount": 2,
+    "overdueCount": 0,
+    "rating": 4.6,
+    "notes": "Strong — one partial delivery (PO-2310) resolved in-period."
+  },
+  {
+    "id": 2,
+    "vendorId": 2,
+    "vendorName": "Midwest Steel Co",
+    "periodStart": "2026-01-01T00:00:00Z",
+    "periodEnd": "2026-03-31T00:00:00Z",
+    "onTimeDeliveryPct": 0.88,
+    "qualityAcceptancePct": 0.95,
+    "priceIndex": 1.04,
+    "openOrderCount": 1,
+    "overdueCount": 0,
+    "rating": 4.1,
+    "notes": "One out-of-round issue (NCR-2026-012) — requiring cert going forward."
+  },
+  {
+    "id": 3,
+    "vendorId": 5,
+    "vendorName": "Grainger Industrial",
+    "periodStart": "2026-01-01T00:00:00Z",
+    "periodEnd": "2026-03-31T00:00:00Z",
+    "onTimeDeliveryPct": 0.99,
+    "qualityAcceptancePct": 1.0,
+    "priceIndex": 1.08,
+    "openOrderCount": 0,
+    "overdueCount": 0,
+    "rating": 4.8,
+    "notes": "Premium pricing but flawless execution."
+  }
+]

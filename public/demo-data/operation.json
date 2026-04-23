@@ -1,1 +1,106 @@
-[]
+[
+  {
+    "id": 1,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "sequence": 10,
+    "operationName": "Mold",
+    "workCenterId": 2,
+    "workCenterName": "Arburg 320C",
+    "setupTimeMinutes": 45,
+    "cycleTimeMinutes": 0.65,
+    "standardRate": 92.0,
+    "notes": "8-cavity tool, 60-ton."
+  },
+  {
+    "id": 2,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "sequence": 20,
+    "operationName": "Deflash + Inspect",
+    "workCenterId": 4,
+    "workCenterName": "QC Lab",
+    "setupTimeMinutes": 10,
+    "cycleTimeMinutes": 0.4,
+    "standardRate": 85.0,
+    "notes": null
+  },
+  {
+    "id": 3,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "sequence": 10,
+    "operationName": "Rough Turn",
+    "workCenterId": 3,
+    "workCenterName": "Okuma Lathe",
+    "setupTimeMinutes": 25,
+    "cycleTimeMinutes": 3.2,
+    "standardRate": 110.0,
+    "notes": "Program: SHAFT-0554-ROUGH.nc"
+  },
+  {
+    "id": 4,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "sequence": 20,
+    "operationName": "Finish Turn",
+    "workCenterId": 3,
+    "workCenterName": "Okuma Lathe",
+    "setupTimeMinutes": 15,
+    "cycleTimeMinutes": 2.8,
+    "standardRate": 110.0,
+    "notes": null
+  },
+  {
+    "id": 5,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "sequence": 30,
+    "operationName": "Mill Flats",
+    "workCenterId": 1,
+    "workCenterName": "Haas VF-2SS",
+    "setupTimeMinutes": 30,
+    "cycleTimeMinutes": 1.8,
+    "standardRate": 125.0,
+    "notes": "4-axis indexer."
+  },
+  {
+    "id": 6,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "sequence": 40,
+    "operationName": "Final Inspection",
+    "workCenterId": 4,
+    "workCenterName": "QC Lab",
+    "setupTimeMinutes": 5,
+    "cycleTimeMinutes": 1.5,
+    "standardRate": 85.0,
+    "notes": "CMM + runout verification."
+  },
+  {
+    "id": 7,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "sequence": 10,
+    "operationName": "Mold",
+    "workCenterId": 2,
+    "workCenterName": "Arburg 320C",
+    "setupTimeMinutes": 50,
+    "cycleTimeMinutes": 1.1,
+    "standardRate": 92.0,
+    "notes": "4-cavity mold (custom)."
+  },
+  {
+    "id": 8,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "sequence": 20,
+    "operationName": "Secondary Assembly",
+    "workCenterId": 5,
+    "workCenterName": "Assembly Cell",
+    "setupTimeMinutes": 15,
+    "cycleTimeMinutes": 2.5,
+    "standardRate": 75.0,
+    "notes": "Insert + label."
+  }
+]

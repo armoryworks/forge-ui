@@ -1,1 +1,72 @@
-[]
+[
+  {
+    "id": 1,
+    "parentPartId": 318,
+    "parentPartNumber": "AR-BRKT-0087",
+    "componentPartId": 201,
+    "componentPartNumber": "AL-6061-BAR-1.5IN",
+    "componentPartName": "Aluminum 6061 bar, 1.5\"",
+    "quantity": 0.3,
+    "unitOfMeasure": "FT",
+    "sourceType": "Buy",
+    "leadTimeDays": 14,
+    "scrapFactor": 0.05,
+    "notes": "Cut to 3.5\" blank."
+  },
+  {
+    "id": 2,
+    "parentPartId": 391,
+    "parentPartNumber": "AS-SHAFT-0554",
+    "componentPartId": 215,
+    "componentPartNumber": "ST-1018-ROD-0.75IN",
+    "componentPartName": "1018 steel rod, 0.75\"",
+    "quantity": 0.75,
+    "unitOfMeasure": "FT",
+    "sourceType": "Buy",
+    "leadTimeDays": 10,
+    "scrapFactor": 0.04,
+    "notes": null
+  },
+  {
+    "id": 3,
+    "parentPartId": 287,
+    "parentPartNumber": "MM-GHS-1142",
+    "componentPartId": 502,
+    "componentPartNumber": "RESIN-PC-NAT",
+    "componentPartName": "Polycarbonate resin, natural",
+    "quantity": 0.042,
+    "unitOfMeasure": "LB",
+    "sourceType": "Buy",
+    "leadTimeDays": 21,
+    "scrapFactor": 0.02,
+    "notes": null
+  },
+  {
+    "id": 4,
+    "parentPartId": 287,
+    "parentPartNumber": "MM-GHS-1142",
+    "componentPartId": 503,
+    "componentPartNumber": "LBL-MM-GHS",
+    "componentPartName": "MedSafe identity label",
+    "quantity": 1,
+    "unitOfMeasure": "EA",
+    "sourceType": "Buy",
+    "leadTimeDays": 14,
+    "scrapFactor": 0.01,
+    "notes": "Applied at Assembly Cell op 20."
+  },
+  {
+    "id": 5,
+    "parentPartId": 601,
+    "parentPartNumber": "AW-ASSY-B",
+    "componentPartId": 318,
+    "componentPartNumber": "AR-BRKT-0087",
+    "componentPartName": "AR Bracket 0087",
+    "quantity": 2,
+    "unitOfMeasure": "EA",
+    "sourceType": "Make",
+    "leadTimeDays": 5,
+    "scrapFactor": 0.0,
+    "notes": "Left + right mount."
+  }
+]

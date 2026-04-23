@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "id": 1,
+    "customerId": 12,
+    "customerName": "MedSafe Systems, Inc.",
+    "contactId": 27,
+    "contactName": "Fielder, Rachel",
+    "type": "Call",
+    "subject": "April shipment follow-up",
+    "notes": "Rachel confirmed delivery on 04/18 was received in good order. Asked about moving May shipment earlier (05/10).",
+    "userId": 7,
+    "userName": "Patel, Ravi",
+    "occurredAt": "2026-04-20T11:00:00Z"
+  },
+  {
+    "id": 2,
+    "customerId": 12,
+    "customerName": "MedSafe Systems, Inc.",
+    "contactId": 27,
+    "contactName": "Fielder, Rachel",
+    "type": "Email",
+    "subject": "PO-2026-0412 acknowledgment",
+    "notes": "Sent PO ack + expected ship date.",
+    "userId": 3,
+    "userName": "Torres, Jamie",
+    "occurredAt": "2026-04-12T14:30:00Z"
+  },
+  {
+    "id": 3,
+    "customerId": 7,
+    "customerName": "Aerospace Partners LLC",
+    "contactId": 14,
+    "contactName": "Brooks, Daniel",
+    "type": "Meeting",
+    "subject": "Quarterly business review",
+    "notes": "In-person QBR. Discussed volume ramp for Q3 and lead-time improvements. Action: send updated quote by 4/30.",
+    "userId": 1,
+    "userName": "Hayes, Morgan",
+    "occurredAt": "2026-04-15T10:00:00Z"
+  },
+  {
+    "id": 4,
+    "customerId": 15,
+    "customerName": "FieldOps Industrial",
+    "contactId": 32,
+    "contactName": "Owens, Terri",
+    "type": "Note",
+    "subject": "Revision pending",
+    "notes": "Customer engineering reviewing BOM change. Pausing Q2 recurring order template.",
+    "userId": 1,
+    "userName": "Hayes, Morgan",
+    "occurredAt": "2026-04-08T09:15:00Z"
+  },
+  {
+    "id": 5,
+    "customerId": 3,
+    "customerName": "Ironhouse Fabrication",
+    "contactId": 9,
+    "contactName": "Marsh, Ellie",
+    "type": "Call",
+    "subject": "RFQ-2026-0025 clarification",
+    "notes": "Clarified cutting fluid spec — blanket PO, monthly release.",
+    "userId": 3,
+    "userName": "Torres, Jamie",
+    "occurredAt": "2026-04-17T13:45:00Z"
+  }
+]

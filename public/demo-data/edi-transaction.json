@@ -1,1 +1,77 @@
-[]
+[
+  {
+    "id": 1,
+    "partnerId": 1,
+    "partnerName": "MedSafe Systems EDI",
+    "transactionType": "850",
+    "description": "Purchase Order (Inbound)",
+    "direction": "Inbound",
+    "status": "Processed",
+    "controlNumber": "EDI-IN-00014201",
+    "receivedAt": "2026-04-22T14:30:00Z",
+    "processedAt": "2026-04-22T14:30:45Z",
+    "relatedEntityType": "SalesOrder",
+    "relatedEntityId": 2215,
+    "errorMessage": null
+  },
+  {
+    "id": 2,
+    "partnerId": 1,
+    "partnerName": "MedSafe Systems EDI",
+    "transactionType": "855",
+    "description": "PO Acknowledgment (Outbound)",
+    "direction": "Outbound",
+    "status": "Sent",
+    "controlNumber": "EDI-OUT-00014201",
+    "receivedAt": null,
+    "processedAt": "2026-04-22T14:32:10Z",
+    "relatedEntityType": "SalesOrder",
+    "relatedEntityId": 2215,
+    "errorMessage": null
+  },
+  {
+    "id": 3,
+    "partnerId": 2,
+    "partnerName": "Aerospace Partners EDI",
+    "transactionType": "856",
+    "description": "Advanced Ship Notice (Outbound)",
+    "direction": "Outbound",
+    "status": "Sent",
+    "controlNumber": "EDI-OUT-00014187",
+    "receivedAt": null,
+    "processedAt": "2026-04-18T16:45:00Z",
+    "relatedEntityType": "Shipment",
+    "relatedEntityId": 412,
+    "errorMessage": null
+  },
+  {
+    "id": 4,
+    "partnerId": 2,
+    "partnerName": "Aerospace Partners EDI",
+    "transactionType": "810",
+    "description": "Invoice (Outbound)",
+    "direction": "Outbound",
+    "status": "Failed",
+    "controlNumber": "EDI-OUT-00014190",
+    "receivedAt": null,
+    "processedAt": "2026-04-19T09:15:00Z",
+    "relatedEntityType": "Invoice",
+    "relatedEntityId": 1024,
+    "errorMessage": "SFTP write failed: connection reset. Will retry."
+  },
+  {
+    "id": 5,
+    "partnerId": 2,
+    "partnerName": "Aerospace Partners EDI",
+    "transactionType": "810",
+    "description": "Invoice (Outbound) — retry",
+    "direction": "Outbound",
+    "status": "Sent",
+    "controlNumber": "EDI-OUT-00014191",
+    "receivedAt": null,
+    "processedAt": "2026-04-19T09:45:00Z",
+    "relatedEntityType": "Invoice",
+    "relatedEntityId": 1024,
+    "errorMessage": null
+  }
+]

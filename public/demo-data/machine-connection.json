@@ -1,1 +1,58 @@
-[]
+[
+  {
+    "id": 1,
+    "assetId": 1,
+    "assetName": "Haas VF-2SS",
+    "connectionType": "MTConnect",
+    "endpoint": "http://10.2.11.21:5000/current",
+    "status": "Connected",
+    "lastHeartbeat": "2026-04-23T07:45:00Z",
+    "currentProgram": "AS-SHAFT-0554-ROUGH.nc",
+    "currentMode": "Automatic",
+    "spindleLoadPct": 62,
+    "feedOverridePct": 100,
+    "alarmCount": 0
+  },
+  {
+    "id": 2,
+    "assetId": 2,
+    "assetName": "Arburg 320C",
+    "connectionType": "Euromap77",
+    "endpoint": "opc.tcp://10.2.11.22:4840",
+    "status": "Connected",
+    "lastHeartbeat": "2026-04-23T07:44:55Z",
+    "currentProgram": "AR-BRKT-0087 (8-cav)",
+    "currentMode": "Automatic",
+    "spindleLoadPct": null,
+    "feedOverridePct": null,
+    "alarmCount": 0
+  },
+  {
+    "id": 3,
+    "assetId": 9,
+    "assetName": "Okuma LB3000",
+    "connectionType": "MTConnect",
+    "endpoint": "http://10.2.11.23:5000/current",
+    "status": "Idle",
+    "lastHeartbeat": "2026-04-23T07:45:10Z",
+    "currentProgram": null,
+    "currentMode": "Manual",
+    "spindleLoadPct": 0,
+    "feedOverridePct": 100,
+    "alarmCount": 0
+  },
+  {
+    "id": 4,
+    "assetId": 5,
+    "assetName": "Mitutoyo CMM",
+    "connectionType": "Custom",
+    "endpoint": "tcp://10.2.11.24:9600",
+    "status": "Connected",
+    "lastHeartbeat": "2026-04-23T07:43:00Z",
+    "currentProgram": "FAIR-SHAFT-0554.prg",
+    "currentMode": "Running",
+    "spindleLoadPct": null,
+    "feedOverridePct": null,
+    "alarmCount": 0
+  }
+]

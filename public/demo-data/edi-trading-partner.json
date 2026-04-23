@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "MedSafe Systems EDI",
+    "partnerCode": "MEDSAFE01",
+    "customerId": 12,
+    "customerName": "MedSafe Systems, Inc.",
+    "format": "X12",
+    "version": "004010",
+    "transportMethod": "AS2",
+    "endpoint": "as2://edi.medsafe.example.com",
+    "isActive": true,
+    "supportedTransactions": ["850", "855", "856", "810"],
+    "contactName": "Murphy, Lee",
+    "contactEmail": "edi@medsafe.example.com"
+  },
+  {
+    "id": 2,
+    "name": "Aerospace Partners EDI",
+    "partnerCode": "AEROLLC01",
+    "customerId": 7,
+    "customerName": "Aerospace Partners LLC",
+    "format": "X12",
+    "version": "005010",
+    "transportMethod": "SFTP",
+    "endpoint": "sftp://edi.aerospacepartners.example.com:22",
+    "isActive": true,
+    "supportedTransactions": ["850", "855", "856", "810", "820"],
+    "contactName": "Brooks, Daniel",
+    "contactEmail": "edi@aerospacepartners.example.com"
+  },
+  {
+    "id": 3,
+    "name": "FieldOps Industrial EDI (Test)",
+    "partnerCode": "FIELDOPS01",
+    "customerId": 15,
+    "customerName": "FieldOps Industrial",
+    "format": "EDIFACT",
+    "version": "D96A",
+    "transportMethod": "AS2",
+    "endpoint": "as2://edi-test.fieldops.example.com",
+    "isActive": false,
+    "supportedTransactions": ["ORDERS", "ORDRSP"],
+    "contactName": "Owens, Terri",
+    "contactEmail": "edi-admin@fieldops.example.com"
+  }
+]

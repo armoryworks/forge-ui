@@ -1,1 +1,41 @@
-[]
+[
+  {
+    "id": 1,
+    "timeEntryId": 4102,
+    "userId": 2,
+    "userName": "Kim, Alex",
+    "correctedById": 1,
+    "correctedByName": "Hayes, Morgan",
+    "fieldChanged": "EndTime",
+    "originalValue": "2026-04-21T14:30:00Z",
+    "newValue": "2026-04-21T15:15:00Z",
+    "reason": "Forgot to clock out before meeting — confirmed with worker.",
+    "correctedAt": "2026-04-22T09:00:00Z"
+  },
+  {
+    "id": 2,
+    "timeEntryId": 4118,
+    "userId": 5,
+    "userName": "Shah, Priya",
+    "correctedById": 1,
+    "correctedByName": "Hayes, Morgan",
+    "fieldChanged": "StartTime",
+    "originalValue": "2026-04-22T14:00:00Z",
+    "newValue": "2026-04-22T13:30:00Z",
+    "reason": "Badge scanner unresponsive — verified on camera.",
+    "correctedAt": "2026-04-22T18:00:00Z"
+  },
+  {
+    "id": 3,
+    "timeEntryId": 4089,
+    "userId": 4,
+    "userName": "Reeves, Sam",
+    "correctedById": 1,
+    "correctedByName": "Hayes, Morgan",
+    "fieldChanged": "JobId",
+    "originalValue": "1042",
+    "newValue": "1056",
+    "reason": "Misassigned time to wrong job. Moved 2.5 hrs.",
+    "correctedAt": "2026-04-19T16:30:00Z"
+  }
+]

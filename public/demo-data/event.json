@@ -1,1 +1,99 @@
-[]
+[
+  {
+    "id": 1,
+    "title": "Weekly Production Standup",
+    "description": "Review week's priorities, open holds, capacity outlook.",
+    "startTime": "2026-04-27T14:00:00Z",
+    "endTime": "2026-04-27T14:30:00Z",
+    "location": "Conference Room A",
+    "eventType": "Meeting",
+    "isRequired": true,
+    "isCancelled": false,
+    "createdByUserId": 1,
+    "createdByName": "Hayes, Morgan",
+    "attendees": [
+      { "id": 1, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-22T10:00:00Z" },
+      { "id": 2, "userId": 2, "userName": "Kim, Alex", "status": "Accepted", "respondedAt": "2026-04-22T10:30:00Z" },
+      { "id": 3, "userId": 3, "userName": "Torres, Jamie", "status": "Invited", "respondedAt": null },
+      { "id": 4, "userId": 4, "userName": "Reeves, Sam", "status": "Accepted", "respondedAt": "2026-04-22T11:00:00Z" }
+    ],
+    "createdAt": "2026-04-22T09:00:00Z"
+  },
+  {
+    "id": 2,
+    "title": "GD&T Training — Module 3",
+    "description": "Feature control frames deep dive. Bring a calculator.",
+    "startTime": "2026-04-28T19:00:00Z",
+    "endTime": "2026-04-28T21:00:00Z",
+    "location": "Training Room",
+    "eventType": "Training",
+    "isRequired": true,
+    "isCancelled": false,
+    "createdByUserId": 1,
+    "createdByName": "Hayes, Morgan",
+    "attendees": [
+      { "id": 5, "userId": 2, "userName": "Kim, Alex", "status": "Accepted", "respondedAt": "2026-04-21T14:00:00Z" },
+      { "id": 6, "userId": 5, "userName": "Shah, Priya", "status": "Accepted", "respondedAt": "2026-04-21T14:10:00Z" },
+      { "id": 7, "userId": 6, "userName": "Liu, Dana", "status": "Declined", "respondedAt": "2026-04-22T08:30:00Z" }
+    ],
+    "createdAt": "2026-04-20T11:00:00Z"
+  },
+  {
+    "id": 3,
+    "title": "Monthly Safety Walkthrough",
+    "description": "Monthly safety inspection. All shop floor areas.",
+    "startTime": "2026-04-30T16:00:00Z",
+    "endTime": "2026-04-30T17:00:00Z",
+    "location": "Shop Floor — all bays",
+    "eventType": "Safety",
+    "isRequired": true,
+    "isCancelled": false,
+    "createdByUserId": 1,
+    "createdByName": "Hayes, Morgan",
+    "attendees": [
+      { "id": 8, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-15T09:00:00Z" },
+      { "id": 9, "userId": 4, "userName": "Reeves, Sam", "status": "Accepted", "respondedAt": "2026-04-15T09:05:00Z" }
+    ],
+    "createdAt": "2026-04-15T09:00:00Z"
+  },
+  {
+    "id": 4,
+    "title": "Customer Visit — Meridian Medical",
+    "description": "Tour plant, discuss Q3 volume forecast.",
+    "startTime": "2026-05-04T18:00:00Z",
+    "endTime": "2026-05-04T20:00:00Z",
+    "location": "Front Office + Shop Floor",
+    "eventType": "Meeting",
+    "isRequired": false,
+    "isCancelled": false,
+    "createdByUserId": 1,
+    "createdByName": "Hayes, Morgan",
+    "attendees": [
+      { "id": 10, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-18T12:00:00Z" },
+      { "id": 11, "userId": 2, "userName": "Kim, Alex", "status": "Invited", "respondedAt": null }
+    ],
+    "createdAt": "2026-04-18T12:00:00Z"
+  },
+  {
+    "id": 5,
+    "title": "Quarterly All-Hands",
+    "description": "Q1 recap, Q2 plan, company updates.",
+    "startTime": "2026-05-08T20:00:00Z",
+    "endTime": "2026-05-08T21:00:00Z",
+    "location": "Main Floor",
+    "eventType": "Meeting",
+    "isRequired": true,
+    "isCancelled": false,
+    "createdByUserId": 1,
+    "createdByName": "Hayes, Morgan",
+    "attendees": [
+      { "id": 12, "userId": 1, "userName": "Hayes, Morgan", "status": "Accepted", "respondedAt": "2026-04-19T10:00:00Z" },
+      { "id": 13, "userId": 2, "userName": "Kim, Alex", "status": "Accepted", "respondedAt": "2026-04-19T10:15:00Z" },
+      { "id": 14, "userId": 3, "userName": "Torres, Jamie", "status": "Accepted", "respondedAt": "2026-04-19T10:20:00Z" },
+      { "id": 15, "userId": 4, "userName": "Reeves, Sam", "status": "Accepted", "respondedAt": "2026-04-19T10:25:00Z" },
+      { "id": 16, "userId": 5, "userName": "Shah, Priya", "status": "Accepted", "respondedAt": "2026-04-19T10:30:00Z" },
+      { "id": 17, "userId": 6, "userName": "Liu, Dana", "status": "Invited", "respondedAt": null }
+    ],
+    "createdAt": "2026-04-19T10:00:00Z"
+  }
+]

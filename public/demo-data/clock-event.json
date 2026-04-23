@@ -1,1 +1,15 @@
-[]
+[
+  { "id": 1, "userId": 2, "userName": "Kim, Alex", "eventType": "ClockIn", "eventAt": "2026-04-22T13:00:00Z", "location": "Main Entry", "notes": null },
+  { "id": 2, "userId": 2, "userName": "Kim, Alex", "eventType": "BreakStart", "eventAt": "2026-04-22T17:00:00Z", "location": null, "notes": null },
+  { "id": 3, "userId": 2, "userName": "Kim, Alex", "eventType": "BreakEnd", "eventAt": "2026-04-22T17:30:00Z", "location": null, "notes": null },
+  { "id": 4, "userId": 2, "userName": "Kim, Alex", "eventType": "ClockOut", "eventAt": "2026-04-22T22:00:00Z", "location": "Main Entry", "notes": null },
+  { "id": 5, "userId": 3, "userName": "Torres, Jamie", "eventType": "ClockIn", "eventAt": "2026-04-22T13:05:00Z", "location": "Main Entry", "notes": null },
+  { "id": 6, "userId": 3, "userName": "Torres, Jamie", "eventType": "ClockOut", "eventAt": "2026-04-22T22:15:00Z", "location": "Main Entry", "notes": null },
+  { "id": 7, "userId": 4, "userName": "Reeves, Sam", "eventType": "ClockIn", "eventAt": "2026-04-22T12:30:00Z", "location": "Dock Door", "notes": null },
+  { "id": 8, "userId": 4, "userName": "Reeves, Sam", "eventType": "ClockOut", "eventAt": "2026-04-22T21:00:00Z", "location": "Dock Door", "notes": null },
+  { "id": 9, "userId": 5, "userName": "Shah, Priya", "eventType": "ClockIn", "eventAt": "2026-04-22T13:15:00Z", "location": "Main Entry", "notes": null },
+  { "id": 10, "userId": 5, "userName": "Shah, Priya", "eventType": "ClockOut", "eventAt": "2026-04-22T22:30:00Z", "location": "Main Entry", "notes": null },
+  { "id": 11, "userId": 2, "userName": "Kim, Alex", "eventType": "ClockIn", "eventAt": "2026-04-23T13:02:00Z", "location": "Main Entry", "notes": null },
+  { "id": 12, "userId": 3, "userName": "Torres, Jamie", "eventType": "ClockIn", "eventAt": "2026-04-23T13:00:00Z", "location": "Main Entry", "notes": null },
+  { "id": 13, "userId": 4, "userName": "Reeves, Sam", "eventType": "ClockIn", "eventAt": "2026-04-23T12:45:00Z", "location": "Dock Door", "notes": null }
+]

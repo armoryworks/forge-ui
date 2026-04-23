@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "id": 1,
+    "userId": 1,
+    "userName": "Hayes, Morgan",
+    "templateId": 1,
+    "templateName": "Form W-4 (2026)",
+    "status": "Completed",
+    "submittedAt": "2026-03-04T11:30:00Z",
+    "reviewedById": null,
+    "reviewedByName": null,
+    "reviewedAt": null,
+    "notes": "Single filer, no additional withholding."
+  },
+  {
+    "id": 2,
+    "userId": 1,
+    "userName": "Hayes, Morgan",
+    "templateId": 2,
+    "templateName": "Form I-9",
+    "status": "Completed",
+    "submittedAt": "2026-03-04T13:00:00Z",
+    "reviewedById": 1,
+    "reviewedByName": "Hayes, Morgan",
+    "reviewedAt": "2026-03-04T14:15:00Z",
+    "notes": "Driver's license + SSN card presented."
+  },
+  {
+    "id": 3,
+    "userId": 2,
+    "userName": "Kim, Alex",
+    "templateId": 1,
+    "templateName": "Form W-4 (2026)",
+    "status": "Completed",
+    "submittedAt": "2026-02-02T09:00:00Z",
+    "reviewedById": null,
+    "reviewedByName": null,
+    "reviewedAt": null,
+    "notes": null
+  },
+  {
+    "id": 4,
+    "userId": 5,
+    "userName": "Shah, Priya",
+    "templateId": 1,
+    "templateName": "Form W-4 (2026)",
+    "status": "InProgress",
+    "submittedAt": null,
+    "reviewedById": null,
+    "reviewedByName": null,
+    "reviewedAt": null,
+    "notes": "Started — stuck on dependents section."
+  }
+]

@@ -1,1 +1,58 @@
-[]
+[
+  {
+    "id": 1,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "revision": "C",
+    "description": "Added chamfer .015 x 45° on mounting face.",
+    "effectiveDate": "2026-04-21T00:00:00Z",
+    "supersededBy": null,
+    "authoredById": 1,
+    "authoredByName": "Hayes, Morgan",
+    "approvedById": 1,
+    "approvedByName": "Hayes, Morgan",
+    "isCurrent": true
+  },
+  {
+    "id": 2,
+    "partId": 318,
+    "partNumber": "AR-BRKT-0087",
+    "revision": "B",
+    "description": "Tightened bore tolerance to ±0.0008.",
+    "effectiveDate": "2025-11-02T00:00:00Z",
+    "supersededBy": "C",
+    "authoredById": 1,
+    "authoredByName": "Hayes, Morgan",
+    "approvedById": 1,
+    "approvedByName": "Hayes, Morgan",
+    "isCurrent": false
+  },
+  {
+    "id": 3,
+    "partId": 391,
+    "partNumber": "AS-SHAFT-0554",
+    "revision": "A",
+    "description": "Initial release.",
+    "effectiveDate": "2025-08-15T00:00:00Z",
+    "supersededBy": null,
+    "authoredById": 1,
+    "authoredByName": "Hayes, Morgan",
+    "approvedById": 1,
+    "approvedByName": "Hayes, Morgan",
+    "isCurrent": true
+  },
+  {
+    "id": 4,
+    "partId": 287,
+    "partNumber": "MM-GHS-1142",
+    "revision": "D",
+    "description": "Moved gate per NCR-2026-013 corrective action.",
+    "effectiveDate": "2026-04-20T00:00:00Z",
+    "supersededBy": null,
+    "authoredById": 1,
+    "authoredByName": "Hayes, Morgan",
+    "approvedById": 1,
+    "approvedByName": "Hayes, Morgan",
+    "isCurrent": true
+  }
+]
