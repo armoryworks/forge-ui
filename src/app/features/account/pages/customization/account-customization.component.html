@@ -121,4 +121,22 @@
       }
     </div>
   </div>
+
+  <!-- Ambient Mode Idle Timeout -->
+  <div class="account-page__card">
+    <span class="account-page__section-label">{{ 'account.ambientIdleTimeout' | translate }}</span>
+    <p class="customization__hint">{{ 'account.ambientIdleTimeoutHint' | translate }}</p>
+
+    <div class="font-scale-picker">
+      @for (opt of ambientIdleOptions; track opt.value) {
+        <button
+          class="font-scale-option"
+          [class.font-scale-option--active]="ambientIdle() === opt.value"
+          (click)="setAmbientIdle(opt.value)"
+          [attr.aria-pressed]="ambientIdle() === opt.value">
+          <span class="font-scale-option__label">{{ opt.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
 </div>

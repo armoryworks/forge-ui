@@ -4,8 +4,15 @@ import { TranslatePipe } from '@ngx-translate/core';
 
 import { FontScale, ThemeService } from '../../../../shared/services/theme.service';
 import { UserPreferencesService } from '../../../../shared/services/user-preferences.service';
+import { IdleService } from '../../../../shared/services/idle.service';
 import { ChatNotificationService, ChatSoundType } from '../../../../shared/services/chat-notification.service';
 import { DRAFT_TTL_OPTIONS, DEFAULT_DRAFT_TTL, DraftTtlOption } from '../../../../shared/models/draft-ttl.model';
+import {
+  AMBIENT_IDLE_OPTIONS,
+  AMBIENT_IDLE_PREF_KEY,
+  AmbientIdleOption,
+  DEFAULT_AMBIENT_IDLE_MS,
+} from '../../../../shared/models/ambient-idle.model';
 
 const DRAFT_TTL_PREF_KEY = 'draft:ttlMs';
 
@@ -20,6 +27,7 @@ const DRAFT_TTL_PREF_KEY = 'draft:ttlMs';
 export class AccountCustomizationComponent {
   private readonly themeService = inject(ThemeService);
   private readonly preferences = inject(UserPreferencesService);
+  private readonly idleService = inject(IdleService);
   protected readonly chatNotification = inject(ChatNotificationService);
 
   protected readonly theme = this.themeService.theme;
@@ -35,6 +43,11 @@ export class AccountCustomizationComponent {
   protected readonly draftTtlOptions: DraftTtlOption[] = DRAFT_TTL_OPTIONS;
   protected readonly draftTtl = signal(
     this.preferences.get<number>(DRAFT_TTL_PREF_KEY) ?? DEFAULT_DRAFT_TTL,
+  );
+
+  protected readonly ambientIdleOptions: AmbientIdleOption[] = AMBIENT_IDLE_OPTIONS;
+  protected readonly ambientIdle = signal(
+    this.preferences.get<number>(AMBIENT_IDLE_PREF_KEY) ?? DEFAULT_AMBIENT_IDLE_MS,
   );
 
   protected readonly soundTypeOptions: { value: ChatSoundType; labelKey: string }[] = [
@@ -55,6 +68,12 @@ export class AccountCustomizationComponent {
   protected setDraftTtl(ttl: number): void {
     this.draftTtl.set(ttl);
     this.preferences.set(DRAFT_TTL_PREF_KEY, ttl);
+  }
+
+  protected setAmbientIdle(ms: number): void {
+    this.ambientIdle.set(ms);
+    this.preferences.set(AMBIENT_IDLE_PREF_KEY, ms);
+    this.idleService.configure(ms);
   }
 
   protected readonly chatSoundEnabled = signal(this.chatNotification.soundEnabled);

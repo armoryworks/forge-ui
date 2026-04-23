@@ -54,7 +54,12 @@ export class AmbientModeComponent implements OnInit, OnDestroy {
   };
 
   protected formatTime(d: Date): string {
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    return d.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
+    });
   }
 
   protected formatDate(d: Date): string {

@@ -1576,6 +1576,8 @@
     "fontScaleComfortable": "Comfortable",
     "fontScaleLarge": "Large",
     "fontScaleXl": "Extra Large",
+    "ambientIdleTimeout": "Auto-enter ambient mode",
+    "ambientIdleTimeoutHint": "Automatically switch to ambient display after a period of inactivity on the dashboard.",
     "genderNone": "-- None --",
     "genderMale": "Male",
     "genderFemale": "Female",

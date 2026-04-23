@@ -1383,6 +1383,8 @@
     "fontScaleComfortable": "Cómodo",
     "fontScaleLarge": "Grande",
     "fontScaleXl": "Extra Grande",
+    "ambientIdleTimeout": "Entrar automáticamente en modo ambiente",
+    "ambientIdleTimeoutHint": "Cambiar automáticamente al modo ambiente después de un período de inactividad en el panel.",
     "genderNone": "-- Ninguno --",
     "genderMale": "Masculino",
     "genderFemale": "Femenino",

@@ -162,6 +162,6 @@
   }
 
   @if (ambientMode()) {
-    <app-ambient-mode (exit)="ambientMode.set(false)" />
+    <app-ambient-mode (exit)="exitAmbientMode()" />
   }
 }

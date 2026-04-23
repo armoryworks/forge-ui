@@ -41,8 +41,10 @@ import { DashboardWidgetConfig } from './models/dashboard-widget-config.model';
 import { DashboardSavedLayout, DashboardWidgetLayout } from './models/dashboard-widget-layout.model';
 import { WIDGET_REGISTRY } from './widget-registry';
 import { DashboardService } from './services/dashboard.service';
+import { IdleService } from '../../shared/services/idle.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { AMBIENT_IDLE_PREF_KEY, DEFAULT_AMBIENT_IDLE_MS } from '../../shared/models/ambient-idle.model';
 
 import type { GridStack, GridStackNode } from 'gridstack';
 
@@ -79,6 +81,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly dashboardService = inject(DashboardService);
   private readonly loadingService = inject(LoadingService);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly idleService = inject(IdleService);
   private readonly ngZone = inject(NgZone);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -120,8 +123,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor() {
     // Init GridStack when the container appears (after data loads and @if renders).
-    // Destroy on cleanup so focus/ambient mode toggles (which unmount the container via @if)
-    // re-init a fresh grid on remount instead of reusing a grid bound to a stale DOM node.
+    // Cleanup tears it down when the container unmounts (e.g. focus mode removes it
+    // from the DOM) so the next mount triggers a fresh initGrid + loadSavedLayout.
     effect((onCleanup) => {
       const container = this.gridContainer()?.nativeElement;
       if (container && !this.grid) {
@@ -137,10 +140,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
       });
     });
+
+    // Auto-enter ambient mode after configured idle timeout. Skip when already
+    // ambient, in focus mode, or editing layout (interactions are rare but deliberate).
+    effect(() => {
+      if (!this.idleService.isIdle()) return;
+      if (this.ambientMode() || this.focusMode() || this.editing()) return;
+      this.ambientMode.set(true);
+    });
   }
 
   ngOnInit(): void {
     this.loadData(true);
+
+    const timeoutMs = this.userPreferences.get<number>(AMBIENT_IDLE_PREF_KEY) ?? DEFAULT_AMBIENT_IDLE_MS;
+    this.idleService.configure(timeoutMs);
 
     interval(DashboardComponent.POLL_INTERVAL_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -214,6 +228,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.grid.destroy(false);
       this.grid = null;
     }
+  }
+
+  protected exitAmbientMode(): void {
+    this.ambientMode.set(false);
+    this.idleService.reset();
   }
 
   protected toggleFocusMode(): void {
