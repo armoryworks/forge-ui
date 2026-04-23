@@ -4,13 +4,20 @@ import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
 import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { roleGuard } from './shared/guards/role.guard';
+import { rootRedirectGuard } from './shared/guards/root-redirect.guard';
 import { setupRequiredGuard, setupCompleteGuard } from './shared/guards/setup.guard';
 
 export const routes: Routes = [
   { path: 'login', canActivate: [setupCompleteGuard], component: LoginComponent },
   { path: 'sso/callback', loadComponent: () => import('./features/auth/sso-callback.component').then(m => m.SsoCallbackComponent) },
+  {
+    path: 'welcome',
+    canActivate: [demoOnlyGuard],
+    loadComponent: () => import('./features/welcome/welcome.component').then(m => m.WelcomeComponent),
+  },
   {
     path: 'oidc',
     loadChildren: () => import('./features/oidc/oidc.routes').then(m => m.OIDC_ROUTES),
@@ -23,11 +30,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/chat/components/chat-popout/chat-popout.component').then(m => m.ChatPopoutComponent),
   },
+  // Root branches on build target before authGuard runs so the demo's /welcome
+  // page is reachable without login. In prod, the guard returns /dashboard and
+  // the authGuard shell below takes over — same behavior as before.
+  { path: '', pathMatch: 'full', canActivate: [rootRedirectGuard], children: [] },
   {
     path: '',
     canActivate: [authGuard, mobileRedirectGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
         loadChildren: () =>

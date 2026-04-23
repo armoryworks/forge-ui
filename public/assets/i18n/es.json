@@ -4144,5 +4144,52 @@
     "tabSettings": "Settings",
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor"
+  },
+  "welcomePage": {
+    "brandName": "Engineer",
+    "demoChip": "DEMO",
+    "tagline": "Operaciones de manufactura, de principio a fin.",
+    "lede": "QB Engineer es una plataforma de código abierto para talleres pequeños y medianos — seguimiento de producción kanban, piezas e inventario, cotización a cobro, calidad y reportes en un solo lugar. Se integra con QuickBooks o funciona de forma independiente.",
+    "ctaDashboard": "Ir al panel",
+    "ctaKanban": "Abrir el tablero kanban",
+    "caveat": "Esta es una demostración totalmente interactiva — cada pantalla es real, cada botón funciona, pero nada se guarda en el servidor. Los cambios viven en la pestaña de su navegador y se restablecen al actualizar.",
+    "gridHeading": "Dónde mirar",
+    "footerLicense": "Código abierto · Licencia GNU",
+    "footerGithub": "GitHub",
+    "footerNoAccount": "No se necesita cuenta — el inicio de sesión está preconfigurado en el modo de demostración.",
+    "tiles": {
+      "kanban": {
+        "title": "Tablero Kanban",
+        "description": "Arrastre trabajos por las etapas de producción — de la cotización al pago — con límites WIP y sincronización en tiempo real."
+      },
+      "dashboard": {
+        "title": "Panel",
+        "description": "KPIs, trabajos abiertos, fechas de vencimiento próximas y acciones rápidas en una pantalla configurable."
+      },
+      "shopFloor": {
+        "title": "Planta de Producción",
+        "description": "Quiosco de pantalla completa para la planta — escanear, fichar, iniciar trabajo, marcar completado."
+      },
+      "parts": {
+        "title": "Piezas e Inventario",
+        "description": "Catálogo de piezas, BOMs, ubicaciones de contenedores, seguimiento de lotes y movimiento por escaneo."
+      },
+      "quoteToCash": {
+        "title": "Cotización a Cobro",
+        "description": "Cotizaciones, órdenes de venta, envíos, facturación y pagos — independiente o conectado con QuickBooks."
+      },
+      "reports": {
+        "title": "Reportes",
+        "description": "Constructor dinámico de reportes con 28 fuentes de datos, 27 plantillas predefinidas y gráficos."
+      },
+      "quality": {
+        "title": "Calidad / CC",
+        "description": "Plantillas de inspección, ejecuciones de CC, trazabilidad de lotes e integración con corridas de producción."
+      },
+      "admin": {
+        "title": "Administración",
+        "description": "Usuarios, roles, tipos de seguimiento, terminología, integraciones y proveedor OIDC para SSO de terceros."
+      }
+    }
   }
 }
