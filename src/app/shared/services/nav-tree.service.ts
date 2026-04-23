@@ -158,13 +158,16 @@ export class NavTreeService {
   });
 
   /**
-   * Ancestor chain restricted to groups with `routePrefix` (currently only
-   * Admin). Used by the sidebar to auto-drill into URL-owned subtrees
-   * without auto-drilling on every page load.
+   * Ancestor chain used by the sidebar to auto-drill into the current URL's
+   * group on page load so the second tier (group's children) is visible. Uses
+   * the same resolution as the breadcrumb — every nav group, not just those
+   * with an explicit routePrefix — so e.g. /kanban lands on Operations'
+   * children instead of the tier-1 group list. Manual drill-override still
+   * wins between navigations (sidebar.drillPath() checks drillOverride first).
    */
   readonly drillTrail: Signal<NavItem[]> = computed(() => {
     const url = this.currentUrl();
-    return this.findTrail([...this.mainTree(), ...this.bottomTree()], url, /*requirePrefix*/ true);
+    return this.findTrail([...this.mainTree(), ...this.bottomTree()], url, /*requirePrefix*/ false);
   });
 
   private filterTree(tree: NavItem[]): NavItem[] {

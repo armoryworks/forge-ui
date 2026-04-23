@@ -16,14 +16,32 @@ export async function synthesizeAggregate(
   method: string,
   path: string,
 ): Promise<unknown | undefined> {
-  // Normalize — strip any ?query, coalesce dashboards/dashboard/layout etc.
-  const p = path.replace(/^\/+/, '').replace(/^api\/v\d+\//, '').split('?')[0];
+  const [pathOnly, queryString] = path.split('?');
+  const p = pathOnly.replace(/^\/+/, '').replace(/^api\/v\d+\//, '');
   const segs = p.split('/').filter(Boolean);
+  const query = new URLSearchParams(queryString ?? '');
 
   if (segs.length === 0) return undefined;
 
   const head = segs[0];
   const sub = segs[1];
+
+  if (head === 'track-types' && method === 'GET' && sub && /^\d+$/.test(sub)) {
+    return synthesizeTrackType(store, Number(sub));
+  }
+
+  if (head === 'jobs' && method === 'GET') {
+    // List with trackTypeId filter — kanban board rows.
+    if (!sub) {
+      const trackTypeId = query.get('trackTypeId');
+      if (trackTypeId) return synthesizeKanbanJobs(store, Number(trackTypeId), query);
+      return undefined; // Fall through to generic handler for unfiltered list.
+    }
+    // Jobs subresource — /jobs/{id}/subtasks|activity|history|comments|children.
+    if (/^\d+$/.test(sub) && segs[2]) {
+      return [];
+    }
+  }
 
   if (head === 'dashboard') {
     if (method !== 'GET') return {};
@@ -268,4 +286,78 @@ function companyProfile(): unknown {
     ein: null,
     website: 'https://qb-engineer.com',
   };
+}
+
+async function synthesizeTrackType(store: DemoDataStore, id: number): Promise<unknown | null> {
+  const [trackTypes, stages] = await Promise.all([
+    store.load('track-type'),
+    store.load('job-stage'),
+  ]);
+  const trackType = trackTypes.find(t => String(t['id']) === String(id));
+  if (!trackType) return null;
+  const nestedStages = stages
+    .filter(s => String(s['trackTypeId']) === String(id) && s['isActive'] !== false)
+    .sort((a, b) => Number(a['sortOrder'] ?? 0) - Number(b['sortOrder'] ?? 0));
+  return { ...trackType, stages: nestedStages };
+}
+
+async function synthesizeKanbanJobs(
+  store: DemoDataStore,
+  trackTypeId: number,
+  query: URLSearchParams,
+): Promise<unknown[]> {
+  const [jobs, stages, users, customers] = await Promise.all([
+    store.load('job'),
+    store.load('job-stage'),
+    store.load('application-user'),
+    store.load('customer'),
+  ]);
+
+  const stageById = new Map(stages.map(s => [String(s['id']), s]));
+  const userById = new Map(users.map(u => [String(u['id']), u]));
+  const customerById = new Map(customers.map(c => [String(c['id']), c]));
+
+  const archivedParam = (query.get('isArchived') ?? '').toLowerCase();
+  const hasArchivedFilter = archivedParam === 'true' || archivedParam === 'false';
+  const wantArchived = archivedParam === 'true';
+  const now = Date.now();
+
+  return jobs
+    .filter(j => String(j['trackTypeId']) === String(trackTypeId))
+    .filter(j => {
+      const archived = Boolean(j['isArchived']);
+      return hasArchivedFilter ? archived === wantArchived : true;
+    })
+    .map(j => {
+      const stage = stageById.get(String(j['currentStageId']));
+      const user = j['assigneeId'] != null ? userById.get(String(j['assigneeId'])) : undefined;
+      const customer = j['customerId'] != null ? customerById.get(String(j['customerId'])) : undefined;
+      const first = String(user?.['firstName'] ?? '').trim();
+      const last = String(user?.['lastName'] ?? '').trim();
+      const initials = user ? ((first[0] ?? '?') + (last[0] ?? '')).toUpperCase() : null;
+      const due = j['dueDate'] ? new Date(String(j['dueDate'])).getTime() : NaN;
+      const isOverdue = !isNaN(due) && due < now && j['completedDate'] == null;
+
+      return {
+        id: j['id'],
+        jobNumber: j['jobNumber'],
+        title: j['title'],
+        stageName: stage ? String(stage['name']) : 'Unassigned',
+        stageColor: stage ? String(stage['color'] ?? '#94a3b8') : '#94a3b8',
+        assigneeId: j['assigneeId'] ?? null,
+        assigneeInitials: initials,
+        assigneeColor: user ? String(user['avatarColor'] ?? '#64748b') : null,
+        priorityName: String(j['priority'] ?? 'Normal'),
+        dueDate: j['dueDate'] ?? null,
+        isOverdue,
+        customerName: customer ? String(customer['name']) : null,
+        billingStatus: null,
+        externalRef: j['externalRef'] ?? null,
+        accountingDocumentType: null,
+        disposition: j['disposition'] ?? null,
+        childJobCount: 0,
+        activeHolds: [],
+        coverPhotoUrl: null,
+      };
+    });
 }

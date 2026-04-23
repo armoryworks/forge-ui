@@ -102,7 +102,9 @@ function handleAuth(url: string, method: string, body: unknown): unknown | null 
 async function handleApi(store: DemoDataStore, req: HttpRequest<unknown>): Promise<HttpEvent<unknown>> {
   // Try aggregate/computed endpoints first (dashboard, search, reports, admin/*, etc.).
   // Generic entity fallback runs only when this returns undefined.
-  const aggregate = await synthesizeAggregate(store, req.method, req.url);
+  // Use urlWithParams so the synth sees the query string (HttpClient keeps params
+  // separate from url until transport time).
+  const aggregate = await synthesizeAggregate(store, req.method, req.urlWithParams);
   if (aggregate !== undefined) return httpOk(aggregate);
 
   const resolved = resolveDemoPath(req.url);
