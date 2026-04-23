@@ -254,6 +254,14 @@
             [placeholder]="isPasswordAuth() ? 'Enter your password' : 'Enter your PIN'" [maxlength]="isPasswordAuth() ? 128 : 8" data-testid="sf-pin-input" />
         </div>
 
+        @if (!isPasswordAuth()) {
+          <app-numeric-keypad
+            [disabled]="authenticating()"
+            (digit)="onKeypadDigit($event)"
+            (backspace)="onKeypadBackspace()"
+            (clear)="onKeypadClear()" />
+        }
+
         <div class="sf-auth-card__actions">
           <button class="action-btn" (click)="cancelPin()" [disabled]="authenticating()"
                   aria-label="Cancel" data-testid="sf-pin-cancel">

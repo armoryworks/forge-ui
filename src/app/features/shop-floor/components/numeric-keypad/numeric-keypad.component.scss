@@ -1,0 +1,88 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+}
+
+.keypad {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  width: 100%;
+}
+
+.keypad__row {
+  display: flex;
+  gap: $sp-md;
+  justify-content: center;
+}
+
+.keypad__key {
+  flex: 1;
+  min-width: 88px;
+  min-height: 88px;
+  font-family: $font-family-mono;
+  font-size: 36px;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--text);
+  border: $border-width solid var(--border);
+  cursor: pointer;
+  user-select: none;
+  transition: background $transition-fast, transform 80ms ease, border-color $transition-fast;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover:not([disabled]) {
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    border-color: var(--primary);
+  }
+
+  &:active:not([disabled]) {
+    transform: scale(0.96);
+    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  }
+
+  &[disabled] {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .material-icons-outlined {
+    font-size: 32px;
+  }
+}
+
+.keypad__key--secondary {
+  background: var(--bg);
+  color: var(--text-muted);
+
+  &:hover:not([disabled]) {
+    color: var(--text);
+  }
+}
+
+.keypad__mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  padding: $sp-xs $sp-md;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &:hover {
+    color: var(--primary);
+  }
+}

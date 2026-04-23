@@ -38,6 +38,7 @@ import { ScanActionOverlayComponent } from './components/scan-action-overlay/sca
 import { ScanDailyLogComponent } from './components/scan-daily-log/scan-daily-log.component';
 import { ScanDevicesPanelComponent } from './components/scan-devices-panel/scan-devices-panel.component';
 import { ScanLocationViewComponent } from './components/scan-location-view/scan-location-view.component';
+import { NumericKeypadComponent } from './components/numeric-keypad/numeric-keypad.component';
 
 const FONT_SIZES = [12, 14, 16, 18, 20] as const;
 type FontSizeStep = typeof FONT_SIZES[number];
@@ -52,7 +53,7 @@ type DisplayPhase = 'main' | 'pin' | 'actions' | 'job-select' | 'receiving' | 's
 @Component({
   selector: 'app-shop-floor-display',
   standalone: true,
-  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent],
+  imports: [DatePipe, ReactiveFormsModule, AvatarComponent, InputComponent, SelectComponent, KioskSearchBarComponent, KioskSessionBarComponent, KioskSetupComponent, TrainingModeBannerComponent, ScanUndoListComponent, ScanActionOverlayComponent, ScanDailyLogComponent, ScanDevicesPanelComponent, ScanLocationViewComponent, NumericKeypadComponent],
   templateUrl: './shop-floor-display.component.html',
   styleUrl: './shop-floor-display.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -362,6 +363,32 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   protected cancelPin(): void {
     this.resetToMain();
+  }
+
+  // ─── Keypad input (touchscreen PIN entry) ───
+
+  protected onKeypadDigit(digit: string): void {
+    this.resetPinTimeout();
+    const current = this.pinControl.value ?? '';
+    const max = this.isPasswordAuth() ? 128 : 8;
+    if (current.length >= max) return;
+    this.pinControl.setValue(current + digit);
+  }
+
+  protected onKeypadBackspace(): void {
+    this.resetPinTimeout();
+    const current = this.pinControl.value ?? '';
+    if (!current) return;
+    this.pinControl.setValue(current.slice(0, -1));
+  }
+
+  protected onKeypadClear(): void {
+    this.resetPinTimeout();
+    this.pinControl.setValue('');
+  }
+
+  private resetPinTimeout(): void {
+    if (this.phase() === 'pin') this.startPhaseTimeout(PIN_TIMEOUT_MS);
   }
 
   // ─── Actions Phase ───

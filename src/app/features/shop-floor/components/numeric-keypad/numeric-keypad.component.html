@@ -1,0 +1,43 @@
+@if (visible()) {
+  <div class="keypad" role="group" aria-label="Numeric keypad">
+    @for (row of topRows; track $index) {
+      <div class="keypad__row">
+        @for (digit of row; track digit) {
+          <button type="button" class="keypad__key"
+                  [disabled]="disabled()"
+                  (click)="onDigit(digit)"
+                  [attr.aria-label]="'Digit ' + digit">
+            {{ digit }}
+          </button>
+        }
+      </div>
+    }
+    <div class="keypad__row">
+      <button type="button" class="keypad__key keypad__key--secondary"
+              [disabled]="disabled()"
+              (click)="onClear()"
+              aria-label="Clear PIN">
+        <span class="material-icons-outlined">clear</span>
+      </button>
+      <button type="button" class="keypad__key"
+              [disabled]="disabled()"
+              (click)="onDigit('0')"
+              aria-label="Digit 0">
+        0
+      </button>
+      <button type="button" class="keypad__key keypad__key--secondary"
+              [disabled]="disabled()"
+              (click)="onBackspace()"
+              aria-label="Delete last digit">
+        <span class="material-icons-outlined">backspace</span>
+      </button>
+    </div>
+  </div>
+}
+
+<button type="button" class="keypad__mode-toggle"
+        (click)="cycleMode()"
+        [attr.aria-label]="modeLabel()">
+  <span class="material-icons-outlined">dialpad</span>
+  {{ modeLabel() }}
+</button>
