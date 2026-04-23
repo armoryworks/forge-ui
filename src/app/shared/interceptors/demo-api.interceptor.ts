@@ -4,6 +4,7 @@ import { Observable, defer, from, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { DemoDataStore } from '../services/demo-data-store.service';
+import { synthesizeAggregate } from './demo-aggregate-synth';
 import { resolveDemoPath } from './demo-url-map';
 
 type Row = Record<string, unknown> & { id?: number | string };
@@ -32,6 +33,18 @@ export const demoApiInterceptor: HttpInterceptorFn = (req, next) => {
   // Let static-asset and demo-data file reads go straight to HttpClient.
   if (PASS_THROUGH_PREFIXES.some(p => url.startsWith(p))) return next(req);
   if (/\.(json|png|jpe?g|svg|ico|woff2?|css|js)(\?|$)/i.test(url)) return next(req);
+
+  // Absolute URLs that don't target this origin (GitHub API for version check, etc.)
+  // must pass through — intercepting them would feed bogus demo shapes back to
+  // code that expects real external responses.
+  if (/^https?:\/\//i.test(url)) {
+    try {
+      const parsed = new URL(url);
+      if (parsed.origin !== window.location.origin) return next(req);
+    } catch {
+      // Fall through — malformed URL, let the interceptor handle it.
+    }
+  }
 
   const store = inject(DemoDataStore);
 
@@ -87,6 +100,11 @@ function handleAuth(url: string, method: string, body: unknown): unknown | null 
 }
 
 async function handleApi(store: DemoDataStore, req: HttpRequest<unknown>): Promise<HttpEvent<unknown>> {
+  // Try aggregate/computed endpoints first (dashboard, search, reports, admin/*, etc.).
+  // Generic entity fallback runs only when this returns undefined.
+  const aggregate = await synthesizeAggregate(store, req.method, req.url);
+  if (aggregate !== undefined) return httpOk(aggregate);
+
   const resolved = resolveDemoPath(req.url);
 
   // Unknown endpoint — give the UI a harmless shape.
