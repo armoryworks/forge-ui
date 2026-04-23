@@ -1,0 +1,53 @@
+[
+  {
+    "name": "Production",
+    "code": "production",
+    "description": null,
+    "isDefault": true,
+    "sortOrder": 1,
+    "isActive": true,
+    "isShopFloor": true,
+    "customFieldDefinitions": null,
+    "stages": null,
+    "jobs": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 1
+  },
+  {
+    "name": "R\u0026D/Tooling",
+    "code": "rnd",
+    "description": null,
+    "isDefault": false,
+    "sortOrder": 2,
+    "isActive": true,
+    "isShopFloor": false,
+    "customFieldDefinitions": null,
+    "stages": null,
+    "jobs": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 2
+  },
+  {
+    "name": "Maintenance",
+    "code": "maintenance",
+    "description": null,
+    "isDefault": false,
+    "sortOrder": 3,
+    "isActive": true,
+    "isShopFloor": true,
+    "customFieldDefinitions": null,
+    "stages": null,
+    "jobs": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 3
+  }
+]

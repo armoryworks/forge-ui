@@ -1,0 +1,114 @@
+[
+  {
+    "paymentId": 1,
+    "invoiceId": 1,
+    "amount": 6200.0000,
+    "payment": null,
+    "invoice": null,
+    "id": 1
+  },
+  {
+    "paymentId": 2,
+    "invoiceId": 2,
+    "amount": 4680.0000,
+    "payment": null,
+    "invoice": null,
+    "id": 2
+  },
+  {
+    "paymentId": 3,
+    "invoiceId": 3,
+    "amount": 15800.0000,
+    "payment": null,
+    "invoice": null,
+    "id": 3
+  },
+  {
+    "paymentId": 4,
+    "invoiceId": 5,
+    "amount": 5900.0000,
+    "payment": null,
+    "invoice": null,
+    "id": 4
+  },
+  {
+    "paymentId": 5,
+    "invoiceId": 6,
+    "amount": 5340.0000,
+    "payment": null,
+    "invoice": null,
+    "id": 5
+  },
+  {
+    "paymentId": 6,
+    "invoiceId": 7,
+    "amount": 3000.0000,
+    "payment": null,
+    "invoice": null,
+    "id": 6
+  },
+  {
+    "paymentId": 7,
+    "invoiceId": 8,
+    "amount": 8629.5000,
+    "payment": null,
+    "invoice": null,
+    "id": 7
+  },
+  {
+    "paymentId": 8,
+    "invoiceId": 9,
+    "amount": 30443.2500,
+    "payment": null,
+    "invoice": null,
+    "id": 8
+  },
+  {
+    "paymentId": 9,
+    "invoiceId": 10,
+    "amount": 7436.7500,
+    "payment": null,
+    "invoice": null,
+    "id": 9
+  },
+  {
+    "paymentId": 10,
+    "invoiceId": 11,
+    "amount": 5657.4000,
+    "payment": null,
+    "invoice": null,
+    "id": 10
+  },
+  {
+    "paymentId": 11,
+    "invoiceId": 12,
+    "amount": 7938.8800,
+    "payment": null,
+    "invoice": null,
+    "id": 11
+  },
+  {
+    "paymentId": 12,
+    "invoiceId": 13,
+    "amount": 6484.1800,
+    "payment": null,
+    "invoice": null,
+    "id": 12
+  },
+  {
+    "paymentId": 13,
+    "invoiceId": 14,
+    "amount": 7723.6000,
+    "payment": null,
+    "invoice": null,
+    "id": 13
+  },
+  {
+    "paymentId": 14,
+    "invoiceId": 15,
+    "amount": 25618.8000,
+    "payment": null,
+    "invoice": null,
+    "id": 14
+  }
+]

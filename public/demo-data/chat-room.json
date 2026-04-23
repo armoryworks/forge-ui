@@ -1,0 +1,40 @@
+[
+  {
+    "name": "General",
+    "isGroup": true,
+    "createdById": 1,
+    "channelType": "System",
+    "description": "Company-wide general discussion",
+    "teamId": null,
+    "isReadOnly": false,
+    "iconName": "forum",
+    "createdBySystem": true,
+    "team": null,
+    "members": null,
+    "messages": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 1
+  },
+  {
+    "name": "Announcements",
+    "isGroup": true,
+    "createdById": 1,
+    "channelType": "Broadcast",
+    "description": "Official company announcements (read-only)",
+    "teamId": null,
+    "isReadOnly": true,
+    "iconName": "campaign",
+    "createdBySystem": true,
+    "team": null,
+    "members": null,
+    "messages": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 2
+  }
+]

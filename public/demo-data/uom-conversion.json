@@ -1,0 +1,178 @@
+[
+  {
+    "fromUomId": 6,
+    "toUomId": 5,
+    "conversionFactor": 12.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 1
+  },
+  {
+    "fromUomId": 7,
+    "toUomId": 6,
+    "conversionFactor": 3.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 2
+  },
+  {
+    "fromUomId": 10,
+    "toUomId": 9,
+    "conversionFactor": 100.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 3
+  },
+  {
+    "fromUomId": 10,
+    "toUomId": 8,
+    "conversionFactor": 1000.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 4
+  },
+  {
+    "fromUomId": 9,
+    "toUomId": 8,
+    "conversionFactor": 10.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 5
+  },
+  {
+    "fromUomId": 6,
+    "toUomId": 10,
+    "conversionFactor": 0.30480000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 6
+  },
+  {
+    "fromUomId": 5,
+    "toUomId": 8,
+    "conversionFactor": 25.40000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 7
+  },
+  {
+    "fromUomId": 12,
+    "toUomId": 11,
+    "conversionFactor": 16.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 8
+  },
+  {
+    "fromUomId": 13,
+    "toUomId": 12,
+    "conversionFactor": 2.20462262,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 9
+  },
+  {
+    "fromUomId": 13,
+    "toUomId": 14,
+    "conversionFactor": 1000.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 10
+  },
+  {
+    "fromUomId": 15,
+    "toUomId": 16,
+    "conversionFactor": 4.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 11
+  },
+  {
+    "fromUomId": 17,
+    "toUomId": 15,
+    "conversionFactor": 0.26417205,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 12
+  },
+  {
+    "fromUomId": 3,
+    "toUomId": 1,
+    "conversionFactor": 12.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 13
+  },
+  {
+    "fromUomId": 2,
+    "toUomId": 1,
+    "conversionFactor": 2.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 14
+  },
+  {
+    "fromUomId": 18,
+    "toUomId": 19,
+    "conversionFactor": 144.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 15
+  },
+  {
+    "fromUomId": 20,
+    "toUomId": 21,
+    "conversionFactor": 60.00000000,
+    "partId": null,
+    "isReversible": true,
+    "fromUom": null,
+    "toUom": null,
+    "part": null,
+    "id": 16
+  }
+]

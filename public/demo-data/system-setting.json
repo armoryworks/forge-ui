@@ -1,0 +1,38 @@
+[
+  {
+    "key": "company.name",
+    "value": "",
+    "description": "Legal business name",
+    "id": 1
+  },
+  {
+    "key": "company.phone",
+    "value": "",
+    "description": "Main company phone",
+    "id": 2
+  },
+  {
+    "key": "company.email",
+    "value": "",
+    "description": "Main company email",
+    "id": 3
+  },
+  {
+    "key": "company.ein",
+    "value": "",
+    "description": "Federal tax identification number (EIN)",
+    "id": 4
+  },
+  {
+    "key": "company.website",
+    "value": "",
+    "description": "Company website URL",
+    "id": 5
+  },
+  {
+    "key": "company_state",
+    "value": "ID",
+    "description": "Company home state (determines default state withholding form)",
+    "id": 6
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "jobId": 1,
+    "userId": 1,
+    "action": "StageMoved",
+    "fieldName": "CurrentStageId",
+    "oldValue": "Materials Received",
+    "newValue": "In Production",
+    "description": "J-1042 moved to Production",
+    "createdAt": "2026-04-23T07:38:53.349604+00:00",
+    "job": null,
+    "id": 1
+  },
+  {
+    "jobId": 10,
+    "userId": 1,
+    "action": "Assigned",
+    "fieldName": "AssigneeId",
+    "oldValue": null,
+    "newValue": "2",
+    "description": "A. Kim assigned to J-1044",
+    "createdAt": "2026-04-23T07:23:53.349604+00:00",
+    "job": null,
+    "id": 2
+  },
+  {
+    "jobId": 2,
+    "userId": 3,
+    "action": "FieldChanged",
+    "fieldName": "Attachment",
+    "oldValue": null,
+    "newValue": "drawing_v2.pdf",
+    "description": "Drawing uploaded to J-1038",
+    "createdAt": "2026-04-23T06:48:53.349604+00:00",
+    "job": null,
+    "id": 3
+  },
+  {
+    "jobId": 27,
+    "userId": 4,
+    "action": "StageMoved",
+    "fieldName": "CurrentStageId",
+    "oldValue": "In Production",
+    "newValue": "QC/Review",
+    "description": "J-1030 passed QC inspection",
+    "createdAt": "2026-04-23T05:48:53.349604+00:00",
+    "job": null,
+    "id": 4
+  },
+  {
+    "jobId": 13,
+    "userId": null,
+    "action": "FieldChanged",
+    "fieldName": "DueDate",
+    "oldValue": null,
+    "newValue": null,
+    "description": "J-1034 overdue \u2014 was due yesterday",
+    "createdAt": "2026-04-23T04:48:53.349604+00:00",
+    "job": null,
+    "id": 5
+  }
+]

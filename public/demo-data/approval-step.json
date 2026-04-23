@@ -1,0 +1,32 @@
+[
+  {
+    "workflowId": 1,
+    "stepNumber": 1,
+    "name": "Manager Approval",
+    "approverType": "Role",
+    "approverUserId": null,
+    "approverRole": "Manager",
+    "useDirectManager": false,
+    "autoApproveBelow": 500.00,
+    "escalationHours": 48,
+    "requireComments": false,
+    "allowDelegation": true,
+    "workflow": null,
+    "id": 1
+  },
+  {
+    "workflowId": 2,
+    "stepNumber": 1,
+    "name": "Manager Approval",
+    "approverType": "Role",
+    "approverUserId": null,
+    "approverRole": "Manager",
+    "useDirectManager": false,
+    "autoApproveBelow": 100.00,
+    "escalationHours": 72,
+    "requireComments": false,
+    "allowDelegation": true,
+    "workflow": null,
+    "id": 2
+  }
+]

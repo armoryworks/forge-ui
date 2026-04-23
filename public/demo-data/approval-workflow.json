@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Purchase Order \u2014 Manager Review",
+    "entityType": "PurchaseOrder",
+    "isActive": true,
+    "description": "Any submitted PO. Auto-approved below $500; above that, routed to any Manager.",
+    "activationConditionsJson": null,
+    "steps": null,
+    "requests": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 1
+  },
+  {
+    "name": "Expense \u2014 Manager Review",
+    "entityType": "Expense",
+    "isActive": true,
+    "description": "Submitted expenses. Auto-approved below $100; above that, routed to any Manager.",
+    "activationConditionsJson": null,
+    "steps": null,
+    "requests": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 2
+  }
+]

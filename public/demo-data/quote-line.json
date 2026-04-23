@@ -1,0 +1,62 @@
+[
+  {
+    "quoteId": 2,
+    "partId": 3,
+    "description": "Precision Mounting Bracket Assembly",
+    "quantity": 25,
+    "unitPrice": 248.0000,
+    "lineNumber": 0,
+    "notes": null,
+    "quote": null,
+    "part": null,
+    "id": 1
+  },
+  {
+    "quoteId": 3,
+    "partId": 6,
+    "description": "48-tooth Spur Gear Blank",
+    "quantity": 30,
+    "unitPrice": 178.0000,
+    "lineNumber": 0,
+    "notes": null,
+    "quote": null,
+    "part": null,
+    "id": 2
+  },
+  {
+    "quoteId": 5,
+    "partId": 9,
+    "description": "Heat Sink Array \u2014 Extrusion Profile",
+    "quantity": 30,
+    "unitPrice": 265.0000,
+    "lineNumber": 0,
+    "notes": null,
+    "quote": null,
+    "part": null,
+    "id": 3
+  },
+  {
+    "quoteId": 7,
+    "partId": 3,
+    "description": "Precision Mounting Bracket Assy",
+    "quantity": 75,
+    "unitPrice": 232.0000,
+    "lineNumber": 0,
+    "notes": null,
+    "quote": null,
+    "part": null,
+    "id": 4
+  },
+  {
+    "quoteId": 7,
+    "partId": 8,
+    "description": "Pneumatic Manifold Block",
+    "quantity": 12,
+    "unitPrice": 665.0000,
+    "lineNumber": 0,
+    "notes": null,
+    "quote": null,
+    "part": null,
+    "id": 5
+  }
+]

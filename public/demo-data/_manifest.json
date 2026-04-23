@@ -1,0 +1,989 @@
+{
+  "entities": [
+    {
+      "entity": "AbcClassification",
+      "file": "abc-classification.json",
+      "count": 0
+    },
+    {
+      "entity": "AbcClassificationRun",
+      "file": "abc-classification-run.json",
+      "count": 0
+    },
+    {
+      "entity": "ActivityLog",
+      "file": "activity-log.json",
+      "count": 0
+    },
+    {
+      "entity": "AiAssistant",
+      "file": "ai-assistant.json",
+      "count": 4
+    },
+    {
+      "entity": "AndonAlert",
+      "file": "andon-alert.json",
+      "count": 0
+    },
+    {
+      "entity": "Announcement",
+      "file": "announcement.json",
+      "count": 0
+    },
+    {
+      "entity": "AnnouncementAcknowledgment",
+      "file": "announcement-acknowledgment.json",
+      "count": 0
+    },
+    {
+      "entity": "AnnouncementTeam",
+      "file": "announcement-team.json",
+      "count": 0
+    },
+    {
+      "entity": "AnnouncementTemplate",
+      "file": "announcement-template.json",
+      "count": 0
+    },
+    {
+      "entity": "ApplicationUser",
+      "file": "application-user.json",
+      "count": 23
+    },
+    {
+      "entity": "ApprovalDecision",
+      "file": "approval-decision.json",
+      "count": 0
+    },
+    {
+      "entity": "ApprovalRequest",
+      "file": "approval-request.json",
+      "count": 0
+    },
+    {
+      "entity": "ApprovalStep",
+      "file": "approval-step.json",
+      "count": 2
+    },
+    {
+      "entity": "ApprovalWorkflow",
+      "file": "approval-workflow.json",
+      "count": 2
+    },
+    {
+      "entity": "Asset",
+      "file": "asset.json",
+      "count": 0
+    },
+    {
+      "entity": "AutoPoSuggestion",
+      "file": "auto-po-suggestion.json",
+      "count": 0
+    },
+    {
+      "entity": "Barcode",
+      "file": "barcode.json",
+      "count": 0
+    },
+    {
+      "entity": "BinContent",
+      "file": "bin-content.json",
+      "count": 0
+    },
+    {
+      "entity": "BinMovement",
+      "file": "bin-movement.json",
+      "count": 0
+    },
+    {
+      "entity": "BOMEntry",
+      "file": "bomentry.json",
+      "count": 0
+    },
+    {
+      "entity": "CalibrationRecord",
+      "file": "calibration-record.json",
+      "count": 0
+    },
+    {
+      "entity": "CapaTask",
+      "file": "capa-task.json",
+      "count": 0
+    },
+    {
+      "entity": "ChatMessage",
+      "file": "chat-message.json",
+      "count": 0
+    },
+    {
+      "entity": "ChatMessageMention",
+      "file": "chat-message-mention.json",
+      "count": 0
+    },
+    {
+      "entity": "ChatRoom",
+      "file": "chat-room.json",
+      "count": 2
+    },
+    {
+      "entity": "ChatRoomMember",
+      "file": "chat-room-member.json",
+      "count": 46
+    },
+    {
+      "entity": "ClockEvent",
+      "file": "clock-event.json",
+      "count": 0
+    },
+    {
+      "entity": "CompanyLocation",
+      "file": "company-location.json",
+      "count": 0
+    },
+    {
+      "entity": "ComplianceFormSubmission",
+      "file": "compliance-form-submission.json",
+      "count": 0
+    },
+    {
+      "entity": "ComplianceFormTemplate",
+      "file": "compliance-form-template.json",
+      "count": 6
+    },
+    {
+      "entity": "ConfiguratorOption",
+      "file": "configurator-option.json",
+      "count": 0
+    },
+    {
+      "entity": "ConsignmentAgreement",
+      "file": "consignment-agreement.json",
+      "count": 0
+    },
+    {
+      "entity": "ConsignmentTransaction",
+      "file": "consignment-transaction.json",
+      "count": 0
+    },
+    {
+      "entity": "Contact",
+      "file": "contact.json",
+      "count": 8
+    },
+    {
+      "entity": "ContactInteraction",
+      "file": "contact-interaction.json",
+      "count": 0
+    },
+    {
+      "entity": "ControlledDocument",
+      "file": "controlled-document.json",
+      "count": 0
+    },
+    {
+      "entity": "CorrectiveAction",
+      "file": "corrective-action.json",
+      "count": 0
+    },
+    {
+      "entity": "CreditHold",
+      "file": "credit-hold.json",
+      "count": 0
+    },
+    {
+      "entity": "Currency",
+      "file": "currency.json",
+      "count": 0
+    },
+    {
+      "entity": "Customer",
+      "file": "customer.json",
+      "count": 8
+    },
+    {
+      "entity": "CustomerAddress",
+      "file": "customer-address.json",
+      "count": 6
+    },
+    {
+      "entity": "CustomerReturn",
+      "file": "customer-return.json",
+      "count": 3
+    },
+    {
+      "entity": "CycleCount",
+      "file": "cycle-count.json",
+      "count": 0
+    },
+    {
+      "entity": "CycleCountLine",
+      "file": "cycle-count-line.json",
+      "count": 0
+    },
+    {
+      "entity": "DemandForecast",
+      "file": "demand-forecast.json",
+      "count": 0
+    },
+    {
+      "entity": "DocumentRevision",
+      "file": "document-revision.json",
+      "count": 0
+    },
+    {
+      "entity": "DowntimeLog",
+      "file": "downtime-log.json",
+      "count": 0
+    },
+    {
+      "entity": "EcoAffectedItem",
+      "file": "eco-affected-item.json",
+      "count": 0
+    },
+    {
+      "entity": "ECommerceIntegration",
+      "file": "ecommerce-integration.json",
+      "count": 0
+    },
+    {
+      "entity": "ECommerceOrderSync",
+      "file": "ecommerce-order-sync.json",
+      "count": 0
+    },
+    {
+      "entity": "EdiMapping",
+      "file": "edi-mapping.json",
+      "count": 0
+    },
+    {
+      "entity": "EdiTradingPartner",
+      "file": "edi-trading-partner.json",
+      "count": 0
+    },
+    {
+      "entity": "EdiTransaction",
+      "file": "edi-transaction.json",
+      "count": 0
+    },
+    {
+      "entity": "EmployeeProfile",
+      "file": "employee-profile.json",
+      "count": 0
+    },
+    {
+      "entity": "EngineeringChangeOrder",
+      "file": "engineering-change-order.json",
+      "count": 0
+    },
+    {
+      "entity": "EntityNote",
+      "file": "entity-note.json",
+      "count": 0
+    },
+    {
+      "entity": "Event",
+      "file": "event.json",
+      "count": 0
+    },
+    {
+      "entity": "EventAttendee",
+      "file": "event-attendee.json",
+      "count": 0
+    },
+    {
+      "entity": "ExchangeRate",
+      "file": "exchange-rate.json",
+      "count": 0
+    },
+    {
+      "entity": "Expense",
+      "file": "expense.json",
+      "count": 0
+    },
+    {
+      "entity": "FileAttachment",
+      "file": "file-attachment.json",
+      "count": 0
+    },
+    {
+      "entity": "FmeaAnalysis",
+      "file": "fmea-analysis.json",
+      "count": 0
+    },
+    {
+      "entity": "FmeaItem",
+      "file": "fmea-item.json",
+      "count": 0
+    },
+    {
+      "entity": "FollowUpTask",
+      "file": "follow-up-task.json",
+      "count": 0
+    },
+    {
+      "entity": "ForecastOverride",
+      "file": "forecast-override.json",
+      "count": 0
+    },
+    {
+      "entity": "FormDefinitionVersion",
+      "file": "form-definition-version.json",
+      "count": 0
+    },
+    {
+      "entity": "Gage",
+      "file": "gage.json",
+      "count": 0
+    },
+    {
+      "entity": "IdentityDocument",
+      "file": "identity-document.json",
+      "count": 0
+    },
+    {
+      "entity": "InterPlantTransfer",
+      "file": "inter-plant-transfer.json",
+      "count": 0
+    },
+    {
+      "entity": "InterPlantTransferLine",
+      "file": "inter-plant-transfer-line.json",
+      "count": 0
+    },
+    {
+      "entity": "Invoice",
+      "file": "invoice.json",
+      "count": 15
+    },
+    {
+      "entity": "InvoiceLine",
+      "file": "invoice-line.json",
+      "count": 20
+    },
+    {
+      "entity": "Job",
+      "file": "job.json",
+      "count": 57
+    },
+    {
+      "entity": "JobActivityLog",
+      "file": "job-activity-log.json",
+      "count": 5
+    },
+    {
+      "entity": "JobLink",
+      "file": "job-link.json",
+      "count": 0
+    },
+    {
+      "entity": "JobNote",
+      "file": "job-note.json",
+      "count": 0
+    },
+    {
+      "entity": "JobPart",
+      "file": "job-part.json",
+      "count": 0
+    },
+    {
+      "entity": "JobStage",
+      "file": "job-stage.json",
+      "count": 20
+    },
+    {
+      "entity": "JobSubtask",
+      "file": "job-subtask.json",
+      "count": 1
+    },
+    {
+      "entity": "KanbanCard",
+      "file": "kanban-card.json",
+      "count": 0
+    },
+    {
+      "entity": "KanbanTriggerLog",
+      "file": "kanban-trigger-log.json",
+      "count": 0
+    },
+    {
+      "entity": "LaborRate",
+      "file": "labor-rate.json",
+      "count": 0
+    },
+    {
+      "entity": "Lead",
+      "file": "lead.json",
+      "count": 8
+    },
+    {
+      "entity": "LeaveBalance",
+      "file": "leave-balance.json",
+      "count": 0
+    },
+    {
+      "entity": "LeavePolicy",
+      "file": "leave-policy.json",
+      "count": 0
+    },
+    {
+      "entity": "LeaveRequest",
+      "file": "leave-request.json",
+      "count": 0
+    },
+    {
+      "entity": "LotRecord",
+      "file": "lot-record.json",
+      "count": 5
+    },
+    {
+      "entity": "MachineConnection",
+      "file": "machine-connection.json",
+      "count": 0
+    },
+    {
+      "entity": "MachineTag",
+      "file": "machine-tag.json",
+      "count": 0
+    },
+    {
+      "entity": "MaintenanceLog",
+      "file": "maintenance-log.json",
+      "count": 0
+    },
+    {
+      "entity": "MaintenancePrediction",
+      "file": "maintenance-prediction.json",
+      "count": 0
+    },
+    {
+      "entity": "MaintenanceSchedule",
+      "file": "maintenance-schedule.json",
+      "count": 0
+    },
+    {
+      "entity": "MasterSchedule",
+      "file": "master-schedule.json",
+      "count": 0
+    },
+    {
+      "entity": "MasterScheduleLine",
+      "file": "master-schedule-line.json",
+      "count": 0
+    },
+    {
+      "entity": "MaterialIssue",
+      "file": "material-issue.json",
+      "count": 0
+    },
+    {
+      "entity": "MlModel",
+      "file": "ml-model.json",
+      "count": 0
+    },
+    {
+      "entity": "MrpDemand",
+      "file": "mrp-demand.json",
+      "count": 0
+    },
+    {
+      "entity": "MrpException",
+      "file": "mrp-exception.json",
+      "count": 0
+    },
+    {
+      "entity": "MrpPlannedOrder",
+      "file": "mrp-planned-order.json",
+      "count": 0
+    },
+    {
+      "entity": "MrpRun",
+      "file": "mrp-run.json",
+      "count": 0
+    },
+    {
+      "entity": "MrpSupply",
+      "file": "mrp-supply.json",
+      "count": 0
+    },
+    {
+      "entity": "NonConformance",
+      "file": "non-conformance.json",
+      "count": 0
+    },
+    {
+      "entity": "Notification",
+      "file": "notification.json",
+      "count": 0
+    },
+    {
+      "entity": "Operation",
+      "file": "operation.json",
+      "count": 0
+    },
+    {
+      "entity": "OperationMaterial",
+      "file": "operation-material.json",
+      "count": 0
+    },
+    {
+      "entity": "OvertimeRule",
+      "file": "overtime-rule.json",
+      "count": 0
+    },
+    {
+      "entity": "Part",
+      "file": "part.json",
+      "count": 12
+    },
+    {
+      "entity": "PartAlternate",
+      "file": "part-alternate.json",
+      "count": 0
+    },
+    {
+      "entity": "PartPrice",
+      "file": "part-price.json",
+      "count": 0
+    },
+    {
+      "entity": "PartRevision",
+      "file": "part-revision.json",
+      "count": 0
+    },
+    {
+      "entity": "Payment",
+      "file": "payment.json",
+      "count": 14
+    },
+    {
+      "entity": "PaymentApplication",
+      "file": "payment-application.json",
+      "count": 14
+    },
+    {
+      "entity": "PayStub",
+      "file": "pay-stub.json",
+      "count": 0
+    },
+    {
+      "entity": "PayStubDeduction",
+      "file": "pay-stub-deduction.json",
+      "count": 0
+    },
+    {
+      "entity": "PerformanceReview",
+      "file": "performance-review.json",
+      "count": 0
+    },
+    {
+      "entity": "PickLine",
+      "file": "pick-line.json",
+      "count": 0
+    },
+    {
+      "entity": "PickWave",
+      "file": "pick-wave.json",
+      "count": 0
+    },
+    {
+      "entity": "PlanningCycle",
+      "file": "planning-cycle.json",
+      "count": 0
+    },
+    {
+      "entity": "PlanningCycleEntry",
+      "file": "planning-cycle-entry.json",
+      "count": 0
+    },
+    {
+      "entity": "Plant",
+      "file": "plant.json",
+      "count": 0
+    },
+    {
+      "entity": "PpapElement",
+      "file": "ppap-element.json",
+      "count": 0
+    },
+    {
+      "entity": "PpapSubmission",
+      "file": "ppap-submission.json",
+      "count": 0
+    },
+    {
+      "entity": "PredictionFeedback",
+      "file": "prediction-feedback.json",
+      "count": 0
+    },
+    {
+      "entity": "PriceList",
+      "file": "price-list.json",
+      "count": 0
+    },
+    {
+      "entity": "PriceListEntry",
+      "file": "price-list-entry.json",
+      "count": 0
+    },
+    {
+      "entity": "ProductConfiguration",
+      "file": "product-configuration.json",
+      "count": 0
+    },
+    {
+      "entity": "ProductConfigurator",
+      "file": "product-configurator.json",
+      "count": 0
+    },
+    {
+      "entity": "ProductionRun",
+      "file": "production-run.json",
+      "count": 0
+    },
+    {
+      "entity": "Project",
+      "file": "project.json",
+      "count": 0
+    },
+    {
+      "entity": "PurchaseOrder",
+      "file": "purchase-order.json",
+      "count": 3
+    },
+    {
+      "entity": "PurchaseOrderLine",
+      "file": "purchase-order-line.json",
+      "count": 3
+    },
+    {
+      "entity": "PurchaseOrderRelease",
+      "file": "purchase-order-release.json",
+      "count": 0
+    },
+    {
+      "entity": "QcChecklistItem",
+      "file": "qc-checklist-item.json",
+      "count": 0
+    },
+    {
+      "entity": "QcChecklistTemplate",
+      "file": "qc-checklist-template.json",
+      "count": 0
+    },
+    {
+      "entity": "QcInspection",
+      "file": "qc-inspection.json",
+      "count": 0
+    },
+    {
+      "entity": "QcInspectionResult",
+      "file": "qc-inspection-result.json",
+      "count": 0
+    },
+    {
+      "entity": "Quote",
+      "file": "quote.json",
+      "count": 7
+    },
+    {
+      "entity": "QuoteLine",
+      "file": "quote-line.json",
+      "count": 5
+    },
+    {
+      "entity": "ReceivingInspection",
+      "file": "receiving-inspection.json",
+      "count": 0
+    },
+    {
+      "entity": "ReceivingRecord",
+      "file": "receiving-record.json",
+      "count": 0
+    },
+    {
+      "entity": "RecurringExpense",
+      "file": "recurring-expense.json",
+      "count": 0
+    },
+    {
+      "entity": "RecurringOrder",
+      "file": "recurring-order.json",
+      "count": 0
+    },
+    {
+      "entity": "RecurringOrderLine",
+      "file": "recurring-order-line.json",
+      "count": 0
+    },
+    {
+      "entity": "ReferenceData",
+      "file": "reference-data.json",
+      "count": 119
+    },
+    {
+      "entity": "ReorderSuggestion",
+      "file": "reorder-suggestion.json",
+      "count": 0
+    },
+    {
+      "entity": "ReportSchedule",
+      "file": "report-schedule.json",
+      "count": 0
+    },
+    {
+      "entity": "RequestForQuote",
+      "file": "request-for-quote.json",
+      "count": 0
+    },
+    {
+      "entity": "Reservation",
+      "file": "reservation.json",
+      "count": 0
+    },
+    {
+      "entity": "ReviewCycle",
+      "file": "review-cycle.json",
+      "count": 0
+    },
+    {
+      "entity": "RfqVendorResponse",
+      "file": "rfq-vendor-response.json",
+      "count": 0
+    },
+    {
+      "entity": "SalesOrder",
+      "file": "sales-order.json",
+      "count": 16
+    },
+    {
+      "entity": "SalesOrderLine",
+      "file": "sales-order-line.json",
+      "count": 21
+    },
+    {
+      "entity": "SalesTaxRate",
+      "file": "sales-tax-rate.json",
+      "count": 51
+    },
+    {
+      "entity": "SavedReport",
+      "file": "saved-report.json",
+      "count": 27
+    },
+    {
+      "entity": "ScheduledOperation",
+      "file": "scheduled-operation.json",
+      "count": 0
+    },
+    {
+      "entity": "ScheduledTask",
+      "file": "scheduled-task.json",
+      "count": 0
+    },
+    {
+      "entity": "ScheduleMilestone",
+      "file": "schedule-milestone.json",
+      "count": 0
+    },
+    {
+      "entity": "ScheduleRun",
+      "file": "schedule-run.json",
+      "count": 0
+    },
+    {
+      "entity": "SerialHistory",
+      "file": "serial-history.json",
+      "count": 0
+    },
+    {
+      "entity": "SerialNumber",
+      "file": "serial-number.json",
+      "count": 0
+    },
+    {
+      "entity": "Shift",
+      "file": "shift.json",
+      "count": 0
+    },
+    {
+      "entity": "ShiftAssignment",
+      "file": "shift-assignment.json",
+      "count": 0
+    },
+    {
+      "entity": "Shipment",
+      "file": "shipment.json",
+      "count": 15
+    },
+    {
+      "entity": "ShipmentLine",
+      "file": "shipment-line.json",
+      "count": 20
+    },
+    {
+      "entity": "ShipmentPackage",
+      "file": "shipment-package.json",
+      "count": 0
+    },
+    {
+      "entity": "SpcCharacteristic",
+      "file": "spc-characteristic.json",
+      "count": 0
+    },
+    {
+      "entity": "SpcControlLimit",
+      "file": "spc-control-limit.json",
+      "count": 0
+    },
+    {
+      "entity": "SpcOocEvent",
+      "file": "spc-ooc-event.json",
+      "count": 0
+    },
+    {
+      "entity": "StatusEntry",
+      "file": "status-entry.json",
+      "count": 0
+    },
+    {
+      "entity": "StorageLocation",
+      "file": "storage-location.json",
+      "count": 0
+    },
+    {
+      "entity": "SubcontractOrder",
+      "file": "subcontract-order.json",
+      "count": 0
+    },
+    {
+      "entity": "SupportedLanguage",
+      "file": "supported-language.json",
+      "count": 0
+    },
+    {
+      "entity": "SystemSetting",
+      "file": "system-setting.json",
+      "count": 6
+    },
+    {
+      "entity": "TaxDocument",
+      "file": "tax-document.json",
+      "count": 0
+    },
+    {
+      "entity": "Team",
+      "file": "team.json",
+      "count": 0
+    },
+    {
+      "entity": "TerminologyEntry",
+      "file": "terminology-entry.json",
+      "count": 0
+    },
+    {
+      "entity": "TimeCorrectionLog",
+      "file": "time-correction-log.json",
+      "count": 0
+    },
+    {
+      "entity": "TimeEntry",
+      "file": "time-entry.json",
+      "count": 60
+    },
+    {
+      "entity": "TrackType",
+      "file": "track-type.json",
+      "count": 3
+    },
+    {
+      "entity": "TrainingModule",
+      "file": "training-module.json",
+      "count": 154
+    },
+    {
+      "entity": "TrainingPath",
+      "file": "training-path.json",
+      "count": 8
+    },
+    {
+      "entity": "TrainingPathEnrollment",
+      "file": "training-path-enrollment.json",
+      "count": 0
+    },
+    {
+      "entity": "TrainingPathModule",
+      "file": "training-path-module.json",
+      "count": 113
+    },
+    {
+      "entity": "TrainingProgress",
+      "file": "training-progress.json",
+      "count": 0
+    },
+    {
+      "entity": "TranslatedLabel",
+      "file": "translated-label.json",
+      "count": 0
+    },
+    {
+      "entity": "UnitOfMeasure",
+      "file": "unit-of-measure.json",
+      "count": 21
+    },
+    {
+      "entity": "UomConversion",
+      "file": "uom-conversion.json",
+      "count": 16
+    },
+    {
+      "entity": "UserPreference",
+      "file": "user-preference.json",
+      "count": 0
+    },
+    {
+      "entity": "UserScanDevice",
+      "file": "user-scan-device.json",
+      "count": 0
+    },
+    {
+      "entity": "Vendor",
+      "file": "vendor.json",
+      "count": 5
+    },
+    {
+      "entity": "VendorScorecard",
+      "file": "vendor-scorecard.json",
+      "count": 0
+    },
+    {
+      "entity": "WbsCostEntry",
+      "file": "wbs-cost-entry.json",
+      "count": 0
+    },
+    {
+      "entity": "WbsElement",
+      "file": "wbs-element.json",
+      "count": 0
+    },
+    {
+      "entity": "WebhookSubscription",
+      "file": "webhook-subscription.json",
+      "count": 0
+    },
+    {
+      "entity": "WorkCenter",
+      "file": "work-center.json",
+      "count": 0
+    },
+    {
+      "entity": "WorkCenterCalendar",
+      "file": "work-center-calendar.json",
+      "count": 0
+    },
+    {
+      "entity": "WorkCenterShift",
+      "file": "work-center-shift.json",
+      "count": 0
+    }
+  ]
+}

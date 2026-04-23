@@ -1,0 +1,222 @@
+[
+  {
+    "invoiceId": 1,
+    "partId": null,
+    "description": "Precision Mounting Bracket Assembly x25",
+    "quantity": 25,
+    "unitPrice": 248.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 1
+  },
+  {
+    "invoiceId": 2,
+    "partId": null,
+    "description": "Shaft Housing CNC x15",
+    "quantity": 15,
+    "unitPrice": 312.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 2
+  },
+  {
+    "invoiceId": 3,
+    "partId": null,
+    "description": "Bracket Assy Rev C x50",
+    "quantity": 50,
+    "unitPrice": 238.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 3
+  },
+  {
+    "invoiceId": 3,
+    "partId": null,
+    "description": "Motor Mount Plate v2 x20",
+    "quantity": 20,
+    "unitPrice": 195.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 4
+  },
+  {
+    "invoiceId": 4,
+    "partId": null,
+    "description": "Pneumatic Manifold Block x8",
+    "quantity": 8,
+    "unitPrice": 685.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 5
+  },
+  {
+    "invoiceId": 5,
+    "partId": null,
+    "description": "Shaft Housing CNC x20",
+    "quantity": 20,
+    "unitPrice": 295.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 6
+  },
+  {
+    "invoiceId": 6,
+    "partId": null,
+    "description": "48-tooth Spur Gear Blank x30",
+    "quantity": 30,
+    "unitPrice": 178.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 7
+  },
+  {
+    "invoiceId": 7,
+    "partId": null,
+    "description": "Electrical Connector Plate x40",
+    "quantity": 40,
+    "unitPrice": 145.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 8
+  },
+  {
+    "invoiceId": 8,
+    "partId": null,
+    "description": "Heat Sink Array x30",
+    "quantity": 30,
+    "unitPrice": 265.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 9
+  },
+  {
+    "invoiceId": 9,
+    "partId": null,
+    "description": "Heat Sink Array x100",
+    "quantity": 100,
+    "unitPrice": 245.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 10
+  },
+  {
+    "invoiceId": 9,
+    "partId": null,
+    "description": "High-Temp Polymer Seal Kit x100",
+    "quantity": 100,
+    "unitPrice": 38.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 11
+  },
+  {
+    "invoiceId": 10,
+    "partId": null,
+    "description": "Pneumatic Manifold Block x10",
+    "quantity": 10,
+    "unitPrice": 710.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 12
+  },
+  {
+    "invoiceId": 11,
+    "partId": null,
+    "description": "Custom Weld Flange 2\u0022 NPT x24",
+    "quantity": 24,
+    "unitPrice": 225.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 13
+  },
+  {
+    "invoiceId": 12,
+    "partId": null,
+    "description": "Motor Mount Plate v2 x40",
+    "quantity": 40,
+    "unitPrice": 188.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 14
+  },
+  {
+    "invoiceId": 13,
+    "partId": null,
+    "description": "Polymer Seal Kit x60",
+    "quantity": 60,
+    "unitPrice": 42.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 15
+  },
+  {
+    "invoiceId": 13,
+    "partId": null,
+    "description": "Connector Plate x25",
+    "quantity": 25,
+    "unitPrice": 148.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 16
+  },
+  {
+    "invoiceId": 14,
+    "partId": null,
+    "description": "Gear Blank 48T x25",
+    "quantity": 25,
+    "unitPrice": 182.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 17
+  },
+  {
+    "invoiceId": 14,
+    "partId": null,
+    "description": "Shaft Housing x10",
+    "quantity": 10,
+    "unitPrice": 310.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 18
+  },
+  {
+    "invoiceId": 15,
+    "partId": null,
+    "description": "Precision Mounting Bracket Assy x75",
+    "quantity": 75,
+    "unitPrice": 232.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 19
+  },
+  {
+    "invoiceId": 15,
+    "partId": null,
+    "description": "Pneumatic Manifold Block x12",
+    "quantity": 12,
+    "unitPrice": 665.0000,
+    "lineNumber": 0,
+    "invoice": null,
+    "part": null,
+    "id": 20
+  }
+]

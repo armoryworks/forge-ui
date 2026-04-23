@@ -1,0 +1,17 @@
+[
+  {
+    "jobId": 1,
+    "text": "Tool change \u2014 End Mill #4 replace",
+    "isCompleted": false,
+    "assigneeId": 4,
+    "sortOrder": 1,
+    "completedAt": null,
+    "completedById": null,
+    "job": null,
+    "createdAt": "2026-04-23T07:48:31.440957+00:00",
+    "updatedAt": "2026-04-23T07:48:31.440957+00:00",
+    "deletedAt": null,
+    "deletedBy": null,
+    "id": 1
+  }
+]
