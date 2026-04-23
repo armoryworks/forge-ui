@@ -1,10 +1,12 @@
 <aside class="sidebar" [class.sidebar--expanded]="!collapsed()">
-  <button class="nav-item nav-item--toggle" (click)="toggleCollapse()" [matTooltip]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate" matTooltipPosition="right" [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate">
-    <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
-    @if (!collapsed()) {
-      <span class="nav-item__label">{{ 'nav.collapse' | translate }}</span>
-    }
-  </button>
+  @if (!drillHeader()) {
+    <button class="nav-item nav-item--toggle" (click)="toggleCollapse()" [matTooltip]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate" matTooltipPosition="right" [attr.aria-label]="(collapsed() ? 'nav.expand' : 'nav.collapse') | translate">
+      <span class="material-icons-outlined">{{ collapsed() ? 'chevron_right' : 'chevron_left' }}</span>
+      @if (!collapsed()) {
+        <span class="nav-item__label">{{ 'nav.collapse' | translate }}</span>
+      }
+    </button>
+  }
 
   @if (drillHeader(); as header) {
     <button class="nav-item nav-item--back" (click)="onBackClick()" [matTooltip]="'nav.back' | translate" matTooltipPosition="right" [attr.aria-label]="'nav.back' | translate">
