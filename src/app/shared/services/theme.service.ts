@@ -26,10 +26,14 @@ export class ThemeService {
 
   constructor() {
     const saved = localStorage.getItem('qbe-theme') as ThemeMode | null;
-    if (saved === 'dark' || saved === 'light') {
-      this._theme.set(saved);
-    }
-    this.applyTheme(this._theme());
+    // Demo builds default to dark when the user has no saved preference — the
+    // armory-works parent site is dark, so launching into a light demo is
+    // visually jarring. User toggles still win once set.
+    const initialTheme: ThemeMode = saved === 'dark' || saved === 'light'
+      ? saved
+      : environment.demoMode ? 'dark' : 'light';
+    this._theme.set(initialTheme);
+    this.applyTheme(initialTheme);
 
     const savedScale = localStorage.getItem('qbe-font-scale') as FontScale | null;
     if (savedScale === 'comfortable' || savedScale === 'large' || savedScale === 'xl') {
