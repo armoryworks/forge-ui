@@ -1,18 +1,18 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
-// Ambient mode uses its own theme-scoped palette (not the global --text etc.)
-// so the experience stays legible in both light and dark modes regardless of
-// what the rest of the app's theme variables resolve to.
+// Ambient mode is always dark — it's a dim kiosk display meant for low-light
+// glance-at-from-across-the-room use. Users' app theme preference does not
+// apply here; a blinding white ambient overlay defeats the purpose.
 .ambient {
-  --amb-bg: #f5f7fa;
-  --amb-fg: #0f172a;
-  --amb-fg-muted: rgba(15, 23, 42, 0.65);
-  --amb-fg-subtle: rgba(15, 23, 42, 0.45);
-  --amb-fg-faint: rgba(15, 23, 42, 0.25);
-  --amb-panel: rgba(15, 23, 42, 0.06);
-  --amb-warning: #b45309;
-  --amb-error: #b91c1c;
+  --amb-bg: #0f172a;
+  --amb-fg: #f8fafc;
+  --amb-fg-muted: rgba(248, 250, 252, 0.7);
+  --amb-fg-subtle: rgba(248, 250, 252, 0.5);
+  --amb-fg-faint: rgba(248, 250, 252, 0.25);
+  --amb-panel: rgba(248, 250, 252, 0.06);
+  --amb-warning: #fbbf24;
+  --amb-error: #f87171;
 
   position: fixed;
   inset: 0;
@@ -26,17 +26,6 @@
   gap: $sp-3xl;
   cursor: pointer;
   animation: fadeIn 0.5s ease;
-
-  [data-theme='dark'] & {
-    --amb-bg: #0f172a;
-    --amb-fg: #f8fafc;
-    --amb-fg-muted: rgba(248, 250, 252, 0.7);
-    --amb-fg-subtle: rgba(248, 250, 252, 0.5);
-    --amb-fg-faint: rgba(248, 250, 252, 0.25);
-    --amb-panel: rgba(248, 250, 252, 0.06);
-    --amb-warning: #fbbf24;
-    --amb-error: #f87171;
-  }
 }
 
 @keyframes fadeIn {
