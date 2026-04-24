@@ -155,6 +155,13 @@ export async function synthesizeAggregate(
     return undefined; // Let generic handler return the list.
   }
 
+  // /reference-data/{groupCode} — filter rows by groupCode. Generic handler
+  // would return ALL rows (non-numeric sub doesn't match the by-id path).
+  if (head === 'reference-data' && method === 'GET' && sub && !/^\d+$/.test(sub)) {
+    const rows = await store.load('reference-data');
+    return rows.filter(r => String(r['groupCode']) === sub);
+  }
+
   if (head === 'scheduled-tasks' && method === 'GET') return [];
   if (head === 'follow-up-tasks' && method === 'GET') return [];
   if (head === 'holds' && method === 'GET') return [];
