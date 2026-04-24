@@ -93,6 +93,12 @@ export class AppComponent implements OnInit, OnDestroy {
   /** Prevents double-launching an inline tour on direct ?walkthrough= navigation. */
   private walkthroughRunning = false;
 
+  /** Tracks whether the user was ever authenticated in this session. Only a
+   *  true→false transition should push to /login (session expiry / logout).
+   *  On initial boot with no token, the route guards decide the destination —
+   *  the effect must not pre-empt the demo's rootRedirectGuard → /welcome. */
+  private wasAuthenticated = false;
+
   protected readonly showShell = computed(() => this.authService.isAuthenticated() && !this.layout.isDisplayRoute() && !this.layout.isAuthRoute());
   protected readonly isGlobalLoading = this.loadingService.isLoading;
 
@@ -109,18 +115,22 @@ export class AppComponent implements OnInit, OnDestroy {
         this.scanner.start();
         this.draftRecovery.onLogin();
         this.announcementService.loadActive();
+        this.wasAuthenticated = true;
       } else {
         this.signalr.stopAll();
         // Don't stop the scanner on display/kiosk routes — they manage their own scanner lifecycle
         if (!this.layout.isDisplayRoute()) {
           this.scanner.stop();
         }
-        // Redirect to login when auth is lost (expired token, logout, etc.)
-        // Use setTimeout to break out of the reactive context — router.navigate
-        // triggers signal changes that conflict with effect execution.
-        if (!this.layout.isAuthRoute() && !this.layout.isDisplayRoute()) {
+        // Only push to /login on a true→false transition (session expiry, logout).
+        // On initial boot, wasAuthenticated is still false — let the route guards
+        // (rootRedirectGuard, authGuard) decide where to send the user. Otherwise
+        // this effect's setTimeout races with and clobbers the demo's root→/welcome
+        // redirect.
+        if (this.wasAuthenticated && !this.layout.isAuthRoute() && !this.layout.isDisplayRoute()) {
           setTimeout(() => this.router.navigate(['/login']));
         }
+        this.wasAuthenticated = false;
       }
     });
 
