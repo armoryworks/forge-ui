@@ -20,7 +20,7 @@ $grid-columns: 5;
   gap: $sp-xl;
   padding: $sp-md $sp-xl;
   background: var(--header);
-  color: #fff;
+  color: var(--header-text);
   flex-shrink: 0;
 }
 
@@ -804,6 +804,7 @@ $grid-columns: 5;
   padding: $sp-xl $sp-lg;
   border: $border-width solid var(--border);
   background: var(--surface);
+  color: var(--text);
   cursor: pointer;
   min-height: 88px;
   font-family: $font-family-primary;

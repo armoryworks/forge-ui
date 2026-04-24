@@ -67,6 +67,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   );
   @HostBinding('attr.data-theme') get dataTheme() { return this.theme(); }
 
+  // Snapshot the main site's <html data-theme> so we can restore it on destroy.
+  // While the kiosk is active we push the shop-floor theme to <html> as well —
+  // CDK overlays (dialogs, toasts, dropdowns) render outside this host and would
+  // otherwise inherit the main site's theme instead of the kiosk's.
+  private readonly originalHtmlTheme: string | null = document.documentElement.getAttribute('data-theme');
+
   // Font size scaling — persisted to localStorage
   protected readonly fontSizeIndex = signal(
     Math.max(0, Math.min(FONT_SIZES.length - 1, parseInt(localStorage.getItem('sf-font-index') ?? '0', 10) || 0)),
@@ -222,6 +228,12 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
     this.handleScanValue(scan.value);
   });
 
+  // Mirror the shop-floor theme onto <html> so CDK overlays (dialogs, toasts,
+  // dropdowns) inherit the kiosk theme rather than the main site's theme.
+  private readonly htmlThemeEffect = effect(() => {
+    document.documentElement.setAttribute('data-theme', this.theme());
+  });
+
   ngOnInit(): void {
     this.authService.clearAuth();
     this.updateClock();
@@ -257,6 +269,13 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.scanner.stop();
+    // Restore the main site's <html data-theme> so leaving the kiosk doesn't
+    // leak the kiosk's theme back into the main app shell.
+    if (this.originalHtmlTheme === null) {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', this.originalHtmlTheme);
+    }
   }
 
   // ─── Scan Handling ───
