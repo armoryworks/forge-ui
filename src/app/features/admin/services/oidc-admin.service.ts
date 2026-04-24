@@ -12,6 +12,9 @@ import { OidcClientStatus } from '../models/oidc-client-status.model';
 import { OidcCreateScopeRequest } from '../models/oidc-create-scope-request.model';
 import { OidcMintTicketRequest } from '../models/oidc-mint-ticket-request.model';
 import { OidcMintTicketResponse } from '../models/oidc-mint-ticket-response.model';
+import { OidcProviderSettings } from '../models/oidc-provider-settings.model';
+import { OidcProvisionClientRequest } from '../models/oidc-provision-client-request.model';
+import { OidcProvisionClientResponse } from '../models/oidc-provision-client-response.model';
 import { OidcRotateSecretResponse } from '../models/oidc-rotate-secret-response.model';
 import { OidcScopeListItem } from '../models/oidc-scope-list-item.model';
 import { OidcSuspendClientRequest } from '../models/oidc-suspend-client-request.model';
@@ -53,6 +56,11 @@ export class OidcAdminService {
 
   getClient(clientId: string): Observable<OidcClientDetailResponse> {
     return this.http.get<OidcClientDetailResponse>(`${this.base}/clients/${encodeURIComponent(clientId)}`);
+  }
+
+  /** Admin-driven direct provisioning — returns full credentials inline (one shot). */
+  provisionClient(body: OidcProvisionClientRequest): Observable<OidcProvisionClientResponse> {
+    return this.http.post<OidcProvisionClientResponse>(`${this.base}/clients`, body);
   }
 
   approveClient(clientId: string, body: OidcApproveClientRequest): Observable<void> {
@@ -97,6 +105,16 @@ export class OidcAdminService {
 
   deleteScope(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/scopes/${id}`);
+  }
+
+  // ── Provider settings (enable toggle + public base URL) ───
+
+  getSettings(): Observable<OidcProviderSettings> {
+    return this.http.get<OidcProviderSettings>(`${this.base}/settings`);
+  }
+
+  updateSettings(body: OidcProviderSettings): Observable<OidcProviderSettings> {
+    return this.http.put<OidcProviderSettings>(`${this.base}/settings`, body);
   }
 
   // ── Audit ─────────────────────────────────────────────────

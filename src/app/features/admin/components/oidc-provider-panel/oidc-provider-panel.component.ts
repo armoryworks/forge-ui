@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,8 +22,11 @@ import { OidcAuditFilter } from '../../models/oidc-audit-filter.model';
 import { OidcClientListItem } from '../../models/oidc-client-list-item.model';
 import { OidcScopeListItem } from '../../models/oidc-scope-list-item.model';
 import { OidcTicketListItem } from '../../models/oidc-ticket-list-item.model';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { OidcProviderSettings } from '../../models/oidc-provider-settings.model';
 import { OidcMintTicketDialogComponent } from '../oidc-mint-ticket-dialog/oidc-mint-ticket-dialog.component';
 import { OidcClientDetailDialogComponent } from '../oidc-client-detail-dialog/oidc-client-detail-dialog.component';
+import { OidcProvisionClientDialogComponent } from '../oidc-provision-client-dialog/oidc-provision-client-dialog.component';
 import { OidcScopeEditorDialogComponent } from '../oidc-scope-editor-dialog/oidc-scope-editor-dialog.component';
 import { OidcAuditDetailDialogComponent } from '../oidc-audit-detail-dialog/oidc-audit-detail-dialog.component';
 
@@ -64,8 +67,9 @@ const AUDIT_EVENT_OPTIONS: SelectOption[] = [
   imports: [
     ReactiveFormsModule,
     MatTabsModule, DataTableComponent, ColumnCellDirective,
-    InputComponent, SelectComponent, DateRangePickerComponent, ToolbarComponent, SpacerDirective,
-    OidcMintTicketDialogComponent, OidcClientDetailDialogComponent, OidcScopeEditorDialogComponent, OidcAuditDetailDialogComponent,
+    InputComponent, SelectComponent, ToggleComponent, DateRangePickerComponent, ToolbarComponent, SpacerDirective,
+    OidcMintTicketDialogComponent, OidcClientDetailDialogComponent, OidcProvisionClientDialogComponent,
+    OidcScopeEditorDialogComponent, OidcAuditDetailDialogComponent,
   ],
   templateUrl: './oidc-provider-panel.component.html',
   styleUrl: './oidc-provider-panel.component.scss',
@@ -89,10 +93,23 @@ export class OidcProviderPanelComponent implements OnInit {
   protected readonly loadingAudit = signal(false);
 
   protected readonly showMintDialog = signal(false);
+  protected readonly showProvisionDialog = signal(false);
   protected readonly selectedClientId = signal<string | null>(null);
   protected readonly scopeEditorOpen = signal(false);
   protected readonly scopeBeingEdited = signal<OidcScopeListItem | null>(null);
   protected readonly selectedAuditEvent = signal<OidcAuditEventListItem | null>(null);
+
+  // Provider settings (enable toggle + public base URL) — surfaced in the header.
+  protected readonly settings = signal<OidcProviderSettings>({ providerEnabled: false, publicBaseUrl: '' });
+  protected readonly settingsLoaded = signal(false);
+  protected readonly settingsSaving = signal(false);
+  protected readonly settingsForm = new FormGroup({
+    providerEnabled: new FormControl<boolean>(false, { nonNullable: true }),
+    publicBaseUrl: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.pattern(/^(https?:\/\/).+/)],
+    }),
+  });
 
   protected readonly auditEventOptions = AUDIT_EVENT_OPTIONS;
 
@@ -175,6 +192,55 @@ export class OidcProviderPanelComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadForSection(this.activeSection());
+    this.loadSettings();
+  }
+
+  private loadSettings(): void {
+    this.oidc.getSettings().subscribe({
+      next: (s) => {
+        this.settings.set(s);
+        this.settingsForm.patchValue(s, { emitEvent: false });
+        this.settingsForm.markAsPristine();
+        this.settingsLoaded.set(true);
+      },
+      error: () => this.settingsLoaded.set(true),
+    });
+  }
+
+  protected saveSettings(): void {
+    if (this.settingsForm.invalid || this.settingsSaving()) return;
+    const v = this.settingsForm.getRawValue();
+    const body: OidcProviderSettings = {
+      providerEnabled: v.providerEnabled,
+      publicBaseUrl: (v.publicBaseUrl || '').trim().replace(/\/$/, ''),
+    };
+    this.settingsSaving.set(true);
+    this.oidc.updateSettings(body).subscribe({
+      next: (s) => {
+        this.settings.set(s);
+        this.settingsForm.patchValue(s, { emitEvent: false });
+        this.settingsForm.markAsPristine();
+        this.settingsSaving.set(false);
+        this.snackbar.success('OIDC provider settings saved.');
+      },
+      error: () => this.settingsSaving.set(false),
+    });
+  }
+
+  protected openProvisionClient(): void {
+    this.showProvisionDialog.set(true);
+  }
+
+  protected onProvisionDialogClosed(): void {
+    this.showProvisionDialog.set(false);
+  }
+
+  protected onClientProvisioned(): void {
+    if (this.activeSection() !== 'clients') {
+      this.selectSection('clients');
+    } else {
+      this.loadClients();
+    }
   }
 
   protected selectSection(section: OidcSectionKey): void {

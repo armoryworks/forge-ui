@@ -11,11 +11,37 @@
       <button class="action-btn action-btn--sm" (click)="refreshActive()" aria-label="Refresh">
         <span class="material-icons-outlined">refresh</span> Refresh
       </button>
-      <button class="action-btn action-btn--sm action-btn--create" (click)="openMintTicket()" aria-label="Mint registration ticket">
-        <span class="material-icons-outlined">add</span> Mint ticket
+      <button class="action-btn action-btn--sm" (click)="openMintTicket()" aria-label="Mint registration ticket">
+        <span class="material-icons-outlined">confirmation_number</span> Mint ticket
+      </button>
+      <button class="action-btn action-btn--sm action-btn--create" (click)="openProvisionClient()" aria-label="Provision client directly">
+        <span class="material-icons-outlined">bolt</span> Provision client
       </button>
     </div>
   </header>
+
+  <!-- Provider settings (enable toggle + public base URL). Flipping the toggle here avoids
+       needing to redeploy the container just to turn the OIDC surface on/off. -->
+  <section class="oidc-panel__settings" [formGroup]="settingsForm">
+    <div class="oidc-panel__settings-row">
+      <app-toggle
+        label="Enable OIDC provider (turn on to let external apps authenticate)"
+        formControlName="providerEnabled" />
+    </div>
+    <div class="oidc-panel__settings-row oidc-panel__settings-row--url">
+      <app-input
+        label="Public base URL (issuer advertised in discovery)"
+        formControlName="publicBaseUrl"
+        placeholder="https://qb-engineer.example.com" />
+      <button
+        type="button"
+        class="action-btn action-btn--sm action-btn--primary"
+        [disabled]="settingsForm.invalid || settingsForm.pristine || settingsSaving()"
+        (click)="saveSettings()">
+        <span class="material-icons-outlined">save</span> Save settings
+      </button>
+    </div>
+  </section>
 
   <mat-tab-group [selectedIndex]="sectionIndex()" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs="false" animationDuration="0ms">
     <mat-tab label="Clients">
@@ -366,9 +392,17 @@
     (minted)="onTicketMinted()" />
 }
 
+@if (showProvisionDialog()) {
+  <app-oidc-provision-client-dialog
+    [publicBaseUrl]="settings().publicBaseUrl"
+    (closed)="onProvisionDialogClosed()"
+    (provisioned)="onClientProvisioned()" />
+}
+
 @if (selectedClientId(); as cid) {
   <app-oidc-client-detail-dialog
     [clientId]="cid"
+    [publicBaseUrl]="settings().publicBaseUrl"
     (closed)="onClientDetailClosed()"
     (changed)="onClientChanged()" />
 }

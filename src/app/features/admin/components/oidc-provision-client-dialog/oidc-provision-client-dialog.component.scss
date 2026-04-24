@@ -1,0 +1,61 @@
+@use 'styles/variables' as *;
+
+.provision-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.provision-form__toggles {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-sm 0;
+  border-top: $border-width-thin dashed var(--border);
+  border-bottom: $border-width-thin dashed var(--border);
+}
+
+.provision-result {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.provision-result__status {
+  padding: $sp-sm $sp-md;
+  background: var(--info-light);
+  color: var(--text);
+  border-left: $border-width-accent solid var(--info);
+  font-size: $font-size-sm;
+}
+
+.provision-result__token {
+  padding: $sp-sm $sp-md;
+  background: var(--row-alt);
+  border: $border-width-thin solid var(--border);
+  font-size: $font-size-sm;
+
+  summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  p {
+    margin: $sp-sm 0;
+    color: var(--text-secondary);
+  }
+
+  code {
+    font-family: $font-family-mono;
+  }
+}
+
+.provision-result__token-value {
+  display: block;
+  padding: $sp-sm;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  word-break: break-all;
+  font-size: $font-size-xs;
+}

@@ -12,6 +12,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { OidcAdminService } from '../../services/oidc-admin.service';
 import { OidcClientDetailResponse } from '../../models/oidc-client-detail-response.model';
 import { OidcRotateSecretResponse } from '../../models/oidc-rotate-secret-response.model';
+import { OidcIntegrationDetailsComponent } from '../oidc-integration-details/oidc-integration-details.component';
 
 type ActivePanel = null | 'approve' | 'suspend' | 'edit' | 'rotated' | 'revoke';
 
@@ -22,6 +23,7 @@ type ActivePanel = null | 'approve' | 'suspend' | 'edit' | 'rotated' | 'revoke';
     DatePipe,
     ReactiveFormsModule,
     DialogComponent, InputComponent, TextareaComponent, ToggleComponent, ValidationButtonComponent,
+    OidcIntegrationDetailsComponent,
   ],
   templateUrl: './oidc-client-detail-dialog.component.html',
   styleUrl: './oidc-client-detail-dialog.component.scss',
@@ -32,6 +34,9 @@ export class OidcClientDetailDialogComponent {
   private readonly snackbar = inject(SnackbarService);
 
   readonly clientId = input.required<string>();
+  /** Passed in from the parent panel — used by the embedded integration-details card so the
+   *  child component doesn't re-fetch provider settings. */
+  readonly publicBaseUrl = input<string>('');
   readonly closed = output<void>();
   readonly changed = output<void>();
 
@@ -85,6 +90,23 @@ export class OidcClientDetailDialogComponent {
   protected readonly canRevoke = computed(() => {
     const s = this.client()?.status;
     return s !== undefined && s !== 'Revoked';
+  });
+
+  /** Extract the scope list from OpenIddict's permission strings — scopes come through
+   *  as `scp:{name}`. Anything else (endpoints, grant types) is hidden from the client
+   *  developer since it's never needed in their config. */
+  protected readonly clientScopes = computed(() => {
+    const perms = this.client()?.permissions ?? [];
+    return perms
+      .filter(p => p.startsWith('scp:'))
+      .map(p => p.substring(4));
+  });
+
+  /** Integration details card only makes sense once the client is past Pending — a
+   *  Pending client can't authenticate anything yet. */
+  protected readonly showIntegrationDetails = computed(() => {
+    const s = this.client()?.status;
+    return s === 'Active' || s === 'Suspended';
   });
 
   constructor() {

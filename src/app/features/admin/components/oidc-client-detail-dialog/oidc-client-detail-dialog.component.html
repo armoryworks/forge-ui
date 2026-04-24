@@ -46,6 +46,17 @@
         </dl>
       </header>
 
+      <!-- Integration details — shown for Active/Suspended clients so the admin can hand the
+           external-app developer everything they need without leaving this dialog. Secret is
+           NOT shown here (only visible once post-provision / post-rotation in the reveal panel). -->
+      @if (showIntegrationDetails() && panel() === null) {
+        <app-oidc-integration-details
+          [clientId]="c.clientId"
+          [scopes]="clientScopes()"
+          [redirectUris]="c.redirectUris"
+          [publicBaseUrl]="publicBaseUrl()" />
+      }
+
       <!-- Action panels (only one visible at a time) -->
       @if (panel() === 'approve') {
         <section class="client-detail__panel">
@@ -134,20 +145,14 @@
 
       @if (panel() === 'rotated' && rotatedSecret(); as r) {
         <section class="client-detail__panel client-detail__panel--reveal">
-          <div class="reveal__warning">
-            <span class="material-icons-outlined">warning_amber</span>
-            <div>
-              <strong>New client secret generated.</strong>
-              <p>Copy it now — it will never be shown again. The old secret is already invalid.</p>
-            </div>
-          </div>
-          <label class="reveal__label">New client secret</label>
-          <div class="reveal__ticket">
-            <code>{{ r.newClientSecret }}</code>
-            <button type="button" class="action-btn action-btn--sm" (click)="copySecret()" aria-label="Copy secret">
-              <span class="material-icons-outlined">content_copy</span> Copy
-            </button>
-          </div>
+          <!-- Show the full integration card with the new secret embedded so the admin can
+               copy everything in one place and update the external app in a single pass. -->
+          <app-oidc-integration-details
+            [clientId]="c.clientId"
+            [clientSecret]="r.newClientSecret"
+            [scopes]="clientScopes()"
+            [redirectUris]="c.redirectUris"
+            [publicBaseUrl]="publicBaseUrl()" />
           <div class="client-detail__panel-actions">
             <button type="button" class="action-btn action-btn--primary" (click)="closePanel()">Done</button>
           </div>
