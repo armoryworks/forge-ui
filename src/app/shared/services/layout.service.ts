@@ -121,7 +121,7 @@ export class LayoutService {
   }
 
   private checkAuthRoute(url: string): boolean {
-    return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback');
+    return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback') || url.startsWith('/welcome');
   }
 
   private checkOnboardingRoute(url: string): boolean {
