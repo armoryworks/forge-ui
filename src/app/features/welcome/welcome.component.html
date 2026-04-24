@@ -1,52 +1,31 @@
 <div class="welcome">
-  <header class="welcome__hero">
-    <div class="welcome__hero-inner">
-      <div class="welcome__brand">
-        <span class="welcome__brand-mark">QB</span>
-        <span class="welcome__brand-name">{{ 'welcomePage.brandName' | translate }}</span>
-        <span class="welcome__brand-chip">{{ 'welcomePage.demoChip' | translate }}</span>
-      </div>
-
-      <h1 class="welcome__tagline">{{ 'welcomePage.tagline' | translate }}</h1>
-
-      <p class="welcome__lede">{{ 'welcomePage.lede' | translate }}</p>
-
-      <div class="welcome__cta-row">
-        <a class="welcome__cta welcome__cta--primary" routerLink="/dashboard">
-          <span class="material-icons-outlined">arrow_forward</span>
-          {{ 'welcomePage.ctaDashboard' | translate }}
-        </a>
-        <a class="welcome__cta" routerLink="/kanban">
-          <span class="material-icons-outlined">view_kanban</span>
-          {{ 'welcomePage.ctaKanban' | translate }}
-        </a>
-      </div>
-
-      <p class="welcome__caveat">
-        <span class="material-icons-outlined">info</span>
-        {{ 'welcomePage.caveat' | translate }}
-      </p>
+  <div class="welcome__card">
+    <div class="welcome__brand">
+      <span class="welcome__brand-mark">QB</span>
+      <span class="welcome__brand-name">{{ 'welcomePage.brandName' | translate }}</span>
+      <span class="welcome__brand-chip">{{ 'welcomePage.demoChip' | translate }}</span>
     </div>
-  </header>
 
-  <section class="welcome__grid" [attr.aria-label]="'welcomePage.gridHeading' | translate">
-    <h2 class="welcome__grid-heading">{{ 'welcomePage.gridHeading' | translate }}</h2>
-    <div class="welcome__tiles">
-      @for (tile of tiles; track tile.route) {
-        <a class="welcome__tile" [routerLink]="tile.route">
-          <span class="welcome__tile-icon material-icons-outlined">{{ tile.icon }}</span>
-          <span class="welcome__tile-title">{{ tile.titleKey | translate }}</span>
-          <span class="welcome__tile-desc">{{ tile.descriptionKey | translate }}</span>
-        </a>
-      }
+    <h1 class="welcome__tagline">{{ 'welcomePage.tagline' | translate }}</h1>
+
+    <p class="welcome__lede">{{ 'welcomePage.lede' | translate }}</p>
+
+    <p class="welcome__caveat">
+      <span class="material-icons-outlined" aria-hidden="true">info</span>
+      {{ 'welcomePage.caveat' | translate }}
+    </p>
+
+    <div class="welcome__cta-row">
+      <a class="welcome__cta welcome__cta--primary" routerLink="/login">
+        <span class="material-icons-outlined" aria-hidden="true">login</span>
+        {{ 'welcomePage.ctaSignIn' | translate }}
+      </a>
     </div>
-  </section>
 
-  <footer class="welcome__footer">
-    <span>{{ 'welcomePage.footerLicense' | translate }}</span>
-    <span class="welcome__dot">·</span>
-    <a href="https://github.com/dhokanson/qb-engineer-wrapper" target="_blank" rel="noopener">{{ 'welcomePage.footerGithub' | translate }}</a>
-    <span class="welcome__dot">·</span>
-    <span>{{ 'welcomePage.footerNoAccount' | translate }}</span>
-  </footer>
+    <footer class="welcome__footer">
+      <span>{{ 'welcomePage.footerLicense' | translate }}</span>
+      <span class="welcome__dot" aria-hidden="true">·</span>
+      <a href="https://github.com/dhokanson/qb-engineer-wrapper" target="_blank" rel="noopener">{{ 'welcomePage.footerGithub' | translate }}</a>
+    </footer>
+  </div>
 </div>

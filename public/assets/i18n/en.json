@@ -4409,46 +4409,9 @@
     "demoChip": "DEMO",
     "tagline": "Manufacturing operations, end to end.",
     "lede": "QB Engineer is an open-source platform for small-to-mid shops — kanban production tracking, parts & inventory, quote-to-cash, quality, and reporting in one place. Integrates with QuickBooks or runs fully standalone.",
-    "ctaDashboard": "Jump to the dashboard",
-    "ctaKanban": "Open the kanban board",
-    "caveat": "This is a fully interactive demo — every screen is real, every button works, but nothing saves server-side. Changes live in your browser tab and reset on refresh.",
-    "gridHeading": "Where to look",
+    "ctaSignIn": "Sign in to the demo",
+    "caveat": "This is a fully interactive demo — every screen is real, every button works, but nothing saves server-side. Changes live in your browser tab and reset on refresh. Any email / password works.",
     "footerLicense": "Open source · GNU licensed",
-    "footerGithub": "GitHub",
-    "footerNoAccount": "No account needed — sign-in is pre-stubbed in demo mode.",
-    "tiles": {
-      "kanban": {
-        "title": "Kanban Board",
-        "description": "Drag jobs through production stages — quote to payment — with WIP limits and real-time sync."
-      },
-      "dashboard": {
-        "title": "Dashboard",
-        "description": "KPIs, open jobs, upcoming due dates, and quick actions on one configurable screen."
-      },
-      "shopFloor": {
-        "title": "Shop Floor",
-        "description": "Full-screen kiosk for the production floor — scan, clock in, start work, mark complete."
-      },
-      "parts": {
-        "title": "Parts & Inventory",
-        "description": "Part catalog, BOMs, bin locations, lot tracking, and scan-driven movement."
-      },
-      "quoteToCash": {
-        "title": "Quote to Cash",
-        "description": "Quotes, sales orders, shipments, invoicing, and payments — standalone or QuickBooks-connected."
-      },
-      "reports": {
-        "title": "Reports",
-        "description": "Dynamic report builder across 28 data sources with 27 pre-built templates and charts."
-      },
-      "quality": {
-        "title": "Quality / QC",
-        "description": "Inspection templates, QC runs, lot traceability, and production run integration."
-      },
-      "admin": {
-        "title": "Admin",
-        "description": "Users, roles, track types, terminology, integrations, and OIDC provider for third-party SSO."
-      }
-    }
+    "footerGithub": "GitHub"
   }
 }
