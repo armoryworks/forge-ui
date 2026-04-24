@@ -24,7 +24,7 @@
 
 .onboarding-banner__action {
   background: var(--warning) !important; // override default btn bg
-  color: white !important;
+  color: var(--warning-text) !important;
   white-space: nowrap;
 
   &:hover {

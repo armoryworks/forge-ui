@@ -105,7 +105,7 @@
   .action-btn--warn {
     background: var(--warning);
     border-color: var(--warning);
-    color: white;
+    color: var(--warning-text);
 
     &:hover {
       background: var(--warning);

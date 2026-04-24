@@ -4,7 +4,7 @@
 .app-header {
   height: var(--header-height);
   background: var(--header);
-  color: white;
+  color: var(--header-text);
   display: flex;
   align-items: center;
   padding: 0 $sp-lg;
@@ -47,7 +47,7 @@
 
 .breadcrumb {
   font-size: var(--font-size-sm);
-  color: white;
+  color: var(--header-text);
   display: flex;
   gap: $sp-sm;
   align-items: center;
@@ -239,7 +239,7 @@
   border-radius: $border-radius;
   border: none;
   background: transparent;
-  color: white;
+  color: var(--header-text);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -266,7 +266,7 @@
   top: 1px;
   right: 1px;
   background: var(--accent);
-  color: white;
+  color: var(--accent-text);
   font-size: 8px;
   font-weight: 700;
   min-width: 14px;
@@ -290,7 +290,7 @@
   padding: $sp-sm $sp-md;
   border: $border-width-thin solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.06);
-  color: white;
+  color: var(--header-text);
   cursor: pointer;
   font-family: $font-family-primary;
   transition: background $transition-fast, border-color $transition-fast;

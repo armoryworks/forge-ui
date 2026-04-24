@@ -348,7 +348,7 @@
 
 .conversation__badge {
   background: var(--accent);
-  color: white;
+  color: var(--accent-text);
   font-size: var(--font-size-xxs);
   font-weight: 700;
   min-width: $badge-size-sm;

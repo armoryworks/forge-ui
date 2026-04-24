@@ -17,7 +17,7 @@
   height: 48px;
   padding: 0 $sp-lg;
   background: var(--header);
-  color: #fff;
+  color: var(--header-text);
   flex-shrink: 0;
   z-index: $z-sticky;
 
@@ -45,7 +45,7 @@
     }
 
     &:hover {
-      color: #fff;
+      color: var(--header-text);
     }
   }
 }
@@ -145,7 +145,7 @@
 
     &--scan {
       font-size: $icon-size-lg;
-      color: #fff;
+      color: var(--primary-btn-text);
     }
   }
 

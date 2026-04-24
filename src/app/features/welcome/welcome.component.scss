@@ -52,7 +52,7 @@
   width: 36px;
   height: 36px;
   background: var(--primary);
-  color: #fff;
+  color: var(--primary-btn-text);
   font-size: $font-size-lg;
   font-weight: 700;
   letter-spacing: -0.5px;
@@ -68,7 +68,7 @@
   margin-left: $sp-sm;
   padding: 2px $sp-sm;
   background: var(--warning);
-  color: #7a4a00;
+  color: var(--warning-text);
   font-size: $font-size-xxs;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -147,12 +147,12 @@
 .welcome__cta--primary {
   background: var(--primary);
   border-color: var(--primary);
-  color: #fff;
+  color: var(--primary-btn-text);
 
   &:hover {
     background: var(--primary-dark);
     border-color: var(--primary-dark);
-    color: #fff;
+    color: var(--primary-btn-text);
   }
 }
 

@@ -17,7 +17,7 @@
   gap: $sp-xl;
   padding: $sp-lg $sp-xl;
   background: var(--header);
-  color: #fff;
+  color: var(--header-text);
   flex-shrink: 0;
 
   app-kiosk-search-bar {

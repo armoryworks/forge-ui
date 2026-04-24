@@ -149,7 +149,7 @@
 
 .nav-item__badge {
   background: var(--accent);
-  color: white;
+  color: var(--accent-text);
   font-size: 8px;
   font-weight: 700;
   min-width: $badge-size-md;
