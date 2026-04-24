@@ -1,12 +1,24 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+// Ambient mode uses its own theme-scoped palette (not the global --text etc.)
+// so the experience stays legible in both light and dark modes regardless of
+// what the rest of the app's theme variables resolve to.
 .ambient {
+  --amb-bg: #f5f7fa;
+  --amb-fg: #0f172a;
+  --amb-fg-muted: rgba(15, 23, 42, 0.65);
+  --amb-fg-subtle: rgba(15, 23, 42, 0.45);
+  --amb-fg-faint: rgba(15, 23, 42, 0.25);
+  --amb-panel: rgba(15, 23, 42, 0.06);
+  --amb-warning: #b45309;
+  --amb-error: #b91c1c;
+
   position: fixed;
   inset: 0;
   z-index: $z-loading;
-  background: var(--text);
-  color: white;
+  background: var(--amb-bg);
+  color: var(--amb-fg);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,6 +26,17 @@
   gap: $sp-3xl;
   cursor: pointer;
   animation: fadeIn 0.5s ease;
+
+  [data-theme='dark'] & {
+    --amb-bg: #0f172a;
+    --amb-fg: #f8fafc;
+    --amb-fg-muted: rgba(248, 250, 252, 0.7);
+    --amb-fg-subtle: rgba(248, 250, 252, 0.5);
+    --amb-fg-faint: rgba(248, 250, 252, 0.25);
+    --amb-panel: rgba(248, 250, 252, 0.06);
+    --amb-warning: #fbbf24;
+    --amb-error: #f87171;
+  }
 }
 
 @keyframes fadeIn {
@@ -33,12 +56,13 @@
   font-weight: 200;
   letter-spacing: -2px;
   font-family: $font-family-primary;
+  color: var(--amb-fg);
 }
 
 .ambient__date {
   font-size: var(--font-size-xl);
   font-weight: 300;
-  color: rgba(white, 0.6);
+  color: var(--amb-fg-muted);
 }
 
 .ambient__kpis {
@@ -53,7 +77,7 @@
   gap: $sp-sm;
 
   &--warning .ambient__kpi-value {
-    color: var(--warning);
+    color: var(--amb-warning);
   }
 }
 
@@ -61,11 +85,12 @@
   font-size: var(--font-size-heading);
   font-weight: 700;
   font-family: $font-family-mono;
+  color: var(--amb-fg);
 }
 
 .ambient__kpi-label {
   @include uppercase-label(var(--font-size-xs), 1px, 500);
-  color: rgba(white, 0.5);
+  color: var(--amb-fg-subtle);
 }
 
 .ambient__deadlines {
@@ -78,7 +103,7 @@
 
 .ambient__section-label {
   @include uppercase-label(var(--font-size-xs), 1px, 600);
-  color: rgba(white, 0.4);
+  color: var(--amb-fg-subtle);
   margin-bottom: $sp-sm;
 }
 
@@ -87,10 +112,10 @@
   align-items: center;
   gap: $sp-md;
   padding: $sp-sm $sp-md;
-  background: rgba(white, 0.05);
+  background: var(--amb-panel);
 
   &--overdue {
-    border-left: $border-width solid var(--error);
+    border-left: $border-width solid var(--amb-error);
   }
 }
 
@@ -99,12 +124,13 @@
   font-family: $font-family-mono;
   font-size: var(--font-size-sm);
   min-width: 80px;
+  color: var(--amb-fg);
 }
 
 .ambient__deadline-desc {
   flex: 1;
   font-size: var(--font-size-sm);
-  color: rgba(white, 0.7);
+  color: var(--amb-fg-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -112,7 +138,7 @@
 
 .ambient__deadline-date {
   font-size: var(--font-size-xs);
-  color: rgba(white, 0.4);
+  color: var(--amb-fg-subtle);
   font-family: $font-family-mono;
 }
 
@@ -120,5 +146,5 @@
   position: absolute;
   bottom: $sp-xl;
   font-size: var(--font-size-xs);
-  color: rgba(white, 0.2);
+  color: var(--amb-fg-faint);
 }
