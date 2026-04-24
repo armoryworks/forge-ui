@@ -774,6 +774,23 @@ $grid-columns: 5;
   width: 100%;
 }
 
+.sf-actions-card__empty {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-lg;
+  border: $border-width-thin dashed var(--border);
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+  text-align: left;
+
+  .material-icons-outlined {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+  }
+}
+
 .sf-actions-card__cancel {
   color: var(--text-muted);
 }

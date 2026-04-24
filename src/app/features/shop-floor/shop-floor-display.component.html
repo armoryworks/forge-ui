@@ -390,6 +390,11 @@
                 }
                 <span class="sf-action-btn__label">{{ action.label }}</span>
               </button>
+            } @empty {
+              <div class="sf-actions-card__empty">
+                <span class="material-icons-outlined">info</span>
+                <span>No clock actions available. Ask an admin to check the Clock Event Type reference data.</span>
+              </div>
             }
           </div>
 
