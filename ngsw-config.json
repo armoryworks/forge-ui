@@ -1,6 +1,18 @@
 {
   "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*__*/**",
+    "!/api/**",
+    "!/connect/**",
+    "!/.well-known/**",
+    "!/hubs/**",
+    "!/docuseal/**",
+    "!/logs/**"
+  ],
   "assetGroups": [
     {
       "name": "app-shell",
