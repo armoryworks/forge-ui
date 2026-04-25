@@ -1,10 +1,4 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Router } from '@angular/router';
-import { MatTabsModule } from '@angular/material/tabs';
-import { map } from 'rxjs';
-
-import { OidcProviderPanelComponent } from '../oidc-provider-panel/oidc-provider-panel.component';
 
 // Provider ID → Simple Icons CDN URL (open-source brand icon set, MIT licensed)
 // Format: https://cdn.simpleicons.org/{slug}/{hex-color}
@@ -51,7 +45,7 @@ const OAUTH_PROVIDERS = new Set(['quickbooks', 'xero', 'freshbooks', 'sage', 'zo
 @Component({
   selector: 'app-integrations-panel',
   standalone: true,
-  imports: [TranslatePipe, MatTabsModule, OidcProviderPanelComponent],
+  imports: [TranslatePipe],
   templateUrl: './integrations-panel.component.html',
   styleUrl: './integrations-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -63,30 +57,6 @@ export class IntegrationsPanelComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
-  private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
-
-  protected readonly activeSection = toSignal(
-    this.route.queryParamMap.pipe(
-      map(p => {
-        const s = p.get('integrationsSection');
-        return s === 'inbound' ? 'inbound' : 'outbound';
-      }),
-    ),
-    { initialValue: 'outbound' as 'inbound' | 'outbound' },
-  );
-
-  protected readonly sectionIndex = computed(() => this.activeSection() === 'inbound' ? 1 : 0);
-
-  protected onSectionChange(index: number): void {
-    const section = index === 1 ? 'inbound' : 'outbound';
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { integrationsSection: section },
-      queryParamsHandling: 'merge',
-      replaceUrl: true,
-    });
-  }
 
   readonly providers = this.accountingService.providers;
   readonly activeProviderId = this.accountingService.providerId;

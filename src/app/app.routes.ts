@@ -18,10 +18,6 @@ export const routes: Routes = [
     canActivate: [demoOnlyGuard],
     loadComponent: () => import('./features/welcome/welcome.component').then(m => m.WelcomeComponent),
   },
-  {
-    path: 'oidc',
-    loadChildren: () => import('./features/oidc/oidc.routes').then(m => m.OIDC_ROUTES),
-  },
   { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
   { path: 'setup/:token', component: TokenSetupComponent },
   {

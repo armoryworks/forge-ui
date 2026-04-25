@@ -1,9 +1,7 @@
-<mat-tab-group class="integrations-tabs" [selectedIndex]="sectionIndex()" (selectedIndexChange)="onSectionChange($event)" mat-stretch-tabs="false" animationDuration="0ms">
-  <mat-tab label="Outbound">
-    <div class="integrations-tabs__body">
-      <p class="integrations-tabs__lead">
-        Services <strong>qb-engineer connects to</strong> — accounting, shipping carriers, and other external APIs.
-      </p>
+<div class="integrations-tabs__body">
+  <p class="integrations-tabs__lead">
+    Services <strong>qb-engineer connects to</strong> — accounting, shipping carriers, and other external APIs.
+  </p>
 <div class="integrations-grid">
   <!-- ─── Accounting Providers ─────────────────────────────────────────── -->
   <div class="section-header">
@@ -254,15 +252,4 @@
     </div>
   }
 </div>
-    </div>
-  </mat-tab>
-
-  <mat-tab label="Inbound">
-    <div class="integrations-tabs__body">
-      <p class="integrations-tabs__lead">
-        Services <strong>that connect to qb-engineer</strong> — let external apps sign in via OpenID Connect.
-      </p>
-      <app-oidc-provider-panel />
-    </div>
-  </mat-tab>
-</mat-tab-group>
+</div>
