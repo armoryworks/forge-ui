@@ -48,6 +48,18 @@
           <div class="lines-empty">{{ 'purchaseOrders.noLinesYet' | translate }}</div>
         }
 
+        @if (inactiveLineWarning()) {
+          <!-- Phase 3 H2 / WU-12: inline-error when any line refers to an
+               obsolete part. Blocks submit. -->
+          <p class="lifecycle-warning" data-testid="po-line-inactive-warning">{{ inactiveLineWarning() }}</p>
+        }
+        <label class="lifecycle-toggle">
+          <input type="checkbox" data-testid="po-show-inactive-parts"
+                 [checked]="showInactiveParts()"
+                 (change)="showInactiveParts.set($any($event.target).checked)" />
+          {{ 'purchaseOrders.showInactiveParts' | translate }}
+        </label>
+
         <!-- Add Line Form -->
         <div class="add-line add-line--4col" [formGroup]="lineForm">
           <app-autocomplete data-testid="po-line-part" [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
@@ -74,6 +86,16 @@
       <div class="dlg-sidebar-section">
         <span class="dlg-sidebar-section__title">{{ 'purchaseOrders.orderDetails' | translate }}</span>
         <app-select data-testid="po-vendor" [label]="'purchaseOrders.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" />
+        @if (selectedVendorWarning()) {
+          <!-- Phase 3 H2 / WU-12: inline-error when chosen vendor is deactivated. -->
+          <p class="lifecycle-warning" data-testid="po-vendor-inactive-warning">{{ selectedVendorWarning() }}</p>
+        }
+        <label class="lifecycle-toggle">
+          <input type="checkbox" data-testid="po-show-inactive-vendors"
+                 [checked]="showInactiveVendors()"
+                 (change)="showInactiveVendors.set($any($event.target).checked)" />
+          {{ 'purchaseOrders.showInactiveVendors' | translate }}
+        </label>
         <app-input data-testid="po-job-id" [label]="'purchaseOrders.jobId' | translate" type="number" formControlName="jobId" [placeholder]="'salesOrders.optional' | translate" />
       </div>
 

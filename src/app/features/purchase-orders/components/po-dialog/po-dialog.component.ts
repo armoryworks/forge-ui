@@ -58,13 +58,72 @@ export class PoDialogComponent {
   /** True while the unit price reflects the part's list price and hasn't been manually edited. */
   protected readonly priceIsDefault = signal(false);
 
-  protected readonly vendorOptions = computed<SelectOption[]>(() => [
-    { value: null, label: this.translate.instant('purchaseOrders.selectVendor') },
-    ...this.vendors().map(v => ({ value: v.id, label: v.companyName })),
-  ]);
+  /**
+   * Phase 3 H2 / WU-12 — when false (default), the vendor & part pickers
+   * exclude deactivated entries. The toggle reveals them, labelled
+   * "(deactivated)" so the operator knows what they are picking. The
+   * server-side active-check is the source of truth: even if the UI lets
+   * an inactive entity slip through (form preloaded, toggle on), the
+   * server rejects with a 400 envelope naming the inactive record.
+   */
+  protected readonly showInactiveVendors = signal(false);
+  protected readonly showInactiveParts = signal(false);
 
-  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
+  protected readonly vendorOptions = computed<SelectOption[]>(() => {
+    const includeInactive = this.showInactiveVendors();
+    const list = this.vendors().filter(v => includeInactive || v.isActive);
+    return [
+      { value: null, label: this.translate.instant('purchaseOrders.selectVendor') },
+      ...list.map(v => ({
+        value: v.id,
+        label: v.isActive ? v.companyName : `${v.companyName} (deactivated)`,
+      })),
+    ];
+  });
+
+  protected readonly partOptions = computed<AutocompleteOption[]>(() => {
+    const includeInactive = this.showInactiveParts();
+    return this.parts()
+      .filter(p => includeInactive || p.status !== 'Obsolete')
+      .map(p => ({
+        value: p.id,
+        label: p.status === 'Obsolete'
+          ? `${p.partNumber} — ${p.description} (deactivated)`
+          : `${p.partNumber} — ${p.description}`,
+      }));
+  });
+
+  /**
+   * Phase 3 H2 / WU-12 — inline-error when the currently-selected vendor
+   * is deactivated (form was loaded with one previously selected, or the
+   * toggle is on and an inactive vendor was chosen). Mirrors the server's
+   * active-check error shape so the operator sees the same wording before
+   * submission attempt.
+   */
+  protected readonly selectedVendorWarning = computed<string | null>(() => {
+    const id = this.form.controls.vendorId.value;
+    if (id == null) return null;
+    const v = this.vendors().find(x => x.id === id);
+    if (v && !v.isActive) {
+      return this.translate.instant('purchaseOrders.vendorDeactivatedWarning', { name: v.companyName })
+        || `Vendor '${v.companyName}' is deactivated.`;
+    }
+    return null;
+  });
+
+  /**
+   * Inline-error when any line refers to an obsolete part. Produces a
+   * single human-readable message naming the offending parts.
+   */
+  protected readonly inactiveLineWarning = computed<string | null>(() => {
+    const obsoleteRefs: string[] = [];
+    for (const line of this.lines()) {
+      const p = this.parts().find(x => x.id === line.partId);
+      if (p && p.status === 'Obsolete') obsoleteRefs.push(p.partNumber);
+    }
+    if (obsoleteRefs.length === 0) return null;
+    return `One or more lines reference obsolete parts: ${obsoleteRefs.join(', ')}`;
+  });
 
   readonly form = new FormGroup({
     vendorId: new FormControl<number | null>(null, [Validators.required]),
@@ -81,6 +140,11 @@ export class PoDialogComponent {
   protected readonly violations: Signal<string[]> = computed(() => [
     ...this.formViolations(),
     ...(this.lines().length === 0 ? ['At least one line item is required'] : []),
+    // Phase 3 H2 / WU-12: surface deactivated-master-data warnings inline
+    // and block submit when present (the server would reject anyway with a
+    // 400; this saves a round trip and gives a friendlier message).
+    ...(this.selectedVendorWarning() ? [this.selectedVendorWarning()!] : []),
+    ...(this.inactiveLineWarning() ? [this.inactiveLineWarning()!] : []),
   ]);
 
   protected readonly lineForm = new FormGroup({
@@ -167,6 +231,10 @@ export class PoDialogComponent {
 
   protected save(): void {
     if (this.form.invalid || this.lines().length === 0) return;
+    // Phase 3 H2 / WU-12: refuse client-side when a deactivated vendor or
+    // obsolete part is referenced — the server will 400 anyway, but this
+    // keeps the user out of a flicker.
+    if (this.selectedVendorWarning() || this.inactiveLineWarning()) return;
     this.saving.set(true);
 
     const f = this.form.getRawValue();

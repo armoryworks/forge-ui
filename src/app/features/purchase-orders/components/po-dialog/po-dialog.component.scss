@@ -11,3 +11,28 @@
 .price-field {
   position: relative;
 }
+
+// Phase 3 H2 / WU-12 — deactivated master-data warnings on PO create.
+.lifecycle-warning {
+  margin: 0.25rem 0 0.25rem;
+  padding: 0.5rem 0.75rem;
+  border-left: 3px solid #c62828;
+  background: #fdecea;
+  color: #b71c1c;
+  font-size: 0.875rem;
+  border-radius: 2px;
+}
+
+.lifecycle-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.25rem 0 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #555);
+  cursor: pointer;
+
+  input[type="checkbox"] {
+    margin: 0;
+  }
+}
