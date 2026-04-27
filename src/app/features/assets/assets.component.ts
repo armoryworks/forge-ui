@@ -70,7 +70,20 @@ export class AssetsComponent {
     isCustomerOwned: new FormControl(false),
     cavityCount: new FormControl<number | null>(null),
     toolLifeExpectancy: new FormControl<number | null>(null),
+    // Phase 3 F4 — full-record fields. All optional on create.
+    acquisitionCost: new FormControl<number | null>(null, [Validators.min(0), Validators.max(1_000_000_000)]),
+    depreciationMethod: new FormControl<'StraightLine' | 'DecliningBalance' | 'UnitsOfProduction' | null>(null),
+    workCenterId: new FormControl<number | null>(null),
+    glAccount: new FormControl<string | null>(null),
   });
+
+  // Depreciation-method options match the server enum exactly.
+  protected readonly depreciationMethodOptions: SelectOption[] = [
+    { value: null, label: '—' },
+    { value: 'StraightLine', label: 'Straight Line' },
+    { value: 'DecliningBalance', label: 'Declining Balance' },
+    { value: 'UnitsOfProduction', label: 'Units of Production' },
+  ];
 
   protected readonly assetViolations = FormValidationService.getViolations(this.assetForm, {
     name: 'Name',
@@ -170,6 +183,9 @@ export class AssetsComponent {
       name: '', assetType: 'Machine', location: '',
       manufacturer: '', model: '', serialNumber: '', notes: '',
       isCustomerOwned: false, cavityCount: null, toolLifeExpectancy: null,
+      // Phase 3 F4 — reset full-record fields too.
+      acquisitionCost: null, depreciationMethod: null,
+      workCenterId: null, glAccount: null,
     });
     this.showDialog.set(true);
   }
@@ -237,6 +253,12 @@ export class AssetsComponent {
         isCustomerOwned: form.isCustomerOwned ?? false,
         cavityCount: form.cavityCount ?? undefined,
         toolLifeExpectancy: form.toolLifeExpectancy ?? undefined,
+        // Phase 3 F4 — pass full-record fields straight through. PATCH-edit
+        // path on the existing UpdateAsset endpoint is unchanged.
+        acquisitionCost: form.acquisitionCost ?? undefined,
+        depreciationMethod: form.depreciationMethod ?? undefined,
+        workCenterId: form.workCenterId ?? undefined,
+        glAccount: form.glAccount || undefined,
       }).subscribe({
         next: () => {
           this.saving.set(false);

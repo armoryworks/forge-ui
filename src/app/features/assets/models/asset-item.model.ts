@@ -1,5 +1,6 @@
 import { AssetType } from './asset-type.type';
 import { AssetStatus } from './asset-status.type';
+import { DepreciationMethod } from './create-asset-request.model';
 
 export interface AssetItem {
   id: number;
@@ -23,4 +24,10 @@ export interface AssetItem {
   sourcePartNumber: string | null;
   createdAt: Date;
   updatedAt: Date;
+  // Phase 3 F4 — full-record fields surfaced on the GET response.
+  acquisitionCost?: number | null;
+  depreciationMethod?: DepreciationMethod | null;
+  workCenterId?: number | null;
+  workCenterCode?: string | null;
+  glAccount?: string | null;
 }

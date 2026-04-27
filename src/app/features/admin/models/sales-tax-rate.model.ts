@@ -9,4 +9,7 @@ export interface SalesTaxRate {
   isDefault: boolean;
   isActive: boolean;
   description: string | null;
+  // Phase 3 F5 — full-record fields surfaced on the GET response.
+  exemptFlag?: boolean;
+  glPostingAccount?: string | null;
 }

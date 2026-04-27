@@ -66,6 +66,31 @@
 
       <app-textarea [label]="'common.notes' | translate" formControlName="notes" data-testid="asset-notes" />
 
+      <!-- Phase 3 F4 — full-record fields. acquisitionCost and depreciationMethod
+           are common at the time of acquisition; workCenterId links the asset to
+           a station; glAccount is optional and populated by the external
+           accounting sync when configured. -->
+      <fieldset class="acquisition-fieldset">
+        <legend>{{ 'assets.acquisitionSection' | translate }}</legend>
+        <div class="dialog-row">
+          <app-input [label]="'assets.acquisitionCost' | translate"
+            type="number" formControlName="acquisitionCost"
+            data-testid="asset-acquisition-cost" />
+          <app-select [label]="'assets.depreciationMethod' | translate"
+            formControlName="depreciationMethod"
+            [options]="depreciationMethodOptions"
+            data-testid="asset-depreciation-method" />
+        </div>
+        <div class="dialog-row">
+          <app-input [label]="'assets.workCenterId' | translate"
+            type="number" formControlName="workCenterId"
+            data-testid="asset-work-center-id" />
+          <app-input [label]="'assets.glAccount' | translate"
+            formControlName="glAccount"
+            data-testid="asset-gl-account" />
+        </div>
+      </fieldset>
+
       @if (assetForm.get('assetType')?.value === 'Tooling') {
         <app-toggle [label]="'assets.customerOwned' | translate" formControlName="isCustomerOwned" />
         <div class="dialog-row">

@@ -712,6 +712,11 @@
     "companyName": "Company Name",
     "contactName": "Contact Name",
     "creditTerms": "Credit Terms",
+    "creditLimit": "Credit Limit",
+    "defaultTaxCodeId": "Default Tax Code ID",
+    "defaultCurrency": "Default Currency (ISO 4217)",
+    "billingAddress": "Billing Address",
+    "shippingAddress": "Shipping Address",
     "taxRate": "Tax Rate",
     "addresses": "Addresses",
     "orders": "Orders",
@@ -1012,6 +1017,11 @@
     "cavityCount": "Cavity Count",
     "toolLife": "Tool Life",
     "toolLifeExpectancy": "Tool Life Expectancy",
+    "acquisitionSection": "Acquisition & Depreciation",
+    "acquisitionCost": "Acquisition Cost",
+    "depreciationMethod": "Depreciation Method",
+    "workCenterId": "Work Center ID",
+    "glAccount": "GL Account (optional)",
     "sourceJob": "Source Job",
     "sourcePart": "Source Part",
     "setStatus": "Set Status",
@@ -2109,6 +2119,13 @@
     "release": "Release",
     "cancel": "Cancel",
     "send": "Send"
+  },
+  "address": {
+    "street": "Street",
+    "city": "City",
+    "state": "State",
+    "postal": "Postal Code",
+    "country": "Country"
   },
   "addressForm": {
     "streetAddress": "Street Address",

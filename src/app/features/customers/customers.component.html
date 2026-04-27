@@ -57,6 +57,44 @@
         <app-input [label]="'common.email' | translate" type="email" formControlName="email" data-testid="customer-email" />
         <app-input [label]="'common.phone' | translate" formControlName="phone" data-testid="customer-phone" />
       </div>
+
+      <!-- Phase 3 F3 — full-record fields. Optional; let the small-shop
+           onboarding flow capture credit limit, default tax/currency, and
+           billing/shipping addresses without forcing a follow-up PATCH. -->
+      <div class="dialog-row">
+        <app-input [label]="'customers.creditLimit' | translate"
+          type="number" formControlName="creditLimit"
+          data-testid="customer-credit-limit" />
+        <app-input [label]="'customers.defaultTaxCodeId' | translate"
+          type="number" formControlName="defaultTaxCodeId"
+          data-testid="customer-default-tax-code" />
+        <app-input [label]="'customers.defaultCurrency' | translate"
+          formControlName="defaultCurrency"
+          placeholder="USD"
+          data-testid="customer-default-currency" />
+      </div>
+
+      <fieldset class="address-fieldset" formGroupName="billingAddress" data-testid="customer-billing-address">
+        <legend>{{ 'customers.billingAddress' | translate }}</legend>
+        <app-input [label]="'address.street' | translate" formControlName="street" />
+        <div class="dialog-row">
+          <app-input [label]="'address.city' | translate" formControlName="city" />
+          <app-input [label]="'address.state' | translate" formControlName="state" />
+          <app-input [label]="'address.postal' | translate" formControlName="postal" />
+          <app-input [label]="'address.country' | translate" formControlName="country" />
+        </div>
+      </fieldset>
+
+      <fieldset class="address-fieldset" formGroupName="shippingAddress" data-testid="customer-shipping-address">
+        <legend>{{ 'customers.shippingAddress' | translate }}</legend>
+        <app-input [label]="'address.street' | translate" formControlName="street" />
+        <div class="dialog-row">
+          <app-input [label]="'address.city' | translate" formControlName="city" />
+          <app-input [label]="'address.state' | translate" formControlName="state" />
+          <app-input [label]="'address.postal' | translate" formControlName="postal" />
+          <app-input [label]="'address.country' | translate" formControlName="country" />
+        </div>
+      </fieldset>
     </div>
 
     <div dialog-footer>

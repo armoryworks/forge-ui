@@ -63,6 +63,10 @@ export class SalesTaxDialogComponent {
     effectiveFrom: new FormControl<Date | null>(new Date()),
     isDefault: new FormControl(false),
     description: new FormControl(''),
+    // Phase 3 F5 — full-record fields. exemptFlag is local; glPostingAccount
+    // is optional (populated by accounting-sync when one is configured).
+    exemptFlag: new FormControl(false),
+    glPostingAccount: new FormControl<string | null>(null, [Validators.maxLength(100)]),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -83,6 +87,8 @@ export class SalesTaxDialogComponent {
         effectiveFrom: r.effectiveFrom ?? new Date(),
         isDefault: r.isDefault,
         description: r.description ?? '',
+        exemptFlag: r.exemptFlag ?? false,
+        glPostingAccount: r.glPostingAccount ?? null,
       });
     }
   }
@@ -107,6 +113,10 @@ export class SalesTaxDialogComponent {
       effectiveFrom: f.effectiveFrom ? toIsoDate(f.effectiveFrom) : null,
       isDefault: f.isDefault ?? false,
       description: f.description || null,
+      // Phase 3 F5 — full-record fields straight through. The PATCH-edit
+      // path already accepts these because update reuses the create DTO.
+      exemptFlag: f.exemptFlag ?? false,
+      glPostingAccount: f.glPostingAccount || null,
     };
 
     const r = this.rate();

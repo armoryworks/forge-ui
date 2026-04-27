@@ -60,13 +60,37 @@ export class CustomersComponent {
     { value: false, label: this.translate.instant('common.inactive') },
   ];
 
-  // Customer Create Dialog
+  // Customer Create Dialog — Phase 3 F3 extends the form with the full-record
+  // fields a small-shop onboarding flow captures: credit limit, default tax
+  // code id, default currency, and billing/shipping addresses. All are
+  // optional; existing minimal-payload submissions still work.
   protected readonly showDialog = signal(false);
   protected readonly customerForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
     companyName: new FormControl(''),
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
+    // F3 — full-record fields
+    creditLimit: new FormControl<number | null>(null, [Validators.min(0), Validators.max(1_000_000_000)]),
+    defaultTaxCodeId: new FormControl<number | null>(null),
+    // ISO 4217: 3 uppercase letters (matches server validation)
+    defaultCurrency: new FormControl<string | null>(null, [Validators.pattern(/^[A-Z]{3}$/)]),
+    billingAddress: new FormGroup({
+      street: new FormControl<string | null>(null),
+      line2: new FormControl<string | null>(null),
+      city: new FormControl<string | null>(null),
+      state: new FormControl<string | null>(null),
+      postal: new FormControl<string | null>(null),
+      country: new FormControl<string | null>('US'),
+    }),
+    shippingAddress: new FormGroup({
+      street: new FormControl<string | null>(null),
+      line2: new FormControl<string | null>(null),
+      city: new FormControl<string | null>(null),
+      state: new FormControl<string | null>(null),
+      postal: new FormControl<string | null>(null),
+      country: new FormControl<string | null>('US'),
+    }),
   });
 
   protected readonly customerViolations = computed(() =>
@@ -75,6 +99,8 @@ export class CustomersComponent {
       companyName: this.translate.instant('customers.companyName'),
       email: this.translate.instant('common.email'),
       phone: this.translate.instant('common.phone'),
+      creditLimit: this.translate.instant('customers.creditLimit'),
+      defaultCurrency: this.translate.instant('customers.defaultCurrency'),
     })
   );
 
@@ -114,11 +140,30 @@ export class CustomersComponent {
 
   // ─── Customer Create ───
   protected openCreateCustomer(): void {
-    this.customerForm.reset({ name: '', companyName: '', email: '', phone: '' });
+    this.customerForm.reset({
+      name: '', companyName: '', email: '', phone: '',
+      creditLimit: null, defaultTaxCodeId: null, defaultCurrency: null,
+      billingAddress: { street: null, line2: null, city: null, state: null, postal: null, country: 'US' },
+      shippingAddress: { street: null, line2: null, city: null, state: null, postal: null, country: 'US' },
+    });
     this.showDialog.set(true);
   }
 
   protected closeDialog(): void { this.showDialog.set(false); }
+
+  /** Returns the inner address object only if the user filled in any required field. */
+  private extractAddress(group: { street: string | null; line2: string | null; city: string | null; state: string | null; postal: string | null; country: string | null }) {
+    const filled = !!(group.street || group.city || group.state || group.postal);
+    if (!filled) return undefined;
+    return {
+      street: group.street ?? '',
+      line2: group.line2 ?? undefined,
+      city: group.city ?? '',
+      state: group.state ?? '',
+      postal: group.postal ?? '',
+      country: group.country ?? undefined,
+    };
+  }
 
   protected saveCustomer(): void {
     if (this.customerForm.invalid) return;
@@ -132,6 +177,14 @@ export class CustomersComponent {
       companyName: form.companyName || undefined,
       email: form.email || undefined,
       phone: form.phone || undefined,
+      // F3 — full-record fields. Empty strings collapse to undefined so the
+      // server treats them as unset rather than failing validation on a blank
+      // address sub-object.
+      creditLimit: form.creditLimit ?? undefined,
+      defaultTaxCodeId: form.defaultTaxCodeId ?? undefined,
+      defaultCurrency: form.defaultCurrency || undefined,
+      billingAddress: this.extractAddress(form.billingAddress),
+      shippingAddress: this.extractAddress(form.shippingAddress),
     }).subscribe({
       next: (created) => {
         this.saving.set(false);

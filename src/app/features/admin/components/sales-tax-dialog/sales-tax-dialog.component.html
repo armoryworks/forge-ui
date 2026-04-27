@@ -38,6 +38,20 @@
       label="Set as default rate"
       formControlName="isDefault"
       [attr.aria-label]="'salesTax.fieldDefault' | translate" />
+
+    <!-- Phase 3 F5 — full-record fields. exemptFlag flags this row as an
+         exemption marker (local concern); glPostingAccount is optional and
+         populated by the external accounting sync when configured. -->
+    <app-toggle
+      label="Exempt rate"
+      formControlName="exemptFlag"
+      data-testid="sales-tax-exempt-flag" />
+
+    <app-input
+      label="GL Posting Account (optional)"
+      formControlName="glPostingAccount"
+      placeholder="e.g. 2200-Sales-Tax"
+      data-testid="sales-tax-gl-posting-account" />
   </div>
 
   <div dialog-footer>
