@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { PartsService } from './services/parts.service';
 import { PartListItem } from './models/part-list-item.model';
@@ -248,6 +249,10 @@ export class PartsComponent {
   protected savePart(): void {
     if (this.partForm.invalid) return;
 
+    // Drop any prior server messages so a re-submit doesn't accumulate.
+    // (Phase 3 / WU-02 envelope pattern, mirroring customer-create.)
+    FormValidationService.clearServerErrors(this.partForm);
+
     const form = this.partForm.getRawValue();
     const editing = this.editingPart();
 
@@ -271,8 +276,13 @@ export class PartsComponent {
           this.loadParts();
           this.snackbar.success(this.translate.instant('parts.partUpdated'));
         },
-        error: () => {
-          this.closePartDialog();
+        error: (err: HttpErrorResponse) => {
+          // Phase 3 / WU-02 / F6: surface per-field server errors against the
+          // form so the validation popover lights up on the offending field
+          // (e.g. partType). Legacy non-envelope errors fall through to the
+          // central interceptor's snackbar. Keep the dialog open so the user
+          // can correct the field rather than losing their input.
+          FormValidationService.applyServerError(this.partForm, err);
         },
       });
     } else {
@@ -297,8 +307,9 @@ export class PartsComponent {
           // Open the newly created part's detail dialog
           this.openPartDetail(detail.id);
         },
-        error: () => {
-          this.closePartDialog();
+        error: (err: HttpErrorResponse) => {
+          // Phase 3 / WU-02 / F6: see updatePart error handler for details.
+          FormValidationService.applyServerError(this.partForm, err);
         },
       });
     }
