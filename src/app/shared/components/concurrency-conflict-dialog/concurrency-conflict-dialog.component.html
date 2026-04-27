@@ -1,0 +1,19 @@
+<div class="concurrency-dialog">
+  <div class="concurrency-dialog__header">
+    <span class="concurrency-dialog__title">{{ 'concurrencyConflict.title' | translate }}</span>
+    <button class="icon-btn" aria-label="Close" matTooltip="Close" matTooltipPosition="above" (click)="cancel()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </div>
+
+  <div class="concurrency-dialog__body">
+    <p class="concurrency-dialog__message">{{ 'concurrencyConflict.message' | translate }}</p>
+  </div>
+
+  <div class="concurrency-dialog__footer">
+    <button class="action-btn" (click)="cancel()">{{ 'concurrencyConflict.cancel' | translate }}</button>
+    <button class="action-btn action-btn--primary" (click)="reload()">
+      {{ 'concurrencyConflict.reload' | translate }}
+    </button>
+  </div>
+</div>

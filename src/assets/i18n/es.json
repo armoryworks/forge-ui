@@ -1503,6 +1503,12 @@
     "archiveTitle": "¿Archivar {item}?",
     "confirm": "Confirmar"
   },
+  "concurrencyConflict": {
+    "title": "Registro modificado",
+    "message": "Otro usuario modificó este registro. ¿Recargar y volver a intentarlo?",
+    "reload": "Recargar",
+    "cancel": "Cancelar"
+  },
   "emptyState": {
     "noJobs": "No se encontraron trabajos",
     "noParts": "No se encontraron piezas",

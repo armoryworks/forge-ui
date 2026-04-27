@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.concurrency-dialog {
+  display: flex;
+  flex-direction: column;
+}
+
+.concurrency-dialog__header {
+  @include flex-between;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.concurrency-dialog__title {
+  @include uppercase-label(var(--font-size-sm), 0.5px, 700);
+}
+
+.concurrency-dialog__body {
+  padding: $sp-lg;
+}
+
+.concurrency-dialog__message {
+  font-size: var(--font-size-base);
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.concurrency-dialog__footer {
+  display: flex;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+  gap: $sp-md;
+
+  .action-btn {
+    flex: 1;
+  }
+}

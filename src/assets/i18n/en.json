@@ -1706,6 +1706,12 @@
     "archiveTitle": "Archive {item}?",
     "confirm": "Confirm"
   },
+  "concurrencyConflict": {
+    "title": "Record Changed",
+    "message": "This record was changed by another user. Reload and try again?",
+    "reload": "Reload",
+    "cancel": "Cancel"
+  },
   "emptyState": {
     "noJobs": "No jobs found",
     "noParts": "No parts found",
