@@ -66,6 +66,69 @@
     &--danger {
       color: var(--error);
     }
+    // Phase 3 / WU-14 / H3 — green-tint on positive credit-on-file balance.
+    &--success {
+      color: var(--success, #15803d);
+    }
+  }
+
+  // Phase 3 / WU-14 / H3 — Credit on File panel.
+  &__on-file {
+    border-top: $border-width-thin solid var(--border);
+    padding-top: $sp-md;
+    margin-bottom: $sp-md;
+  }
+
+  &__on-file-header {
+    @include flex-between;
+    margin-bottom: $sp-xs;
+  }
+
+  &__on-file-empty {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-xs;
+  }
+
+  &__on-file-toggle {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xxs;
+    font-size: $font-size-xs;
+    padding: 0;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+
+  &__on-file-list {
+    list-style: none;
+    margin: $sp-xs 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__on-file-item {
+    display: grid;
+    grid-template-columns: 92px 1fr auto;
+    gap: $sp-sm;
+    padding: $sp-xxs 0;
+    font-size: $font-size-xs;
+  }
+
+  &__on-file-date {
+    color: var(--text-muted);
+  }
+
+  &__on-file-amount {
+    font-weight: 600;
   }
 
   &__bar-container {

@@ -2483,7 +2483,14 @@
     "newPoTitle": "New Purchase Order",
     "noLinesYet": "No lines yet",
     "orderDetails": "Order Details",
-    "tabOrders": "Orders"
+    "tabOrders": "Orders",
+    "shortClose": "Short Close",
+    "shortCloseTitle": "Short-Close Purchase Order",
+    "shortCloseMessage": "Closes this PO and marks the unreceived quantity as cancelled-not-received. Use when the remainder will not arrive (vendor backorder cancelled, item discontinued).",
+    "shortCloseReason": "Reason (required)",
+    "shortClosed": "Short-closed",
+    "shortClosedQty": "Short-closed",
+    "poShortClosed": "Purchase order short-closed."
   },
   "salesOrders": {
     "title": "Sales Orders",

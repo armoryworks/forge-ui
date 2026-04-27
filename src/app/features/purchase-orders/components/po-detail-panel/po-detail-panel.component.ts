@@ -14,6 +14,7 @@ import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -50,6 +51,11 @@ export class PoDetailPanelComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
+
+  // Phase 3 / WU-14 / H3 — short-close is gated to roles that handle PO
+  // closure / AP follow-up. Mirrors the server-side [Authorize] list.
+  protected readonly canShortCloseRole = this.auth.hasAnyRole(['Admin', 'Manager', 'OfficeManager', 'Procurement']);
 
   readonly purchaseOrderId = input.required<number>();
   readonly closed = output<void>();
@@ -158,6 +164,49 @@ export class PoDetailPanelComponent implements OnInit {
         this.snackbar.success(this.translate.instant('purchaseOrders.poClosed'));
       },
     });
+  }
+
+  // Phase 3 / WU-14 / H3 — short-close a partially-received PO. Confirm
+  // dialog gathers the required reason and POSTs to /short-close.
+  protected readonly showShortCloseDialog = signal(false);
+  protected readonly shortCloseSaving = signal(false);
+  protected readonly shortCloseReasonCtrl = new FormControl<string>('', {
+    nonNullable: true,
+    validators: [Validators.required, Validators.minLength(3), Validators.maxLength(2000)],
+  });
+
+  protected openShortClose(): void {
+    this.shortCloseReasonCtrl.reset('');
+    this.showShortCloseDialog.set(true);
+  }
+
+  protected confirmShortClose(): void {
+    const po = this.po();
+    if (!po) return;
+    if (this.shortCloseReasonCtrl.invalid) {
+      this.shortCloseReasonCtrl.markAsTouched();
+      return;
+    }
+    const reason = this.shortCloseReasonCtrl.value.trim();
+    this.shortCloseSaving.set(true);
+    this.poService.shortClosePurchaseOrder(po.id, reason).subscribe({
+      next: () => {
+        this.showShortCloseDialog.set(false);
+        this.shortCloseSaving.set(false);
+        this.loadDetail();
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('purchaseOrders.poShortClosed'));
+      },
+      error: () => this.shortCloseSaving.set(false),
+    });
+  }
+
+  // PO is short-close-eligible when partially-received OR submitted/acknowledged
+  // with at least one line received < ordered. Mirror server gate.
+  protected canShortClose(po: PurchaseOrderDetail): boolean {
+    if (!this.canShortCloseRole) return false;
+    if (po.status === 'Draft' || po.status === 'Closed' || po.status === 'Cancelled') return false;
+    return po.lines.some(l => l.orderedQuantity > l.receivedQuantity + (l.cancelledShortCloseQuantity ?? 0));
   }
 
   protected deletePo(): void {

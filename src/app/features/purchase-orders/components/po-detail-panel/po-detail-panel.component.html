@@ -116,6 +116,17 @@
         </div>
       }
 
+      <!-- Phase 3 / WU-14 / H3 — short-close audit banner. Shown when the PO
+           was closed via /short-close so AP can see the reason at a glance. -->
+      @if (po.shortCloseReason) {
+        <div class="info-section info-section--warn" data-testid="po-short-close-banner">
+          <span class="info-label">{{ 'purchaseOrders.shortClosed' | translate }}
+            @if (po.shortClosedAt) { ({{ po.shortClosedAt | date:'MM/dd/yyyy' }}) }
+          </span>
+          <div class="info-notes">{{ po.shortCloseReason }}</div>
+        </div>
+      }
+
       <!-- Line Items -->
       <div class="lines-section">
         <span class="info-label">{{ 'purchaseOrders.lineItems' | translate }} ({{ po.lines.length }})</span>
@@ -127,6 +138,12 @@
                 <th scope="col">{{ 'common.description' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'purchaseOrders.ordered' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'purchaseOrders.received' | translate }}</th>
+                <!-- Phase 3 / WU-14 / H3 — show short-closed quantity column
+                     when at least one line has any cancelled-short-close
+                     amount (typically only after /short-close fired). -->
+                @if (po.shortCloseReason) {
+                  <th scope="col" class="lines-table__right">{{ 'purchaseOrders.shortClosedQty' | translate }}</th>
+                }
                 <th scope="col" class="lines-table__right">{{ 'purchaseOrders.unitPrice' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
               </tr>
@@ -145,6 +162,15 @@
                       {{ line.receivedQuantity | number:'1.0-4' }}
                     </span>
                   </td>
+                  @if (po.shortCloseReason) {
+                    <td class="lines-table__right">
+                      @if ((line.cancelledShortCloseQuantity ?? 0) > 0) {
+                        <span class="text-warning">{{ line.cancelledShortCloseQuantity | number:'1.0-4' }}</span>
+                      } @else {
+                        &mdash;
+                      }
+                    </td>
+                  }
                   <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
                   <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
                 </tr>
@@ -222,6 +248,14 @@
             {{ 'common.close' | translate }}
           </button>
         }
+        @if (canShortClose(po)) {
+          <!-- Phase 3 / WU-14 / H3 — short-close action. Closes a partial PO when
+               the remainder will not be received. Required reason captured in dialog. -->
+          <button data-testid="po-short-close-btn" class="action-btn" (click)="openShortClose()">
+            <span class="material-icons-outlined">cancel_schedule_send</span>
+            {{ 'purchaseOrders.shortClose' | translate }}
+          </button>
+        }
         @if (canCancel(po.status)) {
           <button data-testid="po-cancel-btn" class="action-btn" (click)="cancelPo()">
             <span class="material-icons-outlined">block</span>
@@ -248,6 +282,29 @@
     [purchaseOrder]="po()!"
     (closed)="closeReceiveDialog()"
     (saved)="onReceiveSaved()" />
+}
+
+<!-- Phase 3 / WU-14 / H3 — Short Close Dialog -->
+@if (showShortCloseDialog()) {
+  <app-dialog [title]="'purchaseOrders.shortCloseTitle' | translate" width="480px" (closed)="showShortCloseDialog.set(false)">
+    <div>
+      <p>{{ 'purchaseOrders.shortCloseMessage' | translate }}</p>
+      <app-textarea
+        [label]="'purchaseOrders.shortCloseReason' | translate"
+        [formControl]="shortCloseReasonCtrl"
+        [required]="true"
+        data-testid="po-short-close-reason" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="showShortCloseDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary"
+        data-testid="po-short-close-confirm"
+        [disabled]="shortCloseReasonCtrl.invalid || shortCloseSaving()"
+        (click)="confirmShortClose()">
+        {{ 'purchaseOrders.shortClose' | translate }}
+      </button>
+    </div>
+  </app-dialog>
 }
 
 <!-- Create Release Dialog -->

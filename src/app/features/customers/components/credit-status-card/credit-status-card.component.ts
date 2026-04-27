@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CurrencyPipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CustomerService } from '../../services/customer.service';
@@ -13,7 +13,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 @Component({
   selector: 'app-credit-status-card',
   standalone: true,
-  imports: [CurrencyPipe, DecimalPipe, PercentPipe, ReactiveFormsModule, DialogComponent, TextareaComponent, LoadingBlockDirective],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, DialogComponent, TextareaComponent, LoadingBlockDirective],
   templateUrl: './credit-status-card.component.html',
   styleUrl: './credit-status-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +30,9 @@ export class CreditStatusCardComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly showHoldDialog = signal(false);
+  // Phase 3 / WU-14 / H3 — collapsible per-payment unapplied-credit list.
+  protected readonly creditsExpanded = signal(false);
+  protected toggleCreditsExpanded(): void { this.creditsExpanded.update(v => !v); }
   protected readonly holdReason = new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(500)] });
 
   ngOnInit(): void {

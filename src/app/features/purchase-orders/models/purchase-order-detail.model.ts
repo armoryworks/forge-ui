@@ -22,4 +22,7 @@ export interface PurchaseOrderDetail {
   lines: PurchaseOrderLine[];
   createdAt: Date;
   updatedAt: Date;
+  // Phase 3 / WU-14 / H3 — short-close audit fields. Null on POs that were not short-closed.
+  shortCloseReason: string | null;
+  shortClosedAt: Date | null;
 }

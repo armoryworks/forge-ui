@@ -58,6 +58,11 @@ export class PurchaseOrderService {
     return this.http.post<void>(`${this.base}/${id}/close`, {});
   }
 
+  // Phase 3 / WU-14 / H3 — short-close a partially-received PO with required reason.
+  shortClosePurchaseOrder(id: number, reason: string): Observable<PurchaseOrderDetail> {
+    return this.http.post<PurchaseOrderDetail>(`${this.base}/${id}/short-close`, { reason });
+  }
+
   deletePurchaseOrder(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
   }

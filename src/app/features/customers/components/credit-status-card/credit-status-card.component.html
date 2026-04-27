@@ -55,6 +55,43 @@
       </div>
     }
 
+    <!-- Phase 3 / WU-14 / H3 / P4-OVERPAY — credit-on-file (unapplied credits)
+         section. Salesperson can read out the customer's available credit
+         and the contributing payments without manual lookup. -->
+    <div class="credit-card__on-file" data-testid="credit-on-file">
+      <div class="credit-card__on-file-header">
+        <span class="credit-card__metric-label">Credit on File</span>
+        <span class="credit-card__metric-value"
+              [class.credit-card__metric-value--success]="c.unappliedCreditAmount > 0"
+              data-testid="credit-on-file-amount">
+          {{ c.unappliedCreditAmount | currency }}
+        </span>
+      </div>
+      @if (c.unappliedCreditAmount === 0 || c.unappliedCredits.length === 0) {
+        <p class="credit-card__on-file-empty">No unapplied credits.</p>
+      } @else {
+        <button type="button" class="credit-card__on-file-toggle" (click)="toggleCreditsExpanded()"
+                [attr.aria-expanded]="creditsExpanded()" aria-label="Toggle credit details">
+          <span class="material-icons-outlined">{{ creditsExpanded() ? 'expand_less' : 'expand_more' }}</span>
+          {{ creditsExpanded() ? 'Hide' : 'Show' }} {{ c.unappliedCredits.length }} payment{{ c.unappliedCredits.length === 1 ? '' : 's' }}
+        </button>
+        @if (creditsExpanded()) {
+          <ul class="credit-card__on-file-list" data-testid="credit-on-file-list">
+            @for (uc of c.unappliedCredits; track uc.paymentId) {
+              <li class="credit-card__on-file-item">
+                <span class="credit-card__on-file-date">{{ uc.date | date:'MM/dd/yyyy' }}</span>
+                <span class="credit-card__on-file-ref">
+                  <strong>{{ uc.paymentNumber }}</strong>
+                  @if (uc.reference) { <span class="text-muted">({{ uc.reference }})</span> }
+                </span>
+                <span class="credit-card__on-file-amount">{{ uc.amount | currency }}</span>
+              </li>
+            }
+          </ul>
+        }
+      }
+    </div>
+
     @if (!c.isOnHold) {
       <div class="credit-card__actions">
         <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="openHoldDialog()" aria-label="Place credit hold">
