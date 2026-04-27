@@ -83,12 +83,20 @@ export class OperationDialogComponent implements OnInit {
     isQcCheckpoint: new FormControl(this.data.operation?.isQcCheckpoint ?? false),
     qcCriteria: new FormControl(this.data.operation?.qcCriteria ?? ''),
     referencedOperationId: new FormControl<number | null>(this.data.operation?.referencedOperationId ?? null),
+    // Phase 3 H5 / WU-13 — subcontract metadata. Server requires vendor +
+    // turn-time when isSubcontract is true; the template conditionally
+    // shows / hides the two dependent fields based on the toggle.
+    isSubcontract: new FormControl(this.data.operation?.isSubcontract ?? false),
+    subcontractVendorId: new FormControl<number | null>(this.data.operation?.subcontractVendorId ?? null),
+    subcontractTurnTimeDays: new FormControl<number | null>(this.data.operation?.subcontractTurnTimeDays ?? null, [Validators.min(0.1)]),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.formGroup, {
     stepNumber: this.translate.instant('parts.stepNumber'),
     title: this.translate.instant('common.title'),
     estimatedMinutes: this.translate.instant('parts.estMinutes'),
+    subcontractVendorId: this.translate.instant('parts.subcontractVendor'),
+    subcontractTurnTimeDays: this.translate.instant('parts.subcontractTurnTimeDays'),
   });
 
   // Other operations in the same routing (for cross-reference select)
@@ -145,6 +153,13 @@ export class OperationDialogComponent implements OnInit {
 
     const raw = this.formGroup.getRawValue();
 
+    // Phase 3 H5 / WU-13 — only send subcontract metadata when the toggle is
+    // on; when off, send the flag as false + clear vendor/turn-time so the
+    // server-side patch handler resets historical values.
+    const isSubcontract = !!raw.isSubcontract;
+    const subVendorId = isSubcontract ? (raw.subcontractVendorId ?? undefined) : null;
+    const subTurnTime = isSubcontract ? (raw.subcontractTurnTimeDays ?? undefined) : null;
+
     if (this.data.operation) {
       this.partsService.updateOperation(this.data.partId, this.data.operation.id, {
         stepNumber: raw.stepNumber ?? undefined,
@@ -155,6 +170,9 @@ export class OperationDialogComponent implements OnInit {
         isQcCheckpoint: raw.isQcCheckpoint ?? undefined,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? 0,
+        isSubcontract,
+        subcontractVendorId: subVendorId as number | null | undefined,
+        subcontractTurnTimeDays: subTurnTime as number | null | undefined,
       }).subscribe({
         next: (result) => {
           this.saving.set(false);
@@ -173,6 +191,9 @@ export class OperationDialogComponent implements OnInit {
         isQcCheckpoint: raw.isQcCheckpoint ?? false,
         qcCriteria: raw.qcCriteria || undefined,
         referencedOperationId: raw.referencedOperationId ?? undefined,
+        isSubcontract,
+        subcontractVendorId: isSubcontract ? (raw.subcontractVendorId ?? undefined) : undefined,
+        subcontractTurnTimeDays: isSubcontract ? (raw.subcontractTurnTimeDays ?? undefined) : undefined,
       }).subscribe({
         next: (result) => {
           this.saving.set(false);

@@ -14,6 +14,12 @@ export interface Operation {
   materials: OperationMaterial[];
   createdAt: Date;
   updatedAt: Date;
+  // Phase 3 H5 / WU-13 — subcontract metadata round-tripped from server
+  // (only meaningful when isSubcontract = true).
+  isSubcontract: boolean;
+  subcontractVendorId: number | null;
+  subcontractVendorName: string | null;
+  subcontractTurnTimeDays: number | null;
 }
 
 export interface OperationMaterial {

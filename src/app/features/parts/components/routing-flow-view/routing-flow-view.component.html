@@ -21,6 +21,13 @@
             {{ operation.estimatedMinutes }}min
           </div>
         }
+        <!-- Phase 3 H5 / WU-13 — subcontract metadata in flow view. -->
+        @if (operation.isSubcontract) {
+          <div class="routing-flow__operation-meta" data-testid="op-flow-subcontract-meta">
+            <span class="material-icons-outlined" aria-hidden="true">local_shipping</span>
+            {{ 'parts.subcontractLabel' | translate }}: {{ operation.subcontractVendorName ?? ('parts.subcontractVendorMissing' | translate) }}@if (operation.subcontractTurnTimeDays != null) {<span>, {{ operation.subcontractTurnTimeDays }} {{ 'parts.daysTurn' | translate }}</span>}
+          </div>
+        }
         @if (operation.isQcCheckpoint) {
           <div class="routing-flow__operation-qc">
             <span class="chip chip--warning">QC</span>

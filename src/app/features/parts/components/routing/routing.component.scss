@@ -85,6 +85,13 @@
     .material-icons-outlined {
       font-size: $icon-size-xs;
     }
+
+    // Phase 3 H5 / WU-13 — subcontract tag uses warning accent so the
+    // route reader instantly sees an offsite step.
+    &--subcontract {
+      color: var(--warning, #b45309);
+      font-weight: 500;
+    }
   }
 
   &__actions {
