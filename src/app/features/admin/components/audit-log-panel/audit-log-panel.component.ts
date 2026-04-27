@@ -43,6 +43,7 @@ export class AuditLogPanelComponent {
 
   protected readonly entityTypeControl = new FormControl<string>('');
   protected readonly actionControl = new FormControl<string>('');
+  protected readonly actionPresetControl = new FormControl<string>('');
   protected readonly fromDateControl = new FormControl<Date | null>(null);
   protected readonly toDateControl = new FormControl<Date | null>(null);
 
@@ -62,6 +63,32 @@ export class AuditLogPanelComponent {
     { value: 'Shipment', label: this.translate.instant('adminPanels.auditLog.types.shipment') },
     { value: 'TimeEntry', label: this.translate.instant('adminPanels.auditLog.types.timeEntry') },
     { value: 'Asset', label: this.translate.instant('adminPanels.auditLog.types.asset') },
+    // Phase 3 / WU-03 retrofit — the system-wide audit log now also captures
+    // identity, MFA, role, and BI-key events. Surface those entity types so
+    // the per-entity filter can scope to them.
+    { value: 'ApplicationUser', label: this.translate.instant('adminPanels.auditLog.types.identity') },
+    { value: 'BiApiKey', label: this.translate.instant('adminPanels.auditLog.types.biApiKey') },
+  ];
+
+  /**
+   * Phase 3 / WU-03 retrofit — quick-pick presets for the system-wide events
+   * that became visible in the audit log after WU-03 (login / MFA / role /
+   * BI key). Selecting a preset writes through to `actionControl`, which
+   * triggers the existing reload effect; "" clears the action filter.
+   */
+  protected readonly actionPresetOptions: SelectOption[] = [
+    { value: '', label: this.translate.instant('adminPanels.auditLog.presets.allActions') },
+    { value: 'UserLoggedIn', label: this.translate.instant('adminPanels.auditLog.presets.userLoggedIn') },
+    { value: 'UserLoginFailed', label: this.translate.instant('adminPanels.auditLog.presets.userLoginFailed') },
+    { value: 'UserLoggedOut', label: this.translate.instant('adminPanels.auditLog.presets.userLoggedOut') },
+    { value: 'UserPasswordChanged', label: this.translate.instant('adminPanels.auditLog.presets.userPasswordChanged') },
+    { value: 'MfaEnabled', label: this.translate.instant('adminPanels.auditLog.presets.mfaEnabled') },
+    { value: 'MfaDisabled', label: this.translate.instant('adminPanels.auditLog.presets.mfaDisabled') },
+    { value: 'RoleAssigned', label: this.translate.instant('adminPanels.auditLog.presets.roleAssigned') },
+    { value: 'UserActivated', label: this.translate.instant('adminPanels.auditLog.presets.userActivated') },
+    { value: 'UserDeactivated', label: this.translate.instant('adminPanels.auditLog.presets.userDeactivated') },
+    { value: 'BiApiKeyIssued', label: this.translate.instant('adminPanels.auditLog.presets.biApiKeyIssued') },
+    { value: 'BiApiKeyRevoked', label: this.translate.instant('adminPanels.auditLog.presets.biApiKeyRevoked') },
   ];
 
   protected readonly columns: ColumnDef[] = [
@@ -83,6 +110,15 @@ export class AuditLogPanelComponent {
     this.actionControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
     this.fromDateControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
     this.toDateControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
+
+    // Phase 3 / WU-03 retrofit — preset writes through to the freeform action
+    // filter. emitEvent: false on the secondary control so we only trigger
+    // one reload via actionControl's own valueChanges subscription.
+    this.actionPresetControl.valueChanges.subscribe(value => {
+      if (this.actionControl.value !== (value ?? '')) {
+        this.actionControl.setValue(value ?? '');
+      }
+    });
   }
 
   protected load(): void {

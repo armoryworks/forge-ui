@@ -3932,6 +3932,7 @@
       "entityType": "Entity Type",
       "action": "Action",
       "actionPlaceholder": "e.g. Created, Updated",
+      "systemEvent": "System Event",
       "fromDate": "From Date",
       "toDate": "To Date",
       "noEntries": "No audit log entries found",
@@ -3959,7 +3960,23 @@
         "quote": "Quote",
         "shipment": "Shipment",
         "timeEntry": "Time Entry",
-        "asset": "Asset"
+        "asset": "Asset",
+        "identity": "Identity (login / MFA / role)",
+        "biApiKey": "BI API Key"
+      },
+      "presets": {
+        "allActions": "-- All Actions --",
+        "userLoggedIn": "User Logged In",
+        "userLoginFailed": "User Login Failed",
+        "userLoggedOut": "User Logged Out",
+        "userPasswordChanged": "Password Changed",
+        "mfaEnabled": "MFA Enabled",
+        "mfaDisabled": "MFA Disabled",
+        "roleAssigned": "Role Assigned",
+        "userActivated": "User Activated",
+        "userDeactivated": "User Deactivated",
+        "biApiKeyIssued": "BI API Key Issued",
+        "biApiKeyRevoked": "BI API Key Revoked"
       }
     },
     "edi": {

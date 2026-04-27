@@ -3723,6 +3723,7 @@
       "entityType": "Tipo de Entidad",
       "action": "Acción",
       "actionPlaceholder": "ej. Creado, Actualizado",
+      "systemEvent": "Evento del Sistema",
       "fromDate": "Desde",
       "toDate": "Hasta",
       "noEntries": "No se encontraron entradas de auditoría",
@@ -3750,7 +3751,23 @@
         "quote": "Cotización",
         "shipment": "Envío",
         "timeEntry": "Entrada de Tiempo",
-        "asset": "Activo"
+        "asset": "Activo",
+        "identity": "Identidad (login / MFA / rol)",
+        "biApiKey": "Clave API de BI"
+      },
+      "presets": {
+        "allActions": "-- Todas las Acciones --",
+        "userLoggedIn": "Inicio de Sesión",
+        "userLoginFailed": "Inicio de Sesión Fallido",
+        "userLoggedOut": "Cierre de Sesión",
+        "userPasswordChanged": "Contraseña Cambiada",
+        "mfaEnabled": "MFA Activada",
+        "mfaDisabled": "MFA Desactivada",
+        "roleAssigned": "Rol Asignado",
+        "userActivated": "Usuario Activado",
+        "userDeactivated": "Usuario Desactivado",
+        "biApiKeyIssued": "Clave API de BI Emitida",
+        "biApiKeyRevoked": "Clave API de BI Revocada"
       }
     },
     "edi": {

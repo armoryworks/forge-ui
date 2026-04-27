@@ -4,6 +4,10 @@
       [label]="'adminPanels.auditLog.entityType' | translate"
       [formControl]="entityTypeControl"
       [options]="entityTypeOptions" />
+    <app-select
+      [label]="'adminPanels.auditLog.systemEvent' | translate"
+      [formControl]="actionPresetControl"
+      [options]="actionPresetOptions" />
     <app-input
       [label]="'adminPanels.auditLog.action' | translate"
       [formControl]="actionControl"
