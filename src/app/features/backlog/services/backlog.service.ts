@@ -8,6 +8,12 @@ export interface BacklogFilters {
   trackTypeId?: number | null;
   assigneeId?: number | null;
   search?: string;
+  /**
+   * When true, fetches archived jobs instead of active. Phase 3 / WU-07 / F2 —
+   * surfaces archived jobs so admins have a recovery path via the unarchive
+   * endpoints (no UI-side recovery existed before).
+   */
+  isArchived?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,7 +21,7 @@ export class BacklogService {
   private readonly http = inject(HttpClient);
 
   getJobs(filters?: BacklogFilters): Observable<KanbanJob[]> {
-    let params = new HttpParams().set('isArchived', 'false');
+    let params = new HttpParams().set('isArchived', filters?.isArchived ? 'true' : 'false');
     if (filters?.trackTypeId) {
       params = params.set('trackTypeId', filters.trackTypeId.toString());
     }

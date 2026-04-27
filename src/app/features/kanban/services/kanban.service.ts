@@ -183,6 +183,16 @@ export class KanbanService {
     return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/archive`, { jobIds });
   }
 
+  /** Inverse of {@link bulkArchive}. Admin-only on the server. Phase 3 / WU-07 / F2. */
+  bulkUnarchive(jobIds: number[]): Observable<BulkResult> {
+    return this.http.patch<BulkResult>(`${environment.apiUrl}/jobs/bulk/unarchive`, { jobIds });
+  }
+
+  /** Single-job convenience over the bulk endpoint. Admin-only on the server. */
+  unarchiveJob(jobId: number): Observable<BulkResult> {
+    return this.http.post<BulkResult>(`${environment.apiUrl}/jobs/${jobId}/unarchive`, {});
+  }
+
   disposeJob(jobId: number, request: DisposeJobRequest): Observable<JobDetail> {
     return this.http.post<JobDetail>(`${environment.apiUrl}/jobs/${jobId}/dispose`, request);
   }

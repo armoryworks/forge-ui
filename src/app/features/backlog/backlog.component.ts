@@ -13,9 +13,12 @@ import { DatePipe } from '@angular/common';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { AuthService } from '../../shared/services/auth.service';
 import { BacklogService } from './services/backlog.service';
 import { KanbanService } from '../kanban/services/kanban.service';
 import { LoadingService } from '../../shared/services/loading.service';
+import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { KanbanJob } from '../kanban/models/kanban-job.model';
 import { UserRef } from '../kanban/models/user-ref.model';
 import { JobDetail } from '../kanban/models/job-detail.model';
@@ -59,6 +62,20 @@ export class BacklogComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly auth = inject(AuthService);
+  private readonly snackbar = inject(SnackbarService);
+
+  /**
+   * Admin-only flag for the archived-jobs view + unarchive actions.
+   * Phase 3 / WU-07 / F2 — restoring an archived job is high-impact, so
+   * the toggle and the row action are both gated client-side; the server
+   * also enforces Admin via [Authorize(Roles = "Admin")].
+   */
+  protected readonly isAdmin = computed(() => this.auth.hasRole('Admin'));
+  protected readonly showArchived = signal(false);
+  /** Selected job ids in the archived-view bulk-action context. WU-07 / F2. */
+  protected readonly selectedJobs = signal<KanbanJob[]>([]);
+  protected readonly selectionCount = computed(() => this.selectedJobs().length);
 
   protected readonly jobs = signal<KanbanJob[]>([]);
   protected readonly trackTypes = signal<TrackType[]>([]);
@@ -99,7 +116,7 @@ export class BacklogComponent implements OnInit {
     const assigneeOptions = this.users()
       .map(u => ({ value: u.initials, label: u.name }));
 
-    return [
+    const cols: ColumnDef[] = [
       { field: 'jobNumber', header: this.translate.instant('jobs.jobNumber'), sortable: true, filterable: true, width: '80px' },
       { field: 'title', header: this.translate.instant('common.title'), sortable: true, filterable: true },
       { field: 'stageName', header: this.translate.instant('jobs.stage'), sortable: true, filterable: true, type: 'enum', filterOptions: stageOptions, width: '100px' },
@@ -109,6 +126,14 @@ export class BacklogComponent implements OnInit {
       { field: 'customerName', header: this.translate.instant('jobs.customer'), sortable: true, filterable: true, type: 'enum', filterOptions: customerOptions, width: '120px' },
       { field: 'dueDate', header: this.translate.instant('common.dueDate'), sortable: true, filterable: true, type: 'date', width: '100px' },
     ];
+
+    // Show an Actions column only in admin archived view, where the row-level
+    // unarchive action lives. Phase 3 / WU-07 / F2.
+    if (this.showArchived() && this.isAdmin()) {
+      cols.push({ field: 'actions', header: this.translate.instant('common.actions'), width: '90px', align: 'center' as const });
+    }
+
+    return cols;
   });
 
   protected readonly backlogRowClass = (row: unknown) => {
@@ -185,7 +210,7 @@ export class BacklogComponent implements OnInit {
   ngOnInit(): void {
     this.isLoading.set(true);
     this.loadingService.track('Loading backlog...', forkJoin({
-      jobs: this.backlogService.getJobs(),
+      jobs: this.backlogService.getJobs({ isArchived: this.showArchived() }),
       trackTypes: this.kanbanService.getTrackTypes(),
       users: this.kanbanService.getUsers(),
     })).subscribe({
@@ -255,6 +280,85 @@ export class BacklogComponent implements OnInit {
   }
 
   private loadJobs(): void {
-    this.backlogService.getJobs().subscribe(jobs => this.jobs.set(jobs));
+    this.backlogService.getJobs({ isArchived: this.showArchived() }).subscribe(jobs => this.jobs.set(jobs));
+  }
+
+  /**
+   * Toggle between active and archived job views. Admin-only.
+   * Phase 3 / WU-07 / F2.
+   */
+  protected toggleShowArchived(): void {
+    if (!this.isAdmin()) return;
+    this.showArchived.update(v => !v);
+    this.selectedJobs.set([]);
+    this.loadJobs();
+  }
+
+  protected onSelectionChange(rows: unknown[]): void {
+    this.selectedJobs.set(rows as KanbanJob[]);
+  }
+
+  protected clearSelection(): void {
+    this.selectedJobs.set([]);
+  }
+
+  /**
+   * Bulk-restore the currently selected archived jobs. Admin-only. Mirrors
+   * the bulk-archive bar pattern from kanban (confirm → call → snackbar).
+   * Phase 3 / WU-07 / F2.
+   */
+  protected bulkUnarchive(): void {
+    if (!this.isAdmin()) return;
+    const ids = this.selectedJobs().map(j => j.id);
+    if (ids.length === 0) return;
+
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('backlog.unarchiveJobsTitle'),
+        message: this.translate.instant('backlog.unarchiveJobsMessage', { count: ids.length }),
+        confirmLabel: this.translate.instant('backlog.unarchive'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.kanbanService.bulkUnarchive(ids).subscribe({
+        next: (r) => {
+          this.snackbar.success(this.translate.instant('backlog.jobsUnarchived', { count: r.successCount }));
+          this.clearSelection();
+          this.loadJobs();
+        },
+        error: () => this.snackbar.error(this.translate.instant('backlog.unarchiveFailed')),
+      });
+    });
+  }
+
+  /**
+   * Restore a single archived job via the unarchive endpoint. Confirms first
+   * (admins shouldn't be surprised by a restore) and then reloads the list so
+   * the now-active job drops out of the archived view. Phase 3 / WU-07 / F2.
+   */
+  protected unarchiveJob(job: KanbanJob, event: Event): void {
+    event.stopPropagation();
+    if (!this.isAdmin()) return;
+
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('backlog.unarchiveTitle'),
+        message: this.translate.instant('backlog.unarchiveMessage', { jobNumber: job.jobNumber }),
+        confirmLabel: this.translate.instant('backlog.unarchive'),
+        severity: 'info',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.kanbanService.unarchiveJob(job.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('backlog.jobUnarchived', { jobNumber: job.jobNumber }));
+          this.loadJobs();
+        },
+        error: () => this.snackbar.error(this.translate.instant('backlog.unarchiveFailed')),
+      });
+    });
   }
 }

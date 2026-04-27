@@ -29,6 +29,17 @@
       <span class="material-icons-outlined">add</span>
       {{ 'jobs.createJob' | translate }}
     </button>
+    @if (isAdmin()) {
+      <button class="icon-btn"
+        [class.icon-btn--active]="showArchived()"
+        [matTooltip]="(showArchived() ? 'backlog.showActive' : 'backlog.showArchived') | translate"
+        matTooltipPosition="below"
+        [attr.aria-label]="(showArchived() ? 'backlog.showActive' : 'backlog.showArchived') | translate"
+        [attr.aria-pressed]="showArchived()"
+        (click)="toggleShowArchived()">
+        <span class="material-icons-outlined">{{ showArchived() ? 'inventory_2' : 'inventory' }}</span>
+      </button>
+    }
   </app-page-header>
 
   @if (viewMode() === 'table') {
@@ -36,7 +47,8 @@
     <app-data-table tableId="backlog" [columns]="backlogColumns()" [data]="filteredJobs()"
       [rowClass]="backlogRowClass" [rowStyle]="backlogRowStyle"
       emptyIcon="search_off" [emptyMessage]="'backlog.noJobsMatch' | translate" [emptyHelpText]="'backlog.noJobsHelp' | translate"
-      [clickableRows]="true" (rowClick)="onRowClicked($any($event))">
+      [clickableRows]="true" (rowClick)="onRowClicked($any($event))"
+      [selectable]="showArchived() && isAdmin()" (selectionChange)="onSelectionChange($event)">
       <ng-template appColumnCell="jobNumber" let-job>
         <span class="job-number">{{ job.jobNumber }}</span>
       </ng-template>
@@ -63,6 +75,17 @@
       <ng-template appColumnCell="dueDate" let-job>
         <span [class.overdue-text]="job.isOverdue">{{ job.dueDate | date:'MM/dd/yyyy' }}</span>
       </ng-template>
+      <ng-template appColumnCell="actions" let-job>
+        @if (showArchived() && isAdmin()) {
+          <button class="icon-btn"
+            [matTooltip]="'backlog.unarchive' | translate"
+            matTooltipPosition="left"
+            [attr.aria-label]="'backlog.unarchive' | translate"
+            (click)="unarchiveJob(job, $event)">
+            <span class="material-icons-outlined">unarchive</span>
+          </button>
+        }
+      </ng-template>
     </app-data-table>
     </div>
   } @else {
@@ -81,5 +104,18 @@
       [trackTypes]="trackTypes()"
       (saved)="onDialogSaved()"
       (cancelled)="onDialogCancelled()" />
+  }
+
+  @if (showArchived() && isAdmin() && selectionCount() > 0) {
+    <div class="bulk-bar">
+      <span class="bulk-bar__count">{{ selectionCount() }} {{ 'common.selected' | translate }}</span>
+      <button class="bulk-bar__btn" (click)="bulkUnarchive()">
+        <span class="material-icons-outlined">unarchive</span>
+        {{ 'backlog.unarchiveSelected' | translate }}
+      </button>
+      <button class="bulk-bar__close" (click)="clearSelection()" [matTooltip]="'common.clearSelection' | translate" matTooltipPosition="above" [attr.aria-label]="'common.clearSelection' | translate">
+        <span class="material-icons-outlined">close</span>
+      </button>
+    </div>
   }
 }
