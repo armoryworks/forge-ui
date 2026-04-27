@@ -1,0 +1,80 @@
+@use 'styles/variables' as *;
+
+.bi-api-keys-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__hint {
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__reveal {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__warning {
+    display: flex;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: var(--warning-surface, rgba(234, 179, 8, 0.1));
+    border-left: 4px solid var(--warning);
+    border-radius: 4px;
+
+    .material-icons-outlined {
+      color: var(--warning);
+      font-size: 24px;
+    }
+
+    p {
+      margin: $sp-xs 0 0 0;
+      font-size: $font-size-sm;
+      color: var(--text);
+    }
+  }
+
+  &__field-label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  &__readout {
+    font-size: $font-size-base;
+    color: var(--text);
+    padding: $sp-sm 0;
+  }
+
+  &__plaintext-row {
+    display: flex;
+    gap: $sp-sm;
+    align-items: stretch;
+  }
+
+  &__plaintext {
+    flex: 1;
+    background: var(--surface-2, #f4f4f5);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: $sp-sm $sp-md;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: $font-size-sm;
+    color: var(--text);
+    word-break: break-all;
+    user-select: all;
+  }
+}

@@ -434,6 +434,13 @@
       </div>
     }
 
+    <!-- BI API Keys Tab — Phase 3 / WU-04 retrofit -->
+    @if (activeTab() === 'bi-api-keys') {
+      <div class="tab-panel">
+        <app-bi-api-keys-panel />
+      </div>
+    }
+
     <!-- EDI Tab -->
     @if (activeTab() === 'edi') {
       <div class="tab-panel">

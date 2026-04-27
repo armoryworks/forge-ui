@@ -1044,6 +1044,7 @@
       "teams": "Teams & Kiosks",
       "salesTax": "Sales Tax",
       "auditLog": "Audit Log",
+      "biApiKeys": "BI API Keys",
       "compliance": "Compliance",
       "timeCorrections": "Time Corrections",
       "events": "Events",
@@ -3928,6 +3929,42 @@
     }
   },
   "adminPanels": {
+    "biApiKeys": {
+      "headerCount": "keys",
+      "newKey": "New API Key",
+      "noKeys": "No BI API keys issued yet",
+      "issueButton": "Issue Key",
+      "statusActive": "Active",
+      "statusRevoked": "Revoked",
+      "never": "Never",
+      "noExpiry": "No expiry",
+      "revokeAria": "Revoke key",
+      "revokeTitle": "Revoke BI API Key?",
+      "revokeMessage": "Revoke key \"{{ name }}\" ({{ prefix }}…)? Any client using this key will start receiving 401 immediately. This cannot be undone.",
+      "revokeConfirm": "Revoke",
+      "revokedSuccess": "Key \"{{ name }}\" revoked",
+      "issuedSuccess": "Key \"{{ name }}\" issued",
+      "issuedTitle": "API Key Issued",
+      "issuedWarningTitle": "Copy this key now",
+      "issuedWarning": "This is the only time the full key will be shown. The server stores only a hash — once you dismiss this dialog the plaintext cannot be recovered.",
+      "expiryHint": "Optional. Leave blank for a non-expiring key.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "dismissReveal": "I have copied the key",
+      "fields": {
+        "name": "Name",
+        "expiresAt": "Expires At",
+        "plaintext": "Plaintext Key (shown once)"
+      },
+      "cols": {
+        "name": "Name",
+        "prefix": "Prefix",
+        "status": "Status",
+        "created": "Created",
+        "expires": "Expires",
+        "lastUsed": "Last Used"
+      }
+    },
     "auditLog": {
       "entityType": "Entity Type",
       "action": "Action",

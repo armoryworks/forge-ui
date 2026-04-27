@@ -1,0 +1,139 @@
+<div class="bi-api-keys-panel">
+  <div class="panel-header">
+    <span class="panel-header__count">
+      {{ keys().length }} {{ 'adminPanels.biApiKeys.headerCount' | translate }}
+    </span>
+    <span class="bi-api-keys-panel__spacer"></span>
+    <button class="action-btn action-btn--create"
+      data-testid="bi-api-key-create-btn"
+      (click)="openCreate()">
+      <span class="material-icons-outlined">vpn_key</span>
+      {{ 'adminPanels.biApiKeys.newKey' | translate }}
+    </button>
+  </div>
+
+  <div [appLoadingBlock]="isLoading()">
+    <app-data-table
+      tableId="admin-bi-api-keys"
+      [columns]="columns"
+      [data]="keys()"
+      emptyIcon="vpn_key"
+      [emptyMessage]="'adminPanels.biApiKeys.noKeys' | translate">
+      <ng-template appColumnCell="status" let-row>
+        @if (row.isActive) {
+          <span class="chip chip--success">{{ 'adminPanels.biApiKeys.statusActive' | translate }}</span>
+        } @else {
+          <span class="chip chip--neutral">{{ 'adminPanels.biApiKeys.statusRevoked' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="lastUsedAt" let-row>
+        @if (row.lastUsedAt) {
+          {{ row.lastUsedAt | date:'MM/dd/yyyy hh:mm' }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.biApiKeys.never' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="expiresAt" let-row>
+        @if (row.expiresAt) {
+          {{ row.expiresAt | date:'MM/dd/yyyy' }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.biApiKeys.noExpiry' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        @if (row.isActive) {
+          <button class="icon-btn icon-btn--danger"
+            [attr.aria-label]="'adminPanels.biApiKeys.revokeAria' | translate"
+            (click)="revoke(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">block</span>
+          </button>
+        }
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+<!-- Create dialog -->
+@if (showCreateDialog()) {
+  <app-dialog
+    [title]="'adminPanels.biApiKeys.newKey' | translate"
+    width="480px"
+    (closed)="closeCreate()">
+    <div [formGroup]="form" class="bi-api-keys-panel__form">
+      <app-input
+        [label]="'adminPanels.biApiKeys.fields.name' | translate"
+        formControlName="name"
+        [required]="true"
+        [maxlength]="200"
+        data-testid="bi-api-key-name" />
+      <app-datepicker
+        [label]="'adminPanels.biApiKeys.fields.expiresAt' | translate"
+        formControlName="expiresAt" />
+      <p class="bi-api-keys-panel__hint">
+        {{ 'adminPanels.biApiKeys.expiryHint' | translate }}
+      </p>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreate()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <app-validation-button [violations]="violations">
+        <button class="action-btn action-btn--primary"
+          data-testid="bi-api-key-submit-btn"
+          [disabled]="form.invalid || creating()"
+          (click)="submitCreate()">
+          <span class="material-icons-outlined">key</span>
+          {{ 'adminPanels.biApiKeys.issueButton' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+<!-- One-time plaintext reveal -->
+@if (issuedKey(); as issued) {
+  <app-dialog
+    [title]="'adminPanels.biApiKeys.issuedTitle' | translate"
+    width="560px"
+    (closed)="dismissIssuedKey()">
+    <div class="bi-api-keys-panel__reveal">
+      <div class="bi-api-keys-panel__warning">
+        <span class="material-icons-outlined">warning</span>
+        <div>
+          <strong>{{ 'adminPanels.biApiKeys.issuedWarningTitle' | translate }}</strong>
+          <p>{{ 'adminPanels.biApiKeys.issuedWarning' | translate }}</p>
+        </div>
+      </div>
+
+      <label class="bi-api-keys-panel__field-label">
+        {{ 'adminPanels.biApiKeys.fields.name' | translate }}
+      </label>
+      <div class="bi-api-keys-panel__readout">{{ issued.name }}</div>
+
+      <label class="bi-api-keys-panel__field-label">
+        {{ 'adminPanels.biApiKeys.fields.plaintext' | translate }}
+      </label>
+      <div class="bi-api-keys-panel__plaintext-row">
+        <code class="bi-api-keys-panel__plaintext"
+          data-testid="bi-api-key-plaintext">{{ issued.plaintextKey }}</code>
+        <button class="action-btn action-btn--secondary"
+          data-testid="bi-api-key-copy-btn"
+          (click)="copyPlaintext()">
+          <span class="material-icons-outlined">
+            {{ plaintextCopied() ? 'check' : 'content_copy' }}
+          </span>
+          @if (plaintextCopied()) {
+            {{ 'adminPanels.biApiKeys.copied' | translate }}
+          } @else {
+            {{ 'adminPanels.biApiKeys.copy' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="dismissIssuedKey()">
+        {{ 'adminPanels.biApiKeys.dismissReveal' | translate }}
+      </button>
+    </div>
+  </app-dialog>
+}
