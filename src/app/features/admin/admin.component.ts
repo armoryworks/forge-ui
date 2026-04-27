@@ -42,6 +42,7 @@ import { ScannerService } from '../../shared/services/scanner.service';
 import { WebHidRfidService } from '../../shared/services/web-hid-rfid.service';
 import { AiAssistantsPanelComponent } from './components/ai-assistants-panel/ai-assistants-panel.component';
 import { TeamsPanelComponent } from './components/teams-panel/teams-panel.component';
+import { RoleTemplatesPanelComponent } from './components/role-templates-panel/role-templates-panel.component';
 import { ComplianceTemplatesPanelComponent } from './components/compliance-templates-panel/compliance-templates-panel.component';
 import { UserCompliancePanelComponent } from './components/user-compliance-panel/user-compliance-panel.component';
 import { SalesTaxPanelComponent } from './components/sales-tax-panel/sales-tax-panel.component';
@@ -60,6 +61,7 @@ import { CompanyLocationDialogComponent } from './components/company-location-di
 import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
+import { RoleTemplate } from './models/role-template.model';
 
 @Component({
   selector: 'app-admin',
@@ -68,7 +70,7 @@ import { CompanyLocation, CompanyProfile } from './models/company-location.model
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
+    EmptyStateComponent, LoadingBlockDirective, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -89,8 +91,8 @@ export class AdminComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
 
-  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys']);
+  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys']);
   private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training', 'time-corrections', 'events', 'announcements']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
@@ -130,6 +132,8 @@ export class AdminComponent {
     role: new FormControl('Engineer', [Validators.required]),
     workLocationId: new FormControl<number | null>(null),
     isActive: new FormControl(true),
+    // Phase 3 / WU-06 / C1 — optional rollup template assignment.
+    roleTemplateId: new FormControl<number | null>(null),
   });
   protected readonly userViolations = FormValidationService.getViolations(this.userForm, {
     firstName: 'First Name', lastName: 'Last Name', email: 'Email',
@@ -233,6 +237,16 @@ export class AdminComponent {
 
   protected readonly roleOptions = signal<SelectOption[]>([]);
 
+  // Phase 3 / WU-06 / C1 — rollup templates available for assignment.
+  protected readonly roleTemplates = signal<RoleTemplate[]>([]);
+  protected readonly roleTemplateOptions = computed<SelectOption[]>(() => [
+    { value: null, label: '— None (use base role above) —' },
+    ...this.roleTemplates().map(t => ({
+      value: t.id,
+      label: `${t.name} (${t.includedRoleNames.join(' + ')})`,
+    })),
+  ]);
+
   protected readonly userColumns = computed<ColumnDef[]>(() => [
     { field: 'avatar', header: '', width: '36px' },
     { field: 'name', header: this.translate.instant('admin.colName'), sortable: true, sortField: 'lastName' },
@@ -262,6 +276,12 @@ export class AdminComponent {
   constructor() {
     // Load roles from API (used by user form select + column filter)
     this.refDataService.getRolesAsOptions().subscribe(opts => this.roleOptions.set(opts));
+
+    // WU-06 / C1 — load active rollup templates for the user form picker.
+    this.adminService.getRoleTemplates().subscribe({
+      next: (t) => this.roleTemplates.set(t),
+      error: () => {},
+    });
 
     effect(() => {
       const tab = this.activeTab();
@@ -334,6 +354,7 @@ export class AdminComponent {
     this.userForm.reset({
       firstName: '', lastName: '', email: '',
       initials: '', role: 'Engineer', isActive: true,
+      roleTemplateId: null,
     });
     this.userForm.controls.email.enable();
     this.avatarColor.set('#0d9488');
@@ -352,6 +373,7 @@ export class AdminComponent {
       role: user.roles[0] ?? 'Engineer',
       workLocationId: user.workLocationId ?? null,
       isActive: user.isActive,
+      roleTemplateId: user.roleTemplateId ?? null,
     });
     this.userForm.controls.email.disable();
     this.avatarColor.set(user.avatarColor ?? '#0d9488');
@@ -386,13 +408,35 @@ export class AdminComponent {
         next: () => {
           // Update work location if changed
           const newLocId = form.workLocationId ?? null;
+          const newTemplateId = form.roleTemplateId ?? null;
+          const oldTemplateId = editing.roleTemplateId ?? null;
+
+          const finalize = () => {
+            // WU-06 / C1 — sync rollup template assignment to backend.
+            if (newTemplateId !== oldTemplateId) {
+              const obs = newTemplateId
+                ? this.adminService.assignRoleTemplateToUser(editing.id, newTemplateId)
+                : this.adminService.unassignRoleTemplateFromUser(editing.id);
+              obs.subscribe({
+                next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
+                error: () => {
+                  this.saving.set(false);
+                  this.snackbar.error('User saved, but role-template assignment failed.');
+                  this.closeUserDialog(); this.loadUsers();
+                },
+              });
+            } else {
+              this.saving.set(false); this.closeUserDialog(); this.loadUsers();
+            }
+          };
+
           if (newLocId !== editing.workLocationId) {
             this.adminService.updateUserWorkLocation(editing.id, newLocId).subscribe({
-              next: () => { this.saving.set(false); this.closeUserDialog(); this.loadUsers(); },
+              next: finalize,
               error: () => { this.saving.set(false); this.snackbar.error(this.translate.instant('admin.userSavedLocationFailed')); this.closeUserDialog(); this.loadUsers(); },
             });
           } else {
-            this.saving.set(false); this.closeUserDialog(); this.loadUsers();
+            finalize();
           }
         },
         error: (err) => { this.saving.set(false); this.error.set(this.translate.instant('admin.updateUserFailed')); },
@@ -432,6 +476,9 @@ export class AdminComponent {
             workLocationId: null,
             workLocationName: null,
             i9Status: null,
+            roleTemplateId: null,
+            roleTemplateName: null,
+            roleTemplateIncludedRoles: null,
           };
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);

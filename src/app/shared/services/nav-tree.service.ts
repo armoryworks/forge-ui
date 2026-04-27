@@ -98,6 +98,7 @@ export class NavTreeService {
           children: [
             { icon: 'people', label: 'Users', i18nKey: 'admin.tabs.users', route: '/admin/users', allowedRoles: ['Admin'] },
             { icon: 'groups', label: 'Teams', i18nKey: 'admin.tabs.teams', route: '/admin/teams', allowedRoles: ['Admin'] },
+            { icon: 'layers', label: 'Role Templates', i18nKey: 'admin.tabs.roleTemplates', route: '/admin/role-templates', allowedRoles: ['Admin'] },
             { icon: 'verified_user', label: 'MFA Policy', i18nKey: 'admin.tabs.mfa', route: '/admin/mfa', allowedRoles: ['Admin'] },
           ],
         },

@@ -19,6 +19,10 @@ export interface AdminUser {
   workLocationId: number | null;
   workLocationName: string | null;
   i9Status: I9ComplianceStatus | null;
+  // Phase 3 / WU-06 / C1 — rollup template assignment.
+  roleTemplateId: number | null;
+  roleTemplateName: string | null;
+  roleTemplateIncludedRoles: string[] | null;
 }
 
 export type I9ComplianceStatus =

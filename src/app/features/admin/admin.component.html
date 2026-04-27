@@ -24,9 +24,21 @@
             <span class="text-muted">{{ user.email }}</span>
           </ng-template>
           <ng-template appColumnCell="role" let-user>
-            <span class="chip" [class.chip--primary]="user.roles.includes('Admin')">
-              {{ user.roles.length ? user.roles[0] : 'None' }}
-            </span>
+            @if (user.roleTemplateName) {
+              <!-- Phase 3 / WU-06 / C1 — display the rollup template
+                   compactly with the underlying roles spelled out. -->
+              <span class="chip chip--primary"
+                    [matTooltip]="user.roleTemplateName + ': ' + (user.roleTemplateIncludedRoles?.join(' + ') || '')"
+                    matTooltipPosition="above">
+                <span class="material-icons-outlined chip__icon">layers</span>
+                {{ user.roleTemplateName }}
+                <span class="chip__detail">({{ user.roleTemplateIncludedRoles?.join(' + ') }})</span>
+              </span>
+            } @else {
+              <span class="chip" [class.chip--primary]="user.roles.includes('Admin')">
+                {{ user.roles.length ? user.roles[0] : 'None' }}
+              </span>
+            }
           </ng-template>
           <ng-template appColumnCell="compliance" let-user>
             @if (user.canBeAssignedJobs) {
@@ -399,6 +411,13 @@
       </div>
     }
 
+    <!-- Role Templates Tab (Phase 3 / WU-06 / C1) -->
+    @if (activeTab() === 'role-templates') {
+      <div class="tab-panel">
+        <app-role-templates-panel />
+      </div>
+    }
+
     <!-- Sales Tax Tab -->
     @if (activeTab() === 'sales-tax') {
       <div class="tab-panel">
@@ -579,6 +598,16 @@
         <app-input [label]="'admin.initials' | translate" formControlName="initials" [maxlength]="3" data-testid="user-initials" />
         <app-select [label]="'admin.role' | translate" formControlName="role" [options]="roleOptions()" [required]="true" data-testid="user-role" />
       </div>
+
+      <!-- Phase 3 / WU-06 / C1 — optional rollup template assignment.
+           When set, the backend grants every role listed in the template at login. -->
+      @if (roleTemplates().length > 0) {
+        <app-select label="Role Template (Rollup)"
+                    formControlName="roleTemplateId"
+                    [options]="roleTemplateOptions()"
+                    placeholder="Optional — pick a rollup if this user wears many hats"
+                    data-testid="user-role-template" />
+      }
 
       @if (editingUser() && locationOptions().length > 1) {
         <app-select [label]="'admin.workLocation' | translate" formControlName="workLocationId" [options]="locationOptions()" />

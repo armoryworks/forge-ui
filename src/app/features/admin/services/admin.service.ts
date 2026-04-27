@@ -28,6 +28,12 @@ import { CompanyLocation, CompanyProfile } from '../models/company-location.mode
 import { IntegrationSettingsResult, IntegrationStatus, TestIntegrationResult } from '../models/integration-status.model';
 import { DomainEventFailure } from '../models/domain-event-failure.model';
 import { OutboxEntry, OutboxProvider, OutboxStatus } from '../models/outbox-entry.model';
+import {
+  RoleTemplate,
+  RoleTemplateAssignee,
+  CreateRoleTemplateRequest,
+  UpdateRoleTemplateRequest,
+} from '../models/role-template.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
@@ -45,6 +51,44 @@ export class AdminService {
 
   updateUser(id: number, request: UpdateUserRequest): Observable<AdminUser> {
     return this.http.put<AdminUser>(`${environment.apiUrl}/admin/users/${id}`, request);
+  }
+
+  // Role Templates (Phase 3 / WU-06 / C1)
+  getRoleTemplates(includeDeactivated = false): Observable<RoleTemplate[]> {
+    const params = includeDeactivated ? '?includeDeactivated=true' : '';
+    return this.http.get<RoleTemplate[]>(
+      `${environment.apiUrl}/admin/role-templates${params}`);
+  }
+
+  createRoleTemplate(request: CreateRoleTemplateRequest): Observable<RoleTemplate> {
+    return this.http.post<RoleTemplate>(
+      `${environment.apiUrl}/admin/role-templates`, request);
+  }
+
+  updateRoleTemplate(id: number, request: UpdateRoleTemplateRequest): Observable<RoleTemplate> {
+    return this.http.put<RoleTemplate>(
+      `${environment.apiUrl}/admin/role-templates/${id}`, request);
+  }
+
+  deleteRoleTemplate(id: number): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiUrl}/admin/role-templates/${id}`);
+  }
+
+  getRoleTemplateAssignees(id: number): Observable<RoleTemplateAssignee[]> {
+    return this.http.get<RoleTemplateAssignee[]>(
+      `${environment.apiUrl}/admin/role-templates/${id}/assignees`);
+  }
+
+  assignRoleTemplateToUser(userId: number, templateId: number): Observable<void> {
+    return this.http.post<void>(
+      `${environment.apiUrl}/admin/users/${userId}/role-template`,
+      { templateId });
+  }
+
+  unassignRoleTemplateFromUser(userId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiUrl}/admin/users/${userId}/role-template`);
   }
 
   // Track Types

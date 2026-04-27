@@ -1,0 +1,107 @@
+<div class="panel-header">
+  <span class="panel-header__count">{{ templates().length }} role templates</span>
+  <div class="panel-header__actions">
+    <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="role-templates-new">
+      <span class="material-icons-outlined">add</span>
+      New Template
+    </button>
+  </div>
+</div>
+
+<p class="panel-hint">
+  Role templates ("rollups") let you bundle several base roles under one name for users who wear many
+  hats — common in small shops. When a user is assigned a template, every included role is granted to them.
+  System defaults seed at install and are read-only; create your own to customize.
+</p>
+
+<div [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="admin-role-templates"
+    [columns]="columns"
+    [data]="templates()"
+    emptyIcon="layers"
+    emptyMessage="No role templates yet"
+    emptyHelpText="Create one to bundle several base roles into a single rollup.">
+
+    <ng-template appColumnCell="name" let-row>
+      <span class="template-name">{{ row.name }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="description" let-row>
+      <span class="text-muted">{{ row.description || '—' }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="includedRoleNames" let-row>
+      <div class="role-chips">
+        @for (r of row.includedRoleNames; track r) {
+          <span class="chip chip--primary">{{ r }}</span>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template appColumnCell="assigneeCount" let-row>
+      <span class="assignee-count">{{ row.assigneeCount }}</span>
+    </ng-template>
+
+    <ng-template appColumnCell="isSystemDefault" let-row>
+      @if (row.isSystemDefault) {
+        <span class="chip chip--system" matTooltip="Seeded at install. Read-only — duplicate to customize."
+              matTooltipPosition="above">System</span>
+      } @else {
+        <span class="chip chip--custom">Custom</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <div class="action-cell">
+        @if (!row.isSystemDefault) {
+          <button class="icon-btn" matTooltip="Edit" matTooltipPosition="above"
+                  (click)="openEdit(row); $event.stopPropagation()" aria-label="Edit role template">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" matTooltip="Delete" matTooltipPosition="above"
+                  (click)="delete(row); $event.stopPropagation()" aria-label="Delete role template">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        } @else {
+          <span class="icon-btn icon-btn--disabled" matTooltip="System defaults are read-only"
+                matTooltipPosition="above">
+            <span class="material-icons-outlined">lock</span>
+          </span>
+        }
+      </div>
+    </ng-template>
+  </app-data-table>
+</div>
+
+@if (showDialog()) {
+  <app-dialog [title]="editingTemplate() ? 'Edit Role Template' : 'New Role Template'"
+              width="540px" (closed)="closeDialog()">
+    <div [formGroup]="form">
+      <app-input label="Template Name" formControlName="name" [maxlength]="100" [required]="true" />
+      <app-textarea label="Description" formControlName="description" [rows]="2" [maxlength]="500" />
+      <app-select label="Included Roles"
+                  formControlName="includedRoleNames"
+                  [options]="roleOptions()"
+                  [multiple]="true"
+                  [required]="true"
+                  placeholder="Pick the underlying roles this template grants" />
+      <p class="form-hint">
+        Pick at least one. The user assigned this template will receive every role listed above
+        in their JWT claims.
+      </p>
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+                [disabled]="form.invalid || saving()"
+                (click)="save()">
+          <span class="material-icons-outlined">save</span>
+          {{ editingTemplate() ? 'Save Changes' : 'Create Template' }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

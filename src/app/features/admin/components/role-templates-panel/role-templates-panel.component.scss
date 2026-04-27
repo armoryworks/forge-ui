@@ -1,0 +1,71 @@
+.panel-hint {
+  margin: 0 0 16px 0;
+  padding: 12px 16px;
+  background: var(--surface-2, #f8fafc);
+  border-radius: 8px;
+  color: var(--text-muted, #64748b);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.template-name {
+  font-weight: 600;
+}
+
+.role-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+
+  &--primary {
+    background: var(--primary-100, #ccfbf1);
+    color: var(--primary-800, #115e59);
+  }
+
+  &--system {
+    background: var(--info-100, #e0f2fe);
+    color: var(--info-800, #075985);
+  }
+
+  &--custom {
+    background: var(--warning-100, #fef3c7);
+    color: var(--warning-800, #92400e);
+  }
+}
+
+.assignee-count {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.action-cell {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.icon-btn--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.form-hint {
+  margin: 8px 0 0 0;
+  color: var(--text-muted, #64748b);
+  font-size: 12px;
+  line-height: 1.5;
+}
