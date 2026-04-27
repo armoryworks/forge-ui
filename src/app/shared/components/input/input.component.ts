@@ -37,6 +37,12 @@ export class InputComponent implements ControlValueAccessor {
   readonly autocomplete = input<string>('off');
   readonly mask = input<'phone' | 'zip' | 'ssn' | 'date' | 'currency' | null>(null);
   readonly required = input<boolean>(false);
+  // Phase 3 / WU-10 — number-input precision controls. Optional; only used when
+  // type === 'number'. PO/SO line quantity + price use step="0.0001" for
+  // 4-decimal precision parity with the server-side decimal(18,4) schema.
+  readonly step = input<string | number | null>(null);
+  readonly min = input<string | number | null>(null);
+  readonly max = input<string | number | null>(null);
 
   protected readonly value = signal<string | number>('');
   protected readonly disabled = signal(false);

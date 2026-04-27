@@ -62,8 +62,10 @@
            onboarding flow capture credit limit, default tax/currency, and
            billing/shipping addresses without forcing a follow-up PATCH. -->
       <div class="dialog-row">
+        <!-- Phase 3 / WU-10 — creditLimit is decimal(18,2) money precision. -->
         <app-input [label]="'customers.creditLimit' | translate"
           type="number" formControlName="creditLimit"
+          step="0.01" min="0"
           data-testid="customer-credit-limit" />
         <app-input [label]="'customers.defaultTaxCodeId' | translate"
           type="number" formControlName="defaultTaxCodeId"

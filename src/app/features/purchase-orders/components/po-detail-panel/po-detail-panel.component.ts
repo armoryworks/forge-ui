@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal, computed } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -32,7 +32,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
   selector: 'app-po-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, TranslatePipe, ReactiveFormsModule,
+    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     ReceiveDialogComponent, LoadingBlockDirective,

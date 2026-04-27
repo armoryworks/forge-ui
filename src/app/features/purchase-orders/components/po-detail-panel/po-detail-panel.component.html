@@ -136,14 +136,16 @@
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
-                  <td class="lines-table__right">{{ line.orderedQuantity }}</td>
+                  <!-- Phase 3 / WU-10 — fractional quantities; display up to 4 decimals,
+                       trim trailing zeros for clarity (1.5, not 1.5000). -->
+                  <td class="lines-table__right">{{ line.orderedQuantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right">
                     <span [class.text-success]="line.receivedQuantity >= line.orderedQuantity"
                           [class.text-warning]="line.receivedQuantity > 0 && line.receivedQuantity < line.orderedQuantity">
-                      {{ line.receivedQuantity }}
+                      {{ line.receivedQuantity | number:'1.0-4' }}
                     </span>
                   </td>
-                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                  <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
                   <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
                 </tr>
               }

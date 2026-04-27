@@ -272,15 +272,16 @@
                       }
                     </td>
                     <td>{{ line.description }}</td>
-                    <td class="lines-table__right">{{ line.quantity }}</td>
+                    <!-- Phase 3 / WU-10 — fractional quantities; up to 4 decimals, trim trailing zeros. -->
+                    <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                     <td class="lines-table__right">
                       <span [class.text-success]="line.isFullyShipped"
                             [class.text-warning]="line.shippedQuantity > 0 && !line.isFullyShipped">
-                        {{ line.shippedQuantity }}
+                        {{ line.shippedQuantity | number:'1.0-4' }}
                       </span>
-                      / {{ line.remainingQuantity }}
+                      / {{ line.remainingQuantity | number:'1.0-4' }}
                     </td>
-                    <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                    <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
                     <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
                   </tr>
                   <!-- Warning row for no jobs -->

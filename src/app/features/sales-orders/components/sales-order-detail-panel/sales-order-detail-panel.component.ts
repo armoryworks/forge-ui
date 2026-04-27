@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -27,7 +27,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'docu
   selector: 'app-sales-order-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, TranslatePipe,
+    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, FileUploadZoneComponent, EmptyStateComponent,

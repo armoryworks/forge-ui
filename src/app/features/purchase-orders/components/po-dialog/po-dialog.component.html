@@ -23,8 +23,10 @@
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
-                  <td class="lines-table__right">{{ line.orderedQuantity }}</td>
-                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
+                  <!-- Phase 3 / WU-10 — quantity may be fractional. Display up to 4 decimals;
+                       trailing zeros collapse via Angular's number pipe. -->
+                  <td class="lines-table__right">{{ line.orderedQuantity | number:'1.0-4' }}</td>
+                  <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
                   <td class="lines-table__right">{{ line.orderedQuantity * line.unitPrice | currency }}</td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
@@ -49,9 +51,12 @@
         <!-- Add Line Form -->
         <div class="add-line add-line--4col" [formGroup]="lineForm">
           <app-autocomplete data-testid="po-line-part" [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" [minChars]="0" />
-          <app-input data-testid="po-line-qty" [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" />
+          <!-- Phase 3 / WU-10 / F8-partial — qty + price are decimal(18,4); UoM-aware shops
+               need fractional quantities (lb, kg, hr, gal). 4 decimals on price is industry-
+               standard for unit prices. -->
+          <app-input data-testid="po-line-qty" [label]="'purchaseOrders.qty' | translate" type="number" formControlName="orderedQuantity" [required]="true" step="0.0001" min="0.0001" />
           <div class="price-field">
-            <app-input data-testid="po-line-price" [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" />
+            <app-input data-testid="po-line-price" [label]="'common.price' | translate" type="number" formControlName="unitPrice" [required]="true" step="0.0001" min="0" />
             @if (priceIsDefault()) {
               <span class="price-badge" [matTooltip]="'List price — edit to override'" matTooltipPosition="above">LIST</span>
             }

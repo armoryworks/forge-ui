@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -32,7 +32,7 @@ interface LineEntry {
   selector: 'app-po-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe,
+    ReactiveFormsModule, CurrencyPipe, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
@@ -85,7 +85,10 @@ export class PoDialogComponent {
 
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
-    orderedQuantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
+    // Phase 3 / WU-10 / F8-partial — fractional qty allowed (decimal(18,4) on
+    // server). Min is 0.0001 — no zero / negative. Default still 1 for the
+    // common whole-unit case (caller can override).
+    orderedQuantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
 
