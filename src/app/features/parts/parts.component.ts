@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map, startWith } from 'rxjs';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -61,6 +61,8 @@ export class PartsComponent {
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
+  // Phase 3 F7-partial / WU-17 — surfaces server-side totalCount.
+  protected readonly totalCount = signal<number>(0);
 
   // ── View Mode (table / cards) — URL param + persisted preference ──
   protected readonly viewMode = toSignal(
@@ -157,6 +159,21 @@ export class PartsComponent {
       this.searchControl.setValue(scan.value);
       this.loadParts();
     });
+
+    // Phase 3 F7-partial / WU-17 — debounced search + filter changes fire the
+    // standardised `?q=`, `?status=`, `?type=` query params against the
+    // server (300ms debounce per the WU-17 charter).
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadParts());
+
+    this.statusFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadParts());
+
+    this.typeFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadParts());
   }
 
   // ── List ──
@@ -166,9 +183,21 @@ export class PartsComponent {
     const status = (this.statusFilter() ?? '') || undefined;
     const type = (this.typeFilter() ?? '') || undefined;
     const search = (this.searchTerm() ?? '').trim() || undefined;
-    this.partsService.getParts(status, type, search).subscribe({
-      next: (parts) => {
-        this.parts.set(parts);
+    // Phase 3 F7-partial / WU-17 — paged endpoint with the standardised
+    // contract; pageSize=200 matches the server cap. The data-table slices
+    // client-side for now; switch to true server-paging if a tenant grows
+    // beyond the 200-row window.
+    this.partsService.getPartsPaged({
+      status,
+      type,
+      q: search,
+      pageSize: 200,
+      sort: 'partNumber',
+      order: 'asc',
+    }).subscribe({
+      next: (paged) => {
+        this.parts.set(paged.items);
+        this.totalCount.set(paged.totalCount);
         this.loading.set(false);
         this.autoOpenFromUrl();
       },

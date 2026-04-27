@@ -3,8 +3,8 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -47,6 +47,11 @@ export class CustomersComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly customers = signal<CustomerListItem[]>([]);
+  // Phase 3 F7-partial / WU-17 — surfaces the server-side totalCount so the
+  // header can show "X of Y" once the data-table is wired to true server
+  // pagination. Today the data-table still slices the 200-record page
+  // client-side, but the envelope is in place.
+  protected readonly totalCount = signal<number>(0);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -120,14 +125,40 @@ export class CustomersComponent {
 
   constructor() {
     this.loadCustomers();
+
+    // Phase 3 F7-partial / WU-17 — debounced search. Typed input fires the
+    // standardised `?q=` query param against the server (300ms debounce per
+    // the WU-17 charter). Active-filter changes also re-fetch so the server
+    // pagination + filter contract is exercised live.
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadCustomers());
+
+    this.activeFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadCustomers());
   }
 
   protected loadCustomers(): void {
     this.loading.set(true);
     const search = (this.searchTerm() ?? '').trim() || undefined;
     const isActive = this.activeFilterControl.value ?? undefined;
-    this.customerService.getCustomers(search, isActive).subscribe({
-      next: (list) => { this.customers.set(list); this.loading.set(false); },
+    // Phase 3 F7-partial / WU-17 — call the paged endpoint directly so we
+    // can read totalCount for the header counter. PageSize=200 matches the
+    // server cap; the data-table handles client-side slicing within that
+    // window. Switch to true server-paging if a tenant exceeds 200 rows.
+    this.customerService.getCustomersPaged({
+      q: search,
+      isActive,
+      pageSize: 200,
+      sort: 'createdAt',
+      order: 'desc',
+    }).subscribe({
+      next: (paged) => {
+        this.customers.set(paged.items);
+        this.totalCount.set(paged.totalCount);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }

@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response.model';
 import { CustomerListItem } from '../models/customer-list-item.model';
 import { CustomerDetail } from '../models/customer-detail.model';
 import { CustomerSummary } from '../models/customer-summary.model';
@@ -13,16 +15,53 @@ import { UpdateContactRequest } from '../models/update-contact-request.model';
 import { ContactInteraction, ContactInteractionRequest } from '../models/contact-interaction.model';
 import { CreditStatus } from '../models/credit-status.model';
 
+/** Phase 3 F7-partial / WU-17 — paged customer list query parameters. */
+export interface CustomerListPagedQuery extends PagedQuery {
+  isActive?: boolean | null;
+  defaultCurrency?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CustomerService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/customers`;
 
+  /**
+   * Phase 3 F7-partial / WU-17 — backward-compat shim that calls the paged
+   * endpoint and unwraps the envelope. Existing callers that just want the
+   * flat array continue to work; new callers should use {@link getCustomersPaged}
+   * instead so they can read `totalCount` for proper server-side pagination.
+   *
+   * Default page size is 200 (the server cap) to preserve the previous
+   * "everything in one round trip" UX while the data-table handles client-
+   * side filtering / sort / pagination. Lists larger than 200 will need a
+   * follow-up to switch the table to true server-side paging.
+   */
   getCustomers(search?: string, isActive?: boolean): Observable<CustomerListItem[]> {
+    return this.getCustomersPaged({
+      q: search,
+      isActive,
+      pageSize: 200,
+    }).pipe(map(p => p.items));
+  }
+
+  /**
+   * Phase 3 F7-partial / WU-17 — paged customer list. Returns the standard
+   * envelope ({ items, totalCount, page, pageSize }) so the caller can wire
+   * up real server-side pagination, sort, and filtering.
+   */
+  getCustomersPaged(query: CustomerListPagedQuery = {}): Observable<PagedResponse<CustomerListItem>> {
     let params = new HttpParams();
-    if (search) params = params.set('search', search);
-    if (isActive !== undefined) params = params.set('isActive', String(isActive));
-    return this.http.get<CustomerListItem[]>(this.base, { params });
+    if (query.page != null) params = params.set('page', String(query.page));
+    if (query.pageSize != null) params = params.set('pageSize', String(query.pageSize));
+    if (query.sort) params = params.set('sort', query.sort);
+    if (query.order) params = params.set('order', query.order);
+    if (query.q) params = params.set('q', query.q);
+    if (query.isActive !== undefined && query.isActive !== null) params = params.set('isActive', String(query.isActive));
+    if (query.defaultCurrency) params = params.set('defaultCurrency', query.defaultCurrency);
+    if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
+    if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    return this.http.get<PagedResponse<CustomerListItem>>(this.base, { params });
   }
 
   getCustomerById(id: number): Observable<CustomerDetail> {

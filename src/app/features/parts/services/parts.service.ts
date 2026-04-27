@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response.model';
 import { PartListItem } from '../models/part-list-item.model';
 import { PartDetail } from '../models/part-detail.model';
 import { CreatePartRequest } from '../models/create-part-request.model';
@@ -22,17 +24,57 @@ import { CreateOperationMaterialRequest } from '../models/create-operation-mater
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 import { PartAlternate, CreatePartAlternateRequest, UpdatePartAlternateRequest } from '../models/part-alternate.model';
 
+/** Phase 3 F7-partial / WU-17 — paged part list query parameters. */
+export interface PartListPagedQuery extends PagedQuery {
+  status?: PartStatus;
+  isActive?: boolean | null;
+  type?: PartType;
+  defaultVendorId?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PartsService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/parts`;
 
+  /**
+   * Phase 3 F7-partial / WU-17 — backward-compat shim. Calls the paged
+   * endpoint and unwraps the envelope so existing callers that just want
+   * the flat array keep working. New callers should use {@link getPartsPaged}
+   * to read `totalCount` for true server-side pagination.
+   *
+   * Default page size is 200 (the server cap); the data-table component
+   * handles client-side sort/filter/page within that slice. Lists exceeding
+   * 200 parts need a follow-up to switch to server-side pagination.
+   */
   getParts(status?: PartStatus, type?: PartType, search?: string): Observable<PartListItem[]> {
+    return this.getPartsPaged({
+      status,
+      type,
+      q: search,
+      pageSize: 200,
+    }).pipe(map(p => p.items));
+  }
+
+  /**
+   * Phase 3 F7-partial / WU-17 — paged part list. Returns the standard
+   * envelope ({ items, totalCount, page, pageSize }) so callers can wire
+   * up real server-side pagination, sort, and filtering.
+   */
+  getPartsPaged(query: PartListPagedQuery = {}): Observable<PagedResponse<PartListItem>> {
     let params = new HttpParams();
-    if (status) params = params.set('status', status);
-    if (type) params = params.set('type', type);
-    if (search) params = params.set('search', search);
-    return this.http.get<PartListItem[]>(this.base, { params });
+    if (query.page != null) params = params.set('page', String(query.page));
+    if (query.pageSize != null) params = params.set('pageSize', String(query.pageSize));
+    if (query.sort) params = params.set('sort', query.sort);
+    if (query.order) params = params.set('order', query.order);
+    if (query.q) params = params.set('q', query.q);
+    if (query.status) params = params.set('status', query.status);
+    if (query.isActive !== undefined && query.isActive !== null) params = params.set('isActive', String(query.isActive));
+    if (query.type) params = params.set('type', query.type);
+    if (query.defaultVendorId != null) params = params.set('defaultVendorId', String(query.defaultVendorId));
+    if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
+    if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    return this.http.get<PagedResponse<PartListItem>>(this.base, { params });
   }
 
   getPartById(id: number): Observable<PartDetail> {
