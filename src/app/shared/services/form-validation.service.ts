@@ -1,6 +1,14 @@
 import { FormGroup, AbstractControl } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Signal, signal } from '@angular/core';
 import { startWith } from 'rxjs';
+
+import {
+  applyServerErrorsToForm,
+  clearServerErrorsOnForm,
+  parseServerValidationEnvelope,
+  ServerValidationError,
+} from '../utils/server-validation.utils';
 
 const ERROR_MESSAGES: Record<string, (label: string, error: unknown) => string> = {
   required: (label) => `${label} is required`,
@@ -54,7 +62,15 @@ export class FormValidationService {
 
       for (const [errorKey, errorValue] of Object.entries(errors)) {
         if (errorValue && typeof errorValue === 'object' && 'message' in errorValue) {
-          violations.push(errorValue.message as string);
+          // Server-side errors and any other rich error envelope use this path.
+          // Prefix the label so a "Date is not valid" message reads as
+          // "Start Date: Date is not valid" — the field is otherwise
+          // unidentifiable in a popover that lists violations across the
+          // whole form.
+          const message = (errorValue as { message: unknown }).message;
+          if (typeof message === 'string') {
+            violations.push(errorKey === 'serverError' ? `${label}: ${message}` : message);
+          }
         } else if (ERROR_MESSAGES[errorKey]) {
           violations.push(ERROR_MESSAGES[errorKey](label, errorValue));
         } else {
@@ -64,5 +80,31 @@ export class FormValidationService {
     }
 
     return violations;
+  }
+
+  /**
+   * Phase 3 / WU-02 retrofit. Apply the server's standardized validation
+   * envelope to a reactive form so per-field error messages render against
+   * the right inputs. Returns the unmatched errors (for the caller to
+   * surface as a generic toast / form-level message). Returns `null` when
+   * the response body did not match the envelope shape — the caller should
+   * fall back to its legacy error path.
+   */
+  static applyServerError(
+    form: FormGroup,
+    error: HttpErrorResponse | unknown,
+  ): { matched: ServerValidationError[]; unmatched: ServerValidationError[] } | null {
+    const errors = parseServerValidationEnvelope(error);
+    if (errors === null) return null;
+    // Drop any prior server messages first so re-submits don't accumulate.
+    clearServerErrorsOnForm(form);
+    const unmatched = applyServerErrorsToForm(form, errors);
+    const matched = errors.filter(e => !unmatched.includes(e));
+    return { matched, unmatched };
+  }
+
+  /** Clear any `serverError` previously written by `applyServerError`. */
+  static clearServerErrors(form: FormGroup): void {
+    clearServerErrorsOnForm(form);
   }
 }

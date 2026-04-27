@@ -7,6 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
+import { parseServerValidationEnvelope } from '../utils/server-validation.utils';
 
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
@@ -22,6 +23,26 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
         return throwError(() => error);
       }
       switch (error.status) {
+        case 400: {
+          // Phase 3 / WU-02 retrofit: server now returns
+          //   { errors: [ { field, message, rejectedValue }, ... ] }
+          // on model-binding rejection. The interceptor's job is only to NOT
+          // surface a generic toast when callers will display per-field
+          // errors against form controls — the calling component pulls the
+          // envelope out of the error and applies it via
+          // `applyServerErrorsToForm`.
+          //
+          // Legacy non-envelope 400 responses still get a snackbar fallback
+          // so the user is not left guessing.
+          if (parseServerValidationEnvelope(error) === null) {
+            const message = extractMessage(error);
+            if (message) {
+              snackbar.error(message);
+            }
+          }
+          break;
+        }
+
         case 401:
           // Auth interceptor handles 401 → login redirect.
           // This is a fallback if auth interceptor doesn't catch it.
@@ -46,6 +67,8 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
 
         case 422:
           // Validation error — typically handled by the calling service.
+          // The same envelope shape (Phase 3 / WU-02) may also appear here
+          // when controllers explicitly emit 422 — leave to the caller.
           break;
 
         case 0:

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -122,6 +123,8 @@ export class CustomersComponent {
   protected saveCustomer(): void {
     if (this.customerForm.invalid) return;
     this.saving.set(true);
+    // Drop any prior server messages so a re-submit doesn't accumulate.
+    FormValidationService.clearServerErrors(this.customerForm);
     const form = this.customerForm.getRawValue();
 
     this.customerService.createCustomer({
@@ -136,7 +139,13 @@ export class CustomersComponent {
         this.snackbar.success(this.translate.instant('customers.customerCreated'));
         this.router.navigate(['/customers', created.id]);
       },
-      error: () => this.saving.set(false),
+      error: (err: HttpErrorResponse) => {
+        this.saving.set(false);
+        // Phase 3 / WU-02: surface per-field server errors against the form
+        // so the validation popover lights up; legacy non-envelope errors
+        // fall through to the central interceptor's snackbar.
+        FormValidationService.applyServerError(this.customerForm, err);
+      },
     });
   }
 }
