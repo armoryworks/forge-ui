@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -37,7 +37,7 @@ interface LineEntry {
   selector: 'app-quote-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe,
+    ReactiveFormsModule, CurrencyPipe, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
     AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
@@ -97,7 +97,8 @@ export class QuoteDialogComponent {
 
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
-    quantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
+    // Phase 3 / WU-23 (F8-broad): fractional UoM-aware quantities accepted.
+    quantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
 

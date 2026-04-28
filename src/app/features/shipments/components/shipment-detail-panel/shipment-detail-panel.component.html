@@ -102,7 +102,7 @@
               @for (line of shipment.lines; track line.id) {
                 <tr>
                   <td>{{ line.description }}</td>
-                  <td class="lines-table__right">{{ line.quantity }}</td>
+                  <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                 </tr>
               }
             </tbody>

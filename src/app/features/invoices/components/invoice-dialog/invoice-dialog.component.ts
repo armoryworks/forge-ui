@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, output, computed, ViewChild } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
+import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -36,7 +36,7 @@ interface LineEntry {
   selector: 'app-invoice-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe, TranslatePipe,
+    ReactiveFormsModule, CurrencyPipe, DecimalPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
     ValidationButtonComponent, MatTooltipModule,
   ],
@@ -92,7 +92,8 @@ export class InvoiceDialogComponent {
     partId: new FormControl<number | null>(null),
     partNumber: new FormControl(''),
     description: new FormControl('', [Validators.required]),
-    quantity: new FormControl<number>(1, [Validators.required, Validators.min(1)]),
+    // Phase 3 / WU-23 (F8-broad): fractional UoM-aware quantities accepted.
+    quantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
 

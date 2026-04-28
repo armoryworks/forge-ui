@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -17,7 +17,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   selector: 'app-invoice-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, TranslatePipe,
+    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent,
   ],

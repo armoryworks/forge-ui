@@ -21,6 +21,8 @@
         type="number"
         formControlName="quantity"
         [required]="true"
+        step="0.0001"
+        min="0.0001"
         data-testid="lot-quantity"
         [attr.aria-label]="'lots.fieldQuantity' | translate" />
 

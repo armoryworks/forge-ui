@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, OnInit, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -21,7 +21,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   selector: 'app-shipment-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, TranslatePipe,
+    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
     MatTooltipModule,
     TrackingTimelineComponent, ShippingRatesDialogComponent, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent,

@@ -23,7 +23,7 @@
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
-                  <td class="lines-table__right">{{ line.quantity }}</td>
+                  <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
                   <td class="lines-table__right">{{ line.quantity * line.unitPrice | currency }}</td>
                   <td>
@@ -51,8 +51,8 @@
           <app-input [label]="'invoices.partId' | translate" type="number" formControlName="partId" />
           <app-input [label]="'invoices.partNumber' | translate" formControlName="partNumber" />
           <app-input [label]="'common.description' | translate" formControlName="description" data-testid="invoice-line-desc" />
-          <app-input [label]="'invoices.qty' | translate" type="number" formControlName="quantity" data-testid="invoice-line-qty" />
-          <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" data-testid="invoice-line-price" />
+          <app-input [label]="'invoices.qty' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="invoice-line-qty" />
+          <app-input [label]="'common.price' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="invoice-line-price" />
           <button class="action-btn action-btn--sm" data-testid="invoice-add-line-btn" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}

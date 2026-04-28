@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,7 +12,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 @Component({
   selector: 'app-lot-detail-panel',
   standalone: true,
-  imports: [DatePipe, MatTooltipModule, TranslatePipe, EntityActivitySectionComponent, LoadingBlockDirective],
+  imports: [DatePipe, DecimalPipe, MatTooltipModule, TranslatePipe, EntityActivitySectionComponent, LoadingBlockDirective],
   templateUrl: './lot-detail-panel.component.html',
   styleUrl: './lot-detail-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
