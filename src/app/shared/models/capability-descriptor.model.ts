@@ -15,6 +15,16 @@ export interface CapabilityDescriptorEntry {
   enabled: boolean;
   isDefaultOn: boolean;
   requiresRoles: string | null;
+  /** Phase 4 Phase-C — monotonic Version, used as the row's ETag value. */
+  version: number;
+  /** Phase 4 Phase-C — weak ETag (`W/"<version>"`) submitted as `If-Match` on writes. */
+  eTag: string;
+  /** Phase 4 Phase-C — separate version for the capability's config row, null if no row exists yet. */
+  configVersion: number | null;
+  configETag: string | null;
+  configId: number | null;
+  dependencies: string[];
+  mutexes: string[];
 }
 
 export interface CapabilityDescriptor {

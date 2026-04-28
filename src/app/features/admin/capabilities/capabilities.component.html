@@ -1,0 +1,55 @@
+<div class="capabilities-admin">
+  <header class="capabilities-admin__header">
+    <h2>Capabilities</h2>
+    <p class="capabilities-admin__hint">
+      Phase 4 Phase-C minimum admin surface. Phase E adds filtering, search, and area grouping.
+    </p>
+    <div class="capabilities-admin__summary">
+      <span><strong>Total:</strong> {{ capabilities().length }}</span>
+      <span><strong>Enabled:</strong> {{ enabledCount() }}</span>
+      <button
+        class="action-btn"
+        type="button"
+        (click)="refresh()"
+        [disabled]="loading()"
+        aria-label="Refresh capabilities">
+        <span class="material-icons-outlined">refresh</span>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  @if (capabilities().length === 0) {
+    <p>No capabilities loaded.</p>
+  } @else {
+    <table class="capabilities-admin__table" aria-label="Capabilities">
+      <thead>
+        <tr>
+          <th scope="col">Code</th>
+          <th scope="col">Area</th>
+          <th scope="col">Name</th>
+          <th scope="col">Default</th>
+          <th scope="col">Enabled</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cap of capabilities(); track cap.code) {
+          <tr>
+            <td><code>{{ cap.code }}</code></td>
+            <td>{{ cap.area }}</td>
+            <td>{{ cap.name }}</td>
+            <td>{{ cap.isDefaultOn ? 'on' : 'off' }}</td>
+            <td>
+              <mat-slide-toggle
+                [checked]="cap.enabled"
+                [disabled]="isPending(cap.code) || loading()"
+                (change)="onToggle(cap, $event.checked)"
+                [attr.aria-label]="'Toggle ' + cap.name">
+              </mat-slide-toggle>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
