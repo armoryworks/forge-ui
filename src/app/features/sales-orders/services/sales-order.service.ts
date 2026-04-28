@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { SalesOrderListItem } from '../models/sales-order-list-item.model';
@@ -9,18 +9,64 @@ import { SalesOrderInvoice } from '../models/sales-order-invoice.model';
 import { CreateSalesOrderRequest } from '../models/create-sales-order-request.model';
 import { FileAttachment } from '../../../shared/models/file.model';
 import { ScheduleMilestone } from '../models/schedule-milestone.model';
+import { PagedQuery, PagedResponse } from '../../../shared/models/paged-response.model';
+
+/** Phase 3 F1 partial / WU-18 — extra filter dimensions on the SO list. */
+export interface SalesOrderListQuery extends PagedQuery {
+  customerId?: number;
+  status?: string;
+  /** "orderDate" (default; uses Job.CreatedAt) or "shipDate" (uses Job.DueDate). */
+  dateField?: 'orderDate' | 'shipDate';
+}
 
 @Injectable({ providedIn: 'root' })
 export class SalesOrderService {
   private readonly http = inject(HttpClient);
+  /**
+   * Mutations + detail/schedule/documents/invoices live on the legacy
+   * `/api/v1/orders` SalesOrders surface (the canonical SalesOrder entity).
+   */
   private readonly base = `${environment.apiUrl}/orders`;
+  /**
+   * Phase 3 F1 partial / WU-18 — read-only Job-projected list at
+   * `/api/v1/sales-orders`. Returns the standard PagedResponse envelope.
+   */
+  private readonly listBase = `${environment.apiUrl}/sales-orders`;
 
-  getSalesOrders(customerId?: number, status?: string, search?: string): Observable<SalesOrderListItem[]> {
+  /**
+   * Phase 3 F1 partial / WU-18 — paged Job-projected sales-order list.
+   *
+   * Returns the standard `{ items, totalCount, page, pageSize }` envelope.
+   * Underlying server endpoint filters Jobs to "Order Confirmed" stage and
+   * downstream production stages, projecting to the SO-shape DTO.
+   */
+  getSalesOrdersPaged(query: SalesOrderListQuery = {}): Observable<PagedResponse<SalesOrderListItem>> {
     let params = new HttpParams();
-    if (customerId) params = params.set('customerId', String(customerId));
-    if (status) params = params.set('status', status);
-    if (search) params = params.set('search', search);
-    return this.http.get<SalesOrderListItem[]>(this.base, { params });
+    if (query.page) params = params.set('page', String(query.page));
+    if (query.pageSize) params = params.set('pageSize', String(query.pageSize));
+    if (query.sort) params = params.set('sort', query.sort);
+    if (query.order) params = params.set('order', query.order);
+    if (query.q) params = params.set('q', query.q);
+    if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
+    if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    if (query.dateField) params = params.set('dateField', query.dateField);
+    if (query.customerId) params = params.set('customerId', String(query.customerId));
+    if (query.status) params = params.set('status', query.status);
+    return this.http.get<PagedResponse<SalesOrderListItem>>(this.listBase, { params });
+  }
+
+  /**
+   * Backward-compat shim. Existing callers that want the flat array continue
+   * to work — internally calls the paged endpoint with `pageSize=200` and
+   * unwraps to the array.
+   */
+  getSalesOrders(customerId?: number, status?: string, search?: string): Observable<SalesOrderListItem[]> {
+    return this.getSalesOrdersPaged({
+      customerId,
+      status,
+      q: search,
+      pageSize: 200,
+    }).pipe(map((p) => p.items));
   }
 
   getSalesOrderById(id: number): Observable<SalesOrderDetail> {

@@ -43,6 +43,8 @@ export class SalesOrdersComponent {
   protected readonly loading = signal(false);
   protected readonly salesOrders = signal<SalesOrderListItem[]>([]);
   protected readonly customers = signal<CustomerListItem[]>([]);
+  /** Phase 3 F1 partial / WU-18 — total rows reported by the paged endpoint. */
+  protected readonly totalCount = signal(0);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -92,9 +94,20 @@ export class SalesOrdersComponent {
     const search = (this.searchTerm() ?? '').trim() || undefined;
     const customerId = this.customerFilterControl.value ?? undefined;
     const status = this.statusFilterControl.value ?? undefined;
-    this.soService.getSalesOrders(customerId, status, search).subscribe({
-      next: (list) => {
-        this.salesOrders.set(list);
+    // Phase 3 F1 partial / WU-18 — consume the paged Job-projected list.
+    // The component still works in-memory inside the data-table within the
+    // 200-row server window; totalCount surfaces the full server-side count.
+    this.soService.getSalesOrdersPaged({
+      customerId,
+      status,
+      q: search,
+      pageSize: 200,
+      sort: 'createdAt',
+      order: 'desc',
+    }).subscribe({
+      next: (page) => {
+        this.salesOrders.set(page.items);
+        this.totalCount.set(page.totalCount);
         this.loading.set(false);
         const detail = this.detailDialog.getDetailFromUrl();
         if (detail?.entityType === 'sales-order') {
