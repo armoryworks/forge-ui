@@ -1,0 +1,54 @@
+<div class="capabilities-debug">
+  <header class="capabilities-debug__header">
+    <h2>Capabilities (Phase 4 Phase-A diagnostic)</h2>
+    <p class="capabilities-debug__hint">
+      Read-only descriptor view. Mutation lands in Phase C; the full admin UI lands in Phase E.
+    </p>
+    <div class="capabilities-debug__summary">
+      @if (descriptor()) {
+        <span><strong>Total:</strong> {{ descriptor()!.totalCount }}</span>
+        <span><strong>Enabled:</strong> {{ enabledCount() }}</span>
+        <span><strong>Generated:</strong> {{ descriptor()!.generatedAt }}</span>
+      } @else {
+        <span>Descriptor not loaded.</span>
+      }
+      <button class="action-btn" type="button" (click)="refresh()" [disabled]="loading()" aria-label="Refresh capability descriptor">
+        <span class="material-icons-outlined">refresh</span>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  @if (capabilities().length === 0) {
+    <p>No capabilities loaded.</p>
+  } @else {
+    <table class="capabilities-debug__table" aria-label="Capabilities">
+      <thead>
+        <tr>
+          <th scope="col">Code</th>
+          <th scope="col">Area</th>
+          <th scope="col">Name</th>
+          <th scope="col">Default</th>
+          <th scope="col">State</th>
+          <th scope="col">Roles</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (cap of capabilities(); track cap.code) {
+          <tr>
+            <td><code>{{ cap.code }}</code></td>
+            <td>{{ cap.area }}</td>
+            <td>{{ cap.name }}</td>
+            <td>{{ cap.isDefaultOn ? 'on' : 'off' }}</td>
+            <td>
+              <span class="chip" [class.chip--success]="cap.enabled" [class.chip--muted]="!cap.enabled">
+                {{ cap.enabled ? 'enabled' : 'disabled' }}
+              </span>
+            </td>
+            <td>{{ cap.requiresRoles ?? '—' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

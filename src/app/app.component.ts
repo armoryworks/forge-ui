@@ -39,6 +39,7 @@ import { OfflineQueueService } from './shared/services/offline-queue.service';
 import { DraftRecoveryService } from './shared/services/draft-recovery.service';
 import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
 import { AnnouncementService } from './shared/services/announcement.service';
+import { CapabilityService } from './shared/services/capability.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -84,6 +85,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly draftRecovery = inject(DraftRecoveryService);
   private readonly draftBroadcast = inject(DraftBroadcastService);
   private readonly announcementService = inject(AnnouncementService);
+  private readonly capabilityService = inject(CapabilityService);
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
@@ -111,12 +113,14 @@ export class AppComponent implements OnInit, OnDestroy {
         this.notificationService.load();
         this.userPreferences.load();
         this.accountingService.load();
+        this.capabilityService.load();
         this.employeeProfile.load();
         this.scanner.start();
         this.draftRecovery.onLogin();
         this.announcementService.loadActive();
         this.wasAuthenticated = true;
       } else {
+        this.capabilityService.clear();
         this.signalr.stopAll();
         // Don't stop the scanner on display/kiosk routes — they manage their own scanner lifecycle
         if (!this.layout.isDisplayRoute()) {
