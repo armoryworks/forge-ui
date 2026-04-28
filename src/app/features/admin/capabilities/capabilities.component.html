@@ -49,9 +49,8 @@
             <strong>Welcome — let's set up qb-engineer for your business.</strong>
             <span>Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.</span>
           </div>
-          <button class="action-btn action-btn--primary action-btn--sm" type="button" disabled
-            matTooltip="Coming in Phase F"
-            matTooltipPosition="above"
+          <button class="action-btn action-btn--primary action-btn--sm" type="button"
+            (click)="runDiscovery()"
             data-testid="capability-banner-discovery-btn">
             Run Discovery
           </button>

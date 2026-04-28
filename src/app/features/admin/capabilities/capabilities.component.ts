@@ -180,6 +180,11 @@ export class CapabilitiesComponent implements OnInit {
     this.installState.dismiss();
   }
 
+  /** Phase 4 Phase-F — navigate to the discovery wizard from the onboarding banner. */
+  protected runDiscovery(): void {
+    this.router.navigate(['/admin/discovery']);
+  }
+
   protected isAreaCollapsed(area: string): boolean {
     return this.collapsedAreas().has(area);
   }

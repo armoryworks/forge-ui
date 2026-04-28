@@ -29,5 +29,13 @@ export const ADMIN_ROUTES: Routes = [
         (m) => m.CapabilityDetailComponent,
       ),
   },
+  // Phase 4 Phase-F — discovery wizard. Lazy-loaded; admin-only via the
+  // server's [Authorize(Roles="Admin")] on the API endpoints. Routed before
+  // the `:tab` catch-all so AdminComponent doesn't intercept it.
+  {
+    path: 'discovery',
+    loadComponent: () =>
+      import('./discovery/discovery.component').then((m) => m.DiscoveryComponent),
+  },
   { path: ':tab', component: AdminComponent },
 ];

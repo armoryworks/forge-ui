@@ -1,0 +1,315 @@
+<app-page-layout pageTitle="Discovery" pageSubtitle="Tell us about your business and we'll recommend a starting point.">
+  <ng-container content>
+    <div class="discovery-page" [appLoadingBlock]="loading()">
+      <!-- Top progress bar -->
+      <div class="discovery-page__progress" data-testid="discovery-progress">
+        <div class="discovery-page__progress-bar">
+          <div class="discovery-page__progress-fill" [style.width.%]="progressPercent()"></div>
+        </div>
+        <span class="discovery-page__progress-label">{{ progressLabel() }}</span>
+        <button
+          type="button"
+          class="action-btn action-btn--sm"
+          [class.action-btn--primary]="consultantModeEnabled()"
+          (click)="toggleConsultantMode()"
+          aria-label="Toggle consultant mode"
+          data-testid="discovery-consultant-toggle">
+          <span class="material-icons-outlined">{{ consultantModeEnabled() ? 'engineering' : 'person' }}</span>
+          {{ consultantModeEnabled() ? 'Consultant mode' : 'Self-serve' }}
+        </button>
+        <button
+          type="button"
+          class="action-btn action-btn--sm action-btn--link"
+          (click)="exitToCustom()"
+          aria-label="Skip discovery and configure manually"
+          data-testid="discovery-skip-btn">
+          Skip discovery
+        </button>
+      </div>
+
+      <!-- Main wizard area -->
+      <div class="discovery-page__layout">
+        <section class="discovery-page__main">
+          @if (isOnRecommendationStep() && recommendation(); as rec) {
+            <!-- Recommendation review screen -->
+            <article class="recommendation" data-testid="discovery-recommendation">
+              <header class="recommendation__header">
+                <span class="recommendation__label">Recommended for you</span>
+                <h2 class="recommendation__title">{{ rec.presetName }}</h2>
+                <p class="recommendation__description">{{ rec.presetDescription }}</p>
+                <div class="recommendation__confidence" [attr.data-confidence]="rec.confidenceLabel">
+                  <span class="material-icons-outlined">
+                    {{ rec.confidenceLabel === 'high' ? 'verified' : rec.confidenceLabel === 'medium' ? 'help_outline' : 'warning' }}
+                  </span>
+                  <span>Confidence: {{ rec.confidenceLabel }}</span>
+                </div>
+              </header>
+
+              <div class="recommendation__rationale">
+                <h3>Why we recommend this</h3>
+                <p>{{ rec.rationale }}</p>
+                @if (rec.factors.length > 0) {
+                  <details>
+                    <summary>{{ rec.factors.length }} factor(s) drove this recommendation</summary>
+                    <ul>
+                      @for (factor of rec.factors; track factor.questionId) {
+                        <li><code>{{ factor.questionId }}</code> — {{ factor.description }}</li>
+                      }
+                    </ul>
+                  </details>
+                }
+              </div>
+
+              @if (rec.alternatives.length > 0) {
+                <div class="recommendation__alternatives" data-testid="discovery-alternatives">
+                  <h3>Or pick an alternative</h3>
+                  <ul>
+                    @for (alt of rec.alternatives; track alt.presetId) {
+                      <li>
+                        <button
+                          type="button"
+                          class="alt-card"
+                          [class.alt-card--chosen]="chosenPreset()?.id === alt.presetId"
+                          (click)="pickAlternative(alt)"
+                          [attr.data-alt-preset]="alt.presetId">
+                          <strong>{{ alt.presetName }}</strong>
+                          <span>{{ alt.distinguishingRationale }}</span>
+                        </button>
+                      </li>
+                    }
+                    <li>
+                      <button
+                        type="button"
+                        class="alt-card alt-card--reset"
+                        [class.alt-card--chosen]="!chosenPreset() || chosenPreset()!.id === rec.presetId"
+                        (click)="resetToRecommended()"
+                        data-testid="discovery-reset-btn">
+                        <strong>Use the recommended preset</strong>
+                        <span>{{ rec.presetName }}</span>
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              }
+
+              @if (rec.capabilityDeltas.length > 0) {
+                <div class="recommendation__deltas" data-testid="discovery-deltas">
+                  <h3>{{ rec.capabilityDeltas.length }} capability changes</h3>
+                  <ul class="delta-list">
+                    @for (d of rec.capabilityDeltas; track d.code) {
+                      <li class="delta-list__item" [class.delta-list__item--enable]="d.willBeEnabled" [class.delta-list__item--disable]="!d.willBeEnabled">
+                        <span class="material-icons-outlined">
+                          {{ d.willBeEnabled ? 'add_circle' : 'remove_circle' }}
+                        </span>
+                        <span class="delta-list__name">{{ d.name }}</span>
+                        <code class="delta-list__code">{{ d.code }}</code>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              } @else {
+                <div class="recommendation__deltas">
+                  <h3>No capability changes</h3>
+                  <p>Your installation already matches this preset.</p>
+                </div>
+              }
+
+              <footer class="recommendation__actions">
+                <button class="action-btn" type="button" (click)="prevStep()" data-testid="discovery-back-btn">Back</button>
+                <button
+                  class="action-btn action-btn--primary"
+                  type="button"
+                  [disabled]="applying()"
+                  (click)="applyRecommendation()"
+                  data-testid="discovery-apply-btn">
+                  <span class="material-icons-outlined">save</span>
+                  {{ applying() ? 'Applying...' : 'Apply ' + (chosenPreset()?.name ?? rec.presetName) }}
+                </button>
+              </footer>
+            </article>
+          } @else if (currentQuestion(); as q) {
+            <!-- Per-question card -->
+            <article class="question-card" [attr.data-question-id]="q.id" data-testid="discovery-question">
+              <header class="question-card__header">
+                <span class="question-card__id"><code>{{ q.id }}</code></span>
+                <h2 class="question-card__text">{{ q.text }}</h2>
+                <p class="question-card__why">
+                  <span class="material-icons-outlined">info</span>
+                  {{ q.whyAsking }}
+                </p>
+              </header>
+
+              <div class="question-card__body">
+                @switch (q.type) {
+                  @case ('Bucketed') {
+                    <div class="choice-list" role="radiogroup" [attr.aria-label]="q.text">
+                      @for (c of q.choices; track c.value) {
+                        <label class="choice"
+                          [class.choice--selected]="getAnswer(q.id) === c.value"
+                          [attr.data-choice-value]="c.value">
+                          <input
+                            type="radio"
+                            [name]="q.id"
+                            [value]="c.value"
+                            [checked]="getAnswer(q.id) === c.value"
+                            (change)="setAnswer(q.id, c.value)"
+                            data-testid="discovery-choice" />
+                          <span class="choice__label">{{ c.label }}</span>
+                        </label>
+                      }
+                    </div>
+                  }
+                  @case ('SingleChoice') {
+                    <div class="choice-list" role="radiogroup" [attr.aria-label]="q.text">
+                      @for (c of q.choices; track c.value) {
+                        <label class="choice"
+                          [class.choice--selected]="getAnswer(q.id) === c.value"
+                          [attr.data-choice-value]="c.value">
+                          <input
+                            type="radio"
+                            [name]="q.id"
+                            [value]="c.value"
+                            [checked]="getAnswer(q.id) === c.value"
+                            (change)="setAnswer(q.id, c.value)"
+                            data-testid="discovery-choice" />
+                          <span class="choice__label">{{ c.label }}</span>
+                        </label>
+                      }
+                    </div>
+                  }
+                  @case ('YesNo') {
+                    <div class="choice-list" role="radiogroup" [attr.aria-label]="q.text">
+                      <label class="choice"
+                        [class.choice--selected]="getAnswer(q.id) === 'yes'">
+                        <input type="radio" [name]="q.id" value="yes"
+                          [checked]="getAnswer(q.id) === 'yes'"
+                          (change)="setAnswer(q.id, 'yes')"
+                          data-testid="discovery-choice" />
+                        <span class="choice__label">Yes</span>
+                      </label>
+                      <label class="choice"
+                        [class.choice--selected]="getAnswer(q.id) === 'no'">
+                        <input type="radio" [name]="q.id" value="no"
+                          [checked]="getAnswer(q.id) === 'no'"
+                          (change)="setAnswer(q.id, 'no')"
+                          data-testid="discovery-choice" />
+                        <span class="choice__label">No</span>
+                      </label>
+                    </div>
+                  }
+                  @case ('YesNoWithDetail') {
+                    <div class="choice-list" role="radiogroup" [attr.aria-label]="q.text">
+                      @for (c of q.choices; track c.value) {
+                        <label class="choice"
+                          [class.choice--selected]="getAnswer(q.id) === c.value">
+                          <input
+                            type="radio"
+                            [name]="q.id"
+                            [value]="c.value"
+                            [checked]="getAnswer(q.id) === c.value"
+                            (change)="setAnswer(q.id, c.value)"
+                            data-testid="discovery-choice" />
+                          <span class="choice__label">{{ c.label }}</span>
+                        </label>
+                      }
+                    </div>
+                  }
+                  @case ('MultiChoice') {
+                    <div class="choice-list">
+                      @for (c of q.choices; track c.value) {
+                        <label class="choice">
+                          <mat-checkbox
+                            [checked]="getAnswer(q.id).split(',').includes(c.value)"
+                            (change)="setAnswer(q.id, ($event.checked ? (getAnswer(q.id) ? getAnswer(q.id) + ',' + c.value : c.value) : getAnswer(q.id).split(',').filter(v => v !== c.value).join(',')))"
+                            data-testid="discovery-choice">
+                            {{ c.label }}
+                          </mat-checkbox>
+                        </label>
+                      }
+                    </div>
+                  }
+                  @case ('FreeText') {
+                    <app-textarea
+                      label="Your answer"
+                      [formControl]="textareaControl(q.id)"
+                      [rows]="4"
+                      (input)="onTextareaInput(q.id, $event)"
+                      data-testid="discovery-freetext" />
+                    <p class="question-card__hint">Optional — but the more you say, the better the recommendation.</p>
+                  }
+                }
+              </div>
+
+              <footer class="question-card__actions">
+                <button
+                  class="action-btn"
+                  type="button"
+                  [disabled]="currentStep() === 0"
+                  (click)="prevStep()"
+                  data-testid="discovery-prev-btn">
+                  Back
+                </button>
+                <button
+                  class="action-btn action-btn--primary"
+                  type="button"
+                  [disabled]="!canAdvance()"
+                  (click)="nextStep()"
+                  data-testid="discovery-next-btn">
+                  Next
+                  <span class="material-icons-outlined">arrow_forward</span>
+                </button>
+                @if (canPreview() && currentStep() >= 5) {
+                  <button
+                    class="action-btn action-btn--link action-btn--sm"
+                    type="button"
+                    (click)="jumpToRecommendation()"
+                    data-testid="discovery-jump-btn">
+                    Jump to recommendation
+                  </button>
+                }
+              </footer>
+            </article>
+          }
+        </section>
+
+        <!-- Live recommendation side panel -->
+        <aside class="discovery-page__sidebar" [appLoadingBlock]="previewing()">
+          @if (recommendation(); as rec) {
+            <div class="live-recommendation" data-testid="discovery-live-preview">
+              <span class="live-recommendation__label">Currently leaning toward</span>
+              <h3 class="live-recommendation__name">{{ rec.presetName }}</h3>
+              <p class="live-recommendation__desc">{{ rec.presetDescription }}</p>
+              <div class="live-recommendation__confidence" [attr.data-confidence]="rec.confidenceLabel">
+                Confidence: {{ rec.confidenceLabel }}
+              </div>
+              <button
+                type="button"
+                class="action-btn action-btn--sm action-btn--link"
+                (click)="jumpToRecommendation()">
+                See full recommendation
+              </button>
+            </div>
+          } @else {
+            <div class="live-recommendation live-recommendation--empty">
+              <span class="material-icons-outlined">auto_awesome</span>
+              <p>Answer the opening questions and we'll start surfacing a recommendation here.</p>
+            </div>
+          }
+
+          <div class="discovery-page__branch">
+            @if (branch()) {
+              <span class="discovery-page__branch-label">Branch {{ branch() }}</span>
+              <span class="discovery-page__branch-detail">
+                @switch (branch()) {
+                  @case ('A') { Small (1–25) }
+                  @case ('B') { Mid (25–200) }
+                  @case ('C') { Large (200+) or multi-site }
+                }
+              </span>
+            }
+          </div>
+        </aside>
+      </div>
+    </div>
+  </ng-container>
+</app-page-layout>
