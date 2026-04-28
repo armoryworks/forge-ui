@@ -16,6 +16,7 @@ import { SearchService } from '../../shared/services/search.service';
 import { AiService, AiSearchSuggestion } from '../../shared/services/ai.service';
 import { LanguageService, SupportedLanguage } from '../../shared/services/language.service';
 import { VersionService } from '../../shared/services/version.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { SearchResult } from '../../shared/models/search.model';
 import { RagSearchResult } from '../../shared/models/rag-search-result.model';
 import { NotificationPanelComponent } from '../../shared/components/notification-panel/notification-panel.component';
@@ -43,9 +44,20 @@ export class AppHeaderComponent implements OnInit {
   protected readonly aiService = inject(AiService);
   protected readonly languageService = inject(LanguageService);
   protected readonly versionService = inject(VersionService);
+  private readonly capabilityService = inject(CapabilityService);
   private readonly router = inject(Router);
 
   protected readonly showAboutDialog = signal(false);
+
+  /**
+   * Phase 4 Phase-B — Chat is gated by `CAP-EXT-CHAT`. When an admin disables
+   * the capability the header chat button hides; when re-enabled it reappears.
+   * Updates reactively via the SignalR `capabilityChanged` broadcast +
+   * `NotificationHubService` re-fetching the descriptor.
+   */
+  protected readonly chatEnabled = computed(() =>
+    this.capabilityService.isEnabled('CAP-EXT-CHAT'),
+  );
 
   protected readonly themeIcon = computed(() =>
     this.themeService.theme() === 'light' ? 'dark_mode' : 'light_mode',

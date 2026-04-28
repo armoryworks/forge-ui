@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { NotificationHubService } from './notification-hub.service';
 import { SignalrService } from './signalr.service';
 import { NotificationService } from './notification.service';
+import { CapabilityService } from './capability.service';
 
 describe('NotificationHubService', () => {
   let service: NotificationHubService;
@@ -13,6 +14,9 @@ describe('NotificationHubService', () => {
   };
   let mockNotificationService: {
     push: ReturnType<typeof vi.fn>;
+  };
+  let mockCapabilityService: {
+    load: ReturnType<typeof vi.fn>;
   };
   let mockConnection: {
     on: ReturnType<typeof vi.fn>;
@@ -35,11 +39,16 @@ describe('NotificationHubService', () => {
       push: vi.fn(),
     };
 
+    mockCapabilityService = {
+      load: vi.fn(),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         NotificationHubService,
         { provide: SignalrService, useValue: mockSignalrService },
         { provide: NotificationService, useValue: mockNotificationService },
+        { provide: CapabilityService, useValue: mockCapabilityService },
       ],
     });
 
@@ -83,6 +92,20 @@ describe('NotificationHubService', () => {
       await service.connect();
       await service.connect();
       expect(mockSignalrService.startConnection).toHaveBeenCalledTimes(1);
+    });
+
+    it('should register capabilityChanged handler and refresh on event', async () => {
+      await service.connect();
+
+      const handler = mockConnection.on.mock.calls.find(
+        (call: unknown[]) => call[0] === 'capabilityChanged',
+      )?.[1] as (event: unknown) => void;
+
+      expect(handler).toBeDefined();
+
+      handler?.({ capabilityId: 'CAP-EXT-CHAT', enabled: false });
+
+      expect(mockCapabilityService.load).toHaveBeenCalled();
     });
   });
 

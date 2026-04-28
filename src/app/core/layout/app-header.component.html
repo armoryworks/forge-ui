@@ -101,12 +101,14 @@
 
   <div class="app-header__actions">
     @if (!layout.isOnboardingRoute()) {
-      <button class="icon-btn" [matTooltip]="'header.chat' | translate" matTooltipPosition="above" [attr.aria-label]="'header.chat' | translate" (click)="chatPanel.toggle()">
-        <span class="material-icons-outlined">chat_bubble_outline</span>
-        @if (chatPanel.totalUnread() > 0) {
-          <span class="badge">{{ chatPanel.totalUnread() }}</span>
-        }
-      </button>
+      @if (chatEnabled()) {
+        <button class="icon-btn" [matTooltip]="'header.chat' | translate" matTooltipPosition="above" [attr.aria-label]="'header.chat' | translate" (click)="chatPanel.toggle()">
+          <span class="material-icons-outlined">chat_bubble_outline</span>
+          @if (chatPanel.totalUnread() > 0) {
+            <span class="badge">{{ chatPanel.totalUnread() }}</span>
+          }
+        </button>
+      }
       @if (aiService.available()) {
         <button class="icon-btn" [matTooltip]="'header.aiAssistant' | translate" matTooltipPosition="above" [attr.aria-label]="'header.aiAssistant' | translate" (click)="aiHelpPanel.toggle()">
           <span class="material-icons-outlined">smart_toy</span>
