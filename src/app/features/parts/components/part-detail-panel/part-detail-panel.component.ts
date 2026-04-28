@@ -37,6 +37,7 @@ import { ColumnCellDirective } from '../../../../shared/directives/column-cell.d
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { RoutingComponent } from '../routing/routing.component';
 import { BomTreeComponent } from '../bom-tree/bom-tree.component';
+import { BomRevisionHistoryComponent } from '../bom-revision-history/bom-revision-history.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { PartAlternatesTabComponent } from '../part-alternates-tab/part-alternates-tab.component';
 import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-tab.component';
@@ -54,7 +55,7 @@ type BomViewMode = 'table' | 'tree';
     EntityPickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent,
     StlViewerComponent, FileUploadZoneComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,
-    RoutingComponent, BomTreeComponent, EntityActivitySectionComponent, PartAlternatesTabComponent,
+    RoutingComponent, BomTreeComponent, BomRevisionHistoryComponent, EntityActivitySectionComponent, PartAlternatesTabComponent,
     SerialNumbersTabComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
@@ -78,6 +79,10 @@ export class PartDetailPanelComponent {
 
   // ── BOM view mode ──
   protected readonly bomViewMode = signal<BomViewMode>('table');
+
+  // Phase 3 H4 / WU-20 — bumped on every BOM mutation so the
+  // revision-history widget refreshes its list.
+  protected readonly bomRefreshToken = signal(0);
 
   // ── Files & Inventory ──
   protected readonly partFiles = signal<FileAttachment[]>([]);
@@ -327,6 +332,8 @@ export class PartDetailPanelComponent {
       next: (detail) => {
         this.part.set(detail);
         this.closeBomDialog();
+        // Phase 3 H4 / WU-20 — server auto-created a new BOM revision; nudge widget.
+        this.bomRefreshToken.update(v => v + 1);
         this.snackbar.success(this.translate.instant('parts.bomEntryAdded'));
       },
     });
@@ -348,6 +355,8 @@ export class PartDetailPanelComponent {
       this.partsService.deleteBOMEntry(p.id, entry.id).subscribe({
         next: (detail) => {
           this.part.set(detail);
+          // Phase 3 H4 / WU-20 — server auto-created a new BOM revision.
+          this.bomRefreshToken.update(v => v + 1);
           this.snackbar.success(this.translate.instant('parts.bomEntryDeleted'));
         },
       });

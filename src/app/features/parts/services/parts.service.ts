@@ -23,6 +23,7 @@ import { UpdateOperationRequest } from '../models/update-operation-request.model
 import { CreateOperationMaterialRequest } from '../models/create-operation-material-request.model';
 import { AddPartPriceRequest, PartPrice } from '../models/part-price.model';
 import { PartAlternate, CreatePartAlternateRequest, UpdatePartAlternateRequest } from '../models/part-alternate.model';
+import { BomRevisionSummary, BomRevisionDetail } from '../models/bom-revision.model';
 
 /** Phase 3 F7-partial / WU-17 — paged part list query parameters. */
 export interface PartListPagedQuery extends PagedQuery {
@@ -208,5 +209,15 @@ export class PartsService {
 
   deletePartAlternate(partId: number, alternateId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${partId}/alternates/${alternateId}`);
+  }
+
+  /** Phase 3 H4 / WU-20 — list BOM revisions for a part (newest first). */
+  getBomRevisions(partId: number): Observable<BomRevisionSummary[]> {
+    return this.http.get<BomRevisionSummary[]>(`${this.base}/${partId}/bom/revisions`);
+  }
+
+  /** Phase 3 H4 / WU-20 — read one immutable BOM revision in detail. */
+  getBomRevisionById(partId: number, revisionId: number): Observable<BomRevisionDetail> {
+    return this.http.get<BomRevisionDetail>(`${this.base}/${partId}/bom/revisions/${revisionId}`);
   }
 }

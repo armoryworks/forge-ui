@@ -462,3 +462,20 @@
   &__edit-icon { font-size: $icon-size-sm; color: var(--text-muted); margin-left: auto; opacity: 0; transition: opacity $transition-fast; }
   &--clickable { cursor: pointer; &:hover { background: var(--bg); } &:hover .meta-row__edit-icon { opacity: 1; } }
 }
+
+// Phase 3 H4 / WU-20 — BOM revision pinned at release.
+.bom-rel-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 6px; border-radius: 4px;
+  background: var(--accent-color, #0d9488); color: #fff;
+  font-size: var(--font-size-xs); font-weight: 600;
+
+  &__date { font-weight: 400; opacity: 0.85; }
+
+  &--stale { background: var(--warning-color, #b45309); }
+}
+
+.bom-rel-stale {
+  margin-left: 8px; font-size: var(--font-size-xs);
+  color: var(--warning-color, #b45309);
+}

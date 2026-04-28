@@ -1,0 +1,78 @@
+<div class="bom-rev-history">
+  <div class="bom-rev-history__header">
+    <h4 class="bom-rev-history__title">{{ 'parts.bomRevisionHistory' | translate }}</h4>
+    <span class="bom-rev-history__hint">{{ 'parts.bomRevisionHistoryHint' | translate }}</span>
+  </div>
+
+  @if (loading()) {
+    <div class="bom-rev-history__loading">{{ 'common.loading' | translate }}</div>
+  } @else if (error()) {
+    <div class="bom-rev-history__error">{{ error() }}</div>
+  } @else if (!hasRevisions()) {
+    <app-empty-state
+      icon="history"
+      [message]="'parts.bomRevisionHistoryEmpty' | translate"
+      [helpText]="'parts.bomRevisionHistoryEmptyHelp' | translate" />
+  } @else {
+    <ul class="bom-rev-list">
+      @for (rev of revisions(); track rev.id) {
+        <li class="bom-rev-list__item" [class.bom-rev-list__item--current]="rev.isCurrent">
+          <button class="bom-rev-row" (click)="toggleExpand(rev)" [attr.aria-expanded]="isExpanded(rev)">
+            <span class="bom-rev-row__chip">v{{ rev.revisionNumber }}</span>
+            @if (rev.isCurrent) {
+              <span class="bom-rev-row__current">{{ 'parts.bomRevisionCurrent' | translate }}</span>
+            }
+            <span class="bom-rev-row__date">{{ formatDate(rev.effectiveDate) }}</span>
+            <span class="bom-rev-row__count">
+              {{ rev.entryCount }} {{ 'parts.bomRevisionLines' | translate }}
+            </span>
+            @if (rev.notes) {
+              <span class="bom-rev-row__notes" [title]="rev.notes">{{ rev.notes }}</span>
+            }
+            <span class="material-icons-outlined bom-rev-row__caret">
+              {{ isExpanded(rev) ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+
+          @if (isExpanded(rev)) {
+            <div class="bom-rev-detail">
+              @if (detailLoading()) {
+                <div class="bom-rev-detail__loading">{{ 'common.loading' | translate }}</div>
+              } @else if (expandedDetail()) {
+                @if (expandedDetail()!.entries.length === 0) {
+                  <div class="bom-rev-detail__empty">{{ 'parts.bomRevisionEmptySnapshot' | translate }}</div>
+                } @else {
+                  <table class="bom-rev-table">
+                    <thead>
+                      <tr>
+                        <th>{{ 'parts.bomPart' | translate }}</th>
+                        <th>{{ 'parts.bomQty' | translate }}</th>
+                        <th>{{ 'parts.bomSource' | translate }}</th>
+                        <th>{{ 'parts.bomRefDes' | translate }}</th>
+                        <th>{{ 'common.notes' | translate }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (e of expandedDetail()!.entries; track e.id) {
+                        <tr>
+                          <td>
+                            <span class="bom-rev-table__pn">{{ e.partNumber }}</span>
+                            <span class="bom-rev-table__desc">{{ e.partDescription }}</span>
+                          </td>
+                          <td>{{ e.quantity }} {{ e.unitOfMeasure }}</td>
+                          <td>{{ e.sourceType }}</td>
+                          <td>{{ e.referenceDesignator || '---' }}</td>
+                          <td>{{ e.notes || '---' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                }
+              }
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  }
+</div>

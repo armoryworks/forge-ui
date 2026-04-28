@@ -20,6 +20,7 @@ import { KanbanService } from '../services/kanban.service';
 import { DisposeJobDialogComponent, DisposeJobDialogData } from './dispose-job-dialog.component';
 import { UserRef } from '../models/user-ref.model';
 import { JobDetail } from '../models/job-detail.model';
+import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
 import { Subtask } from '../models/subtask.model';
 import { JobLink } from '../models/job-link.model';
 import { KanbanJob } from '../models/kanban-job.model';
@@ -65,6 +66,9 @@ export class JobDetailPanelComponent implements OnInit {
   protected readonly files = signal<FileAttachment[]>([]);
   protected readonly timeEntries = signal<TimeEntry[]>([]);
   protected readonly loading = signal(true);
+  // Phase 3 H4 / WU-20 — BOM revision the job was released against, plus
+  // the staleness flag (true if the part's BOM has advanced since).
+  protected readonly bomAtRelease = signal<JobBomAtRelease | null>(null);
   protected readonly newSubtaskControl = new FormControl('');
 
   // Link add form
@@ -119,6 +123,14 @@ export class JobDetailPanelComponent implements OnInit {
       if (detail.childJobCount > 0) {
         this.kanbanService.getChildJobs(id).subscribe(children => this.childJobs.set(children));
       }
+      // Phase 3 H4 / WU-20 — fetch the BOM-at-release pin once we know the
+      // job has a part associated. Endpoint always answers 200 (with
+      // bomRevisionId === null) when nothing is pinned, so we can safely
+      // call regardless and handle the null case in the template.
+      this.kanbanService.getJobBomAtRelease(id).subscribe({
+        next: (snap) => this.bomAtRelease.set(snap),
+        error: () => this.bomAtRelease.set(null),
+      });
       // Load available stages for this track type
       this.kanbanService.getTrackTypes().subscribe(types => {
         const tt = types.find(t => t.id === detail.trackTypeId);

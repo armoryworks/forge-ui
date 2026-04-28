@@ -389,6 +389,27 @@
                 <app-entity-link type="part" [entityId]="j.partId">{{ j.partNumber }}</app-entity-link>
               </span>
             </div>
+            <!-- Phase 3 H4 / WU-20 — BOM revision pinned at release time. -->
+            @if (bomAtRelease(); as snap) {
+              <div class="jd-detail-row">
+                <span class="jd-detail-label">{{ 'parts.bomAtRelease' | translate }}</span>
+                <span class="jd-detail-value">
+                  @if (snap.bomRevisionId !== null) {
+                    <span class="bom-rel-chip" [class.bom-rel-chip--stale]="snap.bomHasBeenUpdatedSinceRelease">
+                      v{{ snap.revisionNumber }}
+                      @if (snap.effectiveDate) {
+                        <span class="bom-rel-chip__date">({{ snap.effectiveDate | date:'shortDate' }})</span>
+                      }
+                    </span>
+                    @if (snap.bomHasBeenUpdatedSinceRelease) {
+                      <span class="bom-rel-stale">{{ 'parts.bomAtReleaseStale' | translate }}</span>
+                    }
+                  } @else {
+                    <span class="text-muted">{{ 'parts.bomAtReleaseNone' | translate }}</span>
+                  }
+                </span>
+              </div>
+            }
           }
           @if (j.parentJobId) {
             <div class="jd-detail-row">

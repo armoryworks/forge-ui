@@ -24,6 +24,7 @@ import { CustomFieldValues } from '../models/custom-field-values.model';
 import { DisposeJobRequest } from '../models/dispose-job-request.model';
 import { ChildJob } from '../models/child-job.model';
 import { BomExplosionResponse } from '../models/bom-explosion-response.model';
+import { JobBomAtRelease } from '../../parts/models/bom-revision.model';
 
 @Injectable({ providedIn: 'root' })
 export class KanbanService {
@@ -56,6 +57,11 @@ export class KanbanService {
 
   getJobDetail(id: number): Observable<JobDetail> {
     return this.http.get<JobDetail>(`${environment.apiUrl}/jobs/${id}`);
+  }
+
+  /** Phase 3 H4 / WU-20 — what BOM revision was the job released against? */
+  getJobBomAtRelease(jobId: number): Observable<JobBomAtRelease> {
+    return this.http.get<JobBomAtRelease>(`${environment.apiUrl}/jobs/${jobId}/bom-at-release`);
   }
 
   getSubtasks(jobId: number): Observable<Subtask[]> {
