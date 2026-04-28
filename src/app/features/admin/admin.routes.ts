@@ -12,12 +12,22 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./capabilities-debug/capabilities-debug.component').then((m) => m.CapabilitiesDebugComponent),
   },
-  // Phase 4 Phase-C — minimum viable capability administration page. Phase E
-  // adds filtering, search, and area grouping on top of this surface.
+  // Phase 4 Phase-E — full admin capability management surface (replaces
+  // Phase C minimum). List page at `/admin/capabilities`; per-capability
+  // detail page at `/admin/capabilities/:id`. Detail route MUST be listed
+  // before the `:tab` catch-all so the AdminComponent doesn't intercept the
+  // capability code as a tab name. Both lazy-loaded.
   {
     path: 'capabilities',
     loadComponent: () =>
       import('./capabilities/capabilities.component').then((m) => m.CapabilitiesComponent),
+  },
+  {
+    path: 'capabilities/:id',
+    loadComponent: () =>
+      import('./capability-detail/capability-detail.component').then(
+        (m) => m.CapabilityDetailComponent,
+      ),
   },
   { path: ':tab', component: AdminComponent },
 ];

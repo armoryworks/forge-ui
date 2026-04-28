@@ -1,0 +1,205 @@
+<app-page-layout [pageTitle]="entry()?.name ?? code()" [pageSubtitle]="'Capability detail'">
+  <ng-container toolbar>
+    <button
+      class="action-btn"
+      type="button"
+      (click)="back()"
+      data-testid="capability-detail-back-btn"
+      aria-label="Back to capabilities">
+      <span class="material-icons-outlined">arrow_back</span>
+      Back
+    </button>
+    <button
+      class="action-btn"
+      type="button"
+      (click)="refreshAll()"
+      data-testid="capability-detail-refresh-btn"
+      aria-label="Refresh">
+      <span class="material-icons-outlined">refresh</span>
+      Refresh
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="cap-detail">
+      @if (!entry()) {
+        <div class="cap-detail__empty">
+          <span class="material-icons-outlined">hourglass_empty</span>
+          <span>Loading capability…</span>
+        </div>
+      } @else {
+        <section class="cap-detail__header">
+          <div class="cap-detail__header-main">
+            <div class="cap-detail__title">{{ entry()!.name }}</div>
+            <code class="cap-detail__code" data-testid="capability-detail-code">{{ entry()!.code }}</code>
+            <div class="cap-detail__meta">
+              <span class="cap-detail__area">{{ entry()!.area }}</span>
+              <span class="cap-detail__divider">·</span>
+              <span>Default: {{ entry()!.isDefaultOn ? 'on' : 'off' }}</span>
+              @if (entry()!.requiresRoles) {
+                <span class="cap-detail__divider">·</span>
+                <span>Requires roles: {{ entry()!.requiresRoles }}</span>
+              }
+            </div>
+            @if (entry()!.description) {
+              <p class="cap-detail__desc">{{ entry()!.description }}</p>
+            }
+          </div>
+
+          <div class="cap-detail__toggle">
+            @if (togglePending()) {
+              <span class="material-icons-outlined spin">sync</span>
+            }
+            <mat-slide-toggle
+              [checked]="entry()!.enabled"
+              [disabled]="togglePending()"
+              (change)="onToggle($event.checked)"
+              data-testid="capability-detail-toggle"
+              [attr.aria-label]="'Toggle ' + entry()!.name">
+            </mat-slide-toggle>
+            <span class="cap-detail__toggle-label">
+              {{ entry()!.enabled ? 'Enabled' : 'Disabled' }}
+            </span>
+          </div>
+        </section>
+
+        <section class="cap-detail__section" [appLoadingBlock]="relationsLoading()">
+          <div class="cap-detail__section-header">
+            <span class="cap-detail__section-title">Relationships</span>
+          </div>
+
+          @if (relations(); as rel) {
+            <div class="cap-detail__relations">
+              <div class="relation-group" data-testid="capability-detail-dependencies">
+                <div class="relation-group__heading">
+                  <span class="material-icons-outlined">link</span>
+                  Depends on ({{ rel.dependencies.length }})
+                </div>
+                @if (rel.dependencies.length === 0) {
+                  <div class="relation-group__empty">No dependencies</div>
+                } @else {
+                  <ul class="relation-list" role="list">
+                    @for (dep of rel.dependencies; track dep.code) {
+                      <li role="listitem">
+                        <button class="relation-chip"
+                          [class.relation-chip--enabled]="dep.enabled"
+                          [class.relation-chip--disabled]="!dep.enabled"
+                          type="button"
+                          (click)="goToCapability(dep)"
+                          [attr.aria-label]="'View ' + dep.name">
+                          <span class="material-icons-outlined relation-chip__state">
+                            {{ dep.enabled ? 'check_circle' : 'radio_button_unchecked' }}
+                          </span>
+                          <span class="relation-chip__name">{{ dep.name }}</span>
+                          @if (consultantModeEnabled()) {
+                            <code class="relation-chip__code">{{ dep.code }}</code>
+                          }
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              <div class="relation-group" data-testid="capability-detail-dependents">
+                <div class="relation-group__heading">
+                  <span class="material-icons-outlined">trending_flat</span>
+                  Required by ({{ rel.dependents.length }})
+                </div>
+                @if (rel.dependents.length === 0) {
+                  <div class="relation-group__empty">No dependents — safe to disable</div>
+                } @else {
+                  <ul class="relation-list" role="list">
+                    @for (dep of rel.dependents; track dep.code) {
+                      <li role="listitem">
+                        <button class="relation-chip"
+                          [class.relation-chip--enabled]="dep.enabled"
+                          [class.relation-chip--disabled]="!dep.enabled"
+                          type="button"
+                          (click)="goToCapability(dep)"
+                          [attr.aria-label]="'View ' + dep.name">
+                          <span class="material-icons-outlined relation-chip__state">
+                            {{ dep.enabled ? 'check_circle' : 'radio_button_unchecked' }}
+                          </span>
+                          <span class="relation-chip__name">{{ dep.name }}</span>
+                          @if (consultantModeEnabled()) {
+                            <code class="relation-chip__code">{{ dep.code }}</code>
+                          }
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+
+              @if (rel.mutexes.length > 0) {
+                <div class="relation-group" data-testid="capability-detail-mutexes">
+                  <div class="relation-group__heading relation-group__heading--warn">
+                    <span class="material-icons-outlined">block</span>
+                    Mutually exclusive with ({{ rel.mutexes.length }})
+                  </div>
+                  <ul class="relation-list" role="list">
+                    @for (peer of rel.mutexes; track peer.code) {
+                      <li role="listitem">
+                        <button class="relation-chip relation-chip--mutex"
+                          type="button"
+                          (click)="goToCapability(peer)"
+                          [attr.aria-label]="'View ' + peer.name">
+                          <span class="material-icons-outlined relation-chip__state">
+                            {{ peer.enabled ? 'check_circle' : 'radio_button_unchecked' }}
+                          </span>
+                          <span class="relation-chip__name">{{ peer.name }}</span>
+                          @if (consultantModeEnabled()) {
+                            <code class="relation-chip__code">{{ peer.code }}</code>
+                          }
+                        </button>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
+        </section>
+
+        <section class="cap-detail__section">
+          <div class="cap-detail__section-header">
+            <span class="cap-detail__section-title">Configuration</span>
+          </div>
+          <div class="cap-detail__config">
+            @if (entry()!.configId) {
+              <pre class="cap-detail__config-payload" data-testid="capability-detail-config">{{ entry()!.configETag ?? '(no ETag)' }}</pre>
+              <p class="cap-detail__config-hint">
+                Config payload is opaque JSON. Editing UI lands in a future iteration; for now,
+                payload changes are submitted via the API directly.
+              </p>
+            } @else {
+              <p class="cap-detail__config-empty">No configuration row exists for this capability yet.</p>
+            }
+          </div>
+        </section>
+
+        <section class="cap-detail__section" [appLoadingBlock]="auditLoading()">
+          <div class="cap-detail__section-header">
+            <span class="cap-detail__section-title">Recent activity</span>
+            <span class="cap-detail__section-meta">last {{ auditLog().length }}</span>
+          </div>
+          @if (auditLog().length === 0) {
+            <div class="cap-detail__audit-empty">No audit entries yet.</div>
+          } @else {
+            <ul class="cap-detail__audit" role="list" data-testid="capability-detail-audit">
+              @for (row of auditLog(); track row.id) {
+                <li class="audit-row" role="listitem">
+                  <div class="audit-row__date">{{ row.createdAt | date:'MM/dd/yyyy hh:mm' }}</div>
+                  <div class="audit-row__action">{{ formatAuditAction(row.action) }}</div>
+                  <div class="audit-row__user">{{ row.userName || '(system)' }}</div>
+                  <div class="audit-row__details">{{ formatAuditDetails(row) }}</div>
+                </li>
+              }
+            </ul>
+          }
+        </section>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

@@ -1,59 +1,218 @@
 @use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
 
-.capabilities-admin {
-  padding: $sp-lg;
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.capabilities-page {
   display: flex;
   flex-direction: column;
   gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  position: relative;
+  min-height: 100%;
 
-  &__header {
+  &__banner {
     display: flex;
-    flex-direction: column;
-    gap: $sp-xs;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    border: $border-width-thin solid var(--primary);
+    border-left: $border-width-accent solid var(--primary);
   }
 
-  &__hint {
-    color: var(--text-muted);
+  &__banner-icon {
+    color: var(--primary);
+    font-size: $icon-size-lg;
+  }
+
+  &__banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    flex: 1;
     font-size: $font-size-sm;
-    margin: 0;
+
+    strong {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    span {
+      color: var(--text-secondary);
+    }
   }
 
   &__summary {
     display: flex;
     align-items: center;
-    gap: $sp-lg;
-    flex-wrap: wrap;
+    gap: $sp-md;
     font-size: $font-size-sm;
     color: var(--text-secondary);
+    padding: 0 $sp-xs;
+  }
 
-    button {
-      margin-left: auto;
+  &__summary-filter {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-md;
+    padding: $sp-3xl $sp-lg;
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-hero;
     }
   }
 
-  &__table {
+  &__groups {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+}
+
+.capability-area {
+  display: flex;
+  flex-direction: column;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: transparent;
+    border: none;
+    border-bottom: $border-width-thin solid var(--border);
+    cursor: pointer;
+    text-align: left;
     width: 100%;
-    border-collapse: collapse;
-    font-size: $font-size-sm;
+    color: var(--text);
+    font-family: inherit;
 
-    th, td {
-      padding: $sp-sm $sp-md;
-      text-align: left;
-      border-bottom: $border-width-thin solid var(--border);
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 6%, transparent);
     }
+  }
 
-    th {
-      background: var(--surface);
-      font-weight: 600;
-      text-transform: uppercase;
-      font-size: $font-size-xxs;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-    }
+  &__chevron {
+    color: var(--text-muted);
+    font-size: $icon-size-sm;
+  }
 
-    code {
-      font-family: $font-family-mono;
-      font-size: $font-size-xs;
+  &__name {
+    @include uppercase-label($font-size-xs, 1px, 700);
+    color: var(--text);
+  }
+
+  &__count {
+    margin-left: auto;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.capability-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border-bottom: $border-width-thin solid var(--border);
+  cursor: pointer;
+  font-size: $font-size-sm;
+  transition: background-color $transition-fast;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 4%, transparent);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+  }
+
+  &--enabled {
+    border-left: $border-width-accent solid var(--success);
+  }
+
+  &--pending {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+  &__main {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-weight: 500;
+    color: var(--text);
+    @include truncate;
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    @include truncate;
+  }
+
+  &__code {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    padding: $sp-xxs $sp-xs;
+    white-space: nowrap;
+  }
+
+  &__deps,
+  &__mutex {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xxs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
     }
+  }
+
+  &__mutex {
+    color: var(--warning);
+  }
+
+  &__open {
+    flex-shrink: 0;
   }
 }

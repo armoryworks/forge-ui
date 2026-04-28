@@ -113,4 +113,77 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
 
     expect(service.getConfigETag('CAP-EXT-CHAT')).toBe('W/"6"');
   });
+
+  // ─── Phase 4 Phase-E additions ───────────────────────────────────────────
+
+  it('getRelations fetches the per-capability dependency graph', () => {
+    let received: unknown = null;
+    service.getRelations('CAP-MD-CUSTOMERS').subscribe((r) => {
+      received = r;
+    });
+    const req = httpMock.expectOne(`${environment.apiUrl}/capabilities/CAP-MD-CUSTOMERS/relations`);
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      code: 'CAP-MD-CUSTOMERS',
+      dependencies: [],
+      dependents: [{ code: 'CAP-O2C-QUOTE', name: 'Quote', area: 'O2C', enabled: true }],
+      mutexes: [],
+    });
+    expect(received).toEqual({
+      code: 'CAP-MD-CUSTOMERS',
+      dependencies: [],
+      dependents: [{ code: 'CAP-O2C-QUOTE', name: 'Quote', area: 'O2C', enabled: true }],
+      mutexes: [],
+    });
+  });
+
+  it('getAuditLog passes cursor and take query params', () => {
+    service.getAuditLog('CAP-EXT-CHAT', { take: 10, before: '2026-04-28T00:00:00Z' }).subscribe();
+    const req = httpMock.expectOne(
+      (r) => r.url === `${environment.apiUrl}/capabilities/CAP-EXT-CHAT/audit-log`,
+    );
+    expect(req.request.method).toBe('GET');
+    expect(req.request.params.get('take')).toBe('10');
+    expect(req.request.params.get('before')).toBe('2026-04-28T00:00:00Z');
+    req.flush([]);
+  });
+
+  it('validate posts the bulk delta and returns the violation envelope', () => {
+    let result: unknown = null;
+    service
+      .validate([{ id: 'CAP-EXT-CHAT', enabled: true }, { id: 'CAP-ACCT-EXTERNAL', enabled: true }])
+      .subscribe((r) => {
+        result = r;
+      });
+    const req = httpMock.expectOne(`${environment.apiUrl}/capabilities/validate`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({
+      items: [
+        { id: 'CAP-EXT-CHAT', enabled: true },
+        { id: 'CAP-ACCT-EXTERNAL', enabled: true },
+      ],
+    });
+    req.flush({
+      valid: false,
+      violations: [
+        {
+          code: 'capability-mutex-violation',
+          capability: 'CAP-ACCT-EXTERNAL',
+          message: "'CAP-ACCT-EXTERNAL' conflicts with enabled: CAP-ACCT-BUILTIN",
+          conflicts: ['CAP-ACCT-BUILTIN'],
+        },
+      ],
+    });
+    expect(result).toEqual({
+      valid: false,
+      violations: [
+        {
+          code: 'capability-mutex-violation',
+          capability: 'CAP-ACCT-EXTERNAL',
+          message: "'CAP-ACCT-EXTERNAL' conflicts with enabled: CAP-ACCT-BUILTIN",
+          conflicts: ['CAP-ACCT-BUILTIN'],
+        },
+      ],
+    });
+  });
 });

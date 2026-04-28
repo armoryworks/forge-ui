@@ -1,10 +1,16 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { Observable, catchError, of, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { CapabilityAuditEntry } from '../models/capability-audit-entry.model';
 import { CapabilityDescriptor, CapabilityDescriptorEntry } from '../models/capability-descriptor.model';
+import { CapabilityRelations } from '../models/capability-relations.model';
+import {
+  CapabilityValidationItem,
+  CapabilityValidationResult,
+} from '../models/capability-validation.model';
 
 /**
  * Phase 4 Phase-A — Capability descriptor service.
@@ -160,5 +166,46 @@ export class CapabilityService {
   /** Clears the in-memory descriptor on logout. */
   clear(): void {
     this._descriptor.set(null);
+  }
+
+  /**
+   * Phase 4 Phase-E — Fetch the dependency graph for a single capability.
+   * Drives the per-capability detail page's "Dependencies / Required by /
+   * Mutually exclusive" sections.
+   */
+  getRelations(code: string): Observable<CapabilityRelations> {
+    return this.http.get<CapabilityRelations>(
+      `${environment.apiUrl}/capabilities/${encodeURIComponent(code)}/relations`,
+    );
+  }
+
+  /**
+   * Phase 4 Phase-E — Fetch scoped audit history for a single capability.
+   * Cursor pagination via `before` (ISO timestamp) + `take`.
+   */
+  getAuditLog(
+    code: string,
+    options: { before?: string; take?: number } = {},
+  ): Observable<CapabilityAuditEntry[]> {
+    let params = new HttpParams();
+    if (options.before) params = params.set('before', options.before);
+    if (options.take !== undefined) params = params.set('take', String(options.take));
+    return this.http.get<CapabilityAuditEntry[]>(
+      `${environment.apiUrl}/capabilities/${encodeURIComponent(code)}/audit-log`,
+      { params },
+    );
+  }
+
+  /**
+   * Phase 4 Phase-E — Validate-only ("dry run") bulk-toggle. Returns the same
+   * constraint-violation shape the bulk-toggle would, but does not persist.
+   * Used by Phase G's preset-apply confirmation modal to list violations
+   * before committing; admins can also preview a multi-toggle change here.
+   */
+  validate(items: CapabilityValidationItem[]): Observable<CapabilityValidationResult> {
+    return this.http.post<CapabilityValidationResult>(
+      `${environment.apiUrl}/capabilities/validate`,
+      { items },
+    );
   }
 }

@@ -1,0 +1,275 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.cap-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+
+  &__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $sp-sm;
+    padding: $sp-3xl $sp-lg;
+    color: var(--text-muted);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-lg;
+    padding: $sp-md $sp-lg;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__header-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__code {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+    padding: $sp-xxs $sp-xs;
+    align-self: flex-start;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__divider {
+    color: var(--text-muted);
+  }
+
+  &__area {
+    @include uppercase-label($font-size-xs, 1px, 700);
+    color: var(--text-secondary);
+  }
+
+  &__desc {
+    margin: $sp-xs 0 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    flex-shrink: 0;
+  }
+
+  &__toggle-label {
+    @include uppercase-label($font-size-xxs, 1px, 700);
+    color: var(--text-muted);
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    padding: $sp-md $sp-lg;
+    position: relative;
+  }
+
+  &__section-header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__section-title {
+    @include uppercase-label($font-size-xxs, 1px, 700);
+    color: var(--text-muted);
+  }
+
+  &__section-meta {
+    margin-left: auto;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__relations {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__config-payload {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    padding: $sp-sm;
+    margin: 0;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+
+  &__config-hint,
+  &__config-empty {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__audit-empty {
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    padding: $sp-md 0;
+  }
+
+  &__audit {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.relation-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: $sp-xs;
+    @include uppercase-label($font-size-xxs, 1px, 700);
+    color: var(--text-muted);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+    }
+
+    &--warn {
+      color: var(--warning);
+    }
+  }
+
+  &__empty {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+.relation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-xs;
+}
+
+.relation-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  padding: $sp-xxs $sp-sm;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  font-size: $font-size-xs;
+  color: var(--text);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+  }
+
+  &--enabled {
+    border-left: 2px solid var(--success);
+  }
+
+  &--disabled {
+    border-left: 2px solid var(--text-muted);
+    color: var(--text-muted);
+  }
+
+  &--mutex {
+    border-left: 2px solid var(--warning);
+  }
+
+  &__state {
+    font-size: $icon-size-xs;
+  }
+
+  &__name {
+    font-weight: 500;
+  }
+
+  &__code {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+}
+
+.audit-row {
+  display: grid;
+  grid-template-columns: 140px 120px 160px 1fr;
+  gap: $sp-md;
+  align-items: center;
+  padding: $sp-xs 0;
+  border-bottom: $border-width-thin solid var(--border);
+  font-size: $font-size-xs;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &__date {
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+
+  &__action {
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  &__user {
+    color: var(--text-secondary);
+  }
+
+  &__details {
+    color: var(--text-muted);
+    @include truncate;
+  }
+}

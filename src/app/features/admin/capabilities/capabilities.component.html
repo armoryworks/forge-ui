@@ -1,55 +1,172 @@
-<div class="capabilities-admin">
-  <header class="capabilities-admin__header">
-    <h2>Capabilities</h2>
-    <p class="capabilities-admin__hint">
-      Phase 4 Phase-C minimum admin surface. Phase E adds filtering, search, and area grouping.
-    </p>
-    <div class="capabilities-admin__summary">
-      <span><strong>Total:</strong> {{ capabilities().length }}</span>
-      <span><strong>Enabled:</strong> {{ enabledCount() }}</span>
-      <button
-        class="action-btn"
-        type="button"
-        (click)="refresh()"
-        [disabled]="loading()"
-        aria-label="Refresh capabilities">
-        <span class="material-icons-outlined">refresh</span>
-        Refresh
-      </button>
-    </div>
-  </header>
+<app-page-layout pageTitle="Capabilities" pageSubtitle="What this installation does and doesn't do">
+  <ng-container toolbar>
+    <app-input
+      label="Search"
+      [formControl]="searchControl"
+      placeholder="Search by name, code, description"
+      data-testid="capability-search" />
+    <app-select
+      label="Area"
+      [formControl]="areaControl"
+      [options]="areaOptions()"
+      data-testid="capability-area-filter" />
+    <app-toggle
+      label="Enabled only"
+      [formControl]="enabledOnlyControl"
+      data-testid="capability-enabled-filter" />
+    <span appSpacer></span>
+    <button
+      class="action-btn"
+      [class.action-btn--primary]="consultantModeEnabled()"
+      type="button"
+      (click)="toggleConsultantMode()"
+      data-testid="capability-consultant-toggle"
+      [matTooltip]="consultantModeEnabled() ? 'Hide capability codes' : 'Show capability codes and consultant-tier affordances'"
+      matTooltipPosition="below"
+      [attr.aria-pressed]="consultantModeEnabled()"
+      aria-label="Toggle consultant mode">
+      <span class="material-icons-outlined">{{ consultantModeEnabled() ? 'engineering' : 'person' }}</span>
+      Consultant mode
+    </button>
+    <button
+      class="action-btn"
+      type="button"
+      (click)="refresh()"
+      [disabled]="loading()"
+      aria-label="Refresh capabilities"
+      data-testid="capability-refresh-btn">
+      <span class="material-icons-outlined">refresh</span>
+      Refresh
+    </button>
+  </ng-container>
 
-  @if (capabilities().length === 0) {
-    <p>No capabilities loaded.</p>
-  } @else {
-    <table class="capabilities-admin__table" aria-label="Capabilities">
-      <thead>
-        <tr>
-          <th scope="col">Code</th>
-          <th scope="col">Area</th>
-          <th scope="col">Name</th>
-          <th scope="col">Default</th>
-          <th scope="col">Enabled</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (cap of capabilities(); track cap.code) {
-          <tr>
-            <td><code>{{ cap.code }}</code></td>
-            <td>{{ cap.area }}</td>
-            <td>{{ cap.name }}</td>
-            <td>{{ cap.isDefaultOn ? 'on' : 'off' }}</td>
-            <td>
-              <mat-slide-toggle
-                [checked]="cap.enabled"
-                [disabled]="isPending(cap.code) || loading()"
-                (change)="onToggle(cap, $event.checked)"
-                [attr.aria-label]="'Toggle ' + cap.name">
-              </mat-slide-toggle>
-            </td>
-          </tr>
+  <ng-container content>
+    <div class="capabilities-page" [appLoadingBlock]="loading()">
+      @if (showOnboardingBanner()) {
+        <div class="capabilities-page__banner" role="alert" aria-live="polite" data-testid="capability-onboarding-banner">
+          <span class="material-icons-outlined capabilities-page__banner-icon">auto_awesome</span>
+          <div class="capabilities-page__banner-text">
+            <strong>Welcome — let's set up qb-engineer for your business.</strong>
+            <span>Run discovery to get a tailored preset, browse curated presets, or skip and configure capabilities manually.</span>
+          </div>
+          <button class="action-btn action-btn--primary action-btn--sm" type="button" disabled
+            matTooltip="Coming in Phase F"
+            matTooltipPosition="above"
+            data-testid="capability-banner-discovery-btn">
+            Run Discovery
+          </button>
+          <button class="action-btn action-btn--sm" type="button" disabled
+            matTooltip="Coming in Phase G"
+            matTooltipPosition="above"
+            data-testid="capability-banner-presets-btn">
+            Browse Presets
+          </button>
+          <button
+            class="icon-btn"
+            type="button"
+            (click)="dismissBanner()"
+            aria-label="Dismiss onboarding banner"
+            data-testid="capability-banner-dismiss-btn">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+      }
+
+      <div class="capabilities-page__summary">
+        <span><strong>{{ enabledCount() }}</strong> of <strong>{{ capabilities().length }}</strong> enabled</span>
+        @if (filtered().length !== capabilities().length) {
+          <span class="capabilities-page__summary-filter">
+            ({{ filtered().length }} after filter)
+          </span>
         }
-      </tbody>
-    </table>
-  }
-</div>
+      </div>
+
+      @if (filtered().length === 0) {
+        <div class="capabilities-page__empty">
+          <span class="material-icons-outlined">search_off</span>
+          <span>No capabilities match the current filter.</span>
+        </div>
+      } @else {
+        <div class="capabilities-page__groups" data-testid="capability-groups">
+          @for (group of groupedByArea(); track group.area) {
+            <section class="capability-area" [attr.data-area]="group.area">
+              <button
+                class="capability-area__header"
+                type="button"
+                (click)="toggleAreaCollapse(group.area)"
+                [attr.aria-expanded]="!isAreaCollapsed(group.area)"
+                [attr.aria-label]="'Toggle ' + group.area + ' section'">
+                <span class="material-icons-outlined capability-area__chevron">
+                  {{ isAreaCollapsed(group.area) ? 'chevron_right' : 'expand_more' }}
+                </span>
+                <span class="capability-area__name">{{ group.area }}</span>
+                <span class="capability-area__count">{{ group.enabledCount }} / {{ group.totalCount }}</span>
+              </button>
+              @if (!isAreaCollapsed(group.area)) {
+                <ul class="capability-area__list" role="list">
+                  @for (cap of group.capabilities; track cap.code) {
+                    <li
+                      class="capability-row"
+                      [class.capability-row--enabled]="cap.enabled"
+                      [class.capability-row--pending]="isPending(cap.code)"
+                      role="listitem"
+                      [attr.data-cap-code]="cap.code"
+                      (click)="openDetail(cap)"
+                      tabindex="0"
+                      (keydown.enter)="openDetail(cap)">
+                      <mat-slide-toggle
+                        [checked]="cap.enabled"
+                        [disabled]="isPending(cap.code) || loading()"
+                        (change)="onToggle(cap, $event.checked)"
+                        (click)="$event.stopPropagation()"
+                        [attr.aria-label]="'Toggle ' + cap.name"
+                        data-testid="capability-toggle">
+                      </mat-slide-toggle>
+
+                      <div class="capability-row__main">
+                        <div class="capability-row__name">{{ cap.name }}</div>
+                        @if (cap.description) {
+                          <div class="capability-row__desc">{{ cap.description }}</div>
+                        }
+                      </div>
+
+                      @if (consultantModeEnabled()) {
+                        <code class="capability-row__code" data-testid="capability-code">{{ cap.code }}</code>
+                      }
+
+                      @if (cap.dependencies.length > 0) {
+                        <span class="capability-row__deps"
+                          [matTooltip]="'Depends on ' + cap.dependencies.join(', ')"
+                          matTooltipPosition="above">
+                          <span class="material-icons-outlined">link</span>
+                          {{ cap.dependencies.length }}
+                        </span>
+                      }
+
+                      @if (cap.mutexes.length > 0) {
+                        <span class="capability-row__mutex"
+                          [matTooltip]="'Mutually exclusive with ' + cap.mutexes.join(', ')"
+                          matTooltipPosition="above">
+                          <span class="material-icons-outlined">block</span>
+                          {{ cap.mutexes.length }}
+                        </span>
+                      }
+
+                      <button
+                        class="icon-btn capability-row__open"
+                        type="button"
+                        (click)="openDetail(cap); $event.stopPropagation()"
+                        aria-label="Open detail page">
+                        <span class="material-icons-outlined">chevron_right</span>
+                      </button>
+                    </li>
+                  }
+                </ul>
+              }
+            </section>
+          }
+        </div>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>
