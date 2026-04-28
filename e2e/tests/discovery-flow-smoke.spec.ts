@@ -97,5 +97,21 @@ test('discovery wizard renders, advances steps, and surfaces recommendation', as
     fullPage: true,
   });
 
+  // Phase 4 Phase-H — verify the apply button now opens the shared
+  // PresetApplyDialogComponent confirmation modal (instead of mutating
+  // immediately). We cancel out so install state isn't modified.
+  const applyBtn = page.locator('[data-testid="discovery-apply-btn"]');
+  if (await applyBtn.isVisible()) {
+    await applyBtn.click();
+    const dialog = page.locator('app-preset-apply-dialog');
+    await expect(dialog).toBeVisible({ timeout: 5000 });
+    await page.screenshot({
+      path: 'e2e/screenshots/discovery-apply-dialog.png',
+      fullPage: false,
+    });
+    // Cancel — do not mutate install state.
+    await page.keyboard.press('Escape');
+  }
+
   await context.close();
 });

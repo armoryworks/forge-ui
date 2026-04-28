@@ -10,6 +10,7 @@ import {
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -19,6 +20,7 @@ import { CapabilityService } from '../../../shared/services/capability.service';
 import { CapabilityInstallStateService } from '../../../shared/services/capability-install-state.service';
 import { ConsultantModeService } from '../../../shared/services/consultant-mode.service';
 import { DiscoveryService } from '../../../shared/services/discovery.service';
+import { PresetService } from '../../../shared/services/preset.service';
 import { SnackbarService } from '../../../shared/services/snackbar.service';
 
 import {
@@ -28,6 +30,11 @@ import {
 import { DiscoveryQuestion } from '../../../shared/models/discovery-question.model';
 
 import { PageLayoutComponent } from '../../../shared/components/page-layout/page-layout.component';
+import {
+  PresetApplyDialogComponent,
+  PresetApplyDialogData,
+  PresetApplyDialogResult,
+} from '../../../shared/components/preset-apply-dialog/preset-apply-dialog.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { LoadingBlockDirective } from '../../../shared/directives/loading-block.directive';
@@ -65,9 +72,11 @@ export class DiscoveryComponent implements OnInit {
   private readonly capabilityService = inject(CapabilityService);
   private readonly consultantMode = inject(ConsultantModeService);
   private readonly installState = inject(CapabilityInstallStateService);
+  private readonly presetService = inject(PresetService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly visibleQuestions = this.discovery.visibleQuestions;
   protected readonly answers = this.discovery.answers;
@@ -226,9 +235,45 @@ export class DiscoveryComponent implements OnInit {
     const rec = this.recommendation();
     if (!rec) return;
     const chosen = this.chosenPresetId() ?? rec.presetId;
-    this.discovery.apply(chosen).subscribe({
+    const chosenName = this.chosenPreset()?.name ?? rec.presetName;
+
+    // Phase 4 Phase-H — route the apply through PresetApplyDialogComponent so
+    // discovery shares the same review-and-confirm step as direct preset apply.
+    // We borrow the preset preview endpoint (which returns deltas + violations
+    // shaped exactly for the dialog) rather than reshaping the recommendation
+    // payload, so the diff/violation rendering stays consistent across both
+    // surfaces.
+    this.presetService.previewApply(chosen).subscribe({
+      next: (preview) => {
+        const data: PresetApplyDialogData = {
+          presetId: chosen,
+          presetName: chosenName,
+          isCustom: preview.isCustom,
+          deltas: preview.deltas,
+          violations: preview.violations,
+          noOp: preview.deltaCount === 0,
+        };
+        this.dialog
+          .open<PresetApplyDialogComponent, PresetApplyDialogData, PresetApplyDialogResult>(
+            PresetApplyDialogComponent,
+            { width: '720px', data },
+          )
+          .afterClosed()
+          .subscribe((result) => {
+            if (!result?.confirmed) return;
+            this.commitApply(chosen, chosenName);
+          });
+      },
+      error: () => {
+        this.snackbar.error('Failed to preview discovery apply — check capability constraints.');
+      },
+    });
+  }
+
+  private commitApply(chosenPresetId: string, chosenPresetName: string): void {
+    this.discovery.apply(chosenPresetId).subscribe({
       next: () => {
-        this.snackbar.success(`Discovery applied — ${chosen}.`);
+        this.snackbar.success(`Discovery applied — ${chosenPresetName}.`);
         this.installState.dismiss();
         this.capabilityService.load();
         this.router.navigate(['/admin/capabilities']);
