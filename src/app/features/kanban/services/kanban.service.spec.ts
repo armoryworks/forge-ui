@@ -49,10 +49,16 @@ describe('KanbanService', () => {
       expect(jobsReq.request.method).toBe('GET');
       expect(jobsReq.request.params.get('trackTypeId')).toBe('1');
       expect(jobsReq.request.params.get('isArchived')).toBe('false');
-      jobsReq.flush([
-        { id: 100, title: 'Job A', stageName: 'Quoting' },
-        { id: 101, title: 'Job B', stageName: 'In Production' },
-      ]);
+      // Phase 3 F7-broad / WU-22 — server returns the paged envelope on /jobs.
+      jobsReq.flush({
+        items: [
+          { id: 100, title: 'Job A', stageName: 'Quoting' },
+          { id: 101, title: 'Job B', stageName: 'In Production' },
+        ],
+        totalCount: 2,
+        page: 1,
+        pageSize: 200,
+      });
 
       expect(result.length).toBe(2);
     });

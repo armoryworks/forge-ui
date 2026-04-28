@@ -20,40 +20,46 @@ describe('EmployeeService', () => {
 
   afterEach(() => httpMock.verify());
 
+  // Phase 3 F7-broad / WU-22 — getEmployees() now goes through the paged
+  // endpoint and unwraps the envelope. The legacy `search` param is mapped
+  // to the standardized `q` query param.
   describe('getEmployees', () => {
+    const empty = { items: [], totalCount: 0, page: 1, pageSize: 200 };
+
     it('should GET employees list', () => {
       service.getEmployees().subscribe();
-      const req = httpMock.expectOne(base);
+      const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush(empty);
     });
 
-    it('should pass search filter', () => {
+    it('should pass search filter (mapped to q)', () => {
       service.getEmployees({ search: 'Smith' }).subscribe();
       const req = httpMock.expectOne(r => r.url === base);
-      expect(req.request.params.get('search')).toBe('Smith');
-      req.flush([]);
+      expect(req.request.params.get('q')).toBe('Smith');
+      req.flush(empty);
     });
 
     it('should pass teamId filter', () => {
       service.getEmployees({ teamId: 5 }).subscribe();
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('teamId')).toBe('5');
-      req.flush([]);
+      req.flush(empty);
     });
 
     it('should pass role filter', () => {
       service.getEmployees({ role: 'Engineer' }).subscribe();
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('role')).toBe('Engineer');
-      req.flush([]);
+      req.flush(empty);
     });
 
     it('should pass isActive filter', () => {
       service.getEmployees({ isActive: true }).subscribe();
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('isActive')).toBe('true');
-      req.flush([]);
+      req.flush(empty);
     });
   });
 

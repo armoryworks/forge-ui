@@ -20,7 +20,7 @@
     </div>
 
     <div [appLoadingBlock]="loading()" class="pmt-list-content">
-      <app-data-table tableId="payments" [columns]="paymentColumns" [data]="filteredPayments()"
+      <app-data-table tableId="payments" [columns]="paymentColumns" [data]="payments()"
         emptyIcon="payments" [emptyMessage]="'payments.noPaymentsFound' | translate"
         [clickableRows]="true" (rowClick)="openPaymentDetail($any($event))">
         <ng-template appColumnCell="paymentNumber" let-row>

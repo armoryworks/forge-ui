@@ -2,8 +2,8 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -40,12 +40,15 @@ export class EmployeeListComponent {
 
   protected readonly loading = signal(false);
   protected readonly employees = signal<EmployeeListItem[]>([]);
+  // Phase 3 F7-broad / WU-22 — server-side total for the header counter.
+  protected readonly totalCount = signal<number>(0);
 
   protected readonly searchControl = new FormControl('');
   protected readonly roleControl = new FormControl<string | null>(null);
   protected readonly statusControl = new FormControl<boolean | null>(null);
-
-  private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
+  // Phase 3 F7-broad / WU-22 — department filter (free-text against
+  // EmployeeProfile.Department).
+  protected readonly departmentControl = new FormControl<string | null>(null);
 
   protected readonly roleOptions = signal<SelectOption[]>([{ value: null, label: '-- All Roles --' }]);
 
@@ -70,15 +73,48 @@ export class EmployeeListComponent {
   constructor() {
     this.refDataService.getRolesAsOptions('-- All Roles --').subscribe(opts => this.roleOptions.set(opts));
     this.loadEmployees();
+
+    // Phase 3 F7-broad / WU-22 — debounced search + filter changes refire
+    // the standardised paged endpoint.
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadEmployees());
+
+    this.roleControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadEmployees());
+
+    this.statusControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadEmployees());
+
+    this.departmentControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadEmployees());
   }
 
   protected loadEmployees(): void {
     this.loading.set(true);
-    const search = (this.searchTerm() ?? '').trim() || undefined;
+    const search = (this.searchControl.value ?? '').trim() || undefined;
     const role = this.roleControl.value ?? undefined;
     const isActive = this.statusControl.value ?? undefined;
-    this.employeeService.getEmployees({ search, role, isActive }).subscribe({
-      next: list => { this.employees.set(list); this.loading.set(false); },
+    const department = (this.departmentControl.value ?? '').trim() || undefined;
+    // Phase 3 F7-broad / WU-22 — call the paged endpoint directly so we can
+    // read totalCount for the header counter.
+    this.employeeService.getEmployeesPaged({
+      q: search,
+      role,
+      isActive,
+      department,
+      pageSize: 200,
+      sort: 'lastName',
+      order: 'asc',
+    }).subscribe({
+      next: paged => {
+        this.employees.set(paged.items);
+        this.totalCount.set(paged.totalCount);
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false),
     });
   }

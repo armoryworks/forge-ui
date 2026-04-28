@@ -1,8 +1,10 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { environment } from '../../../../environments/environment';
+import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response.model';
 import { PurchaseOrderListItem } from '../models/purchase-order-list-item.model';
 import { PurchaseOrderDetail } from '../models/purchase-order-detail.model';
 import { CreatePurchaseOrderRequest } from '../models/create-purchase-order-request.model';
@@ -11,19 +13,48 @@ import { PurchaseOrderRelease, CreatePurchaseOrderReleaseRequest, UpdatePurchase
 import { AutoPoSuggestion } from '../models/auto-po-suggestion.model';
 import { AutoPoSettings, UpdateAutoPoSettingsRequest } from '../models/auto-po-settings.model';
 
+/** Phase 3 F7-broad / WU-22 — paged purchase-order list query parameters. */
+export interface PurchaseOrderListPagedQuery extends PagedQuery {
+  vendorId?: number | null;
+  jobId?: number | null;
+  status?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class PurchaseOrderService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/purchase-orders`;
   private readonly autoPoBase = `${environment.apiUrl}/auto-po`;
 
+  /**
+   * Phase 3 F7-broad / WU-22 — backward-compat shim that calls the paged
+   * endpoint and unwraps the envelope. New callers should use
+   * {@link getPurchaseOrdersPaged} so they can read `totalCount`.
+   */
   getPurchaseOrders(vendorId?: number, jobId?: number, status?: string, search?: string): Observable<PurchaseOrderListItem[]> {
+    return this.getPurchaseOrdersPaged({
+      vendorId, jobId, status, q: search, pageSize: 200,
+    }).pipe(map(p => p.items));
+  }
+
+  /**
+   * Phase 3 F7-broad / WU-22 — paged PO list. Returns the standard envelope
+   * ({ items, totalCount, page, pageSize }) so the caller can wire up real
+   * server-side pagination, sort, and filtering.
+   */
+  getPurchaseOrdersPaged(query: PurchaseOrderListPagedQuery = {}): Observable<PagedResponse<PurchaseOrderListItem>> {
     let params = new HttpParams();
-    if (vendorId) params = params.set('vendorId', String(vendorId));
-    if (jobId) params = params.set('jobId', String(jobId));
-    if (status) params = params.set('status', status);
-    if (search) params = params.set('search', search);
-    return this.http.get<PurchaseOrderListItem[]>(this.base, { params });
+    if (query.page != null) params = params.set('page', String(query.page));
+    if (query.pageSize != null) params = params.set('pageSize', String(query.pageSize));
+    if (query.sort) params = params.set('sort', query.sort);
+    if (query.order) params = params.set('order', query.order);
+    if (query.q) params = params.set('q', query.q);
+    if (query.vendorId) params = params.set('vendorId', String(query.vendorId));
+    if (query.jobId) params = params.set('jobId', String(query.jobId));
+    if (query.status) params = params.set('status', query.status);
+    if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
+    if (query.dateTo) params = params.set('dateTo', query.dateTo);
+    return this.http.get<PagedResponse<PurchaseOrderListItem>>(this.base, { params });
   }
 
   getPurchaseOrderById(id: number): Observable<PurchaseOrderDetail> {

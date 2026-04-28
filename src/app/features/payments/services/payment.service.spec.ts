@@ -20,19 +20,24 @@ describe('PaymentService', () => {
 
   afterEach(() => httpMock.verify());
 
+  // Phase 3 F7-broad / WU-22 — getPayments() now goes through the paged
+  // endpoint and unwraps the envelope.
   describe('getPayments', () => {
+    const empty = { items: [], totalCount: 0, page: 1, pageSize: 200 };
+
     it('should GET payments without filters', () => {
       service.getPayments().subscribe();
-      const req = httpMock.expectOne(base);
+      const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush(empty);
     });
 
     it('should pass customerId filter', () => {
       service.getPayments(12).subscribe();
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('customerId')).toBe('12');
-      req.flush([]);
+      req.flush(empty);
     });
   });
 

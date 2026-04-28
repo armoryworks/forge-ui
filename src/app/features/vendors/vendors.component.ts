@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { VendorService } from './services/vendor.service';
@@ -39,6 +39,11 @@ export class VendorsComponent {
 
   protected readonly loading = signal(false);
   protected readonly vendors = signal<VendorListItem[]>([]);
+  // Phase 3 F7-broad / WU-22 — surfaces the server-side totalCount so the
+  // header can show "X of Y". Today the data-table still slices client-side
+  // within a 200-record window; switch to true server-paging if a tenant
+  // exceeds 200 vendors.
+  protected readonly totalCount = signal<number>(0);
 
   // Create dialog
   protected readonly showDialog = signal(false);
@@ -69,15 +74,37 @@ export class VendorsComponent {
 
   constructor() {
     this.loadVendors();
+
+    // Phase 3 F7-broad / WU-22 — debounced search. Typed input fires the
+    // standardised `?q=` query param against the server (300ms debounce).
+    // Active-filter changes also re-fetch so the server pagination + filter
+    // contract is exercised live.
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadVendors());
+
+    this.activeFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadVendors());
   }
 
   protected loadVendors(): void {
     this.loading.set(true);
     const search = (this.searchTerm() ?? '').trim() || undefined;
     const isActive = this.activeFilterControl.value ?? undefined;
-    this.vendorService.getVendors(search, isActive).subscribe({
-      next: (list) => {
-        this.vendors.set(list);
+    // Phase 3 F7-broad / WU-22 — call the paged endpoint directly so we can
+    // read totalCount for the header counter. PageSize=200 matches the server
+    // cap; the data-table handles client-side slicing within that window.
+    this.vendorService.getVendorsPaged({
+      q: search,
+      isActive,
+      pageSize: 200,
+      sort: 'companyName',
+      order: 'asc',
+    }).subscribe({
+      next: (paged) => {
+        this.vendors.set(paged.items);
+        this.totalCount.set(paged.totalCount);
         this.loading.set(false);
         this.autoOpenFromUrl();
       },

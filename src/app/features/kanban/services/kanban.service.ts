@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map, forkJoin } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
+import { PagedResponse } from '../../../shared/models/paged-response.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 import { ActivityItem } from '../../../shared/models/activity.model';
 import { KanbanJob } from '../models/kanban-job.model';
@@ -33,11 +34,15 @@ export class KanbanService {
   }
 
   getBoard(trackTypeId: number): Observable<BoardColumn[]> {
+    // Phase 3 F7-broad / WU-22 — server now returns the paged envelope on
+    // /jobs. The kanban board still wants the full set so we request the
+    // server cap (200) and unwrap. Boards beyond 200 jobs are out of scope
+    // for the WU-22 sweep — kanban remains a specialised view by design.
     return forkJoin({
       trackType: this.http.get<TrackType>(`${environment.apiUrl}/track-types/${trackTypeId}`),
-      jobs: this.http.get<KanbanJob[]>(`${environment.apiUrl}/jobs`, {
-        params: { trackTypeId: trackTypeId.toString(), isArchived: 'false' },
-      }),
+      jobs: this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, {
+        params: { trackTypeId: trackTypeId.toString(), isArchived: 'false', pageSize: '200' },
+      }).pipe(map(p => p.items)),
     }).pipe(map(({ trackType, jobs }) => this.buildBoard(trackType, jobs)));
   }
 
@@ -162,9 +167,11 @@ export class KanbanService {
   }
 
   searchJobs(search: string): Observable<KanbanJob[]> {
-    return this.http.get<KanbanJob[]>(`${environment.apiUrl}/jobs`, {
-      params: { search, isArchived: 'false' },
-    });
+    // Phase 3 F7-broad / WU-22 — unwrap the paged envelope. The legacy
+    // ?search= alias still works server-side.
+    return this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, {
+      params: { search, isArchived: 'false', pageSize: '50' },
+    }).pipe(map(p => p.items));
   }
 
   bulkMoveStage(jobIds: number[], stageId: number): Observable<BulkResult> {

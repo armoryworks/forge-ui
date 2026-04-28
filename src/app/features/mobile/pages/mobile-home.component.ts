@@ -57,12 +57,13 @@ export class MobileHomeComponent implements OnInit {
       error: () => this.clockStatus.set(null),
     });
 
-    // Load active jobs
-    this.http.get<{ data: MobileJobSummary[] }>('/api/v1/jobs', {
+    // Load active jobs — Phase 3 F7-broad / WU-22 — server returns the
+    // standard paged envelope ({ items, totalCount, page, pageSize }).
+    this.http.get<{ items: MobileJobSummary[] }>('/api/v1/jobs', {
       params: { assigneeId: userId.toString(), pageSize: '5' },
     }).subscribe({
       next: (result) => {
-        this.activeJobs.set(result.data ?? []);
+        this.activeJobs.set(result.items ?? []);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

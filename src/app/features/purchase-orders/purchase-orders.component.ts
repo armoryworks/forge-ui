@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, effect, inject, signal, computed, u
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { map, startWith } from 'rxjs';
+import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -64,6 +64,8 @@ export class PurchaseOrdersComponent {
 
   protected readonly loading = signal(false);
   protected readonly purchaseOrders = signal<PurchaseOrderListItem[]>([]);
+  // Phase 3 F7-broad / WU-22 — server-side total for the header counter.
+  protected readonly totalCount = signal<number>(0);
   protected readonly vendors = signal<VendorResponse[]>([]);
   protected readonly pendingSuggestionCount = signal(0);
 
@@ -120,6 +122,20 @@ export class PurchaseOrdersComponent {
         }
       });
     });
+
+    // Phase 3 F7-broad / WU-22 — debounced search + filter changes refire the
+    // standardised paged endpoint.
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadPurchaseOrders());
+
+    this.vendorFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadPurchaseOrders());
+
+    this.statusFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadPurchaseOrders());
   }
 
   protected switchTab(tab: PoTab): void {
@@ -131,9 +147,20 @@ export class PurchaseOrdersComponent {
     const search = (this.searchTerm() ?? '').trim() || undefined;
     const vendorId = this.vendorFilterControl.value ?? undefined;
     const status = this.statusFilterControl.value ?? undefined;
-    this.poService.getPurchaseOrders(vendorId, undefined, status, search).subscribe({
-      next: (list) => {
-        this.purchaseOrders.set(list);
+    // Phase 3 F7-broad / WU-22 — call the paged endpoint directly so we can
+    // read totalCount for the header counter. PageSize=200 matches the server
+    // cap; the data-table handles client-side slicing within that window.
+    this.poService.getPurchaseOrdersPaged({
+      q: search,
+      vendorId,
+      status,
+      pageSize: 200,
+      sort: 'createdAt',
+      order: 'desc',
+    }).subscribe({
+      next: (paged) => {
+        this.purchaseOrders.set(paged.items);
+        this.totalCount.set(paged.totalCount);
         this.loading.set(false);
         const detail = this.detailDialog.getDetailFromUrl();
         if (detail?.entityType === 'purchase-order') {

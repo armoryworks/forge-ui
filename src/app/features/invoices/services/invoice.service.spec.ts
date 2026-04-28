@@ -20,26 +20,31 @@ describe('InvoiceService', () => {
 
   afterEach(() => httpMock.verify());
 
+  // Phase 3 F7-broad / WU-22 — getInvoices() now goes through the paged
+  // endpoint and unwraps the envelope.
   describe('getInvoices', () => {
+    const empty = { items: [], totalCount: 0, page: 1, pageSize: 200 };
+
     it('should GET invoices without filters', () => {
       service.getInvoices().subscribe();
-      const req = httpMock.expectOne(base);
+      const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush(empty);
     });
 
     it('should pass customerId filter', () => {
       service.getInvoices(5).subscribe();
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('customerId')).toBe('5');
-      req.flush([]);
+      req.flush(empty);
     });
 
     it('should pass status filter', () => {
       service.getInvoices(undefined, 'Sent').subscribe();
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('status')).toBe('Sent');
-      req.flush([]);
+      req.flush(empty);
     });
 
     it('should pass both filters', () => {
@@ -47,7 +52,7 @@ describe('InvoiceService', () => {
       const req = httpMock.expectOne(r => r.url === base);
       expect(req.request.params.get('customerId')).toBe('3');
       expect(req.request.params.get('status')).toBe('Draft');
-      req.flush([]);
+      req.flush(empty);
     });
   });
 

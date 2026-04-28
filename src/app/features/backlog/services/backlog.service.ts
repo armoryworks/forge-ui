@@ -1,7 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { PagedResponse } from '../../../shared/models/paged-response.model';
 import { KanbanJob } from '../../kanban/models/kanban-job.model';
 
 export interface BacklogFilters {
@@ -21,7 +23,12 @@ export class BacklogService {
   private readonly http = inject(HttpClient);
 
   getJobs(filters?: BacklogFilters): Observable<KanbanJob[]> {
-    let params = new HttpParams().set('isArchived', filters?.isArchived ? 'true' : 'false');
+    // Phase 3 F7-broad / WU-22 — server returns the paged envelope on /jobs.
+    // The backlog still wants the full set so we request the server cap (200)
+    // and unwrap. Switch to true server-paging if a backlog grows past 200.
+    let params = new HttpParams()
+      .set('isArchived', filters?.isArchived ? 'true' : 'false')
+      .set('pageSize', '200');
     if (filters?.trackTypeId) {
       params = params.set('trackTypeId', filters.trackTypeId.toString());
     }
@@ -31,6 +38,7 @@ export class BacklogService {
     if (filters?.search) {
       params = params.set('search', filters.search);
     }
-    return this.http.get<KanbanJob[]>(`${environment.apiUrl}/jobs`, { params });
+    return this.http.get<PagedResponse<KanbanJob>>(`${environment.apiUrl}/jobs`, { params })
+      .pipe(map(p => p.items));
   }
 }

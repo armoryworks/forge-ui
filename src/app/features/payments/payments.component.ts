@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { PaymentService } from './services/payment.service';
 import { PaymentListItem } from './models/payment-list-item.model';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -45,12 +45,12 @@ export class PaymentsComponent {
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
   protected readonly payments = signal<PaymentListItem[]>([]);
+  // Phase 3 F7-broad / WU-22 — server-side total for the header counter.
+  protected readonly totalCount = signal<number>(0);
 
   // Filters
   protected readonly searchControl = new FormControl('');
   protected readonly methodFilterControl = new FormControl<string | null>(null);
-
-  private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
 
   protected readonly methodOptions: SelectOption[] = [
     { value: null, label: this.translate.instant('payments.allMethods') },
@@ -81,32 +81,36 @@ export class PaymentsComponent {
     { field: 'createdAt', header: this.translate.instant('common.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
-  protected readonly filteredPayments = computed(() => {
-    const term = (this.searchTerm() ?? '').trim().toLowerCase();
-    const method = this.methodFilterControl.value;
-    let result = this.payments();
-    if (term) {
-      result = result.filter(p =>
-        p.paymentNumber.toLowerCase().includes(term) ||
-        p.customerName.toLowerCase().includes(term) ||
-        (p.referenceNumber?.toLowerCase().includes(term) ?? false)
-      );
-    }
-    if (method) {
-      result = result.filter(p => p.method === method);
-    }
-    return result;
-  });
+  // Phase 3 F7-broad / WU-22 — search + method filter are now server-driven.
+  // The data-table consumes `payments()` directly.
 
   constructor() {
     this.loadPayments();
+
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadPayments());
+
+    this.methodFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadPayments());
   }
 
   protected loadPayments(): void {
     this.loading.set(true);
-    this.paymentService.getPayments().subscribe({
-      next: (list) => {
-        this.payments.set(list);
+    const search = (this.searchControl.value ?? '').trim() || undefined;
+    const method = this.methodFilterControl.value ?? undefined;
+    // Phase 3 F7-broad / WU-22 — call the paged endpoint directly.
+    this.paymentService.getPaymentsPaged({
+      q: search,
+      paymentMethod: method,
+      pageSize: 200,
+      sort: 'paymentDate',
+      order: 'desc',
+    }).subscribe({
+      next: (paged) => {
+        this.payments.set(paged.items);
+        this.totalCount.set(paged.totalCount);
         this.loading.set(false);
         this.autoOpenFromUrl();
       },

@@ -75,7 +75,7 @@ describe('MobileHomeComponent', () => {
     httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush(
       clockStatusOverride ?? defaultStatus,
     );
-    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ data: [] });
+    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
   }
 
   afterEach(() => {
@@ -101,7 +101,7 @@ describe('MobileHomeComponent', () => {
       timeOnTask: '02:30',
     });
 
-    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ data: [] });
+    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
 
     expect(component.clockStatus()).toBeTruthy();
     expect(component.clockStatus()?.isClockedIn).toBe(true);
@@ -121,9 +121,12 @@ describe('MobileHomeComponent', () => {
     expect(jobsReq.request.params.get('pageSize')).toBe('5');
 
     jobsReq.flush({
-      data: [
+      items: [
         { id: 1, jobNumber: 'JOB-001', title: 'Test Job', stageName: 'In Production', stageColor: '#00ff00', hasActiveTimer: false },
       ],
+      totalCount: 1,
+      page: 1,
+      pageSize: 5,
     });
 
     expect(component.activeJobs().length).toBe(1);
@@ -146,7 +149,7 @@ describe('MobileHomeComponent', () => {
       isClockedIn: true, status: 'In', clockedInAt: '2026-04-10T08:00:00Z',
       currentJobNumber: null, timeOnTask: '01:00',
     });
-    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ data: [] });
+    httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
 
     const label = component.statusLabel;
     expect(mockClockTypes.getLabel).toHaveBeenCalledWith('In');

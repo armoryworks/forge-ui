@@ -21,11 +21,13 @@ describe('VendorService', () => {
   afterEach(() => httpMock.verify());
 
   describe('getVendors', () => {
-    it('should GET vendors list', () => {
+    it('should GET vendors list (Phase 3 F7-broad / WU-22 — paged envelope)', () => {
       service.getVendors().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/vendors`);
+      // The shim now hits the paged endpoint with pageSize=200.
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/vendors`);
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
   });
 

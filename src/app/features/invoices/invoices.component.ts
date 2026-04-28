@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime, distinctUntilChanged } from 'rxjs';
 
 import { InvoiceService } from './services/invoice.service';
 import { InvoiceListItem } from './models/invoice-list-item.model';
@@ -50,6 +52,8 @@ export class InvoicesComponent {
   protected readonly showUninvoicedPanel = signal(false);
   protected readonly loading = signal(false);
   protected readonly invoices = signal<InvoiceListItem[]>([]);
+  // Phase 3 F7-broad / WU-22 — server-side total for the header counter.
+  protected readonly totalCount = signal<number>(0);
   protected readonly uninvoicedJobs = signal<UninvoicedJob[]>([]);
   protected readonly uninvoicedCount = signal(0);
 
@@ -89,14 +93,34 @@ export class InvoicesComponent {
   constructor() {
     this.loadInvoices();
     this.loadUninvoicedJobs();
+
+    // Phase 3 F7-broad / WU-22 — debounced search + filter changes refire
+    // the standardised paged endpoint.
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadInvoices());
+
+    this.statusFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadInvoices());
   }
 
   protected loadInvoices(): void {
     this.loading.set(true);
+    const search = (this.searchControl.value ?? '').trim() || undefined;
     const status = this.statusFilterControl.value ?? undefined;
-    this.invoiceService.getInvoices(undefined, status).subscribe({
-      next: (list) => {
-        this.invoices.set(list);
+    // Phase 3 F7-broad / WU-22 — call the paged endpoint directly so we can
+    // read totalCount for the header counter.
+    this.invoiceService.getInvoicesPaged({
+      q: search,
+      status,
+      pageSize: 200,
+      sort: 'invoiceDate',
+      order: 'desc',
+    }).subscribe({
+      next: (paged) => {
+        this.invoices.set(paged.items);
+        this.totalCount.set(paged.totalCount);
         this.loading.set(false);
         const detail = this.detailDialog.getDetailFromUrl();
         if (detail?.entityType === 'invoice') {

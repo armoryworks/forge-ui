@@ -4,6 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
 
 import { environment } from '../../../../../../environments/environment';
+import { PagedResponse } from '../../../../../shared/models/paged-response.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
@@ -52,10 +53,13 @@ export class CustomerInvoicesTabComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Phase 3 F7-broad / WU-22 — server returns paged envelope on /invoices.
     this.loading.set(true);
-    const params = new HttpParams().set('customerId', String(this.customerId()));
-    this.http.get<InvoiceListItem[]>(`${environment.apiUrl}/invoices`, { params }).subscribe({
-      next: data => { this.invoices.set(data); this.loading.set(false); },
+    const params = new HttpParams()
+      .set('customerId', String(this.customerId()))
+      .set('pageSize', '200');
+    this.http.get<PagedResponse<InvoiceListItem>>(`${environment.apiUrl}/invoices`, { params }).subscribe({
+      next: paged => { this.invoices.set(paged.items); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }

@@ -21,23 +21,24 @@ describe('PurchaseOrderService', () => {
   afterEach(() => httpMock.verify());
 
   describe('getPurchaseOrders', () => {
-    it('should GET purchase orders list', () => {
-      const mock = [{ id: 1, poNumber: 'PO-001' }];
+    it('should GET purchase orders list (Phase 3 F7-broad / WU-22 — paged envelope)', () => {
+      const mock = { items: [{ id: 1, poNumber: 'PO-001' }], totalCount: 1, page: 1, pageSize: 200 };
       let result: unknown[] = [];
       service.getPurchaseOrders().subscribe(r => { result = r; });
 
-      const req = httpMock.expectOne(`${apiUrl}/purchase-orders`);
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/purchase-orders`);
       expect(req.request.method).toBe('GET');
+      expect(req.request.params.get('pageSize')).toBe('200');
       req.flush(mock);
       expect(result.length).toBe(1);
     });
 
-    it('should pass filter params', () => {
+    it('should pass filter params (Phase 3 F7-broad / WU-22 — paged envelope)', () => {
       service.getPurchaseOrders(5, undefined, 'Submitted').subscribe();
       const req = httpMock.expectOne(r => r.url === `${apiUrl}/purchase-orders`);
       expect(req.request.params.get('vendorId')).toBe('5');
       expect(req.request.params.get('status')).toBe('Submitted');
-      req.flush([]);
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
   });
 

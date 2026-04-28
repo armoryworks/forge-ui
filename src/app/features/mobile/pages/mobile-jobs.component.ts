@@ -36,11 +36,13 @@ export class MobileJobsComponent implements OnInit {
     const userId = this.authService.user()?.id;
     if (!userId) return;
 
-    this.http.get<{ data: MobileJob[] }>('/api/v1/jobs', {
+    // Phase 3 F7-broad / WU-22 — server returns the standard paged envelope
+    // ({ items, totalCount, page, pageSize }) on /jobs.
+    this.http.get<{ items: MobileJob[] }>('/api/v1/jobs', {
       params: { assigneeId: userId.toString(), pageSize: '50' },
     }).subscribe({
       next: (result) => {
-        this.jobs.set(result.data ?? []);
+        this.jobs.set(result.items ?? []);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

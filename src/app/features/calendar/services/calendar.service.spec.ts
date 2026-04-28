@@ -21,12 +21,12 @@ describe('CalendarService', () => {
   afterEach(() => httpMock.verify());
 
   describe('getJobs', () => {
-    it('should GET jobs with isArchived=false', () => {
+    it('should GET jobs with isArchived=false (Phase 3 F7-broad / WU-22 — paged envelope)', () => {
       service.getJobs().subscribe();
       const req = httpMock.expectOne(r => r.url === `${apiUrl}/jobs`);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('isArchived')).toBe('false');
-      req.flush([]);
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
   });
 
