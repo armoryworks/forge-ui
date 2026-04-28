@@ -37,5 +37,28 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./discovery/discovery.component').then((m) => m.DiscoveryComponent),
   },
+  // Phase 4 Phase-G — preset browser + apply. Lazy-loaded admin-only routes.
+  // Specific routes (compare, custom) listed BEFORE the :id catch-all so
+  // their literal segments win over the dynamic route.
+  {
+    path: 'presets',
+    loadComponent: () =>
+      import('./presets/preset-browser/preset-browser.component').then((m) => m.PresetBrowserComponent),
+  },
+  {
+    path: 'presets/compare',
+    loadComponent: () =>
+      import('./presets/preset-compare/preset-compare.component').then((m) => m.PresetCompareComponent),
+  },
+  {
+    path: 'presets/custom',
+    loadComponent: () =>
+      import('./presets/preset-custom/preset-custom.component').then((m) => m.PresetCustomComponent),
+  },
+  {
+    path: 'presets/:id',
+    loadComponent: () =>
+      import('./presets/preset-detail/preset-detail.component').then((m) => m.PresetDetailComponent),
+  },
   { path: ':tab', component: AdminComponent },
 ];

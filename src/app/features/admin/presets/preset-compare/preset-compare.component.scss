@@ -1,0 +1,140 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.preset-compare {
+  padding: $sp-lg;
+  max-width: 100%;
+
+  &__hint {
+    color: var(--text-muted);
+    font-size: $font-size-xs;
+    margin-left: $sp-md;
+  }
+
+  &__matrix {
+    overflow-x: auto;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+
+    @include custom-scrollbar();
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+  }
+
+  &__th {
+    text-align: left;
+    padding: $sp-sm;
+    background: var(--bg);
+    border-bottom: $border-width-thin solid var(--border);
+    border-right: $border-width-thin solid var(--border);
+    font-weight: 600;
+    font-size: $font-size-xs;
+
+    &--row {
+      min-width: 280px;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      background: var(--bg);
+    }
+
+    &--col {
+      min-width: 200px;
+      vertical-align: top;
+    }
+  }
+
+  &__col-header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__col-name {
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  &__col-id {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__col-count {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__area-row {
+    background: var(--bg);
+  }
+
+  &__area-cell {
+    padding: $sp-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    font-size: $font-size-xxs;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__row {
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 4%, var(--surface) 96%);
+    }
+
+    &--disagreement {
+      background: color-mix(in srgb, var(--info) 6%, var(--surface) 94%);
+    }
+  }
+
+  &__row-name {
+    padding: $sp-sm;
+    border-right: $border-width-thin solid var(--border);
+    border-bottom: $border-width-thin solid var(--border);
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: $sp-sm;
+    align-items: center;
+
+    code {
+      font-family: $font-family-mono;
+      font-size: $font-size-xxs;
+      color: var(--text-muted);
+    }
+  }
+
+  &__default-chip {
+    font-size: $font-size-xxs;
+  }
+
+  &__cell {
+    text-align: center;
+    padding: $sp-sm;
+    border-right: $border-width-thin solid var(--border);
+    border-bottom: $border-width-thin solid var(--border);
+
+    &--in {
+      .material-icons-outlined {
+        color: var(--success);
+        font-size: $icon-size-md;
+      }
+    }
+  }
+
+  &__cell-out {
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+}

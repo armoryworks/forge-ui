@@ -1,0 +1,87 @@
+<app-page-layout pageTitle="Capability Presets">
+  <ng-container toolbar>
+    <button class="action-btn action-btn--sm" type="button"
+      (click)="backToCapabilities()"
+      data-testid="preset-browser-back-btn">
+      <span class="material-icons-outlined">chevron_left</span> Capabilities
+    </button>
+    <button class="action-btn action-btn--sm"
+      type="button"
+      (click)="toggleCompareMode()"
+      [class.action-btn--primary]="compareMode()"
+      data-testid="preset-browser-compare-toggle">
+      <span class="material-icons-outlined">compare</span>
+      {{ compareMode() ? 'Exit compare' : 'Compare' }}
+    </button>
+    @if (compareMode()) {
+      <span class="preset-browser__compare-hint">
+        {{ selectedCount() }} selected (pick 2-4)
+      </span>
+      <button class="action-btn action-btn--primary action-btn--sm"
+        type="button"
+        [disabled]="!canCompare()"
+        (click)="runCompare()"
+        data-testid="preset-browser-run-compare">
+        <span class="material-icons-outlined">arrow_forward</span> Compare
+      </button>
+    }
+  </ng-container>
+
+  <ng-container content>
+    <div class="preset-browser" [appLoadingBlock]="loading()">
+      <p class="preset-browser__intro">
+        Curated capability bundles for common business profiles. Pick a preset to view its capabilities and apply it to this installation. Or build a Custom configuration starting from catalog defaults.
+      </p>
+
+      <div class="preset-browser__grid" data-testid="preset-browser-grid">
+        @for (preset of presets(); track preset.id) {
+          <article class="preset-card"
+            [class.preset-card--active]="preset.isActive"
+            [class.preset-card--custom]="preset.isCustom"
+            [class.preset-card--selected]="isSelected(preset)"
+            (click)="openDetail(preset)"
+            (keydown.enter)="openDetail(preset)"
+            tabindex="0"
+            role="button"
+            [attr.aria-label]="'View ' + preset.name + ' preset'"
+            [attr.data-testid]="'preset-card-' + preset.id">
+            @if (compareMode() && !preset.isCustom) {
+              <input type="checkbox"
+                class="preset-card__compare-check"
+                [checked]="isSelected(preset)"
+                (click)="toggleSelect(preset, $event)"
+                [attr.aria-label]="'Select ' + preset.name + ' for comparison'"
+                [attr.data-testid]="'preset-card-compare-' + preset.id" />
+            } @else if (preset.isActive) {
+              <span class="chip chip--primary preset-card__active-chip">Active</span>
+            }
+            <header class="preset-card__header">
+              <h3 class="preset-card__name">{{ preset.name }}</h3>
+              <span class="preset-card__id">{{ preset.id }}</span>
+            </header>
+            <p class="preset-card__description">{{ preset.shortDescription }}</p>
+            <p class="preset-card__profile" title="{{ preset.targetProfile }}">
+              <span class="material-icons-outlined">groups</span>
+              {{ preset.targetProfile }}
+            </p>
+            <div class="preset-card__tags">
+              @for (tag of preset.recommendedFor; track tag) {
+                <span class="chip preset-card__tag">{{ tag }}</span>
+              }
+            </div>
+            <footer class="preset-card__footer">
+              <span class="preset-card__count">
+                <strong>{{ preset.capabilityCount }}</strong> capabilities
+              </span>
+              @if (!compareMode()) {
+                <span class="preset-card__cta">
+                  <span class="material-icons-outlined">arrow_forward</span>
+                </span>
+              }
+            </footer>
+          </article>
+        }
+      </div>
+    </div>
+  </ng-container>
+</app-page-layout>

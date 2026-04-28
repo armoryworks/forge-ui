@@ -1,0 +1,105 @@
+<app-page-layout pageTitle="Custom Configuration">
+  <ng-container toolbar>
+    <button class="action-btn action-btn--sm" type="button"
+      (click)="back()" data-testid="preset-custom-back-btn">
+      <span class="material-icons-outlined">chevron_left</span> Presets
+    </button>
+    <button class="action-btn action-btn--sm" type="button"
+      (click)="resetOverrides()" data-testid="preset-custom-reset-btn">
+      <span class="material-icons-outlined">restart_alt</span> Reset to defaults
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="preset-custom" [appLoadingBlock]="loading()">
+      <header class="preset-custom__hero">
+        <div class="preset-custom__hero-left">
+          <h2>Custom Configuration</h2>
+          <p>
+            Start from the catalog defaults and toggle individual capabilities. Hand-pick the exact set you want for this installation.
+          </p>
+        </div>
+        <button class="action-btn action-btn--primary"
+          type="button"
+          [disabled]="applying() || violationCount() > 0"
+          (click)="applyCustom()"
+          data-testid="preset-custom-apply-btn">
+          <span class="material-icons-outlined">check</span>
+          Apply Custom
+        </button>
+      </header>
+
+      <section class="preset-custom__stats">
+        <div class="preset-custom__stat">
+          <span class="preset-custom__stat-value">{{ capabilityCount() }}</span>
+          <span class="preset-custom__stat-label">Capabilities enabled</span>
+        </div>
+        <div class="preset-custom__stat">
+          <span class="preset-custom__stat-value">{{ deltaCount() }}</span>
+          <span class="preset-custom__stat-label">Will change if applied</span>
+        </div>
+        <div class="preset-custom__stat" data-testid="preset-custom-violation-count"
+          [class.preset-custom__stat--error]="violationCount() > 0">
+          <span class="preset-custom__stat-value">{{ violationCount() }}</span>
+          <span class="preset-custom__stat-label">Constraint violations</span>
+        </div>
+      </section>
+
+      @if (preview(); as p) {
+        @if (p.violations.length > 0) {
+          <section class="preset-custom__violations" data-testid="preset-custom-violations">
+            <h3 class="preset-custom__section-title">
+              <span class="material-icons-outlined">warning</span>
+              Constraint violations
+            </h3>
+            <p class="preset-custom__violations-help">
+              Resolve each violation before applying. Toggle the capability listed back to fix the issue.
+            </p>
+            <ul class="preset-custom__violation-list">
+              @for (v of p.violations; track v.code + v.capability) {
+                <li>{{ v.message }}</li>
+              }
+            </ul>
+          </section>
+        }
+
+        <section class="preset-custom__capabilities" data-testid="preset-custom-capabilities">
+          <h3 class="preset-custom__section-title">
+            <span class="material-icons-outlined">view_list</span>
+            Capabilities
+          </h3>
+          @for (group of groupedCapabilities(); track group.area) {
+            <div class="preset-custom__area">
+              <h4 class="preset-custom__area-title">{{ group.area }} ({{ group.rows.length }})</h4>
+              <ul class="preset-custom__capability-list">
+                @for (row of group.rows; track row.code) {
+                  <li class="preset-custom__capability-row"
+                    [class.preset-custom__capability-row--in]="row.inPreset"
+                    [class.preset-custom__capability-row--overridden]="row.overridden">
+                    <button class="preset-custom__toggle"
+                      type="button"
+                      (click)="toggle(row)"
+                      [attr.aria-pressed]="row.inPreset"
+                      [attr.aria-label]="(row.inPreset ? 'Disable ' : 'Enable ') + row.name"
+                      [attr.data-testid]="'preset-custom-toggle-' + row.code">
+                      <span class="material-icons-outlined">
+                        {{ row.inPreset ? 'check_box' : 'check_box_outline_blank' }}
+                      </span>
+                    </button>
+                    <code class="preset-custom__capability-code">{{ row.code }}</code>
+                    <span class="preset-custom__capability-name">{{ row.name }}</span>
+                    @if (row.overridden) {
+                      <span class="chip chip--info preset-custom__override-tag">Override</span>
+                    } @else if (row.defaultOn) {
+                      <span class="chip preset-custom__default-tag">Default on</span>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </section>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

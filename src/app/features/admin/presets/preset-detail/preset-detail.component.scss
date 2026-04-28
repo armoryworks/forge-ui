@@ -1,0 +1,227 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+.preset-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+
+  &__hero {
+    display: flex;
+    gap: $sp-lg;
+    padding: $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    border-left: $border-width-accent solid var(--primary);
+    align-items: flex-start;
+  }
+
+  &__hero-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__hero-name {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-xl;
+      font-weight: 600;
+    }
+  }
+
+  &__id {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__description {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-base;
+    line-height: 1.5;
+  }
+
+  &__profile {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+
+    strong {
+      color: var(--text);
+    }
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-sm;
+  }
+
+  &__hero-actions {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $sp-md;
+  }
+
+  &__stat {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__stat-value {
+    font-size: $font-size-kpi;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  &__stat-label {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__section-title {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      color: var(--primary);
+    }
+  }
+
+  &__section-help {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__delta-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__delta-row {
+    display: grid;
+    grid-template-columns: 60px 200px 1fr auto;
+    gap: $sp-sm;
+    align-items: center;
+    padding: $sp-sm;
+    background: var(--bg);
+    font-size: $font-size-xs;
+  }
+
+  &__delta-area {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  &__delta-code {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+  }
+
+  &__delta-name {
+    color: var(--text);
+  }
+
+  &__area {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__area-title {
+    margin: 0;
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__capability-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__capability-row {
+    display: grid;
+    grid-template-columns: 24px 200px 1fr auto;
+    gap: $sp-sm;
+    align-items: center;
+    padding: $sp-sm $sp-md;
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+
+    &--in {
+      color: var(--text);
+      background: color-mix(in srgb, var(--success) 5%, var(--surface) 95%);
+    }
+  }
+
+  &__capability-icon {
+    font-size: $icon-size-md;
+  }
+
+  &__capability-row--in .preset-detail__capability-icon {
+    color: var(--success);
+  }
+
+  &__capability-code {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+  }
+}

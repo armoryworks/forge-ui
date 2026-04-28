@@ -1,0 +1,87 @@
+<app-page-layout pageTitle="Compare Presets">
+  <ng-container toolbar>
+    <button class="action-btn action-btn--sm" type="button"
+      (click)="back()" data-testid="preset-compare-back-btn">
+      <span class="material-icons-outlined">chevron_left</span> Presets
+    </button>
+    <button class="action-btn action-btn--sm" type="button"
+      [class.action-btn--primary]="disagreementOnly()"
+      (click)="toggleDisagreementOnly()"
+      data-testid="preset-compare-disagreement-toggle">
+      <span class="material-icons-outlined">filter_alt</span>
+      {{ disagreementOnly() ? 'Showing differences only' : 'Show all rows' }}
+    </button>
+    @if (response(); as r) {
+      <span class="preset-compare__hint">
+        {{ disagreementCount() }} of {{ r.rows.length }} capabilities differ between selected presets
+      </span>
+    }
+  </ng-container>
+
+  <ng-container content>
+    <div class="preset-compare" [appLoadingBlock]="loading()">
+      @if (response(); as r) {
+        <div class="preset-compare__matrix" data-testid="preset-compare-matrix">
+          <table class="preset-compare__table">
+            <thead>
+              <tr>
+                <th class="preset-compare__th preset-compare__th--row">Capability</th>
+                @for (preset of r.presets; track preset.id) {
+                  <th class="preset-compare__th preset-compare__th--col"
+                    [attr.data-testid]="'preset-compare-col-' + preset.id">
+                    <div class="preset-compare__col-header">
+                      <span class="preset-compare__col-name">{{ preset.name }}</span>
+                      <span class="preset-compare__col-id">{{ preset.id }}</span>
+                      <span class="preset-compare__col-count">
+                        {{ preset.capabilityCount }} capabilities
+                      </span>
+                      <button class="action-btn action-btn--primary action-btn--sm"
+                        type="button"
+                        (click)="pickPreset(preset.id)"
+                        [disabled]="applying()"
+                        [attr.data-testid]="'preset-compare-pick-' + preset.id">
+                        Pick this one
+                      </button>
+                    </div>
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (group of groupedRows(); track group.area) {
+                <tr class="preset-compare__area-row">
+                  <td [attr.colspan]="r.presets.length + 1" class="preset-compare__area-cell">
+                    {{ group.area }} ({{ group.rows.length }})
+                  </td>
+                </tr>
+                @for (row of group.rows; track row.code) {
+                  <tr class="preset-compare__row"
+                    [class.preset-compare__row--disagreement]="row.disagreement">
+                    <td class="preset-compare__row-name">
+                      <code>{{ row.code }}</code>
+                      <span>{{ row.name }}</span>
+                      @if (row.defaultOn) {
+                        <span class="chip preset-compare__default-chip">Default</span>
+                      }
+                    </td>
+                    @for (cell of row.cells; track cell.presetId) {
+                      <td class="preset-compare__cell"
+                        [class.preset-compare__cell--in]="cell.inPreset"
+                        [attr.data-testid]="'preset-compare-cell-' + row.code + '-' + cell.presetId">
+                        @if (cell.inPreset) {
+                          <span class="material-icons-outlined">check_circle</span>
+                        } @else {
+                          <span class="preset-compare__cell-out">—</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

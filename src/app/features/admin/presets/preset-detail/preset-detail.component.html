@@ -1,0 +1,116 @@
+<app-page-layout [pageTitle]="preset()?.name ?? 'Preset'">
+  <ng-container toolbar>
+    <button class="action-btn action-btn--sm" type="button"
+      (click)="back()" data-testid="preset-detail-back-btn">
+      <span class="material-icons-outlined">chevron_left</span> Presets
+    </button>
+  </ng-container>
+
+  <ng-container content>
+    <div class="preset-detail" [appLoadingBlock]="loading()">
+      @if (preset(); as p) {
+        <header class="preset-detail__hero">
+          <div class="preset-detail__hero-left">
+            <div class="preset-detail__hero-name">
+              <h2>{{ p.name }}</h2>
+              <span class="preset-detail__id">{{ p.id }}</span>
+              @if (p.isActive) {
+                <span class="chip chip--primary">Active</span>
+              }
+            </div>
+            <p class="preset-detail__description">{{ p.shortDescription }}</p>
+            <p class="preset-detail__profile">
+              <span class="material-icons-outlined">groups</span>
+              <strong>Target profile:</strong> {{ p.targetProfile }}
+            </p>
+            <div class="preset-detail__tags">
+              @for (tag of p.recommendedFor; track tag) {
+                <span class="chip">{{ tag }}</span>
+              }
+            </div>
+          </div>
+          <div class="preset-detail__hero-actions">
+            <button class="action-btn action-btn--primary"
+              type="button"
+              [disabled]="applying()"
+              (click)="applyPreset()"
+              data-testid="preset-detail-apply-btn">
+              <span class="material-icons-outlined">check</span>
+              {{ p.isActive ? 'Re-apply' : 'Apply this preset' }}
+            </button>
+          </div>
+        </header>
+
+        <section class="preset-detail__stats">
+          <div class="preset-detail__stat" data-testid="preset-detail-stat-count">
+            <span class="preset-detail__stat-value">{{ p.capabilityCount }}</span>
+            <span class="preset-detail__stat-label">Capabilities enabled</span>
+          </div>
+          <div class="preset-detail__stat" data-testid="preset-detail-stat-vs-catalog">
+            <span class="preset-detail__stat-value">{{ deltaVsCatalogCount() }}</span>
+            <span class="preset-detail__stat-label">Differ from catalog defaults</span>
+          </div>
+          <div class="preset-detail__stat" data-testid="preset-detail-stat-vs-install">
+            <span class="preset-detail__stat-value">{{ deltaVsInstallCount() }}</span>
+            <span class="preset-detail__stat-label">Will change if applied</span>
+          </div>
+        </section>
+
+        @if (p.deltaVsCurrentInstall.length > 0) {
+          <section class="preset-detail__section" data-testid="preset-detail-vs-install">
+            <h3 class="preset-detail__section-title">
+              <span class="material-icons-outlined">compare_arrows</span>
+              Differences vs current install
+            </h3>
+            <p class="preset-detail__section-help">
+              These capabilities will change if you apply this preset right now.
+            </p>
+            <div class="preset-detail__delta-grid">
+              @for (delta of p.deltaVsCurrentInstall; track delta.code) {
+                <div class="preset-detail__delta-row">
+                  <span class="preset-detail__delta-area">{{ delta.area }}</span>
+                  <code class="preset-detail__delta-code">{{ delta.code }}</code>
+                  <span class="preset-detail__delta-name">{{ delta.name }}</span>
+                  <span class="chip"
+                    [class.chip--success]="delta.willBeEnabled"
+                    [class.chip--warning]="!delta.willBeEnabled">
+                    {{ delta.willBeEnabled ? 'Will enable' : 'Will disable' }}
+                  </span>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        <section class="preset-detail__section" data-testid="preset-detail-capabilities">
+          <h3 class="preset-detail__section-title">
+            <span class="material-icons-outlined">view_list</span>
+            All capabilities ({{ enabledInPreset() }} in / {{ p.capabilities.length - enabledInPreset() }} out)
+          </h3>
+          @for (group of capabilityGroups(); track group.area) {
+            <div class="preset-detail__area">
+              <h4 class="preset-detail__area-title">{{ group.area }} ({{ group.rows.length }})</h4>
+              <ul class="preset-detail__capability-list">
+                @for (row of group.rows; track row.code) {
+                  <li class="preset-detail__capability-row"
+                    [class.preset-detail__capability-row--in]="row.inPreset">
+                    <span class="material-icons-outlined preset-detail__capability-icon">
+                      {{ row.inPreset ? 'check_circle' : 'remove_circle_outline' }}
+                    </span>
+                    <code class="preset-detail__capability-code">{{ row.code }}</code>
+                    <span class="preset-detail__capability-name">{{ row.name }}</span>
+                    @if (row.defaultOn !== row.inPreset) {
+                      <span class="chip chip--info preset-detail__capability-tag">
+                        {{ row.inPreset ? 'Added' : 'Removed' }}
+                      </span>
+                    }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </section>
+      }
+    </div>
+  </ng-container>
+</app-page-layout>

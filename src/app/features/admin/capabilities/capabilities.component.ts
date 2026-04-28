@@ -185,6 +185,11 @@ export class CapabilitiesComponent implements OnInit {
     this.router.navigate(['/admin/discovery']);
   }
 
+  /** Phase 4 Phase-G — navigate to the preset browser from the onboarding banner. */
+  protected browsePresets(): void {
+    this.router.navigate(['/admin/presets']);
+  }
+
   protected isAreaCollapsed(area: string): boolean {
     return this.collapsedAreas().has(area);
   }

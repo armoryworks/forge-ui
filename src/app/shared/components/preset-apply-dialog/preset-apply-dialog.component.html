@@ -1,0 +1,101 @@
+<div class="preset-apply-dialog">
+  <header class="preset-apply-dialog__header">
+    <h3 class="preset-apply-dialog__title" data-testid="preset-apply-dialog-title">
+      Apply {{ data.presetName }}
+    </h3>
+    <button class="icon-btn" type="button" (click)="cancel()" aria-label="Close apply dialog"
+      data-testid="preset-apply-dialog-close">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </header>
+
+  <div class="preset-apply-dialog__body">
+    @if (data.noOp) {
+      <div class="preset-apply-dialog__noop" data-testid="preset-apply-dialog-noop">
+        <span class="material-icons-outlined">check_circle</span>
+        <div>
+          <strong>Already at this preset.</strong>
+          <span>The current install state matches {{ data.presetName }} — no capabilities will change.</span>
+        </div>
+      </div>
+    } @else if (data.deltas.length === 0) {
+      <div class="preset-apply-dialog__noop" data-testid="preset-apply-dialog-no-deltas">
+        <span class="material-icons-outlined">info</span>
+        <span>No capability changes detected.</span>
+      </div>
+    } @else {
+      <p class="preset-apply-dialog__intro">
+        This will change <strong>{{ data.deltas.length }}</strong> {{ data.deltas.length === 1 ? 'capability' : 'capabilities' }}:
+      </p>
+
+      @if (enableDeltas().length > 0) {
+        <section class="preset-apply-dialog__section preset-apply-dialog__section--enable" data-testid="preset-apply-dialog-enable-section">
+          <h4 class="preset-apply-dialog__section-title">
+            To enable ({{ enableDeltas().length }})
+          </h4>
+          <ul class="preset-apply-dialog__list">
+            @for (delta of enableDeltas(); track delta.code) {
+              <li><span class="capability-area">{{ delta.area }}</span> {{ delta.code }} — {{ delta.name }}</li>
+            }
+          </ul>
+        </section>
+      }
+
+      @if (disableDeltas().length > 0) {
+        <section class="preset-apply-dialog__section preset-apply-dialog__section--disable" data-testid="preset-apply-dialog-disable-section">
+          <h4 class="preset-apply-dialog__section-title">
+            To disable ({{ disableDeltas().length }})
+          </h4>
+          <ul class="preset-apply-dialog__list">
+            @for (delta of disableDeltas(); track delta.code) {
+              <li><span class="capability-area">{{ delta.area }}</span> {{ delta.code }} — {{ delta.name }}</li>
+            }
+          </ul>
+        </section>
+      }
+    }
+
+    @if (hasViolations()) {
+      <section class="preset-apply-dialog__violations" data-testid="preset-apply-dialog-violations">
+        <h4 class="preset-apply-dialog__section-title">
+          <span class="material-icons-outlined">warning</span>
+          Constraint violations ({{ data.violations.length }})
+        </h4>
+        <p class="preset-apply-dialog__violations-help">
+          Apply is blocked until these are resolved.
+        </p>
+        <ul class="preset-apply-dialog__list">
+          @for (v of data.violations; track v.code + v.capability) {
+            <li>{{ v.message }}</li>
+          }
+        </ul>
+      </section>
+    }
+
+    @if (canConfirm() && !data.noOp) {
+      <p class="preset-apply-dialog__note">
+        No data will be deleted. Disabled capabilities keep their data — re-enabling restores them.
+      </p>
+
+      <app-textarea
+        label="Reason (optional)"
+        [formControl]="reasonControl"
+        placeholder="Why are you applying this preset? Captured in audit log."
+        [rows]="2"
+        data-testid="preset-apply-dialog-reason" />
+    }
+  </div>
+
+  <footer class="preset-apply-dialog__footer">
+    <button class="action-btn" type="button" (click)="cancel()" data-testid="preset-apply-dialog-cancel">
+      Cancel
+    </button>
+    <button class="action-btn action-btn--primary" type="button"
+      (click)="confirm()"
+      [disabled]="!canConfirm()"
+      data-testid="preset-apply-dialog-confirm">
+      <span class="material-icons-outlined">check</span>
+      {{ data.noOp ? 'Re-apply' : 'Apply' }}
+    </button>
+  </footer>
+</div>
