@@ -6,7 +6,11 @@ import { environment } from '../../../../environments/environment';
 
 export interface EmployeeProfile {
   id: number;
-  userId: number;
+  // Phase 3 / WU-19 / F9: nullable so an Employee can exist with no User
+  // account. The /employee-profile self-service path always returns a
+  // populated userId (caller is the linked user). Surfaces as null only
+  // for User-less Employees fetched via /employees/{id}.
+  userId: number | null;
   dateOfBirth: string | null;
   gender: string | null;
   street1: string | null;
