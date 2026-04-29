@@ -33,9 +33,9 @@ describe('NcrCapaService', () => {
   });
 
   it('getNcrs(filters) appends provided query params', () => {
-    service.getNcrs({ type: 'Defect', status: 'Open', partId: 10, jobId: 20 }).subscribe();
+    service.getNcrs({ type: 'Internal' as const, status: 'Open' as const, partId: 10, jobId: 20 }).subscribe();
     const req = httpMock.expectOne(r => r.url === ncrsUrl && r.method === 'GET');
-    expect(req.request.params.get('type')).toBe('Defect');
+    expect(req.request.params.get('type')).toBe('Internal');
     expect(req.request.params.get('status')).toBe('Open');
     expect(req.request.params.get('partId')).toBe('10');
     expect(req.request.params.get('jobId')).toBe('20');
@@ -50,7 +50,7 @@ describe('NcrCapaService', () => {
   });
 
   it('createNcr(request) sends POST to /ncrs with body', () => {
-    const payload = { type: 'Defect', description: 'Part scratch' };
+    const payload = { type: 'Internal' as const, description: 'Part scratch' };
     service.createNcr(payload).subscribe();
     const req = httpMock.expectOne(ncrsUrl);
     expect(req.request.method).toBe('POST');
@@ -59,7 +59,7 @@ describe('NcrCapaService', () => {
   });
 
   it('updateNcr(id, request) sends PATCH to /ncrs/{id}', () => {
-    const patch = { status: 'Closed' };
+    const patch = { status: 'Closed' as const };
     service.updateNcr(3, patch).subscribe();
     const req = httpMock.expectOne(`${ncrsUrl}/3`);
     expect(req.request.method).toBe('PATCH');
@@ -68,7 +68,7 @@ describe('NcrCapaService', () => {
   });
 
   it('dispositionNcr(id, disposition) sends POST to /ncrs/{id}/disposition with body', () => {
-    const disposition = { decision: 'Scrap', notes: 'Beyond repair' };
+    const disposition = { code: 'Scrap', notes: 'Beyond repair' };
     service.dispositionNcr(7, disposition).subscribe();
     const req = httpMock.expectOne(`${ncrsUrl}/7/disposition`);
     expect(req.request.method).toBe('POST');
@@ -93,9 +93,9 @@ describe('NcrCapaService', () => {
   });
 
   it('getCapas(filters) appends query params', () => {
-    service.getCapas({ status: 'InProgress' }).subscribe();
+    service.getCapas({ status: 'Implementation' as const }).subscribe();
     const req = httpMock.expectOne(r => r.url === capasUrl && r.method === 'GET');
-    expect(req.request.params.get('status')).toBe('InProgress');
+    expect(req.request.params.get('status')).toBe('Implementation');
     req.flush([]);
   });
 

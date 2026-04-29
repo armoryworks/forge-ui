@@ -12,7 +12,7 @@
       {{ row.measurementCount }}
     </ng-template>
     <ng-template appColumnCell="latestCpk" let-row>
-      @if (row.latestCpk != null) {
+      @if (row.latestCpk !== null) {
         <span class="spc-char__cpk" [class]="getCpkClass(row.latestCpk)">{{ row.latestCpk | number:'1.2-2' }}</span>
       } @else {
         <span class="text-muted">—</span>

@@ -217,14 +217,14 @@
                   @case ('MultiChoice') {
                     <div class="choice-list">
                       @for (c of q.choices; track c.value) {
-                        <label class="choice">
+                        <span class="choice">
                           <mat-checkbox
                             [checked]="getAnswer(q.id).split(',').includes(c.value)"
                             (change)="setAnswer(q.id, ($event.checked ? (getAnswer(q.id) ? getAnswer(q.id) + ',' + c.value : c.value) : getAnswer(q.id).split(',').filter(v => v !== c.value).join(',')))"
                             data-testid="discovery-choice">
                             {{ c.label }}
                           </mat-checkbox>
-                        </label>
+                        </span>
                       }
                     </div>
                   }

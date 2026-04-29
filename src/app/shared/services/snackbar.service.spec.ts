@@ -9,6 +9,7 @@ describe('SnackbarService', () => {
   let service: SnackbarService;
   let snackBarSpy: {
     open: ReturnType<typeof vi.fn>;
+    dismiss: ReturnType<typeof vi.fn>;
   };
   let routerSpy: {
     navigate: ReturnType<typeof vi.fn>;

@@ -58,23 +58,23 @@
 
       <!-- Stats bar -->
       <div class="cd-stats">
-        <div class="cd-stat" (click)="switchTab('estimates')" [class.cd-stat--active]="activeTab() === 'estimates'">
+        <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('estimates')" (keydown.enter)="switchTab('estimates')" (keydown.space)="$event.preventDefault(); switchTab('estimates')" [class.cd-stat--active]="activeTab() === 'estimates'">
           <span class="cd-stat__value">{{ c.estimateCount }}</span>
           <span class="cd-stat__label">Open Estimates</span>
         </div>
-        <div class="cd-stat" (click)="switchTab('quotes')" [class.cd-stat--active]="activeTab() === 'quotes'">
+        <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('quotes')" (keydown.enter)="switchTab('quotes')" (keydown.space)="$event.preventDefault(); switchTab('quotes')" [class.cd-stat--active]="activeTab() === 'quotes'">
           <span class="cd-stat__value">{{ c.quoteCount }}</span>
           <span class="cd-stat__label">Open Quotes</span>
         </div>
-        <div class="cd-stat" (click)="switchTab('orders')" [class.cd-stat--active]="activeTab() === 'orders'">
+        <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('orders')" (keydown.enter)="switchTab('orders')" (keydown.space)="$event.preventDefault(); switchTab('orders')" [class.cd-stat--active]="activeTab() === 'orders'">
           <span class="cd-stat__value">{{ c.orderCount }}</span>
           <span class="cd-stat__label">Open Orders</span>
         </div>
-        <div class="cd-stat" (click)="switchTab('jobs')" [class.cd-stat--active]="activeTab() === 'jobs'">
+        <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('jobs')" (keydown.enter)="switchTab('jobs')" (keydown.space)="$event.preventDefault(); switchTab('jobs')" [class.cd-stat--active]="activeTab() === 'jobs'">
           <span class="cd-stat__value">{{ c.activeJobCount }}</span>
           <span class="cd-stat__label">Active Jobs</span>
         </div>
-        <div class="cd-stat" (click)="switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
+        <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('invoices')" (keydown.enter)="switchTab('invoices')" (keydown.space)="$event.preventDefault(); switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
           <span class="cd-stat__value">{{ c.openInvoiceTotal | currency }}</span>
           <span class="cd-stat__label">Outstanding</span>
         </div>

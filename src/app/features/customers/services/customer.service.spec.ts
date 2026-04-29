@@ -36,8 +36,9 @@ describe('CustomerService', () => {
 
       const req = httpMock.expectOne((r) => r.url === baseUrl);
       expect(req.request.method).toBe('GET');
-      expect(req.request.params.keys().length).toBe(0);
-      req.flush([{ id: 1, name: 'Acme Corp' }]);
+      // Default page size of 200 is always sent
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush({ items: [{ id: 1, name: 'Acme Corp' }], totalCount: 1, page: 1, pageSize: 200 });
 
       expect(result.length).toBe(1);
     });
@@ -46,9 +47,9 @@ describe('CustomerService', () => {
       service.getCustomers('acme', true).subscribe();
 
       const req = httpMock.expectOne((r) => r.url === baseUrl);
-      expect(req.request.params.get('search')).toBe('acme');
+      expect(req.request.params.get('q')).toBe('acme');
       expect(req.request.params.get('isActive')).toBe('true');
-      req.flush([]);
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
   });
 

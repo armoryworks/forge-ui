@@ -1,6 +1,6 @@
 @if (isVisible()) {
-  <div class="scan-overlay" data-testid="scan-overlay" (click)="close()">
-    <div class="scan-overlay__card" (click)="$event.stopPropagation()">
+  <div class="scan-overlay" data-testid="scan-overlay" role="button" tabindex="0" aria-label="Close scan overlay" (click)="close()" (keydown.enter)="close()" (keydown.escape)="close()">
+    <div class="scan-overlay__card" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
 
       <!-- Loading -->
       @if (phase() === 'loading') {

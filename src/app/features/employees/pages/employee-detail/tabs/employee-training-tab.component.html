@@ -11,7 +11,7 @@
       <span class="chip" [class]="getStatusClass(row.status)">{{ row.status }}</span>
     </ng-template>
     <ng-template appColumnCell="quizScore" let-row>
-      {{ row.quizScore != null ? row.quizScore + '%' : '—' }}
+      {{ row.quizScore !== null ? row.quizScore + '%' : '—' }}
     </ng-template>
     <ng-template appColumnCell="startedAt" let-row>
       {{ row.startedAt | date:'MM/dd/yyyy' }}

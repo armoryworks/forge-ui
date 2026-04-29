@@ -44,7 +44,12 @@ describe('EcoService', () => {
   });
 
   it('createEco(data) sends POST to base with body', () => {
-    const payload = { title: 'New ECO', description: 'Change rev' };
+    const payload = {
+      title: 'New ECO',
+      description: 'Change rev',
+      changeType: 'Revision' as const,
+      priority: 'Normal' as const,
+    };
     service.createEco(payload).subscribe();
     const req = httpMock.expectOne(base);
     expect(req.request.method).toBe('POST');
@@ -76,7 +81,11 @@ describe('EcoService', () => {
   });
 
   it('addAffectedItem(ecoId, data) sends POST to base/{ecoId}/affected-items with body', () => {
-    const item = { partId: 99, changeType: 'Revision' };
+    const item = {
+      entityType: 'Part',
+      entityId: 99,
+      changeDescription: 'Revision',
+    };
     service.addAffectedItem(10, item).subscribe();
     const req = httpMock.expectOne(`${base}/10/affected-items`);
     expect(req.request.method).toBe('POST');

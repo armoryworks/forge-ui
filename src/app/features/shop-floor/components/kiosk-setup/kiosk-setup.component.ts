@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, inject, OnInit, output, signal,
+  ChangeDetectionStrategy, Component, inject, output, signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -20,7 +20,7 @@ type SetupPhase = 'admin-login' | 'configure';
   styleUrl: './kiosk-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class KioskSetupComponent implements OnInit {
+export class KioskSetupComponent {
   private readonly authService = inject(AuthService);
   private readonly shopFloorService = inject(ShopFloorService);
   private readonly translate = inject(TranslateService);
@@ -46,9 +46,7 @@ export class KioskSetupComponent implements OnInit {
 
   protected readonly teamOptions = signal<{ value: unknown; label: string }[]>([]);
 
-  ngOnInit(): void {
-    // Teams list is gated — load after admin login in onLoginSubmit().
-  }
+  // Teams list is gated — load after admin login in onLoginSubmit().
 
   protected onLoginSubmit(): void {
     const email = this.emailControl.value?.trim();

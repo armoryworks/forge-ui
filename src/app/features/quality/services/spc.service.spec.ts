@@ -80,7 +80,10 @@ describe('SpcService', () => {
   });
 
   it('recordMeasurements(request) sends POST to /measurements with body', () => {
-    const payload = { characteristicId: 7, values: [10.1, 10.2, 9.9] };
+    const payload = {
+      characteristicId: 7,
+      subgroups: [{ values: [10.1, 10.2, 9.9] }],
+    };
     service.recordMeasurements(payload).subscribe();
     const req = httpMock.expectOne(measurementsUrl);
     expect(req.request.method).toBe('POST');

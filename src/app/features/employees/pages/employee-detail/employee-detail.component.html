@@ -55,23 +55,23 @@
       <!-- Stats bar -->
       @if (stats(); as s) {
         <div class="ed-stats">
-          <div class="ed-stat" (click)="switchTab('time')" [class.ed-stat--active]="activeTab() === 'time'">
+          <div class="ed-stat" role="button" tabindex="0" (click)="switchTab('time')" (keydown.enter)="switchTab('time')" (keydown.space)="$event.preventDefault(); switchTab('time')" [class.ed-stat--active]="activeTab() === 'time'">
             <span class="ed-stat__value">{{ s.hoursThisPeriod }}h</span>
             <span class="ed-stat__label">{{ 'employees.detail.hoursLabel' | translate }}</span>
           </div>
-          <div class="ed-stat" (click)="switchTab('compliance')" [class.ed-stat--active]="activeTab() === 'compliance'">
+          <div class="ed-stat" role="button" tabindex="0" (click)="switchTab('compliance')" (keydown.enter)="switchTab('compliance')" (keydown.space)="$event.preventDefault(); switchTab('compliance')" [class.ed-stat--active]="activeTab() === 'compliance'">
             <span class="ed-stat__value">{{ s.compliancePercent }}%</span>
             <span class="ed-stat__label">{{ 'employees.detail.compliance' | translate }}</span>
           </div>
-          <div class="ed-stat" (click)="switchTab('jobs')" [class.ed-stat--active]="activeTab() === 'jobs'">
+          <div class="ed-stat" role="button" tabindex="0" (click)="switchTab('jobs')" (keydown.enter)="switchTab('jobs')" (keydown.space)="$event.preventDefault(); switchTab('jobs')" [class.ed-stat--active]="activeTab() === 'jobs'">
             <span class="ed-stat__value">{{ s.activeJobCount }}</span>
             <span class="ed-stat__label">{{ 'employees.detail.activeJobs' | translate }}</span>
           </div>
-          <div class="ed-stat" (click)="switchTab('training')" [class.ed-stat--active]="activeTab() === 'training'">
+          <div class="ed-stat" role="button" tabindex="0" (click)="switchTab('training')" (keydown.enter)="switchTab('training')" (keydown.space)="$event.preventDefault(); switchTab('training')" [class.ed-stat--active]="activeTab() === 'training'">
             <span class="ed-stat__value">{{ s.trainingProgressPercent }}%</span>
             <span class="ed-stat__label">{{ 'employees.detail.training' | translate }}</span>
           </div>
-          <div class="ed-stat" (click)="switchTab('expenses')" [class.ed-stat--active]="activeTab() === 'expenses'">
+          <div class="ed-stat" role="button" tabindex="0" (click)="switchTab('expenses')" (keydown.enter)="switchTab('expenses')" (keydown.space)="$event.preventDefault(); switchTab('expenses')" [class.ed-stat--active]="activeTab() === 'expenses'">
             <span class="ed-stat__value">{{ s.outstandingExpenseCount }}</span>
             <span class="ed-stat__label">{{ 'employees.detail.pendingExpenses' | translate }}</span>
           </div>

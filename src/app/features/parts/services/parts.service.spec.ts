@@ -36,8 +36,9 @@ describe('PartsService', () => {
 
       const req = httpMock.expectOne((r) => r.url === baseUrl);
       expect(req.request.method).toBe('GET');
-      expect(req.request.params.keys().length).toBe(0);
-      req.flush([{ id: 1, partNumber: 'P-001' }]);
+      // Default page size of 200 is always sent
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush({ items: [{ id: 1, partNumber: 'P-001' }], totalCount: 1, page: 1, pageSize: 200 });
 
       expect(result.length).toBe(1);
     });
@@ -48,8 +49,8 @@ describe('PartsService', () => {
       const req = httpMock.expectOne((r) => r.url === baseUrl);
       expect(req.request.params.get('status')).toBe('Active');
       expect(req.request.params.get('type')).toBe('Part');
-      expect(req.request.params.get('search')).toBe('widget');
-      req.flush([]);
+      expect(req.request.params.get('q')).toBe('widget');
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
   });
 

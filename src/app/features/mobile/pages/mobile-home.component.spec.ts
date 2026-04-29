@@ -103,9 +103,9 @@ describe('MobileHomeComponent', () => {
 
     httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
 
-    expect(component.clockStatus()).toBeTruthy();
-    expect(component.clockStatus()?.isClockedIn).toBe(true);
-    expect(component.clockStatus()?.status).toBe('In');
+    expect(component['clockStatus']()).toBeTruthy();
+    expect(component['clockStatus']()?.isClockedIn).toBe(true);
+    expect(component['clockStatus']()?.status).toBe('In');
   });
 
   it('should load active jobs on init', () => {
@@ -129,16 +129,16 @@ describe('MobileHomeComponent', () => {
       pageSize: 5,
     });
 
-    expect(component.activeJobs().length).toBe(1);
-    expect(component.activeJobs()[0].jobNumber).toBe('JOB-001');
-    expect(component.loading()).toBe(false);
+    expect(component['activeJobs']().length).toBe(1);
+    expect(component['activeJobs']()[0].jobNumber).toBe('JOB-001');
+    expect(component['loading']()).toBe(false);
   });
 
   it('greeting should return correct time-based greeting', () => {
     createComponent();
     flushInitRequests();
 
-    const greeting = component.greeting;
+    const greeting = component['greeting'];
     expect(['Good morning', 'Good afternoon', 'Good evening']).toContain(greeting);
   });
 
@@ -151,7 +151,7 @@ describe('MobileHomeComponent', () => {
     });
     httpTesting.expectOne((req) => req.url === '/api/v1/jobs').flush({ items: [], totalCount: 0, page: 1, pageSize: 5 });
 
-    const label = component.statusLabel;
+    const label = component['statusLabel'];
     expect(mockClockTypes.getLabel).toHaveBeenCalledWith('In');
     expect(label).toBe('Currently Working');
   });

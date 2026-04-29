@@ -4,10 +4,13 @@ import { HubConnectionState } from '@microsoft/signalr';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
 
-// Create a factory so each test gets a fresh mock connection
+// Create a factory so each test gets a fresh mock connection.
+// HubConnectionState.Disconnected resolves through the vi.mock below at first
+// access; we lazy-initialize to avoid touching the import before the mock is
+// installed.
 function createMockConnection() {
   return {
-    state: HubConnectionState.Disconnected as string,
+    state: 'Disconnected' as string,
     start: vi.fn().mockResolvedValue(undefined),
     stop: vi.fn().mockResolvedValue(undefined),
     invoke: vi.fn().mockResolvedValue(undefined),
@@ -19,7 +22,8 @@ function createMockConnection() {
   };
 }
 
-let mockConnection = createMockConnection();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let mockConnection: ReturnType<typeof createMockConnection>;
 
 vi.mock('@microsoft/signalr', () => {
   const HubConnectionState = {

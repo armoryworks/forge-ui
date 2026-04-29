@@ -119,9 +119,9 @@ describe('MobileClockComponent', () => {
       clockedInAt: '2026-04-10T08:00:00Z',
     });
 
-    expect(component.status()).toBeTruthy();
-    expect(component.status()?.isClockedIn).toBe(true);
-    expect(component.loading()).toBe(false);
+    expect(component['status']()).toBeTruthy();
+    expect(component['status']()?.isClockedIn).toBe(true);
+    expect(component['loading']()).toBe(false);
   });
 
   it('should display available actions', () => {
@@ -129,8 +129,8 @@ describe('MobileClockComponent', () => {
     flushInitRequests();
 
     expect(mockClockTypes.getAvailableActions).toHaveBeenCalledWith('Out');
-    expect(component.actions().length).toBe(1);
-    expect(component.actions()[0].code).toBe('ClockIn');
+    expect(component['actions']().length).toBe(1);
+    expect(component['actions']()[0].code).toBe('ClockIn');
   });
 
   it('should submit clock event', () => {
@@ -149,7 +149,7 @@ describe('MobileClockComponent', () => {
       color: '#22c55e',
     };
 
-    component.submitClock(action);
+    component['submitClock'](action);
 
     const clockReq = httpTesting.expectOne('/api/v1/display/shop-floor/clock');
     expect(clockReq.request.method).toBe('POST');
@@ -160,7 +160,7 @@ describe('MobileClockComponent', () => {
     clockReq.flush({});
 
     expect(mockSnackbar.success).toHaveBeenCalledWith('Clock In recorded');
-    expect(component.submitting()).toBe(false);
+    expect(component['submitting']()).toBe(false);
 
     // Should reload status after successful submit
     httpTesting.expectOne('/api/v1/time-tracking/clock-status').flush({
@@ -186,7 +186,7 @@ describe('MobileClockComponent', () => {
       color: '#22c55e',
     };
 
-    component.submitClock(action);
+    component['submitClock'](action);
 
     httpTesting.expectOne('/api/v1/display/shop-floor/clock').flush(
       { message: 'Server error' },
@@ -194,6 +194,6 @@ describe('MobileClockComponent', () => {
     );
 
     expect(mockSnackbar.error).toHaveBeenCalledWith('Failed to record clock event');
-    expect(component.submitting()).toBe(false);
+    expect(component['submitting']()).toBe(false);
   });
 });

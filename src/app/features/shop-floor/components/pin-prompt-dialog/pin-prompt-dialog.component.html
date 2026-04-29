@@ -11,7 +11,7 @@
     </div>
   }
 
-  <div class="pin-dialog__field" (keydown.enter)="confirm()">
+  <div class="pin-dialog__field">
     <input
       type="password"
       inputmode="numeric"
@@ -21,7 +21,8 @@
       placeholder="Enter PIN"
       class="pin-dialog__input"
       aria-label="PIN"
-      autofocus />
+      autofocus
+      (keydown.enter)="confirm()" />
   </div>
 
   <div class="pin-dialog__actions">

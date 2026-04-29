@@ -61,7 +61,7 @@
                 @if (operation.isSubcontract) {
                   <span class="operation-card__tag operation-card__tag--subcontract" data-testid="op-subcontract-meta">
                     <span class="material-icons-outlined">local_shipping</span>
-                    {{ 'parts.subcontractLabel' | translate }}: {{ operation.subcontractVendorName ?? ('parts.subcontractVendorMissing' | translate) }}@if (operation.subcontractTurnTimeDays != null) {<span>, {{ operation.subcontractTurnTimeDays }} {{ 'parts.daysTurn' | translate }}</span>}
+                    {{ 'parts.subcontractLabel' | translate }}: {{ operation.subcontractVendorName ?? ('parts.subcontractVendorMissing' | translate) }}@if (operation.subcontractTurnTimeDays !== null) {<span>, {{ operation.subcontractTurnTimeDays }} {{ 'parts.daysTurn' | translate }}</span>}
                   </span>
                 }
               </div>

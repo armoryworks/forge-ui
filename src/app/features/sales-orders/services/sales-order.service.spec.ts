@@ -23,9 +23,11 @@ describe('SalesOrderService', () => {
   describe('getSalesOrders', () => {
     it('should GET sales orders', () => {
       service.getSalesOrders().subscribe();
-      const req = httpMock.expectOne(`${apiUrl}/orders`);
+      const req = httpMock.expectOne(r => r.url === `${apiUrl}/sales-orders`);
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      // Default page size of 200 is always sent
+      expect(req.request.params.get('pageSize')).toBe('200');
+      req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });
   });
 

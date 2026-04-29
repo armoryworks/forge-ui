@@ -224,8 +224,8 @@
 
   <!-- ─── PIN Overlay ─── -->
   @if (phase() === 'pin') {
-    <div class="sf-overlay" (click)="cancelPin()">
-      <div class="sf-auth-card" (click)="$event.stopPropagation()">
+    <div class="sf-overlay" role="button" tabindex="0" aria-label="Cancel PIN entry" (click)="cancelPin()" (keydown.escape)="cancelPin()">
+      <div class="sf-auth-card" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <span class="material-icons-outlined sf-auth-card__icon">lock</span>
         <h2 class="sf-auth-card__title">{{ isPasswordAuth() ? 'Enter Password' : 'Enter PIN' }}</h2>
 
@@ -249,7 +249,7 @@
           </div>
         }
 
-        <div class="sf-auth-card__field" (keydown.enter)="onPinSubmit()">
+        <div class="sf-auth-card__field" role="group" aria-label="PIN entry" tabindex="-1" (keydown.enter)="onPinSubmit()">
           <app-input [label]="isPasswordAuth() ? 'Password' : 'PIN'" type="password" [formControl]="pinControl"
             [placeholder]="isPasswordAuth() ? 'Enter your password' : 'Enter your PIN'" [maxlength]="isPasswordAuth() ? 128 : 8" data-testid="sf-pin-input" />
         </div>
@@ -579,8 +579,8 @@
 
   <!-- ─── Location View (triggered by scanning a storage location) ─── -->
   @if (scannedLocationId(); as locId) {
-    <div class="sf-overlay" (click)="closeLocationView()">
-      <div class="sf-location-view-container" (click)="$event.stopPropagation()">
+    <div class="sf-overlay" role="button" tabindex="0" aria-label="Close location view" (click)="closeLocationView()" (keydown.escape)="closeLocationView()">
+      <div class="sf-location-view-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <app-scan-location-view
           [locationId]="locId"
           [locationName]="scannedLocationName() ?? ''"
@@ -591,8 +591,8 @@
 
   <!-- ─── Daily Log Panel ─── -->
   @if (showDailyLog()) {
-    <div class="sf-overlay" (click)="showDailyLog.set(false)">
-      <div class="sf-panel-container" (click)="$event.stopPropagation()">
+    <div class="sf-overlay" role="button" tabindex="0" aria-label="Close daily log" (click)="showDailyLog.set(false)" (keydown.escape)="showDailyLog.set(false)">
+      <div class="sf-panel-container" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <app-scan-daily-log (closed)="showDailyLog.set(false)" />
       </div>
     </div>
@@ -600,8 +600,8 @@
 
   <!-- ─── Devices Panel ─── -->
   @if (showDevicesPanel()) {
-    <div class="sf-overlay" (click)="showDevicesPanel.set(false)">
-      <div class="sf-panel-container sf-panel-container--narrow" (click)="$event.stopPropagation()">
+    <div class="sf-overlay" role="button" tabindex="0" aria-label="Close devices panel" (click)="showDevicesPanel.set(false)" (keydown.escape)="showDevicesPanel.set(false)">
+      <div class="sf-panel-container sf-panel-container--narrow" role="dialog" aria-modal="true" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <app-scan-devices-panel (closed)="showDevicesPanel.set(false)" />
       </div>
     </div>

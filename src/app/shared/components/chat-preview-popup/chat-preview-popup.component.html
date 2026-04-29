@@ -1,7 +1,7 @@
 @if (previews().length > 0) {
   <div class="chat-preview-popup">
     @for (item of previews(); track item.message.id) {
-      <div class="preview-card" (click)="dismiss(item.message)">
+      <div class="preview-card" role="button" tabindex="0" (click)="dismiss(item.message)" (keydown.enter)="dismiss(item.message)" (keydown.space)="$event.preventDefault(); dismiss(item.message)">
         <app-avatar [initials]="item.message.senderInitials" [color]="item.message.senderColor" size="sm" />
         <div class="preview-card__body">
           <span class="preview-card__sender">{{ item.message.senderName }}</span>

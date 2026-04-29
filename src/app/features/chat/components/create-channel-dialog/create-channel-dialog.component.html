@@ -7,7 +7,7 @@
     <app-textarea label="Description" formControlName="description" [rows]="2" data-testid="channel-description" />
 
     <div class="member-section">
-      <label class="member-section__label">Members</label>
+      <span class="member-section__label">Members</span>
       @if (selectedMembers().length > 0) {
         <div class="member-chips">
           @for (member of selectedMembers(); track member.id) {
