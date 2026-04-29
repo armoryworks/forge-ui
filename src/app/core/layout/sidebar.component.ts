@@ -21,6 +21,7 @@ export class SidebarComponent {
   private readonly navTree = inject(NavTreeService);
 
   protected readonly collapsed = computed(() => !this.layout.sidebarExpanded());
+  protected readonly pinnedTopTree = this.navTree.pinnedTopTree;
   protected readonly mainTree = this.navTree.mainTree;
   protected readonly bottomTree = this.navTree.bottomTree;
 
@@ -67,6 +68,21 @@ export class SidebarComponent {
     this.slideDirection.set('forward');
     const current = this.drillPath();
     this.drillOverride.set([...current, item]);
+    if (this.collapsed() && !this.layout.isMobile()) {
+      this.layout.expandSidebar();
+    }
+  }
+
+  /**
+   * Pinned-bottom group clicks (Admin) RESET the drill to that group rather
+   * than appending. If the user is currently drilled into Operations and
+   * clicks Admin from the always-visible bottom region, they expect Admin's
+   * children — not "Operations > Admin > children". Same behavior wherever
+   * the user invokes them, regardless of current drill state.
+   */
+  protected onPinnedGroupClick(item: NavItem): void {
+    this.slideDirection.set('forward');
+    this.drillOverride.set([item]);
     if (this.collapsed() && !this.layout.isMobile()) {
       this.layout.expandSidebar();
     }

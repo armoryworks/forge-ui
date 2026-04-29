@@ -15,6 +15,30 @@
         <span class="nav-item__label nav-item__label--header">{{ header.i18nKey! | translate }}</span>
       }
     </button>
+  }
+
+  <!-- Pinned top: Dashboard. Always visible regardless of drill state so the
+       landing page is one click from anywhere. -->
+  @if (pinnedTopTree().length > 0) {
+    @for (item of pinnedTopTree(); track item.label) {
+      <a class="nav-item"
+         [routerLink]="item.route"
+         routerLinkActive="nav-item--active"
+         [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
+         matTooltipPosition="right"
+         [attr.aria-label]="item.i18nKey! | translate"
+         (click)="onLeafClick()">
+        <span class="material-icons-outlined">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+          @if (item.badge) {
+            <span class="nav-item__badge">{{ item.badge }}</span>
+          } @else if (item.shortcut) {
+            <kbd class="kbd-hint">{{ item.shortcut.join('+') }}</kbd>
+          }
+        }
+      </a>
+    }
     <div class="sidebar__divider"></div>
   }
 
@@ -72,41 +96,43 @@
             }
           </button>
         }
-
-        <div class="sidebar__spacer"></div>
-        <div class="sidebar__divider"></div>
-
-        @for (item of bottomTree(); track item.label) {
-          @if (isGroup(item)) {
-            <button class="nav-item nav-item--group"
-                    [class.nav-item--active]="isInActiveTrail(item)"
-                    (click)="onGroupClick(item)"
-                    [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-                    matTooltipPosition="right"
-                    [attr.aria-label]="item.i18nKey! | translate">
-              <span class="material-icons-outlined">{{ item.icon }}</span>
-              @if (!collapsed()) {
-                <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-                <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
-              }
-            </button>
-          } @else {
-            <a class="nav-item"
-               [routerLink]="item.route"
-               routerLinkActive="nav-item--active"
-               [routerLinkActiveOptions]="{ exact: false }"
-               [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
-               matTooltipPosition="right"
-               [attr.aria-label]="item.i18nKey! | translate"
-               (click)="onLeafClick()">
-              <span class="material-icons-outlined">{{ item.icon }}</span>
-              @if (!collapsed()) {
-                <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
-              }
-            </a>
-          }
-        }
       }
     </div>
+  }
+
+  <!-- Pinned bottom: Shop Floor + Admin. Always visible regardless of drill
+       state. Group clicks here reset the drill rather than append, so user
+       drilled into Operations can jump cleanly to Admin's children. -->
+  <div class="sidebar__spacer"></div>
+  <div class="sidebar__divider"></div>
+  @for (item of bottomTree(); track item.label) {
+    @if (isGroup(item)) {
+      <button class="nav-item nav-item--group"
+              [class.nav-item--active]="isInActiveTrail(item)"
+              (click)="onPinnedGroupClick(item)"
+              [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
+              matTooltipPosition="right"
+              [attr.aria-label]="item.i18nKey! | translate">
+        <span class="material-icons-outlined">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+          <span class="material-icons-outlined nav-item__chevron">chevron_right</span>
+        }
+      </button>
+    } @else {
+      <a class="nav-item"
+         [routerLink]="item.route"
+         routerLinkActive="nav-item--active"
+         [routerLinkActiveOptions]="{ exact: false }"
+         [matTooltip]="collapsed() ? (item.i18nKey! | translate) : ''"
+         matTooltipPosition="right"
+         [attr.aria-label]="item.i18nKey! | translate"
+         (click)="onLeafClick()">
+        <span class="material-icons-outlined">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-item__label">{{ item.i18nKey! | translate }}</span>
+        }
+      </a>
+    }
   }
 </aside>
