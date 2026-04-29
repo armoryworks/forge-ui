@@ -4229,5 +4229,33 @@
     "ctaSignIn": "Iniciar sesión en la demo",
     "footerLicense": "Software libre con licencia MIT",
     "footerGithub": "Ver en GitHub"
+  },
+  "workflow": {
+    "parts": {
+      "definitions": {
+        "assemblyGuidedV1": "Assembly setup",
+        "rawMaterialExpressV1": "Raw material quick-add"
+      },
+      "steps": {
+        "basics": "Basics",
+        "bom": "Bill of Materials",
+        "routing": "Routing",
+        "costing": "Cost",
+        "alternates": "Alternates",
+        "expressForm": "Quick add"
+      }
+    }
+  },
+  "validators": {
+    "parts": {
+      "hasBasics": "Basics",
+      "hasBasicsMissing": "Name, type, and material are required.",
+      "hasBom": "BOM",
+      "hasBomMissing": "BOM not yet defined.",
+      "hasRouting": "Routing",
+      "hasRoutingMissing": "Routing operations not yet defined.",
+      "hasCost": "Cost",
+      "hasCostMissing": "Cost not yet set."
+    }
   }
 }
