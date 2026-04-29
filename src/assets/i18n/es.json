@@ -35,13 +35,26 @@
     "mrp": "MRP",
     "scheduling": "Programación",
     "oee": "OEE",
-    "approvals": "Aprobaciones"
+    "approvals": "Aprobaciones",
+    "back": "Atrás"
   },
   "navGroups": {
     "operations": "Operaciones",
     "sales": "Ventas",
     "supply": "Suministro",
-    "resources": "Recursos"
+    "resources": "Recursos",
+    "production": "Producción",
+    "inventory": "Inventario",
+    "purchasing": "Compras",
+    "people": "Personas",
+    "insights": "Análisis"
+  },
+  "adminGroups": {
+    "usersAccess": "Usuarios y Acceso",
+    "masterData": "Datos Maestros",
+    "integrations": "Integraciones",
+    "workflow": "Flujo de Trabajo",
+    "system": "Sistema"
   },
   "header": {
     "home": "Inicio",
@@ -912,6 +925,8 @@
     "recurringDeleted": "Gasto recurrente eliminado.",
     "deleteRecurringTitle": "¿Eliminar Gasto Recurrente?",
     "deleteRecurringMessage": "Esto eliminará \"{{name}}\" de los gastos recurrentes.",
+    "existingReceipt": "Recibo existente",
+    "receiptRequiredHint": "Se requiere un recibo para este gasto antes de poder enviarlo.",
     "allClassifications": "Todas las Clasificaciones",
     "classSubscription": "Suscripción",
     "classLease": "Arrendamiento",
@@ -1061,7 +1076,11 @@
       "announcements": "Anuncios",
       "edi": "EDI",
       "mfa": "Política MFA",
-      "autoPo": "Auto-PO"
+      "autoPo": "Auto-PO",
+      "automations": "Automatizaciones",
+      "integrationOutbox": "Bandeja de Integración",
+      "expenses": "Política de Gastos",
+      "roleTemplates": "Plantillas de Rol"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -1256,7 +1275,13 @@
     "openKiosk": "Abrir reloj de kiosco",
     "selectColor": "Seleccionar color",
     "removeMember": "Quitar",
-    "addMember": "Agregar"
+    "addMember": "Agregar",
+    "remove": "Quitar",
+    "removeTerminal": "Quitar terminal",
+    "removeTerminalTitle": "¿Quitar Terminal?",
+    "removeTerminalConfirm": "¿Quitar el terminal \"{{name}}\"? Cualquier kiosco conectado en este terminal perderá su sesión de inmediato.",
+    "terminalRemoved": "Terminal eliminado",
+    "terminalRemoveFailed": "Error al eliminar el terminal"
   },
   "onboarding": {
     "completeProfile": "Complete su perfil de empleado",
@@ -1374,6 +1399,8 @@
     "fontScaleComfortable": "Cómodo",
     "fontScaleLarge": "Grande",
     "fontScaleXl": "Extra Grande",
+    "ambientIdleTimeout": "Tiempo de Inactividad para Modo Ambiental",
+    "ambientIdleTimeoutHint": "Tiempo de espera antes de entrar automáticamente en el modo ambiental (solo lectura) tras la inactividad.",
     "genderNone": "-- Ninguno --",
     "genderMale": "Masculino",
     "genderFemale": "Femenino",
@@ -4174,5 +4201,33 @@
     "tabSettings": "Settings",
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor"
+  },
+  "expenseSettings": {
+    "title": "Política de Gastos",
+    "intro": "Configura umbrales, requisitos de recibos y reglas de aprobación para los envíos de gastos.",
+    "allowSelfApproval": "Permitir auto-aprobación",
+    "allowSelfApprovalHint": "Cuando está activo, los empleados pueden aprobar automáticamente sus propios gastos hasta el umbral indicado abajo.",
+    "autoApproveThreshold": "Umbral de auto-aprobación",
+    "autoApproveThresholdHint": "Los gastos iguales o inferiores a este monto se aprueban automáticamente. Déjalo en blanco para exigir aprobación manual en cada gasto.",
+    "noAutoApprove": "Sin auto-aprobación",
+    "maxAmount": "Monto máximo del gasto",
+    "maxAmountHint": "El monto más alto que puede tener un solo gasto. Déjalo en blanco para no fijar límite superior.",
+    "noLimit": "Sin límite",
+    "requireReceipt": "Exigir recibo adjunto",
+    "requireReceiptHint": "Cuando está activo, los empleados deben adjuntar un archivo de recibo antes de enviar cualquier gasto.",
+    "minDescriptionLength": "Longitud mínima de descripción",
+    "minDescriptionLengthHint": "Descripción de gasto mínima aceptable (en caracteres). Usa 0 para permitir descripciones vacías.",
+    "saved": "Política de gastos guardada",
+    "thresholdExceedsMax": "El umbral de auto-aprobación no puede superar el monto máximo del gasto."
+  },
+  "welcomePage": {
+    "brandName": "QB Engineer",
+    "demoChip": "Demo",
+    "tagline": "Un ERP de código abierto para talleres de ingeniería.",
+    "lede": "QB Engineer es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a tu archivo de QuickBooks o de forma totalmente independiente.",
+    "caveat": "Esta es una demo pública. Los datos se reinician periódicamente y se comparten con todos los usuarios conectados.",
+    "ctaSignIn": "Iniciar sesión en la demo",
+    "footerLicense": "Software libre con licencia MIT",
+    "footerGithub": "Ver en GitHub"
   }
 }

@@ -35,13 +35,26 @@
     "mrp": "MRP",
     "scheduling": "Scheduling",
     "oee": "OEE",
-    "approvals": "Approvals"
+    "approvals": "Approvals",
+    "back": "Back"
   },
   "navGroups": {
     "operations": "Operations",
     "sales": "Sales",
     "supply": "Supply",
-    "resources": "Resources"
+    "resources": "Resources",
+    "production": "Production",
+    "inventory": "Inventory",
+    "purchasing": "Purchasing",
+    "people": "People",
+    "insights": "Insights"
+  },
+  "adminGroups": {
+    "usersAccess": "Users & Access",
+    "masterData": "Master Data",
+    "integrations": "Integrations",
+    "workflow": "Workflow",
+    "system": "System"
   },
   "header": {
     "home": "Home",
@@ -937,6 +950,8 @@
     "recurringDeleted": "Recurring expense deleted.",
     "deleteRecurringTitle": "Delete Recurring Expense?",
     "deleteRecurringMessage": "This will remove \"{{name}}\" from recurring expenses.",
+    "existingReceipt": "Existing receipt",
+    "receiptRequiredHint": "A receipt is required for this expense before it can be submitted.",
     "allClassifications": "All Classifications",
     "classSubscription": "Subscription",
     "classLease": "Lease",
@@ -1093,7 +1108,9 @@
       "mfa": "MFA Policy",
       "automations": "Automations",
       "integrationOutbox": "Integration Outbox",
-      "autoPo": "Auto-PO"
+      "autoPo": "Auto-PO",
+      "expenses": "Expense Policy",
+      "roleTemplates": "Role Templates"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -1288,7 +1305,13 @@
     "openKiosk": "Open kiosk clock",
     "selectColor": "Select color",
     "removeMember": "Remove",
-    "addMember": "Add"
+    "addMember": "Add",
+    "remove": "Remove",
+    "removeTerminal": "Remove terminal",
+    "removeTerminalTitle": "Remove Terminal?",
+    "removeTerminalConfirm": "Remove terminal \"{{name}}\"? Any kiosk connected on this terminal will lose its session immediately.",
+    "terminalRemoved": "Terminal removed",
+    "terminalRemoveFailed": "Failed to remove terminal"
   },
   "onboarding": {
     "completeProfile": "Complete your employee profile",
@@ -1594,6 +1617,8 @@
     "fontScaleComfortable": "Comfortable",
     "fontScaleLarge": "Large",
     "fontScaleXl": "Extra Large",
+    "ambientIdleTimeout": "Ambient Mode Idle Timeout",
+    "ambientIdleTimeoutHint": "How long to wait before automatically entering ambient (read-only) display mode after no activity.",
     "genderNone": "-- None --",
     "genderMale": "Male",
     "genderFemale": "Female",
@@ -4477,5 +4502,33 @@
     "tabSettings": "Settings",
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor"
+  },
+  "expenseSettings": {
+    "title": "Expense Policy",
+    "intro": "Configure thresholds, receipt requirements, and approval rules for expense submissions.",
+    "allowSelfApproval": "Allow self-approval",
+    "allowSelfApprovalHint": "When enabled, submitters may auto-approve their own expenses up to the threshold below.",
+    "autoApproveThreshold": "Auto-approve threshold",
+    "autoApproveThresholdHint": "Expenses at or below this amount are approved automatically. Leave blank to require manual approval on every expense.",
+    "noAutoApprove": "No auto-approval",
+    "maxAmount": "Maximum expense amount",
+    "maxAmountHint": "Largest amount a single expense may claim. Leave blank for no upper limit.",
+    "noLimit": "No limit",
+    "requireReceipt": "Require receipt attachment",
+    "requireReceiptHint": "When enabled, submitters must attach a receipt file before submitting any expense.",
+    "minDescriptionLength": "Minimum description length",
+    "minDescriptionLengthHint": "Shortest acceptable expense description (in characters). Use 0 to allow blank descriptions.",
+    "saved": "Expense policy saved",
+    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount."
+  },
+  "welcomePage": {
+    "brandName": "QB Engineer",
+    "demoChip": "Demo",
+    "tagline": "An open ERP for engineering shops.",
+    "lede": "QB Engineer is a self-hostable shop-floor + business management platform — kanban, jobs, parts, inventory, purchasing, sales, payroll, and more — designed to run alongside your QuickBooks file or completely standalone.",
+    "caveat": "This is a public demo. Data resets periodically and is shared with everyone signed in.",
+    "ctaSignIn": "Sign in to the demo",
+    "footerLicense": "MIT-licensed open source",
+    "footerGithub": "View on GitHub"
   }
 }
