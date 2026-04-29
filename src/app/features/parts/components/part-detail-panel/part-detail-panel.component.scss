@@ -601,6 +601,56 @@
   }
 }
 
+// ── Phase 5: Promote-to-Active section ──
+.promote-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+
+  &__hint {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-xs;
+  }
+}
+
+.promote-missing {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--error);
+  border-left-width: $border-width-accent;
+  background: var(--error-light);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    color: var(--error);
+
+    strong {
+      flex: 1;
+    }
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+    }
+  }
+
+  &__list {
+    margin: 0;
+    padding-left: $sp-xl;
+    color: var(--text);
+    font-size: $font-size-sm;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+}
+
 // ── Mobile ──
 @include mobile {
   .info-grid {

@@ -1,0 +1,33 @@
+<section class="part-basics-step" [appLoadingBlock]="saving()" data-testid="part-basics-step">
+  <header class="part-basics-step__header">
+    <h2 class="part-basics-step__title">{{ 'parts.workflow.basics.title' | translate }}</h2>
+    <p class="part-basics-step__hint">{{ 'parts.workflow.basics.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-basics-step__form">
+    <app-select
+      [label]="'parts.workflow.basics.partTypeLabel' | translate"
+      formControlName="partType"
+      [options]="partTypeOptions"
+      [required]="true"
+      data-testid="basics-part-type" />
+
+    <app-input
+      [label]="'parts.workflow.basics.descriptionLabel' | translate"
+      formControlName="description"
+      [required]="true"
+      data-testid="basics-description" />
+
+    <app-input
+      [label]="'parts.workflow.basics.materialLabel' | translate"
+      formControlName="material"
+      [required]="true"
+      data-testid="basics-material" />
+
+    <app-input
+      [label]="'parts.workflow.basics.externalPartNumberLabel' | translate"
+      formControlName="externalPartNumber"
+      [placeholder]="'parts.workflow.basics.externalPartNumberPlaceholder' | translate"
+      data-testid="basics-external-number" />
+  </form>
+</section>

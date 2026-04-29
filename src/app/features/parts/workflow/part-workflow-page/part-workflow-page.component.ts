@@ -1,0 +1,251 @@
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
+import { forkJoin, map } from 'rxjs';
+
+import { EntityValidator } from '../../../../shared/models/entity-validator.model';
+import { LoadingService } from '../../../../shared/services/loading.service';
+import { MissingValidator } from '../../../../shared/models/workflow-missing-validator.model';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { WorkflowDefinition } from '../../../../shared/models/workflow-definition.model';
+import { WorkflowComponent } from '../../../../shared/components/workflow/workflow.component';
+import { WorkflowRun } from '../../../../shared/models/workflow-run.model';
+import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { PartDetail } from '../../models/part-detail.model';
+import { PartsService } from '../../services/parts.service';
+
+/**
+ * Workflow Pattern Phase 5 — Parent page that mounts the generic
+ * {@link WorkflowComponent} shell over a Part. URL-as-source-of-truth: the
+ * `?workflow={definitionId}` query param toggles this view; `?step=` and
+ * `?mode=` track the user's progress and presentation choice.
+ *
+ * Owns the wiring between the shell's typed events and the
+ * {@link WorkflowService}'s API calls — keeps the shell pure of HTTP concerns.
+ */
+@Component({
+  selector: 'app-part-workflow-page',
+  standalone: true,
+  imports: [TranslatePipe, WorkflowComponent],
+  templateUrl: './part-workflow-page.component.html',
+  styleUrl: './part-workflow-page.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class PartWorkflowPageComponent {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly partsService = inject(PartsService);
+  private readonly workflowService = inject(WorkflowService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
+  private readonly loading = inject(LoadingService);
+
+  protected readonly part = signal<PartDetail | null>(null);
+  protected readonly run = signal<WorkflowRun | null>(null);
+  protected readonly definition = signal<WorkflowDefinition | null>(null);
+  protected readonly validators = signal<EntityValidator[]>([]);
+  protected readonly missingValidators = signal<MissingValidator[]>([]);
+
+  // ── URL-bound state ──
+  private readonly partIdFromUrl = toSignal(
+    this.route.paramMap.pipe(map((p) => {
+      const raw = p.get('id');
+      const n = raw ? parseInt(raw, 10) : 0;
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    })),
+    { initialValue: 0 },
+  );
+
+  private readonly definitionIdFromUrl = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('workflow') ?? '')),
+    { initialValue: '' },
+  );
+
+  private readonly stepFromUrl = toSignal(
+    this.route.queryParamMap.pipe(map((p) => p.get('step') ?? '')),
+    { initialValue: '' },
+  );
+
+  private readonly modeFromUrl = toSignal(
+    this.route.queryParamMap.pipe(map((p) => (p.get('mode') === 'express' ? 'express' : 'guided') as 'express' | 'guided')),
+    { initialValue: 'guided' as 'express' | 'guided' },
+  );
+
+  protected readonly entityTitle = computed(() => {
+    const p = this.part();
+    if (!p) return this.translate.instant('parts.workflow.page.loadingTitle');
+    return `${p.partNumber} — ${p.description ?? ''}`.trim().replace(/—\s*$/, '').trim();
+  });
+
+  constructor() {
+    effect(() => {
+      const partId = this.partIdFromUrl();
+      const definitionId = this.definitionIdFromUrl();
+      if (!partId || !definitionId) return;
+      this.loadWorkflowContext(partId, definitionId);
+    });
+
+    // When the URL step changes (back/forward, jump), patch the run pointer.
+    effect(() => {
+      const target = this.stepFromUrl();
+      const run = this.run();
+      if (!target || !run) return;
+      if (run.currentStepId === target) return;
+      this.run.set({ ...run, currentStepId: target });
+    });
+
+    // When the URL mode changes, patch the run mode.
+    effect(() => {
+      const mode = this.modeFromUrl();
+      const run = this.run();
+      if (!run || run.mode === mode) return;
+      this.run.set({ ...run, mode });
+    });
+  }
+
+  private loadWorkflowContext(partId: number, definitionId: string): void {
+    this.loading.start('part-workflow', this.translate.instant('parts.workflow.page.loading'));
+
+    forkJoin({
+      part: this.partsService.getPartById(partId),
+      activeRuns: this.workflowService.listActive(),
+      definitions: this.workflowService.loadDefinitionsForEntity('Part'),
+      validators: this.workflowService.loadValidatorsForEntity('Part'),
+    }).subscribe({
+      next: ({ part, activeRuns, definitions, validators }) => {
+        this.loading.stop('part-workflow');
+        const definition = definitions.find((d) => d.definitionId === definitionId) ?? null;
+        if (!definition) {
+          this.snackbar.error(this.translate.instant('parts.workflow.page.definitionMissing'));
+          this.router.navigate(['/parts']);
+          return;
+        }
+
+        const run = activeRuns.find((r) => r.entityType === 'Part' && r.entityId === partId
+          && r.completedAt == null && r.abandonedAt == null
+          && r.definitionId === definitionId) ?? null;
+
+        // No active run for this part + definition? Start one.
+        if (!run) {
+          this.workflowService.startRun({
+            entityType: 'Part',
+            definitionId,
+            mode: this.modeFromUrl(),
+          }).subscribe({
+            next: (created) => {
+              this.run.set(created);
+              this.part.set(part);
+              this.definition.set(definition);
+              this.validators.set(validators);
+              this.workflowService.setContext({ run: created, definition, entity: part, validators });
+            },
+            error: () => {
+              this.snackbar.error(this.translate.instant('parts.workflow.page.startFailed'));
+              this.router.navigate(['/parts']);
+            },
+          });
+        } else {
+          this.part.set(part);
+          this.run.set(run);
+          this.definition.set(definition);
+          this.validators.set(validators);
+          this.workflowService.setContext({ run, definition, entity: part, validators });
+
+          // Sync URL ?step= to the run's pointer if missing.
+          if (!this.stepFromUrl() && run.currentStepId) {
+            this.router.navigate([], {
+              relativeTo: this.route,
+              queryParams: { step: run.currentStepId, mode: run.mode },
+              queryParamsHandling: 'merge',
+              replaceUrl: true,
+            });
+          }
+        }
+      },
+      error: () => {
+        this.loading.stop('part-workflow');
+        this.snackbar.error(this.translate.instant('parts.workflow.page.loadFailed'));
+        this.router.navigate(['/parts']);
+      },
+    });
+  }
+
+  protected onModeChanged(mode: 'express' | 'guided'): void {
+    const run = this.run();
+    if (!run || run.mode === mode) return;
+    this.workflowService.setMode(run.id, mode).subscribe({
+      next: (updated) => {
+        this.run.set(updated);
+        this.workflowService.currentRun.set(updated);
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { mode },
+          queryParamsHandling: 'merge',
+        });
+      },
+    });
+  }
+
+  protected onStepJumped(stepId: string): void {
+    const run = this.run();
+    if (!run) return;
+    this.workflowService.jumpToStep(run.id, stepId).subscribe({
+      next: (updated) => {
+        this.run.set(updated);
+        this.workflowService.currentRun.set(updated);
+        this.router.navigate([], {
+          relativeTo: this.route,
+          queryParams: { step: stepId },
+          queryParamsHandling: 'merge',
+        });
+      },
+    });
+  }
+
+  protected onStepAdvanced(currentStepId: string): void {
+    const run = this.run();
+    const def = this.definition();
+    if (!run || !def) return;
+    const idx = def.steps.findIndex((s) => s.id === currentStepId);
+    const next = def.steps[idx + 1]?.id;
+    if (!next) return;
+    this.onStepJumped(next);
+  }
+
+  protected onStepBacked(targetStepId: string): void {
+    this.onStepJumped(targetStepId);
+  }
+
+  protected onStepSkipped(currentStepId: string): void {
+    this.onStepAdvanced(currentStepId);
+  }
+
+  protected onCompleteRequested(): void {
+    const run = this.run();
+    if (!run) return;
+    this.workflowService.completeRun(run.id).subscribe({
+      next: (result) => {
+        if (result.success) {
+          this.snackbar.success(this.translate.instant('parts.workflow.page.completeSuccess'));
+          this.router.navigate(['/parts']);
+        } else {
+          this.missingValidators.set(result.missing);
+          this.snackbar.error(this.translate.instant('parts.workflow.page.missingValidators', {
+            missing: result.missing.map((m) => this.translate.instant(m.displayNameKey)).join(', '),
+          }));
+        }
+      },
+    });
+  }
+
+  protected onClosed(): void {
+    this.workflowService.clearContext();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { workflow: null, step: null, mode: null },
+      queryParamsHandling: 'merge',
+    });
+  }
+}

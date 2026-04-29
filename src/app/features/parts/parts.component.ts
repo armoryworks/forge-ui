@@ -30,6 +30,8 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-grid.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { PartDetailDialogComponent, PartDetailDialogData } from './components/part-detail-dialog/part-detail-dialog.component';
+import { WorkflowService } from '../../shared/services/workflow.service';
+import { NewPartChoice, NewPartForkDialogComponent } from './workflow/new-part-fork-dialog/new-part-fork-dialog.component';
 
 type ViewMode = 'table' | 'cards';
 
@@ -58,6 +60,7 @@ export class PartsComponent {
   private readonly router = inject(Router);
   private readonly userPreferences = inject(UserPreferencesService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly workflowService = inject(WorkflowService);
 
   protected readonly loading = signal(false);
   protected readonly parts = signal<PartListItem[]>([]);
@@ -74,11 +77,13 @@ export class PartsComponent {
 
   // ── Page Filters ──
   protected readonly searchControl = new FormControl('');
-  protected readonly statusFilterControl = new FormControl<PartStatus | ''>('');
+  // Phase 5: status filter defaults to Active so Drafts (in-flight workflows) don't pollute the live list.
+  // The user opts into Drafts/All explicitly when they want to resume / audit.
+  protected readonly statusFilterControl = new FormControl<PartStatus | ''>('Active');
   protected readonly typeFilterControl = new FormControl<PartType | ''>('');
 
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
-  private readonly statusFilter = toSignal(this.statusFilterControl.valueChanges.pipe(startWith('' as PartStatus | '')), { initialValue: '' as PartStatus | '' });
+  private readonly statusFilter = toSignal(this.statusFilterControl.valueChanges.pipe(startWith('Active' as PartStatus | '')), { initialValue: 'Active' as PartStatus | '' });
   private readonly typeFilter = toSignal(this.typeFilterControl.valueChanges.pipe(startWith('' as PartType | '')), { initialValue: '' as PartType | '' });
 
   protected readonly statusFilterOptions: SelectOption[] = [
@@ -228,6 +233,34 @@ export class PartsComponent {
   // ── Detail Dialog ──
 
   protected openPartDetail(partId: number): void {
+    // Phase 5: if this is a Draft part, see if a workflow run exists and offer
+    // to resume; otherwise fall back to the regular detail dialog.
+    const part = this.parts().find(p => p.id === partId);
+    if (part?.status === 'Draft') {
+      this.tryResumeOrOpenDetail(partId);
+      return;
+    }
+    this.openDetailDialog(partId);
+  }
+
+  private tryResumeOrOpenDetail(partId: number): void {
+    this.workflowService.listActive().subscribe({
+      next: (runs) => {
+        const run = runs.find(r => r.entityType === 'Part' && r.entityId === partId
+          && r.completedAt == null && r.abandonedAt == null);
+        if (run) {
+          this.router.navigate(['/parts', partId], {
+            queryParams: { workflow: run.definitionId, step: run.currentStepId ?? 'basics', mode: run.mode },
+          });
+        } else {
+          this.openDetailDialog(partId);
+        }
+      },
+      error: () => this.openDetailDialog(partId),
+    });
+  }
+
+  private openDetailDialog(partId: number): void {
     this.detailDialog.open<PartDetailDialogComponent, PartDetailDialogData, { action: string; part: PartDetail } | undefined>(
       'part', partId, PartDetailDialogComponent, { partId }
     ).afterClosed().subscribe(result => {
@@ -238,9 +271,33 @@ export class PartsComponent {
     });
   }
 
+  /** Phase 5: visual marker on Draft rows so they're easy to spot. */
+  protected readonly partRowClass = (row: unknown): string => {
+    const part = row as PartListItem;
+    return part.status === 'Draft' ? 'part-row--draft' : '';
+  };
+
   // ── Part CRUD ──
 
+  /**
+   * Phase 5: Opens the New-Part fork dialog so the user picks express
+   * (single form) vs guided (workflow shell). Express → original create
+   * dialog (existing behavior). Guided → starts a `part-assembly-guided-v1`
+   * run and navigates to the workflow shell.
+   */
   protected openCreatePart(): void {
+    this.dialog.open(NewPartForkDialogComponent, { width: '540px' })
+      .afterClosed().subscribe((choice: NewPartChoice | undefined) => {
+        if (!choice) return;
+        if (choice === 'express') {
+          this.openExpressDialog();
+        } else {
+          this.startGuidedWorkflow();
+        }
+      });
+  }
+
+  private openExpressDialog(): void {
     this.editingPart.set(null);
     this.partForm.reset({
       description: '', revision: 'A',
@@ -250,6 +307,21 @@ export class PartsComponent {
       leadTimeDays: null, safetyStockDays: null,
     });
     this.showPartDialog.set(true);
+  }
+
+  private startGuidedWorkflow(): void {
+    this.workflowService.startRun({
+      entityType: 'Part',
+      definitionId: 'part-assembly-guided-v1',
+      mode: 'guided',
+    }).subscribe({
+      next: (run) => {
+        this.router.navigate(['/parts', run.entityId], {
+          queryParams: { workflow: 'part-assembly-guided-v1', step: 'basics', mode: 'guided' },
+        });
+      },
+      error: () => this.snackbar.error(this.translate.instant('parts.workflow.startFailed')),
+    });
   }
 
   protected editPart(part: PartDetail): void {

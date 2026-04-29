@@ -1,0 +1,123 @@
+@use 'styles/variables' as *;
+
+.part-costing-step {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  position: relative;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__modes {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    margin: 0;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+
+  &__modes-legend {
+    padding: 0 $sp-sm;
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  &__mode {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-md;
+    padding: $sp-md;
+    cursor: pointer;
+    border: $border-width-thin solid transparent;
+    transition: background-color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 5%, transparent);
+    }
+
+    input[type='radio'] {
+      margin-top: 2px;
+    }
+
+    &--disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+
+      &:hover {
+        background: transparent;
+      }
+    }
+  }
+
+  &__mode-body {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__mode-title {
+    font-size: $font-size-base;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  &__mode-desc {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    max-width: 480px;
+  }
+
+  &__current {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    padding: $sp-md;
+    border-left: $border-width-accent solid var(--primary);
+    background: var(--surface);
+  }
+
+  &__current-label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  &__current-value {
+    font-size: $font-size-md;
+    color: var(--text);
+    font-family: var(--font-mono, $font-family-mono);
+  }
+
+  &__current-empty {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}

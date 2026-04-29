@@ -1,0 +1,86 @@
+<section class="part-bom-step" [appLoadingBlock]="saving()" data-testid="part-bom-step">
+  <header class="part-bom-step__header">
+    <div class="part-bom-step__title-block">
+      <h2 class="part-bom-step__title">{{ 'parts.workflow.bom.title' | translate }}</h2>
+      <p class="part-bom-step__hint">{{ 'parts.workflow.bom.hint' | translate }}</p>
+    </div>
+    <button class="action-btn action-btn--create"
+      type="button"
+      data-testid="bom-add-btn"
+      (click)="openAdd()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'parts.workflow.bom.addEntry' | translate }}
+    </button>
+  </header>
+
+  @if (bomEntries().length === 0) {
+    <app-empty-state
+      icon="account_tree"
+      [message]="'parts.workflow.bom.emptyMessage' | translate"
+      [helpText]="'parts.workflow.bom.emptyHelp' | translate" />
+  } @else {
+    <app-data-table
+      tableId="parts-workflow-bom"
+      [columns]="bomColumns"
+      [data]="bomEntries()">
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn icon-btn--danger"
+          type="button"
+          [attr.aria-label]="'common.delete' | translate"
+          (click)="deleteEntry(row)">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</section>
+
+@if (showAddDialog()) {
+  <app-dialog [title]="'parts.workflow.bom.dialogTitle' | translate" (closed)="closeAdd()">
+    <div [formGroup]="form">
+      <app-entity-picker
+        [label]="'parts.workflow.bom.childPart' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        formControlName="childPartId"
+        [required]="true" />
+      <div class="dialog-row">
+        <app-input
+          [label]="'parts.bomQty' | translate"
+          formControlName="quantity"
+          type="number"
+          [required]="true" />
+        <app-select
+          [label]="'parts.bomSource' | translate"
+          formControlName="sourceType"
+          [options]="sourceTypeOptions" />
+      </div>
+      <div class="dialog-row">
+        <app-input
+          [label]="'parts.bomLeadTime' | translate"
+          formControlName="leadTimeDays"
+          type="number" />
+        <app-input
+          [label]="'parts.bomRefDes' | translate"
+          formControlName="referenceDesignator" />
+      </div>
+      <app-textarea
+        [label]="'parts.bomNotes' | translate"
+        formControlName="notes" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" type="button" (click)="closeAdd()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          type="button"
+          data-testid="bom-save-btn"
+          [disabled]="form.invalid || saving()"
+          (click)="save()">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

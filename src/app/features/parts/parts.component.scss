@@ -68,6 +68,13 @@
   &--obsolete { background: var(--error-light); border-color: var(--error); color: var(--error); }
 }
 
+// ─── Phase 5: Draft row marker ───
+:host ::ng-deep tr.part-row--draft .part-desc,
+:host ::ng-deep tr.part-row--draft .part-number {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
 .bom-count {
   @include uppercase-label(var(--font-size-xxs), 0, 700);
   display: inline-flex; align-items: center; justify-content: center;

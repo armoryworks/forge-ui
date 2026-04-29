@@ -15,4 +15,7 @@ export interface UpdatePartRequest {
   reorderQuantity?: number;
   leadTimeDays?: number;
   safetyStockDays?: number;
+  // Workflow Pattern Phase 5 — manual cost override (Tier 1 single-rate).
+  // Sentinel value -1 means "clear to null".
+  manualCostOverride?: number;
 }

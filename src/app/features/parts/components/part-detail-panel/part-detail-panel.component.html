@@ -264,6 +264,40 @@
               }
             </div>
           </div>
+
+          <!-- Phase 5: Promote to Active (Draft-only, runs readiness validators) -->
+          @if (part.status === 'Draft') {
+            <div class="promote-section">
+              <button class="action-btn action-btn--primary"
+                type="button"
+                data-testid="promote-to-active-btn"
+                [disabled]="promoting()"
+                (click)="promoteToActive()">
+                <span class="material-icons-outlined">verified</span>
+                {{ 'parts.workflow.promote.cta' | translate }}
+              </button>
+              <p class="promote-section__hint">{{ 'parts.workflow.promote.hint' | translate }}</p>
+
+              @if (promoteMissing().length > 0) {
+                <div class="promote-missing" data-testid="promote-missing">
+                  <div class="promote-missing__header">
+                    <span class="material-icons-outlined">error_outline</span>
+                    <strong>{{ 'parts.workflow.promote.missingHeader' | translate }}</strong>
+                    <button class="icon-btn" type="button"
+                      [attr.aria-label]="'common.close' | translate"
+                      (click)="dismissPromoteMissing()">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </div>
+                  <ul class="promote-missing__list">
+                    @for (m of promoteMissing(); track m.validatorId) {
+                      <li>{{ m.missingMessageKey | translate }}</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </div>
+          }
         }
 
         <!-- BOM Tab -->

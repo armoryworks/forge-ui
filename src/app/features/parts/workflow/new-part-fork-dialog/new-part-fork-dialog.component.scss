@@ -1,0 +1,64 @@
+@use 'styles/variables' as *;
+
+.new-part-fork {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__intro {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: $font-size-sm;
+  }
+
+  &__choice {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    transition: background-color $transition-fast, border-color $transition-fast;
+
+    &:hover, &:focus-visible {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+  }
+
+  &__icon {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+
+  &__chevron {
+    font-size: $icon-size-md;
+    color: var(--text-muted);
+  }
+}

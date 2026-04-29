@@ -1,0 +1,117 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
+import { Observable, of } from 'rxjs';
+
+import { environment } from '../../../../../environments/environment';
+import { PartDetail } from '../../models/part-detail.model';
+import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
+import { PartCostingStepComponent } from './part-costing-step.component';
+
+class FakeLoader implements TranslateLoader {
+  getTranslation(): Observable<Record<string, string>> { return of({}); }
+}
+
+function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
+  return {
+    id: 42, partNumber: 'PRT-00042', description: 'Widget', revision: 'A',
+    status: 'Draft', partType: 'Assembly', material: 'Steel',
+    moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
+    provider: null, preferredVendorId: null, preferredVendorName: null,
+    minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
+    leadTimeDays: null, safetyStockDays: null, isSerialTracked: false,
+    toolingAssetId: null, toolingAssetName: null,
+    manualCostOverride: null, currentCostCalculationId: null,
+    bomEntries: [], usedIn: [],
+    createdAt: new Date(), updatedAt: new Date(),
+    ...overrides,
+  };
+}
+
+describe('PartCostingStepComponent (Phase 5)', () => {
+  let httpMock: HttpTestingController;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [PartCostingStepComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
+      ],
+    }).compileComponents();
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('hydrates manualCostOverride from the entity', () => {
+    const component = TestBed.runInInjectionContext(() => new PartCostingStepComponent());
+    mockSignalInputs(component, {
+      stepId: 'costing', componentName: 'PartCostingStepComponent',
+      entityId: 42, entity: buildPart({ manualCostOverride: 12.5 }),
+    });
+    TestBed.flushEffects();
+    const form = (component as unknown as { form: { value: { manualCostOverride: number | null } } }).form;
+    expect(form.value.manualCostOverride).toBe(12.5);
+  });
+
+  it('only enables Tier 1 (flat) — Tier 2/3 setMode is rejected', () => {
+    const component = TestBed.runInInjectionContext(() => new PartCostingStepComponent());
+    mockSignalInputs(component, {
+      stepId: 'costing', componentName: 'PartCostingStepComponent',
+      entityId: 42, entity: buildPart(),
+    });
+    const c = component as unknown as {
+      mode(): 'flat' | 'departmental' | 'abc';
+      setMode(m: 'flat' | 'departmental' | 'abc'): void;
+    };
+    expect(c.mode()).toBe('flat');
+    c.setMode('departmental');
+    expect(c.mode()).toBe('flat'); // rejected
+    c.setMode('abc');
+    expect(c.mode()).toBe('flat'); // rejected
+  });
+
+  it('dispatches PATCH with manualCostOverride after debounce', () => {
+    vi.useFakeTimers();
+    try {
+      const component = TestBed.runInInjectionContext(() => new PartCostingStepComponent());
+      mockSignalInputs(component, {
+        stepId: 'costing', componentName: 'PartCostingStepComponent',
+        entityId: 42, entity: buildPart(),
+      });
+      TestBed.flushEffects();
+      const form = (component as unknown as { form: { patchValue(v: unknown): void } }).form;
+      form.patchValue({ manualCostOverride: 99 });
+      vi.advanceTimersByTime(700);
+      const req = httpMock.expectOne(`${environment.apiUrl}/parts/42`);
+      expect(req.request.method).toBe('PATCH');
+      expect(req.request.body.manualCostOverride).toBe(99);
+      req.flush(buildPart({ manualCostOverride: 99 }));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clearing manual override sends -1 sentinel', () => {
+    vi.useFakeTimers();
+    try {
+      const component = TestBed.runInInjectionContext(() => new PartCostingStepComponent());
+      mockSignalInputs(component, {
+        stepId: 'costing', componentName: 'PartCostingStepComponent',
+        entityId: 42, entity: buildPart({ manualCostOverride: 12 }),
+      });
+      TestBed.flushEffects();
+      const form = (component as unknown as { form: { patchValue(v: unknown): void } }).form;
+      form.patchValue({ manualCostOverride: null });
+      vi.advanceTimersByTime(700);
+      const req = httpMock.expectOne(`${environment.apiUrl}/parts/42`);
+      expect(req.request.body.manualCostOverride).toBe(-1);
+      req.flush(buildPart({ manualCostOverride: null }));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+});

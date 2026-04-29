@@ -26,6 +26,10 @@ export interface PartDetail {
   isSerialTracked: boolean;
   toolingAssetId: number | null;
   toolingAssetName: string | null;
+  // Workflow Pattern Phase 5 — surfaces cost gates so the workflow shell's
+  // hasCost predicate can read the part's current cost state.
+  manualCostOverride: number | null;
+  currentCostCalculationId: number | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: Date;

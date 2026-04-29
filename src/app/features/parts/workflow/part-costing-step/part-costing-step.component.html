@@ -1,0 +1,66 @@
+<section class="part-costing-step" [appLoadingBlock]="saving()" data-testid="part-costing-step">
+  <header class="part-costing-step__header">
+    <h2 class="part-costing-step__title">{{ 'parts.workflow.costing.title' | translate }}</h2>
+    <p class="part-costing-step__hint">{{ 'parts.workflow.costing.hint' | translate }}</p>
+  </header>
+
+  <fieldset class="part-costing-step__modes" role="radiogroup"
+    [attr.aria-label]="'parts.workflow.costing.modeLegend' | translate">
+    <legend class="part-costing-step__modes-legend">{{ 'parts.workflow.costing.modeLegend' | translate }}</legend>
+
+    <label class="part-costing-step__mode" data-testid="costing-mode-flat">
+      <input type="radio" name="costing-mode"
+        [checked]="mode() === 'flat'"
+        (change)="setMode('flat')" />
+      <div class="part-costing-step__mode-body">
+        <span class="part-costing-step__mode-title">{{ 'parts.workflow.costing.modeFlat' | translate }}</span>
+        <span class="part-costing-step__mode-desc">{{ 'parts.workflow.costing.modeFlatDesc' | translate }}</span>
+      </div>
+    </label>
+
+    <label class="part-costing-step__mode part-costing-step__mode--disabled"
+      data-testid="costing-mode-departmental"
+      [matTooltip]="'parts.workflow.costing.tier2Tooltip' | translate"
+      matTooltipPosition="right">
+      <input type="radio" name="costing-mode" disabled [checked]="false" />
+      <div class="part-costing-step__mode-body">
+        <span class="part-costing-step__mode-title">{{ 'parts.workflow.costing.modeDepartmental' | translate }}</span>
+        <span class="part-costing-step__mode-desc">{{ 'parts.workflow.costing.modeDepartmentalDesc' | translate }}</span>
+      </div>
+    </label>
+
+    <label class="part-costing-step__mode part-costing-step__mode--disabled"
+      data-testid="costing-mode-abc"
+      [matTooltip]="'parts.workflow.costing.tier3Tooltip' | translate"
+      matTooltipPosition="right">
+      <input type="radio" name="costing-mode" disabled [checked]="false" />
+      <div class="part-costing-step__mode-body">
+        <span class="part-costing-step__mode-title">{{ 'parts.workflow.costing.modeAbc' | translate }}</span>
+        <span class="part-costing-step__mode-desc">{{ 'parts.workflow.costing.modeAbcDesc' | translate }}</span>
+      </div>
+    </label>
+  </fieldset>
+
+  @if (isTier1()) {
+    <form [formGroup]="form" class="part-costing-step__form">
+      <app-input
+        [label]="'parts.workflow.costing.manualOverrideLabel' | translate"
+        formControlName="manualCostOverride"
+        type="number"
+        [placeholder]="'parts.workflow.costing.manualOverridePlaceholder' | translate"
+        prefix="$"
+        data-testid="costing-manual-override" />
+
+      <div class="part-costing-step__current">
+        <span class="part-costing-step__current-label">{{ 'parts.workflow.costing.currentLabel' | translate }}</span>
+        <span class="part-costing-step__current-value">
+          @if (displayedCost(); as cost) {
+            ${{ cost }}
+          } @else {
+            <span class="part-costing-step__current-empty">{{ 'parts.workflow.costing.notSet' | translate }}</span>
+          }
+        </span>
+      </div>
+    </form>
+  }
+</section>

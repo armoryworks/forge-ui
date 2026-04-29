@@ -577,7 +577,87 @@
     "inventoryReplenishment": "Inventory & Replenishment",
     "minStockThreshold": "Min Stock Threshold",
     "reorderQuantity": "Reorder Quantity",
-    "safetyStockDays": "Safety Stock Days"
+    "safetyStockDays": "Safety Stock Days",
+    "workflow": {
+      "startFailed": "Couldn't start the workflow.",
+      "fork": {
+        "title": "How would you like to add this part?",
+        "intro": "Pick the path that fits this part's complexity. You can switch later.",
+        "expressTitle": "Express add",
+        "expressDesc": "One form, all fields visible. Best for raw materials, fasteners, simple parts.",
+        "guidedTitle": "Step-by-step setup",
+        "guidedDesc": "Walks you through basics, BOM, routing, cost, and alternates. Best for assemblies."
+      },
+      "basics": {
+        "title": "Basics",
+        "hint": "Type, description, and material — the minimum to identify this part.",
+        "partTypeLabel": "Type",
+        "descriptionLabel": "Description",
+        "materialLabel": "Material",
+        "externalPartNumberLabel": "External Part #",
+        "externalPartNumberPlaceholder": "Vendor / customer part number (optional)",
+        "saveFailed": "Couldn't save basics."
+      },
+      "bom": {
+        "title": "Bill of Materials",
+        "hint": "List every component this assembly uses. You'll need at least one entry to continue.",
+        "addEntry": "Add Component",
+        "dialogTitle": "Add Component",
+        "childPart": "Part",
+        "saveFailed": "Couldn't save BOM entry.",
+        "emptyMessage": "No components yet.",
+        "emptyHelp": "Add components from the parts catalog to define this assembly's BOM."
+      },
+      "routing": {
+        "title": "Routing",
+        "hint": "Define the operation steps to manufacture this part.",
+        "refreshStatus": "Refresh status"
+      },
+      "costing": {
+        "title": "Cost",
+        "hint": "Set how this part's cost is calculated and (for Tier 1) the manual price.",
+        "modeLegend": "Costing mode",
+        "modeFlat": "Tier 1 — Manual override",
+        "modeFlatDesc": "Single fixed amount entered by you. Use until you have data for tiered costing.",
+        "modeDepartmental": "Tier 2 — Departmental rates",
+        "modeDepartmentalDesc": "Per-cost-center percentage applied based on routing.",
+        "modeAbc": "Tier 3 — Activity-based costing",
+        "modeAbcDesc": "Cost pools allocated by drivers (square footage, machine hours, etc.).",
+        "tier2Tooltip": "Requires CAP-COSTING-DEPARTMENTAL capability",
+        "tier3Tooltip": "Requires CAP-COSTING-ABC capability",
+        "manualOverrideLabel": "Manual cost override",
+        "manualOverridePlaceholder": "0.00",
+        "currentLabel": "Currently displayed cost",
+        "notSet": "Not set",
+        "saveFailed": "Couldn't save costing."
+      },
+      "alternates": {
+        "title": "Alternates",
+        "hint": "Optional — list substitute or equivalent parts for procurement flexibility."
+      },
+      "express": {
+        "title": "Quick add",
+        "hint": "Fill in everything at once. Switch to step-by-step from the header anytime.",
+        "saveFailed": "Couldn't save part."
+      },
+      "page": {
+        "loading": "Loading workflow…",
+        "loadingTitle": "Loading…",
+        "loadFailed": "Couldn't load this workflow.",
+        "definitionMissing": "Workflow definition not found.",
+        "startFailed": "Couldn't start the workflow.",
+        "completeSuccess": "Part promoted to Active.",
+        "missingValidators": "Cannot complete: missing {{missing}}"
+      },
+      "promote": {
+        "cta": "Promote to Active",
+        "hint": "Runs readiness checks. Tells you what's missing if anything blocks promotion.",
+        "success": "Part promoted to Active.",
+        "missingShort": "Some readiness gates aren't satisfied yet.",
+        "missingHeader": "Cannot promote — missing data:",
+        "failed": "Couldn't promote this part."
+      }
+    }
   },
   "inventory": {
     "title": "Inventory",

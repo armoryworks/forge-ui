@@ -557,7 +557,87 @@
     "inventoryReplenishment": "Inventario y Reposición",
     "minStockThreshold": "Umbral Mínimo de Stock",
     "reorderQuantity": "Cantidad de Reorden",
-    "safetyStockDays": "Días de Stock de Seguridad"
+    "safetyStockDays": "Días de Stock de Seguridad",
+    "workflow": {
+      "startFailed": "No se pudo iniciar el flujo.",
+      "fork": {
+        "title": "¿Cómo desea agregar esta pieza?",
+        "intro": "Elija la ruta que se ajuste a la complejidad. Puede cambiar más tarde.",
+        "expressTitle": "Alta rápida",
+        "expressDesc": "Un formulario, todos los campos visibles. Mejor para materias primas y piezas simples.",
+        "guidedTitle": "Configuración paso a paso",
+        "guidedDesc": "Le guía por básicos, BOM, ruta, costo y alternativos. Mejor para ensamblajes."
+      },
+      "basics": {
+        "title": "Básicos",
+        "hint": "Tipo, descripción y material — lo mínimo para identificar la pieza.",
+        "partTypeLabel": "Tipo",
+        "descriptionLabel": "Descripción",
+        "materialLabel": "Material",
+        "externalPartNumberLabel": "N.º de pieza externa",
+        "externalPartNumberPlaceholder": "Número de pieza del proveedor / cliente (opcional)",
+        "saveFailed": "No se pudo guardar."
+      },
+      "bom": {
+        "title": "Lista de Materiales",
+        "hint": "Liste cada componente. Necesitará al menos una entrada para continuar.",
+        "addEntry": "Agregar componente",
+        "dialogTitle": "Agregar componente",
+        "childPart": "Pieza",
+        "saveFailed": "No se pudo guardar.",
+        "emptyMessage": "Sin componentes.",
+        "emptyHelp": "Agregue componentes del catálogo para definir el BOM."
+      },
+      "routing": {
+        "title": "Ruta",
+        "hint": "Defina los pasos de operación para fabricar esta pieza.",
+        "refreshStatus": "Actualizar estado"
+      },
+      "costing": {
+        "title": "Costo",
+        "hint": "Defina cómo se calcula el costo y (Nivel 1) el precio manual.",
+        "modeLegend": "Modo de costeo",
+        "modeFlat": "Nivel 1 — Sustitución manual",
+        "modeFlatDesc": "Monto fijo único ingresado por usted.",
+        "modeDepartmental": "Nivel 2 — Tarifas departamentales",
+        "modeDepartmentalDesc": "Porcentaje por centro de costos según la ruta.",
+        "modeAbc": "Nivel 3 — Costeo basado en actividades",
+        "modeAbcDesc": "Asignación por drivers (m², horas máquina, etc.).",
+        "tier2Tooltip": "Requiere capacidad CAP-COSTING-DEPARTMENTAL",
+        "tier3Tooltip": "Requiere capacidad CAP-COSTING-ABC",
+        "manualOverrideLabel": "Sustitución manual de costo",
+        "manualOverridePlaceholder": "0.00",
+        "currentLabel": "Costo mostrado actualmente",
+        "notSet": "No definido",
+        "saveFailed": "No se pudo guardar."
+      },
+      "alternates": {
+        "title": "Alternativos",
+        "hint": "Opcional — liste piezas sustitutas o equivalentes."
+      },
+      "express": {
+        "title": "Alta rápida",
+        "hint": "Llene todo de una vez.",
+        "saveFailed": "No se pudo guardar."
+      },
+      "page": {
+        "loading": "Cargando flujo…",
+        "loadingTitle": "Cargando…",
+        "loadFailed": "No se pudo cargar.",
+        "definitionMissing": "Definición de flujo no encontrada.",
+        "startFailed": "No se pudo iniciar.",
+        "completeSuccess": "Pieza promovida a Activa.",
+        "missingValidators": "No se puede completar: falta {{missing}}"
+      },
+      "promote": {
+        "cta": "Promover a Activa",
+        "hint": "Ejecuta verificaciones de disponibilidad.",
+        "success": "Pieza promovida a Activa.",
+        "missingShort": "Aún faltan algunos requisitos.",
+        "missingHeader": "No se puede promover — falta:",
+        "failed": "No se pudo promover."
+      }
+    }
   },
   "inventory": {
     "title": "Inventario",

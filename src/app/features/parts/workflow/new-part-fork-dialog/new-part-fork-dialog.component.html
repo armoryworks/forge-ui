@@ -1,0 +1,33 @@
+<app-dialog [title]="'parts.workflow.fork.title' | translate" width="540px" (closed)="close()">
+  <div class="new-part-fork">
+    <p class="new-part-fork__intro">{{ 'parts.workflow.fork.intro' | translate }}</p>
+
+    <button class="new-part-fork__choice"
+      type="button"
+      data-testid="fork-express"
+      (click)="pick('express')">
+      <span class="new-part-fork__icon material-icons-outlined" aria-hidden="true">flash_on</span>
+      <span class="new-part-fork__body">
+        <span class="new-part-fork__title">{{ 'parts.workflow.fork.expressTitle' | translate }}</span>
+        <span class="new-part-fork__desc">{{ 'parts.workflow.fork.expressDesc' | translate }}</span>
+      </span>
+      <span class="new-part-fork__chevron material-icons-outlined" aria-hidden="true">chevron_right</span>
+    </button>
+
+    <button class="new-part-fork__choice"
+      type="button"
+      data-testid="fork-guided"
+      (click)="pick('guided')">
+      <span class="new-part-fork__icon material-icons-outlined" aria-hidden="true">view_list</span>
+      <span class="new-part-fork__body">
+        <span class="new-part-fork__title">{{ 'parts.workflow.fork.guidedTitle' | translate }}</span>
+        <span class="new-part-fork__desc">{{ 'parts.workflow.fork.guidedDesc' | translate }}</span>
+      </span>
+      <span class="new-part-fork__chevron material-icons-outlined" aria-hidden="true">chevron_right</span>
+    </button>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" type="button" (click)="close()">{{ 'common.cancel' | translate }}</button>
+  </div>
+</app-dialog>

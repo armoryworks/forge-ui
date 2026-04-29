@@ -6,6 +6,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
+import { MissingValidator } from '../../../../shared/models/workflow-missing-validator.model';
+import { WorkflowService } from '../../../../shared/services/workflow.service';
+
 import { PartsService } from '../../services/parts.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartListItem } from '../../models/part-list-item.model';
@@ -68,6 +71,11 @@ export class PartDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly workflowService = inject(WorkflowService);
+
+  /** Phase 5: Promote-to-Active workflow state. */
+  protected readonly promoting = signal(false);
+  protected readonly promoteMissing = signal<MissingValidator[]>([]);
 
   readonly partId = input.required<number>();
   readonly closed = output<void>();
@@ -226,6 +234,39 @@ export class PartDetailPanelComponent {
         this.part.set(detail);
       },
     });
+  }
+
+  /**
+   * Phase 5 — Promote-to-Active flow. Calls the readiness-gated server
+   * endpoint; on success reloads the part. On 409 with missing validators,
+   * shows the missing list inline so the user can address each gate
+   * (e.g. "BOM not yet defined").
+   */
+  protected promoteToActive(): void {
+    const p = this.part();
+    if (!p) return;
+    this.promoting.set(true);
+    this.promoteMissing.set([]);
+    this.workflowService.promoteEntityStatus('Part', p.id, 'Active').subscribe({
+      next: (result) => {
+        this.promoting.set(false);
+        if (result.success) {
+          this.snackbar.success(this.translate.instant('parts.workflow.promote.success'));
+          this.loadDetail(p.id);
+        } else {
+          this.promoteMissing.set(result.missing);
+          this.snackbar.error(this.translate.instant('parts.workflow.promote.missingShort'));
+        }
+      },
+      error: () => {
+        this.promoting.set(false);
+        this.snackbar.error(this.translate.instant('parts.workflow.promote.failed'));
+      },
+    });
+  }
+
+  protected dismissPromoteMissing(): void {
+    this.promoteMissing.set([]);
   }
 
   protected addPrice(): void {

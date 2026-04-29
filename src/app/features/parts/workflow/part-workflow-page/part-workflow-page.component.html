@@ -1,0 +1,20 @@
+@if (run() && definition()) {
+  <app-workflow
+    data-testid="part-workflow-shell"
+    [run]="run()"
+    [definition]="definition()"
+    [entity]="part()"
+    [validators]="validators()"
+    [entityTitle]="entityTitle()"
+    (modeChanged)="onModeChanged($event)"
+    (stepJumped)="onStepJumped($event)"
+    (stepAdvanced)="onStepAdvanced($event)"
+    (stepBacked)="onStepBacked($event)"
+    (stepSkipped)="onStepSkipped($event)"
+    (completeRequested)="onCompleteRequested()"
+    (closed)="onClosed()" />
+} @else {
+  <div class="part-workflow-page__loading">
+    {{ 'parts.workflow.page.loading' | translate }}
+  </div>
+}

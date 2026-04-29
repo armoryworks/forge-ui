@@ -1,0 +1,19 @@
+<section class="part-routing-step" data-testid="part-routing-step">
+  <header class="part-routing-step__header">
+    <div class="part-routing-step__title-block">
+      <h2 class="part-routing-step__title">{{ 'parts.workflow.routing.title' | translate }}</h2>
+      <p class="part-routing-step__hint">{{ 'parts.workflow.routing.hint' | translate }}</p>
+    </div>
+    <button class="action-btn"
+      type="button"
+      data-testid="routing-refresh-btn"
+      (click)="refreshGates()">
+      <span class="material-icons-outlined">refresh</span>
+      {{ 'parts.workflow.routing.refreshStatus' | translate }}
+    </button>
+  </header>
+
+  @if (entityId(); as id) {
+    <app-routing [partId]="id" [bomEntries]="bomEntries()" />
+  }
+</section>
