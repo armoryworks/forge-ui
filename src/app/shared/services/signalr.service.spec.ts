@@ -4,12 +4,14 @@ import { HubConnectionState } from '@microsoft/signalr';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
 
-// Create a factory so each test gets a fresh mock connection.
-// HubConnectionState.Disconnected resolves through the vi.mock below at first
-// access; we lazy-initialize to avoid touching the import before the mock is
-// installed.
-function createMockConnection() {
-  return {
+// Use vi.hoisted() so the holder is created at the same hoist phase as
+// vi.mock(), guaranteeing the factory closure binds to a real object before
+// any module (this spec OR a co-loaded sibling spec like board-hub) imports
+// '@microsoft/signalr'. Without this, parallel-worker module-cache contention
+// can let the real SignalR module load first, causing the mock to never apply
+// and tests to time out trying to negotiate a real HTTP connection.
+const mocks = vi.hoisted(() => {
+  const createMockConnection = () => ({
     state: 'Disconnected' as string,
     start: vi.fn().mockResolvedValue(undefined),
     stop: vi.fn().mockResolvedValue(undefined),
@@ -19,11 +21,17 @@ function createMockConnection() {
     onreconnecting: vi.fn(),
     onreconnected: vi.fn(),
     onclose: vi.fn(),
-  };
-}
+  });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let mockConnection: ReturnType<typeof createMockConnection>;
+  // Holder pattern: the factory's HubConnectionBuilder.build() reads
+  // holder.connection lazily, so beforeEach can swap in a fresh mock per test
+  // without re-registering the mock module.
+  const holder: { connection: ReturnType<typeof createMockConnection> } = {
+    connection: createMockConnection(),
+  };
+
+  return { createMockConnection, holder };
+});
 
 vi.mock('@microsoft/signalr', () => {
   const HubConnectionState = {
@@ -43,7 +51,7 @@ vi.mock('@microsoft/signalr', () => {
     withUrl() { return this; }
     withAutomaticReconnect() { return this; }
     configureLogging() { return this; }
-    build() { return mockConnection; }
+    build() { return mocks.holder.connection; }
   }
 
   return {
@@ -55,10 +63,12 @@ vi.mock('@microsoft/signalr', () => {
 
 describe('SignalrService', () => {
   let service: SignalrService;
+  let mockConnection: ReturnType<typeof mocks.createMockConnection>;
   let mockAuthService: { token: ReturnType<typeof vi.fn>; isAuthenticated: ReturnType<typeof vi.fn>; clearAuth: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    mockConnection = createMockConnection();
+    mockConnection = mocks.createMockConnection();
+    mocks.holder.connection = mockConnection;
 
     mockAuthService = {
       token: vi.fn().mockReturnValue('test-token'),
