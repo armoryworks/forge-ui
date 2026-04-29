@@ -1,12 +1,19 @@
 # Release workflow for qb-engineer-ui
 #
 # Triggers:
-#   - push to main             -> builds and publishes :main-<sha> + :latest
-#   - push of a v*.*.* tag     -> builds and publishes :X.Y.Z + :X.Y + :X
+#   - push to main             -> :main-<sha> + :latest
+#   - push of a v*.*.* tag     -> :X.Y.Z + :X.Y + :X
 #
-# Image goes to GHCR (ghcr.io/danielhokanson/qb-engineer-ui).
-# No automatic deployment — pulling the image into a deploy environment
-# is handled by the qb-engineer-deploy repo.
+# Image goes to GHCR (ghcr.io/danielhokanson/qb-engineer-ui) as a native
+# linux/arm64 build (Raspberry Pi production target). Mirrors the
+# qb-engineer-server release.yml shape (Phase 2 reference). To add amd64
+# later, set `platforms` on build-push to `linux/arm64,linux/amd64` and
+# add a `docker/setup-qemu-action` step.
+#
+# Tests gate the image push: lint + build + Vitest must succeed before
+# the build-and-push job starts. A failing test means no image is
+# published. This absorbs the gate that ci.yml provides for PRs into
+# the release path so broken commits on main never produce an image.
 
 name: Release
 
@@ -17,15 +24,45 @@ on:
 
 permissions:
   contents: read
-  packages: write          # required to push to GHCR
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-and-push:
+  test:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Unit tests (Vitest)
+        run: npm run test -- --run
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-24.04-arm
     timeout-minutes: 30
 
     steps:
@@ -41,16 +78,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels)
+      - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # main branch -> main-<sha> + latest
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix=main-,format=short,enable=${{ github.ref == 'refs/heads/main' }}
-            # vX.Y.Z tag -> X.Y.Z, X.Y, X
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
@@ -61,7 +96,11 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          platforms: linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            BUILD_VERSION=${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+            BUILD_SHA=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
