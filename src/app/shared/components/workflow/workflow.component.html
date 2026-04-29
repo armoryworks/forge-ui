@@ -1,0 +1,134 @@
+<div class="workflow-shell" [class.workflow-shell--guided]="mode() === 'guided'" [class.workflow-shell--express]="mode() === 'express'">
+  <header class="workflow-shell__header">
+    <div class="workflow-shell__title-block">
+      @if (entityTitle(); as title) {
+        <h1 class="workflow-shell__title">{{ title }}</h1>
+      }
+      @if (currentStep(); as step) {
+        <span class="workflow-shell__step-label">{{ step.labelKey | translate }}</span>
+      }
+    </div>
+
+    <div class="workflow-shell__mode-toggle" role="group" [attr.aria-label]="'workflow.shell.mode.toggle' | translate">
+      <button
+        type="button"
+        class="workflow-shell__mode-btn"
+        [class.workflow-shell__mode-btn--active]="mode() === 'express'"
+        [attr.aria-pressed]="mode() === 'express'"
+        data-testid="workflow-mode-express"
+        (click)="setMode('express')">
+        {{ 'workflow.shell.mode.express' | translate }}
+      </button>
+      <button
+        type="button"
+        class="workflow-shell__mode-btn"
+        [class.workflow-shell__mode-btn--active]="mode() === 'guided'"
+        [attr.aria-pressed]="mode() === 'guided'"
+        data-testid="workflow-mode-guided"
+        (click)="setMode('guided')">
+        {{ 'workflow.shell.mode.guided' | translate }}
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="icon-btn"
+      [attr.aria-label]="'workflow.shell.actions.close' | translate"
+      [matTooltip]="'workflow.shell.actions.close' | translate"
+      data-testid="workflow-close"
+      (click)="close()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </header>
+
+  <div class="workflow-shell__body">
+    @if (mode() === 'guided') {
+      <nav class="workflow-shell__rail" [attr.aria-label]="'workflow.shell.steps.heading' | translate" data-testid="workflow-rail">
+        <ol class="workflow-shell__rail-list">
+          @for (step of steps(); track step.id; let i = $index) {
+            <li class="workflow-step"
+                [class.workflow-step--current]="isCurrent(step)"
+                [class.workflow-step--complete]="isComplete(step)"
+                [class.workflow-step--locked]="isFutureStep(step)">
+              <button
+                type="button"
+                class="workflow-step__btn"
+                [disabled]="isFutureStep(step)"
+                [attr.aria-current]="isCurrent(step) ? 'step' : null"
+                [attr.aria-disabled]="isFutureStep(step)"
+                [attr.data-testid]="'workflow-step-' + step.id"
+                (click)="jumpTo(step)">
+                <span class="workflow-step__indicator" aria-hidden="true">
+                  @if (isComplete(step)) {
+                    <span class="material-icons-outlined">check</span>
+                  } @else if (isFutureStep(step)) {
+                    <span class="material-icons-outlined">lock</span>
+                  } @else {
+                    <span class="workflow-step__index">{{ i + 1 }}</span>
+                  }
+                </span>
+                <span class="workflow-step__label">{{ step.labelKey | translate }}</span>
+                @if (!step.required) {
+                  <span class="workflow-step__optional">{{ 'workflow.shell.optional' | translate }}</span>
+                }
+              </button>
+            </li>
+          }
+        </ol>
+      </nav>
+
+      <main class="workflow-shell__step-content" data-testid="workflow-step-content">
+        <ng-container *ngComponentOutlet="currentStepComponent(); inputs: stepInputs()" />
+      </main>
+    } @else {
+      <main class="workflow-shell__express" data-testid="workflow-express-content">
+        <ng-container *ngComponentOutlet="expressComponent(); inputs: expressInputs()" />
+      </main>
+    }
+  </div>
+
+  <footer class="workflow-shell__footer">
+    @if (mode() === 'guided') {
+      <button
+        type="button"
+        class="action-btn"
+        [disabled]="isFirstStep()"
+        data-testid="workflow-back"
+        (click)="back()">
+        {{ 'workflow.shell.actions.back' | translate }}
+      </button>
+
+      @if (currentStep(); as step) {
+        @if (!step.required) {
+          <button
+            type="button"
+            class="action-btn"
+            data-testid="workflow-skip"
+            (click)="skip()">
+            {{ 'workflow.shell.actions.skip' | translate }}
+          </button>
+        }
+      }
+
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        data-testid="workflow-next"
+        (click)="next()">
+        @if (isLastStep()) {
+          {{ 'workflow.shell.actions.complete' | translate }}
+        } @else {
+          {{ 'workflow.shell.actions.continue' | translate }}
+        }
+      </button>
+    } @else {
+      <button
+        type="button"
+        class="action-btn action-btn--primary"
+        data-testid="workflow-complete"
+        (click)="completeRequested.emit()">
+        {{ 'workflow.shell.actions.complete' | translate }}
+      </button>
+    }
+  </footer>
+</div>

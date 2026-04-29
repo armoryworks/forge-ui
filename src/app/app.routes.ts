@@ -243,6 +243,15 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
       },
+      {
+        // Workflow Pattern Phase 4 — demo route, no role gating (any
+        // authenticated user can poke at the shell). Phase 5+ wires
+        // per-entity workflow surfaces into their own routes.
+        path: 'workflow-shell-demo',
+        loadComponent: () =>
+          import('./features/workflow-demo/workflow-shell-demo.component')
+            .then(m => m.WorkflowShellDemoComponent),
+      },
     ],
   },
   {

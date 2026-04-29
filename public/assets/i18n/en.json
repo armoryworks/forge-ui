@@ -4413,5 +4413,52 @@
     "caveat": "This is a fully interactive demo — every screen is real, every button works, but nothing saves server-side. Changes live in your browser tab and reset on refresh. Any email / password works.",
     "footerLicense": "Open source · GNU licensed",
     "footerGithub": "GitHub"
+  },
+  "workflow": {
+    "shell": {
+      "actions": {
+        "back": "Back",
+        "continue": "Continue",
+        "complete": "Mark Complete",
+        "skip": "Skip",
+        "close": "Close"
+      },
+      "mode": {
+        "express": "Express",
+        "guided": "Guided",
+        "toggle": "Mode"
+      },
+      "optional": "Optional",
+      "steps": {
+        "heading": "Steps"
+      },
+      "resume": {
+        "heading": "Workflow drafts in progress",
+        "message": "Pick up where you left off.",
+        "resumeButton": "Resume",
+        "dismissButton": "Dismiss",
+        "empty": "No drafts in progress.",
+        "loadFailed": "Couldn't load active drafts."
+      }
+    },
+    "demo": {
+      "steps": {
+        "basics": "Basics",
+        "bom": "Bill of Materials",
+        "routing": "Routing",
+        "costing": "Cost",
+        "alternates": "Alternates"
+      },
+      "readiness": {
+        "basics": "Basics",
+        "basicsMissing": "Name, type, and material are required.",
+        "bom": "BOM",
+        "bomMissing": "BOM not yet defined.",
+        "routing": "Routing",
+        "routingMissing": "Routing operations not yet defined.",
+        "cost": "Cost",
+        "costMissing": "Cost not yet set."
+      }
+    }
   }
 }

@@ -1,0 +1,97 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.workflow-shell-demo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  flex: 1;
+  min-height: 0;
+  background: var(--bg);
+
+  &__shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  &__editor {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    padding: $sp-lg;
+    border-left: $border-width-thin solid var(--border);
+    background: var(--surface);
+    overflow-y: auto;
+    @include custom-scrollbar(8px);
+  }
+
+  &__editor-title {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__editor-hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__group {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    border: $border-width-thin solid var(--border);
+    padding: $sp-md;
+    margin: 0;
+
+    legend {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      padding: 0 $sp-xs;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: $sp-xs;
+      font-size: $font-size-sm;
+    }
+
+    input {
+      padding: $sp-xs $sp-sm;
+      border: $border-width-thin solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: $font-size-sm;
+    }
+
+    button {
+      align-self: flex-start;
+      padding: $sp-xs $sp-md;
+      border: $border-width-thin solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      cursor: pointer;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+@include mobile {
+  .workflow-shell-demo {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 1fr auto;
+    overflow-y: auto;
+  }
+}

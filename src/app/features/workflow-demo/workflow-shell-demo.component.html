@@ -1,0 +1,74 @@
+<div class="workflow-shell-demo">
+  <div class="workflow-shell-demo__shell">
+    <app-workflow
+      [run]="run()"
+      [definition]="definition()"
+      [entity]="entity()"
+      [validators]="validators()"
+      entityTitle="Demo Assembly"
+      (closed)="onClosed()"
+      (stepJumped)="onStepJumped($event)"
+      (modeChanged)="onModeChanged($event)"
+      (stepAdvanced)="onStepAdvanced($event)"
+      (stepBacked)="onStepBacked($event)"
+      (stepSkipped)="onStepSkipped($event)"
+      (completeRequested)="onCompleteRequested()" />
+  </div>
+
+  <aside class="workflow-shell-demo__editor" data-testid="workflow-demo-editor">
+    <h2 class="workflow-shell-demo__editor-title">Entity editor (demo)</h2>
+    <p class="workflow-shell-demo__editor-hint">
+      Mutate the entity below and watch the shell's step rail mark steps complete in real time.
+    </p>
+
+    <fieldset class="workflow-shell-demo__group">
+      <legend>basics</legend>
+      <label>
+        Name
+        <input
+          type="text"
+          data-testid="demo-field-name"
+          [value]="getName()"
+          (input)="setField('name', $any($event.target).value)" />
+      </label>
+      <label>
+        Type
+        <input
+          type="text"
+          data-testid="demo-field-type"
+          [value]="getType()"
+          (input)="setField('type', $any($event.target).value)" />
+      </label>
+      <label>
+        Material
+        <input
+          type="text"
+          data-testid="demo-field-material"
+          [value]="getMaterial()"
+          (input)="setField('material', $any($event.target).value)" />
+      </label>
+    </fieldset>
+
+    <fieldset class="workflow-shell-demo__group">
+      <legend>bom ({{ getBomCount() }})</legend>
+      <button type="button" data-testid="demo-add-bom" (click)="addBomEntry()">+ Add BOM entry</button>
+    </fieldset>
+
+    <fieldset class="workflow-shell-demo__group">
+      <legend>routing ({{ getOperationCount() }})</legend>
+      <button type="button" data-testid="demo-add-operation" (click)="addOperation()">+ Add operation</button>
+    </fieldset>
+
+    <fieldset class="workflow-shell-demo__group">
+      <legend>costing</legend>
+      <label>
+        Manual cost override
+        <input
+          type="number"
+          data-testid="demo-field-cost"
+          [value]="entity()['manualCostOverride'] || ''"
+          (input)="setField('manualCostOverride', $any($event.target).valueAsNumber || null)" />
+      </label>
+    </fieldset>
+  </aside>
+</div>

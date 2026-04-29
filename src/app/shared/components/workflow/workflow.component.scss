@@ -1,0 +1,217 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+/* Workflow Pattern Phase 4 — generic shell layout. */
+
+.workflow-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--bg);
+  color: var(--text);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-lg;
+    border-bottom: $border-width-thin solid var(--border);
+    background: var(--surface);
+    min-height: $header-height;
+  }
+
+  &__title-block {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+    @include truncate;
+  }
+
+  &__step-label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__mode-toggle {
+    display: inline-flex;
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+  }
+
+  &__mode-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: $font-size-sm;
+    padding: $sp-xs $sp-md;
+    cursor: pointer;
+    transition: $transition-fast;
+
+    &:hover {
+      color: var(--text);
+    }
+
+    &--active {
+      background: var(--primary);
+      color: var(--surface);
+      font-weight: 600;
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  &__rail {
+    flex: 0 0 240px;
+    border-right: $border-width-thin solid var(--border);
+    background: var(--surface);
+    overflow-y: auto;
+    @include custom-scrollbar(8px);
+  }
+
+  &__rail-list {
+    list-style: none;
+    margin: 0;
+    padding: $sp-md 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__step-content,
+  &__express {
+    flex: 1;
+    overflow-y: auto;
+    padding: $sp-lg;
+    @include custom-scrollbar(8px);
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-lg;
+    border-top: $border-width-thin solid var(--border);
+    background: var(--surface);
+  }
+}
+
+.workflow-step {
+  margin: 0;
+  padding: 0;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    width: 100%;
+    padding: $sp-sm $sp-md;
+    background: transparent;
+    border: 0;
+    border-left: $border-width-accent solid transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: $font-size-sm;
+    text-align: left;
+    cursor: pointer;
+    transition: $transition-fast;
+
+    &:hover:not(:disabled) {
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+  }
+
+  &__indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: $border-width-thin solid var(--border);
+    background: var(--bg);
+    flex: 0 0 auto;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+
+  &__index {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+
+  &__label {
+    flex: 1;
+    @include truncate;
+  }
+
+  &__optional {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  &--current &__btn {
+    border-left-color: var(--primary);
+    color: var(--text);
+    font-weight: 600;
+    background: var(--bg);
+  }
+
+  &--complete &__indicator {
+    background: var(--success-light, var(--success));
+    border-color: var(--success);
+    color: var(--success);
+  }
+
+  &--locked &__btn {
+    cursor: not-allowed;
+  }
+}
+
+@include mobile {
+  .workflow-shell {
+    &__rail {
+      flex: 0 0 60px;
+    }
+    &__step-label {
+      display: none;
+    }
+    .workflow-step__label {
+      display: none;
+    }
+    .workflow-step__optional {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,51 @@
+<div class="workflow-active-list" data-testid="workflow-active-list">
+  <header class="workflow-active-list__header">
+    <h2 class="workflow-active-list__title">{{ 'workflow.shell.resume.heading' | translate }}</h2>
+    <button type="button" class="icon-btn" [attr.aria-label]="'workflow.shell.actions.close' | translate" (click)="close()">
+      <span class="material-icons-outlined">close</span>
+    </button>
+  </header>
+
+  <p class="workflow-active-list__message">{{ 'workflow.shell.resume.message' | translate }}</p>
+
+  @if (loading()) {
+    <div class="workflow-active-list__placeholder">
+      <span class="material-icons-outlined workflow-active-list__spinner">sync</span>
+    </div>
+  } @else if (error(); as err) {
+    <div class="workflow-active-list__placeholder workflow-active-list__placeholder--error">
+      {{ err | translate }}
+    </div>
+  } @else if (runs().length === 0) {
+    <div class="workflow-active-list__placeholder">
+      {{ 'workflow.shell.resume.empty' | translate }}
+    </div>
+  } @else {
+    <ul class="workflow-active-list__list">
+      @for (run of runs(); track run.id) {
+        <li class="workflow-active-list__item">
+          <button
+            type="button"
+            class="workflow-active-list__row"
+            [attr.data-testid]="'workflow-active-row-' + run.id"
+            (click)="resume(run)">
+            <div class="workflow-active-list__row-meta">
+              <span class="workflow-active-list__row-type">{{ run.entityType }}</span>
+              <span class="workflow-active-list__row-id">#{{ run.entityId }}</span>
+            </div>
+            <span class="workflow-active-list__row-step">{{ run.currentStepId || '—' }}</span>
+            <span class="workflow-active-list__row-time">
+              {{ run.lastActivityAt | date:'MM/dd/yyyy hh:mm' }}
+            </span>
+          </button>
+        </li>
+      }
+    </ul>
+  }
+
+  <footer class="workflow-active-list__footer">
+    <button type="button" class="action-btn" data-testid="workflow-active-list-close" (click)="close()">
+      {{ 'workflow.shell.resume.dismissButton' | translate }}
+    </button>
+  </footer>
+</div>

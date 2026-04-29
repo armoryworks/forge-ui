@@ -1,0 +1,237 @@
+import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  EventEmitter,
+  inject,
+  input,
+  Output,
+  Type,
+} from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { EntityValidator } from '../../models/entity-validator.model';
+import { WorkflowDefinition } from '../../models/workflow-definition.model';
+import { WorkflowRun } from '../../models/workflow-run.model';
+import { WorkflowStepDefinition } from '../../models/workflow-step-definition.model';
+import { PredicateEvaluator } from '../../services/predicate-evaluator';
+import { WorkflowStepRegistryService } from '../../services/workflow-step-registry.service';
+import { WorkflowStepStubComponent } from './workflow-step-stub.component';
+
+/**
+ * Workflow Pattern Phase 4 — Generic shell that hosts a workflow run
+ * (express or guided) over a loaded entity. The shell stays entity-agnostic;
+ * per-step content comes from `WorkflowStepRegistryService`.
+ *
+ * Behavior contract:
+ *   • D2 — step rail clickability: current OR earlier-completed step is
+ *     clickable; future steps are locked. Earlier-completed = predicate
+ *     gates pass for that step.
+ *   • D4 — mode toggle is ALWAYS available (express ↔ guided), including
+ *     mid-flow. Switching keeps the same currentStepId.
+ *   • Mark Complete delegates to the entity-promote-status pipeline via
+ *     the service (which round-trips to the server's authoritative gate).
+ *
+ * The shell is `<app-workflow>` and takes its inputs from a parent (a
+ * feature module's detail page or the demo route). Actions emit outputs
+ * the parent can wire to the WorkflowService — keeping the shell pure of
+ * HTTP concerns and easy to test.
+ */
+@Component({
+  selector: 'app-workflow',
+  standalone: true,
+  imports: [CommonModule, TranslatePipe, MatTooltipModule],
+  templateUrl: './workflow.component.html',
+  styleUrl: './workflow.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class WorkflowComponent {
+  private readonly registry = inject(WorkflowStepRegistryService);
+  private readonly evaluator = new PredicateEvaluator();
+
+  // ─── Inputs ─────────────────────────────────────────────────────────
+
+  readonly run = input<WorkflowRun | null>(null);
+  readonly definition = input<WorkflowDefinition | null>(null);
+  readonly entity = input<unknown>(null);
+  readonly validators = input<EntityValidator[]>([]);
+  /** Display title — entity-specific (e.g. "ASM-100" or "New Assembly"). */
+  readonly entityTitle = input<string>('');
+
+  // ─── Outputs ────────────────────────────────────────────────────────
+
+  @Output() readonly closed = new EventEmitter<void>();
+  @Output() readonly stepJumped = new EventEmitter<string>();
+  @Output() readonly modeChanged = new EventEmitter<'express' | 'guided'>();
+  @Output() readonly stepAdvanced = new EventEmitter<string>();
+  @Output() readonly stepBacked = new EventEmitter<string>();
+  @Output() readonly stepSkipped = new EventEmitter<string>();
+  @Output() readonly completeRequested = new EventEmitter<void>();
+
+  // ─── Derived state ──────────────────────────────────────────────────
+
+  protected readonly mode = computed<'express' | 'guided'>(
+    () => this.run()?.mode ?? this.definition()?.defaultMode ?? 'guided',
+  );
+
+  protected readonly steps = computed<WorkflowStepDefinition[]>(() => this.definition()?.steps ?? []);
+
+  protected readonly currentStepId = computed<string | null>(() => {
+    const explicit = this.run()?.currentStepId ?? null;
+    if (explicit) return explicit;
+    // Fall back to first step (initial mount before patchStep advances).
+    return this.steps()[0]?.id ?? null;
+  });
+
+  protected readonly currentStepIndex = computed<number>(() => {
+    const id = this.currentStepId();
+    if (!id) return 0;
+    return Math.max(0, this.steps().findIndex(s => s.id === id));
+  });
+
+  protected readonly currentStep = computed<WorkflowStepDefinition | null>(() => {
+    const idx = this.currentStepIndex();
+    return this.steps()[idx] ?? null;
+  });
+
+  /**
+   * Per-step completion derived locally from the entity + validator catalog.
+   * Evaluated inline (no service writes from a computed — that's NG0600).
+   */
+  protected readonly completionMap = computed<Map<string, boolean>>(() => {
+    const def = this.definition();
+    const entity = this.entity();
+    const out = new Map<string, boolean>();
+    if (!def || !entity) return out;
+    const validatorsById = new Map<string, EntityValidator>();
+    for (const v of this.validators()) validatorsById.set(v.validatorId, v);
+    for (const step of def.steps) {
+      if (step.completionGates.length === 0) {
+        out.set(step.id, false);
+        continue;
+      }
+      let allPass = true;
+      for (const gateId of step.completionGates) {
+        const v = validatorsById.get(gateId);
+        if (!v || !this.evaluator.evaluateJson(v.predicate, entity)) {
+          allPass = false;
+          break;
+        }
+      }
+      out.set(step.id, allPass);
+    }
+    return out;
+  });
+
+  protected readonly isFirstStep = computed(() => this.currentStepIndex() === 0);
+  protected readonly isLastStep = computed(() => {
+    const steps = this.steps();
+    return steps.length > 0 && this.currentStepIndex() === steps.length - 1;
+  });
+
+  /** Per-step component class to instantiate via `*ngComponentOutlet`. */
+  protected readonly currentStepComponent = computed<Type<unknown>>(() => {
+    const step = this.currentStep();
+    if (!step) return WorkflowStepStubComponent;
+    return this.registry.get(step.componentName) ?? WorkflowStepStubComponent;
+  });
+
+  /** Inputs piped to the current step component. */
+  protected readonly stepInputs = computed<Record<string, unknown>>(() => {
+    const step = this.currentStep();
+    return {
+      stepId: step?.id ?? '',
+      componentName: step?.componentName ?? '',
+      entityId: this.run()?.entityId ?? null,
+      entity: this.entity(),
+    };
+  });
+
+  /** Express-mode template component (one per entity type). */
+  protected readonly expressComponent = computed<Type<unknown>>(() => {
+    const def = this.definition();
+    if (!def?.expressTemplateComponent) return WorkflowStepStubComponent;
+    return this.registry.getExpress(def.expressTemplateComponent) ?? WorkflowStepStubComponent;
+  });
+
+  /** Inputs piped to the express component. */
+  protected readonly expressInputs = computed<Record<string, unknown>>(() => ({
+    stepId: 'express',
+    componentName: this.definition()?.expressTemplateComponent ?? '',
+    entityId: this.run()?.entityId ?? null,
+    entity: this.entity(),
+  }));
+
+  // ─── D2 step rail clickability ──────────────────────────────────────
+
+  /**
+   * A step is "clickable" if it is the current step OR an earlier-completed
+   * step. A step is "locked" (future) when its index > currentStepIndex
+   * AND not all required gates between current and target pass.
+   */
+  protected isClickable(step: WorkflowStepDefinition): boolean {
+    const idx = this.steps().findIndex(s => s.id === step.id);
+    const currentIdx = this.currentStepIndex();
+    if (idx <= currentIdx) return true;
+    // Future steps: locked unless all preceding required steps' gates pass
+    // (rare — typically only true after a jump-back from a later step).
+    const map = this.completionMap();
+    for (let i = 0; i < idx; i++) {
+      const s = this.steps()[i];
+      if (!s.required) continue;
+      if (!map.get(s.id)) return false;
+    }
+    return true;
+  }
+
+  protected isFutureStep(step: WorkflowStepDefinition): boolean {
+    return !this.isClickable(step);
+  }
+
+  protected isComplete(step: WorkflowStepDefinition): boolean {
+    return this.completionMap().get(step.id) === true;
+  }
+
+  protected isCurrent(step: WorkflowStepDefinition): boolean {
+    return this.currentStepId() === step.id;
+  }
+
+  // ─── Action handlers ────────────────────────────────────────────────
+
+  protected jumpTo(step: WorkflowStepDefinition): void {
+    if (!this.isClickable(step)) return;
+    this.stepJumped.emit(step.id);
+  }
+
+  protected setMode(mode: 'express' | 'guided'): void {
+    if (mode === this.mode()) return;
+    this.modeChanged.emit(mode);
+  }
+
+  protected back(): void {
+    if (this.isFirstStep()) return;
+    const prev = this.steps()[this.currentStepIndex() - 1];
+    if (prev) this.stepBacked.emit(prev.id);
+  }
+
+  protected next(): void {
+    if (this.isLastStep()) {
+      this.completeRequested.emit();
+      return;
+    }
+    const current = this.currentStep();
+    if (current) this.stepAdvanced.emit(current.id);
+  }
+
+  protected skip(): void {
+    const current = this.currentStep();
+    if (!current || current.required) return;
+    this.stepSkipped.emit(current.id);
+  }
+
+  protected close(): void {
+    this.closed.emit();
+  }
+}
