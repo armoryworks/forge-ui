@@ -1,6 +1,14 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
 
+// Page-scroll contract — see <app-page-layout> in shared/components.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .preset-custom {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,18 @@
 @use '../../../../../styles/variables' as *;
 @use '../../../../../styles/mixins' as *;
 
+// Page-scroll contract: the routed component host must participate in the
+// flex chain so <app-page-layout>'s `.page-layout__content` can take its
+// `flex: 1; min-height: 0; overflow: auto` shape and actually scroll. Without
+// this, long content (e.g., the All-capabilities list) overflows the viewport
+// without a scroll affordance.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
 .preset-detail {
   display: flex;
   flex-direction: column;

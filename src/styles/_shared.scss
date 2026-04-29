@@ -1,6 +1,33 @@
 @use 'variables' as *;
 @use 'mixins' as *;
 
+// ─── Page-scroll contract ───
+// The layout chain from <app-root> down to a routed page component's content
+// slot must never set `overflow: hidden` or fixed heights that would prevent
+// inner content from scrolling. The default chain is:
+//
+//   :host (app-root)        height: 100vh; overflow: hidden;
+//     .app-body             flex: 1; overflow: hidden; (display: flex)
+//       .app-main           flex: 1; overflow: hidden; (display: flex column)
+//         > * (routed)      flex: 1; min-height: 0;        ← applied by app.component.scss
+//           <app-page-layout>  :host flex: 1; min-height: 0;  ← from page-layout component
+//             .page-layout__content  flex: 1; overflow: auto; min-height: 0;  ← THIS scrolls
+//
+// Pages with long content MUST EITHER:
+//   (a) use <app-page-layout> with the `content` slot (preferred), OR
+//   (b) ensure their outermost container has
+//          `flex: 1 1 0; min-height: 0; overflow-y: auto;`
+//       so content overflow becomes scroll.
+//
+// Routed components that wrap their template in <app-page-layout> must also
+// declare `:host { display: flex; flex-direction: column; flex: 1; min-height: 0; }`
+// so that <app-page-layout>'s flex shape can take effect inside the host element.
+// Without that host rule, .page-layout__content can't compute its bounded height
+// and `overflow: auto` has nothing to clip — long content silently runs off-screen.
+//
+// This is documentation, not an enforced rule. If a page gets cut off
+// mid-content, this is the contract to check first.
+
 // ─── Page Header ───
 .page-header {
   display: flex;

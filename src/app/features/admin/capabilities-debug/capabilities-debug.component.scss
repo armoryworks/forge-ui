@@ -1,5 +1,17 @@
 @use '../../../../styles/variables' as *;
 
+// Page-scroll contract: this diagnostic page predates <app-page-layout>
+// migration. Until it's folded into Phase E's full admin UI, ensure the host
+// participates in the flex chain and overflow scrolls vertically so long
+// capability tables don't get clipped at viewport bottom.
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 .capabilities-debug {
   padding: $sp-lg;
   display: flex;
