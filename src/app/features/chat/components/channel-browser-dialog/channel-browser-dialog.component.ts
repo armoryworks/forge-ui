@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatDialogRef } from '@angular/material/dialog';
@@ -20,6 +21,7 @@ import { ChatRoom } from '../../models/chat-room.model';
 export class ChannelBrowserDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<ChannelBrowserDialogComponent>);
   private readonly chatService = inject(ChatService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly searchControl = new FormControl('');
   protected readonly channels = signal<ChatRoom[]>([]);
@@ -37,7 +39,7 @@ export class ChannelBrowserDialogComponent {
 
   constructor() {
     this.loadChannels();
-    this.searchControl.valueChanges.subscribe(() => {
+    this.searchControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.loadChannels(this.searchControl.value ?? undefined);
     });
   }

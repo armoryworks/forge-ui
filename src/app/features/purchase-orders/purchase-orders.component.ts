@@ -108,7 +108,7 @@ export class PurchaseOrdersComponent {
   ];
 
   constructor() {
-    this.vendorService.getVendorDropdown().subscribe({
+    this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed()).subscribe({
       next: (list) => this.vendors.set(list),
     });
 

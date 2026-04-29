@@ -3,12 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -77,6 +78,7 @@ export class DiscoveryComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly visibleQuestions = this.discovery.visibleQuestions;
   protected readonly answers = this.discovery.answers;
@@ -143,6 +145,7 @@ export class DiscoveryComponent implements OnInit {
     this.capabilityService.load();
     this.discovery
       .loadQuestions(this.consultantMode.enabled())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         // After loading, restore any stored answers into free-text inputs.
         for (const q of this.visibleQuestions()) {
@@ -243,7 +246,7 @@ export class DiscoveryComponent implements OnInit {
     // shaped exactly for the dialog) rather than reshaping the recommendation
     // payload, so the diff/violation rendering stays consistent across both
     // surfaces.
-    this.presetService.previewApply(chosen).subscribe({
+    this.presetService.previewApply(chosen).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (preview) => {
         const data: PresetApplyDialogData = {
           presetId: chosen,
@@ -259,6 +262,7 @@ export class DiscoveryComponent implements OnInit {
             { width: '720px', data },
           )
           .afterClosed()
+          .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((result) => {
             if (!result?.confirmed) return;
             this.commitApply(chosen, chosenName);
@@ -271,7 +275,7 @@ export class DiscoveryComponent implements OnInit {
   }
 
   private commitApply(chosenPresetId: string, chosenPresetName: string): void {
-    this.discovery.apply(chosenPresetId).subscribe({
+    this.discovery.apply(chosenPresetId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.snackbar.success(`Discovery applied — ${chosenPresetName}.`);
         this.installState.dismiss();
@@ -314,7 +318,7 @@ export class DiscoveryComponent implements OnInit {
   /** Trigger a preview if the user has answered enough opening questions. */
   private previewIfReady(): void {
     if (!this.canPreview()) return;
-    this.discovery.preview().subscribe({
+    this.discovery.preview().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => {
         // Suppress errors silently here — preview is optional. Errors get
         // surfaced via the global HTTP interceptor.

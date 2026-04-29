@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -49,6 +50,7 @@ export class RfqDetailDialogComponent {
   private readonly vendorService = inject(VendorService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly data = inject<RfqDetailDialogData>(MAT_DIALOG_DATA);
 
@@ -109,7 +111,7 @@ export class RfqDetailDialogComponent {
 
   constructor() {
     this.loadRfq();
-    this.vendorService.getVendorDropdown().subscribe({
+    this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.vendors.set(list),
     });
   }

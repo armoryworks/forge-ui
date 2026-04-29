@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
@@ -45,6 +46,7 @@ export class CreateChannelDialogComponent {
   private readonly chatService = inject(ChatService);
   private readonly authService = inject(AuthService);
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saving = signal(false);
   protected readonly allUsers = signal<UserListItem[]>([]);
@@ -71,12 +73,16 @@ export class CreateChannelDialogComponent {
   protected readonly filteredUsers = signal<UserListItem[]>([]);
 
   constructor() {
-    this.http.get<UserListItem[]>('/api/v1/users').subscribe(users => {
+    this.http.get<UserListItem[]>('/api/v1/users').pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(users => {
       this.allUsers.set(users);
       this.updateFilteredUsers();
     });
 
-    this.memberSearchControl.valueChanges.subscribe(v => {
+    this.memberSearchControl.valueChanges.pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(v => {
       this.memberSearchTerm.set(v ?? '');
       this.updateFilteredUsers();
     });

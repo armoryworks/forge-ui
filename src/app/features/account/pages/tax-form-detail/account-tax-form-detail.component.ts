@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe, UpperCasePipe } from '@angular/common';
 import { DomSanitizer } from '@angular/platform-browser';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -35,6 +35,7 @@ export class AccountTaxFormDetailComponent {
   private readonly authService = inject(AuthService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly formType = toSignal(
     this.route.paramMap.pipe(map(p => p.get('formType') as string)),
@@ -270,7 +271,7 @@ export class AccountTaxFormDetailComponent {
       const ft = this.formType();
       if (ft === 'stateWithholding' && !this.stateDefinitionLoaded()) {
         this.stateDefinitionLoaded.set(true);
-        this.complianceService.getMyStateDefinition().subscribe({
+        this.complianceService.getMyStateDefinition().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           next: (result) => {
             if (result.formDefinitionJson) {
               try {

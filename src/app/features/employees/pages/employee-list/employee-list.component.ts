@@ -71,7 +71,7 @@ export class EmployeeListComponent {
   ]);
 
   constructor() {
-    this.refDataService.getRolesAsOptions('-- All Roles --').subscribe(opts => this.roleOptions.set(opts));
+    this.refDataService.getRolesAsOptions('-- All Roles --').pipe(takeUntilDestroyed()).subscribe(opts => this.roleOptions.set(opts));
     this.loadEmployees();
 
     // Phase 3 F7-broad / WU-22 — debounced search + filter changes refire

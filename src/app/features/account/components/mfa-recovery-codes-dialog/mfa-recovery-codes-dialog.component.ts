@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef } from '@angular/material/dialog';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -17,13 +18,14 @@ export class MfaRecoveryCodesDialogComponent {
   private readonly mfaService = inject(MfaService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialogRef = inject(MatDialogRef<MfaRecoveryCodesDialogComponent>);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly codes = signal<string[]>([]);
   protected readonly warning = signal('');
   protected readonly loading = signal(true);
 
   constructor() {
-    this.mfaService.generateRecoveryCodes().subscribe({
+    this.mfaService.generateRecoveryCodes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {
         this.codes.set(result.codes);
         this.warning.set(result.warning);

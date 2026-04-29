@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 
 import { SalesOrderService } from './services/sales-order.service';
@@ -38,6 +38,7 @@ export class SalesOrdersComponent {
   private readonly customerService = inject(CustomerService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -84,7 +85,7 @@ export class SalesOrdersComponent {
 
   constructor() {
     this.loadSalesOrders();
-    this.customerService.getCustomers(undefined, true).subscribe({
+    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
   }

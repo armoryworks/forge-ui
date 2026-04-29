@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
@@ -37,6 +38,7 @@ export class ExpenseApprovalQueueComponent {
   private readonly expensesService = inject(ExpensesService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly pendingExpenses = signal<ExpenseItem[]>([]);
@@ -63,7 +65,7 @@ export class ExpenseApprovalQueueComponent {
 
   constructor() {
     this.loadPending();
-    this.notesControl.valueChanges.subscribe(value => {
+    this.notesControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
       const len = (value ?? '').trim().length;
       this.noteLength.set(len);
       this.declineNoteValid.set(len >= this.DECLINE_NOTE_MIN);

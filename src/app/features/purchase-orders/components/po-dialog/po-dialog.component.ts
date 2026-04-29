@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -47,6 +48,7 @@ export class PoDialogComponent {
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -173,20 +175,20 @@ export class PoDialogComponent {
   };
 
   constructor() {
-    this.vendorService.getVendorDropdown().subscribe({
+    this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.vendors.set(list),
     });
-    this.partsService.getParts().subscribe({
+    this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list.filter(p => p.partType !== 'Assembly')),
     });
 
     // Pre-fill unit price from part's list price when a part is selected
-    this.lineForm.controls.partId.valueChanges.subscribe((partId) => {
+    this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((partId) => {
       this.onPartSelected(partId);
     });
 
     // When price is manually changed, clear the "list price" indicator
-    this.lineForm.controls.unitPrice.valueChanges.subscribe(() => {
+    this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.priceIsDefault.set(false);
     });
   }

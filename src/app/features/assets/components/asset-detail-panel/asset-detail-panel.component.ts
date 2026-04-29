@@ -1,5 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -25,6 +26,7 @@ export class AssetDetailPanelComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly assetId = input.required<number>();
   readonly closed = output<void>();
@@ -42,7 +44,7 @@ export class AssetDetailPanelComponent {
       const id = this.assetId();
       if (!id) return;
       this.loading.set(true);
-      this.assetsService.getAssets(undefined, undefined, undefined).subscribe({
+      this.assetsService.getAssets(undefined, undefined, undefined).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (assets) => {
           const found = assets.find(a => a.id === id) ?? null;
           this.asset.set(found);
@@ -59,7 +61,7 @@ export class AssetDetailPanelComponent {
         return;
       }
       this.maintenanceLogsLoading.set(true);
-      this.assetsService.getMaintenanceLogs(id).subscribe({
+      this.assetsService.getMaintenanceLogs(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (logs) => { this.maintenanceLogs.set(logs); this.maintenanceLogsLoading.set(false); },
         error: () => this.maintenanceLogsLoading.set(false),
       });

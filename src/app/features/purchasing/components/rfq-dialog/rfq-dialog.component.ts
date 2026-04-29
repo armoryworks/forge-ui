@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { map } from 'rxjs';
 
@@ -35,6 +36,7 @@ export class RfqDialogComponent {
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly rfq = input<RfqListItem | null>(null);
   readonly closed = output<void>();
@@ -64,7 +66,7 @@ export class RfqDialogComponent {
   });
 
   constructor() {
-    this.partsService.getParts().subscribe({
+    this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => {
         this.parts.set(list);
         this.partOptions.set([

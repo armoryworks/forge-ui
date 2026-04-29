@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { TimeTrackingService } from './services/time-tracking.service';
 import { TimeEntry } from './models/time-entry.model';
@@ -53,6 +53,7 @@ export class TimeTrackingComponent implements OnDestroy {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
@@ -134,8 +135,8 @@ export class TimeTrackingComponent implements OnDestroy {
     this.loadEntries();
     this.initTimerHub();
 
-    this.dateFromControl.valueChanges.subscribe(() => this.loadEntries());
-    this.dateToControl.valueChanges.subscribe(() => this.loadEntries());
+    this.dateFromControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadEntries());
+    this.dateToControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadEntries());
   }
 
   ngOnDestroy(): void {

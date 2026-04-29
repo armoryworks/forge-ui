@@ -1,5 +1,6 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -19,6 +20,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 })
 export class LotDetailPanelComponent {
   private readonly service = inject(LotService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly lotId = input.required<number>();
   readonly lotNumber = input.required<string>();
@@ -32,7 +34,7 @@ export class LotDetailPanelComponent {
       const num = this.lotNumber();
       if (!num) return;
       this.loading.set(true);
-      this.service.trace(num).subscribe({
+      this.service.trace(num).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (t) => { this.trace.set(t); this.loading.set(false); },
         error: () => this.loading.set(false),
       });

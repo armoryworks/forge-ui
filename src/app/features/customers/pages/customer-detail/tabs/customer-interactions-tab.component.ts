@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -44,6 +45,7 @@ export class CustomerInteractionsTabComponent {
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly customerId = input.required<number>();
 
@@ -107,8 +109,8 @@ export class CustomerInteractionsTabComponent {
       }
     });
 
-    this.contactFilterControl.valueChanges.subscribe(() => this.loadInteractions());
-    this.typeFilterControl.valueChanges.subscribe(() => this.loadInteractions());
+    this.contactFilterControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadInteractions());
+    this.typeFilterControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadInteractions());
   }
 
   private loadContacts(): void {

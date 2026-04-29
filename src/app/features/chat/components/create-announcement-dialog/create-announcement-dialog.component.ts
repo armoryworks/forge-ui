@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialogRef } from '@angular/material/dialog';
@@ -41,6 +42,7 @@ export class CreateAnnouncementDialogComponent implements OnInit {
   private readonly announcementService = inject(AnnouncementService);
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly saving = signal(false);
   protected readonly templates = signal<AnnouncementTemplate[]>([]);
@@ -82,7 +84,7 @@ export class CreateAnnouncementDialogComponent implements OnInit {
   protected readonly showTeamSelector = signal(false);
 
   constructor() {
-    this.form.controls.scope.valueChanges.subscribe(scope => {
+    this.form.controls.scope.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(scope => {
       this.showTeamSelector.set(scope === 'SelectedTeams' || scope === 'IndividualTeam');
     });
   }

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview } from '@angular/cdk/drag-drop';
@@ -56,6 +56,7 @@ export class LeadsComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -154,6 +155,7 @@ export class LeadsComponent {
 
   constructor() {
     this.refDataService.getAsOptions('lead_source', { allLabel: this.translate.instant('common.none'), valueField: 'label' })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(opts => this.sourceOptions.set(opts));
     this.loadLeads();
   }

@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { startWith } from 'rxjs';
@@ -52,6 +52,7 @@ export class SoDialogComponent {
   private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -126,10 +127,10 @@ export class SoDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers().subscribe({
+    this.customerService.getCustomers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
-    this.partsService.getParts('Active').subscribe({
+    this.partsService.getParts('Active').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
   }

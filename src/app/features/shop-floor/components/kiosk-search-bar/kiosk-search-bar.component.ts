@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -33,6 +34,7 @@ export class KioskSearchBarComponent {
         `${environment.apiUrl}/display/shop-floor/search`,
         { params: { q: term!, limit: '10' } },
       ).pipe(catchError(() => of([])))),
+      takeUntilDestroyed(),
     ).subscribe(results => {
       this.results.set(results);
       this.showResults.set(results.length > 0);
@@ -40,6 +42,7 @@ export class KioskSearchBarComponent {
 
     this.searchControl.valueChanges.pipe(
       filter(v => !v || v.length < 2),
+      takeUntilDestroyed(),
     ).subscribe(() => {
       this.results.set([]);
       this.showResults.set(false);

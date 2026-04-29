@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
@@ -39,6 +40,7 @@ export class DomainEventFailuresPanelComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isLoading = signal(false);
   protected readonly failures = signal<DomainEventFailure[]>([]);
@@ -79,7 +81,7 @@ export class DomainEventFailuresPanelComponent {
 
   constructor() {
     this.load();
-    this.statusControl.valueChanges.subscribe(() => {
+    this.statusControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       // Filtering is handled by computed signal, no reload needed
     });
   }

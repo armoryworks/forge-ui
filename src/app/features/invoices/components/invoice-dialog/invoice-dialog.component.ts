@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, output, computed, ViewChild } from '@angular/core';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { startWith } from 'rxjs';
@@ -50,6 +50,7 @@ export class InvoiceDialogComponent {
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -121,7 +122,7 @@ export class InvoiceDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers(undefined, true).subscribe({
+    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
   }

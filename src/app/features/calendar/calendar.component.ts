@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -29,6 +30,7 @@ export class CalendarComponent {
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly allJobs = signal<CalendarJob[]>([]);
@@ -105,14 +107,14 @@ export class CalendarComponent {
 
   constructor() {
     this.loadJobs();
-    this.kanbanService.getTrackTypes().subscribe(types => {
+    this.kanbanService.getTrackTypes().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(types => {
       this.trackTypeOptions.set([
         { value: null, label: this.translate.instant('calendar.allTrackTypes') },
         ...types.map(t => ({ value: t.id, label: t.name })),
       ]);
     });
 
-    this.trackTypeControl.valueChanges.subscribe(() => {
+    this.trackTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.allJobs.update(j => [...j]);
     });
 

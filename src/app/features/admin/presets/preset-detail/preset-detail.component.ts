@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   OnInit,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -53,6 +55,7 @@ export class PresetDetailComponent implements OnInit {
   private readonly capabilityService = inject(CapabilityService);
   private readonly installState = inject(CapabilityInstallStateService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly preset = this.presetService.selected;
   protected readonly loading = this.presetService.detailLoading;
@@ -81,7 +84,7 @@ export class PresetDetailComponent implements OnInit {
       this.router.navigate(['/admin/presets']);
       return;
     }
-    this.presetService.getPreset(id).subscribe({
+    this.presetService.getPreset(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       error: () => {
         this.snackbar.error('Preset not found');
         this.router.navigate(['/admin/presets']);
@@ -98,7 +101,7 @@ export class PresetDetailComponent implements OnInit {
     if (!detail) return;
 
     this.applying.set(true);
-    this.presetService.previewApply(detail.id).subscribe({
+    this.presetService.previewApply(detail.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (preview) => {
         this.applying.set(false);
         const data: PresetApplyDialogData = {
@@ -115,6 +118,7 @@ export class PresetDetailComponent implements OnInit {
             { width: '720px', data },
           )
           .afterClosed()
+          .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe((result) => {
             if (!result?.confirmed) return;
             this.commitApply(detail.id, detail.name, result.reason);
@@ -129,7 +133,7 @@ export class PresetDetailComponent implements OnInit {
 
   private commitApply(presetId: string, presetName: string, reason?: string): void {
     this.applying.set(true);
-    this.presetService.apply(presetId, reason).subscribe({
+    this.presetService.apply(presetId, reason).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (result) => {
         this.applying.set(false);
         if (result.noOp) {

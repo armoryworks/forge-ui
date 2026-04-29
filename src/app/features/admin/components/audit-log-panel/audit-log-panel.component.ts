@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
@@ -34,6 +35,7 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 export class AuditLogPanelComponent {
   private readonly adminService = inject(AdminService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly isLoading = signal(false);
   protected readonly entries = signal<AuditLogEntry[]>([]);
@@ -106,15 +108,15 @@ export class AuditLogPanelComponent {
       this.load();
     });
 
-    this.entityTypeControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
-    this.actionControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
-    this.fromDateControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
-    this.toDateControl.valueChanges.subscribe(() => { this.page.set(1); this.load(); });
+    this.entityTypeControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
+    this.actionControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
+    this.fromDateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
+    this.toDateControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => { this.page.set(1); this.load(); });
 
     // Phase 3 / WU-03 retrofit — preset writes through to the freeform action
     // filter. emitEvent: false on the secondary control so we only trigger
     // one reload via actionControl's own valueChanges subscription.
-    this.actionPresetControl.valueChanges.subscribe(value => {
+    this.actionPresetControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(value => {
       if (this.actionControl.value !== (value ?? '')) {
         this.actionControl.setValue(value ?? '');
       }

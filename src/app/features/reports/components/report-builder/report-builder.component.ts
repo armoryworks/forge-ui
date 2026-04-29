@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
@@ -68,6 +69,7 @@ export class ReportBuilderComponent {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Form controls
   protected readonly entityControl = new FormControl<string>('', { nonNullable: true });
@@ -302,7 +304,7 @@ export class ReportBuilderComponent {
     this.builderService.loadSavedReports();
 
     // Reset columns/filters when entity changes
-    this.entityControl.valueChanges.subscribe(() => {
+    this.entityControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.selectedColumns.set([]);
       this.filters.set([]);
       this.groupByControl.setValue('');
@@ -315,7 +317,7 @@ export class ReportBuilderComponent {
     });
 
     // Load saved report when selected
-    this.savedReportControl.valueChanges.subscribe(id => {
+    this.savedReportControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(id => {
       if (id) this.loadSavedReport(id);
     });
   }

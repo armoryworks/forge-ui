@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -19,6 +20,7 @@ import { UserTrainingDetail } from '../../../training/models/user-training-detai
 export class TrainingDetailPanelComponent {
   private readonly trainingService = inject(TrainingService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly userId = input.required<number>();
   readonly closed = output<void>();
@@ -31,7 +33,7 @@ export class TrainingDetailPanelComponent {
       const id = this.userId();
       if (!id) return;
       this.isLoading.set(true);
-      this.trainingService.getUserTrainingDetail(id).subscribe({
+      this.trainingService.getUserTrainingDetail(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: d => { this.detail.set(d); this.isLoading.set(false); },
         error: () => this.isLoading.set(false),
       });

@@ -1,4 +1,5 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
@@ -16,6 +17,7 @@ const DEBOUNCE_MS = 500;
 @Injectable({ providedIn: 'root' })
 export class UserPreferencesService {
   private readonly http = inject(HttpClient);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly base = `${environment.apiUrl}/user-preferences`;
   private readonly cache = signal<Map<string, unknown>>(new Map());
   private readonly pendingUpdates = new Map<string, unknown>();
@@ -25,7 +27,10 @@ export class UserPreferencesService {
   constructor() {
     this.loadFromStorage();
 
-    this.flushSubject.pipe(debounceTime(DEBOUNCE_MS)).subscribe(() => {
+    this.flushSubject.pipe(
+      debounceTime(DEBOUNCE_MS),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(() => {
       this.flushToApi();
     });
   }

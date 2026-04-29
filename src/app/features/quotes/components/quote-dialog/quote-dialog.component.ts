@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CurrencyPipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -53,6 +53,7 @@ export class QuoteDialogComponent {
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -127,20 +128,20 @@ export class QuoteDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers(undefined, true).subscribe({
+    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
     // Load all non-deleted parts regardless of status
-    this.partsService.getParts().subscribe({
+    this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
 
     // Auto-fill tax rate from customer's state when customer is selected
-    this.form.controls.customerId.valueChanges.subscribe((customerId) => {
+    this.form.controls.customerId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((customerId) => {
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
       if (customerId == null) return;
-      this.adminService.getTaxRateForCustomer(customerId).subscribe({
+      this.adminService.getTaxRateForCustomer(customerId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: (rate) => {
           if (rate == null) return;
           const pct = +(rate.rate * 100).toFixed(4);
@@ -154,18 +155,18 @@ export class QuoteDialogComponent {
     });
 
     // When tax rate is manually changed, clear the auto-fill indicator
-    this.form.controls.taxRate.valueChanges.subscribe(() => {
+    this.form.controls.taxRate.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.taxAutoFilled.set(false);
       this.taxAutoLabel.set('');
     });
 
     // Pre-fill unit price from part's list price when a part is selected
-    this.lineForm.controls.partId.valueChanges.subscribe((partId) => {
+    this.lineForm.controls.partId.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((partId) => {
       this.onPartSelected(partId);
     });
 
     // When price is manually changed, clear the "list price" indicator
-    this.lineForm.controls.unitPrice.valueChanges.subscribe(() => {
+    this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.priceIsDefault.set(false);
     });
   }

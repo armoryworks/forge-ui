@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, ViewChild } from '@angular/core';
 
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { ExpenseSettings } from './models/expense-settings.model';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
 import { ExpensesService } from './services/expenses.service';
 import { ExpenseItem } from './models/expense-item.model';
@@ -51,6 +51,7 @@ export class ExpensesComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -120,8 +121,8 @@ export class ExpensesComponent {
   protected readonly categoryOptions = signal<SelectOption[]>([]);
 
   constructor() {
-    this.refDataService.getAsOptions('expense_category', { valueField: 'label' }).subscribe(opts => this.categoryOptions.set(opts));
-    this.expensesService.getSettings().subscribe({
+    this.refDataService.getAsOptions('expense_category', { valueField: 'label' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.categoryOptions.set(opts));
+    this.expensesService.getSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (s) => this.settings.set(s),
       error: () => this.settings.set(null),
     });

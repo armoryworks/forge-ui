@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal, output, computed, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, output, computed, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -44,6 +45,7 @@ export class PaymentDialogComponent {
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -109,7 +111,7 @@ export class PaymentDialogComponent {
   };
 
   constructor() {
-    this.customerService.getCustomers(undefined, true).subscribe({
+    this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
   }

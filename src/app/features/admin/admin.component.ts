@@ -1,9 +1,9 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AdminService } from './services/admin.service';
@@ -89,6 +89,7 @@ export class AdminComponent {
   private readonly refDataService = inject(ReferenceDataService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
   private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys']);
@@ -275,10 +276,10 @@ export class AdminComponent {
 
   constructor() {
     // Load roles from API (used by user form select + column filter)
-    this.refDataService.getRolesAsOptions().subscribe(opts => this.roleOptions.set(opts));
+    this.refDataService.getRolesAsOptions().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.roleOptions.set(opts));
 
     // WU-06 / C1 — load active rollup templates for the user form picker.
-    this.adminService.getRoleTemplates().subscribe({
+    this.adminService.getRoleTemplates().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (t) => this.roleTemplates.set(t),
       error: () => {},
     });

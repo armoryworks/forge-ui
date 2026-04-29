@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -27,6 +28,7 @@ export interface ChannelSelection {
 })
 export class ChatChannelListComponent {
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Inputs
   readonly conversations = input<ChatConversation[]>([]);
@@ -103,7 +105,7 @@ export class ChatChannelListComponent {
   );
 
   constructor() {
-    this.searchControl.valueChanges.subscribe(v => {
+    this.searchControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(v => {
       this.searchChanged.emit(v ?? '');
     });
   }

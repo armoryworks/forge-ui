@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -45,6 +46,7 @@ export class ShipmentDialogComponent {
   private readonly salesOrderService = inject(SalesOrderService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly closed = output<void>();
   readonly saved = output<void>();
@@ -105,10 +107,10 @@ export class ShipmentDialogComponent {
   };
 
   constructor() {
-    this.partsService.getParts('Active').subscribe({
+    this.partsService.getParts('Active').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.parts.set(list),
     });
-    this.salesOrderService.getSalesOrders().subscribe({
+    this.salesOrderService.getSalesOrders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.salesOrders.set(list),
     });
   }

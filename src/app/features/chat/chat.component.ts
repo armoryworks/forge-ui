@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, OnDestroy, OnInit, signal, computed, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, effect, inject, OnDestroy, OnInit, signal, computed, viewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
@@ -48,6 +49,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly chatBroadcast = inject(ChatBroadcastService);
+  private readonly destroyRef = inject(DestroyRef);
 
   private readonly messagesContainer = viewChild<ElementRef<HTMLElement>>('messagesContainer');
 
@@ -116,7 +118,9 @@ export class ChatComponent implements OnInit, OnDestroy {
           if (conv) {
             this.selectConversation(conv);
           } else {
-            this.http.get<UserListItem[]>('/api/v1/users').subscribe(users => {
+            this.http.get<UserListItem[]>('/api/v1/users').pipe(
+              takeUntilDestroyed(this.destroyRef),
+            ).subscribe(users => {
               const user = users.find(u => u.id === msg.userId);
               if (user) this.selectUser(user);
             });
