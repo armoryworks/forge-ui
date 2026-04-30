@@ -1,74 +1,38 @@
 import { TestBed } from '@angular/core/testing';
-import { HubConnectionState } from '@microsoft/signalr';
+import { HubConnection, HubConnectionState } from '@microsoft/signalr';
 
+import { createMockHubConnection } from '../../../testing/signalr.mock';
 import { SignalrService } from './signalr.service';
 import { AuthService } from './auth.service';
 
-// Use vi.hoisted() so the holder is created at the same hoist phase as
-// vi.mock(), guaranteeing the factory closure binds to a real object before
-// any module (this spec OR a co-loaded sibling spec like board-hub) imports
-// '@microsoft/signalr'. Without this, parallel-worker module-cache contention
-// can let the real SignalR module load first, causing the mock to never apply
-// and tests to time out trying to negotiate a real HTTP connection.
-const mocks = vi.hoisted(() => {
-  const createMockConnection = () => ({
-    state: 'Disconnected' as string,
-    start: vi.fn().mockResolvedValue(undefined),
-    stop: vi.fn().mockResolvedValue(undefined),
-    invoke: vi.fn().mockResolvedValue(undefined),
-    on: vi.fn(),
-    off: vi.fn(),
-    onreconnecting: vi.fn(),
-    onreconnected: vi.fn(),
-    onclose: vi.fn(),
-  });
-
-  // Holder pattern: the factory's HubConnectionBuilder.build() reads
-  // holder.connection lazily, so beforeEach can swap in a fresh mock per test
-  // without re-registering the mock module.
-  const holder: { connection: ReturnType<typeof createMockConnection> } = {
-    connection: createMockConnection(),
-  };
-
-  return { createMockConnection, holder };
-});
-
-vi.mock('@microsoft/signalr', () => {
-  const HubConnectionState = {
-    Disconnected: 'Disconnected',
-    Connecting: 'Connecting',
-    Connected: 'Connected',
-    Disconnecting: 'Disconnecting',
-    Reconnecting: 'Reconnecting',
-  };
-
-  const LogLevel = {
-    Warning: 4,
-    Information: 2,
-  };
-
-  class HubConnectionBuilder {
-    withUrl() { return this; }
-    withAutomaticReconnect() { return this; }
-    configureLogging() { return this; }
-    build() { return mocks.holder.connection; }
-  }
-
-  return {
-    HubConnectionState,
-    LogLevel,
-    HubConnectionBuilder,
-  };
-});
+// This spec mocks SignalrService's HubConnection at the SERVICE boundary
+// instead of at the module boundary. SignalrService exposes a protected
+// `buildHubConnection(hubPath)` factory which we spy on per-test, bypassing
+// `vi.mock('@microsoft/signalr')` entirely.
+//
+// Why? `vi.mock` is patched by Angular's `@angular/build:unit-test` runner
+// (`vitest-mock-patch.js`) to forbid relative paths, and the wrapper has a
+// known intermittent stack-trace bug that surfaces as
+// `TypeError: Cannot read properties of undefined (reading 'trim')` from
+// inside Vitest's mock queue. The crash is at suite-init phase (before any
+// `it` runs), so Vitest's `retry` config can't recover. Spying on a service
+// method avoids the patched-mock code path entirely.
+//
+// Spec-level imports of @microsoft/signalr (the `HubConnectionState` enum
+// and the `createMockHubConnection` helper from src/testing/signalr.mock.ts)
+// are aliased via `vitest-base.config.ts` `resolve.alias` so they resolve to
+// the manual mock without touching the real module. Production-code imports
+// in signalr.service.ts continue to use the real module — they're never
+// exercised in tests because we override `buildHubConnection` before any
+// connection is built.
 
 describe('SignalrService', () => {
   let service: SignalrService;
-  let mockConnection: ReturnType<typeof mocks.createMockConnection>;
+  let mockConnection: ReturnType<typeof createMockHubConnection>;
   let mockAuthService: { token: ReturnType<typeof vi.fn>; isAuthenticated: ReturnType<typeof vi.fn>; clearAuth: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    mockConnection = mocks.createMockConnection();
-    mocks.holder.connection = mockConnection;
+    mockConnection = createMockHubConnection();
 
     mockAuthService = {
       token: vi.fn().mockReturnValue('test-token'),
@@ -84,6 +48,11 @@ describe('SignalrService', () => {
     });
 
     service = TestBed.inject(SignalrService);
+
+    // Override the protected factory so SignalrService never instantiates a
+    // real HubConnectionBuilder.
+    vi.spyOn(service as unknown as { buildHubConnection: (hubPath: string) => HubConnection }, 'buildHubConnection')
+      .mockImplementation(() => mockConnection as unknown as HubConnection);
   });
 
   it('should be created', () => {

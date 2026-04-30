@@ -31,13 +31,7 @@ export class SignalrService {
       return stub;
     }
 
-    const connection = new HubConnectionBuilder()
-      .withUrl(`${environment.hubUrl}/${hubPath}`, {
-        accessTokenFactory: () => this.authService.token() ?? '',
-      })
-      .withAutomaticReconnect([0, 1000, 2000, 5000, 10000, 30000])
-      .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
-      .build();
+    const connection = this.buildHubConnection(hubPath);
 
     connection.onreconnecting(() => this.updateGlobalState());
 
@@ -92,6 +86,25 @@ export class SignalrService {
     const paths = Array.from(this.connections.keys());
     await Promise.all(paths.map(path => this.stopConnection(path)));
     this._connectionState.set('disconnected');
+  }
+
+  /**
+   * Construct a fresh HubConnection for the given hub path. Extracted as a
+   * protected method so unit tests can override it (`vi.spyOn(service, ...)`)
+   * without needing `vi.mock('@microsoft/signalr')` — the latter has a known
+   * intermittent failure mode under Angular's `@angular/build:unit-test`
+   * runner (the injected `vitest-mock-patch.js` wrapper interacts badly with
+   * Vitest 4's stack-trace-based importer detection). See
+   * `signalr.service.spec.ts` for the test pattern.
+   */
+  protected buildHubConnection(hubPath: string): HubConnection {
+    return new HubConnectionBuilder()
+      .withUrl(`${environment.hubUrl}/${hubPath}`, {
+        accessTokenFactory: () => this.authService.token() ?? '',
+      })
+      .withAutomaticReconnect([0, 1000, 2000, 5000, 10000, 30000])
+      .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
+      .build();
   }
 
   /**
