@@ -10,6 +10,7 @@ import {
   AiSearchSuggestion,
   AiHelpResponse,
 } from './ai.service';
+import { CapabilityService } from './capability.service';
 import { RagSearchResponse } from '../models/rag-search-response.model';
 import { environment } from '../../../environments/environment';
 
@@ -101,6 +102,51 @@ describe('AiService', () => {
 
       const req = httpMock.expectOne(`${baseUrl}/status`);
       req.flush({ available: true } satisfies AiAvailabilityResponse);
+
+      expect(service.capabilityDisabled()).toBe(false);
+    });
+  });
+
+  describe('layer-3 descriptor pre-check (Phase 4 Phase-D)', () => {
+    it('does NOT fire the HTTP request when CAP-EXT-AI-ASSISTANT is known-disabled', () => {
+      const capability = TestBed.inject(CapabilityService);
+      const isKnownSpy = vi.spyOn(capability, 'isKnown').mockReturnValue(true);
+      const isEnabledSpy = vi.spyOn(capability, 'isEnabled').mockReturnValue(false);
+
+      service.checkAvailability();
+
+      // Critical: no HTTP traffic at all
+      httpMock.expectNone(`${baseUrl}/status`);
+      expect(service.capabilityDisabled()).toBe(true);
+      expect(service.available()).toBe(false);
+      expect(service.checking()).toBe(false);
+
+      isKnownSpy.mockRestore();
+      isEnabledSpy.mockRestore();
+    });
+
+    it('fires the HTTP request normally when CAP-EXT-AI-ASSISTANT is known-enabled', () => {
+      const capability = TestBed.inject(CapabilityService);
+      vi.spyOn(capability, 'isKnown').mockReturnValue(true);
+      vi.spyOn(capability, 'isEnabled').mockReturnValue(true);
+
+      service.checkAvailability();
+
+      const req = httpMock.expectOne(`${baseUrl}/status`);
+      req.flush({ available: true } satisfies AiAvailabilityResponse);
+
+      expect(service.capabilityDisabled()).toBe(false);
+      expect(service.available()).toBe(true);
+    });
+
+    it('fires the HTTP request when capability is unknown (descriptor not loaded yet)', () => {
+      const capability = TestBed.inject(CapabilityService);
+      vi.spyOn(capability, 'isKnown').mockReturnValue(false);
+
+      service.checkAvailability();
+
+      const req = httpMock.expectOne(`${baseUrl}/status`);
+      req.flush({ available: false } satisfies AiAvailabilityResponse);
 
       expect(service.capabilityDisabled()).toBe(false);
     });

@@ -9,12 +9,14 @@ import {
   CreateAnnouncementRequest,
   CreateAnnouncementTemplateRequest,
 } from '../models/announcement.model';
+import { CapabilityService } from './capability.service';
 
 type AnnouncementListener = (announcement: Announcement) => void;
 
 @Injectable({ providedIn: 'root' })
 export class AnnouncementService {
   private readonly http = inject(HttpClient);
+  private readonly capability = inject(CapabilityService);
 
   readonly activeAnnouncements = signal<Announcement[]>([]);
   readonly pendingAnnouncements = computed(() =>
@@ -32,6 +34,17 @@ export class AnnouncementService {
   }
 
   loadActive(): void {
+    // Layer-3 pre-check: skip the HTTP call entirely if the descriptor
+    // already says announcements are disabled. Avoids a 403 round-trip and
+    // keeps devtools clean. The layer-2 interceptor is the safety net for
+    // race conditions during app boot when the descriptor isn't loaded yet.
+    if (this.capability.isKnown('CAP-EXT-ANNOUNCEMENTS')
+      && !this.capability.isEnabled('CAP-EXT-ANNOUNCEMENTS')) {
+      this.activeAnnouncements.set([]);
+      this.capabilityDisabled.set(true);
+      return;
+    }
+
     this.http.get<Announcement[]>('/api/v1/announcements').subscribe({
       next: announcements => {
         this.activeAnnouncements.set(announcements);

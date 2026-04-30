@@ -15,6 +15,7 @@ Chart.register(SankeyController, Flow);
 
 import { routes } from './app.routes';
 import { authInterceptor } from './shared/interceptors/auth.interceptor';
+import { capabilityGateInterceptor } from './shared/interceptors/capability-gate.interceptor';
 import { etagInterceptor } from './shared/interceptors/etag.interceptor';
 import { httpErrorInterceptor } from './shared/interceptors/http-error.interceptor';
 import { dateTransformInterceptor } from './shared/interceptors/date-transform.interceptor';
@@ -34,7 +35,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([demoApiInterceptor, authInterceptor, kioskTokenInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor])),
+    provideHttpClient(withInterceptors([demoApiInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor])),
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     provideServiceWorker('ngsw-worker.js', {

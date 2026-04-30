@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 
 import { PlanningService } from './planning.service';
 import { environment } from '../../../../environments/environment';
+import { CapabilityService } from '../../../shared/services/capability.service';
 
 describe('PlanningService', () => {
   let service: PlanningService;
@@ -133,6 +134,56 @@ describe('PlanningService', () => {
       service.completeEntry(2, 10).subscribe();
       const req = httpMock.expectOne(`${base}/2/entries/10/complete`);
       expect(req.request.method).toBe('POST');
+      req.flush(null);
+    });
+  });
+
+  describe('layer-3 descriptor pre-check (Phase 4 Phase-D)', () => {
+    it('getCurrentCycle does NOT fire HTTP when CAP-PLAN-MRP is known-disabled', () => {
+      const capability = TestBed.inject(CapabilityService);
+      vi.spyOn(capability, 'isKnown').mockReturnValue(true);
+      vi.spyOn(capability, 'isEnabled').mockReturnValue(false);
+
+      let result: unknown = 'unset';
+      service.getCurrentCycle().subscribe((r) => { result = r; });
+
+      httpMock.expectNone(`${base}/current`);
+      expect(result).toBeNull();
+      expect(service.capabilityDisabled()).toBe(true);
+    });
+
+    it('getCycles does NOT fire HTTP when CAP-PLAN-MRP is known-disabled', () => {
+      const capability = TestBed.inject(CapabilityService);
+      vi.spyOn(capability, 'isKnown').mockReturnValue(true);
+      vi.spyOn(capability, 'isEnabled').mockReturnValue(false);
+
+      let result: unknown = 'unset';
+      service.getCycles().subscribe((r) => { result = r; });
+
+      httpMock.expectNone(base);
+      expect(result).toEqual([]);
+      expect(service.capabilityDisabled()).toBe(true);
+    });
+
+    it('getCurrentCycle fires HTTP normally when capability is enabled', () => {
+      const capability = TestBed.inject(CapabilityService);
+      vi.spyOn(capability, 'isKnown').mockReturnValue(true);
+      vi.spyOn(capability, 'isEnabled').mockReturnValue(true);
+
+      service.getCurrentCycle().subscribe();
+      const req = httpMock.expectOne(`${base}/current`);
+      expect(req.request.method).toBe('GET');
+      req.flush({ id: 1 });
+
+      expect(service.capabilityDisabled()).toBe(false);
+    });
+
+    it('getCurrentCycle fires HTTP when capability is unknown (boot race)', () => {
+      const capability = TestBed.inject(CapabilityService);
+      vi.spyOn(capability, 'isKnown').mockReturnValue(false);
+
+      service.getCurrentCycle().subscribe();
+      const req = httpMock.expectOne(`${base}/current`);
       req.flush(null);
     });
   });

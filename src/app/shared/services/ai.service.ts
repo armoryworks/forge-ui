@@ -5,6 +5,7 @@ import { Observable, catchError, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { isCapabilityDisabledError } from '../errors/capability-disabled.error';
 import { RagSearchResponse } from '../models/rag-search-response.model';
+import { CapabilityService } from './capability.service';
 
 export interface AiGenerateRequest {
   prompt: string;
@@ -51,6 +52,7 @@ export interface AiHelpResponse {
 @Injectable({ providedIn: 'root' })
 export class AiService {
   private readonly http = inject(HttpClient);
+  private readonly capability = inject(CapabilityService);
   private readonly base = `${environment.apiUrl}/ai`;
 
   readonly available = signal(false);
@@ -59,6 +61,18 @@ export class AiService {
   readonly capabilityDisabled = signal(false);
 
   checkAvailability(): void {
+    // Layer-3 pre-check: when the descriptor already says AI is off, skip
+    // the network call entirely. This is the user-visible fix — devtools
+    // network tab stays clean. The catchError below remains as layer-2
+    // insurance for the boot-time race window.
+    if (this.capability.isKnown('CAP-EXT-AI-ASSISTANT')
+      && !this.capability.isEnabled('CAP-EXT-AI-ASSISTANT')) {
+      this.available.set(false);
+      this.capabilityDisabled.set(true);
+      this.checking.set(false);
+      return;
+    }
+
     this.checking.set(true);
     this.http.get<AiAvailabilityResponse>(`${this.base}/status`).pipe(
       tap(res => {
