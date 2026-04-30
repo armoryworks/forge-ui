@@ -1,0 +1,11 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: grid;
+}
+
+.currency-input__symbol {
+  color: var(--text-muted);
+  font-size: $font-size-base;
+  font-weight: 500;
+}

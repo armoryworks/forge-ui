@@ -27,11 +27,17 @@
       [required]="true"
       data-testid="express-description" />
 
-    <app-input
-      [label]="'parts.workflow.basics.materialLabel' | translate"
-      formControlName="material"
-      [required]="true"
-      data-testid="express-material" />
+    @if (showMaterialField()) {
+      <div class="part-express-form__field">
+        <app-input
+          [label]="'parts.workflow.basics.materialLabel' | translate"
+          formControlName="material"
+          data-testid="express-material" />
+        <p class="part-express-form__hint part-express-form__hint--field">
+          {{ 'parts.workflow.basics.materialHelper' | translate }}
+        </p>
+      </div>
+    }
 
     <app-input
       [label]="'parts.workflow.basics.externalPartNumberLabel' | translate"
@@ -39,12 +45,10 @@
       [placeholder]="'parts.workflow.basics.externalPartNumberPlaceholder' | translate"
       data-testid="express-external-number" />
 
-    <app-input
+    <app-currency-input
       [label]="'parts.workflow.costing.manualOverrideLabel' | translate"
       formControlName="manualCostOverride"
-      type="number"
       [placeholder]="'parts.workflow.costing.manualOverridePlaceholder' | translate"
-      prefix="$"
       data-testid="express-manual-override" />
   </form>
 

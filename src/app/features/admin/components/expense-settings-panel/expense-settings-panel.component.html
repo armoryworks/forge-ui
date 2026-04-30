@@ -23,23 +23,19 @@
   </div>
 
   <div class="settings-row">
-    <app-input
+    <app-currency-input
       data-testid="expense-settings-auto-approve"
       [label]="'expenseSettings.autoApproveThreshold' | translate"
       formControlName="autoApproveThreshold"
-      type="number"
-      prefix="$"
       [placeholder]="'expenseSettings.noAutoApprove' | translate" />
     <p class="field-hint">{{ 'expenseSettings.autoApproveThresholdHint' | translate }}</p>
   </div>
 
   <div class="settings-row">
-    <app-input
+    <app-currency-input
       data-testid="expense-settings-max-amount"
       [label]="'expenseSettings.maxAmount' | translate"
       formControlName="maxAmount"
-      type="number"
-      prefix="$"
       [placeholder]="'expenseSettings.noLimit' | translate" />
     <p class="field-hint">{{ 'expenseSettings.maxAmountHint' | translate }}</p>
   </div>

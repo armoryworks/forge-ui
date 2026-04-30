@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, startWith } from 'rxjs/operators';
 
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -30,7 +31,7 @@ import { PartsService } from '../../services/parts.service';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     InputComponent, SelectComponent, LoadingBlockDirective,
-    ValidationButtonComponent,
+    ValidationButtonComponent, CurrencyInputComponent,
   ],
   templateUrl: './part-express-form.component.html',
   styleUrl: './part-express-form.component.scss',
@@ -82,12 +83,34 @@ export class PartExpressFormComponent {
     { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
   ];
 
+  /**
+   * Material is the assembly/part's primary composition (e.g., "Aluminum 6061").
+   * For RawMaterial the description IS the material — the field is redundant.
+   * For Consumable/Tooling/Fastener/Electronic/Packaging it's not meaningful.
+   * Only show + collect it for `Part` (made part) and `Assembly`.
+   *
+   * The Part entity's `Material` column is nullable on the server, so the field
+   * is intentionally NOT marked required here — the server contract is the
+   * source of truth.
+   */
   protected readonly form = new FormGroup({
     partType: new FormControl<PartType>('RawMaterial', [Validators.required]),
     description: new FormControl('', [Validators.required, Validators.maxLength(500)]),
-    material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
+    material: new FormControl('', [Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
     manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
+  });
+
+  /** Tracks the live partType selection so the Material visibility recomputes. */
+  protected readonly partTypeSignal = toSignal(
+    this.form.controls.partType.valueChanges.pipe(startWith(this.form.controls.partType.value)),
+    { initialValue: this.form.controls.partType.value },
+  );
+
+  /** Material field is only meaningful for made parts and assemblies. */
+  protected readonly showMaterialField = computed<boolean>(() => {
+    const t = (this.part()?.partType ?? this.partTypeSignal()) as PartType | null;
+    return t === 'Part' || t === 'Assembly';
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {

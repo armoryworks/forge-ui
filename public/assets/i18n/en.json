@@ -582,6 +582,7 @@
         "partTypeLabel": "Type",
         "descriptionLabel": "Description",
         "materialLabel": "Material",
+        "materialHelper": "Primary composition (e.g., Aluminum 6061, Steel A36).",
         "externalPartNumberLabel": "External Part #",
         "externalPartNumberPlaceholder": "Vendor / customer part number (optional)",
         "saveFailed": "Couldn't save basics."

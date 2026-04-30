@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ExpensesService } from '../../../expenses/services/expenses.service';
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -16,7 +17,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, ToggleComponent, LoadingBlockDirective, ValidationButtonComponent,
+    CurrencyInputComponent, InputComponent, ToggleComponent, LoadingBlockDirective, ValidationButtonComponent,
   ],
   templateUrl: './expense-settings-panel.component.html',
   styleUrl: './expense-settings-panel.component.scss',

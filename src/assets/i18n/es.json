@@ -593,6 +593,7 @@
         "partTypeLabel": "Tipo",
         "descriptionLabel": "Descripción",
         "materialLabel": "Material",
+        "materialHelper": "Composición principal (p. ej., Aluminio 6061, Acero A36).",
         "externalPartNumberLabel": "N.º de pieza externa",
         "externalPartNumberPlaceholder": "Número de pieza del proveedor / cliente (opcional)",
         "saveFailed": "No se pudo guardar."

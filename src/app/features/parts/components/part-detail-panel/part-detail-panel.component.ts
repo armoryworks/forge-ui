@@ -22,6 +22,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { AccountingItem } from '../../../admin/models/accounting-item.model';
 import { FileAttachment } from '../../../../shared/models/file.model';
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -54,7 +55,7 @@ type BomViewMode = 'table' | 'tree';
   imports: [
     CurrencyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
     MatTooltipModule,
-    DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    DialogComponent, InputComponent, CurrencyInputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     EntityPickerComponent, EmptyStateComponent, LoadingBlockDirective, ValidationButtonComponent,
     StlViewerComponent, FileUploadZoneComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,

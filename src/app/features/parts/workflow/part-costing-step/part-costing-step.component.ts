@@ -6,7 +6,7 @@ import { debounceTime } from 'rxjs/operators';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { InputComponent } from '../../../../shared/components/input/input.component';
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
@@ -33,7 +33,7 @@ type CostingMode = 'flat' | 'departmental' | 'abc';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe, MatTooltipModule,
-    InputComponent, LoadingBlockDirective,
+    CurrencyInputComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-costing-step.component.html',
   styleUrl: './part-costing-step.component.scss',

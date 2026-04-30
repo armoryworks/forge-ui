@@ -23,6 +23,18 @@
     margin: 0;
     font-size: $font-size-sm;
     color: var(--text-secondary);
+
+    &--field {
+      font-size: $font-size-xs;
+      color: var(--text-muted);
+      margin-top: -$sp-xs;
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
   }
 
   &__form {

@@ -10,6 +10,7 @@ import { ExpenseItem } from './models/expense-item.model';
 import { ExpenseStatus } from './models/expense-status.type';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
+import { CurrencyInputComponent } from '../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
@@ -35,7 +36,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   imports: [
     ReactiveFormsModule, DatePipe, CurrencyPipe,
     PageHeaderComponent, DialogComponent,
-    InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    InputComponent, CurrencyInputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, ColumnCellDirective, ValidationButtonComponent, LoadingBlockDirective,
     TranslatePipe, MatTooltipModule,
   ],

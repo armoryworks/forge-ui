@@ -43,12 +43,10 @@
 
   @if (isTier1()) {
     <form [formGroup]="form" class="part-costing-step__form">
-      <app-input
+      <app-currency-input
         [label]="'parts.workflow.costing.manualOverrideLabel' | translate"
         formControlName="manualCostOverride"
-        type="number"
         [placeholder]="'parts.workflow.costing.manualOverridePlaceholder' | translate"
-        prefix="$"
         data-testid="costing-manual-override" />
 
       <div class="part-costing-step__current">

@@ -11,6 +11,7 @@ import { SnackbarService } from '../../../../../shared/services/snackbar.service
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
+import { CurrencyInputComponent } from '../../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../../shared/components/textarea/textarea.component';
@@ -35,7 +36,7 @@ const STATUS_OPTIONS: SelectOption[] = [
   imports: [
     CurrencyPipe, DatePipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
-    InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    InputComponent, CurrencyInputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, ValidationButtonComponent,
   ],
   templateUrl: './customer-estimates-tab.component.html',
