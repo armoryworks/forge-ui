@@ -1,16 +1,15 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 
 import { TranslateService } from '@ngx-translate/core';
 
+import { CapabilityDisabledError } from '../errors/capability-disabled.error';
 import { SnackbarService } from '../services/snackbar.service';
 import { ToastService } from '../services/toast.service';
 import { parseServerValidationEnvelope } from '../utils/server-validation.utils';
 
 export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
-  const router = inject(Router);
   const snackbar = inject(SnackbarService);
   const toast = inject(ToastService);
   const translate = inject(TranslateService);
@@ -48,9 +47,30 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req, next) => {
           // This is a fallback if auth interceptor doesn't catch it.
           break;
 
-        case 403:
+        case 403: {
+          // Phase 4 Phase-D — capability-gate resilience.
+          //
+          // The server's `CapabilityGateMiddleware` short-circuits gated
+          // endpoints whose capability is disabled with HTTP 403 + envelope
+          //   { errors: [ { code: "capability-disabled", capability, message } ] }
+          // and the `X-Capability-Disabled` response header.
+          //
+          // A disabled capability is an intentional configuration state, not
+          // a security violation. Suppress the access-denied snackbar AND
+          // raise a typed `CapabilityDisabledError` so callers can degrade
+          // their UI silently (hide AI button, render no announcement card,
+          // etc.). Callers that don't catch see no visible UI side-effect —
+          // the Observable simply errors with the tagged error, which the
+          // toast/snackbar layers explicitly ignore.
+          const cap = parseCapabilityDisabled(error);
+          if (cap) {
+            // Diagnostic visibility without flagging as an error in devtools.
+            console.debug(`[capability-disabled] ${cap.capability}: ${cap.message}`);
+            return throwError(() => new CapabilityDisabledError(cap.capability, cap.message));
+          }
           snackbar.error(translate.instant('errors.accessDenied'));
           break;
+        }
 
         case 404:
           // Not found — typically handled by the calling service.
@@ -125,4 +145,48 @@ function extractDetails(error: HttpErrorResponse): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Detect the capability-gate envelope on a 403 response. Checks both the
+ * envelope `errors[0].code === 'capability-disabled'` shape (authoritative —
+ * it carries the capability id and message) and the `X-Capability-Disabled`
+ * response header (defensive — server middleware sets it but consumers may
+ * not have access to the envelope shape if a proxy strips bodies).
+ *
+ * Returns the parsed `{ capability, message }` on match, or `null` when the
+ * 403 is a plain access-denied response.
+ */
+function parseCapabilityDisabled(
+  error: HttpErrorResponse,
+): { capability: string; message: string } | null {
+  const body = error.error as unknown;
+  if (body && typeof body === 'object') {
+    const errors = (body as { errors?: unknown }).errors;
+    if (Array.isArray(errors) && errors.length > 0) {
+      const first = errors[0];
+      if (first && typeof first === 'object'
+        && (first as { code?: unknown }).code === 'capability-disabled') {
+        const capability = String((first as { capability?: unknown }).capability ?? '');
+        const message = String((first as { message?: unknown }).message
+          ?? 'This capability is disabled for this installation.');
+        if (capability) {
+          return { capability, message };
+        }
+      }
+    }
+  }
+
+  // Header-based fallback. The server middleware always sets it alongside
+  // the envelope; checking it lets us survive a body that's been mangled
+  // by a proxy / mocked transport that drops JSON bodies on 403.
+  const header = error.headers?.get('X-Capability-Disabled');
+  if (header) {
+    return {
+      capability: header,
+      message: 'This capability is disabled for this installation.',
+    };
+  }
+
+  return null;
 }

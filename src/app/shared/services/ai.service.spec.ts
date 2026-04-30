@@ -91,6 +91,19 @@ describe('AiService', () => {
       expect(service.available()).toBe(false);
       expect(service.checking()).toBe(false);
     });
+
+    it('should expose capabilityDisabled signal initialized to false (Phase 4 Phase-D)', () => {
+      expect(service.capabilityDisabled()).toBe(false);
+    });
+
+    it('should keep capabilityDisabled false on success (Phase 4 Phase-D)', () => {
+      service.checkAvailability();
+
+      const req = httpMock.expectOne(`${baseUrl}/status`);
+      req.flush({ available: true } satisfies AiAvailabilityResponse);
+
+      expect(service.capabilityDisabled()).toBe(false);
+    });
   });
 
   describe('generate', () => {

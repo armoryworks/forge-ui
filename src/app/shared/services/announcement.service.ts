@@ -1,6 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
+import { isCapabilityDisabledError } from '../errors/capability-disabled.error';
 import {
   Announcement,
   AnnouncementAcknowledgment,
@@ -19,6 +20,8 @@ export class AnnouncementService {
   readonly pendingAnnouncements = computed(() =>
     this.activeAnnouncements().filter(a => a.requiresAcknowledgment && !a.isAcknowledgedByCurrentUser));
   readonly unacknowledgedCount = computed(() => this.pendingAnnouncements().length);
+  /** Phase 4 Phase-D — true when announcements capability is disabled. */
+  readonly capabilityDisabled = signal(false);
 
   private readonly createdListeners = new Set<AnnouncementListener>();
 
@@ -29,8 +32,19 @@ export class AnnouncementService {
   }
 
   loadActive(): void {
-    this.http.get<Announcement[]>('/api/v1/announcements').subscribe(announcements => {
-      this.activeAnnouncements.set(announcements);
+    this.http.get<Announcement[]>('/api/v1/announcements').subscribe({
+      next: announcements => {
+        this.activeAnnouncements.set(announcements);
+        this.capabilityDisabled.set(false);
+      },
+      error: err => {
+        if (isCapabilityDisabledError(err)) {
+          // Announcements feature is intentionally off — render nothing.
+          this.activeAnnouncements.set([]);
+          this.capabilityDisabled.set(true);
+        }
+        // Other errors flow through the global interceptor (toast).
+      },
     });
   }
 

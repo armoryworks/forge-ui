@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, of, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { isCapabilityDisabledError } from '../errors/capability-disabled.error';
 import { RagSearchResponse } from '../models/rag-search-response.model';
 
 export interface AiGenerateRequest {
@@ -54,15 +55,22 @@ export class AiService {
 
   readonly available = signal(false);
   readonly checking = signal(false);
+  /** Phase 4 Phase-D — true when AI capability is disabled for this install. */
+  readonly capabilityDisabled = signal(false);
 
   checkAvailability(): void {
     this.checking.set(true);
     this.http.get<AiAvailabilityResponse>(`${this.base}/status`).pipe(
       tap(res => {
         this.available.set(res.available);
+        this.capabilityDisabled.set(false);
         this.checking.set(false);
       }),
-      catchError(() => {
+      catchError(err => {
+        if (isCapabilityDisabledError(err)) {
+          // AI is intentionally off — hide the AI surface, no error UI.
+          this.capabilityDisabled.set(true);
+        }
         this.available.set(false);
         this.checking.set(false);
         return of(null);

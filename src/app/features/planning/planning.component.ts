@@ -28,6 +28,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { isCapabilityDisabledError } from '../../shared/errors/capability-disabled.error';
 
 @Component({
   selector: 'app-planning',
@@ -59,6 +60,8 @@ export class PlanningComponent implements OnInit {
   protected readonly backlogJobs = signal<KanbanJob[]>([]);
   protected readonly showCycleDialog = signal(false);
   protected readonly editingCycle = signal<PlanningCycleDetail | null>(null);
+  /** Phase 4 Phase-D — true when planning capability is disabled. */
+  protected readonly capabilityDisabled = signal(false);
 
   // Backlog filters
   protected readonly searchControl = new FormControl('');
@@ -148,7 +151,14 @@ export class PlanningComponent implements OnInit {
 
         this.loading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        if (isCapabilityDisabledError(err)) {
+          // Planning capability is intentionally off — show benign empty state.
+          this.capabilityDisabled.set(true);
+          this.cycles.set([]);
+          this.selectedCycle.set(null);
+          this.backlogJobs.set([]);
+        }
         this.loading.set(false);
       },
     });
