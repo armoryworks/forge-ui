@@ -4,11 +4,12 @@
 #   - push to main             -> :main-<sha> + :latest
 #   - push of a v*.*.* tag     -> :X.Y.Z + :X.Y + :X
 #
-# Image goes to GHCR (ghcr.io/danielhokanson/qb-engineer-ui) as a native
-# linux/arm64 build (Raspberry Pi production target). Mirrors the
-# qb-engineer-server release.yml shape (Phase 2 reference). To add amd64
-# later, set `platforms` on build-push to `linux/arm64,linux/amd64` and
-# add a `docker/setup-qemu-action` step.
+# Image goes to GHCR (ghcr.io/danielhokanson/qb-engineer-ui) as a
+# multi-arch manifest covering linux/arm64 (Raspberry Pi production target)
+# and linux/amd64 (developer workstations, x86_64 testers). The runner is a
+# native arm64 machine; amd64 is built via QEMU emulation. Cold-cache build
+# time: ~25-40 min (vs ~12-15 min for arm64 alone). Mirrors the
+# qb-engineer-server release.yml shape (Phase 2 reference).
 #
 # Tests gate the image push: lint + build + Vitest must succeed before
 # the build-and-push job starts. A failing test means no image is
@@ -68,6 +69,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -96,7 +102,7 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          platforms: linux/arm64
+          platforms: linux/arm64,linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
