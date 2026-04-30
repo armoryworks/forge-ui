@@ -108,16 +108,27 @@ export class AppComponent implements OnInit, OnDestroy {
     // Reactively connect/disconnect hubs based on auth state
     effect(() => {
       if (this.authService.isAuthenticated()) {
+        // Hub connections + non-capability-gated init runs immediately —
+        // these don't depend on the capability descriptor.
         this.notificationHub.connect();
         this.chatHub.connect();
-        this.notificationService.load();
         this.userPreferences.load();
-        this.accountingService.load();
-        this.capabilityService.load();
-        this.employeeProfile.load();
         this.scanner.start();
         this.draftRecovery.onLogin();
-        this.announcementService.loadActive();
+
+        // Capability descriptor MUST resolve before any capability-gated
+        // service makes HTTP calls. Otherwise the layer-3 interceptor can't
+        // short-circuit (isKnown returns false on an unloaded descriptor)
+        // and gated calls 403 before layer 2 catches them as red console
+        // errors. Chaining via the load() Observable closes the race.
+        this.capabilityService.load().subscribe({
+          next: () => {
+            this.notificationService.load();
+            this.accountingService.load();
+            this.employeeProfile.load();
+            this.announcementService.loadActive();
+          },
+        });
         this.wasAuthenticated = true;
       } else {
         this.capabilityService.clear();

@@ -66,8 +66,11 @@ describe('AnnouncementService', () => {
       // re-tracing the entire interceptor pipeline.
       vi.spyOn(capability, 'isKnown').mockReturnValue(false);
       const err = new CapabilityDisabledError('CAP-EXT-ANNOUNCEMENTS', 'disabled');
-      // Spy http.get to return a stream that errors with our typed error
-      const httpGetSpy = vi.spyOn((service as unknown as { http: { get: unknown } }).http, 'get');
+      // Spy http.get to return a stream that errors with our typed error.
+      // Use a type assertion through `any` because vi.spyOn can't infer
+      // the method overloads when accessing through an `unknown` cast.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const httpGetSpy = vi.spyOn((service as any).http, 'get');
       httpGetSpy.mockReturnValueOnce({
         subscribe: ({ error }: { error: (e: unknown) => void }) => {
           error(err);

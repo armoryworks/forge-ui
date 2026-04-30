@@ -44,7 +44,7 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
   });
 
   function loadDescriptor(): void {
-    service.load();
+    service.load().subscribe();
     const req = httpMock.expectOne(`${environment.apiUrl}/capabilities/descriptor`);
     const desc: CapabilityDescriptor = {
       generatedAt: '2026-04-28T00:00:00Z',
@@ -95,7 +95,7 @@ describe('CapabilityService — Phase 4 Phase-C ETag handling', () => {
   });
 
   it('setConfig submits the config ETag separately from the toggle ETag', () => {
-    service.load();
+    service.load().subscribe();
     const initialReq = httpMock.expectOne(`${environment.apiUrl}/capabilities/descriptor`);
     initialReq.flush({
       generatedAt: '2026-04-28T00:00:00Z',

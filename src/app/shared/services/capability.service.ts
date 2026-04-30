@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { Observable, catchError, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { CapabilityAuditEntry } from '../models/capability-audit-entry.model';
@@ -84,10 +84,21 @@ export class CapabilityService {
     return this._entryByCode().get(code);
   }
 
-  /** Fetches the descriptor. Idempotent — call on login or after capability:changed. */
-  load(): void {
+  /**
+   * Fetches the descriptor. Idempotent — call on login or after
+   * `capability:changed`.
+   *
+   * Returns an Observable that emits once when the descriptor has been
+   * stored (or the load failed and the snapshot was cleared). Callers that
+   * need to fire other capability-gated HTTP calls AFTER the descriptor is
+   * known should chain on this — otherwise the layer-3 interceptor cannot
+   * short-circuit those calls (it only blocks when the capability is
+   * `isKnown && !isEnabled`; an unloaded descriptor returns false from
+   * `isKnown` and the call falls through to the server).
+   */
+  load(): Observable<void> {
     this._loading.set(true);
-    this.http
+    return this.http
       .get<CapabilityDescriptor>(`${environment.apiUrl}/capabilities/descriptor`)
       .pipe(
         tap((d) => this._descriptor.set(d)),
@@ -98,8 +109,9 @@ export class CapabilityService {
           this._descriptor.set(null);
           return of(null);
         }),
-      )
-      .subscribe(() => this._loading.set(false));
+        tap(() => this._loading.set(false)),
+        map(() => void 0),
+      );
   }
 
   /**
