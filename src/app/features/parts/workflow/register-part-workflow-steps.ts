@@ -29,5 +29,12 @@ export function providePartWorkflowSteps(): EnvironmentProviders {
     registry.register('PartCostingStepComponent', PartCostingStepComponent);
     registry.register('PartAlternatesStepComponent', PartAlternatesStepComponent);
     registry.registerExpress('PartExpressFormComponent', PartExpressFormComponent);
+    // Phase 6 — also register the express form as a step component. The
+    // `part-raw-material-express-v1` definition has a single 'all' step
+    // whose `componentName` is `PartExpressFormComponent`; when a user
+    // overrides Q2 mode to Step-by-step on a raw-material part, the
+    // guided rail mounts the per-step component for 'all', which is the
+    // express form. Same Type registration, two slots in the registry.
+    registry.register('PartExpressFormComponent', PartExpressFormComponent);
   });
 }

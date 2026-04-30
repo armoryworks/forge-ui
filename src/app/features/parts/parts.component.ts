@@ -31,7 +31,7 @@ import { PartsCardGridComponent } from './components/parts-card-grid/parts-card-
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { PartDetailDialogComponent, PartDetailDialogData } from './components/part-detail-dialog/part-detail-dialog.component';
 import { WorkflowService } from '../../shared/services/workflow.service';
-import { NewPartChoice, NewPartForkDialogComponent } from './workflow/new-part-fork-dialog/new-part-fork-dialog.component';
+import { NewPartForkDialogComponent, NewPartForkResult } from './workflow/new-part-fork-dialog/new-part-fork-dialog.component';
 
 type ViewMode = 'table' | 'cards';
 
@@ -280,45 +280,61 @@ export class PartsComponent {
   // ── Part CRUD ──
 
   /**
-   * Phase 5: Opens the New-Part fork dialog so the user picks express
-   * (single form) vs guided (workflow shell). Express → original create
-   * dialog (existing behavior). Guided → starts a `part-assembly-guided-v1`
-   * run and navigates to the workflow shell.
+   * Phase 6: Opens the type-aware New-Part fork dialog. The user picks a
+   * part-type bucket (Q1) and the presentation mode (Q2). The workflow
+   * definition is selected by part type; the mode is the user's pick:
+   *   - Assembly       → `part-assembly-guided-v1`
+   *   - Raw Material   → `part-raw-material-express-v1`
+   *   - Made Part      → `part-raw-material-express-v1` (until type-specific
+   *                       made-part workflows ship)
+   *   - Other          → `part-raw-material-express-v1`
+   *
+   * Both modes route through the same workflow infrastructure — the shell
+   * picks the express template or the step-rail layout based on `mode`.
+   * The legacy "open the old create dialog" express path is gone (Phase 5
+   * was transitional); express now means express-mode-of-the-workflow.
    */
   protected openCreatePart(): void {
     this.dialog.open(NewPartForkDialogComponent, { width: '540px' })
-      .afterClosed().subscribe((choice: NewPartChoice | undefined) => {
-        if (!choice) return;
-        if (choice === 'express') {
-          this.openExpressDialog();
-        } else {
-          this.startGuidedWorkflow();
-        }
+      .afterClosed().subscribe((result: NewPartForkResult | undefined) => {
+        if (!result) return;
+        this.startPartWorkflow(result);
       });
   }
 
-  private openExpressDialog(): void {
-    this.editingPart.set(null);
-    this.partForm.reset({
-      description: '', revision: 'A',
-      partType: 'Part', material: '', moldToolRef: '', externalPartNumber: '',
-      toolingAssetId: null,
-      minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
-      leadTimeDays: null, safetyStockDays: null,
-    });
-    this.showPartDialog.set(true);
+  /**
+   * Picks the workflow definition for a given part type. Phase 6 covers
+   * raw-material + assembly explicitly; everything else falls back to the
+   * raw-material express definition (per design D3 — express is the safer
+   * default for unknown types). Lift to a per-type lookup table when more
+   * type-specific workflows ship.
+   */
+  private workflowDefinitionForPartType(partType: PartType): string {
+    if (partType === 'Assembly') return 'part-assembly-guided-v1';
+    return 'part-raw-material-express-v1';
   }
 
-  private startGuidedWorkflow(): void {
+  private startPartWorkflow(result: NewPartForkResult): void {
+    const definitionId = this.workflowDefinitionForPartType(result.partType);
     this.workflowService.startRun({
       entityType: 'Part',
-      definitionId: 'part-assembly-guided-v1',
-      mode: 'guided',
+      definitionId,
+      mode: result.mode,
+      initialEntityData: { partType: result.partType },
     }).subscribe({
       next: (run) => {
-        this.router.navigate(['/parts', run.entityId], {
-          queryParams: { workflow: 'part-assembly-guided-v1', step: 'basics', mode: 'guided' },
-        });
+        // For express mode the URL omits ?step=, the shell renders the
+        // express template for the definition. For guided, ?step= seeds
+        // the rail at the run's first step (computed server-side from
+        // the definition's StepsJson).
+        const queryParams: Record<string, string> = {
+          workflow: definitionId,
+          mode: result.mode,
+        };
+        if (result.mode === 'guided' && run.currentStepId) {
+          queryParams['step'] = run.currentStepId;
+        }
+        this.router.navigate(['/parts', run.entityId], { queryParams });
       },
       error: () => this.snackbar.error(this.translate.instant('parts.workflow.startFailed')),
     });

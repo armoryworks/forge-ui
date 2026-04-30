@@ -153,8 +153,10 @@ export class PartWorkflowPageComponent {
           this.validators.set(validators);
           this.workflowService.setContext({ run, definition, entity: part, validators });
 
-          // Sync URL ?step= to the run's pointer if missing.
-          if (!this.stepFromUrl() && run.currentStepId) {
+          // Sync URL ?step= to the run's pointer if missing. Only meaningful
+          // in guided mode — express mode has no step rail so the ?step=
+          // param would be cosmetic noise.
+          if (run.mode === 'guided' && !this.stepFromUrl() && run.currentStepId) {
             this.router.navigate([], {
               relativeTo: this.route,
               queryParams: { step: run.currentStepId, mode: run.mode },

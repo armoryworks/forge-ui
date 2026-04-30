@@ -547,12 +547,26 @@
     "workflow": {
       "startFailed": "No se pudo iniciar el flujo.",
       "fork": {
-        "title": "¿Cómo desea agregar esta pieza?",
-        "intro": "Elija la ruta que se ajuste a la complejidad. Puede cambiar más tarde.",
-        "expressTitle": "Alta rápida",
-        "expressDesc": "Un formulario, todos los campos visibles. Mejor para materias primas y piezas simples.",
-        "guidedTitle": "Configuración paso a paso",
-        "guidedDesc": "Le guía por básicos, BOM, ruta, costo y alternativos. Mejor para ensamblajes."
+        "title": "Add a new part",
+        "intro": "Tell us what kind of part this is and how you'd like to set it up. You can switch modes anytime later.",
+        "modeHeading": "How would you like to set it up?",
+        "expressTitle": "Express",
+        "expressDesc": "One form, all fields visible. Best for raw materials and simple parts.",
+        "guidedTitle": "Step-by-step",
+        "guidedDesc": "Walks you through basics, BOM, routing, cost, and alternates. Best for assemblies.",
+        "recommendedTag": "Recommended",
+        "continue": "Continue",
+        "partType": {
+          "heading": "What kind of part?",
+          "assemblyTitle": "Assembly",
+          "assemblyDesc": "Multiple components joined together. Has a BOM and routing.",
+          "rawMaterialTitle": "Raw Material",
+          "rawMaterialDesc": "Stock material consumed by other parts. No BOM.",
+          "madeTitle": "Made Part",
+          "madeDesc": "Single component you fabricate. May have routing.",
+          "otherTitle": "Other",
+          "otherDesc": "Consumable, tooling, fastener, electronic, or packaging."
+        }
       },
       "basics": {
         "title": "Básicos",

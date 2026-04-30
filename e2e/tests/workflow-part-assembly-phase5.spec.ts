@@ -19,7 +19,7 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
     await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
   });
 
-  test('guided flow: New Part → step-by-step → workflow shell mounts → basics fills', async ({ page }) => {
+  test('guided flow: New Part → Assembly + Step-by-step → workflow shell mounts → basics fills', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
     // Click New Part — fork dialog should open
@@ -27,8 +27,9 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
     await expect(page.locator('[data-testid="fork-guided"]')).toBeVisible();
     await expect(page.locator('[data-testid="fork-express"]')).toBeVisible();
 
-    // Pick Step-by-step
-    await page.locator('[data-testid="fork-guided"]').click();
+    // Phase 6 — pick Q1 = Assembly (recommended Q2 = Step-by-step), then Continue.
+    await page.locator('[data-testid="fork-type-Assembly"]').click();
+    await page.locator('[data-testid="fork-continue"]').click();
 
     // Workflow shell mounts on /parts/:id?workflow=part-assembly-guided-v1
     await page.waitForURL(/\/parts\/\d+\?.*workflow=part-assembly-guided-v1/, { timeout: 15000 });
@@ -56,16 +57,25 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
     await page.waitForFunction(() => !window.location.search.includes('workflow='), { timeout: 10000 });
   });
 
-  test('express flow: New Part → Express add → existing dialog opens', async ({ page }) => {
+  test('express flow (Phase 6): New Part → Assembly + Express override → workflow shell mounts in express mode', async ({ page }) => {
+    // Phase 6 — Express path now goes through the workflow infrastructure
+    // (D-PHASE6-5). The legacy create dialog has been retired for new
+    // parts. This test verifies the assembly + express override flow lands
+    // on the workflow shell in express mode.
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
     await page.locator('[data-testid="new-part-btn"]').click();
+    // Pick Q1 = Assembly (default = guided). Override Q2 to Express.
+    await page.locator('[data-testid="fork-type-Assembly"]').click();
     await page.locator('[data-testid="fork-express"]').click();
+    await page.locator('[data-testid="fork-continue"]').click();
 
-    // Existing express dialog should appear (data-testid="part-description")
-    await expect(page.locator('[data-testid="part-description"]')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('[data-testid="part-save-btn"]')).toBeVisible();
-    await page.screenshot({ path: 'e2e/screenshots/phase5-express-dialog.png', fullPage: true });
+    // Workflow shell mounts in express mode (no rail, express form visible).
+    await page.waitForURL(/\/parts\/\d+\?.*workflow=part-assembly-guided-v1/, { timeout: 15000 });
+    await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="workflow-express-content"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="part-express-form"]')).toBeVisible();
+    await page.screenshot({ path: 'e2e/screenshots/phase5-express-shell.png', fullPage: true });
   });
 
   test('promote-direct: Mark Complete on incomplete workflow surfaces missing validators (sugar over /promote-status)', async ({ page, request }) => {

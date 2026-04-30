@@ -581,12 +581,26 @@
     "workflow": {
       "startFailed": "Couldn't start the workflow.",
       "fork": {
-        "title": "How would you like to add this part?",
-        "intro": "Pick the path that fits this part's complexity. You can switch later.",
-        "expressTitle": "Express add",
-        "expressDesc": "One form, all fields visible. Best for raw materials, fasteners, simple parts.",
-        "guidedTitle": "Step-by-step setup",
-        "guidedDesc": "Walks you through basics, BOM, routing, cost, and alternates. Best for assemblies."
+        "title": "Add a new part",
+        "intro": "Tell us what kind of part this is and how you'd like to set it up. You can switch modes anytime later.",
+        "modeHeading": "How would you like to set it up?",
+        "expressTitle": "Express",
+        "expressDesc": "One form, all fields visible. Best for raw materials and simple parts.",
+        "guidedTitle": "Step-by-step",
+        "guidedDesc": "Walks you through basics, BOM, routing, cost, and alternates. Best for assemblies.",
+        "recommendedTag": "Recommended",
+        "continue": "Continue",
+        "partType": {
+          "heading": "What kind of part?",
+          "assemblyTitle": "Assembly",
+          "assemblyDesc": "Multiple components joined together. Has a BOM and routing.",
+          "rawMaterialTitle": "Raw Material",
+          "rawMaterialDesc": "Stock material consumed by other parts. No BOM.",
+          "madeTitle": "Made Part",
+          "madeDesc": "Single component you fabricate. May have routing.",
+          "otherTitle": "Other",
+          "otherDesc": "Consumable, tooling, fastener, electronic, or packaging."
+        }
       },
       "basics": {
         "title": "Basics",

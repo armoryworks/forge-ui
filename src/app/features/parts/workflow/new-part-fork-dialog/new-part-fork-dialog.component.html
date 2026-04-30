@@ -2,32 +2,84 @@
   <div class="new-part-fork">
     <p class="new-part-fork__intro">{{ 'parts.workflow.fork.intro' | translate }}</p>
 
-    <button class="new-part-fork__choice"
-      type="button"
-      data-testid="fork-express"
-      (click)="pick('express')">
-      <span class="new-part-fork__icon material-icons-outlined" aria-hidden="true">flash_on</span>
-      <span class="new-part-fork__body">
-        <span class="new-part-fork__title">{{ 'parts.workflow.fork.expressTitle' | translate }}</span>
-        <span class="new-part-fork__desc">{{ 'parts.workflow.fork.expressDesc' | translate }}</span>
-      </span>
-      <span class="new-part-fork__chevron material-icons-outlined" aria-hidden="true">chevron_right</span>
-    </button>
+    <!-- Q1 — Part type bucket -->
+    <section class="new-part-fork__question" data-testid="fork-question-type">
+      <h3 class="new-part-fork__heading">{{ 'parts.workflow.fork.partType.heading' | translate }}</h3>
+      <div class="new-part-fork__type-grid">
+        @for (choice of partTypeChoices; track choice.value) {
+          <button
+            type="button"
+            class="new-part-fork__type-card"
+            [class.new-part-fork__type-card--selected]="partType() === choice.value"
+            [attr.aria-pressed]="partType() === choice.value"
+            [attr.data-testid]="'fork-type-' + choice.value"
+            (click)="pickPartType(choice.value)">
+            <span class="new-part-fork__type-icon material-icons-outlined" aria-hidden="true">{{ choice.icon }}</span>
+            <span class="new-part-fork__type-body">
+              <span class="new-part-fork__type-title">{{ choice.titleKey | translate }}</span>
+              <span class="new-part-fork__type-desc">{{ choice.descKey | translate }}</span>
+            </span>
+          </button>
+        }
+      </div>
+    </section>
 
-    <button class="new-part-fork__choice"
-      type="button"
-      data-testid="fork-guided"
-      (click)="pick('guided')">
-      <span class="new-part-fork__icon material-icons-outlined" aria-hidden="true">view_list</span>
-      <span class="new-part-fork__body">
-        <span class="new-part-fork__title">{{ 'parts.workflow.fork.guidedTitle' | translate }}</span>
-        <span class="new-part-fork__desc">{{ 'parts.workflow.fork.guidedDesc' | translate }}</span>
-      </span>
-      <span class="new-part-fork__chevron material-icons-outlined" aria-hidden="true">chevron_right</span>
-    </button>
+    <!-- Q2 — Express vs Guided -->
+    <section class="new-part-fork__question" data-testid="fork-question-mode">
+      <h3 class="new-part-fork__heading">{{ 'parts.workflow.fork.modeHeading' | translate }}</h3>
+      <div class="new-part-fork__mode-grid">
+        <button
+          type="button"
+          class="new-part-fork__choice"
+          [class.new-part-fork__choice--selected]="effectiveMode() === 'express'"
+          [class.new-part-fork__choice--default]="defaultMode() === 'express' && modeOverride() === null"
+          [attr.aria-pressed]="effectiveMode() === 'express'"
+          data-testid="fork-express"
+          (click)="pickMode('express')">
+          <span class="new-part-fork__icon material-icons-outlined" aria-hidden="true">flash_on</span>
+          <span class="new-part-fork__body">
+            <span class="new-part-fork__title">
+              {{ 'parts.workflow.fork.expressTitle' | translate }}
+              @if (defaultMode() === 'express' && modeOverride() === null && partType() !== null) {
+                <span class="new-part-fork__default-tag">{{ 'parts.workflow.fork.recommendedTag' | translate }}</span>
+              }
+            </span>
+            <span class="new-part-fork__desc">{{ 'parts.workflow.fork.expressDesc' | translate }}</span>
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="new-part-fork__choice"
+          [class.new-part-fork__choice--selected]="effectiveMode() === 'guided'"
+          [class.new-part-fork__choice--default]="defaultMode() === 'guided' && modeOverride() === null"
+          [attr.aria-pressed]="effectiveMode() === 'guided'"
+          data-testid="fork-guided"
+          (click)="pickMode('guided')">
+          <span class="new-part-fork__icon material-icons-outlined" aria-hidden="true">view_list</span>
+          <span class="new-part-fork__body">
+            <span class="new-part-fork__title">
+              {{ 'parts.workflow.fork.guidedTitle' | translate }}
+              @if (defaultMode() === 'guided' && modeOverride() === null && partType() !== null) {
+                <span class="new-part-fork__default-tag">{{ 'parts.workflow.fork.recommendedTag' | translate }}</span>
+              }
+            </span>
+            <span class="new-part-fork__desc">{{ 'parts.workflow.fork.guidedDesc' | translate }}</span>
+          </span>
+        </button>
+      </div>
+    </section>
   </div>
 
   <div dialog-footer>
     <button class="action-btn" type="button" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <button
+      class="action-btn action-btn--primary"
+      type="button"
+      data-testid="fork-continue"
+      [disabled]="!canContinue()"
+      (click)="continue()">
+      {{ 'parts.workflow.fork.continue' | translate }}
+    </button>
   </div>
 </app-dialog>

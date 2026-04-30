@@ -3,7 +3,7 @@
 .new-part-fork {
   display: flex;
   flex-direction: column;
-  gap: $sp-md;
+  gap: $sp-lg;
 
   &__intro {
     margin: 0;
@@ -11,9 +11,90 @@
     font-size: $font-size-sm;
   }
 
+  &__question {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__heading {
+    margin: 0;
+    font-size: $font-size-xxs;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  &__type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-sm;
+  }
+
+  &__type-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    min-height: 64px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    font-family: inherit;
+    transition: background-color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 1px;
+    }
+
+    &--selected {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+    }
+  }
+
+  &__type-icon {
+    font-size: $icon-size-lg;
+    color: var(--primary);
+  }
+
+  &__type-body {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+  }
+
+  &__type-title {
+    font-size: $font-size-sm;
+    font-weight: 600;
+  }
+
+  &__type-desc {
+    font-size: $font-size-xxs;
+    color: var(--text-secondary);
+    line-height: 1.3;
+  }
+
+  &__mode-grid {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
   &__choice {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     align-items: center;
     gap: $sp-md;
     padding: $sp-md;
@@ -25,7 +106,7 @@
     font-family: inherit;
     transition: background-color $transition-fast, border-color $transition-fast;
 
-    &:hover, &:focus-visible {
+    &:hover {
       border-color: var(--primary);
       background: color-mix(in srgb, var(--primary) 6%, var(--surface));
     }
@@ -33,6 +114,11 @@
     &:focus-visible {
       outline: 2px solid var(--primary);
       outline-offset: 1px;
+    }
+
+    &--selected {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 10%, var(--surface));
     }
   }
 
@@ -45,9 +131,14 @@
     display: flex;
     flex-direction: column;
     gap: $sp-xs;
+    min-width: 0;
   }
 
   &__title {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    flex-wrap: wrap;
     font-size: $font-size-md;
     font-weight: 600;
   }
@@ -57,8 +148,14 @@
     color: var(--text-secondary);
   }
 
-  &__chevron {
-    font-size: $icon-size-md;
-    color: var(--text-muted);
+  &__default-tag {
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    padding: $sp-xxs $sp-sm;
+    border: $border-width-thin solid var(--primary);
   }
 }
