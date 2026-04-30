@@ -31,4 +31,19 @@
     gap: $sp-md;
     max-width: 720px;
   }
+
+  // Small read-only chip displayed when the upstream fork dialog already
+  // committed the part type — replaces the redundant Type select.
+  &__type-chip {
+    align-self: flex-start;
+    font-size: $font-size-xs;
+    padding: $sp-xs $sp-md;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $sp-md;
+    max-width: 720px;
+  }
 }

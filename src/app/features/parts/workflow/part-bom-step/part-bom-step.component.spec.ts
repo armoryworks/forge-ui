@@ -79,6 +79,12 @@ describe('PartBomStepComponent (Phase 5)', () => {
       save(): void;
     };
     c.form.patchValue({ childPartId: 7, quantity: 2, sourceType: 'Buy' });
+    // Picking a child part now triggers a part-detail fetch so the dialog can
+    // auto-derive the source type. Flush it with a stub so the BOM POST below
+    // is unaffected and httpMock.verify() stays clean.
+    const childReq = httpMock.expectOne(`${environment.apiUrl}/parts/7`);
+    expect(childReq.request.method).toBe('GET');
+    childReq.flush(buildPart({ id: 7, partType: 'RawMaterial' }));
     c.save();
     const req = httpMock.expectOne(`${environment.apiUrl}/parts/42/bom`);
     expect(req.request.method).toBe('POST');
@@ -86,5 +92,46 @@ describe('PartBomStepComponent (Phase 5)', () => {
     req.flush(buildPart({ bomEntries: [buildEntry(99)] }));
     const c2 = component as unknown as { bomEntries(): BOMEntry[] };
     expect(c2.bomEntries().length).toBe(1);
+  });
+
+  it('auto-sets sourceType from child part type (Assembly → Make)', () => {
+    const component = TestBed.runInInjectionContext(() => new PartBomStepComponent());
+    mockSignalInputs(component, {
+      stepId: 'bom', componentName: 'PartBomStepComponent',
+      entityId: 42, entity: buildPart(),
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: {
+        patchValue(v: unknown): void;
+        controls: { sourceType: { value: string } };
+        get(name: string): { value: string };
+      };
+    };
+    c.form.patchValue({ childPartId: 11 });
+    const childReq = httpMock.expectOne(`${environment.apiUrl}/parts/11`);
+    childReq.flush(buildPart({ id: 11, partType: 'Assembly' }));
+    expect(c.form.controls.sourceType.value).toBe('Make');
+  });
+
+  it('auto-sets sourceType from child part type (RawMaterial → Buy)', () => {
+    const component = TestBed.runInInjectionContext(() => new PartBomStepComponent());
+    mockSignalInputs(component, {
+      stepId: 'bom', componentName: 'PartBomStepComponent',
+      entityId: 42, entity: buildPart(),
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: {
+        patchValue(v: unknown): void;
+        controls: { sourceType: { setValue(v: string): void; value: string } };
+      };
+    };
+    // Seed sourceType to Make so we can verify it's overridden to Buy.
+    c.form.controls.sourceType.setValue('Make');
+    c.form.patchValue({ childPartId: 22 });
+    const childReq = httpMock.expectOne(`${environment.apiUrl}/parts/22`);
+    childReq.flush(buildPart({ id: 22, partType: 'RawMaterial' }));
+    expect(c.form.controls.sourceType.value).toBe('Buy');
   });
 });

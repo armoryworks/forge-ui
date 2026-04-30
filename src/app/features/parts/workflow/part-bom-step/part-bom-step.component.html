@@ -50,20 +50,17 @@
           formControlName="quantity"
           type="number"
           [required]="true" />
-        <app-select
-          [label]="'parts.bomSource' | translate"
-          formControlName="sourceType"
-          [options]="sourceTypeOptions" />
-      </div>
-      <div class="dialog-row">
         <app-input
           [label]="'parts.bomLeadTime' | translate"
           formControlName="leadTimeDays"
           type="number" />
-        <app-input
-          [label]="'parts.bomRefDes' | translate"
-          formControlName="referenceDesignator" />
       </div>
+      @if (autoSourceLabel(); as autoLabel) {
+        <p class="part-bom-step__auto-source" data-testid="bom-auto-source">{{ autoLabel }}</p>
+      }
+      <app-input
+        [label]="'parts.bomRefDes' | translate"
+        formControlName="referenceDesignator" />
       <app-textarea
         [label]="'parts.bomNotes' | translate"
         formControlName="notes" />

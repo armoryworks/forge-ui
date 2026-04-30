@@ -7,6 +7,8 @@ import { debounceTime } from 'rxjs/operators';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
@@ -28,6 +30,7 @@ import { PartsService } from '../../services/parts.service';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     InputComponent, SelectComponent, LoadingBlockDirective,
+    ValidationButtonComponent,
   ],
   templateUrl: './part-express-form.component.html',
   styleUrl: './part-express-form.component.scss',
@@ -49,6 +52,25 @@ export class PartExpressFormComponent {
 
   protected readonly part = computed<PartDetail | null>(() => (this.entity() as PartDetail | null) ?? null);
 
+  /**
+   * The Type select is redundant when the upstream fork dialog already wrote
+   * `partType` onto the new entity. Hide it in that case and render a small
+   * read-only chip beside the form title — the user must back out (or use
+   * the part detail page) to change the type. When the form is mounted
+   * without a pre-set type (defensive — no current flow does this), the
+   * select still appears so the user can pick.
+   */
+  protected readonly partTypeLocked = computed<boolean>(() => {
+    const t = this.part()?.partType;
+    return t !== null && t !== undefined;
+  });
+
+  protected readonly partTypeLabel = computed<string>(() => {
+    const t = this.part()?.partType;
+    if (!t) return '';
+    return this.translate.instant(`parts.type${t}`);
+  });
+
   protected readonly partTypeOptions: SelectOption[] = [
     { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
     { value: 'Part', label: this.translate.instant('parts.typePart') },
@@ -66,6 +88,14 @@ export class PartExpressFormComponent {
     material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
     manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
+  });
+
+  protected readonly violations = FormValidationService.getViolations(this.form, {
+    partType: this.translate.instant('parts.workflow.basics.partTypeLabel'),
+    description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
+    material: this.translate.instant('parts.workflow.basics.materialLabel'),
+    externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
+    manualCostOverride: this.translate.instant('parts.workflow.costing.manualOverrideLabel'),
   });
 
   private suppressDispatch = false;

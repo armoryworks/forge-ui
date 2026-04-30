@@ -1,8 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { PartType } from '../../models/part-type.type';
 
 /**
@@ -74,13 +75,14 @@ interface PartTypeChoice {
 @Component({
   selector: 'app-new-part-fork-dialog',
   standalone: true,
-  imports: [TranslatePipe, DialogComponent],
+  imports: [TranslatePipe, DialogComponent, ValidationButtonComponent],
   templateUrl: './new-part-fork-dialog.component.html',
   styleUrl: './new-part-fork-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NewPartForkDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<NewPartForkDialogComponent, NewPartForkResult | undefined>);
+  private readonly translate = inject(TranslateService);
 
   /** Q1 — currently picked part-type bucket. Null until the user picks. */
   protected readonly partType = signal<PartTypeBucket | null>(null);
@@ -145,6 +147,20 @@ export class NewPartForkDialogComponent {
 
   /** Continue is enabled once Q1 is picked (Q2 always has a default). */
   protected readonly canContinue = computed<boolean>(() => this.partType() !== null);
+
+  /**
+   * Signal-derived violations list for the `<app-validation-button>` stereotype.
+   * The dialog uses signal-based state instead of a FormGroup, so we compute
+   * the message list directly rather than via FormValidationService. Q2 always
+   * has a default — only Q1 can be missing.
+   */
+  protected readonly violations = computed<string[]>(() => {
+    const list: string[] = [];
+    if (this.partType() === null) {
+      list.push(this.translate.instant('parts.workflow.fork.violations.partTypeRequired'));
+    }
+    return list;
+  });
 
   protected pickPartType(t: PartTypeBucket): void {
     this.partType.set(t);

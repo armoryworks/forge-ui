@@ -468,6 +468,8 @@
     "bomSource": "Source",
     "bomLeadTime": "Lead Time",
     "bomRefDes": "Ref Des",
+    "bomNotes": "Notes",
+    "bomSourceAuto": "Source: {{source}} (auto, based on component type)",
     "noBomEntries": "No BOM entries",
     "addBomEntry": "Add BOM Entry",
     "childPart": "Child Part",
@@ -569,6 +571,9 @@
           "madeDesc": "Single component you fabricate. May have routing.",
           "otherTitle": "Other",
           "otherDesc": "Consumable, tooling, fastener, electronic, or packaging."
+        },
+        "violations": {
+          "partTypeRequired": "Pick a part type"
         }
       },
       "basics": {
@@ -621,7 +626,9 @@
       "express": {
         "title": "Quick add",
         "hint": "Fill in everything at once. Switch to step-by-step from the header anytime.",
-        "saveFailed": "Couldn't save part."
+        "saveFailed": "Couldn't save part.",
+        "save": "Save",
+        "typeLockedHint": "Set when the part was created. Edit on the part detail page if you need to change it."
       },
       "page": {
         "loading": "Loading workflow…",

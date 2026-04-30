@@ -31,4 +31,13 @@
     font-size: $font-size-sm;
     color: var(--text-secondary);
   }
+
+  // Read-only "Source: Make/Buy (auto, based on component type)" line
+  // shown beneath the qty/lead-time row in the Add Component dialog.
+  &__auto-source {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-style: italic;
+  }
 }

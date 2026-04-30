@@ -112,17 +112,29 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
   }
 
   private search(term: string) {
-    let params = new HttpParams().set('search', term).set('pageSize', '10');
+    // Phase 3 / WU-17 standardised paged-list endpoints on `?q=` + `{ items, totalCount, page, pageSize }`.
+    // Older endpoints still accept `?search=` and either return a flat array or a `{ data: [] }` envelope.
+    // Send both query params (server picks the one it knows) and accept all three response shapes
+    // (flat array, { items }, { data }) so the picker works against every list endpoint we have.
+    let params = new HttpParams()
+      .set('q', term)
+      .set('search', term)
+      .set('pageSize', '10');
     const extraFilters = this.filters();
     for (const [key, val] of Object.entries(extraFilters)) {
       params = params.set(key, val);
     }
 
+    type Envelope = { items?: Record<string, unknown>[]; data?: Record<string, unknown>[] };
     return this.http
-      .get<Record<string, unknown>[] | { data: Record<string, unknown>[] }>(`/api/v1/${this.entityType()}`, { params })
+      .get<Record<string, unknown>[] | Envelope>(`/api/v1/${this.entityType()}`, { params })
       .pipe(
-        catchError(() => of([])),
-        switchMap(res => of(Array.isArray(res) ? res : (res.data ?? []))),
+        catchError(() => of([] as Record<string, unknown>[])),
+        switchMap(res => {
+          if (Array.isArray(res)) return of(res);
+          const env = res as Envelope;
+          return of(env.items ?? env.data ?? []);
+        }),
       );
   }
 }

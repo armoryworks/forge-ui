@@ -63,6 +63,28 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     });
   });
 
+  it('partTypeLocked is true when entity has a partType (fork dialog flow)', () => {
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    mockSignalInputs(component, {
+      stepId: 'express', componentName: 'PartExpressFormComponent',
+      entityId: 99, entity: buildPart({ partType: 'RawMaterial' }),
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { partTypeLocked(): boolean };
+    expect(c.partTypeLocked()).toBe(true);
+  });
+
+  it('partTypeLocked is false when entity is null (defensive — no current flow)', () => {
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    mockSignalInputs(component, {
+      stepId: 'express', componentName: 'PartExpressFormComponent',
+      entityId: null, entity: null,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as { partTypeLocked(): boolean };
+    expect(c.partTypeLocked()).toBe(false);
+  });
+
   it('save() PATCHes basics + cost together', () => {
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {

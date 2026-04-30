@@ -73,13 +73,15 @@
 
   <div dialog-footer>
     <button class="action-btn" type="button" (click)="close()">{{ 'common.cancel' | translate }}</button>
-    <button
-      class="action-btn action-btn--primary"
-      type="button"
-      data-testid="fork-continue"
-      [disabled]="!canContinue()"
-      (click)="continue()">
-      {{ 'parts.workflow.fork.continue' | translate }}
-    </button>
+    <app-validation-button [violations]="violations">
+      <button
+        class="action-btn action-btn--primary"
+        type="button"
+        data-testid="fork-continue"
+        [disabled]="!canContinue()"
+        (click)="continue()">
+        {{ 'parts.workflow.fork.continue' | translate }}
+      </button>
+    </app-validation-button>
   </div>
 </app-dialog>

@@ -1,16 +1,25 @@
 <section class="part-express-form" [appLoadingBlock]="saving()" data-testid="part-express-form">
   <header class="part-express-form__header">
     <h2 class="part-express-form__title">{{ 'parts.workflow.express.title' | translate }}</h2>
-    <p class="part-express-form__hint">{{ 'parts.workflow.express.hint' | translate }}</p>
+    @if (partTypeLocked()) {
+      <span class="part-express-form__type-chip chip" data-testid="express-part-type-locked">
+        {{ partTypeLabel() }}
+      </span>
+      <p class="part-express-form__hint">{{ 'parts.workflow.express.typeLockedHint' | translate }}</p>
+    } @else {
+      <p class="part-express-form__hint">{{ 'parts.workflow.express.hint' | translate }}</p>
+    }
   </header>
 
   <form [formGroup]="form" class="part-express-form__form">
-    <app-select
-      [label]="'parts.workflow.basics.partTypeLabel' | translate"
-      formControlName="partType"
-      [options]="partTypeOptions"
-      [required]="true"
-      data-testid="express-part-type" />
+    @if (!partTypeLocked()) {
+      <app-select
+        [label]="'parts.workflow.basics.partTypeLabel' | translate"
+        formControlName="partType"
+        [options]="partTypeOptions"
+        [required]="true"
+        data-testid="express-part-type" />
+    }
 
     <app-input
       [label]="'parts.workflow.basics.descriptionLabel' | translate"
@@ -38,4 +47,18 @@
       prefix="$"
       data-testid="express-manual-override" />
   </form>
+
+  <div class="part-express-form__actions">
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button
+        class="action-btn action-btn--primary"
+        type="button"
+        data-testid="express-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'parts.workflow.express.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
 </section>
