@@ -17,14 +17,15 @@
         formControlName="inspectionSkipAfterN" />
     </div>
 
-    @if (showCompliance()) {
-      <div class="cluster__form-row">
-        <app-input
-          label="Receiving Inspection Template Id"
-          type="number"
-          formControlName="receivingInspectionTemplateId" />
-      </div>
+    <div *appCap="'CAP-MD-PART-COMPLIANCE'" class="cluster__form-row">
+      <app-entity-picker
+        [label]="'parts.detail.quality.inspectionTemplate' | translate"
+        entityType="receiving-inspection-templates"
+        displayField="name"
+        formControlName="receivingInspectionTemplateId" />
+    </div>
 
+    @if (showCompliance()) {
       <div class="cluster__form-row">
         <app-input data-testid="part-quality-hazmat"
           [label]="'parts.detail.quality.hazmatClass' | translate"

@@ -885,6 +885,7 @@
         "requiresInspection": "Requires Receiving Inspection",
         "inspectionFrequency": "Inspection Frequency",
         "inspectionSkipAfter": "Skip After N Receipts",
+        "inspectionTemplate": "Receiving Inspection Template",
         "hazmatClass": "Hazmat Class",
         "shelfLifeDays": "Shelf Life (days)",
         "backflushPolicy": "Backflush Policy"

@@ -284,12 +284,16 @@ describe('InventoryService', () => {
   });
 
   describe('getBinLocations', () => {
-    it('should GET the flat bin locations list', () => {
-      service.getBinLocations().subscribe();
+    it('GETs bin locations with a high pageSize and unwraps the paged envelope', () => {
+      let received: unknown[] | undefined;
+      service.getBinLocations().subscribe(items => { received = items; });
 
-      const req = httpMock.expectOne(`${baseUrl}/locations/bins`);
+      const req = httpMock.expectOne(r =>
+        r.url === `${baseUrl}/locations/bins` && r.params.get('pageSize') === '100',
+      );
       expect(req.request.method).toBe('GET');
-      req.flush([]);
+      req.flush({ items: [{ id: 1 }], totalCount: 1, page: 1, pageSize: 100 });
+      expect(received).toEqual([{ id: 1 }]);
     });
   });
 });

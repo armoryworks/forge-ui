@@ -860,6 +860,7 @@
         "requiresInspection": "Requiere Inspección de Recepción",
         "inspectionFrequency": "Frecuencia de Inspección",
         "inspectionSkipAfter": "Omitir Después de N Recepciones",
+        "inspectionTemplate": "Plantilla de Inspección de Recepción",
         "hazmatClass": "Clase de Materiales Peligrosos",
         "shelfLifeDays": "Vida Útil (días)",
         "backflushPolicy": "Política de Backflush"

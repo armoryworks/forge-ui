@@ -110,6 +110,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   // — NCR-specific paths still 403-and-fall-through-to-layer-2 if NCR is off
   // but inspection is on, which is the rare edge case.
   { prefix: 'quality', capability: 'CAP-QC-INSPECTION' },
+  { prefix: 'receiving-inspection-templates', capability: 'CAP-QC-INSPECTION' },
   { prefix: 'quotes', capability: 'CAP-O2C-QUOTE' },
   { prefix: 'recurring-orders', capability: 'CAP-O2C-RECURRING' },
   { prefix: 'replenishment', capability: 'CAP-PLAN-SAFETYSTOCK' },

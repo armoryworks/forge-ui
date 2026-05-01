@@ -2,10 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { EntityPickerComponent } from '../../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
+import { CapDirective } from '../../../../../shared/directives/cap.directive';
 import { CapabilityService } from '../../../../../shared/services/capability.service';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { BackflushPolicy } from '../../../models/backflush-policy.type';
@@ -17,9 +19,10 @@ import { ReceivingInspectionFrequency } from '../../../models/receiving-inspecti
  *
  * Surfaces receiving-inspection settings (template, frequency, skip-after
  * count), Pillar 2 compliance (HazmatClass, ShelfLifeDays), and the
- * BackflushPolicy override. Receiving-inspection-template is rendered as
- * a numeric id input today — entity picker integration is a future
- * enhancement when the QC template service is available.
+ * BackflushPolicy override. Receiving-inspection-template uses
+ * <c>&lt;app-entity-picker&gt;</c> against
+ * <c>/api/v1/receiving-inspection-templates</c> — gated by the
+ * <c>*appCap</c> structural directive on <c>CAP-MD-PART-COMPLIANCE</c>.
  */
 @Component({
   selector: 'app-part-quality-cluster',
@@ -27,6 +30,7 @@ import { ReceivingInspectionFrequency } from '../../../models/receiving-inspecti
   imports: [
     ReactiveFormsModule, TranslatePipe,
     InputComponent, SelectComponent, ToggleComponent, ValidationButtonComponent,
+    EntityPickerComponent, CapDirective,
   ],
   templateUrl: './part-quality-cluster.component.html',
   styleUrl: '../part-clusters.shared.scss',

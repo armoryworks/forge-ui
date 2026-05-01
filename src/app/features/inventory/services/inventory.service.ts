@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { AtpResult, AtpBucket } from '../models/atp.model';
 import { StorageLocation } from '../models/storage-location.model';
@@ -31,7 +31,14 @@ export class InventoryService {
   }
 
   getBinLocations(): Observable<StorageLocationFlat[]> {
-    return this.http.get<StorageLocationFlat[]>(`${this.base}/locations/bins`);
+    // The endpoint returns the standard paged envelope
+    // (`{ items, totalCount, page, pageSize }`) — callers that want the full
+    // flat list (legacy behaviour) request a large page and unwrap `.items`.
+    return this.http
+      .get<{ items: StorageLocationFlat[] }>(`${this.base}/locations/bins`, {
+        params: { pageSize: '100' },
+      })
+      .pipe(map(res => res.items ?? []));
   }
 
   createLocation(request: CreateStorageLocationRequest): Observable<StorageLocation> {
