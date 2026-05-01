@@ -40,7 +40,7 @@
 
         <!-- Part info -->
         <span class="bom-tree__part-number">{{ node.entry.childPartNumber }}</span>
-        <span class="bom-tree__description" [title]="node.entry.childDescription">{{ node.entry.childDescription }}</span>
+        <span class="bom-tree__description" [title]="node.entry.childName">{{ node.entry.childName }}</span>
 
         <!-- Source chip -->
         <span class="source-chip" [class]="getSourceClass(node.entry.sourceType)">

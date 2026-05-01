@@ -4,7 +4,9 @@ export interface BOMEntry {
   id: number;
   childPartId: number;
   childPartNumber: string;
-  childDescription: string;
+  /** Child part's canonical short name (renamed from childDescription in the
+   * Phase-4 Name+Description split). */
+  childName: string;
   quantity: number;
   referenceDesignator: string | null;
   sortOrder: number;

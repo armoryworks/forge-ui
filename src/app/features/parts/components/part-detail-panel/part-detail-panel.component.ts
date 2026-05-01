@@ -174,7 +174,7 @@ export class PartDetailPanelComponent {
   // ── Used In Table Columns ──
   protected readonly usedInColumns: ColumnDef[] = [
     { field: 'parentPartNumber', header: this.translate.instant('parts.parentPart'), sortable: true },
-    { field: 'parentDescription', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'parentName', header: this.translate.instant('common.name'), sortable: true },
     { field: 'quantity', header: this.translate.instant('parts.bomQty'), width: '60px', align: 'center', sortable: true },
   ];
 

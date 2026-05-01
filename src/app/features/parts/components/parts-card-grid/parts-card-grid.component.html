@@ -8,7 +8,7 @@
         [class.parts-card-grid__card--selected]="part.id === selectedPartId()"
         (click)="onCardClick(part)"
         role="button"
-        [attr.aria-label]="part.partNumber + ' ' + part.description"
+        [attr.aria-label]="part.partNumber + ' ' + part.name"
         tabindex="0"
         (keydown.enter)="onCardClick(part)"
         (keydown.space)="onCardClick(part)">
@@ -23,7 +23,7 @@
 
         <div class="parts-card-grid__info">
           <span class="parts-card-grid__part-number">{{ part.partNumber }}</span>
-          <span class="parts-card-grid__description" [title]="part.description">{{ part.description }}</span>
+          <span class="parts-card-grid__description" [title]="part.name">{{ part.name }}</span>
           <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
         </div>
       </div>

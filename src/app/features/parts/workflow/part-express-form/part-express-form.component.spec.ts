@@ -15,7 +15,7 @@ class FakeLoader implements TranslateLoader {
 
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
-    id: 99, partNumber: 'PRT-00099', description: 'Steel rod', revision: 'A',
+    id: 99, partNumber: 'PRT-00099', name: 'Steel rod', description: null, revision: 'A',
     status: 'Draft', partType: 'RawMaterial', material: 'Steel',
     moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
@@ -51,13 +51,14 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     mockSignalInputs(component, {
       stepId: 'express', componentName: 'PartExpressFormComponent',
       entityId: 99,
-      entity: buildPart({ description: 'Aluminum stock', material: 'Aluminum', manualCostOverride: 5.25 }),
+      entity: buildPart({ name: 'Aluminum stock', description: 'Long-form notes', material: 'Aluminum', manualCostOverride: 5.25 }),
     });
     TestBed.flushEffects();
     const form = (component as unknown as { form: { value: Record<string, unknown> } }).form;
     expect(form.value).toMatchObject({
       partType: 'RawMaterial',
-      description: 'Aluminum stock',
+      name: 'Aluminum stock',
+      description: 'Long-form notes',
       material: 'Aluminum',
       manualCostOverride: 5.25,
     });
@@ -141,7 +142,8 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     };
     c.form.patchValue({
       partType: 'RawMaterial',
-      description: 'Steel bar',
+      name: 'Steel bar',
+      description: '',
       material: '',
       manualCostOverride: 5.0,
     });
@@ -161,7 +163,8 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     };
     c.form.patchValue({
       partType: 'RawMaterial',
-      description: 'Steel bar',
+      name: 'Steel bar',
+      description: '',
       material: 'Steel',
       manualCostOverride: 8.75,
     });
@@ -169,11 +172,11 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/parts/99`);
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toMatchObject({
-      description: 'Steel bar',
+      name: 'Steel bar',
       material: 'Steel',
       partType: 'RawMaterial',
       manualCostOverride: 8.75,
     });
-    req.flush(buildPart({ description: 'Steel bar', manualCostOverride: 8.75 }));
+    req.flush(buildPart({ name: 'Steel bar', manualCostOverride: 8.75 }));
   });
 });

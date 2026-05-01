@@ -116,7 +116,7 @@ export class OperationDialogComponent implements OnInit {
     const assignedIds = new Set(this.materials().map(m => m.bomEntryId));
     return entries
       .filter(e => !assignedIds.has(e.id))
-      .map(e => ({ value: e.id, label: `${e.childPartNumber} — ${e.childDescription}` }));
+      .map(e => ({ value: e.id, label: `${e.childPartNumber} — ${e.childName}` }));
   });
 
   // Add material form controls

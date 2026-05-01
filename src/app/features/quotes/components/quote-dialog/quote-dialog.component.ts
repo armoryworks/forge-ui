@@ -197,7 +197,9 @@ export class QuoteDialogComponent {
     this.lines.update(prev => [...prev, {
       partId: part.id,
       partNumber: part.partNumber,
-      description: part.description,
+      // Phase-4 Name+Description split: line carries the part's short
+      // identifier — Name is now the canonical short identifier.
+      description: part.name,
       quantity: f.quantity!,
       unitPrice: f.unitPrice!,
     }]);

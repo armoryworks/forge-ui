@@ -1,7 +1,10 @@
 import { PartType } from './part-type.type';
 
 export interface CreatePartRequest {
-  description: string;
+  /** Required short identifier. */
+  name: string;
+  /** Optional long-form notes. */
+  description?: string;
   revision?: string;
   partType: PartType;
   material?: string;

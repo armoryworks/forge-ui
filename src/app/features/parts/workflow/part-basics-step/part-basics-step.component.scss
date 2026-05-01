@@ -31,4 +31,17 @@
     gap: $sp-md;
     max-width: 720px;
   }
+
+  // Wraps a control + its inline helper text (used for the optional
+  // Description field's "long-form notes" hint).
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__hint--field {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
 }

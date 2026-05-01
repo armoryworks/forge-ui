@@ -5,7 +5,10 @@
         <span class="material-icons-outlined detail-type-icon">{{ getTypeIcon(part.partType) }}</span>
         <div>
           <div class="detail-part-number">{{ part.partNumber }}</div>
-          <div class="detail-description">{{ part.description }}</div>
+          <div class="detail-description">{{ part.name }}</div>
+          @if (part.description) {
+            <div class="detail-notes">{{ part.description }}</div>
+          }
         </div>
       </div>
       <div class="detail-header__actions">
@@ -342,7 +345,7 @@
               <ng-template appColumnCell="childPartNumber" let-row>
                 <div class="bom-part-info">
                   <span class="bom-part-number">{{ $any(row).childPartNumber }}</span>
-                  <span class="bom-part-desc">{{ $any(row).childDescription }}</span>
+                  <span class="bom-part-desc">{{ $any(row).childName }}</span>
                 </div>
               </ng-template>
               <ng-template appColumnCell="sourceType" let-row>

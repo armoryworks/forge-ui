@@ -15,7 +15,7 @@ class FakeLoader implements TranslateLoader {
 
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
-    id: 42, partNumber: 'PRT-00042', description: 'Widget', revision: 'A',
+    id: 42, partNumber: 'PRT-00042', name: 'Widget', description: null, revision: 'A',
     status: 'Draft', partType: 'Assembly', material: 'Steel',
     moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
@@ -52,13 +52,14 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
     const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
     mockSignalInputs(component, {
       stepId: 'basics', componentName: 'PartBasicsStepComponent',
-      entityId: 42, entity: buildPart({ description: 'Hydration', material: 'Aluminum' }),
+      entityId: 42, entity: buildPart({ name: 'Hydration', description: 'Hydration notes', material: 'Aluminum' }),
     });
     // Trigger effect by reading the form
     TestBed.flushEffects();
     const form = (component as unknown as { form: { value: unknown } }).form;
     expect(form.value).toMatchObject({
-      description: 'Hydration',
+      name: 'Hydration',
+      description: 'Hydration notes',
       material: 'Aluminum',
       partType: 'Assembly',
     });
@@ -70,20 +71,20 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
       const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
       mockSignalInputs(component, {
         stepId: 'basics', componentName: 'PartBasicsStepComponent',
-        entityId: 42, entity: buildPart({ description: 'Initial', material: 'Steel' }),
+        entityId: 42, entity: buildPart({ name: 'Initial', material: 'Steel' }),
       });
       TestBed.flushEffects();
 
       const form = (component as unknown as { form: { patchValue(v: unknown): void } }).form;
-      form.patchValue({ description: 'Updated description' });
+      form.patchValue({ name: 'Updated name' });
 
       // Debounce 600ms
       vi.advanceTimersByTime(700);
 
       const req = httpMock.expectOne(`${environment.apiUrl}/parts/42`);
       expect(req.request.method).toBe('PATCH');
-      expect(req.request.body.description).toBe('Updated description');
-      req.flush(buildPart({ description: 'Updated description' }));
+      expect(req.request.body.name).toBe('Updated name');
+      req.flush(buildPart({ name: 'Updated name' }));
     } finally {
       vi.useRealTimers();
     }

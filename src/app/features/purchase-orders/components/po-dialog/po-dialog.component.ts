@@ -219,7 +219,9 @@ export class PoDialogComponent {
     this.lines.update(prev => [...prev, {
       partId: part.id,
       partNumber: part.partNumber,
-      description: part.description,
+      // Phase-4 Name+Description split: PO line carries the part's short
+      // identifier (formerly stored as Description) — Name is now canonical.
+      description: part.name,
       orderedQuantity: f.orderedQuantity!,
       unitPrice: f.unitPrice!,
     }]);

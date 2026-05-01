@@ -13,10 +13,23 @@
       data-testid="basics-part-type" />
 
     <app-input
-      [label]="'parts.workflow.basics.descriptionLabel' | translate"
-      formControlName="description"
+      [label]="'parts.workflow.basics.nameLabel' | translate"
+      formControlName="name"
       [required]="true"
-      data-testid="basics-description" />
+      [maxlength]="256"
+      data-testid="basics-name" />
+
+    <div class="part-basics-step__field">
+      <app-textarea
+        [label]="'parts.workflow.basics.descriptionLabel' | translate"
+        formControlName="description"
+        [rows]="3"
+        [maxlength]="2000"
+        data-testid="basics-description" />
+      <p class="part-basics-step__hint part-basics-step__hint--field">
+        {{ 'parts.workflow.basics.descriptionHelper' | translate }}
+      </p>
+    </div>
 
     <app-input
       [label]="'parts.workflow.basics.materialLabel' | translate"

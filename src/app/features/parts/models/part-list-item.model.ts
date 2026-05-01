@@ -5,7 +5,10 @@ export interface PartListItem {
   id: number;
   partNumber: string;
   externalPartNumber: string | null;
-  description: string;
+  /** Short canonical identifier (required). Primary list column. */
+  name: string;
+  /** Long-form notes (optional). Shown only when present. */
+  description: string | null;
   revision: string;
   status: PartStatus;
   partType: PartType;

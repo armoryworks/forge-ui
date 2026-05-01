@@ -6,7 +6,10 @@ import { BOMUsage } from './bom-usage.model';
 export interface PartDetail {
   id: number;
   partNumber: string;
-  description: string;
+  /** Short canonical identifier (required). Renders as the primary heading. */
+  name: string;
+  /** Long-form notes (optional). Paragraph-length detail beyond the name. */
+  description: string | null;
   revision: string;
   status: PartStatus;
   partType: PartType;

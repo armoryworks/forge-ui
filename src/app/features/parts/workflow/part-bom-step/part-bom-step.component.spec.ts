@@ -16,7 +16,7 @@ class FakeLoader implements TranslateLoader {
 
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
-    id: 42, partNumber: 'PRT-00042', description: 'Widget', revision: 'A',
+    id: 42, partNumber: 'PRT-00042', name: 'Widget', description: null, revision: 'A',
     status: 'Draft', partType: 'Assembly', material: 'Steel',
     moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
@@ -33,7 +33,7 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
 function buildEntry(id: number): BOMEntry {
   return {
     id, childPartId: id * 100, childPartNumber: `CHILD-${id}`,
-    childDescription: `Child ${id}`,
+    childName: `Child ${id}`,
     quantity: 1, referenceDesignator: null, sortOrder: id,
     sourceType: 'Buy', leadTimeDays: null, notes: null,
   };

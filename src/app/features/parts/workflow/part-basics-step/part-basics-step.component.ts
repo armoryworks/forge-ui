@@ -6,6 +6,7 @@ import { debounceTime } from 'rxjs/operators';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
@@ -29,7 +30,7 @@ import { PartsService } from '../../services/parts.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, SelectComponent, LoadingBlockDirective,
+    InputComponent, SelectComponent, TextareaComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-basics-step.component.html',
   styleUrl: './part-basics-step.component.scss',
@@ -51,7 +52,8 @@ export class PartBasicsStepComponent {
   protected readonly saving = signal(false);
 
   protected readonly form = new FormGroup({
-    description: new FormControl('', [Validators.required, Validators.maxLength(500)]),
+    name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
+    description: new FormControl('', [Validators.maxLength(2000)]),
     partType: new FormControl<PartType>('Assembly', [Validators.required]),
     material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
@@ -78,6 +80,7 @@ export class PartBasicsStepComponent {
       if (!part) return;
       this.suppressDispatch = true;
       this.form.patchValue({
+        name: part.name ?? '',
         description: part.description ?? '',
         partType: part.partType ?? 'Assembly',
         material: part.material ?? '',
@@ -102,7 +105,8 @@ export class PartBasicsStepComponent {
     const value = this.form.getRawValue();
     this.saving.set(true);
     this.partsService.updatePart(id, {
-      description: value.description ?? undefined,
+      name: value.name ?? undefined,
+      description: value.description ?? '', // pass-through; server treats empty as clear
       partType: (value.partType as PartType) ?? undefined,
       material: value.material ?? undefined,
       externalPartNumber: value.externalPartNumber || undefined,

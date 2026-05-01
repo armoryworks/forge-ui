@@ -429,6 +429,7 @@
     "subtitle": "Gestionar piezas, listas de materiales y especificaciones",
     "createPart": "Nueva Pieza",
     "editPart": "Editar Pieza",
+    "descriptionHint": "Notas extensas (opcional)",
     "partNumber": "Pieza #",
     "extPartNumber": "Pieza Ext. #",
     "revision": "Revisión",
@@ -589,9 +590,12 @@
       },
       "basics": {
         "title": "Básicos",
-        "hint": "Tipo, descripción y material — lo mínimo para identificar la pieza.",
+        "hint": "Tipo, nombre y material — lo mínimo para identificar la pieza.",
         "partTypeLabel": "Tipo",
+        "nameLabel": "Nombre",
+        "nameHelper": "Identificador corto (p. ej., \"Sheath Mudkipper\").",
         "descriptionLabel": "Descripción",
+        "descriptionHelper": "Notas extensas (opcional).",
         "materialLabel": "Material",
         "materialHelper": "Composición principal (p. ej., Aluminio 6061, Acero A36).",
         "externalPartNumberLabel": "N.º de pieza externa",
@@ -4396,7 +4400,7 @@
   "validators": {
     "parts": {
       "hasBasics": "Basics",
-      "hasBasicsMissing": "Name, type, and material are required.",
+      "hasBasicsMissing": "Se requieren nombre, tipo y material.",
       "hasBom": "BOM",
       "hasBomMissing": "BOM not yet defined.",
       "hasRouting": "Routing",

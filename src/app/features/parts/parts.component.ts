@@ -17,6 +17,7 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
+import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
@@ -41,7 +42,7 @@ type ViewMode = 'table' | 'cards';
   imports: [
     ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
-    InputComponent, SelectComponent,
+    InputComponent, SelectComponent, TextareaComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationButtonComponent,
     LoadingBlockDirective, MatTooltipModule,
     PartsCardGridComponent,
@@ -109,7 +110,7 @@ export class PartsComponent {
   protected readonly partColumns: ColumnDef[] = [
     { field: 'partNumber', header: this.translate.instant('parts.partNumber'), sortable: true, width: '120px' },
     { field: 'externalPartNumber', header: this.translate.instant('parts.extPartNumber'), sortable: true, width: '120px' },
-    { field: 'description', header: this.translate.instant('common.description'), sortable: true },
+    { field: 'name', header: this.translate.instant('common.name'), sortable: true },
     { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
     { field: 'partType', header: this.translate.instant('common.type'), sortable: true },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
@@ -124,7 +125,8 @@ export class PartsComponent {
   protected readonly editingPart = signal<PartDetail | null>(null);
 
   protected readonly partForm = new FormGroup({
-    description: new FormControl('', [Validators.required]),
+    name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
+    description: new FormControl('', [Validators.maxLength(2000)]),
     revision: new FormControl('A'),
     partType: new FormControl('Part', [Validators.required]),
     material: new FormControl(''),
@@ -139,7 +141,7 @@ export class PartsComponent {
   });
 
   protected readonly partViolations = FormValidationService.getViolations(this.partForm, {
-    description: 'Description', partType: 'Type',
+    name: 'Name', description: 'Description', partType: 'Type',
   });
 
   protected readonly partTypeOptions: SelectOption[] = [
@@ -343,7 +345,8 @@ export class PartsComponent {
   protected editPart(part: PartDetail): void {
     this.editingPart.set(part);
     this.partForm.patchValue({
-      description: part.description,
+      name: part.name,
+      description: part.description ?? '',
       revision: part.revision,
       partType: part.partType,
       material: part.material ?? '',
@@ -375,6 +378,7 @@ export class PartsComponent {
 
     if (editing) {
       this.partsService.updatePart(editing.id, {
+        name: form.name ?? '',
         description: form.description ?? '',
         revision: form.revision ?? 'A',
         partType: (form.partType as PartType) ?? 'Part',
@@ -404,7 +408,8 @@ export class PartsComponent {
       });
     } else {
       this.partsService.createPart({
-        description: form.description ?? '',
+        name: form.name ?? '',
+        description: form.description || undefined,
         revision: form.revision || undefined,
         partType: (form.partType as PartType) ?? 'Part',
         material: form.material || undefined,

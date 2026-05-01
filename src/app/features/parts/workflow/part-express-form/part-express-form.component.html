@@ -22,10 +22,23 @@
     }
 
     <app-input
-      [label]="'parts.workflow.basics.descriptionLabel' | translate"
-      formControlName="description"
+      [label]="'parts.workflow.basics.nameLabel' | translate"
+      formControlName="name"
       [required]="true"
-      data-testid="express-description" />
+      [maxlength]="256"
+      data-testid="express-name" />
+
+    <div class="part-express-form__field">
+      <app-textarea
+        [label]="'parts.workflow.basics.descriptionLabel' | translate"
+        formControlName="description"
+        [rows]="3"
+        [maxlength]="2000"
+        data-testid="express-description" />
+      <p class="part-express-form__hint part-express-form__hint--field">
+        {{ 'parts.workflow.basics.descriptionHelper' | translate }}
+      </p>
+    </div>
 
     @if (showMaterialField()) {
       <div class="part-express-form__field">

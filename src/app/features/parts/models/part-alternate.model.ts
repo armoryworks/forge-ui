@@ -5,7 +5,9 @@ export interface PartAlternate {
   partId: number;
   alternatePartId: number;
   alternatePartNumber: string;
-  alternatePartDescription: string;
+  /** Alternate part's canonical short name (renamed from
+   * alternatePartDescription in the Phase-4 Name+Description split). */
+  alternatePartName: string;
   priority: number;
   type: AlternateType;
   conversionFactor: number | null;

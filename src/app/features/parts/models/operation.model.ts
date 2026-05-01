@@ -27,7 +27,9 @@ export interface OperationMaterial {
   operationId: number;
   bomEntryId: number;
   childPartNumber: string;
-  childPartDescription: string;
+  /** Child part's canonical short name (renamed from childPartDescription in
+   * the Phase-4 Name+Description split). */
+  childPartName: string;
   quantity: number;
   notes: string | null;
 }

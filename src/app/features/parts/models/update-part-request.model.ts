@@ -2,6 +2,9 @@ import { PartStatus } from './part-status.type';
 import { PartType } from './part-type.type';
 
 export interface UpdatePartRequest {
+  /** Required short identifier (omit to leave unchanged). */
+  name?: string;
+  /** Optional long-form notes (empty string clears the value server-side). */
   description?: string;
   revision?: string;
   status?: PartStatus;

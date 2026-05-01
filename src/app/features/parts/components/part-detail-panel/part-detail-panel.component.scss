@@ -67,6 +67,17 @@
   max-width: 300px;
 }
 
+// Long-form notes — secondary block under the canonical name. Kept on a
+// single line with ellipsis here; the full body lives on the part detail
+// page (or in the editing dialog).
+.detail-notes {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  @include truncate;
+  max-width: 300px;
+  margin-top: $sp-xxs;
+}
+
 // ── Tabs ──
 .detail-tabs {
   display: flex;

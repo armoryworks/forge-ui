@@ -61,7 +61,7 @@ export class PartAlternatesTabComponent {
 
   protected readonly columns: ColumnDef[] = [
     { field: 'alternatePartNumber', header: 'Part #', sortable: true, width: '120px' },
-    { field: 'alternatePartDescription', header: 'Description', sortable: true },
+    { field: 'alternatePartName', header: 'Name', sortable: true },
     { field: 'type', header: 'Type', sortable: true, width: '110px' },
     { field: 'priority', header: 'Priority', sortable: true, width: '80px', align: 'center' },
     { field: 'isApproved', header: 'Approved', sortable: true, width: '90px', align: 'center' },

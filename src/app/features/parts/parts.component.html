@@ -44,8 +44,8 @@
           <ng-template appColumnCell="partNumber" let-part>
             <span class="part-number">{{ part.partNumber }}</span>
           </ng-template>
-          <ng-template appColumnCell="description" let-part>
-            <span class="part-desc">{{ part.description }}</span>
+          <ng-template appColumnCell="name" let-part>
+            <span class="part-desc">{{ part.name }}</span>
           </ng-template>
           <ng-template appColumnCell="partType" let-part>
             <span class="type-chip">
@@ -83,7 +83,8 @@
         </div>
       }
       <app-select [label]="'common.type' | translate" formControlName="partType" [options]="partTypeOptions" data-testid="part-type" />
-      <app-input [label]="'common.description' | translate" formControlName="description" data-testid="part-description" />
+      <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" [maxlength]="256" data-testid="part-name" />
+      <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="3" [maxlength]="2000" [placeholder]="'parts.descriptionHint' | translate" data-testid="part-description" />
       <div class="dialog-row">
         <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" data-testid="part-revision" />
         <app-input [label]="'parts.externalPartNumber' | translate" formControlName="externalPartNumber" [placeholder]="'parts.externalPartNumberPlaceholder' | translate" data-testid="part-external-number" />

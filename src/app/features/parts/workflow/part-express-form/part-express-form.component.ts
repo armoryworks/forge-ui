@@ -8,6 +8,7 @@ import { CurrencyInputComponent } from '../../../../shared/components/currency-i
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -30,7 +31,7 @@ import { PartsService } from '../../services/parts.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, SelectComponent, LoadingBlockDirective,
+    InputComponent, SelectComponent, TextareaComponent, LoadingBlockDirective,
     ValidationButtonComponent, CurrencyInputComponent,
   ],
   templateUrl: './part-express-form.component.html',
@@ -95,7 +96,8 @@ export class PartExpressFormComponent {
    */
   protected readonly form = new FormGroup({
     partType: new FormControl<PartType>('RawMaterial', [Validators.required]),
-    description: new FormControl('', [Validators.required, Validators.maxLength(500)]),
+    name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
+    description: new FormControl('', [Validators.maxLength(2000)]),
     material: new FormControl('', [Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
     manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -115,6 +117,7 @@ export class PartExpressFormComponent {
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     partType: this.translate.instant('parts.workflow.basics.partTypeLabel'),
+    name: this.translate.instant('parts.workflow.basics.nameLabel'),
     description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
     material: this.translate.instant('parts.workflow.basics.materialLabel'),
     externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
@@ -130,6 +133,7 @@ export class PartExpressFormComponent {
       this.suppressDispatch = true;
       this.form.patchValue({
         partType: part.partType ?? 'RawMaterial',
+        name: part.name ?? '',
         description: part.description ?? '',
         material: part.material ?? '',
         externalPartNumber: part.externalPartNumber ?? '',
@@ -159,7 +163,8 @@ export class PartExpressFormComponent {
     const overrideToSend = v.manualCostOverride == null ? -1 : v.manualCostOverride;
     this.saving.set(true);
     this.partsService.updatePart(id, {
-      description: v.description ?? undefined,
+      name: v.name ?? undefined,
+      description: v.description ?? '', // pass-through; server treats empty as clear
       partType: (v.partType as PartType) ?? undefined,
       material: v.material ?? undefined,
       externalPartNumber: v.externalPartNumber || undefined,
