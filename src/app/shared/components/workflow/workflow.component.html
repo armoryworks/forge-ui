@@ -87,8 +87,8 @@
     }
   </div>
 
-  <footer class="workflow-shell__footer">
-    @if (mode() === 'guided') {
+  @if (mode() === 'guided') {
+    <footer class="workflow-shell__footer">
       <button
         type="button"
         class="action-btn"
@@ -121,14 +121,11 @@
           {{ 'workflow.shell.actions.continue' | translate }}
         }
       </button>
-    } @else {
-      <button
-        type="button"
-        class="action-btn action-btn--primary"
-        data-testid="workflow-complete"
-        (click)="completeRequested.emit()">
-        {{ 'workflow.shell.actions.complete' | translate }}
-      </button>
-    }
-  </footer>
+    </footer>
+  }
+  <!-- Express mode: the express component owns its own Save button (which
+       patches the step + completes the run). A separate shell-level Mark
+       Complete here would bypass the form's data and 409 with "entity not
+       created yet" — drop it. -->
+
 </div>
