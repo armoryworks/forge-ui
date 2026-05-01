@@ -99,7 +99,11 @@ export class PartExpressFormComponent {
     partType: new FormControl<PartType>('RawMaterial', [Validators.required]),
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
-    material: new FormControl('', [Validators.maxLength(200)]),
+    // Required because the hasBasics readiness gate requires it; without
+    // this the user can fill the form, hit Save, and get an opaque
+    // "missing Basics" 409 from the server. Mark required so the form
+    // validation indicator surfaces it pre-submit.
+    material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
     // Pillar 1 / Tier 0 — manufacturer identity (engineering OEM, distinct
     // from the distributor we may buy through which lives on VendorPart).
@@ -107,7 +111,10 @@ export class PartExpressFormComponent {
     manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
     // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
     traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
-    manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
+    // Required because the express step's hasCost gate needs either
+    // manualCostOverride or currentCostCalculationId — only the override
+    // is reachable from this form, so it's required here.
+    manualCostOverride: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
   });
 
   protected readonly traceabilityOptions: SelectOption[] = [
@@ -122,10 +129,23 @@ export class PartExpressFormComponent {
     { initialValue: this.form.controls.partType.value },
   );
 
-  /** Material field is only meaningful for made parts and assemblies. */
+  /**
+   * Material field visibility. The hasBasics readiness validator requires
+   * `material` to be present for ALL part types (not just made/assembly) —
+   * so this previously-narrowing logic was the cause of "Cannot complete:
+   * missing Basics" on raw materials. Now shown universally.
+   *
+   * For raw materials the Material field is the actual material spec (e.g.
+   * "Polyethylene HDPE", "Aluminum 6061-T6"); for assemblies it's the
+   * primary composition. Per the audit (Section 4 — every combo marks
+   * Material as Required or Recommended), there is no combo where it
+   * shouldn't be collected.
+   */
   protected readonly showMaterialField = computed<boolean>(() => {
-    const t = (this.part()?.partType ?? this.partTypeSignal()) as PartType | null;
-    return t === 'Part' || t === 'Assembly';
+    // Acknowledge the partTypeSignal so changes still trigger recomputation
+    // even though we no longer branch on it.
+    void this.partTypeSignal();
+    return true;
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -191,8 +211,14 @@ export class PartExpressFormComponent {
               this.snackbar.success(this.translate.instant('parts.workflow.express.saveSuccess'));
               this.router.navigate(['/parts']);
             } else {
+              // Use the missingMessageKey when available (it's the
+              // human-readable "what specifically is needed" string per
+              // gate); fall back to the gate name otherwise.
+              const missingDescription = result.missing
+                .map(m => this.translate.instant(m.missingMessageKey ?? m.displayNameKey))
+                .join('; ');
               this.snackbar.error(this.translate.instant('parts.workflow.page.missingValidators', {
-                missing: result.missing.map(m => this.translate.instant(m.displayNameKey)).join(', '),
+                missing: missingDescription,
               }));
             }
           },

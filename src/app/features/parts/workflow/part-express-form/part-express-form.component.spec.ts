@@ -93,51 +93,26 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     expect(c.partTypeLocked()).toBe(false);
   });
 
-  it('hides Material field for RawMaterial part type', () => {
-    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
-    mockSignalInputs(component, {
-      stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'RawMaterial' }),
-    });
-    TestBed.flushEffects();
-    const c = component as unknown as { showMaterialField(): boolean };
-    expect(c.showMaterialField()).toBe(false);
-  });
+  // The Material field is shown for ALL part types because the hasBasics
+  // readiness gate requires it universally (per audit Section 4 — every
+  // viable combo marks Material as Required or Recommended). The previous
+  // narrowing logic ("only made parts and assemblies") was the cause of
+  // the "Cannot complete: missing Basics" trap on raw materials.
+  it.each(['RawMaterial', 'Assembly', 'Part', 'Consumable', 'Tooling', 'Fastener', 'Electronic', 'Packaging'] as const)(
+    'shows Material field for %s part type',
+    (partType) => {
+      const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+      mockSignalInputs(component, {
+        stepId: 'express', componentName: 'PartExpressFormComponent',
+        entityId: 99, entity: buildPart({ partType }),
+      });
+      TestBed.flushEffects();
+      const c = component as unknown as { showMaterialField(): boolean };
+      expect(c.showMaterialField()).toBe(true);
+    },
+  );
 
-  it('shows Material field for Assembly part type', () => {
-    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
-    mockSignalInputs(component, {
-      stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'Assembly' }),
-    });
-    TestBed.flushEffects();
-    const c = component as unknown as { showMaterialField(): boolean };
-    expect(c.showMaterialField()).toBe(true);
-  });
-
-  it('shows Material field for made Part type', () => {
-    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
-    mockSignalInputs(component, {
-      stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'Part' }),
-    });
-    TestBed.flushEffects();
-    const c = component as unknown as { showMaterialField(): boolean };
-    expect(c.showMaterialField()).toBe(true);
-  });
-
-  it('hides Material field for Consumable / other non-made types', () => {
-    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
-    mockSignalInputs(component, {
-      stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'Consumable' }),
-    });
-    TestBed.flushEffects();
-    const c = component as unknown as { showMaterialField(): boolean };
-    expect(c.showMaterialField()).toBe(false);
-  });
-
-  it('form is valid when Material is empty (no longer required)', () => {
+  it('form is INVALID when Material is empty (now required to satisfy hasBasics)', () => {
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {
       stepId: 'express', componentName: 'PartExpressFormComponent',
@@ -152,6 +127,27 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       name: 'Steel bar',
       description: '',
       material: '',
+      manualCostOverride: 5.0,
+    });
+    expect(c.form.valid).toBe(false);
+  });
+
+  it('form is valid when Material is filled in', () => {
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    mockSignalInputs(component, {
+      stepId: 'express', componentName: 'PartExpressFormComponent',
+      entityId: 99, entity: buildPart({ partType: 'RawMaterial', material: '' }),
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { patchValue(v: unknown): void; valid: boolean };
+    };
+    c.form.patchValue({
+      partType: 'RawMaterial',
+      name: 'Steel bar',
+      description: '',
+      material: 'Polyethylene',
+      traceabilityType: 'None',
       manualCostOverride: 5.0,
     });
     expect(c.form.valid).toBe(true);

@@ -45,6 +45,7 @@
         <app-input
           [label]="'parts.workflow.basics.materialLabel' | translate"
           formControlName="material"
+          [required]="true"
           data-testid="express-material" />
         <p class="part-express-form__hint part-express-form__hint--field">
           {{ 'parts.workflow.basics.materialHelper' | translate }}
@@ -78,6 +79,7 @@
     <app-currency-input
       [label]="'parts.workflow.costing.manualOverrideLabel' | translate"
       formControlName="manualCostOverride"
+      [required]="true"
       [placeholder]="'parts.workflow.costing.manualOverridePlaceholder' | translate"
       data-testid="express-manual-override" />
   </form>

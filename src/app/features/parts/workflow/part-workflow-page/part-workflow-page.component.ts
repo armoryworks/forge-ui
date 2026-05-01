@@ -328,8 +328,13 @@ export class PartWorkflowPageComponent {
           this.router.navigate(['/parts']);
         } else {
           this.missingValidators.set(result.missing);
+          // Prefer the missingMessageKey (human "needs name + material + …")
+          // over the gate name ("Basics") so the user knows which fields.
+          const missingDescription = result.missing
+            .map((m) => this.translate.instant(m.missingMessageKey ?? m.displayNameKey))
+            .join('; ');
           this.snackbar.error(this.translate.instant('parts.workflow.page.missingValidators', {
-            missing: result.missing.map((m) => this.translate.instant(m.displayNameKey)).join(', '),
+            missing: missingDescription,
           }));
         }
       },
