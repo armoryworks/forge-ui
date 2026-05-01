@@ -90,7 +90,7 @@
           @if (po.agreedUnitPrice !== null) {
             <div class="info-item">
               <span class="info-label">Agreed Price</span>
-              <span class="info-value">{{ po.agreedUnitPrice | currency }}</span>
+              <span class="info-value"><app-currency-display [value]="po.agreedUnitPrice" [currency]="null" /></span>
             </div>
           }
           @if (po.blanketExpirationDate) {
@@ -172,7 +172,7 @@
                     </td>
                   }
                   <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
-                  <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                 </tr>
               }
             </tbody>

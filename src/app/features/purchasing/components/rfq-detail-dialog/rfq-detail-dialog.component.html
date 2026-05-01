@@ -132,7 +132,11 @@
             <span [class]="getResponseStatusClass(row.responseStatus)">{{ row.responseStatus }}</span>
           </ng-template>
           <ng-template appColumnCell="unitPrice" let-row>
-            <span>{{ row.unitPrice !== null ? (row.unitPrice | currency) : '—' }}</span>
+            @if (row.unitPrice !== null) {
+              <app-currency-display [value]="row.unitPrice" [currency]="null" />
+            } @else {
+              <span>—</span>
+            }
           </ng-template>
           <ng-template appColumnCell="leadTimeDays" let-row>
             <span>{{ row.leadTimeDays !== null ? row.leadTimeDays + ' days' : '—' }}</span>
@@ -141,7 +145,11 @@
             <span>{{ row.minimumOrderQuantity ?? '—' }}</span>
           </ng-template>
           <ng-template appColumnCell="toolingCost" let-row>
-            <span>{{ row.toolingCost !== null ? (row.toolingCost | currency) : '—' }}</span>
+            @if (row.toolingCost !== null) {
+              <app-currency-display [value]="row.toolingCost" [currency]="null" />
+            } @else {
+              <span>—</span>
+            }
           </ng-template>
           <ng-template appColumnCell="quoteValidUntil" let-row>
             <span class="text-muted">{{ row.quoteValidUntil ? (row.quoteValidUntil | date:'MM/dd/yyyy') : '—' }}</span>

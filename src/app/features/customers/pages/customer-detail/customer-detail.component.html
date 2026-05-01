@@ -75,11 +75,11 @@
           <span class="cd-stat__label">Active Jobs</span>
         </div>
         <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('invoices')" (keydown.enter)="switchTab('invoices')" (keydown.space)="$event.preventDefault(); switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
-          <span class="cd-stat__value">{{ c.openInvoiceTotal | currency }}</span>
+          <span class="cd-stat__value"><app-currency-display [value]="c.openInvoiceTotal" [currency]="null" /></span>
           <span class="cd-stat__label">Outstanding</span>
         </div>
         <div class="cd-stat">
-          <span class="cd-stat__value">{{ c.ytdRevenue | currency }}</span>
+          <span class="cd-stat__value"><app-currency-display [value]="c.ytdRevenue" [currency]="null" /></span>
           <span class="cd-stat__label">YTD Revenue</span>
         </div>
       </div>

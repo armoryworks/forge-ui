@@ -14,7 +14,7 @@
     </ng-template>
 
     <ng-template appColumnCell="total" let-row>
-      {{ $any(row).total | currency }}
+      <app-currency-display [value]="$any(row).total" [currency]="null" />
     </ng-template>
 
     <ng-template appColumnCell="expirationDate" let-row>

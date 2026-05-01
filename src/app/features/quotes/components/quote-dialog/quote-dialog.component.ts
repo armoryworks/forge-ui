@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -19,6 +19,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -37,9 +38,9 @@ interface LineEntry {
   selector: 'app-quote-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe, DecimalPipe,
+    ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './quote-dialog.component.html',
   styleUrl: './quote-dialog.component.scss',

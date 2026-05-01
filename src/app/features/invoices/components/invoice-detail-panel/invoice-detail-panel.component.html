@@ -83,8 +83,8 @@
                   <td class="lines-table__mono">{{ line.partNumber ?? '—' }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-                  <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                 </tr>
               }
             </tbody>
@@ -96,23 +96,23 @@
       <div class="totals-section">
         <div class="totals-row">
           <span class="totals-label">{{ 'invoices.subtotal' | translate }}</span>
-          <span class="totals-value">{{ inv.subtotal | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="inv.subtotal" [currency]="null" /></span>
         </div>
         <div class="totals-row">
           <span class="totals-label">{{ 'invoices.tax' | translate }} ({{ inv.taxRate * 100 }}%)</span>
-          <span class="totals-value">{{ inv.taxAmount | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="inv.taxAmount" [currency]="null" /></span>
         </div>
         <div class="totals-row totals-row--total">
           <span class="totals-label">{{ 'common.total' | translate }}</span>
-          <span class="totals-value">{{ inv.total | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="inv.total" [currency]="null" /></span>
         </div>
         <div class="totals-row">
           <span class="totals-label">{{ 'invoices.amountPaid' | translate }}</span>
-          <span class="totals-value">{{ inv.amountPaid | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="inv.amountPaid" [currency]="null" /></span>
         </div>
         <div class="totals-row totals-row--balance">
           <span class="totals-label">{{ 'invoices.balanceDue' | translate }}</span>
-          <span class="totals-value">{{ inv.balanceDue | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="inv.balanceDue" [currency]="null" /></span>
         </div>
       </div>
 

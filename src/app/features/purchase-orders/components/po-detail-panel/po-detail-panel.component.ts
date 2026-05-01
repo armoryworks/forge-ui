@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, output, signal, computed } from '@angular/core';
-import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -25,6 +25,7 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -33,13 +34,13 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
   selector: 'app-po-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
+    DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     ReceiveDialogComponent, LoadingBlockDirective,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
     ValidationButtonComponent,
-    EntityLinkComponent,
+    EntityLinkComponent, CurrencyDisplayComponent,
     DataTableComponent, ColumnCellDirective,
   ],
   templateUrl: './po-detail-panel.component.html',

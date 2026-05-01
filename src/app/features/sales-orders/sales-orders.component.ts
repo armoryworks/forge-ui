@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -15,6 +15,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
@@ -24,10 +25,10 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   selector: 'app-sales-orders',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    SoDialogComponent,
+    CurrencyDisplayComponent, SoDialogComponent,
   ],
   templateUrl: './sales-orders.component.html',
   styleUrl: './sales-orders.component.scss',

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -12,6 +12,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { AccountingService } from '../../shared/services/accounting.service';
@@ -23,10 +24,10 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   selector: 'app-payments',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
-    PaymentDialogComponent,
+    CurrencyDisplayComponent, PaymentDialogComponent,
   ],
   templateUrl: './payments.component.html',
   styleUrl: './payments.component.scss',

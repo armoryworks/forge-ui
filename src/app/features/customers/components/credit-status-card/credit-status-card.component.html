@@ -21,24 +21,28 @@
     <div class="credit-card__metrics">
       <div class="credit-card__metric">
         <span class="credit-card__metric-label">Credit Limit</span>
-        <span class="credit-card__metric-value">{{ c.creditLimit !== null ? (c.creditLimit | currency) : 'None' }}</span>
+        <span class="credit-card__metric-value">
+          @if (c.creditLimit !== null) {
+            <app-currency-display [value]="c.creditLimit" [currency]="null" />
+          } @else { None }
+        </span>
       </div>
       <div class="credit-card__metric">
         <span class="credit-card__metric-label">Open AR</span>
-        <span class="credit-card__metric-value">{{ c.openArBalance | currency }}</span>
+        <span class="credit-card__metric-value"><app-currency-display [value]="c.openArBalance" [currency]="null" /></span>
       </div>
       <div class="credit-card__metric">
         <span class="credit-card__metric-label">Pending Orders</span>
-        <span class="credit-card__metric-value">{{ c.pendingOrdersTotal | currency }}</span>
+        <span class="credit-card__metric-value"><app-currency-display [value]="c.pendingOrdersTotal" [currency]="null" /></span>
       </div>
       <div class="credit-card__metric">
         <span class="credit-card__metric-label">Total Exposure</span>
-        <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.isOverLimit">{{ c.totalExposure | currency }}</span>
+        <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.isOverLimit"><app-currency-display [value]="c.totalExposure" [currency]="null" /></span>
       </div>
       @if (c.creditLimit !== null) {
         <div class="credit-card__metric">
           <span class="credit-card__metric-label">Available Credit</span>
-          <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.availableCredit < 0">{{ c.availableCredit | currency }}</span>
+          <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.availableCredit < 0"><app-currency-display [value]="c.availableCredit" [currency]="null" /></span>
         </div>
         <div class="credit-card__metric">
           <span class="credit-card__metric-label">Utilization</span>
@@ -64,7 +68,7 @@
         <span class="credit-card__metric-value"
               [class.credit-card__metric-value--success]="c.unappliedCreditAmount > 0"
               data-testid="credit-on-file-amount">
-          {{ c.unappliedCreditAmount | currency }}
+          <app-currency-display [value]="c.unappliedCreditAmount" [currency]="null" />
         </span>
       </div>
       @if (c.unappliedCreditAmount === 0 || c.unappliedCredits.length === 0) {
@@ -84,7 +88,7 @@
                   <strong>{{ uc.paymentNumber }}</strong>
                   @if (uc.reference) { <span class="text-muted">({{ uc.reference }})</span> }
                 </span>
-                <span class="credit-card__on-file-amount">{{ uc.amount | currency }}</span>
+                <span class="credit-card__on-file-amount"><app-currency-display [value]="uc.amount" [currency]="null" /></span>
               </li>
             }
           </ul>

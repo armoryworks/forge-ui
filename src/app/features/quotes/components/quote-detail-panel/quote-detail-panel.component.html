@@ -81,8 +81,8 @@
                   <td class="lines-table__mono">{{ line.partNumber ?? '---' }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-                  <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                 </tr>
               }
             </tbody>
@@ -94,15 +94,15 @@
       <div class="totals-section">
         <div class="totals-row">
           <span class="info-label">{{ 'quotes.subtotal' | translate }}</span>
-          <span class="totals-value">{{ quote.subtotal | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="quote.subtotal" [currency]="null" /></span>
         </div>
         <div class="totals-row">
           <span class="info-label">{{ 'quotes.tax' | translate }} ({{ quote.taxRate * 100 }}%)</span>
-          <span class="totals-value">{{ quote.taxAmount | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="quote.taxAmount" [currency]="null" /></span>
         </div>
         <div class="totals-row totals-row--total">
           <span class="info-label">{{ 'common.total' | translate }}</span>
-          <span class="totals-value">{{ quote.total | currency }}</span>
+          <span class="totals-value"><app-currency-display [value]="quote.total" [currency]="null" /></span>
         </div>
       </div>
 

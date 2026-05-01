@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -10,6 +10,7 @@ import { InvoiceDetail } from '../../models/invoice-detail.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
@@ -17,9 +18,9 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   selector: 'app-invoice-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
+    DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
-    EntityActivitySectionComponent, EntityLinkComponent,
+    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './invoice-detail-panel.component.html',
   styleUrl: './invoice-detail-panel.component.scss',

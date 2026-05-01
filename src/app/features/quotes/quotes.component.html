@@ -25,7 +25,7 @@
           <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
         </ng-template>
         <ng-template appColumnCell="total" let-row>
-          <span>{{ row.total | currency }}</span>
+          <app-currency-display [value]="row.total" [currency]="null" />
         </ng-template>
         <ng-template appColumnCell="expirationDate" let-row>
           <span class="text-muted">{{ row.expirationDate ? (row.expirationDate | date:'MM/dd/yyyy') : '---' }}</span>

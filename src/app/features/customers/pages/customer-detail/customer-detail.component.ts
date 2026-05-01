@@ -1,4 +1,3 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
@@ -28,6 +27,7 @@ import { CustomerActivityTabComponent } from './tabs/customer-activity-tab.compo
 import { CustomerInteractionsTabComponent } from './tabs/customer-interactions-tab.component';
 import { CustomerIdentityClusterComponent } from '../../components/customer-clusters/customer-identity-cluster.component';
 import { CustomerActivityClusterComponent } from '../../components/customer-clusters/customer-activity-cluster.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 
 /**
  * Pillar 5 — Customer detail shell.
@@ -49,11 +49,12 @@ import { CustomerActivityClusterComponent } from '../../components/customer-clus
   selector: 'app-customer-detail',
   standalone: true,
   imports: [
-    CurrencyPipe, TranslatePipe, RouterLink, MatTooltipModule,
+    TranslatePipe, RouterLink, MatTooltipModule,
     CustomerOverviewTabComponent, CustomerContactsTabComponent, CustomerAddressesTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
     CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent, CustomerInteractionsTabComponent,
     CustomerIdentityClusterComponent, CustomerActivityClusterComponent,
+    CurrencyDisplayComponent,
   ],
   templateUrl: './customer-detail.component.html',
   styleUrl: './customer-detail.component.scss',

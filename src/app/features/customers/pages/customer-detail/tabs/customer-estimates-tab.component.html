@@ -18,7 +18,7 @@
     (rowClick)="openEdit($any($event))">
 
     <ng-template appColumnCell="estimatedAmount" let-row>
-      {{ $any(row).estimatedAmount | currency }}
+      <app-currency-display [value]="$any(row).estimatedAmount" [currency]="null" />
     </ng-template>
 
     <ng-template appColumnCell="status" let-row>

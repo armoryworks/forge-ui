@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,15 +12,16 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 
 @Component({
   selector: 'app-quote-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
+    DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     EntityActivitySectionComponent,
-    EntityLinkComponent,
+    EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './quote-detail-panel.component.html',
   styleUrl: './quote-detail-panel.component.scss',

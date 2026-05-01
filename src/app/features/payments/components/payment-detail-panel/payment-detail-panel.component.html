@@ -40,15 +40,15 @@
         }
         <div class="info-item">
           <span class="info-label">{{ 'payments.amount' | translate }}</span>
-          <span class="info-value">{{ payment.amount | currency }}</span>
+          <span class="info-value"><app-currency-display [value]="payment.amount" [currency]="null" /></span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'payments.applied' | translate }}</span>
-          <span class="info-value">{{ payment.appliedAmount | currency }}</span>
+          <span class="info-value"><app-currency-display [value]="payment.appliedAmount" [currency]="null" /></span>
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'payments.unapplied' | translate }}</span>
-          <span class="info-value" [class.text-warning]="payment.unappliedAmount > 0">{{ payment.unappliedAmount | currency }}</span>
+          <span class="info-value" [class.text-warning]="payment.unappliedAmount > 0"><app-currency-display [value]="payment.unappliedAmount" [currency]="null" /></span>
         </div>
       </div>
 
@@ -74,7 +74,7 @@
               @for (app of payment.applications; track app.id) {
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
-                  <td class="lines-table__right">{{ app.amount | currency }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
                 </tr>
               }
             </tbody>

@@ -175,15 +175,15 @@
           <div class="info-grid">
             <div class="info-item">
               <span class="info-label">{{ 'salesOrders.subtotal' | translate }}</span>
-              <span class="info-value">{{ so.subtotal | currency }}</span>
+              <span class="info-value"><app-currency-display [value]="so.subtotal" [currency]="null" /></span>
             </div>
             <div class="info-item">
               <span class="info-label">{{ 'salesOrders.tax' | translate }} ({{ so.taxRate }}%)</span>
-              <span class="info-value">{{ so.taxAmount | currency }}</span>
+              <span class="info-value"><app-currency-display [value]="so.taxAmount" [currency]="null" /></span>
             </div>
             <div class="info-item">
               <span class="info-label">{{ 'common.total' | translate }}</span>
-              <span class="info-value info-value--bold">{{ so.total | currency }}</span>
+              <span class="info-value info-value--bold"><app-currency-display [value]="so.total" [currency]="null" /></span>
             </div>
           </div>
 
@@ -282,7 +282,7 @@
                       / {{ line.remainingQuantity | number:'1.0-4' }}
                     </td>
                     <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
-                    <td class="lines-table__right">{{ line.lineTotal | currency }}</td>
+                    <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                   </tr>
                   <!-- Warning row for no jobs -->
                   @if (isLineWarning(line)) {
@@ -401,7 +401,7 @@
                     }
                     <div class="info-item">
                       <span class="info-label">{{ 'salesOrders.shippingCost' | translate }}</span>
-                      <span class="info-value">{{ shipment.shippingCost | currency }}</span>
+                      <span class="info-value"><app-currency-display [value]="shipment.shippingCost" [currency]="null" /></span>
                     </div>
                     @if (shipment.weight) {
                       <div class="info-item">
@@ -600,7 +600,7 @@
                 <div class="so-detail__invoice-details">
                   <div class="so-detail__invoice-row">
                     <span class="so-detail__invoice-label">{{ 'salesOrders.amount' | translate }}</span>
-                    <span class="so-detail__invoice-value">{{ invoice.totalAmount | currency }}</span>
+                    <span class="so-detail__invoice-value"><app-currency-display [value]="invoice.totalAmount" [currency]="null" /></span>
                   </div>
                   <div class="so-detail__invoice-row">
                     <span class="so-detail__invoice-label">{{ 'salesOrders.dueDate' | translate }}</span>
@@ -624,11 +624,11 @@
             <div class="so-detail__invoice-summary">
               <div class="so-detail__invoice-row">
                 <span class="so-detail__invoice-label">{{ 'salesOrders.totalInvoiced' | translate }}</span>
-                <span class="so-detail__invoice-value so-detail__invoice-value--bold">{{ totalInvoiced() | currency }}</span>
+                <span class="so-detail__invoice-value so-detail__invoice-value--bold"><app-currency-display [value]="totalInvoiced()" [currency]="null" /></span>
               </div>
               <div class="so-detail__invoice-row">
                 <span class="so-detail__invoice-label">{{ 'salesOrders.orderTotal' | translate }}</span>
-                <span class="so-detail__invoice-value">{{ so.total | currency }}</span>
+                <span class="so-detail__invoice-value"><app-currency-display [value]="so.total" [currency]="null" /></span>
               </div>
             </div>
           }

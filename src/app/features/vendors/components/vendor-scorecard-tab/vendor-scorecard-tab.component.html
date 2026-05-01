@@ -66,7 +66,7 @@
           <div class="detail-rows">
             <div class="detail-row">
               <span class="detail-row__label">Total Spend</span>
-              <span class="detail-row__value">{{ sc.totalSpend | currency }}</span>
+              <span class="detail-row__value"><app-currency-display [value]="sc.totalSpend" [currency]="null" /></span>
             </div>
             <div class="detail-row">
               <span class="detail-row__label">Avg Price Variance</span>

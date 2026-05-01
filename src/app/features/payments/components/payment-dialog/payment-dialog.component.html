@@ -19,7 +19,7 @@
               @for (app of applications(); track $index) {
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
-                  <td class="lines-table__right">{{ app.amount | currency }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
                       <span class="material-icons-outlined">close</span>
@@ -31,7 +31,7 @@
             <tfoot>
               <tr>
                 <td class="lines-table__right lines-table__bold">{{ 'payments.totalApplied' | translate }}</td>
-                <td class="lines-table__right lines-table__bold">{{ totalApplied() | currency }}</td>
+                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="totalApplied()" [currency]="null" /></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -73,7 +73,7 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'payments.totalApplied' | translate }}</span>
-          <span>{{ totalApplied() | currency }}</span>
+          <app-currency-display [value]="totalApplied()" [currency]="null" />
         </div>
       </div>
     </div>

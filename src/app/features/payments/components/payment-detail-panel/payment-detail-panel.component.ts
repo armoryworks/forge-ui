@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -12,14 +12,15 @@ import { EntityActivitySectionComponent, ActivityFilterTab } from '../../../../s
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 
 @Component({
   selector: 'app-payment-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, TranslatePipe,
+    DatePipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
-    EntityActivitySectionComponent, EntityLinkComponent,
+    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './payment-detail-panel.component.html',
   styleUrl: './payment-detail-panel.component.scss',

@@ -30,13 +30,13 @@
           <span>{{ getMethodLabel(row.method) }}</span>
         </ng-template>
         <ng-template appColumnCell="amount" let-row>
-          <span>{{ row.amount | currency }}</span>
+          <app-currency-display [value]="row.amount" [currency]="null" />
         </ng-template>
         <ng-template appColumnCell="appliedAmount" let-row>
-          <span>{{ row.appliedAmount | currency }}</span>
+          <app-currency-display [value]="row.appliedAmount" [currency]="null" />
         </ng-template>
         <ng-template appColumnCell="unappliedAmount" let-row>
-          <span [class.text-warning]="row.unappliedAmount > 0">{{ row.unappliedAmount | currency }}</span>
+          <span [class.text-warning]="row.unappliedAmount > 0"><app-currency-display [value]="row.unappliedAmount" [currency]="null" /></span>
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
           <span class="text-muted">{{ row.paymentDate | date:'MM/dd/yyyy' }}</span>

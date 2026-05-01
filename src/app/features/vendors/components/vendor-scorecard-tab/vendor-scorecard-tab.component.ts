@@ -6,12 +6,13 @@ import { VendorService } from '../../services/vendor.service';
 import { VendorGrade, VendorScorecard } from '../../models/vendor-scorecard.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { KpiChipComponent } from '../../../../shared/components/kpi-chip/kpi-chip.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
 @Component({
   selector: 'app-vendor-scorecard-tab',
   standalone: true,
-  imports: [CurrencyPipe, DecimalPipe, LoadingBlockDirective, KpiChipComponent, EmptyStateComponent],
+  imports: [CurrencyPipe, DecimalPipe, LoadingBlockDirective, KpiChipComponent, CurrencyDisplayComponent, EmptyStateComponent],
   templateUrl: './vendor-scorecard-tab.component.html',
   styleUrl: './vendor-scorecard-tab.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

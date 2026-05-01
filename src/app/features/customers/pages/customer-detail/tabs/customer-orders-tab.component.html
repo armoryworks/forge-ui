@@ -13,7 +13,7 @@
       <span class="chip" [class]="getStatusClass($any(row).status)">{{ $any(row).status }}</span>
     </ng-template>
 
-    <ng-template appColumnCell="total" let-row>{{ $any(row).total | currency }}</ng-template>
+    <ng-template appColumnCell="total" let-row><app-currency-display [value]="$any(row).total" [currency]="null" /></ng-template>
 
     <ng-template appColumnCell="requestedDate" let-row>
       {{ $any(row).requestedDate | date:'MM/dd/yyyy' }}

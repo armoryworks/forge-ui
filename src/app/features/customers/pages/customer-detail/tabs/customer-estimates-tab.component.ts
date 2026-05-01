@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -12,6 +12,7 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
 import { CurrencyInputComponent } from '../../../../../shared/components/currency-input/currency-input.component';
+import { CurrencyDisplayComponent } from '../../../../../shared/components/currency-display/currency-display.component';
 import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { SelectComponent } from '../../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../../shared/components/textarea/textarea.component';
@@ -34,9 +35,9 @@ const STATUS_OPTIONS: SelectOption[] = [
   selector: 'app-customer-estimates-tab',
   standalone: true,
   imports: [
-    CurrencyPipe, DatePipe, ReactiveFormsModule,
+    DatePipe, ReactiveFormsModule,
     DataTableComponent, ColumnCellDirective,
-    InputComponent, CurrencyInputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
+    InputComponent, CurrencyInputComponent, CurrencyDisplayComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, ValidationButtonComponent,
   ],
   templateUrl: './customer-estimates-tab.component.html',

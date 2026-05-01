@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, output, computed, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { PaymentService } from '../../services/payment.service';
@@ -12,6 +11,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -31,9 +31,9 @@ interface ApplicationEntry {
   selector: 'app-payment-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe,
+    ReactiveFormsModule,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './payment-dialog.component.html',
   styleUrl: './payment-dialog.component.scss',

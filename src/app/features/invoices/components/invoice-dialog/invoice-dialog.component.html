@@ -24,8 +24,8 @@
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
-                  <td class="lines-table__right">{{ line.unitPrice | currency }}</td>
-                  <td class="lines-table__right">{{ line.quantity * line.unitPrice | currency }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.quantity * line.unitPrice" [currency]="null" /></td>
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine($index)">
                       <span class="material-icons-outlined">close</span>
@@ -37,7 +37,7 @@
             <tfoot>
               <tr>
                 <td colspan="4" class="lines-table__right lines-table__bold">{{ 'common.total' | translate }}</td>
-                <td class="lines-table__right lines-table__bold">{{ lineTotal() | currency }}</td>
+                <td class="lines-table__right lines-table__bold"><app-currency-display [value]="lineTotal()" [currency]="null" /></td>
                 <td></td>
               </tr>
             </tfoot>
@@ -83,15 +83,15 @@
         <span class="dlg-sidebar-section__title">{{ 'common.summary' | translate }}</span>
         <div class="dlg-total-row">
           <span>{{ 'quotes.subtotal' | translate }}</span>
-          <span>{{ lineTotal() | currency }}</span>
+          <app-currency-display [value]="lineTotal()" [currency]="null" />
         </div>
         <div class="dlg-total-row">
           <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() }}%)</span>
-          <span>{{ taxAmount() | currency }}</span>
+          <app-currency-display [value]="taxAmount()" [currency]="null" />
         </div>
         <div class="dlg-total-row dlg-total-row--grand">
           <span>{{ 'common.total' | translate }}</span>
-          <span>{{ grandTotal() | currency }}</span>
+          <app-currency-display [value]="grandTotal()" [currency]="null" />
         </div>
       </div>
     </div>

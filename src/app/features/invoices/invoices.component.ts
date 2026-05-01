@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs';
@@ -16,6 +16,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { AccountingService } from '../../shared/services/accounting.service';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -29,9 +30,10 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   selector: 'app-invoices',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
+    CurrencyDisplayComponent,
     InvoiceDialogComponent, UninvoicedJobsPanelComponent, MatTooltipModule,
   ],
   templateUrl: './invoices.component.html',

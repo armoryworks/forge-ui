@@ -1,19 +1,20 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CurrencyPipe, DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CustomerService } from '../../services/customer.service';
 import { CreditRisk, CreditStatus } from '../../models/credit-status.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
 @Component({
   selector: 'app-credit-status-card',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, DialogComponent, TextareaComponent, LoadingBlockDirective],
+  imports: [DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, DialogComponent, TextareaComponent, CurrencyDisplayComponent, LoadingBlockDirective],
   templateUrl: './credit-status-card.component.html',
   styleUrl: './credit-status-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, output, computed, ViewChild } from '@angular/core';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +15,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -36,9 +37,9 @@ interface LineEntry {
   selector: 'app-invoice-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe, DecimalPipe, TranslatePipe,
+    ReactiveFormsModule, DecimalPipe, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, DatepickerComponent, TextareaComponent,
-    ValidationButtonComponent, MatTooltipModule,
+    CurrencyDisplayComponent, ValidationButtonComponent, MatTooltipModule,
   ],
   templateUrl: './invoice-dialog.component.html',
   styleUrl: './invoice-dialog.component.scss',

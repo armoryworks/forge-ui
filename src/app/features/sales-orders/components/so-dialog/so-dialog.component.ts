@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, output, signal, Signal, ViewChild } from '@angular/core';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -18,6 +18,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { AutocompleteComponent, AutocompleteOption } from '../../../../shared/components/autocomplete/autocomplete.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -37,9 +38,9 @@ interface LineEntry {
   selector: 'app-so-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule, CurrencyPipe, DecimalPipe,
+    ReactiveFormsModule, DecimalPipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    AutocompleteComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
+    AutocompleteComponent, CurrencyDisplayComponent, ValidationButtonComponent, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './so-dialog.component.html',
   styleUrl: './so-dialog.component.scss',

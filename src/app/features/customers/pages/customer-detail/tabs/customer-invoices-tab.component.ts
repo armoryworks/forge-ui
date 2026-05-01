@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { environment } from '../../../../../../environments/environment';
 import { PagedResponse } from '../../../../../shared/models/paged-response.model';
 import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
+import { CurrencyDisplayComponent } from '../../../../../shared/components/currency-display/currency-display.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 
 interface InvoiceListItem {
@@ -22,7 +23,7 @@ interface InvoiceListItem {
 @Component({
   selector: 'app-customer-invoices-tab',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
   templateUrl: './customer-invoices-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -15,6 +15,7 @@ import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
@@ -27,10 +28,10 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'docu
   selector: 'app-sales-order-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
+    DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
-    EntityLinkComponent, FileUploadZoneComponent, EmptyStateComponent,
+    EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
     ScheduleTimelineComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',

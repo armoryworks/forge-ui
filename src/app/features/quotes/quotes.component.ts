@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe, CurrencyPipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,6 +14,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { QuoteDialogComponent } from './components/quote-dialog/quote-dialog.component';
 import { QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogResult } from './components/quote-detail-dialog/quote-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
@@ -22,10 +23,10 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   selector: 'app-quotes',
   standalone: true,
   imports: [
-    ReactiveFormsModule, DatePipe, CurrencyPipe, TranslatePipe,
+    ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, InputComponent, SelectComponent,
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective, MatTooltipModule,
-    QuoteDialogComponent,
+    CurrencyDisplayComponent, QuoteDialogComponent,
   ],
   templateUrl: './quotes.component.html',
   styleUrl: './quotes.component.scss',

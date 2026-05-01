@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -24,6 +24,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 export interface RfqDetailDialogData {
@@ -34,10 +35,11 @@ export interface RfqDetailDialogData {
   selector: 'app-rfq-detail-dialog',
   standalone: true,
   imports: [
-    CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, ReactiveFormsModule, TranslatePipe,
     DialogComponent, InputComponent, SelectComponent, TextareaComponent,
     DatepickerComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective, ValidationButtonComponent, EntityLinkComponent,
+    CurrencyDisplayComponent,
   ],
   templateUrl: './rfq-detail-dialog.component.html',
   styleUrl: './rfq-detail-dialog.component.scss',
