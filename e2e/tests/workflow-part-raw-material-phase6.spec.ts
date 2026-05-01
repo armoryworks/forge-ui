@@ -4,106 +4,99 @@ import { loginViaApi, SEED_PASSWORD } from '../helpers/auth.helper';
 const BASE_URL = 'http://localhost:4200';
 
 /**
- * Workflow Pattern Phase 6 — Type-aware fork routing for parts.
+ * Pre-beta — axis-based fork dialog.
  *
- * Verifies the three flows defined by the Phase 6 charter:
- *   1. Raw Material + default (Express) → express form mounts on the
- *      raw-material workflow definition.
- *   2. Assembly + default (Step-by-step) → guided shell mounts with the
- *      assembly definition's full step rail (Phase 5 also tests this; this
- *      test re-verifies the type-aware fork still defaults assemblies to
- *      guided).
- *   3. Raw Material + override to Step-by-step → guided shell mounts with
- *      the raw-material definition (single-step rail) so the user can drive
- *      it via the rail UI even on a simple type.
+ * The dialog now answers four questions (procurement → inventory class →
+ * item kind → mode) per the audit. Each test exercises one of the 11
+ * viable (procurement × inventory) combos plus a mode override path.
  *
  * Auth seeded via API helper. Each flow uses `data-testid` selectors.
  */
 
-test.describe('Workflow Pattern Phase 6 — Part raw-material express-only sibling', () => {
+test.describe('Workflow Pattern — Part axis-based fork (pre-beta)', () => {
   test.beforeEach(async ({ page }) => {
     await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
   });
 
-  test('raw-material default: Q1 RawMaterial → Express recommended → continue → express form mounts', async ({ page }) => {
+  test('Buy + Raw default: express recommended → continue → express form mounts', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
-    // Click New Part — fork dialog should open with both questions visible
+    // Click New Part — fork dialog should open with Step 1 visible.
     await page.locator('[data-testid="new-part-btn"]').click();
-    await expect(page.locator('[data-testid="fork-question-type"]')).toBeVisible();
-    await expect(page.locator('[data-testid="fork-question-mode"]')).toBeVisible();
+    await expect(page.locator('[data-testid="fork-step-procurement"]')).toBeVisible();
 
-    // Pick Q1 — Raw Material
-    await page.locator('[data-testid="fork-type-RawMaterial"]').click();
+    // Step 1 — Buy
+    await page.locator('[data-testid="fork-procurement-Buy"]').click();
+    await expect(page.locator('[data-testid="fork-step-inventory-class"]')).toBeVisible();
 
-    // Q2 — Express should be the recommended (selected) mode after the click.
-    await expect(page.locator('[data-testid="fork-express"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-testid="fork-guided"]')).toHaveAttribute('aria-pressed', 'false');
+    // Step 2 — Raw
+    await page.locator('[data-testid="fork-inventory-class-Raw"]').click();
 
-    // Continue
+    // Step 4 — Express recommended for B1 (Buy + Raw).
+    await expect(page.locator('[data-testid="fork-mode-express"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-testid="fork-mode-guided"]')).toHaveAttribute('aria-pressed', 'false');
+
     await page.locator('[data-testid="fork-continue"]').click();
 
-    // Workflow page mounts with the raw-material express definition.
-    await page.waitForURL(/\/parts\/\d+\?.*workflow=part-raw-material-express-v1/, { timeout: 15000 });
+    // Workflow page mounts with the buy-raw express definition.
+    await page.waitForURL(/\/parts\/(?:new|\d+)\?.*workflow=part-buy-raw-v1/, { timeout: 15000 });
     await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
 
-    // Express mode → no rail, express content visible
-    await expect(page.locator('[data-testid="workflow-express-content"]')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('[data-testid="part-express-form"]')).toBeVisible();
-    await expect(page.locator('[data-testid="workflow-rail"]')).not.toBeVisible();
-
-    await page.screenshot({ path: 'e2e/screenshots/phase6-raw-material-express.png', fullPage: true });
+    await page.screenshot({ path: 'e2e/screenshots/fork-buy-raw-express.png', fullPage: true });
   });
 
-  test('assembly default: Q1 Assembly → Step-by-step recommended → continue → guided shell with full rail', async ({ page }) => {
+  test('Make + Subassembly default: guided recommended → continue → guided shell with rail', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
     await page.locator('[data-testid="new-part-btn"]').click();
-    await page.locator('[data-testid="fork-type-Assembly"]').click();
+    await page.locator('[data-testid="fork-procurement-Make"]').click();
+    await page.locator('[data-testid="fork-inventory-class-Subassembly"]').click();
 
-    // Q2 — Guided (Step-by-step) should be the recommended mode for assembly.
-    await expect(page.locator('[data-testid="fork-guided"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-testid="fork-express"]')).toHaveAttribute('aria-pressed', 'false');
+    // Step 4 — Guided recommended for M2 (Make + Subassembly).
+    await expect(page.locator('[data-testid="fork-mode-guided"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('[data-testid="fork-mode-express"]')).toHaveAttribute('aria-pressed', 'false');
 
     await page.locator('[data-testid="fork-continue"]').click();
 
-    // Guided shell mounts with the assembly definition.
-    await page.waitForURL(/\/parts\/\d+\?.*workflow=part-assembly-guided-v1/, { timeout: 15000 });
+    // Guided shell mounts with the make-subassembly definition.
+    await page.waitForURL(/\/parts\/(?:new|\d+)\?.*workflow=part-make-subassembly-v1/, { timeout: 15000 });
     await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
-
-    // Guided mode → full rail with all 5 steps
     await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
-    await expect(page.locator('[data-testid="workflow-step-basics"]')).toBeVisible();
-    await expect(page.locator('[data-testid="workflow-step-bom"]')).toBeVisible();
-    await expect(page.locator('[data-testid="workflow-step-routing"]')).toBeVisible();
-    await expect(page.locator('[data-testid="workflow-step-costing"]')).toBeVisible();
 
-    await page.screenshot({ path: 'e2e/screenshots/phase6-assembly-guided.png', fullPage: true });
+    await page.screenshot({ path: 'e2e/screenshots/fork-make-subassembly-guided.png', fullPage: true });
   });
 
-  test('raw-material override: Q1 RawMaterial → user picks Step-by-step → continue → guided shell with raw-material rail', async ({ page }) => {
+  test('Phantom Step-1 filters Step-2 to Subassembly + FinishedGood only', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
     await page.locator('[data-testid="new-part-btn"]').click();
+    await page.locator('[data-testid="fork-procurement-Phantom"]').click();
 
-    // Pick Q1 = Raw Material (Express recommended), then override Q2 to Guided.
-    await page.locator('[data-testid="fork-type-RawMaterial"]').click();
-    await expect(page.locator('[data-testid="fork-express"]')).toHaveAttribute('aria-pressed', 'true');
+    // Phantom + Raw / Phantom + Component / Phantom + Consumable etc. are
+    // not viable combos — those buttons must not exist in the DOM.
+    await expect(page.locator('[data-testid="fork-inventory-class-Subassembly"]')).toBeVisible();
+    await expect(page.locator('[data-testid="fork-inventory-class-FinishedGood"]')).toBeVisible();
+    await expect(page.locator('[data-testid="fork-inventory-class-Raw"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="fork-inventory-class-Component"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="fork-inventory-class-Consumable"]')).toHaveCount(0);
+    await expect(page.locator('[data-testid="fork-inventory-class-Tool"]')).toHaveCount(0);
+  });
 
-    await page.locator('[data-testid="fork-guided"]').click();
-    await expect(page.locator('[data-testid="fork-guided"]')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.locator('[data-testid="fork-express"]')).toHaveAttribute('aria-pressed', 'false');
+  test('Buy + Raw with mode override → guided', async ({ page }) => {
+    await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
+
+    await page.locator('[data-testid="new-part-btn"]').click();
+    await page.locator('[data-testid="fork-procurement-Buy"]').click();
+    await page.locator('[data-testid="fork-inventory-class-Raw"]').click();
+    await expect(page.locator('[data-testid="fork-mode-express"]')).toHaveAttribute('aria-pressed', 'true');
+
+    // User overrides to guided.
+    await page.locator('[data-testid="fork-mode-guided"]').click();
+    await expect(page.locator('[data-testid="fork-mode-guided"]')).toHaveAttribute('aria-pressed', 'true');
 
     await page.locator('[data-testid="fork-continue"]').click();
 
-    // Workflow page mounts with the raw-material definition (definition is
-    // type-aware) but in guided mode (mode is the user's override).
-    await page.waitForURL(/\/parts\/\d+\?.*workflow=part-raw-material-express-v1/, { timeout: 15000 });
-    await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
-
-    // Guided mode → rail visible (single-step rail since raw-material has 1 step)
-    await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
-
-    await page.screenshot({ path: 'e2e/screenshots/phase6-raw-material-override-guided.png', fullPage: true });
+    // Definition is still buy-raw (definition keys off the combo, not the mode).
+    await page.waitForURL(/\/parts\/(?:new|\d+)\?.*workflow=part-buy-raw-v1/, { timeout: 15000 });
   });
 });

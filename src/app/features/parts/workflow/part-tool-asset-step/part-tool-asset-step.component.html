@@ -10,16 +10,5 @@
       entityType="assets"
       formControlName="toolingAssetId"
       data-testid="tool-asset-asset-picker" />
-
-    <div class="part-tool-asset-step__field">
-      <app-input
-        [label]="'parts.workflow.toolAsset.moldToolRefLabel' | translate"
-        formControlName="moldToolRef"
-        [maxlength]="100"
-        data-testid="tool-asset-mold-tool-ref" />
-      <p class="part-tool-asset-step__hint part-tool-asset-step__hint--field">
-        {{ 'parts.workflow.toolAsset.moldToolRefHelper' | translate }}
-      </p>
-    </div>
   </form>
 </section>

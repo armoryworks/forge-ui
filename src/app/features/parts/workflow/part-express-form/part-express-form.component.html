@@ -1,9 +1,9 @@
 <section class="part-express-form" [appLoadingBlock]="saving()" data-testid="part-express-form">
   <header class="part-express-form__header">
     <h2 class="part-express-form__title">{{ 'parts.workflow.express.title' | translate }}</h2>
-    @if (partTypeLocked()) {
-      <span class="part-express-form__type-chip chip" data-testid="express-part-type-locked">
-        {{ partTypeLabel() }}
+    @if (axisLabel()) {
+      <span class="part-express-form__type-chip chip" data-testid="express-axis-locked">
+        {{ axisLabel() }}
       </span>
       <p class="part-express-form__hint">{{ 'parts.workflow.express.typeLockedHint' | translate }}</p>
     } @else {
@@ -12,15 +12,6 @@
   </header>
 
   <form [formGroup]="form" class="part-express-form__form">
-    @if (!partTypeLocked()) {
-      <app-select
-        [label]="'parts.workflow.basics.partTypeLabel' | translate"
-        formControlName="partType"
-        [options]="partTypeOptions"
-        [required]="true"
-        data-testid="express-part-type" />
-    }
-
     <app-input
       [label]="'parts.workflow.basics.nameLabel' | translate"
       formControlName="name"
@@ -39,19 +30,6 @@
         {{ 'parts.workflow.basics.descriptionHelper' | translate }}
       </p>
     </div>
-
-    @if (showMaterialField()) {
-      <div class="part-express-form__field">
-        <app-input
-          [label]="'parts.workflow.basics.materialLabel' | translate"
-          formControlName="material"
-          [required]="true"
-          data-testid="express-material" />
-        <p class="part-express-form__hint part-express-form__hint--field">
-          {{ 'parts.workflow.basics.materialHelper' | translate }}
-        </p>
-      </div>
-    }
 
     <app-input
       [label]="'parts.workflow.basics.manufacturerNameLabel' | translate"

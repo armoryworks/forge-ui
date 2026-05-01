@@ -17,15 +17,15 @@ class FakeLoader implements TranslateLoader {
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
     id: 99, partNumber: 'PRT-00099', name: 'Steel rod', description: null, revision: 'A',
-    status: 'Draft', partType: 'RawMaterial',
+    status: 'Draft',
     procurementSource: 'Buy', inventoryClass: 'Raw', itemKindId: null, itemKindLabel: null,
     traceabilityType: 'None', abcClass: null, manufacturerName: null, manufacturerPartNumber: null,
-    material: 'Steel',
     materialSpecId: null, materialSpecLabel: null,
-    moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
+    externalPartNumber: null,
+    externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
-    leadTimeDays: null, safetyStockDays: null, isSerialTracked: false,
+    leadTimeDays: null, safetyStockDays: null,
     toolingAssetId: null, toolingAssetName: null,
     manualCostOverride: null, currentCostCalculationId: null,
     weightEach: null, weightDisplayUnit: null,
@@ -75,98 +75,53 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     mockSignalInputs(component, {
       stepId: 'express', componentName: 'PartExpressFormComponent',
       entityId: 99,
-      entity: buildPart({ name: 'Aluminum stock', description: 'Long-form notes', material: 'Aluminum', manualCostOverride: 5.25 }),
+      entity: buildPart({ name: 'Aluminum stock', description: 'Long-form notes', manualCostOverride: 5.25 }),
     });
     TestBed.flushEffects();
     const form = (component as unknown as { form: { value: Record<string, unknown> } }).form;
     expect(form.value).toMatchObject({
-      partType: 'RawMaterial',
       name: 'Aluminum stock',
       description: 'Long-form notes',
-      material: 'Aluminum',
       manualCostOverride: 5.25,
     });
   });
 
-  it('partTypeLocked is true when entity has a partType (fork dialog flow)', () => {
+  it('axisLabel renders the procurement+inventory pair from the entity', () => {
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {
       stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'RawMaterial' }),
+      entityId: 99, entity: buildPart({ procurementSource: 'Make', inventoryClass: 'Subassembly' }),
     });
     TestBed.flushEffects();
-    const c = component as unknown as { partTypeLocked(): boolean };
-    expect(c.partTypeLocked()).toBe(true);
+    const c = component as unknown as { axisLabel(): string };
+    expect(c.axisLabel()).toBe('Make · Subassembly');
   });
 
-  it('partTypeLocked is false when entity is null (defensive — no current flow)', () => {
+  it('axisLabel is empty when entity is null (defensive — no current flow)', () => {
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {
       stepId: 'express', componentName: 'PartExpressFormComponent',
       entityId: null, entity: null,
     });
     TestBed.flushEffects();
-    const c = component as unknown as { partTypeLocked(): boolean };
-    expect(c.partTypeLocked()).toBe(false);
+    const c = component as unknown as { axisLabel(): string };
+    expect(c.axisLabel()).toBe('');
   });
 
-  // The Material field is shown for ALL part types because the hasBasics
-  // readiness gate requires it universally (per audit Section 4 — every
-  // viable combo marks Material as Required or Recommended). The previous
-  // narrowing logic ("only made parts and assemblies") was the cause of
-  // the "Cannot complete: missing Basics" trap on raw materials.
-  it.each(['RawMaterial', 'Assembly', 'Part', 'Consumable', 'Tooling', 'Fastener', 'Electronic', 'Packaging'] as const)(
-    'shows Material field for %s part type',
-    (partType) => {
-      const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
-      mockSignalInputs(component, {
-        stepId: 'express', componentName: 'PartExpressFormComponent',
-        entityId: 99, entity: buildPart({ partType }),
-      });
-      TestBed.flushEffects();
-      const c = component as unknown as { showMaterialField(): boolean };
-      expect(c.showMaterialField()).toBe(true);
-    },
-  );
-
-  it('form is INVALID when Material is empty (now required to satisfy hasBasics)', () => {
+  it('form is invalid until name + manualCostOverride are filled', () => {
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {
       stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'RawMaterial', material: '' }),
+      entityId: 99, entity: buildPart(),
     });
     TestBed.flushEffects();
     const c = component as unknown as {
       form: { patchValue(v: unknown): void; valid: boolean };
     };
-    c.form.patchValue({
-      partType: 'RawMaterial',
-      name: 'Steel bar',
-      description: '',
-      material: '',
-      manualCostOverride: 5.0,
-    });
+    c.form.patchValue({ name: '', manualCostOverride: null });
     expect(c.form.valid).toBe(false);
-  });
 
-  it('form is valid when Material is filled in', () => {
-    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
-    mockSignalInputs(component, {
-      stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart({ partType: 'RawMaterial', material: '' }),
-    });
-    TestBed.flushEffects();
-    const c = component as unknown as {
-      form: { patchValue(v: unknown): void; valid: boolean };
-    };
-    c.form.patchValue({
-      partType: 'RawMaterial',
-      name: 'Steel bar',
-      description: '',
-      material: 'Polyethylene',
-      traceabilityType: 'None',
-      manualCostOverride: 5.0,
-    });
+    c.form.patchValue({ name: 'Steel bar', manualCostOverride: 5.0 });
     expect(c.form.valid).toBe(true);
   });
 
@@ -184,10 +139,8 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       save(): void;
     };
     c.form.patchValue({
-      partType: 'RawMaterial',
       name: 'Steel bar',
       description: '',
-      material: 'Steel',
       manualCostOverride: 8.75,
     });
     c.save();
@@ -198,8 +151,6 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     expect(stepReq.request.body.stepId).toBe('all');
     expect(stepReq.request.body.fields).toMatchObject({
       name: 'Steel bar',
-      material: 'Steel',
-      partType: 'RawMaterial',
       manualCostOverride: 8.75,
     });
     stepReq.flush({
@@ -234,9 +185,7 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       save(): void;
     };
     c.form.patchValue({
-      partType: 'RawMaterial',
       name: 'Steel bar',
-      material: 'Steel',
       manualCostOverride: 8.75,
     });
     c.save();

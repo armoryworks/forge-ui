@@ -1,5 +1,6 @@
+import { InventoryClass } from './inventory-class.type';
 import { PartStatus } from './part-status.type';
-import { PartType } from './part-type.type';
+import { ProcurementSource } from './procurement-source.type';
 
 export interface PartListItem {
   id: number;
@@ -11,8 +12,9 @@ export interface PartListItem {
   description: string | null;
   revision: string;
   status: PartStatus;
-  partType: PartType;
-  material: string | null;
+  // Pillar 1 — three orthogonal axes (legacy single-axis partType retired pre-beta).
+  procurementSource: ProcurementSource;
+  inventoryClass: InventoryClass;
   bomEntryCount: number;
   createdAt: Date;
   /**

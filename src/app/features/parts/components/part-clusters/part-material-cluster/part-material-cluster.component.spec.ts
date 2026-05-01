@@ -17,18 +17,18 @@ class FakeLoader implements TranslateLoader {
 function makePart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
     id: 1, partNumber: 'PRT', name: 'Widget', description: null, revision: 'A',
-    status: 'Active', partType: 'Part',
+    status: 'Active',
     procurementSource: 'Buy', inventoryClass: 'Component',
     itemKindId: null, itemKindLabel: null,
     traceabilityType: 'None', abcClass: null,
     manufacturerName: null, manufacturerPartNumber: null,
-    material: null, materialSpecId: null, materialSpecLabel: null,
-    moldToolRef: null, externalPartNumber: null,
+    materialSpecId: null, materialSpecLabel: null,
+    externalPartNumber: null,
     externalId: null, externalRef: null, provider: null,
     preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
     leadTimeDays: null, safetyStockDays: null,
-    isSerialTracked: false, toolingAssetId: null, toolingAssetName: null,
+    toolingAssetId: null, toolingAssetName: null,
     manualCostOverride: null, currentCostCalculationId: null,
     weightEach: null, weightDisplayUnit: null,
     lengthMm: null, widthMm: null, heightMm: null, dimensionDisplayUnit: null,
@@ -78,16 +78,16 @@ describe('PartMaterialClusterComponent', () => {
     expect(c.displayMaterial()).toBe('6061-T6');
   });
 
-  it('falls back to the legacy free-text material when materialSpecLabel is null', () => {
+  it('returns null when materialSpecLabel is null (legacy free-text fallback retired pre-beta)', () => {
     const component = TestBed.runInInjectionContext(() => new PartMaterialClusterComponent());
     mockSignalInputs(component, {
-      part: makePart({ materialSpecLabel: null, material: 'Aluminum 6061' }),
+      part: makePart({ materialSpecLabel: null }),
       editing: false,
       saving: false,
     });
     TestBed.flushEffects();
     const c = component as unknown as { displayMaterial(): string | null };
-    expect(c.displayMaterial()).toBe('Aluminum 6061');
+    expect(c.displayMaterial()).toBeNull();
   });
 
   it('emits a save patch with weight converted to canonical grams', () => {

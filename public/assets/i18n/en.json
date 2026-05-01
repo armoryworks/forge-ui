@@ -443,6 +443,7 @@
     "partType": "Part Type",
     "status": "Status",
     "bom": "BOM",
+    "effectivePrice": "Price",
     "usedIn": "Used In",
     "files": "Files",
     "viewer3d": "3D View",
@@ -584,28 +585,46 @@
     "workflow": {
       "startFailed": "Couldn't start the workflow.",
       "fork": {
-        "title": "Add a new part",
-        "intro": "Tell us what kind of part this is and how you'd like to set it up. You can switch modes anytime later.",
-        "modeHeading": "How would you like to set it up?",
-        "expressTitle": "Express",
-        "expressDesc": "One form, all fields visible. Best for raw materials and simple parts.",
-        "guidedTitle": "Step-by-step",
-        "guidedDesc": "Walks you through basics, BOM, routing, cost, and alternates. Best for assemblies.",
-        "recommendedTag": "Recommended",
+        "title": "How would you like to add this part?",
+        "step1Title": "How is this part sourced?",
+        "step1Make": "Made",
+        "step1MakeDesc": "Produced in-house from raw stock or a BOM.",
+        "step1Buy": "Bought",
+        "step1BuyDesc": "Purchased from a vendor as-is.",
+        "step1Subcontract": "Subcontracted",
+        "step1SubcontractDesc": "Vendor builds the entire part on our behalf.",
+        "step1Phantom": "Phantom",
+        "step1PhantomDesc": "Logical grouping; never stocked.",
+
+        "step2Title": "What inventory bucket?",
+        "step2Raw": "Raw material",
+        "step2RawDesc": "Bulk input — bar stock, sheet, pellets, wire.",
+        "step2Component": "Component",
+        "step2ComponentDesc": "Single-piece part used in a parent BOM.",
+        "step2Subassembly": "Subassembly",
+        "step2SubassemblyDesc": "Multi-level build used in higher assemblies.",
+        "step2FinishedGood": "Finished good",
+        "step2FinishedGoodDesc": "Sold to customers.",
+        "step2Consumable": "Consumable",
+        "step2ConsumableDesc": "Single-use shop supply.",
+        "step2Tool": "Tool",
+        "step2ToolDesc": "Durable, multi-use.",
+
+        "step3Title": "Item kind",
+        "step3Helper": "Optional descriptive tag — Fastener, Electronic, Packaging, etc. Skip if unsure.",
+        "step3None": "— None —",
+
+        "step4Title": "How would you like to fill it in?",
+        "step4Express": "Quick add",
+        "step4ExpressDesc": "One form, all fields visible.",
+        "step4Guided": "Step by step",
+        "step4GuidedDesc": "Walk through each cluster of fields in order.",
+
         "continue": "Continue",
-        "partType": {
-          "heading": "What kind of part?",
-          "assemblyTitle": "Assembly",
-          "assemblyDesc": "Multiple components joined together. Has a BOM and routing.",
-          "rawMaterialTitle": "Raw Material",
-          "rawMaterialDesc": "Stock material consumed by other parts. No BOM.",
-          "madeTitle": "Made Part",
-          "madeDesc": "Single component you fabricate. May have routing.",
-          "otherTitle": "Other",
-          "otherDesc": "Consumable, tooling, fastener, electronic, or packaging."
-        },
+        "recommended": "Recommended",
         "violations": {
-          "partTypeRequired": "Pick a part type"
+          "procurementRequired": "Pick how this part is sourced",
+          "inventoryClassRequired": "Pick an inventory bucket"
         }
       },
       "basics": {
@@ -806,6 +825,11 @@
         "salesUomNone": "— Not set —",
         "defaultSalesPriceLabel": "Default Sales Price",
         "defaultSalesPriceHelper": "Editable on the Pricing tab (coming soon).",
+        "inferredPriceLabel": "Inferred Sales Price",
+        "inferredPriceSourcePriceListEntry": "From price-list entry for current customer",
+        "inferredPriceSourcePartPrice": "From part-level default sales price",
+        "inferredPriceSourceVendorPartTier": "From preferred vendor's lowest-tier price",
+        "inferredPriceSourceDefault": "Default — no pricing configured",
         "saveFailed": "Couldn't save sales hooks."
       }
     },
@@ -822,6 +846,7 @@
         "bom": "BOM",
         "routing": "Routing",
         "cost": "Cost",
+        "pricing": "Pricing",
         "quality": "Quality",
         "alternates": "Alternates",
         "material": "Material",
@@ -864,6 +889,28 @@
         "shelfLifeDays": "Shelf Life (days)",
         "backflushPolicy": "Backflush Policy"
       }
+    },
+    "pricing": {
+      "currentPrice": "Current effective price",
+      "priceSource": "Source",
+      "priceSourcePriceListEntry": "Customer price list",
+      "priceSourcePartPrice": "Part-level default",
+      "priceSourceVendorPartTier": "Preferred vendor tier",
+      "priceSourceDefault": "No price configured",
+      "history": "Price history",
+      "historyEmpty": "No price history yet.",
+      "addNewPrice": "Add new effective price",
+      "unitPriceLabel": "Unit Price",
+      "currencyLabel": "Currency",
+      "effectiveFromLabel": "Effective From",
+      "notesLabel": "Notes",
+      "notesHelper": "Why the price changed (e.g. \"competitor matched\", \"raw cost up\").",
+      "savePrice": "Save Price",
+      "closedRowHelper": "Closed (superseded by a later effective row)",
+      "openBadge": "Open",
+      "addedSnack": "Effective price added.",
+      "deletedSnack": "Price row removed.",
+      "confirmDelete": "Remove this price row from history?"
     }
   },
   "vendorPart": {
@@ -897,7 +944,9 @@
       "effectiveTo": "Effective To",
       "addTier": "Add Tier",
       "empty": "No price tiers — add one to enable per-quantity pricing."
-    }
+    },
+    "priceTierHistory": "Price tier history",
+    "priceTierHistoryEmpty": "No tier history yet."
   },
   "inventory": {
     "title": "Inventory",

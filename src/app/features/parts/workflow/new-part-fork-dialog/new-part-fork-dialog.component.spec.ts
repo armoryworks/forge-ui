@@ -1,9 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 import { MatDialogRef } from '@angular/material/dialog';
 
+import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { InventoryClass } from '../../models/inventory-class.type';
+import { ProcurementSource } from '../../models/procurement-source.type';
 import {
   NewPartForkDialogComponent,
   NewPartForkResult,
@@ -14,15 +20,19 @@ class FakeLoader implements TranslateLoader {
 }
 
 interface ForkInternals {
-  partType(): string | null;
+  procurement(): ProcurementSource | null;
+  inventoryClass(): InventoryClass | null;
   modeOverride(): 'express' | 'guided' | null;
-  defaultMode(): 'express' | 'guided';
+  recommendedMode(): 'express' | 'guided';
   effectiveMode(): 'express' | 'guided';
   canContinue(): boolean;
-  pickPartType(t: 'Assembly' | 'RawMaterial' | 'Part' | 'Other'): void;
+  inventoryChoices(): { value: InventoryClass; titleKey: string; descKey: string }[];
+  pickProcurement(p: ProcurementSource): void;
+  pickInventoryClass(c: InventoryClass): void;
   pickMode(m: 'express' | 'guided'): void;
   continue(): void;
   close(): void;
+  itemKindControl: { setValue(v: number | null): void };
 }
 
 function setup() {
@@ -30,11 +40,21 @@ function setup() {
     close: vi.fn(),
   } as unknown as MatDialogRef<NewPartForkDialogComponent, NewPartForkResult | undefined>;
 
+  const refDataStub = {
+    // Pre-beta: the dialog calls getByGroup('part.item_kind'); a no-op
+    // observable is enough for these tests.
+    getByGroup: () => of([]),
+  } as unknown as ReferenceDataService;
+
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     imports: [NewPartForkDialogComponent],
     providers: [
       { provide: MatDialogRef, useValue: dialogRef },
+      { provide: ReferenceDataService, useValue: refDataStub },
+      provideHttpClient(),
+      provideHttpClientTesting(),
+      provideNoopAnimations(),
       provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
     ],
   });
@@ -45,107 +65,134 @@ function setup() {
   return { fixture, component, dialogRef };
 }
 
-describe('NewPartForkDialogComponent (Phase 6 — type-aware fork)', () => {
+describe('NewPartForkDialogComponent (pre-beta — axis-based picker)', () => {
   beforeEach(() => TestBed.resetTestingModule());
 
-  it('starts with no Q1 / Q2 picked and Continue disabled', () => {
+  it('starts with no axis picks and Continue disabled', () => {
     const { component } = setup();
-    expect(component.partType()).toBeNull();
+    expect(component.procurement()).toBeNull();
+    expect(component.inventoryClass()).toBeNull();
     expect(component.modeOverride()).toBeNull();
     expect(component.canContinue()).toBe(false);
-    // Until the user picks Q1, the default mode is 'express' (the safe
-    // default for unknown types).
-    expect(component.defaultMode()).toBe('express');
-    expect(component.effectiveMode()).toBe('express');
   });
 
-  it('Raw Material → Express is the recommended default (D3)', () => {
+  it('Step 1 (Buy) reveals 6 inventory class options (B1-B6 combos)', () => {
     const { component } = setup();
-    component.pickPartType('RawMaterial');
-    expect(component.defaultMode()).toBe('express');
+    component.pickProcurement('Buy');
+    const choices = component.inventoryChoices().map(c => c.value);
+    expect(choices).toEqual(['Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool']);
+  });
+
+  it('Step 1 (Make) reveals 4 inventory class options (M1-M4 combos)', () => {
+    const { component } = setup();
+    component.pickProcurement('Make');
+    const choices = component.inventoryChoices().map(c => c.value);
+    expect(choices).toEqual(['Component', 'Subassembly', 'FinishedGood', 'Tool']);
+  });
+
+  it('Step 1 (Subcontract) reveals 2 inventory class options (S1, S2 combos)', () => {
+    const { component } = setup();
+    component.pickProcurement('Subcontract');
+    const choices = component.inventoryChoices().map(c => c.value);
+    expect(choices).toEqual(['Component', 'Subassembly']);
+  });
+
+  it('Step 1 (Phantom) reveals 2 inventory class options (P1, P3 combos) — no Raw / Component / Consumable', () => {
+    const { component } = setup();
+    component.pickProcurement('Phantom');
+    const choices = component.inventoryChoices().map(c => c.value);
+    expect(choices).toEqual(['Subassembly', 'FinishedGood']);
+  });
+
+  it('switching procurement clears the prior inventory pick', () => {
+    const { component } = setup();
+    component.pickProcurement('Buy');
+    component.pickInventoryClass('Raw');
+    expect(component.inventoryClass()).toBe('Raw');
+    component.pickProcurement('Make');
+    expect(component.inventoryClass()).toBeNull();
+  });
+
+  it('Buy + Raw recommends express (audit Section 5.B1)', () => {
+    const { component } = setup();
+    component.pickProcurement('Buy');
+    component.pickInventoryClass('Raw');
+    expect(component.recommendedMode()).toBe('express');
     expect(component.effectiveMode()).toBe('express');
     expect(component.canContinue()).toBe(true);
   });
 
-  it('Assembly → Step-by-step (guided) is the recommended default (D3)', () => {
+  it('Make + Subassembly recommends guided (audit Section 5.M2)', () => {
     const { component } = setup();
-    component.pickPartType('Assembly');
-    expect(component.defaultMode()).toBe('guided');
+    component.pickProcurement('Make');
+    component.pickInventoryClass('Subassembly');
+    expect(component.recommendedMode()).toBe('guided');
     expect(component.effectiveMode()).toBe('guided');
-    expect(component.canContinue()).toBe(true);
   });
 
-  it('Made Part → Express is the recommended default (D3 — fallback)', () => {
+  it('Subcontract + Component recommends guided (audit Section 5.S1)', () => {
     const { component } = setup();
-    component.pickPartType('Part');
-    expect(component.defaultMode()).toBe('express');
-    expect(component.effectiveMode()).toBe('express');
+    component.pickProcurement('Subcontract');
+    component.pickInventoryClass('Component');
+    expect(component.recommendedMode()).toBe('guided');
   });
 
-  it('Other → Express is the recommended default (D3 — fallback)', () => {
+  it('Phantom + FinishedGood recommends express (audit Section 5.P3)', () => {
     const { component } = setup();
-    component.pickPartType('Other');
-    expect(component.defaultMode()).toBe('express');
-    expect(component.effectiveMode()).toBe('express');
+    component.pickProcurement('Phantom');
+    component.pickInventoryClass('FinishedGood');
+    expect(component.recommendedMode()).toBe('express');
   });
 
-  it('user override of Q2 wins over the Q1 default (Raw Material → guided override)', () => {
+  it('user override of Step 4 wins over the recommended default', () => {
     const { component } = setup();
-    component.pickPartType('RawMaterial');
+    component.pickProcurement('Buy');
+    component.pickInventoryClass('Raw');
     expect(component.effectiveMode()).toBe('express');
     component.pickMode('guided');
     expect(component.modeOverride()).toBe('guided');
     expect(component.effectiveMode()).toBe('guided');
-    // Default doesn't change — only the override does.
-    expect(component.defaultMode()).toBe('express');
   });
 
-  it('user override of Q2 stays sticky when Q1 changes', () => {
-    const { component } = setup();
-    component.pickPartType('Assembly');
-    component.pickMode('express'); // override the guided default
-    expect(component.effectiveMode()).toBe('express');
-
-    // User reconsiders Q1, picks Raw Material instead. The Q2 override
-    // is sticky — the user's explicit pick wins.
-    component.pickPartType('RawMaterial');
-    expect(component.modeOverride()).toBe('express');
-    expect(component.effectiveMode()).toBe('express');
-  });
-
-  it('continue() emits {partType, mode} matching Q1 + effectiveMode', () => {
+  it('continue() emits the four-axis result with itemKindId null when skipped', () => {
     const { component, dialogRef } = setup();
-    component.pickPartType('Assembly');
+    component.pickProcurement('Buy');
+    component.pickInventoryClass('Raw');
     component.continue();
-    expect(dialogRef.close).toHaveBeenCalledWith({ partType: 'Assembly', mode: 'guided' });
+    expect(dialogRef.close).toHaveBeenCalledWith({
+      procurementSource: 'Buy',
+      inventoryClass: 'Raw',
+      itemKindId: null,
+      mode: 'express',
+    });
   });
 
-  it('continue() with Raw Material + default emits express', () => {
+  it('continue() emits the explicit itemKindId when the user picked one', () => {
     const { component, dialogRef } = setup();
-    component.pickPartType('RawMaterial');
+    component.pickProcurement('Make');
+    component.pickInventoryClass('Subassembly');
+    component.itemKindControl.setValue(42);
     component.continue();
-    expect(dialogRef.close).toHaveBeenCalledWith({ partType: 'RawMaterial', mode: 'express' });
+    expect(dialogRef.close).toHaveBeenCalledWith({
+      procurementSource: 'Make',
+      inventoryClass: 'Subassembly',
+      itemKindId: 42,
+      mode: 'guided',
+    });
   });
 
-  it('continue() with Raw Material + guided override emits guided', () => {
-    const { component, dialogRef } = setup();
-    component.pickPartType('RawMaterial');
-    component.pickMode('guided');
-    component.continue();
-    expect(dialogRef.close).toHaveBeenCalledWith({ partType: 'RawMaterial', mode: 'guided' });
-  });
-
-  it('Other UI bucket maps to Consumable on the wire', () => {
-    const { component, dialogRef } = setup();
-    component.pickPartType('Other');
-    component.continue();
-    expect(dialogRef.close).toHaveBeenCalledWith({ partType: 'Consumable', mode: 'express' });
-  });
-
-  it('continue() is a no-op when Q1 is not picked', () => {
+  it('continue() is a no-op until both axes are picked', () => {
     const { component, dialogRef } = setup();
     component.continue();
     expect(dialogRef.close).not.toHaveBeenCalled();
+
+    component.pickProcurement('Buy');
+    component.continue();
+    expect(dialogRef.close).not.toHaveBeenCalled();
+
+    component.pickInventoryClass('Component');
+    component.continue();
+    expect(dialogRef.close).toHaveBeenCalledTimes(1);
   });
 
   it('close() emits undefined', () => {

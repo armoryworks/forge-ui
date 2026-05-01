@@ -326,7 +326,6 @@ export class PartDetailPanelComponent {
     // workflow adapter does. We forward them either way so the wire
     // shape is correct as soon as the API surface widens.
     if ('materialSpecId' in patch) request['materialSpecId'] = patch.materialSpecId;
-    if ('material' in patch) request['material'] = patch.material ?? '';
     if ('weightEach' in patch) request['weightEach'] = patch.weightEach;
     if ('weightDisplayUnit' in patch) request['weightDisplayUnit'] = patch.weightDisplayUnit;
     if ('lengthMm' in patch) request['lengthMm'] = patch.lengthMm;
@@ -476,8 +475,14 @@ export class PartDetailPanelComponent {
 
   // ── Helpers ──
 
-  protected getTypeIcon(type: string): string {
-    return type === 'Assembly' ? 'account_tree' : 'settings';
+  /**
+   * Picks an icon for the inline detail-header type indicator. Pre-beta:
+   * keyed off the InventoryClass axis (the legacy single-axis PartType
+   * was retired). Subassemblies render the tree icon; everything else
+   * falls back to a generic settings icon.
+   */
+  protected getTypeIcon(inventoryClass: string): string {
+    return inventoryClass === 'Subassembly' ? 'account_tree' : 'settings';
   }
 
   // ── Sources Tab (Vendor Parts) ──

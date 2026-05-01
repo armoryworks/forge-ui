@@ -17,15 +17,15 @@ class FakeLoader implements TranslateLoader {
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
     id: 42, partNumber: 'PRT-00042', name: 'Widget', description: null, revision: 'A',
-    status: 'Draft', partType: 'Assembly',
+    status: 'Draft',
     procurementSource: 'Make', inventoryClass: 'Subassembly', itemKindId: null, itemKindLabel: null,
     traceabilityType: 'None', abcClass: null, manufacturerName: null, manufacturerPartNumber: null,
-    material: 'Steel',
     materialSpecId: null, materialSpecLabel: null,
-    moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
+    externalPartNumber: null,
+    externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
-    leadTimeDays: null, safetyStockDays: null, isSerialTracked: false,
+    leadTimeDays: null, safetyStockDays: null,
     toolingAssetId: null, toolingAssetName: null,
     manualCostOverride: null, currentCostCalculationId: null,
     weightEach: null, weightDisplayUnit: null,
@@ -104,7 +104,7 @@ describe('PartBomStepComponent (Phase 5)', () => {
     // is unaffected and httpMock.verify() stays clean.
     const childReq = httpMock.expectOne(`${environment.apiUrl}/parts/7`);
     expect(childReq.request.method).toBe('GET');
-    childReq.flush(buildPart({ id: 7, partType: 'RawMaterial' }));
+    childReq.flush(buildPart({ id: 7, procurementSource: 'Buy', inventoryClass: 'Raw' }));
     c.save();
     const req = httpMock.expectOne(`${environment.apiUrl}/parts/42/bom`);
     expect(req.request.method).toBe('POST');
@@ -114,7 +114,7 @@ describe('PartBomStepComponent (Phase 5)', () => {
     expect(c2.bomEntries().length).toBe(1);
   });
 
-  it('auto-sets sourceType from child part type (Assembly → Make)', () => {
+  it('auto-sets sourceType from child part procurement (Make → Make)', () => {
     const component = TestBed.runInInjectionContext(() => new PartBomStepComponent());
     mockSignalInputs(component, {
       stepId: 'bom', componentName: 'PartBomStepComponent',
@@ -130,11 +130,11 @@ describe('PartBomStepComponent (Phase 5)', () => {
     };
     c.form.patchValue({ childPartId: 11 });
     const childReq = httpMock.expectOne(`${environment.apiUrl}/parts/11`);
-    childReq.flush(buildPart({ id: 11, partType: 'Assembly' }));
+    childReq.flush(buildPart({ id: 11, procurementSource: 'Make', inventoryClass: 'Subassembly' }));
     expect(c.form.controls.sourceType.value).toBe('Make');
   });
 
-  it('auto-sets sourceType from child part type (RawMaterial → Buy)', () => {
+  it('auto-sets sourceType from child part procurement (Buy → Buy)', () => {
     const component = TestBed.runInInjectionContext(() => new PartBomStepComponent());
     mockSignalInputs(component, {
       stepId: 'bom', componentName: 'PartBomStepComponent',
@@ -151,7 +151,7 @@ describe('PartBomStepComponent (Phase 5)', () => {
     c.form.controls.sourceType.setValue('Make');
     c.form.patchValue({ childPartId: 22 });
     const childReq = httpMock.expectOne(`${environment.apiUrl}/parts/22`);
-    childReq.flush(buildPart({ id: 22, partType: 'RawMaterial' }));
+    childReq.flush(buildPart({ id: 22, procurementSource: 'Buy', inventoryClass: 'Raw' }));
     expect(c.form.controls.sourceType.value).toBe('Buy');
   });
 });

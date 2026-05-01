@@ -12,7 +12,6 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
-import { PartType } from '../../models/part-type.type';
 import { TraceabilityType } from '../../models/traceability-type.type';
 import { PartsService } from '../../services/parts.service';
 
@@ -60,8 +59,6 @@ export class PartBasicsStepComponent {
   protected readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
-    partType: new FormControl<PartType>('Assembly', [Validators.required]),
-    material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
     // Tier 0 — manufacturer identity (engineering OEM, distinct from any
     // distributor we buy through, which lives on VendorPart).
@@ -72,17 +69,6 @@ export class PartBasicsStepComponent {
     // Tier 0 — cycle-counting frequency tier. Optional (null = unclassified).
     abcClass: new FormControl<AbcClass | null>(null),
   });
-
-  protected readonly partTypeOptions: SelectOption[] = [
-    { value: 'Assembly', label: this.translate.instant('parts.typeAssembly') },
-    { value: 'Part', label: this.translate.instant('parts.typePart') },
-    { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
-    { value: 'Consumable', label: this.translate.instant('parts.typeConsumable') },
-    { value: 'Tooling', label: this.translate.instant('parts.typeTooling') },
-    { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
-    { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
-    { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
-  ];
 
   protected readonly traceabilityOptions: SelectOption[] = [
     { value: 'None', label: this.translate.instant('parts.workflow.basics.traceabilityNone') },
@@ -109,8 +95,6 @@ export class PartBasicsStepComponent {
       this.form.patchValue({
         name: part.name ?? '',
         description: part.description ?? '',
-        partType: part.partType ?? 'Assembly',
-        material: part.material ?? '',
         externalPartNumber: part.externalPartNumber ?? '',
         manufacturerName: part.manufacturerName ?? '',
         manufacturerPartNumber: part.manufacturerPartNumber ?? '',
@@ -143,8 +127,6 @@ export class PartBasicsStepComponent {
     this.workflowService.patchStep(runId, this.stepId(), {
       name: value.name ?? undefined,
       description: value.description ?? '',
-      partType: (value.partType as PartType) ?? undefined,
-      material: value.material ?? undefined,
       externalPartNumber: value.externalPartNumber || undefined,
       // Tier 0 — manufacturer + traceability + ABC class.
       manufacturerName: value.manufacturerName || undefined,

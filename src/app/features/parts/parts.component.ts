@@ -10,7 +10,6 @@ import { PartsService } from './services/parts.service';
 import { PartListItem } from './models/part-list-item.model';
 import { PartDetail } from './models/part-detail.model';
 import { PartStatus } from './models/part-status.type';
-import { PartType } from './models/part-type.type';
 import { ProcurementSource } from './models/procurement-source.type';
 import { InventoryClass } from './models/inventory-class.type';
 import { TraceabilityType } from './models/traceability-type.type';
@@ -87,11 +86,15 @@ export class PartsComponent {
   // Phase 5: status filter defaults to Active so Drafts (in-flight workflows) don't pollute the live list.
   // The user opts into Drafts/All explicitly when they want to resume / audit.
   protected readonly statusFilterControl = new FormControl<PartStatus | ''>('Active');
-  protected readonly typeFilterControl = new FormControl<PartType | ''>('');
+  // Pre-beta — replaced legacy single-axis `type` filter with the two
+  // orthogonal axis filters that drive the catalog view.
+  protected readonly procurementFilterControl = new FormControl<ProcurementSource | ''>('');
+  protected readonly inventoryClassFilterControl = new FormControl<InventoryClass | ''>('');
 
   private readonly searchTerm = toSignal(this.searchControl.valueChanges.pipe(startWith('')), { initialValue: '' });
   private readonly statusFilter = toSignal(this.statusFilterControl.valueChanges.pipe(startWith('Active' as PartStatus | '')), { initialValue: 'Active' as PartStatus | '' });
-  private readonly typeFilter = toSignal(this.typeFilterControl.valueChanges.pipe(startWith('' as PartType | '')), { initialValue: '' as PartType | '' });
+  private readonly procurementFilter = toSignal(this.procurementFilterControl.valueChanges.pipe(startWith('' as ProcurementSource | '')), { initialValue: '' as ProcurementSource | '' });
+  private readonly inventoryClassFilter = toSignal(this.inventoryClassFilterControl.valueChanges.pipe(startWith('' as InventoryClass | '')), { initialValue: '' as InventoryClass | '' });
 
   protected readonly statusFilterOptions: SelectOption[] = [
     { value: '', label: this.translate.instant('parts.allStatuses') },
@@ -101,16 +104,22 @@ export class PartsComponent {
     { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
   ];
 
-  protected readonly typeFilterOptions: SelectOption[] = [
-    { value: '', label: this.translate.instant('parts.allTypes') },
-    { value: 'Part', label: this.translate.instant('parts.typePart') },
-    { value: 'Assembly', label: this.translate.instant('parts.typeAssembly') },
-    { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
-    { value: 'Consumable', label: this.translate.instant('parts.typeConsumable') },
-    { value: 'Tooling', label: this.translate.instant('parts.typeTooling') },
-    { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
-    { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
-    { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
+  protected readonly procurementFilterOptions: SelectOption[] = [
+    { value: '', label: this.translate.instant('parts.allProcurementSources') },
+    { value: 'Make', label: 'Make' },
+    { value: 'Buy', label: 'Buy' },
+    { value: 'Subcontract', label: 'Subcontract' },
+    { value: 'Phantom', label: 'Phantom' },
+  ];
+
+  protected readonly inventoryClassFilterOptions: SelectOption[] = [
+    { value: '', label: this.translate.instant('parts.allInventoryClasses') },
+    { value: 'Raw', label: 'Raw' },
+    { value: 'Component', label: 'Component' },
+    { value: 'Subassembly', label: 'Subassembly' },
+    { value: 'FinishedGood', label: 'Finished Good' },
+    { value: 'Consumable', label: 'Consumable' },
+    { value: 'Tool', label: 'Tool' },
   ];
 
   protected readonly partColumns: ColumnDef[] = [
@@ -118,11 +127,11 @@ export class PartsComponent {
     { field: 'externalPartNumber', header: this.translate.instant('parts.extPartNumber'), sortable: true, width: '120px' },
     { field: 'name', header: this.translate.instant('common.name'), sortable: true },
     { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
-    { field: 'partType', header: this.translate.instant('common.type'), sortable: true },
+    { field: 'procurementSource', header: 'Procurement', sortable: true, width: '110px' },
+    { field: 'inventoryClass', header: 'Class', sortable: true, width: '110px' },
     { field: 'status', header: this.translate.instant('common.status'), sortable: true, filterable: true, type: 'enum', filterOptions: [
       { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},
-    { field: 'material', header: this.translate.instant('parts.material') },
     { field: 'effectivePrice', header: this.translate.instant('parts.effectivePrice'), sortable: true, width: '110px', align: 'right' },
     { field: 'bomEntryCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
   ];
@@ -135,9 +144,8 @@ export class PartsComponent {
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
     revision: new FormControl('A'),
-    partType: new FormControl('Part', [Validators.required]),
-    material: new FormControl(''),
-    moldToolRef: new FormControl(''),
+    procurementSource: new FormControl<ProcurementSource>('Buy', [Validators.required]),
+    inventoryClass: new FormControl<InventoryClass>('Component', [Validators.required]),
     externalPartNumber: new FormControl(''),
     toolingAssetId: new FormControl<number | null>(null),
     minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -153,18 +161,24 @@ export class PartsComponent {
   });
 
   protected readonly partViolations = FormValidationService.getViolations(this.partForm, {
-    name: 'Name', description: 'Description', partType: 'Type',
+    name: 'Name', description: 'Description',
+    procurementSource: 'Procurement Source', inventoryClass: 'Inventory Class',
   });
 
-  protected readonly partTypeOptions: SelectOption[] = [
-    { value: 'Part', label: this.translate.instant('parts.typePart') },
-    { value: 'Assembly', label: this.translate.instant('parts.typeAssembly') },
-    { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
-    { value: 'Consumable', label: this.translate.instant('parts.typeConsumable') },
-    { value: 'Tooling', label: this.translate.instant('parts.typeTooling') },
-    { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
-    { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
-    { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
+  protected readonly procurementSourceOptions: SelectOption[] = [
+    { value: 'Make', label: 'Make' },
+    { value: 'Buy', label: 'Buy' },
+    { value: 'Subcontract', label: 'Subcontract' },
+    { value: 'Phantom', label: 'Phantom' },
+  ];
+
+  protected readonly inventoryClassOptions: SelectOption[] = [
+    { value: 'Raw', label: 'Raw' },
+    { value: 'Component', label: 'Component' },
+    { value: 'Subassembly', label: 'Subassembly' },
+    { value: 'FinishedGood', label: 'Finished Good' },
+    { value: 'Consumable', label: 'Consumable' },
+    { value: 'Tool', label: 'Tool' },
   ];
 
   protected readonly traceabilityOptions: SelectOption[] = [
@@ -203,7 +217,11 @@ export class PartsComponent {
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadParts());
 
-    this.typeFilterControl.valueChanges
+    this.procurementFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed())
+      .subscribe(() => this.loadParts());
+
+    this.inventoryClassFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadParts());
   }
@@ -213,7 +231,8 @@ export class PartsComponent {
   protected loadParts(): void {
     this.loading.set(true);
     const status = (this.statusFilter() ?? '') || undefined;
-    const type = (this.typeFilter() ?? '') || undefined;
+    const procurementSource = (this.procurementFilter() ?? '') || undefined;
+    const inventoryClass = (this.inventoryClassFilter() ?? '') || undefined;
     const search = (this.searchTerm() ?? '').trim() || undefined;
     // Phase 3 F7-partial / WU-17 — paged endpoint with the standardised
     // contract; pageSize=200 matches the server cap. The data-table slices
@@ -221,7 +240,8 @@ export class PartsComponent {
     // beyond the 200-row window.
     this.partsService.getPartsPaged({
       status,
-      type,
+      procurementSource,
+      inventoryClass,
       q: search,
       pageSize: 200,
       sort: 'partNumber',
@@ -307,22 +327,20 @@ export class PartsComponent {
   // ── Part CRUD ──
 
   /**
-   * Phase 6: Opens the type-aware New-Part fork dialog. The user picks a
-   * part-type bucket (Q1) and the presentation mode (Q2). The workflow
-   * definition is selected by part type; the mode is the user's pick:
-   *   - Assembly       → `part-assembly-guided-v1`
-   *   - Raw Material   → `part-raw-material-express-v1`
-   *   - Made Part      → `part-raw-material-express-v1` (until type-specific
-   *                       made-part workflows ship)
-   *   - Other          → `part-raw-material-express-v1`
+   * Pre-beta — Opens the axis-based New-Part fork dialog. The user answers
+   * four questions:
+   *   1. ProcurementSource (Make / Buy / Subcontract / Phantom)
+   *   2. InventoryClass (filtered to viable combos for the chosen source)
+   *   3. ItemKind (optional ref-data tag)
+   *   4. Mode (express / guided, with per-combo recommended default)
    *
-   * Both modes route through the same workflow infrastructure — the shell
-   * picks the express template or the step-rail layout based on `mode`.
-   * The legacy "open the old create dialog" express path is gone (Phase 5
-   * was transitional); express now means express-mode-of-the-workflow.
+   * The 11 viable (procurement × inventory) combos each map to a canonical
+   * workflow definition seeded server-side. Both modes route through the
+   * same workflow infrastructure — the shell picks the express template or
+   * the step-rail layout based on `mode`.
    */
   protected openCreatePart(): void {
-    this.dialog.open(NewPartForkDialogComponent, { width: '540px' })
+    this.dialog.open(NewPartForkDialogComponent, { width: '560px' })
       .afterClosed().subscribe((result: NewPartForkResult | undefined) => {
         if (!result) return;
         this.startPartWorkflow(result);
@@ -330,32 +348,52 @@ export class PartsComponent {
   }
 
   /**
-   * Picks the workflow definition for a given part type. Phase 6 covers
-   * raw-material + assembly explicitly; everything else falls back to the
-   * raw-material express definition (per design D3 — express is the safer
-   * default for unknown types). Lift to a per-type lookup table when more
-   * type-specific workflows ship.
+   * Maps a (procurement, inventory) combo to its canonical workflow
+   * definition id. The 11 viable combos are seeded server-side; the fork
+   * dialog's Step-2 filter is the only enforcement point. Anything that
+   * slips past — for instance an automated client poking the API directly
+   * with a non-viable combo — would 404 server-side, which is the desired
+   * outcome.
    */
-  private workflowDefinitionForPartType(partType: PartType): string {
-    if (partType === 'Assembly') return 'part-assembly-guided-v1';
-    return 'part-raw-material-express-v1';
+  private workflowDefinitionForCombo(p: ProcurementSource, c: InventoryClass): string {
+    const key = `${p.toLowerCase()}-${c.toLowerCase()}`;
+    switch (key) {
+      // Buy combos
+      case 'buy-raw': return 'part-buy-raw-v1';
+      case 'buy-component': return 'part-buy-component-v1';
+      case 'buy-subassembly': return 'part-buy-subassembly-v1';
+      case 'buy-finishedgood': return 'part-buy-finishedgood-v1';
+      case 'buy-consumable': return 'part-buy-consumable-v1';
+      case 'buy-tool': return 'part-buy-tool-v1';
+      // Make combos
+      case 'make-component': return 'part-make-component-v1';
+      case 'make-subassembly': return 'part-make-subassembly-v1';
+      case 'make-finishedgood': return 'part-make-finishedgood-v1';
+      case 'make-tool': return 'part-make-tool-v1';
+      // Subcontract combos
+      case 'subcontract-component': return 'part-subcontract-component-v1';
+      case 'subcontract-subassembly': return 'part-subcontract-subassembly-v1';
+      // Phantom combos
+      case 'phantom-subassembly': return 'part-phantom-subassembly-v1';
+      case 'phantom-finishedgood': return 'part-phantom-finishedgood-v1';
+      default:
+        // Defensive fallback — should never hit because Step-2's filter
+        // already excludes non-viable combos. Log loudly so the bug
+        // surfaces in CI rather than silently routing to a wrong def.
+        throw new Error(`No workflow definition for ${p} + ${c}`);
+    }
   }
 
   private startPartWorkflow(result: NewPartForkResult): void {
-    const definitionId = this.workflowDefinitionForPartType(result.partType);
-    // Pillar 1 — forward both the legacy partType (the workflow definition
-    // still keys off it for now) AND the new orthogonal axes so the
-    // adapter populates the new columns. Pillar 6 will replace this with a
-    // proper axis-based fork dialog and 14-cell workflow-definition matrix.
-    const { procurementSource, inventoryClass } = inferAxesFromLegacyPartType(result.partType);
+    const definitionId = this.workflowDefinitionForCombo(result.procurementSource, result.inventoryClass);
     this.workflowService.startRun({
       entityType: 'Part',
       definitionId,
       mode: result.mode,
       initialEntityData: {
-        partType: result.partType,
-        procurementSource,
-        inventoryClass,
+        procurementSource: result.procurementSource,
+        inventoryClass: result.inventoryClass,
+        itemKindId: result.itemKindId,
       },
     }).subscribe({
       next: (run) => {
@@ -383,9 +421,8 @@ export class PartsComponent {
       name: part.name,
       description: part.description ?? '',
       revision: part.revision,
-      partType: part.partType,
-      material: part.material ?? '',
-      moldToolRef: part.moldToolRef ?? '',
+      procurementSource: part.procurementSource,
+      inventoryClass: part.inventoryClass,
       externalPartNumber: part.externalPartNumber ?? '',
       toolingAssetId: part.toolingAssetId,
       minStockThreshold: part.minStockThreshold,
@@ -420,9 +457,8 @@ export class PartsComponent {
         name: form.name ?? '',
         description: form.description ?? '',
         revision: form.revision ?? 'A',
-        partType: (form.partType as PartType) ?? 'Part',
-        material: form.material || undefined,
-        moldToolRef: form.moldToolRef || undefined,
+        procurementSource: (form.procurementSource as ProcurementSource) ?? 'Buy',
+        inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
         externalPartNumber: form.externalPartNumber || undefined,
         toolingAssetId: form.toolingAssetId ?? undefined,
         minStockThreshold: form.minStockThreshold ?? undefined,
@@ -454,16 +490,9 @@ export class PartsComponent {
         name: form.name ?? '',
         description: form.description || undefined,
         revision: form.revision || undefined,
-        partType: (form.partType as PartType) ?? 'Part',
-        material: form.material || undefined,
-        moldToolRef: form.moldToolRef || undefined,
+        procurementSource: (form.procurementSource as ProcurementSource) ?? 'Buy',
+        inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
         externalPartNumber: form.externalPartNumber || undefined,
-        toolingAssetId: form.toolingAssetId ?? undefined,
-        minStockThreshold: form.minStockThreshold ?? undefined,
-        reorderPoint: form.reorderPoint ?? undefined,
-        reorderQuantity: form.reorderQuantity ?? undefined,
-        leadTimeDays: form.leadTimeDays ?? undefined,
-        safetyStockDays: form.safetyStockDays ?? undefined,
       }).subscribe({
         next: (detail) => {
           this.closePartDialog();
@@ -492,38 +521,11 @@ export class PartsComponent {
     }
   }
 
-  protected getTypeIcon(type: string): string {
-    return type === 'Assembly' ? 'account_tree' : 'settings';
-  }
-
   protected setViewMode(mode: ViewMode): void {
     this.router.navigate([], {
       queryParams: { view: mode === 'table' ? null : mode },
       queryParamsHandling: 'merge',
     });
     this.userPreferences.set('parts:viewMode', mode);
-  }
-}
-
-/**
- * Pillar 1 — Map a legacy PartType bucket to the new orthogonal axes. Same
- * logic the server's PartWorkflowAdapter uses; mirrored client-side so the
- * fork-dialog's old 4-bucket UI can keep working while the server columns
- * get populated. Pillar 6's axis-aware fork dialog will obsolete this.
- */
-function inferAxesFromLegacyPartType(pt: PartType): {
-  procurementSource: ProcurementSource;
-  inventoryClass: InventoryClass;
-} {
-  switch (pt) {
-    case 'Assembly':    return { procurementSource: 'Make', inventoryClass: 'Subassembly' };
-    case 'RawMaterial': return { procurementSource: 'Buy',  inventoryClass: 'Raw' };
-    case 'Consumable':  return { procurementSource: 'Buy',  inventoryClass: 'Consumable' };
-    case 'Tooling':     return { procurementSource: 'Buy',  inventoryClass: 'Tool' };
-    case 'Fastener':
-    case 'Electronic':  return { procurementSource: 'Buy',  inventoryClass: 'Component' };
-    case 'Packaging':   return { procurementSource: 'Buy',  inventoryClass: 'Consumable' };
-    case 'Part':        return { procurementSource: 'Make', inventoryClass: 'Component' };
-    default:            return { procurementSource: 'Buy',  inventoryClass: 'Component' };
   }
 }

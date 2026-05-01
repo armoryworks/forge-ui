@@ -1,8 +1,9 @@
 import { AbcClass } from './abc-class.type';
 import { BackflushPolicy } from './backflush-policy.type';
+import { InventoryClass } from './inventory-class.type';
 import { LotSizingRule } from './lot-sizing-rule.type';
 import { PartStatus } from './part-status.type';
-import { PartType } from './part-type.type';
+import { ProcurementSource } from './procurement-source.type';
 import { ReceivingInspectionFrequency } from './receiving-inspection-frequency.type';
 import { TraceabilityType } from './traceability-type.type';
 
@@ -21,9 +22,10 @@ export interface UpdatePartRequest {
   description?: string;
   revision?: string;
   status?: PartStatus;
-  partType?: PartType;
-  material?: string;
-  moldToolRef?: string;
+  // Pillar 1 — Three orthogonal axes replace the legacy partType / Material /
+  // MoldToolRef fields (retired pre-beta).
+  procurementSource?: ProcurementSource;
+  inventoryClass?: InventoryClass;
   externalPartNumber?: string;
   toolingAssetId?: number;
   minStockThreshold?: number;

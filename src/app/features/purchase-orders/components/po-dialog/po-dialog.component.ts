@@ -179,7 +179,10 @@ export class PoDialogComponent {
       next: (list) => this.vendors.set(list),
     });
     this.partsService.getParts().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.parts.set(list.filter(p => p.partType !== 'Assembly')),
+      // Pre-beta: filter on the procurement axis (the legacy single-axis
+      // PartType was retired). POs can target Buy or Subcontract parts;
+      // Make / Phantom never appear on a vendor PO line.
+      next: (list) => this.parts.set(list.filter(p => p.procurementSource === 'Buy' || p.procurementSource === 'Subcontract')),
     });
 
     // Pre-fill unit price from part's list price when a part is selected

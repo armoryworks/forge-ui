@@ -22,20 +22,23 @@ import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { BOMEntry } from '../../models/bom-entry.model';
 import { BOMSourceType } from '../../models/bom-source-type.type';
 import { PartDetail } from '../../models/part-detail.model';
-import { PartType } from '../../models/part-type.type';
+import { ProcurementSource } from '../../models/procurement-source.type';
 import { PartsService } from '../../services/parts.service';
 
 /**
- * Maps a component part's type to its BOM source designation.
- * - Assembly / Made Part → Make (we fabricate it in-house)
- * - Raw Material / Consumable / Tooling / Fastener / Electronic / Packaging → Buy
+ * Pre-beta — derives the BOM-row sourceType from the child part's
+ * ProcurementSource axis (the legacy single-axis PartType was retired).
+ *
+ * - Make / Subcontract / Phantom → Make (we own production / it's a
+ *   logical grouping that explodes through to deeper rows).
+ * - Buy → Buy (we purchase the component as-is).
  *
  * "Stock" isn't a master-data attribute of a part — it's a runtime inventory
- * state. We never auto-pick Stock; if the user wants Stock, they edit the BOM
+ * state. We never auto-pick Stock; if the user wants Stock they edit the BOM
  * row's detail view after creation.
  */
-function sourceTypeForPartType(partType: PartType): BOMSourceType {
-  return partType === 'Assembly' || partType === 'Part' ? 'Make' : 'Buy';
+function sourceTypeForProcurement(procurement: ProcurementSource): BOMSourceType {
+  return procurement === 'Buy' ? 'Buy' : 'Make';
 }
 
 /**
@@ -74,11 +77,11 @@ export class PartBomStepComponent {
   protected readonly saving = signal(false);
   protected readonly showAddDialog = signal(false);
   /**
-   * Tracks the resolved part-type of the currently selected child part, so we
-   * can auto-set sourceType and render the read-only "Source: Make/Buy (auto…)"
-   * line. Null until the user picks a part.
+   * Tracks the resolved procurement axis of the currently selected child
+   * part, so we can auto-set sourceType and render the read-only
+   * "Source: Make/Buy (auto…)" line. Null until the user picks a part.
    */
-  protected readonly selectedChildPartType = signal<PartType | null>(null);
+  protected readonly selectedChildProcurement = signal<ProcurementSource | null>(null);
 
   protected readonly part = computed<PartDetail | null>(() => (this.entity() as PartDetail | null) ?? null);
 
@@ -111,9 +114,9 @@ export class PartBomStepComponent {
    * child part is picked.
    */
   protected readonly autoSourceLabel = computed<string | null>(() => {
-    const t = this.selectedChildPartType();
-    if (!t) return null;
-    const src = sourceTypeForPartType(t);
+    const proc = this.selectedChildProcurement();
+    if (!proc) return null;
+    const src = sourceTypeForProcurement(proc);
     const sourceLabel = src === 'Make'
       ? this.translate.instant('parts.sourceMake')
       : this.translate.instant('parts.sourceBuy');
@@ -137,16 +140,16 @@ export class PartBomStepComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((childPartId) => {
         if (childPartId == null) {
-          this.selectedChildPartType.set(null);
+          this.selectedChildProcurement.set(null);
           return;
         }
         this.partsService.getPartById(childPartId).subscribe({
           next: (detail) => {
-            this.selectedChildPartType.set(detail.partType);
-            const auto = sourceTypeForPartType(detail.partType);
+            this.selectedChildProcurement.set(detail.procurementSource);
+            const auto = sourceTypeForProcurement(detail.procurementSource);
             this.form.controls.sourceType.setValue(auto, { emitEvent: false });
           },
-          error: () => this.selectedChildPartType.set(null),
+          error: () => this.selectedChildProcurement.set(null),
         });
       });
   }
@@ -160,7 +163,7 @@ export class PartBomStepComponent {
       leadTimeDays: null,
       notes: '',
     });
-    this.selectedChildPartType.set(null);
+    this.selectedChildProcurement.set(null);
     this.showAddDialog.set(true);
   }
 

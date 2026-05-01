@@ -11,7 +11,8 @@ import { UpdatePartRequest } from '../models/update-part-request.model';
 import { CreateBOMEntryRequest } from '../models/create-bom-entry-request.model';
 import { UpdateBOMEntryRequest } from '../models/update-bom-entry-request.model';
 import { PartStatus } from '../models/part-status.type';
-import { PartType } from '../models/part-type.type';
+import { ProcurementSource } from '../models/procurement-source.type';
+import { InventoryClass } from '../models/inventory-class.type';
 import { PartRevision } from '../models/part-revision.model';
 import { CreatePartRevisionRequest } from '../models/create-part-revision-request.model';
 import { PartInventorySummary } from '../models/part-inventory-summary.model';
@@ -29,7 +30,10 @@ import { BomRevisionSummary, BomRevisionDetail } from '../models/bom-revision.mo
 export interface PartListPagedQuery extends PagedQuery {
   status?: PartStatus;
   isActive?: boolean | null;
-  type?: PartType;
+  /** Pillar 1 axis filter — Make / Buy / Subcontract / Phantom. */
+  procurementSource?: ProcurementSource;
+  /** Pillar 1 axis filter — Raw / Component / Subassembly / FinishedGood / Consumable / Tool. */
+  inventoryClass?: InventoryClass;
   defaultVendorId?: number;
 }
 
@@ -48,10 +52,9 @@ export class PartsService {
    * handles client-side sort/filter/page within that slice. Lists exceeding
    * 200 parts need a follow-up to switch to server-side pagination.
    */
-  getParts(status?: PartStatus, type?: PartType, search?: string): Observable<PartListItem[]> {
+  getParts(status?: PartStatus, search?: string): Observable<PartListItem[]> {
     return this.getPartsPaged({
       status,
-      type,
       q: search,
       pageSize: 200,
     }).pipe(map(p => p.items));
@@ -71,7 +74,8 @@ export class PartsService {
     if (query.q) params = params.set('q', query.q);
     if (query.status) params = params.set('status', query.status);
     if (query.isActive !== undefined && query.isActive !== null) params = params.set('isActive', String(query.isActive));
-    if (query.type) params = params.set('type', query.type);
+    if (query.procurementSource) params = params.set('procurementSource', query.procurementSource);
+    if (query.inventoryClass) params = params.set('inventoryClass', query.inventoryClass);
     if (query.defaultVendorId != null) params = params.set('defaultVendorId', String(query.defaultVendorId));
     if (query.dateFrom) params = params.set('dateFrom', query.dateFrom);
     if (query.dateTo) params = params.set('dateTo', query.dateTo);

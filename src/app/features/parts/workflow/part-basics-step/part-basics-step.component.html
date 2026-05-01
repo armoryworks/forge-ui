@@ -5,13 +5,6 @@
   </header>
 
   <form [formGroup]="form" class="part-basics-step__form">
-    <app-select
-      [label]="'parts.workflow.basics.partTypeLabel' | translate"
-      formControlName="partType"
-      [options]="partTypeOptions"
-      [required]="true"
-      data-testid="basics-part-type" />
-
     <app-input
       [label]="'parts.workflow.basics.nameLabel' | translate"
       formControlName="name"
@@ -30,12 +23,6 @@
         {{ 'parts.workflow.basics.descriptionHelper' | translate }}
       </p>
     </div>
-
-    <app-input
-      [label]="'parts.workflow.basics.materialLabel' | translate"
-      formControlName="material"
-      [required]="true"
-      data-testid="basics-material" />
 
     <app-input
       [label]="'parts.workflow.basics.manufacturerNameLabel' | translate"

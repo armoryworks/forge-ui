@@ -12,7 +12,8 @@
       <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'parts.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
-      <app-select [label]="'common.type' | translate" [formControl]="typeFilterControl" [options]="typeFilterOptions" />
+      <app-select label="Procurement" [formControl]="procurementFilterControl" [options]="procurementFilterOptions" />
+      <app-select label="Class" [formControl]="inventoryClassFilterControl" [options]="inventoryClassFilterOptions" />
       <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
         <button class="icon-btn" [class.icon-btn--active]="viewMode() === 'table'"
                 (click)="setViewMode('table')"
@@ -47,17 +48,14 @@
           <ng-template appColumnCell="name" let-part>
             <span class="part-desc">{{ part.name }}</span>
           </ng-template>
-          <ng-template appColumnCell="partType" let-part>
-            <span class="type-chip">
-              <span class="material-icons-outlined type-icon">{{ getTypeIcon(part.partType) }}</span>
-              {{ part.partType }}
-            </span>
+          <ng-template appColumnCell="procurementSource" let-part>
+            <span class="type-chip">{{ part.procurementSource }}</span>
+          </ng-template>
+          <ng-template appColumnCell="inventoryClass" let-part>
+            <span class="type-chip">{{ part.inventoryClass }}</span>
           </ng-template>
           <ng-template appColumnCell="status" let-part>
             <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
-          </ng-template>
-          <ng-template appColumnCell="material" let-part>
-            <span class="text-muted">{{ part.material ?? '---' }}</span>
           </ng-template>
           <ng-template appColumnCell="effectivePrice" let-part>
             @if (part.effectivePriceSource !== 'Default') {
@@ -91,16 +89,15 @@
           <span class="info-value">{{ editingPart()!.partNumber }}</span>
         </div>
       }
-      <app-select [label]="'common.type' | translate" formControlName="partType" [options]="partTypeOptions" data-testid="part-type" />
+      <div class="dialog-row">
+        <app-select label="Procurement Source" formControlName="procurementSource" [options]="procurementSourceOptions" [required]="true" data-testid="part-procurement-source" />
+        <app-select label="Inventory Class" formControlName="inventoryClass" [options]="inventoryClassOptions" [required]="true" data-testid="part-inventory-class" />
+      </div>
       <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" [maxlength]="256" data-testid="part-name" />
       <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="3" [maxlength]="2000" [placeholder]="'parts.descriptionHint' | translate" data-testid="part-description" />
       <div class="dialog-row">
         <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" data-testid="part-revision" />
         <app-input [label]="'parts.externalPartNumber' | translate" formControlName="externalPartNumber" [placeholder]="'parts.externalPartNumberPlaceholder' | translate" data-testid="part-external-number" />
-      </div>
-      <div class="dialog-row">
-        <app-input [label]="'parts.material' | translate" formControlName="material" data-testid="part-material" />
-        <app-input [label]="'parts.moldToolRef' | translate" formControlName="moldToolRef" />
       </div>
       <div class="dialog-row">
         <app-input

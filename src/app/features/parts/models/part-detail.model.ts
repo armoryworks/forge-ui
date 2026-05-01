@@ -3,7 +3,6 @@ import { BackflushPolicy } from './backflush-policy.type';
 import { InventoryClass } from './inventory-class.type';
 import { LotSizingRule } from './lot-sizing-rule.type';
 import { PartStatus } from './part-status.type';
-import { PartType } from './part-type.type';
 import { ProcurementSource } from './procurement-source.type';
 import { ReceivingInspectionFrequency } from './receiving-inspection-frequency.type';
 import { TraceabilityType } from './traceability-type.type';
@@ -19,13 +18,8 @@ export interface PartDetail {
   description: string | null;
   revision: string;
   status: PartStatus;
-  /**
-   * Legacy overloaded type. Pillar 1 decomposed it into procurementSource +
-   * inventoryClass + itemKindId. Stays on the wire two release cycles for
-   * rollback safety; new UI code should branch on the three axes.
-   */
-  partType: PartType;
-  // Pillar 1 — orthogonal axes
+  // Pillar 1 — three orthogonal axes (legacy single-axis partType retired
+  // pre-beta). The axes are required; itemKindId is the optional descriptive tag.
   procurementSource: ProcurementSource;
   inventoryClass: InventoryClass;
   itemKindId: number | null;
@@ -35,12 +29,11 @@ export interface PartDetail {
   abcClass: AbcClass | null;
   manufacturerName: string | null;
   manufacturerPartNumber: string | null;
-  material: string | null;
   // Pillar 2 — Tier 2 material spec FK (FK to reference_data,
-  // group_code='part.material_spec'). Replaces the free-text material string.
+  // group_code='part.material_spec'). The legacy free-text material string
+  // and moldToolRef were retired pre-beta.
   materialSpecId: number | null;
   materialSpecLabel: string | null;
-  moldToolRef: string | null;
   externalPartNumber: string | null;
   externalId: string | null;
   externalRef: string | null;
@@ -52,7 +45,6 @@ export interface PartDetail {
   reorderQuantity: number | null;
   leadTimeDays: number | null;
   safetyStockDays: number | null;
-  isSerialTracked: boolean;
   toolingAssetId: number | null;
   toolingAssetName: string | null;
   // Workflow Pattern Phase 5 — surfaces cost gates so the workflow shell's

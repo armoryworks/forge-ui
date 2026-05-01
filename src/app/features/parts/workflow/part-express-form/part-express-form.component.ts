@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { startWith } from 'rxjs/operators';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -16,17 +14,19 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
-import { PartType } from '../../models/part-type.type';
 import { TraceabilityType } from '../../models/traceability-type.type';
 
 /**
- * Workflow Pattern Phase 5 — Express form for parts (raw-material default).
+ * Workflow Pattern Phase 5 — Express form for parts.
  *
  * Single-step variant: every gated field visible at once. Same fields as the
- * guided basics + costing steps combined. Auto-saves on field change so the
- * user can hit "Mark Complete" from the shell footer once the gates light up.
+ * guided basics + costing steps combined. The user clicks Save once they're
+ * happy and the workflow promotes the part on success.
  *
- * The same record persists to the same Part row; just a denser presentation.
+ * Pre-beta: dropped the legacy single-axis `partType` + free-text `material`
+ * controls; the three orthogonal axes are set by the fork dialog before this
+ * form opens, and the material spec FK lives on the dedicated material
+ * cluster (post-promotion).
  */
 @Component({
   selector: 'app-part-express-form',
@@ -57,54 +57,19 @@ export class PartExpressFormComponent {
   protected readonly part = computed<PartDetail | null>(() => (this.entity() as PartDetail | null) ?? null);
 
   /**
-   * The Type select is redundant when the upstream fork dialog already wrote
-   * `partType` onto the new entity. Hide it in that case and render a small
-   * read-only chip beside the form title — the user must back out (or use
-   * the part detail page) to change the type. When the form is mounted
-   * without a pre-set type (defensive — no current flow does this), the
-   * select still appears so the user can pick.
+   * Render a small read-only chip showing the procurement+inventory axes the
+   * fork dialog locked in. The axes can't be changed from this form — go
+   * through the part detail page if you need to switch them.
    */
-  protected readonly partTypeLocked = computed<boolean>(() => {
-    const t = this.part()?.partType;
-    return t !== null && t !== undefined;
+  protected readonly axisLabel = computed<string>(() => {
+    const p = this.part();
+    if (!p) return '';
+    return `${p.procurementSource} · ${p.inventoryClass}`;
   });
 
-  protected readonly partTypeLabel = computed<string>(() => {
-    const t = this.part()?.partType;
-    if (!t) return '';
-    return this.translate.instant(`parts.type${t}`);
-  });
-
-  protected readonly partTypeOptions: SelectOption[] = [
-    { value: 'RawMaterial', label: this.translate.instant('parts.typeRawMaterial') },
-    { value: 'Part', label: this.translate.instant('parts.typePart') },
-    { value: 'Assembly', label: this.translate.instant('parts.typeAssembly') },
-    { value: 'Consumable', label: this.translate.instant('parts.typeConsumable') },
-    { value: 'Tooling', label: this.translate.instant('parts.typeTooling') },
-    { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
-    { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
-    { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
-  ];
-
-  /**
-   * Material is the assembly/part's primary composition (e.g., "Aluminum 6061").
-   * For RawMaterial the description IS the material — the field is redundant.
-   * For Consumable/Tooling/Fastener/Electronic/Packaging it's not meaningful.
-   * Only show + collect it for `Part` (made part) and `Assembly`.
-   *
-   * The Part entity's `Material` column is nullable on the server, so the field
-   * is intentionally NOT marked required here — the server contract is the
-   * source of truth.
-   */
   protected readonly form = new FormGroup({
-    partType: new FormControl<PartType>('RawMaterial', [Validators.required]),
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
-    // Required because the hasBasics readiness gate requires it; without
-    // this the user can fill the form, hit Save, and get an opaque
-    // "missing Basics" 409 from the server. Mark required so the form
-    // validation indicator surfaces it pre-submit.
-    material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
     // Pillar 1 / Tier 0 — manufacturer identity (engineering OEM, distinct
     // from the distributor we may buy through which lives on VendorPart).
@@ -133,36 +98,9 @@ export class PartExpressFormComponent {
     { value: 'C', label: this.translate.instant('parts.workflow.basics.abcClassC') },
   ];
 
-  /** Tracks the live partType selection so the Material visibility recomputes. */
-  protected readonly partTypeSignal = toSignal(
-    this.form.controls.partType.valueChanges.pipe(startWith(this.form.controls.partType.value)),
-    { initialValue: this.form.controls.partType.value },
-  );
-
-  /**
-   * Material field visibility. The hasBasics readiness validator requires
-   * `material` to be present for ALL part types (not just made/assembly) —
-   * so this previously-narrowing logic was the cause of "Cannot complete:
-   * missing Basics" on raw materials. Now shown universally.
-   *
-   * For raw materials the Material field is the actual material spec (e.g.
-   * "Polyethylene HDPE", "Aluminum 6061-T6"); for assemblies it's the
-   * primary composition. Per the audit (Section 4 — every combo marks
-   * Material as Required or Recommended), there is no combo where it
-   * shouldn't be collected.
-   */
-  protected readonly showMaterialField = computed<boolean>(() => {
-    // Acknowledge the partTypeSignal so changes still trigger recomputation
-    // even though we no longer branch on it.
-    void this.partTypeSignal();
-    return true;
-  });
-
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    partType: this.translate.instant('parts.workflow.basics.partTypeLabel'),
     name: this.translate.instant('parts.workflow.basics.nameLabel'),
     description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
-    material: this.translate.instant('parts.workflow.basics.materialLabel'),
     externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
     manufacturerName: this.translate.instant('parts.workflow.basics.manufacturerNameLabel'),
     manufacturerPartNumber: this.translate.instant('parts.workflow.basics.manufacturerPartNumberLabel'),
@@ -180,10 +118,8 @@ export class PartExpressFormComponent {
       const part = this.part();
       if (!part) return;
       this.form.patchValue({
-        partType: part.partType ?? 'RawMaterial',
         name: part.name ?? '',
         description: part.description ?? '',
-        material: part.material ?? '',
         externalPartNumber: part.externalPartNumber ?? '',
         manufacturerName: part.manufacturerName ?? '',
         manufacturerPartNumber: part.manufacturerPartNumber ?? '',
@@ -199,10 +135,6 @@ export class PartExpressFormComponent {
    * promotes. Patches the workflow step (which materializes the entity if
    * it doesn't exist yet, then applies fields), then completes the run
    * (Draft → Active), then navigates to the parts list.
-   *
-   * Autosave (the debounced valueChanges path) only patches — it never
-   * completes — so the user can keep editing without the form snapping to
-   * the list mid-typing.
    */
   protected save(): void {
     if (this.form.invalid) return;
@@ -252,10 +184,8 @@ export class PartExpressFormComponent {
     return {
       name: v.name ?? undefined,
       description: v.description ?? '',
-      partType: (v.partType as PartType) ?? undefined,
-      material: v.material ?? undefined,
       externalPartNumber: v.externalPartNumber || undefined,
-      // Tier 0 — manufacturer + traceability + ABC class now flow through the patch.
+      // Tier 0 — manufacturer + traceability + ABC class flow through the patch.
       manufacturerName: v.manufacturerName || undefined,
       manufacturerPartNumber: v.manufacturerPartNumber || undefined,
       traceabilityType: v.traceabilityType ?? 'None',

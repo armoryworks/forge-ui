@@ -43,12 +43,11 @@ describe('PartsService', () => {
       expect(result.length).toBe(1);
     });
 
-    it('should include status and type query params when provided', () => {
-      service.getParts('Active', 'Part', 'widget').subscribe();
+    it('should include status and search query params when provided', () => {
+      service.getParts('Active', 'widget').subscribe();
 
       const req = httpMock.expectOne((r) => r.url === baseUrl);
       expect(req.request.params.get('status')).toBe('Active');
-      expect(req.request.params.get('type')).toBe('Part');
       expect(req.request.params.get('q')).toBe('widget');
       req.flush({ items: [], totalCount: 0, page: 1, pageSize: 200 });
     });

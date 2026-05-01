@@ -1,169 +1,221 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
-import { PartType } from '../../models/part-type.type';
+import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { InventoryClass } from '../../models/inventory-class.type';
+import { ProcurementSource } from '../../models/procurement-source.type';
 
 /**
- * The user's mode pick — preserved name from Phase 5 so callers that still
- * import {@link NewPartChoice} keep compiling. Phase 6 added a sibling
- * payload type ({@link NewPartForkResult}) that wraps both the part type
- * (Q1) and the mode (Q2).
+ * Pre-beta fork dialog mode pick — kept for callers that import the type.
  */
 export type NewPartChoice = 'express' | 'guided';
 
 /**
- * Two-question fork result emitted by the dialog when the user clicks
- * Continue. Phase 6 added the type-aware Q1; the mode (Q2) is the same
- * choice Phase 5 already exposed.
+ * Pre-beta fork result. Replaces the old single-axis legacy `partType`
+ * payload — the fork dialog now answers all four questions per the audit
+ * (`phase-4-output/part-type-field-relevance.md` § 2):
  *
- * - `partType` — the part-type discriminator written to the new entity's
- *   `type` field on creation.
- * - `mode` — the workflow presentation choice ('express' or 'guided').
+ *  1. ProcurementSource — Make / Buy / Subcontract / Phantom.
+ *  2. InventoryClass — filtered to viable combos for the chosen source.
+ *  3. ItemKindId — optional descriptive ref-data tag (Fastener, Electronic,
+ *     etc.). Null when the user skips it.
+ *  4. Mode — express (one form) vs guided (step-by-step).
  */
 export interface NewPartForkResult {
-  partType: PartType;
+  procurementSource: ProcurementSource;
+  inventoryClass: InventoryClass;
+  itemKindId: number | null;
   mode: NewPartChoice;
 }
 
-/**
- * The Q1 UI bucket. `Other` is a UI-only collapse of every PartType that
- * isn't called out as a headline option (Consumable / Tooling / Fastener /
- * Electronic / Packaging) — kept simple at the dialog tier, expanded to a
- * concrete `PartType` when the dialog closes (see `continue`).
- */
-type PartTypeBucket = 'Assembly' | 'RawMaterial' | 'Part' | 'Other';
-
-interface PartTypeChoice {
-  /** UI-tier bucket; not the wire-level enum (see `continue`). */
-  value: PartTypeBucket;
-  /** i18n key for the card title. */
+interface ProcurementChoice {
+  value: ProcurementSource;
   titleKey: string;
-  /** i18n key for the card description. */
   descKey: string;
-  /** Material Icons Outlined icon name. */
   icon: string;
-  /** Default mode for this part type per the design doc D3. */
+}
+
+interface InventoryChoice {
+  value: InventoryClass;
+  titleKey: string;
+  descKey: string;
+}
+
+/** Per-(procurement,inventory) combo metadata: recommended mode default. */
+interface ComboMeta {
+  procurement: ProcurementSource;
+  inventoryClass: InventoryClass;
   defaultMode: NewPartChoice;
 }
 
 /**
- * Workflow Pattern Phase 6 — "How would you like to add this part?" fork
- * shown when the user clicks New Part on the list page. Two questions:
- *   • Q1 (part type) — Assembly, Raw Material, Made Part, Other.
- *   • Q2 (mode) — Express (one form) vs Step-by-step (guided wizard).
+ * Pre-beta — replaces the legacy single-axis 4-bucket fork dialog with a
+ * proper axis-based picker per the audit (Section 2). The user answers four
+ * questions — Procurement → InventoryClass (filtered) → ItemKind → Mode.
  *
- * Q2 defaults from Q1 per the design doc D3:
- *   - Raw Material → Express (default)
- *   - Assembly → Step-by-step (default)
- *   - All other types → Express (default; raw-material's simpler model is
- *     the safer default for unknown until type-specific workflows exist).
- *
- * The user can override the default. Q1's default presents the matched
- * Q2 default live (re-renders on every Q1 click) so the user sees the
- * recommendation update immediately — but the user's explicit Q2 click
- * is sticky once they've made one (we don't override their choice on
- * subsequent Q1 clicks).
- *
- * The dialog routes to the right downstream UI: the picked partType is
- * passed to the workflow's `initialEntityData`, and the mode picks which
- * workflow definition to start (see `workflowDefinitionForPartType` in
- * `parts.component.ts`).
+ * Step 2's options are filtered to the 11 viable combos per the audit.
+ * Phantom + Raw / Phantom + Consumable / Phantom + Component etc. don't
+ * appear because the underlying workflow definitions for those combos don't
+ * exist server-side; the filter is the enforcement point.
  */
 @Component({
   selector: 'app-new-part-fork-dialog',
   standalone: true,
-  imports: [TranslatePipe, DialogComponent, ValidationButtonComponent],
+  imports: [
+    ReactiveFormsModule, TranslatePipe,
+    DialogComponent, SelectComponent, ValidationButtonComponent,
+  ],
   templateUrl: './new-part-fork-dialog.component.html',
   styleUrl: './new-part-fork-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NewPartForkDialogComponent {
+export class NewPartForkDialogComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<NewPartForkDialogComponent, NewPartForkResult | undefined>);
   private readonly translate = inject(TranslateService);
+  private readonly refData = inject(ReferenceDataService);
 
-  /** Q1 — currently picked part-type bucket. Null until the user picks. */
-  protected readonly partType = signal<PartTypeBucket | null>(null);
+  /** Step 1 — picked procurement source. Null until the user picks. */
+  protected readonly procurement = signal<ProcurementSource | null>(null);
+
+  /** Step 2 — picked inventory class. Null until the user picks. */
+  protected readonly inventoryClass = signal<InventoryClass | null>(null);
+
+  /** Step 3 — optional item kind tag. Bound to the standalone FormControl. */
+  protected readonly itemKindControl = new FormControl<number | null>(null);
 
   /**
-   * Q2 — currently picked mode. Null until the user explicitly clicks one.
-   * When null, the rendered "selected" mode is computed from the partType's
-   * default (per D3). Once non-null, the user's pick is sticky across Q1
-   * re-clicks.
+   * Step 4 — explicit mode pick. Null until the user clicks one; falls back
+   * to {@link recommendedMode} so we always have a value.
    */
   protected readonly modeOverride = signal<NewPartChoice | null>(null);
 
-  protected readonly partTypeChoices: readonly PartTypeChoice[] = [
-    {
-      value: 'Assembly',
-      titleKey: 'parts.workflow.fork.partType.assemblyTitle',
-      descKey: 'parts.workflow.fork.partType.assemblyDesc',
-      icon: 'category',
-      defaultMode: 'guided',
-    },
-    {
-      value: 'RawMaterial',
-      titleKey: 'parts.workflow.fork.partType.rawMaterialTitle',
-      descKey: 'parts.workflow.fork.partType.rawMaterialDesc',
-      icon: 'inventory_2',
-      defaultMode: 'express',
-    },
-    {
-      value: 'Part',
-      titleKey: 'parts.workflow.fork.partType.madeTitle',
-      descKey: 'parts.workflow.fork.partType.madeDesc',
-      icon: 'build',
-      defaultMode: 'express',
-    },
-    {
-      value: 'Other',
-      titleKey: 'parts.workflow.fork.partType.otherTitle',
-      descKey: 'parts.workflow.fork.partType.otherDesc',
-      icon: 'more_horiz',
-      defaultMode: 'express',
-    },
+  protected readonly itemKindOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('parts.workflow.fork.step3None') },
+  ]);
+
+  protected readonly procurementChoices: readonly ProcurementChoice[] = [
+    { value: 'Make', titleKey: 'parts.workflow.fork.step1Make', descKey: 'parts.workflow.fork.step1MakeDesc', icon: 'build' },
+    { value: 'Buy', titleKey: 'parts.workflow.fork.step1Buy', descKey: 'parts.workflow.fork.step1BuyDesc', icon: 'shopping_cart' },
+    { value: 'Subcontract', titleKey: 'parts.workflow.fork.step1Subcontract', descKey: 'parts.workflow.fork.step1SubcontractDesc', icon: 'handshake' },
+    { value: 'Phantom', titleKey: 'parts.workflow.fork.step1Phantom', descKey: 'parts.workflow.fork.step1PhantomDesc', icon: 'category' },
   ];
 
   /**
-   * The Q2 default the user would see if they don't click Q2 explicitly.
-   * Falls back to 'express' until Q1 is picked (matches the D3 "default
-   * for unknown" rule). Note: `Other` covers any non-headline part type
-   * (Consumable / Tooling / Fastener / Electronic / Packaging) — those
-   * route to the same raw-material workflow until their own workflows
-   * ship in later phases.
+   * Audit Section 5 — the 11 viable (procurement × inventory) combos with
+   * their per-combo recommended mode default. The `available` lookup
+   * filters Step 2 down to the Step-1-compatible inventory classes.
+   *
+   * Buy: Raw / Component / Subassembly / FinishedGood / Consumable / Tool
+   * Make: Component / Subassembly / FinishedGood / Tool
+   * Subcontract: Component / Subassembly
+   * Phantom: Subassembly / FinishedGood
    */
-  protected readonly defaultMode = computed<NewPartChoice>(() => {
-    const t = this.partType();
-    if (!t) return 'express';
-    return this.partTypeChoices.find(c => c.value === t)?.defaultMode ?? 'express';
+  protected readonly viableCombos: readonly ComboMeta[] = [
+    // Buy — most are express-recommended (single form, simple data shape)
+    { procurement: 'Buy', inventoryClass: 'Raw', defaultMode: 'express' },
+    { procurement: 'Buy', inventoryClass: 'Component', defaultMode: 'express' },
+    { procurement: 'Buy', inventoryClass: 'Subassembly', defaultMode: 'guided' },
+    { procurement: 'Buy', inventoryClass: 'FinishedGood', defaultMode: 'express' },
+    { procurement: 'Buy', inventoryClass: 'Consumable', defaultMode: 'express' },
+    { procurement: 'Buy', inventoryClass: 'Tool', defaultMode: 'express' },
+    // Make — guided-recommended (BOM + routing always needed)
+    { procurement: 'Make', inventoryClass: 'Component', defaultMode: 'guided' },
+    { procurement: 'Make', inventoryClass: 'Subassembly', defaultMode: 'guided' },
+    { procurement: 'Make', inventoryClass: 'FinishedGood', defaultMode: 'guided' },
+    { procurement: 'Make', inventoryClass: 'Tool', defaultMode: 'guided' },
+    // Subcontract — guided-recommended (vendor-side complexity)
+    { procurement: 'Subcontract', inventoryClass: 'Component', defaultMode: 'guided' },
+    { procurement: 'Subcontract', inventoryClass: 'Subassembly', defaultMode: 'guided' },
+    // Phantom — express-recommended (logical grouping; nothing to schedule)
+    { procurement: 'Phantom', inventoryClass: 'Subassembly', defaultMode: 'express' },
+    { procurement: 'Phantom', inventoryClass: 'FinishedGood', defaultMode: 'express' },
+  ];
+
+  private readonly inventoryLabels: Record<InventoryClass, { titleKey: string; descKey: string }> = {
+    Raw: { titleKey: 'parts.workflow.fork.step2Raw', descKey: 'parts.workflow.fork.step2RawDesc' },
+    Component: { titleKey: 'parts.workflow.fork.step2Component', descKey: 'parts.workflow.fork.step2ComponentDesc' },
+    Subassembly: { titleKey: 'parts.workflow.fork.step2Subassembly', descKey: 'parts.workflow.fork.step2SubassemblyDesc' },
+    FinishedGood: { titleKey: 'parts.workflow.fork.step2FinishedGood', descKey: 'parts.workflow.fork.step2FinishedGoodDesc' },
+    Consumable: { titleKey: 'parts.workflow.fork.step2Consumable', descKey: 'parts.workflow.fork.step2ConsumableDesc' },
+    Tool: { titleKey: 'parts.workflow.fork.step2Tool', descKey: 'parts.workflow.fork.step2ToolDesc' },
+  };
+
+  /** Step 2's filtered choices, derived from the Step-1 pick. */
+  protected readonly inventoryChoices = computed<InventoryChoice[]>(() => {
+    const p = this.procurement();
+    if (!p) return [];
+    return this.viableCombos
+      .filter(c => c.procurement === p)
+      .map<InventoryChoice>(c => ({
+        value: c.inventoryClass,
+        titleKey: this.inventoryLabels[c.inventoryClass].titleKey,
+        descKey: this.inventoryLabels[c.inventoryClass].descKey,
+      }));
   });
 
-  /** The mode currently rendered as "selected" — user override wins over default. */
+  /** The mode the dialog recommends for the current (procurement, inventory) pair. */
+  protected readonly recommendedMode = computed<NewPartChoice>(() => {
+    const p = this.procurement();
+    const i = this.inventoryClass();
+    if (!p || !i) return 'express';
+    return this.viableCombos.find(c => c.procurement === p && c.inventoryClass === i)?.defaultMode ?? 'express';
+  });
+
+  /** The mode currently rendered as "selected" — user override wins. */
   protected readonly effectiveMode = computed<NewPartChoice>(() => {
-    return this.modeOverride() ?? this.defaultMode();
+    return this.modeOverride() ?? this.recommendedMode();
   });
 
-  /** Continue is enabled once Q1 is picked (Q2 always has a default). */
-  protected readonly canContinue = computed<boolean>(() => this.partType() !== null);
+  /** Continue is enabled once Steps 1 + 2 are both picked. */
+  protected readonly canContinue = computed<boolean>(() => {
+    return this.procurement() !== null && this.inventoryClass() !== null;
+  });
 
-  /**
-   * Signal-derived violations list for the `<app-validation-button>` stereotype.
-   * The dialog uses signal-based state instead of a FormGroup, so we compute
-   * the message list directly rather than via FormValidationService. Q2 always
-   * has a default — only Q1 can be missing.
-   */
   protected readonly violations = computed<string[]>(() => {
     const list: string[] = [];
-    if (this.partType() === null) {
-      list.push(this.translate.instant('parts.workflow.fork.violations.partTypeRequired'));
+    if (this.procurement() === null) {
+      list.push(this.translate.instant('parts.workflow.fork.violations.procurementRequired'));
+    }
+    if (this.inventoryClass() === null) {
+      list.push(this.translate.instant('parts.workflow.fork.violations.inventoryClassRequired'));
     }
     return list;
   });
 
-  protected pickPartType(t: PartTypeBucket): void {
-    this.partType.set(t);
+  ngOnInit(): void {
+    // Optional kind tag — fallback to a "None" entry only if the load fails
+    // or the ref-data group isn't seeded. The kind is never required.
+    this.refData.getByGroup('part.item_kind').subscribe({
+      next: (items) => {
+        const opts: SelectOption[] = [
+          { value: null, label: this.translate.instant('parts.workflow.fork.step3None') },
+        ];
+        for (const item of [...items].filter(i => i.isActive).sort((a, b) => a.sortOrder - b.sortOrder)) {
+          opts.push({ value: item.id, label: item.label });
+        }
+        this.itemKindOptions.set(opts);
+      },
+    });
+  }
+
+  protected pickProcurement(p: ProcurementSource): void {
+    this.procurement.set(p);
+    // Clear downstream state so the user re-picks Step 2 against the new
+    // filtered options.
+    this.inventoryClass.set(null);
+    this.modeOverride.set(null);
+  }
+
+  protected pickInventoryClass(c: InventoryClass): void {
+    this.inventoryClass.set(c);
+    // Don't clear the user's mode override — they may have already locked
+    // in an explicit pick. The recommendedMode computed handles the
+    // default-from-combo display.
   }
 
   protected pickMode(m: NewPartChoice): void {
@@ -171,12 +223,15 @@ export class NewPartForkDialogComponent {
   }
 
   protected continue(): void {
-    const t = this.partType();
-    if (!t) return;
-    // The 'Other' UI bucket maps to 'Consumable' on the wire — gives the
-    // server a concrete enum value while keeping the Q1 UI simple.
-    const wireType: PartType = t === 'Other' ? 'Consumable' : t;
-    this.dialogRef.close({ partType: wireType, mode: this.effectiveMode() });
+    const p = this.procurement();
+    const i = this.inventoryClass();
+    if (!p || !i) return;
+    this.dialogRef.close({
+      procurementSource: p,
+      inventoryClass: i,
+      itemKindId: this.itemKindControl.value ?? null,
+      mode: this.effectiveMode(),
+    });
   }
 
   protected close(): void {

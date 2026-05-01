@@ -2,7 +2,7 @@
   <div class="detail-panel">
     <div class="detail-header">
       <div class="detail-header__info">
-        <span class="material-icons-outlined detail-type-icon">{{ getTypeIcon(part.partType) }}</span>
+        <span class="material-icons-outlined detail-type-icon">{{ getTypeIcon(part.inventoryClass) }}</span>
         <div>
           <div class="detail-part-number">{{ part.partNumber }}</div>
           <div class="detail-description">{{ part.name }}</div>
@@ -46,7 +46,7 @@
           }
         </button>
       }
-      @if (part.isSerialTracked) {
+      @if (part.traceabilityType === 'Serial') {
         <button class="detail-tab"
           role="tab"
           data-testid="part-tab-serials"

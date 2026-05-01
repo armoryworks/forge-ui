@@ -16,15 +16,15 @@ class FakeLoader implements TranslateLoader {
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
     id: 42, partNumber: 'PRT-00042', name: 'Widget', description: null, revision: 'A',
-    status: 'Draft', partType: 'Assembly',
+    status: 'Draft',
     procurementSource: 'Make', inventoryClass: 'Subassembly', itemKindId: null, itemKindLabel: null,
     traceabilityType: 'None', abcClass: null, manufacturerName: null, manufacturerPartNumber: null,
-    material: 'Steel',
     materialSpecId: null, materialSpecLabel: null,
-    moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
+    externalPartNumber: null,
+    externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
-    leadTimeDays: null, safetyStockDays: null, isSerialTracked: false,
+    leadTimeDays: null, safetyStockDays: null,
     toolingAssetId: null, toolingAssetName: null,
     manualCostOverride: null, currentCostCalculationId: null,
     weightEach: null, weightDisplayUnit: null,
@@ -72,7 +72,7 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
     const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
     mockSignalInputs(component, {
       stepId: 'basics', componentName: 'PartBasicsStepComponent',
-      runId: 7, entityId: 42, entity: buildPart({ name: 'Hydration', description: 'Hydration notes', material: 'Aluminum' }),
+      runId: 7, entityId: 42, entity: buildPart({ name: 'Hydration', description: 'Hydration notes' }),
     });
     // Trigger effect by reading the form
     TestBed.flushEffects();
@@ -80,8 +80,6 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
     expect(form.value).toMatchObject({
       name: 'Hydration',
       description: 'Hydration notes',
-      material: 'Aluminum',
-      partType: 'Assembly',
     });
   });
 
@@ -91,7 +89,7 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
       const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
       mockSignalInputs(component, {
         stepId: 'basics', componentName: 'PartBasicsStepComponent',
-        runId: 7, entityId: 42, entity: buildPart({ name: 'Initial', material: 'Steel' }),
+        runId: 7, entityId: 42, entity: buildPart({ name: 'Initial' }),
       });
       TestBed.flushEffects();
 
@@ -129,7 +127,7 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
       TestBed.flushEffects();
 
       const form = (component as unknown as { form: { patchValue(v: unknown): void } }).form;
-      form.patchValue({ name: 'Whatever', material: 'Steel', partType: 'Part' });
+      form.patchValue({ name: 'Whatever' });
 
       vi.advanceTimersByTime(700);
 

@@ -86,7 +86,6 @@ export class PartMaterialClusterComponent implements OnInit {
 
   protected readonly form = new FormGroup({
     materialSpecId: new FormControl<number | null>(null),
-    material: new FormControl<string | null>(null),
     weight: new FormControl<number | null>(null, [Validators.min(0)]),
     weightDisplayUnit: new FormControl<string>('g', { nonNullable: true }),
     length: new FormControl<number | null>(null, [Validators.min(0)]),
@@ -101,7 +100,7 @@ export class PartMaterialClusterComponent implements OnInit {
 
   protected readonly displayMaterial = computed(() => {
     const p = this.part();
-    return p.materialSpecLabel ?? p.material ?? null;
+    return p.materialSpecLabel ?? null;
   });
 
   ngOnInit(): void {
@@ -136,7 +135,6 @@ export class PartMaterialClusterComponent implements OnInit {
       const vol = this.mlToDisplay(p.volumeMl, p.volumeDisplayUnit);
       this.form.reset({
         materialSpecId: p.materialSpecId,
-        material: p.material,
         weight: weight.value,
         weightDisplayUnit: weight.unit,
         length: dim.length,
@@ -197,7 +195,6 @@ export class PartMaterialClusterComponent implements OnInit {
 
     this.save.emit({
       materialSpecId: v.materialSpecId ?? null,
-      material: v.material ?? null,
       weightEach,
       weightDisplayUnit: v.weightDisplayUnit,
       lengthMm,

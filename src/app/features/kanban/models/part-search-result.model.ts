@@ -4,8 +4,8 @@ export interface PartSearchResult {
   description: string;
   revision: string;
   status: string;
-  partType: string;
-  material: string | null;
+  procurementSource: string;
+  inventoryClass: string;
   bomEntryCount: number;
   createdAt: Date;
 }
