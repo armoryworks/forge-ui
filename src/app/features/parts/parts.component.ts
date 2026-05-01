@@ -13,6 +13,8 @@ import { PartStatus } from './models/part-status.type';
 import { PartType } from './models/part-type.type';
 import { ProcurementSource } from './models/procurement-source.type';
 import { InventoryClass } from './models/inventory-class.type';
+import { TraceabilityType } from './models/traceability-type.type';
+import { AbcClass } from './models/abc-class.type';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -140,6 +142,11 @@ export class PartsComponent {
     reorderQuantity: new FormControl<number | null>(null, [Validators.min(0.01)]),
     leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
     safetyStockDays: new FormControl<number | null>(null, [Validators.min(0)]),
+    // Pillar 1 / Tier 0 — manufacturer + traceability + ABC class.
+    manufacturerName: new FormControl('', [Validators.maxLength(200)]),
+    manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
+    traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
+    abcClass: new FormControl<AbcClass | null>(null),
   });
 
   protected readonly partViolations = FormValidationService.getViolations(this.partForm, {
@@ -155,6 +162,19 @@ export class PartsComponent {
     { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
     { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
     { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
+  ];
+
+  protected readonly traceabilityOptions: SelectOption[] = [
+    { value: 'None', label: this.translate.instant('parts.workflow.basics.traceabilityNone') },
+    { value: 'Lot', label: this.translate.instant('parts.workflow.basics.traceabilityLot') },
+    { value: 'Serial', label: this.translate.instant('parts.workflow.basics.traceabilitySerial') },
+  ];
+
+  protected readonly abcClassOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('parts.workflow.basics.abcClassUnclassified') },
+    { value: 'A', label: this.translate.instant('parts.workflow.basics.abcClassA') },
+    { value: 'B', label: this.translate.instant('parts.workflow.basics.abcClassB') },
+    { value: 'C', label: this.translate.instant('parts.workflow.basics.abcClassC') },
   ];
 
   constructor() {
@@ -370,6 +390,10 @@ export class PartsComponent {
       reorderQuantity: part.reorderQuantity,
       leadTimeDays: part.leadTimeDays,
       safetyStockDays: part.safetyStockDays,
+      manufacturerName: part.manufacturerName ?? '',
+      manufacturerPartNumber: part.manufacturerPartNumber ?? '',
+      traceabilityType: part.traceabilityType ?? 'None',
+      abcClass: part.abcClass ?? null,
     });
     this.showPartDialog.set(true);
   }
@@ -403,6 +427,10 @@ export class PartsComponent {
         reorderQuantity: form.reorderQuantity ?? undefined,
         leadTimeDays: form.leadTimeDays ?? undefined,
         safetyStockDays: form.safetyStockDays ?? undefined,
+        manufacturerName: form.manufacturerName || '',
+        manufacturerPartNumber: form.manufacturerPartNumber || '',
+        traceabilityType: (form.traceabilityType as TraceabilityType) ?? 'None',
+        abcClass: (form.abcClass as AbcClass | null) ?? null,
       }).subscribe({
         next: () => {
           this.closePartDialog();

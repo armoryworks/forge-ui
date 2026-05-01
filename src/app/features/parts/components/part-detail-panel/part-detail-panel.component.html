@@ -92,6 +92,28 @@
               <span class="info-label">{{ 'parts.material' | translate }}</span>
               <span class="info-value">{{ part.material ?? '---' }}</span>
             </div>
+            @if (part.manufacturerName) {
+              <div class="info-item">
+                <span class="info-label">{{ 'parts.workflow.basics.manufacturerNameLabel' | translate }}</span>
+                <span class="info-value">{{ part.manufacturerName }}</span>
+              </div>
+            }
+            @if (part.manufacturerPartNumber) {
+              <div class="info-item">
+                <span class="info-label">{{ 'parts.workflow.basics.manufacturerPartNumberLabel' | translate }}</span>
+                <span class="info-value">{{ part.manufacturerPartNumber }}</span>
+              </div>
+            }
+            <div class="info-item">
+              <span class="info-label">{{ 'parts.workflow.basics.traceabilityLabel' | translate }}</span>
+              <span class="info-value">{{ ('parts.workflow.basics.traceability' + part.traceabilityType) | translate }}</span>
+            </div>
+            @if (part.abcClass) {
+              <div class="info-item">
+                <span class="info-label">{{ 'parts.workflow.basics.abcClassLabel' | translate }}</span>
+                <span class="info-value">{{ part.abcClass }}</span>
+              </div>
+            }
             @if (part.externalPartNumber) {
               <div class="info-item">
                 <span class="info-label">{{ 'parts.externalPartNumber' | translate }}</span>

@@ -595,6 +595,11 @@
         "traceabilityNone": "Bulk (no tracking)",
         "traceabilityLot": "By lot / batch",
         "traceabilitySerial": "By serial number",
+        "abcClassLabel": "ABC Class",
+        "abcClassUnclassified": "— Not classified —",
+        "abcClassA": "A — high value / tight control",
+        "abcClassB": "B — moderate value",
+        "abcClassC": "C — low value / loose control",
         "saveFailed": "Couldn't save basics."
       },
       "bom": {

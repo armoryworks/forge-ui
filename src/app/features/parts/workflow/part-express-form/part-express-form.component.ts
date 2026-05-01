@@ -14,6 +14,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartType } from '../../models/part-type.type';
 import { TraceabilityType } from '../../models/traceability-type.type';
@@ -111,6 +112,8 @@ export class PartExpressFormComponent {
     manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
     // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
     traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
+    // Tier 0 — cycle-counting frequency tier. Optional (null = unclassified).
+    abcClass: new FormControl<AbcClass | null>(null),
     // Required because the express step's hasCost gate needs either
     // manualCostOverride or currentCostCalculationId — only the override
     // is reachable from this form, so it's required here.
@@ -121,6 +124,13 @@ export class PartExpressFormComponent {
     { value: 'None', label: this.translate.instant('parts.workflow.basics.traceabilityNone') },
     { value: 'Lot', label: this.translate.instant('parts.workflow.basics.traceabilityLot') },
     { value: 'Serial', label: this.translate.instant('parts.workflow.basics.traceabilitySerial') },
+  ];
+
+  protected readonly abcClassOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('parts.workflow.basics.abcClassUnclassified') },
+    { value: 'A', label: this.translate.instant('parts.workflow.basics.abcClassA') },
+    { value: 'B', label: this.translate.instant('parts.workflow.basics.abcClassB') },
+    { value: 'C', label: this.translate.instant('parts.workflow.basics.abcClassC') },
   ];
 
   /** Tracks the live partType selection so the Material visibility recomputes. */
@@ -157,6 +167,7 @@ export class PartExpressFormComponent {
     manufacturerName: this.translate.instant('parts.workflow.basics.manufacturerNameLabel'),
     manufacturerPartNumber: this.translate.instant('parts.workflow.basics.manufacturerPartNumberLabel'),
     traceabilityType: this.translate.instant('parts.workflow.basics.traceabilityLabel'),
+    abcClass: this.translate.instant('parts.workflow.basics.abcClassLabel'),
     manualCostOverride: this.translate.instant('parts.workflow.costing.manualOverrideLabel'),
   });
 
@@ -177,6 +188,7 @@ export class PartExpressFormComponent {
         manufacturerName: part.manufacturerName ?? '',
         manufacturerPartNumber: part.manufacturerPartNumber ?? '',
         traceabilityType: part.traceabilityType ?? 'None',
+        abcClass: part.abcClass ?? null,
         manualCostOverride: part.manualCostOverride ?? null,
       }, { emitEvent: false });
     });
@@ -243,10 +255,11 @@ export class PartExpressFormComponent {
       partType: (v.partType as PartType) ?? undefined,
       material: v.material ?? undefined,
       externalPartNumber: v.externalPartNumber || undefined,
-      // Tier 0 — manufacturer + traceability now flow through the patch.
+      // Tier 0 — manufacturer + traceability + ABC class now flow through the patch.
       manufacturerName: v.manufacturerName || undefined,
       manufacturerPartNumber: v.manufacturerPartNumber || undefined,
       traceabilityType: v.traceabilityType ?? 'None',
+      abcClass: v.abcClass ?? null,
       // PartWorkflowAdapter.ApplyAsync interprets null as "clear" via
       // TryReadDecimal — different contract than PartsService.updatePart
       // which uses a -1 sentinel. Pass null explicitly here.

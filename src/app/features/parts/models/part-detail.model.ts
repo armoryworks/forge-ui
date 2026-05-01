@@ -1,4 +1,5 @@
 import { AbcClass } from './abc-class.type';
+import { BackflushPolicy } from './backflush-policy.type';
 import { InventoryClass } from './inventory-class.type';
 import { PartStatus } from './part-status.type';
 import { PartType } from './part-type.type';
@@ -33,6 +34,10 @@ export interface PartDetail {
   manufacturerName: string | null;
   manufacturerPartNumber: string | null;
   material: string | null;
+  // Pillar 2 — Tier 2 material spec FK (FK to reference_data,
+  // group_code='part.material_spec'). Replaces the free-text material string.
+  materialSpecId: number | null;
+  materialSpecLabel: string | null;
   moldToolRef: string | null;
   externalPartNumber: string | null;
   externalId: string | null;
@@ -52,6 +57,28 @@ export interface PartDetail {
   // hasCost predicate can read the part's current cost state.
   manualCostOverride: number | null;
   currentCostCalculationId: number | null;
+  // Pillar 2 — Tier 2 measurement profile (canonical SI; *DisplayUnit
+  // round-trips the unit the user originally typed).
+  weightEach: number | null;
+  weightDisplayUnit: string | null;
+  lengthMm: number | null;
+  widthMm: number | null;
+  heightMm: number | null;
+  dimensionDisplayUnit: string | null;
+  volumeMl: number | null;
+  volumeDisplayUnit: string | null;
+  // Pillar 2 — Tier 2 valuation classification.
+  valuationClassId: number | null;
+  valuationClassLabel: string | null;
+  // Pillar 2 — Tier 3 compliance + classification.
+  htsCode: string | null;
+  hazmatClass: string | null;
+  shelfLifeDays: number | null;
+  backflushPolicy: BackflushPolicy | null;
+  isKit: boolean;
+  isConfigurable: boolean;
+  defaultBinId: number | null;
+  sourcePartId: number | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: Date;

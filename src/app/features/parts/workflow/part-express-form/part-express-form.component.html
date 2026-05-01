@@ -76,6 +76,12 @@
       [required]="true"
       data-testid="express-traceability" />
 
+    <app-select
+      [label]="'parts.workflow.basics.abcClassLabel' | translate"
+      formControlName="abcClass"
+      [options]="abcClassOptions"
+      data-testid="express-abc-class" />
+
     <app-currency-input
       [label]="'parts.workflow.costing.manualOverrideLabel' | translate"
       formControlName="manualCostOverride"

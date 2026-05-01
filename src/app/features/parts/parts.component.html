@@ -93,6 +93,29 @@
         <app-input [label]="'parts.material' | translate" formControlName="material" data-testid="part-material" />
         <app-input [label]="'parts.moldToolRef' | translate" formControlName="moldToolRef" />
       </div>
+      <div class="dialog-row">
+        <app-input
+          [label]="'parts.workflow.basics.manufacturerNameLabel' | translate"
+          formControlName="manufacturerName"
+          data-testid="part-manufacturer-name" />
+        <app-input
+          [label]="'parts.workflow.basics.manufacturerPartNumberLabel' | translate"
+          formControlName="manufacturerPartNumber"
+          data-testid="part-manufacturer-pn" />
+      </div>
+      <div class="dialog-row">
+        <app-select
+          [label]="'parts.workflow.basics.traceabilityLabel' | translate"
+          formControlName="traceabilityType"
+          [options]="traceabilityOptions"
+          [required]="true"
+          data-testid="part-traceability" />
+        <app-select
+          [label]="'parts.workflow.basics.abcClassLabel' | translate"
+          formControlName="abcClass"
+          [options]="abcClassOptions"
+          data-testid="part-abc-class" />
+      </div>
 
       <app-entity-picker
         [label]="'parts.toolingAsset' | translate"

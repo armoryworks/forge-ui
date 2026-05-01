@@ -10,8 +10,10 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartType } from '../../models/part-type.type';
+import { TraceabilityType } from '../../models/traceability-type.type';
 import { PartsService } from '../../services/parts.service';
 
 /**
@@ -61,6 +63,14 @@ export class PartBasicsStepComponent {
     partType: new FormControl<PartType>('Assembly', [Validators.required]),
     material: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
+    // Tier 0 — manufacturer identity (engineering OEM, distinct from any
+    // distributor we buy through, which lives on VendorPart).
+    manufacturerName: new FormControl('', [Validators.maxLength(200)]),
+    manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
+    // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
+    traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
+    // Tier 0 — cycle-counting frequency tier. Optional (null = unclassified).
+    abcClass: new FormControl<AbcClass | null>(null),
   });
 
   protected readonly partTypeOptions: SelectOption[] = [
@@ -72,6 +82,19 @@ export class PartBasicsStepComponent {
     { value: 'Fastener', label: this.translate.instant('parts.typeFastener') },
     { value: 'Electronic', label: this.translate.instant('parts.typeElectronic') },
     { value: 'Packaging', label: this.translate.instant('parts.typePackaging') },
+  ];
+
+  protected readonly traceabilityOptions: SelectOption[] = [
+    { value: 'None', label: this.translate.instant('parts.workflow.basics.traceabilityNone') },
+    { value: 'Lot', label: this.translate.instant('parts.workflow.basics.traceabilityLot') },
+    { value: 'Serial', label: this.translate.instant('parts.workflow.basics.traceabilitySerial') },
+  ];
+
+  protected readonly abcClassOptions: SelectOption[] = [
+    { value: null, label: this.translate.instant('parts.workflow.basics.abcClassUnclassified') },
+    { value: 'A', label: this.translate.instant('parts.workflow.basics.abcClassA') },
+    { value: 'B', label: this.translate.instant('parts.workflow.basics.abcClassB') },
+    { value: 'C', label: this.translate.instant('parts.workflow.basics.abcClassC') },
   ];
 
   /** Suppresses the auto-save effect while we're patching the form from input. */
@@ -89,6 +112,10 @@ export class PartBasicsStepComponent {
         partType: part.partType ?? 'Assembly',
         material: part.material ?? '',
         externalPartNumber: part.externalPartNumber ?? '',
+        manufacturerName: part.manufacturerName ?? '',
+        manufacturerPartNumber: part.manufacturerPartNumber ?? '',
+        traceabilityType: part.traceabilityType ?? 'None',
+        abcClass: part.abcClass ?? null,
       }, { emitEvent: false });
       this.suppressDispatch = false;
     });
@@ -119,6 +146,11 @@ export class PartBasicsStepComponent {
       partType: (value.partType as PartType) ?? undefined,
       material: value.material ?? undefined,
       externalPartNumber: value.externalPartNumber || undefined,
+      // Tier 0 — manufacturer + traceability + ABC class.
+      manufacturerName: value.manufacturerName || undefined,
+      manufacturerPartNumber: value.manufacturerPartNumber || undefined,
+      traceabilityType: value.traceabilityType ?? 'None',
+      abcClass: value.abcClass ?? null,
     }).subscribe({
       next: (run) => {
         this.saving.set(false);

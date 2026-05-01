@@ -606,6 +606,11 @@
         "traceabilityNone": "A granel (sin trazabilidad)",
         "traceabilityLot": "Por lote",
         "traceabilitySerial": "Por número de serie",
+        "abcClassLabel": "Clase ABC",
+        "abcClassUnclassified": "— Sin clasificar —",
+        "abcClassA": "A — alto valor / control estricto",
+        "abcClassB": "B — valor medio",
+        "abcClassC": "C — bajo valor / control flexible",
         "saveFailed": "No se pudo guardar."
       },
       "bom": {
