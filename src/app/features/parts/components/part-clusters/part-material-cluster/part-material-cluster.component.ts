@@ -8,6 +8,7 @@ import { ValidationButtonComponent } from '../../../../../shared/components/vali
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { ReferenceDataService } from '../../../../../shared/services/reference-data.service';
 import { PartDetail } from '../../../models/part-detail.model';
+import { buildMaterialSpecOptions } from './material-spec-options.util';
 
 /**
  * Pillar 4 Phase 2 — Material & physical cluster.
@@ -104,22 +105,14 @@ export class PartMaterialClusterComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.refData.getAsOptions('part.material_spec', { allLabel: '-- None --', valueField: 'code' }).subscribe({
-      next: (_codeOptions) => {
-        // We need id (not code) as the value, since materialSpecId is an int FK.
-        // Re-load using getByGroup so we can map by id.
-        this.refData.getByGroup('part.material_spec').subscribe({
-          next: (items) => {
-            const options: SelectOption[] = [{ value: null, label: '-- None --' }];
-            const sorted = [...items]
-              .filter(i => i.isActive)
-              .sort((a, b) => a.sortOrder - b.sortOrder);
-            for (const item of sorted) {
-              options.push({ value: item.id, label: item.label });
-            }
-            this.materialSpecOptions.set(options);
-          },
-        });
+    // Polish-pass follow-up — `part.material_spec` is hierarchical: parents
+    // (e.g. "Aluminum", "Steel") have children (e.g. "6061-T6", "1018 Cold-
+    // Rolled") via `parent_id`. Parents are not selectable; only leaves are.
+    // Each leaf option's label is prefixed with its parent's label so the
+    // dropdown reads as "Aluminum / 6061-T6" instead of bare "6061-T6".
+    this.refData.getByGroup('part.material_spec').subscribe({
+      next: (items) => {
+        this.materialSpecOptions.set(buildMaterialSpecOptions(items));
       },
     });
   }

@@ -6,6 +6,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../../testing/signal-input-harness';
+import { CapabilityService } from '../../../../../shared/services/capability.service';
 import { PartQualityClusterComponent } from './part-quality-cluster.component';
 import { PartDetail } from '../../../models/part-detail.model';
 
@@ -85,6 +86,26 @@ describe('PartQualityClusterComponent', () => {
     expect(c.form.value['hazmatClass']).toBe('Class 3');
     expect(c.form.value['shelfLifeDays']).toBe(365);
     expect(c.form.value['backflushPolicy']).toBe('Manual');
+  });
+
+  it('shows compliance fields only when CAP-MD-PART-COMPLIANCE is enabled', () => {
+    const cap = TestBed.inject(CapabilityService);
+    vi.spyOn(cap, 'isEnabled').mockImplementation(() => true);
+    const component = TestBed.runInInjectionContext(() => new PartQualityClusterComponent());
+    mockSignalInputs(component, { part: makePart(), editing: true, saving: false });
+    TestBed.flushEffects();
+    const c = component as unknown as { showCompliance(): boolean };
+    expect(c.showCompliance()).toBe(true);
+  });
+
+  it('hides compliance fields when capability is disabled', () => {
+    const cap = TestBed.inject(CapabilityService);
+    vi.spyOn(cap, 'isEnabled').mockImplementation(() => false);
+    const component = TestBed.runInInjectionContext(() => new PartQualityClusterComponent());
+    mockSignalInputs(component, { part: makePart(), editing: true, saving: false });
+    TestBed.flushEffects();
+    const c = component as unknown as { showCompliance(): boolean };
+    expect(c.showCompliance()).toBe(false);
   });
 
   it('emits the quality patch with toggle + enums + numbers', () => {

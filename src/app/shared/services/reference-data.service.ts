@@ -14,6 +14,13 @@ export interface ReferenceDataItem {
   effectiveFrom?: string | null;
   effectiveTo?: string | null;
   metadata?: string;
+  /**
+   * Parent reference-data id, when the group is hierarchical (e.g.
+   * `part.material_spec` parents like "Aluminum" / "Steel" with leaf
+   * children "6061-T6" / "1018 Cold-Rolled"). Null for top-level entries.
+   * Surfaced from the server via {@link ReferenceDataResponseModel}.
+   */
+  parentId?: number | null;
 }
 
 export interface RoleItem {

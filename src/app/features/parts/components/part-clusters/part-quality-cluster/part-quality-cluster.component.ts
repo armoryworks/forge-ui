@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -6,6 +6,7 @@ import { InputComponent } from '../../../../../shared/components/input/input.com
 import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
 import { ToggleComponent } from '../../../../../shared/components/toggle/toggle.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
+import { CapabilityService } from '../../../../../shared/services/capability.service';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { BackflushPolicy } from '../../../models/backflush-policy.type';
 import { PartDetail } from '../../../models/part-detail.model';
@@ -32,12 +33,24 @@ import { ReceivingInspectionFrequency } from '../../../models/receiving-inspecti
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartQualityClusterComponent {
+  private readonly capabilityService = inject(CapabilityService);
+
   readonly part = input.required<PartDetail>();
   readonly editing = input(false);
   readonly saving = input(false);
 
   readonly save = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
+
+  /**
+   * Pillar 2 audit § 9 — Tier 3 part-level compliance fields (HazmatClass,
+   * ShelfLifeDays, BackflushPolicy, ReceivingInspectionTemplateId) gate on
+   * `CAP-MD-PART-COMPLIANCE`. Tier 0 fields (traceability + receiving-
+   * inspection toggle / frequency / skip-after) stay always visible.
+   */
+  protected readonly showCompliance = computed(() =>
+    this.capabilityService.isEnabled('CAP-MD-PART-COMPLIANCE'),
+  );
 
   protected readonly inspectionFrequencyOptions: SelectOption[] = [
     { value: null, label: '-- Unset --' },
