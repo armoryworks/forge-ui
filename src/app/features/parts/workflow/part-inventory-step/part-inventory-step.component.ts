@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { debounceTime } from 'rxjs/operators';
 
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
@@ -22,7 +23,7 @@ import { PartsService } from '../../services/parts.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, SelectComponent, LoadingBlockDirective,
+    EntityPickerComponent, InputComponent, SelectComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-inventory-step.component.html',
   styleUrl: './part-inventory-step.component.scss',
