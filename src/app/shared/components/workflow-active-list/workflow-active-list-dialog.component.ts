@@ -51,10 +51,21 @@ export class WorkflowActiveListDialogComponent implements OnInit {
   }
 
   protected resume(run: WorkflowRun): void {
-    const route = this.entityRoute(run.entityType, run.entityId);
-    this.router.navigate([route], {
-      queryParams: { workflow: run.definitionId, mode: run.mode },
-    });
+    // Deferred materialization: a run with a null entityId hasn't completed
+    // its first step yet, so there's no detail route to land on. Route to
+    // the entity-less workflow path with `runId=` and let the workflow page
+    // pick up where the user left off.
+    if (run.entityId == null) {
+      const segment = this.entityTypeSegment(run.entityType);
+      this.router.navigate([`/${segment}/new`], {
+        queryParams: { runId: run.id, workflow: run.definitionId, mode: run.mode },
+      });
+    } else {
+      const route = this.entityRoute(run.entityType, run.entityId);
+      this.router.navigate([route], {
+        queryParams: { workflow: run.definitionId, mode: run.mode },
+      });
+    }
     this.dialogRef.close({ resumed: run.id });
   }
 
@@ -68,8 +79,11 @@ export class WorkflowActiveListDialogComponent implements OnInit {
    * can land here when the entity's detail route shape differs.
    */
   private entityRoute(entityType: string, entityId: number): string {
+    return `/${this.entityTypeSegment(entityType)}/${entityId}`;
+  }
+
+  private entityTypeSegment(entityType: string): string {
     const lower = entityType.toLowerCase();
-    const segment = lower.endsWith('s') ? lower : `${lower}s`;
-    return `/${segment}/${entityId}`;
+    return lower.endsWith('s') ? lower : `${lower}s`;
   }
 }

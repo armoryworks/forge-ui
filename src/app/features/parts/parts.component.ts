@@ -325,18 +325,19 @@ export class PartsComponent {
       initialEntityData: { partType: result.partType },
     }).subscribe({
       next: (run) => {
-        // For express mode the URL omits ?step=, the shell renders the
-        // express template for the definition. For guided, ?step= seeds
-        // the rail at the run's first step (computed server-side from
-        // the definition's StepsJson).
-        const queryParams: Record<string, string> = {
+        // Deferred materialization: the entity row isn't created at workflow
+        // start, so `run.entityId` is null. Land on /parts/new with the
+        // runId in the query string; the workflow page upgrades the URL to
+        // /parts/{id} once the first step's patch materializes the entity.
+        const queryParams: Record<string, string | number> = {
+          runId: run.id,
           workflow: definitionId,
           mode: result.mode,
         };
         if (result.mode === 'guided' && run.currentStepId) {
           queryParams['step'] = run.currentStepId;
         }
-        this.router.navigate(['/parts', run.entityId], { queryParams });
+        this.router.navigate(['/parts', 'new'], { queryParams });
       },
       error: () => this.snackbar.error(this.translate.instant('parts.workflow.startFailed')),
     });

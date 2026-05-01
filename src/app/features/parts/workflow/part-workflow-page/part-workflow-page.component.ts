@@ -58,6 +58,21 @@ export class PartWorkflowPageComponent {
     { initialValue: 0 },
   );
 
+  /**
+   * Run id from query string. Used by the entity-less /parts/new path before
+   * deferred materialization stamps an entityId; once materialized the page
+   * upgrades the URL to /parts/{id}?... but keeps `runId=` so deep links and
+   * back-nav can resume the same in-flight run.
+   */
+  private readonly runIdFromUrl = toSignal(
+    this.route.queryParamMap.pipe(map((p) => {
+      const raw = p.get('runId');
+      const n = raw ? parseInt(raw, 10) : 0;
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    })),
+    { initialValue: 0 },
+  );
+
   private readonly definitionIdFromUrl = toSignal(
     this.route.queryParamMap.pipe(map((p) => p.get('workflow') ?? '')),
     { initialValue: '' },
@@ -82,9 +97,35 @@ export class PartWorkflowPageComponent {
   constructor() {
     effect(() => {
       const partId = this.partIdFromUrl();
+      const runId = this.runIdFromUrl();
       const definitionId = this.definitionIdFromUrl();
-      if (!partId || !definitionId) return;
-      this.loadWorkflowContext(partId, definitionId);
+      if (!definitionId) return;
+      // Two entry paths converge on the same loader:
+      //  • /parts/{id}?workflow=...      → load by partId (existing entity)
+      //  • /parts/new?runId=N&workflow=… → load by runId (entity not yet materialized)
+      if (partId) {
+        this.loadWorkflowContext(partId, definitionId);
+        return;
+      }
+      if (runId) {
+        this.loadEntitylessWorkflow(runId, definitionId);
+      }
+    });
+
+    // Deferred-materialization URL upgrade — when the workflow service emits
+    // a run with a freshly-stamped entityId (after the basics step's first
+    // patch), swap /parts/new for /parts/{id} via replaceUrl so the URL
+    // matches reality and downstream nav (refresh, share, back-nav) lands
+    // on the right page. Only runs when we're on /parts/new (partId === 0).
+    effect(() => {
+      const run = this.workflowService.currentRun();
+      if (!run || run.entityId == null) return;
+      if (this.partIdFromUrl() !== 0) return; // already on /parts/{id}
+      this.router.navigate(['/parts', run.entityId], {
+        queryParams: { runId: run.id },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
     });
 
     // When the URL step changes (back/forward, jump), patch the run pointer.
@@ -102,6 +143,59 @@ export class PartWorkflowPageComponent {
       const run = this.run();
       if (!run || run.mode === mode) return;
       this.run.set({ ...run, mode });
+    });
+  }
+
+  /**
+   * Entity-less variant: the route is /parts/new with `runId=` in the query
+   * string, meaning the workflow run exists but its primary entity hasn't
+   * been materialized yet (deferred materialization). Load just the run +
+   * definition + validators — entity stays null until the basics step's
+   * first patch returns a stamped entityId, at which point the URL-upgrade
+   * effect swings the page over to /parts/{id} for the rest of the flow.
+   */
+  private loadEntitylessWorkflow(runId: number, definitionId: string): void {
+    this.loading.start('part-workflow', this.translate.instant('parts.workflow.page.loading'));
+    forkJoin({
+      run: this.workflowService.getRun(runId),
+      definitions: this.workflowService.loadDefinitionsForEntity('Part'),
+      validators: this.workflowService.loadValidatorsForEntity('Part'),
+    }).subscribe({
+      next: ({ run, definitions, validators }) => {
+        this.loading.stop('part-workflow');
+        const definition = definitions.find((d) => d.definitionId === definitionId) ?? null;
+        if (!definition) {
+          this.snackbar.error(this.translate.instant('parts.workflow.page.definitionMissing'));
+          this.router.navigate(['/parts']);
+          return;
+        }
+        // If the run was already materialized (e.g. user navigated back to
+        // /parts/new after the URL upgrade fired), the URL-upgrade effect
+        // will swing us to /parts/{id} on the next tick. Until then, render
+        // the shell with whatever entity we can quickly fetch.
+        if (run.entityId != null) {
+          this.partsService.getPartById(run.entityId).subscribe({
+            next: (part) => {
+              this.part.set(part);
+              this.run.set(run);
+              this.definition.set(definition);
+              this.validators.set(validators);
+              this.workflowService.setContext({ run, definition, entity: part, validators });
+            },
+          });
+          return;
+        }
+        this.part.set(null);
+        this.run.set(run);
+        this.definition.set(definition);
+        this.validators.set(validators);
+        this.workflowService.setContext({ run, definition, entity: null, validators });
+      },
+      error: () => {
+        this.loading.stop('part-workflow');
+        this.snackbar.error(this.translate.instant('parts.workflow.page.loadFailed'));
+        this.router.navigate(['/parts']);
+      },
     });
   }
 

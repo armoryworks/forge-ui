@@ -52,7 +52,7 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
     const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
     mockSignalInputs(component, {
       stepId: 'basics', componentName: 'PartBasicsStepComponent',
-      entityId: 42, entity: buildPart({ name: 'Hydration', description: 'Hydration notes', material: 'Aluminum' }),
+      runId: 7, entityId: 42, entity: buildPart({ name: 'Hydration', description: 'Hydration notes', material: 'Aluminum' }),
     });
     // Trigger effect by reading the form
     TestBed.flushEffects();
@@ -65,13 +65,13 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
     });
   });
 
-  it('dispatches a PATCH /parts/:id on form change after debounce', async () => {
+  it('dispatches a PATCH /workflows/:runId/step on form change after debounce', async () => {
     vi.useFakeTimers();
     try {
       const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
       mockSignalInputs(component, {
         stepId: 'basics', componentName: 'PartBasicsStepComponent',
-        entityId: 42, entity: buildPart({ name: 'Initial', material: 'Steel' }),
+        runId: 7, entityId: 42, entity: buildPart({ name: 'Initial', material: 'Steel' }),
       });
       TestBed.flushEffects();
 
@@ -81,10 +81,40 @@ describe('PartBasicsStepComponent (Phase 5)', () => {
       // Debounce 600ms
       vi.advanceTimersByTime(700);
 
-      const req = httpMock.expectOne(`${environment.apiUrl}/parts/42`);
+      const req = httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`);
       expect(req.request.method).toBe('PATCH');
-      expect(req.request.body.name).toBe('Updated name');
-      req.flush(buildPart({ name: 'Updated name' }));
+      expect(req.request.body.stepId).toBe('basics');
+      expect(req.request.body.fields.name).toBe('Updated name');
+      req.flush({
+        id: 7, entityType: 'Part', entityId: 42, definitionId: 'd', currentStepId: 'basics',
+        mode: 'guided', startedAt: '', startedByUserId: 1, completedAt: null,
+        abandonedAt: null, abandonedReason: null, lastActivityAt: '', version: 1,
+      });
+      // Re-fetch of the part for currentEntity sync
+      const partReq = httpMock.expectOne(`${environment.apiUrl}/parts/42`);
+      partReq.flush(buildPart({ name: 'Updated name' }));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('skips the dispatch when runId is null (entity-less, before materialization)', async () => {
+    vi.useFakeTimers();
+    try {
+      const component = TestBed.runInInjectionContext(() => new PartBasicsStepComponent());
+      mockSignalInputs(component, {
+        stepId: 'basics', componentName: 'PartBasicsStepComponent',
+        runId: null, entityId: null, entity: null,
+      });
+      TestBed.flushEffects();
+
+      const form = (component as unknown as { form: { patchValue(v: unknown): void } }).form;
+      form.patchValue({ name: 'Whatever', material: 'Steel', partType: 'Part' });
+
+      vi.advanceTimersByTime(700);
+
+      // Nothing fires — guard clause short-circuits the save.
+      httpMock.verify();
     } finally {
       vi.useRealTimers();
     }

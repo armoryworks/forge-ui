@@ -141,10 +141,12 @@ export class WorkflowComponent {
   /** Inputs piped to the current step component. */
   protected readonly stepInputs = computed<Record<string, unknown>>(() => {
     const step = this.currentStep();
+    const r = this.run();
     return {
       stepId: step?.id ?? '',
       componentName: step?.componentName ?? '',
-      entityId: this.run()?.entityId ?? null,
+      runId: r?.id ?? null,
+      entityId: r?.entityId ?? null,
       entity: this.entity(),
     };
   });
@@ -157,12 +159,16 @@ export class WorkflowComponent {
   });
 
   /** Inputs piped to the express component. */
-  protected readonly expressInputs = computed<Record<string, unknown>>(() => ({
-    stepId: 'express',
-    componentName: this.definition()?.expressTemplateComponent ?? '',
-    entityId: this.run()?.entityId ?? null,
-    entity: this.entity(),
-  }));
+  protected readonly expressInputs = computed<Record<string, unknown>>(() => {
+    const r = this.run();
+    return {
+      stepId: 'express',
+      componentName: this.definition()?.expressTemplateComponent ?? '',
+      runId: r?.id ?? null,
+      entityId: r?.entityId ?? null,
+      entity: this.entity(),
+    };
+  });
 
   // ─── D2 step rail clickability ──────────────────────────────────────
 

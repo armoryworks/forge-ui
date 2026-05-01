@@ -17,10 +17,13 @@ import { PartsService } from '../../services/parts.service';
 /**
  * Workflow Pattern Phase 5 — Part Assembly basics step.
  *
- * Edits the gate fields for `hasBasics`: description, partType, material,
- * and surfaces externalPartNumber as a non-gated convenience field.
- * Persists each change via the parts UpdatePart endpoint after a 600ms
- * debounce so the user can type continuously without spamming PATCH calls.
+ * Edits the gate fields for `hasBasics`: name, partType, material, plus
+ * description (optional) and externalPartNumber (non-gated convenience).
+ * Persists each change via the workflow's PatchWorkflowStep endpoint after
+ * a 600ms debounce — that endpoint owns deferred materialization, so the
+ * first save creates the underlying Part row when the workflow was started
+ * with no entity yet. Subsequent saves apply field updates to the now-real
+ * entity through the same endpoint.
  *
  * Uses the shared `<app-input>` / `<app-select>` wrappers per CLAUDE.md.
  * No inline styles. Form is ReactiveForms; signals drive the loaded state.
@@ -46,6 +49,7 @@ export class PartBasicsStepComponent {
   // ─── Inputs (provided by the shell via *ngComponentOutlet) ──────────
   readonly stepId = input<string>('basics');
   readonly componentName = input<string>('PartBasicsStepComponent');
+  readonly runId = input<number | null>(null);
   readonly entityId = input<number | null>(null);
   readonly entity = input<unknown>(null);
 
@@ -100,22 +104,28 @@ export class PartBasicsStepComponent {
   }
 
   private dispatchSave(): void {
-    const id = this.entityId();
-    if (id == null) return;
+    const runId = this.runId();
+    if (runId == null) return;
     const value = this.form.getRawValue();
     this.saving.set(true);
-    this.partsService.updatePart(id, {
+    // Always patch through the workflow endpoint — it transparently
+    // materializes the entity on first call (when entityId is still null
+    // server-side) and applies field updates on subsequent calls. The
+    // returned run carries the now-stamped entityId; we re-fetch the
+    // entity so the rail's gate evaluation reflects current state.
+    this.workflowService.patchStep(runId, this.stepId(), {
       name: value.name ?? undefined,
-      description: value.description ?? '', // pass-through; server treats empty as clear
+      description: value.description ?? '',
       partType: (value.partType as PartType) ?? undefined,
       material: value.material ?? undefined,
       externalPartNumber: value.externalPartNumber || undefined,
     }).subscribe({
-      next: (detail) => {
+      next: (run) => {
         this.saving.set(false);
-        // Reflect the latest server state into the workflow service so the
-        // step rail's completion gates update.
-        this.workflowService.currentEntity.set(detail);
+        if (run.entityId == null) return;
+        this.partsService.getPartById(run.entityId).subscribe({
+          next: (detail) => this.workflowService.currentEntity.set(detail),
+        });
       },
       error: () => {
         this.saving.set(false);
