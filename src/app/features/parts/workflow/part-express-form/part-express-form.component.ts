@@ -16,6 +16,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartType } from '../../models/part-type.type';
+import { TraceabilityType } from '../../models/traceability-type.type';
 
 /**
  * Workflow Pattern Phase 5 — Express form for parts (raw-material default).
@@ -100,8 +101,20 @@ export class PartExpressFormComponent {
     description: new FormControl('', [Validators.maxLength(2000)]),
     material: new FormControl('', [Validators.maxLength(200)]),
     externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
+    // Pillar 1 / Tier 0 — manufacturer identity (engineering OEM, distinct
+    // from the distributor we may buy through which lives on VendorPart).
+    manufacturerName: new FormControl('', [Validators.maxLength(200)]),
+    manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
+    // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
+    traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
     manualCostOverride: new FormControl<number | null>(null, [Validators.min(0)]),
   });
+
+  protected readonly traceabilityOptions: SelectOption[] = [
+    { value: 'None', label: this.translate.instant('parts.workflow.basics.traceabilityNone') },
+    { value: 'Lot', label: this.translate.instant('parts.workflow.basics.traceabilityLot') },
+    { value: 'Serial', label: this.translate.instant('parts.workflow.basics.traceabilitySerial') },
+  ];
 
   /** Tracks the live partType selection so the Material visibility recomputes. */
   protected readonly partTypeSignal = toSignal(
@@ -121,6 +134,9 @@ export class PartExpressFormComponent {
     description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
     material: this.translate.instant('parts.workflow.basics.materialLabel'),
     externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
+    manufacturerName: this.translate.instant('parts.workflow.basics.manufacturerNameLabel'),
+    manufacturerPartNumber: this.translate.instant('parts.workflow.basics.manufacturerPartNumberLabel'),
+    traceabilityType: this.translate.instant('parts.workflow.basics.traceabilityLabel'),
     manualCostOverride: this.translate.instant('parts.workflow.costing.manualOverrideLabel'),
   });
 
@@ -138,6 +154,9 @@ export class PartExpressFormComponent {
         description: part.description ?? '',
         material: part.material ?? '',
         externalPartNumber: part.externalPartNumber ?? '',
+        manufacturerName: part.manufacturerName ?? '',
+        manufacturerPartNumber: part.manufacturerPartNumber ?? '',
+        traceabilityType: part.traceabilityType ?? 'None',
         manualCostOverride: part.manualCostOverride ?? null,
       }, { emitEvent: false });
     });
@@ -198,6 +217,10 @@ export class PartExpressFormComponent {
       partType: (v.partType as PartType) ?? undefined,
       material: v.material ?? undefined,
       externalPartNumber: v.externalPartNumber || undefined,
+      // Tier 0 — manufacturer + traceability now flow through the patch.
+      manufacturerName: v.manufacturerName || undefined,
+      manufacturerPartNumber: v.manufacturerPartNumber || undefined,
+      traceabilityType: v.traceabilityType ?? 'None',
       // PartWorkflowAdapter.ApplyAsync interprets null as "clear" via
       // TryReadDecimal — different contract than PartsService.updatePart
       // which uses a -1 sentinel. Pass null explicitly here.

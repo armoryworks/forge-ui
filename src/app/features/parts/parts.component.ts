@@ -11,6 +11,8 @@ import { PartListItem } from './models/part-list-item.model';
 import { PartDetail } from './models/part-detail.model';
 import { PartStatus } from './models/part-status.type';
 import { PartType } from './models/part-type.type';
+import { ProcurementSource } from './models/procurement-source.type';
+import { InventoryClass } from './models/inventory-class.type';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -318,11 +320,20 @@ export class PartsComponent {
 
   private startPartWorkflow(result: NewPartForkResult): void {
     const definitionId = this.workflowDefinitionForPartType(result.partType);
+    // Pillar 1 — forward both the legacy partType (the workflow definition
+    // still keys off it for now) AND the new orthogonal axes so the
+    // adapter populates the new columns. Pillar 6 will replace this with a
+    // proper axis-based fork dialog and 14-cell workflow-definition matrix.
+    const { procurementSource, inventoryClass } = inferAxesFromLegacyPartType(result.partType);
     this.workflowService.startRun({
       entityType: 'Part',
       definitionId,
       mode: result.mode,
-      initialEntityData: { partType: result.partType },
+      initialEntityData: {
+        partType: result.partType,
+        procurementSource,
+        inventoryClass,
+      },
     }).subscribe({
       next: (run) => {
         // Deferred materialization: the entity row isn't created at workflow
@@ -460,5 +471,28 @@ export class PartsComponent {
       queryParamsHandling: 'merge',
     });
     this.userPreferences.set('parts:viewMode', mode);
+  }
+}
+
+/**
+ * Pillar 1 — Map a legacy PartType bucket to the new orthogonal axes. Same
+ * logic the server's PartWorkflowAdapter uses; mirrored client-side so the
+ * fork-dialog's old 4-bucket UI can keep working while the server columns
+ * get populated. Pillar 6's axis-aware fork dialog will obsolete this.
+ */
+function inferAxesFromLegacyPartType(pt: PartType): {
+  procurementSource: ProcurementSource;
+  inventoryClass: InventoryClass;
+} {
+  switch (pt) {
+    case 'Assembly':    return { procurementSource: 'Make', inventoryClass: 'Subassembly' };
+    case 'RawMaterial': return { procurementSource: 'Buy',  inventoryClass: 'Raw' };
+    case 'Consumable':  return { procurementSource: 'Buy',  inventoryClass: 'Consumable' };
+    case 'Tooling':     return { procurementSource: 'Buy',  inventoryClass: 'Tool' };
+    case 'Fastener':
+    case 'Electronic':  return { procurementSource: 'Buy',  inventoryClass: 'Component' };
+    case 'Packaging':   return { procurementSource: 'Buy',  inventoryClass: 'Consumable' };
+    case 'Part':        return { procurementSource: 'Make', inventoryClass: 'Component' };
+    default:            return { procurementSource: 'Buy',  inventoryClass: 'Component' };
   }
 }

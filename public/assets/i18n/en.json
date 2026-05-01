@@ -589,6 +589,12 @@
         "materialHelper": "Primary composition (e.g., Aluminum 6061, Steel A36).",
         "externalPartNumberLabel": "External Part #",
         "externalPartNumberPlaceholder": "Vendor / customer part number (optional)",
+        "manufacturerNameLabel": "Manufacturer",
+        "manufacturerPartNumberLabel": "Manufacturer Part #",
+        "traceabilityLabel": "Traceability",
+        "traceabilityNone": "Bulk (no tracking)",
+        "traceabilityLot": "By lot / batch",
+        "traceabilitySerial": "By serial number",
         "saveFailed": "Couldn't save basics."
       },
       "bom": {

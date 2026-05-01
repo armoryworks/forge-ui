@@ -600,6 +600,12 @@
         "materialHelper": "Composición principal (p. ej., Aluminio 6061, Acero A36).",
         "externalPartNumberLabel": "N.º de pieza externa",
         "externalPartNumberPlaceholder": "Número de pieza del proveedor / cliente (opcional)",
+        "manufacturerNameLabel": "Fabricante",
+        "manufacturerPartNumberLabel": "N.º de pieza del fabricante",
+        "traceabilityLabel": "Trazabilidad",
+        "traceabilityNone": "A granel (sin trazabilidad)",
+        "traceabilityLot": "Por lote",
+        "traceabilitySerial": "Por número de serie",
         "saveFailed": "No se pudo guardar."
       },
       "bom": {

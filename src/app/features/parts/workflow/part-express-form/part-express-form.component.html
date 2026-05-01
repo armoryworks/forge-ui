@@ -53,10 +53,27 @@
     }
 
     <app-input
+      [label]="'parts.workflow.basics.manufacturerNameLabel' | translate"
+      formControlName="manufacturerName"
+      data-testid="express-manufacturer-name" />
+
+    <app-input
+      [label]="'parts.workflow.basics.manufacturerPartNumberLabel' | translate"
+      formControlName="manufacturerPartNumber"
+      data-testid="express-manufacturer-pn" />
+
+    <app-input
       [label]="'parts.workflow.basics.externalPartNumberLabel' | translate"
       formControlName="externalPartNumber"
       [placeholder]="'parts.workflow.basics.externalPartNumberPlaceholder' | translate"
       data-testid="express-external-number" />
+
+    <app-select
+      [label]="'parts.workflow.basics.traceabilityLabel' | translate"
+      formControlName="traceabilityType"
+      [options]="traceabilityOptions"
+      [required]="true"
+      data-testid="express-traceability" />
 
     <app-currency-input
       [label]="'parts.workflow.costing.manualOverrideLabel' | translate"
