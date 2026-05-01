@@ -223,35 +223,41 @@
 
         @case ('routing') {
           <div class="detail-body--padded">
-            <app-routing [partId]="part.id" [bomEntries]="part.bomEntries" />
+            <app-part-routing-cluster [entity]="part" [editing]="editing()" />
           </div>
         }
 
         @case ('alternates') {
           <div class="detail-body--padded">
-            <app-part-alternates-tab [partId]="part.id" />
+            <app-part-alternates-cluster [entity]="part" [editing]="editing()" />
           </div>
         }
 
         @case ('quality') {
-          <div class="cluster cluster__placeholder">
-            <span class="material-icons-outlined cluster__placeholder-icon">fact_check</span>
-            <span>{{ 'parts.detail.tabs.placeholderHelp' | translate }}</span>
-          </div>
+          <app-part-quality-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
         }
 
         @case ('mrp') {
-          <div class="cluster cluster__placeholder">
-            <span class="material-icons-outlined cluster__placeholder-icon">event_available</span>
-            <span>{{ 'parts.detail.tabs.placeholderHelp' | translate }}</span>
-          </div>
+          <app-part-mrp-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
         }
 
         @case ('material') {
-          <div class="cluster cluster__placeholder">
-            <span class="material-icons-outlined cluster__placeholder-icon">category</span>
-            <span>{{ 'parts.detail.tabs.placeholderHelp' | translate }}</span>
-          </div>
+          <app-part-material-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
         }
 
         @case ('activity') {

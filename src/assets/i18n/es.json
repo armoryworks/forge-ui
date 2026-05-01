@@ -695,6 +695,41 @@
         "activity": "Actividad",
         "files": "Archivos",
         "placeholderHelp": "Esta pestaña llegará en Pillar 4 Fase 2."
+      },
+      "material": {
+        "title": "Material y Físico",
+        "spec": "Especificación de Material",
+        "specHelper": "Especificación técnica del material — utiliza el campo libre Material cuando no está definida.",
+        "weight": "Peso",
+        "dimensions": "Dimensiones",
+        "volume": "Volumen"
+      },
+      "uom": {
+        "title": "Unidades de medida",
+        "stock": "UM de Inventario",
+        "purchase": "UM de Compra",
+        "sales": "UM de Venta",
+        "helper": "Inventario = unidad de stock. Compra = unidad de factura del proveedor. Venta = unidad de factura del cliente."
+      },
+      "mrp": {
+        "title": "Planificación MRP",
+        "isMrpPlanned": "Planificado por MRP",
+        "lotSizingRule": "Regla de Tamaño de Lote",
+        "fixedOrderQty": "Cantidad Fija de Orden",
+        "minOrderQty": "Cantidad Mínima",
+        "orderMultiple": "Múltiplo de Orden",
+        "planningFence": "Cerco de Planificación (días)",
+        "demandFence": "Cerco de Demanda (días)",
+        "leadTimeNote": "El plazo de entrega se obtiene de VendorPart preferido cuando está configurado."
+      },
+      "quality": {
+        "title": "Calidad y Cumplimiento",
+        "requiresInspection": "Requiere Inspección de Recepción",
+        "inspectionFrequency": "Frecuencia de Inspección",
+        "inspectionSkipAfter": "Omitir Después de N Recepciones",
+        "hazmatClass": "Clase de Materiales Peligrosos",
+        "shelfLifeDays": "Vida Útil (días)",
+        "backflushPolicy": "Política de Backflush"
       }
     }
   },

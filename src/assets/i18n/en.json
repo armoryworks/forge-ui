@@ -715,6 +715,41 @@
         "activity": "Activity",
         "files": "Files",
         "placeholderHelp": "This tab is coming in Pillar 4 Phase 2."
+      },
+      "material": {
+        "title": "Material & Physical",
+        "spec": "Material Spec",
+        "specHelper": "Engineering material spec — falls back to free-text Material when not set.",
+        "weight": "Weight",
+        "dimensions": "Dimensions",
+        "volume": "Volume"
+      },
+      "uom": {
+        "title": "Units of Measure",
+        "stock": "Stock UoM",
+        "purchase": "Purchase UoM",
+        "sales": "Sales UoM",
+        "helper": "Stock = inventory unit. Purchase = vendor invoice unit. Sales = customer invoice unit."
+      },
+      "mrp": {
+        "title": "MRP Planning",
+        "isMrpPlanned": "MRP-Planned",
+        "lotSizingRule": "Lot Sizing Rule",
+        "fixedOrderQty": "Fixed Order Qty",
+        "minOrderQty": "Min Order Qty",
+        "orderMultiple": "Order Multiple",
+        "planningFence": "Planning Fence (days)",
+        "demandFence": "Demand Fence (days)",
+        "leadTimeNote": "Lead time resolves from preferred VendorPart when configured."
+      },
+      "quality": {
+        "title": "Quality & Compliance",
+        "requiresInspection": "Requires Receiving Inspection",
+        "inspectionFrequency": "Inspection Frequency",
+        "inspectionSkipAfter": "Skip After N Receipts",
+        "hazmatClass": "Hazmat Class",
+        "shelfLifeDays": "Shelf Life (days)",
+        "backflushPolicy": "Backflush Policy"
       }
     }
   },

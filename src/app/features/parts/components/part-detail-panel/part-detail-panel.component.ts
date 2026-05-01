@@ -31,10 +31,8 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/co
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { RoutingComponent } from '../routing/routing.component';
 import { BomTreeComponent } from '../bom-tree/bom-tree.component';
 import { BomRevisionHistoryComponent } from '../bom-revision-history/bom-revision-history.component';
-import { PartAlternatesTabComponent } from '../part-alternates-tab/part-alternates-tab.component';
 import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-tab.component';
 import { VendorPartListPanelComponent } from '../vendor-parts-cluster/vendor-part-list-panel.component';
 import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../vendor-parts-cluster/vendor-part-form-dialog.component';
@@ -46,6 +44,16 @@ import { PartInventoryClusterComponent } from '../part-clusters/part-inventory-c
 import { PartCostClusterComponent } from '../part-clusters/part-cost-cluster.component';
 import { PartActivityClusterComponent } from '../part-clusters/part-activity-cluster.component';
 import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.component';
+import { PartMaterialClusterComponent } from '../part-clusters/part-material-cluster/part-material-cluster.component';
+import { PartUomClusterComponent } from '../part-clusters/part-uom-cluster/part-uom-cluster.component';
+import { PartMrpClusterComponent } from '../part-clusters/part-mrp-cluster/part-mrp-cluster.component';
+// PartBomClusterComponent exists as a thin wrapper for future polish but is
+// not currently imported here — the BOM tab keeps its rich inline UI
+// (view toggle, add dialog, revision history) which the cluster wrapper
+// does not yet replicate.
+import { PartRoutingClusterComponent } from '../part-clusters/part-routing-cluster/part-routing-cluster.component';
+import { PartAlternatesClusterComponent } from '../part-clusters/part-alternates-cluster/part-alternates-cluster.component';
+import { PartQualityClusterComponent } from '../part-clusters/part-quality-cluster/part-quality-cluster.component';
 import {
   PartDetailLayoutResolverService,
   PartDetailTabId,
@@ -62,12 +70,13 @@ type BomViewMode = 'table' | 'tree';
  * list of tab descriptors. Identity is always first; Activity → Files
  * always last. Tab id is bound to `?tab=<id>` so refresh holds.
  *
- * Cluster tabs (identity, inventory, cost, activity, files) render the
+ * Cluster tabs (identity, inventory, cost, activity, files, material,
+ * uom, mrp, quality, routing, alternates) render the
  * new `<app-part-*-cluster>` components. Existing inline implementations
- * are reused for sourcing (vendor list panel), bom, routing, alternates.
- * The remaining cluster tabs (mrp, quality, material) currently render
- * a "coming in Pillar 4 Phase 2" placeholder while their existing inline
- * implementations get extracted in a follow-up dispatch.
+ * are reused for sourcing (vendor list panel) and BOM (rich inline UI
+ * with view toggle, add dialog, and revision history — `PartBomClusterComponent`
+ * exists as a thin wrapper for future polish but is not currently wired
+ * into the BOM tab to preserve full add/delete/tree/revisions UX).
  */
 @Component({
   selector: 'app-part-detail-panel',
@@ -79,10 +88,13 @@ type BomViewMode = 'table' | 'tree';
     EntityPickerComponent, LoadingBlockDirective, ValidationButtonComponent,
     StlViewerComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,
-    RoutingComponent, BomTreeComponent, BomRevisionHistoryComponent, PartAlternatesTabComponent,
+    BomTreeComponent, BomRevisionHistoryComponent,
     SerialNumbersTabComponent, VendorPartListPanelComponent,
     PartIdentityClusterComponent, PartInventoryClusterComponent, PartCostClusterComponent,
     PartActivityClusterComponent, PartFilesClusterComponent,
+    PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,
+    PartRoutingClusterComponent, PartAlternatesClusterComponent,
+    PartQualityClusterComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
   styleUrl: './part-detail-panel.component.scss',
@@ -307,6 +319,37 @@ export class PartDetailPanelComponent {
       // Server uses sentinel -1 to mean "clear to null".
       request['manualCostOverride'] = patch.manualCostOverride === null ? -1 : patch.manualCostOverride;
     }
+    // Pillar 4 Phase 2 — Material / UoM / MRP / Quality fields. The
+    // server's PATCH endpoint may not accept all of these yet; the
+    // workflow adapter does. We forward them either way so the wire
+    // shape is correct as soon as the API surface widens.
+    if ('materialSpecId' in patch) request['materialSpecId'] = patch.materialSpecId;
+    if ('material' in patch) request['material'] = patch.material ?? '';
+    if ('weightEach' in patch) request['weightEach'] = patch.weightEach;
+    if ('weightDisplayUnit' in patch) request['weightDisplayUnit'] = patch.weightDisplayUnit;
+    if ('lengthMm' in patch) request['lengthMm'] = patch.lengthMm;
+    if ('widthMm' in patch) request['widthMm'] = patch.widthMm;
+    if ('heightMm' in patch) request['heightMm'] = patch.heightMm;
+    if ('dimensionDisplayUnit' in patch) request['dimensionDisplayUnit'] = patch.dimensionDisplayUnit;
+    if ('volumeMl' in patch) request['volumeMl'] = patch.volumeMl;
+    if ('volumeDisplayUnit' in patch) request['volumeDisplayUnit'] = patch.volumeDisplayUnit;
+    if ('stockUomId' in patch) request['stockUomId'] = patch.stockUomId;
+    if ('purchaseUomId' in patch) request['purchaseUomId'] = patch.purchaseUomId;
+    if ('salesUomId' in patch) request['salesUomId'] = patch.salesUomId;
+    if ('isMrpPlanned' in patch) request['isMrpPlanned'] = patch.isMrpPlanned;
+    if ('lotSizingRule' in patch) request['lotSizingRule'] = patch.lotSizingRule;
+    if ('fixedOrderQuantity' in patch) request['fixedOrderQuantity'] = patch.fixedOrderQuantity;
+    if ('minimumOrderQuantity' in patch) request['minimumOrderQuantity'] = patch.minimumOrderQuantity;
+    if ('orderMultiple' in patch) request['orderMultiple'] = patch.orderMultiple;
+    if ('planningFenceDays' in patch) request['planningFenceDays'] = patch.planningFenceDays;
+    if ('demandFenceDays' in patch) request['demandFenceDays'] = patch.demandFenceDays;
+    if ('requiresReceivingInspection' in patch) request['requiresReceivingInspection'] = patch.requiresReceivingInspection;
+    if ('receivingInspectionTemplateId' in patch) request['receivingInspectionTemplateId'] = patch.receivingInspectionTemplateId;
+    if ('inspectionFrequency' in patch) request['inspectionFrequency'] = patch.inspectionFrequency;
+    if ('inspectionSkipAfterN' in patch) request['inspectionSkipAfterN'] = patch.inspectionSkipAfterN;
+    if ('hazmatClass' in patch) request['hazmatClass'] = patch.hazmatClass;
+    if ('shelfLifeDays' in patch) request['shelfLifeDays'] = patch.shelfLifeDays;
+    if ('backflushPolicy' in patch) request['backflushPolicy'] = patch.backflushPolicy;
 
     this.saving.set(true);
     this.partsService.updatePart(p.id, request).subscribe({

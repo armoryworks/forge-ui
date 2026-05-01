@@ -1,9 +1,11 @@
 import { AbcClass } from './abc-class.type';
 import { BackflushPolicy } from './backflush-policy.type';
 import { InventoryClass } from './inventory-class.type';
+import { LotSizingRule } from './lot-sizing-rule.type';
 import { PartStatus } from './part-status.type';
 import { PartType } from './part-type.type';
 import { ProcurementSource } from './procurement-source.type';
+import { ReceivingInspectionFrequency } from './receiving-inspection-frequency.type';
 import { TraceabilityType } from './traceability-type.type';
 import { BOMEntry } from './bom-entry.model';
 import { BOMUsage } from './bom-usage.model';
@@ -79,6 +81,24 @@ export interface PartDetail {
   isConfigurable: boolean;
   defaultBinId: number | null;
   sourcePartId: number | null;
+  // Pillar 4 Phase 2 — MRP planning. Mirrored on the entity but not yet
+  // returned by GET /api/v1/parts/{id}; cluster guards `?? null` everywhere.
+  isMrpPlanned?: boolean | null;
+  lotSizingRule?: LotSizingRule | null;
+  fixedOrderQuantity?: number | null;
+  minimumOrderQuantity?: number | null;
+  orderMultiple?: number | null;
+  planningFenceDays?: number | null;
+  demandFenceDays?: number | null;
+  // Pillar 4 Phase 2 — Units of measure (FK to UnitOfMeasure).
+  stockUomId?: number | null;
+  purchaseUomId?: number | null;
+  salesUomId?: number | null;
+  // Pillar 4 Phase 2 — Receiving inspection.
+  requiresReceivingInspection?: boolean | null;
+  receivingInspectionTemplateId?: number | null;
+  inspectionFrequency?: ReceivingInspectionFrequency | null;
+  inspectionSkipAfterN?: number | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: Date;
