@@ -81,24 +81,30 @@ export interface PartDetail {
   isConfigurable: boolean;
   defaultBinId: number | null;
   sourcePartId: number | null;
-  // Pillar 4 Phase 2 — MRP planning. Mirrored on the entity but not yet
-  // returned by GET /api/v1/parts/{id}; cluster guards `?? null` everywhere.
-  isMrpPlanned?: boolean | null;
-  lotSizingRule?: LotSizingRule | null;
-  fixedOrderQuantity?: number | null;
-  minimumOrderQuantity?: number | null;
-  orderMultiple?: number | null;
-  planningFenceDays?: number | null;
-  demandFenceDays?: number | null;
-  // Pillar 4 Phase 2 — Units of measure (FK to UnitOfMeasure).
-  stockUomId?: number | null;
-  purchaseUomId?: number | null;
-  salesUomId?: number | null;
+  // Pillar 4 Phase 2 — MRP planning. Server-guaranteed since the
+  // PartDetailResponseModel widening (commit follow-up to cluster dispatch).
+  isMrpPlanned: boolean;
+  lotSizingRule: LotSizingRule | null;
+  fixedOrderQuantity: number | null;
+  minimumOrderQuantity: number | null;
+  orderMultiple: number | null;
+  planningFenceDays: number | null;
+  demandFenceDays: number | null;
+  // Pillar 4 Phase 2 — Units of measure (FK to UnitOfMeasure + resolved code/label).
+  stockUomId: number | null;
+  stockUomCode: string | null;
+  stockUomLabel: string | null;
+  purchaseUomId: number | null;
+  purchaseUomCode: string | null;
+  purchaseUomLabel: string | null;
+  salesUomId: number | null;
+  salesUomCode: string | null;
+  salesUomLabel: string | null;
   // Pillar 4 Phase 2 — Receiving inspection.
-  requiresReceivingInspection?: boolean | null;
-  receivingInspectionTemplateId?: number | null;
-  inspectionFrequency?: ReceivingInspectionFrequency | null;
-  inspectionSkipAfterN?: number | null;
+  requiresReceivingInspection: boolean;
+  receivingInspectionTemplateId: number | null;
+  inspectionFrequency: ReceivingInspectionFrequency | null;
+  inspectionSkipAfterN: number | null;
   bomEntries: BOMEntry[];
   usedIn: BOMUsage[];
   createdAt: Date;
