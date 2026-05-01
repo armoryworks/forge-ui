@@ -17,7 +17,10 @@ class FakeLoader implements TranslateLoader {
 function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
   return {
     id: 42, partNumber: 'PRT-00042', name: 'Widget', description: null, revision: 'A',
-    status: 'Draft', partType: 'Assembly', material: 'Steel',
+    status: 'Draft', partType: 'Assembly',
+    procurementSource: 'Make', inventoryClass: 'Subassembly', itemKindId: null, itemKindLabel: null,
+    traceabilityType: 'None', abcClass: null, manufacturerName: null, manufacturerPartNumber: null,
+    material: 'Steel',
     moldToolRef: null, externalPartNumber: null, externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,

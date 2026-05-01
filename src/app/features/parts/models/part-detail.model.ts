@@ -1,5 +1,9 @@
+import { AbcClass } from './abc-class.type';
+import { InventoryClass } from './inventory-class.type';
 import { PartStatus } from './part-status.type';
 import { PartType } from './part-type.type';
+import { ProcurementSource } from './procurement-source.type';
+import { TraceabilityType } from './traceability-type.type';
 import { BOMEntry } from './bom-entry.model';
 import { BOMUsage } from './bom-usage.model';
 
@@ -12,7 +16,22 @@ export interface PartDetail {
   description: string | null;
   revision: string;
   status: PartStatus;
+  /**
+   * Legacy overloaded type. Pillar 1 decomposed it into procurementSource +
+   * inventoryClass + itemKindId. Stays on the wire two release cycles for
+   * rollback safety; new UI code should branch on the three axes.
+   */
   partType: PartType;
+  // Pillar 1 — orthogonal axes
+  procurementSource: ProcurementSource;
+  inventoryClass: InventoryClass;
+  itemKindId: number | null;
+  itemKindLabel: string | null;
+  // Tier 0 additions
+  traceabilityType: TraceabilityType;
+  abcClass: AbcClass | null;
+  manufacturerName: string | null;
+  manufacturerPartNumber: string | null;
   material: string | null;
   moldToolRef: string | null;
   externalPartNumber: string | null;
