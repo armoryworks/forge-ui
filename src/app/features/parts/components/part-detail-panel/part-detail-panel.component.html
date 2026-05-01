@@ -133,7 +133,8 @@
             (edit)="openVendorPartEdit($event)"
             (delete)="deleteVendorPart($event)"
             (togglePreferred)="toggleVendorPartPreferred($event)"
-            (viewTiers)="openVendorPartTiers($event)" />
+            (viewTiers)="openVendorPartTiers($event)"
+            (viewTierHistory)="openVendorPartTierHistory($event)" />
           </div>
         }
 
@@ -151,6 +152,14 @@
             [part]="part"
             [editing]="editing()"
             [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
+        }
+
+        @case ('pricing') {
+          <app-part-pricing-cluster
+            [entity]="part"
+            [editing]="editing()"
             (save)="saveClusterPatch($event)"
             (cancelled)="cancelEdit()" />
         }

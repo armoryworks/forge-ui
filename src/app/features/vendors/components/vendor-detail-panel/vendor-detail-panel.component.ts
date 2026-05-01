@@ -25,6 +25,7 @@ import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scor
 import { VendorPartListPanelComponent } from '../../../parts/components/vendor-parts-cluster/vendor-part-list-panel.component';
 import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-form-dialog.component';
 import { VendorPartPriceTiersDialogComponent, VendorPartPriceTiersDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-price-tiers-dialog.component';
+import { VendorPartPriceTierHistoryDialogComponent, VendorPartPriceTierHistoryDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-price-tier-history-dialog.component';
 import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
 import { VendorPart } from '../../../parts/models/vendor-part.model';
 
@@ -261,5 +262,16 @@ export class VendorDetailPanelComponent {
       width: '700px',
       data: { vendorPart: vp },
     }).afterClosed().subscribe(() => this.loadVendorParts());
+  }
+
+  /** Dispatch C — read-only tier history dialog. */
+  protected openVendorPartTierHistory(vp: VendorPart): void {
+    this.dialog.open<
+      VendorPartPriceTierHistoryDialogComponent,
+      VendorPartPriceTierHistoryDialogData
+    >(VendorPartPriceTierHistoryDialogComponent, {
+      width: '700px',
+      data: { vendorPart: vp },
+    });
   }
 }

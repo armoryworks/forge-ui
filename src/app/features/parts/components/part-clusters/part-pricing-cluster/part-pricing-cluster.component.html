@@ -1,0 +1,125 @@
+<div class="cluster">
+  <!-- Resolver-current effective price -->
+  <section class="pricing-current">
+    <div class="pricing-current__row">
+      <span class="cluster__label">{{ 'parts.pricing.currentPrice' | translate }}</span>
+      <span class="pricing-current__amount">
+        @if (entity().effectivePriceSource !== 'Default') {
+          <app-currency-display
+            [value]="entity().effectivePrice"
+            [currency]="entity().effectivePriceCurrency" />
+        } @else {
+          <span class="cluster__value--muted">{{ 'parts.pricing.priceSourceDefault' | translate }}</span>
+        }
+      </span>
+    </div>
+    @if (entity().effectivePriceSource !== 'Default') {
+      <div class="pricing-current__source">
+        <span class="cluster__label">{{ 'parts.pricing.priceSource' | translate }}</span>
+        <span class="pricing-current__source-badge">
+          {{ sourceLabelKey() | translate }}
+        </span>
+      </div>
+    }
+  </section>
+
+  <!-- Price history -->
+  <section class="pricing-history" [appLoadingBlock]="loading()">
+    <h4 class="cluster__title">{{ 'parts.pricing.history' | translate }}</h4>
+
+    @if (history().length === 0) {
+      <app-empty-state
+        icon="history"
+        [message]="'parts.pricing.historyEmpty' | translate" />
+    } @else {
+      <app-data-table
+        tableId="part-price-history"
+        [columns]="columns"
+        [data]="history()"
+        [rowClass]="$any(this).rowClass"
+        emptyIcon="history"
+        [emptyMessage]="'parts.pricing.historyEmpty' | translate">
+
+        <ng-template appColumnCell="effectiveFrom" let-row>
+          {{ row.effectiveFrom | date:'MM/dd/yyyy' }}
+        </ng-template>
+        <ng-template appColumnCell="effectiveTo" let-row>
+          @if (row.effectiveTo) {
+            <span class="cluster__value--muted"
+              [matTooltip]="'parts.pricing.closedRowHelper' | translate"
+              matTooltipPosition="above">
+              {{ row.effectiveTo | date:'MM/dd/yyyy' }}
+            </span>
+          } @else {
+            <span class="pricing-history__open-badge">{{ 'parts.pricing.openBadge' | translate }}</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="unitPrice" let-row>
+          <span [class.cluster__value--muted]="row.effectiveTo !== null">
+            <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="notes" let-row>
+          <span [class.cluster__value--muted]="row.effectiveTo !== null">{{ row.notes || '---' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          @if (editing() && row.id === openRowId()) {
+            <button class="icon-btn icon-btn--danger"
+              type="button"
+              [matTooltip]="'common.delete' | translate" matTooltipPosition="above"
+              [attr.aria-label]="'common.delete' | translate"
+              (click)="deleteRow(row)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    }
+  </section>
+
+  <!-- Add new effective price (edit mode only) -->
+  @if (editing()) {
+    <section class="pricing-add" [formGroup]="form">
+      <h4 class="cluster__title">{{ 'parts.pricing.addNewPrice' | translate }}</h4>
+
+      <div class="cluster__form-row">
+        <app-currency-input
+          data-testid="part-price-unit-price"
+          [label]="'parts.pricing.unitPriceLabel' | translate"
+          formControlName="unitPrice"
+          [required]="true" />
+        <app-input
+          data-testid="part-price-currency"
+          [label]="'parts.pricing.currencyLabel' | translate"
+          formControlName="currency"
+          [maxlength]="3"
+          [required]="true" />
+      </div>
+      <div class="cluster__form-row">
+        <app-datepicker
+          data-testid="part-price-effective-from"
+          [label]="'parts.pricing.effectiveFromLabel' | translate"
+          formControlName="effectiveFrom" />
+      </div>
+      <app-textarea
+        data-testid="part-price-notes"
+        [label]="'parts.pricing.notesLabel' | translate"
+        [rows]="2"
+        formControlName="notes" />
+      <p class="pricing-add__helper">{{ 'parts.pricing.notesHelper' | translate }}</p>
+
+      <div class="cluster__actions">
+        <app-validation-button [violations]="violations" [loading]="saving()">
+          <button class="action-btn action-btn--primary"
+            type="button"
+            data-testid="part-price-save-btn"
+            [disabled]="form.invalid || saving()"
+            (click)="addPrice()">
+            <span class="material-icons-outlined">save</span>
+            {{ 'parts.pricing.savePrice' | translate }}
+          </button>
+        </app-validation-button>
+      </div>
+    </section>
+  }
+</div>

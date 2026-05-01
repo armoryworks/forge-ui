@@ -1,0 +1,55 @@
+<app-dialog [title]="title()" width="700px" (closed)="close()">
+  <div class="tier-history" [appLoadingBlock]="loading()">
+    <header class="tier-history__header">
+      <span class="tier-history__subtitle">{{ 'vendorPart.priceTierHistory' | translate }}</span>
+    </header>
+
+    @if (tiers().length === 0 && !loading()) {
+      <app-empty-state
+        icon="history"
+        [message]="'vendorPart.priceTierHistoryEmpty' | translate" />
+    } @else {
+      <app-data-table
+        tableId="vendor-part-price-tier-history"
+        [columns]="columns"
+        [data]="tiers()"
+        emptyIcon="history"
+        [emptyMessage]="'vendorPart.priceTierHistoryEmpty' | translate">
+
+        <ng-template appColumnCell="minQuantity" let-row>
+          <span [class.tier-history__closed]="row.effectiveTo !== null">
+            {{ row.minQuantity }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="unitPrice" let-row>
+          <span [class.tier-history__closed]="row.effectiveTo !== null">
+            <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="effectiveFrom" let-row>
+          <span [class.tier-history__closed]="row.effectiveTo !== null">
+            {{ row.effectiveFrom | date:'MM/dd/yyyy' }}
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="effectiveTo" let-row>
+          @if (row.effectiveTo) {
+            <span class="tier-history__closed"
+              [matTooltip]="'parts.pricing.closedRowHelper' | translate"
+              matTooltipPosition="above">
+              {{ row.effectiveTo | date:'MM/dd/yyyy' }}
+            </span>
+          } @else {
+            <span class="tier-history__open">{{ 'parts.pricing.openBadge' | translate }}</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="notes" let-row>
+          <span [class.tier-history__closed]="row.effectiveTo !== null">{{ row.notes || '---' }}</span>
+        </ng-template>
+      </app-data-table>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn action-btn--primary" (click)="close()">{{ 'common.close' | translate }}</button>
+  </div>
+</app-dialog>

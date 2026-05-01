@@ -107,6 +107,13 @@
 
       <ng-template appColumnCell="actions" let-row>
         <button class="icon-btn"
+          data-testid="vendor-part-history-btn"
+          [matTooltip]="'vendorPart.priceTierHistory' | translate" matTooltipPosition="above"
+          (click)="onViewTierHistory(row)"
+          [attr.aria-label]="'vendorPart.priceTierHistory' | translate">
+          <span class="material-icons-outlined">history</span>
+        </button>
+        <button class="icon-btn"
           [matTooltip]="'common.edit' | translate" matTooltipPosition="above"
           (click)="onEdit(row)"
           [attr.aria-label]="'common.edit' | translate">

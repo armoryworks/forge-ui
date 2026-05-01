@@ -20,6 +20,7 @@ export type PartDetailTabId =
   | 'bom'
   | 'routing'
   | 'cost'
+  | 'pricing'
   | 'quality'
   | 'alternates'
   | 'material'
@@ -45,6 +46,7 @@ const MRP: TabLayoutEntry = { id: 'mrp', labelKey: 'parts.detail.tabs.mrp', icon
 const BOM: TabLayoutEntry = { id: 'bom', labelKey: 'parts.detail.tabs.bom', iconName: 'account_tree' };
 const ROUTING: TabLayoutEntry = { id: 'routing', labelKey: 'parts.detail.tabs.routing', iconName: 'alt_route' };
 const COST: TabLayoutEntry = { id: 'cost', labelKey: 'parts.detail.tabs.cost', iconName: 'payments' };
+const PRICING: TabLayoutEntry = { id: 'pricing', labelKey: 'parts.detail.tabs.pricing', iconName: 'sell' };
 const QUALITY: TabLayoutEntry = { id: 'quality', labelKey: 'parts.detail.tabs.quality', iconName: 'fact_check' };
 const ALTERNATES: TabLayoutEntry = { id: 'alternates', labelKey: 'parts.detail.tabs.alternates', iconName: 'swap_horiz' };
 const MATERIAL: TabLayoutEntry = { id: 'material', labelKey: 'parts.detail.tabs.material', iconName: 'category' };
@@ -70,48 +72,48 @@ export class PartDetailLayoutResolverService {
   private middleTabs(ps: ProcurementSource, ic: InventoryClass): TabLayoutEntry[] {
     // Buy + Raw (B1)
     if (ps === 'Buy' && ic === 'Raw') {
-      return [SOURCING, INVENTORY, QUALITY, COST];
+      return [SOURCING, INVENTORY, QUALITY, COST, PRICING];
     }
     // Buy + Component / Subassembly / FinishedGood (B2 / B3 / B4)
     if (ps === 'Buy' && (ic === 'Component' || ic === 'Subassembly' || ic === 'FinishedGood')) {
-      return [SOURCING, INVENTORY, QUALITY, COST, ALTERNATES];
+      return [SOURCING, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
     // Buy + Consumable (B5) — no Quality
     if (ps === 'Buy' && ic === 'Consumable') {
-      return [SOURCING, INVENTORY, COST];
+      return [SOURCING, INVENTORY, COST, PRICING];
     }
     // Buy + Tool (B6)
     if (ps === 'Buy' && ic === 'Tool') {
-      return [SOURCING, INVENTORY, QUALITY, COST, ALTERNATES];
+      return [SOURCING, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
 
     // Make + Component (M1)
     if (ps === 'Make' && ic === 'Component') {
-      return [MATERIAL, INVENTORY, MRP, ROUTING, COST, QUALITY, ALTERNATES];
+      return [MATERIAL, INVENTORY, MRP, ROUTING, COST, PRICING, QUALITY, ALTERNATES];
     }
     // Make + Subassembly / FinishedGood (M2 / M3)
     if (ps === 'Make' && (ic === 'Subassembly' || ic === 'FinishedGood')) {
-      return [MATERIAL, BOM, ROUTING, INVENTORY, MRP, COST, QUALITY, ALTERNATES];
+      return [MATERIAL, BOM, ROUTING, INVENTORY, MRP, COST, PRICING, QUALITY, ALTERNATES];
     }
-    // Make + Tool (M4) — lives mostly as an Asset; minimal middle
+    // Make + Tool (M4) — lives mostly as an Asset; minimal middle, no sales pricing
     if (ps === 'Make' && ic === 'Tool') {
       return [MATERIAL, BOM, ROUTING];
     }
 
     // Subcontract + Component / Subassembly (S1 / S2)
     if (ps === 'Subcontract' && ic === 'Component') {
-      return [SOURCING, INVENTORY, QUALITY, COST, ALTERNATES];
+      return [SOURCING, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
     if (ps === 'Subcontract' && ic === 'Subassembly') {
-      return [SOURCING, BOM, INVENTORY, QUALITY, COST, ALTERNATES];
+      return [SOURCING, BOM, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
     }
 
-    // Phantom + Subassembly / FinishedGood (P1 / P3) — never stocked
+    // Phantom + Subassembly / FinishedGood (P1 / P3) — never stocked, never priced
     if (ps === 'Phantom' && (ic === 'Subassembly' || ic === 'FinishedGood')) {
       return [BOM];
     }
 
     // Default: Buy + Component layout
-    return [SOURCING, INVENTORY, QUALITY, COST, ALTERNATES];
+    return [SOURCING, INVENTORY, QUALITY, COST, PRICING, ALTERNATES];
   }
 }

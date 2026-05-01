@@ -11,27 +11,33 @@ describe('PartDetailLayoutResolverService', () => {
     service = TestBed.inject(PartDetailLayoutResolverService);
   });
 
-  it('Buy + Raw → identity, sourcing, inventory, quality, cost, activity, files', () => {
+  it('Buy + Raw → identity, sourcing, inventory, quality, cost, pricing, activity, files', () => {
     const ids = service.resolve('Buy', 'Raw').map(t => t.id);
-    expect(ids).toEqual(['identity', 'sourcing', 'inventory', 'quality', 'cost', 'activity', 'files']);
+    expect(ids).toEqual(['identity', 'sourcing', 'inventory', 'quality', 'cost', 'pricing', 'activity', 'files']);
   });
 
-  it('Make + Subassembly → identity, material, bom, routing, inventory, mrp, cost, quality, alternates, activity, files', () => {
+  it('Make + Subassembly → identity, material, bom, routing, inventory, mrp, cost, pricing, quality, alternates, activity, files', () => {
     const ids = service.resolve('Make', 'Subassembly').map(t => t.id);
     expect(ids).toEqual([
-      'identity', 'material', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'quality', 'alternates', 'activity', 'files',
+      'identity', 'material', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'pricing', 'quality', 'alternates', 'activity', 'files',
     ]);
   });
 
-  it('Phantom + Subassembly → identity, bom, activity, files (very narrow set)', () => {
+  it('Phantom + Subassembly → identity, bom, activity, files (very narrow set, no pricing)', () => {
     const ids = service.resolve('Phantom', 'Subassembly').map(t => t.id);
     expect(ids).toEqual(['identity', 'bom', 'activity', 'files']);
+    expect(ids).not.toContain('pricing');
   });
 
-  it('unknown combo defaults to Buy + Component layout', () => {
+  it('Phantom + FinishedGood excludes pricing tab', () => {
+    const ids = service.resolve('Phantom', 'FinishedGood').map(t => t.id);
+    expect(ids).not.toContain('pricing');
+  });
+
+  it('unknown combo defaults to Buy + Component layout (includes pricing)', () => {
     // Phantom + Raw is not a viable combo per Section 2 — should default.
     const ids = service.resolve('Phantom', 'Raw').map(t => t.id);
-    expect(ids).toEqual(['identity', 'sourcing', 'inventory', 'quality', 'cost', 'alternates', 'activity', 'files']);
+    expect(ids).toEqual(['identity', 'sourcing', 'inventory', 'quality', 'cost', 'pricing', 'alternates', 'activity', 'files']);
   });
 
   it('Identity always first; Activity then Files always last across every combo', () => {
@@ -47,14 +53,39 @@ describe('PartDetailLayoutResolverService', () => {
     }
   });
 
-  it('Buy + Consumable (B5) hides Quality and Alternates', () => {
+  it('Buy + Consumable (B5) hides Quality and Alternates but still shows Pricing', () => {
     const ids = service.resolve('Buy', 'Consumable').map(t => t.id);
     expect(ids).not.toContain('quality');
     expect(ids).not.toContain('alternates');
+    expect(ids).toContain('pricing');
   });
 
-  it('Make + Tool (M4) limits to material/bom/routing in the middle (lives as Asset)', () => {
+  it('Make + Tool (M4) limits to material/bom/routing — no Pricing (sold as asset, not part)', () => {
     const ids = service.resolve('Make', 'Tool').map(t => t.id);
     expect(ids).toEqual(['identity', 'material', 'bom', 'routing', 'activity', 'files']);
+    expect(ids).not.toContain('pricing');
+  });
+
+  it('Pricing tab is positioned immediately after Cost on every non-Phantom combo', () => {
+    const cases: { ps: 'Buy' | 'Make' | 'Subcontract'; ic: 'Raw' | 'Component' | 'Subassembly' | 'FinishedGood' | 'Consumable' | 'Tool' }[] = [
+      { ps: 'Buy', ic: 'Raw' },
+      { ps: 'Buy', ic: 'Component' },
+      { ps: 'Buy', ic: 'Subassembly' },
+      { ps: 'Buy', ic: 'FinishedGood' },
+      { ps: 'Buy', ic: 'Consumable' },
+      { ps: 'Buy', ic: 'Tool' },
+      { ps: 'Make', ic: 'Component' },
+      { ps: 'Make', ic: 'Subassembly' },
+      { ps: 'Make', ic: 'FinishedGood' },
+      { ps: 'Subcontract', ic: 'Component' },
+      { ps: 'Subcontract', ic: 'Subassembly' },
+    ];
+    for (const { ps, ic } of cases) {
+      const ids = service.resolve(ps, ic).map(t => t.id);
+      const costIndex = ids.indexOf('cost');
+      const pricingIndex = ids.indexOf('pricing');
+      expect(costIndex, `cost present for ${ps}+${ic}`).toBeGreaterThanOrEqual(0);
+      expect(pricingIndex, `pricing present for ${ps}+${ic}`).toBe(costIndex + 1);
+    }
   });
 });

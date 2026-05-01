@@ -59,4 +59,15 @@ export class VendorPartsService {
       `${environment.apiUrl}/vendor-parts/${vendorPartId}/price-tiers/${tierId}`,
     );
   }
+
+  /**
+   * Read-only price-tier history for a VendorPart — current + closed rows,
+   * ordered EffectiveFrom DESC, then MinQuantity ASC. Powers the tier
+   * history dialog opened from the Vendor catalog row.
+   */
+  getPriceTierHistory(vendorPartId: number): Observable<VendorPartPriceTier[]> {
+    return this.http.get<VendorPartPriceTier[]>(
+      `${environment.apiUrl}/vendor-parts/${vendorPartId}/price-tiers/history`,
+    );
+  }
 }

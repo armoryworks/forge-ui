@@ -1,0 +1,34 @@
+@use '../../../../../styles/variables' as *;
+
+.tier-history {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+}
+
+.tier-history__header {
+  display: flex;
+  align-items: baseline;
+  gap: $sp-md;
+}
+
+.tier-history__subtitle {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.tier-history__closed {
+  color: var(--text-muted);
+}
+
+.tier-history__open {
+  font-size: $font-size-xxs;
+  color: var(--success);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

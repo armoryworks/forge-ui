@@ -1,0 +1,65 @@
+@use '../../../../../../styles/variables' as *;
+@use '../../../../../../styles/mixins' as *;
+
+.pricing-current {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  background: var(--bg);
+  border-left: $border-width-accent solid var(--primary);
+}
+
+.pricing-current__row {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.pricing-current__amount {
+  font-size: $font-size-kpi;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.pricing-current__source {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+}
+
+.pricing-current__source-badge {
+  font-size: $font-size-xs;
+  color: var(--text-secondary);
+  padding: $sp-xxs $sp-sm;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+}
+
+.pricing-history {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.pricing-history__open-badge {
+  font-size: $font-size-xxs;
+  color: var(--success);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pricing-add {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding-top: $sp-md;
+  border-top: $border-width-thin solid var(--border);
+}
+
+.pricing-add__helper {
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+  margin: 0;
+}

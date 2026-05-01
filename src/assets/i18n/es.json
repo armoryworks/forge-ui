@@ -803,6 +803,7 @@
         "bom": "BOM",
         "routing": "Ruta",
         "cost": "Coste",
+        "pricing": "Precios",
         "quality": "Calidad",
         "alternates": "Alternativas",
         "material": "Material",
@@ -845,6 +846,28 @@
         "shelfLifeDays": "Vida Útil (días)",
         "backflushPolicy": "Política de Backflush"
       }
+    },
+    "pricing": {
+      "currentPrice": "Precio efectivo actual",
+      "priceSource": "Fuente",
+      "priceSourcePriceListEntry": "Lista de precios del cliente",
+      "priceSourcePartPrice": "Precio por defecto de la pieza",
+      "priceSourceVendorPartTier": "Nivel del proveedor preferente",
+      "priceSourceDefault": "Sin precio configurado",
+      "history": "Historial de precios",
+      "historyEmpty": "Sin historial de precios todavía.",
+      "addNewPrice": "Añadir nuevo precio efectivo",
+      "unitPriceLabel": "Precio unitario",
+      "currencyLabel": "Moneda",
+      "effectiveFromLabel": "Vigente desde",
+      "notesLabel": "Notas",
+      "notesHelper": "Por qué cambió el precio (p. ej. \"competidor igualó\", \"materia prima subió\").",
+      "savePrice": "Guardar precio",
+      "closedRowHelper": "Cerrado (reemplazado por una fila vigente posterior)",
+      "openBadge": "Abierto",
+      "addedSnack": "Precio efectivo añadido.",
+      "deletedSnack": "Fila de precio eliminada.",
+      "confirmDelete": "¿Eliminar esta fila de precio del historial?"
     }
   },
   "vendorPart": {
@@ -878,7 +901,9 @@
       "effectiveTo": "Vigente hasta",
       "addTier": "Añadir nivel",
       "empty": "Sin niveles — añade uno para precios por cantidad."
-    }
+    },
+    "priceTierHistory": "Historial de niveles de precio",
+    "priceTierHistoryEmpty": "Sin historial de niveles todavía."
   },
   "inventory": {
     "title": "Inventario",

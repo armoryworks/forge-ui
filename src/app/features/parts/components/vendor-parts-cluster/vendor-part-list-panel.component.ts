@@ -51,6 +51,8 @@ export class VendorPartListPanelComponent {
   readonly delete = output<VendorPart>();
   readonly togglePreferred = output<VendorPart>();
   readonly viewTiers = output<VendorPart>();
+  /** Dispatch C — open the read-only price-tier history dialog. */
+  readonly viewTierHistory = output<VendorPart>();
 
   protected readonly tableId = computed(() =>
     this.mode() === 'sources' ? 'part-vendor-sources' : 'vendor-part-catalog',
@@ -86,7 +88,7 @@ export class VendorPartListPanelComponent {
         { field: 'lowestTierPrice', header: t.instant('vendorPart.priceTiersLabel'), width: '110px', align: 'right' },
         { field: 'isApproved', header: t.instant('vendorPart.isApproved'), width: '90px', align: 'center', sortable: true },
         { field: 'notes', header: t.instant('vendorPart.notes') },
-        { field: 'actions', header: '', width: '80px' },
+        { field: 'actions', header: '', width: '110px' },
       ];
     }
     return [
@@ -118,4 +120,5 @@ export class VendorPartListPanelComponent {
   protected onDelete(row: VendorPart): void { this.delete.emit(row); }
   protected onTogglePreferred(row: VendorPart): void { this.togglePreferred.emit(row); }
   protected onViewTiers(row: VendorPart): void { this.viewTiers.emit(row); }
+  protected onViewTierHistory(row: VendorPart): void { this.viewTierHistory.emit(row); }
 }

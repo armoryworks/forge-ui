@@ -828,6 +828,7 @@
         "bom": "BOM",
         "routing": "Routing",
         "cost": "Cost",
+        "pricing": "Pricing",
         "quality": "Quality",
         "alternates": "Alternates",
         "material": "Material",
@@ -870,6 +871,28 @@
         "shelfLifeDays": "Shelf Life (days)",
         "backflushPolicy": "Backflush Policy"
       }
+    },
+    "pricing": {
+      "currentPrice": "Current effective price",
+      "priceSource": "Source",
+      "priceSourcePriceListEntry": "Customer price list",
+      "priceSourcePartPrice": "Part-level default",
+      "priceSourceVendorPartTier": "Preferred vendor tier",
+      "priceSourceDefault": "No price configured",
+      "history": "Price history",
+      "historyEmpty": "No price history yet.",
+      "addNewPrice": "Add new effective price",
+      "unitPriceLabel": "Unit Price",
+      "currencyLabel": "Currency",
+      "effectiveFromLabel": "Effective From",
+      "notesLabel": "Notes",
+      "notesHelper": "Why the price changed (e.g. \"competitor matched\", \"raw cost up\").",
+      "savePrice": "Save Price",
+      "closedRowHelper": "Closed (superseded by a later effective row)",
+      "openBadge": "Open",
+      "addedSnack": "Effective price added.",
+      "deletedSnack": "Price row removed.",
+      "confirmDelete": "Remove this price row from history?"
     }
   },
   "vendorPart": {
@@ -903,7 +926,9 @@
       "effectiveTo": "Effective To",
       "addTier": "Add Tier",
       "empty": "No price tiers — add one to enable per-quantity pricing."
-    }
+    },
+    "priceTierHistory": "Price tier history",
+    "priceTierHistoryEmpty": "No tier history yet."
   },
   "inventory": {
     "title": "Inventory",

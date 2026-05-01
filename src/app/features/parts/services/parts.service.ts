@@ -187,12 +187,30 @@ export class PartsService {
     return this.http.get<{ partId: number; thumbnailUrl: string | null }[]>(`${this.base}/thumbnails`, { params });
   }
 
-  getPartPrices(partId: number): Observable<PartPrice[]> {
+  /**
+   * Returns the chronological history of effective-dated PartPrice rows for
+   * the part — current open row first, then closed rows in EffectiveFrom
+   * DESC order. Powers the Pricing tab's history table on Part detail.
+   */
+  getPartPriceHistory(partId: number): Observable<PartPrice[]> {
     return this.http.get<PartPrice[]>(`${this.base}/${partId}/prices`);
   }
 
+  /**
+   * Posts a new effective-dated PartPrice row. The server closes out any
+   * prior open row by setting its EffectiveTo to this row's EffectiveFrom.
+   */
   addPartPrice(partId: number, request: AddPartPriceRequest): Observable<PartPrice> {
     return this.http.post<PartPrice>(`${this.base}/${partId}/prices`, request);
+  }
+
+  /**
+   * Removes a PartPrice history row. Pre-beta the server hard-deletes (no
+   * soft-delete column) — once history is committed, prefer leaving rows
+   * intact for audit. UI exposes this only on the most-recent open row.
+   */
+  deletePartPrice(partId: number, priceId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${partId}/prices/${priceId}`);
   }
 
   getPartAlternates(partId: number): Observable<PartAlternate[]> {

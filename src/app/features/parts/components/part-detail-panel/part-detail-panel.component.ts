@@ -37,12 +37,14 @@ import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-
 import { VendorPartListPanelComponent } from '../vendor-parts-cluster/vendor-part-list-panel.component';
 import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../vendor-parts-cluster/vendor-part-form-dialog.component';
 import { VendorPartPriceTiersDialogComponent, VendorPartPriceTiersDialogData } from '../vendor-parts-cluster/vendor-part-price-tiers-dialog.component';
+import { VendorPartPriceTierHistoryDialogComponent, VendorPartPriceTierHistoryDialogData } from '../vendor-parts-cluster/vendor-part-price-tier-history-dialog.component';
 import { VendorPartsService } from '../../services/vendor-parts.service';
 import { VendorPart } from '../../models/vendor-part.model';
 import { PartIdentityClusterComponent } from '../part-clusters/part-identity-cluster.component';
 import { PartInventoryClusterComponent } from '../part-clusters/part-inventory-cluster.component';
 import { PartCostClusterComponent } from '../part-clusters/part-cost-cluster.component';
 import { PartActivityClusterComponent } from '../part-clusters/part-activity-cluster.component';
+import { PartPricingClusterComponent } from '../part-clusters/part-pricing-cluster/part-pricing-cluster.component';
 import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.component';
 import { PartMaterialClusterComponent } from '../part-clusters/part-material-cluster/part-material-cluster.component';
 import { PartUomClusterComponent } from '../part-clusters/part-uom-cluster/part-uom-cluster.component';
@@ -94,7 +96,7 @@ type BomViewMode = 'table' | 'tree';
     PartActivityClusterComponent, PartFilesClusterComponent,
     PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,
     PartRoutingClusterComponent, PartAlternatesClusterComponent,
-    PartQualityClusterComponent,
+    PartQualityClusterComponent, PartPricingClusterComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
   styleUrl: './part-detail-panel.component.scss',
@@ -571,5 +573,16 @@ export class PartDetailPanelComponent {
       width: '700px',
       data: { vendorPart: vp },
     }).afterClosed().subscribe(() => this.loadVendorParts());
+  }
+
+  /** Dispatch C — read-only tier history dialog. */
+  protected openVendorPartTierHistory(vp: VendorPart): void {
+    this.dialog.open<
+      VendorPartPriceTierHistoryDialogComponent,
+      VendorPartPriceTierHistoryDialogData
+    >(VendorPartPriceTierHistoryDialogComponent, {
+      width: '700px',
+      data: { vendorPart: vp },
+    });
   }
 }
