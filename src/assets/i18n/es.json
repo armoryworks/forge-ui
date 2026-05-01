@@ -949,7 +949,22 @@
     "archiveMessage": "Este cliente será archivado.",
     "archiveTitle": "¿Archivar Cliente?",
     "archived": "Cliente archivado",
-    "saved": "Cliente guardado"
+    "saved": "Cliente guardado",
+    "detail": {
+      "tabs": {
+        "overview": "Resumen",
+        "contacts": "Contactos",
+        "addresses": "Direcciones",
+        "estimates": "Presupuestos",
+        "quotes": "Cotizaciones",
+        "orders": "Pedidos",
+        "jobs": "Trabajos",
+        "invoices": "Facturas",
+        "interactions": "Interacciones",
+        "activity": "Actividad",
+        "placeholderHelp": "Esta pestaña llegará en un próximo lanzamiento."
+      }
+    }
   },
   "leads": {
     "title": "Prospectos",

@@ -974,7 +974,22 @@
     "archiveMessage": "This customer will be archived.",
     "archiveTitle": "Archive Customer?",
     "archived": "Customer archived",
-    "saved": "Customer saved"
+    "saved": "Customer saved",
+    "detail": {
+      "tabs": {
+        "overview": "Overview",
+        "contacts": "Contacts",
+        "addresses": "Addresses",
+        "estimates": "Estimates",
+        "quotes": "Quotes",
+        "orders": "Orders",
+        "jobs": "Jobs",
+        "invoices": "Invoices",
+        "interactions": "Interactions",
+        "activity": "Activity",
+        "placeholderHelp": "This tab is coming in a follow-up dispatch."
+      }
+    }
   },
   "leads": {
     "title": "Leads",

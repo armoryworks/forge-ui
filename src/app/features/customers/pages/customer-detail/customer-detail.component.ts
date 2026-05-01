@@ -1,6 +1,5 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -10,13 +9,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { CustomerService } from '../../services/customer.service';
 import { CustomerSummary } from '../../models/customer-summary.model';
-import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import {
+  CustomerDetailLayoutResolverService,
+  CustomerDetailTabId,
+  TabLayoutEntry,
+} from '../../services/customer-detail-layout-resolver.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent } from '../../../../shared/components/select/select.component';
-import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
-import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
 import { CustomerContactsTabComponent } from './tabs/customer-contacts-tab.component';
 import { CustomerAddressesTabComponent } from './tabs/customer-addresses-tab.component';
@@ -27,19 +26,34 @@ import { CustomerJobsTabComponent } from './tabs/customer-jobs-tab.component';
 import { CustomerInvoicesTabComponent } from './tabs/customer-invoices-tab.component';
 import { CustomerActivityTabComponent } from './tabs/customer-activity-tab.component';
 import { CustomerInteractionsTabComponent } from './tabs/customer-interactions-tab.component';
+import { CustomerIdentityClusterComponent } from '../../components/customer-clusters/customer-identity-cluster.component';
+import { CustomerActivityClusterComponent } from '../../components/customer-clusters/customer-activity-cluster.component';
 
-const TABS = ['overview', 'contacts', 'interactions', 'addresses', 'estimates', 'quotes', 'orders', 'jobs', 'invoices', 'activity'] as const;
-type CustomerTab = typeof TABS[number];
-
+/**
+ * Pillar 5 — Customer detail shell.
+ *
+ * Tabs are driven by `CustomerDetailLayoutResolverService.resolve(...)` which
+ * maps the customer's lifecycle bucket (Active / Prospect / Archived, derived
+ * from `IsActive` + open-doc counts) to an ordered list of tab descriptors.
+ * Identity (overview) is always first; Activity always last.
+ *
+ * Existing per-tab components (`customer-{tab}-tab.component`) continue to
+ * surface through the resolver-driven shell. The `overview` tab now mounts
+ * the new `<app-customer-identity-cluster>` (read + edit). The `activity`
+ * tab mounts the new `<app-customer-activity-cluster>` (wraps the shared
+ * `<app-entity-activity-section>`).
+ *
+ * Spec source of truth: `docs/entity-detail-pattern.md` § 6.
+ */
 @Component({
   selector: 'app-customer-detail',
   standalone: true,
   imports: [
-    CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe, RouterLink, MatTooltipModule,
-    InputComponent, SelectComponent, DialogComponent, ValidationButtonComponent,
+    CurrencyPipe, TranslatePipe, RouterLink, MatTooltipModule,
     CustomerOverviewTabComponent, CustomerContactsTabComponent, CustomerAddressesTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
     CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent, CustomerInteractionsTabComponent,
+    CustomerIdentityClusterComponent, CustomerActivityClusterComponent,
   ],
   templateUrl: './customer-detail.component.html',
   styleUrl: './customer-detail.component.scss',
@@ -52,6 +66,7 @@ export class CustomerDetailComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
+  private readonly layoutResolver = inject(CustomerDetailLayoutResolverService);
 
   protected readonly customerId = toSignal(
     this.route.paramMap.pipe(map(p => +p.get('id')!)),
@@ -59,36 +74,42 @@ export class CustomerDetailComponent {
   );
 
   protected readonly activeTab = toSignal(
-    this.route.paramMap.pipe(map(p => (p.get('tab') ?? 'overview') as CustomerTab)),
-    { initialValue: 'overview' as CustomerTab },
+    this.route.paramMap.pipe(map(p => (p.get('tab') ?? 'overview') as CustomerDetailTabId)),
+    { initialValue: 'overview' as CustomerDetailTabId },
   );
 
   protected readonly customer = signal<CustomerSummary | null>(null);
   protected readonly loading = signal(true);
-  protected readonly showEditDialog = signal(false);
+  protected readonly editing = signal(false);
   protected readonly saving = signal(false);
 
-  protected readonly editForm = new FormGroup({
-    name: new FormControl('', [Validators.required, Validators.maxLength(200)]),
-    companyName: new FormControl(''),
-    email: new FormControl('', [Validators.email, Validators.maxLength(200)]),
-    phone: new FormControl(''),
-    isActive: new FormControl(true),
+  /**
+   * Pillar 5 — Resolved tab layout for the loaded Customer. Derived from the
+   * customer's lifecycle bucket via `deriveLifecycle(...)`.
+   */
+  protected readonly tabLayout = computed<TabLayoutEntry[]>(() => {
+    const c = this.customer();
+    if (!c) return [];
+    const lifecycle = this.layoutResolver.deriveLifecycle(c);
+    return this.layoutResolver.resolve(lifecycle);
   });
-
-  protected readonly violations = computed(() =>
-    FormValidationService.getViolations(this.editForm, {
-      name: 'Name',
-      email: 'Email',
-    })
-  );
-
-  protected readonly tabs = TABS;
 
   constructor() {
     effect(() => {
       const id = this.customerId();
       if (id > 0) this.loadCustomer(id);
+    });
+
+    // If the resolver no longer surfaces the active tab (e.g. customer
+    // archived → Orders tab disappears), fall back to the first tab.
+    effect(() => {
+      const layout = this.tabLayout();
+      if (layout.length === 0) return;
+      const current = this.activeTab();
+      if (!layout.some(t => t.id === current)) {
+        const fallback = layout[0].id;
+        this.router.navigate(['..', fallback], { relativeTo: this.route, replaceUrl: true });
+      }
     });
   }
 
@@ -106,49 +127,41 @@ export class CustomerDetailComponent {
     });
   }
 
-  protected switchTab(tab: CustomerTab): void {
+  protected switchTab(tab: CustomerDetailTabId): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
-  protected openEdit(): void {
+  protected toggleEdit(): void {
+    this.editing.update(v => !v);
+  }
+
+  protected cancelEdit(): void {
+    this.editing.set(false);
+  }
+
+  /**
+   * Pillar 5 — Generic save handler used by the identity cluster (and any
+   * future editable cluster). The cluster emits a `Partial<CustomerSummary>`
+   * patch; we map onto `UpdateCustomerRequest` and refresh.
+   */
+  protected saveClusterPatch(patch: Partial<CustomerSummary>): void {
     const c = this.customer();
     if (!c) return;
-    this.editForm.patchValue({
-      name: c.name,
-      companyName: c.companyName ?? '',
-      email: c.email ?? '',
-      phone: c.phone ?? '',
-      isActive: c.isActive,
-    });
-    this.showEditDialog.set(true);
-  }
-
-  protected closeEdit(): void {
-    this.showEditDialog.set(false);
-    this.editForm.reset();
-  }
-
-  protected saveEdit(): void {
-    if (this.editForm.invalid || this.saving()) return;
-    const id = this.customerId();
-    const v = this.editForm.value;
     this.saving.set(true);
-    this.customerService.updateCustomer(id, {
-      name: v.name!,
-      companyName: v.companyName ?? undefined,
-      email: v.email ?? undefined,
-      phone: v.phone ?? undefined,
-      isActive: v.isActive ?? true,
+    this.customerService.updateCustomer(c.id, {
+      name: patch.name ?? c.name,
+      companyName: patch.companyName ?? c.companyName,
+      email: patch.email ?? c.email,
+      phone: patch.phone ?? c.phone,
+      isActive: patch.isActive ?? c.isActive,
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.showEditDialog.set(false);
-        this.loadCustomer(id);
+        this.editing.set(false);
+        this.loadCustomer(c.id);
         this.snackbar.success(this.translate.instant('customers.saved'));
       },
-      error: () => {
-        this.saving.set(false);
-      },
+      error: () => this.saving.set(false),
     });
   }
 
@@ -172,21 +185,5 @@ export class CustomerDetailComponent {
         },
       });
     });
-  }
-
-  protected tabLabel(tab: CustomerTab): string {
-    const labels: Record<CustomerTab, string> = {
-      overview: 'Overview',
-      contacts: 'Contacts',
-      interactions: 'Interactions',
-      addresses: 'Addresses',
-      estimates: 'Estimates',
-      quotes: 'Quotes',
-      orders: 'Orders',
-      jobs: 'Jobs',
-      invoices: 'Invoices',
-      activity: 'Activity',
-    };
-    return labels[tab];
   }
 }

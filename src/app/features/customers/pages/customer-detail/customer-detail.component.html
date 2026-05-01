@@ -14,9 +14,9 @@
           Customers
         </a>
         <div class="cd-header__actions">
-          <button class="action-btn" (click)="openEdit()" aria-label="Edit customer">
-            <span class="material-icons-outlined">edit</span>
-            Edit
+          <button class="action-btn" (click)="toggleEdit()" aria-label="Edit customer">
+            <span class="material-icons-outlined">{{ editing() ? 'close' : 'edit' }}</span>
+            {{ editing() ? 'Done' : 'Edit' }}
           </button>
           <button class="action-btn" (click)="archiveCustomer()" aria-label="Archive customer">
             <span class="material-icons-outlined">archive</span>
@@ -84,17 +84,17 @@
         </div>
       </div>
 
-      <!-- Tab bar -->
+      <!-- Tab bar — Pillar 5: driven by CustomerDetailLayoutResolverService -->
       <nav class="cd-tabs" role="tablist">
-        @for (tab of tabs; track tab) {
+        @for (tab of tabLayout(); track tab.id) {
           <button
             class="cd-tab"
-            [class.cd-tab--active]="activeTab() === tab"
-            (click)="switchTab(tab)"
+            [class.cd-tab--active]="activeTab() === tab.id"
+            (click)="switchTab(tab.id)"
             role="tab"
-            [attr.aria-selected]="activeTab() === tab"
-            [attr.aria-label]="tabLabel(tab) + ' tab'">
-            {{ tabLabel(tab) }}
+            [attr.aria-selected]="activeTab() === tab.id"
+            [attr.aria-label]="(tab.labelKey | translate) + ' tab'">
+            {{ tab.labelKey | translate }}
           </button>
         }
       </nav>
@@ -102,58 +102,48 @@
 
     <!-- ── Tab content ── -->
     <div class="cd-content">
-      @if (activeTab() === 'overview') {
-        <app-customer-overview-tab [customer]="c" />
-      }
-      @if (activeTab() === 'contacts') {
-        <app-customer-contacts-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'interactions') {
-        <app-customer-interactions-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'addresses') {
-        <app-customer-addresses-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'estimates') {
-        <app-customer-estimates-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'quotes') {
-        <app-customer-quotes-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'orders') {
-        <app-customer-orders-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'jobs') {
-        <app-customer-jobs-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'invoices') {
-        <app-customer-invoices-tab [customerId]="c.id" />
-      }
-      @if (activeTab() === 'activity') {
-        <app-customer-activity-tab [customerId]="c.id" />
+      @switch (activeTab()) {
+        @case ('overview') {
+          <!-- Pillar 5 — Identity cluster (read + edit) plus existing context sections. -->
+          <app-customer-identity-cluster
+            [customer]="c"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
+          @if (!editing()) {
+            <app-customer-overview-tab [customer]="c" />
+          }
+        }
+        @case ('contacts') {
+          <app-customer-contacts-tab [customerId]="c.id" />
+        }
+        @case ('interactions') {
+          <app-customer-interactions-tab [customerId]="c.id" />
+        }
+        @case ('addresses') {
+          <app-customer-addresses-tab [customerId]="c.id" />
+        }
+        @case ('estimates') {
+          <app-customer-estimates-tab [customerId]="c.id" />
+        }
+        @case ('quotes') {
+          <app-customer-quotes-tab [customerId]="c.id" />
+        }
+        @case ('orders') {
+          <app-customer-orders-tab [customerId]="c.id" />
+        }
+        @case ('jobs') {
+          <app-customer-jobs-tab [customerId]="c.id" />
+        }
+        @case ('invoices') {
+          <app-customer-invoices-tab [customerId]="c.id" />
+        }
+        @case ('activity') {
+          <!-- Pillar 5 — Activity cluster wraps shared entity-activity-section. -->
+          <app-customer-activity-cluster [customerId]="c.id" />
+        }
       }
     </div>
   }
 </div>
-
-<!-- Edit dialog -->
-@if (showEditDialog()) {
-  <app-dialog title="Edit Customer" width="520px" (closed)="closeEdit()">
-    <div [formGroup]="editForm">
-      <app-input label="Name" formControlName="name" [required]="true" />
-      <app-input label="Company Name" formControlName="companyName" />
-      <div class="dialog-row">
-        <app-input label="Email" formControlName="email" type="email" />
-        <app-input label="Phone" formControlName="phone" mask="phone" />
-      </div>
-    </div>
-    <div dialog-footer>
-      <button class="action-btn" (click)="closeEdit()">Cancel</button>
-      <app-validation-button [violations]="violations()" [loading]="saving()">
-      <button class="action-btn action-btn--primary"
-        [disabled]="editForm.invalid || saving()"
-        (click)="saveEdit()">Save</button>
-      </app-validation-button>
-    </div>
-  </app-dialog>
-}
