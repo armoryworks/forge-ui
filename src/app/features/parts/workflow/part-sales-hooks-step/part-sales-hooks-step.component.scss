@@ -32,14 +32,31 @@
     max-width: 720px;
   }
 
-  &__field {
-    display: flex;
-    flex-direction: column;
-    gap: $sp-xs;
+  &__inferred-price {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
   }
 
-  &__hint--field {
+  &__inferred-price-label {
     font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     color: var(--text-muted);
+  }
+
+  &__inferred-price-value {
+    font-family: $font-family-mono;
+    font-size: $font-size-md;
+    color: var(--text);
+  }
+
+  &__inferred-price-source {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
   }
 }

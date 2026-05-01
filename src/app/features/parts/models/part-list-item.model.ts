@@ -15,5 +15,11 @@ export interface PartListItem {
   material: string | null;
   bomEntryCount: number;
   createdAt: Date;
-  defaultPrice?: number | null;
+  /**
+   * Effective sales price as resolved server-side via IPartPricingResolver.
+   * Always present; <code>0</code> when {@link effectivePriceSource} is "Default".
+   */
+  effectivePrice: number;
+  effectivePriceCurrency: string;
+  effectivePriceSource: 'PriceListEntry' | 'PartPrice' | 'VendorPartTier' | 'Default';
 }

@@ -92,6 +92,9 @@ function makePart(overrides: Partial<PartDetail> = {}): PartDetail {
     usedIn: [],
     createdAt: new Date('2026-01-01T00:00:00Z'),
     updatedAt: new Date('2026-01-01T00:00:00Z'),
+    effectivePrice: 0,
+    effectivePriceCurrency: 'USD',
+    effectivePriceSource: 'Default',
     ...overrides,
   };
 }

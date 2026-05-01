@@ -203,8 +203,10 @@ export class PoDialogComponent {
       return;
     }
     const part = this.parts().find(p => p.id === partId);
-    if (part?.defaultPrice != null) {
-      this.lineForm.controls.unitPrice.setValue(part.defaultPrice, { emitEvent: false });
+    // Use the resolver-supplied effective price. When source is "Default" the
+    // resolver returned 0 (no pricing configured) — don't pre-fill in that case.
+    if (part && part.effectivePriceSource !== 'Default' && part.effectivePrice > 0) {
+      this.lineForm.controls.unitPrice.setValue(part.effectivePrice, { emitEvent: false });
       this.priceIsDefault.set(true);
     } else {
       this.priceIsDefault.set(false);

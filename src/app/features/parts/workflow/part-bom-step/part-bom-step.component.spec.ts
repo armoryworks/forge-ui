@@ -45,6 +45,7 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
     inspectionFrequency: null, inspectionSkipAfterN: null,
     bomEntries: [], usedIn: [],
     createdAt: new Date(), updatedAt: new Date(),
+    effectivePrice: 0, effectivePriceCurrency: 'USD', effectivePriceSource: 'Default',
     ...overrides,
   };
 }

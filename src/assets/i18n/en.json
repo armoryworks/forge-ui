@@ -806,6 +806,11 @@
         "salesUomNone": "— Not set —",
         "defaultSalesPriceLabel": "Default Sales Price",
         "defaultSalesPriceHelper": "Editable on the Pricing tab (coming soon).",
+        "inferredPriceLabel": "Inferred Sales Price",
+        "inferredPriceSourcePriceListEntry": "From price-list entry for current customer",
+        "inferredPriceSourcePartPrice": "From part-level default sales price",
+        "inferredPriceSourceVendorPartTier": "From preferred vendor's lowest-tier price",
+        "inferredPriceSourceDefault": "Default — no pricing configured",
         "saveFailed": "Couldn't save sales hooks."
       }
     },

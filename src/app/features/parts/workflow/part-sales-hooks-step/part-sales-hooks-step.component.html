@@ -11,14 +11,16 @@
       [options]="salesUomOptions"
       data-testid="sales-hooks-sales-uom" />
 
-    <div class="part-sales-hooks-step__field">
-      <app-currency-input
-        [label]="'parts.workflow.salesHooks.defaultSalesPriceLabel' | translate"
-        formControlName="defaultSalesPrice"
-        data-testid="sales-hooks-default-sales-price" />
-      <p class="part-sales-hooks-step__hint part-sales-hooks-step__hint--field">
-        {{ 'parts.workflow.salesHooks.defaultSalesPriceHelper' | translate }}
-      </p>
+    <div class="part-sales-hooks-step__inferred-price" data-testid="sales-hooks-inferred-price">
+      <span class="part-sales-hooks-step__inferred-price-label">
+        {{ 'parts.workflow.salesHooks.inferredPriceLabel' | translate }}
+      </span>
+      <span class="part-sales-hooks-step__inferred-price-value">
+        ${{ effectivePrice() }}
+      </span>
+      <span class="part-sales-hooks-step__inferred-price-source">
+        {{ effectivePriceSourceLabelKey() | translate }}
+      </span>
     </div>
   </form>
 </section>

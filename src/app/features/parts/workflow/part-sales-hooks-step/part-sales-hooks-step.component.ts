@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { debounceTime } from 'rxjs/operators';
 
-import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -15,16 +14,17 @@ import { PartsService } from '../../services/parts.service';
 /**
  * Pillar 6 follow-up — Sales Hooks step. Used by Buy + FinishedGood (B4)
  * to surface the sales-side bits the workflow shouldn't ignore on a
- * resold finished good. Sales UoM persists; the default sales price is
- * captured but disabled because the column doesn't yet exist on Part —
- * it's reserved for the Pricing tab work.
+ * resold finished good. Sales UoM persists; the "Default Sales Price"
+ * input is gone — pricing now flows through IPartPricingResolver and
+ * we show the inferred effective price + its source as a read-only
+ * preview row.
  */
 @Component({
   selector: 'app-part-sales-hooks-step',
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    CurrencyInputComponent, SelectComponent, LoadingBlockDirective,
+    SelectComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-sales-hooks-step.component.html',
   styleUrl: './part-sales-hooks-step.component.scss',
@@ -58,9 +58,28 @@ export class PartSalesHooksStepComponent {
 
   protected readonly form = new FormGroup({
     salesUomCode: new FormControl<string | null>(null),
-    // Read-only placeholder — real default-sales-price column lands with the
-    // Pricing tab. Disabled in the template; never dispatched.
-    defaultSalesPrice: new FormControl<number | null>({ value: null, disabled: true }),
+  });
+
+  /** Resolver-supplied effective price (server-computed, read-only here). */
+  protected readonly effectivePrice = computed(() => {
+    const part = this.entity() as PartDetail | null;
+    return part?.effectivePrice ?? 0;
+  });
+
+  protected readonly effectivePriceCurrency = computed(() => {
+    const part = this.entity() as PartDetail | null;
+    return part?.effectivePriceCurrency ?? 'USD';
+  });
+
+  protected readonly effectivePriceSourceLabelKey = computed(() => {
+    const part = this.entity() as PartDetail | null;
+    const source = part?.effectivePriceSource ?? 'Default';
+    switch (source) {
+      case 'PriceListEntry': return 'parts.workflow.salesHooks.inferredPriceSourcePriceListEntry';
+      case 'PartPrice':      return 'parts.workflow.salesHooks.inferredPriceSourcePartPrice';
+      case 'VendorPartTier': return 'parts.workflow.salesHooks.inferredPriceSourceVendorPartTier';
+      default:               return 'parts.workflow.salesHooks.inferredPriceSourceDefault';
+    }
   });
 
   private suppressDispatch = false;
@@ -72,7 +91,6 @@ export class PartSalesHooksStepComponent {
       this.suppressDispatch = true;
       this.form.patchValue({
         salesUomCode: part.salesUomCode ?? null,
-        defaultSalesPrice: null,
       }, { emitEvent: false });
       this.suppressDispatch = false;
     });
