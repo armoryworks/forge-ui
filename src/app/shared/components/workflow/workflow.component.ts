@@ -158,11 +158,19 @@ export class WorkflowComponent {
     return this.registry.getExpress(def.expressTemplateComponent) ?? WorkflowStepStubComponent;
   });
 
-  /** Inputs piped to the express component. */
+  /**
+   * Inputs piped to the express component. Express mode collapses the
+   * workflow into a single step, but the stepId we send back through
+   * patchStep must match the definition — for raw-material-express-v1
+   * that's "all", not the literal "express" the express component used to
+   * default to. Use the first (and only) step in the definition; fall back
+   * to "express" if the definition somehow has no steps.
+   */
   protected readonly expressInputs = computed<Record<string, unknown>>(() => {
     const r = this.run();
+    const stepId = this.steps()[0]?.id ?? 'express';
     return {
-      stepId: 'express',
+      stepId,
       componentName: this.definition()?.expressTemplateComponent ?? '',
       runId: r?.id ?? null,
       entityId: r?.entityId ?? null,

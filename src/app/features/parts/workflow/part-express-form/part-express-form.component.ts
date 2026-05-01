@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { debounceTime, startWith } from 'rxjs/operators';
+import { startWith } from 'rxjs/operators';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -16,7 +16,6 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartType } from '../../models/part-type.type';
-import { PartsService } from '../../services/parts.service';
 
 /**
  * Workflow Pattern Phase 5 — Express form for parts (raw-material default).
@@ -40,12 +39,10 @@ import { PartsService } from '../../services/parts.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartExpressFormComponent {
-  private readonly partsService = inject(PartsService);
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('express');
   readonly componentName = input<string>('PartExpressFormComponent');
@@ -127,13 +124,14 @@ export class PartExpressFormComponent {
     manualCostOverride: this.translate.instant('parts.workflow.costing.manualOverrideLabel'),
   });
 
-  private suppressDispatch = false;
-
   constructor() {
+    // Re-hydrate from the bound entity when the workflow page resolves it
+    // (e.g. resuming an in-flight run). No autosave: express mode is the
+    // "one form, one click" path — every save creates / promotes a part,
+    // so we only fire on the user's explicit Save click.
     effect(() => {
       const part = this.part();
       if (!part) return;
-      this.suppressDispatch = true;
       this.form.patchValue({
         partType: part.partType ?? 'RawMaterial',
         name: part.name ?? '',
@@ -142,16 +140,7 @@ export class PartExpressFormComponent {
         externalPartNumber: part.externalPartNumber ?? '',
         manualCostOverride: part.manualCostOverride ?? null,
       }, { emitEvent: false });
-      this.suppressDispatch = false;
     });
-
-    this.form.valueChanges
-      .pipe(debounceTime(600), takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        if (this.suppressDispatch) return;
-        if (this.form.invalid) return;
-        this.dispatchSave();
-      });
   }
 
   /**
@@ -192,25 +181,6 @@ export class PartExpressFormComponent {
             this.saving.set(false);
             this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
           },
-        });
-      },
-      error: () => {
-        this.saving.set(false);
-        this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
-      },
-    });
-  }
-
-  private dispatchSave(): void {
-    const runId = this.runId();
-    if (runId == null) return;
-    this.saving.set(true);
-    this.workflowService.patchStep(runId, this.stepId(), this.fieldsFromForm()).subscribe({
-      next: (run) => {
-        this.saving.set(false);
-        if (run.entityId == null) return;
-        this.partsService.getPartById(run.entityId).subscribe({
-          next: (detail) => this.workflowService.currentEntity.set(detail),
         });
       },
       error: () => {
