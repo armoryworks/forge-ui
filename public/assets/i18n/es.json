@@ -41,10 +41,12 @@
   "navGroups": {
     "operations": "Operaciones",
     "sales": "Ventas",
+    "supply": "Suministro",
+    "resources": "Recursos",
     "production": "Producción",
     "inventory": "Inventario",
     "purchasing": "Compras",
-    "people": "Personal",
+    "people": "Personas",
     "insights": "Análisis"
   },
   "adminGroups": {
@@ -118,12 +120,13 @@
     "export": "Exportar",
     "import": "Importar",
     "archive": "Archivar",
+    "unarchive": "Desarchivar",
     "restore": "Restaurar",
+    "clearSelection": "Limpiar selección",
     "duplicate": "Duplicar",
     "print": "Imprimir",
     "download": "Descargar",
     "upload": "Subir",
-    "uploading": "Subiendo...",
     "view": "Ver",
     "details": "Detalles",
     "type": "Tipo",
@@ -379,7 +382,18 @@
     "cardView": "Vista de Tarjetas",
     "tableView": "Vista de Tabla",
     "viewMode": "Modo de vista",
-    "noDate": "Sin fecha"
+    "noDate": "Sin fecha",
+    "showArchived": "Mostrar trabajos archivados",
+    "showActive": "Mostrar trabajos activos",
+    "unarchive": "Desarchivar",
+    "unarchiveTitle": "¿Restaurar este trabajo?",
+    "unarchiveMessage": "El trabajo {{jobNumber}} será restaurado a la lista activa.",
+    "unarchiveJobsTitle": "¿Restaurar trabajos seleccionados?",
+    "unarchiveJobsMessage": "{{count}} trabajo(s) archivado(s) será(n) restaurado(s) a la lista activa.",
+    "unarchiveSelected": "Desarchivar seleccionados",
+    "jobUnarchived": "Trabajo {{jobNumber}} restaurado",
+    "jobsUnarchived": "{{count}} trabajo(s) restaurado(s)",
+    "unarchiveFailed": "Error al restaurar trabajo(s)"
   },
   "jobs": {
     "title": "Trabajos",
@@ -660,6 +674,119 @@
         "missingShort": "Aún faltan algunos requisitos.",
         "missingHeader": "No se puede promover — falta:",
         "failed": "No se pudo promover."
+      },
+      "sourcing": {
+        "title": "Abastecimiento",
+        "hint": "Proveedor predeterminado y parámetros de pedido. Las anulaciones por proveedor van en la pestaña Fuentes.",
+        "preferredVendorLabel": "Proveedor Preferido",
+        "leadTimeDaysLabel": "Plazo (días)",
+        "leadTimeDaysHelper": "Valor por defecto; el plazo por proveedor se establece en la pestaña Fuentes.",
+        "minOrderQtyLabel": "Cantidad Mínima",
+        "packSizeLabel": "Tamaño de Paquete",
+        "externalPartNumberLabel": "N.º de Pieza Externo",
+        "saveFailed": "No se pudo guardar el abastecimiento."
+      },
+      "manufacturer": {
+        "title": "Fabricante",
+        "hint": "Identidad OEM de ingeniería — distinta de cualquier distribuidor por el cual compramos.",
+        "manufacturerNameLabel": "Fabricante",
+        "manufacturerPartNumberLabel": "N.º de Pieza del Fabricante",
+        "externalPartNumberLabel": "N.º de Pieza Externo",
+        "saveFailed": "No se pudo guardar la información del fabricante."
+      },
+      "inventory": {
+        "title": "Inventario",
+        "hint": "Umbrales de stock y unidad de medida. Activa los reabastecimientos.",
+        "minStockThresholdLabel": "Umbral Mínimo",
+        "reorderPointLabel": "Punto de Reorden",
+        "reorderQuantityLabel": "Cantidad de Reorden",
+        "safetyStockDaysLabel": "Días de Stock de Seguridad",
+        "stockUomLabel": "UoM de Stock",
+        "stockUomNone": "— No establecido —",
+        "defaultBinLabel": "Bin Predeterminado (id)",
+        "defaultBinHelper": "Id numérico. Reemplazado por un selector real de bin en una versión posterior.",
+        "saveFailed": "No se pudo guardar el inventario."
+      },
+      "quality": {
+        "title": "Calidad",
+        "hint": "Inspección de recepción, trazabilidad, clase ABC, peligro y vida útil.",
+        "traceabilityLabel": "Trazabilidad",
+        "traceabilityNone": "A granel (sin seguimiento)",
+        "traceabilityLot": "Por lote",
+        "traceabilitySerial": "Por número de serie",
+        "requiresReceivingInspectionLabel": "Requiere Inspección al Recibir",
+        "inspectionFrequencyLabel": "Frecuencia de Inspección",
+        "frequencyEvery": "Cada recepción",
+        "frequencyFirstArticle": "Solo primer artículo",
+        "frequencySkipLot": "Omitir-lote",
+        "frequencyRandom": "Muestreo aleatorio",
+        "inspectionSkipAfterNLabel": "Omitir Después de N Recepciones Limpias",
+        "abcClassLabel": "Clase ABC",
+        "abcClassUnclassified": "— Sin clasificar —",
+        "abcClassA": "A — alto valor / control estricto",
+        "abcClassB": "B — valor moderado",
+        "abcClassC": "C — bajo valor / control flexible",
+        "hazmatClassLabel": "Clase Peligrosa",
+        "shelfLifeDaysLabel": "Vida Útil (días)",
+        "saveFailed": "No se pudo guardar calidad."
+      },
+      "shipping": {
+        "title": "Envío y Físico",
+        "hint": "Masa, dimensiones y volumen. Para tarifas de envío y volumen de inventario.",
+        "weightLabel": "Peso (cada uno)",
+        "weightUnitLabel": "Unidad de Peso",
+        "lengthLabel": "Largo",
+        "widthLabel": "Ancho",
+        "heightLabel": "Alto",
+        "dimensionUnitLabel": "Unidad de Dimensión",
+        "volumeLabel": "Volumen",
+        "volumeUnitLabel": "Unidad de Volumen",
+        "saveFailed": "No se pudo guardar la información de envío."
+      },
+      "toolAsset": {
+        "title": "Activo de Herramienta",
+        "hint": "Vincula esta pieza a su Activo de herramienta (cavidad, vida útil, calibración).",
+        "toolingAssetLabel": "Activo de Herramienta",
+        "moldToolRefLabel": "Referencia de Molde/Herramienta",
+        "moldToolRefHelper": "Vestigial — usa el Activo de Herramienta arriba cuando sea posible.",
+        "saveFailed": "No se pudo guardar el vínculo del activo."
+      },
+      "sourcePart": {
+        "title": "Pieza de Origen",
+        "hint": "La pieza interna pre-acabada que se envía al subcontratista.",
+        "sourcePartLabel": "Pieza de Origen",
+        "sourcePartHelper": "La pieza interna pre-acabada que se envía al proveedor.",
+        "saveFailed": "No se pudo guardar la pieza de origen."
+      },
+      "vendor": {
+        "title": "Proveedor",
+        "hint": "Único proveedor de subcontratación. La MOQ y el tamaño de paquete viven en la pieza de origen.",
+        "preferredVendorLabel": "Proveedor Preferido",
+        "leadTimeDaysLabel": "Plazo (días)",
+        "saveFailed": "No se pudo guardar la información del proveedor."
+      },
+      "flags": {
+        "title": "Indicadores",
+        "hint": "Indicadores específicos de phantom: kit, configurador y política de backflush.",
+        "isKitLabel": "Es Kit",
+        "isKitHelper": "Enviar como kit (los hijos se entregan con el padre).",
+        "isConfigurableLabel": "Es Configurable",
+        "isConfigurableHelper": "Habilita el asistente del configurador para este padre.",
+        "backflushPolicyLabel": "Política de Backflush",
+        "backflushDefault": "— Usar predeterminado global —",
+        "backflushAuto": "Automático",
+        "backflushManual": "Manual",
+        "backflushNone": "Ninguno",
+        "saveFailed": "No se pudieron guardar los indicadores."
+      },
+      "salesHooks": {
+        "title": "Configuración de Ventas",
+        "hint": "Parámetros de venta para productos terminados revendidos.",
+        "salesUomLabel": "UoM de Ventas",
+        "salesUomNone": "— No establecido —",
+        "defaultSalesPriceLabel": "Precio de Venta Predeterminado",
+        "defaultSalesPriceHelper": "Editable en la pestaña Precios (próximamente).",
+        "saveFailed": "No se pudieron guardar los datos de ventas."
       }
     },
     "detail": {
@@ -970,7 +1097,22 @@
     "archiveMessage": "Este cliente será archivado.",
     "archiveTitle": "¿Archivar Cliente?",
     "archived": "Cliente archivado",
-    "saved": "Cliente guardado"
+    "saved": "Cliente guardado",
+    "detail": {
+      "tabs": {
+        "overview": "Resumen",
+        "contacts": "Contactos",
+        "addresses": "Direcciones",
+        "estimates": "Presupuestos",
+        "quotes": "Cotizaciones",
+        "orders": "Pedidos",
+        "jobs": "Trabajos",
+        "invoices": "Facturas",
+        "interactions": "Interacciones",
+        "activity": "Actividad",
+        "placeholderHelp": "Esta pestaña llegará en un próximo lanzamiento."
+      }
+    }
   },
   "leads": {
     "title": "Prospectos",
@@ -1085,17 +1227,13 @@
     "job": "Trabajo",
     "approvalNotesOptional": "Notas de Aprobación (opcional)",
     "reviewNoteLabel": "Notas",
-    "declineNoteHint": "Se requiere una nota para Rechazar / Solicitar Revisión — mínimo {{ min }} caracteres ({{ len }}).",
-    "declineNoteRequiredTooltip": "Se requiere una nota de al menos {{ min }} caracteres para rechazar o solicitar una revisión.",
-    "requestRevision": "Necesita Revisión",
-    "needsRevision": "Necesita Revisión",
+    "declineNoteHint": "Nota requerida para Rechazar / Solicitar Revisión — mínimo {{ min }} caracteres ({{ len }}).",
+    "declineNoteRequiredTooltip": "Se requiere una nota de al menos {{ min }} caracteres para rechazar o solicitar revisión.",
+    "requestRevision": "Requiere Revisión",
+    "needsRevision": "Requiere Revisión",
     "expenseRevisionRequested": "Revisión solicitada.",
     "resubmit": "Reenviar",
     "expenseResubmitted": "Gasto reenviado.",
-    "receipt": "Recibo",
-    "uploadReceipt": "Cargar recibo",
-    "existingReceipt": "Recibo archivado",
-    "receiptRequiredHint": "La política de la empresa requiere un recibo.",
     "ledgerTitle": "Libro de Gastos",
     "newRecurring": "Nuevo Recurrente",
     "upcomingTab": "Próximos (90 Días)",
@@ -1122,6 +1260,8 @@
     "recurringDeleted": "Gasto recurrente eliminado.",
     "deleteRecurringTitle": "¿Eliminar Gasto Recurrente?",
     "deleteRecurringMessage": "Esto eliminará \"{{name}}\" de los gastos recurrentes.",
+    "existingReceipt": "Recibo existente",
+    "receiptRequiredHint": "Se requiere un recibo para este gasto antes de poder enviarlo.",
     "allClassifications": "Todas las Clasificaciones",
     "classSubscription": "Suscripción",
     "classLease": "Arrendamiento",
@@ -1264,6 +1404,7 @@
       "teams": "Equipos y Kioscos",
       "salesTax": "Impuesto",
       "auditLog": "Registro de Auditoría",
+      "biApiKeys": "Claves API de BI",
       "compliance": "Cumplimiento",
       "timeCorrections": "Correcciones de Tiempo",
       "events": "Eventos",
@@ -1271,7 +1412,10 @@
       "edi": "EDI",
       "mfa": "Política MFA",
       "autoPo": "Auto-PO",
-      "expenses": "Política de Gastos"
+      "automations": "Automatizaciones",
+      "integrationOutbox": "Bandeja de Integración",
+      "expenses": "Política de Gastos",
+      "roleTemplates": "Plantillas de Rol"
     },
     "users": "Usuarios",
     "addUser": "Agregar Usuario",
@@ -1468,11 +1612,11 @@
     "removeMember": "Quitar",
     "addMember": "Agregar",
     "remove": "Quitar",
-    "removeTerminal": "Quitar kiosco",
-    "removeTerminalTitle": "¿Quitar terminal de kiosco?",
-    "removeTerminalConfirm": "Esto desvinculará \"{{name}}\" y requerirá reconfigurar el kiosco desde el dispositivo. ¿Continuar?",
-    "terminalRemoved": "Terminal de kiosco eliminada",
-    "terminalRemoveFailed": "Error al eliminar la terminal"
+    "removeTerminal": "Quitar terminal",
+    "removeTerminalTitle": "¿Quitar Terminal?",
+    "removeTerminalConfirm": "¿Quitar el terminal \"{{name}}\"? Cualquier kiosco conectado en este terminal perderá su sesión de inmediato.",
+    "terminalRemoved": "Terminal eliminado",
+    "terminalRemoveFailed": "Error al eliminar el terminal"
   },
   "onboarding": {
     "completeProfile": "Complete su perfil de empleado",
@@ -1590,8 +1734,8 @@
     "fontScaleComfortable": "Cómodo",
     "fontScaleLarge": "Grande",
     "fontScaleXl": "Extra Grande",
-    "ambientIdleTimeout": "Entrar automáticamente en modo ambiente",
-    "ambientIdleTimeoutHint": "Cambiar automáticamente al modo ambiente después de un período de inactividad en el panel.",
+    "ambientIdleTimeout": "Tiempo de Inactividad para Modo Ambiental",
+    "ambientIdleTimeoutHint": "Tiempo de espera antes de entrar automáticamente en el modo ambiental (solo lectura) tras la inactividad.",
     "genderNone": "-- Ninguno --",
     "genderMale": "Masculino",
     "genderFemale": "Femenino",
@@ -1720,6 +1864,12 @@
     "deleteTitle": "¿Eliminar {item}?",
     "archiveTitle": "¿Archivar {item}?",
     "confirm": "Confirmar"
+  },
+  "concurrencyConflict": {
+    "title": "Registro modificado",
+    "message": "Otro usuario modificó este registro. ¿Recargar y volver a intentarlo?",
+    "reload": "Recargar",
+    "cancel": "Cancelar"
   },
   "emptyState": {
     "noJobs": "No se encontraron trabajos",
@@ -3957,10 +4107,47 @@
     }
   },
   "adminPanels": {
+    "biApiKeys": {
+      "headerCount": "claves",
+      "newKey": "Nueva Clave API",
+      "noKeys": "Aún no se han emitido claves API de BI",
+      "issueButton": "Emitir Clave",
+      "statusActive": "Activa",
+      "statusRevoked": "Revocada",
+      "never": "Nunca",
+      "noExpiry": "Sin expiración",
+      "revokeAria": "Revocar clave",
+      "revokeTitle": "¿Revocar Clave API de BI?",
+      "revokeMessage": "¿Revocar la clave \"{{ name }}\" ({{ prefix }}…)? Cualquier cliente que use esta clave empezará a recibir 401 de inmediato. Esto no se puede deshacer.",
+      "revokeConfirm": "Revocar",
+      "revokedSuccess": "Clave \"{{ name }}\" revocada",
+      "issuedSuccess": "Clave \"{{ name }}\" emitida",
+      "issuedTitle": "Clave API Emitida",
+      "issuedWarningTitle": "Copie esta clave ahora",
+      "issuedWarning": "Esta es la única vez que se mostrará la clave completa. El servidor sólo almacena el hash — una vez que cierre este diálogo, el texto plano no podrá recuperarse.",
+      "expiryHint": "Opcional. Dejar en blanco para una clave sin expiración.",
+      "copy": "Copiar",
+      "copied": "Copiada",
+      "dismissReveal": "He copiado la clave",
+      "fields": {
+        "name": "Nombre",
+        "expiresAt": "Expira el",
+        "plaintext": "Clave en Texto Plano (se muestra una sola vez)"
+      },
+      "cols": {
+        "name": "Nombre",
+        "prefix": "Prefijo",
+        "status": "Estado",
+        "created": "Creada",
+        "expires": "Expira",
+        "lastUsed": "Último Uso"
+      }
+    },
     "auditLog": {
       "entityType": "Tipo de Entidad",
       "action": "Acción",
       "actionPlaceholder": "ej. Creado, Actualizado",
+      "systemEvent": "Evento del Sistema",
       "fromDate": "Desde",
       "toDate": "Hasta",
       "noEntries": "No se encontraron entradas de auditoría",
@@ -3988,7 +4175,23 @@
         "quote": "Cotización",
         "shipment": "Envío",
         "timeEntry": "Entrada de Tiempo",
-        "asset": "Activo"
+        "asset": "Activo",
+        "identity": "Identidad (login / MFA / rol)",
+        "biApiKey": "Clave API de BI"
+      },
+      "presets": {
+        "allActions": "-- Todas las Acciones --",
+        "userLoggedIn": "Inicio de Sesión",
+        "userLoginFailed": "Inicio de Sesión Fallido",
+        "userLoggedOut": "Cierre de Sesión",
+        "userPasswordChanged": "Contraseña Cambiada",
+        "mfaEnabled": "MFA Activada",
+        "mfaDisabled": "MFA Desactivada",
+        "roleAssigned": "Rol Asignado",
+        "userActivated": "Usuario Activado",
+        "userDeactivated": "Usuario Desactivado",
+        "biApiKeyIssued": "Clave API de BI Emitida",
+        "biApiKeyRevoked": "Clave API de BI Revocada"
       }
     },
     "edi": {
@@ -4297,24 +4500,6 @@
       "templateDeleted": "Plantilla eliminada"
     }
   },
-  "expenseSettings": {
-    "title": "Política de Gastos",
-    "intro": "Las reglas se aplican tanto en el servidor como en el cliente. Los cambios se aplican a la próxima presentación de gastos.",
-    "allowSelfApproval": "Permitir Auto-Aprobación",
-    "allowSelfApprovalHint": "Cuando está activado, los gastos por debajo del umbral de auto-aprobación se aprueban automáticamente.",
-    "autoApproveThreshold": "Umbral de Auto-Aprobación",
-    "autoApproveThresholdHint": "Los gastos por debajo de este monto se aprueban automáticamente. Déjelo en blanco para requerir revisión manual.",
-    "noAutoApprove": "Sin auto-aprobación",
-    "maxAmount": "Monto Máximo de Gasto",
-    "maxAmountHint": "Límite máximo para un gasto individual. Déjelo en blanco para no tener límite.",
-    "noLimit": "Sin límite",
-    "requireReceipt": "Requerir Adjunto de Recibo",
-    "requireReceiptHint": "Cuando está activado, cada gasto debe tener un archivo de recibo adjunto antes de enviarse.",
-    "minDescriptionLength": "Longitud Mínima de Descripción",
-    "minDescriptionLengthHint": "Obliga a los usuarios a describir el gasto (0 = sin mínimo, máximo 500 caracteres).",
-    "saved": "Política de gastos guardada.",
-    "thresholdExceedsMax": "El umbral de auto-aprobación no puede exceder el monto máximo del gasto."
-  },
   "autoPo": {
     "autoPoSuggestions": "Sugerencias Auto-OC",
     "pendingSuggestions": "sugerencias pendientes",
@@ -4358,29 +4543,58 @@
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor"
   },
+  "expenseSettings": {
+    "title": "Política de Gastos",
+    "intro": "Configura umbrales, requisitos de recibos y reglas de aprobación para los envíos de gastos.",
+    "allowSelfApproval": "Permitir auto-aprobación",
+    "allowSelfApprovalHint": "Cuando está activo, los empleados pueden aprobar automáticamente sus propios gastos hasta el umbral indicado abajo.",
+    "autoApproveThreshold": "Umbral de auto-aprobación",
+    "autoApproveThresholdHint": "Los gastos iguales o inferiores a este monto se aprueban automáticamente. Déjalo en blanco para exigir aprobación manual en cada gasto.",
+    "noAutoApprove": "Sin auto-aprobación",
+    "maxAmount": "Monto máximo del gasto",
+    "maxAmountHint": "El monto más alto que puede tener un solo gasto. Déjalo en blanco para no fijar límite superior.",
+    "noLimit": "Sin límite",
+    "requireReceipt": "Exigir recibo adjunto",
+    "requireReceiptHint": "Cuando está activo, los empleados deben adjuntar un archivo de recibo antes de enviar cualquier gasto.",
+    "minDescriptionLength": "Longitud mínima de descripción",
+    "minDescriptionLengthHint": "Descripción de gasto mínima aceptable (en caracteres). Usa 0 para permitir descripciones vacías.",
+    "saved": "Política de gastos guardada",
+    "thresholdExceedsMax": "El umbral de auto-aprobación no puede superar el monto máximo del gasto."
+  },
   "welcomePage": {
-    "brandName": "Engineer",
-    "demoChip": "DEMO",
-    "tagline": "Operaciones de manufactura, de principio a fin.",
-    "lede": "QB Engineer es una plataforma de código abierto para talleres pequeños y medianos — seguimiento de producción kanban, piezas e inventario, cotización a cobro, calidad y reportes en un solo lugar. Se integra con QuickBooks o funciona de forma independiente.",
-    "ctaSignIn": "Entrar a la demostración",
-    "caveat": "Esta es una demostración totalmente interactiva — cada pantalla es real, cada botón funciona, pero nada se guarda en el servidor. Los cambios viven en la pestaña de su navegador y se restablecen al actualizar. Cualquier correo / contraseña funciona.",
-    "footerLicense": "Código abierto · Licencia GNU",
-    "footerGithub": "GitHub"
+    "brandName": "QB Engineer",
+    "demoChip": "Demo",
+    "tagline": "Un ERP de código abierto para talleres de ingeniería.",
+    "lede": "QB Engineer es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a tu archivo de QuickBooks o de forma totalmente independiente.",
+    "caveat": "Esta es una demo pública. Los datos se reinician periódicamente y se comparten con todos los usuarios conectados.",
+    "ctaSignIn": "Iniciar sesión en la demo",
+    "footerLicense": "Software libre con licencia MIT",
+    "footerGithub": "Ver en GitHub"
   },
   "workflow": {
     "parts": {
       "definitions": {
-        "assemblyGuidedV1": "Configuración de ensamblaje",
-        "rawMaterialExpressV1": "Alta rápida de materia prima"
+        "assemblyGuidedV1": "Assembly setup",
+        "rawMaterialExpressV1": "Raw material quick-add"
       },
       "steps": {
-        "basics": "Básicos",
-        "bom": "Lista de Materiales",
-        "routing": "Ruta",
-        "costing": "Costo",
-        "alternates": "Alternativos",
-        "expressForm": "Alta rápida"
+        "basics": "Basics",
+        "bom": "Bill of Materials",
+        "routing": "Routing",
+        "costing": "Cost",
+        "alternates": "Alternates",
+        "expressForm": "Quick add",
+        "sourcing": "Abastecimiento",
+        "manufacturer": "Fabricante",
+        "inventory": "Inventario",
+        "manufacturing": "Fabricación",
+        "quality": "Calidad",
+        "shipping": "Envío",
+        "toolAsset": "Activo de Herramienta",
+        "sourcePart": "Pieza de Origen",
+        "vendor": "Proveedor",
+        "flags": "Indicadores",
+        "salesHooks": "Configuración de Ventas"
       }
     },
     "shell": {
@@ -4431,14 +4645,14 @@
   },
   "validators": {
     "parts": {
-      "hasBasics": "Básicos",
+      "hasBasics": "Basics",
       "hasBasicsMissing": "Se requieren nombre, tipo y material.",
       "hasBom": "BOM",
-      "hasBomMissing": "BOM aún no definido.",
-      "hasRouting": "Ruta",
-      "hasRoutingMissing": "Operaciones de ruta aún no definidas.",
-      "hasCost": "Costo",
-      "hasCostMissing": "Costo aún no definido."
+      "hasBomMissing": "BOM not yet defined.",
+      "hasRouting": "Routing",
+      "hasRoutingMissing": "Routing operations not yet defined.",
+      "hasCost": "Cost",
+      "hasCostMissing": "Cost not yet set."
     }
   }
 }

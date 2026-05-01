@@ -41,6 +41,8 @@
   "navGroups": {
     "operations": "Operations",
     "sales": "Sales",
+    "supply": "Supply",
+    "resources": "Resources",
     "production": "Production",
     "inventory": "Inventory",
     "purchasing": "Purchasing",
@@ -118,12 +120,13 @@
     "export": "Export",
     "import": "Import",
     "archive": "Archive",
+    "unarchive": "Unarchive",
     "restore": "Restore",
+    "clearSelection": "Clear selection",
     "duplicate": "Duplicate",
     "print": "Print",
     "download": "Download",
     "upload": "Upload",
-    "uploading": "Uploading...",
     "view": "View",
     "details": "Details",
     "type": "Type",
@@ -382,7 +385,18 @@
     "cardView": "Card View",
     "tableView": "Table View",
     "viewMode": "View mode",
-    "noDate": "No date"
+    "noDate": "No date",
+    "showArchived": "Show archived jobs",
+    "showActive": "Show active jobs",
+    "unarchive": "Unarchive",
+    "unarchiveTitle": "Restore this job?",
+    "unarchiveMessage": "Job {{jobNumber}} will be restored to the active list.",
+    "unarchiveJobsTitle": "Restore selected jobs?",
+    "unarchiveJobsMessage": "{{count}} archived job(s) will be restored to the active list.",
+    "unarchiveSelected": "Unarchive selected",
+    "jobUnarchived": "Restored job {{jobNumber}}",
+    "jobsUnarchived": "Restored {{count}} job(s)",
+    "unarchiveFailed": "Failed to restore job(s)"
   },
   "jobs": {
     "title": "Jobs",
@@ -488,6 +502,17 @@
     "partCreated": "Part created.",
     "bomEntryAdded": "BOM entry added.",
     "bomEntryDeleted": "BOM entry deleted.",
+    "bomRevisionHistory": "Revision history",
+    "bomRevisionHistoryHint": "Each component change creates an immutable snapshot.",
+    "bomRevisionHistoryEmpty": "No revisions yet",
+    "bomRevisionHistoryEmptyHelp": "Adding a BOM line will create revision 1.",
+    "bomRevisionCurrent": "Current",
+    "bomRevisionLines": "lines",
+    "bomRevisionEmptySnapshot": "This revision contains no component lines.",
+    "bomAtRelease": "BOM revision at release",
+    "bomAtReleaseStale": "BOM has been updated since this Job was released.",
+    "bomAtReleaseNone": "Not pinned to a BOM revision.",
+    "viewBomRevision": "View revision",
     "partDeleted": "Part deleted.",
     "accountingUnlinked": "Accounting item unlinked.",
     "routing": "Routing",
@@ -503,6 +528,12 @@
     "workCenter": "Work Center",
     "qcCheckpoint": "QC Checkpoint",
     "qcCriteria": "QC Pass/Fail Criteria",
+    "isSubcontract": "Subcontract Operation",
+    "subcontractVendor": "Subcontract Vendor",
+    "subcontractTurnTimeDays": "Turn Time (days)",
+    "subcontractLabel": "Subcontract",
+    "subcontractVendorMissing": "(no vendor)",
+    "daysTurn": "days turn",
     "update": "Update",
     "deleteOperation": "Delete Operation?",
     "deleteOperationMessage": "This will remove operation {{stepNumber}}: \"{{title}}\" from the routing.",
@@ -663,6 +694,119 @@
         "missingShort": "Some readiness gates aren't satisfied yet.",
         "missingHeader": "Cannot promote — missing data:",
         "failed": "Couldn't promote this part."
+      },
+      "sourcing": {
+        "title": "Sourcing",
+        "hint": "Default vendor and ordering parameters. Per-vendor overrides go on the Sources tab.",
+        "preferredVendorLabel": "Preferred Vendor",
+        "leadTimeDaysLabel": "Lead Time (days)",
+        "leadTimeDaysHelper": "Default value; per-vendor lead time set on the Sources tab.",
+        "minOrderQtyLabel": "Min Order Qty",
+        "packSizeLabel": "Pack Size",
+        "externalPartNumberLabel": "External Part #",
+        "saveFailed": "Couldn't save sourcing."
+      },
+      "manufacturer": {
+        "title": "Manufacturer",
+        "hint": "Engineering OEM identity — distinct from any distributor we buy through.",
+        "manufacturerNameLabel": "Manufacturer",
+        "manufacturerPartNumberLabel": "Manufacturer Part #",
+        "externalPartNumberLabel": "External Part #",
+        "saveFailed": "Couldn't save manufacturer info."
+      },
+      "inventory": {
+        "title": "Inventory",
+        "hint": "Stock thresholds and unit of measure. Drives reorder triggers and bin defaults.",
+        "minStockThresholdLabel": "Min Stock Threshold",
+        "reorderPointLabel": "Reorder Point",
+        "reorderQuantityLabel": "Reorder Quantity",
+        "safetyStockDaysLabel": "Safety Stock Days",
+        "stockUomLabel": "Stock UoM",
+        "stockUomNone": "— Not set —",
+        "defaultBinLabel": "Default Bin (id)",
+        "defaultBinHelper": "Numeric bin id. Replaced by a real bin picker in a later release.",
+        "saveFailed": "Couldn't save inventory settings."
+      },
+      "quality": {
+        "title": "Quality",
+        "hint": "Receiving inspection, traceability, ABC class, hazmat, and shelf life.",
+        "traceabilityLabel": "Traceability",
+        "traceabilityNone": "Bulk (no tracking)",
+        "traceabilityLot": "By lot / batch",
+        "traceabilitySerial": "By serial number",
+        "requiresReceivingInspectionLabel": "Requires Receiving Inspection",
+        "inspectionFrequencyLabel": "Inspection Frequency",
+        "frequencyEvery": "Every receipt",
+        "frequencyFirstArticle": "First article only",
+        "frequencySkipLot": "Skip-lot",
+        "frequencyRandom": "Random sampling",
+        "inspectionSkipAfterNLabel": "Skip After N Clean Receipts",
+        "abcClassLabel": "ABC Class",
+        "abcClassUnclassified": "— Not classified —",
+        "abcClassA": "A — high value / tight control",
+        "abcClassB": "B — moderate value",
+        "abcClassC": "C — low value / loose control",
+        "hazmatClassLabel": "Hazmat Class",
+        "shelfLifeDaysLabel": "Shelf Life (days)",
+        "saveFailed": "Couldn't save quality settings."
+      },
+      "shipping": {
+        "title": "Shipping & Physical",
+        "hint": "Mass, dimensions, and volume. Drives shipping rate quotes and inventory cube.",
+        "weightLabel": "Weight (each)",
+        "weightUnitLabel": "Weight Unit",
+        "lengthLabel": "Length",
+        "widthLabel": "Width",
+        "heightLabel": "Height",
+        "dimensionUnitLabel": "Dimension Unit",
+        "volumeLabel": "Volume",
+        "volumeUnitLabel": "Volume Unit",
+        "saveFailed": "Couldn't save shipping info."
+      },
+      "toolAsset": {
+        "title": "Tooling Asset",
+        "hint": "Link this part to its tooling Asset record (for cavity, life, calibration tracking).",
+        "toolingAssetLabel": "Tooling Asset",
+        "moldToolRefLabel": "Mold/Tool Reference",
+        "moldToolRefHelper": "Vestigial — use Tooling Asset above when possible.",
+        "saveFailed": "Couldn't save tool asset link."
+      },
+      "sourcePart": {
+        "title": "Source Part",
+        "hint": "The pre-finishing in-house part that's sent to the subcontractor.",
+        "sourcePartLabel": "Source Part",
+        "sourcePartHelper": "The pre-finishing in-house part that's sent to the vendor.",
+        "saveFailed": "Couldn't save source part."
+      },
+      "vendor": {
+        "title": "Vendor",
+        "hint": "Single subcontract vendor. MOQ and pack size live on the source-part downstream.",
+        "preferredVendorLabel": "Preferred Vendor",
+        "leadTimeDaysLabel": "Lead Time (days)",
+        "saveFailed": "Couldn't save vendor info."
+      },
+      "flags": {
+        "title": "Flags",
+        "hint": "Phantom-specific flags: kit, configurator, and backflush policy.",
+        "isKitLabel": "Is Kit",
+        "isKitHelper": "Ship-as-kit (children deliver with parent).",
+        "isConfigurableLabel": "Is Configurable",
+        "isConfigurableHelper": "Enables the configurator wizard for this parent.",
+        "backflushPolicyLabel": "Backflush Policy",
+        "backflushDefault": "— Use global default —",
+        "backflushAuto": "Auto",
+        "backflushManual": "Manual",
+        "backflushNone": "None",
+        "saveFailed": "Couldn't save flags."
+      },
+      "salesHooks": {
+        "title": "Sales Setup",
+        "hint": "Sales-side parameters for resold finished goods.",
+        "salesUomLabel": "Sales UoM",
+        "salesUomNone": "— Not set —",
+        "defaultSalesPriceLabel": "Default Sales Price",
+        "defaultSalesPriceHelper": "Editable on the Pricing tab (coming soon).",
+        "saveFailed": "Couldn't save sales hooks."
       }
     },
     "detail": {
@@ -918,6 +1062,11 @@
     "companyName": "Company Name",
     "contactName": "Contact Name",
     "creditTerms": "Credit Terms",
+    "creditLimit": "Credit Limit",
+    "defaultTaxCodeId": "Default Tax Code ID",
+    "defaultCurrency": "Default Currency (ISO 4217)",
+    "billingAddress": "Billing Address",
+    "shippingAddress": "Shipping Address",
     "taxRate": "Tax Rate",
     "addresses": "Addresses",
     "orders": "Orders",
@@ -973,7 +1122,22 @@
     "archiveMessage": "This customer will be archived.",
     "archiveTitle": "Archive Customer?",
     "archived": "Customer archived",
-    "saved": "Customer saved"
+    "saved": "Customer saved",
+    "detail": {
+      "tabs": {
+        "overview": "Overview",
+        "contacts": "Contacts",
+        "addresses": "Addresses",
+        "estimates": "Estimates",
+        "quotes": "Quotes",
+        "orders": "Orders",
+        "jobs": "Jobs",
+        "invoices": "Invoices",
+        "interactions": "Interactions",
+        "activity": "Activity",
+        "placeholderHelp": "This tab is coming in a follow-up dispatch."
+      }
+    }
   },
   "leads": {
     "title": "Leads",
@@ -1095,10 +1259,6 @@
     "expenseRevisionRequested": "Revision requested.",
     "resubmit": "Resubmit",
     "expenseResubmitted": "Expense resubmitted.",
-    "receipt": "Receipt",
-    "uploadReceipt": "Upload Receipt",
-    "existingReceipt": "Receipt on file",
-    "receiptRequiredHint": "A receipt is required by company policy.",
     "ledgerTitle": "Expense Ledger",
     "newRecurring": "New Recurring",
     "upcomingTab": "Upcoming (90 Days)",
@@ -1125,6 +1285,8 @@
     "recurringDeleted": "Recurring expense deleted.",
     "deleteRecurringTitle": "Delete Recurring Expense?",
     "deleteRecurringMessage": "This will remove \"{{name}}\" from recurring expenses.",
+    "existingReceipt": "Existing receipt",
+    "receiptRequiredHint": "A receipt is required for this expense before it can be submitted.",
     "allClassifications": "All Classifications",
     "classSubscription": "Subscription",
     "classLease": "Lease",
@@ -1222,6 +1384,11 @@
     "cavityCount": "Cavity Count",
     "toolLife": "Tool Life",
     "toolLifeExpectancy": "Tool Life Expectancy",
+    "acquisitionSection": "Acquisition & Depreciation",
+    "acquisitionCost": "Acquisition Cost",
+    "depreciationMethod": "Depreciation Method",
+    "workCenterId": "Work Center ID",
+    "glAccount": "GL Account (optional)",
     "sourceJob": "Source Job",
     "sourcePart": "Source Part",
     "setStatus": "Set Status",
@@ -1267,6 +1434,7 @@
       "teams": "Teams & Kiosks",
       "salesTax": "Sales Tax",
       "auditLog": "Audit Log",
+      "biApiKeys": "BI API Keys",
       "compliance": "Compliance",
       "timeCorrections": "Time Corrections",
       "events": "Events",
@@ -1274,9 +1442,10 @@
       "edi": "EDI",
       "mfa": "MFA Policy",
       "automations": "Automations",
+      "integrationOutbox": "Integration Outbox",
       "autoPo": "Auto-PO",
       "expenses": "Expense Policy",
-      "integrationOutbox": "Integration Outbox"
+      "roleTemplates": "Role Templates"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -1473,10 +1642,10 @@
     "removeMember": "Remove",
     "addMember": "Add",
     "remove": "Remove",
-    "removeTerminal": "Remove kiosk",
-    "removeTerminalTitle": "Remove Kiosk Terminal?",
-    "removeTerminalConfirm": "This will unpair \"{{name}}\" and require the kiosk to be set up again from the device. Continue?",
-    "terminalRemoved": "Kiosk terminal removed",
+    "removeTerminal": "Remove terminal",
+    "removeTerminalTitle": "Remove Terminal?",
+    "removeTerminalConfirm": "Remove terminal \"{{name}}\"? Any kiosk connected on this terminal will lose its session immediately.",
+    "terminalRemoved": "Terminal removed",
     "terminalRemoveFailed": "Failed to remove terminal"
   },
   "onboarding": {
@@ -1783,8 +1952,8 @@
     "fontScaleComfortable": "Comfortable",
     "fontScaleLarge": "Large",
     "fontScaleXl": "Extra Large",
-    "ambientIdleTimeout": "Auto-enter ambient mode",
-    "ambientIdleTimeoutHint": "Automatically switch to ambient display after a period of inactivity on the dashboard.",
+    "ambientIdleTimeout": "Ambient Mode Idle Timeout",
+    "ambientIdleTimeoutHint": "How long to wait before automatically entering ambient (read-only) display mode after no activity.",
     "genderNone": "-- None --",
     "genderMale": "Male",
     "genderFemale": "Female",
@@ -1913,6 +2082,12 @@
     "deleteTitle": "Delete {item}?",
     "archiveTitle": "Archive {item}?",
     "confirm": "Confirm"
+  },
+  "concurrencyConflict": {
+    "title": "Record Changed",
+    "message": "This record was changed by another user. Reload and try again?",
+    "reload": "Reload",
+    "cancel": "Cancel"
   },
   "emptyState": {
     "noJobs": "No jobs found",
@@ -2328,6 +2503,13 @@
     "cancel": "Cancel",
     "send": "Send"
   },
+  "address": {
+    "street": "Street",
+    "city": "City",
+    "state": "State",
+    "postal": "Postal Code",
+    "country": "Country"
+  },
   "addressForm": {
     "streetAddress": "Street Address",
     "streetAddress2": "Street Address 2",
@@ -2664,6 +2846,9 @@
     "poCreated": "Purchase order created.",
     "createPo": "Create PO",
     "selectVendor": "Select vendor...",
+    "showInactiveVendors": "Show inactive vendors",
+    "showInactiveParts": "Show obsolete parts",
+    "vendorDeactivatedWarning": "Vendor '{{name}}' is deactivated. Reactivate it or choose another.",
     "jobId": "Job ID",
     "partId": "Part ID",
     "receiveTitle": "Receive Items — {{number}}",
@@ -2675,7 +2860,14 @@
     "newPoTitle": "New Purchase Order",
     "noLinesYet": "No lines yet",
     "orderDetails": "Order Details",
-    "tabOrders": "Orders"
+    "tabOrders": "Orders",
+    "shortClose": "Short Close",
+    "shortCloseTitle": "Short-Close Purchase Order",
+    "shortCloseMessage": "Closes this PO and marks the unreceived quantity as cancelled-not-received. Use when the remainder will not arrive (vendor backorder cancelled, item discontinued).",
+    "shortCloseReason": "Reason (required)",
+    "shortClosed": "Short-closed",
+    "shortClosedQty": "Short-closed",
+    "poShortClosed": "Purchase order short-closed."
   },
   "salesOrders": {
     "title": "Sales Orders",
@@ -3424,6 +3616,17 @@
     "maxSessionsReached": "Maximum concurrent sessions reached",
     "sessionActive": "Active",
     "sessionIdle": "Idle",
+    "dailyLog": {
+      "title": "Scan Daily Log",
+      "filterByDate": "Date",
+      "filterByAction": "Action Type",
+      "allActions": "All Actions",
+      "summaryStats": "Summary",
+      "scansToday": "scans today",
+      "exportCsv": "Export CSV",
+      "noScans": "No scans recorded for this date."
+    },
+    "devices": "Scanner Devices",
     "shipFlow": {
       "title": "Ship Items",
       "selectShipmentLine": "Select a shipment line to fulfill",
@@ -3503,17 +3706,6 @@
       "pairSuccess": "Scanner paired successfully",
       "unpairSuccess": "Scanner unpaired"
     },
-    "dailyLog": {
-      "title": "Scan Daily Log",
-      "filterByDate": "Date",
-      "filterByAction": "Action Type",
-      "allActions": "All Actions",
-      "summaryStats": "Summary",
-      "scansToday": "scans today",
-      "exportCsv": "Export CSV",
-      "noScans": "No scans recorded for this date."
-    },
-    "devices": "Scanner Devices",
     "kioskSession": {
       "activeSession": "Active Sessions",
       "idleSince": "Idle for {{time}}",
@@ -4166,10 +4358,47 @@
     }
   },
   "adminPanels": {
+    "biApiKeys": {
+      "headerCount": "keys",
+      "newKey": "New API Key",
+      "noKeys": "No BI API keys issued yet",
+      "issueButton": "Issue Key",
+      "statusActive": "Active",
+      "statusRevoked": "Revoked",
+      "never": "Never",
+      "noExpiry": "No expiry",
+      "revokeAria": "Revoke key",
+      "revokeTitle": "Revoke BI API Key?",
+      "revokeMessage": "Revoke key \"{{ name }}\" ({{ prefix }}…)? Any client using this key will start receiving 401 immediately. This cannot be undone.",
+      "revokeConfirm": "Revoke",
+      "revokedSuccess": "Key \"{{ name }}\" revoked",
+      "issuedSuccess": "Key \"{{ name }}\" issued",
+      "issuedTitle": "API Key Issued",
+      "issuedWarningTitle": "Copy this key now",
+      "issuedWarning": "This is the only time the full key will be shown. The server stores only a hash — once you dismiss this dialog the plaintext cannot be recovered.",
+      "expiryHint": "Optional. Leave blank for a non-expiring key.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "dismissReveal": "I have copied the key",
+      "fields": {
+        "name": "Name",
+        "expiresAt": "Expires At",
+        "plaintext": "Plaintext Key (shown once)"
+      },
+      "cols": {
+        "name": "Name",
+        "prefix": "Prefix",
+        "status": "Status",
+        "created": "Created",
+        "expires": "Expires",
+        "lastUsed": "Last Used"
+      }
+    },
     "auditLog": {
       "entityType": "Entity Type",
       "action": "Action",
       "actionPlaceholder": "e.g. Created, Updated",
+      "systemEvent": "System Event",
       "fromDate": "From Date",
       "toDate": "To Date",
       "noEntries": "No audit log entries found",
@@ -4197,7 +4426,23 @@
         "quote": "Quote",
         "shipment": "Shipment",
         "timeEntry": "Time Entry",
-        "asset": "Asset"
+        "asset": "Asset",
+        "identity": "Identity (login / MFA / role)",
+        "biApiKey": "BI API Key"
+      },
+      "presets": {
+        "allActions": "-- All Actions --",
+        "userLoggedIn": "User Logged In",
+        "userLoginFailed": "User Login Failed",
+        "userLoggedOut": "User Logged Out",
+        "userPasswordChanged": "Password Changed",
+        "mfaEnabled": "MFA Enabled",
+        "mfaDisabled": "MFA Disabled",
+        "roleAssigned": "Role Assigned",
+        "userActivated": "User Activated",
+        "userDeactivated": "User Deactivated",
+        "biApiKeyIssued": "BI API Key Issued",
+        "biApiKeyRevoked": "BI API Key Revoked"
       }
     },
     "edi": {
@@ -4556,24 +4801,6 @@
       "templateDeleted": "Template deleted"
     }
   },
-  "expenseSettings": {
-    "title": "Expense Policy Settings",
-    "intro": "Policy rules are enforced on both the server and client. Changes take effect on the next expense submission.",
-    "allowSelfApproval": "Allow Self-Approval",
-    "allowSelfApprovalHint": "When enabled, expenses under the auto-approve threshold are approved automatically for the submitter.",
-    "autoApproveThreshold": "Auto-Approve Threshold",
-    "autoApproveThresholdHint": "Expenses submitted under this amount are auto-approved. Leave blank to require manual review of every expense.",
-    "noAutoApprove": "No auto-approval",
-    "maxAmount": "Maximum Expense Amount",
-    "maxAmountHint": "Hard cap on a single expense. Leave blank for no limit. Submissions above this amount are rejected before approval.",
-    "noLimit": "No limit",
-    "requireReceipt": "Require Receipt Attachment",
-    "requireReceiptHint": "When enabled, every expense must have a receipt file attached before it can be submitted.",
-    "minDescriptionLength": "Minimum Description Length",
-    "minDescriptionLengthHint": "Force submitters to describe the expense (0 = no minimum, max 500 characters).",
-    "saved": "Expense policy saved.",
-    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount."
-  },
   "autoPo": {
     "autoPoSuggestions": "Auto-PO Suggestions",
     "pendingSuggestions": "pending suggestions",
@@ -4617,15 +4844,33 @@
     "tabSuggestions": "Suggestions",
     "vendor": "Vendor"
   },
+  "expenseSettings": {
+    "title": "Expense Policy",
+    "intro": "Configure thresholds, receipt requirements, and approval rules for expense submissions.",
+    "allowSelfApproval": "Allow self-approval",
+    "allowSelfApprovalHint": "When enabled, submitters may auto-approve their own expenses up to the threshold below.",
+    "autoApproveThreshold": "Auto-approve threshold",
+    "autoApproveThresholdHint": "Expenses at or below this amount are approved automatically. Leave blank to require manual approval on every expense.",
+    "noAutoApprove": "No auto-approval",
+    "maxAmount": "Maximum expense amount",
+    "maxAmountHint": "Largest amount a single expense may claim. Leave blank for no upper limit.",
+    "noLimit": "No limit",
+    "requireReceipt": "Require receipt attachment",
+    "requireReceiptHint": "When enabled, submitters must attach a receipt file before submitting any expense.",
+    "minDescriptionLength": "Minimum description length",
+    "minDescriptionLengthHint": "Shortest acceptable expense description (in characters). Use 0 to allow blank descriptions.",
+    "saved": "Expense policy saved",
+    "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount."
+  },
   "welcomePage": {
-    "brandName": "Engineer",
-    "demoChip": "DEMO",
-    "tagline": "Manufacturing operations, end to end.",
-    "lede": "QB Engineer is an open-source platform for small-to-mid shops — kanban production tracking, parts & inventory, quote-to-cash, quality, and reporting in one place. Integrates with QuickBooks or runs fully standalone.",
+    "brandName": "QB Engineer",
+    "demoChip": "Demo",
+    "tagline": "An open ERP for engineering shops.",
+    "lede": "QB Engineer is a self-hostable shop-floor + business management platform — kanban, jobs, parts, inventory, purchasing, sales, payroll, and more — designed to run alongside your QuickBooks file or completely standalone.",
+    "caveat": "This is a public demo. Data resets periodically and is shared with everyone signed in.",
     "ctaSignIn": "Sign in to the demo",
-    "caveat": "This is a fully interactive demo — every screen is real, every button works, but nothing saves server-side. Changes live in your browser tab and reset on refresh. Any email / password works.",
-    "footerLicense": "Open source · GNU licensed",
-    "footerGithub": "GitHub"
+    "footerLicense": "MIT-licensed open source",
+    "footerGithub": "View on GitHub"
   },
   "workflow": {
     "parts": {
@@ -4639,7 +4884,18 @@
         "routing": "Routing",
         "costing": "Cost",
         "alternates": "Alternates",
-        "expressForm": "Quick add"
+        "expressForm": "Quick add",
+        "sourcing": "Sourcing",
+        "manufacturer": "Manufacturer",
+        "inventory": "Inventory",
+        "manufacturing": "Manufacturing",
+        "quality": "Quality",
+        "shipping": "Shipping",
+        "toolAsset": "Tooling Asset",
+        "sourcePart": "Source Part",
+        "vendor": "Vendor",
+        "flags": "Flags",
+        "salesHooks": "Sales Setup"
       }
     },
     "shell": {

@@ -1,0 +1,19 @@
+<section class="part-source-part-step" [appLoadingBlock]="saving()" data-testid="part-source-part-step">
+  <header class="part-source-part-step__header">
+    <h2 class="part-source-part-step__title">{{ 'parts.workflow.sourcePart.title' | translate }}</h2>
+    <p class="part-source-part-step__hint">{{ 'parts.workflow.sourcePart.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-source-part-step__form">
+    <div class="part-source-part-step__field">
+      <app-entity-picker
+        [label]="'parts.workflow.sourcePart.sourcePartLabel' | translate"
+        entityType="parts"
+        formControlName="sourcePartId"
+        data-testid="source-part-picker" />
+      <p class="part-source-part-step__hint part-source-part-step__hint--field">
+        {{ 'parts.workflow.sourcePart.sourcePartHelper' | translate }}
+      </p>
+    </div>
+  </form>
+</section>

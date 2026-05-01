@@ -1,0 +1,25 @@
+<section class="part-tool-asset-step" [appLoadingBlock]="saving()" data-testid="part-tool-asset-step">
+  <header class="part-tool-asset-step__header">
+    <h2 class="part-tool-asset-step__title">{{ 'parts.workflow.toolAsset.title' | translate }}</h2>
+    <p class="part-tool-asset-step__hint">{{ 'parts.workflow.toolAsset.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-tool-asset-step__form">
+    <app-entity-picker
+      [label]="'parts.workflow.toolAsset.toolingAssetLabel' | translate"
+      entityType="assets"
+      formControlName="toolingAssetId"
+      data-testid="tool-asset-asset-picker" />
+
+    <div class="part-tool-asset-step__field">
+      <app-input
+        [label]="'parts.workflow.toolAsset.moldToolRefLabel' | translate"
+        formControlName="moldToolRef"
+        [maxlength]="100"
+        data-testid="tool-asset-mold-tool-ref" />
+      <p class="part-tool-asset-step__hint part-tool-asset-step__hint--field">
+        {{ 'parts.workflow.toolAsset.moldToolRefHelper' | translate }}
+      </p>
+    </div>
+  </form>
+</section>

@@ -1,0 +1,20 @@
+<section class="part-vendor-step" [appLoadingBlock]="saving()" data-testid="part-vendor-step">
+  <header class="part-vendor-step__header">
+    <h2 class="part-vendor-step__title">{{ 'parts.workflow.vendor.title' | translate }}</h2>
+    <p class="part-vendor-step__hint">{{ 'parts.workflow.vendor.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-vendor-step__form">
+    <app-entity-picker
+      [label]="'parts.workflow.vendor.preferredVendorLabel' | translate"
+      entityType="vendors"
+      formControlName="preferredVendorId"
+      data-testid="vendor-preferred-vendor" />
+
+    <app-input
+      [label]="'parts.workflow.vendor.leadTimeDaysLabel' | translate"
+      type="number"
+      formControlName="leadTimeDays"
+      data-testid="vendor-lead-time" />
+  </form>
+</section>

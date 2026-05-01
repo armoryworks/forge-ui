@@ -1,0 +1,57 @@
+<section class="part-shipping-step" [appLoadingBlock]="saving()" data-testid="part-shipping-step">
+  <header class="part-shipping-step__header">
+    <h2 class="part-shipping-step__title">{{ 'parts.workflow.shipping.title' | translate }}</h2>
+    <p class="part-shipping-step__hint">{{ 'parts.workflow.shipping.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-shipping-step__form">
+    <div class="part-shipping-step__row">
+      <app-input
+        [label]="'parts.workflow.shipping.weightLabel' | translate"
+        type="number"
+        formControlName="weight"
+        data-testid="shipping-weight" />
+      <app-select
+        [label]="'parts.workflow.shipping.weightUnitLabel' | translate"
+        formControlName="weightDisplayUnit"
+        [options]="weightUnitOptions"
+        data-testid="shipping-weight-unit" />
+    </div>
+
+    <div class="part-shipping-step__row part-shipping-step__row--quad">
+      <app-input
+        [label]="'parts.workflow.shipping.lengthLabel' | translate"
+        type="number"
+        formControlName="length"
+        data-testid="shipping-length" />
+      <app-input
+        [label]="'parts.workflow.shipping.widthLabel' | translate"
+        type="number"
+        formControlName="width"
+        data-testid="shipping-width" />
+      <app-input
+        [label]="'parts.workflow.shipping.heightLabel' | translate"
+        type="number"
+        formControlName="height"
+        data-testid="shipping-height" />
+      <app-select
+        [label]="'parts.workflow.shipping.dimensionUnitLabel' | translate"
+        formControlName="dimensionDisplayUnit"
+        [options]="dimensionUnitOptions"
+        data-testid="shipping-dimension-unit" />
+    </div>
+
+    <div class="part-shipping-step__row">
+      <app-input
+        [label]="'parts.workflow.shipping.volumeLabel' | translate"
+        type="number"
+        formControlName="volume"
+        data-testid="shipping-volume" />
+      <app-select
+        [label]="'parts.workflow.shipping.volumeUnitLabel' | translate"
+        formControlName="volumeDisplayUnit"
+        [options]="volumeUnitOptions"
+        data-testid="shipping-volume-unit" />
+    </div>
+  </form>
+</section>

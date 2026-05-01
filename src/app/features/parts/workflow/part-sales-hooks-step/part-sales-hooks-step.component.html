@@ -1,0 +1,24 @@
+<section class="part-sales-hooks-step" [appLoadingBlock]="saving()" data-testid="part-sales-hooks-step">
+  <header class="part-sales-hooks-step__header">
+    <h2 class="part-sales-hooks-step__title">{{ 'parts.workflow.salesHooks.title' | translate }}</h2>
+    <p class="part-sales-hooks-step__hint">{{ 'parts.workflow.salesHooks.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-sales-hooks-step__form">
+    <app-select
+      [label]="'parts.workflow.salesHooks.salesUomLabel' | translate"
+      formControlName="salesUomCode"
+      [options]="salesUomOptions"
+      data-testid="sales-hooks-sales-uom" />
+
+    <div class="part-sales-hooks-step__field">
+      <app-currency-input
+        [label]="'parts.workflow.salesHooks.defaultSalesPriceLabel' | translate"
+        formControlName="defaultSalesPrice"
+        data-testid="sales-hooks-default-sales-price" />
+      <p class="part-sales-hooks-step__hint part-sales-hooks-step__hint--field">
+        {{ 'parts.workflow.salesHooks.defaultSalesPriceHelper' | translate }}
+      </p>
+    </div>
+  </form>
+</section>

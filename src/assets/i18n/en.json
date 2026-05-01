@@ -694,6 +694,119 @@
         "missingShort": "Some readiness gates aren't satisfied yet.",
         "missingHeader": "Cannot promote — missing data:",
         "failed": "Couldn't promote this part."
+      },
+      "sourcing": {
+        "title": "Sourcing",
+        "hint": "Default vendor and ordering parameters. Per-vendor overrides go on the Sources tab.",
+        "preferredVendorLabel": "Preferred Vendor",
+        "leadTimeDaysLabel": "Lead Time (days)",
+        "leadTimeDaysHelper": "Default value; per-vendor lead time set on the Sources tab.",
+        "minOrderQtyLabel": "Min Order Qty",
+        "packSizeLabel": "Pack Size",
+        "externalPartNumberLabel": "External Part #",
+        "saveFailed": "Couldn't save sourcing."
+      },
+      "manufacturer": {
+        "title": "Manufacturer",
+        "hint": "Engineering OEM identity — distinct from any distributor we buy through.",
+        "manufacturerNameLabel": "Manufacturer",
+        "manufacturerPartNumberLabel": "Manufacturer Part #",
+        "externalPartNumberLabel": "External Part #",
+        "saveFailed": "Couldn't save manufacturer info."
+      },
+      "inventory": {
+        "title": "Inventory",
+        "hint": "Stock thresholds and unit of measure. Drives reorder triggers and bin defaults.",
+        "minStockThresholdLabel": "Min Stock Threshold",
+        "reorderPointLabel": "Reorder Point",
+        "reorderQuantityLabel": "Reorder Quantity",
+        "safetyStockDaysLabel": "Safety Stock Days",
+        "stockUomLabel": "Stock UoM",
+        "stockUomNone": "— Not set —",
+        "defaultBinLabel": "Default Bin (id)",
+        "defaultBinHelper": "Numeric bin id. Replaced by a real bin picker in a later release.",
+        "saveFailed": "Couldn't save inventory settings."
+      },
+      "quality": {
+        "title": "Quality",
+        "hint": "Receiving inspection, traceability, ABC class, hazmat, and shelf life.",
+        "traceabilityLabel": "Traceability",
+        "traceabilityNone": "Bulk (no tracking)",
+        "traceabilityLot": "By lot / batch",
+        "traceabilitySerial": "By serial number",
+        "requiresReceivingInspectionLabel": "Requires Receiving Inspection",
+        "inspectionFrequencyLabel": "Inspection Frequency",
+        "frequencyEvery": "Every receipt",
+        "frequencyFirstArticle": "First article only",
+        "frequencySkipLot": "Skip-lot",
+        "frequencyRandom": "Random sampling",
+        "inspectionSkipAfterNLabel": "Skip After N Clean Receipts",
+        "abcClassLabel": "ABC Class",
+        "abcClassUnclassified": "— Not classified —",
+        "abcClassA": "A — high value / tight control",
+        "abcClassB": "B — moderate value",
+        "abcClassC": "C — low value / loose control",
+        "hazmatClassLabel": "Hazmat Class",
+        "shelfLifeDaysLabel": "Shelf Life (days)",
+        "saveFailed": "Couldn't save quality settings."
+      },
+      "shipping": {
+        "title": "Shipping & Physical",
+        "hint": "Mass, dimensions, and volume. Drives shipping rate quotes and inventory cube.",
+        "weightLabel": "Weight (each)",
+        "weightUnitLabel": "Weight Unit",
+        "lengthLabel": "Length",
+        "widthLabel": "Width",
+        "heightLabel": "Height",
+        "dimensionUnitLabel": "Dimension Unit",
+        "volumeLabel": "Volume",
+        "volumeUnitLabel": "Volume Unit",
+        "saveFailed": "Couldn't save shipping info."
+      },
+      "toolAsset": {
+        "title": "Tooling Asset",
+        "hint": "Link this part to its tooling Asset record (for cavity, life, calibration tracking).",
+        "toolingAssetLabel": "Tooling Asset",
+        "moldToolRefLabel": "Mold/Tool Reference",
+        "moldToolRefHelper": "Vestigial — use Tooling Asset above when possible.",
+        "saveFailed": "Couldn't save tool asset link."
+      },
+      "sourcePart": {
+        "title": "Source Part",
+        "hint": "The pre-finishing in-house part that's sent to the subcontractor.",
+        "sourcePartLabel": "Source Part",
+        "sourcePartHelper": "The pre-finishing in-house part that's sent to the vendor.",
+        "saveFailed": "Couldn't save source part."
+      },
+      "vendor": {
+        "title": "Vendor",
+        "hint": "Single subcontract vendor. MOQ and pack size live on the source-part downstream.",
+        "preferredVendorLabel": "Preferred Vendor",
+        "leadTimeDaysLabel": "Lead Time (days)",
+        "saveFailed": "Couldn't save vendor info."
+      },
+      "flags": {
+        "title": "Flags",
+        "hint": "Phantom-specific flags: kit, configurator, and backflush policy.",
+        "isKitLabel": "Is Kit",
+        "isKitHelper": "Ship-as-kit (children deliver with parent).",
+        "isConfigurableLabel": "Is Configurable",
+        "isConfigurableHelper": "Enables the configurator wizard for this parent.",
+        "backflushPolicyLabel": "Backflush Policy",
+        "backflushDefault": "— Use global default —",
+        "backflushAuto": "Auto",
+        "backflushManual": "Manual",
+        "backflushNone": "None",
+        "saveFailed": "Couldn't save flags."
+      },
+      "salesHooks": {
+        "title": "Sales Setup",
+        "hint": "Sales-side parameters for resold finished goods.",
+        "salesUomLabel": "Sales UoM",
+        "salesUomNone": "— Not set —",
+        "defaultSalesPriceLabel": "Default Sales Price",
+        "defaultSalesPriceHelper": "Editable on the Pricing tab (coming soon).",
+        "saveFailed": "Couldn't save sales hooks."
       }
     },
     "detail": {
@@ -4771,7 +4884,18 @@
         "routing": "Routing",
         "costing": "Cost",
         "alternates": "Alternates",
-        "expressForm": "Quick add"
+        "expressForm": "Quick add",
+        "sourcing": "Sourcing",
+        "manufacturer": "Manufacturer",
+        "inventory": "Inventory",
+        "manufacturing": "Manufacturing",
+        "quality": "Quality",
+        "shipping": "Shipping",
+        "toolAsset": "Tooling Asset",
+        "sourcePart": "Source Part",
+        "vendor": "Vendor",
+        "flags": "Flags",
+        "salesHooks": "Sales Setup"
       }
     },
     "shell": {

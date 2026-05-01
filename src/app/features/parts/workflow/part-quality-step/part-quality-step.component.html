@@ -1,0 +1,52 @@
+<section class="part-quality-step" [appLoadingBlock]="saving()" data-testid="part-quality-step">
+  <header class="part-quality-step__header">
+    <h2 class="part-quality-step__title">{{ 'parts.workflow.quality.title' | translate }}</h2>
+    <p class="part-quality-step__hint">{{ 'parts.workflow.quality.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-quality-step__form">
+    <app-select
+      [label]="'parts.workflow.quality.traceabilityLabel' | translate"
+      formControlName="traceabilityType"
+      [options]="traceabilityOptions"
+      [required]="true"
+      data-testid="quality-traceability" />
+
+    <app-toggle
+      [label]="'parts.workflow.quality.requiresReceivingInspectionLabel' | translate"
+      formControlName="requiresReceivingInspection"
+      data-testid="quality-requires-inspection" />
+
+    @if (showInspectionFields()) {
+      <app-select
+        [label]="'parts.workflow.quality.inspectionFrequencyLabel' | translate"
+        formControlName="inspectionFrequency"
+        [options]="inspectionFrequencyOptions"
+        data-testid="quality-inspection-frequency" />
+
+      <app-input
+        [label]="'parts.workflow.quality.inspectionSkipAfterNLabel' | translate"
+        type="number"
+        formControlName="inspectionSkipAfterN"
+        data-testid="quality-inspection-skip-after" />
+    }
+
+    <app-select
+      [label]="'parts.workflow.quality.abcClassLabel' | translate"
+      formControlName="abcClass"
+      [options]="abcClassOptions"
+      data-testid="quality-abc-class" />
+
+    <app-input
+      [label]="'parts.workflow.quality.hazmatClassLabel' | translate"
+      formControlName="hazmatClass"
+      [maxlength]="50"
+      data-testid="quality-hazmat-class" />
+
+    <app-input
+      [label]="'parts.workflow.quality.shelfLifeDaysLabel' | translate"
+      type="number"
+      formControlName="shelfLifeDays"
+      data-testid="quality-shelf-life-days" />
+  </form>
+</section>

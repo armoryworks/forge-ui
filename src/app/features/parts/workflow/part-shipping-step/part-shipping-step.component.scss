@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+
+.part-shipping-step {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  position: relative;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    max-width: 720px;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-md;
+
+    &--quad {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+  }
+}

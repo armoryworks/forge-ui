@@ -1,0 +1,34 @@
+<section class="part-flags-step" [appLoadingBlock]="saving()" data-testid="part-flags-step">
+  <header class="part-flags-step__header">
+    <h2 class="part-flags-step__title">{{ 'parts.workflow.flags.title' | translate }}</h2>
+    <p class="part-flags-step__hint">{{ 'parts.workflow.flags.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-flags-step__form">
+    <div class="part-flags-step__field">
+      <app-toggle
+        [label]="'parts.workflow.flags.isKitLabel' | translate"
+        formControlName="isKit"
+        data-testid="flags-is-kit" />
+      <p class="part-flags-step__hint part-flags-step__hint--field">
+        {{ 'parts.workflow.flags.isKitHelper' | translate }}
+      </p>
+    </div>
+
+    <div class="part-flags-step__field">
+      <app-toggle
+        [label]="'parts.workflow.flags.isConfigurableLabel' | translate"
+        formControlName="isConfigurable"
+        data-testid="flags-is-configurable" />
+      <p class="part-flags-step__hint part-flags-step__hint--field">
+        {{ 'parts.workflow.flags.isConfigurableHelper' | translate }}
+      </p>
+    </div>
+
+    <app-select
+      [label]="'parts.workflow.flags.backflushPolicyLabel' | translate"
+      formControlName="backflushPolicy"
+      [options]="backflushOptions"
+      data-testid="flags-backflush-policy" />
+  </form>
+</section>

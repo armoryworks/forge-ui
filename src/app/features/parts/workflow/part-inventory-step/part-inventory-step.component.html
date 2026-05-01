@@ -1,0 +1,49 @@
+<section class="part-inventory-step" [appLoadingBlock]="saving()" data-testid="part-inventory-step">
+  <header class="part-inventory-step__header">
+    <h2 class="part-inventory-step__title">{{ 'parts.workflow.inventory.title' | translate }}</h2>
+    <p class="part-inventory-step__hint">{{ 'parts.workflow.inventory.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="part-inventory-step__form">
+    <app-input
+      [label]="'parts.workflow.inventory.minStockThresholdLabel' | translate"
+      type="number"
+      formControlName="minStockThreshold"
+      data-testid="inventory-min-stock" />
+
+    <app-input
+      [label]="'parts.workflow.inventory.reorderPointLabel' | translate"
+      type="number"
+      formControlName="reorderPoint"
+      data-testid="inventory-reorder-point" />
+
+    <app-input
+      [label]="'parts.workflow.inventory.reorderQuantityLabel' | translate"
+      type="number"
+      formControlName="reorderQuantity"
+      data-testid="inventory-reorder-qty" />
+
+    <app-input
+      [label]="'parts.workflow.inventory.safetyStockDaysLabel' | translate"
+      type="number"
+      formControlName="safetyStockDays"
+      data-testid="inventory-safety-stock-days" />
+
+    <app-select
+      [label]="'parts.workflow.inventory.stockUomLabel' | translate"
+      formControlName="stockUomCode"
+      [options]="stockUomOptions"
+      data-testid="inventory-stock-uom" />
+
+    <div class="part-inventory-step__field">
+      <app-input
+        [label]="'parts.workflow.inventory.defaultBinLabel' | translate"
+        type="number"
+        formControlName="defaultBinId"
+        data-testid="inventory-default-bin" />
+      <p class="part-inventory-step__hint part-inventory-step__hint--field">
+        {{ 'parts.workflow.inventory.defaultBinHelper' | translate }}
+      </p>
+    </div>
+  </form>
+</section>

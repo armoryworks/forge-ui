@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+
+.part-inventory-step {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  position: relative;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    max-width: 720px;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__hint--field {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+}

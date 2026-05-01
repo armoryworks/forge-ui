@@ -674,6 +674,119 @@
         "missingShort": "Aún faltan algunos requisitos.",
         "missingHeader": "No se puede promover — falta:",
         "failed": "No se pudo promover."
+      },
+      "sourcing": {
+        "title": "Abastecimiento",
+        "hint": "Proveedor predeterminado y parámetros de pedido. Las anulaciones por proveedor van en la pestaña Fuentes.",
+        "preferredVendorLabel": "Proveedor Preferido",
+        "leadTimeDaysLabel": "Plazo (días)",
+        "leadTimeDaysHelper": "Valor por defecto; el plazo por proveedor se establece en la pestaña Fuentes.",
+        "minOrderQtyLabel": "Cantidad Mínima",
+        "packSizeLabel": "Tamaño de Paquete",
+        "externalPartNumberLabel": "N.º de Pieza Externo",
+        "saveFailed": "No se pudo guardar el abastecimiento."
+      },
+      "manufacturer": {
+        "title": "Fabricante",
+        "hint": "Identidad OEM de ingeniería — distinta de cualquier distribuidor por el cual compramos.",
+        "manufacturerNameLabel": "Fabricante",
+        "manufacturerPartNumberLabel": "N.º de Pieza del Fabricante",
+        "externalPartNumberLabel": "N.º de Pieza Externo",
+        "saveFailed": "No se pudo guardar la información del fabricante."
+      },
+      "inventory": {
+        "title": "Inventario",
+        "hint": "Umbrales de stock y unidad de medida. Activa los reabastecimientos.",
+        "minStockThresholdLabel": "Umbral Mínimo",
+        "reorderPointLabel": "Punto de Reorden",
+        "reorderQuantityLabel": "Cantidad de Reorden",
+        "safetyStockDaysLabel": "Días de Stock de Seguridad",
+        "stockUomLabel": "UoM de Stock",
+        "stockUomNone": "— No establecido —",
+        "defaultBinLabel": "Bin Predeterminado (id)",
+        "defaultBinHelper": "Id numérico. Reemplazado por un selector real de bin en una versión posterior.",
+        "saveFailed": "No se pudo guardar el inventario."
+      },
+      "quality": {
+        "title": "Calidad",
+        "hint": "Inspección de recepción, trazabilidad, clase ABC, peligro y vida útil.",
+        "traceabilityLabel": "Trazabilidad",
+        "traceabilityNone": "A granel (sin seguimiento)",
+        "traceabilityLot": "Por lote",
+        "traceabilitySerial": "Por número de serie",
+        "requiresReceivingInspectionLabel": "Requiere Inspección al Recibir",
+        "inspectionFrequencyLabel": "Frecuencia de Inspección",
+        "frequencyEvery": "Cada recepción",
+        "frequencyFirstArticle": "Solo primer artículo",
+        "frequencySkipLot": "Omitir-lote",
+        "frequencyRandom": "Muestreo aleatorio",
+        "inspectionSkipAfterNLabel": "Omitir Después de N Recepciones Limpias",
+        "abcClassLabel": "Clase ABC",
+        "abcClassUnclassified": "— Sin clasificar —",
+        "abcClassA": "A — alto valor / control estricto",
+        "abcClassB": "B — valor moderado",
+        "abcClassC": "C — bajo valor / control flexible",
+        "hazmatClassLabel": "Clase Peligrosa",
+        "shelfLifeDaysLabel": "Vida Útil (días)",
+        "saveFailed": "No se pudo guardar calidad."
+      },
+      "shipping": {
+        "title": "Envío y Físico",
+        "hint": "Masa, dimensiones y volumen. Para tarifas de envío y volumen de inventario.",
+        "weightLabel": "Peso (cada uno)",
+        "weightUnitLabel": "Unidad de Peso",
+        "lengthLabel": "Largo",
+        "widthLabel": "Ancho",
+        "heightLabel": "Alto",
+        "dimensionUnitLabel": "Unidad de Dimensión",
+        "volumeLabel": "Volumen",
+        "volumeUnitLabel": "Unidad de Volumen",
+        "saveFailed": "No se pudo guardar la información de envío."
+      },
+      "toolAsset": {
+        "title": "Activo de Herramienta",
+        "hint": "Vincula esta pieza a su Activo de herramienta (cavidad, vida útil, calibración).",
+        "toolingAssetLabel": "Activo de Herramienta",
+        "moldToolRefLabel": "Referencia de Molde/Herramienta",
+        "moldToolRefHelper": "Vestigial — usa el Activo de Herramienta arriba cuando sea posible.",
+        "saveFailed": "No se pudo guardar el vínculo del activo."
+      },
+      "sourcePart": {
+        "title": "Pieza de Origen",
+        "hint": "La pieza interna pre-acabada que se envía al subcontratista.",
+        "sourcePartLabel": "Pieza de Origen",
+        "sourcePartHelper": "La pieza interna pre-acabada que se envía al proveedor.",
+        "saveFailed": "No se pudo guardar la pieza de origen."
+      },
+      "vendor": {
+        "title": "Proveedor",
+        "hint": "Único proveedor de subcontratación. La MOQ y el tamaño de paquete viven en la pieza de origen.",
+        "preferredVendorLabel": "Proveedor Preferido",
+        "leadTimeDaysLabel": "Plazo (días)",
+        "saveFailed": "No se pudo guardar la información del proveedor."
+      },
+      "flags": {
+        "title": "Indicadores",
+        "hint": "Indicadores específicos de phantom: kit, configurador y política de backflush.",
+        "isKitLabel": "Es Kit",
+        "isKitHelper": "Enviar como kit (los hijos se entregan con el padre).",
+        "isConfigurableLabel": "Es Configurable",
+        "isConfigurableHelper": "Habilita el asistente del configurador para este padre.",
+        "backflushPolicyLabel": "Política de Backflush",
+        "backflushDefault": "— Usar predeterminado global —",
+        "backflushAuto": "Automático",
+        "backflushManual": "Manual",
+        "backflushNone": "Ninguno",
+        "saveFailed": "No se pudieron guardar los indicadores."
+      },
+      "salesHooks": {
+        "title": "Configuración de Ventas",
+        "hint": "Parámetros de venta para productos terminados revendidos.",
+        "salesUomLabel": "UoM de Ventas",
+        "salesUomNone": "— No establecido —",
+        "defaultSalesPriceLabel": "Precio de Venta Predeterminado",
+        "defaultSalesPriceHelper": "Editable en la pestaña Precios (próximamente).",
+        "saveFailed": "No se pudieron guardar los datos de ventas."
       }
     },
     "detail": {
@@ -4470,7 +4583,18 @@
         "routing": "Routing",
         "costing": "Cost",
         "alternates": "Alternates",
-        "expressForm": "Quick add"
+        "expressForm": "Quick add",
+        "sourcing": "Abastecimiento",
+        "manufacturer": "Fabricante",
+        "inventory": "Inventario",
+        "manufacturing": "Fabricación",
+        "quality": "Calidad",
+        "shipping": "Envío",
+        "toolAsset": "Activo de Herramienta",
+        "sourcePart": "Pieza de Origen",
+        "vendor": "Proveedor",
+        "flags": "Indicadores",
+        "salesHooks": "Configuración de Ventas"
       }
     },
     "shell": {
