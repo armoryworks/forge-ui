@@ -440,6 +440,7 @@
     "partType": "Tipo de Pieza",
     "status": "Estado",
     "bom": "Lista de Materiales",
+    "effectivePrice": "Precio",
     "usedIn": "Usado En",
     "files": "Archivos",
     "viewer3d": "Vista 3D",

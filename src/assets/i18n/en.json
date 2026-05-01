@@ -443,6 +443,7 @@
     "partType": "Part Type",
     "status": "Status",
     "bom": "BOM",
+    "effectivePrice": "Price",
     "usedIn": "Used In",
     "files": "Files",
     "viewer3d": "3D View",

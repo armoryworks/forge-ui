@@ -4,6 +4,7 @@ import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { debounceTime } from 'rxjs/operators';
 
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -24,6 +25,7 @@ import { PartsService } from '../../services/parts.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
+    CurrencyDisplayComponent,
     SelectComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-sales-hooks-step.component.html',

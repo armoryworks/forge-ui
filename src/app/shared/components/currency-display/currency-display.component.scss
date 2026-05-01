@@ -1,0 +1,8 @@
+.currency-display {
+  // Component is a thin display wrapper — no styling of its own. The
+  // host span inherits typography from the surrounding cell / row /
+  // detail-grid item so it can sit anywhere a raw "{{ x | currency }}"
+  // sat before. Keeping the rule for BEM consistency + future hooks
+  // (mixed-currency tooltip, etc.).
+  font-variant-numeric: tabular-nums;
+}

@@ -77,7 +77,7 @@
             [matTooltip]="'vendorPart.priceTiersCount' | translate:{ count: row.priceTiers.length }"
             matTooltipPosition="above"
             [attr.aria-label]="'vendorPart.priceTiersLabel' | translate">
-            {{ t.price | currency:t.currency }}
+            <app-currency-display [value]="t.price" [currency]="t.currency" />
             <span class="vendor-part-tier-link__count">({{ row.priceTiers.length }})</span>
           </button>
         } @else {

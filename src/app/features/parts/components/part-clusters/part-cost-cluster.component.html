@@ -25,7 +25,7 @@
         <span class="cluster__label">Manual Cost Override</span>
         <span class="cluster__value" [class.cluster__value--muted]="part().manualCostOverride === null">
           @if (part().manualCostOverride !== null) {
-            ${{ part().manualCostOverride }}
+            <app-currency-display [value]="part().manualCostOverride!" />
           } @else {
             ---
           }

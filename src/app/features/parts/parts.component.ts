@@ -22,6 +22,7 @@ import { DialogComponent } from '../../shared/components/dialog/dialog.component
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { TextareaComponent } from '../../shared/components/textarea/textarea.component';
+import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../shared/components/data-table/data-table.component';
 import { EntityPickerComponent } from '../../shared/components/entity-picker/entity-picker.component';
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
@@ -47,6 +48,7 @@ type ViewMode = 'table' | 'cards';
     ReactiveFormsModule, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent,
+    CurrencyDisplayComponent,
     DataTableComponent, EntityPickerComponent, ColumnCellDirective, ValidationButtonComponent,
     LoadingBlockDirective, MatTooltipModule,
     PartsCardGridComponent,
@@ -121,6 +123,7 @@ export class PartsComponent {
       { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},
     { field: 'material', header: this.translate.instant('parts.material') },
+    { field: 'effectivePrice', header: this.translate.instant('parts.effectivePrice'), sortable: true, width: '110px', align: 'right' },
     { field: 'bomEntryCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
   ];
 

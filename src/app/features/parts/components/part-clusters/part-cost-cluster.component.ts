@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, effect, input, output } from '@angu
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
@@ -20,7 +21,7 @@ import { PartDetail } from '../../models/part-detail.model';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    CurrencyInputComponent, ValidationButtonComponent,
+    CurrencyDisplayComponent, CurrencyInputComponent, ValidationButtonComponent,
   ],
   templateUrl: './part-cost-cluster.component.html',
   styleUrl: './part-clusters.shared.scss',

@@ -59,6 +59,15 @@
           <ng-template appColumnCell="material" let-part>
             <span class="text-muted">{{ part.material ?? '---' }}</span>
           </ng-template>
+          <ng-template appColumnCell="effectivePrice" let-part>
+            @if (part.effectivePriceSource !== 'Default') {
+              <app-currency-display
+                [value]="part.effectivePrice"
+                [currency]="part.effectivePriceCurrency" />
+            } @else {
+              <span class="text-muted">---</span>
+            }
+          </ng-template>
           <ng-template appColumnCell="bomEntryCount" let-part>
             @if (part.bomEntryCount > 0) {
               <span class="bom-count">{{ part.bomEntryCount }}</span>

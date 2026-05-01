@@ -1,10 +1,10 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -27,8 +27,9 @@ export type VendorPartParentEntityType = 'part' | 'vendor';
   selector: 'app-vendor-part-list-panel',
   standalone: true,
   imports: [
-    CurrencyPipe, TranslatePipe,
+    TranslatePipe,
     MatTooltipModule,
+    CurrencyDisplayComponent,
     DataTableComponent, ColumnCellDirective,
     EmptyStateComponent, LoadingBlockDirective,
   ],

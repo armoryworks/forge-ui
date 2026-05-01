@@ -40,6 +40,7 @@ import { DraftRecoveryService } from './shared/services/draft-recovery.service';
 import { DraftBroadcastService } from './shared/services/draft-broadcast.service';
 import { AnnouncementService } from './shared/services/announcement.service';
 import { CapabilityService } from './shared/services/capability.service';
+import { CurrencyService } from './shared/services/currency.service';
 import { EmployeeProfileService } from './features/account/services/employee-profile.service';
 import { TrainingService } from './features/training/services/training.service';
 import { WalkthroughContent } from './features/training/models/walkthrough-content.model';
@@ -86,6 +87,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly draftBroadcast = inject(DraftBroadcastService);
   private readonly announcementService = inject(AnnouncementService);
   private readonly capabilityService = inject(CapabilityService);
+  private readonly currencyService = inject(CurrencyService);
   private readonly employeeProfile = inject(EmployeeProfileService);
   private readonly trainingService = inject(TrainingService);
   private readonly ngZone = inject(NgZone);
@@ -127,6 +129,10 @@ export class AppComponent implements OnInit, OnDestroy {
             this.accountingService.load();
             this.employeeProfile.load();
             this.announcementService.loadActive();
+            // Base currency — load once after auth so currency-display can
+            // disambiguate non-base currencies inline. Failures fall back
+            // to USD inside the service; no need to chain anything.
+            this.currencyService.load().subscribe();
           },
         });
         this.wasAuthenticated = true;

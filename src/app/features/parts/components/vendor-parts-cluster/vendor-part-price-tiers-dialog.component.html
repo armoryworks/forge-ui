@@ -20,7 +20,7 @@
           {{ row.minQuantity }}
         </ng-template>
         <ng-template appColumnCell="unitPrice" let-row>
-          {{ row.unitPrice | currency:row.currency }}
+          <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
         </ng-template>
         <ng-template appColumnCell="effectiveFrom" let-row>
           <span class="text-muted">{{ row.effectiveFrom | date:'MM/dd/yyyy' }}</span>

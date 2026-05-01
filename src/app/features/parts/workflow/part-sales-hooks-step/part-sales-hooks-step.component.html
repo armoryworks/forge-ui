@@ -16,7 +16,9 @@
         {{ 'parts.workflow.salesHooks.inferredPriceLabel' | translate }}
       </span>
       <span class="part-sales-hooks-step__inferred-price-value">
-        ${{ effectivePrice() }}
+        <app-currency-display
+          [value]="effectivePrice()"
+          [currency]="effectivePriceCurrency()" />
       </span>
       <span class="part-sales-hooks-step__inferred-price-source">
         {{ effectivePriceSourceLabelKey() | translate }}

@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
@@ -8,6 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
@@ -31,9 +32,10 @@ export interface VendorPartPriceTiersDialogData {
   selector: 'app-vendor-part-price-tiers-dialog',
   standalone: true,
   imports: [
-    CurrencyPipe, DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, ReactiveFormsModule, TranslatePipe,
     MatTooltipModule,
     DialogComponent, DatepickerComponent, InputComponent, CurrencyInputComponent,
+    CurrencyDisplayComponent,
     DataTableComponent, ColumnCellDirective,
     EmptyStateComponent, ValidationButtonComponent,
   ],
