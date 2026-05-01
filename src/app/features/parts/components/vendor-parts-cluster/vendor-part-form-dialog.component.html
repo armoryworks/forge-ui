@@ -1,0 +1,119 @@
+<app-dialog [title]="title()" width="600px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="vendor-part-form">
+
+    <section class="vendor-part-form__section">
+      @if (showVendorPicker) {
+        <app-entity-picker
+          data-testid="vendor-part-vendor"
+          [label]="'vendors.companyName' | translate"
+          entityType="vendors"
+          displayField="companyName"
+          formControlName="vendorId" />
+      } @else if (data.parentEntityType === 'vendor' || isEdit) {
+        <div class="vendor-part-form__locked-field">
+          <span class="vendor-part-form__locked-label">{{ 'vendors.companyName' | translate }}</span>
+          <span class="vendor-part-form__locked-value">
+            {{ data.vendorPart?.vendorCompanyName || data.parentLabel || '---' }}
+          </span>
+        </div>
+      }
+
+      @if (showPartPicker) {
+        <app-entity-picker
+          data-testid="vendor-part-part"
+          [label]="'parts.partNumber' | translate"
+          entityType="parts"
+          displayField="partNumber"
+          formControlName="partId" />
+      } @else if (data.parentEntityType === 'part' || isEdit) {
+        <div class="vendor-part-form__locked-field">
+          <span class="vendor-part-form__locked-label">{{ 'parts.partNumber' | translate }}</span>
+          <span class="vendor-part-form__locked-value">
+            @if (data.vendorPart) {
+              {{ data.vendorPart.partNumber }} — {{ data.vendorPart.partName }}
+            } @else {
+              {{ data.parentLabel || '---' }}
+            }
+          </span>
+        </div>
+      }
+
+      <div class="dialog-row">
+        <app-input
+          data-testid="vendor-part-vendor-pn"
+          [label]="'vendorPart.vendorPartNumber' | translate"
+          formControlName="vendorPartNumber"
+          [maxlength]="100" />
+        <app-input
+          data-testid="vendor-part-vendor-mpn"
+          [label]="'vendorPart.vendorMpn' | translate"
+          formControlName="vendorMpn"
+          [maxlength]="100" />
+      </div>
+      <p class="vendor-part-form__hint">{{ 'vendorPart.vendorMpnHelper' | translate }}</p>
+
+      <div class="dialog-row">
+        <app-input
+          data-testid="vendor-part-lead-time"
+          [label]="'vendorPart.leadTimeDays' | translate"
+          type="number"
+          formControlName="leadTimeDays" />
+        <app-input
+          data-testid="vendor-part-moq"
+          [label]="'vendorPart.minOrderQty' | translate"
+          type="number"
+          formControlName="minOrderQty" />
+        <app-input
+          data-testid="vendor-part-pack-size"
+          [label]="'vendorPart.packSize' | translate"
+          type="number"
+          formControlName="packSize" />
+      </div>
+
+      <div class="dialog-row">
+        <app-input
+          data-testid="vendor-part-coo"
+          [label]="'vendorPart.countryOfOrigin' | translate"
+          formControlName="countryOfOrigin"
+          [maxlength]="2" />
+        <app-input
+          data-testid="vendor-part-hts"
+          [label]="'vendorPart.htsCode' | translate"
+          formControlName="htsCode"
+          [maxlength]="20" />
+      </div>
+      <p class="vendor-part-form__hint">{{ 'vendorPart.countryOfOriginHelper' | translate }}</p>
+    </section>
+
+    <section class="vendor-part-form__section">
+      <div class="dialog-row">
+        <app-toggle [label]="'vendorPart.isApproved' | translate" formControlName="isApproved" />
+        <app-toggle [label]="'vendorPart.isPreferred' | translate" formControlName="isPreferred" />
+      </div>
+      <p class="vendor-part-form__hint">{{ 'vendorPart.isPreferredHelper' | translate }}</p>
+
+      <app-datepicker
+        data-testid="vendor-part-last-quoted"
+        [label]="'vendorPart.lastQuotedDate' | translate"
+        formControlName="lastQuotedDate" />
+
+      <app-textarea
+        data-testid="vendor-part-notes"
+        [label]="'vendorPart.notes' | translate"
+        formControlName="notes"
+        [rows]="3" />
+    </section>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        data-testid="vendor-part-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.price-tiers-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.price-tiers-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.price-tiers-dialog__subtitle {
+  @include uppercase-label;
+  color: var(--text-muted);
+}
+
+.price-tiers-dialog__add {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+}
+
+.price-tiers-dialog__add-header {
+  @include uppercase-label;
+  color: var(--text-muted);
+}
+
+.price-tiers-dialog__add-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: $sp-sm;
+}

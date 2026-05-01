@@ -3,7 +3,16 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { VendorPart } from '../models/vendor-part.model';
+import { VendorPart, VendorPartPriceTier } from '../models/vendor-part.model';
+
+export interface UpsertVendorPartPriceTierRequest {
+  minQuantity: number;
+  unitPrice: number;
+  currency: string;
+  effectiveFrom?: string | null;
+  effectiveTo?: string | null;
+  notes?: string | null;
+}
 
 /**
  * Pillar 3 — Thin HTTP wrapper around the VendorPart API surface. Powers
@@ -36,5 +45,18 @@ export class VendorPartsService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${environment.apiUrl}/vendor-parts/${id}`);
+  }
+
+  addPriceTier(vendorPartId: number, body: UpsertVendorPartPriceTierRequest): Observable<VendorPartPriceTier> {
+    return this.http.post<VendorPartPriceTier>(
+      `${environment.apiUrl}/vendor-parts/${vendorPartId}/price-tiers`,
+      body,
+    );
+  }
+
+  deletePriceTier(vendorPartId: number, tierId: number): Observable<void> {
+    return this.http.delete<void>(
+      `${environment.apiUrl}/vendor-parts/${vendorPartId}/price-tiers/${tierId}`,
+    );
   }
 }

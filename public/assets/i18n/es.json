@@ -661,6 +661,45 @@
         "missingHeader": "No se puede promover — falta:",
         "failed": "No se pudo promover."
       }
+    },
+    "detail": {
+      "sourcesTab": "Fuentes",
+      "sourcesEmpty": "Aún no hay proveedores.",
+      "sourcesEmptyHelp": "Añade un proveedor que suministre esta pieza para registrar plazo, MOQ y precios.",
+      "addVendorSource": "Añadir proveedor"
+    }
+  },
+  "vendorPart": {
+    "vendorPartNumber": "Pieza del proveedor",
+    "vendorMpn": "MPN del proveedor",
+    "vendorMpnHelper": "Si el proveedor es distribuidor y el fabricante difiere del proveedor.",
+    "leadTimeDays": "Plazo (días)",
+    "minOrderQty": "Cant. mín. de pedido",
+    "packSize": "Tamaño de paquete",
+    "countryOfOrigin": "País de origen",
+    "countryOfOriginHelper": "Código ISO-3166 alfa-2, p. ej. US / CN / DE",
+    "htsCode": "Código HTS",
+    "isApproved": "Aprobado (AVL)",
+    "isPreferred": "Proveedor preferente",
+    "isPreferredHelper": "Solo un proveedor por pieza puede ser preferente.",
+    "lastQuotedDate": "Última cotización",
+    "notes": "Notas",
+    "priceTiersLabel": "Niveles de precio",
+    "priceTiersCount": "{{count}} nivel(es)",
+    "dialogTitleCreate": "Añadir proveedor",
+    "dialogTitleEdit": "Editar proveedor",
+    "confirmDelete": "¿Eliminar esta fuente del proveedor?",
+    "removeVendor": "Eliminar proveedor",
+    "removePart": "Eliminar del catálogo",
+    "priceTiers": {
+      "title": "Niveles de precio",
+      "minQuantity": "Cant. mín.",
+      "unitPrice": "Precio unitario",
+      "currency": "Moneda",
+      "effectiveFrom": "Vigente desde",
+      "effectiveTo": "Vigente hasta",
+      "addTier": "Añadir nivel",
+      "empty": "Sin niveles — añade uno para precios por cantidad."
     }
   },
   "inventory": {
@@ -2329,7 +2368,13 @@
     "poNumber": "OC #",
     "poStatusPartial": "Parcial",
     "lines": "Líneas",
-    "expected": "Esperado"
+    "expected": "Esperado",
+    "detail": {
+      "catalogTab": "Catálogo",
+      "catalogEmpty": "Este proveedor aún no tiene piezas en el catálogo.",
+      "catalogEmptyHelp": "Añade una pieza que este proveedor suministre.",
+      "addPartToCatalog": "Añadir pieza"
+    }
   },
   "purchaseOrders": {
     "title": "Órdenes de Compra",

@@ -664,6 +664,45 @@
         "missingHeader": "Cannot promote — missing data:",
         "failed": "Couldn't promote this part."
       }
+    },
+    "detail": {
+      "sourcesTab": "Sources",
+      "sourcesEmpty": "No vendor sources yet.",
+      "sourcesEmptyHelp": "Add a vendor that supplies this part to track lead time, MOQ, and pricing.",
+      "addVendorSource": "Add Vendor"
+    }
+  },
+  "vendorPart": {
+    "vendorPartNumber": "Vendor Part #",
+    "vendorMpn": "Vendor MPN",
+    "vendorMpnHelper": "If the vendor is a distributor and the manufacturer differs from the vendor itself.",
+    "leadTimeDays": "Lead Time (days)",
+    "minOrderQty": "Min Order Qty",
+    "packSize": "Pack Size",
+    "countryOfOrigin": "Country of Origin",
+    "countryOfOriginHelper": "ISO-3166 alpha-2 code, e.g. US / CN / DE",
+    "htsCode": "HTS Code",
+    "isApproved": "Approved (AVL)",
+    "isPreferred": "Preferred Source",
+    "isPreferredHelper": "Only one vendor per part can be the preferred source.",
+    "lastQuotedDate": "Last Quoted",
+    "notes": "Notes",
+    "priceTiersLabel": "Price Tiers",
+    "priceTiersCount": "{{count}} tier(s)",
+    "dialogTitleCreate": "Add Vendor Source",
+    "dialogTitleEdit": "Edit Vendor Source",
+    "confirmDelete": "Remove this vendor source?",
+    "removeVendor": "Remove vendor source",
+    "removePart": "Remove from catalog",
+    "priceTiers": {
+      "title": "Price Tiers",
+      "minQuantity": "Min Qty",
+      "unitPrice": "Unit Price",
+      "currency": "Currency",
+      "effectiveFrom": "Effective From",
+      "effectiveTo": "Effective To",
+      "addTier": "Add Tier",
+      "empty": "No price tiers — add one to enable per-quantity pricing."
     }
   },
   "inventory": {
@@ -2522,7 +2561,13 @@
     "poNumber": "PO #",
     "poStatusPartial": "Partial",
     "lines": "Lines",
-    "expected": "Expected"
+    "expected": "Expected",
+    "detail": {
+      "catalogTab": "Catalog",
+      "catalogEmpty": "This vendor has no parts in the catalog yet.",
+      "catalogEmptyHelp": "Add a part this vendor supplies.",
+      "addPartToCatalog": "Add Part"
+    }
   },
   "purchaseOrders": {
     "title": "Purchase Orders",

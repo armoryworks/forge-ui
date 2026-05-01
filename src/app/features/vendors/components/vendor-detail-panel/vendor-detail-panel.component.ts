@@ -22,6 +22,11 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scorecard-tab.component';
+import { VendorPartListPanelComponent } from '../../../parts/components/vendor-parts-cluster/vendor-part-list-panel.component';
+import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-form-dialog.component';
+import { VendorPartPriceTiersDialogComponent, VendorPartPriceTiersDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-price-tiers-dialog.component';
+import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
+import { VendorPart } from '../../../parts/models/vendor-part.model';
 
 @Component({
   selector: 'app-vendor-detail-panel',
@@ -33,6 +38,7 @@ import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scor
     DataTableComponent, ColumnCellDirective,
     EmptyStateComponent, LoadingBlockDirective,
     VendorDialogComponent, EntityActivitySectionComponent, VendorScorecardTabComponent,
+    VendorPartListPanelComponent,
   ],
   templateUrl: './vendor-detail-panel.component.html',
   styleUrl: './vendor-detail-panel.component.scss',
@@ -51,7 +57,12 @@ export class VendorDetailPanelComponent {
 
   protected readonly loading = signal(false);
   protected readonly vendor = signal<VendorDetail | null>(null);
-  protected readonly activeTab = signal<'info' | 'purchase-orders' | 'scorecard'>('info');
+  protected readonly activeTab = signal<'info' | 'purchase-orders' | 'scorecard' | 'catalog'>('info');
+
+  // Catalog tab (Vendor Parts)
+  private readonly vendorPartsService = inject(VendorPartsService);
+  protected readonly vendorParts = signal<VendorPart[]>([]);
+  protected readonly vendorPartsLoading = signal(false);
 
   // Inline edit dialog
   protected readonly showEditDialog = signal(false);
@@ -154,5 +165,101 @@ export class VendorDetailPanelComponent {
 
   protected openPurchaseOrder(row: { id: number }): void {
     this.router.navigate(['/purchase-orders'], { queryParams: { detail: `purchase-order:${row.id}` } });
+  }
+
+  // ── Catalog Tab (Vendor Parts) ──
+
+  protected onCatalogTabActivated(): void {
+    this.activeTab.set('catalog');
+    this.loadVendorParts();
+  }
+
+  protected loadVendorParts(): void {
+    const v = this.vendor();
+    if (!v) return;
+    this.vendorPartsLoading.set(true);
+    this.vendorPartsService.listForVendor(v.id).subscribe({
+      next: (list) => {
+        const sorted = [...list].sort((a, b) => a.partNumber.localeCompare(b.partNumber));
+        this.vendorParts.set(sorted);
+        this.vendorPartsLoading.set(false);
+      },
+      error: () => this.vendorPartsLoading.set(false),
+    });
+  }
+
+  protected openVendorPartCreate(): void {
+    const v = this.vendor();
+    if (!v) return;
+    this.dialog.open<
+      VendorPartFormDialogComponent,
+      VendorPartFormDialogData,
+      VendorPart | null
+    >(VendorPartFormDialogComponent, {
+      width: '600px',
+      data: {
+        vendorPart: null,
+        parentEntityType: 'vendor',
+        parentEntityId: v.id,
+        parentLabel: v.companyName,
+      },
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadVendorParts();
+    });
+  }
+
+  protected openVendorPartEdit(vp: VendorPart): void {
+    const v = this.vendor();
+    if (!v) return;
+    this.dialog.open<
+      VendorPartFormDialogComponent,
+      VendorPartFormDialogData,
+      VendorPart | null
+    >(VendorPartFormDialogComponent, {
+      width: '600px',
+      data: {
+        vendorPart: vp,
+        parentEntityType: 'vendor',
+        parentEntityId: v.id,
+      },
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadVendorParts();
+    });
+  }
+
+  protected deleteVendorPart(vp: VendorPart): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('vendorPart.removePart'),
+        message: this.translate.instant('vendorPart.confirmDelete'),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.vendorPartsService.delete(vp.id).subscribe({
+        next: () => {
+          this.snackbar.success('Removed from catalog');
+          this.loadVendorParts();
+        },
+      });
+    });
+  }
+
+  protected toggleVendorPartPreferred(vp: VendorPart): void {
+    this.vendorPartsService.update(vp.id, { isPreferred: !vp.isPreferred }).subscribe({
+      next: () => this.loadVendorParts(),
+    });
+  }
+
+  protected openVendorPartTiers(vp: VendorPart): void {
+    this.dialog.open<
+      VendorPartPriceTiersDialogComponent,
+      VendorPartPriceTiersDialogData
+    >(VendorPartPriceTiersDialogComponent, {
+      width: '700px',
+      data: { vendorPart: vp },
+    }).afterClosed().subscribe(() => this.loadVendorParts());
   }
 }

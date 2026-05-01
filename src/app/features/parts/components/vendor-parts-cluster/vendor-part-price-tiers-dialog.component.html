@@ -1,0 +1,100 @@
+<app-dialog [title]="title()" width="700px" (closed)="close()">
+  <div class="price-tiers-dialog">
+    <header class="price-tiers-dialog__header">
+      <span class="price-tiers-dialog__subtitle">{{ 'vendorPart.priceTiersLabel' | translate }}</span>
+    </header>
+
+    @if (tiers().length === 0) {
+      <app-empty-state
+        icon="payments"
+        [message]="'vendorPart.priceTiers.empty' | translate" />
+    } @else {
+      <app-data-table
+        tableId="vendor-part-price-tiers"
+        [columns]="columns"
+        [data]="tiers()"
+        emptyIcon="payments"
+        [emptyMessage]="'vendorPart.priceTiers.empty' | translate">
+
+        <ng-template appColumnCell="minQuantity" let-row>
+          {{ row.minQuantity }}
+        </ng-template>
+        <ng-template appColumnCell="unitPrice" let-row>
+          {{ row.unitPrice | currency:row.currency }}
+        </ng-template>
+        <ng-template appColumnCell="effectiveFrom" let-row>
+          <span class="text-muted">{{ row.effectiveFrom | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="effectiveTo" let-row>
+          <span class="text-muted">{{ row.effectiveTo ? (row.effectiveTo | date:'MM/dd/yyyy') : '---' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="notes" let-row>
+          <span class="text-muted">{{ row.notes || '---' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn icon-btn--danger"
+            [matTooltip]="'common.delete' | translate" matTooltipPosition="above"
+            [attr.aria-label]="'common.delete' | translate"
+            (click)="deleteTier(row)">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    }
+
+    <section class="price-tiers-dialog__add" [formGroup]="form">
+      <header class="price-tiers-dialog__add-header">
+        {{ 'vendorPart.priceTiers.addTier' | translate }}
+      </header>
+      <div class="dialog-row">
+        <app-input
+          data-testid="price-tier-min-qty"
+          [label]="'vendorPart.priceTiers.minQuantity' | translate"
+          type="number"
+          formControlName="minQuantity"
+          [required]="true" />
+        <app-currency-input
+          data-testid="price-tier-unit-price"
+          [label]="'vendorPart.priceTiers.unitPrice' | translate"
+          formControlName="unitPrice"
+          [required]="true" />
+        <app-input
+          data-testid="price-tier-currency"
+          [label]="'vendorPart.priceTiers.currency' | translate"
+          formControlName="currency"
+          [maxlength]="3"
+          [required]="true" />
+      </div>
+      <div class="dialog-row">
+        <app-datepicker
+          data-testid="price-tier-effective-from"
+          [label]="'vendorPart.priceTiers.effectiveFrom' | translate"
+          formControlName="effectiveFrom" />
+        <app-datepicker
+          data-testid="price-tier-effective-to"
+          [label]="'vendorPart.priceTiers.effectiveTo' | translate"
+          formControlName="effectiveTo" />
+      </div>
+      <app-input
+        data-testid="price-tier-notes"
+        [label]="'vendorPart.notes' | translate"
+        formControlName="notes" />
+
+      <div class="price-tiers-dialog__add-actions">
+        <app-validation-button [violations]="violations" [loading]="saving()">
+          <button class="action-btn action-btn--primary action-btn--sm"
+            data-testid="price-tier-add-btn"
+            [disabled]="form.invalid || saving()"
+            (click)="addTier()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'vendorPart.priceTiers.addTier' | translate }}
+          </button>
+        </app-validation-button>
+      </div>
+    </section>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn action-btn--primary" (click)="close()">{{ 'common.done' | translate }}</button>
+  </div>
+</app-dialog>

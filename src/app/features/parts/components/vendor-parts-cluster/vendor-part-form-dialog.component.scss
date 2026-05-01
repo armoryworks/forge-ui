@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.vendor-part-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+}
+
+.vendor-part-form__section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.vendor-part-form__locked-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+}
+
+.vendor-part-form__locked-label {
+  @include uppercase-label;
+  color: var(--text-muted);
+}
+
+.vendor-part-form__locked-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.vendor-part-form__hint {
+  margin: 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

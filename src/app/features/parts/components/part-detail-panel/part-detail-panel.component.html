@@ -54,6 +54,10 @@
         (click)="detailTab.set('alternates')">
         Alternates
       </button>
+      <button class="detail-tab" data-testid="part-tab-sources" [class.detail-tab--active]="detailTab() === 'sources'"
+        (click)="onSourcesTabActivated()">
+        {{ 'parts.detail.sourcesTab' | translate }}
+      </button>
       @if (part.isSerialTracked) {
         <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'serials'"
           (click)="detailTab.set('serials')">
@@ -438,6 +442,21 @@
         <!-- Alternates Tab -->
         @if (detailTab() === 'alternates') {
           <app-part-alternates-tab [partId]="part.id" />
+        }
+
+        <!-- Sources Tab (Vendor Parts) -->
+        @if (detailTab() === 'sources') {
+          <app-vendor-part-list-panel
+            mode="sources"
+            parentEntityType="part"
+            [parentEntityId]="part.id"
+            [vendorParts]="vendorParts()"
+            [loading]="vendorPartsLoading()"
+            (add)="openVendorPartCreate()"
+            (edit)="openVendorPartEdit($event)"
+            (delete)="deleteVendorPart($event)"
+            (togglePreferred)="toggleVendorPartPreferred($event)"
+            (viewTiers)="openVendorPartTiers($event)" />
         }
 
         <!-- Serials Tab -->

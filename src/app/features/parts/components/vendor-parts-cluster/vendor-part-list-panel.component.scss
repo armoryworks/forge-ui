@@ -1,0 +1,81 @@
+@use 'styles/variables' as *;
+
+.vendor-part-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.vendor-part-panel__header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.vendor-part-name {
+  font-weight: 600;
+}
+
+.vendor-part-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.vendor-part-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+  font-weight: 600;
+}
+
+.vendor-part-notes {
+  display: inline-block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vendor-part-star {
+  color: var(--text-muted);
+  transition: color $transition-fast;
+
+  &--on {
+    color: var(--warning);
+  }
+}
+
+.vendor-part-tier-link {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--primary);
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color $transition-fast;
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+
+  &--empty {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+}
+
+.vendor-part-tier-link__count {
+  margin-left: $sp-xs;
+  color: var(--text-muted);
+  font-size: $font-size-xs;
+}
+
+.approved-icon {
+  color: var(--success);
+  font-size: $icon-size-md;
+}
+
+.unapproved-icon {
+  color: var(--text-muted);
+  font-size: $icon-size-md;
+}

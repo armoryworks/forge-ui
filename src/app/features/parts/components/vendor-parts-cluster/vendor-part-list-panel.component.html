@@ -1,0 +1,125 @@
+<div class="vendor-part-panel" [appLoadingBlock]="loading()">
+  <div class="vendor-part-panel__header">
+    <button class="action-btn action-btn--sm action-btn--create"
+      data-testid="vendor-part-add-btn"
+      (click)="onAdd()"
+      [attr.aria-label]="addLabelKey() | translate">
+      <span class="material-icons-outlined">add</span>
+      {{ addLabelKey() | translate }}
+    </button>
+  </div>
+
+  @if (vendorParts().length === 0 && !loading()) {
+    <app-empty-state
+      [icon]="emptyIcon()"
+      [message]="emptyMessageKey() | translate"
+      [helpText]="emptyHelpKey() | translate"
+      [actionLabel]="addLabelKey() | translate"
+      (action)="onAdd()" />
+  } @else {
+    <app-data-table
+      [tableId]="tableId()"
+      [columns]="columns()"
+      [data]="vendorParts()"
+      [emptyIcon]="emptyIcon()"
+      [emptyMessage]="emptyMessageKey() | translate">
+
+      <ng-template appColumnCell="isPreferred" let-row>
+        <button class="icon-btn vendor-part-star"
+          [class.vendor-part-star--on]="row.isPreferred"
+          [matTooltip]="'vendorPart.isPreferred' | translate"
+          matTooltipPosition="above"
+          (click)="onTogglePreferred(row)"
+          [attr.aria-label]="'vendorPart.isPreferred' | translate"
+          [attr.aria-pressed]="row.isPreferred">
+          <span class="material-icons-outlined">{{ row.isPreferred ? 'star' : 'star_border' }}</span>
+        </button>
+      </ng-template>
+
+      <ng-template appColumnCell="vendorCompanyName" let-row>
+        <span class="vendor-part-name">{{ row.vendorCompanyName }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="partNumber" let-row>
+        <div class="vendor-part-info">
+          <span class="vendor-part-number">{{ row.partNumber }}</span>
+        </div>
+      </ng-template>
+
+      <ng-template appColumnCell="partName" let-row>
+        <span>{{ row.partName }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="vendorPartNumber" let-row>
+        <span class="text-muted">{{ row.vendorPartNumber || '---' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="vendorMpn" let-row>
+        <span class="text-muted">{{ row.vendorMpn || '---' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="leadTimeDays" let-row>
+        <span class="text-muted">{{ row.leadTimeDays !== null ? row.leadTimeDays + 'd' : '---' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="minOrderQty" let-row>
+        <span class="text-muted">{{ row.minOrderQty ?? '---' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="packSize" let-row>
+        <span class="text-muted">{{ row.packSize ?? '---' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="lowestTierPrice" let-row>
+        @if (getLowestTier(row); as t) {
+          <button class="vendor-part-tier-link"
+            (click)="onViewTiers(row)"
+            [matTooltip]="'vendorPart.priceTiersCount' | translate:{ count: row.priceTiers.length }"
+            matTooltipPosition="above"
+            [attr.aria-label]="'vendorPart.priceTiersLabel' | translate">
+            {{ t.price | currency:t.currency }}
+            <span class="vendor-part-tier-link__count">({{ row.priceTiers.length }})</span>
+          </button>
+        } @else {
+          <button class="vendor-part-tier-link vendor-part-tier-link--empty"
+            (click)="onViewTiers(row)"
+            [matTooltip]="'vendorPart.priceTiersLabel' | translate"
+            matTooltipPosition="above"
+            [attr.aria-label]="'vendorPart.priceTiersLabel' | translate">
+            ---
+          </button>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="isApproved" let-row>
+        @if (row.isApproved) {
+          <span class="material-icons-outlined approved-icon"
+            [matTooltip]="'vendorPart.isApproved' | translate" matTooltipPosition="above">check_circle</span>
+        } @else {
+          <span class="material-icons-outlined unapproved-icon"
+            [matTooltip]="'vendorPart.isApproved' | translate" matTooltipPosition="above">block</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="notes" let-row>
+        <span class="text-muted vendor-part-notes">{{ row.notes || '---' }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn"
+          [matTooltip]="'common.edit' | translate" matTooltipPosition="above"
+          (click)="onEdit(row)"
+          [attr.aria-label]="'common.edit' | translate">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger"
+          [matTooltip]="(mode() === 'sources' ? 'vendorPart.removeVendor' : 'vendorPart.removePart') | translate"
+          matTooltipPosition="above"
+          (click)="onDelete(row)"
+          [attr.aria-label]="(mode() === 'sources' ? 'vendorPart.removeVendor' : 'vendorPart.removePart') | translate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</div>

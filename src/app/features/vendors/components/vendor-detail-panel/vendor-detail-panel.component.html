@@ -27,6 +27,9 @@
       <button class="tab" [class.tab--active]="activeTab() === 'purchase-orders'" (click)="activeTab.set('purchase-orders')">
         {{ 'vendors.purchaseOrders' | translate }} ({{ vendor.purchaseOrders.length }})
       </button>
+      <button class="tab" data-testid="vendor-tab-catalog" [class.tab--active]="activeTab() === 'catalog'" (click)="onCatalogTabActivated()">
+        {{ 'vendors.detail.catalogTab' | translate }}
+      </button>
       <button class="tab" [class.tab--active]="activeTab() === 'scorecard'" (click)="activeTab.set('scorecard')">
         Scorecard
       </button>
@@ -156,6 +159,21 @@
 
       @if (activeTab() === 'scorecard') {
         <app-vendor-scorecard-tab [vendorId]="vendor.id" />
+      }
+
+      <!-- Catalog Tab (Vendor Parts) -->
+      @if (activeTab() === 'catalog') {
+        <app-vendor-part-list-panel
+          mode="catalog"
+          parentEntityType="vendor"
+          [parentEntityId]="vendor.id"
+          [vendorParts]="vendorParts()"
+          [loading]="vendorPartsLoading()"
+          (add)="openVendorPartCreate()"
+          (edit)="openVendorPartEdit($event)"
+          (delete)="deleteVendorPart($event)"
+          (togglePreferred)="toggleVendorPartPreferred($event)"
+          (viewTiers)="openVendorPartTiers($event)" />
       }
     </div>
   }

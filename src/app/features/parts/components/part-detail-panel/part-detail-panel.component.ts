@@ -45,6 +45,11 @@ import { BomRevisionHistoryComponent } from '../bom-revision-history/bom-revisio
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { PartAlternatesTabComponent } from '../part-alternates-tab/part-alternates-tab.component';
 import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-tab.component';
+import { VendorPartListPanelComponent } from '../vendor-parts-cluster/vendor-part-list-panel.component';
+import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../vendor-parts-cluster/vendor-part-form-dialog.component';
+import { VendorPartPriceTiersDialogComponent, VendorPartPriceTiersDialogData } from '../vendor-parts-cluster/vendor-part-price-tiers-dialog.component';
+import { VendorPartsService } from '../../services/vendor-parts.service';
+import { VendorPart } from '../../models/vendor-part.model';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 type BomViewMode = 'table' | 'tree';
@@ -60,7 +65,7 @@ type BomViewMode = 'table' | 'tree';
     StlViewerComponent, FileUploadZoneComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,
     RoutingComponent, BomTreeComponent, BomRevisionHistoryComponent, EntityActivitySectionComponent, PartAlternatesTabComponent,
-    SerialNumbersTabComponent,
+    SerialNumbersTabComponent, VendorPartListPanelComponent,
   ],
   templateUrl: './part-detail-panel.component.html',
   styleUrl: './part-detail-panel.component.scss',
@@ -84,7 +89,12 @@ export class PartDetailPanelComponent {
 
   protected readonly part = signal<PartDetail | null>(null);
   protected readonly detailLoading = signal(false);
-  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'process' | 'viewer' | 'files' | 'alternates' | 'serials'>('info');
+  protected readonly detailTab = signal<'info' | 'bom' | 'usage' | 'process' | 'viewer' | 'files' | 'alternates' | 'serials' | 'sources'>('info');
+
+  // ── Sources Tab ──
+  private readonly vendorPartsService = inject(VendorPartsService);
+  protected readonly vendorParts = signal<VendorPart[]>([]);
+  protected readonly vendorPartsLoading = signal(false);
 
   // ── BOM view mode ──
   protected readonly bomViewMode = signal<BomViewMode>('table');
@@ -434,5 +444,106 @@ export class PartDetailPanelComponent {
 
   protected getTypeIcon(type: string): string {
     return type === 'Assembly' ? 'account_tree' : 'settings';
+  }
+
+  // ── Sources Tab (Vendor Parts) ──
+
+  protected loadVendorParts(): void {
+    const p = this.part();
+    if (!p) return;
+    this.vendorPartsLoading.set(true);
+    this.vendorPartsService.listForPart(p.id).subscribe({
+      next: (list) => {
+        // Sort: preferred first, approved next, then by vendor name
+        const sorted = [...list].sort((a, b) => {
+          if (a.isPreferred !== b.isPreferred) return a.isPreferred ? -1 : 1;
+          if (a.isApproved !== b.isApproved) return a.isApproved ? -1 : 1;
+          return a.vendorCompanyName.localeCompare(b.vendorCompanyName);
+        });
+        this.vendorParts.set(sorted);
+        this.vendorPartsLoading.set(false);
+      },
+      error: () => this.vendorPartsLoading.set(false),
+    });
+  }
+
+  protected openVendorPartCreate(): void {
+    const p = this.part();
+    if (!p) return;
+    this.dialog.open<
+      VendorPartFormDialogComponent,
+      VendorPartFormDialogData,
+      VendorPart | null
+    >(VendorPartFormDialogComponent, {
+      width: '600px',
+      data: {
+        vendorPart: null,
+        parentEntityType: 'part',
+        parentEntityId: p.id,
+        parentLabel: `${p.partNumber} — ${p.name}`,
+      },
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadVendorParts();
+    });
+  }
+
+  protected openVendorPartEdit(vp: VendorPart): void {
+    const p = this.part();
+    if (!p) return;
+    this.dialog.open<
+      VendorPartFormDialogComponent,
+      VendorPartFormDialogData,
+      VendorPart | null
+    >(VendorPartFormDialogComponent, {
+      width: '600px',
+      data: {
+        vendorPart: vp,
+        parentEntityType: 'part',
+        parentEntityId: p.id,
+      },
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadVendorParts();
+    });
+  }
+
+  protected deleteVendorPart(vp: VendorPart): void {
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('vendorPart.removeVendor'),
+        message: this.translate.instant('vendorPart.confirmDelete'),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.vendorPartsService.delete(vp.id).subscribe({
+        next: () => {
+          this.snackbar.success('Vendor source removed');
+          this.loadVendorParts();
+        },
+      });
+    });
+  }
+
+  protected toggleVendorPartPreferred(vp: VendorPart): void {
+    this.vendorPartsService.update(vp.id, { isPreferred: !vp.isPreferred }).subscribe({
+      next: () => this.loadVendorParts(),
+    });
+  }
+
+  protected openVendorPartTiers(vp: VendorPart): void {
+    this.dialog.open<
+      VendorPartPriceTiersDialogComponent,
+      VendorPartPriceTiersDialogData
+    >(VendorPartPriceTiersDialogComponent, {
+      width: '700px',
+      data: { vendorPart: vp },
+    }).afterClosed().subscribe(() => this.loadVendorParts());
+  }
+
+  protected onSourcesTabActivated(): void {
+    this.detailTab.set('sources');
+    this.loadVendorParts();
   }
 }
