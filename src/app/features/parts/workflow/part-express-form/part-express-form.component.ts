@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -43,10 +44,12 @@ export class PartExpressFormComponent {
   private readonly workflowService = inject(WorkflowService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('express');
   readonly componentName = input<string>('PartExpressFormComponent');
+  readonly runId = input<number | null>(null);
   readonly entityId = input<number | null>(null);
   readonly entity = input<unknown>(null);
 
@@ -151,33 +154,84 @@ export class PartExpressFormComponent {
       });
   }
 
+  /**
+   * Manual Save — express mode is one-form-one-click, so this submits AND
+   * promotes. Patches the workflow step (which materializes the entity if
+   * it doesn't exist yet, then applies fields), then completes the run
+   * (Draft → Active), then navigates to the parts list.
+   *
+   * Autosave (the debounced valueChanges path) only patches — it never
+   * completes — so the user can keep editing without the form snapping to
+   * the list mid-typing.
+   */
   protected save(): void {
     if (this.form.invalid) return;
-    this.dispatchSave();
-  }
-
-  private dispatchSave(): void {
-    const id = this.entityId();
-    if (id == null) return;
-    const v = this.form.getRawValue();
-    const overrideToSend = v.manualCostOverride == null ? -1 : v.manualCostOverride;
+    const runId = this.runId();
+    if (runId == null) return;
+    const fields = this.fieldsFromForm();
     this.saving.set(true);
-    this.partsService.updatePart(id, {
-      name: v.name ?? undefined,
-      description: v.description ?? '', // pass-through; server treats empty as clear
-      partType: (v.partType as PartType) ?? undefined,
-      material: v.material ?? undefined,
-      externalPartNumber: v.externalPartNumber || undefined,
-      manualCostOverride: overrideToSend,
-    }).subscribe({
-      next: (detail) => {
-        this.saving.set(false);
-        this.workflowService.currentEntity.set(detail);
+    this.workflowService.patchStep(runId, this.stepId(), fields).subscribe({
+      next: (run) => {
+        if (run.entityId == null) {
+          this.saving.set(false);
+          return;
+        }
+        this.workflowService.completeRun(runId).subscribe({
+          next: (result) => {
+            this.saving.set(false);
+            if (result.success) {
+              this.snackbar.success(this.translate.instant('parts.workflow.express.saveSuccess'));
+              this.router.navigate(['/parts']);
+            } else {
+              this.snackbar.error(this.translate.instant('parts.workflow.page.missingValidators', {
+                missing: result.missing.map(m => this.translate.instant(m.displayNameKey)).join(', '),
+              }));
+            }
+          },
+          error: () => {
+            this.saving.set(false);
+            this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
+          },
+        });
       },
       error: () => {
         this.saving.set(false);
         this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
       },
     });
+  }
+
+  private dispatchSave(): void {
+    const runId = this.runId();
+    if (runId == null) return;
+    this.saving.set(true);
+    this.workflowService.patchStep(runId, this.stepId(), this.fieldsFromForm()).subscribe({
+      next: (run) => {
+        this.saving.set(false);
+        if (run.entityId == null) return;
+        this.partsService.getPartById(run.entityId).subscribe({
+          next: (detail) => this.workflowService.currentEntity.set(detail),
+        });
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error(this.translate.instant('parts.workflow.express.saveFailed'));
+      },
+    });
+  }
+
+  private fieldsFromForm(): Record<string, unknown> {
+    const v = this.form.getRawValue();
+    return {
+      name: v.name ?? undefined,
+      description: v.description ?? '',
+      partType: (v.partType as PartType) ?? undefined,
+      material: v.material ?? undefined,
+      externalPartNumber: v.externalPartNumber || undefined,
+      // PartWorkflowAdapter.ApplyAsync interprets null as "clear" via
+      // TryReadDecimal — different contract than PartsService.updatePart
+      // which uses a -1 sentinel. Pass null explicitly here.
+      manualCostOverride: v.manualCostOverride ?? null,
+    };
   }
 }

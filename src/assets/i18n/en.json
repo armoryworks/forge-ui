@@ -663,6 +663,7 @@
         "title": "Quick add",
         "hint": "Fill in everything at once. Switch to step-by-step from the header anytime.",
         "saveFailed": "Couldn't save part.",
+        "saveSuccess": "Part saved.",
         "save": "Save",
         "typeLockedHint": "Set when the part was created. Edit on the part detail page if you need to change it."
       },

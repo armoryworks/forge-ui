@@ -629,6 +629,7 @@
         "title": "Alta rápida",
         "hint": "Llene todo de una vez.",
         "saveFailed": "No se pudo guardar.",
+        "saveSuccess": "Pieza guardada.",
         "save": "Save",
         "typeLockedHint": "Set when the part was created. Edit on the part detail page if you need to change it."
       },

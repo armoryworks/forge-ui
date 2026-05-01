@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
 import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
@@ -31,6 +32,7 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
 
 describe('PartExpressFormComponent (Phase 5)', () => {
   let httpMock: HttpTestingController;
+  let router: Router;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -38,10 +40,12 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([{ path: 'parts', children: [] }]),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
       ],
     }).compileComponents();
     httpMock = TestBed.inject(HttpTestingController);
+    router = TestBed.inject(Router);
   });
 
   afterEach(() => httpMock.verify());
@@ -150,11 +154,13 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     expect(c.form.valid).toBe(true);
   });
 
-  it('save() PATCHes basics + cost together', () => {
+  it('save() PATCHes the workflow step then completes the run', () => {
+    const navSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {
-      stepId: 'express', componentName: 'PartExpressFormComponent',
-      entityId: 99, entity: buildPart(),
+      stepId: 'all', componentName: 'PartExpressFormComponent',
+      runId: 7, entityId: 99, entity: buildPart(),
     });
     TestBed.flushEffects();
     const c = component as unknown as {
@@ -169,14 +175,55 @@ describe('PartExpressFormComponent (Phase 5)', () => {
       manualCostOverride: 8.75,
     });
     c.save();
-    const req = httpMock.expectOne(`${environment.apiUrl}/parts/99`);
-    expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toMatchObject({
+
+    // First request: workflow step PATCH (materializes / applies fields).
+    const stepReq = httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`);
+    expect(stepReq.request.method).toBe('PATCH');
+    expect(stepReq.request.body.stepId).toBe('all');
+    expect(stepReq.request.body.fields).toMatchObject({
       name: 'Steel bar',
       material: 'Steel',
       partType: 'RawMaterial',
       manualCostOverride: 8.75,
     });
-    req.flush(buildPart({ name: 'Steel bar', manualCostOverride: 8.75 }));
+    stepReq.flush({
+      id: 7, entityType: 'Part', entityId: 99, definitionId: 'part-raw-material-express-v1',
+      currentStepId: null, mode: 'express', startedAt: '', startedByUserId: 1,
+      completedAt: null, abandonedAt: null, abandonedReason: null,
+      lastActivityAt: '', version: 2,
+    });
+
+    // Second request: complete the run (Draft → Active).
+    const completeReq = httpMock.expectOne(`${environment.apiUrl}/workflows/7/complete`);
+    expect(completeReq.request.method).toBe('POST');
+    completeReq.flush({
+      id: 7, entityType: 'Part', entityId: 99, definitionId: 'part-raw-material-express-v1',
+      currentStepId: null, mode: 'express', startedAt: '', startedByUserId: 1,
+      completedAt: '2026-04-30T20:00:00Z', abandonedAt: null, abandonedReason: null,
+      lastActivityAt: '', version: 3,
+    });
+
+    expect(navSpy).toHaveBeenCalledWith(['/parts']);
+  });
+
+  it('save() is a no-op when runId is null (entity-less, before materialization)', () => {
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    mockSignalInputs(component, {
+      stepId: 'all', componentName: 'PartExpressFormComponent',
+      runId: null, entityId: null, entity: null,
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { patchValue(v: unknown): void };
+      save(): void;
+    };
+    c.form.patchValue({
+      partType: 'RawMaterial',
+      name: 'Steel bar',
+      material: 'Steel',
+      manualCostOverride: 8.75,
+    });
+    c.save();
+    httpMock.verify(); // No requests fired.
   });
 });
