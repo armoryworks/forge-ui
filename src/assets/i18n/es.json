@@ -680,7 +680,22 @@
       "sourcesTab": "Fuentes",
       "sourcesEmpty": "Aún no hay proveedores.",
       "sourcesEmptyHelp": "Añade un proveedor que suministre esta pieza para registrar plazo, MOQ y precios.",
-      "addVendorSource": "Añadir proveedor"
+      "addVendorSource": "Añadir proveedor",
+      "tabs": {
+        "identity": "Identidad",
+        "sourcing": "Fuentes",
+        "inventory": "Inventario",
+        "mrp": "MRP",
+        "bom": "BOM",
+        "routing": "Ruta",
+        "cost": "Coste",
+        "quality": "Calidad",
+        "alternates": "Alternativas",
+        "material": "Material",
+        "activity": "Actividad",
+        "files": "Archivos",
+        "placeholderHelp": "Esta pestaña llegará en Pillar 4 Fase 2."
+      }
     }
   },
   "vendorPart": {

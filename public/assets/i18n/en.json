@@ -669,7 +669,22 @@
       "sourcesTab": "Sources",
       "sourcesEmpty": "No vendor sources yet.",
       "sourcesEmptyHelp": "Add a vendor that supplies this part to track lead time, MOQ, and pricing.",
-      "addVendorSource": "Add Vendor"
+      "addVendorSource": "Add Vendor",
+      "tabs": {
+        "identity": "Identity",
+        "sourcing": "Sources",
+        "inventory": "Inventory",
+        "mrp": "MRP",
+        "bom": "BOM",
+        "routing": "Routing",
+        "cost": "Cost",
+        "quality": "Quality",
+        "alternates": "Alternates",
+        "material": "Material",
+        "activity": "Activity",
+        "files": "Files",
+        "placeholderHelp": "This tab is coming in Pillar 4 Phase 2."
+      }
     }
   },
   "vendorPart": {

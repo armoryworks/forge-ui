@@ -1,0 +1,116 @@
+@use '../../../../../styles/variables' as *;
+@use '../../../../../styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.cluster {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+}
+
+.cluster__title {
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.cluster__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md $sp-lg;
+}
+
+.cluster__item {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.cluster__label {
+  @include uppercase-label(var(--font-size-xxs), 0.5px, 700);
+  color: var(--text-muted);
+}
+
+.cluster__value {
+  font-size: var(--font-size-sm);
+  color: var(--text);
+
+  &--muted {
+    color: var(--text-muted);
+  }
+}
+
+.cluster__form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.cluster__form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cluster__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $sp-md;
+  padding-top: $sp-md;
+}
+
+.cluster__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $sp-md;
+  padding: $sp-2xl $sp-lg;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.cluster__placeholder-icon {
+  font-size: $icon-size-hero;
+}
+
+// ── Files cluster ──
+.files-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__name {
+    flex: 1;
+    color: var(--text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+
+    &:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+  }
+
+  &__meta {
+    font-size: var(--font-size-xxs);
+    color: var(--text-muted);
+  }
+}

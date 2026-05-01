@@ -1,0 +1,27 @@
+<div class="cluster">
+  <h3 class="cluster__title">{{ 'parts.detail.tabs.files' | translate }}</h3>
+
+  <app-file-upload-zone
+    entityType="parts"
+    [entityId]="partId()"
+    accept=".pdf,.step,.stl,.dxf,.dwg,.png,.jpg,.jpeg"
+    [maxSizeMb]="50"
+    (uploaded)="onFileUploaded()" />
+
+  @if (files().length > 0) {
+    <div class="files-list">
+      @for (file of files(); track file.id) {
+        <div class="file-item">
+          <span class="material-icons-outlined">description</span>
+          <a class="file-item__name"
+             [href]="partsService.getFileDownloadUrl(file.id)"
+             target="_blank"
+             rel="noopener">{{ file.fileName }}</a>
+          <span class="file-item__meta">{{ file.contentType }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <app-empty-state icon="attach_file" [message]="'parts.noFilesAttached' | translate" />
+  }
+</div>

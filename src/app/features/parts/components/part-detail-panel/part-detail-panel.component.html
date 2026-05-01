@@ -12,8 +12,14 @@
         </div>
       </div>
       <div class="detail-header__actions">
-        <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" (click)="openEditPart()" aria-label="Edit part">
-          <span class="material-icons-outlined">edit</span>
+        <button class="icon-btn"
+          [class.icon-btn--active]="editing()"
+          [matTooltip]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)"
+          matTooltipPosition="above"
+          data-testid="part-detail-edit-toggle"
+          (click)="editing() ? cancelEdit() : toggleEdit()"
+          [attr.aria-label]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)">
+          <span class="material-icons-outlined">{{ editing() ? 'close' : 'edit' }}</span>
         </button>
         <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="closePanel()" aria-label="Close panel">
           <span class="material-icons-outlined">close</span>
@@ -21,278 +27,63 @@
       </div>
     </div>
 
-    <!-- Detail Tabs -->
-    <div class="detail-tabs">
-      <button class="detail-tab" data-testid="part-tab-info" [class.detail-tab--active]="detailTab() === 'info'"
-        (click)="detailTab.set('info')">{{ 'parts.info' | translate }}</button>
-      <button class="detail-tab" data-testid="part-tab-bom" [class.detail-tab--active]="detailTab() === 'bom'"
-        (click)="detailTab.set('bom')">
-        {{ 'parts.bom' | translate }}
-        @if (part.bomEntries.length > 0) {
-          <span class="tab-badge">{{ part.bomEntries.length }}</span>
-        }
-      </button>
-      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'usage'"
-        (click)="detailTab.set('usage')">
-        {{ 'parts.usedIn' | translate }}
-        @if (part.usedIn.length > 0) {
-          <span class="tab-badge">{{ part.usedIn.length }}</span>
-        }
-      </button>
-      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'process'"
-        (click)="detailTab.set('process')">
-        {{ 'parts.routing' | translate }}
-      </button>
-      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'files'"
-        (click)="detailTab.set('files')">
-        {{ 'parts.files' | translate }}
-        @if (partFiles().length > 0) {
-          <span class="tab-badge">{{ partFiles().length }}</span>
-        }
-      </button>
-      <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'alternates'"
-        (click)="detailTab.set('alternates')">
-        Alternates
-      </button>
-      <button class="detail-tab" data-testid="part-tab-sources" [class.detail-tab--active]="detailTab() === 'sources'"
-        (click)="onSourcesTabActivated()">
-        {{ 'parts.detail.sourcesTab' | translate }}
-      </button>
+    <!-- Detail Tabs (driven by PartDetailLayoutResolverService) -->
+    <div class="detail-tabs" role="tablist">
+      @for (tab of tabLayout(); track tab.id) {
+        <button class="detail-tab"
+          role="tab"
+          [attr.data-testid]="'part-tab-' + tab.id"
+          [class.detail-tab--active]="activeTabId() === tab.id"
+          [attr.aria-selected]="activeTabId() === tab.id"
+          (click)="selectTab(tab.id)">
+          <span class="material-icons-outlined detail-tab__icon">{{ tab.iconName }}</span>
+          {{ tab.labelKey | translate }}
+          @if (tab.id === 'bom' && part.bomEntries.length > 0) {
+            <span class="tab-badge">{{ part.bomEntries.length }}</span>
+          }
+          @if (tab.id === 'files' && partFiles().length > 0) {
+            <span class="tab-badge">{{ partFiles().length }}</span>
+          }
+        </button>
+      }
       @if (part.isSerialTracked) {
-        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'serials'"
-          (click)="detailTab.set('serials')">
+        <button class="detail-tab"
+          role="tab"
+          data-testid="part-tab-serials"
+          [class.detail-tab--active]="activeTabId() === 'serials'"
+          (click)="selectTab('serials')">
           <span class="material-icons-outlined detail-tab__icon">qr_code_2</span>
           Serials
         </button>
       }
       @if (stlFile()) {
-        <button class="detail-tab" [class.detail-tab--active]="detailTab() === 'viewer'"
-          (click)="detailTab.set('viewer')">
+        <button class="detail-tab"
+          role="tab"
+          [class.detail-tab--active]="activeTabId() === 'viewer'"
+          (click)="selectTab('viewer')">
           <span class="material-icons-outlined detail-tab__icon">view_in_ar</span>
           {{ 'parts.viewer3d' | translate }}
         </button>
       }
     </div>
 
-    <div class="detail-body" [appLoadingBlock]="detailLoading()">
-        <!-- Info Tab -->
-        @if (detailTab() === 'info') {
-          <div class="info-grid">
-            <div class="info-item">
-              <span class="info-label">{{ 'parts.revision' | translate }}</span>
-              <span class="info-value">{{ part.revision }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">{{ 'common.type' | translate }}</span>
-              <span class="info-value">{{ part.partType }}</span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">{{ 'common.status' | translate }}</span>
-              <span class="info-value">
-                <span class="status-badge" [class]="getStatusClass(part.status)">{{ part.status }}</span>
-              </span>
-            </div>
-            <div class="info-item">
-              <span class="info-label">{{ 'parts.material' | translate }}</span>
-              <span class="info-value">{{ part.material ?? '---' }}</span>
-            </div>
-            @if (part.manufacturerName) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.workflow.basics.manufacturerNameLabel' | translate }}</span>
-                <span class="info-value">{{ part.manufacturerName }}</span>
-              </div>
-            }
-            @if (part.manufacturerPartNumber) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.workflow.basics.manufacturerPartNumberLabel' | translate }}</span>
-                <span class="info-value">{{ part.manufacturerPartNumber }}</span>
-              </div>
-            }
-            <div class="info-item">
-              <span class="info-label">{{ 'parts.workflow.basics.traceabilityLabel' | translate }}</span>
-              <span class="info-value">{{ ('parts.workflow.basics.traceability' + part.traceabilityType) | translate }}</span>
-            </div>
-            @if (part.abcClass) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.workflow.basics.abcClassLabel' | translate }}</span>
-                <span class="info-value">{{ part.abcClass }}</span>
-              </div>
-            }
-            @if (part.externalPartNumber) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.externalPartNumber' | translate }}</span>
-                <span class="info-value">{{ part.externalPartNumber }}</span>
-              </div>
-            }
-            @if (part.moldToolRef) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.moldToolRef' | translate }}</span>
-                <span class="info-value">{{ part.moldToolRef }}</span>
-              </div>
-            }
-            @if (part.preferredVendorName) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.preferredVendor' | translate }}</span>
-                <span class="info-value">{{ part.preferredVendorName }}</span>
-              </div>
-            }
-            @if (part.toolingAssetName) {
-              <div class="info-item">
-                <span class="info-label">{{ 'parts.toolingAsset' | translate }}</span>
-                <span class="info-value">{{ part.toolingAssetName }}</span>
-              </div>
-            }
-          </div>
+    <div class="detail-body" [appLoadingBlock]="detailLoading() || saving()">
+      @switch (activeTabId()) {
+        @case ('identity') {
+          <app-part-identity-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
 
+          <div class="detail-body--padded">
           <app-barcode-info
             entityType="Part"
             [entityId]="part.id"
             [entityLabel]="part.partNumber"
             [naturalIdentifier]="part.partNumber"
             [compact]="true" />
-
-          <!-- Accounting Linkage -->
-          @if (accountingService.isConfigured()) {
-            <div class="accounting-link-section">
-              <div class="accounting-link-section__header">
-                <span class="info-label">{{ 'parts.accountingItem' | translate }}</span>
-                @if (isLinked()) {
-                  <button class="icon-btn icon-btn--danger" [matTooltip]="'parts.unlink' | translate" matTooltipPosition="above" (click)="unlinkAccountingItem()" aria-label="Unlink accounting item">
-                    <span class="material-icons-outlined">link_off</span>
-                  </button>
-                } @else {
-                  <button class="action-btn action-btn--sm" (click)="openLinkDialog()">
-                    <span class="material-icons-outlined">link</span>
-                    {{ 'parts.link' | translate }}
-                  </button>
-                }
-              </div>
-              @if (isLinked()) {
-                <div class="accounting-link-card">
-                  <span class="material-icons-outlined accounting-link-card__icon">receipt_long</span>
-                  <div class="accounting-link-card__info">
-                    <span class="accounting-link-card__name">{{ part.externalRef }}</span>
-                    <span class="accounting-link-card__meta">{{ part.provider }} &middot; {{ part.externalId }}</span>
-                  </div>
-                </div>
-              } @else {
-                <span class="text-muted">{{ 'parts.notLinked' | translate }}</span>
-              }
-            </div>
-          }
-
-          <!-- Inventory Summary -->
-          @if (inventorySummary(); as inv) {
-            <div class="inventory-summary">
-              <span class="info-label">{{ 'parts.inventory' | translate }}</span>
-              <div class="inventory-summary__qty" [class.inventory-summary__qty--low]="isLowStock()">
-                <span class="inventory-summary__value">{{ inv.totalQuantity }}</span>
-                <span class="inventory-summary__label">{{ 'parts.totalQty' | translate }}</span>
-                @if (isLowStock()) {
-                  <span class="material-icons-outlined inventory-summary__warn">warning</span>
-                  <span class="inventory-summary__warn-text">{{ 'parts.lowStock' | translate }}</span>
-                }
-              </div>
-              <div class="info-grid">
-                @if (part.minStockThreshold !== null) {
-                  <div class="info-item">
-                    <span class="info-label">{{ 'parts.minStock' | translate }}</span>
-                    <span class="info-value">{{ part.minStockThreshold }}</span>
-                  </div>
-                }
-                @if (part.reorderPoint !== null) {
-                  <div class="info-item">
-                    <span class="info-label">{{ 'parts.reorderPoint' | translate }}</span>
-                    <span class="info-value">{{ part.reorderPoint }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-          } @else if (part.minStockThreshold !== null || part.reorderPoint !== null) {
-            <div class="inventory-thresholds">
-              <span class="info-label">{{ 'parts.inventoryThresholds' | translate }}</span>
-              <div class="info-grid">
-                @if (part.minStockThreshold !== null) {
-                  <div class="info-item">
-                    <span class="info-label">{{ 'parts.minStock' | translate }}</span>
-                    <span class="info-value">{{ part.minStockThreshold }}</span>
-                  </div>
-                }
-                @if (part.reorderPoint !== null) {
-                  <div class="info-item">
-                    <span class="info-label">{{ 'parts.reorderPoint' | translate }}</span>
-                    <span class="info-value">{{ part.reorderPoint }}</span>
-                  </div>
-                }
-              </div>
-            </div>
-          }
-
-          <!-- Pricing Section -->
-          <div class="pricing-section">
-            <div class="pricing-section__header">
-              <span class="info-label">LIST PRICE</span>
-            </div>
-            @if (currentPrice(); as price) {
-              <div class="pricing-current">
-                <span class="pricing-current__value">{{ price.unitPrice | currency }}</span>
-                <span class="pricing-current__since">effective {{ price.effectiveFrom | date:'MM/dd/yyyy' }}</span>
-              </div>
-            } @else {
-              <span class="text-muted">No price set</span>
-            }
-
-            <!-- Set new price inline form -->
-            <div class="pricing-add" [formGroup]="priceForm">
-              <app-currency-input label="New Price" formControlName="unitPrice" [required]="true" />
-              <app-datepicker label="Effective From" formControlName="effectiveFrom" aria-label="Effective from date" />
-              <app-input label="Notes" formControlName="notes" />
-              <button class="action-btn action-btn--sm pricing-add__btn"
-                (click)="addPrice()"
-                [disabled]="priceForm.invalid || priceSaving()"
-                aria-label="Set new price">
-                <span class="material-icons-outlined">save</span>
-                Set Price
-              </button>
-            </div>
-
-            @if (priceHistory().length > 0) {
-              <div class="price-history">
-                <span class="info-label">HISTORY</span>
-                <table class="price-history-table" aria-label="Price history">
-                  <thead>
-                    <tr>
-                      <th scope="col">Price</th>
-                      <th scope="col">Effective</th>
-                      <th scope="col">Until</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (p of priceHistory(); track p.id) {
-                      <tr>
-                        <td>{{ p.unitPrice | currency }}</td>
-                        <td>{{ p.effectiveFrom | date:'MM/dd/yyyy' }}</td>
-                        <td>{{ p.effectiveTo ? (p.effectiveTo | date:'MM/dd/yyyy') : '---' }}</td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          </div>
-
-          <div class="status-actions">
-            <span class="info-label">{{ 'parts.setStatus' | translate }}</span>
-            <div class="status-btn-group">
-              @for (s of partStatuses; track s) {
-                <button class="status-btn" [class.status-btn--active]="part.status === s"
-                  [class]="'status-btn--' + s.toLowerCase()"
-                  (click)="updatePartStatus(s)">
-                  {{ s }}
-                </button>
-              }
-            </div>
-          </div>
 
           <!-- Phase 5: Promote to Active (Draft-only, runs readiness validators) -->
           @if (part.status === 'Draft') {
@@ -327,10 +118,45 @@
               }
             </div>
           }
+          </div>
         }
 
-        <!-- BOM Tab -->
-        @if (detailTab() === 'bom') {
+        @case ('sourcing') {
+          <div class="detail-body--padded">
+          <app-vendor-part-list-panel
+            mode="sources"
+            parentEntityType="part"
+            [parentEntityId]="part.id"
+            [vendorParts]="vendorParts()"
+            [loading]="vendorPartsLoading()"
+            (add)="openVendorPartCreate()"
+            (edit)="openVendorPartEdit($event)"
+            (delete)="deleteVendorPart($event)"
+            (togglePreferred)="toggleVendorPartPreferred($event)"
+            (viewTiers)="openVendorPartTiers($event)" />
+          </div>
+        }
+
+        @case ('inventory') {
+          <app-part-inventory-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
+        }
+
+        @case ('cost') {
+          <app-part-cost-cluster
+            [part]="part"
+            [editing]="editing()"
+            [saving]="saving()"
+            (save)="saveClusterPatch($event)"
+            (cancelled)="cancelEdit()" />
+        }
+
+        @case ('bom') {
+          <div class="detail-body--padded">
           <div class="bom-header">
             <span class="bom-count-label">{{ part.bomEntries.length }} {{ 'parts.bomComponents' | translate }}</span>
             <div class="bom-header__actions">
@@ -359,7 +185,6 @@
 
           @if (bomViewMode() === 'tree') {
             <app-bom-tree [entries]="part.bomEntries" (entryDelete)="deleteBomEntry($event)" />
-            <!-- Phase 3 H4 / WU-20 — read-only revision history widget. -->
             <app-bom-revision-history [partId]="part.id" [refreshToken]="bomRefreshToken()" />
           } @else {
             <app-data-table
@@ -391,122 +216,70 @@
                 </button>
               </ng-template>
             </app-data-table>
-            <!-- Phase 3 H4 / WU-20 — read-only revision history widget. -->
             <app-bom-revision-history [partId]="part.id" [refreshToken]="bomRefreshToken()" />
           }
+          </div>
         }
 
-        <!-- Used In Tab -->
-        @if (detailTab() === 'usage') {
-          <app-data-table
-            tableId="part-used-in"
-            [columns]="usedInColumns"
-            [data]="part.usedIn"
-            [clickableRows]="true"
-            emptyIcon="link_off"
-            [emptyMessage]="'parts.notUsedInAssemblies' | translate"
-            (rowClick)="navigateToPart($any($event))" />
+        @case ('routing') {
+          <div class="detail-body--padded">
+            <app-routing [partId]="part.id" [bomEntries]="part.bomEntries" />
+          </div>
         }
 
-        <!-- Process Tab -->
-        @if (detailTab() === 'process') {
-          <app-routing [partId]="part.id" [bomEntries]="part.bomEntries" />
+        @case ('alternates') {
+          <div class="detail-body--padded">
+            <app-part-alternates-tab [partId]="part.id" />
+          </div>
         }
 
-        <!-- Files Tab -->
-        @if (detailTab() === 'files') {
-          <app-file-upload-zone
-            entityType="parts"
-            [entityId]="part.id"
-            accept=".pdf,.step,.stl,.dxf,.dwg,.png,.jpg,.jpeg"
-            [maxSizeMb]="50"
-            (uploaded)="onFileUploaded()" />
+        @case ('quality') {
+          <div class="cluster cluster__placeholder">
+            <span class="material-icons-outlined cluster__placeholder-icon">fact_check</span>
+            <span>{{ 'parts.detail.tabs.placeholderHelp' | translate }}</span>
+          </div>
+        }
 
-          @if (partFiles().length > 0) {
-            <div class="files-list">
-              @for (file of partFiles(); track file.id) {
-                <div class="file-item">
-                  <span class="material-icons-outlined file-item__icon">description</span>
-                  <div class="file-item__info">
-                    <a class="file-item__name" [href]="partsService.getFileDownloadUrl(file.id)" target="_blank">{{ file.fileName }}</a>
-                    <span class="file-item__size">{{ file.contentType }}</span>
-                  </div>
-                </div>
-              }
-            </div>
-          } @else {
-            <app-empty-state icon="attach_file" [message]="'parts.noFilesAttached' | translate" />
+        @case ('mrp') {
+          <div class="cluster cluster__placeholder">
+            <span class="material-icons-outlined cluster__placeholder-icon">event_available</span>
+            <span>{{ 'parts.detail.tabs.placeholderHelp' | translate }}</span>
+          </div>
+        }
+
+        @case ('material') {
+          <div class="cluster cluster__placeholder">
+            <span class="material-icons-outlined cluster__placeholder-icon">category</span>
+            <span>{{ 'parts.detail.tabs.placeholderHelp' | translate }}</span>
+          </div>
+        }
+
+        @case ('activity') {
+          <app-part-activity-cluster [partId]="part.id" />
+        }
+
+        @case ('files') {
+          <app-part-files-cluster [partId]="part.id" />
+        }
+
+        @case ('serials') {
+          <div class="detail-body--padded">
+            <app-serial-numbers-tab [partId]="part.id" />
+          </div>
+        }
+
+        @case ('viewer') {
+          @if (stlFileUrl(); as url) {
+            <app-stl-viewer [url]="url" height="100%" />
           }
         }
-
-        <!-- Alternates Tab -->
-        @if (detailTab() === 'alternates') {
-          <app-part-alternates-tab [partId]="part.id" />
-        }
-
-        <!-- Sources Tab (Vendor Parts) -->
-        @if (detailTab() === 'sources') {
-          <app-vendor-part-list-panel
-            mode="sources"
-            parentEntityType="part"
-            [parentEntityId]="part.id"
-            [vendorParts]="vendorParts()"
-            [loading]="vendorPartsLoading()"
-            (add)="openVendorPartCreate()"
-            (edit)="openVendorPartEdit($event)"
-            (delete)="deleteVendorPart($event)"
-            (togglePreferred)="toggleVendorPartPreferred($event)"
-            (viewTiers)="openVendorPartTiers($event)" />
-        }
-
-        <!-- Serials Tab -->
-        @if (detailTab() === 'serials') {
-          <app-serial-numbers-tab [partId]="part.id" />
-        }
-
-        <!-- 3D Viewer Tab -->
-        @if (detailTab() === 'viewer' && stlFileUrl()) {
-          <app-stl-viewer [url]="stlFileUrl()!" height="100%" />
-        }
-
-        <!-- Activity Section -->
-        <app-entity-activity-section entityType="Part" [entityId]="partId()" />
+      }
     </div>
   </div>
 } @else {
   <div class="detail-panel detail-panel--loading" [appLoadingBlock]="detailLoading()">
     <div class="detail-panel__empty"></div>
   </div>
-}
-
-<!-- Link Accounting Item Dialog -->
-@if (showLinkDialog()) {
-  <app-dialog [title]="'parts.linkAccountingItem' | translate" width="520px" (closed)="closeLinkDialog()">
-    <div class="accounting-items-list" [appLoadingBlock]="accountingItemsLoading()">
-      @for (item of accountingService.items(); track item.externalId) {
-        <button class="accounting-item-row" [disabled]="linkSaving()" (click)="linkToAccountingItem(item)">
-          <div class="accounting-item-row__info">
-            <span class="accounting-item-row__name">{{ item.name }}</span>
-            @if (item.sku) {
-              <span class="accounting-item-row__sku">{{ 'parts.sku' | translate }}: {{ item.sku }}</span>
-            }
-            @if (item.description) {
-              <span class="accounting-item-row__desc">{{ item.description }}</span>
-            }
-          </div>
-          @if (item.unitPrice !== null) {
-            <span class="accounting-item-row__price">{{ item.unitPrice | number:'1.2-2' }}</span>
-          }
-        </button>
-      } @empty {
-        <app-empty-state icon="receipt_long" [message]="'parts.noAccountingItems' | translate" />
-      }
-    </div>
-
-    <div dialog-footer>
-      <button class="action-btn" (click)="closeLinkDialog()">{{ 'common.cancel' | translate }}</button>
-    </div>
-  </app-dialog>
 }
 
 <!-- BOM Entry Dialog -->
@@ -531,9 +304,9 @@
     <div dialog-footer>
       <button class="action-btn" (click)="closeBomDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="bomViolations">
-      <button class="action-btn action-btn--primary" data-testid="bom-save-btn"
-        [disabled]="bomForm.invalid"
-        (click)="saveBomEntry()">{{ 'parts.addEntry' | translate }}</button>
+        <button class="action-btn action-btn--primary" data-testid="bom-save-btn"
+          [disabled]="bomForm.invalid"
+          (click)="saveBomEntry()">{{ 'parts.addEntry' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

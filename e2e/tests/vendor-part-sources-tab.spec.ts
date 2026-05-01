@@ -57,12 +57,13 @@ test.describe('Part Sources tab — add vendor', () => {
     // Open the part detail dialog directly via ?detail=part:{id}
     await page.goto(`${BASE_URL}/parts?detail=part:${partId}`, { waitUntil: 'networkidle' });
 
-    // Wait for the part detail dialog to appear
-    await expect(page.locator('[data-testid="part-tab-info"]')).toBeVisible({ timeout: 15000 });
+    // Wait for the part detail dialog to appear (Pillar 4: tab ids are now
+    // identity/sourcing instead of info/sources)
+    await expect(page.locator('[data-testid="part-tab-identity"]')).toBeVisible({ timeout: 15000 });
 
-    // Click the Sources tab
-    await page.locator('[data-testid="part-tab-sources"]').click();
-    await expect(page.locator('[data-testid="part-tab-sources"]')).toHaveAttribute('class', /detail-tab--active/);
+    // Click the Sourcing tab
+    await page.locator('[data-testid="part-tab-sourcing"]').click();
+    await expect(page.locator('[data-testid="part-tab-sourcing"]')).toHaveAttribute('class', /detail-tab--active/);
 
     // Click "Add Vendor" — there may be one in the empty-state CTA OR in the
     // panel header; either is wired to the same output. Use the panel header
