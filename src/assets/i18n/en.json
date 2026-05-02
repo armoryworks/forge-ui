@@ -1212,6 +1212,10 @@
     "notesHelper": "Why this price (e.g., negotiated, contract).",
     "dialogTitleCreate": "Add Price Entry",
     "dialogTitleEdit": "Edit Price Entry",
+    "cellEditTooltip": "Click to edit",
+    "cellEditError": "Couldn't save — press Esc to cancel",
+    "cellEditInvalid": "Invalid value",
+    "cellSaved": "Saved",
     "bulkImport": {
       "label": "Import CSV",
       "dialogTitle": "Import price list entries",

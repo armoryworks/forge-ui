@@ -23,3 +23,58 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+// Inline-cell edit affordance (Pattern D, applied to unitPrice + minQuantity).
+.ple-cell-edit-trigger {
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  padding: 0 $sp-xs;
+  transition: border-bottom-color $transition-fast;
+
+  &:hover {
+    border-bottom-color: var(--text-muted);
+  }
+}
+
+.ple-cell-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  width: 100%;
+
+  &__input {
+    width: 100%;
+    min-width: 60px;
+    padding: $sp-xs $sp-sm;
+    border: 1px solid var(--primary);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    text-align: right;
+
+    &:focus {
+      outline: 2px solid var(--primary-light);
+      outline-offset: -2px;
+    }
+  }
+
+  &__spinner {
+    color: var(--primary);
+    font-size: $icon-size-sm;
+    animation: spin 1s linear infinite;
+  }
+
+  &__error {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: $badge-size-md;
+    height: $badge-size-md;
+    border: 1px solid var(--error);
+    background: var(--error-light);
+    color: var(--error);
+    font-weight: bold;
+    font-size: $font-size-xs;
+    cursor: help;
+  }
+}

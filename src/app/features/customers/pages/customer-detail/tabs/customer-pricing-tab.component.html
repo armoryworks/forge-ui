@@ -55,7 +55,8 @@
         [loading]="entriesLoading()"
         (add)="onAdd()"
         (edit)="onEdit($event)"
-        (delete)="onDelete($event)" />
+        (delete)="onDelete($event)"
+        (cellSaved)="onCellSaved($event)" />
     </section>
   } @else if (!listsLoading()) {
     <app-empty-state

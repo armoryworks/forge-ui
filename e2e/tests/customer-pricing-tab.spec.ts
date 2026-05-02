@@ -257,4 +257,83 @@ test.describe('Customer Pricing tab — add entry', () => {
       page.locator(`app-price-list-entries-table:has-text("${partNumber}")`).first(),
     ).toBeVisible({ timeout: 10000 });
   });
+
+  /**
+   * Inline-cell edit (Pattern D) — click a Unit Price cell, change the
+   * value, press Enter, and assert the new value persists across reload.
+   * Verifies the table-level optimistic-cache update plus the server PUT.
+   */
+  test('edits a price entry inline via the Unit Price cell and persists across reload', async ({ page, request }) => {
+    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    expect(token).toBeTruthy();
+
+    const partsResp = await request.get(`${API_BASE}parts?pageSize=1`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const customersResp = await request.get(`${API_BASE}customers?pageSize=1&isActive=true`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!partsResp.ok() || !customersResp.ok()) {
+      test.skip(true, 'Seed data unavailable — skipping inline-edit e2e');
+      return;
+    }
+    const partsData: { items?: { id: number }[]; data?: { id: number }[] } = await partsResp.json();
+    const customersData: { items?: { id: number }[]; data?: { id: number }[] } = await customersResp.json();
+    const partItems = partsData.items ?? partsData.data ?? [];
+    const customerItems = customersData.items ?? customersData.data ?? [];
+    if (partItems.length === 0 || customerItems.length === 0) {
+      test.skip(true, 'No parts or customers in seed; cannot exercise inline edit');
+      return;
+    }
+    const customerId = customerItems[0].id;
+
+    await request.put(`${API_BASE}capabilities/CAP-MD-PRICELIST/enabled`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { enabled: true },
+    });
+
+    // Seed a price list with one entry whose price we'll inline-edit.
+    const initialPrice = 7.5;
+    const newPrice = 19.99;
+    const createResp = await request.post(`${API_BASE}price-lists`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: {
+        name: `E2E Inline Edit ${Date.now()}`,
+        description: null,
+        customerId,
+        isDefault: false,
+        effectiveFrom: null,
+        effectiveTo: null,
+        entries: [{ partId: partItems[0].id, unitPrice: initialPrice, minQuantity: 1 }],
+      },
+    });
+    expect(createResp.ok()).toBe(true);
+
+    await page.goto(`${BASE_URL}/customers/${customerId}/pricing`, { waitUntil: 'networkidle' });
+    await expect(page.locator('[data-testid="price-list-entries-section"]')).toBeVisible({ timeout: 15000 });
+
+    // Click the unit-price cell to enter edit mode; then type a new value
+    // and press Enter to commit.
+    const cellTrigger = page.locator('[data-testid="price-list-entry-unit-price-cell"]').first();
+    await expect(cellTrigger).toBeVisible({ timeout: 10000 });
+    await cellTrigger.click();
+
+    const cellInput = page.locator('[data-testid="price-list-entry-unit-price-inline"]').first();
+    await expect(cellInput).toBeVisible({ timeout: 5000 });
+    // The component selects the input on focus, so a fresh fill replaces it.
+    await cellInput.fill(String(newPrice));
+    await cellInput.press('Enter');
+
+    // Cell flips back to read state with the new value.
+    await expect(
+      page.locator(`app-price-list-entries-table:has-text("${newPrice.toFixed(2)}")`).first(),
+    ).toBeVisible({ timeout: 10000 });
+
+    // Reload and confirm the new value persisted server-side.
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.locator('[data-testid="price-list-entries-section"]')).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator(`app-price-list-entries-table:has-text("${newPrice.toFixed(2)}")`).first(),
+    ).toBeVisible({ timeout: 10000 });
+  });
 });

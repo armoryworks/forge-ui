@@ -33,11 +33,81 @@
       </ng-template>
 
       <ng-template appColumnCell="minQuantity" let-row>
-        <span>{{ row.minQuantity }}</span>
+        @if (isEditing(row, 'minQuantity')) {
+          <span class="ple-cell-edit">
+            <input
+              #cellEditInput
+              class="ple-cell-edit__input"
+              data-testid="price-list-entry-min-qty-inline"
+              type="number"
+              step="1"
+              min="1"
+              [value]="row.minQuantity"
+              (keydown.enter)="commitEdit(row, 'minQuantity', readValue($event.target))"
+              (keydown.escape)="cancelEdit()"
+              (blur)="commitEdit(row, 'minQuantity', readValue($event.target))" />
+            @if (isSaving(row, 'minQuantity')) {
+              <span class="ple-cell-edit__spinner material-icons-outlined" aria-hidden="true">sync</span>
+            }
+            @if (getCellError(row, 'minQuantity'); as msg) {
+              <span class="ple-cell-edit__error"
+                [matTooltip]="msg"
+                matTooltipPosition="above"
+                [attr.aria-label]="msg">!</span>
+            }
+          </span>
+        } @else {
+          <span class="ple-cell-edit-trigger"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'priceListEntry.cellEditTooltip' | translate"
+            [matTooltip]="'priceListEntry.cellEditTooltip' | translate"
+            matTooltipPosition="above"
+            data-testid="price-list-entry-min-qty-cell"
+            (click)="startEdit(row, 'minQuantity')"
+            (keydown.enter)="startEdit(row, 'minQuantity')"
+            (keydown.space)="startEdit(row, 'minQuantity'); $event.preventDefault()">{{ row.minQuantity }}</span>
+        }
       </ng-template>
 
       <ng-template appColumnCell="unitPrice" let-row>
-        <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
+        @if (isEditing(row, 'unitPrice')) {
+          <span class="ple-cell-edit">
+            <input
+              #cellEditInput
+              class="ple-cell-edit__input"
+              data-testid="price-list-entry-unit-price-inline"
+              type="number"
+              step="0.01"
+              min="0"
+              [value]="row.unitPrice"
+              (keydown.enter)="commitEdit(row, 'unitPrice', readValue($event.target))"
+              (keydown.escape)="cancelEdit()"
+              (blur)="commitEdit(row, 'unitPrice', readValue($event.target))" />
+            @if (isSaving(row, 'unitPrice')) {
+              <span class="ple-cell-edit__spinner material-icons-outlined" aria-hidden="true">sync</span>
+            }
+            @if (getCellError(row, 'unitPrice'); as msg) {
+              <span class="ple-cell-edit__error"
+                [matTooltip]="msg"
+                matTooltipPosition="above"
+                [attr.aria-label]="msg">!</span>
+            }
+          </span>
+        } @else {
+          <span class="ple-cell-edit-trigger"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="'priceListEntry.cellEditTooltip' | translate"
+            [matTooltip]="'priceListEntry.cellEditTooltip' | translate"
+            matTooltipPosition="above"
+            data-testid="price-list-entry-unit-price-cell"
+            (click)="startEdit(row, 'unitPrice')"
+            (keydown.enter)="startEdit(row, 'unitPrice')"
+            (keydown.space)="startEdit(row, 'unitPrice'); $event.preventDefault()">
+            <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
+          </span>
+        }
       </ng-template>
 
       <ng-template appColumnCell="currency" let-row>

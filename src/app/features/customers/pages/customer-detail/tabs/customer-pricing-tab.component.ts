@@ -233,6 +233,17 @@ export class CustomerPricingTabComponent implements OnInit {
     });
   }
 
+  /**
+   * Inline-cell save (Pattern D — see `phase-4-output/pricelist-entry-edit-ux.md`).
+   * The table component has already PUT the row; we splice the updated
+   * entry into the local cache so the next render reflects it without
+   * refetching the whole page.
+   */
+  protected onCellSaved(updated: PriceListEntry): void {
+    this.entries.update(rows => rows.map(e => e.id === updated.id ? updated : e));
+    this.snackbar.success(this.translate.instant('priceListEntry.cellSaved'));
+  }
+
   private openEntryDialog(entry: PriceListEntry | null, priceListId: number): void {
     this.dialog.open(PriceListEntryFormDialogComponent, {
       width: '520px',
