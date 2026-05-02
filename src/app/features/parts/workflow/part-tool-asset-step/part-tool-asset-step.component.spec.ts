@@ -20,7 +20,6 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
     procurementSource: 'Make', inventoryClass: 'Tool', itemKindId: null, itemKindLabel: null,
     traceabilityType: 'None', abcClass: null, 
     materialSpecId: null, materialSpecLabel: null,
-    externalPartNumber: null,
     externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,

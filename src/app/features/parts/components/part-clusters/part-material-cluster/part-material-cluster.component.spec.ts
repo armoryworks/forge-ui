@@ -23,7 +23,6 @@ function makePart(overrides: Partial<PartDetail> = {}): PartDetail {
     traceabilityType: 'None', abcClass: null,
     
     materialSpecId: null, materialSpecLabel: null,
-    externalPartNumber: null,
     externalId: null, externalRef: null, provider: null,
     preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,

@@ -22,11 +22,10 @@ function makePart(overrides: Partial<PartDetail> = {}): PartDetail {
     traceabilityType: 'None', abcClass: null,
     
     materialSpecId: null, materialSpecLabel: null,
-    externalPartNumber: null,
     externalId: null, externalRef: null, provider: null,
     preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: 25, reorderPoint: 50, reorderQuantity: 100,
-    leadTimeDays: 14, safetyStockDays: 7,
+    safetyStockDays: 7,
     toolingAssetId: null, toolingAssetName: null,
     manualCostOverride: null, currentCostCalculationId: null,
     weightEach: null, weightDisplayUnit: null,
