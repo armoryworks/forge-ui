@@ -14,6 +14,10 @@ import { SnackbarService } from '../../../../../shared/services/snackbar.service
 
 import { PriceListEntriesTableComponent } from '../../../components/price-list-entries-cluster/price-list-entries-table.component';
 import {
+  PriceListEntryBulkImportDialogComponent,
+  PriceListEntryBulkImportDialogData,
+} from '../../../components/price-list-entries-cluster/price-list-entry-bulk-import-dialog/price-list-entry-bulk-import-dialog.component';
+import {
   PriceListEntryFormDialogComponent,
   PriceListEntryFormDialogData,
 } from '../../../components/price-list-entries-cluster/price-list-entry-form-dialog.component';
@@ -235,6 +239,25 @@ export class CustomerPricingTabComponent implements OnInit {
       data: { entry, priceListId } satisfies PriceListEntryFormDialogData,
     }).afterClosed().subscribe(result => {
       if (result) this.loadEntries(priceListId);
+    });
+  }
+
+  // -------- CSV bulk import --------
+
+  /**
+   * Open the bulk-import dialog for the currently-selected price list. The
+   * dialog runs the two-step (preview → apply) flow itself; on close, the
+   * apply result reaches us when the user committed and we refresh the
+   * entries table.
+   */
+  protected openBulkImport(): void {
+    const list = this.selectedList();
+    if (!list) return;
+    this.dialog.open(PriceListEntryBulkImportDialogComponent, {
+      width: '800px',
+      data: { priceListId: list.id, priceListName: list.name } satisfies PriceListEntryBulkImportDialogData,
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadEntries(list.id);
     });
   }
 }

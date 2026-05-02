@@ -1181,7 +1181,30 @@
     "notesLabel": "Notas",
     "notesHelper": "Por qué este precio (p. ej., negociado, contrato).",
     "dialogTitleCreate": "Agregar Entrada de Precio",
-    "dialogTitleEdit": "Editar Entrada de Precio"
+    "dialogTitleEdit": "Editar Entrada de Precio",
+    "bulkImport": {
+      "label": "Importar CSV",
+      "dialogTitle": "Importar entradas de lista de precios",
+      "helper": "Sube un CSV con columnas: partNumber, unitPrice, minQuantity (opcional), currency (opcional), notes (opcional).",
+      "dropzone": "Suelta un archivo .csv aquí, o",
+      "browse": "Examinar",
+      "downloadTemplate": "Descargar plantilla CSV",
+      "parsing": "Procesando...",
+      "previewSummary": "Se agregarán: {{add}} | Se actualizarán: {{update}} | Errores: {{error}}",
+      "previewEmpty": "No hay filas en el archivo cargado.",
+      "actionAdd": "Agregar",
+      "actionUpdate": "Actualizar",
+      "actionSkip": "Omitir",
+      "actionError": "Error",
+      "applyButton": "Aplicar",
+      "applyDisabledHelper": "Corrige las filas con error en tu CSV y vuelve a cargarlo.",
+      "applySuccess": "Importadas: {{added}} agregadas, {{updated}} actualizadas.",
+      "back": "Atrás",
+      "cancel": "Cancelar",
+      "fileTooLarge": "El archivo supera el límite de 5MB.",
+      "fileTypeNotAllowed": "Solo se permiten archivos .csv.",
+      "previewFailed": "Error al leer el archivo CSV."
+    }
   },
   "priceList": {
     "dialogTitleCreate": "Crear Lista de Precios",

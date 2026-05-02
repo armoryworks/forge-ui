@@ -5,6 +5,10 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { PagedResponse } from '../../../shared/models/paged-response.model';
 import {
+  BulkImportPreviewResponse,
+  BulkImportResultResponse,
+} from '../models/price-list-bulk-import.model';
+import {
   CreatePriceListEntryRequest,
   CreatePriceListRequest,
   PriceList,
@@ -77,5 +81,28 @@ export class PriceListsService {
 
   deleteEntry(entryId: number): Observable<void> {
     return this.http.delete<void>(`${this.entriesBase}/${entryId}`);
+  }
+
+  // --- CSV bulk import: dry-run preview + apply ---------------------------
+  // Two-step flow per the universal ERP convention. Both endpoints accept a
+  // multipart upload; preview never mutates the DB. The UI shows the
+  // preview table, the user confirms, and apply commits the upsert.
+
+  previewImport(priceListId: number, file: File): Observable<BulkImportPreviewResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<BulkImportPreviewResponse>(
+      `${this.priceListsBase}/${priceListId}/entries/import-preview`,
+      formData,
+    );
+  }
+
+  applyImport(priceListId: number, file: File): Observable<BulkImportResultResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<BulkImportResultResponse>(
+      `${this.priceListsBase}/${priceListId}/entries/import-apply`,
+      formData,
+    );
   }
 }

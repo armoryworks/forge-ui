@@ -173,4 +173,88 @@ test.describe('Customer Pricing tab — add entry', () => {
       page.locator(`[data-testid="price-list-header-name"]:has-text("${renamed}")`),
     ).toBeVisible({ timeout: 10000 });
   });
+
+  /**
+   * CSV bulk-import flow — file picker → preview → apply. Mirrors the
+   * preview-then-commit convention surveyed in
+   * phase-4-output/pricelist-entry-edit-ux.md.
+   */
+  test('imports price list entries from a CSV via the bulk-import dialog', async ({ page, request }) => {
+    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    expect(token).toBeTruthy();
+
+    const partsResp = await request.get(`${API_BASE}parts?pageSize=1`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const customersResp = await request.get(`${API_BASE}customers?pageSize=1&isActive=true`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!partsResp.ok() || !customersResp.ok()) {
+      test.skip(true, 'Seed data unavailable — skipping bulk import e2e');
+      return;
+    }
+    const partsData: { items?: { id: number; partNumber?: string }[]; data?: { id: number; partNumber?: string }[] } = await partsResp.json();
+    const customersData: { items?: { id: number }[]; data?: { id: number }[] } = await customersResp.json();
+    const partItems = partsData.items ?? partsData.data ?? [];
+    const customerItems = customersData.items ?? customersData.data ?? [];
+    if (partItems.length === 0 || customerItems.length === 0) {
+      test.skip(true, 'No parts or customers in seed; cannot exercise bulk import');
+      return;
+    }
+    const customerId = customerItems[0].id;
+    const partNumber = partItems[0].partNumber;
+    if (!partNumber) {
+      test.skip(true, 'Seed part has no partNumber; bulk import requires it');
+      return;
+    }
+
+    // Ensure capability is enabled.
+    await request.put(`${API_BASE}capabilities/CAP-MD-PRICELIST/enabled`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { enabled: true },
+    });
+
+    // Seed an empty price list to import into. Unique min-quantities below
+    // keep the (list, part, minQty) keys distinct.
+    const createResp = await request.post(`${API_BASE}price-lists`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: {
+        name: `E2E Bulk Import ${Date.now()}`,
+        description: null,
+        customerId,
+        isDefault: false,
+        effectiveFrom: null,
+        effectiveTo: null,
+        entries: [],
+      },
+    });
+    expect(createResp.ok()).toBe(true);
+
+    await page.goto(`${BASE_URL}/customers/${customerId}/pricing`, { waitUntil: 'networkidle' });
+    await expect(page.locator('[data-testid="price-list-entries-section"]')).toBeVisible({ timeout: 15000 });
+
+    // Open the bulk-import dialog.
+    await page.locator('[data-testid="price-list-bulk-import-btn"]').first().click();
+    await expect(page.locator('[data-testid="price-list-entry-bulk-browse-btn"]')).toBeVisible({ timeout: 10000 });
+
+    // Build a tiny CSV referencing the seeded part, with two distinct
+    // min-quantities so both rows insert as new entries.
+    const csv = `partNumber,unitPrice,minQuantity\n${partNumber},2.50,500\n${partNumber},2.25,1000\n`;
+    await page.setInputFiles(
+      'app-price-list-entry-bulk-import-dialog input[type="file"]',
+      { name: 'import.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) },
+    );
+
+    // Preview state appears with our 2 add rows.
+    await expect(page.locator('[data-testid="price-list-entry-bulk-preview"]')).toBeVisible({ timeout: 10000 });
+    const applyBtn = page.locator('[data-testid="price-list-entry-bulk-apply-btn"]');
+    await expect(applyBtn).toBeEnabled({ timeout: 10000 });
+
+    // Apply — dialog closes and entries appear in the parent table.
+    await applyBtn.click();
+    await expect(page.locator('app-price-list-entries-table')).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator(`app-price-list-entries-table:has-text("${partNumber}")`).first(),
+    ).toBeVisible({ timeout: 10000 });
+  });
 });

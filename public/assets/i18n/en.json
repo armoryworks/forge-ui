@@ -1210,7 +1210,30 @@
     "notesLabel": "Notes",
     "notesHelper": "Why this price (e.g., negotiated, contract).",
     "dialogTitleCreate": "Add Price Entry",
-    "dialogTitleEdit": "Edit Price Entry"
+    "dialogTitleEdit": "Edit Price Entry",
+    "bulkImport": {
+      "label": "Import CSV",
+      "dialogTitle": "Import price list entries",
+      "helper": "Upload a CSV with columns: partNumber, unitPrice, minQuantity (optional), currency (optional), notes (optional).",
+      "dropzone": "Drop a .csv file here, or",
+      "browse": "Browse",
+      "downloadTemplate": "Download template CSV",
+      "parsing": "Parsing...",
+      "previewSummary": "Will add: {{add}} | Will update: {{update}} | Errors: {{error}}",
+      "previewEmpty": "No rows in the uploaded file.",
+      "actionAdd": "Add",
+      "actionUpdate": "Update",
+      "actionSkip": "Skip",
+      "actionError": "Error",
+      "applyButton": "Apply",
+      "applyDisabledHelper": "Fix the errored rows in your CSV and re-upload.",
+      "applySuccess": "Imported {{added}} added, {{updated}} updated.",
+      "back": "Back",
+      "cancel": "Cancel",
+      "fileTooLarge": "File exceeds 5MB limit.",
+      "fileTypeNotAllowed": "Only .csv files are allowed.",
+      "previewFailed": "Failed to read the CSV file."
+    }
   },
   "priceList": {
     "dialogTitleCreate": "Create Price List",

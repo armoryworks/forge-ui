@@ -26,6 +26,14 @@
         <span class="cd-pricing-tab__effective text-muted">
           {{ 'customers.pricing.effective' | translate }}: {{ formatRange(list) }}
         </span>
+        <button class="action-btn action-btn--sm"
+          data-testid="price-list-bulk-import-btn"
+          (click)="openBulkImport()"
+          [matTooltip]="'priceListEntry.bulkImport.label' | translate"
+          [attr.aria-label]="'priceListEntry.bulkImport.label' | translate">
+          <span class="material-icons-outlined">upload_file</span>
+          {{ 'priceListEntry.bulkImport.label' | translate }}
+        </button>
         <button class="icon-btn"
           data-testid="price-list-edit-btn"
           (click)="editList(list)"

@@ -1,0 +1,145 @@
+<app-dialog
+  [title]="'priceListEntry.bulkImport.dialogTitle' | translate"
+  width="800px"
+  (closed)="close()">
+
+  @if (!inPreviewState()) {
+    <!-- State 1: file picker -->
+    <section class="ple-import">
+      <p class="ple-import__helper">
+        {{ 'priceListEntry.bulkImport.helper' | translate }}
+      </p>
+
+      <div class="ple-import__dropzone"
+        [class.ple-import__dropzone--drag]="dragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        <span class="material-icons-outlined ple-import__dropzone-icon">upload_file</span>
+        <p class="ple-import__dropzone-text">
+          {{ 'priceListEntry.bulkImport.dropzone' | translate }}
+        </p>
+        <button class="action-btn"
+          data-testid="price-list-entry-bulk-browse-btn"
+          (click)="browse()"
+          [attr.aria-label]="'priceListEntry.bulkImport.browse' | translate">
+          {{ 'priceListEntry.bulkImport.browse' | translate }}
+        </button>
+        <input #fileInput type="file" accept=".csv" hidden (change)="onFileChange($event)" />
+      </div>
+
+      @if (fileError()) {
+        <p class="ple-import__error" role="alert">{{ fileError() }}</p>
+      }
+      @if (previewLoading()) {
+        <p class="ple-import__loading text-muted">
+          <span class="material-icons-outlined">sync</span>
+          {{ 'priceListEntry.bulkImport.parsing' | translate }}
+        </p>
+      }
+
+      <div class="ple-import__template">
+        <button class="action-btn action-btn--link"
+          data-testid="price-list-entry-bulk-template-btn"
+          (click)="downloadTemplate()">
+          <span class="material-icons-outlined">download</span>
+          {{ 'priceListEntry.bulkImport.downloadTemplate' | translate }}
+        </button>
+      </div>
+    </section>
+  } @else {
+    <!-- State 2: preview -->
+    <section class="ple-import" data-testid="price-list-entry-bulk-preview">
+      <div class="ple-import__summary">
+        <span>{{ 'priceListEntry.bulkImport.previewSummary' | translate:{
+          add: preview()!.addCount,
+          update: preview()!.updateCount,
+          error: preview()!.errorCount
+        } }}</span>
+      </div>
+
+      <app-data-table
+        tableId="price-list-entry-bulk-import-preview"
+        [columns]="columns"
+        [data]="rows()"
+        emptyIcon="upload_file"
+        [emptyMessage]="'priceListEntry.bulkImport.previewEmpty' | translate"
+        trackByField="lineNumber">
+
+        <ng-template appColumnCell="lineNumber" let-row>
+          <span>{{ row.lineNumber }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="partNumber" let-row>
+          <span>{{ row.partNumber || '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="partName" let-row>
+          <span class="text-muted">{{ row.partName || '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="unitPrice" let-row>
+          @if (row.unitPrice !== null) {
+            <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
+          } @else {
+            <span>---</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="minQuantity" let-row>
+          <span>{{ row.minQuantity }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="currency" let-row>
+          <span class="text-muted">{{ row.currency }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="notes" let-row>
+          <span class="text-muted ple-import__notes"
+            [matTooltip]="row.notes || ''"
+            matTooltipPosition="above">
+            {{ row.notes || '---' }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="action" let-row>
+          <span [class]="actionChipClass(row.action)">{{ actionLabel(row.action) }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="errorMessage" let-row>
+          @if (row.errorMessage) {
+            <span class="ple-import__error-cell">{{ row.errorMessage }}</span>
+          }
+        </ng-template>
+      </app-data-table>
+
+      @if (!canApply() && preview()!.errorCount > 0) {
+        <p class="ple-import__hint text-muted">
+          {{ 'priceListEntry.bulkImport.applyDisabledHelper' | translate }}
+        </p>
+      }
+    </section>
+  }
+
+  <div dialog-footer>
+    @if (inPreviewState()) {
+      <button class="action-btn"
+        data-testid="price-list-entry-bulk-back-btn"
+        (click)="backToPicker()">
+        {{ 'priceListEntry.bulkImport.back' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary"
+        data-testid="price-list-entry-bulk-apply-btn"
+        [disabled]="!canApply() || applying()"
+        (click)="apply()">
+        {{ 'priceListEntry.bulkImport.applyButton' | translate }}
+      </button>
+    } @else {
+      <button class="action-btn"
+        data-testid="price-list-entry-bulk-cancel-btn"
+        (click)="close()">
+        {{ 'priceListEntry.bulkImport.cancel' | translate }}
+      </button>
+    }
+  </div>
+</app-dialog>
