@@ -1,0 +1,58 @@
+<app-dialog [title]="title()" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="pl-form">
+    <app-input
+      data-testid="price-list-name"
+      [label]="'priceList.nameLabel' | translate"
+      formControlName="name"
+      [maxlength]="100"
+      [required]="true" />
+    <p class="pl-form__hint">{{ 'priceList.nameHelper' | translate }}</p>
+
+    <app-textarea
+      data-testid="price-list-description"
+      [label]="'priceList.descriptionLabel' | translate"
+      formControlName="description"
+      [rows]="2" />
+
+    <div class="dialog-row">
+      <app-datepicker
+        data-testid="price-list-effective-from"
+        [label]="'priceList.effectiveFromLabel' | translate"
+        formControlName="effectiveFrom" />
+      <app-datepicker
+        data-testid="price-list-effective-to"
+        [label]="'priceList.effectiveToLabel' | translate"
+        formControlName="effectiveTo" />
+    </div>
+    <p class="pl-form__hint">{{ 'priceList.effectiveFromHelper' | translate }}</p>
+    <p class="pl-form__hint">{{ 'priceList.effectiveToHelper' | translate }}</p>
+
+    <div class="pl-form__toggle-row">
+      <app-toggle
+        data-testid="price-list-is-default"
+        [label]="'priceList.isDefaultLabel' | translate"
+        formControlName="isDefault" />
+      <p class="pl-form__hint">{{ 'priceList.isDefaultHelper' | translate }}</p>
+    </div>
+
+    <div class="pl-form__toggle-row">
+      <app-toggle
+        data-testid="price-list-is-active"
+        [label]="'priceList.isActiveLabel' | translate"
+        formControlName="isActive" />
+      <p class="pl-form__hint">{{ 'priceList.isActiveHelper' | translate }}</p>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        data-testid="price-list-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ submitLabel() }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

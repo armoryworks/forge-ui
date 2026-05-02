@@ -238,8 +238,7 @@
 
   &__entries-header {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    align-items: center;
     gap: $sp-md;
   }
 
@@ -251,5 +250,6 @@
 
   &__effective {
     font-size: $font-size-xs;
+    flex: 1;
   }
 }

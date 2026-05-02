@@ -110,4 +110,67 @@ test.describe('Customer Pricing tab — add entry', () => {
       page.locator('app-price-list-entries-table:has-text("15.75"), app-price-list-entries-table:has-text("$15.75")').first(),
     ).toBeVisible({ timeout: 10000 });
   });
+
+  test('creates a new price list via the New Price List dialog and edits its name', async ({ page, request }) => {
+    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    expect(token).toBeTruthy();
+
+    const customersResp = await request.get(`${API_BASE}customers?pageSize=1&isActive=true`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!customersResp.ok()) {
+      test.skip(true, 'No customers in seed; cannot exercise the pricing tab CRUD');
+      return;
+    }
+    const customersData: { items?: { id: number }[]; data?: { id: number }[] } = await customersResp.json();
+    const customerItems = customersData.items ?? customersData.data ?? [];
+    if (customerItems.length === 0) {
+      test.skip(true, 'No customers in seed; cannot exercise the pricing tab CRUD');
+      return;
+    }
+    const customerId = customerItems[0].id;
+
+    // Ensure CAP-MD-PRICELIST is enabled.
+    await request.put(`${API_BASE}capabilities/CAP-MD-PRICELIST/enabled`, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      data: { enabled: true },
+    });
+
+    await page.goto(`${BASE_URL}/customers/${customerId}/pricing`, { waitUntil: 'networkidle' });
+
+    // Click "New price list" → dialog opens.
+    await page.locator('[data-testid="price-list-new-btn"]').first().click();
+    await expect(page.locator('[data-testid="price-list-name"]')).toBeVisible({ timeout: 10000 });
+
+    const initialName = `E2E PL ${Date.now()}`;
+    await page.locator('[data-testid="price-list-name"] input').fill(initialName);
+
+    // Submit creates the list.
+    const saveBtn = page.locator('[data-testid="price-list-save-btn"]');
+    await expect(saveBtn).toBeEnabled({ timeout: 5000 });
+    await saveBtn.click();
+
+    // Dialog closes; the new list is selected and its name appears in the header.
+    await expect(page.locator('[data-testid="price-list-entries-section"]')).toBeVisible({ timeout: 15000 });
+    await expect(
+      page.locator(`[data-testid="price-list-header-name"]:has-text("${initialName}")`),
+    ).toBeVisible({ timeout: 10000 });
+
+    // Now click Edit → rename → save → header reflects the new name.
+    await page.locator('[data-testid="price-list-edit-btn"]').first().click();
+    await expect(page.locator('[data-testid="price-list-name"]')).toBeVisible({ timeout: 10000 });
+
+    const renamed = `${initialName} (edited)`;
+    const nameInput = page.locator('[data-testid="price-list-name"] input');
+    await nameInput.fill('');
+    await nameInput.fill(renamed);
+
+    const saveBtn2 = page.locator('[data-testid="price-list-save-btn"]');
+    await expect(saveBtn2).toBeEnabled({ timeout: 5000 });
+    await saveBtn2.click();
+
+    await expect(
+      page.locator(`[data-testid="price-list-header-name"]:has-text("${renamed}")`),
+    ).toBeVisible({ timeout: 10000 });
+  });
 });

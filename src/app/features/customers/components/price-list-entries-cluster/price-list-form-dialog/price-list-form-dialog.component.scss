@@ -1,0 +1,19 @@
+@use 'styles/variables' as *;
+
+.pl-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__hint {
+    margin: -$sp-xs 0 0;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__toggle-row {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+}

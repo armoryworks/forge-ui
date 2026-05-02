@@ -6,9 +6,11 @@ import { environment } from '../../../../environments/environment';
 import { PagedResponse } from '../../../shared/models/paged-response.model';
 import {
   CreatePriceListEntryRequest,
+  CreatePriceListRequest,
   PriceList,
   PriceListEntry,
   UpdatePriceListEntryRequest,
+  UpdatePriceListRequest,
 } from '../models/price-list.model';
 
 /**
@@ -26,6 +28,26 @@ export class PriceListsService {
     return this.http.get<PriceList[]>(
       `${environment.apiUrl}/customers/${customerId}/price-lists`,
     );
+  }
+
+  /** Fetch a single list with full details (including entries). */
+  get(id: number): Observable<PriceList> {
+    return this.http.get<PriceList>(`${this.priceListsBase}/${id}`);
+  }
+
+  /** Create a price list (entries optional — see server model). */
+  create(body: CreatePriceListRequest): Observable<PriceList> {
+    return this.http.post<PriceList>(this.priceListsBase, body);
+  }
+
+  /** Update the parent price list metadata (Name, dates, IsDefault, IsActive). */
+  update(id: number, body: UpdatePriceListRequest): Observable<PriceList> {
+    return this.http.put<PriceList>(`${this.priceListsBase}/${id}`, body);
+  }
+
+  /** Soft-delete the price list (cascades to its entries via global filter). */
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.priceListsBase}/${id}`);
   }
 
   getEntries(

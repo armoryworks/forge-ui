@@ -34,6 +34,35 @@ export interface PriceListEntry {
   updatedAt: string;
 }
 
+/**
+ * Body for `POST /api/v1/price-lists`. Entries are optional — the Customer
+ * Pricing tab UI creates an empty list first and adds entries one at a time
+ * through the entries dialog.
+ */
+export interface CreatePriceListRequest {
+  name: string;
+  description: string | null;
+  customerId: number | null;
+  isDefault: boolean;
+  isActive: boolean;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+  entries?: { partId: number; unitPrice: number; minQuantity: number }[];
+}
+
+/**
+ * Body for `PUT /api/v1/price-lists/{id}`. CustomerId omitted — scope is
+ * fixed at creation time (mirrors the server model).
+ */
+export interface UpdatePriceListRequest {
+  name: string;
+  description: string | null;
+  isDefault: boolean;
+  isActive: boolean;
+  effectiveFrom: string | null;
+  effectiveTo: string | null;
+}
+
 /** Body for `POST /api/v1/price-lists/{id}/entries`. */
 export interface CreatePriceListEntryRequest {
   partId: number;

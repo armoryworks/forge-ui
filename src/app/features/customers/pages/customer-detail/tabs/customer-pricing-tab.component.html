@@ -22,10 +22,24 @@
   @if (selectedList(); as list) {
     <section class="cd-pricing-tab__entries" data-testid="price-list-entries-section">
       <div class="cd-pricing-tab__entries-header">
-        <h4 class="cd-pricing-tab__list-name">{{ list.name }}</h4>
+        <h4 class="cd-pricing-tab__list-name" data-testid="price-list-header-name">{{ list.name }}</h4>
         <span class="cd-pricing-tab__effective text-muted">
           {{ 'customers.pricing.effective' | translate }}: {{ formatRange(list) }}
         </span>
+        <button class="icon-btn"
+          data-testid="price-list-edit-btn"
+          (click)="editList(list)"
+          [matTooltip]="'priceList.editList' | translate"
+          [attr.aria-label]="'priceList.editList' | translate">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger"
+          data-testid="price-list-delete-btn"
+          (click)="deleteList(list)"
+          [matTooltip]="'priceList.deleteList' | translate"
+          [attr.aria-label]="'priceList.deleteList' | translate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
       </div>
       <app-price-list-entries-table
         [priceListId]="list.id"
