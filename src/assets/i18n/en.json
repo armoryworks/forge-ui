@@ -629,7 +629,7 @@
       },
       "basics": {
         "title": "Basics",
-        "hint": "Type, name, and material — the minimum to identify this part.",
+        "hint": "Name and a short description — the minimum to identify this part. The procurement and inventory axes were chosen on the previous screen.",
         "partTypeLabel": "Type",
         "nameLabel": "Name",
         "nameHelper": "Short canonical identifier (e.g., \"Sheath Mudkipper\").",
@@ -5010,15 +5010,15 @@
         "costing": "Cost",
         "alternates": "Alternates",
         "expressForm": "Quick add",
-        "sourcing": "Sourcing",
-        "manufacturer": "Manufacturer",
+        "sourcing": "Preferred Vendor",
+        "vendorParts": "Vendor Parts",
         "inventory": "Inventory",
         "manufacturing": "Manufacturing",
         "quality": "Quality",
         "shipping": "Shipping",
         "toolAsset": "Tooling Asset",
         "sourcePart": "Source Part",
-        "vendor": "Vendor",
+        "vendor": "Subcontract Vendor",
         "flags": "Flags",
         "salesHooks": "Sales Setup"
       }

@@ -97,11 +97,38 @@
     gap: $sp-xs;
   }
 
-  &__step-content,
+  /*
+   * Step content + footer share a centered, max-width column so the form
+   * fields and their commit buttons stay visually paired instead of being
+   * stretched across a wide viewport. Footer sticks to the bottom of the
+   * column (not the viewport) — when the form is short the buttons sit
+   * just under the inputs; when the form is long the column scrolls and
+   * the footer stays glued to the bottom edge of the rail-less area.
+   */
+  &__main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+  }
+
+  &__step-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: $sp-lg;
+    @include custom-scrollbar(8px);
+  }
+
   &__express {
     flex: 1;
     overflow-y: auto;
     padding: $sp-lg;
+    max-width: 880px;
+    width: 100%;
+    margin: 0 auto;
     @include custom-scrollbar(8px);
   }
 

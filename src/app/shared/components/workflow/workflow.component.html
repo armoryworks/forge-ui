@@ -77,55 +77,55 @@
         </ol>
       </nav>
 
-      <main class="workflow-shell__step-content" data-testid="workflow-step-content">
-        <ng-container *ngComponentOutlet="currentStepComponent(); inputs: stepInputs()" />
-      </main>
+      <div class="workflow-shell__main">
+        <main class="workflow-shell__step-content" data-testid="workflow-step-content">
+          <ng-container *ngComponentOutlet="currentStepComponent(); inputs: stepInputs()" />
+        </main>
+
+        <footer class="workflow-shell__footer">
+          <button
+            type="button"
+            class="action-btn"
+            [disabled]="isFirstStep()"
+            data-testid="workflow-back"
+            (click)="back()">
+            {{ 'workflow.shell.actions.back' | translate }}
+          </button>
+
+          @if (currentStep(); as step) {
+            @if (!step.required) {
+              <button
+                type="button"
+                class="action-btn"
+                data-testid="workflow-skip"
+                (click)="skip()">
+                {{ 'workflow.shell.actions.skip' | translate }}
+              </button>
+            }
+          }
+
+          <app-validation-button [violations]="workflowService.currentStepViolations">
+            <button
+              type="button"
+              class="action-btn action-btn--primary"
+              [disabled]="!workflowService.currentStepValid()"
+              data-testid="workflow-next"
+              (click)="next()">
+              @if (isLastStep()) {
+                {{ 'workflow.shell.actions.complete' | translate }}
+              } @else {
+                {{ 'workflow.shell.actions.continue' | translate }}
+              }
+            </button>
+          </app-validation-button>
+        </footer>
+      </div>
     } @else {
       <main class="workflow-shell__express" data-testid="workflow-express-content">
         <ng-container *ngComponentOutlet="expressComponent(); inputs: expressInputs()" />
       </main>
     }
   </div>
-
-  @if (mode() === 'guided') {
-    <footer class="workflow-shell__footer">
-      <button
-        type="button"
-        class="action-btn"
-        [disabled]="isFirstStep()"
-        data-testid="workflow-back"
-        (click)="back()">
-        {{ 'workflow.shell.actions.back' | translate }}
-      </button>
-
-      @if (currentStep(); as step) {
-        @if (!step.required) {
-          <button
-            type="button"
-            class="action-btn"
-            data-testid="workflow-skip"
-            (click)="skip()">
-            {{ 'workflow.shell.actions.skip' | translate }}
-          </button>
-        }
-      }
-
-      <app-validation-button [violations]="workflowService.currentStepViolations">
-        <button
-          type="button"
-          class="action-btn action-btn--primary"
-          [disabled]="!workflowService.currentStepValid()"
-          data-testid="workflow-next"
-          (click)="next()">
-          @if (isLastStep()) {
-            {{ 'workflow.shell.actions.complete' | translate }}
-          } @else {
-            {{ 'workflow.shell.actions.continue' | translate }}
-          }
-        </button>
-      </app-validation-button>
-    </footer>
-  }
   <!-- Express mode: the express component owns its own Save button (which
        patches the step + completes the run). A separate shell-level Mark
        Complete here would bypass the form's data and 409 with "entity not
