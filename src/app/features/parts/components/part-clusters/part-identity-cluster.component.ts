@@ -45,9 +45,6 @@ export class PartIdentityClusterComponent {
     description: new FormControl<string | null>(null),
     revision: new FormControl('', { nonNullable: true }),
     status: new FormControl<PartStatus>('Draft', { nonNullable: true, validators: [Validators.required] }),
-    manufacturerName: new FormControl<string | null>(null),
-    manufacturerPartNumber: new FormControl<string | null>(null),
-    externalPartNumber: new FormControl<string | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -72,9 +69,6 @@ export class PartIdentityClusterComponent {
         description: p.description,
         revision: p.revision,
         status: p.status,
-        manufacturerName: p.manufacturerName,
-        manufacturerPartNumber: p.manufacturerPartNumber,
-        externalPartNumber: p.externalPartNumber,
       });
       if (this.editing()) {
         this.form.enable();
@@ -92,9 +86,6 @@ export class PartIdentityClusterComponent {
       description: v.description ?? null,
       revision: v.revision,
       status: v.status,
-      manufacturerName: v.manufacturerName ?? null,
-      manufacturerPartNumber: v.manufacturerPartNumber ?? null,
-      externalPartNumber: v.externalPartNumber ?? null,
     });
   }
 

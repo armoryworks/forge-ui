@@ -70,6 +70,7 @@ export class VendorPartFormDialogComponent {
       this.showPartPicker ? [Validators.required] : [],
     ),
     vendorPartNumber: new FormControl<string | null>(this.data.vendorPart?.vendorPartNumber ?? '', [Validators.maxLength(100)]),
+    manufacturerName: new FormControl<string | null>(this.data.vendorPart?.manufacturerName ?? '', [Validators.maxLength(200)]),
     vendorMpn: new FormControl<string | null>(this.data.vendorPart?.vendorMpn ?? '', [Validators.maxLength(100)]),
     leadTimeDays: new FormControl<number | null>(this.data.vendorPart?.leadTimeDays ?? null, [Validators.min(0)]),
     minOrderQty: new FormControl<number | null>(this.data.vendorPart?.minOrderQty ?? null, [Validators.min(0)]),
@@ -88,6 +89,7 @@ export class VendorPartFormDialogComponent {
     vendorId: this.translate.instant('vendors.title'),
     partId: this.translate.instant('parts.title'),
     vendorPartNumber: this.translate.instant('vendorPart.vendorPartNumber'),
+    manufacturerName: this.translate.instant('vendorPart.manufacturerName'),
     vendorMpn: this.translate.instant('vendorPart.vendorMpn'),
     leadTimeDays: this.translate.instant('vendorPart.leadTimeDays'),
     minOrderQty: this.translate.instant('vendorPart.minOrderQty'),
@@ -108,6 +110,7 @@ export class VendorPartFormDialogComponent {
 
     const payload = {
       vendorPartNumber: v.vendorPartNumber || null,
+      manufacturerName: v.manufacturerName || null,
       vendorMpn: v.vendorMpn || null,
       leadTimeDays: v.leadTimeDays ?? null,
       minOrderQty: v.minOrderQty ?? null,

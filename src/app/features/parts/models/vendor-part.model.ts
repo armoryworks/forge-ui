@@ -18,6 +18,7 @@ export interface VendorPart {
   partNumber: string;
   partName: string;
   vendorPartNumber: string | null;
+  manufacturerName: string | null;
   vendorMpn: string | null;
   leadTimeDays: number | null;
   minOrderQty: number | null;

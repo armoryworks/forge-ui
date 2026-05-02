@@ -307,9 +307,6 @@ export class PartDetailPanelComponent {
     if ('description' in patch) request['description'] = patch.description ?? '';
     if ('revision' in patch) request['revision'] = patch.revision;
     if ('status' in patch) request['status'] = patch.status;
-    if ('manufacturerName' in patch) request['manufacturerName'] = patch.manufacturerName ?? '';
-    if ('manufacturerPartNumber' in patch) request['manufacturerPartNumber'] = patch.manufacturerPartNumber ?? '';
-    if ('externalPartNumber' in patch) request['externalPartNumber'] = patch.externalPartNumber ?? '';
     if ('minStockThreshold' in patch) request['minStockThreshold'] = patch.minStockThreshold;
     if ('reorderPoint' in patch) request['reorderPoint'] = patch.reorderPoint;
     if ('reorderQuantity' in patch) request['reorderQuantity'] = patch.reorderQuantity;

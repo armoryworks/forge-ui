@@ -45,6 +45,11 @@
           formControlName="vendorPartNumber"
           [maxlength]="100" />
         <app-input
+          data-testid="vendor-part-manufacturer-name"
+          [label]="'vendorPart.manufacturerName' | translate"
+          formControlName="manufacturerName"
+          [maxlength]="200" />
+        <app-input
           data-testid="vendor-part-vendor-mpn"
           [label]="'vendorPart.vendorMpn' | translate"
           formControlName="vendorMpn"

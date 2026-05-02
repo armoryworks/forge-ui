@@ -13,5 +13,4 @@ export interface CreatePartRequest {
   procurementSource: ProcurementSource;
   inventoryClass: InventoryClass;
   materialSpecId?: number;
-  externalPartNumber?: string;
 }

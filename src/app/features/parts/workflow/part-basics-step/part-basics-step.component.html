@@ -23,21 +23,5 @@
         {{ 'parts.workflow.basics.descriptionHelper' | translate }}
       </p>
     </div>
-
-    <app-input
-      [label]="'parts.workflow.basics.manufacturerNameLabel' | translate"
-      formControlName="manufacturerName"
-      data-testid="basics-manufacturer-name" />
-
-    <app-input
-      [label]="'parts.workflow.basics.manufacturerPartNumberLabel' | translate"
-      formControlName="manufacturerPartNumber"
-      data-testid="basics-manufacturer-pn" />
-
-    <app-input
-      [label]="'parts.workflow.basics.externalPartNumberLabel' | translate"
-      formControlName="externalPartNumber"
-      [placeholder]="'parts.workflow.basics.externalPartNumberPlaceholder' | translate"
-      data-testid="basics-external-number" />
   </form>
 </section>

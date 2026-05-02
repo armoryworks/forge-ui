@@ -9,15 +9,7 @@
 
     <app-textarea data-testid="part-identity-description" label="Description" formControlName="description" [rows]="2" />
 
-    <div class="cluster__form-row">
-      <app-select data-testid="part-identity-status" label="Status" formControlName="status" [options]="statusOptions" [required]="true" />
-      <app-input label="External Part Number" formControlName="externalPartNumber" />
-    </div>
-
-    <div class="cluster__form-row">
-      <app-input label="Manufacturer Name" formControlName="manufacturerName" />
-      <app-input label="Manufacturer Part #" formControlName="manufacturerPartNumber" />
-    </div>
+    <app-select data-testid="part-identity-status" label="Status" formControlName="status" [options]="statusOptions" [required]="true" />
 
     <div class="cluster__actions">
       <button class="action-btn" type="button" (click)="onCancel()">Cancel</button>
@@ -63,24 +55,6 @@
         <div class="cluster__item">
           <span class="cluster__label">Item Kind</span>
           <span class="cluster__value">{{ part().itemKindLabel }}</span>
-        </div>
-      }
-      @if (part().manufacturerName) {
-        <div class="cluster__item">
-          <span class="cluster__label">Manufacturer</span>
-          <span class="cluster__value">{{ part().manufacturerName }}</span>
-        </div>
-      }
-      @if (part().manufacturerPartNumber) {
-        <div class="cluster__item">
-          <span class="cluster__label">Manufacturer Part #</span>
-          <span class="cluster__value">{{ part().manufacturerPartNumber }}</span>
-        </div>
-      }
-      @if (part().externalPartNumber) {
-        <div class="cluster__item">
-          <span class="cluster__label">External Part #</span>
-          <span class="cluster__value">{{ part().externalPartNumber }}</span>
         </div>
       }
     </div>

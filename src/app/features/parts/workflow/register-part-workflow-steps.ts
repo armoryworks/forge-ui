@@ -8,7 +8,6 @@ import { PartCostingStepComponent } from './part-costing-step/part-costing-step.
 import { PartExpressFormComponent } from './part-express-form/part-express-form.component';
 import { PartFlagsStepComponent } from './part-flags-step/part-flags-step.component';
 import { PartInventoryStepComponent } from './part-inventory-step/part-inventory-step.component';
-import { PartManufacturerStepComponent } from './part-manufacturer-step/part-manufacturer-step.component';
 import { PartQualityStepComponent } from './part-quality-step/part-quality-step.component';
 import { PartRoutingStepComponent } from './part-routing-step/part-routing-step.component';
 import { PartSalesHooksStepComponent } from './part-sales-hooks-step/part-sales-hooks-step.component';
@@ -16,6 +15,7 @@ import { PartShippingStepComponent } from './part-shipping-step/part-shipping-st
 import { PartSourcePartStepComponent } from './part-source-part-step/part-source-part-step.component';
 import { PartSourcingStepComponent } from './part-sourcing-step/part-sourcing-step.component';
 import { PartToolAssetStepComponent } from './part-tool-asset-step/part-tool-asset-step.component';
+import { PartVendorPartsStepComponent } from './part-vendor-parts-step/part-vendor-parts-step.component';
 import { PartVendorStepComponent } from './part-vendor-step/part-vendor-step.component';
 
 /**
@@ -50,9 +50,13 @@ export function providePartWorkflowSteps(): EnvironmentProviders {
     // express form. Same Type registration, two slots in the registry.
     registry.register('PartExpressFormComponent', PartExpressFormComponent);
 
-    // Pillar 6 follow-up — combo-specific step components.
+    // Pillar 6 follow-up — combo-specific step components. Pre-beta:
+    // PartManufacturerStepComponent was retired when OEM identity moved
+    // off Part onto VendorPart; the new PartVendorPartsStepComponent
+    // (post-Sourcing) is its replacement and captures manufacturer name,
+    // mfr PN, vendor SKU, and pricing per (Part, Vendor) row.
     registry.register('PartSourcingStepComponent', PartSourcingStepComponent);
-    registry.register('PartManufacturerStepComponent', PartManufacturerStepComponent);
+    registry.register('PartVendorPartsStepComponent', PartVendorPartsStepComponent);
     registry.register('PartInventoryStepComponent', PartInventoryStepComponent);
     registry.register('PartQualityStepComponent', PartQualityStepComponent);
     registry.register('PartShippingStepComponent', PartShippingStepComponent);

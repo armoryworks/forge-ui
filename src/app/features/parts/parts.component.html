@@ -95,29 +95,16 @@
       </div>
       <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" [maxlength]="256" data-testid="part-name" />
       <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="3" [maxlength]="2000" [placeholder]="'parts.descriptionHint' | translate" data-testid="part-description" />
-      <div class="dialog-row">
-        <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" data-testid="part-revision" />
-        <app-input [label]="'parts.externalPartNumber' | translate" formControlName="externalPartNumber" [placeholder]="'parts.externalPartNumberPlaceholder' | translate" data-testid="part-external-number" />
-      </div>
-      <div class="dialog-row">
-        <app-input
-          [label]="'parts.workflow.basics.manufacturerNameLabel' | translate"
-          formControlName="manufacturerName"
-          data-testid="part-manufacturer-name" />
-        <app-input
-          [label]="'parts.workflow.basics.manufacturerPartNumberLabel' | translate"
-          formControlName="manufacturerPartNumber"
-          data-testid="part-manufacturer-pn" />
-      </div>
+      <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" data-testid="part-revision" />
       <div class="dialog-row">
         <app-select
-          [label]="'parts.workflow.basics.traceabilityLabel' | translate"
+          [label]="'parts.workflow.quality.traceabilityLabel' | translate"
           formControlName="traceabilityType"
           [options]="traceabilityOptions"
           [required]="true"
           data-testid="part-traceability" />
         <app-select
-          [label]="'parts.workflow.basics.abcClassLabel' | translate"
+          [label]="'parts.workflow.quality.abcClassLabel' | translate"
           formControlName="abcClass"
           [options]="abcClassOptions"
           data-testid="part-abc-class" />

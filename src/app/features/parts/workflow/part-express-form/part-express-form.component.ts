@@ -70,11 +70,6 @@ export class PartExpressFormComponent {
   protected readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
-    externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
-    // Pillar 1 / Tier 0 — manufacturer identity (engineering OEM, distinct
-    // from the distributor we may buy through which lives on VendorPart).
-    manufacturerName: new FormControl('', [Validators.maxLength(200)]),
-    manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
     // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
     traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
     // Tier 0 — cycle-counting frequency tier. Optional (null = unclassified).
@@ -101,11 +96,8 @@ export class PartExpressFormComponent {
   protected readonly violations = FormValidationService.getViolations(this.form, {
     name: this.translate.instant('parts.workflow.basics.nameLabel'),
     description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
-    externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
-    manufacturerName: this.translate.instant('parts.workflow.basics.manufacturerNameLabel'),
-    manufacturerPartNumber: this.translate.instant('parts.workflow.basics.manufacturerPartNumberLabel'),
-    traceabilityType: this.translate.instant('parts.workflow.basics.traceabilityLabel'),
-    abcClass: this.translate.instant('parts.workflow.basics.abcClassLabel'),
+    traceabilityType: this.translate.instant('parts.workflow.quality.traceabilityLabel'),
+    abcClass: this.translate.instant('parts.workflow.quality.abcClassLabel'),
     manualCostOverride: this.translate.instant('parts.workflow.costing.manualOverrideLabel'),
   });
 
@@ -120,9 +112,6 @@ export class PartExpressFormComponent {
       this.form.patchValue({
         name: part.name ?? '',
         description: part.description ?? '',
-        externalPartNumber: part.externalPartNumber ?? '',
-        manufacturerName: part.manufacturerName ?? '',
-        manufacturerPartNumber: part.manufacturerPartNumber ?? '',
         traceabilityType: part.traceabilityType ?? 'None',
         abcClass: part.abcClass ?? null,
         manualCostOverride: part.manualCostOverride ?? null,
@@ -184,10 +173,8 @@ export class PartExpressFormComponent {
     return {
       name: v.name ?? undefined,
       description: v.description ?? '',
-      externalPartNumber: v.externalPartNumber || undefined,
-      // Tier 0 — manufacturer + traceability + ABC class flow through the patch.
-      manufacturerName: v.manufacturerName || undefined,
-      manufacturerPartNumber: v.manufacturerPartNumber || undefined,
+      // Tier 0 — traceability + ABC class. (OEM identity captured per-vendor
+      // in the new Vendor Parts cluster step, not here.)
       traceabilityType: v.traceabilityType ?? 'None',
       abcClass: v.abcClass ?? null,
       // PartWorkflowAdapter.ApplyAsync interprets null as "clear" via

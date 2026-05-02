@@ -5,7 +5,6 @@ import { ProcurementSource } from './procurement-source.type';
 export interface PartListItem {
   id: number;
   partNumber: string;
-  externalPartNumber: string | null;
   /** Short canonical identifier (required). Primary list column. */
   name: string;
   /** Long-form notes (optional). Shown only when present. */

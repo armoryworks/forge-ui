@@ -804,6 +804,11 @@
         "leadTimeDaysLabel": "Lead Time (days)",
         "saveFailed": "Couldn't save vendor info."
       },
+      "vendorParts": {
+        "title": "Vendor Parts",
+        "hint": "OEM identity (manufacturer + MPN + vendor SKU) and per-vendor pricing live on each (Part, Vendor) row. Add at least the preferred source; alternates can follow.",
+        "pendingMaterialization": "Save earlier steps first to enable vendor sources for this part."
+      },
       "flags": {
         "title": "Flags",
         "hint": "Phantom-specific flags: kit, configurator, and backflush policy.",
@@ -915,9 +920,10 @@
     }
   },
   "vendorPart": {
-    "vendorPartNumber": "Vendor Part #",
-    "vendorMpn": "Vendor MPN",
-    "vendorMpnHelper": "If the vendor is a distributor and the manufacturer differs from the vendor itself.",
+    "vendorPartNumber": "Vendor Part # / External SKU",
+    "manufacturerName": "Manufacturer",
+    "vendorMpn": "Manufacturer Part #",
+    "vendorMpnHelper": "OEM identity as carried by this vendor. Different distributors of the same part can list different manufacturer names + MPNs.",
     "leadTimeDays": "Lead Time (days)",
     "minOrderQty": "Min Order Qty",
     "packSize": "Pack Size",

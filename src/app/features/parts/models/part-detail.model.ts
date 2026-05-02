@@ -27,14 +27,11 @@ export interface PartDetail {
   // Tier 0 additions
   traceabilityType: TraceabilityType;
   abcClass: AbcClass | null;
-  manufacturerName: string | null;
-  manufacturerPartNumber: string | null;
   // Pillar 2 — Tier 2 material spec FK (FK to reference_data,
   // group_code='part.material_spec'). The legacy free-text material string
   // and moldToolRef were retired pre-beta.
   materialSpecId: number | null;
   materialSpecLabel: string | null;
-  externalPartNumber: string | null;
   externalId: string | null;
   externalRef: string | null;
   provider: string | null;

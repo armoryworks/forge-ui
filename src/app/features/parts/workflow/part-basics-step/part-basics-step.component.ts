@@ -56,11 +56,6 @@ export class PartBasicsStepComponent {
   protected readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(256)]),
     description: new FormControl('', [Validators.maxLength(2000)]),
-    externalPartNumber: new FormControl('', [Validators.maxLength(100)]),
-    // Tier 0 — manufacturer identity (engineering OEM, distinct from any
-    // distributor we buy through, which lives on VendorPart).
-    manufacturerName: new FormControl('', [Validators.maxLength(200)]),
-    manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
   });
 
   /** Suppresses the auto-save effect while we're patching the form from input. */
@@ -75,9 +70,6 @@ export class PartBasicsStepComponent {
       this.form.patchValue({
         name: part.name ?? '',
         description: part.description ?? '',
-        externalPartNumber: part.externalPartNumber ?? '',
-        manufacturerName: part.manufacturerName ?? '',
-        manufacturerPartNumber: part.manufacturerPartNumber ?? '',
       }, { emitEvent: false });
       this.suppressDispatch = false;
     });
@@ -96,9 +88,6 @@ export class PartBasicsStepComponent {
     this.workflowService.registerStepForm(this.form, {
       name: this.translate.instant('parts.workflow.basics.nameLabel'),
       description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
-      externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
-      manufacturerName: this.translate.instant('parts.workflow.basics.manufacturerNameLabel'),
-      manufacturerPartNumber: this.translate.instant('parts.workflow.basics.manufacturerPartNumberLabel'),
     });
     this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
@@ -116,10 +105,6 @@ export class PartBasicsStepComponent {
     this.workflowService.patchStep(runId, this.stepId(), {
       name: value.name ?? undefined,
       description: value.description ?? '',
-      externalPartNumber: value.externalPartNumber || undefined,
-      // Tier 0 — manufacturer identity.
-      manufacturerName: value.manufacturerName || undefined,
-      manufacturerPartNumber: value.manufacturerPartNumber || undefined,
     }).subscribe({
       next: (run) => {
         this.saving.set(false);

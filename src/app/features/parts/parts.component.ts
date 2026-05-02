@@ -124,7 +124,6 @@ export class PartsComponent {
 
   protected readonly partColumns: ColumnDef[] = [
     { field: 'partNumber', header: this.translate.instant('parts.partNumber'), sortable: true, width: '120px' },
-    { field: 'externalPartNumber', header: this.translate.instant('parts.extPartNumber'), sortable: true, width: '120px' },
     { field: 'name', header: this.translate.instant('common.name'), sortable: true },
     { field: 'revision', header: this.translate.instant('parts.rev'), width: '60px', align: 'center' },
     { field: 'procurementSource', header: 'Procurement', sortable: true, width: '110px' },
@@ -146,16 +145,13 @@ export class PartsComponent {
     revision: new FormControl('A'),
     procurementSource: new FormControl<ProcurementSource>('Buy', [Validators.required]),
     inventoryClass: new FormControl<InventoryClass>('Component', [Validators.required]),
-    externalPartNumber: new FormControl(''),
     toolingAssetId: new FormControl<number | null>(null),
     minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderPoint: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderQuantity: new FormControl<number | null>(null, [Validators.min(0.01)]),
     leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
     safetyStockDays: new FormControl<number | null>(null, [Validators.min(0)]),
-    // Pillar 1 / Tier 0 — manufacturer + traceability + ABC class.
-    manufacturerName: new FormControl('', [Validators.maxLength(200)]),
-    manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
+    // Tier 0 — traceability + ABC class. (OEM identity moved to VendorPart.)
     traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
     abcClass: new FormControl<AbcClass | null>(null),
   });
@@ -423,15 +419,12 @@ export class PartsComponent {
       revision: part.revision,
       procurementSource: part.procurementSource,
       inventoryClass: part.inventoryClass,
-      externalPartNumber: part.externalPartNumber ?? '',
       toolingAssetId: part.toolingAssetId,
       minStockThreshold: part.minStockThreshold,
       reorderPoint: part.reorderPoint,
       reorderQuantity: part.reorderQuantity,
       leadTimeDays: part.leadTimeDays,
       safetyStockDays: part.safetyStockDays,
-      manufacturerName: part.manufacturerName ?? '',
-      manufacturerPartNumber: part.manufacturerPartNumber ?? '',
       traceabilityType: part.traceabilityType ?? 'None',
       abcClass: part.abcClass ?? null,
     });
@@ -459,15 +452,12 @@ export class PartsComponent {
         revision: form.revision ?? 'A',
         procurementSource: (form.procurementSource as ProcurementSource) ?? 'Buy',
         inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
-        externalPartNumber: form.externalPartNumber || undefined,
         toolingAssetId: form.toolingAssetId ?? undefined,
         minStockThreshold: form.minStockThreshold ?? undefined,
         reorderPoint: form.reorderPoint ?? undefined,
         reorderQuantity: form.reorderQuantity ?? undefined,
         leadTimeDays: form.leadTimeDays ?? undefined,
         safetyStockDays: form.safetyStockDays ?? undefined,
-        manufacturerName: form.manufacturerName || '',
-        manufacturerPartNumber: form.manufacturerPartNumber || '',
         traceabilityType: (form.traceabilityType as TraceabilityType) ?? 'None',
         abcClass: (form.abcClass as AbcClass | null) ?? null,
       }).subscribe({
@@ -492,7 +482,6 @@ export class PartsComponent {
         revision: form.revision || undefined,
         procurementSource: (form.procurementSource as ProcurementSource) ?? 'Buy',
         inventoryClass: (form.inventoryClass as InventoryClass) ?? 'Component',
-        externalPartNumber: form.externalPartNumber || undefined,
       }).subscribe({
         next: (detail) => {
           this.closePartDialog();

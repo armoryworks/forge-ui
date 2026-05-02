@@ -1,0 +1,25 @@
+<section class="part-vendor-parts-step" [appLoadingBlock]="loading()" data-testid="part-vendor-parts-step">
+  <header class="part-vendor-parts-step__header">
+    <h2 class="part-vendor-parts-step__title">{{ 'parts.workflow.vendorParts.title' | translate }}</h2>
+    <p class="part-vendor-parts-step__hint">{{ 'parts.workflow.vendorParts.hint' | translate }}</p>
+  </header>
+
+  @if (entityId(); as id) {
+    <app-vendor-part-list-panel
+      mode="sources"
+      parentEntityType="part"
+      [parentEntityId]="id"
+      [vendorParts]="vendorParts()"
+      [loading]="loading()"
+      (add)="onAdd()"
+      (edit)="onEdit($event)"
+      (delete)="onDelete($event)"
+      (togglePreferred)="onTogglePreferred($event)"
+      (viewTiers)="onViewTiers($event)"
+      (viewTierHistory)="onViewTierHistory($event)" />
+  } @else {
+    <p class="part-vendor-parts-step__pending">
+      {{ 'parts.workflow.vendorParts.pendingMaterialization' | translate }}
+    </p>
+  }
+</section>

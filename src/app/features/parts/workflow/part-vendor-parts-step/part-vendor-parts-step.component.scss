@@ -1,11 +1,11 @@
-@use 'styles/variables' as *;
+@use '../../../../../styles/variables' as *;
 
-.part-manufacturer-step {
+.part-vendor-parts-step {
   display: flex;
   flex-direction: column;
-  gap: $sp-lg;
-  padding: $sp-lg;
+  gap: $sp-md;
   position: relative;
+  min-height: 200px;
 
   &__header {
     display: flex;
@@ -16,7 +16,6 @@
   &__title {
     margin: 0;
     font-size: $font-size-lg;
-    color: var(--text);
   }
 
   &__hint {
@@ -25,10 +24,11 @@
     color: var(--text-secondary);
   }
 
-  &__form {
-    display: flex;
-    flex-direction: column;
-    gap: $sp-md;
-    max-width: 720px;
+  &__pending {
+    margin: 0;
+    padding: $sp-lg;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    font-style: italic;
   }
 }

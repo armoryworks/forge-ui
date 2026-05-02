@@ -49,7 +49,6 @@ export class PartSourcingStepComponent {
     leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
     minOrderQty: new FormControl<number | null>(null, [Validators.min(0)]),
     packSize: new FormControl<number | null>(null, [Validators.min(0)]),
-    externalPartNumber: new FormControl<string>('', [Validators.maxLength(100)]),
   });
 
   private suppressDispatch = false;
@@ -64,7 +63,6 @@ export class PartSourcingStepComponent {
         leadTimeDays: part.leadTimeDays ?? null,
         minOrderQty: part.minimumOrderQuantity ?? null,
         packSize: part.orderMultiple ?? null,
-        externalPartNumber: part.externalPartNumber ?? '',
       }, { emitEvent: false });
       this.suppressDispatch = false;
     });
@@ -88,7 +86,6 @@ export class PartSourcingStepComponent {
       leadTimeDays: value.leadTimeDays ?? null,
       minimumOrderQuantity: value.minOrderQty ?? null,
       orderMultiple: value.packSize ?? null,
-      externalPartNumber: value.externalPartNumber || undefined,
     }).subscribe({
       next: (run) => {
         this.saving.set(false);

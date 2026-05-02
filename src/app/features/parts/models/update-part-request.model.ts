@@ -26,7 +26,6 @@ export interface UpdatePartRequest {
   // MoldToolRef fields (retired pre-beta).
   procurementSource?: ProcurementSource;
   inventoryClass?: InventoryClass;
-  externalPartNumber?: string;
   toolingAssetId?: number;
   minStockThreshold?: number;
   reorderPoint?: number;
@@ -36,9 +35,7 @@ export interface UpdatePartRequest {
   // Workflow Pattern Phase 5 — manual cost override (Tier 1 single-rate).
   // Sentinel value -1 means "clear to null".
   manualCostOverride?: number;
-  // Pillar 1 / Tier 0 — manufacturer + traceability + ABC class.
-  manufacturerName?: string;
-  manufacturerPartNumber?: string;
+  // Tier 0 — traceability + ABC class. (OEM identity moved to VendorPart.)
   traceabilityType?: TraceabilityType;
   abcClass?: AbcClass | null;
   // Pillar 4 Phase 2 — UoM cluster (FK to UnitOfMeasure)
