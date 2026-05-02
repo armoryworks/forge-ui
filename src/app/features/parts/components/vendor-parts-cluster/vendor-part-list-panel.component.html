@@ -1,13 +1,23 @@
 <div class="vendor-part-panel" [appLoadingBlock]="loading()">
-  <div class="vendor-part-panel__header">
-    <button class="action-btn action-btn--sm action-btn--create"
-      data-testid="vendor-part-add-btn"
-      (click)="onAdd()"
-      [attr.aria-label]="addLabelKey() | translate">
-      <span class="material-icons-outlined">add</span>
-      {{ addLabelKey() | translate }}
-    </button>
-  </div>
+  <!--
+    Header add button is shown in two cases:
+      • empty state — the empty-state has its own CTA but a top-right
+        "+ Add" stays available too; harmless redundancy.
+      • multi-source list — the data-table needs an entry point.
+    Hidden in the single-source inline-card case because the card has
+    its own "+ Add alternate vendor" button in its action row.
+  -->
+  @if (!showInlineCard()) {
+    <div class="vendor-part-panel__header">
+      <button class="action-btn action-btn--sm action-btn--create"
+        data-testid="vendor-part-add-btn"
+        (click)="onAdd()"
+        [attr.aria-label]="addLabelKey() | translate">
+        <span class="material-icons-outlined">add</span>
+        {{ addLabelKey() | translate }}
+      </button>
+    </div>
+  }
 
   @if (vendorParts().length === 0 && !loading()) {
     <app-empty-state
@@ -16,6 +26,98 @@
       [helpText]="emptyHelpKey() | translate"
       [actionLabel]="addLabelKey() | translate"
       (action)="onAdd()" />
+  } @else if (soleSource(); as row) {
+    <!--
+      Sole-source inline card — looks like a form section, not a list.
+      For an exclusive-vendor part this is the entire Sources tab.
+      "+ Add alternate vendor" promotes the panel to the multi-source
+      list view on next render.
+    -->
+    <article class="vp-card" data-testid="vendor-part-inline-card">
+      <header class="vp-card__head">
+        <div class="vp-card__id">
+          <span class="vp-card__vendor">{{ row.vendorCompanyName }}</span>
+          @if (row.isPreferred) {
+            <span class="chip chip--success">{{ 'vendorPart.isPreferred' | translate }}</span>
+          }
+          @if (row.isApproved) {
+            <span class="vp-card__approved" [matTooltip]="'vendorPart.isApproved' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined approved-icon">check_circle</span>
+            </span>
+          }
+        </div>
+        <div class="vp-card__actions">
+          <button class="action-btn action-btn--sm"
+            data-testid="vendor-part-card-edit"
+            (click)="onEdit(row)">
+            <span class="material-icons-outlined">edit</span>
+            {{ 'common.edit' | translate }}
+          </button>
+          <button class="action-btn action-btn--sm"
+            data-testid="vendor-part-card-tiers"
+            (click)="onViewTiers(row)">
+            <span class="material-icons-outlined">price_change</span>
+            {{ 'vendorPart.priceTiersLabel' | translate }}
+          </button>
+          <button class="action-btn action-btn--sm action-btn--create"
+            data-testid="vendor-part-card-add-alt"
+            (click)="onAdd()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'parts.detail.addAlternateVendor' | translate }}
+          </button>
+        </div>
+      </header>
+
+      <dl class="vp-card__grid">
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.manufacturerName' | translate }}</dt>
+          <dd>{{ row.manufacturerName || '—' }}</dd>
+        </div>
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.vendorMpn' | translate }}</dt>
+          <dd>{{ row.vendorMpn || '—' }}</dd>
+        </div>
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.vendorPartNumber' | translate }}</dt>
+          <dd>{{ row.vendorPartNumber || '—' }}</dd>
+        </div>
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.leadTimeDays' | translate }}</dt>
+          <dd>{{ row.leadTimeDays !== null ? row.leadTimeDays + 'd' : '—' }}</dd>
+        </div>
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.minOrderQty' | translate }}</dt>
+          <dd>{{ row.minOrderQty ?? '—' }}</dd>
+        </div>
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.packSize' | translate }}</dt>
+          <dd>{{ row.packSize ?? '—' }}</dd>
+        </div>
+        <div class="vp-card__field">
+          <dt>{{ 'vendorPart.priceTiersLabel' | translate }}</dt>
+          <dd>
+            @if (getLowestTier(row); as t) {
+              <button class="vendor-part-tier-link" (click)="onViewTiers(row)">
+                <app-currency-display [value]="t.price" [currency]="t.currency" />
+                <span class="vendor-part-tier-link__count">({{ row.priceTiers.length }})</span>
+              </button>
+            } @else {
+              <button class="vendor-part-tier-link vendor-part-tier-link--empty" (click)="onViewTiers(row)">—</button>
+            }
+          </dd>
+        </div>
+        @if (row.countryOfOrigin) {
+          <div class="vp-card__field">
+            <dt>{{ 'vendorPart.countryOfOrigin' | translate }}</dt>
+            <dd>{{ row.countryOfOrigin }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (row.notes) {
+        <p class="vp-card__notes">{{ row.notes }}</p>
+      }
+    </article>
   } @else {
     <app-data-table
       [tableId]="tableId()"

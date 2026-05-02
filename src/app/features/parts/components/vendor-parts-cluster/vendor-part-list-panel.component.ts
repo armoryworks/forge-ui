@@ -74,6 +74,25 @@ export class VendorPartListPanelComponent {
     this.mode() === 'sources' ? 'parts.detail.addVendorSource' : 'vendors.detail.addPartToCatalog',
   );
 
+  /**
+   * Count-driven UX: in sources mode (Part-detail Sources tab) the panel
+   * collapses to a single inline card when the part has exactly one
+   * vendor source, so an exclusive-vendor part doesn't carry list chrome.
+   * Two or more sources fall through to the data-table — the table is
+   * good for comparison/scan ergonomics that only matter once an AVL
+   * actually exists. The vendor-detail Catalog mode is unconditionally
+   * a list because each row there is "another part this vendor sells",
+   * not "another source for this part".
+   */
+  protected readonly showInlineCard = computed(() =>
+    this.mode() === 'sources' && this.vendorParts().length === 1,
+  );
+
+  /** Convenience accessor for the inline-card branch. */
+  protected readonly soleSource = computed<VendorPart | null>(
+    () => (this.showInlineCard() ? this.vendorParts()[0] : null),
+  );
+
   protected readonly columns = computed<ColumnDef[]>(() => {
     const t = this.translate;
     if (this.mode() === 'sources') {

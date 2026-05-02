@@ -837,6 +837,7 @@
       "sourcesEmpty": "No vendor sources yet.",
       "sourcesEmptyHelp": "Add a vendor that supplies this part to track lead time, MOQ, and pricing.",
       "addVendorSource": "Add Vendor",
+      "addAlternateVendor": "Add alternate",
       "tabs": {
         "identity": "Identity",
         "sourcing": "Sources",

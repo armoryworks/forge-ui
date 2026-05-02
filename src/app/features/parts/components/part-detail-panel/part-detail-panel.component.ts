@@ -504,6 +504,10 @@ export class PartDetailPanelComponent {
   protected openVendorPartCreate(): void {
     const p = this.part();
     if (!p) return;
+    // First-vendor shortcut: if this is the part's only source, default
+    // preferred=true so the user doesn't have to think about preference
+    // until an alternate actually exists.
+    const isFirstSource = this.vendorParts().length === 0;
     this.dialog.open<
       VendorPartFormDialogComponent,
       VendorPartFormDialogData,
@@ -515,6 +519,7 @@ export class PartDetailPanelComponent {
         parentEntityType: 'part',
         parentEntityId: p.id,
         parentLabel: `${p.partNumber} — ${p.name}`,
+        defaultIsPreferred: isFirstSource,
       },
     }).afterClosed().subscribe(result => {
       if (result) this.loadVendorParts();

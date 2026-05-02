@@ -25,6 +25,14 @@ export interface VendorPartFormDialogData {
   parentEntityId: number;
   /** Display label for the locked parent entity (vendor name or part number/name). */
   parentLabel?: string;
+  /**
+   * First-vendor shortcut — when the create dialog opens for a part that
+   * has no VendorPart rows yet, callers pass `true` here so the isPreferred
+   * toggle defaults checked. The user doesn't have to think about preference
+   * for their first source; preference only becomes a real decision once
+   * an alternate exists.
+   */
+  defaultIsPreferred?: boolean;
 }
 
 @Component({
@@ -78,7 +86,10 @@ export class VendorPartFormDialogComponent {
     countryOfOrigin: new FormControl<string | null>(this.data.vendorPart?.countryOfOrigin ?? '', [Validators.maxLength(2)]),
     htsCode: new FormControl<string | null>(this.data.vendorPart?.htsCode ?? '', [Validators.maxLength(20)]),
     isApproved: new FormControl<boolean>(this.data.vendorPart?.isApproved ?? true, { nonNullable: true }),
-    isPreferred: new FormControl<boolean>(this.data.vendorPart?.isPreferred ?? false, { nonNullable: true }),
+    isPreferred: new FormControl<boolean>(
+      this.data.vendorPart?.isPreferred ?? this.data.defaultIsPreferred ?? false,
+      { nonNullable: true },
+    ),
     lastQuotedDate: new FormControl<Date | null>(
       this.data.vendorPart?.lastQuotedDate ? new Date(this.data.vendorPart.lastQuotedDate) : null,
     ),
