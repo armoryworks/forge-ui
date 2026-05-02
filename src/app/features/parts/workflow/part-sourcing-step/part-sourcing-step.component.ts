@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { debounceTime } from 'rxjs/operators';
 
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
-import { InputComponent } from '../../../../shared/components/input/input.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
@@ -13,17 +12,17 @@ import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 
 /**
- * Pillar 6 follow-up — Sourcing step. Used by Buy* and Subcontract* combos
- * to capture the default-vendor block: preferred vendor, lead time, MOQ,
- * pack size, and external part number. Per-vendor overrides happen on the
- * Sources tab.
+ * Sourcing step — designates the preferred vendor for the part. Per-vendor
+ * sourcing terms (lead time, MOQ, pack size, OEM identity, pricing) live
+ * on the VendorPart row and are entered in the subsequent VendorParts step;
+ * this step's only output is <c>preferredVendorId</c> on the Part.
  */
 @Component({
   selector: 'app-part-sourcing-step',
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, EntityPickerComponent, LoadingBlockDirective,
+    EntityPickerComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-sourcing-step.component.html',
   styleUrl: './part-sourcing-step.component.scss',
@@ -46,9 +45,6 @@ export class PartSourcingStepComponent {
 
   protected readonly form = new FormGroup({
     preferredVendorId: new FormControl<number | null>(null),
-    leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
-    minOrderQty: new FormControl<number | null>(null, [Validators.min(0)]),
-    packSize: new FormControl<number | null>(null, [Validators.min(0)]),
   });
 
   private suppressDispatch = false;
@@ -60,9 +56,6 @@ export class PartSourcingStepComponent {
       this.suppressDispatch = true;
       this.form.patchValue({
         preferredVendorId: part.preferredVendorId ?? null,
-        leadTimeDays: part.leadTimeDays ?? null,
-        minOrderQty: part.minimumOrderQuantity ?? null,
-        packSize: part.orderMultiple ?? null,
       }, { emitEvent: false });
       this.suppressDispatch = false;
     });
@@ -83,9 +76,6 @@ export class PartSourcingStepComponent {
     this.saving.set(true);
     this.workflowService.patchStep(runId, this.stepId(), {
       preferredVendorId: value.preferredVendorId ?? null,
-      leadTimeDays: value.leadTimeDays ?? null,
-      minimumOrderQuantity: value.minOrderQty ?? null,
-      orderMultiple: value.packSize ?? null,
     }).subscribe({
       next: (run) => {
         this.saving.set(false);

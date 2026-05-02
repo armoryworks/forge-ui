@@ -8,10 +8,9 @@
     </div>
     <div class="cluster__form-row">
       <app-input label="Reorder Quantity" type="number" formControlName="reorderQuantity" />
-      <app-input label="Lead Time (days)" type="number" formControlName="leadTimeDays" />
+      <app-input label="Safety Stock (days)" type="number" formControlName="safetyStockDays" />
     </div>
     <div class="cluster__form-row">
-      <app-input label="Safety Stock (days)" type="number" formControlName="safetyStockDays" />
       <app-select label="Traceability" formControlName="traceabilityType" [options]="traceabilityOptions" />
     </div>
     <div class="cluster__form-row">
@@ -49,12 +48,6 @@
         <span class="cluster__label">Reorder Quantity</span>
         <span class="cluster__value" [class.cluster__value--muted]="part().reorderQuantity === null">
           {{ part().reorderQuantity ?? '---' }}
-        </span>
-      </div>
-      <div class="cluster__item">
-        <span class="cluster__label">Lead Time (days)</span>
-        <span class="cluster__value" [class.cluster__value--muted]="part().leadTimeDays === null">
-          {{ part().leadTimeDays ?? '---' }}
         </span>
       </div>
       <div class="cluster__item">

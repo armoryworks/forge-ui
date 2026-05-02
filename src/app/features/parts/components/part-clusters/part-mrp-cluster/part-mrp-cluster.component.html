@@ -101,12 +101,6 @@
           {{ part().demandFenceDays ?? '---' }}
         </span>
       </div>
-      <div class="cluster__item">
-        <span class="cluster__label">Lead Time (days)</span>
-        <span class="cluster__value" [class.cluster__value--muted]="part().leadTimeDays === null">
-          {{ part().leadTimeDays ?? '---' }}
-        </span>
-      </div>
     </div>
     <p class="cluster__value cluster__value--muted">{{ 'parts.detail.mrp.leadTimeNote' | translate }}</p>
   </div>

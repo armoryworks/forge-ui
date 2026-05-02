@@ -41,7 +41,6 @@ export class PartInventoryClusterComponent {
     reorderPoint: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderQuantity: new FormControl<number | null>(null, [Validators.min(0)]),
     safetyStockDays: new FormControl<number | null>(null, [Validators.min(0)]),
-    leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
     traceabilityType: new FormControl<TraceabilityType>('None', { nonNullable: true }),
     abcClass: new FormControl<AbcClass | null>(null),
   });
@@ -69,7 +68,6 @@ export class PartInventoryClusterComponent {
         reorderPoint: p.reorderPoint,
         reorderQuantity: p.reorderQuantity,
         safetyStockDays: p.safetyStockDays,
-        leadTimeDays: p.leadTimeDays,
         traceabilityType: p.traceabilityType,
         abcClass: p.abcClass,
       });
@@ -89,7 +87,6 @@ export class PartInventoryClusterComponent {
       reorderPoint: v.reorderPoint ?? null,
       reorderQuantity: v.reorderQuantity ?? null,
       safetyStockDays: v.safetyStockDays ?? null,
-      leadTimeDays: v.leadTimeDays ?? null,
       traceabilityType: v.traceabilityType,
       abcClass: v.abcClass ?? null,
     });

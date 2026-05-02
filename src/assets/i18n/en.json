@@ -715,14 +715,9 @@
         "failed": "Couldn't promote this part."
       },
       "sourcing": {
-        "title": "Sourcing",
-        "hint": "Default vendor and ordering parameters. Per-vendor overrides go on the Sources tab.",
+        "title": "Preferred Vendor",
+        "hint": "Pick the default vendor for this part. Lead time, MOQ, pack size, OEM identity, and pricing are entered per-vendor on the next step.",
         "preferredVendorLabel": "Preferred Vendor",
-        "leadTimeDaysLabel": "Lead Time (days)",
-        "leadTimeDaysHelper": "Default value; per-vendor lead time set on the Sources tab.",
-        "minOrderQtyLabel": "Min Order Qty",
-        "packSizeLabel": "Pack Size",
-        "externalPartNumberLabel": "External Part #",
         "saveFailed": "Couldn't save sourcing."
       },
       "manufacturer": {
@@ -798,10 +793,9 @@
         "saveFailed": "Couldn't save source part."
       },
       "vendor": {
-        "title": "Vendor",
-        "hint": "Single subcontract vendor. MOQ and pack size live on the source-part downstream.",
+        "title": "Subcontract Vendor",
+        "hint": "Pick the subcontract vendor for this part. Lead time and per-vendor terms are entered on the next step.",
         "preferredVendorLabel": "Preferred Vendor",
-        "leadTimeDaysLabel": "Lead Time (days)",
         "saveFailed": "Couldn't save vendor info."
       },
       "vendorParts": {

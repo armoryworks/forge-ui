@@ -11,28 +11,5 @@
       displayField="companyName"
       formControlName="preferredVendorId"
       data-testid="sourcing-preferred-vendor" />
-
-    <div class="part-sourcing-step__field">
-      <app-input
-        [label]="'parts.workflow.sourcing.leadTimeDaysLabel' | translate"
-        type="number"
-        formControlName="leadTimeDays"
-        data-testid="sourcing-lead-time" />
-      <p class="part-sourcing-step__hint part-sourcing-step__hint--field">
-        {{ 'parts.workflow.sourcing.leadTimeDaysHelper' | translate }}
-      </p>
-    </div>
-
-    <app-input
-      [label]="'parts.workflow.sourcing.minOrderQtyLabel' | translate"
-      type="number"
-      formControlName="minOrderQty"
-      data-testid="sourcing-moq" />
-
-    <app-input
-      [label]="'parts.workflow.sourcing.packSizeLabel' | translate"
-      type="number"
-      formControlName="packSize"
-      data-testid="sourcing-pack-size" />
   </form>
 </section>

@@ -149,7 +149,6 @@ export class PartsComponent {
     minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderPoint: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderQuantity: new FormControl<number | null>(null, [Validators.min(0.01)]),
-    leadTimeDays: new FormControl<number | null>(null, [Validators.min(0)]),
     safetyStockDays: new FormControl<number | null>(null, [Validators.min(0)]),
     // Tier 0 — traceability + ABC class. (OEM identity moved to VendorPart.)
     traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
@@ -423,7 +422,6 @@ export class PartsComponent {
       minStockThreshold: part.minStockThreshold,
       reorderPoint: part.reorderPoint,
       reorderQuantity: part.reorderQuantity,
-      leadTimeDays: part.leadTimeDays,
       safetyStockDays: part.safetyStockDays,
       traceabilityType: part.traceabilityType ?? 'None',
       abcClass: part.abcClass ?? null,
@@ -456,7 +454,6 @@ export class PartsComponent {
         minStockThreshold: form.minStockThreshold ?? undefined,
         reorderPoint: form.reorderPoint ?? undefined,
         reorderQuantity: form.reorderQuantity ?? undefined,
-        leadTimeDays: form.leadTimeDays ?? undefined,
         safetyStockDays: form.safetyStockDays ?? undefined,
         traceabilityType: (form.traceabilityType as TraceabilityType) ?? 'None',
         abcClass: (form.abcClass as AbcClass | null) ?? null,

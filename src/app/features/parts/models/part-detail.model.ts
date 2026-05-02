@@ -40,7 +40,6 @@ export interface PartDetail {
   minStockThreshold: number | null;
   reorderPoint: number | null;
   reorderQuantity: number | null;
-  leadTimeDays: number | null;
   safetyStockDays: number | null;
   toolingAssetId: number | null;
   toolingAssetName: string | null;

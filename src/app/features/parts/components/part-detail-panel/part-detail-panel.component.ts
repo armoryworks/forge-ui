@@ -310,7 +310,6 @@ export class PartDetailPanelComponent {
     if ('minStockThreshold' in patch) request['minStockThreshold'] = patch.minStockThreshold;
     if ('reorderPoint' in patch) request['reorderPoint'] = patch.reorderPoint;
     if ('reorderQuantity' in patch) request['reorderQuantity'] = patch.reorderQuantity;
-    if ('leadTimeDays' in patch) request['leadTimeDays'] = patch.leadTimeDays;
     if ('safetyStockDays' in patch) request['safetyStockDays'] = patch.safetyStockDays;
     if ('traceabilityType' in patch) request['traceabilityType'] = patch.traceabilityType;
     if ('abcClass' in patch) request['abcClass'] = patch.abcClass;
