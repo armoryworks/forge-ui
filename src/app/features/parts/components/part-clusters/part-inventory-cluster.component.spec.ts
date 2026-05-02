@@ -20,7 +20,7 @@ function makePart(overrides: Partial<PartDetail> = {}): PartDetail {
     procurementSource: 'Buy', inventoryClass: 'Component',
     itemKindId: null, itemKindLabel: null,
     traceabilityType: 'None', abcClass: null,
-    manufacturerName: null, manufacturerPartNumber: null,
+    
     materialSpecId: null, materialSpecLabel: null,
     externalPartNumber: null,
     externalId: null, externalRef: null, provider: null,

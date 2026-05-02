@@ -21,7 +21,7 @@ function makeVendorPart(overrides: Partial<VendorPart> = {}): VendorPart {
   return {
     id: 42, vendorId: 1, vendorCompanyName: 'Acme', partId: 7,
     partNumber: 'PRT', partName: 'Widget',
-    vendorPartNumber: null, vendorMpn: null,
+    vendorPartNumber: null, manufacturerName: null, vendorMpn: null,
     leadTimeDays: 14, minOrderQty: 1, packSize: null,
     countryOfOrigin: null, htsCode: null,
     isApproved: true, isPreferred: true,

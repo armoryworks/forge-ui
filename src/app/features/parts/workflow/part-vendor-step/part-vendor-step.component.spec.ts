@@ -18,13 +18,13 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
     id: 42, partNumber: 'PRT-00042', name: 'Widget', description: null, revision: 'A',
     status: 'Draft',
     procurementSource: 'Subcontract', inventoryClass: 'Component', itemKindId: null, itemKindLabel: null,
-    traceabilityType: 'None', abcClass: null, manufacturerName: null, manufacturerPartNumber: null,
+    traceabilityType: 'None', abcClass: null, 
     materialSpecId: null, materialSpecLabel: null,
     externalPartNumber: null,
     externalId: null, externalRef: null,
     provider: null, preferredVendorId: null, preferredVendorName: null,
     minStockThreshold: null, reorderPoint: null, reorderQuantity: null,
-    leadTimeDays: null, safetyStockDays: null,
+    safetyStockDays: null,
     toolingAssetId: null, toolingAssetName: null,
     manualCostOverride: null, currentCostCalculationId: null,
     weightEach: null, weightDisplayUnit: null,
@@ -89,21 +89,23 @@ describe('PartVendorStepComponent', () => {
       TestBed.flushEffects();
 
       const form = (component as unknown as { form: { patchValue(v: unknown): void } }).form;
-      form.patchValue({ leadTimeDays: 21 });
+      // Subcontract Vendor step writes only preferredVendorId now —
+      // per-vendor lead time lives on the VendorPart row.
+      form.patchValue({ preferredVendorId: 99 });
 
       vi.advanceTimersByTime(700);
 
       const req = httpMock.expectOne(`${environment.apiUrl}/workflows/7/step`);
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body.stepId).toBe('vendor');
-      expect(req.request.body.fields.leadTimeDays).toBe(21);
+      expect(req.request.body.fields.preferredVendorId).toBe(99);
       req.flush({
         id: 7, entityType: 'Part', entityId: 42, definitionId: 'd', currentStepId: 'vendor',
         mode: 'guided', startedAt: '', startedByUserId: 1, completedAt: null,
         abandonedAt: null, abandonedReason: null, lastActivityAt: '', version: 1,
       });
       const partReq = httpMock.expectOne(`${environment.apiUrl}/parts/42`);
-      partReq.flush(buildPart({ leadTimeDays: 21 }));
+      partReq.flush(buildPart({ preferredVendorId: 99 }));
     } finally {
       vi.useRealTimers();
     }
