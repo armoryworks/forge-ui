@@ -1,0 +1,25 @@
+@use 'styles/variables' as *;
+
+.ple-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__header {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.ple-part-number {
+  font-family: $font-family-mono;
+  font-size: $font-size-sm;
+}
+
+.ple-notes {
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

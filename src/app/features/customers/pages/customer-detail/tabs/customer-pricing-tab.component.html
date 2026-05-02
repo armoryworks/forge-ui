@@ -1,0 +1,45 @@
+<div class="cd-pricing-tab">
+  <header class="cd-pricing-tab__header">
+    <h3 class="cd-pricing-tab__title">{{ 'customers.pricing.lists' | translate }}</h3>
+
+    @if (priceLists().length > 1) {
+      <app-select
+        data-testid="price-list-selector"
+        [label]="'customers.pricing.lists' | translate"
+        [formControl]="selectedListControl"
+        [options]="listOptions()" />
+    }
+
+    <button class="action-btn action-btn--sm action-btn--create"
+      data-testid="price-list-new-btn"
+      (click)="createNewList()"
+      [attr.aria-label]="'customers.pricing.newList' | translate">
+      <span class="material-icons-outlined">add</span>
+      {{ 'customers.pricing.newList' | translate }}
+    </button>
+  </header>
+
+  @if (selectedList(); as list) {
+    <section class="cd-pricing-tab__entries" data-testid="price-list-entries-section">
+      <div class="cd-pricing-tab__entries-header">
+        <h4 class="cd-pricing-tab__list-name">{{ list.name }}</h4>
+        <span class="cd-pricing-tab__effective text-muted">
+          {{ 'customers.pricing.effective' | translate }}: {{ formatRange(list) }}
+        </span>
+      </div>
+      <app-price-list-entries-table
+        [priceListId]="list.id"
+        [entries]="entries()"
+        [loading]="entriesLoading()"
+        (add)="onAdd()"
+        (edit)="onEdit($event)"
+        (delete)="onDelete($event)" />
+    </section>
+  } @else if (!listsLoading()) {
+    <app-empty-state
+      icon="sell"
+      [message]="'customers.pricing.noLists' | translate"
+      [actionLabel]="'customers.pricing.createFirstList' | translate"
+      (action)="createNewList()" />
+  }
+</div>

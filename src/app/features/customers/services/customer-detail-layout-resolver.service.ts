@@ -22,6 +22,7 @@ export type CustomerDetailTabId =
   | 'jobs'
   | 'invoices'
   | 'interactions'
+  | 'pricing'
   | 'activity';
 
 /** A single tab descriptor returned by the resolver. */
@@ -45,6 +46,7 @@ const ORDERS: TabLayoutEntry = { id: 'orders', labelKey: 'customers.detail.tabs.
 const JOBS: TabLayoutEntry = { id: 'jobs', labelKey: 'customers.detail.tabs.jobs', iconName: 'engineering' };
 const INVOICES: TabLayoutEntry = { id: 'invoices', labelKey: 'customers.detail.tabs.invoices', iconName: 'receipt_long' };
 const INTERACTIONS: TabLayoutEntry = { id: 'interactions', labelKey: 'customers.detail.tabs.interactions', iconName: 'forum' };
+const PRICING: TabLayoutEntry = { id: 'pricing', labelKey: 'customers.detail.tabs.pricing', iconName: 'sell' };
 const ACTIVITY: TabLayoutEntry = { id: 'activity', labelKey: 'customers.detail.tabs.activity', iconName: 'timeline' };
 
 /**
@@ -66,14 +68,16 @@ export class CustomerDetailLayoutResolverService {
   private middleTabs(lifecycle: CustomerLifecycle): TabLayoutEntry[] {
     if (lifecycle === 'Prospect') {
       // No active business yet — surface intake + sales-pipeline tabs only.
+      // Pricing is omitted: prospects rarely have negotiated price lists.
       return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, INTERACTIONS];
     }
     if (lifecycle === 'Archived') {
       // Read-only history posture. Keep Invoices for unpaid balances.
       return [CONTACTS, ADDRESSES, INVOICES, INTERACTIONS];
     }
-    // Active (default permissive layout).
-    return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, ORDERS, JOBS, INVOICES, INTERACTIONS];
+    // Active (default permissive layout). Pricing surfaces here so Office
+    // Managers can adjust customer-specific price lists in-context.
+    return [CONTACTS, ADDRESSES, ESTIMATES, QUOTES, ORDERS, JOBS, INVOICES, PRICING, INTERACTIONS];
   }
 
   /**

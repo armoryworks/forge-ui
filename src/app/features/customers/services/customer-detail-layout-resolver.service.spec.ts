@@ -30,11 +30,11 @@ describe('CustomerDetailLayoutResolverService', () => {
     service = TestBed.inject(CustomerDetailLayoutResolverService);
   });
 
-  it('Active → overview, contacts, addresses, estimates, quotes, orders, jobs, invoices, interactions, activity', () => {
+  it('Active → overview, contacts, addresses, estimates, quotes, orders, jobs, invoices, pricing, interactions, activity', () => {
     const ids = service.resolve('Active').map(t => t.id);
     expect(ids).toEqual([
       'overview', 'contacts', 'addresses', 'estimates', 'quotes',
-      'orders', 'jobs', 'invoices', 'interactions', 'activity',
+      'orders', 'jobs', 'invoices', 'pricing', 'interactions', 'activity',
     ]);
   });
 
@@ -74,7 +74,7 @@ describe('CustomerDetailLayoutResolverService', () => {
     const ids = service.resolve('Unknown' as never).map(t => t.id);
     expect(ids).toEqual([
       'overview', 'contacts', 'addresses', 'estimates', 'quotes',
-      'orders', 'jobs', 'invoices', 'interactions', 'activity',
+      'orders', 'jobs', 'invoices', 'pricing', 'interactions', 'activity',
     ]);
   });
 

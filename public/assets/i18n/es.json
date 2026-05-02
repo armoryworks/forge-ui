@@ -1153,10 +1153,34 @@
         "jobs": "Trabajos",
         "invoices": "Facturas",
         "interactions": "Interacciones",
+        "pricing": "Precios",
         "activity": "Actividad",
         "placeholderHelp": "Esta pestaña llegará en un próximo lanzamiento."
       }
+    },
+    "pricing": {
+      "lists": "Listas de precios",
+      "newList": "Nueva lista de precios",
+      "effective": "Vigente",
+      "noLists": "Aún no hay listas de precios.",
+      "createFirstList": "Crear primera lista",
+      "entries": "Entradas",
+      "empty": "Aún no hay entradas.",
+      "emptyHelp": "Agrega una pieza para comenzar a fijar precios en esta lista.",
+      "addEntry": "Agregar Entrada",
+      "confirmDelete": "¿Eliminar esta entrada de precio?"
     }
+  },
+  "priceListEntry": {
+    "partLabel": "Pieza",
+    "unitPriceLabel": "Precio Unitario",
+    "minQuantityLabel": "Cantidad Mínima",
+    "minQuantityHelper": "Cantidad de quiebre — aplica para pedidos ≥ a este tamaño.",
+    "currencyLabel": "Moneda",
+    "notesLabel": "Notas",
+    "notesHelper": "Por qué este precio (p. ej., negociado, contrato).",
+    "dialogTitleCreate": "Agregar Entrada de Precio",
+    "dialogTitleEdit": "Editar Entrada de Precio"
   },
   "leads": {
     "title": "Prospectos",

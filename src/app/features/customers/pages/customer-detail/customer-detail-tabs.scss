@@ -207,3 +207,49 @@
   gap: $sp-xs;
   justify-content: flex-end;
 }
+
+// Pricing tab — list selector + entries section
+.cd-pricing-tab {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+  padding: $sp-xl;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__title {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0;
+    flex: 1;
+  }
+
+  &__entries {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__entries-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: $sp-md;
+  }
+
+  &__list-name {
+    font-size: $font-size-md;
+    margin: 0;
+    color: var(--text);
+  }
+
+  &__effective {
+    font-size: $font-size-xs;
+  }
+}

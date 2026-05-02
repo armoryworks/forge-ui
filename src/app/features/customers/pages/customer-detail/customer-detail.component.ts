@@ -25,6 +25,7 @@ import { CustomerJobsTabComponent } from './tabs/customer-jobs-tab.component';
 import { CustomerInvoicesTabComponent } from './tabs/customer-invoices-tab.component';
 import { CustomerActivityTabComponent } from './tabs/customer-activity-tab.component';
 import { CustomerInteractionsTabComponent } from './tabs/customer-interactions-tab.component';
+import { CustomerPricingTabComponent } from './tabs/customer-pricing-tab.component';
 import { CustomerIdentityClusterComponent } from '../../components/customer-clusters/customer-identity-cluster.component';
 import { CustomerActivityClusterComponent } from '../../components/customer-clusters/customer-activity-cluster.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
@@ -53,6 +54,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
     CustomerOverviewTabComponent, CustomerContactsTabComponent, CustomerAddressesTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
     CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent, CustomerInteractionsTabComponent,
+    CustomerPricingTabComponent,
     CustomerIdentityClusterComponent, CustomerActivityClusterComponent,
     CurrencyDisplayComponent,
   ],

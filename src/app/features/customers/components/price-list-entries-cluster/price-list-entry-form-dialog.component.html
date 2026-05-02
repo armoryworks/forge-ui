@@ -1,0 +1,61 @@
+<app-dialog [title]="title()" width="520px" [dirty]="form.dirty" (closed)="close()">
+  <div [formGroup]="form" class="ple-form">
+
+    @if (isEdit && data.entry) {
+      <div class="ple-form__locked-field">
+        <span class="ple-form__locked-label">{{ 'priceListEntry.partLabel' | translate }}</span>
+        <span class="ple-form__locked-value">
+          {{ data.entry.partNumber }} — {{ data.entry.partName }}
+        </span>
+      </div>
+    } @else {
+      <app-entity-picker
+        data-testid="price-list-entry-part"
+        [label]="'priceListEntry.partLabel' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        formControlName="partId" />
+    }
+
+    <div class="dialog-row">
+      <app-currency-input
+        data-testid="price-list-entry-unit-price"
+        [label]="'priceListEntry.unitPriceLabel' | translate"
+        formControlName="unitPrice"
+        [required]="true" />
+      <app-input
+        data-testid="price-list-entry-min-qty"
+        [label]="'priceListEntry.minQuantityLabel' | translate"
+        type="number"
+        formControlName="minQuantity"
+        [required]="true" />
+    </div>
+    <p class="ple-form__hint">{{ 'priceListEntry.minQuantityHelper' | translate }}</p>
+
+    <app-select
+      data-testid="price-list-entry-currency"
+      [label]="'priceListEntry.currencyLabel' | translate"
+      [options]="currencyOptions"
+      formControlName="currency"
+      [required]="true" />
+
+    <app-textarea
+      data-testid="price-list-entry-notes"
+      [label]="'priceListEntry.notesLabel' | translate"
+      formControlName="notes"
+      [rows]="3" />
+    <p class="ple-form__hint">{{ 'priceListEntry.notesHelper' | translate }}</p>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        data-testid="price-list-entry-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

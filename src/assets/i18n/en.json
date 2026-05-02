@@ -1184,10 +1184,34 @@
         "jobs": "Jobs",
         "invoices": "Invoices",
         "interactions": "Interactions",
+        "pricing": "Pricing",
         "activity": "Activity",
         "placeholderHelp": "This tab is coming in a follow-up dispatch."
       }
+    },
+    "pricing": {
+      "lists": "Price lists",
+      "newList": "New price list",
+      "effective": "Effective",
+      "noLists": "No price lists yet.",
+      "createFirstList": "Create first list",
+      "entries": "Entries",
+      "empty": "No entries yet.",
+      "emptyHelp": "Add a part to start pricing this list.",
+      "addEntry": "Add Entry",
+      "confirmDelete": "Remove this price entry?"
     }
+  },
+  "priceListEntry": {
+    "partLabel": "Part",
+    "unitPriceLabel": "Unit Price",
+    "minQuantityLabel": "Min Quantity",
+    "minQuantityHelper": "Quantity break — applies for orders ≥ this size.",
+    "currencyLabel": "Currency",
+    "notesLabel": "Notes",
+    "notesHelper": "Why this price (e.g., negotiated, contract).",
+    "dialogTitleCreate": "Add Price Entry",
+    "dialogTitleEdit": "Edit Price Entry"
   },
   "leads": {
     "title": "Leads",

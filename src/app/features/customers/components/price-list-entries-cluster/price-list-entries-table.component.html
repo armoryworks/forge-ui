@@ -1,0 +1,71 @@
+<div class="ple-panel" [appLoadingBlock]="loading()">
+  <div class="ple-panel__header">
+    <button class="action-btn action-btn--sm action-btn--create"
+      data-testid="price-list-entry-add-btn"
+      (click)="onAdd()"
+      [attr.aria-label]="addLabel()">
+      <span class="material-icons-outlined">add</span>
+      {{ addLabel() }}
+    </button>
+  </div>
+
+  @if (entries().length === 0 && !loading()) {
+    <app-empty-state
+      icon="sell"
+      [message]="'customers.pricing.empty' | translate"
+      [helpText]="'customers.pricing.emptyHelp' | translate"
+      [actionLabel]="addLabel()"
+      (action)="onAdd()" />
+  } @else {
+    <app-data-table
+      tableId="customer-price-list-entries"
+      [columns]="columns"
+      [data]="entries()"
+      emptyIcon="sell"
+      [emptyMessage]="'customers.pricing.empty' | translate">
+
+      <ng-template appColumnCell="partNumber" let-row>
+        <span class="ple-part-number">{{ row.partNumber }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="partName" let-row>
+        <span>{{ row.partName }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="minQuantity" let-row>
+        <span>{{ row.minQuantity }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="unitPrice" let-row>
+        <app-currency-display [value]="row.unitPrice" [currency]="row.currency" />
+      </ng-template>
+
+      <ng-template appColumnCell="currency" let-row>
+        <span class="text-muted">{{ row.currency }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="notes" let-row>
+        <span class="text-muted ple-notes"
+          [matTooltip]="row.notes || ''"
+          matTooltipPosition="above">
+          {{ row.notes || '---' }}
+        </span>
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn"
+          [matTooltip]="'common.edit' | translate" matTooltipPosition="above"
+          (click)="onEdit(row)"
+          [attr.aria-label]="'common.edit' | translate">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        <button class="icon-btn icon-btn--danger"
+          [matTooltip]="'common.delete' | translate" matTooltipPosition="above"
+          (click)="onDelete(row)"
+          [attr.aria-label]="'common.delete' | translate">
+          <span class="material-icons-outlined">delete</span>
+        </button>
+      </ng-template>
+    </app-data-table>
+  }
+</div>
