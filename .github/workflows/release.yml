@@ -1,15 +1,26 @@
 # Release workflow for qb-engineer-ui
 #
 # Triggers:
-#   - push to main             -> :main-<sha> + :latest
-#   - push of a v*.*.* tag     -> :X.Y.Z + :X.Y + :X
+#   - push to main             -> auto-bumped semver: :X.Y.Z + :X.Y + :latest + :main-<sha>
+#   - push of a v*.*.* tag     -> :X.Y.Z + :X.Y + :X (manual milestone, fully overrides VERSION)
+#
+# Versioning model (alpha): the repo's VERSION file holds MAJOR.MINOR.BASE
+# manually (e.g. "0.0.0", "0.1.0", "1.0.0"). On every main push, CI computes:
+#
+#   patch    = BASE + (commits since VERSION was last touched)
+#   version  = MAJOR.MINOR.patch
+#
+# So patch increments automatically on every main build; minor and major
+# bumps are an explicit `VERSION` edit + commit (next CI build picks them
+# up because the distance count resets to 0). No git tag pushing happens
+# from inside the workflow, so no recursive build loop. Mirrors the
+# qb-engineer-server release.yml shape.
 #
 # Image goes to GHCR (ghcr.io/danielhokanson/qb-engineer-ui) as a
 # multi-arch manifest covering linux/arm64 (Raspberry Pi production target)
 # and linux/amd64 (developer workstations, x86_64 testers). The runner is a
 # native arm64 machine; amd64 is built via QEMU emulation. Cold-cache build
-# time: ~25-40 min (vs ~12-15 min for arm64 alone). Mirrors the
-# qb-engineer-server release.yml shape (Phase 2 reference).
+# time: ~25-40 min (vs ~12-15 min for arm64 alone).
 #
 # Tests gate the image push: lint + build + Vitest must succeed before
 # the build-and-push job starts. A failing test means no image is
@@ -68,6 +79,29 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Need the full history so the version-compute step can count
+          # commits since VERSION was last touched.
+          fetch-depth: 0
+
+      - name: Compute version (auto-bump patch on main)
+        id: version
+        if: github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          base=$(tr -d '[:space:]' < VERSION 2>/dev/null || echo "0.0.0")
+          IFS='.' read -r major minor base_patch <<< "$base"
+          anchor=$(git log -1 --format=%H -- VERSION 2>/dev/null || echo "")
+          if [[ -z "$anchor" ]]; then
+            distance=0
+          else
+            distance=$(git rev-list --count "${anchor}..HEAD")
+          fi
+          patch=$((base_patch + distance))
+          version="${major}.${minor}.${patch}"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "minor=${major}.${minor}" >> "$GITHUB_OUTPUT"
+          echo "Computed image version: ${version} (base=${base}, distance=${distance})"
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -90,8 +124,12 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            # Main-push path: auto-bumped semver from VERSION file.
+            type=raw,value=${{ steps.version.outputs.version }},enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=${{ steps.version.outputs.minor }},enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix=main-,format=short,enable=${{ github.ref == 'refs/heads/main' }}
+            # Tag-push path: explicit milestone tag (manual git tag vX.Y.Z).
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
@@ -106,7 +144,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
-            BUILD_VERSION=${{ github.ref_type == 'tag' && github.ref_name || github.sha }}
+            BUILD_VERSION=${{ steps.version.outputs.version || github.ref_name }}
             BUILD_SHA=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
