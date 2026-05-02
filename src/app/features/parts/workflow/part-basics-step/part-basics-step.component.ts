@@ -5,14 +5,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { debounceTime } from 'rxjs/operators';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
-import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
-import { TraceabilityType } from '../../models/traceability-type.type';
 import { PartsService } from '../../services/parts.service';
 
 /**
@@ -34,7 +31,7 @@ import { PartsService } from '../../services/parts.service';
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
-    InputComponent, SelectComponent, TextareaComponent, LoadingBlockDirective,
+    InputComponent, TextareaComponent, LoadingBlockDirective,
   ],
   templateUrl: './part-basics-step.component.html',
   styleUrl: './part-basics-step.component.scss',
@@ -64,24 +61,7 @@ export class PartBasicsStepComponent {
     // distributor we buy through, which lives on VendorPart).
     manufacturerName: new FormControl('', [Validators.maxLength(200)]),
     manufacturerPartNumber: new FormControl('', [Validators.maxLength(100)]),
-    // Tier 0 — replaces legacy isSerialTracked boolean. Defaults None.
-    traceabilityType: new FormControl<TraceabilityType>('None', [Validators.required]),
-    // Tier 0 — cycle-counting frequency tier. Optional (null = unclassified).
-    abcClass: new FormControl<AbcClass | null>(null),
   });
-
-  protected readonly traceabilityOptions: SelectOption[] = [
-    { value: 'None', label: this.translate.instant('parts.workflow.basics.traceabilityNone') },
-    { value: 'Lot', label: this.translate.instant('parts.workflow.basics.traceabilityLot') },
-    { value: 'Serial', label: this.translate.instant('parts.workflow.basics.traceabilitySerial') },
-  ];
-
-  protected readonly abcClassOptions: SelectOption[] = [
-    { value: null, label: this.translate.instant('parts.workflow.basics.abcClassUnclassified') },
-    { value: 'A', label: this.translate.instant('parts.workflow.basics.abcClassA') },
-    { value: 'B', label: this.translate.instant('parts.workflow.basics.abcClassB') },
-    { value: 'C', label: this.translate.instant('parts.workflow.basics.abcClassC') },
-  ];
 
   /** Suppresses the auto-save effect while we're patching the form from input. */
   private suppressDispatch = false;
@@ -98,8 +78,6 @@ export class PartBasicsStepComponent {
         externalPartNumber: part.externalPartNumber ?? '',
         manufacturerName: part.manufacturerName ?? '',
         manufacturerPartNumber: part.manufacturerPartNumber ?? '',
-        traceabilityType: part.traceabilityType ?? 'None',
-        abcClass: part.abcClass ?? null,
       }, { emitEvent: false });
       this.suppressDispatch = false;
     });
@@ -112,6 +90,17 @@ export class PartBasicsStepComponent {
         if (this.form.invalid) return;
         this.dispatchSave();
       });
+
+    // Register form with the shell so Continue gates on validity + the
+    // app-validation-button surfaces required-field violations.
+    this.workflowService.registerStepForm(this.form, {
+      name: this.translate.instant('parts.workflow.basics.nameLabel'),
+      description: this.translate.instant('parts.workflow.basics.descriptionLabel'),
+      externalPartNumber: this.translate.instant('parts.workflow.basics.externalPartNumberLabel'),
+      manufacturerName: this.translate.instant('parts.workflow.basics.manufacturerNameLabel'),
+      manufacturerPartNumber: this.translate.instant('parts.workflow.basics.manufacturerPartNumberLabel'),
+    });
+    this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
 
   private dispatchSave(): void {
@@ -128,11 +117,9 @@ export class PartBasicsStepComponent {
       name: value.name ?? undefined,
       description: value.description ?? '',
       externalPartNumber: value.externalPartNumber || undefined,
-      // Tier 0 — manufacturer + traceability + ABC class.
+      // Tier 0 — manufacturer identity.
       manufacturerName: value.manufacturerName || undefined,
       manufacturerPartNumber: value.manufacturerPartNumber || undefined,
-      traceabilityType: value.traceabilityType ?? 'None',
-      abcClass: value.abcClass ?? null,
     }).subscribe({
       next: (run) => {
         this.saving.set(false);

@@ -144,6 +144,21 @@ export class PartWorkflowPageComponent {
       if (!run || run.mode === mode) return;
       this.run.set({ ...run, mode });
     });
+
+    // After any step's patchStep round-trip, the step component refetches the
+    // entity and writes it to workflowService.currentEntity. Mirror that into
+    // this page's `part` signal so the shell's `[entity]` input — and every
+    // downstream step's hydration effect + the rail's completionMap — see
+    // the latest persisted state. Without this, navigating to a later step
+    // shows blank fields and the rail's gate predicates evaluate against
+    // the stale snapshot from the initial load (steps never tick complete).
+    effect(() => {
+      const fresh = this.workflowService.currentEntity() as PartDetail | null;
+      if (!fresh) return;
+      const current = this.part();
+      if (current === fresh) return;
+      this.part.set(fresh);
+    });
   }
 
   /**

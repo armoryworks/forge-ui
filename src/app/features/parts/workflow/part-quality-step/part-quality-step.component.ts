@@ -114,6 +114,17 @@ export class PartQualityStepComponent {
         if (this.form.invalid) return;
         this.dispatchSave();
       });
+
+    this.workflowService.registerStepForm(this.form, {
+      traceabilityType: this.translate.instant('parts.workflow.quality.traceabilityLabel'),
+      requiresReceivingInspection: this.translate.instant('parts.workflow.quality.requiresReceivingInspectionLabel'),
+      inspectionFrequency: this.translate.instant('parts.workflow.quality.inspectionFrequencyLabel'),
+      inspectionSkipAfterN: this.translate.instant('parts.workflow.quality.inspectionSkipAfterNLabel'),
+      abcClass: this.translate.instant('parts.workflow.quality.abcClassLabel'),
+      hazmatClass: this.translate.instant('parts.workflow.quality.hazmatClassLabel'),
+      shelfLifeDays: this.translate.instant('parts.workflow.quality.shelfLifeDaysLabel'),
+    });
+    this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
   }
 
   private dispatchSave(): void {

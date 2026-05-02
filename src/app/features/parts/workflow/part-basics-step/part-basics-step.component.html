@@ -39,18 +39,5 @@
       formControlName="externalPartNumber"
       [placeholder]="'parts.workflow.basics.externalPartNumberPlaceholder' | translate"
       data-testid="basics-external-number" />
-
-    <app-select
-      [label]="'parts.workflow.basics.traceabilityLabel' | translate"
-      formControlName="traceabilityType"
-      [options]="traceabilityOptions"
-      [required]="true"
-      data-testid="basics-traceability" />
-
-    <app-select
-      [label]="'parts.workflow.basics.abcClassLabel' | translate"
-      formControlName="abcClass"
-      [options]="abcClassOptions"
-      data-testid="basics-abc-class" />
   </form>
 </section>

@@ -110,17 +110,20 @@
         }
       }
 
-      <button
-        type="button"
-        class="action-btn action-btn--primary"
-        data-testid="workflow-next"
-        (click)="next()">
-        @if (isLastStep()) {
-          {{ 'workflow.shell.actions.complete' | translate }}
-        } @else {
-          {{ 'workflow.shell.actions.continue' | translate }}
-        }
-      </button>
+      <app-validation-button [violations]="workflowService.currentStepViolations">
+        <button
+          type="button"
+          class="action-btn action-btn--primary"
+          [disabled]="!workflowService.currentStepValid()"
+          data-testid="workflow-next"
+          (click)="next()">
+          @if (isLastStep()) {
+            {{ 'workflow.shell.actions.complete' | translate }}
+          } @else {
+            {{ 'workflow.shell.actions.continue' | translate }}
+          }
+        </button>
+      </app-validation-button>
     </footer>
   }
   <!-- Express mode: the express component owns its own Save button (which

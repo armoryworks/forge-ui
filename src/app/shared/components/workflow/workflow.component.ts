@@ -17,7 +17,9 @@ import { WorkflowDefinition } from '../../models/workflow-definition.model';
 import { WorkflowRun } from '../../models/workflow-run.model';
 import { WorkflowStepDefinition } from '../../models/workflow-step-definition.model';
 import { PredicateEvaluator } from '../../services/predicate-evaluator';
+import { WorkflowService } from '../../services/workflow.service';
 import { WorkflowStepRegistryService } from '../../services/workflow-step-registry.service';
+import { ValidationButtonComponent } from '../validation-button/validation-button.component';
 import { WorkflowStepStubComponent } from './workflow-step-stub.component';
 
 /**
@@ -42,7 +44,7 @@ import { WorkflowStepStubComponent } from './workflow-step-stub.component';
 @Component({
   selector: 'app-workflow',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, MatTooltipModule],
+  imports: [CommonModule, TranslatePipe, MatTooltipModule, ValidationButtonComponent],
   templateUrl: './workflow.component.html',
   styleUrl: './workflow.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,6 +52,7 @@ import { WorkflowStepStubComponent } from './workflow-step-stub.component';
 export class WorkflowComponent {
   private readonly registry = inject(WorkflowStepRegistryService);
   private readonly evaluator = new PredicateEvaluator();
+  protected readonly workflowService = inject(WorkflowService);
 
   // ─── Inputs ─────────────────────────────────────────────────────────
 

@@ -1,7 +1,9 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { FormGroup } from '@angular/forms';
 
-import { Observable, catchError, map, of, shareReplay, tap, throwError } from 'rxjs';
+import { Observable, Subscription, catchError, map, of, shareReplay, tap, throwError } from 'rxjs';
+import { startWith } from 'rxjs/operators';
 
 import { environment } from '../../../environments/environment';
 import { EntityValidator } from '../models/entity-validator.model';
@@ -9,6 +11,7 @@ import { MissingValidator } from '../models/workflow-missing-validator.model';
 import { WorkflowDefinition } from '../models/workflow-definition.model';
 import { WorkflowRun } from '../models/workflow-run.model';
 import { WorkflowStepDefinition } from '../models/workflow-step-definition.model';
+import { FormValidationService } from './form-validation.service';
 import { PredicateEvaluator } from './predicate-evaluator';
 
 /**
@@ -44,6 +47,21 @@ export class WorkflowService {
 
   /** Validator catalog for the current entity type. */
   readonly currentValidators = signal<EntityValidator[]>([]);
+
+  /**
+   * Live validity of the currently mounted step's reactive form. The shell's
+   * Continue button reads this to gate progression on required fields. Defaults
+   * to `true` so steps without a form (e.g. acknowledge-only) don't block.
+   */
+  readonly currentStepValid = signal<boolean>(true);
+
+  /**
+   * Live violation messages for the currently mounted step's form, formatted
+   * for the shared `<app-validation-button>` popover. Cleared on step swap.
+   */
+  readonly currentStepViolations = signal<string[]>([]);
+
+  private currentStepFormSub: Subscription | null = null;
 
   /** Mode (express / guided). Falls back to 'guided' until a run loads. */
   readonly mode = computed<'express' | 'guided'>(() => this.currentRun()?.mode ?? 'guided');
@@ -266,6 +284,37 @@ export class WorkflowService {
     this.currentDefinition.set(null);
     this.currentEntity.set(null);
     this.currentValidators.set([]);
+    this.unregisterStepForm();
+  }
+
+  /**
+   * Step components register their reactive form here on mount so the shell's
+   * Continue button can gate on form validity and surface violations through
+   * the standard `<app-validation-button>` popover. `labels` maps form-control
+   * names to human-readable labels for the popover ("Lead Time Days is
+   * required" vs "leadTimeDays is required").
+   *
+   * Each call replaces the prior subscription — *ngComponentOutlet destroys
+   * the old step before mounting the new one, so when this fires the prior
+   * registration's destroy hook has already cleared. Defensive
+   * unregisterStepForm() handles the rare overlap.
+   */
+  registerStepForm(form: FormGroup, labels: Record<string, string>): void {
+    this.unregisterStepForm();
+    const refresh = (): void => {
+      this.currentStepValid.set(form.valid);
+      this.currentStepViolations.set(FormValidationService.collectViolations(form, labels));
+    };
+    this.currentStepFormSub = form.statusChanges.pipe(startWith(form.status)).subscribe(refresh);
+    refresh();
+  }
+
+  /** Step components call this from `destroyRef.onDestroy()` to clean up. */
+  unregisterStepForm(): void {
+    this.currentStepFormSub?.unsubscribe();
+    this.currentStepFormSub = null;
+    this.currentStepValid.set(true);
+    this.currentStepViolations.set([]);
   }
 
   /** Drop cached definition / validator fetches — useful after admin edits. */
