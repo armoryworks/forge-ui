@@ -4,7 +4,10 @@
       <div class="detail-header__info">
         <span class="material-icons-outlined detail-type-icon">{{ getTypeIcon(part.inventoryClass) }}</span>
         <div>
-          <div class="detail-part-number">{{ part.partNumber }}</div>
+          <div class="detail-part-number">
+            {{ part.partNumber }}
+            <app-entity-completeness-chip entityType="Part" [entityId]="part.id" />
+          </div>
           <div class="detail-description">{{ part.name }}</div>
           @if (part.description) {
             <div class="detail-notes">{{ part.description }}</div>
@@ -19,7 +22,7 @@
           data-testid="part-detail-edit-toggle"
           (click)="editing() ? cancelEdit() : toggleEdit()"
           [attr.aria-label]="editing() ? ('common.cancel' | translate) : ('common.edit' | translate)">
-          <span class="material-icons-outlined">{{ editing() ? 'close' : 'edit' }}</span>
+          <span class="material-icons-outlined">{{ editing() ? 'cancel' : 'edit' }}</span>
         </button>
         <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" (click)="closePanel()" aria-label="Close panel">
           <span class="material-icons-outlined">close</span>

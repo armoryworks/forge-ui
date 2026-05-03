@@ -1,5 +1,6 @@
-<mat-form-field appearance="outline">
+<mat-form-field appearance="outline" class="entity-picker__field">
   <mat-label>{{ label() }}</mat-label>
+  <span matPrefix class="material-icons-outlined entity-picker__icon" aria-hidden="true">search</span>
   <input matInput
     [formControl]="searchControl"
     [matAutocomplete]="auto"
@@ -7,12 +8,17 @@
     [disabled]="disabled()"
     (input)="onInput()"
     (blur)="markTouched()" />
-  <span matSuffix class="material-icons-outlined entity-picker__icon">search</span>
   <mat-autocomplete #auto="matAutocomplete"
     [displayWith]="displayFn"
     (optionSelected)="onOptionSelected($event)">
     @for (entity of results(); track entity['id']) {
       <mat-option [value]="entity">{{ getDisplayText(entity) }}</mat-option>
+    }
+    @if (canShowCreateNew()) {
+      <mat-option value="__create_new__" class="entity-picker__create-new">
+        <span class="material-icons-outlined entity-picker__create-icon" aria-hidden="true">add</span>
+        <span>{{ 'entityPicker.createNew' | translate:{ label: createNewLabel(), term: searchControl.value } }}</span>
+      </mat-option>
     }
   </mat-autocomplete>
 </mat-form-field>

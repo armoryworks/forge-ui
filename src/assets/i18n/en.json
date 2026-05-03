@@ -54,6 +54,7 @@
     "masterData": "Master Data",
     "integrations": "Integrations",
     "workflow": "Workflow",
+    "capabilities": "Capabilities",
     "system": "System"
   },
   "header": {
@@ -82,9 +83,11 @@
   },
   "common": {
     "save": "Save",
+    "saved": "Saved",
     "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "delete": "Delete",
+    "deleted": "Deleted",
     "edit": "Edit",
     "create": "Create",
     "search": "Search",
@@ -429,6 +432,22 @@
   },
   "parts": {
     "title": "Parts Catalog",
+    "part": "Part",
+    "searchByPartNumber": "Search by part number…",
+    "procurementSource": {
+      "Make": "Make",
+      "Buy": "Buy",
+      "Subcontract": "Subcontract",
+      "Phantom": "Phantom"
+    },
+    "inventoryClass": {
+      "Raw": "Raw Material",
+      "Component": "Component",
+      "Subassembly": "Subassembly",
+      "FinishedGood": "Finished Good",
+      "Consumable": "Consumable",
+      "Tool": "Tool"
+    },
     "subtitle": "Manage parts, BOMs, and specifications",
     "createPart": "New Part",
     "editPart": "Edit Part",
@@ -631,6 +650,8 @@
         "title": "Basics",
         "hint": "Name and a short description — the minimum to identify this part. The procurement and inventory axes were chosen on the previous screen.",
         "partTypeLabel": "Type",
+        "procurementSourceLabel": "Procurement Source",
+        "inventoryClassLabel": "Inventory Class",
         "nameLabel": "Name",
         "nameHelper": "Short canonical identifier (e.g., \"Sheath Mudkipper\").",
         "descriptionLabel": "Description",
@@ -1571,7 +1592,11 @@
       "integrationOutbox": "Integration Outbox",
       "autoPo": "Auto-PO",
       "expenses": "Expense Policy",
-      "roleTemplates": "Role Templates"
+      "capabilities": "Capabilities",
+      "discovery": "Discovery Wizard",
+      "presets": "Presets",
+      "roleTemplates": "Role Templates",
+      "entityCompleteness": "Entity Completeness"
     },
     "users": "Users",
     "addUser": "Add User",
@@ -1732,7 +1757,31 @@
     "lockPeriod": "Lock Period",
     "lockPeriodFailed": "Failed to lock period",
     "lockPeriodHint": "Lock a pay period to prevent further edits",
-    "payPeriod": "Pay Period"
+    "payPeriod": "Pay Period",
+    "entityCompleteness": {
+      "title": "Entity Completeness Requirements",
+      "subtitle": "Define which entity fields each capability requires.",
+      "newRequirement": "New requirement",
+      "col": {
+        "entityType": "Entity Type",
+        "capabilityCode": "Capability Code",
+        "requirementId": "Requirement Id",
+        "displayNameKey": "Display Name Key",
+        "missingMessageKey": "Missing Message Key",
+        "sortOrder": "Sort Order"
+      },
+      "dialog": {
+        "titleNew": "New Requirement",
+        "titleEdit": "Edit Requirement",
+        "predicateLabel": "Predicate (JSON)",
+        "predicateHelper": "JSON predicate evaluated server-side. Example: { \"type\": \"fieldPresent\", \"field\": \"taxId\" }",
+        "sortOrderLabel": "Sort Order"
+      },
+      "confirmDelete": {
+        "title": "Delete requirement?",
+        "message": "This will permanently remove requirement \"{{requirementId}}\". The completeness chip will refresh on next render."
+      }
+    }
   },
   "teamsPanel": {
     "teams": "teams",
@@ -2568,6 +2617,31 @@
     "poDeliveriesCount": "{{count}} deliveries",
     "poLines": "PO Lines"
   },
+  "entityPicker": {
+    "createNew": "+ Create new {{label}} “{{term}}”"
+  },
+  "vendorQuickCreate": {
+    "title": "Quick-create vendor",
+    "hint": "Just the company name — finish the rest later from the vendor's detail page.",
+    "create": "Create vendor",
+    "created": "Vendor “{{name}}” created."
+  },
+  "partQuickCreate": {
+    "title": "Quick-create part",
+    "hint": "Name, procurement, and inventory class — the minimum needed to reference this part. Finish the rest later from the part's detail page.",
+    "create": "Create part",
+    "created": "Part “{{name}}” created."
+  },
+  "entityCompleteness": {
+    "loading": "Checking completeness…",
+    "ready": "Ready",
+    "incompleteFor": "Incomplete for {{count}}",
+    "badgeTooltip": "Incomplete for {{count}}: {{names}}",
+    "columnHeader": "Completeness",
+    "popover": {
+      "heading": "Missing requirements"
+    }
+  },
   "shared": {
     "closeDialog": "Close dialog",
     "helpTour": "Page help tour",
@@ -2888,6 +2962,8 @@
   },
   "vendors": {
     "title": "Vendors",
+    "vendor": "Vendor",
+    "searchByCompanyName": "Search by company name…",
     "subtitle": "Manage suppliers and vendor relationships",
     "newVendor": "New Vendor",
     "editVendor": "Edit Vendor",
