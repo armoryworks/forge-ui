@@ -79,6 +79,19 @@ export class WorkflowComponent {
    */
   readonly missingValidators = input<MissingValidator[]>([]);
 
+  /**
+   * Read-only presentation. Used by the workflow-runs admin (b) and any
+   * future history-view surface that wants to show the rail + current
+   * step without form controls. When true:
+   *   • The shell hides the entire footer (Back / Skip / Continue).
+   *   • The mode toggle is hidden (no editing → no need to switch).
+   *   • Step components receive readonly: true via stepInputs and are
+   *     responsible for honoring it (disable form controls, hide their
+   *     own Save buttons). Step components opt in to the contract; the
+   *     shell trusts the input.
+   */
+  readonly readonly = input<boolean>(false);
+
   // ─── Outputs ────────────────────────────────────────────────────────
 
   @Output() readonly closed = new EventEmitter<void>();
@@ -172,7 +185,17 @@ export class WorkflowComponent {
         let allPass = true;
         for (const gateId of step.completionGates) {
           const v = validatorsById.get(gateId);
-          if (!v || !this.evaluator.evaluateJson(v.predicate, entity)) {
+          if (!v) { allPass = false; break; }
+          // Per-record applicability: when present, evaluate first.
+          // Non-applicable validators are treated as satisfied — there's
+          // nothing for them to gate on for this record. Mirrors the
+          // server's EntityReadinessService behavior so the rail
+          // matches the server's missing-validators answer.
+          if (v.applicabilityPredicate
+              && !this.evaluator.evaluateJson(v.applicabilityPredicate, entity)) {
+            continue;
+          }
+          if (!this.evaluator.evaluateJson(v.predicate, entity)) {
             allPass = false;
             break;
           }
@@ -254,6 +277,7 @@ export class WorkflowComponent {
       runId: r?.id ?? null,
       entityId: r?.entityId ?? null,
       entity: this.entity(),
+      readonly: this.readonly(),
     };
   });
 
@@ -281,6 +305,7 @@ export class WorkflowComponent {
       runId: r?.id ?? null,
       entityId: r?.entityId ?? null,
       entity: this.entity(),
+      readonly: this.readonly(),
     };
   });
 
