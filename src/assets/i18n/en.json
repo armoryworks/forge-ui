@@ -5114,10 +5114,22 @@
       },
       "mode": {
         "express": "Express",
+        "expressSublabel": "All at once",
         "guided": "Guided",
+        "guidedSublabel": "Step by step",
         "toggle": "Mode"
       },
+      "modeSwitch": {
+        "confirmTitle": "Switch modes?",
+        "confirmMessage": "You have unsaved changes on this step. Switching modes will discard them.",
+        "confirmAction": "Switch and discard"
+      },
       "optional": "Optional",
+      "resumeBanner": "Picking up where you left off — last edited {{lastEdited}}.",
+      "stepCounter": "Step {{current}} of {{total}}",
+      "stepErrors": {
+        "heading": "This step is missing data needed to complete the workflow"
+      },
       "steps": {
         "heading": "Steps"
       },
@@ -5159,7 +5171,11 @@
       "hasRouting": "Routing",
       "hasRoutingMissing": "Routing operations not yet defined.",
       "hasCost": "Cost",
-      "hasCostMissing": "Cost not yet set."
+      "hasCostMissing": "Cost not yet set.",
+      "hasSourcing": "Sourcing",
+      "hasSourcingMissing": "Preferred vendor not yet selected.",
+      "hasInventory": "Inventory",
+      "hasInventoryMissing": "Stock unit of measure not yet set."
     }
   }
 }

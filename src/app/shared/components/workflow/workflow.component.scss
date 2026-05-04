@@ -39,10 +39,30 @@
   }
 
   &__step-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: $sp-xs;
     font-size: $font-size-xxs;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     color: var(--text-muted);
+  }
+
+  // Breadcrumb pieces — "Step 2 of 4 · Sourcing" — let the user orient
+  // themselves without counting rail dots.
+  &__step-counter {
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  &__step-sep {
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  &__step-name {
+    color: var(--text-secondary);
+    font-weight: 600;
   }
 
   &__mode-toggle {
@@ -58,12 +78,21 @@
     color: var(--text-secondary);
     font-family: inherit;
     font-size: $font-size-sm;
+    font-weight: 500;
     padding: $sp-xs $sp-md;
+    line-height: 1.2;
+    text-align: center;
     cursor: pointer;
-    transition: $transition-fast;
+    transition: background-color $transition-fast, color $transition-fast,
+      opacity $transition-fast;
 
-    &:hover {
+    &:hover:not(:disabled) {
       color: var(--text);
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     &--active {
@@ -71,6 +100,17 @@
       color: var(--surface);
       font-weight: 600;
     }
+  }
+
+  // Sub-label under each mode button — turns "Express / Guided" from
+  // jargon into a self-explanatory choice without needing a tour.
+  &__mode-btn-sublabel {
+    display: block;
+    font-size: $font-size-xxs;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-top: 1px;
+    line-height: 1;
   }
 
   &__body {
@@ -117,9 +157,80 @@
 
   &__step-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-md;
     overflow-y: auto;
     padding: $sp-lg;
     @include custom-scrollbar(8px);
+
+    // Fade newly-mounted step content in so navigation feels like a
+    // soft swap rather than a hard pop. Keyed off ngComponentOutlet
+    // remounting the body; CSS animation re-fires every time.
+    // The width:100% + max-width pair lets each step claim the centered
+    // 760px column without each step needing its own align-items rule.
+    > * {
+      width: 100%;
+      max-width: 760px;
+      animation: workflow-content-fade-in $transition-normal ease-out;
+    }
+  }
+
+  // Resume banner — soft acknowledgement when picking up an in-flight
+  // run hours or days later. Sits above the step body so it's the first
+  // thing the user reads on remount.
+  &__resume-banner {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--info) 12%, transparent);
+    color: var(--info);
+    font-size: $font-size-sm;
+    border-left: $border-width-accent solid var(--info);
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      flex: 0 0 auto;
+    }
+  }
+
+  // Inline step-error alert — sits at the top of the step body when
+  // the server's missing-validators payload fingers this step's gates.
+  // Style mirrors the not-implemented warning notice in the costing
+  // step; visually consistent with other 'pay attention' surfaces.
+  &__step-errors {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--error) 12%, transparent);
+    color: var(--error);
+    border-left: $border-width-accent solid var(--error);
+  }
+
+  &__step-errors-heading {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-size: $font-size-sm;
+    font-weight: 600;
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+    }
+  }
+
+  &__step-errors-list {
+    margin: 0;
+    padding-left: $sp-2xl;
+    font-size: $font-size-sm;
+    color: var(--text);
+
+    li {
+      line-height: 1.5;
+    }
   }
 
   &__express {
@@ -130,16 +241,34 @@
     width: 100%;
     margin: 0 auto;
     @include custom-scrollbar(8px);
+
+    > * {
+      animation: workflow-content-fade-in $transition-normal ease-out;
+    }
   }
 
   &__footer {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     gap: $sp-sm;
     padding: $sp-sm $sp-lg;
     border-top: $border-width-thin solid var(--border);
     background: var(--surface);
+  }
+
+  // Wrap groups inside the footer so Back can sit on the left while
+  // Skip + Continue cluster on the right — the conventional 'go back'
+  // vs. 'commit and proceed' split. Footer body is justify-content
+  // space-between; these groups are the two flex children.
+  &__footer-left,
+  &__footer-right {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+  }
+  &__footer-right {
+    margin-left: auto;
   }
 }
 
@@ -161,16 +290,26 @@
     font-size: $font-size-sm;
     text-align: left;
     cursor: pointer;
-    transition: $transition-fast;
+    transition: background-color $transition-fast, color $transition-fast,
+      border-left-color $transition-fast;
 
     &:hover:not(:disabled) {
       background: var(--bg);
       color: var(--text);
+
+      .workflow-step__indicator {
+        border-color: var(--text-secondary);
+      }
     }
 
     &:disabled {
       cursor: not-allowed;
-      opacity: 0.5;
+      opacity: 0.55;
+    }
+
+    &:focus-visible {
+      outline: $border-width solid var(--primary);
+      outline-offset: -$border-width;
     }
   }
 
@@ -183,6 +322,8 @@
     border: $border-width-thin solid var(--border);
     background: var(--bg);
     flex: 0 0 auto;
+    transition: background-color $transition-normal, border-color $transition-normal,
+      color $transition-normal, transform $transition-fast;
 
     .material-icons-outlined {
       font-size: $icon-size-sm;
@@ -193,6 +334,7 @@
     font-size: $font-size-xs;
     font-weight: 600;
     color: var(--text-secondary);
+    transition: color $transition-fast;
   }
 
   &__label {
@@ -200,30 +342,80 @@
     @include truncate;
   }
 
+  // Optional badge — small chip-style indicator. Was just upper-cased
+  // muted text, easy to miss and visually tied to the label more than
+  // the row. Now renders as a pill so the user can skim down the rail
+  // and catch which steps are skippable without reading.
   &__optional {
     font-size: $font-size-xxs;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.06em;
     color: var(--text-muted);
+    background: color-mix(in srgb, var(--text-muted) 12%, transparent);
+    padding: 1px $sp-sm;
+    line-height: 1.4;
     margin-left: auto;
+    flex: 0 0 auto;
   }
 
   &--current &__btn {
     border-left-color: var(--primary);
     color: var(--text);
     font-weight: 600;
-    background: var(--bg);
+    background: color-mix(in srgb, var(--primary) 6%, transparent);
   }
 
+  &--current &__indicator {
+    border-color: var(--primary);
+    color: var(--primary);
+  }
+
+  &--current &__index {
+    color: var(--primary);
+  }
+
+  // Completion state — animate the indicator settling into its
+  // success state instead of snapping. Triggered any time the gate
+  // flips to satisfied (validator effect re-renders the rail row
+  // with the --complete modifier).
   &--complete &__indicator {
-    background: var(--success-light, var(--success));
+    background: color-mix(in srgb, var(--success) 18%, transparent);
     border-color: var(--success);
     color: var(--success);
+    animation: workflow-step-complete-pop $transition-normal ease-out;
   }
 
   &--locked &__btn {
     cursor: not-allowed;
   }
+
+  &--locked &__indicator {
+    opacity: 0.6;
+  }
+
+  // Server-reported missing-validator state. The user attempted to
+  // Mark Complete and the gate against this step's data failed; we
+  // need to draw the eye to which step is blocking promotion.
+  &--has-error &__btn {
+    color: var(--error);
+  }
+
+  &--has-error &__indicator {
+    background: color-mix(in srgb, var(--error) 18%, transparent);
+    border-color: var(--error);
+    color: var(--error);
+  }
+
+  &--has-error &__index {
+    color: var(--error);
+  }
+}
+
+@keyframes workflow-step-complete-pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
 }
 
 @include mobile {
@@ -238,6 +430,24 @@
       display: none;
     }
     .workflow-step__optional {
+      display: none;
+    }
+    // Mode toggle becomes icon-only at the smallest breakpoint to
+    // free header room for the truncated title. Keep accessible
+    // labels via aria-pressed + aria-label on the buttons.
+    &__mode-btn-sublabel {
+      display: none;
+    }
+  }
+}
+
+// Footer button labels go icon-only on the narrowest screens so the
+// chevrons remain useful and the validation chip + Continue still fit
+// without wrapping. Keep aria labels for screen readers.
+@media (max-width: 480px) {
+  .workflow-shell__footer .action-btn {
+    padding-inline: $sp-sm;
+    span:not(.material-icons-outlined) {
       display: none;
     }
   }
