@@ -891,6 +891,7 @@
       "tabs": {
         "identity": "Identity",
         "sourcing": "Sources",
+        "purchaseHistory": "Purchase History",
         "inventory": "Inventory",
         "mrp": "MRP",
         "bom": "BOM",
@@ -903,6 +904,19 @@
         "activity": "Activity",
         "files": "Files",
         "placeholderHelp": "This tab is coming in Pillar 4 Phase 2."
+      },
+      "purchaseHistory": {
+        "searchLabel": "Search",
+        "searchPlaceholder": "PO #, vendor, or line description",
+        "cap": "Showing last {{count}} (max 50)",
+        "empty": "No purchase orders include this part yet.",
+        "poNumber": "PO #",
+        "vendor": "Vendor",
+        "status": "Status",
+        "qty": "Recv / Ord",
+        "unitPrice": "Unit Price",
+        "total": "Line Total",
+        "ordered": "Ordered"
       },
       "material": {
         "title": "Material & Physical",
@@ -985,6 +999,7 @@
       "currency": "Currency",
       "effectiveFrom": "Effective from",
       "remove": "Remove tier",
+      "removePending": "Drop this pending tier",
       "undelete": "Restore tier",
       "showHistory": "Show history",
       "hideHistory": "Hide history",
@@ -2741,6 +2756,10 @@
     }
   },
   "shared": {
+    "slideout": {
+      "label": "Side panel",
+      "close": "Close panel"
+    },
     "closeDialog": "Close dialog",
     "helpTour": "Page help tour",
     "startHelpTour": "Start page help tour",
@@ -5218,10 +5237,11 @@
         "confirmMessage": "You have unsaved changes on this step. Switching modes will discard them.",
         "confirmAction": "Switch and discard"
       },
-      "contextPaneLabel": "Step context",
       "optional": "Optional",
       "rationale": {
-        "heading": "Why this step?"
+        "heading": "Why this step?",
+        "toggle": "Why this step?",
+        "close": "Close help"
       },
       "readonlyLabel": "View only",
       "resumeBanner": "Picking up where you left off — last edited {{lastEdited}}.",
