@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -33,6 +33,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { StlViewerComponent } from '../../../../shared/components/stl-viewer/stl-viewer.component';
 import { BarcodeInfoComponent } from '../../../../shared/components/barcode-info/barcode-info.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../part-quick-create-dialog/part-quick-create-dialog.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -175,6 +176,13 @@ export class PartDetailPanelComponent {
 
   // ── BOM Dialog ──
   protected readonly showBomDialog = signal(false);
+  /**
+   * Reference to the BOM child-part picker so we can call `setSelected`
+   * after a successful inline-create round-trip — that pushes the freshly
+   * created part into the picker without bouncing back through the search
+   * endpoint.
+   */
+  @ViewChild('bomChildPartPicker') protected bomChildPartPicker?: EntityPickerComponent;
 
   protected readonly bomForm = new FormGroup({
     childPartId: new FormControl<number | null>(null, [Validators.required]),
@@ -461,6 +469,32 @@ export class PartDetailPanelComponent {
 
   protected closeBomDialog(): void {
     this.showBomDialog.set(false);
+  }
+
+  /**
+   * Inline-create handler for the BOM child-part picker. Opens the
+   * PartQuickCreateDialog pre-filled with whatever the user typed.
+   * On success: pushes the new part into the BOM form's childPartId
+   * and feeds the picker its display text so the user doesn't see an
+   * empty input. The new part lands as a Draft with the three required
+   * server fields (Name + ProcurementSource + InventoryClass); deeper
+   * detail (description, specs, sourcing tier) is filled in later via
+   * the full part edit / workflow — capability-indexed completeness
+   * will surface "Incomplete" status until those gates are met.
+   *
+   * Defaults ProcurementSource to 'Buy' since BOM children are most
+   * commonly off-the-shelf bought parts; the user can flip it inside
+   * the quick-create dialog.
+   */
+  protected onCreateChildPart(typedTerm: string): void {
+    this.dialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: typedTerm, defaultProcurementSource: 'Buy' } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.bomForm.controls.childPartId.setValue(created.id);
+      this.bomChildPartPicker?.setSelected(created.id, created.partNumber);
+    });
   }
 
   protected saveBomEntry(): void {

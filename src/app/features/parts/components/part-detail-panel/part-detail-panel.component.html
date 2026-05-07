@@ -347,7 +347,14 @@
 @if (showBomDialog()) {
   <app-dialog [title]="'parts.addBomEntry' | translate" (closed)="closeBomDialog()">
     <div [formGroup]="bomForm">
-      <app-entity-picker data-testid="bom-child-part" [label]="'parts.childPart' | translate" entityType="parts" displayField="partNumber" formControlName="childPartId" />
+      <app-entity-picker #bomChildPartPicker
+        data-testid="bom-child-part"
+        [label]="'parts.childPart' | translate"
+        entityType="parts"
+        displayField="partNumber"
+        [createNewLabel]="('parts.part' | translate).toLowerCase()"
+        (createNew)="onCreateChildPart($event)"
+        formControlName="childPartId" />
 
       <div class="dialog-row">
         <app-input data-testid="bom-quantity" [label]="'common.quantity' | translate" type="number" formControlName="quantity" />
