@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CurrencyService } from '../../../../shared/services/currency.service';
@@ -18,6 +18,8 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 import { PriceListsService } from '../../services/price-lists.service';
 import { PriceListEntry } from '../../models/price-list.model';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../../../parts/components/part-quick-create-dialog/part-quick-create-dialog.component';
+import { PartDetail } from '../../../parts/models/part-detail.model';
 
 export interface PriceListEntryFormDialogData {
   /** Null = create mode; populated = edit mode (PartId locked). */
@@ -53,8 +55,12 @@ export class PriceListEntryFormDialogComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly currencyService = inject(CurrencyService);
+  private readonly matDialog = inject(MatDialog);
   private readonly dialogRef = inject(MatDialogRef<PriceListEntryFormDialogComponent, PriceListEntry | null>);
   protected readonly data = inject<PriceListEntryFormDialogData>(MAT_DIALOG_DATA);
+
+  /** Picker ref so the inline-create round-trip can call setSelected(). */
+  @ViewChild('partPicker') protected partPicker?: EntityPickerComponent;
 
   protected readonly saving = signal(false);
   protected readonly isEdit = !!this.data.entry;
@@ -137,5 +143,23 @@ export class PriceListEntryFormDialogComponent {
         error: () => this.saving.set(false),
       });
     }
+  }
+
+  /**
+   * Inline-create handler — opens PartQuickCreateDialog pre-filled with
+   * the typed term, lands the new part as Draft (Buy default since price
+   * lists are sell-side: a customer-facing price list typically prices
+   * finished goods or stock, but Buy is the safest default and the user
+   * can flip it).
+   */
+  protected onCreateNewPart(typedTerm: string): void {
+    this.matDialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: typedTerm, defaultProcurementSource: 'Buy' } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.form.controls.partId.setValue(created.id);
+      this.partPicker?.setSelected(created.id, created.partNumber);
+    });
   }
 }

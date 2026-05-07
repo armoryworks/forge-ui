@@ -9,11 +9,13 @@
         </span>
       </div>
     } @else {
-      <app-entity-picker
+      <app-entity-picker #partPicker
         data-testid="price-list-entry-part"
         [label]="'priceListEntry.partLabel' | translate"
         entityType="parts"
         displayField="partNumber"
+        [createNewLabel]="('parts.part' | translate).toLowerCase()"
+        (createNew)="onCreateNewPart($event)"
         formControlName="partId" />
     }
 

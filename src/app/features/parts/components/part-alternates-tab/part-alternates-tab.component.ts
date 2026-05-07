@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
@@ -24,6 +24,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../part-quick-create-dialog/part-quick-create-dialog.component';
+import { PartDetail } from '../../models/part-detail.model';
 
 @Component({
   selector: 'app-part-alternates-tab',
@@ -45,6 +47,8 @@ export class PartAlternatesTabComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+
+  @ViewChild('alternatePartPicker') protected alternatePartPicker?: EntityPickerComponent;
 
   readonly partId = input.required<number>();
 
@@ -170,5 +174,23 @@ export class PartAlternatesTabComponent {
       case 'Equivalent': return 'chip chip--success';
       case 'Superseded': return 'chip chip--warning';
     }
+  }
+
+  /**
+   * Inline-create handler for the alternate-part picker. "Add an
+   * alternate to a part not yet entered" is a real catalog-curation
+   * flow — the engineer knows the alternate exists but hasn't formally
+   * cataloged it. Defaults ProcurementSource to Buy since alternates
+   * are typically off-the-shelf interchangeable parts.
+   */
+  protected onCreateNewPart(typedTerm: string): void {
+    this.dialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: typedTerm, defaultProcurementSource: 'Buy' } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.form.controls.alternatePartId.setValue(created.id);
+      this.alternatePartPicker?.setSelected(created.id, created.partNumber);
+    });
   }
 }

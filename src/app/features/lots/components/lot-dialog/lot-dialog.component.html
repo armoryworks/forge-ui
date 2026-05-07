@@ -6,12 +6,14 @@
   (closed)="close()">
 
   <div [formGroup]="lotForm">
-    <app-entity-picker
+    <app-entity-picker #partPicker
       label="Part"
       entityType="parts"
       displayField="partNumber"
       formControlName="partId"
       [required]="true"
+      [createNewLabel]="('parts.part' | translate).toLowerCase()"
+      (createNew)="onCreateNewPart($event)"
       data-testid="lot-part"
       [attr.aria-label]="'lots.fieldPart' | translate" />
 

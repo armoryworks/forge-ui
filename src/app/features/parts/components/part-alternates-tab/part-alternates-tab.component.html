@@ -44,12 +44,14 @@
 @if (showDialog()) {
   <app-dialog title="Add Alternate Part" width="520px" (closed)="closeDialog()">
     <div [formGroup]="form">
-      <app-entity-picker
+      <app-entity-picker #alternatePartPicker
         label="Alternate Part"
         entityType="parts"
         displayField="partNumber"
         formControlName="alternatePartId"
-        [required]="true" />
+        [required]="true"
+        [createNewLabel]="('parts.part' | translate).toLowerCase()"
+        (createNew)="onCreateNewPart($event)" />
       <div class="dialog-row">
         <app-select label="Type" [options]="typeOptions" formControlName="type" />
         <app-input label="Priority" type="number" formControlName="priority" [required]="true" />

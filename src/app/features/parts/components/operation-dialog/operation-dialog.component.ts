@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
@@ -23,6 +23,8 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { ActivityItem } from '../../../../shared/models/activity.model';
 import { environment } from '../../../../../environments/environment';
+import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '../../../vendors/components/vendor-quick-create-dialog/vendor-quick-create-dialog.component';
+import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
 
 export type OperationTab = 'details' | 'materials' | 'files' | 'activity';
 
@@ -51,10 +53,12 @@ export interface OperationDialogData {
 })
 export class OperationDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild('subcontractVendorPicker') protected subcontractVendorPicker?: EntityPickerComponent;
 
   private readonly partsService = inject(PartsService);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly matDialog = inject(MatDialog);
   protected readonly matDialogRef = inject(MatDialogRef<OperationDialogComponent>);
   protected readonly data = inject<OperationDialogData>(MAT_DIALOG_DATA);
 
@@ -269,5 +273,23 @@ export class OperationDialogComponent implements OnInit {
 
   protected getFileUrl(fileId: number): string {
     return `${environment.apiUrl}/files/${fileId}/download`;
+  }
+
+  /**
+   * Inline-create handler for the subcontract-vendor picker. When the
+   * routing engineer realizes mid-flow that the chosen subcontract op
+   * needs a vendor we haven't cataloged yet, opens the
+   * VendorQuickCreateDialog pre-filled with the typed term so they
+   * can keep going without bailing to the vendors page.
+   */
+  protected onCreateNewSubcontractVendor(typedTerm: string): void {
+    this.matDialog.open<VendorQuickCreateDialogComponent, VendorQuickCreateDialogData, VendorListItem | null>(
+      VendorQuickCreateDialogComponent,
+      { width: '480px', data: { initialCompanyName: typedTerm } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.formGroup.controls.subcontractVendorId.setValue(created.id);
+      this.subcontractVendorPicker?.setSelected(created.id, created.companyName);
+    });
   }
 }

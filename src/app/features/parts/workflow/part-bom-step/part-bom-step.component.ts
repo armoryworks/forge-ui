@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -24,6 +24,7 @@ import { BOMSourceType } from '../../models/bom-source-type.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { ProcurementSource } from '../../models/procurement-source.type';
 import { PartsService } from '../../services/parts.service';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../../components/part-quick-create-dialog/part-quick-create-dialog.component';
 
 /**
  * Pre-beta — derives the BOM-row sourceType from the child part's
@@ -67,6 +68,8 @@ export class PartBomStepComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+
+  @ViewChild('childPartPicker') protected childPartPicker?: EntityPickerComponent;
 
   readonly stepId = input<string>('bom');
   readonly componentName = input<string>('PartBomStepComponent');
@@ -196,6 +199,23 @@ export class PartBomStepComponent {
         this.saving.set(false);
         this.snackbar.error(this.translate.instant('parts.workflow.bom.saveFailed'));
       },
+    });
+  }
+
+  /**
+   * Inline-create handler — same affordance as the BOM cluster on the
+   * detail panel. Opens the PartQuickCreateDialog pre-filled with the
+   * typed term so the workflow flow doesn't force the user to bail out
+   * mid-step to go register a missing component.
+   */
+  protected onCreateChildPart(typedTerm: string): void {
+    this.dialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: typedTerm, defaultProcurementSource: 'Buy' } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.form.controls.childPartId.setValue(created.id);
+      this.childPartPicker?.setSelected(created.id, created.partNumber);
     });
   }
 

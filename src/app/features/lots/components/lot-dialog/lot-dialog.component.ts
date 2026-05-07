@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, output, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LotService } from '../../services/lot.service';
@@ -14,6 +15,8 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { PartQuickCreateDialogComponent, PartQuickCreateDialogData } from '../../../parts/components/part-quick-create-dialog/part-quick-create-dialog.component';
+import { PartDetail } from '../../../parts/models/part-detail.model';
 
 @Component({
   selector: 'app-lot-dialog',
@@ -28,7 +31,9 @@ import { toIsoDate } from '../../../../shared/utils/date.utils';
 })
 export class LotDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
+  @ViewChild('partPicker') protected partPicker?: EntityPickerComponent;
   private readonly service = inject(LotService);
+  private readonly matDialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
 
@@ -81,6 +86,24 @@ export class LotDialogComponent {
         this.saved.emit();
       },
       error: () => this.saving.set(false),
+    });
+  }
+
+  /**
+   * Inline-create handler — opens PartQuickCreateDialog pre-filled with
+   * the typed term. Lot recording for a not-yet-entered part is a real
+   * shop-floor flow (someone receives material before purchasing has
+   * fully cataloged it). Defaults ProcurementSource to Buy since lot
+   * tracking is most common on bought + raw inputs.
+   */
+  protected onCreateNewPart(typedTerm: string): void {
+    this.matDialog.open<PartQuickCreateDialogComponent, PartQuickCreateDialogData, PartDetail | null>(
+      PartQuickCreateDialogComponent,
+      { width: '480px', data: { initialName: typedTerm, defaultProcurementSource: 'Buy' } },
+    ).afterClosed().subscribe((created) => {
+      if (!created) return;
+      this.lotForm.controls.partId.setValue(created.id);
+      this.partPicker?.setSelected(created.id, created.partNumber);
     });
   }
 }

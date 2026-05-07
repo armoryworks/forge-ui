@@ -52,11 +52,13 @@
       <app-toggle data-testid="op-is-subcontract" [label]="'parts.isSubcontract' | translate" formControlName="isSubcontract" />
       @if (formGroup.get('isSubcontract')?.value) {
         <div class="dialog-row">
-          <app-entity-picker
+          <app-entity-picker #subcontractVendorPicker
             data-testid="op-subcontract-vendor"
             [label]="'parts.subcontractVendor' | translate"
             entityType="vendors"
             displayField="companyName"
+            [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
+            (createNew)="onCreateNewSubcontractVendor($event)"
             formControlName="subcontractVendorId" />
           <app-input
             data-testid="op-subcontract-turn-time"

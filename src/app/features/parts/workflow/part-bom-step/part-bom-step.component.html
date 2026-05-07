@@ -38,12 +38,14 @@
 @if (showAddDialog()) {
   <app-dialog [title]="'parts.workflow.bom.dialogTitle' | translate" (closed)="closeAdd()">
     <div [formGroup]="form">
-      <app-entity-picker
+      <app-entity-picker #childPartPicker
         [label]="'parts.workflow.bom.childPart' | translate"
         entityType="parts"
         displayField="partNumber"
         formControlName="childPartId"
-        [required]="true" />
+        [required]="true"
+        [createNewLabel]="('parts.part' | translate).toLowerCase()"
+        (createNew)="onCreateChildPart($event)" />
       <div class="dialog-row">
         <app-input
           [label]="'parts.bomQty' | translate"
