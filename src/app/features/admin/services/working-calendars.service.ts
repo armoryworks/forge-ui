@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import {
+  CalendarShift,
+  CalendarShiftRequest,
   Holiday,
   HolidayRequest,
   WorkingCalendar,
@@ -45,5 +47,19 @@ export class WorkingCalendarsService {
 
   deleteHoliday(calendarId: number, holidayId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${calendarId}/holidays/${holidayId}`);
+  }
+
+  // Shifts effort — calendar-bound shift CRUD. Read path is via get(id);
+  // the calendar response embeds the shifts list + computed weekly capacity.
+  addShift(calendarId: number, request: CalendarShiftRequest): Observable<CalendarShift> {
+    return this.http.post<CalendarShift>(`${this.base}/${calendarId}/shifts`, request);
+  }
+
+  updateShift(calendarId: number, shiftId: number, request: CalendarShiftRequest): Observable<CalendarShift> {
+    return this.http.put<CalendarShift>(`${this.base}/${calendarId}/shifts/${shiftId}`, request);
+  }
+
+  deleteShift(calendarId: number, shiftId: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${calendarId}/shifts/${shiftId}`);
   }
 }

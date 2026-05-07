@@ -16,6 +16,39 @@ export interface WorkingCalendar {
   holidays: Holiday[];
   createdAt: string;
   updatedAt: string;
+  // Shifts effort — calendar-bound shifts. Embedded on the detail
+  // response; weekly capacity is server-computed.
+  shifts: CalendarShift[];
+  weeklyCapacityHours: number;
+}
+
+/**
+ * Shifts effort — calendar-bound shift. Mirrors `CalendarShiftResponseModel`.
+ * `daysOfWeekMask` uses the same 7-bit Sun..Sat convention as the parent
+ * calendar's `workingDaysMask`. `effectiveCapacityHours` is the server's
+ * resolved value (CapacityHours when set, NetHours fallback, wall-clock final).
+ */
+export interface CalendarShift {
+  id: number;
+  workingCalendarId: number;
+  name: string;
+  daysOfWeekMask: number;
+  startTime: string; // HH:mm:ss
+  endTime: string;
+  premiumMultiplier: number;
+  capacityHours: number;
+  effectiveCapacityHours: number;
+  isActive: boolean;
+}
+
+export interface CalendarShiftRequest {
+  name: string;
+  daysOfWeekMask: number;
+  startTime: string; // HH:mm:ss
+  endTime: string;
+  premiumMultiplier: number;
+  capacityHours: number;
+  isActive: boolean;
 }
 
 export interface WorkingCalendarRequest {

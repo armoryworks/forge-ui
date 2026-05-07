@@ -20,6 +20,7 @@ import { toDateOnly } from '../../../shared/utils/date.utils';
 
 import { WorkingCalendarsService } from '../services/working-calendars.service';
 import {
+  CalendarShift,
   DAY_NAMES,
   Holiday,
   WORKING_DAYS_MASK_DEFAULT,
@@ -88,6 +89,26 @@ export class WorkingCalendarsComponent {
     date: 'Date', name: 'Name',
   });
 
+  // Shifts effort — calendar-bound shifts. Inline edit/add panel below the
+  // holidays panel. Editing a shift loads its values into the same form;
+  // editingShiftId distinguishes update vs add at save.
+  protected readonly editingShiftId = signal<number | null>(null);
+  protected readonly shiftDayBits = signal<boolean[]>([false, true, true, true, true, true, false]);
+
+  protected readonly shiftForm = new FormGroup({
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),
+    startTime: new FormControl('08:00', { nonNullable: true, validators: [Validators.required] }),
+    endTime: new FormControl('16:00', { nonNullable: true, validators: [Validators.required] }),
+    premiumMultiplier: new FormControl<number>(1.0, { nonNullable: true, validators: [Validators.min(0), Validators.max(10)] }),
+    capacityHours: new FormControl<number>(0, { nonNullable: true, validators: [Validators.min(0), Validators.max(24)] }),
+    isActive: new FormControl(true, { nonNullable: true }),
+  });
+
+  protected readonly shiftViolations = FormValidationService.getViolations(this.shiftForm, {
+    name: 'Name', startTime: 'Start Time', endTime: 'End Time',
+    premiumMultiplier: 'Premium Multiplier', capacityHours: 'Capacity Hours',
+  });
+
   // Common timezones; admins typing a custom IANA tz are still accepted by
   // the server (free text). Just a UX shortcut.
   protected readonly timeZoneOptions: SelectOption[] = [
@@ -131,8 +152,15 @@ export class WorkingCalendarsComponent {
 
   protected select(id: number): void {
     this.selectedId.set(id);
-    const cal = this.calendars().find(c => c.id === id);
-    if (cal) this.seedFromCalendar(cal);
+    // Fetch the full detail (the list endpoint omits shifts to keep the
+    // payload small). Embed the result back into the cached list so
+    // selected() reflects the freshest shifts + capacity hours.
+    this.service.get(id).subscribe({
+      next: (full) => {
+        this.calendars.update(prev => prev.map(c => c.id === id ? full : c));
+        this.seedFromCalendar(full);
+      },
+    });
   }
 
   /** New-calendar mode — clears selection + resets form to defaults. */
@@ -259,5 +287,108 @@ export class WorkingCalendarsComponent {
         next: () => { this.snackbar.success('Holiday removed'); this.load(); },
       });
     });
+  }
+
+  // ─── Shifts effort ──────────────────────────────────────────────────
+  protected toggleShiftDay(idx: number): void {
+    const bits = [...this.shiftDayBits()];
+    bits[idx] = !bits[idx];
+    this.shiftDayBits.set(bits);
+  }
+
+  protected resetShiftForm(): void {
+    this.editingShiftId.set(null);
+    this.shiftForm.reset({
+      name: '',
+      startTime: '08:00',
+      endTime: '16:00',
+      premiumMultiplier: 1.0,
+      capacityHours: 0,
+      isActive: true,
+    });
+    this.shiftDayBits.set([false, true, true, true, true, true, false]);
+  }
+
+  protected editShift(shift: CalendarShift): void {
+    this.editingShiftId.set(shift.id);
+    this.shiftForm.reset({
+      name: shift.name,
+      // The server uses TimeOnly which serializes as "HH:mm:ss"; the form
+      // wants "HH:mm" for the native time input.
+      startTime: this.toHm(shift.startTime),
+      endTime: this.toHm(shift.endTime),
+      premiumMultiplier: shift.premiumMultiplier,
+      capacityHours: shift.capacityHours,
+      isActive: shift.isActive,
+    });
+    const bits: boolean[] = [];
+    for (let i = 0; i < 7; i++) bits.push((shift.daysOfWeekMask & (1 << i)) !== 0);
+    this.shiftDayBits.set(bits);
+  }
+
+  protected saveShift(): void {
+    const sel = this.selected();
+    if (!sel || this.shiftForm.invalid) return;
+    const v = this.shiftForm.getRawValue();
+    let mask = 0;
+    this.shiftDayBits().forEach((on, i) => { if (on) mask |= (1 << i); });
+    if (mask === 0) {
+      this.snackbar.error('Pick at least one day for the shift');
+      return;
+    }
+    const body = {
+      name: v.name,
+      daysOfWeekMask: mask,
+      // Pad form's "HH:mm" back to TimeOnly's "HH:mm:ss".
+      startTime: `${v.startTime}:00`,
+      endTime: `${v.endTime}:00`,
+      premiumMultiplier: v.premiumMultiplier,
+      capacityHours: v.capacityHours,
+      isActive: v.isActive,
+    };
+    const id = this.editingShiftId();
+    const op = id == null
+      ? this.service.addShift(sel.id, body)
+      : this.service.updateShift(sel.id, id, body);
+    op.subscribe({
+      next: () => {
+        this.snackbar.success(id == null ? 'Shift added' : 'Shift updated');
+        this.resetShiftForm();
+        this.select(sel.id);
+      },
+    });
+  }
+
+  protected deleteShift(shift: CalendarShift): void {
+    const sel = this.selected();
+    if (!sel) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Remove Shift?',
+        message: `Remove "${shift.name}"?`,
+        confirmLabel: 'Remove',
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe((confirmed) => {
+      if (!confirmed) return;
+      this.service.deleteShift(sel.id, shift.id).subscribe({
+        next: () => {
+          this.snackbar.success('Shift removed');
+          if (this.editingShiftId() === shift.id) this.resetShiftForm();
+          this.select(sel.id);
+        },
+      });
+    });
+  }
+
+  /** "HH:mm:ss" → "HH:mm" for the native time input. */
+  private toHm(time: string): string {
+    return time?.length >= 5 ? time.substring(0, 5) : '00:00';
+  }
+
+  /** Pretty render for the shift's day mask in the list (e.g. "M T W T F"). */
+  protected renderMask(mask: number): string {
+    return DAY_NAMES.map((n, i) => (mask & (1 << i)) !== 0 ? n[0] : '·').join(' ');
   }
 }

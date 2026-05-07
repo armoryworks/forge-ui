@@ -145,6 +145,107 @@
               </app-validation-button>
             </form>
           </div>
+
+          <!-- Shifts effort — calendar-bound shifts panel. Drives
+               hours-of-operation, MRP capacity, and (future) payroll
+               premium. Each calendar maintains its own roster. -->
+          <div class="working-calendars__shifts">
+            <div class="working-calendars__shifts-header">
+              <h4>Shifts</h4>
+              <span class="working-calendars__shifts-capacity">
+                {{ sel.weeklyCapacityHours }} h / week
+              </span>
+            </div>
+
+            @if (!sel.shifts || sel.shifts.length === 0) {
+              <p class="working-calendars__shifts-empty">No shifts configured. Add one below.</p>
+            } @else {
+              <table class="working-calendars__holidays-table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Days</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Capacity</th>
+                    <th>Premium</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (s of sel.shifts; track s.id) {
+                    <tr [class.working-calendars__shift--inactive]="!s.isActive">
+                      <td>{{ s.name }}</td>
+                      <td class="working-calendars__shift-days">{{ renderMask(s.daysOfWeekMask) }}</td>
+                      <td>{{ s.startTime.substring(0, 5) }}</td>
+                      <td>{{ s.endTime.substring(0, 5) }}</td>
+                      <td>{{ s.effectiveCapacityHours }}h</td>
+                      <td>{{ s.premiumMultiplier }}x</td>
+                      <td class="working-calendars__holidays-action">
+                        <button type="button" class="icon-btn"
+                          [matTooltip]="'Edit'"
+                          (click)="editShift(s)">
+                          <span class="material-icons-outlined">edit</span>
+                        </button>
+                        <button type="button" class="icon-btn icon-btn--danger"
+                          [matTooltip]="'Remove'"
+                          (click)="deleteShift(s)">
+                          <span class="material-icons-outlined">delete</span>
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+
+            <form [formGroup]="shiftForm" class="working-calendars__shift-form">
+              <app-input label="Name" formControlName="name" [required]="true" />
+
+              <div class="working-calendars__day-toggles working-calendars__day-toggles--shift">
+                <span class="working-calendars__day-toggles-label">Days</span>
+                @for (name of dayNames; track $index) {
+                  <button type="button"
+                    class="working-calendars__day-btn"
+                    [class.working-calendars__day-btn--on]="shiftDayBits()[$index]"
+                    (click)="toggleShiftDay($index)">
+                    {{ name }}
+                  </button>
+                }
+              </div>
+
+              <div class="working-calendars__shift-row">
+                <label class="working-calendars__shift-label">
+                  <span>Start</span>
+                  <input type="time" formControlName="startTime" />
+                </label>
+                <label class="working-calendars__shift-label">
+                  <span>End</span>
+                  <input type="time" formControlName="endTime" />
+                </label>
+                <app-input label="Capacity (h)" type="number" formControlName="capacityHours"
+                  step="0.25" min="0" max="24" />
+                <app-input label="Premium" type="number" formControlName="premiumMultiplier"
+                  step="0.05" min="0" max="10" />
+                <app-toggle label="Active" formControlName="isActive" />
+              </div>
+
+              <div class="working-calendars__shift-actions">
+                @if (editingShiftId() !== null) {
+                  <button type="button" class="action-btn" (click)="resetShiftForm()">Cancel</button>
+                }
+                <app-validation-button [violations]="shiftViolations">
+                  <button type="button"
+                    [class]="editingShiftId() === null ? 'action-btn action-btn--create' : 'action-btn action-btn--primary'"
+                    [disabled]="shiftForm.invalid"
+                    (click)="saveShift()">
+                    <span class="material-icons-outlined">{{ editingShiftId() === null ? 'add' : 'save' }}</span>
+                    <span>{{ editingShiftId() === null ? 'Add Shift' : 'Save Shift' }}</span>
+                  </button>
+                </app-validation-button>
+              </div>
+            </form>
+          </div>
         }
       </section>
     </div>
