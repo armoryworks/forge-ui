@@ -352,6 +352,7 @@
         [label]="'parts.childPart' | translate"
         entityType="parts"
         displayField="partNumber"
+        secondaryDisplayField="name"
         [createNewLabel]="('parts.part' | translate).toLowerCase()"
         (createNew)="onCreateChildPart($event)"
         formControlName="childPartId" />

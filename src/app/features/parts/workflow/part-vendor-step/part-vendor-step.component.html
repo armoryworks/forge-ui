@@ -9,6 +9,7 @@
       [label]="'parts.workflow.vendor.preferredVendorLabel' | translate"
       entityType="vendors"
       displayField="companyName"
+      secondaryDisplayField="contactName"
       [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
       [placeholder]="'vendors.searchByCompanyName' | translate"
       (createNew)="onCreateNewVendor($event)"

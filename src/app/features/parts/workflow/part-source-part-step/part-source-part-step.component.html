@@ -9,6 +9,8 @@
       <app-entity-picker
         [label]="'parts.workflow.sourcePart.sourcePartLabel' | translate"
         entityType="parts"
+        displayField="partNumber"
+        secondaryDisplayField="name"
         formControlName="sourcePartId"
         data-testid="source-part-picker" />
       <p class="part-source-part-step__hint part-source-part-step__hint--field">

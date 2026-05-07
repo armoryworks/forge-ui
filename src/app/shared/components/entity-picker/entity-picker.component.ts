@@ -40,6 +40,16 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
   readonly label = input.required<string>();
   readonly entityType = input.required<string>();
   readonly displayField = input<string>('name');
+  /**
+   * Optional secondary field rendered as a muted subtitle below the
+   * primary on each result row. Helps when the server matches on a
+   * different field than `displayField` — e.g., a part picker keyed
+   * on `partNumber` that the server matched via `name`. Without this
+   * the user sees results that don't visibly contain their typed term
+   * and the match looks broken. Falsy / missing values on the row are
+   * hidden silently. Omit to revert to single-line rows.
+   */
+  readonly secondaryDisplayField = input<string | null>(null);
   readonly filters = input<Record<string, string>>({});
   readonly placeholder = input<string>('');
   readonly isReadonly = input<boolean>(false);
@@ -191,6 +201,18 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
 
   protected getDisplayText(entity: Record<string, unknown>): string {
     return String(entity[this.displayField()] ?? '');
+  }
+
+  /**
+   * Subtitle text for a result row. Empty when `secondaryDisplayField`
+   * is unset or the entity lacks a value at that key — the template
+   * uses that to skip the subtitle slot entirely (no empty line).
+   */
+  protected getSecondaryText(entity: Record<string, unknown>): string {
+    const key = this.secondaryDisplayField();
+    if (!key) return '';
+    const v = entity[key];
+    return v == null ? '' : String(v);
   }
 
   private search(term: string) {

@@ -9,6 +9,7 @@
           [placeholder]="'vendors.searchByCompanyName' | translate"
           entityType="vendors"
           displayField="companyName"
+          secondaryDisplayField="contactName"
           [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
           (createNew)="onCreateNewVendor($event)"
           formControlName="vendorId" />
@@ -28,6 +29,7 @@
           [placeholder]="'parts.searchByPartNumber' | translate"
           entityType="parts"
           displayField="partNumber"
+          secondaryDisplayField="name"
           [createNewLabel]="('parts.part' | translate).toLowerCase()"
           (createNew)="onCreateNewPart($event)"
           formControlName="partId" />

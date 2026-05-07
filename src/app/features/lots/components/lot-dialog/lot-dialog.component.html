@@ -10,6 +10,7 @@
       label="Part"
       entityType="parts"
       displayField="partNumber"
+      secondaryDisplayField="name"
       formControlName="partId"
       [required]="true"
       [createNewLabel]="('parts.part' | translate).toLowerCase()"
@@ -41,6 +42,7 @@
         label="Linked Job (optional)"
         entityType="jobs"
         displayField="jobNumber"
+        secondaryDisplayField="title"
         formControlName="jobId"
         data-testid="lot-job"
         [attr.aria-label]="'lots.fieldJob' | translate" />

@@ -15,7 +15,14 @@
     [displayWith]="displayFn"
     (optionSelected)="onOptionSelected($event)">
     @for (entity of results(); track entity['id']) {
-      <mat-option [value]="entity">{{ getDisplayText(entity) }}</mat-option>
+      <mat-option [value]="entity">
+        <div class="entity-picker__option">
+          <span class="entity-picker__option-primary">{{ getDisplayText(entity) }}</span>
+          @if (getSecondaryText(entity); as secondary) {
+            <span class="entity-picker__option-secondary">{{ secondary }}</span>
+          }
+        </div>
+      </mat-option>
     }
     @if (canShowCreateNew()) {
       <mat-option [value]="CREATE_NEW_SENTINEL"

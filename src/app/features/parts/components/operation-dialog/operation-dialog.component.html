@@ -39,7 +39,7 @@
       <app-textarea data-testid="op-instructions" [label]="'parts.instructions' | translate" formControlName="instructions" [rows]="5" [maxlength]="4000" />
 
       <div class="dialog-row">
-        <app-entity-picker data-testid="op-work-center" [label]="'parts.workCenter' | translate" entityType="assets" displayField="name" formControlName="workCenterId" />
+        <app-entity-picker data-testid="op-work-center" [label]="'parts.workCenter' | translate" entityType="assets" displayField="name" secondaryDisplayField="assetType" formControlName="workCenterId" />
         <app-select data-testid="op-referenced-op" [label]="'parts.referencedOperation' | translate" formControlName="referencedOperationId" [options]="otherOperationOptions()" />
       </div>
 
@@ -57,6 +57,7 @@
             [label]="'parts.subcontractVendor' | translate"
             entityType="vendors"
             displayField="companyName"
+            secondaryDisplayField="contactName"
             [createNewLabel]="('vendors.vendor' | translate).toLowerCase()"
             (createNew)="onCreateNewSubcontractVendor($event)"
             formControlName="subcontractVendorId" />

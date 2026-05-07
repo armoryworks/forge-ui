@@ -8,6 +8,8 @@
     <app-entity-picker
       [label]="'parts.workflow.toolAsset.toolingAssetLabel' | translate"
       entityType="assets"
+      displayField="name"
+      secondaryDisplayField="serialNumber"
       formControlName="toolingAssetId"
       data-testid="tool-asset-asset-picker" />
   </form>

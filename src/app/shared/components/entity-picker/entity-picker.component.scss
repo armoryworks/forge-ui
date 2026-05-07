@@ -42,3 +42,31 @@
   margin-right: $sp-sm;
   vertical-align: middle;
 }
+
+// Two-line option layout — primary identifier on top, muted contextual
+// secondary below. Used everywhere the picker renders a row whose
+// primary alone (e.g., a part number, a vendor company name) doesn't
+// give the user enough context to confirm the match — especially when
+// the server matched on the secondary field, which would otherwise
+// look like a non-matching result.
+.entity-picker__option {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.entity-picker__option-primary {
+  font-weight: 500;
+}
+
+.entity-picker__option-secondary {
+  color: var(--text-muted);
+  font-size: var(--font-size-xs);
+}
+
+// Keep the option vertically compact even with two lines — Material's
+// default min-height is 48px which is fine, but the line-height tweak
+// above + tight font-size keeps the row from looking spacious.
+::ng-deep .mat-mdc-autocomplete-panel .mat-mdc-option:has(.entity-picker__option) {
+  min-height: 44px;
+}
