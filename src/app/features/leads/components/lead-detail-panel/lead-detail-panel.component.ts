@@ -9,7 +9,8 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { LeadsService } from '../../services/leads.service';
 import { LeadItem } from '../../models/lead-item.model';
 import { LeadStatus } from '../../models/lead-status.type';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { ConvertLeadRequest } from '../../models/convert-lead-request.model';
+import { LeadConvertDialogComponent, LeadConvertDialogData } from '../lead-convert-dialog/lead-convert-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -116,32 +117,23 @@ export class LeadDetailPanelComponent {
     const lead = this.lead();
     if (!lead) return;
 
-    this.dialog.open(ConfirmDialogComponent, {
-      width: '400px',
-      data: {
-        title: this.translate.instant('leads.convertTitle'),
-        message: this.translate.instant('leads.convertMessage', { name: lead.companyName }),
-        confirmLabel: this.translate.instant('leads.convertOnly'),
-        severity: 'info',
-      } satisfies ConfirmDialogData,
-    }).afterClosed().subscribe(confirmed => {
-      if (confirmed === undefined) return;
-      this.executeConversion(lead.id, false);
+    this.dialog.open<
+      LeadConvertDialogComponent, LeadConvertDialogData, ConvertLeadRequest | undefined
+    >(LeadConvertDialogComponent, {
+      width: '640px',
+      data: { lead } satisfies LeadConvertDialogData,
+    }).afterClosed().subscribe(request => {
+      if (!request) return;
+      this.executeConversion(lead.id, request);
     });
   }
 
-  protected convertLeadWithJob(): void {
-    const lead = this.lead();
-    if (!lead) return;
-    this.executeConversion(lead.id, true);
-  }
-
-  private executeConversion(leadId: number, createJob: boolean): void {
+  private executeConversion(leadId: number, request: ConvertLeadRequest): void {
     this.saving.set(true);
-    this.leadsService.convertLead(leadId, createJob).subscribe({
+    this.leadsService.convertLead(leadId, request).subscribe({
       next: () => {
         this.saving.set(false);
-        const msg = createJob
+        const msg = request.createJob
           ? this.translate.instant('leads.convertedWithJob')
           : this.translate.instant('leads.convertedOnly');
         this.snackbar.success(msg);

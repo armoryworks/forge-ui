@@ -1,0 +1,179 @@
+<app-dialog [title]="'leads.convertStepper.title' | translate" width="600px" (closed)="close()">
+  <div [formGroup]="form" class="convert-stepper">
+    <mat-stepper [selectedIndex]="currentStep()" (selectionChange)="currentStep.set($event.selectedIndex)" #stepper>
+
+      <!-- Step 1 — what carries over from the lead -->
+      <mat-step [label]="'leads.convertStepper.step1Title' | translate">
+        <p class="step-hint">{{ 'leads.convertStepper.step1Hint' | translate }}</p>
+        <dl class="carryover-list">
+          <dt>{{ 'leads.convertStepper.step1FieldCompany' | translate }}</dt>
+          <dd>{{ lead.companyName }}</dd>
+
+          @if (lead.contactName) {
+            <dt>{{ 'leads.convertStepper.step1FieldContact' | translate }}</dt>
+            <dd>{{ lead.contactName }}</dd>
+          }
+
+          @if (lead.email) {
+            <dt>{{ 'leads.convertStepper.step1FieldEmail' | translate }}</dt>
+            <dd>{{ lead.email }}</dd>
+          }
+
+          @if (lead.phone) {
+            <dt>{{ 'leads.convertStepper.step1FieldPhone' | translate }}</dt>
+            <dd>{{ lead.phone }}</dd>
+          }
+
+          @if (lead.source) {
+            <dt>{{ 'leads.convertStepper.step1FieldSource' | translate }}</dt>
+            <dd>{{ lead.source }}</dd>
+          }
+
+          @if (lead.notes) {
+            <dt>{{ 'leads.convertStepper.step1FieldNotes' | translate }}</dt>
+            <dd class="carryover-list__notes">{{ lead.notes }}</dd>
+          }
+        </dl>
+      </mat-step>
+
+      <!-- Step 2 — customer-required details -->
+      <mat-step [label]="'leads.convertStepper.step2Title' | translate">
+        <p class="step-hint">{{ 'leads.convertStepper.step2Hint' | translate }}</p>
+
+        <div class="step-grid">
+          <app-currency-input
+            [label]="'leads.convertStepper.step2CreditLimit' | translate"
+            formControlName="creditLimit" />
+
+          <app-select
+            [label]="'leads.convertStepper.step2DefaultCurrency' | translate"
+            formControlName="defaultCurrency"
+            [options]="currencyOptions" />
+        </div>
+
+        <div class="step-grid">
+          <app-toggle
+            [label]="'leads.convertStepper.step2IsTaxExempt' | translate"
+            formControlName="isTaxExempt" />
+
+          @if (form.controls.isTaxExempt.value) {
+            <app-input
+              [label]="'leads.convertStepper.step2TaxExemptionId' | translate"
+              formControlName="taxExemptionId"
+              [required]="true" />
+          }
+        </div>
+
+        <h4 class="step-section-title">{{ 'leads.convertStepper.step2BillingAddressTitle' | translate }}</h4>
+        <app-address-form
+          formControlName="billingAddress"
+          [showVerify]="false"
+          [requireLine1]="false"
+          [requireCity]="false"
+          [requireState]="false"
+          [requirePostalCode]="false" />
+
+        <div class="same-as-billing">
+          <app-toggle
+            [label]="'leads.convertStepper.step2SameAsBilling' | translate"
+            formControlName="shippingSameAsBilling" />
+        </div>
+
+        @if (!form.controls.shippingSameAsBilling.value) {
+          <h4 class="step-section-title">{{ 'leads.convertStepper.step2ShippingAddressTitle' | translate }}</h4>
+          <app-address-form
+            formControlName="shippingAddress"
+            [showVerify]="false"
+            [requireLine1]="false"
+            [requireCity]="false"
+            [requireState]="false"
+            [requirePostalCode]="false" />
+        }
+
+        <div class="step-section-title">&nbsp;</div>
+        <app-toggle
+          [label]="'leads.convertStepper.step2CreateJob' | translate"
+          formControlName="createJob" />
+      </mat-step>
+
+      <!-- Step 3 — review + commit -->
+      <mat-step [label]="'leads.convertStepper.step3Title' | translate">
+        <p class="step-hint">{{ 'leads.convertStepper.step3Hint' | translate }}</p>
+
+        <h4 class="step-section-title">{{ 'leads.convertStepper.step3Carryover' | translate }}</h4>
+        <dl class="carryover-list carryover-list--compact">
+          <dt>{{ 'leads.convertStepper.step1FieldCompany' | translate }}</dt>
+          <dd>{{ lead.companyName }}</dd>
+          @if (lead.contactName) {
+            <dt>{{ 'leads.convertStepper.step1FieldContact' | translate }}</dt>
+            <dd>{{ lead.contactName }}</dd>
+          }
+        </dl>
+
+        @if (hasCustomerDetails()) {
+          <h4 class="step-section-title">{{ 'leads.convertStepper.step3CustomerDetails' | translate }}</h4>
+          <dl class="carryover-list carryover-list--compact">
+            @if (form.controls.creditLimit.value !== null) {
+              <dt>{{ 'leads.convertStepper.step2CreditLimit' | translate }}</dt>
+              <dd>{{ form.controls.creditLimit.value }} {{ form.controls.defaultCurrency.value }}</dd>
+            }
+            @if (form.controls.isTaxExempt.value) {
+              <dt>{{ 'leads.convertStepper.step2IsTaxExempt' | translate }}</dt>
+              <dd>{{ form.controls.taxExemptionId.value }}</dd>
+            }
+            @if (form.controls.billingAddress.value) {
+              <dt>{{ 'leads.convertStepper.step2BillingAddressTitle' | translate }}</dt>
+              <dd>
+                {{ form.controls.billingAddress.value?.line1 }},
+                {{ form.controls.billingAddress.value?.city }},
+                {{ form.controls.billingAddress.value?.state }}
+                {{ form.controls.billingAddress.value?.postalCode }}
+              </dd>
+            }
+            @if (!form.controls.shippingSameAsBilling.value && form.controls.shippingAddress.value) {
+              <dt>{{ 'leads.convertStepper.step2ShippingAddressTitle' | translate }}</dt>
+              <dd>
+                {{ form.controls.shippingAddress.value?.line1 }},
+                {{ form.controls.shippingAddress.value?.city }},
+                {{ form.controls.shippingAddress.value?.state }}
+                {{ form.controls.shippingAddress.value?.postalCode }}
+              </dd>
+            }
+          </dl>
+        } @else {
+          <p class="step-hint step-hint--muted">
+            {{ 'leads.convertStepper.step3NoCustomerDetails' | translate }}
+          </p>
+        }
+
+        @if (form.controls.createJob.value) {
+          <p class="step-hint">{{ 'leads.convertStepper.step3JobToggle' | translate }}</p>
+        }
+      </mat-step>
+    </mat-stepper>
+  </div>
+
+  <div dialog-footer>
+    @if (currentStep() > 0) {
+      <button class="action-btn" (click)="back()">{{ 'leads.convertStepper.back' | translate }}</button>
+    } @else {
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    }
+
+    @if (currentStep() < 2) {
+      <button class="action-btn action-btn--primary" (click)="next()">
+        {{ 'leads.convertStepper.next' | translate }}
+      </button>
+    } @else {
+      <app-validation-button [violations]="violations">
+        <button class="action-btn action-btn--primary"
+          data-testid="lead-convert-confirm-btn"
+          [disabled]="form.invalid"
+          (click)="confirm()">
+          <span class="material-icons-outlined">person_add</span>
+          {{ 'leads.convertStepper.convert' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

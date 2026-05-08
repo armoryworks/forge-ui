@@ -7,6 +7,7 @@ import { CreateLeadRequest } from '../models/create-lead-request.model';
 import { UpdateLeadRequest } from '../models/update-lead-request.model';
 import { LeadStatus } from '../models/lead-status.type';
 import { ConvertLeadResult } from '../models/convert-lead-result.model';
+import { ConvertLeadRequest } from '../models/convert-lead-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
@@ -32,10 +33,8 @@ export class LeadsService {
     return this.http.patch<LeadItem>(`${this.base}/${id}`, request);
   }
 
-  convertLead(id: number, createJob: boolean): Observable<ConvertLeadResult> {
-    let params = new HttpParams();
-    if (createJob) params = params.set('createJob', 'true');
-    return this.http.post<ConvertLeadResult>(`${this.base}/${id}/convert`, null, { params });
+  convertLead(id: number, request: ConvertLeadRequest): Observable<ConvertLeadResult> {
+    return this.http.post<ConvertLeadResult>(`${this.base}/${id}/convert`, request);
   }
 
   deleteLead(id: number): Observable<void> {

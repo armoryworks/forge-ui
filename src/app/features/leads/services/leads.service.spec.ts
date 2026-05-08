@@ -110,26 +110,36 @@ describe('LeadsService', () => {
   // ── convertLead ───────────────────────────────────────────────────────────
 
   describe('convertLead', () => {
-    it('should POST to convert endpoint with createJob param', () => {
+    it('should POST the request body to convert endpoint', () => {
       const mockResult = { customerId: 10, jobId: 20 };
       let result: unknown = null;
 
-      service.convertLead(1, true).subscribe((r) => { result = r; });
+      service.convertLead(1, { createJob: true }).subscribe((r) => { result = r; });
 
-      const req = httpMock.expectOne((r) => r.url === `${baseUrl}/1/convert`);
+      const req = httpMock.expectOne(`${baseUrl}/1/convert`);
       expect(req.request.method).toBe('POST');
-      expect(req.request.params.get('createJob')).toBe('true');
-      expect(req.request.body).toBeNull();
+      expect(req.request.body).toEqual({ createJob: true });
       req.flush(mockResult);
 
       expect(result).toEqual(mockResult);
     });
 
-    it('should not include createJob param when false', () => {
-      service.convertLead(1, false).subscribe();
+    it('should send the full richer payload when populated by the stepper', () => {
+      service.convertLead(1, {
+        createJob: false,
+        creditLimit: 50000,
+        isTaxExempt: true,
+        taxExemptionId: 'EX-1',
+        defaultCurrency: 'USD',
+        billingAddress: {
+          street: '100 Main', city: 'Boston', state: 'MA', postal: '02108', country: 'US',
+        },
+      }).subscribe();
 
-      const req = httpMock.expectOne((r) => r.url === `${baseUrl}/1/convert`);
-      expect(req.request.params.has('createJob')).toBe(false);
+      const req = httpMock.expectOne(`${baseUrl}/1/convert`);
+      expect(req.request.body.creditLimit).toBe(50000);
+      expect(req.request.body.isTaxExempt).toBe(true);
+      expect(req.request.body.billingAddress.street).toBe('100 Main');
       req.flush({});
     });
   });

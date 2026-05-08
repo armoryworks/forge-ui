@@ -1,0 +1,80 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.convert-stepper {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.step-hint {
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+  margin: 0 0 $sp-md;
+  line-height: 1.4;
+
+  &--muted {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+.step-section-title {
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin: $sp-md 0 $sp-sm;
+  font-weight: 600;
+}
+
+.step-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+  margin-bottom: $sp-md;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.same-as-billing {
+  margin: $sp-md 0;
+}
+
+.carryover-list {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: $sp-sm $sp-lg;
+  margin: 0;
+
+  dt {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+    align-self: center;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--text);
+    font-size: $font-size-base;
+  }
+
+  &__notes {
+    grid-column: 2;
+    white-space: pre-wrap;
+  }
+
+  &--compact {
+    gap: $sp-xs $sp-md;
+    margin-bottom: $sp-md;
+  }
+}
+
+::ng-deep .convert-stepper .mat-horizontal-stepper-header-container {
+  margin-bottom: $sp-md;
+}

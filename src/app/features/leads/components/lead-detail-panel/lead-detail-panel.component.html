@@ -96,13 +96,14 @@
         <div class="convert-actions">
           <span class="info-label">{{ 'leads.convert' | translate }}</span>
           <div class="convert-btn-group">
+            <!-- Single Convert button — opens the stepper, where the user
+                 picks credit/tax/addresses and toggles "Also create a job"
+                 if desired. The previous two-button setup (Convert + Convert
+                 & Create Job) collapsed into one entry-point + a toggle in
+                 step 2 of the stepper. -->
             <button data-testid="lead-convert-btn" class="action-btn action-btn--primary" [disabled]="saving()" (click)="convertLead()">
-              <span class="material-icons-outlined">person</span>
+              <span class="material-icons-outlined">person_add</span>
               {{ 'leads.convertToCustomer' | translate }}
-            </button>
-            <button class="action-btn" [disabled]="saving()" (click)="convertLeadWithJob()">
-              <span class="material-icons-outlined">work</span>
-              {{ 'leads.convertAndCreateJob' | translate }}
             </button>
           </div>
         </div>
