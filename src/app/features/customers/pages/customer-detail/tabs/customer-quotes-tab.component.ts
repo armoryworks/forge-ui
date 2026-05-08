@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -31,6 +31,7 @@ interface QuoteListItem {
 export class CustomerQuotesTabComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   readonly customerId = input.required<number>();
 
@@ -38,12 +39,12 @@ export class CustomerQuotesTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'quoteNumber', header: 'Quote #', sortable: true, width: '100px' },
-    { field: 'status', header: 'Status', sortable: true, width: '110px' },
-    { field: 'lineCount', header: 'Lines', sortable: true, width: '70px', align: 'center' },
-    { field: 'total', header: 'Total', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'expirationDate', header: 'Expires', sortable: true, type: 'date', width: '100px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
+    { field: 'quoteNumber', header: this.translate.instant('customers.tabs.colQuoteNumber'), sortable: true, width: '100px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, width: '110px' },
+    { field: 'lineCount', header: this.translate.instant('customers.tabs.colLines'), sortable: true, width: '70px', align: 'center' },
+    { field: 'total', header: this.translate.instant('customers.tabs.colTotal'), sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'expirationDate', header: this.translate.instant('customers.tabs.colExpires'), sortable: true, type: 'date', width: '100px' },
+    { field: 'createdAt', header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '100px' },
   ];
 
   protected getStatusClass(status: string): string {

@@ -1475,7 +1475,20 @@
       "noQuotesYet": "Aún no hay cotizaciones",
       "noOrdersYet": "Aún no hay órdenes de venta",
       "noJobsYet": "No hay trabajos vinculados a este cliente",
-      "noInvoicesYet": "Aún no hay facturas"
+      "noInvoicesYet": "Aún no hay facturas",
+      "colQuoteNumber": "N.º cotización",
+      "colOrderNumber": "N.º OV",
+      "colJobNumber": "N.º trabajo",
+      "colInvoiceNumber": "N.º factura",
+      "colLines": "Líneas",
+      "colTotal": "Total",
+      "colExpires": "Vence",
+      "colReqDate": "Solicitada",
+      "colDueDate": "Vencimiento",
+      "colDue": "Vence",
+      "colTitle": "Título",
+      "colStage": "Etapa",
+      "colPriority": "Prioridad"
     },
     "estimates": {
       "newEstimate": "Nueva estimación",

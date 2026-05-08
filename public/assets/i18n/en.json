@@ -1484,7 +1484,20 @@
       "noQuotesYet": "No quotes yet",
       "noOrdersYet": "No sales orders yet",
       "noJobsYet": "No jobs linked to this customer",
-      "noInvoicesYet": "No invoices yet"
+      "noInvoicesYet": "No invoices yet",
+      "colQuoteNumber": "Quote #",
+      "colOrderNumber": "SO #",
+      "colJobNumber": "Job #",
+      "colInvoiceNumber": "Invoice #",
+      "colLines": "Lines",
+      "colTotal": "Total",
+      "colExpires": "Expires",
+      "colReqDate": "Req. Date",
+      "colDueDate": "Due Date",
+      "colDue": "Due",
+      "colTitle": "Title",
+      "colStage": "Stage",
+      "colPriority": "Priority"
     },
     "estimates": {
       "newEstimate": "New Estimate",

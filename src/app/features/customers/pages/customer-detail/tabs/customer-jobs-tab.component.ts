@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -32,6 +32,7 @@ interface CustomerJob {
 export class CustomerJobsTabComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   readonly customerId = input.required<number>();
 
@@ -39,12 +40,12 @@ export class CustomerJobsTabComponent implements OnInit {
   protected readonly loading = signal(false);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'jobNumber', header: 'Job #', sortable: true, width: '90px' },
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'stageName', header: 'Stage', sortable: true, width: '140px' },
-    { field: 'priority', header: 'Priority', sortable: true, width: '90px' },
-    { field: 'dueDate', header: 'Due', sortable: true, type: 'date', width: '100px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
+    { field: 'jobNumber', header: this.translate.instant('customers.tabs.colJobNumber'), sortable: true, width: '90px' },
+    { field: 'title', header: this.translate.instant('customers.tabs.colTitle'), sortable: true },
+    { field: 'stageName', header: this.translate.instant('customers.tabs.colStage'), sortable: true, width: '140px' },
+    { field: 'priority', header: this.translate.instant('customers.tabs.colPriority'), sortable: true, width: '90px' },
+    { field: 'dueDate', header: this.translate.instant('customers.tabs.colDue'), sortable: true, type: 'date', width: '100px' },
+    { field: 'createdAt', header: this.translate.instant('customers.colCreated'), sortable: true, type: 'date', width: '100px' },
   ];
 
   ngOnInit(): void {
