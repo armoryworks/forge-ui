@@ -16,8 +16,8 @@
       <app-input [label]="'common.search' | translate" [formControl]="searchControl" [placeholder]="'parts.searchPlaceholder' | translate"
         (keyup.enter)="applyFilters()" />
       <app-select [label]="'common.status' | translate" [formControl]="statusFilterControl" [options]="statusFilterOptions" />
-      <app-select label="Procurement" [formControl]="procurementFilterControl" [options]="procurementFilterOptions" />
-      <app-select label="Class" [formControl]="inventoryClassFilterControl" [options]="inventoryClassFilterOptions" />
+      <app-select [label]="'parts.detail.clusters.identity.procurementSource' | translate" [formControl]="procurementFilterControl" [options]="procurementFilterOptions" />
+      <app-select [label]="'parts.detail.clusters.identity.inventoryClass' | translate" [formControl]="inventoryClassFilterControl" [options]="inventoryClassFilterOptions" />
     </div>
 
     <!--
@@ -146,15 +146,30 @@
   <app-dialog [title]="editingPart() ? editingPart()!.partNumber : ('parts.createPart' | translate)" (closed)="closePartDialog()">
     <div [formGroup]="partForm">
       @if (editingPart()) {
+        <!-- On edit, identity axes (procurementSource, inventoryClass) are
+             immutable — they drive the part's workflow and are changed via
+             dedicated migration tools, not inline. Display read-only to
+             match part-identity-cluster behavior. -->
         <div class="auto-part-number">
           <span class="info-label">{{ 'parts.partNumberLabel' | translate }}</span>
           <span class="info-value">{{ editingPart()!.partNumber }}</span>
         </div>
+        <div class="dialog-row">
+          <div class="auto-part-number">
+            <span class="info-label">{{ 'parts.detail.clusters.identity.procurementSource' | translate }}</span>
+            <span class="info-value">{{ editingPart()!.procurementSource }}</span>
+          </div>
+          <div class="auto-part-number">
+            <span class="info-label">{{ 'parts.detail.clusters.identity.inventoryClass' | translate }}</span>
+            <span class="info-value">{{ editingPart()!.inventoryClass }}</span>
+          </div>
+        </div>
+      } @else {
+        <div class="dialog-row">
+          <app-select [label]="'parts.detail.clusters.identity.procurementSource' | translate" formControlName="procurementSource" [options]="procurementSourceOptions" [required]="true" data-testid="part-procurement-source" />
+          <app-select [label]="'parts.detail.clusters.identity.inventoryClass' | translate" formControlName="inventoryClass" [options]="inventoryClassOptions" [required]="true" data-testid="part-inventory-class" />
+        </div>
       }
-      <div class="dialog-row">
-        <app-select label="Procurement Source" formControlName="procurementSource" [options]="procurementSourceOptions" [required]="true" data-testid="part-procurement-source" />
-        <app-select label="Inventory Class" formControlName="inventoryClass" [options]="inventoryClassOptions" [required]="true" data-testid="part-inventory-class" />
-      </div>
       <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" [maxlength]="256" data-testid="part-name" />
       <app-textarea [label]="'common.description' | translate" formControlName="description" [rows]="3" [maxlength]="2000" [placeholder]="'parts.descriptionHint' | translate" data-testid="part-description" />
       <app-input [label]="'parts.revision' | translate" formControlName="revision" [maxlength]="5" data-testid="part-revision" />

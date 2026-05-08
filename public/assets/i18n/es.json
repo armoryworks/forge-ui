@@ -883,6 +883,31 @@
         "files": "Archivos",
         "placeholderHelp": "Esta pestaña llegará en Pillar 4 Fase 2."
       },
+      "clusters": {
+        "identity": {
+          "partNumber": "Número de pieza",
+          "procurementSource": "Fuente de adquisición",
+          "inventoryClass": "Clase de inventario",
+          "itemKind": "Tipo de artículo",
+          "name": "Nombre",
+          "revision": "Revisión",
+          "description": "Descripción",
+          "status": "Estado"
+        },
+        "inventory": {
+          "minStock": "Stock mínimo",
+          "reorderPoint": "Punto de reorden",
+          "reorderQuantity": "Cantidad de reorden",
+          "safetyStockDays": "Stock de seguridad (días)",
+          "traceability": "Trazabilidad",
+          "abcClass": "Clase ABC"
+        },
+        "cost": {
+          "manualCostOverride": "Costo manual (sobrescribir)",
+          "costCalculationId": "Id de cálculo de costo",
+          "valuationClass": "Clase de valoración"
+        }
+      },
       "purchaseHistory": {
         "searchLabel": "Buscar",
         "searchPlaceholder": "Nº PO, proveedor o descripción de línea",

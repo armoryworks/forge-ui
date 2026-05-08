@@ -1,7 +1,0 @@
-<div class="cluster">
-  @if (entity().bomEntries.length === 0) {
-    <app-empty-state icon="account_tree" [message]="'parts.noBomEntries' | translate" />
-  } @else {
-    <app-bom-tree [entries]="entity().bomEntries" />
-  }
-</div>

@@ -9,20 +9,20 @@
        dedicated tools (workflow / migration helpers), not inline. -->
   <div class="cluster__grid">
     <div class="cluster__item">
-      <span class="cluster__label">Part Number</span>
+      <span class="cluster__label">{{ 'parts.detail.clusters.identity.partNumber' | translate }}</span>
       <span class="cluster__value">{{ part().partNumber }}</span>
     </div>
     <div class="cluster__item">
-      <span class="cluster__label">Procurement Source</span>
+      <span class="cluster__label">{{ 'parts.detail.clusters.identity.procurementSource' | translate }}</span>
       <span class="cluster__value">{{ procurementLabel() }}</span>
     </div>
     <div class="cluster__item">
-      <span class="cluster__label">Inventory Class</span>
+      <span class="cluster__label">{{ 'parts.detail.clusters.identity.inventoryClass' | translate }}</span>
       <span class="cluster__value">{{ inventoryClassLabel() }}</span>
     </div>
     @if (part().itemKindLabel) {
       <div class="cluster__item">
-        <span class="cluster__label">Item Kind</span>
+        <span class="cluster__label">{{ 'parts.detail.clusters.identity.itemKind' | translate }}</span>
         <span class="cluster__value">{{ part().itemKindLabel }}</span>
       </div>
     }
@@ -30,24 +30,24 @@
 
   <!-- ─── Editable identity fields ──────────────────────────────── -->
   <div class="cluster__form-row">
-    <app-input data-testid="part-identity-name" label="Name" formControlName="name" [required]="true" [isReadonly]="!editing()" />
-    <app-input data-testid="part-identity-revision" label="Revision" formControlName="revision" [isReadonly]="!editing()" />
+    <app-input data-testid="part-identity-name" [label]="'parts.detail.clusters.identity.name' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
+    <app-input data-testid="part-identity-revision" [label]="'parts.detail.clusters.identity.revision' | translate" formControlName="revision" [isReadonly]="!editing()" />
   </div>
 
-  <app-textarea data-testid="part-identity-description" label="Description" formControlName="description" [rows]="2" [isReadonly]="!editing()" />
+  <app-textarea data-testid="part-identity-description" [label]="'parts.detail.clusters.identity.description' | translate" formControlName="description" [rows]="2" [isReadonly]="!editing()" />
 
-  <app-select data-testid="part-identity-status" label="Status" formControlName="status" [options]="statusOptions" [required]="true" [isReadonly]="!editing()" />
+  <app-select data-testid="part-identity-status" [label]="'parts.detail.clusters.identity.status' | translate" formControlName="status" [options]="statusOptions" [required]="true" [isReadonly]="!editing()" />
 
   @if (editing()) {
     <div class="cluster__actions">
-      <button class="action-btn" type="button" (click)="onCancel()">Cancel</button>
+      <button class="action-btn" type="button" (click)="onCancel()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations" [loading]="saving()">
         <button class="action-btn action-btn--primary" type="button"
           data-testid="part-identity-save"
           [disabled]="form.invalid || saving()"
           (click)="onSave()">
           <span class="material-icons-outlined">save</span>
-          Save
+          {{ 'common.save' | translate }}
         </button>
       </app-validation-button>
     </div>

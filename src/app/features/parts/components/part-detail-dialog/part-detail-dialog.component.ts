@@ -11,13 +11,8 @@ export interface PartDetailDialogData {
   selector: 'app-part-detail-dialog',
   standalone: true,
   imports: [PartDetailPanelComponent],
-  template: `
-    <app-part-detail-panel
-      [partId]="data.partId"
-      (closed)="close()"
-      (editRequested)="onEditRequested($event)" />
-  `,
-  styles: [`:host { display: block; width: 100%; height: 100%; }`],
+  templateUrl: './part-detail-dialog.component.html',
+  styleUrl: './part-detail-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PartDetailDialogComponent {

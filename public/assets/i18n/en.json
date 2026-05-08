@@ -905,6 +905,31 @@
         "files": "Files",
         "placeholderHelp": "This tab is coming in Pillar 4 Phase 2."
       },
+      "clusters": {
+        "identity": {
+          "partNumber": "Part Number",
+          "procurementSource": "Procurement Source",
+          "inventoryClass": "Inventory Class",
+          "itemKind": "Item Kind",
+          "name": "Name",
+          "revision": "Revision",
+          "description": "Description",
+          "status": "Status"
+        },
+        "inventory": {
+          "minStock": "Min Stock",
+          "reorderPoint": "Reorder Point",
+          "reorderQuantity": "Reorder Quantity",
+          "safetyStockDays": "Safety Stock (days)",
+          "traceability": "Traceability",
+          "abcClass": "ABC Class"
+        },
+        "cost": {
+          "manualCostOverride": "Manual Cost Override",
+          "costCalculationId": "Cost Calculation Id",
+          "valuationClass": "Valuation Class"
+        }
+      },
       "purchaseHistory": {
         "searchLabel": "Search",
         "searchPlaceholder": "PO #, vendor, or line description",

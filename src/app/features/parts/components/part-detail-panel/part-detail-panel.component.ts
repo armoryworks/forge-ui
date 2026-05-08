@@ -52,10 +52,6 @@ import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.c
 import { PartMaterialClusterComponent } from '../part-clusters/part-material-cluster/part-material-cluster.component';
 import { PartUomClusterComponent } from '../part-clusters/part-uom-cluster/part-uom-cluster.component';
 import { PartMrpClusterComponent } from '../part-clusters/part-mrp-cluster/part-mrp-cluster.component';
-// PartBomClusterComponent exists as a thin wrapper for future polish but is
-// not currently imported here — the BOM tab keeps its rich inline UI
-// (view toggle, add dialog, revision history) which the cluster wrapper
-// does not yet replicate.
 import { PartRoutingClusterComponent } from '../part-clusters/part-routing-cluster/part-routing-cluster.component';
 import { PartAlternatesClusterComponent } from '../part-clusters/part-alternates-cluster/part-alternates-cluster.component';
 import { PartQualityClusterComponent } from '../part-clusters/part-quality-cluster/part-quality-cluster.component';
@@ -80,9 +76,8 @@ type BomViewMode = 'table' | 'tree';
  * uom, mrp, quality, routing, alternates) render the
  * new `<app-part-*-cluster>` components. Existing inline implementations
  * are reused for sourcing (vendor list panel) and BOM (rich inline UI
- * with view toggle, add dialog, and revision history — `PartBomClusterComponent`
- * exists as a thin wrapper for future polish but is not currently wired
- * into the BOM tab to preserve full add/delete/tree/revisions UX).
+ * with view toggle, add dialog, and revision history) which the cluster
+ * extraction has not yet replicated.
  */
 @Component({
   selector: 'app-part-detail-panel',

@@ -11,11 +11,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
   selector: 'app-part-activity-cluster',
   standalone: true,
   imports: [EntityActivitySectionComponent],
-  template: `
-    <div class="cluster">
-      <app-entity-activity-section entityType="Part" [entityId]="partId()" />
-    </div>
-  `,
+  templateUrl: './part-activity-cluster.component.html',
   styleUrl: './part-clusters.shared.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
