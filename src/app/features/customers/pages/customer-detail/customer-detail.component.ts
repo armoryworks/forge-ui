@@ -14,6 +14,7 @@ import {
   TabLayoutEntry,
 } from '../../services/customer-detail-layout-resolver.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
 import { CustomerContactsTabComponent } from './tabs/customer-contacts-tab.component';
@@ -72,6 +73,19 @@ export class CustomerDetailComponent {
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
   private readonly layoutResolver = inject(CustomerDetailLayoutResolverService);
+  private readonly capabilityService = inject(CapabilityService);
+
+  /**
+   * Wave 5 — Tabs whose entire surface is capability-gated. The resolver
+   * returns the unfiltered logical layout; we drop tabs whose capability
+   * isn't enabled before rendering, matching the gating already applied
+   * to the corresponding controllers.
+   */
+  private readonly tabCapabilityMap: Partial<Record<CustomerDetailTabId, string>> = {
+    contacts: 'CAP-MD-CUSTOMER-CONTACTS',
+    addresses: 'CAP-MD-CUSTOMER-ADDRESSES',
+    interactions: 'CAP-MD-CUSTOMER-INTERACTIONS',
+  };
 
   protected readonly customerId = toSignal(
     this.route.paramMap.pipe(map(p => +p.get('id')!)),
@@ -96,8 +110,23 @@ export class CustomerDetailComponent {
     const c = this.customer();
     if (!c) return [];
     const lifecycle = this.layoutResolver.deriveLifecycle(c);
-    return this.layoutResolver.resolve(lifecycle);
+    const layout = this.layoutResolver.resolve(lifecycle);
+    // Wave 5 — drop tabs whose backing capability is disabled. The
+    // capability snapshot is reactive; toggling a capability on/off
+    // remounts the layout without a manual reload.
+    return layout.filter(tab => {
+      const cap = this.tabCapabilityMap[tab.id];
+      return !cap || this.capabilityService.isEnabled(cap);
+    });
   });
+
+  /**
+   * Wave 5 — Bound to the credit-status card's `*appCap`. Returns true
+   * only when CAP-O2C-CREDIT-LIMITS is enabled. COD / prepaid shops
+   * disable the card entirely.
+   */
+  protected readonly creditLimitsEnabled = computed(() =>
+    this.capabilityService.isEnabled('CAP-O2C-CREDIT-LIMITS'));
 
   constructor() {
     effect(() => {

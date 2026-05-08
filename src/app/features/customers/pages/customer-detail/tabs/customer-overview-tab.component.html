@@ -63,7 +63,14 @@
       </section>
     }
 
-    <app-credit-status-card [customerId]="customer().id" />
+    <!-- Wave 5 — Credit Status card is gated by CAP-O2C-CREDIT-LIMITS so
+         COD / prepaid shops don't see the credit policy surface. The card
+         itself fetches /credit-status which returns 403 when the capability
+         is off, but mounting the component just to handle the 403 is wasted
+         work — the *appCap directive prevents render. -->
+    <ng-container *appCap="'CAP-O2C-CREDIT-LIMITS'">
+      <app-credit-status-card [customerId]="customer().id" />
+    </ng-container>
 
   </div>
 </div>
