@@ -1,18 +1,28 @@
 <div class="cluster" [formGroup]="form">
   <h3 class="cluster__title">{{ 'customers.detail.tabs.overview' | translate }}</h3>
 
-  <!-- ─── Editable identity fields ──────────────────────────────── -->
+  <!-- ─── Editable identity fields ───────────────────────────────
+       Wave 4 — `name` carries an immutability cue in edit mode.
+       Customers do legitimately rename (typo / business rebrand)
+       so we don't hard-lock the field; we just signal that it's
+       the customer's identity and changes ripple downstream. -->
   <div class="cluster__form-row">
-    <app-input data-testid="customer-identity-name" label="Name" formControlName="name" [required]="true" [isReadonly]="!editing()" />
-    <app-input data-testid="customer-identity-company" label="Company Name" formControlName="companyName" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-name" [label]="'customers.colName' | translate" formControlName="name" [required]="true" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-company" [label]="'customers.companyName' | translate" formControlName="companyName" [isReadonly]="!editing()" />
   </div>
+  @if (editing()) {
+    <div class="cluster__hint" role="note">
+      <span class="material-icons-outlined cluster__hint-icon">info</span>
+      {{ 'customers.identityCluster.nameImmutabilityHint' | translate }}
+    </div>
+  }
 
   <div class="cluster__form-row">
-    <app-input data-testid="customer-identity-email" label="Email" formControlName="email" type="email" [isReadonly]="!editing()" />
-    <app-input data-testid="customer-identity-phone" label="Phone" formControlName="phone" mask="phone" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-email" [label]="'customers.colEmail' | translate" formControlName="email" type="email" [isReadonly]="!editing()" />
+    <app-input data-testid="customer-identity-phone" [label]="'customers.colPhone' | translate" formControlName="phone" mask="phone" [isReadonly]="!editing()" />
   </div>
 
-  <app-toggle data-testid="customer-identity-active" label="Active" formControlName="isActive" [isReadonly]="!editing()" />
+  <app-toggle data-testid="customer-identity-active" [label]="'customers.colActive' | translate" formControlName="isActive" [isReadonly]="!editing()" />
 
   <!-- ─── Always-derived external-system fields ─────────────────
        Provider and ExternalId aren't editable here (managed by the
@@ -22,13 +32,13 @@
     <div class="cluster__grid">
       @if (customer().provider) {
         <div class="cluster__item">
-          <span class="cluster__label">Provider</span>
+          <span class="cluster__label">{{ 'customers.provider' | translate }}</span>
           <span class="cluster__value">{{ customer().provider }}</span>
         </div>
       }
       @if (customer().externalId) {
         <div class="cluster__item">
-          <span class="cluster__label">External ID</span>
+          <span class="cluster__label">{{ 'customers.externalId' | translate }}</span>
           <span class="cluster__value">{{ customer().externalId }}</span>
         </div>
       }
@@ -37,14 +47,14 @@
 
   @if (editing()) {
     <div class="cluster__actions">
-      <button class="action-btn" type="button" (click)="onCancel()">Cancel</button>
+      <button class="action-btn" type="button" (click)="onCancel()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations" [loading]="saving()">
         <button class="action-btn action-btn--primary" type="button"
           data-testid="customer-identity-save"
           [disabled]="form.invalid || saving()"
           (click)="onSave()">
           <span class="material-icons-outlined">save</span>
-          Save
+          {{ 'common.save' | translate }}
         </button>
       </app-validation-button>
     </div>

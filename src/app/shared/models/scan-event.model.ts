@@ -6,7 +6,9 @@ export type ScanContext =
   | 'kanban'
   | 'receiving'
   | 'shipping'
-  | 'quality';
+  | 'quality'
+  | 'customers'
+  | 'leads';
 
 export interface ScanEvent {
   value: string;

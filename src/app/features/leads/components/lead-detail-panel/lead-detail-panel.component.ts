@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -13,6 +13,8 @@ import { ConvertLeadRequest } from '../../models/convert-lead-request.model';
 import { LeadConvertDialogComponent, LeadConvertDialogData } from '../lead-convert-dialog/lead-convert-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 
@@ -21,7 +23,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
   standalone: true,
   imports: [
     DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
-    DialogComponent, TextareaComponent, EntityActivitySectionComponent,
+    DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent,
   ],
   templateUrl: './lead-detail-panel.component.html',
   styleUrl: './lead-detail-panel.component.scss',
@@ -41,9 +43,14 @@ export class LeadDetailPanelComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
 
-  // Lost reason dialog
+  // Lost reason dialog. Reason required + validation-button stereotype on
+  // submit so a salesperson can't drop a lead without recording why.
   protected readonly showLostDialog = signal(false);
-  protected readonly lostReasonControl = new FormControl('');
+  protected readonly lostReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
+  protected readonly lostFormGroup = new FormGroup({ reason: this.lostReasonControl });
+  protected readonly lostViolations = FormValidationService.getViolations(this.lostFormGroup, {
+    reason: this.translate.instant('leads.reason'),
+  });
 
   protected readonly statuses: LeadStatus[] = ['New', 'Contacted', 'Quoting', 'Converted', 'Lost'];
 

@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
@@ -30,6 +30,8 @@ import { CustomerSummary } from '../../models/customer-summary.model';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerIdentityClusterComponent {
+  private readonly translate = inject(TranslateService);
+
   readonly customer = input.required<CustomerSummary>();
   readonly editing = input(false);
   readonly saving = input(false);
@@ -46,8 +48,8 @@ export class CustomerIdentityClusterComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    name: 'Name',
-    email: 'Email',
+    name: this.translate.instant('customers.identityCluster.violations.name'),
+    email: this.translate.instant('customers.identityCluster.violations.email'),
   });
 
   constructor() {

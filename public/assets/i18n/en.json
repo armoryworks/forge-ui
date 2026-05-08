@@ -1459,6 +1459,13 @@
         "email": "Email"
       }
     },
+    "identityCluster": {
+      "nameImmutabilityHint": "Identity field — changing this affects search, cross-entity references, and accounting links.",
+      "violations": {
+        "name": "Name",
+        "email": "Email"
+      }
+    },
     "pricing": {
       "lists": "Price lists",
       "newList": "New price list",

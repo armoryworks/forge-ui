@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { startWith } from 'rxjs';
+import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview } from '@angular/cdk/drag-drop';
 
@@ -25,6 +26,7 @@ import { ValidationButtonComponent } from '../../shared/components/validation-bu
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toIsoDate } from '../../shared/utils/date.utils';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { ScannerService } from '../../shared/services/scanner.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
@@ -57,6 +59,9 @@ export class LeadsComponent {
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly scanner = inject(ScannerService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -98,10 +103,16 @@ export class LeadsComponent {
     followUpDate: 'Follow-Up Date',
   });
 
-  // Lost reason dialog (used by pipeline drag-to-Lost)
+  // Lost reason dialog (used by pipeline drag-to-Lost). Reason is required —
+  // a lead going cold without a recorded reason is a data-quality hit; the
+  // validation-button stereotype on the dialog's submit makes the gap visible.
   protected readonly showLostDialog = signal(false);
   protected readonly lostLeadId = signal<number | null>(null);
-  protected readonly lostReasonControl = new FormControl('');
+  protected readonly lostReasonControl = new FormControl('', [Validators.required, Validators.maxLength(500)]);
+  protected readonly lostFormGroup = new FormGroup({ reason: this.lostReasonControl });
+  protected readonly lostViolations = FormValidationService.getViolations(this.lostFormGroup, {
+    reason: this.translate.instant('leads.reason'),
+  });
 
   protected readonly leadColumns: ColumnDef[] = [
     { field: 'companyName', header: this.translate.instant('leads.colCompany'), sortable: true },
@@ -154,10 +165,52 @@ export class LeadsComponent {
   });
 
   constructor() {
+    // Wave 4 — URL-as-truth on filter state. Hydrate from query params on
+    // mount so a refresh / shared link lands on the same filter pose, then
+    // mirror back via syncUrl() on every change. replaceUrl prevents the
+    // back stack from filling up with intermediate keystroke states.
+    const params = this.route.snapshot.queryParamMap;
+    const initialSearch = params.get('q') ?? '';
+    const initialStatus = params.get('status') as LeadStatus | null;
+    this.searchControl.setValue(initialSearch, { emitEvent: false });
+    if (initialStatus && this.statuses.includes(initialStatus)) {
+      this.statusFilterControl.setValue(initialStatus, { emitEvent: false });
+    }
+
+    this.scanner.setContext('leads');
+
     this.refDataService.getAsOptions('lead_source', { allLabel: this.translate.instant('common.none'), valueField: 'label' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(opts => this.sourceOptions.set(opts));
     this.loadLeads();
+
+    // Scanner hookup — drop scanned values into the search input.
+    effect(() => {
+      const scan = this.scanner.lastScan();
+      if (!scan || scan.context !== 'leads') return;
+      this.scanner.clearLastScan();
+      this.searchControl.setValue(scan.value);
+    });
+
+    this.searchControl.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => { this.syncUrl(); this.loadLeads(); });
+
+    this.statusFilterControl.valueChanges
+      .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => { this.syncUrl(); this.loadLeads(); });
+  }
+
+  /** Mirror filter state into the URL. Mirrors the parts pattern. */
+  private syncUrl(): void {
+    const search = (this.searchControl.value ?? '').trim() || null;
+    const status = this.statusFilterControl.value;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q: search, status: status ?? null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   protected setViewMode(mode: ViewMode): void {

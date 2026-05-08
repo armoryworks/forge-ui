@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,6 +20,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ScannerService } from '../../shared/services/scanner.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EntityCompletenessChipComponent } from '../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { EntityCompletenessBadgeComponent } from '../../shared/components/entity-completeness-badge/entity-completeness-badge.component';
@@ -42,9 +43,11 @@ import { EntityCompletenessBadgeComponent } from '../../shared/components/entity
 export class CustomersComponent {
   private readonly customerService = inject(CustomerService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly scanner = inject(ScannerService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -129,7 +132,28 @@ export class CustomersComponent {
   ];
 
   constructor() {
+    // Wave 4 — URL-as-truth on filter state. Read on construct so a refresh /
+    // shared link lands on the same filter pose, then write back on change so
+    // the URL stays in sync. Uses replaceUrl so each keystroke doesn't pile
+    // entries onto the back stack.
+    const params = this.route.snapshot.queryParamMap;
+    const initialSearch = params.get('q') ?? '';
+    const initialActive = params.get('active');
+    this.searchControl.setValue(initialSearch, { emitEvent: false });
+    if (initialActive === 'true') this.activeFilterControl.setValue(true, { emitEvent: false });
+    else if (initialActive === 'false') this.activeFilterControl.setValue(false, { emitEvent: false });
+
+    this.scanner.setContext('customers');
     this.loadCustomers();
+
+    // Scanner — drop scanned values into the search field. Loads on the
+    // next tick via the debounced search subscription below.
+    effect(() => {
+      const scan = this.scanner.lastScan();
+      if (!scan || scan.context !== 'customers') return;
+      this.scanner.clearLastScan();
+      this.searchControl.setValue(scan.value);
+    });
 
     // Phase 3 F7-partial / WU-17 — debounced search. Typed input fires the
     // standardised `?q=` query param against the server (300ms debounce per
@@ -137,11 +161,30 @@ export class CustomersComponent {
     // pagination + filter contract is exercised live.
     this.searchControl.valueChanges
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadCustomers());
+      .subscribe(() => { this.syncUrl(); this.loadCustomers(); });
 
     this.activeFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
-      .subscribe(() => this.loadCustomers());
+      .subscribe(() => { this.syncUrl(); this.loadCustomers(); });
+  }
+
+  /**
+   * Mirror the current filter state into the URL. Mirrors the established
+   * Parts pattern; refresh / share the URL and the same filter pose returns.
+   * `replaceUrl` prevents back-stack pollution from each keystroke.
+   */
+  private syncUrl(): void {
+    const search = (this.searchControl.value ?? '').trim() || null;
+    const active = this.activeFilterControl.value;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        q: search,
+        active: active === null ? null : String(active),
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   protected loadCustomers(): void {

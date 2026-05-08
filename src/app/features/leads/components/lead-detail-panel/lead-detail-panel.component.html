@@ -131,14 +131,18 @@
   </div>
 }
 
-<!-- Lost Reason Dialog -->
+<!-- Lost Reason Dialog — required so the activity log captures why the lead went cold. -->
 @if (showLostDialog()) {
   <app-dialog [title]="'leads.markAsLost' | translate" width="360px" (closed)="showLostDialog.set(false)">
-    <app-textarea [label]="'leads.reason' | translate" [formControl]="lostReasonControl" />
+    <app-textarea [label]="'leads.reason' | translate" [formControl]="lostReasonControl" [required]="true" [maxlength]="500" />
 
     <div dialog-footer>
       <button class="action-btn" (click)="showLostDialog.set(false)">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary" (click)="confirmLost()">{{ 'leads.confirmLost' | translate }}</button>
+      <app-validation-button [violations]="lostViolations">
+        <button class="action-btn action-btn--primary"
+          [disabled]="lostFormGroup.invalid"
+          (click)="confirmLost()">{{ 'leads.confirmLost' | translate }}</button>
+      </app-validation-button>
     </div>
   </app-dialog>
 }

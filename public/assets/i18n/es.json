@@ -1450,6 +1450,13 @@
         "email": "Correo electrónico"
       }
     },
+    "identityCluster": {
+      "nameImmutabilityHint": "Campo de identidad — cambiarlo afecta la búsqueda, las referencias cruzadas y los enlaces contables.",
+      "violations": {
+        "name": "Nombre",
+        "email": "Correo electrónico"
+      }
+    },
     "pricing": {
       "lists": "Listas de precios",
       "newList": "Nueva lista de precios",
