@@ -1,8 +1,9 @@
 <div class="tab-toolbar">
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--create" data-testid="add-contact-btn" (click)="openAdd()" aria-label="Add contact">
+  <button class="action-btn action-btn--create" data-testid="add-contact-btn" (click)="openAdd()"
+          [attr.aria-label]="'customers.contactsCluster.addContactAriaLabel' | translate">
     <span class="material-icons-outlined">add</span>
-    Add Contact
+    {{ 'customers.addContact' | translate }}
   </button>
 </div>
 
@@ -14,8 +15,10 @@
   } @else if (contacts().length === 0) {
     <div class="tab-empty">
       <span class="material-icons-outlined">person_off</span>
-      <p>No contacts yet</p>
-      <button class="action-btn action-btn--create" (click)="openAdd()">Add First Contact</button>
+      <p>{{ 'customers.contactsCluster.noneYet' | translate }}</p>
+      <button class="action-btn action-btn--create" (click)="openAdd()">
+        {{ 'customers.contactsCluster.addFirst' | translate }}
+      </button>
     </div>
   } @else {
     <div class="contacts-grid">
@@ -26,7 +29,7 @@
             <div class="contact-card__name">
               {{ contact.lastName }}, {{ contact.firstName }}
               @if (contact.isPrimary) {
-                <span class="chip chip--primary">Primary</span>
+                <span class="chip chip--primary">{{ 'customers.primary' | translate }}</span>
               }
             </div>
             @if (contact.role) {
@@ -44,10 +47,12 @@
             }
           </div>
           <div class="contact-card__actions">
-            <button class="icon-btn" (click)="openEdit(contact)" aria-label="Edit contact">
+            <button class="icon-btn" (click)="openEdit(contact)"
+                    [attr.aria-label]="'customers.contactsCluster.editContactAriaLabel' | translate">
               <span class="material-icons-outlined">edit</span>
             </button>
-            <button class="icon-btn icon-btn--danger" (click)="deleteContact(contact)" aria-label="Remove contact">
+            <button class="icon-btn icon-btn--danger" (click)="deleteContact(contact)"
+                    [attr.aria-label]="'customers.contactsCluster.removeContactAriaLabel' | translate">
               <span class="material-icons-outlined">delete</span>
             </button>
           </div>
@@ -61,24 +66,24 @@
   <app-dialog [title]="dialogTitle()" width="520px" (closed)="closeDialog()">
     <div [formGroup]="contactForm">
       <div class="dialog-row">
-        <app-input data-testid="contact-first-name" label="First Name" formControlName="firstName" [required]="true" />
-        <app-input data-testid="contact-last-name" label="Last Name" formControlName="lastName" [required]="true" />
+        <app-input data-testid="contact-first-name" [label]="'customers.firstName' | translate" formControlName="firstName" [required]="true" />
+        <app-input data-testid="contact-last-name" [label]="'customers.lastName' | translate" formControlName="lastName" [required]="true" />
       </div>
       <div class="dialog-row">
-        <app-input data-testid="contact-email" label="Email" formControlName="email" type="email" />
-        <app-input data-testid="contact-phone" label="Phone" formControlName="phone" mask="phone" />
+        <app-input data-testid="contact-email" [label]="'customers.colEmail' | translate" formControlName="email" type="email" />
+        <app-input data-testid="contact-phone" [label]="'customers.colPhone' | translate" formControlName="phone" mask="phone" />
       </div>
       <div class="dialog-row">
-        <app-select data-testid="contact-role" label="Role" formControlName="role" [options]="roleOptions()" />
-        <app-toggle data-testid="contact-primary" label="Primary Contact" formControlName="isPrimary" />
+        <app-select data-testid="contact-role" [label]="'customers.role' | translate" formControlName="role" [options]="roleOptions()" />
+        <app-toggle data-testid="contact-primary" [label]="'customers.primaryContact' | translate" formControlName="isPrimary" />
       </div>
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations()" [loading]="saving()">
       <button class="action-btn action-btn--primary" data-testid="contact-save-btn"
         [disabled]="contactForm.invalid || saving()"
-        (click)="saveContact()">Save</button>
+        (click)="saveContact()">{{ 'common.save' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

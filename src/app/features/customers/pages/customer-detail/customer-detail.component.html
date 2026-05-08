@@ -11,14 +11,14 @@
       <div class="cd-header__top">
         <a routerLink="/customers" class="cd-back">
           <span class="material-icons-outlined">chevron_left</span>
-          Customers
+          {{ 'customers.detail.back' | translate }}
         </a>
         <div class="cd-header__actions">
-          <button class="action-btn" (click)="toggleEdit()" aria-label="Edit customer">
+          <button class="action-btn" (click)="toggleEdit()" [attr.aria-label]="'customers.detail.editAriaLabel' | translate">
             <span class="material-icons-outlined">{{ editing() ? 'cancel' : 'edit' }}</span>
-            {{ editing() ? 'Done' : 'Edit' }}
+            {{ (editing() ? 'customers.detail.done' : 'customers.detail.edit') | translate }}
           </button>
-          <button class="action-btn" (click)="archiveCustomer()" aria-label="Archive customer">
+          <button class="action-btn" (click)="archiveCustomer()" [attr.aria-label]="'customers.detail.archiveAriaLabel' | translate">
             <span class="material-icons-outlined">archive</span>
           </button>
         </div>
@@ -28,10 +28,10 @@
         <div class="cd-header__name-row">
           <h1 class="cd-header__name">{{ c.name }}</h1>
           <span class="chip" [class.chip--success]="c.isActive" [class.chip--muted]="!c.isActive">
-            {{ c.isActive ? 'Active' : 'Inactive' }}
+            {{ (c.isActive ? 'customers.detail.active' : 'customers.detail.inactive') | translate }}
           </span>
           @if (c.provider) {
-            <span class="chip chip--info" [matTooltip]="'Synced with ' + c.provider">
+            <span class="chip chip--info" [matTooltip]="'customers.detail.syncedWith' | translate: { provider: c.provider }">
               <span class="material-icons-outlined">sync</span>
               {{ c.provider }}
             </span>
@@ -61,27 +61,27 @@
       <div class="cd-stats">
         <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('estimates')" (keydown.enter)="switchTab('estimates')" (keydown.space)="$event.preventDefault(); switchTab('estimates')" [class.cd-stat--active]="activeTab() === 'estimates'">
           <span class="cd-stat__value">{{ c.estimateCount }}</span>
-          <span class="cd-stat__label">Open Estimates</span>
+          <span class="cd-stat__label">{{ 'customers.detail.stats.openEstimates' | translate }}</span>
         </div>
         <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('quotes')" (keydown.enter)="switchTab('quotes')" (keydown.space)="$event.preventDefault(); switchTab('quotes')" [class.cd-stat--active]="activeTab() === 'quotes'">
           <span class="cd-stat__value">{{ c.quoteCount }}</span>
-          <span class="cd-stat__label">Open Quotes</span>
+          <span class="cd-stat__label">{{ 'customers.detail.stats.openQuotes' | translate }}</span>
         </div>
         <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('orders')" (keydown.enter)="switchTab('orders')" (keydown.space)="$event.preventDefault(); switchTab('orders')" [class.cd-stat--active]="activeTab() === 'orders'">
           <span class="cd-stat__value">{{ c.orderCount }}</span>
-          <span class="cd-stat__label">Open Orders</span>
+          <span class="cd-stat__label">{{ 'customers.detail.stats.openOrders' | translate }}</span>
         </div>
         <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('jobs')" (keydown.enter)="switchTab('jobs')" (keydown.space)="$event.preventDefault(); switchTab('jobs')" [class.cd-stat--active]="activeTab() === 'jobs'">
           <span class="cd-stat__value">{{ c.activeJobCount }}</span>
-          <span class="cd-stat__label">Active Jobs</span>
+          <span class="cd-stat__label">{{ 'customers.detail.stats.activeJobs' | translate }}</span>
         </div>
         <div class="cd-stat" role="button" tabindex="0" (click)="switchTab('invoices')" (keydown.enter)="switchTab('invoices')" (keydown.space)="$event.preventDefault(); switchTab('invoices')" [class.cd-stat--active]="activeTab() === 'invoices'">
           <span class="cd-stat__value"><app-currency-display [value]="c.openInvoiceTotal" [currency]="null" /></span>
-          <span class="cd-stat__label">Outstanding</span>
+          <span class="cd-stat__label">{{ 'customers.detail.stats.outstanding' | translate }}</span>
         </div>
         <div class="cd-stat">
           <span class="cd-stat__value"><app-currency-display [value]="c.ytdRevenue" [currency]="null" /></span>
-          <span class="cd-stat__label">YTD Revenue</span>
+          <span class="cd-stat__label">{{ 'customers.detail.stats.ytdRevenue' | translate }}</span>
         </div>
       </div>
 

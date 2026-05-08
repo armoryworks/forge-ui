@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { CustomerService } from '../../../services/customer.service';
 import { ContactInteraction } from '../../../models/contact-interaction.model';
@@ -27,6 +28,7 @@ import { toIsoDate } from '../../../../../shared/utils/date.utils';
   imports: [
     DatePipe,
     ReactiveFormsModule,
+    TranslatePipe,
     DataTableComponent,
     ColumnCellDirective,
     InputComponent,
@@ -46,6 +48,7 @@ export class CustomerInteractionsTabComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly customerId = input.required<number>();
 
@@ -57,21 +60,23 @@ export class CustomerInteractionsTabComponent {
 
   protected readonly contactFilterControl = new FormControl<number | null>(null);
   protected readonly typeFilterControl = new FormControl<string>('');
-  protected readonly contactOptions = signal<SelectOption[]>([{ value: null, label: '-- All Contacts --' }]);
+  protected readonly contactOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('customers.interactions.filterAllContacts') },
+  ]);
 
   protected readonly typeOptions: SelectOption[] = [
-    { value: '', label: '-- All Types --' },
-    { value: 'Call', label: 'Call' },
-    { value: 'Email', label: 'Email' },
-    { value: 'Meeting', label: 'Meeting' },
-    { value: 'Note', label: 'Note' },
+    { value: '', label: this.translate.instant('customers.interactions.filterAllTypes') },
+    { value: 'Call', label: this.translate.instant('customers.interactions.types.Call') },
+    { value: 'Email', label: this.translate.instant('customers.interactions.types.Email') },
+    { value: 'Meeting', label: this.translate.instant('customers.interactions.types.Meeting') },
+    { value: 'Note', label: this.translate.instant('customers.interactions.types.Note') },
   ];
 
   protected readonly formTypeOptions: SelectOption[] = [
-    { value: 'Call', label: 'Call' },
-    { value: 'Email', label: 'Email' },
-    { value: 'Meeting', label: 'Meeting' },
-    { value: 'Note', label: 'Note' },
+    { value: 'Call', label: this.translate.instant('customers.interactions.types.Call') },
+    { value: 'Email', label: this.translate.instant('customers.interactions.types.Email') },
+    { value: 'Meeting', label: this.translate.instant('customers.interactions.types.Meeting') },
+    { value: 'Note', label: this.translate.instant('customers.interactions.types.Note') },
   ];
 
   protected readonly form = new FormGroup({
@@ -84,19 +89,20 @@ export class CustomerInteractionsTabComponent {
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
-    type: 'Type',
-    subject: 'Subject',
-    interactionDate: 'Date',
+    type: this.translate.instant('customers.interactions.violations.type'),
+    subject: this.translate.instant('customers.interactions.violations.subject'),
+    interactionDate: this.translate.instant('customers.interactions.violations.date'),
   });
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'type', header: 'Type', sortable: true, filterable: true, type: 'enum', width: '100px',
+    { field: 'type', header: this.translate.instant('customers.interactions.type'),
+      sortable: true, filterable: true, type: 'enum', width: '100px',
       filterOptions: this.typeOptions.slice(1) },
-    { field: 'subject', header: 'Subject', sortable: true },
-    { field: 'contactName', header: 'Contact', sortable: true, width: '160px' },
-    { field: 'userName', header: 'Logged By', sortable: true, width: '160px' },
-    { field: 'interactionDate', header: 'Date', sortable: true, type: 'date', width: '120px' },
-    { field: 'durationMinutes', header: 'Duration', sortable: true, type: 'number', width: '90px' },
+    { field: 'subject', header: this.translate.instant('customers.interactions.subject'), sortable: true },
+    { field: 'contactName', header: this.translate.instant('customers.interactions.contact'), sortable: true, width: '160px' },
+    { field: 'userName', header: this.translate.instant('customers.interactions.loggedBy'), sortable: true, width: '160px' },
+    { field: 'interactionDate', header: this.translate.instant('customers.interactions.date'), sortable: true, type: 'date', width: '120px' },
+    { field: 'durationMinutes', header: this.translate.instant('customers.interactions.duration'), sortable: true, type: 'number', width: '90px' },
     { field: 'actions', header: '', width: '80px' },
   ];
 
@@ -118,7 +124,7 @@ export class CustomerInteractionsTabComponent {
       next: (customer) => {
         const contacts = (customer as { contacts?: { id: number; firstName: string; lastName: string }[] }).contacts ?? [];
         this.contactOptions.set([
-          { value: null, label: '-- All Contacts --' },
+          { value: null, label: this.translate.instant('customers.interactions.filterAllContacts') },
           ...contacts.map(c => ({ value: c.id, label: `${c.lastName}, ${c.firstName}` })),
         ]);
       },
@@ -190,7 +196,7 @@ export class CustomerInteractionsTabComponent {
         this.saving.set(false);
         this.closeDialog();
         this.loadInteractions();
-        this.snackbar.success(id ? 'Interaction updated' : 'Interaction logged');
+        this.snackbar.success(this.translate.instant(id ? 'customers.interactions.updated' : 'customers.interactions.logged'));
       },
       error: () => this.saving.set(false),
     });
@@ -200,9 +206,9 @@ export class CustomerInteractionsTabComponent {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Interaction?',
-        message: `Delete "${interaction.subject}"? This cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('customers.interactions.deleteTitle'),
+        message: this.translate.instant('customers.interactions.deleteMessage', { subject: interaction.subject }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -210,7 +216,7 @@ export class CustomerInteractionsTabComponent {
       this.customerService.deleteInteraction(this.customerId(), interaction.id).subscribe({
         next: () => {
           this.loadInteractions();
-          this.snackbar.success('Interaction deleted');
+          this.snackbar.success(this.translate.instant('customers.interactions.deleted'));
         },
       });
     });

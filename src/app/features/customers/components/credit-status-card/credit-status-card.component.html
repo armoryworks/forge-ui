@@ -1,7 +1,7 @@
 <section class="credit-card" [appLoadingBlock]="loading()">
   @if (credit(); as c) {
     <div class="credit-card__header">
-      <h3 class="credit-card__title">Credit Status</h3>
+      <h3 class="credit-card__title">{{ 'customers.creditStatus.title' | translate }}</h3>
       <span class="chip" [class]="'chip--' + riskClass(c.riskLevel)">{{ c.riskLevel }}</span>
     </div>
 
@@ -9,43 +9,45 @@
       <div class="credit-card__hold-banner">
         <span class="material-icons-outlined">block</span>
         <div>
-          <strong>Credit Hold</strong>
+          <strong>{{ 'customers.creditStatus.creditHold' | translate }}</strong>
           @if (c.holdReason) {
             <p>{{ c.holdReason }}</p>
           }
         </div>
-        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="releaseHold()">Release</button>
+        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="releaseHold()">
+          {{ 'customers.creditStatus.release' | translate }}
+        </button>
       </div>
     }
 
     <div class="credit-card__metrics">
       <div class="credit-card__metric">
-        <span class="credit-card__metric-label">Credit Limit</span>
+        <span class="credit-card__metric-label">{{ 'customers.creditStatus.creditLimit' | translate }}</span>
         <span class="credit-card__metric-value">
           @if (c.creditLimit !== null) {
             <app-currency-display [value]="c.creditLimit" [currency]="null" />
-          } @else { None }
+          } @else { {{ 'customers.creditStatus.none' | translate }} }
         </span>
       </div>
       <div class="credit-card__metric">
-        <span class="credit-card__metric-label">Open AR</span>
+        <span class="credit-card__metric-label">{{ 'customers.creditStatus.openAr' | translate }}</span>
         <span class="credit-card__metric-value"><app-currency-display [value]="c.openArBalance" [currency]="null" /></span>
       </div>
       <div class="credit-card__metric">
-        <span class="credit-card__metric-label">Pending Orders</span>
+        <span class="credit-card__metric-label">{{ 'customers.creditStatus.pendingOrders' | translate }}</span>
         <span class="credit-card__metric-value"><app-currency-display [value]="c.pendingOrdersTotal" [currency]="null" /></span>
       </div>
       <div class="credit-card__metric">
-        <span class="credit-card__metric-label">Total Exposure</span>
+        <span class="credit-card__metric-label">{{ 'customers.creditStatus.totalExposure' | translate }}</span>
         <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.isOverLimit"><app-currency-display [value]="c.totalExposure" [currency]="null" /></span>
       </div>
       @if (c.creditLimit !== null) {
         <div class="credit-card__metric">
-          <span class="credit-card__metric-label">Available Credit</span>
+          <span class="credit-card__metric-label">{{ 'customers.creditStatus.availableCredit' | translate }}</span>
           <span class="credit-card__metric-value" [class.credit-card__metric-value--danger]="c.availableCredit < 0"><app-currency-display [value]="c.availableCredit" [currency]="null" /></span>
         </div>
         <div class="credit-card__metric">
-          <span class="credit-card__metric-label">Utilization</span>
+          <span class="credit-card__metric-label">{{ 'customers.creditStatus.utilization' | translate }}</span>
           <span class="credit-card__metric-value">{{ c.utilizationPercent | number:'1.0-1' }}%</span>
         </div>
       }
@@ -64,7 +66,7 @@
          and the contributing payments without manual lookup. -->
     <div class="credit-card__on-file" data-testid="credit-on-file">
       <div class="credit-card__on-file-header">
-        <span class="credit-card__metric-label">Credit on File</span>
+        <span class="credit-card__metric-label">{{ 'customers.creditStatus.creditOnFile' | translate }}</span>
         <span class="credit-card__metric-value"
               [class.credit-card__metric-value--success]="c.unappliedCreditAmount > 0"
               data-testid="credit-on-file-amount">
@@ -72,12 +74,25 @@
         </span>
       </div>
       @if (c.unappliedCreditAmount === 0 || c.unappliedCredits.length === 0) {
-        <p class="credit-card__on-file-empty">No unapplied credits.</p>
+        <p class="credit-card__on-file-empty">{{ 'customers.creditStatus.noUnappliedCredits' | translate }}</p>
       } @else {
         <button type="button" class="credit-card__on-file-toggle" (click)="toggleCreditsExpanded()"
-                [attr.aria-expanded]="creditsExpanded()" aria-label="Toggle credit details">
+                [attr.aria-expanded]="creditsExpanded()"
+                [attr.aria-label]="'customers.creditStatus.toggleCreditDetailsAriaLabel' | translate">
           <span class="material-icons-outlined">{{ creditsExpanded() ? 'expand_less' : 'expand_more' }}</span>
-          {{ creditsExpanded() ? 'Hide' : 'Show' }} {{ c.unappliedCredits.length }} payment{{ c.unappliedCredits.length === 1 ? '' : 's' }}
+          @if (creditsExpanded()) {
+            @if (c.unappliedCredits.length === 1) {
+              {{ 'customers.creditStatus.hidePayments' | translate: { count: c.unappliedCredits.length } }}
+            } @else {
+              {{ 'customers.creditStatus.hidePaymentsPlural' | translate: { count: c.unappliedCredits.length } }}
+            }
+          } @else {
+            @if (c.unappliedCredits.length === 1) {
+              {{ 'customers.creditStatus.showPayments' | translate: { count: c.unappliedCredits.length } }}
+            } @else {
+              {{ 'customers.creditStatus.showPaymentsPlural' | translate: { count: c.unappliedCredits.length } }}
+            }
+          }
         </button>
         @if (creditsExpanded()) {
           <ul class="credit-card__on-file-list" data-testid="credit-on-file-list">
@@ -98,8 +113,9 @@
 
     @if (!c.isOnHold) {
       <div class="credit-card__actions">
-        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="openHoldDialog()" aria-label="Place credit hold">
-          <span class="material-icons-outlined">block</span> Place Hold
+        <button class="action-btn action-btn--sm" [disabled]="saving()" (click)="openHoldDialog()"
+                [attr.aria-label]="'customers.creditStatus.placeHoldAriaLabel' | translate">
+          <span class="material-icons-outlined">block</span> {{ 'customers.creditStatus.placeHold' | translate }}
         </button>
       </div>
     }
@@ -107,12 +123,14 @@
 </section>
 
 @if (showHoldDialog()) {
-  <app-dialog title="Place Credit Hold" width="440px" (closed)="showHoldDialog.set(false)">
-    <p class="text-muted">Customer will be blocked from new orders while on hold.</p>
-    <app-textarea label="Hold Reason" [formControl]="holdReason" [rows]="3" [required]="true" [maxlength]="500" />
+  <app-dialog [title]="'customers.creditStatus.placeHoldDialogTitle' | translate" width="440px" (closed)="showHoldDialog.set(false)">
+    <p class="text-muted">{{ 'customers.creditStatus.placeHoldDialogHint' | translate }}</p>
+    <app-textarea [label]="'customers.creditStatus.holdReason' | translate" [formControl]="holdReason" [rows]="3" [required]="true" [maxlength]="500" />
     <div dialog-footer>
-      <button class="action-btn" (click)="showHoldDialog.set(false)">Cancel</button>
-      <button class="action-btn action-btn--primary" [disabled]="holdReason.invalid || saving()" (click)="placeHold()">Place Hold</button>
+      <button class="action-btn" (click)="showHoldDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary" [disabled]="holdReason.invalid || saving()" (click)="placeHold()">
+        {{ 'customers.creditStatus.placeHold' | translate }}
+      </button>
     </div>
   </app-dialog>
 }

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { CustomerService } from '../../../services/customer.service';
@@ -21,7 +21,7 @@ import { Contact } from '../../../models/contact.model';
   selector: 'app-customer-contacts-tab',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, TranslatePipe,
     AvatarComponent, InputComponent, SelectComponent, ToggleComponent,
     DialogComponent, ValidationButtonComponent,
   ],
@@ -43,7 +43,9 @@ export class CustomerContactsTabComponent implements OnInit {
   protected readonly saving = signal(false);
   protected readonly showDialog = signal(false);
   protected readonly editingId = signal<number | null>(null);
-  protected readonly roleOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
+  protected readonly roleOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('customers.roleOptions.none') },
+  ]);
 
   protected readonly contactForm = new FormGroup({
     firstName: new FormControl('', [Validators.required, Validators.maxLength(100)]),
@@ -56,14 +58,14 @@ export class CustomerContactsTabComponent implements OnInit {
 
   protected readonly violations = computed(() =>
     FormValidationService.getViolations(this.contactForm, {
-      firstName: 'First Name',
-      lastName: 'Last Name',
-      email: 'Email',
+      firstName: this.translate.instant('customers.contactsCluster.violations.firstName'),
+      lastName: this.translate.instant('customers.contactsCluster.violations.lastName'),
+      email: this.translate.instant('customers.contactsCluster.violations.email'),
     })
   );
 
   protected readonly dialogTitle = computed(() =>
-    this.editingId() ? 'Edit Contact' : 'New Contact'
+    this.translate.instant(this.editingId() ? 'customers.editContact' : 'customers.newContact')
   );
 
   protected getInitials(c: Contact): string {
@@ -71,8 +73,10 @@ export class CustomerContactsTabComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.refDataService.getAsOptions('contact_role', { allLabel: '-- None --', valueField: 'label' })
-      .subscribe(opts => this.roleOptions.set(opts));
+    this.refDataService.getAsOptions('contact_role', {
+      allLabel: this.translate.instant('customers.roleOptions.none'),
+      valueField: 'label',
+    }).subscribe(opts => this.roleOptions.set(opts));
     this.loadContacts();
   }
 
@@ -134,7 +138,7 @@ export class CustomerContactsTabComponent implements OnInit {
         this.saving.set(false);
         this.closeDialog();
         this.loadContacts();
-        this.snackbar.success(id ? 'Contact updated' : 'Contact added');
+        this.snackbar.success(this.translate.instant(id ? 'customers.contactUpdated' : 'customers.contactCreated'));
       },
       error: () => this.saving.set(false),
     });
@@ -144,9 +148,11 @@ export class CustomerContactsTabComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Remove Contact?',
-        message: `Remove ${contact.firstName} ${contact.lastName} from this customer?`,
-        confirmLabel: 'Remove',
+        title: this.translate.instant('customers.deleteContactTitle'),
+        message: this.translate.instant('customers.deleteContactMessage', {
+          name: `${contact.firstName} ${contact.lastName}`,
+        }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'warn',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -154,7 +160,7 @@ export class CustomerContactsTabComponent implements OnInit {
       this.customerService.deleteContact(this.customerId(), contact.id).subscribe({
         next: () => {
           this.loadContacts();
-          this.snackbar.success('Contact removed');
+          this.snackbar.success(this.translate.instant('customers.contactRemoved'));
         },
       });
     });

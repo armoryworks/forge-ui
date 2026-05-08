@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, 
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 import { CustomerService } from '../../services/customer.service';
 import { CreditRisk, CreditStatus } from '../../models/credit-status.model';
@@ -14,7 +15,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 @Component({
   selector: 'app-credit-status-card',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, DialogComponent, TextareaComponent, CurrencyDisplayComponent, LoadingBlockDirective],
+  imports: [DatePipe, DecimalPipe, PercentPipe, ReactiveFormsModule, TranslatePipe, DialogComponent, TextareaComponent, CurrencyDisplayComponent, LoadingBlockDirective],
   templateUrl: './credit-status-card.component.html',
   styleUrl: './credit-status-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
