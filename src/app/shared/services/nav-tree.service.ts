@@ -20,17 +20,20 @@ export class NavTreeService {
   );
 
   // Pinned-top items: always rendered at the top of the sidebar regardless of
-  // which group the user has drilled into. Empty by default — Dashboard used
-  // to live here as a "one click from anywhere" landing-page shortcut, but
-  // the constant top-anchor read as more chrome than affordance, so it now
-  // lives inside the Operations group like the other workflow-specific tools.
+  // which group the user has drilled into. Currently empty — see allMainTree
+  // below for Dashboard's home as a top-level peer (not workflow-domain-bound).
   private readonly allPinnedTopTree: NavItem[] = [];
 
   private readonly allMainTree: NavItem[] = [
+    // Dashboard sits at the top of the main tree as a peer of Operations / Sales
+    // / Production / etc. — NOT as a child of any one functional area. The
+    // dashboard is per-user, customized to the signed-in user's role and main
+    // job function (engineer, PM, office manager, production worker), so
+    // bucketing it under any single domain misrepresents what it shows.
+    { icon: 'dashboard', label: 'Dashboard', i18nKey: 'nav.dashboard', route: '/dashboard', shortcut: ['Q', 'D'] },
     {
       icon: 'space_dashboard', label: 'Operations', i18nKey: 'navGroups.operations',
       children: [
-        { icon: 'dashboard', label: 'Dashboard', i18nKey: 'nav.dashboard', route: '/dashboard', shortcut: ['Q', 'D'] },
         { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
         { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
         { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', allowedRoles: ['Admin', 'Manager', 'PM'] },
@@ -168,8 +171,9 @@ export class NavTreeService {
   /**
    * Full ancestor chain of the current URL, walking all groups (including
    * non-routePrefix groups). Used by the header breadcrumb so that e.g.
-   * `/dashboard` shows `Operations > Dashboard` even though Operations
-   * doesn't own the `/dashboard` URL prefix.
+   * `/kanban` shows `Operations > Board` even though Operations doesn't
+   * own the `/kanban` URL prefix. Top-level peer leaves like `/dashboard`
+   * resolve to a single-item trail (just `Dashboard`).
    */
   readonly breadcrumbTrail: Signal<NavItem[]> = computed(() => {
     const url = this.currentUrl();

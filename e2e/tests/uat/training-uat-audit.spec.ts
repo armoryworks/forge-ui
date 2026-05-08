@@ -21,8 +21,10 @@ const APP_BASE = 'http://localhost:4200';
 
 // All major pages to audit, grouped by business domain
 const PAGES_TO_AUDIT = [
+  // Home (per-user landing — not bound to a single functional area)
+  { route: '/dashboard', name: 'Dashboard', domain: 'Home', trainingSlug: 'dashboard' },
+
   // Operations
-  { route: '/dashboard', name: 'Dashboard', domain: 'Operations', trainingSlug: 'dashboard' },
   { route: '/kanban', name: 'Kanban Board', domain: 'Operations', trainingSlug: 'kanban' },
   { route: '/backlog', name: 'Backlog', domain: 'Operations', trainingSlug: 'backlog' },
   { route: '/planning', name: 'Planning Cycles', domain: 'Operations', trainingSlug: 'planning' },
