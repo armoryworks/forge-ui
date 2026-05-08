@@ -5,7 +5,7 @@
     [data]="orders()"
     [loading]="loading()"
     emptyIcon="shopping_cart"
-    emptyMessage="No sales orders yet"
+    [emptyMessage]="'customers.tabs.noOrdersYet' | translate"
     [clickableRows]="true"
     (rowClick)="openOrder($any($event))">
 

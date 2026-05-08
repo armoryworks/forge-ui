@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EstimateService } from '../../../services/estimate.service';
 import { Estimate, EstimateStatus } from '../../../models/estimate.model';
@@ -35,7 +35,7 @@ const STATUS_OPTIONS: SelectOption[] = [
   selector: 'app-customer-estimates-tab',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule,
+    DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     InputComponent, CurrencyInputComponent, CurrencyDisplayComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DialogComponent, ValidationButtonComponent,
@@ -60,12 +60,16 @@ export class CustomerEstimatesTabComponent implements OnInit {
   protected readonly statusOptions = STATUS_OPTIONS;
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'title', header: 'Title', sortable: true },
-    { field: 'estimatedAmount', header: 'Amount', sortable: true, type: 'number', width: '120px', align: 'right' },
-    { field: 'status', header: 'Status', sortable: true, filterable: true, type: 'enum', width: '110px',
+    { field: 'title', header: this.translate.instant('customers.estimates.title'), sortable: true },
+    { field: 'estimatedAmount', header: this.translate.instant('customers.estimates.estimatedAmount'),
+      sortable: true, type: 'number', width: '120px', align: 'right' },
+    { field: 'status', header: this.translate.instant('common.status'),
+      sortable: true, filterable: true, type: 'enum', width: '110px',
       filterOptions: STATUS_OPTIONS },
-    { field: 'validUntil', header: 'Valid Until', sortable: true, type: 'date', width: '110px' },
-    { field: 'createdAt', header: 'Created', sortable: true, type: 'date', width: '100px' },
+    { field: 'validUntil', header: this.translate.instant('customers.estimates.validUntil'),
+      sortable: true, type: 'date', width: '110px' },
+    { field: 'createdAt', header: this.translate.instant('customers.colCreated'),
+      sortable: true, type: 'date', width: '100px' },
     { field: 'actions', header: '', width: '100px' },
   ];
 
@@ -80,13 +84,13 @@ export class CustomerEstimatesTabComponent implements OnInit {
 
   protected readonly violations = computed(() =>
     FormValidationService.getViolations(this.estimateForm, {
-      title: 'Title',
-      estimatedAmount: 'Estimated Amount',
+      title: this.translate.instant('customers.estimates.title'),
+      estimatedAmount: this.translate.instant('customers.estimates.estimatedAmount'),
     })
   );
 
   protected readonly dialogTitle = computed(() =>
-    this.editingId() ? 'Edit Estimate' : 'New Estimate'
+    this.translate.instant(this.editingId() ? 'customers.estimates.editEstimate' : 'customers.estimates.newEstimate')
   );
 
   protected readonly isEditing = computed(() => this.editingId() !== null);
@@ -156,7 +160,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
           this.saving.set(false);
           this.closeDialog();
           this.loadEstimates();
-          this.snackbar.success('Estimate updated');
+          this.snackbar.success(this.translate.instant('customers.estimates.estimateUpdated'));
         },
         error: () => this.saving.set(false),
       });
@@ -173,7 +177,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
           this.saving.set(false);
           this.closeDialog();
           this.loadEstimates();
-          this.snackbar.success('Estimate created');
+          this.snackbar.success(this.translate.instant('customers.estimates.estimateCreated'));
         },
         error: () => this.saving.set(false),
       });
@@ -184,9 +188,9 @@ export class CustomerEstimatesTabComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: 'Delete Estimate?',
-        message: `Delete "${estimate.title}"? This cannot be undone.`,
-        confirmLabel: 'Delete',
+        title: this.translate.instant('customers.estimates.deleteTitle'),
+        message: this.translate.instant('customers.estimates.deleteMessage', { title: estimate.title }),
+        confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -194,7 +198,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
       this.estimateService.deleteEstimate(estimate.id).subscribe({
         next: () => {
           this.loadEstimates();
-          this.snackbar.success('Estimate deleted');
+          this.snackbar.success(this.translate.instant('customers.estimates.estimateDeleted'));
         },
       });
     });
@@ -204,9 +208,9 @@ export class CustomerEstimatesTabComponent implements OnInit {
     this.dialog.open(ConfirmDialogComponent, {
       width: '420px',
       data: {
-        title: 'Convert to Quote?',
-        message: `Convert "${estimate.title}" to a formal quote? The estimate will be marked as Accepted.`,
-        confirmLabel: 'Convert',
+        title: this.translate.instant('customers.estimates.convertTitle'),
+        message: this.translate.instant('customers.estimates.convertMessage', { title: estimate.title }),
+        confirmLabel: this.translate.instant('customers.estimates.convertConfirmLabel'),
         severity: 'info',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
@@ -214,7 +218,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
       this.estimateService.convertToQuote(estimate.id).subscribe({
         next: result => {
           this.loadEstimates();
-          this.snackbar.success(`Created quote ${result.quoteNumber ?? ''}`);
+          this.snackbar.success(this.translate.instant('customers.estimates.createdQuote', { number: result.quoteNumber ?? '' }));
         },
       });
     });

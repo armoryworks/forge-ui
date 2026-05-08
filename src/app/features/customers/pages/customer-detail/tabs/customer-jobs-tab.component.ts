@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -23,7 +24,7 @@ interface CustomerJob {
 @Component({
   selector: 'app-customer-jobs-tab',
   standalone: true,
-  imports: [DatePipe, DataTableComponent, ColumnCellDirective],
+  imports: [DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective],
   templateUrl: './customer-jobs-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

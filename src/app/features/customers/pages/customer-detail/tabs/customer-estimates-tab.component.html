@@ -1,8 +1,9 @@
 <div class="tab-toolbar">
   <span class="tab-toolbar__spacer"></span>
-  <button class="action-btn action-btn--create" (click)="openCreate()" aria-label="New estimate">
+  <button class="action-btn action-btn--create" (click)="openCreate()"
+          [attr.aria-label]="'customers.estimates.newEstimateAriaLabel' | translate">
     <span class="material-icons-outlined">add</span>
-    New Estimate
+    {{ 'customers.estimates.newEstimate' | translate }}
   </button>
 </div>
 
@@ -13,7 +14,7 @@
     [data]="estimates()"
     [loading]="loading()"
     emptyIcon="request_quote"
-    emptyMessage="No estimates yet"
+    [emptyMessage]="'customers.tabs.noEstimatesYet' | translate"
     [clickableRows]="true"
     (rowClick)="openEdit($any($event))">
 
@@ -37,12 +38,13 @@
       <div class="row-actions">
         @if (!$any(row).generatedQuoteId) {
           <button class="icon-btn" (click)="$event.stopPropagation(); convertToQuote($any(row))"
-                  aria-label="Convert to quote" title="Convert to Quote">
+                  [attr.aria-label]="'customers.estimates.convertToQuoteAriaLabel' | translate"
+                  [title]="'customers.estimates.convertToQuote' | translate">
             <span class="material-icons-outlined">forward</span>
           </button>
         }
         <button class="icon-btn icon-btn--danger" (click)="$event.stopPropagation(); deleteEstimate($any(row))"
-                aria-label="Delete estimate">
+                [attr.aria-label]="'customers.estimates.deleteEstimateAriaLabel' | translate">
           <span class="material-icons-outlined">delete</span>
         </button>
       </div>
@@ -53,23 +55,23 @@
 @if (showDialog()) {
   <app-dialog [title]="dialogTitle()" width="520px" (closed)="closeDialog()">
     <div [formGroup]="estimateForm">
-      <app-input label="Title" formControlName="title" [required]="true" />
-      <app-textarea label="Description" formControlName="description" [rows]="2" />
+      <app-input [label]="'customers.estimates.title' | translate" formControlName="title" [required]="true" />
+      <app-textarea [label]="'customers.estimates.description' | translate" formControlName="description" [rows]="2" />
       <div class="dialog-row">
-        <app-currency-input label="Estimated Amount" formControlName="estimatedAmount" [required]="true" />
-        <app-datepicker label="Valid Until" formControlName="validUntil" />
+        <app-currency-input [label]="'customers.estimates.estimatedAmount' | translate" formControlName="estimatedAmount" [required]="true" />
+        <app-datepicker [label]="'customers.estimates.validUntil' | translate" formControlName="validUntil" />
       </div>
       @if (isEditing()) {
-        <app-select label="Status" formControlName="status" [options]="statusOptions" />
+        <app-select [label]="'common.status' | translate" formControlName="status" [options]="statusOptions" />
       }
-      <app-textarea label="Notes" formControlName="notes" [rows]="2" />
+      <app-textarea [label]="'customers.estimates.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
     <div dialog-footer>
-      <button class="action-btn" (click)="closeDialog()">Cancel</button>
+      <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations()" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         [disabled]="estimateForm.invalid || saving()"
-        (click)="saveEstimate()">Save</button>
+        (click)="saveEstimate()">{{ 'common.save' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

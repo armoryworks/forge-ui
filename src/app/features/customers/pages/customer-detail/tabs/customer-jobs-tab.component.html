@@ -5,7 +5,7 @@
     [data]="jobs()"
     [loading]="loading()"
     emptyIcon="work_off"
-    emptyMessage="No jobs linked to this customer"
+    [emptyMessage]="'customers.tabs.noJobsYet' | translate"
     [clickableRows]="true"
     (rowClick)="openJob($any($event))">
 

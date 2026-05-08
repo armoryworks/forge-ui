@@ -1,4 +1,5 @@
 import { DatePipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
 import { ChangeDetectionStrategy, Component, inject, input, OnInit, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -22,7 +23,7 @@ interface SalesOrderListItem {
 @Component({
   selector: 'app-customer-orders-tab',
   standalone: true,
-  imports: [DatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
+  imports: [DatePipe, TranslatePipe, DataTableComponent, ColumnCellDirective, CurrencyDisplayComponent],
   templateUrl: './customer-orders-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

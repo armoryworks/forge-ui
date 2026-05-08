@@ -1462,6 +1462,44 @@
       "openFullPageAriaLabel": "Abrir página de detalle del cliente",
       "loadFailed": "No se pudo cargar el cliente."
     },
+    "overview": {
+      "accountDetails": "Datos de la cuenta",
+      "customerName": "Nombre del cliente",
+      "company": "Empresa",
+      "customerSince": "Cliente desde",
+      "accountingIntegration": "Integración contable",
+      "reference": "Referencia"
+    },
+    "tabs": {
+      "noEstimatesYet": "Aún no hay estimaciones",
+      "noQuotesYet": "Aún no hay cotizaciones",
+      "noOrdersYet": "Aún no hay órdenes de venta",
+      "noJobsYet": "No hay trabajos vinculados a este cliente",
+      "noInvoicesYet": "Aún no hay facturas"
+    },
+    "estimates": {
+      "newEstimate": "Nueva estimación",
+      "newEstimateAriaLabel": "Nueva estimación",
+      "editEstimate": "Editar estimación",
+      "convertToQuote": "Convertir a cotización",
+      "convertToQuoteAriaLabel": "Convertir a cotización",
+      "deleteEstimate": "Eliminar estimación",
+      "deleteEstimateAriaLabel": "Eliminar estimación",
+      "title": "Título",
+      "description": "Descripción",
+      "estimatedAmount": "Monto estimado",
+      "validUntil": "Válido hasta",
+      "notes": "Notas",
+      "estimateCreated": "Estimación creada",
+      "estimateUpdated": "Estimación actualizada",
+      "estimateDeleted": "Estimación eliminada",
+      "deleteTitle": "¿Eliminar estimación?",
+      "deleteMessage": "¿Eliminar \"{{title}}\"? Esta acción no se puede deshacer.",
+      "convertTitle": "¿Convertir a cotización?",
+      "convertMessage": "¿Convertir \"{{title}}\" en una cotización formal? La estimación se marcará como Aceptada.",
+      "convertConfirmLabel": "Convertir",
+      "createdQuote": "Cotización {{number}} creada"
+    },
     "pricing": {
       "lists": "Listas de precios",
       "newList": "Nueva lista de precios",

@@ -1471,6 +1471,44 @@
       "openFullPageAriaLabel": "Open customer detail page",
       "loadFailed": "Couldn't load customer."
     },
+    "overview": {
+      "accountDetails": "Account Details",
+      "customerName": "Customer Name",
+      "company": "Company",
+      "customerSince": "Customer Since",
+      "accountingIntegration": "Accounting Integration",
+      "reference": "Reference"
+    },
+    "tabs": {
+      "noEstimatesYet": "No estimates yet",
+      "noQuotesYet": "No quotes yet",
+      "noOrdersYet": "No sales orders yet",
+      "noJobsYet": "No jobs linked to this customer",
+      "noInvoicesYet": "No invoices yet"
+    },
+    "estimates": {
+      "newEstimate": "New Estimate",
+      "newEstimateAriaLabel": "New estimate",
+      "editEstimate": "Edit Estimate",
+      "convertToQuote": "Convert to Quote",
+      "convertToQuoteAriaLabel": "Convert to quote",
+      "deleteEstimate": "Delete Estimate",
+      "deleteEstimateAriaLabel": "Delete estimate",
+      "title": "Title",
+      "description": "Description",
+      "estimatedAmount": "Estimated Amount",
+      "validUntil": "Valid Until",
+      "notes": "Notes",
+      "estimateCreated": "Estimate created",
+      "estimateUpdated": "Estimate updated",
+      "estimateDeleted": "Estimate deleted",
+      "deleteTitle": "Delete Estimate?",
+      "deleteMessage": "Delete \"{{title}}\"? This cannot be undone.",
+      "convertTitle": "Convert to Quote?",
+      "convertMessage": "Convert \"{{title}}\" to a formal quote? The estimate will be marked as Accepted.",
+      "convertConfirmLabel": "Convert",
+      "createdQuote": "Created quote {{number}}"
+    },
     "pricing": {
       "lists": "Price lists",
       "newList": "New price list",

@@ -5,7 +5,7 @@
     [data]="quotes()"
     [loading]="loading()"
     emptyIcon="request_quote"
-    emptyMessage="No quotes yet"
+    [emptyMessage]="'customers.tabs.noQuotesYet' | translate"
     [clickableRows]="true"
     (rowClick)="openQuote($any($event))">
 

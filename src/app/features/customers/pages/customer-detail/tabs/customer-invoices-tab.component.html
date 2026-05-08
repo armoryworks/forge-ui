@@ -5,7 +5,7 @@
     [data]="invoices()"
     [loading]="loading()"
     emptyIcon="receipt_long"
-    emptyMessage="No invoices yet"
+    [emptyMessage]="'customers.tabs.noInvoicesYet' | translate"
     [clickableRows]="true"
     (rowClick)="openInvoice($any($event))">
 
