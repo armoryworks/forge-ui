@@ -21,9 +21,11 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
+import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { EntityCompletenessChipComponent } from '../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { EntityCompletenessBadgeComponent } from '../../shared/components/entity-completeness-badge/entity-completeness-badge.component';
+import { CustomerDetailDialogComponent, CustomerDetailDialogData, CustomerDetailDialogResult } from './components/customer-detail-dialog/customer-detail-dialog.component';
 
 @Component({
   selector: 'app-customers',
@@ -48,6 +50,7 @@ export class CustomersComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly scanner = inject(ScannerService);
+  private readonly detailDialog = inject(DetailDialogService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -146,6 +149,17 @@ export class CustomersComponent {
     this.scanner.setContext('customers');
     this.loadCustomers();
 
+    // Wave 5+ — auto-open the customer preview dialog when landing on the
+    // page with `?detail=customer:{id}`. Cross-entity links from invoice /
+    // SO / shipment screens drop a query param like that and route here;
+    // the dialog opens after the list loads. User can dismiss to remain
+    // on the customers list, or click "Open Customer Page" to navigate
+    // into the full multi-tab detail.
+    const detail = this.detailDialog.getDetailFromUrl();
+    if (detail?.entityType === 'customer') {
+      this.openCustomerPreview(detail.entityId);
+    }
+
     // Scanner — drop scanned values into the search field. Loads on the
     // next tick via the debounced search subscription below.
     effect(() => {
@@ -215,6 +229,17 @@ export class CustomersComponent {
 
   protected selectCustomer(item: CustomerListItem): void {
     this.router.navigate(['/customers', item.id]);
+  }
+
+  /**
+   * Wave 5+ — Open the customer preview dialog. Used by the auto-open-from-URL
+   * path; cross-entity links route here via `?detail=customer:{id}`. Mirrors
+   * the lead/part detail-dialog patterns.
+   */
+  protected openCustomerPreview(customerId: number): void {
+    this.detailDialog.open<
+      CustomerDetailDialogComponent, CustomerDetailDialogData, CustomerDetailDialogResult | undefined
+    >('customer', customerId, CustomerDetailDialogComponent, { customerId }, { width: '720px' });
   }
 
   // ─── Customer Create ───

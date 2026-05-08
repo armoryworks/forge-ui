@@ -60,10 +60,12 @@ export class EntityLinkComponent {
     const id = this.entityId();
     const basePath = ENTITY_ROUTES[entityType];
 
-    if (entityType === 'customer') {
-      this.router.navigate(['/customers', id, 'overview']);
-    } else {
-      this.router.navigate([basePath], { queryParams: { detail: `${entityType}:${id}` } });
-    }
+    // Wave 5+ — Customer used to special-case to a yank-to-/customers/:id
+    // navigation that ripped the user out of their originating context.
+    // Now routes through the standard ?detail=type:{id} preview dialog
+    // (CustomerDetailDialog opens via DetailDialogService on the customers
+    // list page). The dialog's "Open Full Page" button is the explicit
+    // opt-in for the full multi-tab detail view.
+    this.router.navigate([basePath], { queryParams: { detail: `${entityType}:${id}` } });
   }
 }

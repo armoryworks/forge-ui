@@ -1457,6 +1457,11 @@
         "email": "Correo electrónico"
       }
     },
+    "previewDialog": {
+      "openFullPage": "Abrir página del cliente",
+      "openFullPageAriaLabel": "Abrir página de detalle del cliente",
+      "loadFailed": "No se pudo cargar el cliente."
+    },
     "pricing": {
       "lists": "Listas de precios",
       "newList": "Nueva lista de precios",

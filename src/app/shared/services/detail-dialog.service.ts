@@ -20,17 +20,22 @@ export class DetailDialogService {
    * Open a detail dialog and sync the URL.
    *
    * @returns MatDialogRef — callers can chain `.afterClosed()` for feature-specific logic.
+   *
+   * `config.width` defaults to 1400px (full-detail wrapper case used by Parts,
+   * Vendors, Leads, etc.). Lightweight preview dialogs (CustomerDetailDialog
+   * shows just the overview) override to a narrower width — pass e.g. `'720px'`.
    */
   open<T, D, R = undefined>(
     entityType: string,
     entityId: number,
     component: ComponentType<T>,
     data: D,
+    config?: { width?: string },
   ): MatDialogRef<T, R> {
     this.setDetailParam(entityType, entityId);
 
     const ref = this.dialog.open<T, D, R>(component, {
-      width: '1400px',
+      width: config?.width ?? '1400px',
       maxWidth: '95vw',
       panelClass: 'detail-dialog-panel',
       data,

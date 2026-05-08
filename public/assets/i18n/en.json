@@ -1466,6 +1466,11 @@
         "email": "Email"
       }
     },
+    "previewDialog": {
+      "openFullPage": "Open customer page",
+      "openFullPageAriaLabel": "Open customer detail page",
+      "loadFailed": "Couldn't load customer."
+    },
     "pricing": {
       "lists": "Price lists",
       "newList": "New price list",

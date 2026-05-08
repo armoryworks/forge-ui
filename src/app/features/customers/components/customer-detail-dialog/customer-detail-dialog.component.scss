@@ -1,0 +1,9 @@
+@use 'styles/variables' as *;
+
+.customer-preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  min-height: 240px;
+}

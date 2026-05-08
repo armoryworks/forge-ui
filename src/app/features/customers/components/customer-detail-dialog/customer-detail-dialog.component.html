@@ -1,0 +1,20 @@
+<app-dialog [title]="customer()?.name ?? ''" width="720px" (closed)="close()">
+  <div class="customer-preview" [appLoadingBlock]="loading()">
+    @if (customer(); as c) {
+      <app-customer-identity-cluster [customer]="c" [editing]="false" />
+      <app-customer-overview-tab [customer]="c" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+    <button class="action-btn action-btn--primary"
+      data-testid="customer-preview-open-full-btn"
+      (click)="openFullPage()"
+      [attr.aria-label]="'customers.previewDialog.openFullPageAriaLabel' | translate"
+      [disabled]="!customer()">
+      <span class="material-icons-outlined">open_in_new</span>
+      {{ 'customers.previewDialog.openFullPage' | translate }}
+    </button>
+  </div>
+</app-dialog>
