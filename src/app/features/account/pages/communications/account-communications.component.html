@@ -4,6 +4,32 @@
     <p class="comms__subtitle">{{ 'account.communications.subtitle' | translate }}</p>
   </div>
 
+  @if (health().total > 0) {
+    <div class="comms__health">
+      <div class="comms__health-stat">
+        <span class="comms__health-num">{{ health().total }}</span>
+        <span class="comms__health-label">{{ 'account.communications.health.total' | translate }}</span>
+      </div>
+      <div class="comms__health-stat comms__health-stat--good"
+        [class.comms__health-stat--zero]="health().connected === 0">
+        <span class="comms__health-num">{{ health().connected }}</span>
+        <span class="comms__health-label">{{ 'account.communications.health.healthy' | translate }}</span>
+      </div>
+      @if (health().errored > 0) {
+        <div class="comms__health-stat comms__health-stat--bad">
+          <span class="comms__health-num">{{ health().errored }}</span>
+          <span class="comms__health-label">{{ 'account.communications.health.errored' | translate }}</span>
+        </div>
+      }
+      @if (health().pending > 0) {
+        <div class="comms__health-stat comms__health-stat--warn">
+          <span class="comms__health-num">{{ health().pending }}</span>
+          <span class="comms__health-label">{{ 'account.communications.health.pending' | translate }}</span>
+        </div>
+      }
+    </div>
+  }
+
   @for (group of kindGroups(); track group.kind) {
     <div class="kind-group">
       <div class="kind-group__header">

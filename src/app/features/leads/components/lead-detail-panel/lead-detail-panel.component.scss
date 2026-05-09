@@ -100,3 +100,54 @@
 .converted-icon {
   font-size: $icon-size-lg;
 }
+
+// ─── Phase 1j Engagement Strip ───
+.engagement-strip {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  margin-bottom: $sp-md;
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+  border-left: $border-width-accent solid var(--primary);
+
+  &__hint {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    font-size: $font-size-xs;
+    color: var(--text);
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--primary);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+
+  &__hint-text {
+    line-height: 1.4;
+
+    strong {
+      font-weight: 600;
+      margin-right: $sp-xs;
+    }
+  }
+
+  &__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $sp-xs;
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: $sp-xs;
+
+      .material-icons-outlined {
+        font-size: $font-size-sm;
+      }
+    }
+  }
+}

@@ -57,6 +57,23 @@ export class AccountCommunicationsComponent implements OnInit {
   protected readonly loading = this.service.loading;
   protected readonly syncing = this.service.syncing;
 
+  /**
+   * Phase 1k.1 — aggregate health for the current user's connections.
+   * Surfaces above the kind groups so a salesperson lands on the page
+   * and immediately sees "1 broken / 2 healthy / 0 pending" rather than
+   * having to read each card.
+   */
+  protected readonly health = computed(() => {
+    const all = this.service.connections();
+    return {
+      total: all.length,
+      connected: all.filter(c => c.isConnected && !c.lastError).length,
+      pending: all.filter(c => !c.isConnected).length,
+      errored: all.filter(c => !!c.lastError).length,
+      neverSynced: all.filter(c => c.isConnected && c.lastSyncedAt === null).length,
+    };
+  });
+
   protected readonly kindGroups = computed<KindGroup[]>(() => {
     const connections = this.service.connections();
     const providers = this.service.providers;

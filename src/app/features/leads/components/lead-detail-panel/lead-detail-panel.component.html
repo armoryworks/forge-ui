@@ -26,6 +26,37 @@
     </div>
 
     <div class="detail-body">
+      <!-- Phase 1j — engagement signal strip. Shape playbook hint +
+           engagement count + stale badge. Hidden when the lead is
+           Converted / Lost (terminal — guidance no longer applies). -->
+      @if (lead.status !== 'Converted' && lead.status !== 'Lost') {
+        <div class="engagement-strip">
+          @if (lead.engagementShape && lead.engagementShape !== 'Unknown') {
+            <div class="engagement-strip__hint">
+              <span class="material-icons-outlined">{{ getShapeIcon(lead.engagementShape) }}</span>
+              <span class="engagement-strip__hint-text">
+                <strong>{{ ('leads.fork.shape' + lead.engagementShape) | translate }}:</strong>
+                {{ getShapePlaybook(lead.engagementShape) }}
+              </span>
+            </div>
+          }
+          <div class="engagement-strip__chips">
+            @if (lead.recentEngagementCount && lead.recentEngagementCount > 0) {
+              <span class="chip chip--info">
+                <span class="material-icons-outlined">forum</span>
+                {{ 'leads.engagement.recentCount' | translate: { count: lead.recentEngagementCount } }}
+              </span>
+            }
+            @if (lead.isStale) {
+              <span class="chip chip--warning" [attr.title]="'leads.engagement.staleTooltip' | translate">
+                <span class="material-icons-outlined">schedule</span>
+                {{ 'leads.engagement.stale' | translate }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+
       <div class="info-grid">
         <div class="info-item">
           <span class="info-label">{{ 'common.status' | translate }}</span>

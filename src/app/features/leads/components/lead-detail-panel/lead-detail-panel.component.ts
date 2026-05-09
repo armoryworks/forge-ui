@@ -87,6 +87,27 @@ export class LeadDetailPanelComponent {
     return d.getTime() < new Date().getTime();
   }
 
+  /**
+   * Phase 1j.3 — per-shape next-action hint. The engagement shape implies
+   * a sales motion; the hint nudges reps toward the right next step
+   * without prescribing a hard process. Static map for v1; admin-
+   * customizable copy is a follow-on (would land in reference_data).
+   */
+  protected getShapePlaybook(shape: string): string {
+    return this.translate.instant('leads.playbook.' + shape);
+  }
+
+  protected getShapeIcon(shape: string): string {
+    const map: Record<string, string> = {
+      QuickQuote: 'request_quote',
+      Repeat: 'repeat',
+      Strategic: 'business_center',
+      Prototype: 'science',
+      Unknown: 'flash_on',
+    };
+    return map[shape] ?? 'flag';
+  }
+
   protected updateStatus(status: LeadStatus): void {
     const lead = this.lead();
     if (!lead) return;

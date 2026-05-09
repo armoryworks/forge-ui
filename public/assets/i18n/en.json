@@ -1657,6 +1657,18 @@
     "convertAndCreateJob": "Convert & Create Job",
     "convertedInfo": "This lead has been converted to a customer.",
     "reopenLead": "Reopen Lead",
+    "playbook": {
+      "QuickQuote": "Turn the quote around fast — the buyer is in price-comparison mode. Aim for a same-day response.",
+      "Repeat": "Reference the prior job. Pricing context and lead time consistency matter most.",
+      "Strategic": "Map decision-makers and the champion. Plan a multi-touch cadence; expect a longer cycle.",
+      "Prototype": "Confirm capability fit early. Set expectations on iteration count and timeline.",
+      "Unknown": "Capture context as you learn it — the shape can be reclassified once the motion is clearer."
+    },
+    "engagement": {
+      "recentCount": "{{count}} recent comm",
+      "stale": "Stale",
+      "staleTooltip": "No activity in the last 14 days — consider a follow-up or reclassify."
+    },
     "lostReason": "Lost Reason",
     "markAsLost": "Mark as Lost",
     "reason": "Reason",
@@ -2548,6 +2560,12 @@
       "statusConnected": "Connected",
       "statusPending": "Pending handshake",
       "statusError": "Sync failed",
+      "health": {
+        "total": "Total",
+        "healthy": "Healthy",
+        "errored": "Errored",
+        "pending": "Pending"
+      },
       "statusMock": "Mock",
       "statusPlanned": "Coming soon",
       "lastSync": "Last sync",

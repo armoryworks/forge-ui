@@ -6,7 +6,7 @@
   max-width: 800px;
 
   &__header {
-    margin-bottom: $sp-xl;
+    margin-bottom: $sp-lg;
   }
 
   &__title {
@@ -19,6 +19,41 @@
     font-size: $font-size-sm;
     color: var(--text-muted);
     margin: 0;
+  }
+
+  // Phase 1k.1 — connection health summary banner
+  &__health {
+    display: flex;
+    gap: $sp-lg;
+    padding: $sp-md $sp-lg;
+    margin-bottom: $sp-xl;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__health-stat {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+
+    &--good { color: var(--success); }
+    &--bad  { color: var(--error); }
+    &--warn { color: var(--warning); }
+
+    &--zero {
+      color: var(--text-muted);
+    }
+  }
+
+  &__health-num {
+    font-size: $font-size-kpi;
+    font-weight: 600;
+    line-height: 1;
+  }
+
+  &__health-label {
+    @include uppercase-label($font-size-xxs, 0.5px);
+    color: var(--text-muted);
   }
 }
 

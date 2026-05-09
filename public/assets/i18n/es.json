@@ -1653,6 +1653,18 @@
     "convertAndCreateJob": "Convertir y Crear Trabajo",
     "convertedInfo": "Este prospecto ha sido convertido a cliente.",
     "reopenLead": "Reabrir Prospecto",
+    "playbook": {
+      "QuickQuote": "Devuelva la cotización rápido — el comprador está comparando precios. Apunte a una respuesta el mismo día.",
+      "Repeat": "Haga referencia al trabajo anterior. El contexto de precios y la consistencia del plazo son lo más importante.",
+      "Strategic": "Identifique a quienes deciden y al patrocinador interno. Planifique una cadencia de múltiples contactos; espere un ciclo más largo.",
+      "Prototype": "Confirme la capacidad de fabricación temprano. Establezca expectativas sobre iteraciones y cronograma.",
+      "Unknown": "Capture el contexto a medida que aprende — la forma se puede reclasificar una vez que la motivación esté más clara."
+    },
+    "engagement": {
+      "recentCount": "{{count}} comm. recientes",
+      "stale": "Inactivo",
+      "staleTooltip": "Sin actividad en los últimos 14 días — considere un seguimiento o reclasifique."
+    },
     "lostReason": "Razón de Pérdida",
     "markAsLost": "Marcar como Perdido",
     "reason": "Razón",
@@ -2544,6 +2556,12 @@
       "statusConnected": "Conectado",
       "statusPending": "Esperando enlace",
       "statusError": "Sincronización fallida",
+      "health": {
+        "total": "Total",
+        "healthy": "Saludables",
+        "errored": "Con error",
+        "pending": "Pendientes"
+      },
       "statusMock": "Simulado",
       "statusPlanned": "Próximamente",
       "lastSync": "Última sincronización",
