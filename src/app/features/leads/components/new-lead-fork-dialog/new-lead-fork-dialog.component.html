@@ -1,0 +1,142 @@
+<app-dialog [title]="'leads.fork.title' | translate" width="640px" (closed)="close()">
+  <div class="lead-fork">
+
+    <!-- Step 1 — pick the engagement shape -->
+    @if (currentStep() === 0) {
+      <p class="step-hint">{{ 'leads.fork.step1Title' | translate }}</p>
+      <p class="step-hint step-hint--muted">{{ 'leads.fork.step1Hint' | translate }}</p>
+      <div class="shape-grid">
+        @for (choice of shapeChoices; track choice.value) {
+          <button type="button" class="shape-card"
+                  [class.shape-card--quick]="choice.value === 'Unknown'"
+                  (click)="pickShape(choice.value)">
+            <span class="material-icons-outlined shape-card__icon">{{ choice.icon }}</span>
+            <div class="shape-card__body">
+              <div class="shape-card__title">{{ choice.titleKey | translate }}</div>
+              <div class="shape-card__desc">{{ choice.descKey | translate }}</div>
+            </div>
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Step 2 — fill the form (always-visible base + shape-specific extras) -->
+    @if (currentStep() === 1) {
+      <p class="step-hint">{{ 'leads.fork.step2Title' | translate }}</p>
+      <p class="step-hint step-hint--muted">{{ 'leads.fork.step2Hint' | translate }}</p>
+
+      <div [formGroup]="form" class="form-grid">
+        <!-- Always-visible base fields. Same shape as the legacy flat dialog. -->
+        <app-input data-testid="lead-company-name" [label]="'leads.companyName' | translate"
+                   formControlName="companyName" [required]="true" [maxlength]="200" />
+        <app-input data-testid="lead-contact-name" [label]="'leads.contactName' | translate"
+                   formControlName="contactName" [maxlength]="200" />
+        <div class="form-row">
+          <app-input data-testid="lead-email" [label]="'common.email' | translate"
+                     formControlName="email" type="email" />
+          <app-input data-testid="lead-phone" [label]="'common.phone' | translate"
+                     formControlName="phone" mask="phone" />
+        </div>
+        <div class="form-row">
+          <app-select data-testid="lead-source" [label]="'leads.source' | translate"
+                      formControlName="source" [options]="sourceOptions()" />
+          <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate"
+                          formControlName="followUpDate" />
+        </div>
+
+        <!-- Shape-specific extras: revealed conditionally. The fields land
+             in `extras` group inside the form so the JSON serialisation
+             for CustomFieldValues at submit-time stays a single op. -->
+        <div formGroupName="extras" class="extras-group">
+
+          @if (showsRfqFields()) {
+            <h4 class="extras-section-title">
+              <span class="material-icons-outlined">request_quote</span>
+              {{ 'leads.fork.shapeQuickQuote' | translate }}
+            </h4>
+            <app-textarea data-testid="lead-rfq-parts"
+                          [label]="'leads.fork.rfqPartsLabel' | translate"
+                          formControlName="rfqParts" [rows]="3"
+                          [placeholder]="'leads.fork.rfqPartsHint' | translate" />
+            <div class="form-row">
+              <app-input data-testid="lead-rfq-target-price"
+                         [label]="'leads.fork.rfqTargetPriceLabel' | translate"
+                         formControlName="rfqTargetPrice" />
+              <app-datepicker data-testid="lead-rfq-due-date"
+                              [label]="'leads.fork.rfqDueDateLabel' | translate"
+                              formControlName="rfqDueDate" />
+            </div>
+          }
+
+          @if (showsStrategicFields()) {
+            <h4 class="extras-section-title">
+              <span class="material-icons-outlined">business_center</span>
+              {{ 'leads.fork.shapeStrategic' | translate }}
+            </h4>
+            <app-input data-testid="lead-decision-maker"
+                       [label]="'leads.fork.decisionMakerLabel' | translate"
+                       formControlName="decisionMaker"
+                       [placeholder]="'leads.fork.decisionMakerHint' | translate" />
+            <app-input data-testid="lead-champion"
+                       [label]="'leads.fork.championLabel' | translate"
+                       formControlName="champion"
+                       [placeholder]="'leads.fork.championHint' | translate" />
+            <app-input data-testid="lead-current-vendor"
+                       [label]="'leads.fork.currentVendorLabel' | translate"
+                       formControlName="currentVendor"
+                       [placeholder]="'leads.fork.currentVendorHint' | translate" />
+          }
+
+          @if (showsReferenceJob()) {
+            <h4 class="extras-section-title">
+              <span class="material-icons-outlined">repeat</span>
+              {{ 'leads.fork.shapeRepeat' | translate }}
+            </h4>
+            <app-input data-testid="lead-reference-job"
+                       [label]="'leads.fork.referenceJobLabel' | translate"
+                       formControlName="referenceJob"
+                       [placeholder]="'leads.fork.referenceJobHint' | translate" />
+          }
+
+          @if (showsPrototypeFields()) {
+            <h4 class="extras-section-title">
+              <span class="material-icons-outlined">science</span>
+              {{ 'leads.fork.shapePrototype' | translate }}
+            </h4>
+            <div class="form-row">
+              <app-input data-testid="lead-project-type"
+                         [label]="'leads.fork.projectTypeLabel' | translate"
+                         formControlName="projectType"
+                         [placeholder]="'leads.fork.projectTypeHint' | translate" />
+              <app-input data-testid="lead-expected-timeline"
+                         [label]="'leads.fork.expectedTimelineLabel' | translate"
+                         formControlName="expectedTimeline"
+                         [placeholder]="'leads.fork.expectedTimelineHint' | translate" />
+            </div>
+          }
+        </div>
+
+        <app-textarea data-testid="lead-notes" [label]="'leads.notes' | translate"
+                      formControlName="notes" [rows]="3" />
+      </div>
+    }
+
+  </div>
+
+  <div dialog-footer>
+    @if (currentStep() === 0) {
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    } @else {
+      <button class="action-btn" (click)="back()">{{ 'leads.fork.back' | translate }}</button>
+      <app-validation-button [violations]="violations">
+        <button class="action-btn action-btn--primary"
+          data-testid="lead-fork-create-btn"
+          [disabled]="form.invalid"
+          (click)="create()">
+          <span class="material-icons-outlined">person_add</span>
+          {{ 'leads.fork.create' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

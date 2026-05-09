@@ -1,0 +1,131 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.lead-fork {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.step-hint {
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+
+  &--muted {
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    margin-bottom: $sp-md;
+  }
+}
+
+// Shape grid — 5 cards, "Quick add" sits first/full-width visually.
+.shape-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $sp-md;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shape-card {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width solid var(--border);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+  }
+
+  // Quick add card — span both columns + accent the "easiest path" framing
+  // that the user's spec calls out ("make quick and dirty the easiest up
+  // front"). Visually distinct first hit on the grid.
+  &--quick {
+    grid-column: span 2;
+    border-left: $border-width-accent solid var(--accent);
+
+    @include mobile {
+      grid-column: span 1;
+    }
+  }
+}
+
+.shape-card__icon {
+  font-size: $icon-size-xl;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+}
+
+.shape-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+}
+
+.shape-card__title {
+  font-size: $font-size-base;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.shape-card__desc {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+// Step 2 form
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $sp-md;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Shape-specific extras section — visually grouped + lightly accented
+// so users can see at a glance which fields came from their shape pick.
+.extras-group {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  margin: $sp-sm 0;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  border-left: $border-width-accent solid var(--accent);
+}
+
+.extras-section-title {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-xxs;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  margin: 0;
+  font-weight: 600;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--accent);
+  }
+}

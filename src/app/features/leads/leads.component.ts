@@ -11,6 +11,8 @@ import { LeadsService } from './services/leads.service';
 import { LeadItem } from './models/lead-item.model';
 import { LeadStatus } from './models/lead-status.type';
 import { LeadDetailDialogComponent, LeadDetailDialogData, LeadDetailDialogResult } from './components/lead-detail-dialog/lead-detail-dialog.component';
+import { NewLeadForkDialogComponent } from './components/new-lead-fork-dialog/new-lead-fork-dialog.component';
+import { CreateLeadRequest } from './models/create-lead-request.model';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
@@ -258,18 +260,23 @@ export class LeadsComponent {
   }
 
   protected openCreateLead(): void {
-    this.editingLead.set(null);
-    this.draftConfig = { entityType: 'lead', entityId: 'new', route: '/leads' };
-    this.leadForm.reset({
-      companyName: '',
-      contactName: '',
-      email: '',
-      phone: '',
-      source: '',
-      notes: '',
-      followUpDate: null,
+    // Wave 7 — New Lead routes through the fork dialog (engagement-shape
+    // axis pick → form with shape-specific extras). Edit still uses the
+    // inline flat form below since the lead has already been classified.
+    this.dialog.open<NewLeadForkDialogComponent, void, CreateLeadRequest | undefined>(
+      NewLeadForkDialogComponent,
+      { width: '720px', maxWidth: '95vw' },
+    ).afterClosed().subscribe(request => {
+      if (!request) return;
+      this.saving.set(true);
+      this.leadsService.createLead(request).subscribe({
+        next: () => {
+          this.saving.set(false);
+          this.loadLeads();
+        },
+        error: () => this.saving.set(false),
+      });
     });
-    this.showDialog.set(true);
   }
 
   private openEditLeadFromDetail(lead: LeadItem): void {
