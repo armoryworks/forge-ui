@@ -26,7 +26,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
-import { toIsoDate } from '../../shared/utils/date.utils';
+import { toIsoDate, todayStart } from '../../shared/utils/date.utils';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -68,6 +68,16 @@ export class LeadsComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly leads = signal<LeadItem[]>([]);
+  /**
+   * Phase 1l — follow-up dates can't be set in the past on CREATE. On
+   * EDIT, an existing lead may carry a stale past-dated follow-up; we
+   * leave that alone (the rep is most likely updating it forward, but
+   * blocking the form on the existing value with `matDatepickerMin`
+   * would prevent unrelated edits to other fields). Computed signal so
+   * the constraint flips off when the dialog opens in edit mode.
+   */
+  protected readonly today = todayStart();
+  protected readonly followUpMin = computed(() => this.editingLead() ? null : this.today);
   protected draftConfig: DraftConfig = { entityType: 'lead', entityId: 'new', route: '/leads' };
 
   // View mode — persisted to localStorage

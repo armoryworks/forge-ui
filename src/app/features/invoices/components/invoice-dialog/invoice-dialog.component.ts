@@ -20,7 +20,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
 
 interface LineEntry {
@@ -58,6 +58,8 @@ export class InvoiceDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly customers = signal<CustomerListItem[]>([]);
+  /** Phase 1l — invoice issue date is when it was issued; not future. */
+  protected readonly today = todayEnd();
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [

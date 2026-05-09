@@ -20,7 +20,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 
 /**
  * Wave 6 — Customer Interactions cluster (CRM activity log).
@@ -99,6 +99,11 @@ export class CustomerInteractionsClusterComponent {
     interactionDate: new FormControl<Date | null>(new Date(), [Validators.required]),
     durationMinutes: new FormControl<number | null>(null),
   });
+
+  /** Phase 1l — interactions log a thing that already happened. Future
+   *  dates make no sense; [max]=today is safe even on edit (existing
+   *  past dates pass the constraint). */
+  protected readonly today = todayEnd();
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     type: this.translate.instant('customers.interactions.violations.type'),

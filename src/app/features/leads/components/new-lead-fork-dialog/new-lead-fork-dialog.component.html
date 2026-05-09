@@ -41,7 +41,7 @@
           <app-select data-testid="lead-source" [label]="'leads.source' | translate"
                       formControlName="source" [options]="sourceOptions()" />
           <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate"
-                          formControlName="followUpDate" />
+                          formControlName="followUpDate" [min]="today" />
         </div>
 
         <!-- Shape-specific extras: revealed conditionally. The fields land
@@ -64,7 +64,7 @@
                          formControlName="rfqTargetPrice" />
               <app-datepicker data-testid="lead-rfq-due-date"
                               [label]="'leads.fork.rfqDueDateLabel' | translate"
-                              formControlName="rfqDueDate" />
+                              formControlName="rfqDueDate" [min]="today" />
             </div>
           }
 

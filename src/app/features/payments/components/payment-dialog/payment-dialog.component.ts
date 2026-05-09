@@ -16,7 +16,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -52,6 +52,8 @@ export class PaymentDialogComponent {
 
   protected readonly saving = signal(false);
   protected readonly customers = signal<CustomerListItem[]>([]);
+  /** Phase 1l — payment dates record when payment was received; not future. */
+  protected readonly today = todayEnd();
   protected readonly applications = signal<ApplicationEntry[]>([]);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [

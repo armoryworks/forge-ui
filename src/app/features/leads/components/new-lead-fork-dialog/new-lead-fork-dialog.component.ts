@@ -11,7 +11,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
 import { CreateLeadRequest } from '../../models/create-lead-request.model';
 import { LeadEngagementShape } from '../../models/lead-engagement-shape.type';
 
@@ -60,6 +60,8 @@ export class NewLeadForkDialogComponent {
 
   protected readonly currentStep = signal(0);
   protected readonly shape = signal<LeadEngagementShape>('Unknown');
+  /** Phase 1l — follow-up + RFQ-due dates can't be in the past. */
+  protected readonly today = todayStart();
   protected readonly sourceOptions = signal<SelectOption[]>([
     { value: null, label: this.translate.instant('common.none') },
   ]);

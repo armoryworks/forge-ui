@@ -176,7 +176,7 @@
 
       <div class="dialog-row">
         <app-select data-testid="lead-source" [label]="'leads.source' | translate" formControlName="source" [options]="sourceOptions()" />
-        <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate" formControlName="followUpDate" />
+        <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate" formControlName="followUpDate" [min]="followUpMin()" />
       </div>
 
       <app-textarea data-testid="lead-notes" [label]="'common.notes' | translate" formControlName="notes" />

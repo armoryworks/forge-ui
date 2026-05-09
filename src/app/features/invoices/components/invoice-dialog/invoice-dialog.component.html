@@ -67,7 +67,7 @@
         <span class="dlg-sidebar-section__title">{{ 'invoices.invoiceDetails' | translate }}</span>
         <app-select [label]="'invoices.customer' | translate" formControlName="customerId" [options]="customerOptions()" [required]="true" data-testid="invoice-customer" />
         <app-input [label]="'invoices.salesOrderId' | translate" type="number" formControlName="salesOrderId" [placeholder]="'common.optional' | translate" />
-        <app-datepicker [label]="'invoices.invoiceDate' | translate" formControlName="invoiceDate" data-testid="invoice-date" />
+        <app-datepicker [label]="'invoices.invoiceDate' | translate" formControlName="invoiceDate" [max]="today" data-testid="invoice-date" />
         <app-datepicker [label]="'invoices.dueDate' | translate" formControlName="dueDate" data-testid="invoice-due-date" />
         <app-select [label]="'invoices.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="invoice-credit-terms" />
         <app-input [label]="'invoices.taxRate' | translate" type="number" formControlName="taxRate" suffix="%" data-testid="invoice-tax-rate" />

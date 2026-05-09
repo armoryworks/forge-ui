@@ -24,7 +24,7 @@
         </div>
         <div class="account-page__row">
           <app-input [label]="'account.initials' | translate" formControlName="initials" placeholder="e.g. DH" [maxlength]="3" />
-          <app-datepicker [label]="'account.dateOfBirth' | translate" formControlName="dateOfBirth" />
+          <app-datepicker [label]="'account.dateOfBirth' | translate" formControlName="dateOfBirth" [min]="dobMin" [max]="dobMax" />
         </div>
         <app-select [label]="'account.gender' | translate" formControlName="gender" [options]="genderOptions" />
       </div>

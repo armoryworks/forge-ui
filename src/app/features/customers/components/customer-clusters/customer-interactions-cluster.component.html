@@ -66,7 +66,7 @@
                  formControlName="subject" [maxlength]="200" [required]="true" />
       <div class="dialog-row">
         <app-datepicker data-testid="interaction-date" [label]="'customers.interactions.date' | translate"
-                        formControlName="interactionDate" [required]="true" />
+                        formControlName="interactionDate" [required]="true" [max]="today" />
         <app-input data-testid="interaction-duration" [label]="'customers.interactions.durationMinutes' | translate"
                    type="number" formControlName="durationMinutes" />
       </div>

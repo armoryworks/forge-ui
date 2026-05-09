@@ -63,3 +63,39 @@ export function formatFullName(firstName: string, lastName: string, middleInitia
   const mi = middleInitial ? ` ${middleInitial}` : '';
   return `${lastName}, ${firstName}${mi}`;
 }
+
+// ── Phase 1l Date-bound helpers ──
+//
+// These return a fresh Date each call so binding [min]/[max] to them in
+// templates always reflects the current local date. Components that need
+// real-time edge cases (midnight rollover within a long-lived form) should
+// call these inside a `computed`; for typical CRUD dialogs, computing once
+// at component init is sufficient.
+
+/** Today at 00:00 local time — for [min] on future-only date pickers. */
+export function todayStart(): Date {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** Today at 23:59:59 local time — for [max] on past-or-today pickers. */
+export function todayEnd(): Date {
+  const d = new Date();
+  d.setHours(23, 59, 59, 999);
+  return d;
+}
+
+/** Reasonable [min] for date-of-birth: 120 years ago. */
+export function dateOfBirthMin(): Date {
+  const d = todayStart();
+  d.setFullYear(d.getFullYear() - 120);
+  return d;
+}
+
+/** Reasonable [max] for date-of-birth: 13 years ago (child-labor floor). */
+export function dateOfBirthMax(): Date {
+  const d = todayStart();
+  d.setFullYear(d.getFullYear() - 13);
+  return d;
+}

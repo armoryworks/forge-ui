@@ -21,7 +21,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
-import { toIsoDate } from '../../shared/utils/date.utils';
+import { toIsoDate, todayEnd } from '../../shared/utils/date.utils';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -57,6 +57,8 @@ export class ExpensesComponent {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly expenses = signal<ExpenseItem[]>([]);
+  /** Phase 1l — expense dates can't be in the future. */
+  protected readonly today = todayEnd();
   protected draftConfig: DraftConfig = { entityType: 'expense', entityId: 'new', route: '/expenses' };
 
   // Filters

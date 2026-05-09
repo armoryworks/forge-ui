@@ -60,7 +60,7 @@
         <app-select [label]="'payments.customer' | translate" formControlName="customerId" [options]="customerOptions()" data-testid="payment-customer" />
         <app-select [label]="'payments.paymentMethod' | translate" formControlName="method" [options]="methodOptions" data-testid="payment-method" />
         <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" [required]="true" data-testid="payment-amount" />
-        <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" data-testid="payment-date" />
+        <app-datepicker [label]="'payments.paymentDate' | translate" formControlName="paymentDate" [max]="today" data-testid="payment-date" />
         <app-input [label]="'payments.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'payments.optional' | translate" data-testid="payment-ref" />
       </div>
 

@@ -14,7 +14,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 
 @Component({
   selector: 'app-customer-return-dialog',
@@ -38,6 +38,9 @@ export class CustomerReturnDialogComponent {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
+  /** Phase 1l — return-date is when the customer returned the item;
+   *  future dates make no sense. [max]=today is safe even on edit. */
+  protected readonly today = todayEnd();
 
   protected readonly returnForm = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),

@@ -38,6 +38,7 @@
     <app-datepicker
       label="Return Date"
       formControlName="returnDate"
+      [max]="today"
       data-testid="return-date"
       [attr.aria-label]="'customerReturns.fieldReturnDate' | translate" />
 

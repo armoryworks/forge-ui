@@ -13,6 +13,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { AccountService } from '../../services/account.service';
 import { EmployeeProfileService } from '../../services/employee-profile.service';
+import { dateOfBirthMin, dateOfBirthMax } from '../../../../shared/utils/date.utils';
 
 const AVATAR_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444', '#f97316',
@@ -49,6 +50,9 @@ export class AccountProfileComponent {
   protected readonly genderOptions = GENDER_OPTIONS;
   protected readonly saving = signal(false);
   protected readonly selectedColor = signal('');
+  /** Phase 1l — DOB bounds: 13y to 120y ago (child-labor floor + sanity). */
+  protected readonly dobMin = dateOfBirthMin();
+  protected readonly dobMax = dateOfBirthMax();
 
   protected readonly form = new FormGroup({
     firstName: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.maxLength(100)] }),

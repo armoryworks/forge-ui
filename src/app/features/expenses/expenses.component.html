@@ -69,7 +69,7 @@
       }
       <div class="dialog-row">
         <app-currency-input data-testid="expense-amount" [label]="'expenses.amount' | translate" formControlName="amount" />
-        <app-datepicker data-testid="expense-date" [label]="'expenses.date' | translate" formControlName="expenseDate" />
+        <app-datepicker data-testid="expense-date" [label]="'expenses.date' | translate" formControlName="expenseDate" [max]="today" />
       </div>
 
       <app-select data-testid="expense-category" [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions()" />
