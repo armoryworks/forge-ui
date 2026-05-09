@@ -1,0 +1,104 @@
+<div class="setup-wizard" [appLoadingBlock]="loading()">
+  <div class="setup-wizard__header">
+    <h1 class="setup-wizard__title">{{ 'setupIntegrations.title' | translate }}</h1>
+    <p class="setup-wizard__subtitle">{{ 'setupIntegrations.subtitle' | translate }}</p>
+
+    <div class="setup-wizard__stats">
+      <div class="setup-wizard__stat">
+        <span class="setup-wizard__stat-num">{{ stats().configured }}</span>
+        <span class="setup-wizard__stat-label">{{ 'setupIntegrations.statsConfigured' | translate }}</span>
+      </div>
+      <div class="setup-wizard__stat">
+        <span class="setup-wizard__stat-num">{{ stats().remaining }}</span>
+        <span class="setup-wizard__stat-label">{{ 'setupIntegrations.statsRemaining' | translate }}</span>
+      </div>
+      <div class="setup-wizard__stat">
+        <span class="setup-wizard__stat-num">{{ stats().skipped }}</span>
+        <span class="setup-wizard__stat-label">{{ 'setupIntegrations.statsSkipped' | translate }}</span>
+      </div>
+    </div>
+  </div>
+
+  @if (integrations().length === 0 && !loading()) {
+    <div class="setup-wizard__empty">
+      {{ 'setupIntegrations.empty' | translate }}
+    </div>
+  }
+
+  @for (group of grouped(); track group.category) {
+    <section class="setup-wizard__group">
+      <h2 class="setup-wizard__group-title">{{ categoryLabel(group.category) }}</h2>
+
+      <div class="setup-wizard__cards">
+        @for (integration of group.items; track integration.provider) {
+          <div class="setup-card"
+            [class.setup-card--configured]="integration.isConfigured"
+            [class.setup-card--skipped]="isSkipped(integration.provider)">
+            <div class="setup-card__icon">
+              @if (integration.logoUrl) {
+                <img [src]="integration.logoUrl" [alt]="integration.name" class="setup-card__logo" />
+              } @else {
+                <span class="material-icons-outlined">{{ integration.icon }}</span>
+              }
+            </div>
+
+            <div class="setup-card__body">
+              <div class="setup-card__name">{{ integration.name }}</div>
+              <div class="setup-card__description">{{ integration.description }}</div>
+
+              @if (integration.sandboxSteps && integration.sandboxSteps.length > 0 && !integration.isConfigured) {
+                <details class="setup-card__details">
+                  <summary>{{ 'setupIntegrations.howToSetUp' | translate }}</summary>
+                  <ol class="setup-card__steps">
+                    @for (step of integration.sandboxSteps; track $index) {
+                      <li>{{ step }}</li>
+                    }
+                  </ol>
+                  @if (integration.sandboxUrl) {
+                    <a [href]="integration.sandboxUrl" target="_blank" rel="noopener" class="setup-card__signup-link">
+                      {{ 'setupIntegrations.signupLink' | translate }} ↗
+                    </a>
+                  }
+                </details>
+              }
+            </div>
+
+            <div class="setup-card__actions">
+              @if (integration.isConfigured) {
+                <span class="setup-card__chip setup-card__chip--configured">
+                  <span class="material-icons-outlined">check_circle</span>
+                  {{ 'setupIntegrations.statusConfigured' | translate }}
+                </span>
+              } @else if (isSkipped(integration.provider)) {
+                <span class="setup-card__chip setup-card__chip--skipped">
+                  {{ 'setupIntegrations.statusSkipped' | translate }}
+                </span>
+                <button class="action-btn" (click)="setUp(integration)">
+                  {{ 'setupIntegrations.setUpAfterAll' | translate }}
+                </button>
+              } @else {
+                <button class="action-btn action-btn--primary"
+                  (click)="setUp(integration)">
+                  {{ 'setupIntegrations.setUpNow' | translate }}
+                </button>
+                <button class="action-btn" (click)="skip(integration)">
+                  {{ 'setupIntegrations.skipForNow' | translate }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <div class="setup-wizard__footer">
+    <button class="action-btn action-btn--primary" (click)="finish()">
+      <span class="material-icons-outlined">done</span>
+      {{ 'setupIntegrations.finish' | translate }}
+    </button>
+    <p class="setup-wizard__footer-hint">
+      {{ 'setupIntegrations.footerHint' | translate }}
+    </p>
+  </div>
+</div>

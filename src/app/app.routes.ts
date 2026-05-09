@@ -19,6 +19,17 @@ export const routes: Routes = [
   },
   { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
   { path: 'setup/:token', component: TokenSetupComponent },
+  // Phase 1m.7 — post-first-admin integration setup wizard. Shown
+  // after the first admin completes initial account setup; walks
+  // through optional integrations with "Set up" / "Skip" choices per
+  // card. Auth-gated; admin-only is enforced inside the component.
+  {
+    path: 'setup/integrations',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/setup-integrations/setup-integrations.component')
+        .then(m => m.SetupIntegrationsComponent),
+  },
   {
     path: 'chat/popout',
     canActivate: [authGuard],

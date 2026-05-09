@@ -5711,5 +5711,29 @@
     "title": "Recent Communications",
     "loading": "Loading…",
     "empty": "No recent communications. Connect a mailbox or phone line under Account > Communications to start auto-logging."
+  },
+  "setupIntegrations": {
+    "title": "Set up your integrations",
+    "subtitle": "Optional services that can be wired up now or later. Skip any you don't use — you can always come back to Admin → Integrations to set them up.",
+    "statsConfigured": "Configured",
+    "statsRemaining": "Available",
+    "statsSkipped": "Skipped",
+    "empty": "No integrations are available on this install.",
+    "category": {
+      "communications": "Communications",
+      "service": "Services",
+      "shipping": "Shipping carriers",
+      "accounting": "Accounting"
+    },
+    "howToSetUp": "How to set this up",
+    "signupLink": "Open developer portal",
+    "statusConfigured": "Configured",
+    "statusSkipped": "Skipped",
+    "setUpNow": "Set up now",
+    "skipForNow": "Skip for now",
+    "setUpAfterAll": "Actually, set up",
+    "finish": "Done — go to dashboard",
+    "footerHint": "You can revisit this anytime under Admin → Integrations.",
+    "loadFailed": "Couldn't load integrations. Try refreshing or check the server logs."
   }
 }

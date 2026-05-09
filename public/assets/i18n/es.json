@@ -5707,5 +5707,29 @@
     "title": "Comunicaciones recientes",
     "loading": "Cargando…",
     "empty": "Sin comunicaciones recientes. Conecte un buzón o teléfono en Cuenta > Comunicaciones para empezar a registrarlas automáticamente."
+  },
+  "setupIntegrations": {
+    "title": "Configure sus integraciones",
+    "subtitle": "Servicios opcionales que puede configurar ahora o más tarde. Omita los que no use — siempre puede volver a Admin → Integraciones.",
+    "statsConfigured": "Configuradas",
+    "statsRemaining": "Disponibles",
+    "statsSkipped": "Omitidas",
+    "empty": "No hay integraciones disponibles en esta instalación.",
+    "category": {
+      "communications": "Comunicaciones",
+      "service": "Servicios",
+      "shipping": "Transportistas",
+      "accounting": "Contabilidad"
+    },
+    "howToSetUp": "Cómo configurar",
+    "signupLink": "Abrir portal de desarrolladores",
+    "statusConfigured": "Configurada",
+    "statusSkipped": "Omitida",
+    "setUpNow": "Configurar ahora",
+    "skipForNow": "Omitir por ahora",
+    "setUpAfterAll": "Mejor, configurar",
+    "finish": "Listo — ir al panel",
+    "footerHint": "Puede revisitar esto en cualquier momento en Admin → Integraciones.",
+    "loadFailed": "No se pudieron cargar las integraciones. Pruebe a actualizar o revise los registros del servidor."
   }
 }
