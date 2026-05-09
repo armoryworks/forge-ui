@@ -26,6 +26,14 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { EntityCompletenessChipComponent } from '../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { EntityCompletenessBadgeComponent } from '../../shared/components/entity-completeness-badge/entity-completeness-badge.component';
 import { CustomerDetailDialogComponent, CustomerDetailDialogData, CustomerDetailDialogResult } from './components/customer-detail-dialog/customer-detail-dialog.component';
+import { NewCustomerForkDialogComponent, CustomerCreatePath } from './components/new-customer-fork-dialog/new-customer-fork-dialog.component';
+import { LeadPickerDialogComponent } from './components/new-customer-fork-dialog/lead-picker-dialog.component';
+import { GuidedCustomerDialogComponent } from './components/guided-customer-dialog/guided-customer-dialog.component';
+import { CreateCustomerRequest } from './models/create-customer-request.model';
+import { LeadItem } from '../leads/models/lead-item.model';
+import { LeadConvertDialogComponent, LeadConvertDialogData } from '../leads/components/lead-convert-dialog/lead-convert-dialog.component';
+import { ConvertLeadRequest } from '../leads/models/convert-lead-request.model';
+import { LeadsService } from '../leads/services/leads.service';
 
 @Component({
   selector: 'app-customers',
@@ -51,6 +59,7 @@ export class CustomersComponent {
   private readonly translate = inject(TranslateService);
   private readonly scanner = inject(ScannerService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly leadsService = inject(LeadsService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -243,7 +252,28 @@ export class CustomersComponent {
   }
 
   // ─── Customer Create ───
+  /**
+   * Phase 1o.4 — entry point opens the fork dialog first; the chosen
+   * path then routes to the appropriate downstream flow:
+   *   quick    → existing inline customer dialog
+   *   fromLead → lead picker → existing lead-convert stepper
+   *   guided   → multi-step guided wizard
+   */
   protected openCreateCustomer(): void {
+    this.dialog.open<NewCustomerForkDialogComponent, void, CustomerCreatePath | undefined>(
+      NewCustomerForkDialogComponent, { width: '560px' },
+    ).afterClosed().subscribe(path => {
+      if (!path) return;
+      switch (path) {
+        case 'quick': this.openQuickCreateCustomer(); break;
+        case 'fromLead': this.openLeadPicker(); break;
+        case 'guided': this.openGuidedCreateCustomer(); break;
+      }
+    });
+  }
+
+  /** Quick add — the original flat 7-field dialog. */
+  private openQuickCreateCustomer(): void {
     this.customerForm.reset({
       name: '', companyName: '', email: '', phone: '',
       creditLimit: null, defaultTaxCodeId: null, defaultCurrency: null,
@@ -251,6 +281,64 @@ export class CustomersComponent {
       shippingAddress: { street: null, line2: null, city: null, state: null, postal: null, country: 'US' },
     });
     this.showDialog.set(true);
+  }
+
+  /** Convert from lead — pick a lead, then run the existing convert stepper. */
+  private openLeadPicker(): void {
+    this.dialog.open<LeadPickerDialogComponent, void, LeadItem | undefined>(
+      LeadPickerDialogComponent, { width: '560px' },
+    ).afterClosed().subscribe(lead => {
+      if (!lead) return;
+      this.dialog.open<LeadConvertDialogComponent, LeadConvertDialogData, ConvertLeadRequest | undefined>(
+        LeadConvertDialogComponent,
+        { width: '640px', data: { lead } satisfies LeadConvertDialogData },
+      ).afterClosed().subscribe(request => {
+        if (!request) return;
+        this.executeLeadConversion(lead.id, request);
+      });
+    });
+  }
+
+  private executeLeadConversion(leadId: number, request: ConvertLeadRequest): void {
+    this.saving.set(true);
+    this.leadsService.convertLead(leadId, request).subscribe({
+      next: (result) => {
+        this.saving.set(false);
+        this.snackbar.success(this.translate.instant('leads.convertedOnly'));
+        if (result.customerId) {
+          this.router.navigate(['/customers', result.customerId]);
+        } else {
+          this.loadCustomers();
+        }
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error(this.translate.instant('leads.convertFailed'));
+      },
+    });
+  }
+
+  /** Guided wizard — net-new strategic accounts. */
+  private openGuidedCreateCustomer(): void {
+    this.dialog.open<GuidedCustomerDialogComponent, void, CreateCustomerRequest | undefined>(
+      GuidedCustomerDialogComponent, { width: '720px' },
+    ).afterClosed().subscribe(request => {
+      if (!request) return;
+      this.saving.set(true);
+      this.customerService.createCustomer(request).subscribe({
+        next: (created) => {
+          this.saving.set(false);
+          this.snackbar.success(this.translate.instant('customers.customerCreated'));
+          this.router.navigate(['/customers', created.id]);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.saving.set(false);
+          // Guided dialog has already closed; surface server error via
+          // toast (the global interceptor handles unhandled cases).
+          if (!err) return;
+        },
+      });
+    });
   }
 
   protected closeDialog(): void { this.showDialog.set(false); }

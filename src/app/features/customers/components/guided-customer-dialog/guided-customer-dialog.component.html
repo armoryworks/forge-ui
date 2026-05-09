@@ -1,0 +1,198 @@
+<app-dialog [title]="'customers.guided.title' | translate" width="640px" (closed)="close()">
+  <div [formGroup]="form" class="guided-stepper">
+    <mat-stepper [selectedIndex]="currentStep()"
+      (selectionChange)="currentStep.set($event.selectedIndex)" #stepper>
+
+      <!-- Step 1 — identity -->
+      <mat-step [label]="'customers.guided.step1Title' | translate">
+        <p class="step-hint">{{ 'customers.guided.step1Hint' | translate }}</p>
+
+        <app-input [label]="'customers.guided.fields.name' | translate"
+          formControlName="name" [required]="true"
+          data-testid="guided-customer-name" />
+
+        <app-input [label]="'customers.guided.fields.companyName' | translate"
+          formControlName="companyName"
+          data-testid="guided-customer-company" />
+
+        <div class="step-grid">
+          <app-input [label]="'customers.guided.fields.contactName' | translate"
+            formControlName="contactName" />
+          <app-input [label]="'common.email' | translate"
+            type="email" formControlName="email" />
+        </div>
+
+        <app-input [label]="'common.phone' | translate"
+          formControlName="phone" mask="phone" />
+      </mat-step>
+
+      <!-- Step 2 — engagement shape -->
+      <mat-step [label]="'customers.guided.step2Title' | translate">
+        <p class="step-hint">{{ 'customers.guided.step2Hint' | translate }}</p>
+
+        <div class="shape-grid">
+          @for (choice of shapeChoices; track choice.value) {
+            <button class="shape-card"
+              type="button"
+              [class.shape-card--active]="shape() === choice.value"
+              [attr.data-testid]="'guided-customer-shape-' + choice.value"
+              (click)="pickShape(choice.value)">
+              <span class="material-icons-outlined shape-card__icon">{{ choice.icon }}</span>
+              <div class="shape-card__title">{{ choice.titleKey | translate }}</div>
+              <div class="shape-card__desc">{{ choice.descKey | translate }}</div>
+            </button>
+          }
+        </div>
+
+        @if (shapePlaybook()) {
+          <div class="shape-strip shape-strip--inline">
+            <span class="material-icons-outlined">tips_and_updates</span>
+            <span>{{ shapePlaybook() }}</span>
+          </div>
+        }
+
+        <!-- Shape-specific extras -->
+        @if (showsStrategicExtras()) {
+          <h4 class="step-section-title">{{ 'leads.fork.shapeStrategic' | translate }}</h4>
+          <app-input [label]="'leads.fork.decisionMakerLabel' | translate"
+            formControlName="decisionMaker"
+            [placeholder]="'leads.fork.decisionMakerHint' | translate" />
+          <app-input [label]="'leads.fork.championLabel' | translate"
+            formControlName="champion"
+            [placeholder]="'leads.fork.championHint' | translate" />
+          <app-input [label]="'leads.fork.currentVendorLabel' | translate"
+            formControlName="currentVendor"
+            [placeholder]="'leads.fork.currentVendorHint' | translate" />
+        }
+
+        @if (showsRepeatExtras()) {
+          <h4 class="step-section-title">{{ 'leads.fork.shapeRepeat' | translate }}</h4>
+          <app-input [label]="'leads.fork.referenceJobLabel' | translate"
+            formControlName="referenceJob" />
+        }
+
+        @if (showsPrototypeExtras()) {
+          <h4 class="step-section-title">{{ 'leads.fork.shapePrototype' | translate }}</h4>
+          <app-input [label]="'leads.fork.projectTypeLabel' | translate"
+            formControlName="projectType" />
+          <app-input [label]="'leads.fork.expectedTimelineLabel' | translate"
+            formControlName="expectedTimeline" />
+        }
+      </mat-step>
+
+      <!-- Step 3 — addresses -->
+      <mat-step [label]="'customers.guided.step3Title' | translate">
+        <p class="step-hint">{{ 'customers.guided.step3Hint' | translate }}</p>
+
+        <h4 class="step-section-title">{{ 'leads.convertStepper.step2BillingAddressTitle' | translate }}</h4>
+        <app-address-form formControlName="billingAddress"
+          [showVerify]="false"
+          [requireLine1]="false" [requireCity]="false"
+          [requireState]="false" [requirePostalCode]="false" />
+
+        <div class="same-as-billing">
+          <app-toggle [label]="'leads.convertStepper.step2SameAsBilling' | translate"
+            formControlName="shippingSameAsBilling" />
+        </div>
+
+        @if (!form.controls.shippingSameAsBilling.value) {
+          <h4 class="step-section-title">{{ 'leads.convertStepper.step2ShippingAddressTitle' | translate }}</h4>
+          <app-address-form formControlName="shippingAddress"
+            [showVerify]="false"
+            [requireLine1]="false" [requireCity]="false"
+            [requireState]="false" [requirePostalCode]="false" />
+        }
+      </mat-step>
+
+      <!-- Step 4 — credit & tax -->
+      <mat-step [label]="'customers.guided.step4Title' | translate">
+        <p class="step-hint">{{ 'customers.guided.step4Hint' | translate }}</p>
+
+        <div class="step-grid">
+          <app-currency-input [label]="'leads.convertStepper.step2CreditLimit' | translate"
+            formControlName="creditLimit" />
+          <app-select [label]="'leads.convertStepper.step2DefaultCurrency' | translate"
+            formControlName="defaultCurrency"
+            [options]="currencyOptions" />
+        </div>
+
+        <div class="step-grid">
+          <app-toggle [label]="'leads.convertStepper.step2IsTaxExempt' | translate"
+            formControlName="isTaxExempt" />
+          @if (form.controls.isTaxExempt.value) {
+            <app-input [label]="'leads.convertStepper.step2TaxExemptionId' | translate"
+              formControlName="taxExemptionId" [required]="true" />
+          }
+        </div>
+
+        <app-textarea [label]="'common.notes' | translate"
+          formControlName="notes" [rows]="3" />
+      </mat-step>
+
+      <!-- Step 5 — review -->
+      <mat-step [label]="'customers.guided.step5Title' | translate">
+        <p class="step-hint">{{ 'customers.guided.step5Hint' | translate }}</p>
+
+        <h4 class="step-section-title">{{ 'customers.guided.step1Title' | translate }}</h4>
+        <dl class="review-list">
+          <dt>{{ 'customers.guided.fields.name' | translate }}</dt>
+          <dd>{{ form.controls.name.value }}</dd>
+          @if (form.controls.companyName.value) {
+            <dt>{{ 'customers.guided.fields.companyName' | translate }}</dt>
+            <dd>{{ form.controls.companyName.value }}</dd>
+          }
+          @if (form.controls.email.value) {
+            <dt>{{ 'common.email' | translate }}</dt>
+            <dd>{{ form.controls.email.value }}</dd>
+          }
+        </dl>
+
+        @if (shape() !== 'Unknown') {
+          <h4 class="step-section-title">{{ 'customers.guided.step2Title' | translate }}</h4>
+          <dl class="review-list">
+            <dt>{{ 'leads.fork.shape' + shape() | translate }}</dt>
+            <dd>{{ shapePlaybook() }}</dd>
+          </dl>
+        }
+
+        @if (form.controls.creditLimit.value !== null || form.controls.isTaxExempt.value) {
+          <h4 class="step-section-title">{{ 'customers.guided.step4Title' | translate }}</h4>
+          <dl class="review-list">
+            @if (form.controls.creditLimit.value !== null) {
+              <dt>{{ 'leads.convertStepper.step2CreditLimit' | translate }}</dt>
+              <dd>{{ form.controls.creditLimit.value }} {{ form.controls.defaultCurrency.value }}</dd>
+            }
+            @if (form.controls.isTaxExempt.value) {
+              <dt>{{ 'leads.convertStepper.step2IsTaxExempt' | translate }}</dt>
+              <dd>{{ form.controls.taxExemptionId.value }}</dd>
+            }
+          </dl>
+        }
+      </mat-step>
+    </mat-stepper>
+  </div>
+
+  <div dialog-footer>
+    @if (currentStep() > 0) {
+      <button class="action-btn" (click)="back()">{{ 'leads.convertStepper.back' | translate }}</button>
+    } @else {
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    }
+
+    @if (currentStep() < 4) {
+      <button class="action-btn action-btn--primary" (click)="next()">
+        {{ 'leads.convertStepper.next' | translate }}
+      </button>
+    } @else {
+      <app-validation-button [violations]="violations">
+        <button class="action-btn action-btn--primary"
+          data-testid="guided-customer-confirm"
+          [disabled]="form.invalid"
+          (click)="confirm()">
+          <span class="material-icons-outlined">check</span>
+          {{ 'customers.guided.create' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

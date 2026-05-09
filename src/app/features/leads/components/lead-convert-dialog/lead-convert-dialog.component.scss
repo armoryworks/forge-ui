@@ -28,6 +28,41 @@
   font-weight: 600;
 }
 
+// Phase 1o.1 — shape strip carries the lead's EngagementShape +
+// playbook hint into the convert flow. Same visual idiom as the
+// engagement-strip on the lead detail panel (phase 1j.3) for
+// continuity.
+.shape-strip {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-sm;
+  padding: $sp-sm $sp-md;
+  margin-bottom: $sp-md;
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+  border-left: $border-width-accent solid var(--primary);
+  font-size: $font-size-xs;
+  line-height: 1.4;
+
+  &--inline {
+    margin-top: 0;
+  }
+
+  &__icon {
+    font-size: $icon-size-sm;
+    color: var(--primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  &__body {
+    flex: 1;
+  }
+
+  &__hint {
+    color: var(--text);
+  }
+}
+
 .step-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

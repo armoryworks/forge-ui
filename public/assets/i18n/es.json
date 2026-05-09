@@ -1285,6 +1285,42 @@
     "title": "Clientes",
     "subtitle": "Gestionar contactos y direcciones de clientes",
     "createCustomer": "Nuevo Cliente",
+    "fork": {
+      "title": "¿Cómo deseas agregar este cliente?",
+      "hint": "Elige la ruta que coincida con lo que ya sabes de esta cuenta.",
+      "quickTitle": "Agregar rápido",
+      "quickDesc": "Captura un nombre y un par de datos de contacto y sigue adelante.",
+      "quickBadge": "Más común",
+      "fromLeadTitle": "Convertir desde prospecto",
+      "fromLeadDesc": "Elige un prospecto existente y pásalo por el asistente de conversión.",
+      "guidedTitle": "Configuración guiada",
+      "guidedDesc": "Pasa por identidad, compromiso, direcciones y facturación para una cuenta estratégica."
+    },
+    "leadPicker": {
+      "title": "Elige un prospecto para convertir",
+      "hint": "Solo aparecen prospectos que aún no estén Perdidos o Convertidos.",
+      "search": "Buscar por empresa, contacto o correo",
+      "empty": "No hay prospectos coincidentes."
+    },
+    "guided": {
+      "title": "Configuración guiada de cliente",
+      "step1Title": "Identidad",
+      "step1Hint": "¿Quién es este cliente? Captura primero lo básico.",
+      "step2Title": "Compromiso",
+      "step2Hint": "¿Qué tipo de relación estamos configurando? Elige el que mejor encaje.",
+      "step3Title": "Direcciones",
+      "step3Hint": "Facturación primero; desactiva \"igual que facturación\" para capturar un envío distinto.",
+      "step4Title": "Crédito e impuestos",
+      "step4Hint": "Opcional hoy — establece un límite de crédito y exención fiscal si los tienes.",
+      "step5Title": "Revisar",
+      "step5Hint": "Confirma y crea. Puedes editar todo desde la página de detalle del cliente después.",
+      "fields": {
+        "name": "Nombre para mostrar",
+        "companyName": "Nombre de la empresa",
+        "contactName": "Contacto principal"
+      },
+      "create": "Crear cliente"
+    },
     "editCustomer": "Editar Cliente",
     "companyName": "Nombre de Empresa",
     "contactName": "Nombre de Contacto",

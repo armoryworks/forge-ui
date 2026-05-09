@@ -58,6 +58,49 @@ export class LeadConvertDialogComponent {
   protected readonly lead = this.data.lead;
   protected readonly currentStep = signal(0);
 
+  /**
+   * Phase 1o.1 — parse the lead's CustomFieldValues JSON so step 1 can
+   * surface the shape-specific extras the rep captured at lead-creation
+   * (decisionMaker for Strategic, referenceJob for Repeat, etc.).
+   * Empty record when the lead has no extras.
+   */
+  protected readonly leadExtras = computed<Record<string, string>>(() => {
+    if (!this.lead.customFieldValues) return {};
+    try {
+      const parsed = JSON.parse(this.lead.customFieldValues);
+      return typeof parsed === 'object' && parsed !== null ? parsed as Record<string, string> : {};
+    } catch {
+      return {};
+    }
+  });
+
+  /**
+   * Phase 1o.1 — shape-keyed playbook hint surfaced as a banner at the
+   * top of step 2. Mirrors the per-shape playbooks rendered on the lead
+   * detail panel (phase 1j.3) so the same guidance carries through the
+   * conversion that lived on the lead.
+   */
+  protected readonly shapePlaybook = computed(() => {
+    const shape = this.lead.engagementShape;
+    if (!shape || shape === 'Unknown') return null;
+    return this.translate.instant('leads.playbook.' + shape);
+  });
+
+  /**
+   * Map a shape to its Material icon. Mirrors the mapping in
+   * lead-detail-panel.component.ts so the same visual cue carries.
+   */
+  protected getShapeIcon(): string {
+    const map: Record<string, string> = {
+      QuickQuote: 'request_quote',
+      Repeat: 'repeat',
+      Strategic: 'business_center',
+      Prototype: 'science',
+      Unknown: 'flash_on',
+    };
+    return map[this.lead.engagementShape ?? 'Unknown'] ?? 'flag';
+  }
+
   protected readonly form = new FormGroup({
     creditLimit: new FormControl<number | null>(null),
     isTaxExempt: new FormControl(false, { nonNullable: true }),

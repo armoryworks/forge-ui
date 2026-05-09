@@ -1,0 +1,89 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.fork-hint {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  margin: 0 0 $sp-md;
+  line-height: 1.4;
+}
+
+.fork-choices {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+}
+
+.fork-card {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  }
+
+  &--primary {
+    border-color: var(--primary);
+
+    .fork-card__icon {
+      background: var(--primary);
+      color: white;
+    }
+  }
+
+  &__icon {
+    @include flex-center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    background: color-mix(in srgb, var(--primary) 10%, transparent);
+    color: var(--primary);
+
+    .material-icons-outlined {
+      font-size: $icon-size-lg;
+    }
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    font-size: $font-size-base;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin-bottom: 2px;
+  }
+
+  &__badge {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    padding: 1px $sp-xs;
+    background: color-mix(in srgb, var(--primary) 15%, transparent);
+    color: var(--primary);
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  &__chevron {
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+}

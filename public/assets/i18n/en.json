@@ -1289,6 +1289,42 @@
     "title": "Customers",
     "subtitle": "Manage customer contacts and addresses",
     "createCustomer": "New Customer",
+    "fork": {
+      "title": "How would you like to add this customer?",
+      "hint": "Pick the path that matches what you already know about this account.",
+      "quickTitle": "Quick add",
+      "quickDesc": "Drop in a name + a couple of contact bits and keep moving.",
+      "quickBadge": "Most common",
+      "fromLeadTitle": "Convert from lead",
+      "fromLeadDesc": "Pick an existing lead and run it through the convert stepper.",
+      "guidedTitle": "Guided setup",
+      "guidedDesc": "Step through identity, engagement, addresses, and billing for a strategic account."
+    },
+    "leadPicker": {
+      "title": "Pick a lead to convert",
+      "hint": "Only leads that aren't yet Lost or Converted appear here.",
+      "search": "Search by company, contact, or email",
+      "empty": "No matching leads."
+    },
+    "guided": {
+      "title": "Guided customer setup",
+      "step1Title": "Identity",
+      "step1Hint": "Who is this customer? Capture the basics first.",
+      "step2Title": "Engagement",
+      "step2Hint": "What kind of relationship are we setting up? Pick the closest fit.",
+      "step3Title": "Addresses",
+      "step3Hint": "Billing first; toggle off \"same as billing\" to capture a separate ship-to.",
+      "step4Title": "Credit & tax",
+      "step4Hint": "Optional today — set a credit limit and tax-exempt status if you have them.",
+      "step5Title": "Review",
+      "step5Hint": "Confirm and create. You can edit anything from the customer detail page after.",
+      "fields": {
+        "name": "Display name",
+        "companyName": "Company name",
+        "contactName": "Primary contact name"
+      },
+      "create": "Create customer"
+    },
     "editCustomer": "Edit Customer",
     "companyName": "Company Name",
     "contactName": "Contact Name",

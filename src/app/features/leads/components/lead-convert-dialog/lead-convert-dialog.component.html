@@ -5,6 +5,19 @@
       <!-- Step 1 — what carries over from the lead -->
       <mat-step [label]="'leads.convertStepper.step1Title' | translate">
         <p class="step-hint">{{ 'leads.convertStepper.step1Hint' | translate }}</p>
+
+        @if (lead.engagementShape && lead.engagementShape !== 'Unknown') {
+          <div class="shape-strip">
+            <span class="material-icons-outlined shape-strip__icon">{{ getShapeIcon() }}</span>
+            <div class="shape-strip__body">
+              <strong>{{ ('leads.fork.shape' + lead.engagementShape) | translate }}</strong>
+              @if (shapePlaybook()) {
+                <span class="shape-strip__hint">— {{ shapePlaybook() }}</span>
+              }
+            </div>
+          </div>
+        }
+
         <dl class="carryover-list">
           <dt>{{ 'leads.convertStepper.step1FieldCompany' | translate }}</dt>
           <dd>{{ lead.companyName }}</dd>
@@ -33,12 +46,57 @@
             <dt>{{ 'leads.convertStepper.step1FieldNotes' | translate }}</dt>
             <dd class="carryover-list__notes">{{ lead.notes }}</dd>
           }
+
+          <!-- Phase 1o.1 — shape-specific extras captured at lead-creation. -->
+          @if (leadExtras()['decisionMaker']) {
+            <dt>{{ 'leads.fork.decisionMakerLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['decisionMaker'] }}</dd>
+          }
+          @if (leadExtras()['champion']) {
+            <dt>{{ 'leads.fork.championLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['champion'] }}</dd>
+          }
+          @if (leadExtras()['currentVendor']) {
+            <dt>{{ 'leads.fork.currentVendorLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['currentVendor'] }}</dd>
+          }
+          @if (leadExtras()['referenceJob']) {
+            <dt>{{ 'leads.fork.referenceJobLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['referenceJob'] }}</dd>
+          }
+          @if (leadExtras()['rfqParts']) {
+            <dt>{{ 'leads.fork.rfqPartsLabel' | translate }}</dt>
+            <dd class="carryover-list__notes">{{ leadExtras()['rfqParts'] }}</dd>
+          }
+          @if (leadExtras()['rfqTargetPrice']) {
+            <dt>{{ 'leads.fork.rfqTargetPriceLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['rfqTargetPrice'] }}</dd>
+          }
+          @if (leadExtras()['rfqDueDate']) {
+            <dt>{{ 'leads.fork.rfqDueDateLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['rfqDueDate'] }}</dd>
+          }
+          @if (leadExtras()['projectType']) {
+            <dt>{{ 'leads.fork.projectTypeLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['projectType'] }}</dd>
+          }
+          @if (leadExtras()['expectedTimeline']) {
+            <dt>{{ 'leads.fork.expectedTimelineLabel' | translate }}</dt>
+            <dd>{{ leadExtras()['expectedTimeline'] }}</dd>
+          }
         </dl>
       </mat-step>
 
       <!-- Step 2 — customer-required details -->
       <mat-step [label]="'leads.convertStepper.step2Title' | translate">
         <p class="step-hint">{{ 'leads.convertStepper.step2Hint' | translate }}</p>
+
+        @if (shapePlaybook()) {
+          <div class="shape-strip shape-strip--inline">
+            <span class="material-icons-outlined shape-strip__icon">{{ getShapeIcon() }}</span>
+            <span class="shape-strip__hint">{{ shapePlaybook() }}</span>
+          </div>
+        }
 
         <div class="step-grid">
           <app-currency-input
@@ -99,6 +157,13 @@
       <!-- Step 3 — review + commit -->
       <mat-step [label]="'leads.convertStepper.step3Title' | translate">
         <p class="step-hint">{{ 'leads.convertStepper.step3Hint' | translate }}</p>
+
+        @if (lead.engagementShape && lead.engagementShape !== 'Unknown') {
+          <div class="shape-strip shape-strip--inline">
+            <span class="material-icons-outlined shape-strip__icon">{{ getShapeIcon() }}</span>
+            <span><strong>{{ ('leads.fork.shape' + lead.engagementShape) | translate }}</strong></span>
+          </div>
+        }
 
         <h4 class="step-section-title">{{ 'leads.convertStepper.step3Carryover' | translate }}</h4>
         <dl class="carryover-list carryover-list--compact">

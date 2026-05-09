@@ -1,0 +1,42 @@
+<app-dialog [title]="'customers.leadPicker.title' | translate" width="540px" (closed)="close()">
+  <div class="lead-picker">
+    <p class="picker-hint">{{ 'customers.leadPicker.hint' | translate }}</p>
+
+    <app-input
+      [label]="'customers.leadPicker.search' | translate"
+      [formControl]="searchControl" />
+
+    <div class="lead-list" [appLoadingBlock]="loading()">
+      @if (!loading() && filtered().length === 0) {
+        <div class="empty-state">
+          <span class="material-icons-outlined">person_search</span>
+          <p>{{ 'customers.leadPicker.empty' | translate }}</p>
+        </div>
+      }
+
+      @for (lead of filtered(); track lead.id) {
+        <button type="button" class="lead-row" (click)="pick(lead)">
+          <div class="lead-row__main">
+            <span class="lead-row__company">{{ lead.companyName }}</span>
+            @if (lead.contactName) {
+              <span class="lead-row__contact">{{ lead.contactName }}</span>
+            }
+          </div>
+          <div class="lead-row__meta">
+            @if (lead.status) {
+              <span class="chip chip--info">{{ lead.status }}</span>
+            }
+            @if (lead.engagementShape && lead.engagementShape !== 'Unknown') {
+              <span class="chip chip--primary">{{ ('leads.fork.shape' + lead.engagementShape) | translate }}</span>
+            }
+          </div>
+          <span class="material-icons-outlined lead-row__chevron">chevron_right</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+  </div>
+</app-dialog>
