@@ -2547,6 +2547,7 @@
       "externalAccountIdVoicePlaceholder": "+15035551212",
       "statusConnected": "Connected",
       "statusPending": "Pending handshake",
+      "statusError": "Sync failed",
       "statusMock": "Mock",
       "statusPlanned": "Coming soon",
       "lastSync": "Last sync",

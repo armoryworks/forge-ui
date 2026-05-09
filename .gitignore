@@ -58,6 +58,13 @@ __screenshots__/
 # Generated at build time
 /public/assets/version.json
 
+# Sample screenshots — regenerable from e2e/tests/sample-screenshots.spec.ts.
+# Not committed because (a) the f3-scan cardboard render uses Math.random()
+# so every run diffs, and (b) kiosk frames bake the wall-clock time into
+# the Shop Floor header. Run the spec on demand; downstream consumers
+# (marketing site, docs site) pull from a release artifact, not git.
+/public/sample-screenshots/
+
 # System files
 .DS_Store
 Thumbs.db

@@ -165,6 +165,13 @@
 
   &__status {
     font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+
+    .material-icons-outlined {
+      font-size: $font-size-sm;
+    }
 
     &--active {
       color: var(--success);
@@ -173,6 +180,20 @@
     &--pending {
       color: var(--warning);
     }
+
+    &--error {
+      color: var(--error);
+    }
+  }
+
+  &__error-detail {
+    margin-top: $sp-xs;
+    padding: $sp-xs $sp-sm;
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+    border-left: $border-width-accent solid var(--error);
+    font-size: $font-size-xxs;
+    color: var(--text);
+    @include truncate;
   }
 
   &__external {

@@ -2543,6 +2543,7 @@
       "externalAccountIdVoicePlaceholder": "+15035551212",
       "statusConnected": "Conectado",
       "statusPending": "Esperando enlace",
+      "statusError": "Sincronización fallida",
       "statusMock": "Simulado",
       "statusPlanned": "Próximamente",
       "lastSync": "Última sincronización",

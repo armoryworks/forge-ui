@@ -12,6 +12,12 @@ export interface CommunicationSyncConfigSummary {
   isConnected: boolean;
   externalAccountId: string | null;
   lastSyncedAt: string | null;
+  /**
+   * Phase 1i — last sync error from the backend. Null when the
+   * connection is healthy or has never failed. Cleared on next success.
+   */
+  lastError: string | null;
+  lastErrorAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

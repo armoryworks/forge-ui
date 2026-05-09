@@ -34,7 +34,13 @@
                   }
                 </div>
                 <div class="connection-card__meta">
-                  @if (connection.isConnected) {
+                  @if (connection.lastError) {
+                    <span class="connection-card__status connection-card__status--error"
+                      [attr.title]="connection.lastError">
+                      <span class="material-icons-outlined">error_outline</span>
+                      {{ 'account.communications.statusError' | translate }}
+                    </span>
+                  } @else if (connection.isConnected) {
                     <span class="connection-card__status connection-card__status--active">
                       {{ 'account.communications.statusConnected' | translate }}
                     </span>
@@ -50,6 +56,9 @@
                     {{ 'account.communications.lastSync' | translate }}: {{ formatDate(connection.lastSyncedAt) }}
                   </span>
                 </div>
+                @if (connection.lastError) {
+                  <div class="connection-card__error-detail">{{ connection.lastError }}</div>
+                }
               </div>
               <div class="connection-card__actions">
                 <button class="icon-btn"
