@@ -16,6 +16,7 @@ import {
   ConnectCommunicationDialogComponent,
   ConnectCommunicationDialogData,
 } from './connect-communication-dialog.component';
+import { ConnectImapDialogComponent } from './connect-imap-dialog.component';
 
 interface KindGroup {
   kind: 'Email' | 'Voice';
@@ -89,6 +90,15 @@ export class AccountCommunicationsComponent implements OnInit {
   }
 
   protected connectProvider(provider: CommunicationProviderInfo): void {
+    // IMAP gets its own dialog with preset picker + host/port/creds. The
+    // generic dialog would let the user persist a row whose ConfigJson
+    // doesn't match what ImapEmailSyncProvider expects, then sync would
+    // fail every Hangfire tick. Better to enforce the shape at connect.
+    if (provider.providerId === 'imap') {
+      this.dialog.open(ConnectImapDialogComponent, { width: '520px' });
+      return;
+    }
+
     this.dialog.open(ConnectCommunicationDialogComponent, {
       width: '480px',
       data: { provider } satisfies ConnectCommunicationDialogData,

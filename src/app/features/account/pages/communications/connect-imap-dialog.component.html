@@ -1,0 +1,85 @@
+<app-dialog [title]="'account.communications.imap.title' | translate" width="520px" (closed)="close()">
+  @if (currentStep() === 0) {
+    <div class="imap-presets">
+      <p class="imap-presets__hint">{{ 'account.communications.imap.pickPreset' | translate }}</p>
+      @for (p of presets; track p.id) {
+        <button class="imap-preset"
+          [attr.aria-label]="p.displayName"
+          (click)="pickPreset(p)">
+          <div class="imap-preset__body">
+            <div class="imap-preset__name">{{ p.displayName }}</div>
+            @if (p.host) {
+              <div class="imap-preset__server">{{ p.host }}:{{ p.port }} ({{ p.useSsl ? 'SSL' : 'plain' }})</div>
+            }
+            @if (p.hint) {
+              <div class="imap-preset__hint">{{ p.hint }}</div>
+            }
+          </div>
+          <span class="material-icons-outlined imap-preset__chevron">chevron_right</span>
+        </button>
+      }
+    </div>
+  } @else {
+    <div [formGroup]="form" class="imap-form">
+      @if (preset()?.hint) {
+        <div class="imap-form__provider-hint">
+          <span class="material-icons-outlined">info</span>
+          <span>{{ preset()!.hint }}</span>
+        </div>
+      }
+
+      <app-input
+        [label]="'account.communications.imap.username' | translate"
+        formControlName="username"
+        [required]="true"
+        [placeholder]="'account.communications.externalAccountIdEmailPlaceholder' | translate" />
+
+      <app-input
+        [label]="'account.communications.imap.password' | translate"
+        type="password"
+        formControlName="password"
+        [required]="true" />
+
+      @if (isCustom()) {
+        <div class="imap-form__row">
+          <app-input
+            [label]="'account.communications.imap.host' | translate"
+            formControlName="host"
+            [required]="true" />
+          <app-input
+            [label]="'account.communications.imap.port' | translate"
+            type="number"
+            formControlName="port"
+            [required]="true" />
+        </div>
+        <app-toggle
+          [label]="'account.communications.imap.useSsl' | translate"
+          formControlName="useSsl" />
+      }
+
+      <app-input
+        [label]="'account.communications.imap.mailbox' | translate"
+        formControlName="mailbox"
+        [placeholder]="'INBOX'" />
+
+      <app-input
+        [label]="'account.communications.displayLabel' | translate"
+        [placeholder]="'account.communications.displayLabelPlaceholder' | translate"
+        formControlName="displayLabel" />
+    </div>
+  }
+
+  <div dialog-footer>
+    @if (currentStep() === 1) {
+      <button class="action-btn" (click)="back()">{{ 'common.back' | translate }}</button>
+    }
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    @if (currentStep() === 1) {
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          [disabled]="form.invalid || saving()"
+          (click)="connect()">{{ 'account.communications.connect' | translate }}</button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

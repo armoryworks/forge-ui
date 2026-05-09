@@ -7,6 +7,7 @@ import {
   CommunicationSyncConfigSummary,
   CreateCommunicationSyncConfigRequest,
 } from '../models/communication-sync.model';
+import { ImapConnectRequest } from '../models/imap-connect-request.model';
 
 /**
  * Wave 8 — Angular service for the communication-sync surface. Wraps
@@ -59,7 +60,7 @@ export class CommunicationsService {
       displayName: 'IMAP Mailbox',
       description: 'Universal email — works with Gmail, Outlook, Yahoo, Fastmail, custom servers.',
       icon: 'mail',
-      status: 'planned',
+      status: 'available',
     },
     {
       providerId: 'gmail',
@@ -108,6 +109,17 @@ export class CommunicationsService {
 
   create(request: CreateCommunicationSyncConfigRequest): Observable<CommunicationSyncConfigSummary> {
     return this.http.post<CommunicationSyncConfigSummary>(`${this.baseUrl}/connections`, request).pipe(
+      tap(() => this.loadConnections()),
+    );
+  }
+
+  /**
+   * IMAP-specific connect path — server test-authenticates against the
+   * live server before persisting, encrypts the password en route to the
+   * sealed envelope. 4xx response on bad creds / unreachable host.
+   */
+  connectImap(request: ImapConnectRequest): Observable<CommunicationSyncConfigSummary> {
+    return this.http.post<CommunicationSyncConfigSummary>(`${this.baseUrl}/connections/imap`, request).pipe(
       tap(() => this.loadConnections()),
     );
   }

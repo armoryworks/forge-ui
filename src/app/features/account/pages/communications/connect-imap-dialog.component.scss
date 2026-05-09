@@ -1,0 +1,89 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.imap-presets {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: 0 0 $sp-sm;
+  }
+}
+
+.imap-preset {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 5%, var(--surface));
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-base;
+    font-weight: 600;
+  }
+
+  &__server {
+    font-size: $font-size-xxs;
+    font-family: $font-family-mono;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  &__hint {
+    font-size: $font-size-xxs;
+    color: var(--warning);
+    margin-top: 2px;
+  }
+
+  &__chevron {
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+}
+
+.imap-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: $sp-md;
+  }
+
+  &__provider-hint {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--info) 10%, transparent);
+    border-left: $border-width-accent solid var(--info);
+    font-size: $font-size-xs;
+    color: var(--text);
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--info);
+    }
+  }
+}

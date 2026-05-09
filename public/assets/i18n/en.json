@@ -2553,7 +2553,20 @@
       "never": "Never",
       "syncNow": "Sync now",
       "syncCompleted": "Sync complete — {{count}} event(s) processed.",
-      "capabilityDisabled": "{{capability}} is not enabled on this install — admin must enable it before new connections can be added."
+      "capabilityDisabled": "{{capability}} is not enabled on this install — admin must enable it before new connections can be added.",
+      "imap": {
+        "title": "Connect IMAP Mailbox",
+        "pickPreset": "Choose your email provider — host and port will be filled in for you.",
+        "host": "IMAP Host",
+        "port": "Port",
+        "useSsl": "Use SSL/TLS",
+        "username": "Email Address",
+        "password": "Password",
+        "mailbox": "Mailbox Folder",
+        "connectSuccess": "IMAP mailbox connected — first sync runs within 15 minutes.",
+        "connectFailed": "Connection test failed. Verify host, port, and credentials.",
+        "connectFailedTitle": "IMAP connection failed"
+      }
     },
     "customization": "Customization",
     "colorTheme": "Color Theme",

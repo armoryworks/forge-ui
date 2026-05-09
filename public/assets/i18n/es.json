@@ -2549,7 +2549,20 @@
       "never": "Nunca",
       "syncNow": "Sincronizar ahora",
       "syncCompleted": "Sincronización completa — {{count}} evento(s) procesado(s).",
-      "capabilityDisabled": "{{capability}} no está habilitada en esta instalación — el administrador debe habilitarla antes de añadir nuevas conexiones."
+      "capabilityDisabled": "{{capability}} no está habilitada en esta instalación — el administrador debe habilitarla antes de añadir nuevas conexiones.",
+      "imap": {
+        "title": "Conectar buzón IMAP",
+        "pickPreset": "Elija su proveedor de correo — el host y el puerto se completarán automáticamente.",
+        "host": "Servidor IMAP",
+        "port": "Puerto",
+        "useSsl": "Usar SSL/TLS",
+        "username": "Dirección de correo",
+        "password": "Contraseña",
+        "mailbox": "Carpeta del buzón",
+        "connectSuccess": "Buzón IMAP conectado — la primera sincronización se ejecuta en 15 minutos.",
+        "connectFailed": "La prueba de conexión falló. Verifique servidor, puerto y credenciales.",
+        "connectFailedTitle": "Falló la conexión IMAP"
+      }
     },
     "customization": "Personalización",
     "colorTheme": "Tema de color",
