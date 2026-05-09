@@ -1,4 +1,4 @@
-import { test, expect, devices, type Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -169,71 +169,29 @@ async function seedCustomerInteractions(token: string, customerId: number): Prom
 }
 
 /**
- * Make sure the operator has 4 shop-floor jobs assigned to them so the
- * kiosk worker tile + actions overlay render with a populated YOUR JOBS
- * section instead of an empty tile.
+ * Re-assign a fixed set of shop-floor jobs to the operator so the kiosk
+ * actions overlay (C-K-F2 "queue") renders the YOUR JOBS section
+ * populated. Required because repeated runs of this spec walk akim's
+ * jobs through the workflow into the irreversible "Payment Received"
+ * stage — at which point the kiosk filters them out (it only shows
+ * jobs whose stage has IsShopFloor=true). The pool of in-production
+ * jobs is fixed in the seed; we just claim 3 of them for akim.
  *
- * Previous version hard-coded job IDs 9 / 15 / 4, but each spec run
- * advances those jobs through the workflow (timer start in C-K-F3,
- * Mark Complete in C-K-F4) — after a few runs they're in "Payment
- * Received" (IsShopFloor=false) and the kiosk filters them out, leaving
- * akim's tile empty. The fix is to ask the API for whatever IS in a
- * shop-floor stage right now and claim 4 of those for akim.
+ * Job IDs hard-coded:
+ *   • 9  → J-1037 Surface grind — Dowel Plate (Quantum Dynamics)
+ *   • 15 → J-1048 Tumble finish — Small parts lot
+ *   • 4  → J-1041 Weld fixture alignment check (Meridian Systems)
  *
- * Algorithm:
- *   1. GET /display/shop-floor — returns every active job in any
- *      stage where IsShopFloor=true. This is exactly the same query
- *      the kiosk uses to render worker tiles, so anything we pick
- *      from this list is guaranteed to render.
- *   2. Prefer jobs that are unassigned (we don't want to steal from
- *      a different worker tile and leave THEM empty). Fall back to
- *      anything if there aren't 4 unassigned.
- *   3. PATCH /jobs/bulk/assign with the picked IDs + akim's user ID.
- *
- * Idempotent — re-runs just re-claim whatever's currently in stage,
- * which may be a different set than last run (because the workflow
- * keeps moving jobs forward), but the outcome is the same: akim has
- * 4 visible jobs.
+ * All three are in stage "In Production" (id 6) so the kiosk welcome
+ * tile + actions card render them with Start/Done buttons. Idempotent —
+ * PATCH /jobs/bulk/assign just sets assigneeId, no-op if already set.
  */
 async function ensureOperatorHasShopFloorJobs(adminToken: string, operatorId: number): Promise<boolean> {
   try {
     const ctx = await request.newContext({ baseURL: API_BASE, ignoreHTTPSErrors: true });
-    const headers = { Authorization: `Bearer ${adminToken}` };
-
-    const overviewResp = await ctx.get('display/shop-floor', { headers });
-    if (!overviewResp.ok()) {
-      await ctx.dispose();
-      return false;
-    }
-    const overview = await overviewResp.json() as { activeJobs?: Array<{ id: number; assigneeId: number | null }> };
-    const allJobs = overview.activeJobs ?? [];
-    if (allJobs.length === 0) {
-      await ctx.dispose();
-      return false;
-    }
-
-    // Already assigned to akim? We're done — these will render on his tile.
-    const alreadyHis = allJobs.filter(j => j.assigneeId === operatorId);
-    if (alreadyHis.length >= 4) {
-      await ctx.dispose();
-      return true;
-    }
-
-    const need = 4 - alreadyHis.length;
-    const unassigned = allJobs.filter(j => j.assigneeId === null);
-    const pickFrom = unassigned.length >= need
-      ? unassigned
-      : [...unassigned, ...allJobs.filter(j => j.assigneeId !== null && j.assigneeId !== operatorId)];
-    const toClaim = pickFrom.slice(0, need).map(j => j.id);
-
-    if (toClaim.length === 0) {
-      await ctx.dispose();
-      return true;
-    }
-
     const resp = await ctx.patch('jobs/bulk/assign', {
-      headers,
-      data: { jobIds: toClaim, assigneeId: operatorId },
+      headers: { Authorization: `Bearer ${adminToken}` },
+      data: { jobIds: [9, 15, 4], assigneeId: operatorId },
     });
     await ctx.dispose();
     return resp.ok();
@@ -372,21 +330,7 @@ const SAMPLE_INVOICE_ID = 15;
 // surfaces fill more of the captured frame, improving readability when
 // the marketing site scales them to display width.
 const LANDSCAPE = { width: 1280, height: 800 } as const;
-// Mobile emulation uses Playwright's built-in `devices['Pixel 7']`
-// descriptor as the base. Pixel 7/8/9 all share the same CSS viewport
-// profile (412×839 visible area, 412×915 screen, DPR 2.625), so the
-// official Pixel 7 descriptor is the closest correct emulation for a
-// "modern Pixel" — Playwright doesn't ship a Pixel 9 descriptor of its
-// own. We override only the UA string to keep the Pixel 9 branding.
-//
-// Why not roll our own viewport: previously this used a hand-rolled
-// 412×915 viewport, but 915 is the SCREEN height (including browser
-// chrome). Real phones render at ~412×839 of CSS pixels because the
-// URL bar + status bar consume the rest. Capturing at 412×915 made
-// the source PNGs (1081×2402) taller than what an operator actually
-// sees, so frames looked stretched in side-by-side comparisons.
-const PIXEL_DEVICE = devices['Pixel 7'];
-const PIXEL9_UA = 'Mozilla/5.0 (Linux; Android 14; Pixel 9) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36';
+const PORTRAIT = { width: 720, height: 1280 } as const;
 
 /** Captures a screenshot at the given output path, ensuring the dir exists. */
 async function shoot(page: Page, outRel: string): Promise<string> {
@@ -513,211 +457,6 @@ async function setDarkTheme(page: Page): Promise<void> {
 async function settle(page: Page, ms = 500): Promise<void> {
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(ms);
-}
-
-/**
- * Paint a generated "barcode on a slightly used cardboard box" image
- * over the `#qr-reader` viewport on /m/scan. Chromium's synthetic
- * camera (`--use-fake-device-for-media-stream`) renders a moving
- * green/red ball test pattern — fine as a "camera works" signal but
- * reads as radar in marketing frames. Replacing the html5-qrcode
- * <video> with a procedural cardboard+barcode image gives the frame
- * an honest "what an operator sees when scanning a part" look without
- * needing a real camera, ffmpeg, or a Y4M file at the launch arg.
- *
- * Generated entirely on-page via a single 2D canvas so this stays
- * dependency-free. Layers (bottom→top): cardboard base gradient,
- * fluted vertical grain, RGB noise pass, scuff marks, dirt smudges,
- * shipping label (slight tilt, paper gradient, drop shadow), Code-128-
- * lookalike bars, human-readable code text, fine-print product line,
- * lighting vignette.
- */
-async function paintBarcodeOnCardboard(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const reader = document.getElementById('qr-reader');
-    const viewport = document.querySelector('.scanner-viewport') as HTMLElement | null;
-    if (!reader || !viewport) return;
-
-    const cnv = document.createElement('canvas');
-    const W = 800;
-    const H = 600;
-    cnv.width = W;
-    cnv.height = H;
-    const ctx = cnv.getContext('2d');
-    if (!ctx) return;
-
-    // Cardboard base — warm beige with subtle vertical gradient.
-    const grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#c8a878');
-    grad.addColorStop(0.5, '#b89568');
-    grad.addColorStop(1, '#a08555');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    // Fluted-cardboard vertical grain — irregular lines.
-    for (let x = 0; x < W; x += 8) {
-      ctx.strokeStyle = `rgba(0,0,0,${Math.random() * 0.05 + 0.03})`;
-      ctx.lineWidth = 1 + Math.random();
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, H);
-      ctx.stroke();
-    }
-
-    // Per-pixel RGB noise for paper texture.
-    const imgData = ctx.getImageData(0, 0, W, H);
-    const d = imgData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      const n = (Math.random() - 0.5) * 30;
-      d[i] = Math.max(0, Math.min(255, d[i] + n));
-      d[i + 1] = Math.max(0, Math.min(255, d[i + 1] + n));
-      d[i + 2] = Math.max(0, Math.min(255, d[i + 2] + n));
-    }
-    ctx.putImageData(imgData, 0, 0);
-
-    // Scuff marks — short dark scribbles at random angles.
-    for (let i = 0; i < 22; i++) {
-      ctx.strokeStyle = `rgba(60, 35, 20, ${Math.random() * 0.4 + 0.1})`;
-      ctx.lineWidth = Math.random() * 3 + 1;
-      ctx.beginPath();
-      const sx = Math.random() * W;
-      const sy = Math.random() * H;
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(sx + (Math.random() - 0.5) * 60, sy + (Math.random() - 0.5) * 30);
-      ctx.stroke();
-    }
-
-    // Dirt smudges — soft radial gradients.
-    for (let i = 0; i < 8; i++) {
-      const cx = Math.random() * W;
-      const cy = Math.random() * H;
-      const r = Math.random() * 50 + 30;
-      const radial = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      radial.addColorStop(0, 'rgba(40, 25, 15, 0.3)');
-      radial.addColorStop(1, 'rgba(40, 25, 15, 0)');
-      ctx.fillStyle = radial;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // Shipping label — slight 2.3° tilt.
-    ctx.save();
-    ctx.translate(W * 0.5, H * 0.5);
-    ctx.rotate(-0.04);
-    const labelW = 500;
-    const labelH = 290;
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-    ctx.fillRect(-labelW / 2 + 6, -labelH / 2 + 6, labelW, labelH);
-
-    const labelGrad = ctx.createLinearGradient(-labelW / 2, -labelH / 2, labelW / 2, labelH / 2);
-    labelGrad.addColorStop(0, '#fbf8f0');
-    labelGrad.addColorStop(1, '#ebe4d4');
-    ctx.fillStyle = labelGrad;
-    ctx.fillRect(-labelW / 2, -labelH / 2, labelW, labelH);
-
-    ctx.strokeStyle = 'rgba(120, 100, 70, 0.5)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-labelW / 2, -labelH / 2, labelW, labelH);
-
-    // Code-128-lookalike bars — randomised stripe widths.
-    const bcX = -labelW / 2 + 32;
-    const bcY = -labelH / 2 + 56;
-    const bcW = labelW - 64;
-    const bcH = 140;
-    const widths = [2, 4, 1, 3, 2, 1, 4, 2, 1, 3, 2, 4, 1, 2, 3, 1, 2, 4, 1, 3, 2, 1, 3, 4, 1, 2, 3, 2, 4, 1, 2, 3, 1, 4, 2, 1, 3, 2];
-    let cx = bcX;
-    let i = 0;
-    while (cx < bcX + bcW - 4) {
-      const w = widths[i % widths.length];
-      if (i % 2 === 0) {
-        ctx.fillStyle = '#1a1a1a';
-        ctx.fillRect(cx, bcY, w * 1.7, bcH);
-      }
-      cx += w * 1.7;
-      i++;
-    }
-
-    // Human-readable code under the barcode.
-    ctx.fillStyle = '#222';
-    ctx.font = 'bold 20px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('P-1001-43-22A', 0, bcY + bcH + 30);
-
-    // Fine-print product line.
-    ctx.font = '12px sans-serif';
-    ctx.fillStyle = '#555';
-    ctx.fillText('PRECISION MOUNTING BRACKET ASSY · REV C', 0, bcY + bcH + 52);
-
-    ctx.restore();
-
-    // Soft vignette so edges don't read as flat colour.
-    const vig = ctx.createRadialGradient(W / 2, H / 2, W * 0.3, W / 2, H / 2, W * 0.7);
-    vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.4)');
-    ctx.fillStyle = vig;
-    ctx.fillRect(0, 0, W, H);
-
-    // Replace whatever html5-qrcode rendered with our image. Wrap in
-    // a relative-positioned div so we can layer the ghosted scan-region
-    // guide on top of the cardboard photo.
-    reader.innerHTML = '';
-    const wrap = document.createElement('div');
-    wrap.style.position = 'relative';
-    wrap.style.width = '100%';
-    wrap.style.height = '100%';
-    wrap.style.display = 'block';
-
-    const img = document.createElement('img');
-    img.src = cnv.toDataURL('image/png');
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'cover';
-    img.style.display = 'block';
-    wrap.appendChild(img);
-
-    // Ghosted scan-region frame — the "place barcode here" guide that
-    // any QR/barcode scanner overlays on top of the camera feed.
-    // Built as inline SVG so it scales cleanly with the viewport and
-    // doesn't depend on the html5-qrcode library's own scan region
-    // (which we tore out when we set reader.innerHTML = '').
-    //   • Outer dim mask (everything outside the frame goes ~50% darker)
-    //   • Inner clear window (no overlay — viewer sees the full image)
-    //   • Four corner brackets in primary green
-    const overlay = document.createElement('div');
-    overlay.style.position = 'absolute';
-    overlay.style.inset = '0';
-    overlay.style.pointerEvents = 'none';
-    overlay.innerHTML = `
-      <svg viewBox="0 0 100 100" preserveAspectRatio="none"
-           style="position:absolute;inset:0;width:100%;height:100%;">
-        <defs>
-          <mask id="scan-window">
-            <rect width="100" height="100" fill="white"/>
-            <rect x="15" y="28" width="70" height="44" rx="2" ry="2" fill="black"/>
-          </mask>
-        </defs>
-        <rect width="100" height="100" fill="rgba(0,0,0,0.45)" mask="url(#scan-window)"/>
-      </svg>
-      <div style="position:absolute;left:15%;top:28%;width:70%;height:44%;">
-        <span style="position:absolute;left:0;top:0;width:18px;height:18px;border-left:3px solid #00d4aa;border-top:3px solid #00d4aa;"></span>
-        <span style="position:absolute;right:0;top:0;width:18px;height:18px;border-right:3px solid #00d4aa;border-top:3px solid #00d4aa;"></span>
-        <span style="position:absolute;left:0;bottom:0;width:18px;height:18px;border-left:3px solid #00d4aa;border-bottom:3px solid #00d4aa;"></span>
-        <span style="position:absolute;right:0;bottom:0;width:18px;height:18px;border-right:3px solid #00d4aa;border-bottom:3px solid #00d4aa;"></span>
-      </div>
-    `;
-    wrap.appendChild(overlay);
-
-    reader.appendChild(wrap);
-    (reader as HTMLElement).style.minHeight = '360px';
-    (reader as HTMLElement).style.background = '#000';
-
-    const loading = viewport.querySelector('.scanner-viewport__loading') as HTMLElement | null;
-    if (loading) loading.style.display = 'none';
-  });
-  // Give the <img> a moment to decode before screenshot.
-  await page.waitForTimeout(200);
 }
 
 test.describe('App sample-screenshot batch', () => {
@@ -1147,13 +886,13 @@ test.describe('App sample-screenshot batch', () => {
     await desktop.close();
 
     // ─── Portrait captures (mobile track) ───────────────────────────────
-    // Spread Playwright's built-in Pixel 7 descriptor (412×839 viewport,
-    // 412×915 screen, DPR 2.625, isMobile, hasTouch) — same CSS profile
-    // as Pixel 9. Override the UA to advertise as Pixel 9 for branding.
     const mobile = await browser.newContext({
-      ...PIXEL_DEVICE,
+      viewport: PORTRAIT,
       colorScheme: 'dark',
-      userAgent: PIXEL9_UA,
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      isMobile: true,
+      hasTouch: true,
+      deviceScaleFactor: 3,
       // Auto-grant camera so /m/scan getUserMedia resolves with the fake
       // synthetic video device wired up via Chromium's
       // --use-fake-device-for-media-stream launch arg (see
@@ -1202,15 +941,14 @@ test.describe('App sample-screenshot batch', () => {
       await mPage.waitForTimeout(1500);
       captured.push(await shoot(mPage, 'c-floor-mobile/f2-queue.png'));
 
-      // F3 — barcode scanner UI. Chromium's synthetic camera renders
-      // a moving green/red ball test pattern that reads as radar in
-      // marketing frames. Wait long enough for html5-qrcode to attach
-      // its <video>, then paint a generated barcode-on-cardboard image
-      // (with ghosted scan-region overlay) over the viewport so the
-      // frame shows what an operator actually sees while scanning.
+      // F3 — barcode scanner UI. With the camera permission granted +
+      // Chromium's --use-fake-device-for-media-stream launch arg
+      // (set in playwright.config.ts), getUserMedia returns a synthetic
+      // video track and the viewfinder renders an actual feed instead
+      // of the "camera blocked" empty state.
       await mPage.goto('http://localhost:4200/m/scan', { waitUntil: 'networkidle' });
+      // Allow the camera stream to attach + first few frames to render.
       await mPage.waitForTimeout(2000);
-      await paintBarcodeOnCardboard(mPage);
       captured.push(await shoot(mPage, 'c-floor-mobile/f3-scan.png'));
 
       // F4 — drill into a job from the queue, toggle the timer to
