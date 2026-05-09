@@ -87,20 +87,20 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./tariffs/tariffs.component').then((m) => m.TariffsComponent),
   },
-  // Phase 1m — admin-managed integration & system configuration. Per-group
-  // editor at /admin/configuration/{group}; the bare /admin/configuration
-  // shows the group index. Renamed from /admin/settings (which is taken
-  // by AdminComponent's in-page brand/system tab) so the two surfaces
-  // don't collide. Listed before the `:tab` catch-all.
+  // Phase 1m option-3 — /admin/configuration was the parallel admin
+  // surface for the descriptor-driven settings. Retired: the existing
+  // /admin/integrations page (rendered inside AdminComponent's
+  // 'integrations' tab) now drives off IntegrationDescriptorCatalog +
+  // ISettingsService, so there's no need for a separate page. The route
+  // redirects so old bookmarks land on the new surface.
   {
     path: 'configuration',
-    loadComponent: () =>
-      import('./settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
+    redirectTo: 'integrations',
+    pathMatch: 'full',
   },
   {
     path: 'configuration/:group',
-    loadComponent: () =>
-      import('./settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
+    redirectTo: 'integrations',
   },
   { path: ':tab', component: AdminComponent },
 ];

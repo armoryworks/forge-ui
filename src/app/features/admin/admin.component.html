@@ -222,23 +222,6 @@
     @if (activeTab() === 'settings') {
       <div class="tab-panel">
 
-        <!-- Phase 1m — pointer to the schema-driven configuration page -->
-        <div class="settings-section">
-          <div class="settings-section__header">
-            <h3 class="settings-section__title">
-              <span class="material-icons-outlined">tune</span>
-              {{ 'admin.integrationConfig.title' | translate }}
-            </h3>
-          </div>
-          <p class="settings-section__hint">
-            {{ 'admin.integrationConfig.hint' | translate }}
-          </p>
-          <a [routerLink]="['/admin/configuration']" class="action-btn">
-            <span class="material-icons-outlined">arrow_forward</span>
-            {{ 'admin.integrationConfig.openButton' | translate }}
-          </a>
-        </div>
-
         <!-- Company Profile -->
         <div class="settings-section">
           <div class="settings-section__header">

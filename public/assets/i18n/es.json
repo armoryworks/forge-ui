@@ -2050,23 +2050,6 @@
     "ein": "EIN / ID Fiscal",
     "website": "Sitio Web",
     "saveProfile": "Guardar Perfil",
-    "integrationConfig": {
-      "title": "Configuración de Integraciones y Sistema",
-      "hint": "Gestione credenciales y ajustes para proveedores OAuth, contabilidad, transportistas, IA, SMTP y almacenamiento. Los cambios surten efecto inmediato — sin reinicio.",
-      "openButton": "Abrir Configuración"
-    },
-    "settings": {
-      "title": "Configuración",
-      "headingHint": "Los cambios se guardan automáticamente al salir de un campo. Los valores vacíos vuelven al predeterminado.",
-      "saved": "{{name}} guardado",
-      "saveFailed": "El cambio no pudo guardarse. Verifique que el valor tenga el formato correcto.",
-      "saveFailedTitle": "No se pudo guardar {{name}}",
-      "defaultHint": "Predeterminado: {{value}}",
-      "unset": "(sin configurar)",
-      "revealSecret": "Mostrar valor secreto",
-      "hideSecret": "Ocultar valor secreto",
-      "clearSecret": "Borrar secreto almacenado"
-    },
     "locations": "Ubicaciones",
     "newLocation": "Nueva Ubicación",
     "noLocations": "Sin ubicaciones configuradas",
