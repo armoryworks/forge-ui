@@ -1,0 +1,38 @@
+<div class="recent-comms">
+  <div class="recent-comms__header">
+    <span class="material-icons-outlined recent-comms__header-icon">forum</span>
+    <span class="recent-comms__header-title">{{ 'recentCommunications.title' | translate }}</span>
+    <span class="recent-comms__header-count">{{ filtered().length }}</span>
+  </div>
+
+  @if (isLoading() && filtered().length === 0) {
+    <div class="recent-comms__loading">{{ 'recentCommunications.loading' | translate }}</div>
+  } @else if (filtered().length === 0) {
+    <div class="recent-comms__empty">
+      <span class="material-icons-outlined recent-comms__empty-icon">mail_outline</span>
+      <div class="recent-comms__empty-msg">{{ 'recentCommunications.empty' | translate }}</div>
+    </div>
+  } @else {
+    <ul class="recent-comms__list">
+      @for (item of filtered(); track item.id) {
+        <li class="recent-comms__row">
+          <span class="material-icons-outlined recent-comms__icon"
+            [attr.aria-label]="item.action">{{ iconFor(item.action) }}</span>
+          <div class="recent-comms__body">
+            <div class="recent-comms__description">{{ item.description }}</div>
+            <div class="recent-comms__meta">
+              @if (item.userInitials) {
+                @if (item.userColor) {
+                  <app-avatar [initials]="item.userInitials" [color]="item.userColor" size="sm" />
+                } @else {
+                  <app-avatar [initials]="item.userInitials" size="sm" />
+                }
+              }
+              <span class="recent-comms__time">{{ formatDate(item.createdAt) }}</span>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</div>

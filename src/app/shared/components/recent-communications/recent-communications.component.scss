@@ -1,0 +1,104 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.recent-comms {
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+  padding: $sp-md $sp-lg;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding-bottom: $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+    margin-bottom: $sp-sm;
+  }
+
+  &__header-icon {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__header-title {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+    flex: 1;
+  }
+
+  &__header-count {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__loading,
+  &__empty {
+    padding: $sp-md;
+    color: var(--text-muted);
+    font-size: $font-size-xs;
+    text-align: center;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-sm;
+  }
+
+  &__empty-icon {
+    font-size: $icon-size-xl;
+    color: var(--text-muted);
+    opacity: 0.5;
+  }
+
+  &__empty-msg {
+    font-size: $font-size-xs;
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__row {
+    display: flex;
+    gap: $sp-sm;
+    align-items: flex-start;
+  }
+
+  &__icon {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__description {
+    font-size: $font-size-xs;
+    color: var(--text);
+    @include truncate;
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    margin-top: 2px;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__time {
+    font-variant-numeric: tabular-nums;
+  }
+}

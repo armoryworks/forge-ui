@@ -72,5 +72,8 @@
       <app-credit-status-card [customerId]="customer().id" />
     </ng-container>
 
+    <!-- Wave 8 — auto-logged email + voice from sales rep mailboxes / VoIP. -->
+    <app-recent-communications entityType="Customer" [entityId]="customer().id" />
+
   </div>
 </div>

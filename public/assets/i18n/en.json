@@ -5662,5 +5662,10 @@
       "hasInventory": "Inventory",
       "hasInventoryMissing": "Stock unit of measure not yet set."
     }
+  },
+  "recentCommunications": {
+    "title": "Recent Communications",
+    "loading": "Loading…",
+    "empty": "No recent communications. Connect a mailbox or phone line under Account > Communications to start auto-logging."
   }
 }

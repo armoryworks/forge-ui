@@ -125,6 +125,9 @@
         </div>
       }
 
+      <!-- Wave 8 — Recent communications (auto-logged email + voice) -->
+      <app-recent-communications entityType="Lead" [entityId]="leadId()" />
+
       <!-- Activity Section -->
       <app-entity-activity-section entityType="Lead" [entityId]="leadId()" />
     </div>

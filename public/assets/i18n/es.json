@@ -5658,5 +5658,10 @@
     "state": "Estado",
     "postal": "Código postal",
     "country": "País"
+  },
+  "recentCommunications": {
+    "title": "Comunicaciones recientes",
+    "loading": "Cargando…",
+    "empty": "Sin comunicaciones recientes. Conecte un buzón o teléfono en Cuenta > Comunicaciones para empezar a registrarlas automáticamente."
   }
 }

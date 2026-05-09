@@ -17,6 +17,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
+import { RecentCommunicationsComponent } from '../../../../shared/components/recent-communications/recent-communications.component';
 
 @Component({
   selector: 'app-lead-detail-panel',
@@ -24,6 +25,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
   imports: [
     DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
     DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent,
+    RecentCommunicationsComponent,
   ],
   templateUrl: './lead-detail-panel.component.html',
   styleUrl: './lead-detail-panel.component.scss',
