@@ -87,5 +87,20 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./tariffs/tariffs.component').then((m) => m.TariffsComponent),
   },
+  // Phase 1m — admin-managed integration & system configuration. Per-group
+  // editor at /admin/configuration/{group}; the bare /admin/configuration
+  // shows the group index. Renamed from /admin/settings (which is taken
+  // by AdminComponent's in-page brand/system tab) so the two surfaces
+  // don't collide. Listed before the `:tab` catch-all.
+  {
+    path: 'configuration',
+    loadComponent: () =>
+      import('./settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
+  },
+  {
+    path: 'configuration/:group',
+    loadComponent: () =>
+      import('./settings/admin-settings.component').then((m) => m.AdminSettingsComponent),
+  },
   { path: ':tab', component: AdminComponent },
 ];

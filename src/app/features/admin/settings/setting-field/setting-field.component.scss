@@ -1,0 +1,61 @@
+@use 'styles/variables' as *;
+
+.setting-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--surface);
+
+  &__header {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-sm;
+    flex-wrap: wrap;
+  }
+
+  &__label {
+    font-size: $font-size-base;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  &__required {
+    color: var(--error);
+    font-weight: 600;
+  }
+
+  &__default-hint {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    font-family: $font-family-mono;
+  }
+
+  &__unset-hint {
+    font-size: $font-size-xxs;
+    color: var(--warning);
+    font-style: italic;
+  }
+
+  &__description {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: 0 0 $sp-sm;
+    line-height: 1.4;
+  }
+
+  &__input {
+    margin-top: $sp-xs;
+  }
+
+  &__input-row {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+
+    app-input {
+      flex: 1;
+    }
+  }
+}

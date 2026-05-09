@@ -1,0 +1,80 @@
+<div class="setting-field">
+  <div class="setting-field__header">
+    <label class="setting-field__label" [for]="entry().key">
+      {{ entry().displayName }}
+      @if (entry().isRequired) {
+        <span class="setting-field__required" aria-hidden="true">*</span>
+      }
+    </label>
+    @if (defaultHint()) {
+      <span class="setting-field__default-hint">
+        {{ 'admin.settings.defaultHint' | translate: { value: defaultHint() } }}
+      </span>
+    }
+    @if (!entry().hasValue && !entry().defaultValue) {
+      <span class="setting-field__unset-hint">
+        {{ 'admin.settings.unset' | translate }}
+      </span>
+    }
+  </div>
+
+  @if (entry().description) {
+    <p class="setting-field__description">{{ entry().description }}</p>
+  }
+
+  <div class="setting-field__input">
+    @switch (entry().dataType) {
+      @case ('Boolean') {
+        <app-toggle
+          [label]="entry().displayName"
+          [formControl]="control"
+          (change)="onToggleSave(($any($event.target)).checked)" />
+      }
+
+      @case ('Enum') {
+        <app-select
+          [label]="entry().displayName"
+          [options]="enumOptions()"
+          [formControl]="control"
+          (change)="onEnumSave(control.value)" />
+      }
+
+      @case ('Json') {
+        <app-textarea
+          [label]="entry().displayName"
+          [formControl]="control"
+          [rows]="6"
+          (blur)="onBlur()" />
+      }
+
+      @default {
+        <div class="setting-field__input-row">
+          <app-input
+            [label]="entry().displayName"
+            [type]="inputType"
+            [formControl]="control"
+            (blur)="onBlur()" />
+
+          @if (entry().isSecret) {
+            <button class="icon-btn"
+              type="button"
+              [attr.aria-label]="(secretRevealed() ? 'admin.settings.hideSecret' : 'admin.settings.revealSecret') | translate"
+              (click)="toggleSecretReveal()">
+              <span class="material-icons-outlined">
+                {{ secretRevealed() ? 'visibility_off' : 'visibility' }}
+              </span>
+            </button>
+            @if (entry().hasValue) {
+              <button class="icon-btn icon-btn--danger"
+                type="button"
+                [attr.aria-label]="'admin.settings.clearSecret' | translate"
+                (click)="clearSecret()">
+                <span class="material-icons-outlined">close</span>
+              </button>
+            }
+          }
+        </div>
+      }
+    }
+  </div>
+</div>

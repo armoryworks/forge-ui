@@ -2054,6 +2054,23 @@
     "ein": "EIN / Tax ID",
     "website": "Website",
     "saveProfile": "Save Profile",
+    "integrationConfig": {
+      "title": "Integration & System Configuration",
+      "hint": "Manage credentials and settings for OAuth providers, accounting systems, shipping carriers, AI, SMTP, and storage. Updates take effect immediately — no restart required.",
+      "openButton": "Open Configuration"
+    },
+    "settings": {
+      "title": "Configuration",
+      "headingHint": "Changes save automatically when you tab away from a field. Empty values revert to the default.",
+      "saved": "{{name}} saved",
+      "saveFailed": "The change couldn't be saved. Verify the value is the right shape.",
+      "saveFailedTitle": "Couldn't save {{name}}",
+      "defaultHint": "Default: {{value}}",
+      "unset": "(not configured)",
+      "revealSecret": "Reveal secret value",
+      "hideSecret": "Hide secret value",
+      "clearSecret": "Clear stored secret"
+    },
     "locations": "Locations",
     "newLocation": "New Location",
     "noLocations": "No locations configured",

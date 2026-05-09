@@ -1,0 +1,94 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.admin-settings {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: $sp-xl;
+  padding: $sp-xl;
+  max-width: 1200px;
+
+  &__nav {
+    border-right: $border-width-thin solid var(--border);
+    padding-right: $sp-lg;
+  }
+
+  &__nav-title {
+    @include uppercase-label($font-size-xxs, 0.5px, 600);
+    color: var(--text-muted);
+    margin: 0 0 $sp-md;
+  }
+
+  &__nav-empty {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__nav-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+  }
+
+  &__nav-link {
+    display: block;
+    padding: $sp-sm $sp-md;
+    font-size: $font-size-sm;
+    color: var(--text);
+    text-decoration: none;
+    border-left: $border-width-accent solid transparent;
+    transition: background $transition-fast, border-color $transition-fast;
+
+    &:hover {
+      background: color-mix(in srgb, var(--primary) 5%, transparent);
+    }
+
+    &--active {
+      background: color-mix(in srgb, var(--primary) 10%, transparent);
+      border-left-color: var(--primary);
+      font-weight: 600;
+      color: var(--primary);
+    }
+  }
+
+  &__main {
+    min-width: 0;
+  }
+
+  &__heading {
+    margin-bottom: $sp-lg;
+  }
+
+  &__heading-title {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    margin: 0 0 $sp-xs;
+  }
+
+  &__heading-hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  &__fields {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  @include mobile {
+    grid-template-columns: 1fr;
+
+    &__nav {
+      border-right: none;
+      padding-right: 0;
+      border-bottom: $border-width-thin solid var(--border);
+      padding-bottom: $sp-md;
+    }
+  }
+}
