@@ -3,33 +3,49 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 
-import { CustomerService } from '../../../services/customer.service';
-import { ReferenceDataService } from '../../../../../shared/services/reference-data.service';
-import { FormValidationService } from '../../../../../shared/services/form-validation.service';
-import { SnackbarService } from '../../../../../shared/services/snackbar.service';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { AvatarComponent } from '../../../../../shared/components/avatar/avatar.component';
-import { InputComponent } from '../../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
-import { ToggleComponent } from '../../../../../shared/components/toggle/toggle.component';
-import { DialogComponent } from '../../../../../shared/components/dialog/dialog.component';
-import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
-import { Contact } from '../../../models/contact.model';
+import { CustomerService } from '../../services/customer.service';
+import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { AvatarComponent } from '../../../../shared/components/avatar/avatar.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { ToggleComponent } from '../../../../shared/components/toggle/toggle.component';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { Contact } from '../../models/contact.model';
 
-
+/**
+ * Wave 6 — Customer Contacts cluster.
+ *
+ * Multi-row entity collection cluster (mirrors VendorSourcesPanelComponent's
+ * shape on Parts). Renders the contact list + add/edit modal dialog;
+ * mounted into the Contacts tab on the customer detail page.
+ *
+ * Was previously `CustomerContactsTabComponent` at
+ * `pages/customer-detail/tabs/`. Moved to `components/customer-clusters/`
+ * + renamed to match the cluster naming convention used everywhere else
+ * (identity, activity, etc.) so the customer detail page's component
+ * tree is uniform with Parts. The visible UX is unchanged.
+ *
+ * The cluster is gated server-side by CAP-MD-CUSTOMER-CONTACTS;
+ * customer-detail.component.ts drops the corresponding tab from the
+ * layout when the capability is disabled.
+ */
 @Component({
-  selector: 'app-customer-contacts-tab',
+  selector: 'app-customer-contacts-cluster',
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
     AvatarComponent, InputComponent, SelectComponent, ToggleComponent,
     DialogComponent, ValidationButtonComponent,
   ],
-  templateUrl: './customer-contacts-tab.component.html',
-  styleUrl: '../customer-detail-tabs.scss',
+  templateUrl: './customer-contacts-cluster.component.html',
+  styleUrl: '../../pages/customer-detail/customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerContactsTabComponent implements OnInit {
+export class CustomerContactsClusterComponent implements OnInit {
   private readonly customerService = inject(CustomerService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);

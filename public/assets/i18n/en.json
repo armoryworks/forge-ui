@@ -1485,6 +1485,8 @@
       "noOrdersYet": "No sales orders yet",
       "noJobsYet": "No jobs linked to this customer",
       "noInvoicesYet": "No invoices yet",
+      "noAddressesOnFile": "No addresses on file",
+      "addressDefault": "Default",
       "colQuoteNumber": "Quote #",
       "colOrderNumber": "SO #",
       "colJobNumber": "Job #",

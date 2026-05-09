@@ -17,18 +17,23 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CapabilityService } from '../../../../shared/services/capability.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { CustomerOverviewTabComponent } from './tabs/customer-overview-tab.component';
-import { CustomerContactsTabComponent } from './tabs/customer-contacts-tab.component';
-import { CustomerAddressesTabComponent } from './tabs/customer-addresses-tab.component';
 import { CustomerEstimatesTabComponent } from './tabs/customer-estimates-tab.component';
 import { CustomerQuotesTabComponent } from './tabs/customer-quotes-tab.component';
 import { CustomerOrdersTabComponent } from './tabs/customer-orders-tab.component';
 import { CustomerJobsTabComponent } from './tabs/customer-jobs-tab.component';
 import { CustomerInvoicesTabComponent } from './tabs/customer-invoices-tab.component';
 import { CustomerActivityTabComponent } from './tabs/customer-activity-tab.component';
-import { CustomerInteractionsTabComponent } from './tabs/customer-interactions-tab.component';
 import { CustomerPricingTabComponent } from './tabs/customer-pricing-tab.component';
 import { CustomerIdentityClusterComponent } from '../../components/customer-clusters/customer-identity-cluster.component';
 import { CustomerActivityClusterComponent } from '../../components/customer-clusters/customer-activity-cluster.component';
+// Wave 6 — Contacts/Addresses/Interactions are now clusters (moved from
+// pages/customer-detail/tabs/ to components/customer-clusters/) so the
+// customer detail tree mirrors Parts' cluster naming convention. The
+// remaining tab components are query-shaped (read-only list views) and
+// stay as tabs.
+import { CustomerContactsClusterComponent } from '../../components/customer-clusters/customer-contacts-cluster.component';
+import { CustomerAddressesClusterComponent } from '../../components/customer-clusters/customer-addresses-cluster.component';
+import { CustomerInteractionsClusterComponent } from '../../components/customer-clusters/customer-interactions-cluster.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityCompletenessChipComponent } from '../../../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 
@@ -53,11 +58,12 @@ import { EntityCompletenessChipComponent } from '../../../../shared/components/e
   standalone: true,
   imports: [
     TranslatePipe, RouterLink, MatTooltipModule,
-    CustomerOverviewTabComponent, CustomerContactsTabComponent, CustomerAddressesTabComponent,
+    CustomerOverviewTabComponent,
     CustomerEstimatesTabComponent, CustomerQuotesTabComponent, CustomerOrdersTabComponent,
-    CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent, CustomerInteractionsTabComponent,
+    CustomerJobsTabComponent, CustomerInvoicesTabComponent, CustomerActivityTabComponent,
     CustomerPricingTabComponent,
     CustomerIdentityClusterComponent, CustomerActivityClusterComponent,
+    CustomerContactsClusterComponent, CustomerAddressesClusterComponent, CustomerInteractionsClusterComponent,
     CurrencyDisplayComponent,
     EntityCompletenessChipComponent,
   ],

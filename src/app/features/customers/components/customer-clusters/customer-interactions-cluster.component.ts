@@ -5,25 +5,37 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { CustomerService } from '../../../services/customer.service';
-import { ContactInteraction } from '../../../models/contact-interaction.model';
-import { SnackbarService } from '../../../../../shared/services/snackbar.service';
-import { FormValidationService } from '../../../../../shared/services/form-validation.service';
-import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
-import { DataTableComponent } from '../../../../../shared/components/data-table/data-table.component';
-import { ColumnCellDirective } from '../../../../../shared/directives/column-cell.directive';
-import { InputComponent } from '../../../../../shared/components/input/input.component';
-import { SelectComponent, SelectOption } from '../../../../../shared/components/select/select.component';
-import { TextareaComponent } from '../../../../../shared/components/textarea/textarea.component';
-import { DatepickerComponent } from '../../../../../shared/components/datepicker/datepicker.component';
-import { DialogComponent } from '../../../../../shared/components/dialog/dialog.component';
-import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
-import { LoadingBlockDirective } from '../../../../../shared/directives/loading-block.directive';
-import { ColumnDef } from '../../../../../shared/models/column-def.model';
-import { toIsoDate } from '../../../../../shared/utils/date.utils';
+import { CustomerService } from '../../services/customer.service';
+import { ContactInteraction } from '../../models/contact-interaction.model';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
+import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { toIsoDate } from '../../../../shared/utils/date.utils';
 
+/**
+ * Wave 6 — Customer Interactions cluster (CRM activity log).
+ *
+ * Multi-row entity collection cluster surfacing the contact-interaction
+ * timeline (call / email / meeting / note logs) per contact + per
+ * customer. Mounted into the Interactions tab on the customer detail
+ * page when CAP-MD-CUSTOMER-INTERACTIONS is enabled.
+ *
+ * Was previously `CustomerInteractionsTabComponent` at
+ * `pages/customer-detail/tabs/`. Moved to `components/customer-clusters/`
+ * + renamed to match the cluster naming convention. Visible UX unchanged.
+ */
 @Component({
-  selector: 'app-customer-interactions-tab',
+  selector: 'app-customer-interactions-cluster',
   standalone: true,
   imports: [
     DatePipe,
@@ -39,11 +51,11 @@ import { toIsoDate } from '../../../../../shared/utils/date.utils';
     ValidationButtonComponent,
     LoadingBlockDirective,
   ],
-  templateUrl: './customer-interactions-tab.component.html',
-  styleUrl: '../customer-detail-tabs.scss',
+  templateUrl: './customer-interactions-cluster.component.html',
+  styleUrl: '../../pages/customer-detail/customer-detail-tabs.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerInteractionsTabComponent {
+export class CustomerInteractionsClusterComponent {
   private readonly customerService = inject(CustomerService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);

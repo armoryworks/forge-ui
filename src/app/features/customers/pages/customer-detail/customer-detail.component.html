@@ -117,13 +117,13 @@
           }
         }
         @case ('contacts') {
-          <app-customer-contacts-tab [customerId]="c.id" />
+          <app-customer-contacts-cluster [customerId]="c.id" />
         }
         @case ('interactions') {
-          <app-customer-interactions-tab [customerId]="c.id" />
+          <app-customer-interactions-cluster [customerId]="c.id" />
         }
         @case ('addresses') {
-          <app-customer-addresses-tab [customerId]="c.id" />
+          <app-customer-addresses-cluster [customerId]="c.id" />
         }
         @case ('estimates') {
           <app-customer-estimates-tab [customerId]="c.id" />

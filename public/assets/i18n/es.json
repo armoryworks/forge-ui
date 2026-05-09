@@ -1476,6 +1476,8 @@
       "noOrdersYet": "Aún no hay órdenes de venta",
       "noJobsYet": "No hay trabajos vinculados a este cliente",
       "noInvoicesYet": "Aún no hay facturas",
+      "noAddressesOnFile": "Sin direcciones registradas",
+      "addressDefault": "Predeterminada",
       "colQuoteNumber": "N.º cotización",
       "colOrderNumber": "N.º OV",
       "colJobNumber": "N.º trabajo",

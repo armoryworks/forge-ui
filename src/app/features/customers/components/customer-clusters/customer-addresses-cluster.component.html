@@ -6,7 +6,7 @@
   } @else if (addresses().length === 0) {
     <div class="tab-empty">
       <span class="material-icons-outlined">location_off</span>
-      <p>No addresses on file</p>
+      <p>{{ 'customers.tabs.noAddressesOnFile' | translate }}</p>
     </div>
   } @else {
     <div class="address-list">
@@ -15,7 +15,7 @@
           <div class="address-card__header">
             <span class="chip chip--muted">{{ addr.type }}</span>
             @if (addr.isDefault) {
-              <span class="chip chip--primary">Default</span>
+              <span class="chip chip--primary">{{ 'customers.tabs.addressDefault' | translate }}</span>
             }
           </div>
           <p class="address-card__line">{{ addr.line1 }}</p>
