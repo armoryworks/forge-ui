@@ -2547,6 +2547,8 @@
       "statusPlanned": "Próximamente",
       "lastSync": "Última sincronización",
       "never": "Nunca",
+      "syncNow": "Sincronizar ahora",
+      "syncCompleted": "Sincronización completa — {{count}} evento(s) procesado(s).",
       "capabilityDisabled": "{{capability}} no está habilitada en esta instalación — el administrador debe habilitarla antes de añadir nuevas conexiones."
     },
     "customization": "Personalización",

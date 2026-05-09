@@ -2551,6 +2551,8 @@
       "statusPlanned": "Coming soon",
       "lastSync": "Last sync",
       "never": "Never",
+      "syncNow": "Sync now",
+      "syncCompleted": "Sync complete — {{count}} event(s) processed.",
       "capabilityDisabled": "{{capability}} is not enabled on this install — admin must enable it before new connections can be added."
     },
     "customization": "Customization",

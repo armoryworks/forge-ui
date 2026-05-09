@@ -54,6 +54,7 @@ export class AccountCommunicationsComponent implements OnInit {
   private readonly translate = inject(TranslateService);
 
   protected readonly loading = this.service.loading;
+  protected readonly syncing = this.service.syncing;
 
   protected readonly kindGroups = computed<KindGroup[]>(() => {
     const connections = this.service.connections();
@@ -91,6 +92,17 @@ export class AccountCommunicationsComponent implements OnInit {
     this.dialog.open(ConnectCommunicationDialogComponent, {
       width: '480px',
       data: { provider } satisfies ConnectCommunicationDialogData,
+    });
+  }
+
+  protected syncNow(connection: CommunicationSyncConfigSummary): void {
+    if (this.syncing().has(connection.id)) return;
+    this.service.syncNow(connection.id).subscribe({
+      next: (result) => {
+        this.snackbar.success(this.translate.instant('account.communications.syncCompleted', {
+          count: result.eventCount,
+        }));
+      },
     });
   }
 

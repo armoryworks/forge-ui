@@ -52,6 +52,13 @@
                 </div>
               </div>
               <div class="connection-card__actions">
+                <button class="icon-btn"
+                  [attr.aria-label]="'account.communications.syncNow' | translate"
+                  [disabled]="syncing().has(connection.id)"
+                  (click)="syncNow(connection)">
+                  <span class="material-icons-outlined"
+                    [class.spin]="syncing().has(connection.id)">sync</span>
+                </button>
                 <button class="icon-btn icon-btn--danger"
                   [attr.aria-label]="'account.communications.disconnect' | translate"
                   (click)="disconnect(connection)">

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { finalize, Observable, tap } from 'rxjs';
 
 import {
   CommunicationProviderInfo,
@@ -24,6 +24,8 @@ export class CommunicationsService {
 
   readonly connections = signal<CommunicationSyncConfigSummary[]>([]);
   readonly loading = signal(false);
+  /** Connection ids currently syncing — keyed for per-card spinner state. */
+  readonly syncing = signal<Set<number>>(new Set());
 
   /**
    * Static provider catalog. Each entry implements `ICommunicationSyncProvider`
@@ -41,7 +43,10 @@ export class CommunicationsService {
       status: 'mock',
     },
     {
-      providerId: 'mock-voice',
+      // Server-side ProviderId for the mock voice provider is "mock-voip"
+      // (matches the existing VoIP nomenclature used elsewhere in the
+      // capability catalog: CAP-EXT-VOIP-SYNC, etc.).
+      providerId: 'mock-voip',
       kind: 'Voice',
       displayName: 'Mock Voice Provider',
       description: 'Synthetic calls for testing — never places or receives real calls.',
@@ -110,6 +115,20 @@ export class CommunicationsService {
   disconnect(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/connections/${id}`).pipe(
       tap(() => this.loadConnections()),
+    );
+  }
+
+  syncNow(id: number): Observable<{ id: number; eventCount: number; syncedAt: string }> {
+    this.syncing.update(s => new Set(s).add(id));
+    return this.http.post<{ id: number; eventCount: number; syncedAt: string }>(
+      `${this.baseUrl}/connections/${id}/sync`, {},
+    ).pipe(
+      tap(() => this.loadConnections()),
+      finalize(() => this.syncing.update(s => {
+        const next = new Set(s);
+        next.delete(id);
+        return next;
+      })),
     );
   }
 }
