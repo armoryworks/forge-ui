@@ -63,20 +63,25 @@ export class CommunicationsService {
       status: 'available',
     },
     {
-      providerId: 'gmail',
+      // OAuth-IMAP (SASL OAUTHBEARER). Backed server-side by ProviderId
+      // "imap" with ConfigJson.AuthMethod="oauth"; the catalog uses
+      // "gmail-oauth" so the UI can route to the OAuth flow rather than
+      // the password dialog. Admin must set OAuthImap:Google credentials
+      // in appsettings before this provider is selectable.
+      providerId: 'gmail-oauth',
       kind: 'Email',
       displayName: 'Gmail',
-      description: 'Google Workspace / Gmail with full label + history support.',
+      description: 'Google Workspace / Gmail via OAuth — no app password required.',
       icon: 'mark_email_read',
-      status: 'planned',
+      status: 'available',
     },
     {
-      providerId: 'microsoft-graph',
+      providerId: 'microsoft-oauth',
       kind: 'Email',
-      displayName: 'Microsoft 365',
-      description: 'Outlook / Microsoft 365 mailbox via Graph API.',
+      displayName: 'Outlook / Microsoft 365',
+      description: 'Outlook / Microsoft 365 via OAuth — supports MFA + work/school accounts.',
       icon: 'forward_to_inbox',
-      status: 'planned',
+      status: 'available',
     },
     {
       providerId: 'twilio',
@@ -122,6 +127,24 @@ export class CommunicationsService {
     return this.http.post<CommunicationSyncConfigSummary>(`${this.baseUrl}/connections/imap`, request).pipe(
       tap(() => this.loadConnections()),
     );
+  }
+
+  /**
+   * Phase 1k.2 — initiate OAuth-IMAP flow. Server generates a state
+   * token + returns the authorize URL. Caller opens that URL (popup or
+   * navigation); the redirect lands on the SPA callback page which
+   * posts the code+state back via {@link completeOAuthImap}.
+   */
+  beginOAuthImap(provider: 'google' | 'microsoft'): Observable<{ authorizeUrl: string; state: string }> {
+    return this.http.post<{ authorizeUrl: string; state: string }>(
+      `${this.baseUrl}/oauth/imap/${provider}/begin`, {});
+  }
+
+  completeOAuthImap(provider: 'google' | 'microsoft', code: string, state: string): Observable<CommunicationSyncConfigSummary> {
+    return this.http.post<CommunicationSyncConfigSummary>(
+      `${this.baseUrl}/oauth/imap/${provider}/complete`,
+      { code, state },
+    ).pipe(tap(() => this.loadConnections()));
   }
 
   disconnect(id: number): Observable<void> {

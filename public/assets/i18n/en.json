@@ -2573,6 +2573,18 @@
       "syncNow": "Sync now",
       "syncCompleted": "Sync complete — {{count}} event(s) processed.",
       "capabilityDisabled": "{{capability}} is not enabled on this install — admin must enable it before new connections can be added.",
+      "oauth": {
+        "callbackPendingTitle": "Connecting your mailbox…",
+        "callbackPending": "Exchanging the authorization code with the provider.",
+        "callbackSuccessTitle": "Mailbox connected",
+        "callbackSuccess": "First sync runs within 15 minutes — returning you to Communications.",
+        "callbackSuccessSnackbar": "Mailbox connected.",
+        "callbackErrorTitle": "Couldn't complete the connection",
+        "callbackFailed": "The provider rejected the authorization. Please try again.",
+        "callbackMissingParams": "The provider redirect was missing the expected code or state. Please retry.",
+        "callbackProviderUnknown": "We lost track of which provider you were authorizing — please retry from Communications.",
+        "providerDeclined": "Authorization was declined: {{error}}"
+      },
       "imap": {
         "title": "Connect IMAP Mailbox",
         "pickPreset": "Choose your email provider — host and port will be filled in for you.",

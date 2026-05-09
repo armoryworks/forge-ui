@@ -116,6 +116,26 @@ export class AccountCommunicationsComponent implements OnInit {
       return;
     }
 
+    // Phase 1k.2 — Gmail / Microsoft via OAuth. Server returns the
+    // authorize URL; we navigate same-tab to it. The provider redirects
+    // to /account/communications/oauth-callback which exchanges code+state
+    // and bounces back to /account/communications.
+    if (provider.providerId === 'gmail-oauth' || provider.providerId === 'microsoft-oauth') {
+      const providerKey = provider.providerId === 'gmail-oauth' ? 'google' : 'microsoft';
+      this.service.beginOAuthImap(providerKey).subscribe({
+        next: (result) => {
+          // Persist provider-key for the callback page to know which
+          // /complete endpoint to POST to (state alone doesn't tell us).
+          sessionStorage.setItem('qbe-oauth-imap-provider', providerKey);
+          window.location.href = result.authorizeUrl;
+        },
+        error: () => {
+          // HttpErrorInterceptor already toasts; nothing else to do.
+        },
+      });
+      return;
+    }
+
     this.dialog.open(ConnectCommunicationDialogComponent, {
       width: '480px',
       data: { provider } satisfies ConnectCommunicationDialogData,

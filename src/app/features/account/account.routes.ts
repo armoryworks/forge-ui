@@ -56,6 +56,13 @@ export const ACCOUNT_ROUTES: Routes = [
         path: 'communications',
         loadComponent: () => import('./pages/communications/account-communications.component').then(m => m.AccountCommunicationsComponent),
       },
+      {
+        // Phase 1k.2 — OAuth-IMAP redirect-back. Registered with Google
+        // + Microsoft as the authorized redirect URI; provider posts
+        // ?code= + ?state= here.
+        path: 'communications/oauth-callback',
+        loadComponent: () => import('./pages/communications/oauth-callback.component').then(m => m.OauthCallbackComponent),
+      },
     ],
   },
 ];
