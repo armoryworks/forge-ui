@@ -1,0 +1,134 @@
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
+import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { CapabilityService } from '../../../../shared/services/capability.service';
+import {
+  CommunicationProviderInfo,
+  CommunicationSyncConfigSummary,
+} from '../../models/communication-sync.model';
+import { CommunicationsService } from '../../services/communications.service';
+import {
+  ConnectCommunicationDialogComponent,
+  ConnectCommunicationDialogData,
+} from './connect-communication-dialog.component';
+
+interface KindGroup {
+  kind: 'Email' | 'Voice';
+  labelKey: string;
+  icon: string;
+  capability: string;
+  capabilityEnabled: boolean;
+  connected: CommunicationSyncConfigSummary[];
+  available: CommunicationProviderInfo[];
+}
+
+/**
+ * Wave 8 — Communication tracking surface. Lets a salesperson connect
+ * their work mailbox / phone so the matcher can auto-log inbound and
+ * outbound traffic against active leads / customer contacts.
+ *
+ * Layout mirrors the existing Integrations page: per-Kind groups (Email,
+ * Voice) showing the user's connected rows on top and the available
+ * provider tiles below. Capability gating is per-kind — when
+ * CAP-EXT-EMAIL-SYNC or CAP-EXT-VOIP-SYNC is disabled, the corresponding
+ * group hides its available list and adds a banner explaining the gate.
+ */
+@Component({
+  selector: 'app-account-communications',
+  standalone: true,
+  imports: [TranslatePipe, EmptyStateComponent, LoadingBlockDirective],
+  templateUrl: './account-communications.component.html',
+  styleUrl: './account-communications.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class AccountCommunicationsComponent implements OnInit {
+  private readonly service = inject(CommunicationsService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly translate = inject(TranslateService);
+
+  protected readonly loading = this.service.loading;
+
+  protected readonly kindGroups = computed<KindGroup[]>(() => {
+    const connections = this.service.connections();
+    const providers = this.service.providers;
+
+    const groups: { kind: 'Email' | 'Voice'; labelKey: string; icon: string; capability: string }[] = [
+      { kind: 'Email', labelKey: 'account.communications.kindEmail', icon: 'mail', capability: 'CAP-EXT-EMAIL-SYNC' },
+      { kind: 'Voice', labelKey: 'account.communications.kindVoice', icon: 'phone', capability: 'CAP-EXT-VOIP-SYNC' },
+    ];
+
+    return groups.map(g => {
+      const connected = connections.filter(c => c.kind === g.kind);
+      const available = providers
+        .filter(p => p.kind === g.kind)
+        // Hide a provider tile when the user already has *any* connection
+        // for it — most users only want one mailbox per provider; the
+        // "two Gmail accounts" case still works via the "add another"
+        // affordance on the connected card (future).
+        .filter(p => !connected.some(c => c.providerId === p.providerId));
+
+      return {
+        ...g,
+        capabilityEnabled: this.capabilities.isEnabled(g.capability),
+        connected,
+        available,
+      };
+    });
+  });
+
+  ngOnInit(): void {
+    this.service.loadConnections();
+  }
+
+  protected connectProvider(provider: CommunicationProviderInfo): void {
+    this.dialog.open(ConnectCommunicationDialogComponent, {
+      width: '480px',
+      data: { provider } satisfies ConnectCommunicationDialogData,
+    });
+  }
+
+  protected disconnect(connection: CommunicationSyncConfigSummary): void {
+    const provider = this.service.providers.find(p => p.providerId === connection.providerId);
+    const providerLabel = provider?.displayName ?? connection.providerId;
+    const accountLabel = connection.externalAccountId ?? connection.displayLabel ?? '';
+
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('account.communications.disconnectTitle'),
+        message: this.translate.instant('account.communications.disconnectMessage', {
+          provider: providerLabel,
+          account: accountLabel,
+        }),
+        confirmLabel: this.translate.instant('account.communications.disconnect'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.service.disconnect(connection.id).subscribe({
+        next: () => this.snackbar.success(this.translate.instant('account.communications.disconnected', {
+          provider: providerLabel,
+        })),
+      });
+    });
+  }
+
+  protected getProviderInfo(providerId: string): CommunicationProviderInfo | undefined {
+    return this.service.providers.find(p => p.providerId === providerId);
+  }
+
+  protected formatDate(dateStr: string | null): string {
+    if (!dateStr) return this.translate.instant('account.communications.never');
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: '2-digit', day: '2-digit', year: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+}

@@ -1,0 +1,104 @@
+<div class="comms" [appLoadingBlock]="loading()">
+  <div class="comms__header">
+    <h2 class="comms__title">{{ 'account.communications.title' | translate }}</h2>
+    <p class="comms__subtitle">{{ 'account.communications.subtitle' | translate }}</p>
+  </div>
+
+  @for (group of kindGroups(); track group.kind) {
+    <div class="kind-group">
+      <div class="kind-group__header">
+        <span class="material-icons-outlined kind-group__icon">{{ group.icon }}</span>
+        <h3 class="kind-group__title">{{ group.labelKey | translate }}</h3>
+        <span class="kind-group__count">{{ group.connected.length }} {{ 'account.communications.connectedSuffix' | translate }}</span>
+      </div>
+
+      @if (!group.capabilityEnabled) {
+        <div class="kind-group__capability-banner" role="status">
+          <span class="material-icons-outlined">lock</span>
+          {{ 'account.communications.capabilityDisabled' | translate: { capability: group.capability } }}
+        </div>
+      }
+
+      @if (group.connected.length > 0) {
+        <div class="connection-list">
+          @for (connection of group.connected; track connection.id) {
+            <div class="connection-card">
+              <div class="connection-card__icon">
+                <span class="material-icons-outlined">{{ getProviderInfo(connection.providerId)?.icon ?? 'cloud_sync' }}</span>
+              </div>
+              <div class="connection-card__info">
+                <div class="connection-card__name">
+                  {{ getProviderInfo(connection.providerId)?.displayName ?? connection.providerId }}
+                  @if (connection.displayLabel) {
+                    <span class="connection-card__label">{{ connection.displayLabel }}</span>
+                  }
+                </div>
+                <div class="connection-card__meta">
+                  @if (connection.isConnected) {
+                    <span class="connection-card__status connection-card__status--active">
+                      {{ 'account.communications.statusConnected' | translate }}
+                    </span>
+                  } @else {
+                    <span class="connection-card__status connection-card__status--pending">
+                      {{ 'account.communications.statusPending' | translate }}
+                    </span>
+                  }
+                  @if (connection.externalAccountId) {
+                    <span class="connection-card__external">{{ connection.externalAccountId }}</span>
+                  }
+                  <span class="connection-card__sync">
+                    {{ 'account.communications.lastSync' | translate }}: {{ formatDate(connection.lastSyncedAt) }}
+                  </span>
+                </div>
+              </div>
+              <div class="connection-card__actions">
+                <button class="icon-btn icon-btn--danger"
+                  [attr.aria-label]="'account.communications.disconnect' | translate"
+                  (click)="disconnect(connection)">
+                  <span class="material-icons-outlined">link_off</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      @if (group.capabilityEnabled && group.available.length > 0) {
+        <div class="available-list">
+          @for (provider of group.available; track provider.providerId) {
+            <button class="connection-card connection-card--available"
+              [disabled]="provider.status === 'planned'"
+              (click)="connectProvider(provider)">
+              <div class="connection-card__icon">
+                <span class="material-icons-outlined">{{ provider.icon }}</span>
+              </div>
+              <div class="connection-card__info">
+                <div class="connection-card__name">
+                  {{ provider.displayName }}
+                  @if (provider.status === 'mock') {
+                    <span class="connection-card__badge connection-card__badge--mock">
+                      {{ 'account.communications.statusMock' | translate }}
+                    </span>
+                  } @else if (provider.status === 'planned') {
+                    <span class="connection-card__badge connection-card__badge--planned">
+                      {{ 'account.communications.statusPlanned' | translate }}
+                    </span>
+                  }
+                </div>
+                <div class="connection-card__description">{{ provider.description }}</div>
+              </div>
+              <div class="connection-card__connect">
+                <span class="material-icons-outlined">add</span>
+                {{ 'account.communications.connect' | translate }}
+              </div>
+            </button>
+          }
+        </div>
+      }
+
+      @if (group.capabilityEnabled && group.connected.length === 0 && group.available.length === 0) {
+        <app-empty-state icon="inbox" [message]="'account.communications.empty' | translate" />
+      }
+    </div>
+  }
+</div>

@@ -52,6 +52,10 @@ export const ACCOUNT_ROUTES: Routes = [
         path: 'integrations',
         loadComponent: () => import('./pages/integrations/account-integrations.component').then(m => m.AccountIntegrationsComponent),
       },
+      {
+        path: 'communications',
+        loadComponent: () => import('./pages/communications/account-communications.component').then(m => m.AccountCommunicationsComponent),
+      },
     ],
   },
 ];

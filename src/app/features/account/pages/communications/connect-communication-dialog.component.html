@@ -1,0 +1,41 @@
+<app-dialog [title]="data.provider.displayName" width="480px" (closed)="close()">
+  <div class="provider-summary">
+    <div class="provider-summary__icon">
+      <span class="material-icons-outlined">{{ data.provider.icon }}</span>
+    </div>
+    <div class="provider-summary__body">
+      <div class="provider-summary__title">{{ data.provider.displayName }}</div>
+      <div class="provider-summary__description">{{ data.provider.description }}</div>
+      @if (data.provider.status === 'mock') {
+        <div class="provider-summary__badge provider-summary__badge--mock">
+          {{ 'account.communications.statusMock' | translate }}
+        </div>
+      } @else if (data.provider.status === 'planned') {
+        <div class="provider-summary__badge provider-summary__badge--planned">
+          {{ 'account.communications.statusPlanned' | translate }}
+        </div>
+      }
+    </div>
+  </div>
+
+  <div [formGroup]="form">
+    <app-input
+      [label]="'account.communications.externalAccountId' | translate"
+      [placeholder]="externalAccountPlaceholder"
+      formControlName="externalAccountId"
+      [required]="true" />
+    <app-input
+      [label]="'account.communications.displayLabel' | translate"
+      [placeholder]="'account.communications.displayLabelPlaceholder' | translate"
+      formControlName="displayLabel" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">{{ 'account.communications.connect' | translate }}</button>
+    </app-validation-button>
+  </div>
+</app-dialog>
