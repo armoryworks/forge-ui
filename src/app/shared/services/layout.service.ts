@@ -121,7 +121,12 @@ export class LayoutService {
   }
 
   private checkAuthRoute(url: string): boolean {
-    return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback') || url.startsWith('/welcome');
+    return url.startsWith('/login') || url.startsWith('/setup') || url.startsWith('/sso/callback') || url.startsWith('/welcome')
+      // Phase 1q — customer portal lives outside the employee shell.
+      // Treating /portal/* as an "auth route" means showShell() returns
+      // false there, so the green QB·ENG header + sidebar don't render
+      // even when an employee is also logged into this same browser.
+      || url.startsWith('/portal');
   }
 
   private checkOnboardingRoute(url: string): boolean {
