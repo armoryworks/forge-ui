@@ -1,0 +1,68 @@
+<app-page-layout [pageTitle]="'leads.samples.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <app-select
+        [label]="'common.status' | translate"
+        [formControl]="statusFilter"
+        [options]="statusOptions" />
+      <span appSpacer></span>
+      <span class="toolbar__hint">{{ 'leads.samples.hint' | translate }}</span>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="leads-samples"
+        [columns]="columns"
+        [data]="filteredSamples()"
+        [clickableRows]="true"
+        (rowClick)="openLead($any($event))"
+        emptyIcon="card_giftcard"
+        [emptyMessage]="'leads.samples.empty' | translate">
+
+        <ng-template appColumnCell="leadId" let-row>
+          <span class="lead-link">#{{ row.leadId }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="partDescription" let-row>
+          @if (row.partDescription) {
+            {{ row.partDescription }}
+          } @else {
+            <span class="text-muted">{{ 'leads.samples.unnamedPart' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">
+            {{ ('leads.samples.status.' + row.status) | translate }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="requestedAt" let-row>
+          @if (row.requestedAt) { {{ row.requestedAt | date:'MM/dd/yyyy' }} }
+        </ng-template>
+
+        <ng-template appColumnCell="shippedAt" let-row>
+          @if (row.shippedAt) { {{ row.shippedAt | date:'MM/dd/yyyy' }} }
+        </ng-template>
+
+        <ng-template appColumnCell="deliveredAt" let-row>
+          @if (row.deliveredAt) { {{ row.deliveredAt | date:'MM/dd/yyyy' }} }
+        </ng-template>
+
+        <ng-template appColumnCell="costToUs" let-row>
+          @if (row.costToUs !== null) {
+            ${{ row.costToUs | number:'1.2-2' }}
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="trackingNumber" let-row>
+          @if (row.trackingNumber) {
+            <span class="tracking">{{ row.carrier }} {{ row.trackingNumber }}</span>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>

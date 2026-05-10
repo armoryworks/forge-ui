@@ -1,0 +1,13 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.hint-text {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  margin: $sp-xs 0 $sp-md;
+  line-height: 1.4;
+}

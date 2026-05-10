@@ -1,0 +1,22 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.lead-link {
+  font-family: $font-family-mono;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.tracking {
+  font-family: $font-family-mono;
+  font-size: $font-size-xs;
+}

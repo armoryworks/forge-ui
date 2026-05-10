@@ -34,4 +34,11 @@ export const LEADS_ROUTES: Routes = [
     path: 'suppression',
     loadComponent: () => import('./pages/suppression/leads-suppression.component').then(m => m.LeadsSuppressionComponent),
   },
+  // Phase 1r / Batch 16 — pre-quote sample shipment tracking. Shows samples
+  // across all leads with status lifecycle (Requested / Approved / Shipped /
+  // Delivered / Outcome) so sales managers can see what's in flight.
+  {
+    path: 'samples',
+    loadComponent: () => import('./pages/samples/leads-samples.component').then(m => m.LeadsSamplesComponent),
+  },
 ];

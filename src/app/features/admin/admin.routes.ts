@@ -96,6 +96,21 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./lead-sources/lead-sources.component').then((m) => m.LeadSourcesComponent),
   },
+  // Phase 1r / Batch 10 — ICP rubric admin. Admins define the scoring
+  // scheme + dimensions used by the nightly LeadScore recompute job.
+  {
+    path: 'icp-rubrics',
+    loadComponent: () =>
+      import('./icp-rubrics/icp-rubrics.component').then((m) => m.IcpRubricsComponent),
+  },
+  // Phase 1r / Batch 11 — lead assignment rules. Admin-configured priority-
+  // ordered rules that route incoming leads to reps (round-robin / territory
+  // / industry / account-based).
+  {
+    path: 'assignment-rules',
+    loadComponent: () =>
+      import('./assignment-rules/assignment-rules.component').then((m) => m.AssignmentRulesComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

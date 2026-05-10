@@ -1,0 +1,53 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.rubric-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-lg;
+  margin-bottom: $sp-md;
+}
+
+.dimensions-section {
+  border-top: $border-width-thin solid var(--border);
+  padding-top: $sp-md;
+  margin-top: $sp-md;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    margin-bottom: $sp-sm;
+  }
+
+  &__title {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0;
+    flex: 1;
+  }
+
+  &__empty {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-style: italic;
+    margin: $sp-sm 0;
+  }
+}
+
+.dimension-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.2fr 1.5fr 90px auto;
+  gap: $sp-sm;
+  align-items: center;
+  padding: $sp-xs 0;
+  border-bottom: $border-width-thin dashed var(--border);
+
+  &:last-child { border-bottom: none; }
+}

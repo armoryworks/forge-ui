@@ -74,6 +74,7 @@ export class NavTreeService {
             { icon: 'speed', label: 'Worker Queue', i18nKey: 'nav.leadsQueue', route: '/leads/queue' },
             { icon: 'campaign', label: 'Campaigns', i18nKey: 'nav.leadsCampaigns', route: '/leads/campaigns' },
             { icon: 'block', label: 'Suppression', i18nKey: 'nav.leadsSuppression', route: '/leads/suppression' },
+            { icon: 'card_giftcard', label: 'Samples', i18nKey: 'nav.leadsSamples', route: '/leads/samples' },
           ],
         },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
@@ -150,6 +151,8 @@ export class NavTreeService {
             { icon: 'route', label: 'Track Types', i18nKey: 'admin.tabs.trackTypes', route: '/admin/track-types', allowedRoles: ['Admin'] },
             { icon: 'percent', label: 'Sales Tax', i18nKey: 'admin.tabs.salesTax', route: '/admin/sales-tax', allowedRoles: ['Admin'] },
             { icon: 'campaign', label: 'Lead Sources', i18nKey: 'admin.tabs.leadSources', route: '/admin/lead-sources', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'fact_check', label: 'ICP Rubrics', i18nKey: 'admin.tabs.icpRubrics', route: '/admin/icp-rubrics', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'alt_route', label: 'Assignment Rules', i18nKey: 'admin.tabs.assignmentRules', route: '/admin/assignment-rules', allowedRoles: ['Admin', 'Manager'] },
           ],
         },
         {

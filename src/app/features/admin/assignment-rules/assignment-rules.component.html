@@ -1,0 +1,97 @@
+<app-page-layout [pageTitle]="'admin.assignmentRules.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'admin.assignmentRules.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openNew()" data-testid="assignment-rule-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'admin.assignmentRules.newRule' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-assignment-rules"
+        [columns]="columns"
+        [data]="rules()"
+        [clickableRows]="true"
+        (rowClick)="openEdit($any($event))"
+        emptyIcon="alt_route"
+        [emptyMessage]="'admin.assignmentRules.empty' | translate">
+
+        <ng-template appColumnCell="kind" let-row>
+          <span class="chip chip--info">{{ ('admin.assignmentRules.kind.' + row.kind) | translate }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="createdAt" let-row>
+          {{ row.createdAt | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'common.edit' | translate"
+                  (click)="openEdit($any(row)); $event.stopPropagation()" data-testid="assignment-rule-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate"
+                  (click)="confirmDelete($any(row)); $event.stopPropagation()" data-testid="assignment-rule-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showDialog()) {
+  <app-dialog
+    [title]="(editingId() === null ? 'admin.assignmentRules.newRule' : 'admin.assignmentRules.editRule') | translate"
+    width="520px"
+    (closed)="close()">
+    <div [formGroup]="form">
+      <app-input [label]="'admin.assignmentRules.fieldName' | translate"
+        formControlName="name" [required]="true"
+        data-testid="assignment-rule-name" />
+      <app-select [label]="'admin.assignmentRules.fieldKind' | translate"
+        formControlName="kind"
+        [options]="kindOptions" [required]="true"
+        data-testid="assignment-rule-kind" />
+      <app-input [label]="'admin.assignmentRules.fieldPriority' | translate"
+        type="number"
+        formControlName="priority" [required]="true"
+        data-testid="assignment-rule-priority" />
+      <app-textarea [label]="'admin.assignmentRules.fieldSpec' | translate"
+        formControlName="spec"
+        [rows]="6" [maxlength]="4000"
+        [placeholder]="'admin.assignmentRules.specPlaceholder' | translate"
+        data-testid="assignment-rule-spec" />
+      <p class="hint-text">{{ 'admin.assignmentRules.specHint' | translate }}</p>
+      @if (editingId() !== null) {
+        <app-toggle [label]="'common.active' | translate"
+          formControlName="isActive"
+          data-testid="assignment-rule-active" />
+      }
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          [disabled]="form.invalid || saving()"
+          (click)="save()"
+          data-testid="assignment-rule-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

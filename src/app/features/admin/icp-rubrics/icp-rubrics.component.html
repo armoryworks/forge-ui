@@ -1,0 +1,128 @@
+<app-page-layout [pageTitle]="'admin.icpRubrics.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'admin.icpRubrics.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openNew()" data-testid="icp-rubric-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'admin.icpRubrics.newRubric' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-icp-rubrics"
+        [columns]="columns"
+        [data]="rubrics()"
+        [clickableRows]="true"
+        (rowClick)="openEdit($any($event))"
+        emptyIcon="fact_check"
+        [emptyMessage]="'admin.icpRubrics.empty' | translate">
+
+        <ng-template appColumnCell="isDefault" let-row>
+          @if (row.isDefault) {
+            <span class="chip chip--primary">{{ 'admin.icpRubrics.default' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="createdAt" let-row>
+          {{ row.createdAt | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn" [attr.aria-label]="'common.edit' | translate"
+                  (click)="openEdit($any(row)); $event.stopPropagation()" data-testid="icp-rubric-edit-btn">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate"
+                  (click)="confirmDelete($any(row)); $event.stopPropagation()" data-testid="icp-rubric-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showDialog()) {
+  <app-dialog
+    [title]="(editingId() === null ? 'admin.icpRubrics.newRubric' : 'admin.icpRubrics.editRubric') | translate"
+    width="720px"
+    (closed)="close()">
+    <div [formGroup]="form">
+      <app-input [label]="'admin.icpRubrics.fieldName' | translate"
+        formControlName="name" [required]="true"
+        data-testid="icp-rubric-name" />
+      <app-textarea [label]="'admin.icpRubrics.fieldDescription' | translate"
+        formControlName="description"
+        [rows]="2" [maxlength]="500"
+        data-testid="icp-rubric-description" />
+
+      <div class="rubric-toggles">
+        <app-toggle [label]="'common.active' | translate"
+          formControlName="isActive"
+          data-testid="icp-rubric-active" />
+        <app-toggle [label]="'admin.icpRubrics.fieldDefault' | translate"
+          formControlName="isDefault"
+          data-testid="icp-rubric-default" />
+      </div>
+
+      <div class="dimensions-section">
+        <div class="dimensions-section__header">
+          <h4 class="dimensions-section__title">{{ 'admin.icpRubrics.dimensionsTitle' | translate }}</h4>
+          <button class="action-btn action-btn--sm" type="button" (click)="addDimension()" data-testid="icp-dim-add-btn">
+            <span class="material-icons-outlined">add</span>
+            {{ 'admin.icpRubrics.addDimension' | translate }}
+          </button>
+        </div>
+        @if (dimensions.length === 0) {
+          <p class="dimensions-section__empty">{{ 'admin.icpRubrics.dimensionsEmpty' | translate }}</p>
+        }
+        <div formArrayName="dimensions">
+          @for (dim of dimensions.controls; track $index; let i = $index) {
+            <div class="dimension-row" [formGroupName]="i">
+              <app-input [label]="'admin.icpRubrics.dimFieldKey' | translate"
+                formControlName="fieldKey" [required]="true"
+                [placeholder]="'admin.icpRubrics.dimFieldKeyPlaceholder' | translate" />
+              <app-input [label]="'admin.icpRubrics.dimLabel' | translate"
+                formControlName="label" />
+              <app-input [label]="'admin.icpRubrics.dimMatchSpec' | translate"
+                formControlName="matchSpec"
+                [placeholder]="'admin.icpRubrics.dimMatchSpecPlaceholder' | translate" />
+              <app-input [label]="'admin.icpRubrics.dimWeight' | translate"
+                type="number"
+                formControlName="weight" [required]="true" />
+              <button class="icon-btn icon-btn--danger" type="button"
+                      [attr.aria-label]="'common.delete' | translate"
+                      (click)="removeDimension(i)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          [disabled]="form.invalid || saving()"
+          (click)="save()"
+          data-testid="icp-rubric-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
