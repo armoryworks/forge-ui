@@ -45,7 +45,22 @@ export class NavTreeService {
       icon: 'sell', label: 'Sales', i18nKey: 'navGroups.sales',
       children: [
         { icon: 'people', label: 'Customers', i18nKey: 'nav.customers', route: '/customers', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'people_outline', label: 'Leads', i18nKey: 'nav.leads', route: '/leads', allowedRoles: ['Admin', 'Manager', 'PM'] },
+        // Phase 1r — Leads is now a group with sub-routes for high-volume
+        // marketing surfaces (bulk intake / worker queue / campaigns /
+        // suppression). First child "All" routes to the original list page
+        // so /leads still resolves cleanly for existing bookmarks + cross-
+        // entity links. Same submenu pattern Admin uses.
+        {
+          icon: 'people_outline', label: 'Leads', i18nKey: 'nav.leads',
+          allowedRoles: ['Admin', 'Manager', 'PM'],
+          children: [
+            { icon: 'list', label: 'All Leads', i18nKey: 'nav.leadsAll', route: '/leads' },
+            { icon: 'upload_file', label: 'Bulk Intake', i18nKey: 'nav.leadsIntake', route: '/leads/intake' },
+            { icon: 'speed', label: 'Worker Queue', i18nKey: 'nav.leadsQueue', route: '/leads/queue' },
+            { icon: 'campaign', label: 'Campaigns', i18nKey: 'nav.leadsCampaigns', route: '/leads/campaigns' },
+            { icon: 'block', label: 'Suppression', i18nKey: 'nav.leadsSuppression', route: '/leads/suppression' },
+          ],
+        },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },

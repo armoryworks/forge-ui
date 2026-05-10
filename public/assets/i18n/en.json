@@ -8,6 +8,11 @@
     "inventory": "Inventory",
     "customers": "Customers",
     "leads": "Leads",
+    "leadsAll": "All Leads",
+    "leadsIntake": "Bulk Intake",
+    "leadsQueue": "Worker Queue",
+    "leadsCampaigns": "Campaigns",
+    "leadsSuppression": "Suppression",
     "expenses": "Expenses",
     "assets": "Assets",
     "timeTracking": "Time",
@@ -1639,6 +1644,34 @@
   "leads": {
     "title": "Leads",
     "createLead": "New Lead",
+    "createLeadMore": "More ways to add leads",
+    "bulkImport": "Import bulk leads…",
+    "pullFromQueue": "Pull from worker queue",
+    "startCampaign": "Start a campaign",
+    "intake": {
+      "title": "Bulk Intake",
+      "subtitle": "Upload a list, dedup against existing leads + suppression, gate quality before commit.",
+      "placeholderMessage": "Bulk intake is coming soon.",
+      "placeholderHelp": "Upload a CSV, pick the strategy (cold call / cold email / etc.), and the dedup wizard will preview matches against existing leads, suppressed contacts, and active cooldowns before any rows commit. Implementation lands in Batch 4."
+    },
+    "queue": {
+      "title": "Worker Queue",
+      "subtitle": "Pull-based queue for high-volume outreach. Single-keystroke dispositions, J/K to advance.",
+      "placeholderMessage": "Worker queue is coming soon.",
+      "placeholderHelp": "Click \"give me my next 25\" and the queue serves disjoint slices to each seller (no two reps dial the same lead). One record at a time, single-keystroke dispositions, integrated outbound dialer. Implementation lands in Batch 6."
+    },
+    "campaigns": {
+      "title": "Campaigns",
+      "subtitle": "Wrap each bulk batch in a Campaign for cohort reporting and per-strategy config.",
+      "placeholderMessage": "Campaigns are coming soon.",
+      "placeholderHelp": "A Campaign carries the strategy type, channel, required fields, owner, dates, and default cooldown override. Every Lead from a bulk import gets a CampaignId FK so reporting can answer \"September LinkedIn batch vs August\" cleanly. Implementation lands in Batch 5."
+    },
+    "suppression": {
+      "title": "Suppression / Do Not Contact",
+      "subtitle": "Manage per-channel opt-outs and active cooldown windows.",
+      "placeholderMessage": "Suppression UI is coming soon.",
+      "placeholderHelp": "The backend is in place: per-channel email/call/sms opt-outs with timestamps + sources, plus time-bounded cooldown windows. The list-of-suppressed-leads endpoint + UI for bulk DNC management lands in a follow-on commit."
+    },
     "editLead": "Edit Lead",
     "companyName": "Company Name",
     "contactName": "Contact Name",

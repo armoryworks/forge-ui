@@ -229,3 +229,29 @@
   flex-shrink: 0;
 }
 
+// ── Phase 1r split-button entry ─────────────────────────────────────
+// Primary "+ New Lead" + chevron-dropdown for the bulk paths
+// (intake / queue / campaigns). Visually attached: the chevron's
+// left border collapses into the primary's right border, gap is 0.
+
+.lead-create-split {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 0;
+
+  &__primary {
+    border-right-width: 0;
+  }
+
+  &__chevron {
+    padding-left: $sp-xs;
+    padding-right: $sp-xs;
+    border-left: $border-width-thin solid color-mix(in srgb, white 25%, transparent);
+
+    .material-icons-outlined {
+      font-size: $icon-size-md;
+      margin: 0;
+    }
+  }
+}
+

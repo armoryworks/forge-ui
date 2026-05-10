@@ -19,10 +19,35 @@
     </button>
   </div>
 
-  <button data-testid="new-lead-btn" class="action-btn action-btn--create" (click)="openCreateLead()">
-    <span class="material-icons-outlined">add</span>
-    {{ 'leads.createLead' | translate }}
-  </button>
+  <!-- Phase 1r / Batch 2 — Split-button entry. Primary action stays the
+       single new-lead form; chevron drops a menu with the bulk-marketing
+       paths (mirrors the new-customer-fork idiom). -->
+  <div class="lead-create-split">
+    <button data-testid="new-lead-btn" class="action-btn action-btn--create lead-create-split__primary" (click)="openCreateLead()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'leads.createLead' | translate }}
+    </button>
+    <button class="action-btn action-btn--create lead-create-split__chevron"
+      [matMenuTriggerFor]="leadCreateMenu"
+      [attr.aria-label]="'leads.createLeadMore' | translate"
+      data-testid="new-lead-more-btn">
+      <span class="material-icons-outlined">expand_more</span>
+    </button>
+    <mat-menu #leadCreateMenu="matMenu">
+      <a mat-menu-item routerLink="/leads/intake" data-testid="new-lead-bulk-import">
+        <span class="material-icons-outlined">upload_file</span>
+        {{ 'leads.bulkImport' | translate }}
+      </a>
+      <a mat-menu-item routerLink="/leads/queue" data-testid="new-lead-pull-queue">
+        <span class="material-icons-outlined">speed</span>
+        {{ 'leads.pullFromQueue' | translate }}
+      </a>
+      <a mat-menu-item routerLink="/leads/campaigns" data-testid="new-lead-start-campaign">
+        <span class="material-icons-outlined">campaign</span>
+        {{ 'leads.startCampaign' | translate }}
+      </a>
+    </mat-menu>
+  </div>
 </app-page-header>
 
 @if (viewMode() === 'table') {

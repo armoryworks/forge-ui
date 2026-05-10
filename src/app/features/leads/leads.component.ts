@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -30,6 +30,7 @@ import { toIsoDate, todayStart } from '../../shared/utils/date.utils';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { ScannerService } from '../../shared/services/scanner.service';
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 
@@ -44,9 +45,9 @@ const VIEW_MODE_KEY = 'leads-view-mode';
     ReactiveFormsModule, DatePipe, TranslatePipe,
     PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DataTableComponent, ColumnCellDirective, ValidationButtonComponent, MatTooltipModule,
+    DataTableComponent, ColumnCellDirective, ValidationButtonComponent, MatTooltipModule, MatMenuModule,
     CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview,
-    AvatarComponent,
+    AvatarComponent, RouterLink,
   ],
   templateUrl: './leads.component.html',
   styleUrl: './leads.component.scss',

@@ -8,6 +8,11 @@
     "inventory": "Inventario",
     "customers": "Clientes",
     "leads": "Prospectos",
+    "leadsAll": "Todos los Prospectos",
+    "leadsIntake": "Carga Masiva",
+    "leadsQueue": "Cola de Trabajo",
+    "leadsCampaigns": "Campañas",
+    "leadsSuppression": "Supresión",
     "expenses": "Gastos",
     "assets": "Activos",
     "timeTracking": "Tiempo",
@@ -1635,6 +1640,34 @@
   "leads": {
     "title": "Prospectos",
     "createLead": "Nuevo Prospecto",
+    "createLeadMore": "Más formas de agregar prospectos",
+    "bulkImport": "Importar prospectos en lote…",
+    "pullFromQueue": "Tomar de la cola de trabajo",
+    "startCampaign": "Iniciar una campaña",
+    "intake": {
+      "title": "Carga Masiva",
+      "subtitle": "Sube una lista, deduplica contra prospectos existentes + supresión, valida calidad antes de confirmar.",
+      "placeholderMessage": "La carga masiva está en camino.",
+      "placeholderHelp": "Sube un CSV, elige la estrategia (llamada en frío / correo en frío / etc.), y el asistente de deduplicación previsualizará coincidencias contra prospectos existentes, contactos suprimidos y enfriamientos activos antes de confirmar. Implementación en Lote 4."
+    },
+    "queue": {
+      "title": "Cola de Trabajo",
+      "subtitle": "Cola por demanda para difusión de alto volumen. Disposiciones con una tecla, J/K para avanzar.",
+      "placeholderMessage": "La cola de trabajo está en camino.",
+      "placeholderHelp": "Haz clic en \"dame mis siguientes 25\" y la cola sirve segmentos disjuntos a cada vendedor (dos representantes nunca llaman al mismo prospecto). Un registro a la vez, disposiciones con una tecla, marcador de salida integrado. Implementación en Lote 6."
+    },
+    "campaigns": {
+      "title": "Campañas",
+      "subtitle": "Envuelve cada lote masivo en una Campaña para reportes de cohorte y configuración por estrategia.",
+      "placeholderMessage": "Las campañas están en camino.",
+      "placeholderHelp": "Una Campaña lleva el tipo de estrategia, canal, campos requeridos, propietario, fechas y override de enfriamiento por defecto. Cada Prospecto de una importación masiva recibe un FK CampaignId para que los reportes puedan responder \"lote LinkedIn de septiembre vs agosto\" limpiamente. Implementación en Lote 5."
+    },
+    "suppression": {
+      "title": "Supresión / No Contactar",
+      "subtitle": "Gestiona opt-outs por canal y ventanas de enfriamiento activas.",
+      "placeholderMessage": "La UI de supresión está en camino.",
+      "placeholderHelp": "El backend ya está listo: opt-outs por canal de email/llamada/sms con timestamps + fuentes, más ventanas de enfriamiento. El endpoint de lista-de-prospectos-suprimidos + UI para gestión masiva de DNC llega en un commit de seguimiento."
+    },
     "editLead": "Editar Prospecto",
     "companyName": "Nombre de Empresa",
     "contactName": "Nombre de Contacto",
