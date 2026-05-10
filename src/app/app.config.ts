@@ -22,6 +22,7 @@ import { httpErrorInterceptor } from './shared/interceptors/http-error.intercept
 import { dateTransformInterceptor } from './shared/interceptors/date-transform.interceptor';
 import { kioskTokenInterceptor } from './shared/interceptors/kiosk-token.interceptor';
 import { demoApiInterceptor } from './shared/interceptors/demo-api.interceptor';
+import { portalAuthInterceptor } from './features/portal/services/portal-auth.interceptor';
 
 function initTranslations(): () => Promise<void> {
   const translate = inject(TranslateService);
@@ -36,7 +37,7 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideAnimationsAsync(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([demoApiInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor])),
+    provideHttpClient(withInterceptors([demoApiInterceptor, portalAuthInterceptor, authInterceptor, kioskTokenInterceptor, capabilityGateInterceptor, etagInterceptor, httpErrorInterceptor, dateTransformInterceptor])),
     provideCharts(withDefaultRegisterables()),
     provideMarkdown(),
     provideServiceWorker('ngsw-worker.js', {

@@ -1,0 +1,67 @@
+@use 'styles/variables' as *;
+
+.portal-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xl;
+
+  &__hero {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__greeting {
+    margin: 0;
+    font-size: $font-size-heading;
+    font-weight: 600;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: $font-size-md;
+    color: var(--text-muted);
+  }
+
+  &__cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: $sp-md;
+  }
+
+  &__card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $sp-xs;
+    padding: $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color $transition-fast, transform $transition-fast;
+
+    &:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+  }
+
+  &__icon {
+    font-size: $icon-size-xxl;
+    color: var(--primary);
+  }
+
+  &__count {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  &__label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+}

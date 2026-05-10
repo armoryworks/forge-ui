@@ -4753,6 +4753,92 @@
       "variancePct": "Variance %"
     }
   },
+  "portal": {
+    "title": "Customer Portal",
+    "logout": "Sign out",
+    "nav": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "quotes": "Quotes",
+      "invoices": "Invoices",
+      "shipments": "Shipments"
+    },
+    "login": {
+      "title": "Sign in to your portal",
+      "hint": "Enter your email and we'll send you a one-time sign-in link. The link expires in 15 minutes.",
+      "email": "Email address",
+      "send": "Send sign-in link",
+      "error": "We couldn't send the sign-in link. Please try again.",
+      "sentTitle": "Check your inbox",
+      "sentBody": "If we have your email on file, a sign-in link is on its way. The link expires in 15 minutes — feel free to close this tab.",
+      "devLink": "Dev mode — SMTP isn't configured. Use the link directly:",
+      "openLink": "Open sign-in link"
+    },
+    "callback": {
+      "signingIn": "Signing you in",
+      "signingInBody": "One moment while we verify your link.",
+      "missing": "This link is missing its sign-in token. Please request a new one.",
+      "failed": "This sign-in link is invalid or has expired. Please request a new one.",
+      "failedTitle": "Sign-in link didn't work",
+      "backToLogin": "Request a new link"
+    },
+    "dashboard": {
+      "welcome": "Welcome back, {{name}}",
+      "openOrders": "Open Orders",
+      "openQuotes": "Open Quotes",
+      "openInvoices": "Open Invoices",
+      "inTransit": "Shipments In Transit"
+    },
+    "orders": {
+      "title": "Your Orders",
+      "subtitle": "Open and recent sales orders. The latest 200 are shown.",
+      "empty": "You have no orders yet.",
+      "colNumber": "Order #",
+      "colDate": "Order Date",
+      "colRequested": "Requested",
+      "colStatus": "Status",
+      "colTotal": "Total"
+    },
+    "quotes": {
+      "title": "Your Quotes",
+      "subtitle": "Open quotes and estimates. Sent quotes can be accepted or declined here.",
+      "empty": "You have no quotes yet.",
+      "accept": "Accept",
+      "decline": "Decline",
+      "acceptedToast": "Quote accepted. Thank you!",
+      "declinedToast": "Quote declined.",
+      "colNumber": "Quote #",
+      "colType": "Type",
+      "colDate": "Sent",
+      "colExpires": "Expires",
+      "colStatus": "Status",
+      "colTotal": "Total",
+      "colActions": "Actions"
+    },
+    "invoices": {
+      "title": "Your Invoices",
+      "subtitle": "Open and recent invoices. If your supplier uses an external accounting provider, see their portal for the most current data.",
+      "empty": "No invoices to show. Your supplier may handle billing through an external accounting provider.",
+      "colNumber": "Invoice #",
+      "colDate": "Invoice Date",
+      "colDueDate": "Due Date",
+      "colStatus": "Status",
+      "colTotal": "Total",
+      "colPaid": "Paid",
+      "colBalance": "Balance"
+    },
+    "shipments": {
+      "title": "Your Shipments",
+      "subtitle": "Outbound shipments tied to your orders.",
+      "empty": "No shipments yet.",
+      "colNumber": "Shipment #",
+      "colStatus": "Status",
+      "colShipped": "Shipped",
+      "colDelivered": "Delivered",
+      "colCarrier": "Carrier",
+      "colTracking": "Tracking #"
+    }
+  },
   "scheduling": {
     "title": "Scheduling",
     "kpi": {

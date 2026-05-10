@@ -1,0 +1,39 @@
+<div class="portal-list" [appLoadingBlock]="loading()">
+  <header class="portal-list__header">
+    <h1 class="portal-list__title">{{ 'portal.invoices.title' | translate }}</h1>
+    <p class="portal-list__subtitle">{{ 'portal.invoices.subtitle' | translate }}</p>
+  </header>
+
+  @if (!loading() && invoices().length === 0) {
+    <app-empty-state icon="payments" [message]="'portal.invoices.empty' | translate" />
+  } @else {
+    <div class="portal-list__table-wrap">
+      <table class="portal-list__table">
+        <thead>
+          <tr>
+            <th>{{ 'portal.invoices.colNumber' | translate }}</th>
+            <th>{{ 'portal.invoices.colDate' | translate }}</th>
+            <th>{{ 'portal.invoices.colDueDate' | translate }}</th>
+            <th>{{ 'portal.invoices.colStatus' | translate }}</th>
+            <th class="portal-list__num">{{ 'portal.invoices.colTotal' | translate }}</th>
+            <th class="portal-list__num">{{ 'portal.invoices.colPaid' | translate }}</th>
+            <th class="portal-list__num">{{ 'portal.invoices.colBalance' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (i of invoices(); track i.id) {
+            <tr>
+              <td>{{ i.invoiceNumber }}</td>
+              <td>{{ i.invoiceDate | date:'MM/dd/yyyy' }}</td>
+              <td>{{ i.dueDate ? (i.dueDate | date:'MM/dd/yyyy') : '—' }}</td>
+              <td><span [class]="statusClass(i.status)">{{ i.status }}</span></td>
+              <td class="portal-list__num">{{ i.total | number:'1.2-2' }}</td>
+              <td class="portal-list__num">{{ i.amountPaid | number:'1.2-2' }}</td>
+              <td class="portal-list__num">{{ i.balance | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

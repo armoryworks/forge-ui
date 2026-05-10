@@ -18,8 +18,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const layout = inject(LayoutService);
   const token = authService.token();
   const isOwnApi = OWN_API_PATTERN.test(req.url);
+  // Phase 1q — never attach the employee token to /portal/* requests.
+  // Customer-portal calls carry their own session JWT (handled by
+  // portalAuthInterceptor) and the two token namespaces must not mix.
+  const isPortalCall = req.url.includes('/portal/');
 
-  const authReq = token && isOwnApi
+  const authReq = token && isOwnApi && !isPortalCall
     ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
     : req;
 

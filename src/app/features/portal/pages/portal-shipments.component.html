@@ -1,0 +1,37 @@
+<div class="portal-list" [appLoadingBlock]="loading()">
+  <header class="portal-list__header">
+    <h1 class="portal-list__title">{{ 'portal.shipments.title' | translate }}</h1>
+    <p class="portal-list__subtitle">{{ 'portal.shipments.subtitle' | translate }}</p>
+  </header>
+
+  @if (!loading() && shipments().length === 0) {
+    <app-empty-state icon="local_shipping" [message]="'portal.shipments.empty' | translate" />
+  } @else {
+    <div class="portal-list__table-wrap">
+      <table class="portal-list__table">
+        <thead>
+          <tr>
+            <th>{{ 'portal.shipments.colNumber' | translate }}</th>
+            <th>{{ 'portal.shipments.colStatus' | translate }}</th>
+            <th>{{ 'portal.shipments.colShipped' | translate }}</th>
+            <th>{{ 'portal.shipments.colDelivered' | translate }}</th>
+            <th>{{ 'portal.shipments.colCarrier' | translate }}</th>
+            <th>{{ 'portal.shipments.colTracking' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (s of shipments(); track s.id) {
+            <tr>
+              <td>{{ s.shipmentNumber }}</td>
+              <td><span [class]="statusClass(s.status)">{{ s.status }}</span></td>
+              <td>{{ s.shippedDate ? (s.shippedDate | date:'MM/dd/yyyy') : '—' }}</td>
+              <td>{{ s.deliveredDate ? (s.deliveredDate | date:'MM/dd/yyyy') : '—' }}</td>
+              <td>{{ s.carrier ?? '—' }}</td>
+              <td>{{ s.trackingNumber ?? '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

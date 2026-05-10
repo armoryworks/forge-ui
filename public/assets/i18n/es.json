@@ -4742,6 +4742,92 @@
       "variancePct": "Variancia %"
     }
   },
+  "portal": {
+    "title": "Portal de Cliente",
+    "logout": "Cerrar sesión",
+    "nav": {
+      "dashboard": "Panel",
+      "orders": "Pedidos",
+      "quotes": "Cotizaciones",
+      "invoices": "Facturas",
+      "shipments": "Envíos"
+    },
+    "login": {
+      "title": "Inicia sesión en tu portal",
+      "hint": "Ingresa tu correo y te enviaremos un enlace de inicio de sesión de un solo uso. El enlace expira en 15 minutos.",
+      "email": "Correo electrónico",
+      "send": "Enviar enlace de inicio",
+      "error": "No pudimos enviar el enlace de inicio. Inténtalo de nuevo.",
+      "sentTitle": "Revisa tu bandeja de entrada",
+      "sentBody": "Si tenemos tu correo registrado, el enlace de inicio está en camino. El enlace expira en 15 minutos — puedes cerrar esta pestaña.",
+      "devLink": "Modo dev — SMTP no está configurado. Usa el enlace directamente:",
+      "openLink": "Abrir enlace de inicio"
+    },
+    "callback": {
+      "signingIn": "Iniciando sesión",
+      "signingInBody": "Un momento mientras verificamos tu enlace.",
+      "missing": "A este enlace le falta el token de inicio. Solicita uno nuevo.",
+      "failed": "Este enlace de inicio es inválido o expiró. Solicita uno nuevo.",
+      "failedTitle": "El enlace de inicio no funcionó",
+      "backToLogin": "Solicitar un nuevo enlace"
+    },
+    "dashboard": {
+      "welcome": "Bienvenido de nuevo, {{name}}",
+      "openOrders": "Pedidos Abiertos",
+      "openQuotes": "Cotizaciones Abiertas",
+      "openInvoices": "Facturas Abiertas",
+      "inTransit": "Envíos en Tránsito"
+    },
+    "orders": {
+      "title": "Tus Pedidos",
+      "subtitle": "Pedidos de venta abiertos y recientes. Se muestran los últimos 200.",
+      "empty": "Aún no tienes pedidos.",
+      "colNumber": "Pedido #",
+      "colDate": "Fecha del Pedido",
+      "colRequested": "Solicitado",
+      "colStatus": "Estado",
+      "colTotal": "Total"
+    },
+    "quotes": {
+      "title": "Tus Cotizaciones",
+      "subtitle": "Cotizaciones y estimados abiertos. Las cotizaciones enviadas pueden aceptarse o rechazarse aquí.",
+      "empty": "Aún no tienes cotizaciones.",
+      "accept": "Aceptar",
+      "decline": "Rechazar",
+      "acceptedToast": "Cotización aceptada. ¡Gracias!",
+      "declinedToast": "Cotización rechazada.",
+      "colNumber": "Cotización #",
+      "colType": "Tipo",
+      "colDate": "Enviada",
+      "colExpires": "Expira",
+      "colStatus": "Estado",
+      "colTotal": "Total",
+      "colActions": "Acciones"
+    },
+    "invoices": {
+      "title": "Tus Facturas",
+      "subtitle": "Facturas abiertas y recientes. Si tu proveedor usa un sistema contable externo, consulta su portal para los datos más actuales.",
+      "empty": "No hay facturas para mostrar. Tu proveedor podría gestionar la facturación a través de un sistema contable externo.",
+      "colNumber": "Factura #",
+      "colDate": "Fecha de Factura",
+      "colDueDate": "Fecha de Vencimiento",
+      "colStatus": "Estado",
+      "colTotal": "Total",
+      "colPaid": "Pagado",
+      "colBalance": "Saldo"
+    },
+    "shipments": {
+      "title": "Tus Envíos",
+      "subtitle": "Envíos salientes vinculados a tus pedidos.",
+      "empty": "Aún no hay envíos.",
+      "colNumber": "Envío #",
+      "colStatus": "Estado",
+      "colShipped": "Enviado",
+      "colDelivered": "Entregado",
+      "colCarrier": "Transportista",
+      "colTracking": "Rastreo #"
+    }
+  },
   "scheduling": {
     "title": "Programación",
     "kpi": {

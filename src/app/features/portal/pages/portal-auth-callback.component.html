@@ -1,0 +1,17 @@
+<div class="portal-callback">
+  <div class="portal-callback__card">
+    @if (status() === 'pending') {
+      <span class="material-icons-outlined portal-callback__spinner">sync</span>
+      <h2>{{ 'portal.callback.signingIn' | translate }}</h2>
+      <p>{{ 'portal.callback.signingInBody' | translate }}</p>
+    } @else {
+      <span class="material-icons-outlined portal-callback__error-icon">error_outline</span>
+      <h2>{{ 'portal.callback.failedTitle' | translate }}</h2>
+      <p>{{ errorMessage() }}</p>
+      <a routerLink="/portal/login" class="action-btn action-btn--primary">
+        <span class="material-icons-outlined">arrow_back</span>
+        {{ 'portal.callback.backToLogin' | translate }}
+      </a>
+    }
+  </div>
+</div>

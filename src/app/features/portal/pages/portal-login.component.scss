@@ -1,0 +1,101 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.portal-login {
+  min-height: 100vh;
+  background: var(--bg);
+  @include flex-center;
+  padding: $sp-xl;
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    padding: $sp-xl;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+  }
+
+  &__error {
+    margin: 0;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+    border-left: $border-width-accent solid var(--error);
+    color: var(--error);
+    font-size: $font-size-sm;
+  }
+
+  &__submit {
+    width: 100%;
+  }
+
+  &__success {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-sm;
+
+    h2 {
+      margin: $sp-sm 0 0;
+      font-size: $font-size-lg;
+    }
+
+    p {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: var(--text-muted);
+    }
+  }
+
+  &__success-icon {
+    font-size: $icon-size-hero;
+    color: var(--success);
+  }
+
+  &__dev {
+    margin-top: $sp-md;
+    padding: $sp-md;
+    background: color-mix(in srgb, var(--info) 5%, transparent);
+    border-left: $border-width-accent solid var(--info);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__dev-label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__dev-link {
+    font-family: $font-family-mono;
+    font-size: $font-size-xxs;
+    word-break: break-all;
+    color: var(--text-muted);
+  }
+}

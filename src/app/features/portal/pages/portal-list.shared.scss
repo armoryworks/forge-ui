@@ -1,0 +1,67 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.portal-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-lg;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-xl;
+    font-weight: 600;
+  }
+
+  &__subtitle {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__table-wrap {
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    overflow-x: auto;
+    @include custom-scrollbar(6px);
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th, td {
+      padding: $sp-sm $sp-md;
+      border-bottom: $border-width-thin solid var(--border);
+      text-align: left;
+      white-space: nowrap;
+    }
+
+    th {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: color-mix(in srgb, var(--primary) 4%, var(--surface));
+    }
+
+    tbody tr:hover {
+      background: color-mix(in srgb, var(--primary) 4%, transparent);
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  &__num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+}

@@ -19,6 +19,14 @@ export const routes: Routes = [
   },
   { path: 'setup', canActivate: [setupRequiredGuard], component: SetupComponent },
   { path: 'setup/:token', component: TokenSetupComponent },
+  // Phase 1q — customer portal lives outside the employee app shell. Has
+  // its own auth flow (passwordless magic link) and its own layout (no
+  // sidebar, distinct chrome). Routes are reachable without an employee
+  // session and have no role guard.
+  {
+    path: 'portal',
+    loadChildren: () => import('./features/portal/portal.routes').then(m => m.PORTAL_ROUTES),
+  },
   // Phase 1m.7 — post-first-admin integration setup wizard. Shown
   // after the first admin completes initial account setup; walks
   // through optional integrations with "Set up" / "Skip" choices per

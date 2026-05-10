@@ -1,0 +1,43 @@
+<div class="portal-shell">
+  <header class="portal-shell__header">
+    <div class="portal-shell__brand">
+      <span class="portal-shell__logo">QB·ENG</span>
+      <span class="portal-shell__title">{{ 'portal.title' | translate }}</span>
+    </div>
+
+    @if (identity(); as me) {
+      <nav class="portal-shell__nav">
+        <a routerLink="/portal/dashboard" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
+          {{ 'portal.nav.dashboard' | translate }}
+        </a>
+        <a routerLink="/portal/orders" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
+          {{ 'portal.nav.orders' | translate }}
+        </a>
+        <a routerLink="/portal/quotes" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
+          {{ 'portal.nav.quotes' | translate }}
+        </a>
+        <a routerLink="/portal/invoices" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
+          {{ 'portal.nav.invoices' | translate }}
+        </a>
+        <a routerLink="/portal/shipments" routerLinkActive="portal-shell__tab--active" class="portal-shell__tab">
+          {{ 'portal.nav.shipments' | translate }}
+        </a>
+      </nav>
+
+      <div class="portal-shell__user">
+        <div class="portal-shell__avatar" aria-hidden="true">{{ initials() }}</div>
+        <div class="portal-shell__user-meta">
+          <span class="portal-shell__user-name">{{ me.contactFirstName }} {{ me.contactLastName }}</span>
+          <span class="portal-shell__user-customer">{{ me.customerName }}</span>
+        </div>
+        <button type="button" class="portal-shell__logout" (click)="logout()" [attr.aria-label]="'portal.logout' | translate">
+          <span class="material-icons-outlined">logout</span>
+        </button>
+      </div>
+    }
+  </header>
+
+  <main class="portal-shell__main">
+    <router-outlet />
+  </main>
+</div>

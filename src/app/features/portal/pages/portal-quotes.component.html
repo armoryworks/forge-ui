@@ -1,0 +1,58 @@
+<div class="portal-list" [appLoadingBlock]="loading()">
+  <header class="portal-list__header">
+    <h1 class="portal-list__title">{{ 'portal.quotes.title' | translate }}</h1>
+    <p class="portal-list__subtitle">{{ 'portal.quotes.subtitle' | translate }}</p>
+  </header>
+
+  @if (!loading() && quotes().length === 0) {
+    <app-empty-state icon="request_quote" [message]="'portal.quotes.empty' | translate" />
+  } @else {
+    <div class="portal-list__table-wrap">
+      <table class="portal-list__table">
+        <thead>
+          <tr>
+            <th>{{ 'portal.quotes.colNumber' | translate }}</th>
+            <th>{{ 'portal.quotes.colType' | translate }}</th>
+            <th>{{ 'portal.quotes.colDate' | translate }}</th>
+            <th>{{ 'portal.quotes.colExpires' | translate }}</th>
+            <th>{{ 'portal.quotes.colStatus' | translate }}</th>
+            <th class="portal-list__num">{{ 'portal.quotes.colTotal' | translate }}</th>
+            <th>{{ 'portal.quotes.colActions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (q of quotes(); track q.id) {
+            <tr>
+              <td>{{ q.quoteNumber }}</td>
+              <td>{{ q.quoteType }}</td>
+              <td>{{ q.quoteDate | date:'MM/dd/yyyy' }}</td>
+              <td>{{ q.expiresAt ? (q.expiresAt | date:'MM/dd/yyyy') : '—' }}</td>
+              <td><span [class]="statusClass(q.status)">{{ q.status }}</span></td>
+              <td class="portal-list__num">{{ q.total | number:'1.2-2' }}</td>
+              <td>
+                @if (q.status === 'Sent') {
+                  <button type="button" class="action-btn action-btn--sm action-btn--primary"
+                    [disabled]="isResponding(q.id)"
+                    (click)="respond(q, true)"
+                    [attr.data-testid]="'portal-quote-accept-' + q.id">
+                    <span class="material-icons-outlined">check</span>
+                    {{ 'portal.quotes.accept' | translate }}
+                  </button>
+                  <button type="button" class="action-btn action-btn--sm action-btn--danger"
+                    [disabled]="isResponding(q.id)"
+                    (click)="respond(q, false)"
+                    [attr.data-testid]="'portal-quote-decline-' + q.id">
+                    <span class="material-icons-outlined">close</span>
+                    {{ 'portal.quotes.decline' | translate }}
+                  </button>
+                } @else {
+                  <span class="portal-list__muted">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

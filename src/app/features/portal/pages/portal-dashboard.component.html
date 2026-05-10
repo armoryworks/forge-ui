@@ -1,0 +1,38 @@
+<div class="portal-dashboard" [appLoadingBlock]="loading()">
+  <header class="portal-dashboard__hero">
+    @if (identity(); as me) {
+      <h1 class="portal-dashboard__greeting">
+        {{ 'portal.dashboard.welcome' | translate:{ name: me.contactFirstName } }}
+      </h1>
+      <p class="portal-dashboard__subtitle">{{ me.customerName }}</p>
+    }
+  </header>
+
+  @if (summary(); as s) {
+    <div class="portal-dashboard__cards">
+      <a routerLink="/portal/orders" class="portal-dashboard__card">
+        <span class="material-icons-outlined portal-dashboard__icon">receipt_long</span>
+        <span class="portal-dashboard__count">{{ s.openSalesOrderCount }}</span>
+        <span class="portal-dashboard__label">{{ 'portal.dashboard.openOrders' | translate }}</span>
+      </a>
+
+      <a routerLink="/portal/quotes" class="portal-dashboard__card">
+        <span class="material-icons-outlined portal-dashboard__icon">request_quote</span>
+        <span class="portal-dashboard__count">{{ s.openQuoteCount }}</span>
+        <span class="portal-dashboard__label">{{ 'portal.dashboard.openQuotes' | translate }}</span>
+      </a>
+
+      <a routerLink="/portal/invoices" class="portal-dashboard__card">
+        <span class="material-icons-outlined portal-dashboard__icon">payments</span>
+        <span class="portal-dashboard__count">{{ s.openInvoiceCount }}</span>
+        <span class="portal-dashboard__label">{{ 'portal.dashboard.openInvoices' | translate }}</span>
+      </a>
+
+      <a routerLink="/portal/shipments" class="portal-dashboard__card">
+        <span class="material-icons-outlined portal-dashboard__icon">local_shipping</span>
+        <span class="portal-dashboard__count">{{ s.inTransitShipmentCount }}</span>
+        <span class="portal-dashboard__label">{{ 'portal.dashboard.inTransit' | translate }}</span>
+      </a>
+    </div>
+  }
+</div>

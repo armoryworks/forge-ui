@@ -1,0 +1,44 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.portal-callback {
+  min-height: 100vh;
+  background: var(--bg);
+  @include flex-center;
+  padding: $sp-xl;
+
+  &__card {
+    width: 100%;
+    max-width: 420px;
+    padding: $sp-xl;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-md;
+
+    h2 {
+      margin: 0;
+      font-size: $font-size-lg;
+    }
+
+    p {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: var(--text-muted);
+    }
+  }
+
+  &__spinner {
+    font-size: $icon-size-hero;
+    color: var(--primary);
+    animation: spin 1.5s linear infinite;
+  }
+
+  &__error-icon {
+    font-size: $icon-size-hero;
+    color: var(--error);
+  }
+}

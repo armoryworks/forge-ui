@@ -1,0 +1,51 @@
+<div class="portal-login">
+  <div class="portal-login__card">
+    <h1 class="portal-login__title">{{ 'portal.login.title' | translate }}</h1>
+    <p class="portal-login__hint">{{ 'portal.login.hint' | translate }}</p>
+
+    @if (!submitted()) {
+      <form (submit)="$event.preventDefault(); submit()">
+        <app-input
+          [label]="'portal.login.email' | translate"
+          type="email"
+          [formControl]="emailControl"
+          [required]="true"
+          autocomplete="email"
+          data-testid="portal-login-email" />
+
+        @if (errorMessage(); as msg) {
+          <p class="portal-login__error">{{ msg }}</p>
+        }
+
+        <button class="action-btn action-btn--primary portal-login__submit"
+          data-testid="portal-login-submit"
+          type="submit"
+          [disabled]="emailControl.invalid || submitting()">
+          @if (submitting()) {
+            <span class="material-icons-outlined">sync</span>
+          } @else {
+            <span class="material-icons-outlined">send</span>
+          }
+          {{ 'portal.login.send' | translate }}
+        </button>
+      </form>
+    } @else {
+      <div class="portal-login__success">
+        <span class="material-icons-outlined portal-login__success-icon">mark_email_read</span>
+        <h2>{{ 'portal.login.sentTitle' | translate }}</h2>
+        <p>{{ 'portal.login.sentBody' | translate }}</p>
+
+        @if (devLink(); as link) {
+          <div class="portal-login__dev">
+            <p class="portal-login__dev-label">{{ 'portal.login.devLink' | translate }}</p>
+            <button class="action-btn action-btn--primary" type="button" (click)="followDevLink()">
+              <span class="material-icons-outlined">vpn_key</span>
+              {{ 'portal.login.openLink' | translate }}
+            </button>
+            <code class="portal-login__dev-link">{{ link }}</code>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

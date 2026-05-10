@@ -1,0 +1,35 @@
+<div class="portal-list" [appLoadingBlock]="loading()">
+  <header class="portal-list__header">
+    <h1 class="portal-list__title">{{ 'portal.orders.title' | translate }}</h1>
+    <p class="portal-list__subtitle">{{ 'portal.orders.subtitle' | translate }}</p>
+  </header>
+
+  @if (!loading() && orders().length === 0) {
+    <app-empty-state icon="receipt_long" [message]="'portal.orders.empty' | translate" />
+  } @else {
+    <div class="portal-list__table-wrap">
+      <table class="portal-list__table">
+        <thead>
+          <tr>
+            <th>{{ 'portal.orders.colNumber' | translate }}</th>
+            <th>{{ 'portal.orders.colDate' | translate }}</th>
+            <th>{{ 'portal.orders.colRequested' | translate }}</th>
+            <th>{{ 'portal.orders.colStatus' | translate }}</th>
+            <th class="portal-list__num">{{ 'portal.orders.colTotal' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of orders(); track o.id) {
+            <tr>
+              <td>{{ o.orderNumber }}</td>
+              <td>{{ o.orderDate | date:'MM/dd/yyyy' }}</td>
+              <td>{{ o.requestedDate ? (o.requestedDate | date:'MM/dd/yyyy') : '—' }}</td>
+              <td><span [class]="statusClass(o.status)">{{ o.status }}</span></td>
+              <td class="portal-list__num">{{ o.total | number:'1.2-2' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
