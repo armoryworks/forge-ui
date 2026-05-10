@@ -1,5 +1,8 @@
-import { Injectable, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
+
+import { environment } from '../../../environments/environment';
 
 /**
  * Phase 1r / Batch 7 — outbound-call provider abstraction. The default
@@ -94,6 +97,55 @@ export class TelLinkOutboundService implements IOutboundCallService {
       window.location.href = `tel:${cleaned}`;
     }, 0);
     return of({ ok: true, callId: null });
+  }
+}
+
+/**
+ * Phase 1r / Batch 8 — Asterisk-backed implementation. Talks to the
+ * companion qb-engineer-voice side repo over HTTP. Self-hosted SIP
+ * call control with the deployer's choice of SIP trunk (VoIP.ms /
+ * Telnyx / Bandwidth / etc.) — vendor-neutral. Not active by default;
+ * registered alongside TelLinkOutboundService so admin can flip
+ * providers without a rebuild.
+ *
+ * The side-repo service exposes /api/voice/call which translates to
+ * an ARI Originate; call-state webhooks post back to the main API
+ * (CAP-EXT-VOIP-SYNC consumes them and auto-logs ContactInteraction
+ * rows the same way it already does for inbound Twilio webhooks).
+ */
+@Injectable({ providedIn: 'root' })
+export class AsteriskOutboundService implements IOutboundCallService {
+  private readonly http = inject(HttpClient);
+
+  /**
+   * Base URL of the qb-engineer-voice container. Defaults to the
+   * docker-compose service name; deployments override via the
+   * `voiceServiceUrl` field on environment.ts (optional, undefined
+   * here means the impl is not configured and isAvailable=false).
+   */
+  private readonly base = (environment as { voiceServiceUrl?: string }).voiceServiceUrl ?? '';
+
+  readonly providerId = 'asterisk';
+  readonly providerName = 'Asterisk (self-hosted SIP)';
+  /** Availability hint based on env config — actual reachability is verified per-call. */
+  readonly isAvailable = !!this.base;
+  readonly capabilities = {
+    programmaticDial: true,
+    recording: true,
+    voicemailDrop: true,
+  };
+
+  placeCall(phone: string, context?: OutboundCallContext): Observable<OutboundCallResult> {
+    if (!this.isAvailable) {
+      return of({ ok: false, callId: null, errorCode: 'provider-unavailable' as const });
+    }
+    return this.http.post<{ ok: boolean; callId: string | null; error?: string }>(
+      `${this.base}/api/voice/call`,
+      { phone, context },
+    ).pipe(
+      map(r => ({ ok: r.ok, callId: r.callId, errorCode: r.ok ? undefined : 'provider-unavailable' as const })),
+      catchError(() => of({ ok: false, callId: null, errorCode: 'provider-unavailable' as const })),
+    );
   }
 }
 
