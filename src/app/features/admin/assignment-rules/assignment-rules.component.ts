@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { startWith } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
@@ -81,8 +82,27 @@ export class AssignmentRulesComponent {
     kind: new FormControl<AssignmentRuleKind>('RoundRobin', { nonNullable: true, validators: [Validators.required] }),
     priority: new FormControl<number>(100, { nonNullable: true, validators: [Validators.required] }),
     isActive: new FormControl<boolean>(true, { nonNullable: true }),
-    spec: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(4000)] }),
+    // Structured fields — each kind reads its own subset; on save we
+    // serialize the relevant fields to JSON into `spec`. Storing
+    // structured + raw side-by-side lets the admin fall back to raw
+    // when a Kind acquires fields the form doesn't surface yet.
+    specRepIds: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    specStates: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    specZipPrefixes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    specIndustries: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(500)] }),
+    specRaw: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(4000)] }),
   });
+
+  /** Reactive Kind so the template can show/hide kind-specific sub-forms. */
+  protected readonly currentKind = toSignal(
+    this.form.controls.kind.valueChanges.pipe(startWith(this.form.controls.kind.value)),
+    { initialValue: this.form.controls.kind.value },
+  );
+
+  protected readonly showRoundRobinFields = computed(() => this.currentKind() === 'RoundRobin');
+  protected readonly showTerritoryFields = computed(() => this.currentKind() === 'Territory');
+  protected readonly showIndustryFields = computed(() => this.currentKind() === 'Industry');
+  protected readonly showAccountBasedHint = computed(() => this.currentKind() === 'AccountBased');
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     name: this.translate.instant('admin.assignmentRules.fieldName'),
@@ -104,20 +124,97 @@ export class AssignmentRulesComponent {
 
   protected openNew(): void {
     this.editingId.set(null);
-    this.form.reset({ name: '', kind: 'RoundRobin', priority: 100, isActive: true, spec: '' });
+    this.form.reset({
+      name: '', kind: 'RoundRobin', priority: 100, isActive: true,
+      specRepIds: '', specStates: '', specZipPrefixes: '', specIndustries: '', specRaw: '',
+    });
     this.showDialog.set(true);
   }
 
   protected openEdit(row: AssignmentRule): void {
     this.editingId.set(row.id);
+    const parsed = this.parseSpec(row.spec, row.kind);
     this.form.reset({
       name: row.name,
       kind: row.kind,
       priority: row.priority,
       isActive: row.isActive,
-      spec: row.spec ?? '',
+      specRepIds: parsed.repIds,
+      specStates: parsed.states,
+      specZipPrefixes: parsed.zipPrefixes,
+      specIndustries: parsed.industries,
+      specRaw: parsed.raw,
     });
     this.showDialog.set(true);
+  }
+
+  /**
+   * Parse the stored JSON spec into the structured form fields. When the
+   * JSON doesn't match the expected Kind shape (admin hand-edited it, or
+   * Kind changed), we fall through to the raw textarea so nothing is lost.
+   */
+  private parseSpec(spec: string | null, kind: AssignmentRuleKind): {
+    repIds: string; states: string; zipPrefixes: string; industries: string; raw: string;
+  } {
+    const empty = { repIds: '', states: '', zipPrefixes: '', industries: '', raw: '' };
+    if (!spec) return empty;
+    try {
+      const obj = JSON.parse(spec) as Record<string, unknown>;
+      if (kind === 'RoundRobin' && Array.isArray(obj['repIds'])) {
+        return { ...empty, repIds: (obj['repIds'] as number[]).join(', ') };
+      }
+      if (kind === 'Territory') {
+        const states = Array.isArray(obj['states']) ? (obj['states'] as string[]).join(', ') : '';
+        const zips = Array.isArray(obj['zipPrefixes']) ? (obj['zipPrefixes'] as string[]).join(', ') : '';
+        if (states || zips) return { ...empty, states, zipPrefixes: zips };
+      }
+      if (kind === 'Industry' && Array.isArray(obj['industries'])) {
+        return { ...empty, industries: (obj['industries'] as string[]).join(', ') };
+      }
+    } catch {
+      // Fall through to raw display.
+    }
+    return { ...empty, raw: spec };
+  }
+
+  /**
+   * Serialize the structured form fields back to a JSON spec string. The
+   * raw field wins when the structured fields are empty (lets admins
+   * paste a hand-crafted spec for kinds the form doesn't surface).
+   */
+  private buildSpec(kind: AssignmentRuleKind, form: {
+    specRepIds: string; specStates: string; specZipPrefixes: string;
+    specIndustries: string; specRaw: string;
+  }): string | null {
+    if (kind === 'RoundRobin') {
+      const ids = this.parseIntList(form.specRepIds);
+      if (ids.length > 0) return JSON.stringify({ repIds: ids });
+    }
+    if (kind === 'Territory') {
+      const states = this.parseStringList(form.specStates).map(s => s.toUpperCase());
+      const zips = this.parseStringList(form.specZipPrefixes);
+      if (states.length > 0 || zips.length > 0) {
+        const payload: Record<string, string[]> = {};
+        if (states.length > 0) payload['states'] = states;
+        if (zips.length > 0) payload['zipPrefixes'] = zips;
+        return JSON.stringify(payload);
+      }
+    }
+    if (kind === 'Industry') {
+      const industries = this.parseStringList(form.specIndustries);
+      if (industries.length > 0) return JSON.stringify({ industries });
+    }
+    if (kind === 'AccountBased') return null;
+    // Fallback to raw JSON when structured fields are empty.
+    return form.specRaw.trim() || null;
+  }
+
+  private parseIntList(input: string): number[] {
+    return input.split(/[,\s]+/).map(s => s.trim()).filter(s => s).map(s => Number(s)).filter(n => Number.isFinite(n) && n > 0);
+  }
+
+  private parseStringList(input: string): string[] {
+    return input.split(/[,\s]+/).map(s => s.trim()).filter(s => s);
   }
 
   protected close(): void {
@@ -129,6 +226,7 @@ export class AssignmentRulesComponent {
     this.saving.set(true);
     const f = this.form.getRawValue();
     const id = this.editingId();
+    const spec = this.buildSpec(f.kind, f);
 
     if (id !== null) {
       this.service.update(id, {
@@ -136,7 +234,7 @@ export class AssignmentRulesComponent {
         kind: f.kind,
         priority: f.priority,
         isActive: f.isActive,
-        spec: f.spec.trim() || null,
+        spec,
       }).subscribe({
         next: () => {
           this.saving.set(false);
@@ -151,7 +249,7 @@ export class AssignmentRulesComponent {
         name: f.name.trim(),
         kind: f.kind,
         priority: f.priority,
-        spec: f.spec.trim() || null,
+        spec,
       }).subscribe({
         next: () => {
           this.saving.set(false);

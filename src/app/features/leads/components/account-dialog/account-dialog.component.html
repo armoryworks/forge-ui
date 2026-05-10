@@ -1,0 +1,57 @@
+<app-dialog
+  [title]="(isEdit ? 'leads.accounts.editAccount' : 'leads.accounts.newAccount') | translate"
+  width="640px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'leads.accounts.fieldName' | translate"
+      formControlName="name" [required]="true" data-testid="account-name" />
+
+    <div class="dialog-row">
+      <app-input [label]="'leads.accounts.fieldIndustry' | translate"
+        formControlName="industry"
+        [placeholder]="'leads.accounts.industryPlaceholder' | translate" />
+      <app-select [label]="'leads.accounts.fieldSize' | translate"
+        formControlName="sizeBracket"
+        [options]="sizeOptions" />
+    </div>
+
+    <div class="dialog-row">
+      <app-input [label]="'leads.accounts.fieldWebsite' | translate"
+        formControlName="website"
+        [placeholder]="'leads.accounts.websitePlaceholder' | translate" />
+      <app-input [label]="'leads.accounts.fieldPhone' | translate"
+        formControlName="phone" mask="phone" />
+    </div>
+
+    <app-input [label]="'leads.accounts.fieldAddress' | translate"
+      formControlName="address" />
+
+    <div class="dialog-row dialog-row--three">
+      <app-input [label]="'leads.accounts.fieldCity' | translate"
+        formControlName="city" />
+      <app-input [label]="'leads.accounts.fieldState' | translate"
+        formControlName="state" />
+      <app-input [label]="'leads.accounts.fieldPostalCode' | translate"
+        formControlName="postalCode" />
+    </div>
+
+    <app-input [label]="'leads.accounts.fieldCountry' | translate"
+      formControlName="country" />
+
+    <app-textarea [label]="'leads.accounts.fieldDescription' | translate"
+      formControlName="description"
+      [rows]="3" [maxlength]="1000" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid"
+        (click)="save()" data-testid="account-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

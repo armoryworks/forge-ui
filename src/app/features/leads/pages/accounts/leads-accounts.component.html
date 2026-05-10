@@ -1,0 +1,30 @@
+<app-page-layout [pageTitle]="'leads.accounts.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'leads.accounts.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openNew()" data-testid="account-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'leads.accounts.newAccount' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="leads-accounts"
+        [columns]="columns"
+        [data]="accounts()"
+        [clickableRows]="true"
+        (rowClick)="openEdit($any($event))"
+        emptyIcon="business"
+        [emptyMessage]="'leads.accounts.empty' | translate">
+
+        <ng-template appColumnCell="createdAt" let-row>
+          {{ row.createdAt | date:'MM/dd/yyyy' }}
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>

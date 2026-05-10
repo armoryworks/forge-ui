@@ -41,4 +41,11 @@ export const LEADS_ROUTES: Routes = [
     path: 'samples',
     loadComponent: () => import('./pages/samples/leads-samples.component').then(m => m.LeadsSamplesComponent),
   },
+  // Phase 1r / Batch 12 — multi-contact B2B parent groupings. Lead.accountId
+  // optionally points at one of these so reps managing a complex prospect
+  // can keep all relevant contacts under one umbrella.
+  {
+    path: 'accounts',
+    loadComponent: () => import('./pages/accounts/leads-accounts.component').then(m => m.LeadsAccountsComponent),
+  },
 ];

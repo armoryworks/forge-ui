@@ -1,0 +1,23 @@
+<app-dialog
+  [title]="'leads.queue.callbackSchedulerTitle' | translate"
+  width="420px"
+  (closed)="cancel()">
+  <div [formGroup]="form">
+    <app-datepicker [label]="'leads.queue.callbackDate' | translate"
+      formControlName="callbackDate" [required]="true" />
+    <app-select [label]="'leads.queue.callbackTime' | translate"
+      formControlName="callbackTime" [options]="timeOptions" [required]="true" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid"
+        (click)="confirm()">
+        <span class="material-icons-outlined">schedule</span>
+        {{ 'leads.queue.scheduleCallback' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

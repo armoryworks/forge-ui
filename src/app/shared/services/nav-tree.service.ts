@@ -75,6 +75,7 @@ export class NavTreeService {
             { icon: 'campaign', label: 'Campaigns', i18nKey: 'nav.leadsCampaigns', route: '/leads/campaigns' },
             { icon: 'block', label: 'Suppression', i18nKey: 'nav.leadsSuppression', route: '/leads/suppression' },
             { icon: 'card_giftcard', label: 'Samples', i18nKey: 'nav.leadsSamples', route: '/leads/samples' },
+            { icon: 'business', label: 'Accounts', i18nKey: 'nav.leadsAccounts', route: '/leads/accounts' },
           ],
         },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },

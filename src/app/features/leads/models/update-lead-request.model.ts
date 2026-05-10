@@ -20,4 +20,6 @@ export interface UpdateLeadRequest {
   ndaSignedAt?: string;
   ndaExpiresAt?: string;
   exportControl?: ExportControlClearance;
+  /** Phase 1r / Batch 12 — multi-contact B2B parent. Null clears the link. */
+  accountId?: number | null;
 }

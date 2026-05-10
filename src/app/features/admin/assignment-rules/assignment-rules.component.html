@@ -69,12 +69,43 @@
         type="number"
         formControlName="priority" [required]="true"
         data-testid="assignment-rule-priority" />
-      <app-textarea [label]="'admin.assignmentRules.fieldSpec' | translate"
-        formControlName="spec"
-        [rows]="6" [maxlength]="4000"
-        [placeholder]="'admin.assignmentRules.specPlaceholder' | translate"
-        data-testid="assignment-rule-spec" />
-      <p class="hint-text">{{ 'admin.assignmentRules.specHint' | translate }}</p>
+      @if (showRoundRobinFields()) {
+        <app-input [label]="'admin.assignmentRules.specRepIds' | translate"
+          formControlName="specRepIds"
+          [placeholder]="'admin.assignmentRules.specRepIdsPlaceholder' | translate"
+          data-testid="assignment-rule-repids" />
+        <p class="hint-text">{{ 'admin.assignmentRules.specRepIdsHint' | translate }}</p>
+      }
+      @if (showTerritoryFields()) {
+        <app-input [label]="'admin.assignmentRules.specStates' | translate"
+          formControlName="specStates"
+          [placeholder]="'admin.assignmentRules.specStatesPlaceholder' | translate"
+          data-testid="assignment-rule-states" />
+        <app-input [label]="'admin.assignmentRules.specZipPrefixes' | translate"
+          formControlName="specZipPrefixes"
+          [placeholder]="'admin.assignmentRules.specZipPrefixesPlaceholder' | translate"
+          data-testid="assignment-rule-zips" />
+        <p class="hint-text">{{ 'admin.assignmentRules.specTerritoryHint' | translate }}</p>
+      }
+      @if (showIndustryFields()) {
+        <app-input [label]="'admin.assignmentRules.specIndustries' | translate"
+          formControlName="specIndustries"
+          [placeholder]="'admin.assignmentRules.specIndustriesPlaceholder' | translate"
+          data-testid="assignment-rule-industries" />
+        <p class="hint-text">{{ 'admin.assignmentRules.specIndustriesHint' | translate }}</p>
+      }
+      @if (showAccountBasedHint()) {
+        <p class="hint-text">{{ 'admin.assignmentRules.specAccountBasedHint' | translate }}</p>
+      }
+      <details class="raw-spec">
+        <summary>{{ 'admin.assignmentRules.rawSpecToggle' | translate }}</summary>
+        <app-textarea [label]="'admin.assignmentRules.rawSpec' | translate"
+          formControlName="specRaw"
+          [rows]="5" [maxlength]="4000"
+          [placeholder]="'admin.assignmentRules.specPlaceholder' | translate"
+          data-testid="assignment-rule-raw" />
+        <p class="hint-text">{{ 'admin.assignmentRules.rawSpecHint' | translate }}</p>
+      </details>
       @if (editingId() !== null) {
         <app-toggle [label]="'common.active' | translate"
           formControlName="isActive"

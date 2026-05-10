@@ -8,7 +8,9 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder, CdkDragPreview } from '@angular/cdk/drag-drop';
 
 import { LeadsService } from './services/leads.service';
+import { AccountsService } from './services/accounts.service';
 import { LeadItem } from './models/lead-item.model';
+import { Account } from './models/account.model';
 import { LeadStatus } from './models/lead-status.type';
 import { LeadDetailDialogComponent, LeadDetailDialogData, LeadDetailDialogResult } from './components/lead-detail-dialog/lead-detail-dialog.component';
 import { NewLeadForkDialogComponent } from './components/new-lead-fork-dialog/new-lead-fork-dialog.component';
@@ -57,6 +59,7 @@ export class LeadsComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly leadsService = inject(LeadsService);
+  private readonly accountsService = inject(AccountsService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -102,9 +105,19 @@ export class LeadsComponent {
     email: new FormControl('', [Validators.email]),
     phone: new FormControl(''),
     source: new FormControl<string | null>(null),
+    accountId: new FormControl<number | null>(null),
     notes: new FormControl(''),
     followUpDate: new FormControl<Date | null>(null),
   });
+
+  // Phase 1r / Batch 12 — populate the account picker on the edit dialog.
+  // Loaded lazily on first edit-open; the empty/null option lets reps
+  // unaffiliate a lead from any prior account.
+  protected readonly accounts = signal<Account[]>([]);
+  protected readonly accountOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('leads.accounts.noneOption') },
+    ...this.accounts().map(a => ({ value: a.id, label: a.name })),
+  ]);
 
   protected readonly leadViolations = FormValidationService.getViolations(this.leadForm, {
     companyName: 'Company Name',
@@ -299,9 +312,16 @@ export class LeadsComponent {
       email: lead.email ?? '',
       phone: lead.phone ?? '',
       source: lead.source ?? '',
+      accountId: lead.accountId ?? null,
       notes: lead.notes ?? '',
       followUpDate: lead.followUpDate ?? null,
     });
+    // Lazy-load the account list the first time an edit dialog opens.
+    if (this.accounts().length === 0) {
+      this.accountsService.list().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (rows) => this.accounts.set(rows),
+      });
+    }
     this.showDialog.set(true);
   }
 
@@ -316,12 +336,17 @@ export class LeadsComponent {
     const form = this.leadForm.getRawValue();
     const editing = this.editingLead();
 
+    // Note: accountId is always included (not coerced to undefined) so that
+    // explicitly clearing it on the edit dialog actually round-trips to the
+    // server. The other optional fields use undefined elision since they
+    // have no "clear" semantics distinct from "leave alone".
     const payload = {
       companyName: form.companyName!,
       contactName: form.contactName || undefined,
       email: form.email || undefined,
       phone: form.phone || undefined,
       source: form.source || undefined,
+      accountId: form.accountId,
       notes: form.notes || undefined,
       followUpDate: toIsoDate(form.followUpDate) ?? undefined,
     };

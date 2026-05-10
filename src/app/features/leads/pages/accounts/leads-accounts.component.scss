@@ -1,0 +1,6 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

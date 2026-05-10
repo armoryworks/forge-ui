@@ -204,6 +204,15 @@
         <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate" formControlName="followUpDate" [min]="followUpMin()" />
       </div>
 
+      @if (editingLead()) {
+        <!-- Phase 1r / Batch 12 — account picker only shows on edit since
+             new-lead intake doesn't have an account context yet. -->
+        <app-select data-testid="lead-account"
+          [label]="'leads.accounts.fieldName' | translate"
+          formControlName="accountId"
+          [options]="accountOptions()" />
+      }
+
       <app-textarea data-testid="lead-notes" [label]="'common.notes' | translate" formControlName="notes" />
     </div>
 

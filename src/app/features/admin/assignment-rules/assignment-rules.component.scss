@@ -11,3 +11,23 @@
   margin: $sp-xs 0 $sp-md;
   line-height: 1.4;
 }
+
+.raw-spec {
+  margin-top: $sp-md;
+  padding-top: $sp-md;
+  border-top: $border-width-thin solid var(--border);
+
+  summary {
+    cursor: pointer;
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    padding: $sp-xs 0;
+    user-select: none;
+
+    &:hover { color: var(--text); }
+  }
+
+  &[open] summary { margin-bottom: $sp-sm; }
+}

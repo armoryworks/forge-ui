@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, HostListener, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
@@ -11,6 +12,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { TelLinkOutboundService } from '../../../../shared/services/outbound-call.service';
 import { LeadsService } from '../../services/leads.service';
 import { DispositionRequest, OutreachState, QueueLead } from '../../models/queue.model';
+import { CallbackSchedulerDialogComponent, CallbackSchedulerResult } from '../../components/callback-scheduler-dialog/callback-scheduler-dialog.component';
 
 interface DispositionAction {
   state: OutreachState;
@@ -28,7 +30,7 @@ interface DispositionAction {
  *   E  — Engaged (lead exits queue, status flips to Contacted)
  *   N  — NoAnswer (re-queues for retry)
  *   V  — VoicemailLeft (re-queues for retry)
- *   C  — CallbackScheduled (TODO: callback time picker; v1 uses now+24h)
+ *   C  — CallbackScheduled (opens callback-scheduler dialog for date + time)
  *   B  — BadData (lost — wrong number / bounce / disconnected)
  *   S  — Suppressed (operator-initiated DNC; UI follow-up to set prefs)
  *   J  — next lead in current batch
@@ -54,6 +56,7 @@ export class LeadsQueueComponent {
   private readonly leadsService = inject(LeadsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly outboundCall = inject(TelLinkOutboundService);
+  private readonly dialog = inject(MatDialog);
   protected readonly translate = inject(TranslateService);
 
   protected readonly batch = signal<QueueLead[]>([]);
@@ -102,23 +105,36 @@ export class LeadsQueueComponent {
   protected dispose(action: DispositionAction): void {
     const lead = this.currentLead();
     if (!lead) return;
-    const req: DispositionRequest = {
-      nextState: action.state,
-      notes: this.notesControl.value.trim() || undefined,
-    };
+
     if (action.state === 'CallbackScheduled') {
-      // Default callback to tomorrow at the same time of day. Future
-      // commit can replace with a callback-time picker.
-      const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      req.callbackAt = tomorrow.toISOString();
+      // Open the scheduler dialog and only proceed once the operator
+      // confirms a date/time. Cancelling the dialog aborts the
+      // disposition entirely so the lead stays on the current rep.
+      this.dialog.open<CallbackSchedulerDialogComponent, void, CallbackSchedulerResult | undefined>(
+        CallbackSchedulerDialogComponent, { width: '420px' },
+      ).afterClosed().subscribe(result => {
+        if (!result) return;
+        this.submitDisposition(lead.id, {
+          nextState: action.state,
+          notes: this.notesControl.value.trim() || undefined,
+          callbackAt: result.callbackAt,
+        }, action.labelKey);
+      });
+      return;
     }
 
+    this.submitDisposition(lead.id, {
+      nextState: action.state,
+      notes: this.notesControl.value.trim() || undefined,
+    }, action.labelKey);
+  }
+
+  private submitDisposition(leadId: number, req: DispositionRequest, labelKey: string): void {
     this.working.set(true);
-    this.leadsService.dispositionLead(lead.id, req).subscribe({
+    this.leadsService.dispositionLead(leadId, req).subscribe({
       next: () => {
         this.working.set(false);
-        this.snackbar.success(this.translate.instant(action.labelKey));
+        this.snackbar.success(this.translate.instant(labelKey));
         this.notesControl.setValue('');
         this.advance();
       },
