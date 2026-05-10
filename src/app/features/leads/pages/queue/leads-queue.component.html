@@ -1,0 +1,110 @@
+<app-page-header
+  [title]="'leads.queue.title' | translate"
+  [subtitle]="'leads.queue.subtitle' | translate" />
+
+<div class="queue" [appLoadingBlock]="working()">
+  @if (batch().length === 0) {
+    <div class="queue__empty-card">
+      <span class="material-icons-outlined queue__empty-icon">speed</span>
+      <h3 class="queue__empty-title">{{ 'leads.queue.readyTitle' | translate }}</h3>
+      <p class="queue__empty-help">{{ 'leads.queue.readyHelp' | translate }}</p>
+      <div class="queue__pull-row">
+        <label class="queue__batch-size">
+          {{ 'leads.queue.batchSize' | translate }}
+          <input type="number" min="1" max="50" [formControl]="batchSizeControl" data-testid="queue-batch-size" />
+        </label>
+        <button type="button" class="action-btn action-btn--primary"
+          (click)="pull()" data-testid="queue-pull-btn">
+          <span class="material-icons-outlined">play_arrow</span>
+          {{ 'leads.queue.pullN' | translate:{ count: batchSizeControl.value } }}
+        </button>
+      </div>
+    </div>
+  } @else if (currentLead(); as lead) {
+    <div class="queue__progress-bar">
+      @if (progress(); as p) {
+        <span class="queue__progress-text">{{ 'leads.queue.progress' | translate:p }}</span>
+      }
+      <div class="queue__progress-controls">
+        <button type="button" class="icon-btn" (click)="back()"
+          [disabled]="cursor() === 0"
+          [attr.aria-label]="'leads.queue.previous' | translate">
+          <span class="material-icons-outlined">chevron_left</span>
+        </button>
+        <kbd>K</kbd>
+        <kbd>J</kbd>
+        <button type="button" class="icon-btn" (click)="advance()"
+          [attr.aria-label]="'leads.queue.next' | translate">
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="queue__lead-card">
+      <header class="queue__lead-header">
+        <h2 class="queue__company">{{ lead.companyName }}</h2>
+        @if (lead.campaignName) {
+          <span class="chip chip--info">{{ lead.campaignName }}</span>
+        }
+        @if (lead.cooldownUntil) {
+          <span class="chip chip--warning">
+            {{ 'leads.queue.cooldownUntil' | translate:{ date: lead.cooldownUntil | date:'MM/dd/yyyy' } }}
+          </span>
+        }
+        @if (lead.emailOptOut) {
+          <span class="chip chip--error">{{ 'leads.queue.emailOptOut' | translate }}</span>
+        }
+        @if (lead.callOptOut) {
+          <span class="chip chip--error">{{ 'leads.queue.callOptOut' | translate }}</span>
+        }
+      </header>
+
+      <dl class="queue__lead-grid">
+        @if (lead.contactName) {
+          <dt>{{ 'customers.contactName' | translate }}</dt>
+          <dd>{{ lead.contactName }}</dd>
+        }
+        @if (lead.email) {
+          <dt>{{ 'common.email' | translate }}</dt>
+          <dd><a [href]="'mailto:' + lead.email">{{ lead.email }}</a></dd>
+        }
+        @if (lead.phone) {
+          <dt>{{ 'common.phone' | translate }}</dt>
+          <dd><a [href]="'tel:' + lead.phone">{{ lead.phone }}</a></dd>
+        }
+        @if (lead.source) {
+          <dt>{{ 'leads.source' | translate }}</dt>
+          <dd>{{ lead.source }}</dd>
+        }
+        @if (lead.lastActivityAt) {
+          <dt>{{ 'leads.queue.lastActivity' | translate }}</dt>
+          <dd>{{ lead.lastActivityAt | date:'MM/dd/yyyy hh:mm' }}</dd>
+        }
+        @if (lead.notes) {
+          <dt>{{ 'common.notes' | translate }}</dt>
+          <dd class="queue__notes">{{ lead.notes }}</dd>
+        }
+      </dl>
+
+      <app-textarea
+        [label]="'leads.queue.dispositionNotes' | translate"
+        [formControl]="notesControl"
+        [rows]="3"
+        data-testid="queue-notes" />
+
+      <div class="queue__actions">
+        @for (a of actions; track a.state) {
+          <button type="button"
+            class="queue__action-btn"
+            [class]="'queue__action-btn--' + a.styleClass"
+            (click)="dispose(a)"
+            [attr.data-testid]="'queue-action-' + a.state">
+            <span class="material-icons-outlined">{{ a.icon }}</span>
+            <span class="queue__action-label">{{ a.labelKey | translate }}</span>
+            <kbd>{{ a.shortcut }}</kbd>
+          </button>
+        }
+      </div>
+    </div>
+  }
+</div>

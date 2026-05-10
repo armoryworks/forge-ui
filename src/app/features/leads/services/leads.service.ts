@@ -9,6 +9,7 @@ import { LeadStatus } from '../models/lead-status.type';
 import { ConvertLeadResult } from '../models/convert-lead-result.model';
 import { ConvertLeadRequest } from '../models/convert-lead-request.model';
 import { BulkLeadIntakeRequest, BulkLeadIntakeResponse } from '../models/bulk-intake.model';
+import { DispositionRequest, PullQueueRequest, QueueLead } from '../models/queue.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
@@ -52,5 +53,17 @@ export class LeadsService {
 
   bulkIntakeCommit(request: BulkLeadIntakeRequest): Observable<BulkLeadIntakeResponse> {
     return this.http.post<BulkLeadIntakeResponse>(`${this.base}/bulk-intake/commit`, request);
+  }
+
+  // Phase 1r / Batch 6 — worker queue. Pull serves disjoint slices via
+  // FOR UPDATE SKIP LOCKED so two reps can pull simultaneously without
+  // overlapping; disposition advances the outreach-state per touch.
+
+  pullQueue(request: PullQueueRequest): Observable<QueueLead[]> {
+    return this.http.post<QueueLead[]>(`${this.base}/queue/pull`, request);
+  }
+
+  dispositionLead(leadId: number, request: DispositionRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${leadId}/queue/disposition`, request);
   }
 }
