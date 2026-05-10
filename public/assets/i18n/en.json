@@ -1304,8 +1304,7 @@
     "contactsPage": {
       "title": "All Contacts",
       "subtitle": "Flat cross-customer view of every contact — \"who do I know at company X?\".",
-      "placeholderMessage": "Cross-customer contacts view is coming soon.",
-      "placeholderHelp": "A flat searchable list of every contact across every customer, with filters by role, primary-status, and last-activity. Tied into the new Contact-level outreach preferences from Batch 1 so you can see opt-out / cooldown state at a glance."
+      "empty": "No contacts yet. Add contacts to customers to populate this view."
     },
     "portalAccessPage": {
       "title": "Portal Access",

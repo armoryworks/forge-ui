@@ -1,0 +1,33 @@
+<app-page-header
+  [title]="'customers.contactsPage.title' | translate"
+  [subtitle]="'customers.contactsPage.subtitle' | translate" />
+
+<div class="page-body" [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="customers-all-contacts"
+    [columns]="columns"
+    [data]="displayRows()"
+    [clickableRows]="true"
+    (rowClick)="openCustomer($any($event))"
+    emptyIcon="contacts"
+    [emptyMessage]="'customers.contactsPage.empty' | translate">
+
+    <ng-template appColumnCell="isPrimary" let-row>
+      @if (row.isPrimary) {
+        <span class="chip chip--primary">{{ 'customers.primary' | translate }}</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="suppression" let-row>
+      @if (row.emailOptOut) {
+        <span class="chip chip--error">{{ 'leads.queue.emailOptOut' | translate }}</span>
+      }
+      @if (row.callOptOut) {
+        <span class="chip chip--error">{{ 'leads.queue.callOptOut' | translate }}</span>
+      }
+      @if (row.inCooldown) {
+        <span class="chip chip--warning">{{ 'leads.queue.cooldownUntil' | translate:{ date: '' } }}</span>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

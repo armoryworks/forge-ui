@@ -1300,8 +1300,7 @@
     "contactsPage": {
       "title": "Todos los Contactos",
       "subtitle": "Vista plana entre clientes de cada contacto — \"¿a quién conozco en la empresa X?\".",
-      "placeholderMessage": "La vista de contactos entre clientes está en camino.",
-      "placeholderHelp": "Una lista plana y buscable de cada contacto en cada cliente, con filtros por rol, estado-primario y última actividad. Conectada con las preferencias de difusión a nivel de Contacto del Lote 1 para ver el estado de opt-out / enfriamiento de un vistazo."
+      "empty": "Sin contactos. Agrega contactos a los clientes para poblar esta vista."
     },
     "portalAccessPage": {
       "title": "Acceso al Portal",

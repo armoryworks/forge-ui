@@ -14,6 +14,7 @@ import { CreateContactRequest } from '../models/create-contact-request.model';
 import { UpdateContactRequest } from '../models/update-contact-request.model';
 import { ContactInteraction, ContactInteractionRequest } from '../models/contact-interaction.model';
 import { CreditStatus } from '../models/credit-status.model';
+import { FlatContactRow } from '../models/flat-contact.model';
 
 /** Phase 3 F7-partial / WU-17 — paged customer list query parameters. */
 export interface CustomerListPagedQuery extends PagedQuery {
@@ -132,5 +133,10 @@ export class CustomerService {
 
   deleteInteraction(customerId: number, interactionId: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${customerId}/interactions/${interactionId}`);
+  }
+
+  // Phase 1r — flat cross-customer contact listing.
+  getAllContactsFlat(): Observable<FlatContactRow[]> {
+    return this.http.get<FlatContactRow[]>(`${this.base}/all-contacts`);
   }
 }
