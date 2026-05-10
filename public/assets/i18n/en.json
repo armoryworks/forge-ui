@@ -7,6 +7,11 @@
     "parts": "Parts",
     "inventory": "Inventory",
     "customers": "Customers",
+    "customersAll": "All Customers",
+    "customersContacts": "Contacts",
+    "customersPortalAccess": "Portal Access",
+    "customersSegments": "Segments",
+    "customersImport": "Import",
     "leads": "Leads",
     "leadsAll": "All Leads",
     "leadsIntake": "Bulk Intake",
@@ -1295,6 +1300,30 @@
     "title": "Customers",
     "subtitle": "Manage customer contacts and addresses",
     "createCustomer": "New Customer",
+    "contactsPage": {
+      "title": "All Contacts",
+      "subtitle": "Flat cross-customer view of every contact — \"who do I know at company X?\".",
+      "placeholderMessage": "Cross-customer contacts view is coming soon.",
+      "placeholderHelp": "A flat searchable list of every contact across every customer, with filters by role, primary-status, and last-activity. Tied into the new Contact-level outreach preferences from Batch 1 so you can see opt-out / cooldown state at a glance."
+    },
+    "portalAccessPage": {
+      "title": "Portal Access",
+      "subtitle": "Admin oversight of which contacts can sign in to the customer portal.",
+      "placeholderMessage": "Portal-access admin is coming soon.",
+      "placeholderHelp": "List every CustomerPortalAccess row across every contact with last-login timestamp, IsEnabled flag, and bulk enable/disable actions. Pairs with the customer-portal feature shipped in Phase 1q."
+    },
+    "segmentsPage": {
+      "title": "Segments",
+      "subtitle": "Saved cross-customer filter sets for marketing + reporting.",
+      "placeholderMessage": "Customer segments are coming soon.",
+      "placeholderHelp": "Define a filter (e.g. \"open AR > $10K AND industry = aerospace AND last order < 90 days\"), save it as a named segment, and reuse across reports, marketing campaigns, and dashboards."
+    },
+    "importPage": {
+      "title": "Bulk Import",
+      "subtitle": "Upload a CSV of customers + contacts, dedup against existing rows.",
+      "placeholderMessage": "Customer bulk import is coming soon.",
+      "placeholderHelp": "Same dedup-wizard pattern as Leads bulk intake — upload CSV, preview matches, gate quality before commit. Differs in that customers carry billing/shipping addresses + credit terms + contacts as a hierarchy."
+    },
     "fork": {
       "title": "How would you like to add this customer?",
       "hint": "Pick the path that matches what you already know about this account.",

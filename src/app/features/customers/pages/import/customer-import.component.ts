@@ -3,17 +3,17 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { StubPageComponent } from '../../../../shared/components/stub-page/stub-page.component';
 
 @Component({
-  selector: 'app-leads-suppression',
+  selector: 'app-customer-import-page',
   standalone: true,
   imports: [StubPageComponent],
   template: `
     <app-stub-page
-      title="leads.suppression.title"
-      subtitle="leads.suppression.subtitle"
-      icon="block"
-      emptyMessage="leads.suppression.placeholderMessage"
-      emptyHelp="leads.suppression.placeholderHelp" />
+      title="customers.importPage.title"
+      subtitle="customers.importPage.subtitle"
+      icon="upload_file"
+      emptyMessage="customers.importPage.placeholderMessage"
+      emptyHelp="customers.importPage.placeholderHelp" />
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LeadsSuppressionComponent {}
+export class CustomerImportPageComponent {}

@@ -7,6 +7,11 @@
     "parts": "Piezas",
     "inventory": "Inventario",
     "customers": "Clientes",
+    "customersAll": "Todos los Clientes",
+    "customersContacts": "Contactos",
+    "customersPortalAccess": "Acceso al Portal",
+    "customersSegments": "Segmentos",
+    "customersImport": "Importar",
     "leads": "Prospectos",
     "leadsAll": "Todos los Prospectos",
     "leadsIntake": "Carga Masiva",
@@ -1291,6 +1296,30 @@
     "title": "Clientes",
     "subtitle": "Gestionar contactos y direcciones de clientes",
     "createCustomer": "Nuevo Cliente",
+    "contactsPage": {
+      "title": "Todos los Contactos",
+      "subtitle": "Vista plana entre clientes de cada contacto — \"¿a quién conozco en la empresa X?\".",
+      "placeholderMessage": "La vista de contactos entre clientes está en camino.",
+      "placeholderHelp": "Una lista plana y buscable de cada contacto en cada cliente, con filtros por rol, estado-primario y última actividad. Conectada con las preferencias de difusión a nivel de Contacto del Lote 1 para ver el estado de opt-out / enfriamiento de un vistazo."
+    },
+    "portalAccessPage": {
+      "title": "Acceso al Portal",
+      "subtitle": "Supervisión administrativa de qué contactos pueden iniciar sesión en el portal del cliente.",
+      "placeholderMessage": "La administración de acceso al portal está en camino.",
+      "placeholderHelp": "Lista cada fila de CustomerPortalAccess en cada contacto con timestamp del último inicio de sesión, bandera IsEnabled y acciones masivas de activar/desactivar. Acompaña la función de portal-cliente entregada en la Fase 1q."
+    },
+    "segmentsPage": {
+      "title": "Segmentos",
+      "subtitle": "Conjuntos de filtros guardados entre clientes para marketing + reportes.",
+      "placeholderMessage": "Los segmentos de clientes están en camino.",
+      "placeholderHelp": "Define un filtro (p. ej. \"AR abierto > $10K Y industria = aeroespacial Y último pedido < 90 días\"), guárdalo como segmento nombrado, y reutilízalo en reportes, campañas de marketing y dashboards."
+    },
+    "importPage": {
+      "title": "Importación Masiva",
+      "subtitle": "Sube un CSV de clientes + contactos, deduplica contra filas existentes.",
+      "placeholderMessage": "La importación masiva de clientes está en camino.",
+      "placeholderHelp": "Mismo patrón de asistente-de-deduplicación que la carga masiva de Prospectos — sube CSV, previsualiza coincidencias, valida calidad antes de confirmar. Difiere en que los clientes llevan direcciones de facturación/envío + términos de crédito + contactos como jerarquía."
+    },
     "fork": {
       "title": "¿Cómo deseas agregar este cliente?",
       "hint": "Elige la ruta que coincida con lo que ya sabes de esta cuenta.",

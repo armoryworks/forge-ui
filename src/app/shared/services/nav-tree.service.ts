@@ -44,7 +44,22 @@ export class NavTreeService {
     {
       icon: 'sell', label: 'Sales', i18nKey: 'navGroups.sales',
       children: [
-        { icon: 'people', label: 'Customers', i18nKey: 'nav.customers', route: '/customers', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        // Phase 1r — Customers is now a group with sub-routes for
+        // account-management surfaces (flat cross-customer contact view,
+        // portal-access admin, saved segments, bulk import). Same
+        // submenu shape Leads uses but customer-specific children since
+        // customer work is *management*, not *acquisition*.
+        {
+          icon: 'people', label: 'Customers', i18nKey: 'nav.customers',
+          allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
+          children: [
+            { icon: 'list', label: 'All Customers', i18nKey: 'nav.customersAll', route: '/customers' },
+            { icon: 'contacts', label: 'Contacts', i18nKey: 'nav.customersContacts', route: '/customers/contacts' },
+            { icon: 'vpn_key', label: 'Portal Access', i18nKey: 'nav.customersPortalAccess', route: '/customers/portal-access' },
+            { icon: 'filter_alt', label: 'Segments', i18nKey: 'nav.customersSegments', route: '/customers/segments' },
+            { icon: 'upload_file', label: 'Import', i18nKey: 'nav.customersImport', route: '/customers/import' },
+          ],
+        },
         // Phase 1r — Leads is now a group with sub-routes for high-volume
         // marketing surfaces (bulk intake / worker queue / campaigns /
         // suppression). First child "All" routes to the original list page
