@@ -95,6 +95,7 @@
   "common": {
     "save": "Guardar",
     "saved": "Guardado",
+    "lastUpdated": "Última Actualización",
     "saveChanges": "Guardar Cambios",
     "cancel": "Cancelar",
     "delete": "Eliminar",
@@ -1749,14 +1750,28 @@
     "campaigns": {
       "title": "Campañas",
       "subtitle": "Envuelve cada lote masivo en una Campaña para reportes de cohorte y configuración por estrategia.",
-      "placeholderMessage": "Las campañas están en camino.",
-      "placeholderHelp": "Una Campaña lleva el tipo de estrategia, canal, campos requeridos, propietario, fechas y override de enfriamiento por defecto. Cada Prospecto de una importación masiva recibe un FK CampaignId para que los reportes puedan responder \"lote LinkedIn de septiembre vs agosto\" limpiamente. Implementación en Lote 5."
+      "placeholderMessage": "Aún sin campañas. Crea una para rastrear cohortes de marketing masivo.",
+      "placeholderHelp": "Una Campaña lleva el tipo de estrategia, canal, campos requeridos, propietario, fechas y override de enfriamiento por defecto. Cada Prospecto de una importación masiva recibe un FK CampaignId para que los reportes puedan responder \"lote LinkedIn de septiembre vs agosto\" limpiamente.",
+      "create": "Nueva Campaña",
+      "createTitle": "Crear Campaña",
+      "editTitle": "Editar Campaña",
+      "fieldName": "Nombre",
+      "fieldDescription": "Descripción",
+      "fieldCooldownDays": "Override de enfriamiento por defecto",
+      "fieldStartedAt": "Inició",
+      "fieldEndedAt": "Terminó",
+      "fieldIsActive": "Activa",
+      "colLeads": "Prospectos",
+      "created": "Campaña creada.",
+      "updated": "Campaña actualizada."
     },
     "suppression": {
       "title": "Supresión / No Contactar",
       "subtitle": "Gestiona opt-outs por canal y ventanas de enfriamiento activas.",
-      "placeholderMessage": "La UI de supresión está en camino.",
-      "placeholderHelp": "El backend ya está listo: opt-outs por canal de email/llamada/sms con timestamps + fuentes, más ventanas de enfriamiento. El endpoint de lista-de-prospectos-suprimidos + UI para gestión masiva de DNC llega en un commit de seguimiento."
+      "empty": "Sin prospectos suprimidos. Nuevos opt-outs y enfriamientos aparecen aquí conforme se acumulan.",
+      "colChannels": "Supresión",
+      "colCooldownUntil": "Enfriamiento Hasta",
+      "colReason": "Motivo"
     },
     "editLead": "Editar Prospecto",
     "companyName": "Nombre de Empresa",

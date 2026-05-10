@@ -1,0 +1,55 @@
+<app-dialog [title]="title()" width="560px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-input
+      [label]="'leads.campaigns.fieldName' | translate"
+      formControlName="name"
+      [required]="true"
+      data-testid="campaign-name" />
+
+    <app-textarea
+      [label]="'leads.campaigns.fieldDescription' | translate"
+      formControlName="description"
+      [rows]="2" />
+
+    @if (!editing) {
+      <app-select
+        [label]="'leads.intake.fieldStrategy' | translate"
+        formControlName="strategy"
+        [options]="strategyOptions" />
+    }
+
+    <app-input
+      [label]="'leads.campaigns.fieldCooldownDays' | translate"
+      type="number"
+      formControlName="defaultCooldownDays"
+      min="0" max="730" suffix="days" />
+
+    <div class="dialog-row">
+      <app-datepicker
+        [label]="'leads.campaigns.fieldStartedAt' | translate"
+        formControlName="startedAt" />
+      <app-datepicker
+        [label]="'leads.campaigns.fieldEndedAt' | translate"
+        formControlName="endedAt" />
+    </div>
+
+    @if (editing) {
+      <app-toggle
+        [label]="'leads.campaigns.fieldIsActive' | translate"
+        formControlName="isActive" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        data-testid="campaign-save-btn"
+        [disabled]="form.invalid || saving()"
+        (click)="confirm()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

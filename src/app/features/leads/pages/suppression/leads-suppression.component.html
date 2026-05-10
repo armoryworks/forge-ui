@@ -1,0 +1,30 @@
+<app-page-header
+  [title]="'leads.suppression.title' | translate"
+  [subtitle]="'leads.suppression.subtitle' | translate" />
+
+<div class="page-body" [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="leads-suppression"
+    [columns]="columns"
+    [data]="rows()"
+    [clickableRows]="true"
+    (rowClick)="openLead($any($event))"
+    emptyIcon="block"
+    [emptyMessage]="'leads.suppression.empty' | translate">
+
+    <ng-template appColumnCell="channels" let-row>
+      @if (row.emailOptOut) {
+        <span class="chip chip--error">{{ 'leads.queue.emailOptOut' | translate }}</span>
+      }
+      @if (row.callOptOut) {
+        <span class="chip chip--error">{{ 'leads.queue.callOptOut' | translate }}</span>
+      }
+      @if (row.smsOptOut) {
+        <span class="chip chip--error">SMS</span>
+      }
+      @if (row.cooldownUntil) {
+        <span class="chip chip--warning">{{ 'leads.queue.cooldownUntil' | translate:{ date: row.cooldownUntil | date:'MM/dd' } }}</span>
+      }
+    </ng-template>
+  </app-data-table>
+</div>

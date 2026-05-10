@@ -10,6 +10,7 @@ import { ConvertLeadResult } from '../models/convert-lead-result.model';
 import { ConvertLeadRequest } from '../models/convert-lead-request.model';
 import { BulkLeadIntakeRequest, BulkLeadIntakeResponse } from '../models/bulk-intake.model';
 import { DispositionRequest, PullQueueRequest, QueueLead } from '../models/queue.model';
+import { OutreachPreferences, SuppressedLeadSummary, UpdateOutreachPreferencesRequest } from '../models/suppression.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
@@ -65,5 +66,19 @@ export class LeadsService {
 
   dispositionLead(leadId: number, request: DispositionRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/${leadId}/queue/disposition`, request);
+  }
+
+  // Phase 1r — outreach preferences (lead-side).
+
+  listSuppressed(): Observable<SuppressedLeadSummary[]> {
+    return this.http.get<SuppressedLeadSummary[]>(`${this.base}/suppression`);
+  }
+
+  getOutreachPreferences(leadId: number): Observable<OutreachPreferences | null> {
+    return this.http.get<OutreachPreferences | null>(`${this.base}/${leadId}/outreach-preferences`);
+  }
+
+  updateOutreachPreferences(leadId: number, request: UpdateOutreachPreferencesRequest): Observable<OutreachPreferences> {
+    return this.http.put<OutreachPreferences>(`${this.base}/${leadId}/outreach-preferences`, request);
   }
 }

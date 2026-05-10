@@ -95,6 +95,7 @@
   "common": {
     "save": "Save",
     "saved": "Saved",
+    "lastUpdated": "Last Updated",
     "saveChanges": "Save Changes",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -1753,14 +1754,28 @@
     "campaigns": {
       "title": "Campaigns",
       "subtitle": "Wrap each bulk batch in a Campaign for cohort reporting and per-strategy config.",
-      "placeholderMessage": "Campaigns are coming soon.",
-      "placeholderHelp": "A Campaign carries the strategy type, channel, required fields, owner, dates, and default cooldown override. Every Lead from a bulk import gets a CampaignId FK so reporting can answer \"September LinkedIn batch vs August\" cleanly. Implementation lands in Batch 5."
+      "placeholderMessage": "No campaigns yet. Create one to track bulk-marketing cohorts.",
+      "placeholderHelp": "A Campaign carries the strategy type, channel, required fields, owner, dates, and default cooldown override. Every Lead from a bulk import gets a CampaignId FK so reporting can answer \"September LinkedIn batch vs August\" cleanly.",
+      "create": "New Campaign",
+      "createTitle": "Create Campaign",
+      "editTitle": "Edit Campaign",
+      "fieldName": "Name",
+      "fieldDescription": "Description",
+      "fieldCooldownDays": "Default cooldown override",
+      "fieldStartedAt": "Started",
+      "fieldEndedAt": "Ended",
+      "fieldIsActive": "Active",
+      "colLeads": "Leads",
+      "created": "Campaign created.",
+      "updated": "Campaign updated."
     },
     "suppression": {
       "title": "Suppression / Do Not Contact",
       "subtitle": "Manage per-channel opt-outs and active cooldown windows.",
-      "placeholderMessage": "Suppression UI is coming soon.",
-      "placeholderHelp": "The backend is in place: per-channel email/call/sms opt-outs with timestamps + sources, plus time-bounded cooldown windows. The list-of-suppressed-leads endpoint + UI for bulk DNC management lands in a follow-on commit."
+      "empty": "No suppressed leads. New opt-outs and cooldowns appear here as they accumulate.",
+      "colChannels": "Suppression",
+      "colCooldownUntil": "Cooldown Until",
+      "colReason": "Reason"
     },
     "editLead": "Edit Lead",
     "companyName": "Company Name",

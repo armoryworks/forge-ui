@@ -1,0 +1,36 @@
+<app-page-header
+  [title]="'leads.campaigns.title' | translate"
+  [subtitle]="'leads.campaigns.subtitle' | translate">
+  <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="campaign-new-btn">
+    <span class="material-icons-outlined">add</span>
+    {{ 'leads.campaigns.create' | translate }}
+  </button>
+</app-page-header>
+
+<div class="page-body" [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="leads-campaigns"
+    [columns]="columns"
+    [data]="campaigns()"
+    [clickableRows]="true"
+    (rowClick)="openEdit($any($event))"
+    emptyIcon="campaign"
+    [emptyMessage]="'leads.campaigns.placeholderMessage' | translate">
+
+    <ng-template appColumnCell="isActive" let-row>
+      @if (row.isActive) {
+        <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+      } @else {
+        <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <button class="icon-btn"
+        (click)="$event.stopPropagation(); openEdit(row)"
+        [attr.aria-label]="'common.edit' | translate">
+        <span class="material-icons-outlined">edit</span>
+      </button>
+    </ng-template>
+  </app-data-table>
+</div>
