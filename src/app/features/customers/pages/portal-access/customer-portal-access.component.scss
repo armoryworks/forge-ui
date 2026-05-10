@@ -1,0 +1,10 @@
+@use 'styles/variables' as *;
+
+.page-body {
+  padding: $sp-md;
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-style: italic;
+}

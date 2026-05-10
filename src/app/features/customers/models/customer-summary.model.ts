@@ -17,4 +17,11 @@ export interface CustomerSummary {
   openInvoiceCount: number;
   openInvoiceTotal: number;
   ytdRevenue: number;
+  // Phase 1r / Batch 15-16 — regulated-industry flags + reference-customer consent.
+  isFdaRegulated?: boolean;
+  isAerospace?: boolean;
+  isAutomotive?: boolean;
+  isItarControlled?: boolean;
+  isReferenceOk?: boolean;
+  referenceNotes?: string | null;
 }

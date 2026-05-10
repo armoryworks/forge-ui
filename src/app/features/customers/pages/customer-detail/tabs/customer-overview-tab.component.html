@@ -72,6 +72,74 @@
       <app-credit-status-card [customerId]="customer().id" />
     </ng-container>
 
+    <!-- Phase 1r / Batch 15 — regulated-industry flags. Each toggle PATCHes
+         independently and emits a rolled-up activity row. Surfaced in
+         Overview because it's static-ish customer metadata (not a
+         per-quote / per-job decision). -->
+    <section class="overview-section">
+      <h3 class="overview-section__title">{{ 'customers.compliance.title' | translate }}</h3>
+      <p class="overview-section__hint">{{ 'customers.compliance.hint' | translate }}</p>
+      <div class="compliance-toggles">
+        @for (flag of complianceFlags; track flag.key) {
+          <div class="compliance-toggle">
+            <mat-slide-toggle
+              [checked]="!!customer()[flag.key]"
+              [disabled]="isPending(flag.key)"
+              (change)="toggleFlag(flag.key, $event.checked)"
+              [attr.aria-label]="flag.labelKey | translate">
+              <span class="compliance-toggle__label">{{ flag.labelKey | translate }}</span>
+            </mat-slide-toggle>
+            <span class="compliance-toggle__help">{{ flag.helpKey | translate }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Phase 1r / Batch 16 — reference-customer consent + notes. -->
+    <section class="overview-section">
+      <h3 class="overview-section__title">{{ 'customers.compliance.referenceTitle' | translate }}</h3>
+      <p class="overview-section__hint">{{ 'customers.compliance.referenceHint' | translate }}</p>
+      <div class="compliance-toggle">
+        <mat-slide-toggle
+          [checked]="!!customer().isReferenceOk"
+          [disabled]="isPending('isReferenceOk')"
+          (change)="toggleReferenceOk($event.checked)"
+          [attr.aria-label]="'customers.compliance.referenceOk' | translate">
+          <span class="compliance-toggle__label">{{ 'customers.compliance.referenceOk' | translate }}</span>
+        </mat-slide-toggle>
+        <span class="compliance-toggle__help">{{ 'customers.compliance.referenceOkHelp' | translate }}</span>
+      </div>
+
+      @if (customer().isReferenceOk) {
+        <div class="reference-notes">
+          <span class="detail-row__label">{{ 'customers.compliance.referenceNotes' | translate }}</span>
+          @if (editingNotes()) {
+            <app-textarea
+              [label]="'customers.compliance.referenceNotes' | translate"
+              [rows]="3"
+              [maxlength]="500"
+              [formControl]="notesControl" />
+            <div class="reference-notes__actions">
+              <button class="action-btn" (click)="cancelEditNotes()">{{ 'common.cancel' | translate }}</button>
+              <button class="action-btn action-btn--primary"
+                [disabled]="isPending('referenceNotes')"
+                (click)="saveNotes()">{{ 'common.save' | translate }}</button>
+            </div>
+          } @else {
+            @if (customer().referenceNotes) {
+              <p class="reference-notes__text">{{ customer().referenceNotes }}</p>
+            } @else {
+              <p class="reference-notes__text reference-notes__text--muted">{{ 'customers.compliance.referenceNotesEmpty' | translate }}</p>
+            }
+            <button class="action-btn action-btn--sm" (click)="startEditNotes()">
+              <span class="material-icons-outlined">edit</span>
+              {{ 'common.edit' | translate }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+
     <!-- Wave 8 — auto-logged email + voice from sales rep mailboxes / VoIP. -->
     <app-recent-communications entityType="Customer" [entityId]="customer().id" />
 

@@ -1,0 +1,28 @@
+<app-page-header
+  [title]="'customers.segmentsPage.title' | translate"
+  [subtitle]="'customers.segmentsPage.subtitle' | translate" />
+
+<div class="page-body">
+  <div class="banner">
+    <span class="material-icons-outlined banner__icon">construction</span>
+    <div class="banner__content">
+      <div class="banner__title">{{ 'customers.segmentsPage.preview' | translate }}</div>
+      <div class="banner__hint">{{ 'customers.segmentsPage.placeholderHelp' | translate }}</div>
+    </div>
+  </div>
+
+  <h3 class="section-title">{{ 'customers.segmentsPage.exampleSegments' | translate }}</h3>
+  <div class="segment-grid">
+    @for (s of examples; track s.name) {
+      <div class="segment-card">
+        <div class="segment-card__header">
+          <span class="material-icons-outlined">filter_alt</span>
+          <span class="segment-card__name">{{ s.name }}</span>
+          <span class="chip chip--info">~{{ s.estimatedCount }}</span>
+        </div>
+        <p class="segment-card__description">{{ s.description }}</p>
+        <code class="segment-card__filter">{{ s.filterSummary }}</code>
+      </div>
+    }
+  </div>
+</div>

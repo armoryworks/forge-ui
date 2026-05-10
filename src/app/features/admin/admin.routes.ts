@@ -87,6 +87,15 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./tariffs/tariffs.component').then((m) => m.TariffsComponent),
   },
+  // Phase 1r / Batch 9 — LeadSource admin. Admin-managed catalog of formal
+  // lead sources (replaces the legacy free-text Lead.Source field). Quality
+  // score is owned by the nightly recompute job — admin manages name +
+  // description + active flag.
+  {
+    path: 'lead-sources',
+    loadComponent: () =>
+      import('./lead-sources/lead-sources.component').then((m) => m.LeadSourcesComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

@@ -1,0 +1,36 @@
+<app-page-header
+  [title]="'customers.portalAccessPage.title' | translate"
+  [subtitle]="'customers.portalAccessPage.subtitle' | translate" />
+
+<div class="page-body" [appLoadingBlock]="loading()">
+  <app-data-table
+    tableId="customers-portal-access"
+    [columns]="columns"
+    [data]="rows()"
+    [clickableRows]="true"
+    (rowClick)="openCustomer($any($event))"
+    emptyIcon="vpn_key"
+    [emptyMessage]="'customers.portalAccessPage.empty' | translate">
+
+    <ng-template appColumnCell="lastLoginAt" let-row>
+      @if (row.lastLoginAt) {
+        {{ row.lastLoginAt | date:'MM/dd/yyyy hh:mm' }}
+      } @else {
+        <span class="text-muted">{{ 'customers.portalAccessPage.neverSignedIn' | translate }}</span>
+      }
+    </ng-template>
+
+    <ng-template appColumnCell="createdAt" let-row>
+      {{ row.createdAt | date:'MM/dd/yyyy' }}
+    </ng-template>
+
+    <ng-template appColumnCell="isEnabled" let-row>
+      <mat-slide-toggle
+        [checked]="row.isEnabled"
+        [disabled]="isPending(row.accessId)"
+        (change)="onToggleEnabled(row, $event.checked)"
+        (click)="$event.stopPropagation()"
+        [attr.aria-label]="'customers.portalAccessPage.toggleAriaLabel' | translate:{ name: row.contactFullName }" />
+    </ng-template>
+  </app-data-table>
+</div>

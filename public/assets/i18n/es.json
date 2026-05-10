@@ -1305,20 +1305,65 @@
     "portalAccessPage": {
       "title": "Acceso al Portal",
       "subtitle": "Supervisión administrativa de qué contactos pueden iniciar sesión en el portal del cliente.",
-      "placeholderMessage": "La administración de acceso al portal está en camino.",
-      "placeholderHelp": "Lista cada fila de CustomerPortalAccess en cada contacto con timestamp del último inicio de sesión, bandera IsEnabled y acciones masivas de activar/desactivar. Acompaña la función de portal-cliente entregada en la Fase 1q."
+      "empty": "Ningún contacto tiene acceso al portal aún. Aprovisiona acceso desde una fila de contacto en una página de detalle de cliente.",
+      "colLastLogin": "Último Acceso",
+      "colCreated": "Aprovisionado",
+      "colEnabled": "Habilitado",
+      "neverSignedIn": "Nunca ha iniciado sesión",
+      "toggleEnabled": "Acceso al portal habilitado para {{ name }}.",
+      "toggleDisabled": "Acceso al portal deshabilitado para {{ name }}.",
+      "toggleAriaLabel": "Alternar acceso al portal para {{ name }}"
     },
     "segmentsPage": {
       "title": "Segmentos",
       "subtitle": "Conjuntos de filtros guardados entre clientes para marketing + reportes.",
-      "placeholderMessage": "Los segmentos de clientes están en camino.",
-      "placeholderHelp": "Define un filtro (p. ej. \"AR abierto > $10K Y industria = aeroespacial Y último pedido < 90 días\"), guárdalo como segmento nombrado, y reutilízalo en reportes, campañas de marketing y dashboards."
+      "preview": "Próximamente — solo vista previa",
+      "placeholderHelp": "Define un filtro (p. ej. \"AR abierto > $10K Y industria = aeroespacial Y último pedido < 90 días\"), guárdalo como segmento nombrado, y reutilízalo en reportes, campañas de marketing y dashboards.",
+      "exampleSegments": "Segmentos de ejemplo",
+      "examples": {
+        "aerospaceHighValue": {
+          "name": "Aeroespacial de alto valor",
+          "description": "Clientes certificados AS9100 con > $10K de AR abierto. Útil para la cadencia trimestral de revisión de cuentas."
+        },
+        "itarReady": {
+          "name": "Pool de referencias autorizadas ITAR",
+          "description": "Clientes de defensa autorizados para trabajo ITAR que también han optado por ser referencias para prospectos similares."
+        },
+        "dormant90": {
+          "name": "Inactivos > 90 días",
+          "description": "Clientes activos sin pedido en el último trimestre. Objetivo de campaña de reactivación."
+        },
+        "creditWatch": {
+          "name": "Lista de vigilancia de crédito",
+          "description": "Clientes con bloqueo crediticio o utilización superior al 80%. Aparece en la revisión de antigüedad de AR."
+        }
+      }
     },
     "importPage": {
       "title": "Importación Masiva",
       "subtitle": "Sube un CSV de clientes + contactos, deduplica contra filas existentes.",
-      "placeholderMessage": "La importación masiva de clientes está en camino.",
-      "placeholderHelp": "Mismo patrón de asistente-de-deduplicación que la carga masiva de Prospectos — sube CSV, previsualiza coincidencias, valida calidad antes de confirmar. Difiere en que los clientes llevan direcciones de facturación/envío + términos de crédito + contactos como jerarquía."
+      "preview": "Próximamente — solo vista previa",
+      "placeholderHelp": "Mismo patrón de asistente-de-deduplicación que la carga masiva de Prospectos — sube CSV, previsualiza coincidencias, valida calidad antes de confirmar. Difiere en que los clientes llevan direcciones de facturación/envío + términos de crédito + contactos como jerarquía.",
+      "flowTitle": "Flujo del asistente",
+      "expectedColumns": "Columnas CSV esperadas",
+      "steps": {
+        "upload": {
+          "title": "Subir CSV",
+          "description": "Arrastra y suelta o navega para seleccionar un CSV. Fila de encabezado requerida; alias de columnas detectados automáticamente."
+        },
+        "dedupe": {
+          "title": "Coincidir con filas existentes",
+          "description": "El servidor ejecuta la misma canalización de deduplicación que la captación masiva de leads — por email, luego teléfono, luego companyName + estado."
+        },
+        "review": {
+          "title": "Revisar estado por fila",
+          "description": "Cada fila obtiene un chip: Creado / DuplicadoExistente / Inválido / CampoRequeridoFaltante. El operador elige omitir o anular."
+        },
+        "commit": {
+          "title": "Confirmar",
+          "description": "Inserta las filas Creadas en una sola transacción. La jerarquía de direcciones + contactos se construye atómicamente junto con cada cliente."
+        }
+      }
     },
     "fork": {
       "title": "¿Cómo deseas agregar este cliente?",
@@ -1540,6 +1585,28 @@
       "customerSince": "Cliente desde",
       "accountingIntegration": "Integración contable",
       "reference": "Referencia"
+    },
+    "compliance": {
+      "title": "Industrias reguladas",
+      "hint": "Estos selectores marcan al cliente para requisitos posteriores de QA / documentación. Cada uno se establece de forma independiente.",
+      "fdaRegulated": "Regulado por FDA",
+      "fdaRegulatedHelp": "Dispositivo médico o farmacéutico. Activa revisión de QA del ajuste de capacidades en cada lead relacionado.",
+      "aerospace": "AS9100 / aeroespacial",
+      "aerospaceHelp": "Trabajo certificado aeroespacial. Afecta requisitos de documentación de piezas.",
+      "automotive": "IATF 16949 / automotriz",
+      "automotiveHelp": "Proveedor automotriz. Impulsa requisitos de PPAP + rigor de trazabilidad.",
+      "itarControlled": "Controlado por ITAR / defensa",
+      "itarControlledHelp": "Trabajo de defensa controlado por exportación. Activa autorización ITAR en cada lead relacionado.",
+      "flagUpdated": "Bandera de cumplimiento actualizada.",
+      "referenceTitle": "Consentimiento como cliente de referencia",
+      "referenceHint": "Cuando está habilitado, este cliente puede usarse como referencia para prospectos en su industria.",
+      "referenceOk": "Usar como referencia",
+      "referenceOkHelp": "Los representantes de ventas pueden citar este cliente al construir relaciones con prospectos similares.",
+      "referenceEnabled": "Marcado como referencia-OK.",
+      "referenceDisabled": "Consentimiento de referencia revocado.",
+      "referenceNotes": "Notas de referencia",
+      "referenceNotesEmpty": "Sin notas — añade detalles de alcance (p. ej. \"ok para prospectos aeroespaciales solo, sin defensa\").",
+      "referenceNotesSaved": "Notas de referencia guardadas."
     },
     "tabs": {
       "noEstimatesYet": "Aún no hay estimaciones",
@@ -1838,6 +1905,35 @@
       "recentCount": "{{count}} comm. recientes",
       "stale": "Inactivo",
       "staleTooltip": "Sin actividad en los últimos 14 días — considere un seguimiento o reclasifique."
+    },
+    "campaignFallback": "Campaña #{{ id }}",
+    "classification": {
+      "title": "Clasificación",
+      "campaignTooltip": "Campaña de marketing masiva que produjo este lead. Se asigna en la captación.",
+      "capFitAriaLabel": "Definir ajuste-de-capacidad",
+      "ndaAriaLabel": "Definir estado de NDA",
+      "exportAriaLabel": "Definir autorización ITAR / control de exportación",
+      "capabilityFitUpdated": "Ajuste de capacidad definido como {{ state }}.",
+      "ndaUpdated": "Estado de NDA definido como {{ state }}.",
+      "exportControlUpdated": "Autorización de control de exportación definida como {{ state }}.",
+      "capFit": {
+        "NotAssessed": "Capacidad: sin evaluar",
+        "Fits": "Capacidad: ajusta",
+        "NeedsReview": "Capacidad: requiere revisión",
+        "DoesntFit": "Capacidad: no ajusta"
+      },
+      "nda": {
+        "None": "ninguno",
+        "Requested": "solicitado",
+        "InForce": "vigente",
+        "Expired": "expirado"
+      },
+      "export": {
+        "NotApplicable": "n/a",
+        "Pending": "pendiente",
+        "Cleared": "autorizado",
+        "Denied": "denegado"
+      }
     },
     "lostReason": "Razón de Pérdida",
     "markAsLost": "Marcar como Perdido",
@@ -2150,6 +2246,7 @@
       "aiAssistants": "Asistentes IA",
       "teams": "Equipos y Kioscos",
       "salesTax": "Impuesto",
+      "leadSources": "Fuentes de Leads",
       "auditLog": "Registro de Auditoría",
       "biApiKeys": "Claves API de BI",
       "compliance": "Cumplimiento",
@@ -2328,6 +2425,23 @@
     "lockPeriodFailed": "Error al bloquear período",
     "lockPeriodHint": "Bloquear un período de nómina para evitar ediciones",
     "payPeriod": "Período de Nómina",
+    "leadSources": {
+      "title": "Fuentes de Leads",
+      "hint": "Catálogo de fuentes formales de atribución de leads. Las puntuaciones de calidad se calculan cada noche a partir de los resultados de disposición de los leads vinculados — alta puntuación significa que la fuente convierte; baja significa que el proveedor entrega basura.",
+      "newSource": "Nueva fuente",
+      "editSource": "Editar fuente",
+      "empty": "Aún no hay fuentes de leads. Añade al menos una antes de la captación masiva para tener atribución limpia.",
+      "fieldName": "Nombre",
+      "fieldCode": "Código",
+      "fieldDescription": "Descripción",
+      "namePlaceholder": "p. ej. Formulario web, Feria 2026, Exportación ZoomInfo",
+      "codePlaceholder": "p. ej. web_form, ts_2026_oeste, zoominfo",
+      "created": "Fuente de leads creada.",
+      "updated": "Fuente de leads actualizada.",
+      "deleted": "Fuente de leads eliminada.",
+      "deleteTitle": "¿Eliminar fuente de leads?",
+      "deleteMessage": "¿Eliminar suavemente \"{{name}}\"? Si algún lead está atribuido a esta fuente, el servidor se negará — desactiva en su lugar."
+    },
     "tariffs": {
       "title": "Tarifas Arancelarias",
       "hint": "Las tasas arancelarias por código HTS alimentan el componente de aranceles del costo aterrizado en la pestaña de Costo de la pieza. SCD-2: para retirar una tasa, edita la fila y establece Vigente Hasta, luego añade una nueva fila con un Vigente Desde nuevo.",

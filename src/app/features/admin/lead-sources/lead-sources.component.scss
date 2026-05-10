@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.quality-score {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  padding: 2px $sp-sm;
+  border-radius: $border-radius;
+  font-size: $font-size-xs;
+  background: color-mix(in srgb, var(--text-muted) 15%, transparent);
+  color: var(--text);
+
+  &--good { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }
+  &--warn { background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
+  &--bad  { background: color-mix(in srgb, var(--error) 18%, transparent);   color: var(--error); }
+}

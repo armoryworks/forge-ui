@@ -149,6 +149,7 @@ export class NavTreeService {
             { icon: 'translate', label: 'Terminology', i18nKey: 'admin.tabs.terminology', route: '/admin/terminology', allowedRoles: ['Admin'] },
             { icon: 'route', label: 'Track Types', i18nKey: 'admin.tabs.trackTypes', route: '/admin/track-types', allowedRoles: ['Admin'] },
             { icon: 'percent', label: 'Sales Tax', i18nKey: 'admin.tabs.salesTax', route: '/admin/sales-tax', allowedRoles: ['Admin'] },
+            { icon: 'campaign', label: 'Lead Sources', i18nKey: 'admin.tabs.leadSources', route: '/admin/lead-sources', allowedRoles: ['Admin', 'Manager'] },
           ],
         },
         {

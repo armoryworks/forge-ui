@@ -167,6 +167,11 @@ export class CustomerDetailComponent {
     });
   }
 
+  protected reloadCustomer(): void {
+    const id = this.customerId();
+    if (id > 0) this.loadCustomer(id);
+  }
+
   protected switchTab(tab: CustomerDetailTabId): void {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }

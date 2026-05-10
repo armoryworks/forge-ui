@@ -113,7 +113,7 @@
             (save)="saveClusterPatch($event)"
             (cancelled)="cancelEdit()" />
           @if (!editing()) {
-            <app-customer-overview-tab [customer]="c" />
+            <app-customer-overview-tab [customer]="c" (customerUpdated)="reloadCustomer()" />
           }
         }
         @case ('contacts') {

@@ -1,4 +1,6 @@
 import { LeadStatus } from './lead-status.type';
+import { LeadEngagementShape } from './lead-engagement-shape.type';
+import { CapabilityFitStatus, NdaState, ExportControlClearance } from './lead-item.model';
 
 export interface UpdateLeadRequest {
   companyName?: string;
@@ -10,4 +12,12 @@ export interface UpdateLeadRequest {
   notes?: string;
   followUpDate?: string;
   lostReason?: string;
+  engagementShape?: LeadEngagementShape;
+  customFieldValues?: string;
+  // Phase 1r / Batch 13-14 — manufacturing/compliance classifications.
+  capabilityFit?: CapabilityFitStatus;
+  ndaState?: NdaState;
+  ndaSignedAt?: string;
+  ndaExpiresAt?: string;
+  exportControl?: ExportControlClearance;
 }

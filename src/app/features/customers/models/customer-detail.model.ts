@@ -15,4 +15,11 @@ export interface CustomerDetail {
   updatedAt: Date;
   contacts: Contact[];
   jobs: CustomerJob[];
+  // Phase 1r / Batch 15-16 — regulated-industry flags + reference-customer consent.
+  isFdaRegulated?: boolean;
+  isAerospace?: boolean;
+  isAutomotive?: boolean;
+  isItarControlled?: boolean;
+  isReferenceOk?: boolean;
+  referenceNotes?: string | null;
 }

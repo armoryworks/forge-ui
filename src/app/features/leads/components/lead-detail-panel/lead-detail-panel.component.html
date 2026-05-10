@@ -98,6 +98,73 @@
         }
       </div>
 
+      <!-- Phase 1r — manufacturing/compliance classification strip. Each chip
+           is click-to-cycle via a mat-menu. Campaign chip is read-only — the
+           campaign FK is set at intake (bulk-import or manual fork) and
+           reassigning a lead's source-of-record happens at the campaign-
+           level, not from the detail panel. -->
+      <div class="classification-strip">
+        <span class="info-label">{{ 'leads.classification.title' | translate }}</span>
+        <div class="classification-chips">
+          @if (lead.campaignId) {
+            <span class="chip chip--primary"
+              [matTooltip]="'leads.classification.campaignTooltip' | translate"
+              matTooltipPosition="above">
+              <span class="material-icons-outlined">campaign</span>
+              {{ getCampaignName(lead.campaignId) }}
+            </span>
+          }
+
+          <button class="chip-edit-btn" type="button"
+            [matMenuTriggerFor]="capFitMenu"
+            [class]="getCapabilityFitClass(lead.capabilityFit)"
+            [attr.aria-label]="'leads.classification.capFitAriaLabel' | translate">
+            <span class="material-icons-outlined">precision_manufacturing</span>
+            <span>{{ ('leads.classification.capFit.' + (lead.capabilityFit ?? 'NotAssessed')) | translate }}</span>
+            <span class="material-icons-outlined chip-edit-btn__chevron">arrow_drop_down</span>
+          </button>
+          <mat-menu #capFitMenu="matMenu">
+            @for (opt of capabilityFitOptions; track opt) {
+              <button mat-menu-item type="button" (click)="setCapabilityFit(opt)">
+                {{ ('leads.classification.capFit.' + opt) | translate }}
+              </button>
+            }
+          </mat-menu>
+
+          <button class="chip-edit-btn" type="button"
+            [matMenuTriggerFor]="ndaMenu"
+            [class]="getNdaStateClass(lead.ndaState)"
+            [attr.aria-label]="'leads.classification.ndaAriaLabel' | translate">
+            <span class="material-icons-outlined">lock</span>
+            <span>NDA: {{ ('leads.classification.nda.' + (lead.ndaState ?? 'None')) | translate }}</span>
+            <span class="material-icons-outlined chip-edit-btn__chevron">arrow_drop_down</span>
+          </button>
+          <mat-menu #ndaMenu="matMenu">
+            @for (opt of ndaStateOptions; track opt) {
+              <button mat-menu-item type="button" (click)="setNdaState(opt)">
+                {{ ('leads.classification.nda.' + opt) | translate }}
+              </button>
+            }
+          </mat-menu>
+
+          <button class="chip-edit-btn" type="button"
+            [matMenuTriggerFor]="exportMenu"
+            [class]="getExportControlClass(lead.exportControl)"
+            [attr.aria-label]="'leads.classification.exportAriaLabel' | translate">
+            <span class="material-icons-outlined">public</span>
+            <span>ITAR: {{ ('leads.classification.export.' + (lead.exportControl ?? 'NotApplicable')) | translate }}</span>
+            <span class="material-icons-outlined chip-edit-btn__chevron">arrow_drop_down</span>
+          </button>
+          <mat-menu #exportMenu="matMenu">
+            @for (opt of exportControlOptions; track opt) {
+              <button mat-menu-item type="button" (click)="setExportControl(opt)">
+                {{ ('leads.classification.export.' + opt) | translate }}
+              </button>
+            }
+          </mat-menu>
+        </div>
+      </div>
+
       @if (lead.notes) {
         <div class="notes-section">
           <span class="info-label">{{ 'common.notes' | translate }}</span>

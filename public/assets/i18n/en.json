@@ -1309,20 +1309,65 @@
     "portalAccessPage": {
       "title": "Portal Access",
       "subtitle": "Admin oversight of which contacts can sign in to the customer portal.",
-      "placeholderMessage": "Portal-access admin is coming soon.",
-      "placeholderHelp": "List every CustomerPortalAccess row across every contact with last-login timestamp, IsEnabled flag, and bulk enable/disable actions. Pairs with the customer-portal feature shipped in Phase 1q."
+      "empty": "No contacts have portal access yet. Provision access from a contact row in a customer detail page.",
+      "colLastLogin": "Last Login",
+      "colCreated": "Provisioned",
+      "colEnabled": "Enabled",
+      "neverSignedIn": "Never signed in",
+      "toggleEnabled": "Enabled portal access for {{ name }}.",
+      "toggleDisabled": "Disabled portal access for {{ name }}.",
+      "toggleAriaLabel": "Toggle portal access for {{ name }}"
     },
     "segmentsPage": {
       "title": "Segments",
       "subtitle": "Saved cross-customer filter sets for marketing + reporting.",
-      "placeholderMessage": "Customer segments are coming soon.",
-      "placeholderHelp": "Define a filter (e.g. \"open AR > $10K AND industry = aerospace AND last order < 90 days\"), save it as a named segment, and reuse across reports, marketing campaigns, and dashboards."
+      "preview": "Coming soon — preview only",
+      "placeholderHelp": "Define a filter (e.g. \"open AR > $10K AND industry = aerospace AND last order < 90 days\"), save it as a named segment, and reuse across reports, marketing campaigns, and dashboards.",
+      "exampleSegments": "Example segments",
+      "examples": {
+        "aerospaceHighValue": {
+          "name": "High-Value Aerospace",
+          "description": "AS9100-certified customers with > $10K open AR. Useful for the quarterly account-review cadence."
+        },
+        "itarReady": {
+          "name": "ITAR-cleared Reference Pool",
+          "description": "Defense customers cleared for ITAR work who have also opted in as references for similar prospects."
+        },
+        "dormant90": {
+          "name": "Dormant > 90 Days",
+          "description": "Active customers with no order in the last quarter. Re-engagement campaign target."
+        },
+        "creditWatch": {
+          "name": "Credit Watch List",
+          "description": "Customers on credit hold or with utilization above 80%. Surfaces in the AR aging review."
+        }
+      }
     },
     "importPage": {
       "title": "Bulk Import",
       "subtitle": "Upload a CSV of customers + contacts, dedup against existing rows.",
-      "placeholderMessage": "Customer bulk import is coming soon.",
-      "placeholderHelp": "Same dedup-wizard pattern as Leads bulk intake — upload CSV, preview matches, gate quality before commit. Differs in that customers carry billing/shipping addresses + credit terms + contacts as a hierarchy."
+      "preview": "Coming soon — preview only",
+      "placeholderHelp": "Same dedup-wizard pattern as Leads bulk intake — upload CSV, preview matches, gate quality before commit. Differs in that customers carry billing/shipping addresses + credit terms + contacts as a hierarchy.",
+      "flowTitle": "Wizard Flow",
+      "expectedColumns": "Expected CSV columns",
+      "steps": {
+        "upload": {
+          "title": "Upload CSV",
+          "description": "Drag-and-drop or browse to select a CSV. Header row required; column aliases auto-detected."
+        },
+        "dedupe": {
+          "title": "Match against existing rows",
+          "description": "Server runs the same dedupe pipeline as leads bulk intake — by email, then phone, then companyName + state."
+        },
+        "review": {
+          "title": "Review per-row status",
+          "description": "Each row gets a chip: Created / DuplicateExisting / Invalid / MissingRequiredField. Operator chooses to skip or override."
+        },
+        "commit": {
+          "title": "Commit",
+          "description": "Inserts the Created rows in a single transaction. Address + contact hierarchy is built atomically alongside each customer."
+        }
+      }
     },
     "fork": {
       "title": "How would you like to add this customer?",
@@ -1549,6 +1594,28 @@
       "customerSince": "Customer Since",
       "accountingIntegration": "Accounting Integration",
       "reference": "Reference"
+    },
+    "compliance": {
+      "title": "Regulated Industries",
+      "hint": "Toggles flag this customer for downstream QA / documentation requirements. Each can be set independently.",
+      "fdaRegulated": "FDA-regulated",
+      "fdaRegulatedHelp": "Medical device or pharma. Triggers QA review of capability fit on every related lead.",
+      "aerospace": "AS9100 / aerospace",
+      "aerospaceHelp": "Aerospace certified work. Affects part documentation requirements.",
+      "automotive": "IATF 16949 / automotive",
+      "automotiveHelp": "Automotive supplier. Drives PPAP requirements + traceability rigor.",
+      "itarControlled": "ITAR-controlled / defense",
+      "itarControlledHelp": "Export-controlled defense work. Gates ITAR clearance on every related lead.",
+      "flagUpdated": "Compliance flag updated.",
+      "referenceTitle": "Reference Customer Consent",
+      "referenceHint": "When enabled, this customer can be used as a reference for prospects in their industry.",
+      "referenceOk": "OK to use as reference",
+      "referenceOkHelp": "Sales reps can cite this customer when building rapport with similar prospects.",
+      "referenceEnabled": "Marked as reference-OK.",
+      "referenceDisabled": "Reference consent revoked.",
+      "referenceNotes": "Reference notes",
+      "referenceNotesEmpty": "No notes — add scope details (e.g. \"ok for aerospace prospects only, no defense\").",
+      "referenceNotesSaved": "Reference notes saved."
     },
     "tabs": {
       "noEstimatesYet": "No estimates yet",
@@ -1842,6 +1909,35 @@
       "recentCount": "{{count}} recent comm",
       "stale": "Stale",
       "staleTooltip": "No activity in the last 14 days — consider a follow-up or reclassify."
+    },
+    "campaignFallback": "Campaign #{{ id }}",
+    "classification": {
+      "title": "Classification",
+      "campaignTooltip": "Bulk-marketing campaign that produced this lead. Set at intake.",
+      "capFitAriaLabel": "Set capability-fit",
+      "ndaAriaLabel": "Set NDA state",
+      "exportAriaLabel": "Set ITAR / export-control clearance",
+      "capabilityFitUpdated": "Capability fit set to {{ state }}.",
+      "ndaUpdated": "NDA state set to {{ state }}.",
+      "exportControlUpdated": "Export-control clearance set to {{ state }}.",
+      "capFit": {
+        "NotAssessed": "Cap fit: not assessed",
+        "Fits": "Cap fit: fits",
+        "NeedsReview": "Cap fit: needs review",
+        "DoesntFit": "Cap fit: doesn't fit"
+      },
+      "nda": {
+        "None": "none",
+        "Requested": "requested",
+        "InForce": "in force",
+        "Expired": "expired"
+      },
+      "export": {
+        "NotApplicable": "n/a",
+        "Pending": "pending",
+        "Cleared": "cleared",
+        "Denied": "denied"
+      }
     },
     "lostReason": "Lost Reason",
     "markAsLost": "Mark as Lost",
@@ -2154,6 +2250,7 @@
       "aiAssistants": "AI Assistants",
       "teams": "Teams & Kiosks",
       "salesTax": "Sales Tax",
+      "leadSources": "Lead Sources",
       "auditLog": "Audit Log",
       "biApiKeys": "BI API Keys",
       "compliance": "Compliance",
@@ -2332,6 +2429,23 @@
     "lockPeriodFailed": "Failed to lock period",
     "lockPeriodHint": "Lock a pay period to prevent further edits",
     "payPeriod": "Pay Period",
+    "leadSources": {
+      "title": "Lead Sources",
+      "hint": "Catalog of formal lead-attribution sources. Quality scores are computed nightly from disposition outcomes on linked leads — high score means the source converts; low score means the list provider delivers garbage.",
+      "newSource": "New Source",
+      "editSource": "Edit Source",
+      "empty": "No lead sources yet. Add at least one before bulk intake to get clean attribution.",
+      "fieldName": "Name",
+      "fieldCode": "Code",
+      "fieldDescription": "Description",
+      "namePlaceholder": "e.g. Web form, Trade show 2026, ZoomInfo export",
+      "codePlaceholder": "e.g. web_form, ts_2026_west, zoominfo",
+      "created": "Lead source created.",
+      "updated": "Lead source updated.",
+      "deleted": "Lead source deleted.",
+      "deleteTitle": "Delete lead source?",
+      "deleteMessage": "Soft-delete \"{{name}}\"? If any lead is attributed to this source, the server will refuse — deactivate instead."
+    },
     "tariffs": {
       "title": "Tariff Rates",
       "hint": "HTS-code import duty rates feed the landed-cost duty component on the part Cost tab. SCD-2: to retire a rate, edit the row and set Effective To, then add a new row with a fresh Effective From.",

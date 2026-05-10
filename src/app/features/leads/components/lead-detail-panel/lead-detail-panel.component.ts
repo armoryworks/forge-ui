@@ -3,11 +3,13 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { LeadsService } from '../../services/leads.service';
-import { LeadItem } from '../../models/lead-item.model';
+import { OutreachCampaignsService } from '../../services/outreach-campaigns.service';
+import { LeadItem, CapabilityFitStatus, NdaState, ExportControlClearance } from '../../models/lead-item.model';
 import { LeadStatus } from '../../models/lead-status.type';
 import { ConvertLeadRequest } from '../../models/convert-lead-request.model';
 import { LeadConvertDialogComponent, LeadConvertDialogData } from '../lead-convert-dialog/lead-convert-dialog.component';
@@ -23,7 +25,7 @@ import { RecentCommunicationsComponent } from '../../../../shared/components/rec
   selector: 'app-lead-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule,
+    DatePipe, ReactiveFormsModule, TranslatePipe, MatTooltipModule, MatMenuModule,
     DialogComponent, TextareaComponent, ValidationButtonComponent, EntityActivitySectionComponent,
     RecentCommunicationsComponent,
   ],
@@ -33,6 +35,7 @@ import { RecentCommunicationsComponent } from '../../../../shared/components/rec
 })
 export class LeadDetailPanelComponent {
   private readonly leadsService = inject(LeadsService);
+  private readonly campaignsService = inject(OutreachCampaignsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -44,6 +47,12 @@ export class LeadDetailPanelComponent {
   protected readonly lead = signal<LeadItem | null>(null);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
+  /** Phase 1r — campaign name lookup. Loaded lazily; falls back to "Campaign #N". */
+  protected readonly campaignNames = signal<Map<number, string>>(new Map());
+
+  protected readonly capabilityFitOptions: CapabilityFitStatus[] = ['NotAssessed', 'Fits', 'NeedsReview', 'DoesntFit'];
+  protected readonly ndaStateOptions: NdaState[] = ['None', 'Requested', 'InForce', 'Expired'];
+  protected readonly exportControlOptions: ExportControlClearance[] = ['NotApplicable', 'Pending', 'Cleared', 'Denied'];
 
   // Lost reason dialog. Reason required + validation-button stereotype on
   // submit so a salesperson can't drop a lead without recording why.
@@ -63,6 +72,13 @@ export class LeadDetailPanelComponent {
         this.loadLead(id);
       }
     });
+
+    effect(() => {
+      const campaignId = this.lead()?.campaignId;
+      if (campaignId && !this.campaignNames().has(campaignId)) {
+        this.loadCampaignNames();
+      }
+    });
   }
 
   private loadLead(id: number): void {
@@ -70,6 +86,77 @@ export class LeadDetailPanelComponent {
     this.leadsService.getLeadById(id).subscribe({
       next: (lead) => { this.lead.set(lead); this.loading.set(false); },
       error: () => this.loading.set(false),
+    });
+  }
+
+  private loadCampaignNames(): void {
+    this.campaignsService.list().subscribe({
+      next: (campaigns) => {
+        const map = new Map<number, string>();
+        for (const c of campaigns) map.set(c.id, c.name);
+        this.campaignNames.set(map);
+      },
+    });
+  }
+
+  protected getCampaignName(campaignId: number): string {
+    return this.campaignNames().get(campaignId) ?? this.translate.instant('leads.campaignFallback', { id: campaignId });
+  }
+
+  protected getCapabilityFitClass(value: CapabilityFitStatus | undefined): string {
+    const map: Record<CapabilityFitStatus, string> = {
+      NotAssessed: 'chip--muted', Fits: 'chip--success',
+      NeedsReview: 'chip--warning', DoesntFit: 'chip--error',
+    };
+    return `chip ${value ? map[value] : 'chip--muted'}`;
+  }
+
+  protected getNdaStateClass(value: NdaState | undefined): string {
+    const map: Record<NdaState, string> = {
+      None: 'chip--muted', Requested: 'chip--info',
+      InForce: 'chip--success', Expired: 'chip--warning',
+    };
+    return `chip ${value ? map[value] : 'chip--muted'}`;
+  }
+
+  protected getExportControlClass(value: ExportControlClearance | undefined): string {
+    const map: Record<ExportControlClearance, string> = {
+      NotApplicable: 'chip--muted', Pending: 'chip--warning',
+      Cleared: 'chip--success', Denied: 'chip--error',
+    };
+    return `chip ${value ? map[value] : 'chip--muted'}`;
+  }
+
+  protected setCapabilityFit(value: CapabilityFitStatus): void {
+    const lead = this.lead();
+    if (!lead || lead.capabilityFit === value) return;
+    this.leadsService.updateLead(lead.id, { capabilityFit: value }).subscribe({
+      next: (updated) => {
+        this.lead.set(updated);
+        this.snackbar.success(this.translate.instant('leads.classification.capabilityFitUpdated', { state: this.translate.instant('leads.classification.capFit.' + value) }));
+      },
+    });
+  }
+
+  protected setNdaState(value: NdaState): void {
+    const lead = this.lead();
+    if (!lead || lead.ndaState === value) return;
+    this.leadsService.updateLead(lead.id, { ndaState: value }).subscribe({
+      next: (updated) => {
+        this.lead.set(updated);
+        this.snackbar.success(this.translate.instant('leads.classification.ndaUpdated', { state: this.translate.instant('leads.classification.nda.' + value) }));
+      },
+    });
+  }
+
+  protected setExportControl(value: ExportControlClearance): void {
+    const lead = this.lead();
+    if (!lead || lead.exportControl === value) return;
+    this.leadsService.updateLead(lead.id, { exportControl: value }).subscribe({
+      next: (updated) => {
+        this.lead.set(updated);
+        this.snackbar.success(this.translate.instant('leads.classification.exportControlUpdated', { state: this.translate.instant('leads.classification.export.' + value) }));
+      },
     });
   }
 

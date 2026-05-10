@@ -1,0 +1,36 @@
+<app-page-header
+  [title]="'customers.importPage.title' | translate"
+  [subtitle]="'customers.importPage.subtitle' | translate" />
+
+<div class="page-body">
+  <div class="banner">
+    <span class="material-icons-outlined banner__icon">construction</span>
+    <div class="banner__content">
+      <div class="banner__title">{{ 'customers.importPage.preview' | translate }}</div>
+      <div class="banner__hint">{{ 'customers.importPage.placeholderHelp' | translate }}</div>
+    </div>
+  </div>
+
+  <h3 class="section-title">{{ 'customers.importPage.flowTitle' | translate }}</h3>
+  <ol class="step-list">
+    @for (step of steps; track step.number) {
+      <li class="step-item">
+        <div class="step-item__marker">
+          <span class="material-icons-outlined">{{ step.icon }}</span>
+          <span class="step-item__number">{{ step.number }}</span>
+        </div>
+        <div class="step-item__body">
+          <div class="step-item__title">{{ step.titleKey | translate }}</div>
+          <div class="step-item__description">{{ step.descriptionKey | translate }}</div>
+        </div>
+      </li>
+    }
+  </ol>
+
+  <h3 class="section-title">{{ 'customers.importPage.expectedColumns' | translate }}</h3>
+  <ul class="column-list">
+    @for (col of expectedColumns; track col) {
+      <li class="column-list__item"><code>{{ col }}</code></li>
+    }
+  </ul>
+</div>
