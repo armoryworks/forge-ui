@@ -70,7 +70,12 @@
         }
         @if (lead.phone) {
           <dt>{{ 'common.phone' | translate }}</dt>
-          <dd><a [href]="'tel:' + lead.phone">{{ lead.phone }}</a></dd>
+          <dd>
+            <button type="button" class="queue__dial-btn" (click)="dial()" data-testid="queue-dial-btn">
+              <span class="material-icons-outlined">call</span>
+              {{ lead.phone }}
+            </button>
+          </dd>
         }
         @if (lead.source) {
           <dt>{{ 'leads.source' | translate }}</dt>

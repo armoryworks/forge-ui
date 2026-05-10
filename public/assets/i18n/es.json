@@ -1742,6 +1742,7 @@
       "actionCallback": "Programar devolución",
       "actionBadData": "Datos incorrectos",
       "actionSuppress": "Suprimir (DNC)",
+      "dialFailed": "No se pudo realizar la llamada. Verifica el formato del número de teléfono.",
       "placeholderMessage": "Cola de trabajo lista",
       "placeholderHelp": "Toma prospectos de la cola para comenzar a trabajarlos. Las disposiciones con una tecla avanzan automáticamente al siguiente prospecto."
     },

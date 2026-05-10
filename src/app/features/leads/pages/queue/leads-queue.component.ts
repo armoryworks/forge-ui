@@ -8,6 +8,7 @@ import { TextareaComponent } from '../../../../shared/components/textarea/textar
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { TelLinkOutboundService } from '../../../../shared/services/outbound-call.service';
 import { LeadsService } from '../../services/leads.service';
 import { DispositionRequest, OutreachState, QueueLead } from '../../models/queue.model';
 
@@ -52,6 +53,7 @@ interface DispositionAction {
 export class LeadsQueueComponent {
   private readonly leadsService = inject(LeadsService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly outboundCall = inject(TelLinkOutboundService);
   protected readonly translate = inject(TranslateService);
 
   protected readonly batch = signal<QueueLead[]>([]);
@@ -131,6 +133,21 @@ export class LeadsQueueComponent {
 
   protected back(): void {
     if (this.cursor() > 0) this.cursor.update(c => c - 1);
+  }
+
+  /**
+   * Click-to-dial action wired through IOutboundCallService. v1
+   * implementation fires a tel: link; future Asterisk/Twilio impls
+   * place the call programmatically + auto-log the ContactInteraction.
+   */
+  protected dial(): void {
+    const lead = this.currentLead();
+    if (!lead?.phone) return;
+    this.outboundCall.placeCall(lead.phone, { entityType: 'Lead', entityId: lead.id }).subscribe(result => {
+      if (!result.ok) {
+        this.snackbar.error(this.translate.instant('leads.queue.dialFailed'));
+      }
+    });
   }
 
   /**

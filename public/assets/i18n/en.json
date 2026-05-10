@@ -1746,6 +1746,7 @@
       "actionCallback": "Schedule callback",
       "actionBadData": "Bad data",
       "actionSuppress": "Suppress (DNC)",
+      "dialFailed": "Couldn't place the call. Check the phone number format.",
       "placeholderMessage": "Worker queue is ready",
       "placeholderHelp": "Pull leads from the queue to start working through them. Single-keystroke dispositions advance to the next lead automatically."
     },
