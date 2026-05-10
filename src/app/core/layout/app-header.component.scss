@@ -81,6 +81,103 @@
   cursor: default;
 }
 
+// ── Overflow / ellipsis ──────────────────────────────────────────────
+// When the breadcrumb trail exceeds the visible cap, the hidden middle
+// crumbs collapse into a "…" trigger. Hover / keyboard-focus on the
+// trigger reveals a vertical list of the hidden crumbs underneath the
+// header. CSS-only — no JS for the popover state, since hover-to-reveal
+// + focus-within covers both pointer and keyboard users.
+
+.breadcrumb__overflow {
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  display: inline-flex;
+  align-items: center;
+
+  &:hover .breadcrumb__overflow-popover,
+  &:focus .breadcrumb__overflow-popover,
+  &:focus-within .breadcrumb__overflow-popover {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  &:focus-visible .breadcrumb__overflow-trigger {
+    outline: $border-width-thin solid var(--primary-light);
+    outline-offset: 2px;
+  }
+}
+
+.breadcrumb__overflow-trigger {
+  font-size: var(--font-size-md);
+  line-height: 1;
+  letter-spacing: 1px;
+  opacity: 0.8;
+  transition: opacity $transition-fast;
+  padding: 0 $sp-xs;
+
+  .breadcrumb__overflow:hover &,
+  .breadcrumb__overflow:focus-within & {
+    opacity: 1;
+  }
+}
+
+.breadcrumb__overflow-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: $sp-xs;
+  z-index: $z-dropdown;
+
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: $sp-xs 0;
+  background: var(--surface);
+  color: var(--text);
+  border: $border-width-thin solid var(--border);
+  box-shadow: $shadow-dropdown;
+
+  // Hidden by default; the parent's :hover / :focus-within toggles
+  // these properties for the reveal.
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: opacity $transition-fast, transform $transition-fast, visibility $transition-fast;
+  pointer-events: none; // disable interaction while hidden
+
+  // Re-enable interaction once shown
+  .breadcrumb__overflow:hover &,
+  .breadcrumb__overflow:focus &,
+  .breadcrumb__overflow:focus-within & {
+    pointer-events: auto;
+  }
+}
+
+.breadcrumb__overflow-item {
+  padding: $sp-xs $sp-md;
+  font-size: var(--font-size-sm);
+  text-transform: none;
+  letter-spacing: 0;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  }
+
+  &--group {
+    color: var(--text-muted);
+    cursor: default;
+
+    &:hover {
+      background: transparent;
+    }
+  }
+}
+
 .app-header__search {
   flex: 1;
   background: var(--bg);

@@ -50,6 +50,27 @@ export class AppHeaderComponent implements OnInit {
   protected readonly showAboutDialog = signal(false);
 
   /**
+   * Breadcrumb truncation: when the trail exceeds the visible cap (2),
+   * hide all but the last 2 crumbs and surface the rest behind an
+   * ellipsis. Hovering / focusing the ellipsis reveals the hidden
+   * crumbs as a clickable list. Home is always visible (rendered
+   * outside the trail).
+   */
+  protected readonly maxVisibleCrumbs = 2;
+
+  protected readonly visibleCrumbs = computed(() => {
+    const trail = this.navTree.breadcrumbTrail();
+    if (trail.length <= this.maxVisibleCrumbs) return trail;
+    return trail.slice(-this.maxVisibleCrumbs);
+  });
+
+  protected readonly hiddenCrumbs = computed(() => {
+    const trail = this.navTree.breadcrumbTrail();
+    if (trail.length <= this.maxVisibleCrumbs) return [];
+    return trail.slice(0, trail.length - this.maxVisibleCrumbs);
+  });
+
+  /**
    * Phase 4 Phase-B — Chat is gated by `CAP-EXT-CHAT`. When an admin disables
    * the capability the header chat button hides; when re-enabled it reappears.
    * Updates reactively via the SignalR `capabilityChanged` broadcast +

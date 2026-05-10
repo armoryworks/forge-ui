@@ -59,6 +59,7 @@
   },
   "header": {
     "home": "Home",
+    "showMoreBreadcrumbs": "Show full navigation path",
     "searchPlaceholder": "Search jobs, parts, people...",
     "results": "Results",
     "aiResults": "AI Results",

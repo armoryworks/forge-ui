@@ -59,6 +59,7 @@
   },
   "header": {
     "home": "Inicio",
+    "showMoreBreadcrumbs": "Mostrar ruta de navegación completa",
     "searchPlaceholder": "Buscar trabajos, piezas, personas...",
     "results": "Resultados",
     "aiResults": "Resultados IA",

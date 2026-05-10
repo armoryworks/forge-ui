@@ -14,7 +14,24 @@
   <div class="header-sep hide-tablet"></div>
   <nav class="breadcrumb hide-tablet" aria-label="Breadcrumb">
     <a routerLink="/dashboard" class="breadcrumb__link">{{ 'header.home' | translate }}</a>
-    @for (crumb of navTree.breadcrumbTrail(); track crumb.label; let last = $last) {
+    @if (hiddenCrumbs().length > 0) {
+      <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
+      <span class="breadcrumb__overflow"
+        tabindex="0"
+        [attr.aria-label]="'header.showMoreBreadcrumbs' | translate">
+        <span class="breadcrumb__overflow-trigger">…</span>
+        <span class="breadcrumb__overflow-popover" role="menu">
+          @for (crumb of hiddenCrumbs(); track crumb.label) {
+            @if (crumb.route) {
+              <a [routerLink]="crumb.route" class="breadcrumb__overflow-item">{{ crumb.i18nKey! | translate }}</a>
+            } @else {
+              <span class="breadcrumb__overflow-item breadcrumb__overflow-item--group">{{ crumb.i18nKey! | translate }}</span>
+            }
+          }
+        </span>
+      </span>
+    }
+    @for (crumb of visibleCrumbs(); track crumb.label; let last = $last) {
       <span class="material-icons-outlined breadcrumb__separator">chevron_right</span>
       @if (crumb.route && last) {
         <a [routerLink]="crumb.route" class="breadcrumb__link breadcrumb__current">{{ crumb.i18nKey! | translate }}</a>
