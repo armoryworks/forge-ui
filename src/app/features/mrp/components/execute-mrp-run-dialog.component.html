@@ -1,0 +1,43 @@
+<app-dialog [title]="title" width="480px" (closed)="close()">
+  <div [formGroup]="form" class="run-dialog">
+    <p class="run-dialog__hint">
+      @if (isSimulation) {
+        {{ 'mrp.runDialog.hintSimulate' | translate }}
+      } @else {
+        {{ 'mrp.runDialog.hint' | translate }}
+      }
+    </p>
+
+    <app-select
+      [label]="'mrp.runDialog.fieldRunType' | translate"
+      formControlName="runType"
+      [options]="runTypeOptions"
+      [required]="true" />
+
+    <app-input
+      [label]="'mrp.runDialog.fieldHorizon' | translate"
+      type="number"
+      formControlName="planningHorizonDays"
+      [required]="true"
+      min="1" max="730" suffix="days" />
+
+    <p class="run-dialog__footnote">{{ 'mrp.runDialog.horizonHint' | translate }}</p>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        data-testid="mrp-run-confirm-btn"
+        [disabled]="form.invalid"
+        (click)="confirm()">
+        <span class="material-icons-outlined">{{ isSimulation ? 'science' : 'play_arrow' }}</span>
+        @if (isSimulation) {
+          {{ 'mrp.simulate' | translate }}
+        } @else {
+          {{ 'mrp.runMrp' | translate }}
+        }
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

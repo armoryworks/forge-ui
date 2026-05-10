@@ -1,0 +1,19 @@
+@use 'styles/variables' as *;
+
+.run-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__hint,
+  &__footnote {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  &__footnote {
+    font-size: $font-size-xs;
+  }
+}

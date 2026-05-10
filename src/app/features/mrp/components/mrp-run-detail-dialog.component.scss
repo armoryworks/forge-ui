@@ -1,0 +1,186 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.run-detail {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__section-title {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0 0 $sp-sm;
+    font-weight: 600;
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: $sp-sm;
+  }
+
+  &__kpi {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    padding: $sp-sm;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__kpi-label {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+
+  &__kpi-value {
+    font-size: $font-size-md;
+    font-weight: 600;
+    @include truncate;
+  }
+
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+    border-left: $border-width-accent solid var(--error);
+    color: var(--error);
+    font-size: $font-size-sm;
+  }
+
+  &__split {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: $sp-md;
+    min-height: 320px;
+  }
+
+  &__parts {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    border-right: $border-width-thin solid var(--border);
+    padding-right: $sp-md;
+    max-height: 480px;
+  }
+
+  &__part-list {
+    flex: 1;
+    overflow-y: auto;
+    @include custom-scrollbar(6px);
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+  }
+
+  &__part {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: $sp-sm;
+    padding: $sp-sm;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    &:hover {
+      border-color: var(--primary);
+    }
+
+    &--active {
+      border-color: var(--primary);
+      background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    }
+  }
+
+  &__part-main {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+  }
+
+  &__part-number {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    @include truncate;
+  }
+
+  &__part-desc {
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    @include truncate;
+  }
+
+  &__part-meta {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  &__drill {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    overflow-y: auto;
+    max-height: 480px;
+    @include custom-scrollbar(6px);
+  }
+
+  &__buckets {
+    overflow-x: auto;
+    @include custom-scrollbar(6px);
+  }
+
+  &__bucket-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-xs;
+
+    th, td {
+      padding: $sp-xs $sp-sm;
+      border-bottom: $border-width-thin solid var(--border);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th {
+      text-align: left;
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+    }
+
+    th:first-child,
+    td:first-child {
+      text-align: left;
+    }
+
+    tbody tr:hover {
+      background: color-mix(in srgb, var(--primary) 4%, transparent);
+    }
+  }
+
+  &__neg {
+    color: var(--error);
+    font-weight: 600;
+  }
+}

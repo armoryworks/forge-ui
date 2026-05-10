@@ -1,0 +1,56 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.mps-actual {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-xs;
+
+    th, td {
+      padding: $sp-xs $sp-sm;
+      border-bottom: $border-width-thin solid var(--border);
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th:first-child,
+    th:nth-child(2),
+    td:first-child,
+    td:nth-child(2) {
+      text-align: left;
+    }
+
+    th {
+      font-size: $font-size-xxs;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      background: var(--surface);
+    }
+
+    tfoot td {
+      border-top: $border-width-thin solid var(--text);
+      border-bottom: none;
+      padding-top: $sp-sm;
+    }
+
+    tbody tr:hover {
+      background: color-mix(in srgb, var(--primary) 4%, transparent);
+    }
+  }
+
+  &__pos { color: var(--success); font-weight: 600; }
+  &__neg { color: var(--error); font-weight: 600; }
+}

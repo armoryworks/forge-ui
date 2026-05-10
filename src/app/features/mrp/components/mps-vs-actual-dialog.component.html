@@ -1,0 +1,47 @@
+<app-dialog [title]="('mrp.mpsActual.title' | translate) + ' — ' + schedule.name" width="720px" (closed)="close()">
+  <div class="mps-actual" [appLoadingBlock]="loading()">
+    <p class="mps-actual__hint">{{ 'mrp.mpsActual.hint' | translate }}</p>
+
+    @if (!loading() && rows().length === 0) {
+      <app-empty-state icon="bar_chart" [message]="'mrp.mpsActual.empty' | translate" />
+    } @else {
+      <table class="mps-actual__table">
+        <thead>
+          <tr>
+            <th>{{ 'mrp.cols.partNumber' | translate }}</th>
+            <th>{{ 'mrp.cols.description' | translate }}</th>
+            <th>{{ 'mrp.mpsActual.planned' | translate }}</th>
+            <th>{{ 'mrp.mpsActual.actual' | translate }}</th>
+            <th>{{ 'mrp.mpsActual.variance' | translate }}</th>
+            <th>{{ 'mrp.mpsActual.variancePct' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (r of rows(); track r.partId) {
+            <tr>
+              <td>{{ r.partNumber }}</td>
+              <td>{{ r.partDescription ?? '—' }}</td>
+              <td>{{ r.plannedQuantity | number:'1.0-2' }}</td>
+              <td>{{ r.actualQuantity | number:'1.0-2' }}</td>
+              <td [class]="varianceClass(r.variance)">{{ r.variance | number:'1.0-2' }}</td>
+              <td [class]="varianceClass(r.variance)">{{ r.variancePercent | number:'1.0-2' }}%</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2"><strong>{{ 'common.total' | translate }}</strong></td>
+            <td><strong>{{ totals().planned | number:'1.0-2' }}</strong></td>
+            <td><strong>{{ totals().actual | number:'1.0-2' }}</strong></td>
+            <td [class]="varianceClass(totals().variance)"><strong>{{ totals().variance | number:'1.0-2' }}</strong></td>
+            <td [class]="varianceClass(totals().variance)"><strong>{{ totals().variancePct | number:'1.0-2' }}%</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+  </div>
+</app-dialog>

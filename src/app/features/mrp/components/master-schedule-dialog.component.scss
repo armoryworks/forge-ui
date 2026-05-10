@@ -1,0 +1,60 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.schedule-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__section-title {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 600;
+  }
+
+  &__lines-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: $sp-md;
+  }
+
+  &__empty {
+    margin: 0;
+    padding: $sp-lg;
+    background: var(--surface);
+    border: $border-width-thin dashed var(--border);
+    text-align: center;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+  }
+
+  &__lines {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+    max-height: 360px;
+    overflow-y: auto;
+    @include custom-scrollbar(6px);
+  }
+
+  &__line {
+    display: flex;
+    align-items: flex-start;
+    gap: $sp-sm;
+    padding: $sp-sm;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+  }
+
+  &__line-fields {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr 1fr 1fr;
+    gap: $sp-sm;
+    min-width: 0;
+  }
+}

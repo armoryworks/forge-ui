@@ -1,0 +1,64 @@
+<app-dialog [title]="'mrp.forecastDialog.title' | translate" width="540px" (closed)="close()">
+  <div [formGroup]="form" class="forecast-dialog">
+    <p class="forecast-dialog__hint">{{ 'mrp.forecastDialog.hint' | translate }}</p>
+
+    <app-input
+      [label]="'mrp.forecastDialog.fieldName' | translate"
+      formControlName="name"
+      [required]="true"
+      data-testid="mrp-forecast-name" />
+
+    <app-entity-picker
+      [label]="'mrp.forecastDialog.fieldPart' | translate"
+      entityType="parts"
+      displayField="partNumber"
+      secondaryDisplayField="description"
+      formControlName="partId"
+      [required]="true" />
+
+    <app-select
+      [label]="'mrp.forecastDialog.fieldMethod' | translate"
+      formControlName="method"
+      [options]="methodOptions"
+      [required]="true" />
+
+    <div class="dialog-row">
+      <app-input
+        [label]="'mrp.forecastDialog.fieldHistorical' | translate"
+        type="number"
+        formControlName="historicalPeriods"
+        [required]="true"
+        min="2" max="60" suffix="periods" />
+
+      <app-input
+        [label]="'mrp.forecastDialog.fieldForecast' | translate"
+        type="number"
+        formControlName="forecastPeriods"
+        [required]="true"
+        min="1" max="36" suffix="periods" />
+    </div>
+
+    @if (showSmoothing()) {
+      <app-input
+        [label]="'mrp.forecastDialog.fieldAlpha' | translate"
+        type="number"
+        formControlName="smoothingFactor"
+        [required]="true"
+        step="0.01" min="0.01" max="1" />
+      <p class="forecast-dialog__footnote">{{ 'mrp.forecastDialog.alphaHint' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        data-testid="mrp-forecast-confirm-btn"
+        [disabled]="form.invalid"
+        (click)="confirm()">
+        <span class="material-icons-outlined">trending_up</span>
+        {{ 'mrp.forecastDialog.generate' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

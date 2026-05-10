@@ -194,7 +194,8 @@
       [data]="runs()"
       emptyIcon="play_circle"
       [emptyMessage]="'mrp.noRuns' | translate"
-      [clickableRows]="false">
+      [clickableRows]="true"
+      (rowClick)="openRunDetail($any($event))">
 
       <ng-template appColumnCell="status" let-row>
         <span [class]="getRunStatusClass(row.status)">{{ row.status }}</span>
@@ -208,11 +209,14 @@
   <div class="tab-panel" [appLoadingBlock]="loadingSchedules()">
     <app-toolbar>
       <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openCreateSchedule()" data-testid="mrp-schedule-new-btn">
+        <span class="material-icons-outlined">add</span> {{ 'mrp.newMasterSchedule' | translate }}
+      </button>
     </app-toolbar>
 
     <app-data-table
       tableId="mrp-master-schedules"
-      [columns]="scheduleColumns"
+      [columns]="scheduleColumnsWithActions"
       [data]="masterSchedules()"
       emptyIcon="calendar_month"
       [emptyMessage]="'mrp.noMasterSchedules' | translate"
@@ -220,6 +224,28 @@
 
       <ng-template appColumnCell="status" let-row>
         <span [class]="getScheduleStatusClass(row.status)">{{ row.status }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        <button class="icon-btn"
+          [attr.aria-label]="'common.edit' | translate" [title]="'common.edit' | translate"
+          (click)="openEditSchedule(row)">
+          <span class="material-icons-outlined">edit</span>
+        </button>
+        @if (row.status === 'Draft') {
+          <button class="icon-btn"
+            [attr.aria-label]="'mrp.activateSchedule' | translate" [title]="'mrp.activateSchedule' | translate"
+            (click)="activateSchedule(row)">
+            <span class="material-icons-outlined">play_arrow</span>
+          </button>
+        }
+        @if (row.status === 'Active' || row.status === 'Completed') {
+          <button class="icon-btn"
+            [attr.aria-label]="'mrp.mpsActual.title' | translate" [title]="'mrp.mpsActual.title' | translate"
+            (click)="openMpsVsActual(row)">
+            <span class="material-icons-outlined">bar_chart</span>
+          </button>
+        }
       </ng-template>
     </app-data-table>
   </div>
@@ -230,11 +256,14 @@
   <div class="tab-panel" [appLoadingBlock]="loadingForecasts()">
     <app-toolbar>
       <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openGenerateForecast()" data-testid="mrp-forecast-new-btn">
+        <span class="material-icons-outlined">add</span> {{ 'mrp.newForecast' | translate }}
+      </button>
     </app-toolbar>
 
     <app-data-table
       tableId="mrp-forecasts"
-      [columns]="forecastColumns"
+      [columns]="forecastColumnsWithActions"
       [data]="forecasts()"
       emptyIcon="trending_up"
       [emptyMessage]="'mrp.noForecasts' | translate"
@@ -242,6 +271,16 @@
 
       <ng-template appColumnCell="status" let-row>
         <span [class]="getForecastStatusClass(row.status)">{{ row.status }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        @if (row.status === 'Draft') {
+          <button class="icon-btn"
+            [attr.aria-label]="'mrp.approveForecast' | translate" [title]="'mrp.approveForecast' | translate"
+            (click)="approveForecast(row)">
+            <span class="material-icons-outlined">check</span>
+          </button>
+        }
       </ng-template>
     </app-data-table>
   </div>

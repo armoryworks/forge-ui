@@ -1,0 +1,138 @@
+<app-dialog [title]="('mrp.runDetail.title' | translate) + ' — ' + run.runNumber" width="960px" (closed)="close()">
+  <div class="run-detail">
+    <div class="run-detail__summary">
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.cols.type' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.runType }}</span>
+      </div>
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.cols.status' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.status }}</span>
+      </div>
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.runDetail.horizon' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.planningHorizonDays }} d</span>
+      </div>
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.demands' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.totalDemandCount }}</span>
+      </div>
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.supplies' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.totalSupplyCount }}</span>
+      </div>
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.plannedOrders' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.plannedOrderCount }}</span>
+      </div>
+      <div class="run-detail__kpi">
+        <span class="run-detail__kpi-label">{{ 'mrp.exceptions' | translate }}</span>
+        <span class="run-detail__kpi-value">{{ run.exceptionCount }}</span>
+      </div>
+    </div>
+
+    @if (run.errorMessage) {
+      <div class="run-detail__error">
+        <span class="material-icons-outlined">error</span>
+        <span>{{ run.errorMessage }}</span>
+      </div>
+    }
+
+    <div class="run-detail__split">
+      <div class="run-detail__parts" [appLoadingBlock]="loadingParts()">
+        <h4 class="run-detail__section-title">{{ 'mrp.runDetail.partsTouched' | translate }}</h4>
+        @if (!loadingParts() && parts().length === 0) {
+          <app-empty-state icon="assignment" [message]="'mrp.runDetail.noParts' | translate" />
+        }
+        <div class="run-detail__part-list">
+          @for (p of parts(); track p.partId) {
+            <button type="button" class="run-detail__part"
+              [class.run-detail__part--active]="selectedPartId() === p.partId"
+              (click)="selectPart(p.partId)">
+              <div class="run-detail__part-main">
+                <span class="run-detail__part-number">{{ p.partNumber }}</span>
+                @if (p.partDescription) {
+                  <span class="run-detail__part-desc">{{ p.partDescription }}</span>
+                }
+              </div>
+              <div class="run-detail__part-meta">
+                <span>{{ p.orderCount }} {{ 'mrp.runDetail.orders' | translate }}</span>
+                <span>{{ p.totalQuantity | number:'1.0-2' }}</span>
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="run-detail__drill" [appLoadingBlock]="loadingDrill()">
+        @if (selectedPartId() === null) {
+          <app-empty-state icon="touch_app" [message]="'mrp.runDetail.pickPart' | translate" />
+        } @else {
+          <h4 class="run-detail__section-title">{{ 'mrp.runDetail.timeBuckets' | translate }}</h4>
+          @if (partPlan(); as plan) {
+            <div class="run-detail__buckets">
+              <table class="run-detail__bucket-table">
+                <thead>
+                  <tr>
+                    <th>{{ 'mrp.runDetail.bucketStart' | translate }}</th>
+                    <th>{{ 'mrp.runDetail.gross' | translate }}</th>
+                    <th>{{ 'mrp.runDetail.scheduled' | translate }}</th>
+                    <th>{{ 'mrp.runDetail.poReceipts' | translate }}</th>
+                    <th>{{ 'mrp.runDetail.onHand' | translate }}</th>
+                    <th>{{ 'mrp.runDetail.net' | translate }}</th>
+                    <th>{{ 'mrp.runDetail.releases' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (b of plan.buckets; track b.periodStart) {
+                    <tr>
+                      <td>{{ b.periodStart | date:'MM/dd/yyyy' }}</td>
+                      <td>{{ b.grossRequirements | number:'1.0-2' }}</td>
+                      <td>{{ b.scheduledReceipts | number:'1.0-2' }}</td>
+                      <td>{{ b.plannedOrderReceipts | number:'1.0-2' }}</td>
+                      <td [class.run-detail__neg]="b.projectedOnHand < 0">{{ b.projectedOnHand | number:'1.0-2' }}</td>
+                      <td [class.run-detail__neg]="b.netRequirements > 0">{{ b.netRequirements | number:'1.0-2' }}</td>
+                      <td>{{ b.plannedOrderReleases | number:'1.0-2' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+          @if (pegging().length > 0) {
+            <h4 class="run-detail__section-title">{{ 'mrp.runDetail.pegging' | translate }}</h4>
+            <table class="run-detail__bucket-table">
+              <thead>
+                <tr>
+                  <th>{{ 'mrp.runDetail.demandSource' | translate }}</th>
+                  <th>{{ 'mrp.runDetail.demandQty' | translate }}</th>
+                  <th>{{ 'mrp.runDetail.requiredDate' | translate }}</th>
+                  <th>{{ 'mrp.runDetail.supplySource' | translate }}</th>
+                  <th>{{ 'mrp.runDetail.supplyQty' | translate }}</th>
+                  <th>{{ 'mrp.runDetail.supplyDate' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of pegging(); track p.demandId) {
+                  <tr>
+                    <td>{{ p.demandSource }}</td>
+                    <td>{{ p.demandQuantity | number:'1.0-2' }}</td>
+                    <td>{{ p.requiredDate | date:'MM/dd/yyyy' }}</td>
+                    <td>{{ p.supplySource ?? '—' }}</td>
+                    <td>{{ p.supplyQuantity ? (p.supplyQuantity | number:'1.0-2') : '—' }}</td>
+                    <td>{{ p.supplyDate ? (p.supplyDate | date:'MM/dd/yyyy') : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+  </div>
+</app-dialog>

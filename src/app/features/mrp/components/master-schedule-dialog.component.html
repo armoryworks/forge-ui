@@ -1,0 +1,89 @@
+<app-dialog [title]="title()" width="800px" (closed)="close()">
+  <div [formGroup]="form" class="schedule-dialog">
+    <app-input
+      [label]="'mrp.scheduleDialog.fieldName' | translate"
+      formControlName="name"
+      [required]="true"
+      data-testid="mrp-schedule-name" />
+
+    <app-textarea
+      [label]="'mrp.scheduleDialog.fieldDescription' | translate"
+      formControlName="description"
+      [rows]="2" />
+
+    <div class="dialog-row">
+      <app-datepicker
+        [label]="'mrp.scheduleDialog.fieldStart' | translate"
+        formControlName="periodStart"
+        [required]="true" />
+
+      <app-datepicker
+        [label]="'mrp.scheduleDialog.fieldEnd' | translate"
+        formControlName="periodEnd"
+        [required]="true" />
+    </div>
+
+    <div class="schedule-dialog__lines-header">
+      <h4 class="schedule-dialog__section-title">{{ 'mrp.scheduleDialog.lines' | translate }}</h4>
+      <button type="button" class="action-btn action-btn--sm" (click)="addLine()" data-testid="mrp-schedule-add-line">
+        <span class="material-icons-outlined">add</span>
+        {{ 'mrp.scheduleDialog.addLine' | translate }}
+      </button>
+    </div>
+
+    @if (lines.length === 0) {
+      <p class="schedule-dialog__empty">{{ 'mrp.scheduleDialog.linesEmpty' | translate }}</p>
+    }
+
+    <div class="schedule-dialog__lines" formArrayName="lines">
+      @for (line of lines.controls; track $index; let i = $index) {
+        <div class="schedule-dialog__line" [formGroupName]="i">
+          <div class="schedule-dialog__line-fields">
+            <app-entity-picker
+              [label]="'mrp.scheduleDialog.linePart' | translate"
+              entityType="parts"
+              displayField="partNumber"
+              secondaryDisplayField="description"
+              formControlName="partId"
+              [required]="true" />
+
+            <app-input
+              [label]="'mrp.scheduleDialog.lineQty' | translate"
+              type="number"
+              formControlName="quantity"
+              [required]="true"
+              step="0.0001" min="0.0001" />
+
+            <app-datepicker
+              [label]="'mrp.scheduleDialog.lineDueDate' | translate"
+              formControlName="dueDate"
+              [required]="true" />
+
+            <app-input
+              [label]="'mrp.scheduleDialog.lineNotes' | translate"
+              formControlName="notes" />
+          </div>
+
+          <button type="button" class="icon-btn icon-btn--danger"
+            [attr.aria-label]="'mrp.scheduleDialog.removeLine' | translate"
+            (click)="removeLine(i)">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        data-testid="mrp-schedule-save-btn"
+        [disabled]="form.invalid || lines.length === 0 || saving()"
+        (click)="confirm()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

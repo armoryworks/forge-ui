@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -25,8 +26,31 @@ import {
   MrpPlannedOrder,
   MrpException,
   MasterSchedule,
+  MasterScheduleDetail,
   DemandForecast,
 } from './models/mrp.model';
+import {
+  ExecuteMrpRunDialogComponent,
+  ExecuteMrpRunDialogData,
+  ExecuteMrpRunDialogResult,
+} from './components/execute-mrp-run-dialog.component';
+import {
+  MasterScheduleDialogComponent,
+  MasterScheduleDialogData,
+  MasterScheduleDialogResult,
+} from './components/master-schedule-dialog.component';
+import {
+  GenerateForecastDialogComponent,
+} from './components/generate-forecast-dialog.component';
+import {
+  MrpRunDetailDialogComponent,
+  MrpRunDetailDialogData,
+} from './components/mrp-run-detail-dialog.component';
+import {
+  MpsVsActualDialogComponent,
+  MpsVsActualDialogData,
+} from './components/mps-vs-actual-dialog.component';
+import { GenerateForecastRequest } from './models/mrp.model';
 
 type MrpTab = 'dashboard' | 'planned-orders' | 'exceptions' | 'runs' | 'master-schedule' | 'forecasts';
 
@@ -59,6 +83,7 @@ export class MrpComponent {
   private readonly mrpService = inject(MrpService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -164,6 +189,11 @@ export class MrpComponent {
     { field: 'createdAt', header: this.translate.instant('mrp.cols.created'), sortable: true, type: 'date', width: '110px' },
   ];
 
+  protected readonly scheduleColumnsWithActions: ColumnDef[] = [
+    ...this.scheduleColumns,
+    { field: 'actions', header: '', width: '120px' },
+  ];
+
   protected readonly forecastColumns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('mrp.cols.name'), sortable: true },
     { field: 'partNumber', header: this.translate.instant('mrp.cols.partNumber'), sortable: true, width: '120px' },
@@ -176,6 +206,11 @@ export class MrpComponent {
     { field: 'forecastPeriods', header: this.translate.instant('mrp.cols.periods'), sortable: true, width: '80px', align: 'right' },
     { field: 'overrideCount', header: this.translate.instant('mrp.cols.overrides'), sortable: true, width: '90px', align: 'right' },
     { field: 'createdAt', header: this.translate.instant('mrp.cols.created'), sortable: true, type: 'date', width: '110px' },
+  ];
+
+  protected readonly forecastColumnsWithActions: ColumnDef[] = [
+    ...this.forecastColumns,
+    { field: 'actions', header: '', width: '60px' },
   ];
 
   constructor() {
@@ -211,20 +246,42 @@ export class MrpComponent {
     this.router.navigate(['..', tab], { relativeTo: this.route });
   }
 
+  /**
+   * Phase 1p — opens a parameter dialog instead of executing with hardcoded
+   * Full + 90 days. The dialog returns the request shape the service
+   * expects; we then route to executeRun or simulateRun based on the
+   * dialog's `isSimulation` flag.
+   */
   protected executeRun(simulate = false): void {
-    this.executingRun.set(true);
-    const request = { runType: 'Full' as const, planningHorizonDays: 90 };
-    const call = simulate ? this.mrpService.simulateRun(request) : this.mrpService.executeRun(request);
-    call.subscribe({
-      next: () => {
-        this.executingRun.set(false);
-        this.snackbar.success(simulate ? this.translate.instant('mrp.snackbar.simulationComplete') : this.translate.instant('mrp.snackbar.runComplete'));
-        this.loadRuns();
-        this.loadPlannedOrders();
-        this.loadExceptions();
-      },
-      error: () => this.executingRun.set(false),
+    this.dialog.open<ExecuteMrpRunDialogComponent, ExecuteMrpRunDialogData, ExecuteMrpRunDialogResult | undefined>(
+      ExecuteMrpRunDialogComponent,
+      { width: '480px', data: { isSimulation: simulate } satisfies ExecuteMrpRunDialogData },
+    ).afterClosed().subscribe(result => {
+      if (!result) return;
+      this.executingRun.set(true);
+      const call = result.isSimulation
+        ? this.mrpService.simulateRun(result.request)
+        : this.mrpService.executeRun(result.request);
+      call.subscribe({
+        next: () => {
+          this.executingRun.set(false);
+          this.snackbar.success(result.isSimulation
+            ? this.translate.instant('mrp.snackbar.simulationComplete')
+            : this.translate.instant('mrp.snackbar.runComplete'));
+          this.loadRuns();
+          this.loadPlannedOrders();
+          this.loadExceptions();
+        },
+        error: () => this.executingRun.set(false),
+      });
     });
+  }
+
+  protected openRunDetail(run: MrpRun): void {
+    this.dialog.open<MrpRunDetailDialogComponent, MrpRunDetailDialogData>(
+      MrpRunDetailDialogComponent,
+      { width: '960px', data: { run } satisfies MrpRunDetailDialogData },
+    );
   }
 
   protected firmOrder(order: MrpPlannedOrder): void {
@@ -269,6 +326,63 @@ export class MrpComponent {
         this.snackbar.success(this.translate.instant('mrp.snackbar.forecastApproved'));
         this.loadForecasts();
       },
+    });
+  }
+
+  /**
+   * Phase 1p — open the create/edit dialog for a master schedule. When
+   * editing we first hydrate the detail (lines aren't on the list response)
+   * so the line editor has the existing rows; create-mode opens immediately.
+   */
+  protected openCreateSchedule(): void {
+    this.openScheduleDialogWith(undefined);
+  }
+
+  protected openEditSchedule(schedule: MasterSchedule): void {
+    this.mrpService.getMasterSchedule(schedule.id).subscribe({
+      next: (detail) => this.openScheduleDialogWith(detail),
+    });
+  }
+
+  private openScheduleDialogWith(scheduleDetail: MasterScheduleDetail | undefined): void {
+    this.dialog.open<MasterScheduleDialogComponent, MasterScheduleDialogData, MasterScheduleDialogResult | undefined>(
+      MasterScheduleDialogComponent,
+      { width: '800px', data: { schedule: scheduleDetail } satisfies MasterScheduleDialogData },
+    ).afterClosed().subscribe(result => {
+      if (!result) return;
+      const call = result.mode === 'create'
+        ? this.mrpService.createMasterSchedule(result.request)
+        : this.mrpService.updateMasterSchedule(result.id, result.request);
+      call.subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant(
+            result.mode === 'create' ? 'mrp.snackbar.scheduleCreated' : 'mrp.snackbar.scheduleUpdated',
+          ));
+          this.loadMasterSchedules();
+        },
+      });
+    });
+  }
+
+  protected openMpsVsActual(schedule: MasterSchedule): void {
+    this.dialog.open<MpsVsActualDialogComponent, MpsVsActualDialogData>(
+      MpsVsActualDialogComponent,
+      { width: '720px', data: { schedule } satisfies MpsVsActualDialogData },
+    );
+  }
+
+  protected openGenerateForecast(): void {
+    this.dialog.open<GenerateForecastDialogComponent, void, GenerateForecastRequest | undefined>(
+      GenerateForecastDialogComponent,
+      { width: '540px' },
+    ).afterClosed().subscribe(request => {
+      if (!request) return;
+      this.mrpService.generateForecast(request).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('mrp.snackbar.forecastGenerated'));
+          this.loadForecasts();
+        },
+      });
     });
   }
 
