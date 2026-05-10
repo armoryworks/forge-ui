@@ -1,0 +1,172 @@
+<app-page-header
+  [title]="'leads.intake.title' | translate"
+  [subtitle]="'leads.intake.subtitle' | translate" />
+
+<div class="intake" [appLoadingBlock]="working()">
+  <section class="intake__step">
+    <div class="intake__step-header">
+      <span class="intake__step-num">1</span>
+      <h3 class="intake__step-title">{{ 'leads.intake.step1Title' | translate }}</h3>
+    </div>
+    <div class="intake__step-body intake__row">
+      <app-select
+        [label]="'leads.intake.fieldStrategy' | translate"
+        [formControl]="strategyControl"
+        [options]="strategyOptions" />
+      <app-input
+        [label]="'leads.intake.fieldCampaignTag' | translate"
+        [formControl]="campaignTagControl"
+        placeholder="e.g. IMTS-2026" />
+    </div>
+    <p class="intake__hint">{{ 'leads.intake.strategyHint' | translate }}</p>
+  </section>
+
+  <section class="intake__step">
+    <div class="intake__step-header">
+      <span class="intake__step-num">2</span>
+      <h3 class="intake__step-title">{{ 'leads.intake.step2Title' | translate }}</h3>
+    </div>
+    <div class="intake__step-body">
+      <p class="intake__hint">{{ 'leads.intake.uploadHint' | translate }}</p>
+
+      <div class="intake__upload">
+        <label class="intake__upload-button action-btn action-btn--primary">
+          <span class="material-icons-outlined">upload_file</span>
+          {{ 'leads.intake.chooseFile' | translate }}
+          <input type="file" accept=".csv,text/csv,text/plain" (change)="onFileChange($event)" hidden
+            data-testid="intake-file-input" />
+        </label>
+        <span class="intake__upload-or">{{ 'leads.intake.orPaste' | translate }}</span>
+      </div>
+
+      <app-textarea
+        [label]="'leads.intake.pasteLabel' | translate"
+        [formControl]="pasteControl"
+        [rows]="6"
+        placeholder="companyName,contactName,email,phone&#10;Acme Corp,Steve Baxter,sbaxter&#64;acme.com,(555) 555-0101" />
+
+      <div class="intake__row">
+        <button type="button" class="action-btn"
+          [disabled]="!pasteControl.value.trim()"
+          (click)="onPasteParse()"
+          data-testid="intake-parse-paste">
+          <span class="material-icons-outlined">data_object</span>
+          {{ 'leads.intake.parsePaste' | translate }}
+        </button>
+        @if (parsedRows().length > 0) {
+          <button type="button" class="action-btn" (click)="reset()" data-testid="intake-reset">
+            <span class="material-icons-outlined">restart_alt</span>
+            {{ 'leads.intake.reset' | translate }}
+          </button>
+        }
+      </div>
+
+      @if (parseErrors().length > 0) {
+        <div class="intake__errors">
+          @for (err of parseErrors(); track err) {
+            <p class="intake__error">{{ err }}</p>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  @if (parsedRows().length > 0) {
+    <section class="intake__step">
+      <div class="intake__step-header">
+        <span class="intake__step-num">3</span>
+        <h3 class="intake__step-title">{{ 'leads.intake.step3Title' | translate }}</h3>
+        <span class="intake__row-count">
+          {{ 'leads.intake.rowCount' | translate:{ count: parsedRows().length } }}
+        </span>
+      </div>
+      <div class="intake__step-body">
+        @if (preview() === null) {
+          <p class="intake__hint">{{ 'leads.intake.previewHint' | translate }}</p>
+          <button type="button" class="action-btn action-btn--primary"
+            [disabled]="!canPreview()"
+            (click)="runPreview()"
+            data-testid="intake-preview-btn">
+            <span class="material-icons-outlined">preview</span>
+            {{ 'leads.intake.runPreview' | translate }}
+          </button>
+        } @else {
+          @if (preview(); as p) {
+            <div class="intake__summary">
+              <div class="intake__summary-stat">
+                <span class="intake__summary-num intake__summary-num--success">{{ p.createdCount }}</span>
+                <span class="intake__summary-label">{{ 'leads.intake.createdLabel' | translate }}</span>
+              </div>
+              <div class="intake__summary-stat">
+                <span class="intake__summary-num intake__summary-num--warning">{{ p.skippedCount }}</span>
+                <span class="intake__summary-label">{{ 'leads.intake.skippedLabel' | translate }}</span>
+              </div>
+              <div class="intake__summary-stat">
+                <span class="intake__summary-num">{{ p.totalRows }}</span>
+                <span class="intake__summary-label">{{ 'leads.intake.totalLabel' | translate }}</span>
+              </div>
+            </div>
+          }
+
+          <div class="intake__table-wrap">
+            <table class="intake__table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>{{ 'customers.companyName' | translate }}</th>
+                  <th>{{ 'customers.contactName' | translate }}</th>
+                  <th>{{ 'common.email' | translate }}</th>
+                  <th>{{ 'common.phone' | translate }}</th>
+                  <th>{{ 'leads.intake.statusCol' | translate }}</th>
+                  <th>{{ 'leads.intake.reasonCol' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of parsedRows(); track row.externalRowKey; let i = $index) {
+                  <tr>
+                    <td class="intake__num">{{ i + 1 }}</td>
+                    <td>{{ row.companyName }}</td>
+                    <td>{{ row.contactName ?? '—' }}</td>
+                    <td>{{ row.email ?? '—' }}</td>
+                    <td>{{ row.phone ?? '—' }}</td>
+                    <td>
+                      @if (resultFor(row.externalRowKey); as r) {
+                        <span [class]="statusChipClass(r.status)">{{ statusLabel(r.status) }}</span>
+                      }
+                    </td>
+                    <td class="intake__reason">{{ resultFor(row.externalRowKey)?.reason ?? '' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="intake__row intake__commit-row">
+            <button type="button" class="action-btn"
+              (click)="runPreview()"
+              data-testid="intake-rerun-preview">
+              <span class="material-icons-outlined">refresh</span>
+              {{ 'leads.intake.rerunPreview' | translate }}
+            </button>
+            <button type="button" class="action-btn action-btn--primary"
+              [disabled]="!canCommit()"
+              (click)="commit()"
+              data-testid="intake-commit-btn">
+              @if (committing()) {
+                <span class="material-icons-outlined">sync</span>
+              } @else {
+                <span class="material-icons-outlined">save</span>
+              }
+              {{ 'leads.intake.commitN' | translate:{ count: preview()?.createdCount ?? 0 } }}
+            </button>
+          </div>
+        }
+      </div>
+    </section>
+  } @else if (parseErrors().length === 0) {
+    <app-empty-state
+      icon="upload_file"
+      [message]="'leads.intake.placeholderMessage' | translate"
+      [helpText]="'leads.intake.placeholderHelp' | translate" />
+  }
+</div>

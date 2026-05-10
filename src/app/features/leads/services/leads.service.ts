@@ -8,6 +8,7 @@ import { UpdateLeadRequest } from '../models/update-lead-request.model';
 import { LeadStatus } from '../models/lead-status.type';
 import { ConvertLeadResult } from '../models/convert-lead-result.model';
 import { ConvertLeadRequest } from '../models/convert-lead-request.model';
+import { BulkLeadIntakeRequest, BulkLeadIntakeResponse } from '../models/bulk-intake.model';
 
 @Injectable({ providedIn: 'root' })
 export class LeadsService {
@@ -39,5 +40,17 @@ export class LeadsService {
 
   deleteLead(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
+  // Phase 1r / Batch 4 — bulk intake. Preview returns per-row dedup +
+  // suppression + quality status without persisting; commit re-runs the
+  // pipeline AND inserts the rows that pass.
+
+  bulkIntakePreview(request: BulkLeadIntakeRequest): Observable<BulkLeadIntakeResponse> {
+    return this.http.post<BulkLeadIntakeResponse>(`${this.base}/bulk-intake/preview`, request);
+  }
+
+  bulkIntakeCommit(request: BulkLeadIntakeRequest): Observable<BulkLeadIntakeResponse> {
+    return this.http.post<BulkLeadIntakeResponse>(`${this.base}/bulk-intake/commit`, request);
   }
 }
