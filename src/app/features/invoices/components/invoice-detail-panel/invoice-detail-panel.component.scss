@@ -115,12 +115,18 @@
 .totals-value { font-family: $font-family-mono; }
 
 // --- Actions ---
+// Standard footer pattern: right-justified, primary furthest right, destructive
+// separated to far left via `margin-right: auto`. See CLAUDE.md "UI Layout Rules".
 .detail-actions {
   display: flex;
   flex-wrap: wrap;
   gap: $sp-md;
   padding-top: $sp-md;
   border-top: $border-width-thin solid var(--border);
+  justify-content: flex-end;
+
+  .action-btn--danger,
+  .action-btn--destructive { margin-right: auto; }
 }
 
 // --- Empty / Loading State ---

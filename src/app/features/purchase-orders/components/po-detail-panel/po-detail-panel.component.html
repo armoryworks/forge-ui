@@ -275,8 +275,34 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Actions — destructive on far left, primary furthest right. -->
       <div class="detail-actions">
+        @if (canDelete(po.status)) {
+          <button data-testid="po-delete-btn" class="action-btn action-btn--danger" (click)="deletePo()">
+            <span class="material-icons-outlined">delete</span>
+            {{ 'common.delete' | translate }}
+          </button>
+        }
+        @if (canCancel(po.status)) {
+          <button data-testid="po-cancel-btn" class="action-btn" (click)="cancelPo()">
+            <span class="material-icons-outlined">block</span>
+            {{ 'common.cancel' | translate }}
+          </button>
+        }
+        @if (canShortClose(po)) {
+          <!-- Phase 3 / WU-14 / H3 — short-close action. Closes a partial PO when
+               the remainder will not be received. Required reason captured in dialog. -->
+          <button data-testid="po-short-close-btn" class="action-btn" (click)="openShortClose()">
+            <span class="material-icons-outlined">cancel_schedule_send</span>
+            {{ 'purchaseOrders.shortClose' | translate }}
+          </button>
+        }
+        @if (canClose(po.status)) {
+          <button data-testid="po-close-btn" class="action-btn" (click)="closePo()">
+            <span class="material-icons-outlined">check_circle</span>
+            {{ 'common.close' | translate }}
+          </button>
+        }
         @if (canSubmit(po.status)) {
           <button data-testid="po-submit-btn" class="action-btn action-btn--primary" (click)="submitPo()">
             <span class="material-icons-outlined">send</span>
@@ -293,32 +319,6 @@
           <button data-testid="po-receive-btn" class="action-btn action-btn--primary" (click)="openReceiveDialog()">
             <span class="material-icons-outlined">inventory</span>
             {{ 'purchaseOrders.receiveItems' | translate }}
-          </button>
-        }
-        @if (canClose(po.status)) {
-          <button data-testid="po-close-btn" class="action-btn" (click)="closePo()">
-            <span class="material-icons-outlined">check_circle</span>
-            {{ 'common.close' | translate }}
-          </button>
-        }
-        @if (canShortClose(po)) {
-          <!-- Phase 3 / WU-14 / H3 — short-close action. Closes a partial PO when
-               the remainder will not be received. Required reason captured in dialog. -->
-          <button data-testid="po-short-close-btn" class="action-btn" (click)="openShortClose()">
-            <span class="material-icons-outlined">cancel_schedule_send</span>
-            {{ 'purchaseOrders.shortClose' | translate }}
-          </button>
-        }
-        @if (canCancel(po.status)) {
-          <button data-testid="po-cancel-btn" class="action-btn" (click)="cancelPo()">
-            <span class="material-icons-outlined">block</span>
-            {{ 'common.cancel' | translate }}
-          </button>
-        }
-        @if (canDelete(po.status)) {
-          <button data-testid="po-delete-btn" class="action-btn action-btn--danger" (click)="deletePo()">
-            <span class="material-icons-outlined">delete</span>
-            {{ 'common.delete' | translate }}
           </button>
         }
       </div>

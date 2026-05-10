@@ -127,12 +127,12 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Actions — destructive on far left, primary furthest right. -->
       <div class="detail-actions">
-        @if (canSend(inv.status)) {
-          <button class="action-btn action-btn--primary" (click)="sendInvoice()">
-            <span class="material-icons-outlined">send</span>
-            {{ 'invoices.send' | translate }}
+        @if (canDelete(inv.status)) {
+          <button class="action-btn action-btn--danger" (click)="deleteInvoice()">
+            <span class="material-icons-outlined">delete</span>
+            {{ 'common.delete' | translate }}
           </button>
         }
         @if (canVoid(inv.status)) {
@@ -141,10 +141,10 @@
             {{ 'invoices.void' | translate }}
           </button>
         }
-        @if (canDelete(inv.status)) {
-          <button class="action-btn action-btn--danger" (click)="deleteInvoice()">
-            <span class="material-icons-outlined">delete</span>
-            {{ 'common.delete' | translate }}
+        @if (canSend(inv.status)) {
+          <button class="action-btn action-btn--primary" (click)="sendInvoice()">
+            <span class="material-icons-outlined">send</span>
+            {{ 'invoices.send' | translate }}
           </button>
         }
       </div>

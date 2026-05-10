@@ -117,8 +117,20 @@
         </div>
       </div>
 
-      <!-- Actions -->
+      <!-- Actions — destructive on far left, primary furthest right. -->
       <div class="detail-actions">
+        @if (canDelete(quote.status)) {
+          <button data-testid="quote-delete-btn" class="action-btn action-btn--danger" (click)="deleteQuote()">
+            <span class="material-icons-outlined">delete</span>
+            {{ 'common.delete' | translate }}
+          </button>
+        }
+        @if (canReject(quote.status)) {
+          <button data-testid="quote-reject-btn" class="action-btn" (click)="rejectQuote()">
+            <span class="material-icons-outlined">thumb_down</span>
+            {{ 'quotes.reject' | translate }}
+          </button>
+        }
         @if (canSend(quote.status)) {
           <button data-testid="quote-send-btn" class="action-btn action-btn--primary" (click)="sendQuote()">
             <span class="material-icons-outlined">send</span>
@@ -131,22 +143,10 @@
             {{ 'quotes.accept' | translate }}
           </button>
         }
-        @if (canReject(quote.status)) {
-          <button data-testid="quote-reject-btn" class="action-btn" (click)="rejectQuote()">
-            <span class="material-icons-outlined">thumb_down</span>
-            {{ 'quotes.reject' | translate }}
-          </button>
-        }
         @if (canConvert(quote.status)) {
           <button data-testid="quote-convert-btn" class="action-btn action-btn--primary" (click)="convertToOrder()">
             <span class="material-icons-outlined">shopping_cart</span>
             {{ 'quotes.convertToOrder' | translate }}
-          </button>
-        }
-        @if (canDelete(quote.status)) {
-          <button data-testid="quote-delete-btn" class="action-btn action-btn--danger" (click)="deleteQuote()">
-            <span class="material-icons-outlined">delete</span>
-            {{ 'common.delete' | translate }}
           </button>
         }
       </div>
