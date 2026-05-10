@@ -227,7 +227,18 @@ export class NavTreeService {
   }
 
   private findTrail(tree: NavItem[], url: string, requirePrefix: boolean, insideDrillable = false): NavItem[] {
-    for (const item of tree) {
+    // Phase 1r — match the most-specific leaf when siblings have
+    // overlapping route prefixes. e.g. under the Leads group, "All
+    // Leads" has route `/leads` and "Bulk Intake" has `/leads/intake`;
+    // for url `/leads/intake` we want the Intake match, not the
+    // prefix-y All-Leads match. Sort by route length descending so
+    // longer routes are tested first; groups (no route) sort to the
+    // end of the leaf-match phase but their child recursion is still
+    // attempted.
+    const ordered = [...tree].sort((a, b) =>
+      (b.route?.length ?? 0) - (a.route?.length ?? 0));
+
+    for (const item of ordered) {
       if (item.children?.length) {
         if (requirePrefix && item.routePrefix && !this.urlMatchesPrefix(url, item.routePrefix)) continue;
         const isDrillable = insideDrillable || !!item.routePrefix;
