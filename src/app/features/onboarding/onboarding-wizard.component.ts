@@ -183,6 +183,11 @@ export class OnboardingWizardComponent {
     { initialValue: 0 },
   );
 
+  // Review-phase params live in the URL too (?review=preview|signing&formIdx=N)
+  // so the address bar represents what the user is looking at and a shared
+  // link can land on the same screen. The formsToSign list itself is too
+  // large to embed; we keep it in localStorage and restore from there.
+
   protected readonly currentViolations = computed<string[]>(() => {
     switch (this.currentStepIndex()) {
       case 0: return this.personalViolations();
@@ -655,6 +660,33 @@ export class OnboardingWizardComponent {
       localStorage.setItem(REVIEW_STATE_KEY, JSON.stringify(state));
     });
 
+    // Mirror review state into the URL (?review=preview|signing&formIdx=N) so
+    // the address bar represents what the user is actually looking at and
+    // bookmarks / shared links round-trip correctly. Skipped while idle so
+    // we don't pollute the URL during the regular wizard flow.
+    effect(() => {
+      const phase = this.reviewPhase();
+      const idx = this.currentFormIndex();
+      if (phase === 'idle') {
+        const params = this.route.snapshot.queryParamMap;
+        if (params.has('review') || params.has('formIdx')) {
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { review: null, formIdx: null },
+            queryParamsHandling: 'merge',
+            replaceUrl: true,
+          });
+        }
+        return;
+      }
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { review: phase, formIdx: idx },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      });
+    });
+
     // Convert base64 PDF → blob URL → SafeResourceUrl for <embed> viewer.
     // Revokes the previous blob URL to prevent memory leaks.
     effect(() => {
@@ -924,9 +956,15 @@ export class OnboardingWizardComponent {
     }
   }
 
-  protected goBackToStep(formType: string | undefined): void {
-    const stepMap: Record<string, number> = { W4: 2, StateWithholding: 3, I9: 4 };
-    const step = formType ? (stepMap[formType] ?? 0) : 0;
+  /**
+   * Drop out of the review/sign flow back into the wizard. Always returns to
+   * step 6 (Acknowledgments) — that's where the user was when they hit submit
+   * so "back" feels like an undo. From there they can navigate to W-4/I-9/
+   * state-withholding via the wizard's Back button if a specific edit is
+   * needed. (Previously jumped straight to the form's edit step, which was
+   * surprising — reported 2026-05-10.)
+   */
+  protected goBackToStep(_formType: string | undefined): void {
     this.formsToSign.set([]);
     this.currentFormIndex.set(0);
     this.reviewPhase.set('idle');
@@ -934,7 +972,11 @@ export class OnboardingWizardComponent {
     this.currentSigningUrl.set(null);
     this.signedFormIndices.set(new Set());
     localStorage.removeItem(REVIEW_STATE_KEY);
-    this.router.navigate([], { relativeTo: this.route, queryParams: { step }, queryParamsHandling: 'merge' });
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step: 6, review: null, formIdx: null },
+      queryParamsHandling: 'merge',
+    });
   }
 
   protected onDocuSealSubmit(): void {
@@ -987,8 +1029,10 @@ export class OnboardingWizardComponent {
    * refresh during the e-sign loop puts the user back into the review flow
    * instead of the (now empty) wizard stepper.
    *
-   * If state restoration triggers signing for the current form, we kick off
-   * a preview load just like submit() would.
+   * URL params (`?review`, `?formIdx`) take priority over the persisted
+   * snapshot for phase + form index — that's how a shared link picks the
+   * right form/screen. The formsToSign list comes from localStorage either
+   * way (it's too large for the URL).
    */
   private restoreReviewState(): void {
     try {
@@ -996,14 +1040,28 @@ export class OnboardingWizardComponent {
       if (!raw) return;
       const state = JSON.parse(raw) as PersistedReviewState;
       if (!state.formsToSign || state.formsToSign.length === 0) return;
+
+      const urlParams = this.route.snapshot.queryParamMap;
+      const urlReview = urlParams.get('review');
+      const urlFormIdx = parseInt(urlParams.get('formIdx') ?? '', 10);
+
+      const phase: 'idle' | 'preview' | 'signing' =
+        urlReview === 'preview' || urlReview === 'signing'
+          ? urlReview
+          : (state.reviewPhase ?? 'preview');
+      const formIdx = !isNaN(urlFormIdx)
+        ? Math.min(Math.max(urlFormIdx, 0), state.formsToSign.length - 1)
+        : Math.min(state.currentFormIndex ?? 0, state.formsToSign.length - 1);
+
       this.formsToSign.set(state.formsToSign);
-      this.currentFormIndex.set(Math.min(state.currentFormIndex ?? 0, state.formsToSign.length - 1));
+      this.currentFormIndex.set(formIdx);
       this.signedFormIndices.set(new Set(state.signedFormIndices ?? []));
-      this.reviewPhase.set(state.reviewPhase ?? 'preview');
+      this.reviewPhase.set(phase);
+
       // Kick off whatever phase we restored into so the relevant data loads.
-      if (this.reviewPhase() === 'preview') {
+      if (phase === 'preview') {
         this.loadPreviewForCurrentForm();
-      } else if (this.reviewPhase() === 'signing') {
+      } else if (phase === 'signing') {
         this.loadSigningUrlForCurrentForm();
       }
     } catch {
