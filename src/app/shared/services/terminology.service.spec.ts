@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { TerminologyService } from './terminology.service';
 import { environment } from '../../../environments/environment';
@@ -8,9 +9,11 @@ import { environment } from '../../../environments/environment';
 describe('TerminologyService', () => {
   let service: TerminologyService;
   let httpMock: HttpTestingController;
+  let translate: TranslateService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
@@ -19,6 +22,7 @@ describe('TerminologyService', () => {
 
     service = TestBed.inject(TerminologyService);
     httpMock = TestBed.inject(HttpTestingController);
+    translate = TestBed.inject(TranslateService);
   });
 
   afterEach(() => {
@@ -100,6 +104,32 @@ describe('TerminologyService', () => {
 
     it('should title-case multi-word fallbacks', () => {
       expect(service.resolve('entity_sales_order')).toBe('Sales Order');
+    });
+
+    // Wave 13 — ngx-translate fallback tier (Pro Services rollout).
+    describe('ngx-translate fallback', () => {
+      it('falls through to ngx-translate when no preset override is set', () => {
+        translate.setTranslation('en', { 'entity_job': 'Trabajo' });
+        translate.use('en');
+
+        // No preset override loaded, but translate has the key.
+        expect(service.resolve('entity_job')).toBe('Trabajo');
+      });
+
+      it('preset overrides win over ngx-translate', () => {
+        translate.setTranslation('en', { 'entity_job': 'Trabajo' });
+        translate.use('en');
+
+        // Preset override seeded — should win even though translate has a value.
+        service.set('entity_job', 'Task');
+        expect(service.resolve('entity_job')).toBe('Task');
+      });
+
+      it('falls through to humanize when ngx-translate returns the key verbatim', () => {
+        // No translation registered for this key — ngx-translate returns the
+        // key as-is, signaling "not translated"; service should humanize.
+        expect(service.resolve('entity_purchase_order')).toBe('Purchase Order');
+      });
     });
   });
 
