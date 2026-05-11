@@ -133,13 +133,16 @@ export class SetupComponent {
  * requirement surfaces as its own violation in the validation popover
  * (via FormValidationService — the service reads the `message` property
  * directly when an error value has one), so users see exactly what's
- * still needed instead of one generic "invalid" line. Required-empty
- * and minLength are handled by their respective built-in validators
- * and stay separate.
+ * still needed instead of one generic "invalid" line.
+ *
+ * Intentionally does NOT short-circuit on empty value — the requirements
+ * fire even for a blank field so the popover surfaces them up-front
+ * alongside "Password is required" (from Validators.required). Users
+ * learn what's needed before they start typing instead of discovering
+ * each rule one keystroke at a time.
  */
 function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
-  const value = control.value as string | null | undefined;
-  if (!value) return null;  // `required` covers the empty case.
+  const value = (control.value as string | null | undefined) ?? '';
 
   const errors: ValidationErrors = {};
   if (!/[A-Z]/.test(value)) errors['passwordUppercase'] = { message: 'Password must contain an uppercase letter' };
