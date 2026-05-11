@@ -302,13 +302,13 @@
           <div class="step-content__subsection">
             <div class="step-content__subsection-title">{{ 'onboarding.w4.step4Title' | translate }}</div>
             <div class="step-row">
-              <app-input [label]="'onboarding.w4.otherIncome' | translate"
-                formControlName="otherIncome" type="number" data-testid="onboarding-w4-other-income" />
-              <app-input [label]="'onboarding.w4.deductions' | translate"
-                formControlName="deductions" type="number" data-testid="onboarding-w4-deductions" />
+              <app-currency-input [label]="'onboarding.w4.otherIncome' | translate"
+                formControlName="otherIncome" data-testid="onboarding-w4-other-income" />
+              <app-currency-input [label]="'onboarding.w4.deductions' | translate"
+                formControlName="deductions" data-testid="onboarding-w4-deductions" />
             </div>
-            <app-input [label]="'onboarding.w4.extraWithholding' | translate"
-              formControlName="extraWithholding" type="number" data-testid="onboarding-w4-extra-withholding" />
+            <app-currency-input [label]="'onboarding.w4.extraWithholding' | translate"
+              formControlName="extraWithholding" data-testid="onboarding-w4-extra-withholding" />
           </div>
 
           <app-toggle [label]="'onboarding.w4.exemptLabel' | translate"
@@ -360,8 +360,8 @@
               <app-input [label]="'onboarding.stateTax.allowancesLabel' | translate"
                 formControlName="stateAllowances" type="number" data-testid="onboarding-state-allowances" />
             </div>
-            <app-input [label]="'onboarding.stateTax.additionalWithholding' | translate"
-              formControlName="stateAdditionalWithholding" type="number" data-testid="onboarding-state-extra-withholding" />
+            <app-currency-input [label]="'onboarding.stateTax.additionalWithholding' | translate"
+              formControlName="stateAdditionalWithholding" data-testid="onboarding-state-extra-withholding" />
             <app-toggle [label]="'onboarding.stateTax.exemptLabel' | translate"
               formControlName="stateExempt" data-testid="onboarding-state-exempt" />
           }
@@ -643,31 +643,6 @@
             formControlName="accountType"
             [options]="accountTypeOptions"
             [required]="true" data-testid="onboarding-account-type" />
-
-          <div class="step-content__section-label">{{ 'onboarding.deposit.voidedCheck' | translate }}</div>
-          @if (!voidedCheckFileName() && !_depositVal().voidedCheckFileId) {
-            <label class="doc-upload__zone" [class.doc-upload__zone--uploading]="uploadingVoidedCheck()">
-              <input type="file" accept="image/*,.pdf" (change)="onVoidedCheckSelected($event)"
-                style="display:none" [attr.aria-label]="'Upload voided check'" />
-              @if (uploadingVoidedCheck()) {
-                <span class="material-icons-outlined doc-upload__spinner">sync</span>
-                <span>{{ 'onboarding.deposit.uploadingCheck' | translate }}</span>
-              } @else {
-                <span class="material-icons-outlined">cloud_upload</span>
-                <span>{{ 'onboarding.deposit.uploadVoidedCheck' | translate }}</span>
-              }
-            </label>
-          } @else {
-            <div class="doc-upload__attached">
-              <span class="material-icons-outlined doc-upload__attached-icon">check_circle</span>
-              <span class="doc-upload__attached-name">{{ voidedCheckFileName() ?? ('onboarding.deposit.voidedCheckUploaded' | translate) }}</span>
-              <button type="button" class="doc-upload__remove"
-                (click)="clearVoidedCheck()"
-                [attr.aria-label]="'Remove voided check'">
-                <span class="material-icons-outlined">close</span>
-              </button>
-            </div>
-          }
         </div>
       </mat-step>
 
@@ -686,19 +661,31 @@
               <strong>{{ 'onboarding.ack.workersCompTitle' | translate }}</strong>
             </div>
             <p class="ack-card__body">{{ 'onboarding.ack.workersCompBody' | translate }}</p>
+            @if (policyDocs().workersCompDocUrl; as wcUrl) {
+              <a class="ack-card__doc-link" [href]="wcUrl" target="_blank" rel="noopener">
+                <span class="material-icons-outlined">picture_as_pdf</span>
+                {{ 'onboarding.ack.workersCompLink' | translate }}
+              </a>
+            }
             <app-toggle [label]="'onboarding.ack.workersCompToggle' | translate"
               formControlName="workersComp" data-testid="onboarding-ack-workers-comp" />
           </div>
 
-          <div class="ack-card">
-            <div class="ack-card__header">
-              <span class="material-icons-outlined">menu_book</span>
-              <strong>{{ 'onboarding.ack.handbookTitle' | translate }}</strong>
+          @if (hasHandbook()) {
+            <div class="ack-card">
+              <div class="ack-card__header">
+                <span class="material-icons-outlined">menu_book</span>
+                <strong>{{ 'onboarding.ack.handbookTitle' | translate }}</strong>
+              </div>
+              <p class="ack-card__body">{{ 'onboarding.ack.handbookBody' | translate }}</p>
+              <a class="ack-card__doc-link" [href]="policyDocs().handbookDocUrl!" target="_blank" rel="noopener">
+                <span class="material-icons-outlined">picture_as_pdf</span>
+                {{ 'onboarding.ack.handbookLink' | translate }}
+              </a>
+              <app-toggle [label]="'onboarding.ack.handbookToggle' | translate"
+                formControlName="handbook" data-testid="onboarding-ack-handbook" />
             </div>
-            <p class="ack-card__body">{{ 'onboarding.ack.handbookBody' | translate }}</p>
-            <app-toggle [label]="'onboarding.ack.handbookToggle' | translate"
-              formControlName="handbook" data-testid="onboarding-ack-handbook" />
-          </div>
+          }
 
           <p class="step-content__note">
             <span class="material-icons-outlined">info</span>

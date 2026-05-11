@@ -2983,9 +2983,11 @@
       "workersCompTitle": "Workers' Compensation",
       "workersCompBody": "I acknowledge that I have been informed of my rights under the workers' compensation laws of my state. I understand that workers' compensation insurance covers work-related injuries and illnesses, and I agree to report any such injury or illness to my supervisor immediately.",
       "workersCompToggle": "I acknowledge the Workers' Compensation policy",
+      "workersCompLink": "View Workers' Compensation notice",
       "handbookTitle": "Employee Handbook",
       "handbookBody": "I acknowledge that I have received, read, and understood the Employee Handbook. I understand it is not a contract of employment, that it may be updated at any time, and that I agree to comply with all policies and procedures contained within.",
       "handbookToggle": "I acknowledge receipt of the Employee Handbook",
+      "handbookLink": "Open the Employee Handbook",
       "submitNote": "After clicking Submit, you'll be guided through electronically signing your W-4, state withholding form, and I-9 via DocuSign."
     },
     "actions": {

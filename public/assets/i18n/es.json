@@ -2979,9 +2979,11 @@
       "workersCompTitle": "Compensación al trabajador",
       "workersCompBody": "Reconozco que se me ha informado de mis derechos bajo las leyes de compensación al trabajador de mi estado. Entiendo que el seguro de compensación al trabajador cubre lesiones y enfermedades relacionadas con el trabajo, y acepto reportar cualquier lesión o enfermedad de este tipo a mi supervisor inmediatamente.",
       "workersCompToggle": "Reconozco la política de compensación al trabajador",
+      "workersCompLink": "Ver aviso de compensación al trabajador",
       "handbookTitle": "Manual del empleado",
       "handbookBody": "Reconozco que he recibido, leído y entendido el Manual del Empleado. Entiendo que no es un contrato de empleo, que puede actualizarse en cualquier momento, y acepto cumplir con todas las políticas y procedimientos contenidos en él.",
       "handbookToggle": "Reconozco la recepción del Manual del Empleado",
+      "handbookLink": "Abrir el Manual del Empleado",
       "submitNote": "Después de hacer clic en Enviar, serás guiado a firmar electrónicamente tu W-4, formulario de retención estatal e I-9 vía DocuSign."
     },
     "actions": {

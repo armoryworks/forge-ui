@@ -23,6 +23,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
 import { DatepickerComponent } from '../../shared/components/datepicker/datepicker.component';
 import { ToggleComponent } from '../../shared/components/toggle/toggle.component';
+import { CurrencyInputComponent } from '../../shared/components/currency-input/currency-input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
@@ -34,12 +35,21 @@ import { EmployeeProfileService } from '../account/services/employee-profile.ser
 
 import {
   OnboardingFormToSignItem,
+  OnboardingPolicyDocs,
   OnboardingService,
   OnboardingSigningUrl,
   OnboardingSubmitRequest,
 } from './onboarding.service';
 
 const DRAFT_KEY = 'qbe-onboarding-draft';
+const REVIEW_STATE_KEY = 'qbe-onboarding-review-state';
+
+interface PersistedReviewState {
+  formsToSign: OnboardingFormToSignItem[];
+  currentFormIndex: number;
+  signedFormIndices: number[];
+  reviewPhase: 'idle' | 'preview' | 'signing';
+}
 
 const US_STATES = [
   { value: 'AL', label: 'Alabama' }, { value: 'AK', label: 'Alaska' },
@@ -141,6 +151,7 @@ interface I9Attachment {
     SelectComponent,
     DatepickerComponent,
     ToggleComponent,
+    CurrencyInputComponent,
     ValidationButtonComponent,
     TranslatePipe,
   ],
@@ -460,30 +471,38 @@ export class OnboardingWizardComponent {
   );
 
   // ── Step 6: Direct Deposit ────────────────────────────────────────────────
+  // Voided check upload was removed 2026-05-10 — payroll ops confirmed it's no
+  // longer required for direct-deposit setup (routing + account number is
+  // sufficient). Backend `VoidedCheckFileAttachmentId` remains nullable in case
+  // it's reintroduced later; we just no longer prompt for it here.
   protected readonly depositForm = new FormGroup({
     bankName: new FormControl('', [Validators.required]),
     routingNumber: new FormControl('', [Validators.required, Validators.pattern(/^\d{9}$/)]),
     accountNumber: new FormControl('', [Validators.required]),
     accountType: new FormControl('Checking', [Validators.required]),
-    voidedCheckFileId: new FormControl<number | null>(null, [Validators.required]),
   });
-
-  protected readonly voidedCheckFileName = signal<string | null>(null);
-  protected readonly uploadingVoidedCheck = signal(false);
 
   protected readonly depositViolations = FormValidationService.getViolations(this.depositForm, {
     bankName: 'Bank Name',
     routingNumber: 'Routing Number (9 digits)',
     accountNumber: 'Account Number',
     accountType: 'Account Type',
-    voidedCheckFileId: 'Voided Check Upload',
   });
 
   // ── Step 7: Acknowledgments ───────────────────────────────────────────────
+  // Handbook ack is required only when an actual handbook URL is configured —
+  // policyDocs is loaded on init and we (re)apply Validators.requiredTrue
+  // accordingly. Workers' comp ack is always required.
   protected readonly ackForm = new FormGroup({
     workersComp: new FormControl(false, [Validators.requiredTrue]),
-    handbook: new FormControl(false, [Validators.requiredTrue]),
+    handbook: new FormControl(false),
   });
+
+  protected readonly policyDocs = signal<OnboardingPolicyDocs>({
+    workersCompDocUrl: null,
+    handbookDocUrl: null,
+  });
+  protected readonly hasHandbook = computed(() => !!this.policyDocs().handbookDocUrl);
 
   protected readonly ackViolations = FormValidationService.getViolations(this.ackForm, {
     workersComp: "Workers' Compensation Acknowledgment",
@@ -519,6 +538,29 @@ export class OnboardingWizardComponent {
       }
       ctrl.updateValueAndValidity({ emitEvent: false });
     });
+
+    // Load policy docs — handbook ack is required only when a URL is set
+    this.service.getPolicyDocs().subscribe({
+      next: docs => this.policyDocs.set(docs),
+      error: () => {}, // Non-fatal — UI falls back to no links + no handbook section
+    });
+
+    // Re-apply handbook required validator whenever the handbook URL flips
+    effect(() => {
+      const ctrl = this.ackForm.controls.handbook;
+      if (this.hasHandbook()) {
+        ctrl.addValidators(Validators.requiredTrue);
+      } else {
+        ctrl.removeValidators(Validators.requiredTrue);
+        // If no handbook is configured, the field shouldn't block submit
+        ctrl.setValue(false, { emitEvent: false });
+      }
+      ctrl.updateValueAndValidity({ emitEvent: false });
+    });
+
+    // Restore review state BEFORE re-prefilling forms — if the user was
+    // mid-signing when they refreshed, drop them back into the review flow.
+    this.restoreReviewState();
 
     // Restore saved draft first — takes priority over admin prefill
     const draftRestored = this.restoreDraft();
@@ -592,6 +634,25 @@ export class OnboardingWizardComponent {
         deposit:  this._depositVal(),
         ack:      this._ackVal(),
       }));
+    });
+
+    // Persist review state — formsToSign + currentFormIndex + signedFormIndices +
+    // reviewPhase — so a refresh during the e-sign loop puts the user back
+    // where they were rather than the wizard's last step (reported 2026-05-10).
+    effect(() => {
+      const forms = this.formsToSign();
+      const phase = this.reviewPhase();
+      if (phase === 'idle' && forms.length === 0) {
+        localStorage.removeItem(REVIEW_STATE_KEY);
+        return;
+      }
+      const state: PersistedReviewState = {
+        formsToSign: forms,
+        currentFormIndex: this.currentFormIndex(),
+        signedFormIndices: Array.from(this.signedFormIndices()),
+        reviewPhase: phase,
+      };
+      localStorage.setItem(REVIEW_STATE_KEY, JSON.stringify(state));
     });
 
     // Convert base64 PDF → blob URL → SafeResourceUrl for <embed> viewer.
@@ -682,31 +743,6 @@ export class OnboardingWizardComponent {
     }
   }
 
-  protected onVoidedCheckSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-    input.value = '';
-
-    this.uploadingVoidedCheck.set(true);
-    this.service.uploadVoidedCheck(file).subscribe({
-      next: result => {
-        this.uploadingVoidedCheck.set(false);
-        this.voidedCheckFileName.set(result.fileName);
-        this.depositForm.controls.voidedCheckFileId.setValue(result.fileAttachmentId);
-      },
-      error: () => {
-        this.uploadingVoidedCheck.set(false);
-        this.snackbar.error(this.translate.instant('onboarding.errors.voidedCheckFailed'));
-      },
-    });
-  }
-
-  protected clearVoidedCheck(): void {
-    this.voidedCheckFileName.set(null);
-    this.depositForm.controls.voidedCheckFileId.setValue(null);
-  }
-
   // ── Build canonical request from all form values ──────────────────────────
   private buildRequest(): OnboardingSubmitRequest {
     const p = this.personalForm.value;
@@ -774,7 +810,6 @@ export class OnboardingWizardComponent {
       routingNumber: d.routingNumber!,
       accountNumber: d.accountNumber!,
       accountType: d.accountType!,
-      voidedCheckFileAttachmentId: d.voidedCheckFileId ?? undefined,
       acknowledgeWorkersComp: k.workersComp ?? false,
       acknowledgeHandbook: k.handbook ?? false,
     };
@@ -787,13 +822,18 @@ export class OnboardingWizardComponent {
     this.service.saveData(this.buildRequest()).subscribe({
       next: result => {
         this.submitting.set(false);
-        localStorage.removeItem(DRAFT_KEY);
         if (result.formsToSign.length > 0) {
+          // Keep DRAFT_KEY until signing finishes — if the user refreshes
+          // mid-loop we still want their wizard data available in case they
+          // hit "Go back to edit".
           this.formsToSign.set(result.formsToSign);
           this.currentFormIndex.set(0);
           this.reviewPhase.set('preview');
           this.loadPreviewForCurrentForm();
         } else {
+          // Nothing to sign — onboarding is done. Clear both drafts now.
+          localStorage.removeItem(DRAFT_KEY);
+          localStorage.removeItem(REVIEW_STATE_KEY);
           this.signingComplete.set(true);
         }
       },
@@ -870,6 +910,9 @@ export class OnboardingWizardComponent {
   protected advanceToNextForm(): void {
     const next = this.currentFormIndex() + 1;
     if (next >= this.formsToSign().length) {
+      // All forms signed — onboarding is done; safe to discard both drafts.
+      localStorage.removeItem(DRAFT_KEY);
+      localStorage.removeItem(REVIEW_STATE_KEY);
       this.signingComplete.set(true);
       this.reviewPhase.set('idle');
     } else {
@@ -890,6 +933,7 @@ export class OnboardingWizardComponent {
     this.previewPdfBase64.set(null);
     this.currentSigningUrl.set(null);
     this.signedFormIndices.set(new Set());
+    localStorage.removeItem(REVIEW_STATE_KEY);
     this.router.navigate([], { relativeTo: this.route, queryParams: { step }, queryParamsHandling: 'merge' });
   }
 
@@ -912,6 +956,10 @@ export class OnboardingWizardComponent {
   }
 
   protected goToDashboard(): void {
+    // Defensive — clear drafts in case the user clicked through before the
+    // advanceToNextForm() flush ran (e.g. mock signing returned synchronously).
+    localStorage.removeItem(DRAFT_KEY);
+    localStorage.removeItem(REVIEW_STATE_KEY);
     this.router.navigate([this.layout.getDefaultRoute()]);
   }
 
@@ -931,6 +979,36 @@ export class OnboardingWizardComponent {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * Restore the per-form review/signing state from localStorage so a page
+   * refresh during the e-sign loop puts the user back into the review flow
+   * instead of the (now empty) wizard stepper.
+   *
+   * If state restoration triggers signing for the current form, we kick off
+   * a preview load just like submit() would.
+   */
+  private restoreReviewState(): void {
+    try {
+      const raw = localStorage.getItem(REVIEW_STATE_KEY);
+      if (!raw) return;
+      const state = JSON.parse(raw) as PersistedReviewState;
+      if (!state.formsToSign || state.formsToSign.length === 0) return;
+      this.formsToSign.set(state.formsToSign);
+      this.currentFormIndex.set(Math.min(state.currentFormIndex ?? 0, state.formsToSign.length - 1));
+      this.signedFormIndices.set(new Set(state.signedFormIndices ?? []));
+      this.reviewPhase.set(state.reviewPhase ?? 'preview');
+      // Kick off whatever phase we restored into so the relevant data loads.
+      if (this.reviewPhase() === 'preview') {
+        this.loadPreviewForCurrentForm();
+      } else if (this.reviewPhase() === 'signing') {
+        this.loadSigningUrlForCurrentForm();
+      }
+    } catch {
+      // Corrupt state — drop it so the next session starts clean
+      localStorage.removeItem(REVIEW_STATE_KEY);
     }
   }
 }

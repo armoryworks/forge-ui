@@ -52,6 +52,7 @@ export class DatepickerComponent implements ControlValueAccessor {
   readonly label = input.required<string>();
   readonly min = input<Date | null>(null);
   readonly max = input<Date | null>(null);
+  readonly required = input<boolean>(false);
   /** Read-only mode — see styles.scss .app-readonly-field treatment.
    *  The calendar toggle button is hidden via the global rule. */
   readonly isReadonly = input<boolean>(false);

@@ -105,6 +105,11 @@ export interface UploadI9DocumentResult {
   fileName: string;
 }
 
+export interface OnboardingPolicyDocs {
+  workersCompDocUrl: string | null;
+  handbookDocUrl: string | null;
+}
+
 // ── Per-form review flow models ───────────────────────────────────────────────
 
 export interface OnboardingFormToSignItem {
@@ -167,6 +172,11 @@ export class OnboardingService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<UploadI9DocumentResult>(`${this.base}/voided-check`, formData);
+  }
+
+  /** Workers' comp + handbook document URLs surfaced on the Acknowledgments step. */
+  getPolicyDocs(): Observable<OnboardingPolicyDocs> {
+    return this.http.get<OnboardingPolicyDocs>(`${this.base}/policy-docs`);
   }
 
   // ── Per-form review flow ──────────────────────────────────────────────────

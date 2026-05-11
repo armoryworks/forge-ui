@@ -937,4 +937,26 @@
     line-height: 1.6;
     margin: 0;
   }
+
+  // Clickable link to the underlying policy PDF — sits between the body copy
+  // and the acknowledgment toggle so the user can read the document before
+  // checking the box.
+  &__doc-link {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+    align-self: flex-start;
+    font-size: var(--font-size-sm);
+    color: var(--primary);
+    text-decoration: none;
+    padding: $sp-xs 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
 }

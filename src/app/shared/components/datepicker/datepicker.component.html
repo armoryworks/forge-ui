@@ -5,6 +5,7 @@
     [formControl]="internalControl"
     [min]="min()"
     [max]="max()"
+    [required]="required()"
     [readonly]="isReadonly()"
     (blur)="markTouched()" />
   <mat-datepicker-toggle matSuffix [for]="picker" [disabled]="isReadonly() || internalControl.disabled" />
