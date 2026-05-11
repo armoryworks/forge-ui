@@ -64,11 +64,10 @@
     flex-direction: column;
     gap: $sp-xl;
 
-    // Extra separation between the last input and the submit button so
-    // the action affordance reads as a clear next step rather than the
-    // next field. Total visual gap = $sp-xl + $sp-md (32px).
+    // Light touch of extra separation between the last input and the
+    // submit button — the $sp-xl flex gap does most of the work.
     > app-validation-button {
-      margin-top: $sp-md;
+      margin-top: $sp-sm;
     }
   }
 
@@ -90,7 +89,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $sp-md;
-    margin-top: $sp-md;
+    margin-top: $sp-sm;
 
     button {
       width: 100%;
