@@ -46,7 +46,11 @@
   justify-content: center;
   gap: $sp-xs;
   flex: 0 0 auto;
-  height: $input-height;
+  // min-height (not height) so the host's align-items: stretch can grow
+  // the trigger to match a taller sibling button (e.g. a Material
+  // mat-flat-button ~36-40px) without losing the 32px floor when
+  // standalone.
+  min-height: $input-height;
   padding: 0 $sp-sm;
   border: $border-width solid var(--error);
   background: var(--surface);

@@ -58,6 +58,13 @@ export class SetupComponent {
   });
 
   // Step 2: Company Details
+  // The `address` control wraps a Record<string,string> from
+  // AddressFormComponent (line1 / city / state / postalCode, etc.).
+  // AddressFormComponent renders visual `*` marks on its required
+  // fields but its own internal Validators don't propagate up to this
+  // parent FormControl — so the validation popover would silently miss
+  // them. addressRequiredValidator below surfaces one entry per missing
+  // required address field so the visual `*` and the popover stay in sync.
   protected readonly companyForm = new FormGroup({
     companyName: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     companyPhone: new FormControl(''),
@@ -65,12 +72,13 @@ export class SetupComponent {
     companyEin: new FormControl(''),
     companyWebsite: new FormControl(''),
     locationName: new FormControl('Main Office'),
-    address: new FormControl<Record<string, string> | null>(null),
+    address: new FormControl<Record<string, string> | null>(null, [addressRequiredValidator]),
   });
 
   protected readonly companyViolations = FormValidationService.getViolations(this.companyForm, {
     companyName: 'Company Name',
     companyEmail: 'Company Email',
+    address: 'Address',
   });
 
   protected nextStep(): void {
@@ -148,5 +156,24 @@ function passwordStrengthValidator(control: AbstractControl): ValidationErrors |
   if (!/[A-Z]/.test(value)) errors['passwordUppercase'] = { message: 'Password must contain an uppercase letter' };
   if (!/[a-z]/.test(value)) errors['passwordLowercase'] = { message: 'Password must contain a lowercase letter' };
   if (!/[0-9]/.test(value)) errors['passwordDigit'] = { message: 'Password must contain a digit' };
+  return Object.keys(errors).length > 0 ? errors : null;
+}
+
+/**
+ * Surfaces per-field violations matching the visual `*` marks
+ * AddressFormComponent renders on its required line1 / city / state /
+ * postalCode controls. The child component's internal validators don't
+ * propagate up to the parent's `address` FormControl, so without this
+ * the validation popover would silently miss them.
+ */
+function addressRequiredValidator(control: AbstractControl): ValidationErrors | null {
+  const value = (control.value ?? {}) as Record<string, string | null | undefined>;
+
+  const isBlank = (v: string | null | undefined) => !v || !v.trim();
+  const errors: ValidationErrors = {};
+  if (isBlank(value['line1'])) errors['streetRequired'] = { message: 'Street Address is required' };
+  if (isBlank(value['city'])) errors['cityRequired'] = { message: 'City is required' };
+  if (isBlank(value['state'])) errors['stateRequired'] = { message: 'State is required' };
+  if (isBlank(value['postalCode'])) errors['postalRequired'] = { message: 'ZIP / Postal Code is required' };
   return Object.keys(errors).length > 0 ? errors : null;
 }
