@@ -56,19 +56,15 @@
   // Explicit flex stack (NOT relying on [formGroup] from _shared.scss —
   // Angular's [formGroup]="..." property binding doesn't render a
   // `formGroup` DOM attribute, so the `[formGroup]` CSS selector never
-  // matches and gap goes ignored). Setup wizard wants generous breathing
-  // room — $sp-xl between fields makes each one read as a distinct
-  // decision rather than part of a packed stack.
+  // matches and gap goes ignored).
+  //
+  // Vertical gap matches the horizontal $sp-md gap in `.auth-card__row`
+  // (between First Name and Last Name) — uniform spacing top-to-bottom
+  // and left-to-right.
   &__form {
     display: flex;
     flex-direction: column;
-    gap: $sp-xl;
-
-    // Light touch of extra separation between the last input and the
-    // submit button — the $sp-xl flex gap does most of the work.
-    > app-validation-button {
-      margin-top: $sp-sm;
-    }
+    gap: $sp-md;
   }
 
   &__form button[mat-flat-button] {
@@ -89,7 +85,6 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $sp-md;
-    margin-top: $sp-sm;
 
     button {
       width: 100%;
