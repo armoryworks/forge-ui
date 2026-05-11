@@ -53,16 +53,22 @@
     margin: $sp-md 0 0;
   }
 
-  // [formGroup] in _shared.scss applies flex-column + $sp-md gap by
-  // default. Setup wizard wants more breathing room between fields than
-  // a dense panel — override to $sp-lg.
+  // Explicit flex stack (NOT relying on [formGroup] from _shared.scss —
+  // Angular's [formGroup]="..." property binding doesn't render a
+  // `formGroup` DOM attribute, so the `[formGroup]` CSS selector never
+  // matches and gap goes ignored). Setup wizard wants generous breathing
+  // room — $sp-xl between fields makes each one read as a distinct
+  // decision rather than part of a packed stack.
   &__form {
-    gap: $sp-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xl;
 
     // Extra separation between the last input and the submit button so
-    // the action affordance reads as distinct from the field stack.
+    // the action affordance reads as a clear next step rather than the
+    // next field. Total visual gap = $sp-xl + $sp-md (32px).
     > app-validation-button {
-      margin-top: $sp-sm;
+      margin-top: $sp-md;
     }
   }
 
@@ -84,7 +90,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $sp-md;
-    margin-top: $sp-sm;
+    margin-top: $sp-md;
 
     button {
       width: 100%;
