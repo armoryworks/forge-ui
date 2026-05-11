@@ -97,6 +97,13 @@
         [rows]="3"
         data-testid="queue-notes" />
 
+      <!-- Shortcut hint — the per-button <kbd> badges are functional keys,
+           not just labels. New users miss this without an explicit note. -->
+      <p class="queue__shortcut-hint">
+        <span class="material-icons-outlined">keyboard</span>
+        {{ 'leads.queue.shortcutHint' | translate }}
+      </p>
+
       <div class="queue__actions">
         @for (a of actions; track a.state) {
           <button type="button"

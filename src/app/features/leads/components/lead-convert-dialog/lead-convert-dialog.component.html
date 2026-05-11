@@ -85,6 +85,28 @@
             <dd>{{ leadExtras()['expectedTimeline'] }}</dd>
           }
         </dl>
+
+        <!-- Account-linked leads inherit the account's contacts as non-primary
+             Contact rows on the new Customer. Surface those rows so the
+             user sees exactly what's about to land. -->
+        @if (lead.accountId && accountContacts().length > 0) {
+          <div class="rollover-preview">
+            <div class="rollover-preview__heading">
+              <span class="material-icons-outlined">groups</span>
+              <strong>{{ 'leads.convertStepper.accountRolloverTitle' | translate:{ name: accountName() ?? '' } }}</strong>
+            </div>
+            <p class="rollover-preview__hint">{{ 'leads.convertStepper.accountRolloverHint' | translate:{ count: accountContacts().length } }}</p>
+            <ul class="rollover-preview__list">
+              @for (c of accountContacts(); track c.id) {
+                <li>
+                  <strong>{{ c.lastName }}, {{ c.firstName }}</strong>
+                  @if (c.role) { <span class="rollover-preview__role">— {{ c.role }}</span> }
+                  @if (c.email) { <span class="rollover-preview__detail">{{ c.email }}</span> }
+                </li>
+              }
+            </ul>
+          </div>
+        }
       </mat-step>
 
       <!-- Step 2 — customer-required details -->
@@ -106,7 +128,7 @@
           <app-select
             [label]="'leads.convertStepper.step2DefaultCurrency' | translate"
             formControlName="defaultCurrency"
-            [options]="currencyOptions" />
+            [options]="currencyOptions()" />
         </div>
 
         <div class="step-grid">

@@ -149,4 +149,8 @@ export class CustomerService {
   setPortalAccessEnabled(accessId: number, enabled: boolean): Observable<void> {
     return this.http.put<void>(`${this.base}/portal-access/${accessId}/enabled`, { enabled });
   }
+
+  provisionPortalAccess(contactId: number): Observable<PortalAccessRow> {
+    return this.http.post<PortalAccessRow>(`${this.base}/portal-access`, { contactId });
+  }
 }

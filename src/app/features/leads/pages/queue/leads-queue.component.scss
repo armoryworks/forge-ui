@@ -223,3 +223,14 @@ kbd {
   font-family: $font-family-mono;
   color: var(--text-muted);
 }
+
+.queue__shortcut-hint {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  margin: $sp-md 0 $sp-sm;
+
+  .material-icons-outlined { font-size: $icon-size-sm; }
+}

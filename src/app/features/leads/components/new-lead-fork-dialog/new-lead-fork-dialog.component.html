@@ -1,4 +1,6 @@
-<app-dialog [title]="'leads.fork.title' | translate" width="640px" (closed)="close()">
+<app-dialog [title]="'leads.fork.title' | translate" width="640px"
+  [draftConfig]="draftConfig" [draftFormGroup]="form"
+  (closed)="close()">
   <div class="lead-fork">
 
     <!-- Step 1 — pick the engagement shape -->
@@ -43,6 +45,13 @@
           <app-datepicker data-testid="lead-follow-up" [label]="'leads.followUpDate' | translate"
                           formControlName="followUpDate" [min]="today" />
         </div>
+        <!-- Phase 1r — optional account link at intake. The fork dialog's
+             primary axis is engagement shape, but a rep who already knows
+             which B2B parent the lead belongs to shouldn't have to wait
+             for a follow-up edit to assign it. -->
+        <app-select data-testid="lead-account-picker"
+                    [label]="'leads.accounts.fieldName' | translate"
+                    formControlName="accountId" [options]="accountOptions()" />
 
         <!-- Shape-specific extras: revealed conditionally. The fields land
              in `extras` group inside the form so the JSON serialisation

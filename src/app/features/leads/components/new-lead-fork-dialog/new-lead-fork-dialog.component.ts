@@ -12,8 +12,11 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CreateLeadRequest } from '../../models/create-lead-request.model';
 import { LeadEngagementShape } from '../../models/lead-engagement-shape.type';
+import { AccountsService } from '../../services/accounts.service';
+import { Account } from '../../models/account.model';
 
 interface ShapeChoice {
   value: LeadEngagementShape;
@@ -57,13 +60,24 @@ export class NewLeadForkDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<NewLeadForkDialogComponent, CreateLeadRequest | undefined>);
   protected readonly translate = inject(TranslateService);
   private readonly refDataService = inject(ReferenceDataService);
+  private readonly accountsService = inject(AccountsService);
 
   protected readonly currentStep = signal(0);
   protected readonly shape = signal<LeadEngagementShape>('Unknown');
+  // Hook into the shared DraftService via app-dialog's [draftConfig].
+  // entityId is 'fork-new' so it doesn't collide with the edit-lead
+  // dialog's 'lead:{id}' key. The form's shape-specific extras live
+  // inside `extras` so they round-trip through the same auto-save.
+  protected readonly draftConfig: DraftConfig = { entityType: 'lead', entityId: 'fork-new', route: '/leads' };
   /** Phase 1l — follow-up + RFQ-due dates can't be in the past. */
   protected readonly today = todayStart();
   protected readonly sourceOptions = signal<SelectOption[]>([
     { value: null, label: this.translate.instant('common.none') },
+  ]);
+  // Phase 1r — optional account link at intake. Loaded once on construction;
+  // null option leads the list so reps can leave the lead unaffiliated.
+  protected readonly accountOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('leads.accounts.noneOption') },
   ]);
 
   // Form. Always-visible fields land directly on top-level controls;
@@ -79,6 +93,7 @@ export class NewLeadForkDialogComponent {
     email: new FormControl<string>('', { nonNullable: true, validators: [Validators.email] }),
     phone: new FormControl<string>('', { nonNullable: true }),
     source: new FormControl<string | null>(null),
+    accountId: new FormControl<number | null>(null),
     notes: new FormControl<string>('', { nonNullable: true }),
     followUpDate: new FormControl<Date | null>(null),
     extras: new FormGroup({
@@ -134,6 +149,16 @@ export class NewLeadForkDialogComponent {
       allLabel: this.translate.instant('common.none'),
       valueField: 'label',
     }).subscribe(opts => this.sourceOptions.set(opts));
+
+    // Lazy-load Accounts so the picker has options once Step 2 lands.
+    // Empty install with no accounts → picker shows only the "— None —"
+    // option, which is the right "no account yet" UX.
+    this.accountsService.list().subscribe({
+      next: (accounts: Account[]) => this.accountOptions.set([
+        { value: null, label: this.translate.instant('leads.accounts.noneOption') },
+        ...accounts.map(a => ({ value: a.id, label: a.name })),
+      ]),
+    });
   }
 
   protected pickShape(s: LeadEngagementShape): void {
@@ -187,6 +212,7 @@ export class NewLeadForkDialogComponent {
       followUpDate: toIsoDate(v.followUpDate) ?? undefined,
       engagementShape: this.shape(),
       customFieldValues: Object.keys(custom).length > 0 ? JSON.stringify(custom) : undefined,
+      accountId: v.accountId,
     };
 
     this.dialogRef.close(request);

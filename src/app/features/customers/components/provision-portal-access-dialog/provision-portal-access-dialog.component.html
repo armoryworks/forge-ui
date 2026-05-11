@@ -1,0 +1,31 @@
+<app-dialog
+  [title]="'customers.portalAccessPage.provisionTitle' | translate"
+  width="520px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    @if (hasEligible) {
+      <p class="hint">{{ 'customers.portalAccessPage.provisionHint' | translate }}</p>
+      <app-select
+        [label]="'customers.portalAccessPage.provisionContactLabel' | translate"
+        formControlName="contactId" [required]="true"
+        [options]="options"
+        data-testid="provision-portal-contact" />
+    } @else {
+      <p class="hint hint--muted">{{ 'customers.portalAccessPage.provisionNoneEligible' | translate }}</p>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    @if (hasEligible) {
+      <app-validation-button [violations]="violations">
+        <button class="action-btn action-btn--primary"
+          [disabled]="form.invalid"
+          (click)="confirm()" data-testid="provision-portal-confirm-btn">
+          <span class="material-icons-outlined">vpn_key</span>
+          {{ 'customers.portalAccessPage.provisionConfirm' | translate }}
+        </button>
+      </app-validation-button>
+    }
+  </div>
+</app-dialog>

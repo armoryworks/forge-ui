@@ -15,4 +15,6 @@ export interface CreateLeadRequest {
   // decision-maker, etc.) land here as a serialised JSON object so
   // adding new shapes doesn't require schema work.
   customFieldValues?: string;
+  // Phase 1r / Batch 12 — optional B2B parent account at intake.
+  accountId?: number | null;
 }

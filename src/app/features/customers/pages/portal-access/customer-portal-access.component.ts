@@ -1,10 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
-import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
+import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
+import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
+import { SpacerDirective } from '../../../../shared/directives/spacer.directive';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
@@ -12,6 +15,12 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { CustomerService } from '../../services/customer.service';
 import { PortalAccessRow } from '../../models/portal-access.model';
+import { FlatContactRow } from '../../models/flat-contact.model';
+import {
+  ProvisionPortalAccessDialogComponent,
+  ProvisionPortalAccessDialogData,
+  ProvisionPortalAccessResult,
+} from '../../components/provision-portal-access-dialog/provision-portal-access-dialog.component';
 
 interface PortalAccessDisplayRow extends PortalAccessRow {
   contactFullName: string;
@@ -24,7 +33,8 @@ interface PortalAccessDisplayRow extends PortalAccessRow {
     DatePipe,
     TranslatePipe,
     MatSlideToggleModule,
-    PageHeaderComponent, DataTableComponent, ColumnCellDirective,
+    PageLayoutComponent, ToolbarComponent, SpacerDirective,
+    DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective,
   ],
   templateUrl: './customer-portal-access.component.html',
@@ -33,6 +43,7 @@ interface PortalAccessDisplayRow extends PortalAccessRow {
 })
 export class CustomerPortalAccessPageComponent implements OnInit {
   private readonly service = inject(CustomerService);
+  private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly snackbar = inject(SnackbarService);
@@ -97,5 +108,35 @@ export class CustomerPortalAccessPageComponent implements OnInit {
 
   protected openCustomer(row: PortalAccessDisplayRow): void {
     this.router.navigate(['/customers', row.customerId, 'contacts']);
+  }
+
+  /**
+   * Open the provision dialog. Loads the flat-contact list on demand,
+   * filters to contacts with an email (portal login uses email as the
+   * identifier) and no existing portal-access row, then hands the
+   * eligible set to the dialog for picker rendering. Idempotent at the
+   * server side, so if the admin somehow provisions a contact that
+   * already has access we still get a sensible result.
+   */
+  protected openProvision(): void {
+    this.service.getAllContactsFlat().subscribe({
+      next: (contacts) => {
+        const existingContactIds = new Set(this.rows().map(r => r.contactId));
+        const eligible = contacts.filter((c: FlatContactRow) =>
+          !!c.email && !existingContactIds.has(c.contactId));
+        this.dialog.open<ProvisionPortalAccessDialogComponent, ProvisionPortalAccessDialogData, ProvisionPortalAccessResult | undefined>(
+          ProvisionPortalAccessDialogComponent,
+          { width: '520px', data: { eligibleContacts: eligible } },
+        ).afterClosed().subscribe(result => {
+          if (!result) return;
+          this.service.provisionPortalAccess(result.contactId).subscribe({
+            next: () => {
+              this.snackbar.success(this.translate.instant('customers.portalAccessPage.provisioned'));
+              this.load();
+            },
+          });
+        });
+      },
+    });
   }
 }

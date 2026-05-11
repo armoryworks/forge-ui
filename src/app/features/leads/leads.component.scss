@@ -51,6 +51,23 @@
 .company-name { font-weight: 600; }
 .overdue { color: var(--error); font-weight: 600; }
 
+// Bulk action bar appears above the DataTable when 1+ leads are selected.
+.bulk-action-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-xs $sp-md;
+  margin-bottom: $sp-xs;
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  border-left: $border-width-accent solid var(--primary);
+
+  &__count {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: var(--text);
+  }
+}
+
 // ─── PIPELINE VIEW ─────────────────────────────────────────────────────────
 
 .pipeline-toolbar {

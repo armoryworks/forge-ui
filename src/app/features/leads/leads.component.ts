@@ -26,6 +26,7 @@ import { DataTableComponent } from '../../shared/components/data-table/data-tabl
 import { ColumnCellDirective } from '../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { FormValidationService } from '../../shared/services/form-validation.service';
+import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { DraftConfig } from '../../shared/models/draft-config.model';
 import { toIsoDate, todayStart } from '../../shared/utils/date.utils';
@@ -60,6 +61,7 @@ export class LeadsComponent {
 
   private readonly leadsService = inject(LeadsService);
   private readonly accountsService = inject(AccountsService);
+  private readonly snackbar = inject(SnackbarService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -118,6 +120,13 @@ export class LeadsComponent {
     { value: null, label: this.translate.instant('leads.accounts.noneOption') },
     ...this.accounts().map(a => ({ value: a.id, label: a.name })),
   ]);
+
+  // Bulk-assign-account on the table. Selection is tracked here from the
+  // DataTable's selectionChange. When > 0 rows are selected, an action
+  // bar appears with the "Assign to account" button.
+  protected readonly selectedLeads = signal<LeadItem[]>([]);
+  protected readonly bulkAccountControl = new FormControl<number | null>(null);
+  protected readonly showBulkAssignDialog = signal(false);
 
   protected readonly leadViolations = FormValidationService.getViolations(this.leadForm, {
     companyName: 'Company Name',
@@ -327,6 +336,71 @@ export class LeadsComponent {
 
   protected closeDialog(): void {
     this.showDialog.set(false);
+  }
+
+  /**
+   * Bulk-assign-account flow. Selection comes from the DataTable's
+   * selectionChange emit; opening the dialog ensures accounts are loaded
+   * so the picker has options. Submit loops PATCH /leads/{id} once per
+   * selected lead — leans on the existing update endpoint rather than a
+   * dedicated bulk-route because the volume is bounded (a rep typically
+   * selects < 50 leads to bulk-assign).
+   */
+  protected onLeadsSelectionChange(selected: unknown[]): void {
+    this.selectedLeads.set(selected as LeadItem[]);
+  }
+
+  protected openBulkAssignDialog(): void {
+    if (this.selectedLeads().length === 0) return;
+    this.bulkAccountControl.setValue(null);
+    if (this.accounts().length === 0) {
+      this.accountsService.list().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: (rows) => this.accounts.set(rows),
+      });
+    }
+    this.showBulkAssignDialog.set(true);
+  }
+
+  protected closeBulkAssignDialog(): void {
+    this.showBulkAssignDialog.set(false);
+  }
+
+  protected confirmBulkAssign(): void {
+    const accountId = this.bulkAccountControl.value;
+    const selected = this.selectedLeads();
+    if (selected.length === 0) return;
+    this.saving.set(true);
+    // Fire all PATCHes in parallel — the server handles them as discrete
+    // transactions; if some succeed and one fails we still want partial
+    // success surfaced. Final reload pulls authoritative state.
+    let inflight = selected.length;
+    let errors = 0;
+    selected.forEach(lead => {
+      this.leadsService.updateLead(lead.id, { accountId }).subscribe({
+        next: () => {
+          if (--inflight === 0) this.finishBulkAssign(errors, selected.length);
+        },
+        error: () => {
+          errors++;
+          if (--inflight === 0) this.finishBulkAssign(errors, selected.length);
+        },
+      });
+    });
+  }
+
+  private finishBulkAssign(errors: number, total: number): void {
+    this.saving.set(false);
+    this.showBulkAssignDialog.set(false);
+    if (errors === 0) {
+      this.snackbar.success(this.translate.instant('leads.bulkAssignSuccess', { count: total }));
+    } else if (errors < total) {
+      this.snackbar.error(this.translate.instant('leads.bulkAssignPartial', {
+        ok: total - errors, total,
+      }));
+    } else {
+      this.snackbar.error(this.translate.instant('leads.bulkAssignFailed'));
+    }
+    this.loadLeads();
   }
 
   protected saveLead(): void {

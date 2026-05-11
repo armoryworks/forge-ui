@@ -1309,14 +1309,20 @@
     "portalAccessPage": {
       "title": "Acceso al Portal",
       "subtitle": "Supervisión administrativa de qué contactos pueden iniciar sesión en el portal del cliente.",
-      "empty": "Ningún contacto tiene acceso al portal aún. Aprovisiona acceso desde una fila de contacto en una página de detalle de cliente.",
+      "empty": "Ningún contacto tiene acceso al portal aún. Haz clic en \"Aprovisionar acceso\" arriba para elegir un contacto.",
       "colLastLogin": "Último Acceso",
       "colCreated": "Aprovisionado",
       "colEnabled": "Habilitado",
       "neverSignedIn": "Nunca ha iniciado sesión",
       "toggleEnabled": "Acceso al portal habilitado para {{ name }}.",
       "toggleDisabled": "Acceso al portal deshabilitado para {{ name }}.",
-      "toggleAriaLabel": "Alternar acceso al portal para {{ name }}"
+      "toggleAriaLabel": "Alternar acceso al portal para {{ name }}",
+      "provisionTitle": "Aprovisionar acceso",
+      "provisionHint": "Elige un contacto para otorgarle acceso al portal. Solo aparecen aquí los contactos con email (el identificador de inicio de sesión) y sin acceso ya existente.",
+      "provisionContactLabel": "Contacto",
+      "provisionConfirm": "Otorgar acceso",
+      "provisionNoneEligible": "Sin contactos elegibles. Todos los contactos carecen de email o ya tienen acceso.",
+      "provisioned": "Acceso al portal aprovisionado."
     },
     "segmentsPage": {
       "title": "Segmentos",
@@ -1610,7 +1616,8 @@
       "referenceDisabled": "Consentimiento de referencia revocado.",
       "referenceNotes": "Notas de referencia",
       "referenceNotesEmpty": "Sin notas — añade detalles de alcance (p. ej. \"ok para prospectos aeroespaciales solo, sin defensa\").",
-      "referenceNotesSaved": "Notas de referencia guardadas."
+      "referenceNotesSaved": "Notas de referencia guardadas.",
+      "referenceNotesDiscardConfirm": "¿Descartar las notas de referencia sin guardar?"
     },
     "tabs": {
       "noEstimatesYet": "Aún no hay estimaciones",
@@ -1756,6 +1763,11 @@
       "fieldCampaignTag": "Etiqueta de campaña (opcional)",
       "strategyHint": "La estrategia determina qué campos son requeridos y qué canal de supresión se verifica. Llamada en frío necesita teléfono; correo en frío necesita email; seguimiento de feria acepta cualquiera.",
       "uploadHint": "Fila de encabezado requerida. Columnas reconocidas: companyName, contactName, email, phone, source, notes (no distingue mayúsculas, variantes comunes aceptadas).",
+      "columnsHelpToggle": "Columnas CSV esperadas",
+      "columnsHelpHint": "La coincidencia de columnas no distingue mayúsculas y los alias listados se mapean al mismo campo. Solo `companyName` es requerido; los demás pueden quedar vacíos sin bloquear la carga.",
+      "colHeader": "Encabezado",
+      "colRequired": "¿Requerido?",
+      "colAliases": "También aceptados",
       "chooseFile": "Elegir archivo CSV",
       "orPaste": "o pega abajo",
       "pasteLabel": "Pega filas (CSV o separado por tabs, encabezado en la primera línea)",
@@ -1819,7 +1831,8 @@
       "callbackSchedulerTitle": "Programar devolución de llamada",
       "callbackDate": "Fecha de devolución",
       "callbackTime": "Hora de devolución",
-      "scheduleCallback": "Programar"
+      "scheduleCallback": "Programar",
+      "shortcutHint": "Pulsa una tecla resaltada para disparar la acción correspondiente. J/K navegan entre leads del lote."
     },
     "campaigns": {
       "title": "Campañas",
@@ -1845,7 +1858,18 @@
       "empty": "Sin prospectos suprimidos. Nuevos opt-outs y enfriamientos aparecen aquí conforme se acumulan.",
       "colChannels": "Supresión",
       "colCooldownUntil": "Enfriamiento Hasta",
-      "colReason": "Motivo"
+      "colReason": "Motivo",
+      "unsuppressEmail": "Reactivar correo",
+      "unsuppressCall": "Reactivar llamadas",
+      "unsuppressSms": "Reactivar SMS",
+      "clearCooldown": "Limpiar enfriamiento",
+      "unsuppressed": "{{ channel }} reactivado.",
+      "cooldownCleared": "Enfriamiento limpiado.",
+      "channel": {
+        "email": "Correo",
+        "call": "Llamadas",
+        "sms": "SMS"
+      }
     },
     "accounts": {
       "title": "Cuentas",
@@ -1876,7 +1900,11 @@
       "industryPlaceholder": "p. ej. Aeroespacial, Dispositivo Médico, Automotriz",
       "websitePlaceholder": "https://ejemplo.com",
       "created": "Cuenta creada.",
-      "updated": "Cuenta actualizada."
+      "updated": "Cuenta actualizada.",
+      "deleted": "Cuenta eliminada.",
+      "deleteTitle": "¿Eliminar cuenta?",
+      "deleteMessage": "¿Eliminar suavemente \"{{ name }}\"? Los leads ya convertidos no se afectan; solo la cuenta sale de esta lista.",
+      "deleteBlockedMessage": "\"{{ name }}\" aún tiene {{ count }} lead(s) vinculados. Desvincula la cuenta en esos leads primero, luego reintenta."
     },
     "samples": {
       "title": "Envíos de Muestra",
@@ -1901,9 +1929,31 @@
         "QuotedFromSample": "Cotizado",
         "LostFromSample": "Perdido",
         "Stale": "Inactivo"
-      }
+      },
+      "advanceTooltip": "Avanzar a {{ next }}",
+      "outcomeTooltip": "Definir resultado",
+      "markQuoted": "Marcar Cotizado desde muestra",
+      "markLost": "Marcar Perdido desde muestra",
+      "markStale": "Marcar Inactivo",
+      "transitioned": "Estado de muestra definido como {{ status }}."
     },
     "editLead": "Editar Prospecto",
+    "statusUpdated": "Estado definido como {{ status }}.",
+    "statuses": {
+      "New": "Nuevo",
+      "Contacted": "Contactado",
+      "Quoting": "Cotizando",
+      "Converted": "Convertido",
+      "Lost": "Perdido"
+    },
+    "bulkSelected": "{{ count }} seleccionados",
+    "bulkAssignAccount": "Asignar a cuenta",
+    "bulkAssignTitle": "Asignar leads a cuenta",
+    "bulkAssignHint": "{{ count }} lead(s) se vincularán a la cuenta elegida. Elige \"— Ninguno —\" para desafiliar.",
+    "bulkAssignConfirm": "Asignar",
+    "bulkAssignSuccess": "{{ count }} lead(s) asignados.",
+    "bulkAssignPartial": "Asignados {{ ok }} de {{ total }} — algunos fallaron. Revisa el registro de actividad.",
+    "bulkAssignFailed": "Asignación masiva fallida.",
     "companyName": "Nombre de Empresa",
     "contactName": "Nombre de Contacto",
     "source": "Fuente",
@@ -1974,6 +2024,7 @@
     "classification": {
       "title": "Clasificación",
       "campaignTooltip": "Campaña de marketing masiva que produjo este lead. Se asigna en la captación.",
+      "campaignNavTooltip": "Abrir esta campaña en la página de Campañas.",
       "capFitAriaLabel": "Definir ajuste-de-capacidad",
       "ndaAriaLabel": "Definir estado de NDA",
       "exportAriaLabel": "Definir autorización ITAR / control de exportación",
@@ -2019,6 +2070,8 @@
       "step1FieldPhone": "Teléfono",
       "step1FieldSource": "Origen",
       "step1FieldNotes": "Notas",
+      "accountRolloverTitle": "Vinculado a cuenta: {{ name }}",
+      "accountRolloverHint": "{{ count }} contacto(s) de esta cuenta también se añadirán al nuevo Cliente como contactos secundarios. El contacto propio del lead (arriba) se vuelve principal.",
       "step2Title": "Detalles del cliente",
       "step2Hint": "Complete los campos que un cliente necesita y un prospecto no. Todos opcionales: omita lo que llenará después.",
       "step2CreditLimit": "Límite de crédito",

@@ -29,6 +29,54 @@
     <div class="intake__step-body">
       <p class="intake__hint">{{ 'leads.intake.uploadHint' | translate }}</p>
 
+      <!-- Collapsible columns reference. Default-open so first-time users
+           see it; admins who know the format collapse it once. -->
+      <details class="intake__columns-help" open>
+        <summary>{{ 'leads.intake.columnsHelpToggle' | translate }}</summary>
+        <p class="intake__columns-help-hint">{{ 'leads.intake.columnsHelpHint' | translate }}</p>
+        <table class="intake__columns-table">
+          <thead>
+            <tr>
+              <th>{{ 'leads.intake.colHeader' | translate }}</th>
+              <th>{{ 'leads.intake.colRequired' | translate }}</th>
+              <th>{{ 'leads.intake.colAliases' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>companyName</code></td>
+              <td><span class="chip chip--error">{{ 'common.required' | translate }}</span></td>
+              <td><code>company</code>, <code>company_name</code></td>
+            </tr>
+            <tr>
+              <td><code>contactName</code></td>
+              <td><span class="chip chip--muted">{{ 'common.optional' | translate }}</span></td>
+              <td><code>contact</code>, <code>name</code>, <code>contact_name</code></td>
+            </tr>
+            <tr>
+              <td><code>email</code></td>
+              <td><span class="chip chip--muted">{{ 'common.optional' | translate }}</span></td>
+              <td><code>email_address</code>, <code>e-mail</code></td>
+            </tr>
+            <tr>
+              <td><code>phone</code></td>
+              <td><span class="chip chip--muted">{{ 'common.optional' | translate }}</span></td>
+              <td><code>phone_number</code>, <code>tel</code>, <code>telephone</code></td>
+            </tr>
+            <tr>
+              <td><code>source</code></td>
+              <td><span class="chip chip--muted">{{ 'common.optional' | translate }}</span></td>
+              <td><code>lead_source</code></td>
+            </tr>
+            <tr>
+              <td><code>notes</code></td>
+              <td><span class="chip chip--muted">{{ 'common.optional' | translate }}</span></td>
+              <td><code>note</code>, <code>comment</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </details>
+
       <div class="intake__upload">
         <label class="intake__upload-button action-btn action-btn--primary">
           <span class="material-icons-outlined">upload_file</span>

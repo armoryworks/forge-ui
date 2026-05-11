@@ -24,6 +24,15 @@
         <ng-template appColumnCell="createdAt" let-row>
           {{ row.createdAt | date:'MM/dd/yyyy' }}
         </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn icon-btn--danger"
+                  [attr.aria-label]="'common.delete' | translate"
+                  (click)="confirmDelete($any(row), $event)"
+                  data-testid="account-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
       </app-data-table>
     </div>
   </ng-container>

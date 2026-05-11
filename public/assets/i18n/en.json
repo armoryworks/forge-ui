@@ -1313,14 +1313,20 @@
     "portalAccessPage": {
       "title": "Portal Access",
       "subtitle": "Admin oversight of which contacts can sign in to the customer portal.",
-      "empty": "No contacts have portal access yet. Provision access from a contact row in a customer detail page.",
+      "empty": "No contacts have portal access yet. Click \"Provision Access\" above to pick a contact.",
       "colLastLogin": "Last Login",
       "colCreated": "Provisioned",
       "colEnabled": "Enabled",
       "neverSignedIn": "Never signed in",
       "toggleEnabled": "Enabled portal access for {{ name }}.",
       "toggleDisabled": "Disabled portal access for {{ name }}.",
-      "toggleAriaLabel": "Toggle portal access for {{ name }}"
+      "toggleAriaLabel": "Toggle portal access for {{ name }}",
+      "provisionTitle": "Provision Access",
+      "provisionHint": "Pick a contact to grant portal access. Only contacts with an email address (the portal login identifier) and no existing access appear here.",
+      "provisionContactLabel": "Contact",
+      "provisionConfirm": "Grant access",
+      "provisionNoneEligible": "No eligible contacts. Every contact either lacks an email or already has portal access.",
+      "provisioned": "Portal access provisioned."
     },
     "segmentsPage": {
       "title": "Segments",
@@ -1619,7 +1625,8 @@
       "referenceDisabled": "Reference consent revoked.",
       "referenceNotes": "Reference notes",
       "referenceNotesEmpty": "No notes — add scope details (e.g. \"ok for aerospace prospects only, no defense\").",
-      "referenceNotesSaved": "Reference notes saved."
+      "referenceNotesSaved": "Reference notes saved.",
+      "referenceNotesDiscardConfirm": "Discard unsaved reference notes?"
     },
     "tabs": {
       "noEstimatesYet": "No estimates yet",
@@ -1760,6 +1767,11 @@
       "fieldCampaignTag": "Campaign tag (optional)",
       "strategyHint": "The strategy drives which fields are required and which suppression channel is checked. Cold-call needs phone; cold-email needs email; trade-show follow-up accepts either.",
       "uploadHint": "Header row required. Recognized columns: companyName, contactName, email, phone, source, notes (case-insensitive, common variants accepted).",
+      "columnsHelpToggle": "Expected CSV columns",
+      "columnsHelpHint": "Column matching is case-insensitive and the listed aliases all map to the same field. Only `companyName` is required; the rest can be left blank without blocking the upload.",
+      "colHeader": "Header",
+      "colRequired": "Required?",
+      "colAliases": "Also accepted",
       "chooseFile": "Choose CSV file",
       "orPaste": "or paste below",
       "pasteLabel": "Paste rows (CSV or tab-separated, header on first line)",
@@ -1823,7 +1835,8 @@
       "callbackSchedulerTitle": "Schedule callback",
       "callbackDate": "Callback date",
       "callbackTime": "Callback time",
-      "scheduleCallback": "Schedule"
+      "scheduleCallback": "Schedule",
+      "shortcutHint": "Tap a highlighted key to fire the matching action. J/K move between leads in this batch."
     },
     "campaigns": {
       "title": "Campaigns",
@@ -1849,7 +1862,18 @@
       "empty": "No suppressed leads. New opt-outs and cooldowns appear here as they accumulate.",
       "colChannels": "Suppression",
       "colCooldownUntil": "Cooldown Until",
-      "colReason": "Reason"
+      "colReason": "Reason",
+      "unsuppressEmail": "Lift email opt-out",
+      "unsuppressCall": "Lift call opt-out",
+      "unsuppressSms": "Lift SMS opt-out",
+      "clearCooldown": "Clear cooldown",
+      "unsuppressed": "{{ channel }} re-enabled.",
+      "cooldownCleared": "Cooldown cleared.",
+      "channel": {
+        "email": "Email",
+        "call": "Calls",
+        "sms": "SMS"
+      }
     },
     "accounts": {
       "title": "Accounts",
@@ -1880,7 +1904,11 @@
       "industryPlaceholder": "e.g. Aerospace, Medical Device, Automotive",
       "websitePlaceholder": "https://example.com",
       "created": "Account created.",
-      "updated": "Account updated."
+      "updated": "Account updated.",
+      "deleted": "Account deleted.",
+      "deleteTitle": "Delete account?",
+      "deleteMessage": "Soft-delete \"{{ name }}\"? Already-converted leads are unaffected; the account itself is removed from this list.",
+      "deleteBlockedMessage": "\"{{ name }}\" still has {{ count }} lead(s) linked to it. Unassign the account on those leads first, then retry."
     },
     "samples": {
       "title": "Sample Shipments",
@@ -1905,9 +1933,31 @@
         "QuotedFromSample": "Quoted",
         "LostFromSample": "Lost",
         "Stale": "Stale"
-      }
+      },
+      "advanceTooltip": "Advance to {{ next }}",
+      "outcomeTooltip": "Set outcome",
+      "markQuoted": "Mark Quoted from sample",
+      "markLost": "Mark Lost from sample",
+      "markStale": "Mark Stale",
+      "transitioned": "Sample status set to {{ status }}."
     },
     "editLead": "Edit Lead",
+    "statusUpdated": "Status set to {{ status }}.",
+    "statuses": {
+      "New": "New",
+      "Contacted": "Contacted",
+      "Quoting": "Quoting",
+      "Converted": "Converted",
+      "Lost": "Lost"
+    },
+    "bulkSelected": "{{ count }} selected",
+    "bulkAssignAccount": "Assign to account",
+    "bulkAssignTitle": "Assign leads to account",
+    "bulkAssignHint": "{{ count }} lead(s) will be linked to the picked account. Pick \"— None —\" to unaffiliate.",
+    "bulkAssignConfirm": "Assign",
+    "bulkAssignSuccess": "{{ count }} lead(s) assigned.",
+    "bulkAssignPartial": "Assigned {{ ok }} of {{ total }} — some failed. Check the activity log for details.",
+    "bulkAssignFailed": "Bulk assign failed.",
     "companyName": "Company Name",
     "contactName": "Contact Name",
     "source": "Source",
@@ -1978,6 +2028,7 @@
     "classification": {
       "title": "Classification",
       "campaignTooltip": "Bulk-marketing campaign that produced this lead. Set at intake.",
+      "campaignNavTooltip": "Open this campaign in the Campaigns page.",
       "capFitAriaLabel": "Set capability-fit",
       "ndaAriaLabel": "Set NDA state",
       "exportAriaLabel": "Set ITAR / export-control clearance",
@@ -2023,6 +2074,8 @@
       "step1FieldPhone": "Phone",
       "step1FieldSource": "Source",
       "step1FieldNotes": "Notes",
+      "accountRolloverTitle": "Linked to account: {{ name }}",
+      "accountRolloverHint": "{{ count }} contact(s) from this account will also be added to the new Customer as non-primary contacts. The lead's own contact (above) becomes primary.",
       "step2Title": "Customer details",
       "step2Hint": "Fill in the fields a customer needs that a lead doesn't. All optional — skip anything you'll fill in later.",
       "step2CreditLimit": "Credit limit",

@@ -117,17 +117,30 @@
   padding: $sp-sm $sp-md;
   border-right: $border-width-thin solid var(--border);
   cursor: default;
-  transition: background $transition-fast;
+  transition: background $transition-fast, box-shadow $transition-fast;
+  position: relative;
 
   &:last-child { border-right: none; }
 
-  &[role]:hover,
-  &--active {
-    background: color-mix(in srgb, var(--primary) 8%, transparent);
+  // Clickable stats carry role="button" — give them the full affordance:
+  // pointer cursor, hover background, and a subtle inset highlight on the
+  // bottom edge so the hover state is unmissable. Focus-visible mirrors
+  // the hover so keyboard nav also has a clear cue.
+  &[role="button"] {
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+      background: color-mix(in srgb, var(--primary) 8%, transparent);
+      box-shadow: inset 0 -2px 0 var(--primary);
+      outline: none;
+    }
   }
 
-  // Only make stat items that have click handlers look clickable
-  &:has(+ .cd-stat) { cursor: pointer; }
+  &--active {
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    box-shadow: inset 0 -2px 0 var(--primary);
+  }
 }
 
 .cd-stat__value {

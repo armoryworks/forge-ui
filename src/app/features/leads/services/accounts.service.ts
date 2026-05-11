@@ -32,6 +32,10 @@ export class AccountsService {
     return this.http.put<Account>(`${this.base}/${id}`, request);
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/${id}`);
+  }
+
   listContacts(id: number): Observable<AccountContact[]> {
     return this.http.get<AccountContact[]>(`${this.base}/${id}/contacts`);
   }

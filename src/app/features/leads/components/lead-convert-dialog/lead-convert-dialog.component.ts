@@ -16,6 +16,9 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { LeadItem } from '../../models/lead-item.model';
 import { ConvertLeadRequest } from '../../models/convert-lead-request.model';
 import { AddressInput } from '../../../customers/models/create-customer-request.model';
+import { AccountsService } from '../../services/accounts.service';
+import { AccountContact } from '../../models/account.model';
+import { CurrencyService } from '../../../admin/services/currency.service';
 
 export interface LeadConvertDialogData {
   lead: LeadItem;
@@ -52,11 +55,20 @@ export interface LeadConvertDialogData {
 })
 export class LeadConvertDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<LeadConvertDialogComponent, ConvertLeadRequest | undefined>);
+  private readonly accountsService = inject(AccountsService);
+  private readonly currencyService = inject(CurrencyService);
   protected readonly translate = inject(TranslateService);
   protected readonly data = inject<LeadConvertDialogData>(MAT_DIALOG_DATA);
 
   protected readonly lead = this.data.lead;
   protected readonly currentStep = signal(0);
+
+  // When the lead has an Account, its AccountContacts roll forward to the
+  // new Customer as non-primary Contact rows. Surface them in Step 1 so the
+  // user sees what's coming with the conversion instead of being surprised
+  // afterward.
+  protected readonly accountContacts = signal<AccountContact[]>([]);
+  protected readonly accountName = signal<string | null>(null);
 
   /**
    * Phase 1o.1 — parse the lead's CustomFieldValues JSON so step 1 can
@@ -112,13 +124,16 @@ export class LeadConvertDialogComponent {
     createJob: new FormControl(false, { nonNullable: true }),
   });
 
-  protected readonly currencyOptions: SelectOption[] = [
+  // Dynamic Currency list from the admin catalog. Falls back to a small
+  // canned set when the catalog hasn't been populated yet (fresh install)
+  // so the conversion flow still works.
+  protected readonly currencyOptions = signal<SelectOption[]>([
     { value: 'USD', label: this.translate.instant('leads.convertStepper.currencyUSD') },
     { value: 'EUR', label: this.translate.instant('leads.convertStepper.currencyEUR') },
     { value: 'GBP', label: this.translate.instant('leads.convertStepper.currencyGBP') },
     { value: 'CAD', label: this.translate.instant('leads.convertStepper.currencyCAD') },
     { value: 'MXN', label: this.translate.instant('leads.convertStepper.currencyMXN') },
-  ];
+  ]);
 
   // Cross-field rule: tax-exempt requires the certificate id. Step 2 won't
   // block forward navigation on this (the form is intentionally permissive)
@@ -139,6 +154,36 @@ export class LeadConvertDialogComponent {
   });
 
   constructor() {
+    // Pull the active currency list and default the form's defaultCurrency
+    // to the install's base currency when one is configured. Falls back to
+    // the hardcoded list if the catalog is empty (fresh install) so the
+    // dialog never blocks on a missing currency.
+    this.currencyService.listCurrencies().subscribe({
+      next: (currencies) => {
+        const active = currencies.filter(c => c.isActive);
+        if (active.length > 0) {
+          this.currencyOptions.set(active
+            .sort((a, b) => a.sortOrder - b.sortOrder || a.code.localeCompare(b.code))
+            .map(c => ({ value: c.code, label: `${c.code} — ${c.name}` })));
+          const base = active.find(c => c.isBaseCurrency);
+          if (base) this.form.controls.defaultCurrency.setValue(base.code);
+        }
+      },
+    });
+
+    // Load account contacts up front when the lead is account-linked. The
+    // server's convert handler rolls these forward as non-primary Contact
+    // rows on the new Customer; surfacing them on Step 1 lets the user
+    // see exactly what's about to land.
+    if (this.lead.accountId) {
+      this.accountsService.getById(this.lead.accountId).subscribe({
+        next: (acc) => this.accountName.set(acc.name),
+      });
+      this.accountsService.listContacts(this.lead.accountId).subscribe({
+        next: (contacts) => this.accountContacts.set(contacts),
+      });
+    }
+
     // Tax-exempt → exemption id required (mirrors CreateCustomer rule).
     this.form.controls.isTaxExempt.valueChanges.subscribe(isExempt => {
       const ctrl = this.form.controls.taxExemptionId;

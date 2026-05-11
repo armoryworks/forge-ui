@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { SampleShipmentsService } from '../../services/sample-shipments.service';
@@ -15,6 +17,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 /**
  * Phase 1r / Batch 16 — sample shipment tracker. Shows pre-quote sample
@@ -32,6 +35,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   standalone: true,
   imports: [
     DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
+    MatMenuModule, MatTooltipModule,
     PageLayoutComponent, ToolbarComponent, SpacerDirective,
     SelectComponent, DataTableComponent, ColumnCellDirective,
     LoadingBlockDirective,
@@ -43,11 +47,16 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
 export class LeadsSamplesComponent {
   private readonly service = inject(SampleShipmentsService);
   private readonly router = inject(Router);
+  private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly samples = signal<SampleShipment[]>([]);
   protected readonly loading = signal(true);
+  // Per-row in-flight markers so transition buttons can dim/disable while
+  // the PATCH is still inflight. Single Set so multiple rows in flight
+  // don't step on each other.
+  protected readonly pendingIds = signal<Set<number>>(new Set());
 
   protected readonly statusFilter = new FormControl<string>('all', { nonNullable: true });
 
@@ -73,6 +82,7 @@ export class LeadsSamplesComponent {
     { field: 'deliveredAt', header: this.translate.instant('leads.samples.colDelivered'), sortable: true, type: 'date', width: '120px' },
     { field: 'costToUs', header: this.translate.instant('leads.samples.colCost'), sortable: true, type: 'number', align: 'right', width: '100px' },
     { field: 'trackingNumber', header: this.translate.instant('leads.samples.colTracking'), sortable: true, width: '160px' },
+    { field: 'actions', header: '', width: '110px', align: 'right' },
   ];
 
   protected readonly filteredSamples = computed(() => {
@@ -115,5 +125,79 @@ export class LeadsSamplesComponent {
 
   protected openLead(sample: SampleShipment): void {
     this.router.navigate(['/leads'], { queryParams: { detail: `lead:${sample.leadId}` } });
+  }
+
+  /**
+   * Direct linear transitions only — Requested → Approved → Shipped →
+   * Delivered. Outcome states (QuotedFromSample / LostFromSample / Stale)
+   * are reached via the Outcome menu since they need operator intent
+   * rather than "advance the lifecycle one step." Stale is auto-set by
+   * the nightly job; offering it here would shortcut the cooldown.
+   */
+  protected nextStatus(s: SampleShipment): SampleShipmentStatus | null {
+    if (s.status === 'Requested') return 'Approved';
+    if (s.status === 'Approved') return 'Shipped';
+    if (s.status === 'Shipped') return 'Delivered';
+    return null;
+  }
+
+  protected canAdvance(s: SampleShipment): boolean {
+    return this.nextStatus(s) !== null;
+  }
+
+  protected isPending(id: number): boolean {
+    return this.pendingIds().has(id);
+  }
+
+  protected advance(s: SampleShipment, ev?: Event): void {
+    ev?.stopPropagation();
+    const next = this.nextStatus(s);
+    if (!next) return;
+    this.transition(s, next);
+  }
+
+  protected setOutcome(s: SampleShipment, next: SampleShipmentStatus, ev?: Event): void {
+    ev?.stopPropagation();
+    this.transition(s, next);
+  }
+
+  private transition(s: SampleShipment, next: SampleShipmentStatus): void {
+    const pending = new Set(this.pendingIds());
+    pending.add(s.id);
+    this.pendingIds.set(pending);
+
+    // Stamp the appropriate timestamp on the way through. The server will
+    // happily round-trip them; we set them client-side too so the row
+    // reflects the new state immediately on next reload.
+    const now = new Date().toISOString();
+    this.service.update(s.id, {
+      partId: s.partId,
+      partDescription: s.partDescription,
+      quantity: s.quantity,
+      status: next,
+      requestedAt: s.requestedAt,
+      shippedAt: next === 'Shipped' && !s.shippedAt ? now : s.shippedAt,
+      deliveredAt: next === 'Delivered' && !s.deliveredAt ? now : s.deliveredAt,
+      costToUs: s.costToUs,
+      chargedAmount: s.chargedAmount,
+      trackingNumber: s.trackingNumber,
+      carrier: s.carrier,
+      notes: s.notes,
+    }).subscribe({
+      next: () => {
+        this.snackbar.success(this.translate.instant('leads.samples.transitioned', {
+          status: this.translate.instant('leads.samples.status.' + next),
+        }));
+        this.clearPending(s.id);
+        this.load();
+      },
+      error: () => this.clearPending(s.id),
+    });
+  }
+
+  private clearPending(id: number): void {
+    const pending = new Set(this.pendingIds());
+    pending.delete(id);
+    this.pendingIds.set(pending);
   }
 }

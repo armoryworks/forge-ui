@@ -26,5 +26,51 @@
         <span class="chip chip--warning">{{ 'leads.queue.cooldownUntil' | translate:{ date: row.cooldownUntil | date:'MM/dd' } }}</span>
       }
     </ng-template>
+
+    <ng-template appColumnCell="actions" let-row>
+      <!-- Per-channel unsuppress. Each button is conditional on the channel
+           actually being suppressed; clearing one re-enables outreach via
+           that channel only. Cooldown is a separate button when present. -->
+      @if (row.emailOptOut) {
+        <button class="icon-btn"
+          [matTooltip]="'leads.suppression.unsuppressEmail' | translate"
+          matTooltipPosition="left"
+          [attr.aria-label]="'leads.suppression.unsuppressEmail' | translate"
+          [disabled]="isPending(row.leadId)"
+          (click)="unsuppressChannel($any(row), 'email', $event)">
+          <span class="material-icons-outlined">mail</span>
+        </button>
+      }
+      @if (row.callOptOut) {
+        <button class="icon-btn"
+          [matTooltip]="'leads.suppression.unsuppressCall' | translate"
+          matTooltipPosition="left"
+          [attr.aria-label]="'leads.suppression.unsuppressCall' | translate"
+          [disabled]="isPending(row.leadId)"
+          (click)="unsuppressChannel($any(row), 'call', $event)">
+          <span class="material-icons-outlined">phone</span>
+        </button>
+      }
+      @if (row.smsOptOut) {
+        <button class="icon-btn"
+          [matTooltip]="'leads.suppression.unsuppressSms' | translate"
+          matTooltipPosition="left"
+          [attr.aria-label]="'leads.suppression.unsuppressSms' | translate"
+          [disabled]="isPending(row.leadId)"
+          (click)="unsuppressChannel($any(row), 'sms', $event)">
+          <span class="material-icons-outlined">sms</span>
+        </button>
+      }
+      @if (row.cooldownUntil) {
+        <button class="icon-btn"
+          [matTooltip]="'leads.suppression.clearCooldown' | translate"
+          matTooltipPosition="left"
+          [attr.aria-label]="'leads.suppression.clearCooldown' | translate"
+          [disabled]="isPending(row.leadId)"
+          (click)="clearCooldown($any(row), $event)">
+          <span class="material-icons-outlined">schedule</span>
+        </button>
+      }
+    </ng-template>
   </app-data-table>
 </div>

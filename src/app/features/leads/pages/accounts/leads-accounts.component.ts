@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AccountsService } from '../../services/accounts.service';
 import { Account, CreateAccountRequest, UpdateAccountRequest } from '../../models/account.model';
 import { AccountDialogComponent, AccountDialogData } from '../../components/account-dialog/account-dialog.component';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { PageLayoutComponent } from '../../../../shared/components/page-layout/page-layout.component';
 import { ToolbarComponent } from '../../../../shared/components/toolbar/toolbar.component';
 import { SpacerDirective } from '../../../../shared/directives/spacer.directive';
@@ -62,6 +63,7 @@ export class LeadsAccountsComponent {
     { field: 'contactCount', header: this.translate.instant('leads.accounts.colContacts'), sortable: true, type: 'number', align: 'right', width: '90px' },
     { field: 'leadCount', header: this.translate.instant('leads.accounts.colLeads'), sortable: true, type: 'number', align: 'right', width: '80px' },
     { field: 'createdAt', header: this.translate.instant('leads.accounts.colCreated'), sortable: true, type: 'date', width: '110px' },
+    { field: 'actions', header: '', width: '90px', align: 'right' },
   ];
 
   constructor() {
@@ -98,6 +100,34 @@ export class LeadsAccountsComponent {
       this.service.update(account.id, payload as UpdateAccountRequest).subscribe({
         next: () => {
           this.snackbar.success(this.translate.instant('leads.accounts.updated'));
+          this.load();
+        },
+      });
+    });
+  }
+
+  /**
+   * Confirm + soft-delete an account. The server refuses deletion when
+   * any lead references the account; the snackbar surfaces that case via
+   * the global HTTP-error interceptor.
+   */
+  protected confirmDelete(account: Account, ev?: Event): void {
+    ev?.stopPropagation();
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('leads.accounts.deleteTitle'),
+        message: account.leadCount > 0
+          ? this.translate.instant('leads.accounts.deleteBlockedMessage', { name: account.name, count: account.leadCount })
+          : this.translate.instant('leads.accounts.deleteMessage', { name: account.name }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.service.delete(account.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('leads.accounts.deleted'));
           this.load();
         },
       });

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
@@ -39,6 +40,7 @@ export class LeadDetailPanelComponent {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly router = inject(Router);
 
   readonly leadId = input.required<number>();
   readonly closed = output<void>();
@@ -103,6 +105,17 @@ export class LeadDetailPanelComponent {
     return this.campaignNames().get(campaignId) ?? this.translate.instant('leads.campaignFallback', { id: campaignId });
   }
 
+  /**
+   * Navigate to the campaigns list. We don't try to highlight a specific
+   * row (the shared DataTable doesn't expose row anchors and per-row
+   * detail navigation isn't a campaign concept) — landing on the list
+   * with the campaign name visible is the useful outcome.
+   * `campaignId` param signature kept for future deep-link support.
+   */
+  protected openCampaign(_campaignId: number): void {
+    this.router.navigate(['/leads/campaigns']);
+  }
+
   protected getCapabilityFitClass(value: CapabilityFitStatus | undefined): string {
     const map: Record<CapabilityFitStatus, string> = {
       NotAssessed: 'chip--muted', Fits: 'chip--success',
@@ -127,36 +140,52 @@ export class LeadDetailPanelComponent {
     return `chip ${value ? map[value] : 'chip--muted'}`;
   }
 
+  // Per-chip pending markers so the template can dim the chip while the
+  // PATCH is in flight. Three separate signals so concurrent chip edits
+  // don't fight each other.
+  protected readonly capFitPending = signal(false);
+  protected readonly ndaPending = signal(false);
+  protected readonly exportPending = signal(false);
+
   protected setCapabilityFit(value: CapabilityFitStatus): void {
     const lead = this.lead();
     if (!lead || lead.capabilityFit === value) return;
+    this.capFitPending.set(true);
     this.leadsService.updateLead(lead.id, { capabilityFit: value }).subscribe({
       next: (updated) => {
         this.lead.set(updated);
         this.snackbar.success(this.translate.instant('leads.classification.capabilityFitUpdated', { state: this.translate.instant('leads.classification.capFit.' + value) }));
+        this.capFitPending.set(false);
       },
+      error: () => this.capFitPending.set(false),
     });
   }
 
   protected setNdaState(value: NdaState): void {
     const lead = this.lead();
     if (!lead || lead.ndaState === value) return;
+    this.ndaPending.set(true);
     this.leadsService.updateLead(lead.id, { ndaState: value }).subscribe({
       next: (updated) => {
         this.lead.set(updated);
         this.snackbar.success(this.translate.instant('leads.classification.ndaUpdated', { state: this.translate.instant('leads.classification.nda.' + value) }));
+        this.ndaPending.set(false);
       },
+      error: () => this.ndaPending.set(false),
     });
   }
 
   protected setExportControl(value: ExportControlClearance): void {
     const lead = this.lead();
     if (!lead || lead.exportControl === value) return;
+    this.exportPending.set(true);
     this.leadsService.updateLead(lead.id, { exportControl: value }).subscribe({
       next: (updated) => {
         this.lead.set(updated);
         this.snackbar.success(this.translate.instant('leads.classification.exportControlUpdated', { state: this.translate.instant('leads.classification.export.' + value) }));
+        this.exportPending.set(false);
       },
+      error: () => this.exportPending.set(false),
     });
   }
 
@@ -195,6 +224,12 @@ export class LeadDetailPanelComponent {
     return map[shape] ?? 'flag';
   }
 
+  // Which status button is currently mid-PATCH. Disables the button + shows
+  // a spinner on it; on success the chip color updates via the refreshed
+  // lead signal. We optimistically set the lead's status before the PATCH
+  // completes so the chip flips immediately; on error we revert.
+  protected readonly statusPending = signal<LeadStatus | null>(null);
+
   protected updateStatus(status: LeadStatus): void {
     const lead = this.lead();
     if (!lead) return;
@@ -204,8 +239,27 @@ export class LeadDetailPanelComponent {
       return;
     }
 
+    // Optimistic update — flip the chip immediately so the rep gets
+    // feedback. Stash the previous status so we can revert on failure.
+    const previous = lead.status;
+    this.lead.set({ ...lead, status });
+    this.statusPending.set(status);
+
     this.leadsService.updateLead(lead.id, { status }).subscribe({
-      next: (updated) => { this.lead.set(updated); },
+      next: (updated) => {
+        this.lead.set(updated);
+        this.statusPending.set(null);
+        this.snackbar.success(this.translate.instant('leads.statusUpdated', {
+          status: this.translate.instant('leads.statuses.' + status),
+        }));
+      },
+      error: () => {
+        // Revert the optimistic flip — the chip goes back to the prior
+        // status. The global HTTP-error interceptor already surfaces the
+        // failure toast so we don't need a second message here.
+        this.lead.set({ ...lead, status: previous });
+        this.statusPending.set(null);
+      },
     });
   }
 

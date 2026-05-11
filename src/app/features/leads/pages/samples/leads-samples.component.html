@@ -62,6 +62,45 @@
             <span class="tracking">{{ row.carrier }} {{ row.trackingNumber }}</span>
           }
         </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <!-- Advance lifecycle (Requested → Approved → Shipped → Delivered).
+               Disabled once the sample lands in Delivered or an outcome state. -->
+          @if (canAdvance(row)) {
+            <button class="icon-btn"
+              [matTooltip]="'leads.samples.advanceTooltip' | translate:{ next: ('leads.samples.status.' + nextStatus(row)) | translate }"
+              matTooltipPosition="left"
+              [attr.aria-label]="'leads.samples.advanceTooltip' | translate:{ next: ('leads.samples.status.' + nextStatus(row)) | translate }"
+              [disabled]="isPending(row.id)"
+              (click)="advance($any(row), $event)">
+              <span class="material-icons-outlined">arrow_forward</span>
+            </button>
+          }
+          <!-- Outcome menu — final-state transitions need operator intent. -->
+          <button class="icon-btn"
+            [matMenuTriggerFor]="outcomeMenu"
+            [matTooltip]="'leads.samples.outcomeTooltip' | translate"
+            matTooltipPosition="left"
+            [attr.aria-label]="'leads.samples.outcomeTooltip' | translate"
+            [disabled]="isPending(row.id)"
+            (click)="$event.stopPropagation()">
+            <span class="material-icons-outlined">more_vert</span>
+          </button>
+          <mat-menu #outcomeMenu="matMenu">
+            <button mat-menu-item type="button" (click)="setOutcome($any(row), 'QuotedFromSample', $event)">
+              <span class="material-icons-outlined">request_quote</span>
+              {{ 'leads.samples.markQuoted' | translate }}
+            </button>
+            <button mat-menu-item type="button" (click)="setOutcome($any(row), 'LostFromSample', $event)">
+              <span class="material-icons-outlined">cancel</span>
+              {{ 'leads.samples.markLost' | translate }}
+            </button>
+            <button mat-menu-item type="button" (click)="setOutcome($any(row), 'Stale', $event)">
+              <span class="material-icons-outlined">schedule</span>
+              {{ 'leads.samples.markStale' | translate }}
+            </button>
+          </mat-menu>
+        </ng-template>
       </app-data-table>
     </div>
   </ng-container>

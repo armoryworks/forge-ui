@@ -180,4 +180,52 @@
     max-width: 320px;
     white-space: normal;
   }
+
+  // Collapsible CSV-columns reference card. Default-open so first-time
+  // users see what columns the parser expects.
+  &__columns-help {
+    margin: $sp-sm 0;
+    padding: $sp-sm $sp-md;
+    background: color-mix(in srgb, var(--info) 6%, transparent);
+    border-left: $border-width-accent solid var(--info);
+
+    summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: $font-size-sm;
+      padding: $sp-xs 0;
+      user-select: none;
+      &:hover { color: var(--primary); }
+    }
+  }
+
+  &__columns-help-hint {
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+    margin: $sp-xs 0 $sp-sm;
+    line-height: 1.4;
+  }
+
+  &__columns-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-xs;
+
+    th, td {
+      text-align: left;
+      padding: $sp-xs $sp-sm;
+      border-bottom: $border-width-thin dashed var(--border);
+    }
+    th {
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    code {
+      font-family: $font-family-mono;
+      background: var(--bg);
+      padding: 1px $sp-xs;
+    }
+  }
 }

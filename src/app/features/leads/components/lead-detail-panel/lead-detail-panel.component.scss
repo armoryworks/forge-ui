@@ -69,8 +69,18 @@
   cursor: pointer;
   border-radius: $border-radius;
   font-family: $font-family-primary;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
   &:hover { background: var(--bg); color: var(--text); }
+  &:disabled { cursor: not-allowed; opacity: 0.6; }
   &--active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+  &--pending { opacity: 1; }
+
+  &__spinner {
+    font-size: $font-size-sm;
+    animation: spin 1s linear infinite;
+  }
 }
 
 // ─── Convert Actions ───
@@ -122,6 +132,27 @@
   }
 }
 
+// Chip rendered as a button so it can navigate (open campaign / open account
+// / etc.). Visually identical to a static .chip — only difference is the
+// trailing `open_in_new` chevron and the cursor.
+.chip--link {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  border: none;
+  font-family: $font-family-primary;
+  font-weight: 600;
+
+  &:hover { filter: brightness(0.95); }
+  &:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+}
+
+.chip__chev {
+  font-size: $icon-size-xs;
+  opacity: 0.6;
+}
+
 .chip-edit-btn {
   display: inline-flex;
   align-items: center;
@@ -139,6 +170,15 @@
 
   .material-icons-outlined { font-size: $font-size-sm; }
   &__chevron { font-size: $icon-size-sm; opacity: 0.7; margin-left: $sp-xxs; }
+
+  // Pending — chip is mid-PATCH. Dim it + let the chevron icon (swapped
+  // to `sync`) spin in place so the in-flight state is obvious without
+  // a separate overlay.
+  &--pending {
+    opacity: 0.6;
+    pointer-events: none;
+    .chip-edit-btn__chevron { animation: spin 1s linear infinite; }
+  }
 }
 
 // ─── Phase 1j Engagement Strip ───

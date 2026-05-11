@@ -67,9 +67,26 @@
           <span>{{ 'common.loading' | translate }}</span>
         </div>
       } @else {
+        @if (selectedLeads().length > 0) {
+          <!-- Bulk action bar — appears when one or more leads are selected
+               in the table. Today's only action is bulk-assign-account; more
+               can be added beside it as the team's bulk-edit appetite grows. -->
+          <div class="bulk-action-bar">
+            <span class="bulk-action-bar__count">
+              {{ 'leads.bulkSelected' | translate:{ count: selectedLeads().length } }}
+            </span>
+            <button class="action-btn action-btn--sm" type="button"
+                    (click)="openBulkAssignDialog()" data-testid="leads-bulk-assign-btn">
+              <span class="material-icons-outlined">business</span>
+              {{ 'leads.bulkAssignAccount' | translate }}
+            </button>
+          </div>
+        }
         <app-data-table tableId="leads" [columns]="leadColumns" [data]="leads()"
           emptyIcon="person_search" [emptyMessage]="'leads.noLeadsFound' | translate" [emptyHelpText]="'leads.noLeadsHelp' | translate"
           [clickableRows]="true"
+          [selectable]="true"
+          (selectionChange)="onLeadsSelectionChange($event)"
           (rowClick)="openLeadDetail($any($event).id)">
           <ng-template appColumnCell="companyName" let-lead>
             <span class="company-name">{{ lead.companyName }}</span>
@@ -242,6 +259,26 @@
           [disabled]="lostFormGroup.invalid"
           (click)="confirmLost()">{{ 'leads.confirmLost' | translate }}</button>
       </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (showBulkAssignDialog()) {
+  <app-dialog [title]="'leads.bulkAssignTitle' | translate" width="480px" (closed)="closeBulkAssignDialog()">
+    <p class="hint">{{ 'leads.bulkAssignHint' | translate:{ count: selectedLeads().length } }}</p>
+    <app-select
+      [label]="'leads.accounts.fieldName' | translate"
+      [formControl]="bulkAccountControl"
+      [options]="accountOptions()"
+      data-testid="bulk-assign-account-picker" />
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeBulkAssignDialog()">{{ 'common.cancel' | translate }}</button>
+      <button class="action-btn action-btn--primary"
+        [disabled]="saving()"
+        (click)="confirmBulkAssign()" data-testid="bulk-assign-confirm-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'leads.bulkAssignConfirm' | translate }}
+      </button>
     </div>
   </app-dialog>
 }

@@ -91,10 +91,21 @@ export class CustomerOverviewTabComponent {
 
   protected startEditNotes(): void {
     this.notesControl.setValue(this.customer().referenceNotes ?? '');
+    this.notesControl.markAsPristine();
     this.editingNotes.set(true);
   }
 
+  /**
+   * Guard against silent loss of typed-but-unsaved reference notes. If the
+   * control is dirty (user typed something since startEditNotes), ask
+   * before exiting. native confirm() is sufficient here — the textual
+   * loss is small and a full ConfirmDialog would be overkill.
+   */
   protected cancelEditNotes(): void {
+    if (this.notesControl.dirty) {
+      const ok = window.confirm(this.translate.instant('customers.compliance.referenceNotesDiscardConfirm'));
+      if (!ok) return;
+    }
     this.editingNotes.set(false);
   }
 

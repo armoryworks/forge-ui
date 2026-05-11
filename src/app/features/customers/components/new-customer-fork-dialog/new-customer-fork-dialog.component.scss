@@ -33,10 +33,21 @@
     background: color-mix(in srgb, var(--primary) 5%, var(--surface));
   }
 
+  // The primary fork option (Quick) is the dominant path. Border-color
+  // alone was too subtle — users were picking Guided by mistake. Adding
+  // a tinted background, accent stripe, and stronger badge so the card
+  // reads as the recommended choice at a glance.
   &--primary {
     border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    box-shadow: inset 4px 0 0 var(--primary);
 
     .fork-card__icon {
+      background: var(--primary);
+      color: white;
+    }
+
+    .fork-card__badge {
       background: var(--primary);
       color: white;
     }
