@@ -35,7 +35,7 @@ export class InputComponent implements ControlValueAccessor {
   readonly isReadonly = input<boolean>(false);
   readonly maxlength = input<number | null>(null);
   readonly autocomplete = input<string>('off');
-  readonly mask = input<'phone' | 'zip' | 'ssn' | 'date' | 'currency' | null>(null);
+  readonly mask = input<'phone' | 'zip' | 'ssn' | 'ein' | 'date' | 'currency' | null>(null);
   readonly required = input<boolean>(false);
   // Phase 3 / WU-10 — number-input precision controls. Optional; only used when
   // type === 'number'. PO/SO line quantity + price use step="0.0001" for
@@ -114,6 +114,7 @@ export class InputComponent implements ControlValueAccessor {
       case 'phone': return this.formatPhone(raw);
       case 'zip': return this.formatZip(raw);
       case 'ssn': return this.formatSsn(raw);
+      case 'ein': return this.formatEin(raw);
       case 'date': return this.formatDate(raw);
       case 'currency': return this.formatCurrency(raw);
       default: return raw;
@@ -140,6 +141,14 @@ export class InputComponent implements ControlValueAccessor {
     if (digits.length <= 3) return digits;
     if (digits.length <= 5) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
     return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
+  }
+
+  // EIN format: XX-XXXXXXX (2 digits, dash, 7 digits — 9 total).
+  private formatEin(raw: string): string {
+    const digits = raw.replace(/\D/g, '').slice(0, 9);
+    if (digits.length === 0) return '';
+    if (digits.length <= 2) return digits;
+    return `${digits.slice(0, 2)}-${digits.slice(2)}`;
   }
 
   private formatDate(raw: string): string {
