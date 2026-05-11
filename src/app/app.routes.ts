@@ -108,6 +108,12 @@ export const routes: Routes = [
           import('./features/assets/assets.routes').then((m) => m.ASSETS_ROUTES),
       },
       {
+        path: 'maintenance',
+        canActivate: [roleGuard('Admin', 'Manager')],
+        loadChildren: () =>
+          import('./features/maintenance/maintenance.routes').then((m) => m.MAINTENANCE_ROUTES),
+      },
+      {
         path: 'time-tracking',
         loadChildren: () =>
           import('./features/time-tracking/time-tracking.routes').then((m) => m.TIME_TRACKING_ROUTES),

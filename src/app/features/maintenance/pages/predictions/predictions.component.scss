@@ -1,0 +1,39 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: $sp-sm;
+  padding: $sp-md $sp-lg;
+  background: var(--surface);
+  border-bottom: $border-width-thin solid var(--border);
+}
+
+.kpi-card {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  padding: $sp-sm $sp-md;
+  background: var(--bg);
+  border-left: $border-width-accent solid var(--primary);
+
+  &--critical { border-left-color: var(--error); }
+
+  &__label {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__value {
+    font-size: $font-size-kpi;
+    font-weight: 700;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

@@ -1,0 +1,37 @@
+@use 'styles/variables' as *;
+
+.section {
+  margin-bottom: $sp-xl;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    padding: $sp-sm $sp-lg;
+    background: var(--surface);
+    border-bottom: $border-width-thin solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin: 0;
+    font-weight: 700;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+.pair {
+  font-family: $font-family-mono;
+  font-weight: 600;
+}

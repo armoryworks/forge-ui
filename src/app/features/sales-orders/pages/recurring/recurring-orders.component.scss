@@ -1,0 +1,11 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
+.text-muted {
+  color: var(--text-muted);
+  font-style: italic;
+}

@@ -1,0 +1,74 @@
+<app-dialog
+  [title]="'salesOrders.recurring.newRecurring' | translate"
+  width="720px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <app-input [label]="'salesOrders.recurring.fieldName' | translate"
+      formControlName="name" [required]="true"
+      data-testid="recurring-name" />
+
+    <div class="dialog-row">
+      <app-entity-picker
+        [label]="'salesOrders.recurring.fieldCustomer' | translate"
+        entityType="customers"
+        displayField="name"
+        formControlName="customerId" />
+      <app-datepicker [label]="'salesOrders.recurring.fieldNextRun' | translate"
+        formControlName="nextGenerationDate" [required]="true" />
+    </div>
+
+    <div class="dialog-row">
+      <app-input [label]="'salesOrders.recurring.fieldInterval' | translate"
+        type="number" formControlName="intervalDays" [required]="true" />
+    </div>
+
+    <app-textarea [label]="'common.notes' | translate"
+      formControlName="notes"
+      [rows]="2" [maxlength]="2000" />
+
+    <div class="lines-section">
+      <div class="lines-section__header">
+        <h4 class="lines-section__title">{{ 'salesOrders.recurring.linesTitle' | translate }}</h4>
+        <button class="action-btn action-btn--sm" type="button" (click)="addLine()" data-testid="recurring-add-line-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'salesOrders.recurring.addLine' | translate }}
+        </button>
+      </div>
+      <div formArrayName="lines">
+        @for (line of lines.controls; track $index; let i = $index) {
+          <div class="line-row" [formGroupName]="i">
+            <app-entity-picker
+              [label]="'salesOrders.recurring.linePart' | translate"
+              entityType="parts"
+              displayField="partNumber"
+              formControlName="partId" />
+            <app-input [label]="'salesOrders.recurring.lineDescription' | translate"
+              formControlName="description" [required]="true" />
+            <app-input [label]="'salesOrders.recurring.lineQty' | translate"
+              type="number" formControlName="quantity" [required]="true" />
+            <app-input [label]="'salesOrders.recurring.lineUnitPrice' | translate"
+              type="number" formControlName="unitPrice" [required]="true" />
+            <button class="icon-btn icon-btn--danger" type="button"
+                    [attr.aria-label]="'common.delete' | translate"
+                    [disabled]="lines.length <= 1"
+                    (click)="removeLine(i)">
+              <span class="material-icons-outlined">delete</span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid"
+        (click)="save()" data-testid="recurring-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

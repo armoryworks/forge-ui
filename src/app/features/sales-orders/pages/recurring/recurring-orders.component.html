@@ -1,0 +1,51 @@
+<app-page-layout [pageTitle]="'salesOrders.recurring.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'salesOrders.recurring.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openNew()" data-testid="recurring-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'salesOrders.recurring.newRecurring' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="sales-recurring-orders"
+        [columns]="columns"
+        [data]="rows()"
+        emptyIcon="event_repeat"
+        [emptyMessage]="'salesOrders.recurring.empty' | translate">
+
+        <ng-template appColumnCell="nextGenerationDate" let-row>
+          {{ row.nextGenerationDate | date:'MM/dd/yyyy' }}
+        </ng-template>
+
+        <ng-template appColumnCell="lastGeneratedDate" let-row>
+          @if (row.lastGeneratedDate) {
+            {{ row.lastGeneratedDate | date:'MM/dd/yyyy' }}
+          } @else {
+            <span class="text-muted">{{ 'salesOrders.recurring.neverRun' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate"
+                  (click)="confirmDelete($any(row))" data-testid="recurring-delete-btn">
+            <span class="material-icons-outlined">delete</span>
+          </button>
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>

@@ -1,0 +1,34 @@
+@use 'styles/variables' as *;
+
+.lines-section {
+  border-top: $border-width-thin solid var(--border);
+  padding-top: $sp-md;
+  margin-top: $sp-md;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+    margin-bottom: $sp-sm;
+
+    h4 { margin: 0; flex: 1; }
+  }
+
+  &__title {
+    font-size: $font-size-xs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+  }
+}
+
+.line-row {
+  display: grid;
+  grid-template-columns: 1.5fr 2fr 80px 100px auto;
+  gap: $sp-sm;
+  align-items: center;
+  padding: $sp-xs 0;
+  border-bottom: $border-width-thin dashed var(--border);
+
+  &:last-child { border-bottom: none; }
+}

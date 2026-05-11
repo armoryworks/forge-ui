@@ -1,0 +1,23 @@
+<app-dialog
+  [title]="(isResolve ? 'maintenance.resolveDialog.resolveTitle' : 'maintenance.resolveDialog.falsePositiveTitle') | translate"
+  width="480px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <p class="hint">{{ (isResolve ? 'maintenance.resolveDialog.resolveHint' : 'maintenance.resolveDialog.falsePositiveHint') | translate }}</p>
+    <app-textarea [label]="'maintenance.resolveDialog.fieldNotes' | translate"
+      formControlName="notes" [rows]="4" [maxlength]="2000" [required]="true"
+      data-testid="resolve-notes" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid"
+        (click)="confirm()" data-testid="resolve-confirm-btn">
+        <span class="material-icons-outlined">check</span>
+        {{ (isResolve ? 'maintenance.resolveDialog.confirmResolve' : 'maintenance.resolveDialog.confirmFalsePositive') | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

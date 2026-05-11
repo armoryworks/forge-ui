@@ -111,6 +111,12 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./assignment-rules/assignment-rules.component').then((m) => m.AssignmentRulesComponent),
   },
+  // Multi-currency admin — currencies catalog + per-day FX rates.
+  {
+    path: 'currencies',
+    loadComponent: () =>
+      import('./currencies/currencies.component').then((m) => m.CurrenciesComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

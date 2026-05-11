@@ -1,0 +1,103 @@
+<app-page-layout [pageTitle]="'maintenance.title' | translate">
+  <ng-container content>
+    <!-- Dashboard KPI strip -->
+    <section class="kpi-strip" [appLoadingBlock]="loadingDashboard()">
+      @if (dashboard(); as d) {
+        <div class="kpi-card">
+          <div class="kpi-card__label">{{ 'maintenance.kpiActive' | translate }}</div>
+          <div class="kpi-card__value">{{ d.activePredictions }}</div>
+        </div>
+        <div class="kpi-card kpi-card--critical">
+          <div class="kpi-card__label">{{ 'maintenance.kpiCritical' | translate }}</div>
+          <div class="kpi-card__value">{{ d.criticalPredictions }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__label">{{ 'maintenance.kpiPendingAck' | translate }}</div>
+          <div class="kpi-card__value">{{ d.pendingAcknowledgment }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__label">{{ 'maintenance.kpiScheduled' | translate }}</div>
+          <div class="kpi-card__value">{{ d.maintenanceScheduled }}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__label">{{ 'maintenance.kpiAccuracy' | translate }}</div>
+          <div class="kpi-card__value">{{ d.overallModelAccuracy | number:'1.1-1' }}%</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-card__label">{{ 'maintenance.kpiDowntimePrevented' | translate }}</div>
+          <div class="kpi-card__value">{{ d.estimatedDowntimePreventedHours | number:'1.0-0' }}h</div>
+        </div>
+      }
+    </section>
+
+    <!-- Filters -->
+    <app-toolbar>
+      <app-select [label]="'maintenance.filterSeverity' | translate"
+        [formControl]="severityControl" [options]="severityOptions" />
+      <app-select [label]="'maintenance.filterStatus' | translate"
+        [formControl]="statusControl" [options]="statusOptions" />
+      <span appSpacer></span>
+      <span class="toolbar__hint">{{ 'maintenance.hint' | translate }}</span>
+    </app-toolbar>
+
+    <!-- Predictions table -->
+    <div [appLoadingBlock]="loadingList()">
+      <app-data-table
+        tableId="maintenance-predictions"
+        [columns]="columns"
+        [data]="filteredPredictions()"
+        emptyIcon="precision_manufacturing"
+        [emptyMessage]="'maintenance.empty' | translate">
+
+        <ng-template appColumnCell="severity" let-row>
+          <span [class]="getSeverityClass(row.severity)">
+            {{ ('maintenance.severity.' + row.severity) | translate }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="confidencePercent" let-row>
+          {{ row.confidencePercent | number:'1.0-1' }}%
+        </ng-template>
+
+        <ng-template appColumnCell="predictedFailureDate" let-row>
+          {{ row.predictedFailureDate | date:'MM/dd/yyyy hh:mm' }}
+        </ng-template>
+
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">
+            {{ ('maintenance.status.' + row.status) | translate }}
+          </span>
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          @if (canAcknowledge(row)) {
+            <button class="icon-btn" [attr.aria-label]="'maintenance.acknowledge' | translate"
+                    [matTooltip]="'maintenance.acknowledge' | translate"
+                    (click)="acknowledge($any(row))">
+              <span class="material-icons-outlined">check_circle</span>
+            </button>
+          }
+          @if (canSchedule(row)) {
+            <button class="icon-btn" [attr.aria-label]="'maintenance.scheduleMaintenance' | translate"
+                    [matTooltip]="'maintenance.scheduleMaintenance' | translate"
+                    (click)="schedule($any(row))">
+              <span class="material-icons-outlined">schedule</span>
+            </button>
+          }
+          @if (canResolve(row)) {
+            <button class="icon-btn" [attr.aria-label]="'maintenance.resolve' | translate"
+                    [matTooltip]="'maintenance.resolve' | translate"
+                    (click)="resolve($any(row))">
+              <span class="material-icons-outlined">task_alt</span>
+            </button>
+            <button class="icon-btn" [attr.aria-label]="'maintenance.falsePositive' | translate"
+                    [matTooltip]="'maintenance.falsePositive' | translate"
+                    (click)="falsePositive($any(row))">
+              <span class="material-icons-outlined">cancel</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>

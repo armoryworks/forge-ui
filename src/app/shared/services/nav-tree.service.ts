@@ -80,6 +80,7 @@ export class NavTreeService {
         },
         { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'event_repeat', label: 'Recurring Orders', i18nKey: 'nav.recurringOrders', route: '/sales-orders/recurring', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
         { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
@@ -101,6 +102,7 @@ export class NavTreeService {
       children: [
         { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
         { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'precision_manufacturing', label: 'Maintenance', i18nKey: 'nav.maintenance', route: '/maintenance/predictions', allowedRoles: ['Admin', 'Manager'] },
       ],
     },
     {
@@ -154,6 +156,7 @@ export class NavTreeService {
             { icon: 'campaign', label: 'Lead Sources', i18nKey: 'admin.tabs.leadSources', route: '/admin/lead-sources', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'fact_check', label: 'ICP Rubrics', i18nKey: 'admin.tabs.icpRubrics', route: '/admin/icp-rubrics', allowedRoles: ['Admin', 'Manager'] },
             { icon: 'alt_route', label: 'Assignment Rules', i18nKey: 'admin.tabs.assignmentRules', route: '/admin/assignment-rules', allowedRoles: ['Admin', 'Manager'] },
+            { icon: 'payments', label: 'Currencies & FX', i18nKey: 'admin.tabs.currencies', route: '/admin/currencies', allowedRoles: ['Admin'] },
           ],
         },
         {

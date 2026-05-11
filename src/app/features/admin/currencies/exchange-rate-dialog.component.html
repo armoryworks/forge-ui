@@ -1,0 +1,37 @@
+<app-dialog
+  [title]="'admin.currencies.newExchangeRate' | translate"
+  width="480px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-select [label]="'admin.currencies.fieldFromCurrency' | translate"
+        formControlName="fromCurrencyId"
+        [options]="currencyOptions" [required]="true"
+        data-testid="rate-from" />
+      <app-select [label]="'admin.currencies.fieldToCurrency' | translate"
+        formControlName="toCurrencyId"
+        [options]="currencyOptions" [required]="true"
+        data-testid="rate-to" />
+    </div>
+    <app-input [label]="'admin.currencies.fieldRate' | translate"
+      type="number" formControlName="rate" [required]="true"
+      step="0.0001"
+      [placeholder]="'admin.currencies.ratePlaceholder' | translate"
+      data-testid="rate-value" />
+    <app-datepicker [label]="'admin.currencies.fieldEffectiveDate' | translate"
+      formControlName="effectiveDate" [required]="true"
+      data-testid="rate-effective" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid"
+        (click)="save()" data-testid="rate-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

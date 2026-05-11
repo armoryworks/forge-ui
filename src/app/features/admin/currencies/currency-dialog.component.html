@@ -1,0 +1,47 @@
+<app-dialog
+  [title]="(isEdit ? 'admin.currencies.editCurrency' : 'admin.currencies.newCurrency') | translate"
+  width="480px"
+  (closed)="close()">
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'admin.currencies.fieldCode' | translate"
+        formControlName="code" [required]="true"
+        [placeholder]="'admin.currencies.codePlaceholder' | translate"
+        data-testid="currency-code" />
+      <app-input [label]="'admin.currencies.fieldSymbol' | translate"
+        formControlName="symbol" [required]="true"
+        data-testid="currency-symbol" />
+    </div>
+    <app-input [label]="'admin.currencies.fieldName' | translate"
+      formControlName="name" [required]="true"
+      data-testid="currency-name" />
+    <div class="dialog-row">
+      <app-input [label]="'admin.currencies.fieldDecimalPlaces' | translate"
+        type="number" formControlName="decimalPlaces" [required]="true"
+        data-testid="currency-decimals" />
+      <app-input [label]="'admin.currencies.fieldSortOrder' | translate"
+        type="number" formControlName="sortOrder" [required]="true"
+        data-testid="currency-sort" />
+    </div>
+    <app-toggle [label]="'admin.currencies.fieldIsBaseCurrency' | translate"
+      formControlName="isBaseCurrency"
+      data-testid="currency-base" />
+    @if (isEdit) {
+      <app-toggle [label]="'common.active' | translate"
+        formControlName="isActive"
+        data-testid="currency-active" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid"
+        (click)="save()" data-testid="currency-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

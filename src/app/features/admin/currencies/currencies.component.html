@@ -1,0 +1,83 @@
+<app-page-layout [pageTitle]="'admin.currencies.title' | translate">
+  <ng-container content>
+    <section class="section">
+      <header class="section__header">
+        <h3 class="section__title">{{ 'admin.currencies.currenciesTitle' | translate }}</h3>
+        <p class="section__hint">{{ 'admin.currencies.currenciesHint' | translate }}</p>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--create" (click)="openNewCurrency()" data-testid="currency-new-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'admin.currencies.newCurrency' | translate }}
+        </button>
+      </header>
+      <div [appLoadingBlock]="loadingCurrencies()">
+        <app-data-table
+          tableId="admin-currencies"
+          [columns]="currencyColumns"
+          [data]="currencies()"
+          [clickableRows]="true"
+          (rowClick)="openEditCurrency($any($event))"
+          emptyIcon="payments"
+          [emptyMessage]="'admin.currencies.currenciesEmpty' | translate">
+
+          <ng-template appColumnCell="isBaseCurrency" let-row>
+            @if (row.isBaseCurrency) {
+              <span class="chip chip--primary">{{ 'admin.currencies.base' | translate }}</span>
+            }
+          </ng-template>
+
+          <ng-template appColumnCell="isActive" let-row>
+            @if (row.isActive) {
+              <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+            } @else {
+              <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    </section>
+
+    <section class="section">
+      <header class="section__header">
+        <h3 class="section__title">{{ 'admin.currencies.ratesTitle' | translate }}</h3>
+        <p class="section__hint">{{ 'admin.currencies.ratesHint' | translate }}</p>
+        <span appSpacer></span>
+        <button class="action-btn action-btn--create" (click)="openNewRate()" data-testid="rate-new-btn">
+          <span class="material-icons-outlined">add</span>
+          {{ 'admin.currencies.newExchangeRate' | translate }}
+        </button>
+      </header>
+      <div [appLoadingBlock]="loadingRates()">
+        <app-data-table
+          tableId="admin-exchange-rates"
+          [columns]="rateColumns"
+          [data]="rates()"
+          emptyIcon="currency_exchange"
+          [emptyMessage]="'admin.currencies.ratesEmpty' | translate">
+
+          <ng-template appColumnCell="effectiveDate" let-row>
+            {{ row.effectiveDate | date:'MM/dd/yyyy' }}
+          </ng-template>
+
+          <ng-template appColumnCell="pair" let-row>
+            <span class="pair">{{ row.fromCurrencyCode }} → {{ row.toCurrencyCode }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="rate" let-row>
+            {{ row.rate | number:'1.4-6' }}
+          </ng-template>
+
+          <ng-template appColumnCell="source" let-row>
+            <span class="chip chip--muted">{{ row.source }}</span>
+          </ng-template>
+
+          <ng-template appColumnCell="fetchedAt" let-row>
+            @if (row.fetchedAt) {
+              {{ row.fetchedAt | date:'MM/dd/yyyy hh:mm' }}
+            }
+          </ng-template>
+        </app-data-table>
+      </div>
+    </section>
+  </ng-container>
+</app-page-layout>
