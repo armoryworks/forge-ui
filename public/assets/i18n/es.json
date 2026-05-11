@@ -3822,7 +3822,6 @@
     "step2Title": "Paso 2 de 2 — Datos de la empresa",
     "firstName": "Nombre",
     "lastName": "Apellido",
-    "passwordHint": "Al menos 8 caracteres con mayúsculas, minúsculas y un dígito",
     "companyName": "Nombre de la empresa",
     "ein": "EIN / ID Fiscal",
     "einPlaceholder": "XX-XXXXXXX",

@@ -3833,7 +3833,6 @@
     "step2Title": "Step 2 of 2 — Company Details",
     "firstName": "First Name",
     "lastName": "Last Name",
-    "passwordHint": "At least 8 characters with uppercase, lowercase, and a digit",
     "companyName": "Company Name",
     "ein": "EIN / Tax ID",
     "einPlaceholder": "XX-XXXXXXX",

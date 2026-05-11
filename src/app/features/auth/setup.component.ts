@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormGroup, FormControl, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,7 +43,11 @@ export class SetupComponent {
     firstName: new FormControl('', [Validators.required]),
     lastName: new FormControl('', [Validators.required]),
     email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(8),
+      passwordStrengthValidator,
+    ]),
   });
 
   protected readonly accountViolations = FormValidationService.getViolations(this.accountForm, {
@@ -122,4 +126,24 @@ export class SetupComponent {
       this.snackbar.error(detail ?? 'Setup failed. Please try again.');
     }
   }
+}
+
+/**
+ * Replaces the old [info] hint on the password field. Each missing
+ * requirement surfaces as its own violation in the validation popover
+ * (via FormValidationService — the service reads the `message` property
+ * directly when an error value has one), so users see exactly what's
+ * still needed instead of one generic "invalid" line. Required-empty
+ * and minLength are handled by their respective built-in validators
+ * and stay separate.
+ */
+function passwordStrengthValidator(control: AbstractControl): ValidationErrors | null {
+  const value = control.value as string | null | undefined;
+  if (!value) return null;  // `required` covers the empty case.
+
+  const errors: ValidationErrors = {};
+  if (!/[A-Z]/.test(value)) errors['passwordUppercase'] = { message: 'Password must contain an uppercase letter' };
+  if (!/[a-z]/.test(value)) errors['passwordLowercase'] = { message: 'Password must contain a lowercase letter' };
+  if (!/[0-9]/.test(value)) errors['passwordDigit'] = { message: 'Password must contain a digit' };
+  return Object.keys(errors).length > 0 ? errors : null;
 }
