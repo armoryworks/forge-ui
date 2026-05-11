@@ -12,7 +12,7 @@
 .auth-card {
   max-width: 360px;
   width: 100%;
-  padding: $sp-lg;
+  padding: $sp-xl;
   transition: max-width $transition-normal;
 
   &--wide {
@@ -21,6 +21,11 @@
 
   &__header {
     text-align: center;
+    // Generous space below the header so the "Step X of Y" subtitle has
+    // visual breathing room from the form fields below. Setup wizards
+    // are focal-point pages, not dense panels — the auth-card's
+    // $sp-xl padding alone isn't enough.
+    margin-bottom: $sp-xl;
   }
 
   &__icon {
@@ -48,7 +53,19 @@
     margin: $sp-md 0 0;
   }
 
-  // [formGroup] in _shared.scss handles flex-column + gap
+  // [formGroup] in _shared.scss applies flex-column + $sp-md gap by
+  // default. Setup wizard wants more breathing room between fields than
+  // a dense panel — override to $sp-lg.
+  &__form {
+    gap: $sp-lg;
+
+    // Extra separation between the last input and the submit button so
+    // the action affordance reads as distinct from the field stack.
+    > app-validation-button {
+      margin-top: $sp-sm;
+    }
+  }
+
   &__form button[mat-flat-button] {
     width: 100%;
   }
@@ -67,6 +84,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: $sp-md;
+    margin-top: $sp-sm;
 
     button {
       width: 100%;
