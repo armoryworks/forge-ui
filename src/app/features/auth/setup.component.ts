@@ -39,6 +39,10 @@ export class SetupComponent {
   protected readonly loading = this.loadingService.isLoading;
 
   // Step 1: Admin Account
+  // confirmPassword catches typos on the masked password field — this is
+  // the FIRST admin account on the install, so a typo locks the user
+  // out. The visibility-toggle eye on the password input is helpful but
+  // not sufficient; standard pattern is to also require a re-entry.
   protected readonly accountForm = new FormGroup({
     firstName: new FormControl('', [Validators.required]),
     lastName: new FormControl('', [Validators.required]),
@@ -48,6 +52,10 @@ export class SetupComponent {
       Validators.minLength(8),
       passwordStrengthValidator,
     ]),
+    confirmPassword: new FormControl('', [
+      Validators.required,
+      passwordsMatchValidator,
+    ]),
   });
 
   protected readonly accountViolations = FormValidationService.getViolations(this.accountForm, {
@@ -55,7 +63,17 @@ export class SetupComponent {
     lastName: 'Last Name',
     email: 'Email',
     password: 'Password',
+    confirmPassword: 'Confirm Password',
   });
+
+  constructor() {
+    // When the password changes, re-run confirmPassword's validators so
+    // the popover stays in sync with the latest match state (otherwise
+    // confirmPassword's validator only fires on its own valueChanges).
+    this.accountForm.controls.password.valueChanges.subscribe(() => {
+      this.accountForm.controls.confirmPassword.updateValueAndValidity({ emitEvent: false });
+    });
+  }
 
   // Step 2: Company Details
   // The `address` control wraps a Record<string,string> from
@@ -157,6 +175,22 @@ function passwordStrengthValidator(control: AbstractControl): ValidationErrors |
   if (!/[a-z]/.test(value)) errors['passwordLowercase'] = { message: 'Password must contain a lowercase letter' };
   if (!/[0-9]/.test(value)) errors['passwordDigit'] = { message: 'Password must contain a digit' };
   return Object.keys(errors).length > 0 ? errors : null;
+}
+
+/**
+ * Cross-field validator on confirmPassword that fires when its value
+ * is non-empty but doesn't match the sibling `password` control. Lives
+ * on confirmPassword (not on the form) so FormValidationService picks
+ * it up — the service iterates per-control errors, not form-level ones.
+ */
+function passwordsMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const confirm = control.value as string | null | undefined;
+  if (!confirm) return null;  // `required` covers the empty case.
+  const password = control.parent?.get('password')?.value as string | null | undefined;
+  if (password && confirm !== password) {
+    return { passwordsMismatch: { message: 'Passwords must match' } };
+  }
+  return null;
 }
 
 /**
