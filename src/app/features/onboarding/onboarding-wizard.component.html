@@ -168,7 +168,13 @@
     </div>
   } @else {
     <!-- ── Wizard steps ───────────────────────────────────────────────────── -->
-    <mat-stepper class="onboarding__stepper" orientation="horizontal" [selectedIndex]="currentStepIndex()">
+    <!-- linear=true gates step jumps to completed/current steps (Material checks
+         each step's stepControl validity). selectionChange routes the URL so
+         the click round-trips through ?step= and keeps the URL the source of
+         truth. -->
+    <mat-stepper class="onboarding__stepper" orientation="horizontal"
+      [linear]="true" [selectedIndex]="currentStepIndex()"
+      (selectionChange)="onStepperSelectionChange($event.selectedIndex)">
       <!-- Override the default "create" (pencil) edit icon with step numbers -->
       <ng-template matStepperIcon="edit" let-index="index">{{ index + 1 }}</ng-template>
 

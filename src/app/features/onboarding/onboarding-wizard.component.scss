@@ -92,13 +92,19 @@
       }
 
       .mat-step-header {
-        // Disable direct step-header click navigation — users must use Back/Continue
-        // to keep URL state (currentStepIndex) in sync with the displayed step.
-        pointer-events: none;
-        cursor: default;
+        // Clickable when linear-mode lets the step be selected (visited /
+        // current). Material handles the validity gate via [linear]="true"
+        // on mat-stepper — disabled headers stay non-interactive because
+        // Material applies aria-disabled + ignores the click.
+        cursor: pointer;
         padding: $sp-xxs $sp-sm;
         height: 40px;
         min-height: 0;
+
+        &[aria-disabled='true'] {
+          cursor: not-allowed;
+          opacity: 0.55;
+        }
       }
 
       .mat-step-icon {

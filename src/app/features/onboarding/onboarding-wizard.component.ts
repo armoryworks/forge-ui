@@ -224,6 +224,22 @@ export class OnboardingWizardComponent {
     this.router.navigate([], { relativeTo: this.route, queryParams: { step: prev }, queryParamsHandling: 'merge' });
   }
 
+  /**
+   * Fires when the user clicks a step header in the mat-stepper. Routes the
+   * click through the URL so ?step= stays the source of truth — without this
+   * the stepper would change selectedIndex internally but the next change to
+   * currentStepIndex() would yank it back. Material's linear mode gates the
+   * click to visited/current steps before this fires.
+   */
+  protected onStepperSelectionChange(index: number): void {
+    if (index === this.currentStepIndex()) return;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step: index },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   // ── State ────────────────────────────────────────────────────────────────
   protected readonly submitting = signal(false);
   // Legacy: kept for DocuSeal postMessage listener compatibility
