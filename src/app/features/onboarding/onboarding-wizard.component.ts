@@ -220,7 +220,7 @@ export class OnboardingWizardComponent {
       case 0: return this.personalViolations();
       case 1: return this.addressViolations();
       case 2: return this.w4Violations();
-      case 3: return [] as string[];
+      case 3: return this.stateViolations();
       case 4: return this.i9Violations();
       case 5: return this.depositViolations();
       case 6: return this.ackViolations();
@@ -233,7 +233,7 @@ export class OnboardingWizardComponent {
       case 0: return this.personalFormStatus()  === 'INVALID';
       case 1: return this.addressFormStatus()   === 'INVALID';
       case 2: return this.w4FormStatus()        === 'INVALID';
-      case 3: return false;
+      case 3: return this.stateFormStatus()     === 'INVALID';
       case 4: return this.i9FormStatus()        === 'INVALID';
       case 5: return this.depositFormStatus()   === 'INVALID';
       case 6: return this.ackFormStatus()       === 'INVALID' || this.submitting();
@@ -453,6 +453,10 @@ export class OnboardingWizardComponent {
     { initialValue: false },
   );
 
+  protected readonly stateViolations = FormValidationService.getViolations(this.stateForm, {
+    stateFilingStatus: 'State Filing Status',
+  });
+
   // ── Step 5: I-9 Employment Eligibility ───────────────────────────────────
   protected readonly i9Form = new FormGroup({
     citizenshipStatus: new FormControl('', [Validators.required]),
@@ -586,6 +590,7 @@ export class OnboardingWizardComponent {
   private readonly personalFormStatus  = toSignal(this.personalForm.statusChanges.pipe(startWith(this.personalForm.status)),  { initialValue: this.personalForm.status });
   private readonly addressFormStatus   = toSignal(this.addressForm.statusChanges.pipe(startWith(this.addressForm.status)),   { initialValue: this.addressForm.status });
   private readonly w4FormStatus        = toSignal(this.w4Form.statusChanges.pipe(startWith(this.w4Form.status)),             { initialValue: this.w4Form.status });
+  private readonly stateFormStatus     = toSignal(this.stateForm.statusChanges.pipe(startWith(this.stateForm.status)),       { initialValue: this.stateForm.status });
   private readonly i9FormStatus        = toSignal(this.i9Form.statusChanges.pipe(startWith(this.i9Form.status)),             { initialValue: this.i9Form.status });
   private readonly depositFormStatus   = toSignal(this.depositForm.statusChanges.pipe(startWith(this.depositForm.status)),   { initialValue: this.depositForm.status });
   private readonly ackFormStatus       = toSignal(this.ackForm.statusChanges.pipe(startWith(this.ackForm.status)),           { initialValue: this.ackForm.status });
@@ -601,7 +606,9 @@ export class OnboardingWizardComponent {
 
   // ── Constructor: restore draft, prefill, auto-save ───────────────────────
   constructor() {
-    // When exempt is toggled on, filing status is no longer required
+    // When exempt is toggled on, filing status is no longer required.
+    // Fire stateForm.updateValueAndValidity() at the end (no emitEvent:false)
+    // so stateViolations picks up the relaxed validator immediately.
     effect(() => {
       const ctrl = this.stateForm.controls.stateFilingStatus;
       if (this.stateExempt()) {
@@ -610,6 +617,7 @@ export class OnboardingWizardComponent {
         ctrl.addValidators(Validators.required);
       }
       ctrl.updateValueAndValidity({ emitEvent: false });
+      this.stateForm.updateValueAndValidity();
     });
 
     // Load policy docs — handbook ack is required only when a URL is set
@@ -1179,6 +1187,16 @@ export class OnboardingWizardComponent {
     this.i9Form.controls.listADocNumber.updateValueAndValidity({ emitEvent: false });
     this.i9Form.controls.listBDocNumber.updateValueAndValidity({ emitEvent: false });
     this.i9Form.controls.listCDocNumber.updateValueAndValidity({ emitEvent: false });
+
+    // Force each parent FormGroup to re-emit statusChanges so the violations
+    // signals subscribed via FormValidationService.getViolations() pick up
+    // the relaxed validators. Without this, individual updateValueAndValidity
+    // calls with emitEvent:false silently update control.errors but the
+    // violation list stays stale ("Social Security Number is required" even
+    // with the green Securely-stored badge — reported 2026-05-12).
+    this.personalForm.updateValueAndValidity();
+    this.depositForm.updateValueAndValidity();
+    this.i9Form.updateValueAndValidity();
   }
 
   private flipRequired(
