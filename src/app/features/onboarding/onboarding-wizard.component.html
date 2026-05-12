@@ -198,8 +198,16 @@
 
           <div class="step-row">
             <app-datepicker [label]="'onboarding.personal.dateOfBirth' | translate" formControlName="dateOfBirth" [required]="true" data-testid="onboarding-dob" />
-            <app-input [label]="'onboarding.personal.ssn' | translate" formControlName="ssn"
-              mask="ssn" [required]="true" [placeholder]="'onboarding.personal.ssnPlaceholder' | translate" data-testid="onboarding-ssn" />
+            <div class="secure-field">
+              <app-input [label]="'onboarding.personal.ssn' | translate" formControlName="ssn"
+                mask="ssn" [required]="!hasStoredSsn()" [placeholder]="'onboarding.personal.ssnPlaceholder' | translate" data-testid="onboarding-ssn" />
+              @if (hasStoredSsn()) {
+                <p class="secure-field__hint">
+                  <span class="material-icons-outlined">lock</span>
+                  {{ 'onboarding.securelyStored' | translate }}
+                </p>
+              }
+            </div>
           </div>
 
           <div class="step-row">
@@ -482,7 +490,15 @@
                 <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listAType"
                   [options]="listATypeOptions" data-testid="onboarding-i9-list-a-type" />
                 <div class="step-row">
-                  <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listADocNumber" data-testid="onboarding-i9-list-a-doc-number" />
+                  <div class="secure-field">
+                    <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listADocNumber" data-testid="onboarding-i9-list-a-doc-number" />
+                    @if (hasStoredListADocNum()) {
+                      <p class="secure-field__hint">
+                        <span class="material-icons-outlined">lock</span>
+                        {{ 'onboarding.securelyStored' | translate }}
+                      </p>
+                    }
+                  </div>
                   <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listAAuthority" data-testid="onboarding-i9-list-a-authority" />
                 </div>
                 <app-datepicker [label]="'onboarding.i9.expirationDate' | translate"
@@ -519,7 +535,15 @@
                 <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listBType"
                   [options]="listBTypeOptions" data-testid="onboarding-i9-list-b-type" />
                 <div class="step-row">
-                  <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listBDocNumber" data-testid="onboarding-i9-list-b-doc-number" />
+                  <div class="secure-field">
+                    <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listBDocNumber" data-testid="onboarding-i9-list-b-doc-number" />
+                    @if (hasStoredListBDocNum()) {
+                      <p class="secure-field__hint">
+                        <span class="material-icons-outlined">lock</span>
+                        {{ 'onboarding.securelyStored' | translate }}
+                      </p>
+                    }
+                  </div>
                   <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listBAuthority" data-testid="onboarding-i9-list-b-authority" />
                 </div>
                 <app-datepicker [label]="'onboarding.i9.expirationDateShort' | translate"
@@ -554,7 +578,15 @@
                 <app-select [label]="'onboarding.i9.docType' | translate" formControlName="listCType"
                   [options]="listCTypeOptions" data-testid="onboarding-i9-list-c-type" />
                 <div class="step-row">
-                  <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listCDocNumber" data-testid="onboarding-i9-list-c-doc-number" />
+                  <div class="secure-field">
+                    <app-input [label]="'onboarding.i9.docNumber' | translate" formControlName="listCDocNumber" data-testid="onboarding-i9-list-c-doc-number" />
+                    @if (hasStoredListCDocNum()) {
+                      <p class="secure-field__hint">
+                        <span class="material-icons-outlined">lock</span>
+                        {{ 'onboarding.securelyStored' | translate }}
+                      </p>
+                    }
+                  </div>
                   <app-input [label]="'onboarding.i9.issuingAuthority' | translate" formControlName="listCAuthority" data-testid="onboarding-i9-list-c-authority" />
                 </div>
                 <app-datepicker [label]="'onboarding.i9.expirationDate' | translate"
@@ -639,11 +671,27 @@
 
           <app-input [label]="'onboarding.deposit.bankName' | translate" formControlName="bankName" [required]="true" data-testid="onboarding-bank-name" />
           <div class="step-row">
-            <app-input [label]="'onboarding.deposit.routingNumber' | translate"
-              formControlName="routingNumber" [required]="true"
-              [placeholder]="'onboarding.deposit.routingPlaceholder' | translate" [maxlength]="9" data-testid="onboarding-routing-number" />
-            <app-input [label]="'onboarding.deposit.accountNumber' | translate"
-              formControlName="accountNumber" [required]="true" data-testid="onboarding-account-number" />
+            <div class="secure-field">
+              <app-input [label]="'onboarding.deposit.routingNumber' | translate"
+                formControlName="routingNumber" [required]="!hasStoredBankRouting()"
+                [placeholder]="'onboarding.deposit.routingPlaceholder' | translate" [maxlength]="9" data-testid="onboarding-routing-number" />
+              @if (hasStoredBankRouting()) {
+                <p class="secure-field__hint">
+                  <span class="material-icons-outlined">lock</span>
+                  {{ 'onboarding.securelyStored' | translate }}
+                </p>
+              }
+            </div>
+            <div class="secure-field">
+              <app-input [label]="'onboarding.deposit.accountNumber' | translate"
+                formControlName="accountNumber" [required]="!hasStoredBankAccount()" data-testid="onboarding-account-number" />
+              @if (hasStoredBankAccount()) {
+                <p class="secure-field__hint">
+                  <span class="material-icons-outlined">lock</span>
+                  {{ 'onboarding.securelyStored' | translate }}
+                </p>
+              }
+            </div>
           </div>
           <app-select [label]="'onboarding.deposit.accountType' | translate"
             formControlName="accountType"

@@ -110,6 +110,92 @@ export interface OnboardingPolicyDocs {
   handbookDocUrl: string | null;
 }
 
+/**
+ * Partial onboarding-draft request. Mirror of OnboardingSubmitRequest with
+ * every field optional — the server upserts whatever's non-null. Sensitive
+ * identifiers (SSN, bank routing/account, I-9 doc numbers) are encrypted at
+ * rest server-side; passing null preserves the existing ciphertext.
+ */
+export interface SaveOnboardingDraftRequest {
+  firstName?: string;
+  middleName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  ssn?: string;
+  email?: string;
+  phone?: string;
+  street1?: string;
+  street2?: string;
+  city?: string;
+  addressState?: string;
+  zipCode?: string;
+  i9DocumentChoice?: string;
+  i9ListAType?: string;
+  i9ListADocNumber?: string;
+  i9ListAAuthority?: string;
+  i9ListAExpiry?: string;
+  i9ListAFileAttachmentId?: number;
+  i9ListBType?: string;
+  i9ListBDocNumber?: string;
+  i9ListBAuthority?: string;
+  i9ListBExpiry?: string;
+  i9ListBFileAttachmentId?: number;
+  i9ListCType?: string;
+  i9ListCDocNumber?: string;
+  i9ListCAuthority?: string;
+  i9ListCExpiry?: string;
+  i9ListCFileAttachmentId?: number;
+  bankName?: string;
+  routingNumber?: string;
+  accountNumber?: string;
+  accountType?: string;
+}
+
+/**
+ * Echoed draft state from GET /onboarding/draft. Sensitive identifiers are
+ * NEVER returned as plaintext or ciphertext — only a Has* boolean signals
+ * that something is stored. The wizard uses these flags to render a
+ * "Securely stored — re-enter to overwrite" badge next to fields that are
+ * intentionally blank for security.
+ */
+export interface OnboardingDraftStatus {
+  firstName: string | null;
+  middleName: string | null;
+  lastName: string | null;
+  dateOfBirth: string | null;
+  email: string | null;
+  phone: string | null;
+  hasSsn: boolean;
+
+  street1: string | null;
+  street2: string | null;
+  city: string | null;
+  addressState: string | null;
+  zipCode: string | null;
+
+  i9DocumentChoice: string | null;
+  i9ListAType: string | null;
+  i9ListAAuthority: string | null;
+  i9ListAExpiry: string | null;
+  i9ListAFileAttachmentId: number | null;
+  hasListADocNumber: boolean;
+  i9ListBType: string | null;
+  i9ListBAuthority: string | null;
+  i9ListBExpiry: string | null;
+  i9ListBFileAttachmentId: number | null;
+  hasListBDocNumber: boolean;
+  i9ListCType: string | null;
+  i9ListCAuthority: string | null;
+  i9ListCExpiry: string | null;
+  i9ListCFileAttachmentId: number | null;
+  hasListCDocNumber: boolean;
+
+  bankName: string | null;
+  accountType: string | null;
+  hasBankRouting: boolean;
+  hasBankAccount: boolean;
+}
+
 // ── Per-form review flow models ───────────────────────────────────────────────
 
 export interface OnboardingFormToSignItem {
@@ -177,6 +263,20 @@ export class OnboardingService {
   /** Workers' comp + handbook document URLs surfaced on the Acknowledgments step. */
   getPolicyDocs(): Observable<OnboardingPolicyDocs> {
     return this.http.get<OnboardingPolicyDocs>(`${this.base}/policy-docs`);
+  }
+
+  /**
+   * Server-side draft (replaces the old localStorage draft for sensitive
+   * data). Sends a partial — only fields the caller wants to update — and
+   * gets back the canonical status (Has* booleans for sensitive fields).
+   */
+  saveDraft(request: SaveOnboardingDraftRequest): Observable<OnboardingDraftStatus> {
+    return this.http.post<OnboardingDraftStatus>(`${this.base}/draft`, request);
+  }
+
+  /** Loads the current server-side draft status for the calling user. */
+  getDraft(): Observable<OnboardingDraftStatus> {
+    return this.http.get<OnboardingDraftStatus>(`${this.base}/draft`);
   }
 
   // ── Per-form review flow ──────────────────────────────────────────────────

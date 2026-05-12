@@ -2996,6 +2996,7 @@
       "preparingDocuments": "Preparing Documents...",
       "submitAndSign": "Submit & Sign Documents"
     },
+    "securelyStored": "Securely stored — leave blank to keep, or enter a new value to overwrite.",
     "errors": {
       "uploadFailed": "Failed to upload document. Please try again.",
       "voidedCheckFailed": "Failed to upload voided check. Please try again.",

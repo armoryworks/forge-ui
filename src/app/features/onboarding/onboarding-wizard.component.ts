@@ -11,7 +11,7 @@ import { CurrencyPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fromEvent, filter, map, startWith } from 'rxjs';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,32 +31,37 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { toIsoDate } from '../../shared/utils/date.utils';
 
 import { AuthService } from '../../shared/services/auth.service';
-import { EmployeeProfileService } from '../account/services/employee-profile.service';
 
 import {
+  OnboardingDraftStatus,
   OnboardingFormToSignItem,
   OnboardingPolicyDocs,
   OnboardingService,
   OnboardingSigningUrl,
   OnboardingSubmitRequest,
+  SaveOnboardingDraftRequest,
 } from './onboarding.service';
 
-const DRAFT_KEY = 'qbe-onboarding-draft';
 const REVIEW_STATE_KEY = 'qbe-onboarding-review-state';
 
 /**
- * Return a shallow clone of `obj` with the listed keys removed. Used to keep
- * regulatory-sensitive identifiers (SSN, bank account, I-9 doc numbers) out
- * of the localStorage draft snapshot — those values exist only in memory and
- * have to be re-entered if the user refreshes mid-wizard. See the auto-save
- * effect's SECURITY comment for the threat model.
+ * Default OnboardingDraftStatus before the server response lands. All Has*
+ * flags default false so the wizard renders required-field behavior until we
+ * know otherwise.
  */
-function stripSensitive<T extends object>(obj: T | null | undefined, keys: readonly (keyof T)[]): Partial<T> {
-  if (!obj) return {};
-  const copy: Partial<T> = { ...obj };
-  for (const k of keys) delete copy[k];
-  return copy;
-}
+const EMPTY_DRAFT_STATUS: OnboardingDraftStatus = {
+  firstName: null, middleName: null, lastName: null, dateOfBirth: null,
+  email: null, phone: null, hasSsn: false,
+  street1: null, street2: null, city: null, addressState: null, zipCode: null,
+  i9DocumentChoice: null,
+  i9ListAType: null, i9ListAAuthority: null, i9ListAExpiry: null,
+  i9ListAFileAttachmentId: null, hasListADocNumber: false,
+  i9ListBType: null, i9ListBAuthority: null, i9ListBExpiry: null,
+  i9ListBFileAttachmentId: null, hasListBDocNumber: false,
+  i9ListCType: null, i9ListCAuthority: null, i9ListCExpiry: null,
+  i9ListCFileAttachmentId: null, hasListCDocNumber: false,
+  bankName: null, accountType: null, hasBankRouting: false, hasBankAccount: false,
+};
 
 interface PersistedReviewState {
   formsToSign: OnboardingFormToSignItem[];
@@ -185,7 +190,6 @@ export class OnboardingWizardComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly translate = inject(TranslateService);
-  private readonly profileService = inject(EmployeeProfileService);
   private readonly sanitizer = inject(DomSanitizer);
 
   // ── Step tracking — URL is source of truth (?step=0..6) ──────────────────
@@ -229,24 +233,31 @@ export class OnboardingWizardComponent {
   });
 
   protected nextStep(): void {
-    const next = Math.min((this.currentStepIndex() ?? 0) + 1, 6);
+    const current = this.currentStepIndex() ?? 0;
+    this.saveStepToDraft(current);
+    const next = Math.min(current + 1, 6);
     this.router.navigate([], { relativeTo: this.route, queryParams: { step: next }, queryParamsHandling: 'merge' });
   }
 
   protected prevStep(): void {
-    const prev = Math.max((this.currentStepIndex() ?? 0) - 1, 0);
+    const current = this.currentStepIndex() ?? 0;
+    this.saveStepToDraft(current);
+    const prev = Math.max(current - 1, 0);
     this.router.navigate([], { relativeTo: this.route, queryParams: { step: prev }, queryParamsHandling: 'merge' });
   }
 
   /**
-   * Fires when the user clicks a step header in the mat-stepper. Routes the
-   * click through the URL so ?step= stays the source of truth — without this
-   * the stepper would change selectedIndex internally but the next change to
+   * Fires when the user clicks a step header in the mat-stepper. Persists the
+   * step they're leaving (so jumps don't lose work) and routes the click
+   * through the URL so ?step= stays the source of truth — without this the
+   * stepper would change selectedIndex internally but the next change to
    * currentStepIndex() would yank it back. Material's linear mode gates the
    * click to visited/current steps before this fires.
    */
   protected onStepperSelectionChange(index: number): void {
-    if (index === this.currentStepIndex()) return;
+    const current = this.currentStepIndex() ?? 0;
+    if (index === current) return;
+    this.saveStepToDraft(current);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { step: index },
@@ -539,6 +550,21 @@ export class OnboardingWizardComponent {
   });
   protected readonly hasHandbook = computed(() => !!this.policyDocs().handbookDocUrl);
 
+  /**
+   * Server-side onboarding draft status. Drives the "Securely stored — re-enter
+   * to overwrite" indicator next to SSN / bank / I-9-doc-number fields, and
+   * the relaxed-required validators applied when those values are already
+   * stored. Replaces the localStorage draft for sensitive data — see the
+   * 6c5eae1 commit for the threat model.
+   */
+  protected readonly draftStatus = signal<OnboardingDraftStatus>(EMPTY_DRAFT_STATUS);
+  protected readonly hasStoredSsn          = computed(() => this.draftStatus().hasSsn);
+  protected readonly hasStoredBankRouting  = computed(() => this.draftStatus().hasBankRouting);
+  protected readonly hasStoredBankAccount  = computed(() => this.draftStatus().hasBankAccount);
+  protected readonly hasStoredListADocNum  = computed(() => this.draftStatus().hasListADocNumber);
+  protected readonly hasStoredListBDocNum  = computed(() => this.draftStatus().hasListBDocNumber);
+  protected readonly hasStoredListCDocNum  = computed(() => this.draftStatus().hasListCDocNumber);
+
   protected readonly ackViolations = FormValidationService.getViolations(this.ackForm, {
     workersComp: "Workers' Compensation Acknowledgment",
     handbook: 'Employee Handbook Acknowledgment',
@@ -593,42 +619,32 @@ export class OnboardingWizardComponent {
       ctrl.updateValueAndValidity({ emitEvent: false });
     });
 
-    // Restore review state BEFORE re-prefilling forms — if the user was
+    // Restore review state BEFORE loading the draft — if the user was
     // mid-signing when they refreshed, drop them back into the review flow.
     this.restoreReviewState();
 
-    // Restore saved draft first — takes priority over admin prefill
-    const draftRestored = this.restoreDraft();
-
-    // Prefill from auth user only when no draft exists
-    if (!draftRestored) {
-      const user = this.authService.user();
-      if (user) {
-        this.personalForm.patchValue({
-          firstName: user.firstName ?? '',
-          lastName: user.lastName ?? '',
-          email: user.email ?? '',
-        });
-      }
-
-      // Load employee profile and prefill whatever the admin already entered
-      this.profileService.load();
-      effect(() => {
-        const profile = this.profileService.profile();
-        if (!profile) return;
-        this.personalForm.patchValue({
-          ...(profile.phoneNumber ? { phone: profile.phoneNumber } : {}),
-          ...(profile.dateOfBirth ? { dateOfBirth: new Date(profile.dateOfBirth) } : {}),
-        });
-        this.addressForm.patchValue({
-          ...(profile.street1   ? { street1: profile.street1   } : {}),
-          ...(profile.street2   ? { street2: profile.street2   } : {}),
-          ...(profile.city      ? { city: profile.city         } : {}),
-          ...(profile.state     ? { state: profile.state       } : {}),
-          ...(profile.zipCode   ? { zipCode: profile.zipCode   } : {}),
-        });
+    // Server-side onboarding draft is the source of truth. Patches forms with
+    // every non-sensitive value the server has + sets Has* flags for the
+    // sensitive ones (SSN, bank routing/account, I-9 doc numbers — those
+    // never come back to the client). Auth-user email/name still primes the
+    // form for the very first session before any draft exists.
+    const user = this.authService.user();
+    if (user) {
+      this.personalForm.patchValue({
+        firstName: user.firstName ?? '',
+        lastName: user.lastName ?? '',
+        email: user.email ?? '',
       });
     }
+    this.service.getDraft().subscribe({
+      next: status => this.applyDraftStatus(status),
+      error: () => {}, // First-time user — empty draft is fine
+    });
+
+    // Relax Validators.required on sensitive fields when the server tells us
+    // they're already stored. The user can leave them blank to keep the
+    // existing encrypted value; typing a new value overwrites on next save.
+    effect(() => this.applySensitiveValidators());
 
     // Conditionally require document fields based on selected list
     effect(() => {
@@ -658,33 +674,11 @@ export class OnboardingWizardComponent {
       this.i9Form.updateValueAndValidity();
     });
 
-    // Auto-save to localStorage whenever any form value changes.
-    //
-    // SECURITY — sensitive identifiers are stripped before persistence.
-    // localStorage is plaintext, persists across sessions, is readable by any
-    // script on this origin (incl. XSS / malicious extensions / future
-    // supply-chain compromise of an npm dep), and may be replicated by
-    // browser-sync features. SSN, bank routing/account numbers, I-9 doc
-    // numbers, and foreign identity numbers (regulatory PII under GLBA /
-    // FACTA / IRS Pub 1075) MUST NOT land here. The convenience trade-off:
-    // a user who refreshes mid-wizard re-enters those specific fields.
-    effect(() => {
-      const personal = this._personalVal();
-      const i9 = this._i9Val();
-      const deposit = this._depositVal();
-      localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        personal: stripSensitive(personal, ['ssn']),
-        address:  this._addressVal(),
-        w4:       this._w4Val(),
-        state:    this._stateVal(),
-        i9:       stripSensitive(i9, [
-          'alienRegNumber', 'i94Number', 'foreignPassportNumber',
-          'listADocNumber', 'listBDocNumber', 'listCDocNumber',
-        ]),
-        deposit:  stripSensitive(deposit, ['routingNumber', 'accountNumber']),
-        ack:      this._ackVal(),
-      }));
-    });
+    // Server-side draft is now the source of truth — saveDraft() is called
+    // from saveStepToDraft() on Continue / step jumps, not on every keystroke.
+    // localStorage no longer carries any onboarding form data; review state
+    // (formsToSign + currentFormIndex + ...) still uses REVIEW_STATE_KEY
+    // because it's not sensitive.
 
     // Persist review state — formsToSign + currentFormIndex + signedFormIndices +
     // reviewPhase — so a refresh during the e-sign loop puts the user back
@@ -900,16 +894,13 @@ export class OnboardingWizardComponent {
       next: result => {
         this.submitting.set(false);
         if (result.formsToSign.length > 0) {
-          // Keep DRAFT_KEY until signing finishes — if the user refreshes
-          // mid-loop we still want their wizard data available in case they
-          // hit "Go back to edit".
           this.formsToSign.set(result.formsToSign);
           this.currentFormIndex.set(0);
           this.reviewPhase.set('preview');
           this.loadPreviewForCurrentForm();
         } else {
-          // Nothing to sign — onboarding is done. Clear both drafts now.
-          localStorage.removeItem(DRAFT_KEY);
+          // Nothing to sign — onboarding is done. Clear review state.
+          // (Server-side draft persists; that's the authoritative record.)
           localStorage.removeItem(REVIEW_STATE_KEY);
           this.signingComplete.set(true);
         }
@@ -987,8 +978,8 @@ export class OnboardingWizardComponent {
   protected advanceToNextForm(): void {
     const next = this.currentFormIndex() + 1;
     if (next >= this.formsToSign().length) {
-      // All forms signed — onboarding is done; safe to discard both drafts.
-      localStorage.removeItem(DRAFT_KEY);
+      // All forms signed — clear review state. Server-side onboarding draft
+      // persists as the authoritative record.
       localStorage.removeItem(REVIEW_STATE_KEY);
       this.signingComplete.set(true);
       this.reviewPhase.set('idle');
@@ -1045,37 +1036,182 @@ export class OnboardingWizardComponent {
   protected goToDashboard(): void {
     // Defensive — clear drafts in case the user clicked through before the
     // advanceToNextForm() flush ran (e.g. mock signing returned synchronously).
-    localStorage.removeItem(DRAFT_KEY);
     localStorage.removeItem(REVIEW_STATE_KEY);
     this.router.navigate([this.layout.getDefaultRoute()]);
   }
 
-  // ── Draft persistence ─────────────────────────────────────────────────────
-  private restoreDraft(): boolean {
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (!raw) return false;
-      const draft = JSON.parse(raw) as Record<string, Record<string, unknown> | undefined>;
-      // Sanitize on read too — guards against any stale plaintext written by
-      // an older build before the auto-save effect was hardened. The next
-      // auto-save will rewrite localStorage without these fields.
-      const personal = stripSensitive(draft['personal'] ?? {}, ['ssn']);
-      const i9 = stripSensitive(draft['i9'] ?? {}, [
-        'alienRegNumber', 'i94Number', 'foreignPassportNumber',
-        'listADocNumber', 'listBDocNumber', 'listCDocNumber',
-      ]);
-      const deposit = stripSensitive(draft['deposit'] ?? {}, ['routingNumber', 'accountNumber']);
-      this.personalForm.patchValue(personal as never);
-      if (draft['address']) this.addressForm.patchValue(draft['address'] as never);
-      if (draft['w4'])      this.w4Form.patchValue(draft['w4'] as never);
-      if (draft['state'])   this.stateForm.patchValue(draft['state'] as never);
-      this.i9Form.patchValue(i9 as never);
-      this.depositForm.patchValue(deposit as never);
-      if (draft['ack'])     this.ackForm.patchValue(draft['ack'] as never);
-      return true;
-    } catch {
-      return false;
+  // ── Server-side draft sync ────────────────────────────────────────────────
+
+  /**
+   * Patches each form group with the non-sensitive values coming back from
+   * GET /onboarding/draft. Sensitive fields (SSN, bank routing/account,
+   * I-9 doc numbers) are intentionally left blank — the user re-enters
+   * them only if they want to overwrite. The Has* signals drive the
+   * "Securely stored" badge + validator relaxation.
+   */
+  private applyDraftStatus(status: OnboardingDraftStatus): void {
+    this.draftStatus.set(status);
+
+    this.personalForm.patchValue({
+      firstName:    status.firstName ?? this.personalForm.controls.firstName.value ?? '',
+      middleName:   status.middleName ?? '',
+      lastName:     status.lastName ?? this.personalForm.controls.lastName.value ?? '',
+      dateOfBirth:  status.dateOfBirth ? new Date(status.dateOfBirth) : null,
+      email:        status.email ?? this.personalForm.controls.email.value ?? '',
+      phone:        status.phone ?? '',
+    });
+    this.addressForm.patchValue({
+      street1:  status.street1 ?? '',
+      street2:  status.street2 ?? '',
+      city:     status.city ?? '',
+      state:    status.addressState ?? null,
+      zipCode:  status.zipCode ?? '',
+    });
+
+    // I-9 selections (doc type, authority, expiry, file id come back; doc
+    // number stays blank with Has* indicator)
+    if (status.i9DocumentChoice) {
+      this.i9Form.controls.documentChoice.setValue(status.i9DocumentChoice as 'A' | 'BC');
     }
+    this.i9Form.patchValue({
+      listAType:      status.i9ListAType ?? '',
+      listAAuthority: status.i9ListAAuthority ?? '',
+      listAExpiry:    status.i9ListAExpiry ? new Date(status.i9ListAExpiry) : null,
+      listAFileId:    status.i9ListAFileAttachmentId ?? null,
+      listBType:      status.i9ListBType ?? '',
+      listBAuthority: status.i9ListBAuthority ?? '',
+      listBExpiry:    status.i9ListBExpiry ? new Date(status.i9ListBExpiry) : null,
+      listBFileId:    status.i9ListBFileAttachmentId ?? null,
+      listCType:      status.i9ListCType ?? '',
+      listCAuthority: status.i9ListCAuthority ?? '',
+      listCExpiry:    status.i9ListCExpiry ? new Date(status.i9ListCExpiry) : null,
+      listCFileId:    status.i9ListCFileAttachmentId ?? null,
+    });
+
+    // Step 6 — bank name + account type are not sensitive; routing/account
+    // come back only as Has* flags.
+    this.depositForm.patchValue({
+      bankName:    status.bankName ?? '',
+      accountType: status.accountType ?? 'Checking',
+    });
+
+    // Re-apply the conditional required-validator pass with fresh Has* flags.
+    this.applySensitiveValidators();
+  }
+
+  /**
+   * When the server has already stored a sensitive value (SSN / bank routing /
+   * bank account / I-9 doc number), the user's wizard field renders blank
+   * with a "Securely stored — re-enter to overwrite" badge. Validators.required
+   * must NOT block submission in that case — the encrypted ciphertext is
+   * already on the server. The pattern validator stays attached so a
+   * non-empty re-entry is still format-validated.
+   */
+  private applySensitiveValidators(): void {
+    this.flipRequired(this.personalForm.controls.ssn,
+      [Validators.required, Validators.pattern(/^\d{3}-?\d{2}-?\d{4}$/)],
+      [Validators.pattern(/^\d{3}-?\d{2}-?\d{4}$/)],
+      this.hasStoredSsn());
+    this.flipRequired(this.depositForm.controls.routingNumber,
+      [Validators.required, Validators.pattern(/^\d{9}$/)],
+      [Validators.pattern(/^\d{9}$/)],
+      this.hasStoredBankRouting());
+    this.flipRequired(this.depositForm.controls.accountNumber,
+      [Validators.required], [], this.hasStoredBankAccount());
+    // I-9 doc-number validators are managed by the documentChoice effect; we
+    // just toggle required there too based on the corresponding Has* flag.
+    if (this.hasStoredListADocNum()) this.i9Form.controls.listADocNumber.clearValidators();
+    if (this.hasStoredListBDocNum()) this.i9Form.controls.listBDocNumber.clearValidators();
+    if (this.hasStoredListCDocNum()) this.i9Form.controls.listCDocNumber.clearValidators();
+    this.i9Form.controls.listADocNumber.updateValueAndValidity({ emitEvent: false });
+    this.i9Form.controls.listBDocNumber.updateValueAndValidity({ emitEvent: false });
+    this.i9Form.controls.listCDocNumber.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private flipRequired(
+    ctrl: FormControl<string | null> | FormControl<number | null>,
+    requiredValidators: ValidatorFn[],
+    optionalValidators: ValidatorFn[],
+    isStored: boolean,
+  ): void {
+    ctrl.clearValidators();
+    ctrl.setValidators(isStored ? optionalValidators : requiredValidators);
+    ctrl.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * Builds the partial draft payload for a single wizard step and POSTs it.
+   * Each step contributes only its own fields — null/blank values are
+   * filtered so the server preserves existing ciphertext for sensitive
+   * fields the user didn't re-enter. Called from nextStep() + the stepper
+   * selectionChange handler so every navigation persists progress.
+   */
+  private saveStepToDraft(stepIndex: number): void {
+    let payload: SaveOnboardingDraftRequest;
+    switch (stepIndex) {
+      case 0: {
+        const v = this._personalVal();
+        payload = {
+          firstName: v.firstName ?? undefined,
+          middleName: v.middleName ?? undefined,
+          lastName: v.lastName ?? undefined,
+          dateOfBirth: v.dateOfBirth ? toIsoDate(v.dateOfBirth) ?? undefined : undefined,
+          ssn: v.ssn || undefined, // blank string -> undefined (preserve stored)
+          email: v.email ?? undefined,
+          phone: v.phone ?? undefined,
+        };
+        break;
+      }
+      case 1: {
+        const v = this._addressVal();
+        payload = {
+          street1: v.street1 ?? undefined,
+          street2: v.street2 ?? undefined,
+          city: v.city ?? undefined,
+          addressState: v.state ?? undefined,
+          zipCode: v.zipCode ?? undefined,
+        };
+        break;
+      }
+      case 4: {
+        const v = this._i9Val();
+        payload = {
+          i9DocumentChoice: v.documentChoice ?? undefined,
+          i9ListAType: v.listAType ?? undefined,
+          i9ListADocNumber: v.listADocNumber || undefined,
+          i9ListAAuthority: v.listAAuthority ?? undefined,
+          i9ListAExpiry: v.listAExpiry ? toIsoDate(v.listAExpiry) ?? undefined : undefined,
+          i9ListAFileAttachmentId: v.listAFileId ?? undefined,
+          i9ListBType: v.listBType ?? undefined,
+          i9ListBDocNumber: v.listBDocNumber || undefined,
+          i9ListBAuthority: v.listBAuthority ?? undefined,
+          i9ListBExpiry: v.listBExpiry ? toIsoDate(v.listBExpiry) ?? undefined : undefined,
+          i9ListBFileAttachmentId: v.listBFileId ?? undefined,
+          i9ListCType: v.listCType ?? undefined,
+          i9ListCDocNumber: v.listCDocNumber || undefined,
+          i9ListCAuthority: v.listCAuthority ?? undefined,
+          i9ListCExpiry: v.listCExpiry ? toIsoDate(v.listCExpiry) ?? undefined : undefined,
+          i9ListCFileAttachmentId: v.listCFileId ?? undefined,
+        };
+        break;
+      }
+      case 5: {
+        const v = this._depositVal();
+        payload = {
+          bankName: v.bankName ?? undefined,
+          routingNumber: v.routingNumber || undefined,
+          accountNumber: v.accountNumber || undefined,
+          accountType: v.accountType ?? undefined,
+        };
+        break;
+      }
+      default:
+        return; // W-4 / state / ack steps have no server-side draft target
+    }
+    this.service.saveDraft(payload).subscribe({
+      next: status => this.draftStatus.set(status),
+      error: () => {}, // Non-fatal — user can retry on next nav
+    });
   }
 
   /**

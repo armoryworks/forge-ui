@@ -2992,6 +2992,7 @@
       "preparingDocuments": "Preparando documentos...",
       "submitAndSign": "Enviar y firmar documentos"
     },
+    "securelyStored": "Almacenado de forma segura — déjalo en blanco para mantenerlo, o ingresa un nuevo valor para sobrescribirlo.",
     "errors": {
       "uploadFailed": "Falló la carga del documento. Inténtalo de nuevo.",
       "voidedCheckFailed": "Falló la carga del cheque anulado. Inténtalo de nuevo.",

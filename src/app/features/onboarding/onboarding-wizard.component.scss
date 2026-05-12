@@ -966,3 +966,32 @@
     }
   }
 }
+
+// ── Secure-field hint ─────────────────────────────────────────────────────
+// Wraps SSN / bank routing / bank account / I-9 doc-number inputs so the
+// "Securely stored — leave blank to keep" hint can sit directly underneath
+// the field. Subscript wrapper is globally display:none (see styles.scss);
+// this is the explicit replacement for that pattern.
+
+.secure-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  min-width: 0; // let the inner mat-form-field shrink in grid/flex parents
+
+  &__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+    margin: 0;
+    padding: $sp-xs $sp-sm;
+    font-size: var(--font-size-xs);
+    color: var(--success);
+    background: color-mix(in srgb, var(--success) 10%, transparent);
+    border-left: $border-width-accent solid var(--success);
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+    }
+  }
+}
