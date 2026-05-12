@@ -11,7 +11,7 @@ import { CurrencyPipe } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { fromEvent, filter, map, startWith } from 'rxjs';
-import { ReactiveFormsModule, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { STEPPER_GLOBAL_OPTIONS } from '@angular/cdk/stepper';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
@@ -53,6 +53,15 @@ const EMPTY_DRAFT_STATUS: OnboardingDraftStatus = {
   firstName: null, middleName: null, lastName: null, dateOfBirth: null,
   email: null, phone: null, hasSsn: false,
   street1: null, street2: null, city: null, addressState: null, zipCode: null,
+  w4FilingStatus: null, w4MultipleJobs: null,
+  w4QualifyingChildren: null, w4OtherDependents: null,
+  w4OtherIncome: null, w4Deductions: null, w4ExtraWithholding: null,
+  w4ExemptFromWithholding: null,
+  stateFilingStatus: null, stateAllowances: null,
+  stateAdditionalWithholding: null, stateExempt: null,
+  i9CitizenshipStatus: null,
+  hasAlienRegNumber: false, hasI94Number: false, hasForeignPassportNumber: false,
+  i9ForeignPassportCountry: null, i9WorkAuthExpiry: null,
   i9DocumentChoice: null,
   i9ListAType: null, i9ListAAuthority: null, i9ListAExpiry: null,
   i9ListAFileAttachmentId: null, hasListADocNumber: false,
@@ -394,7 +403,7 @@ export class OnboardingWizardComponent {
 
   // ── Step 3: W-4 Federal Withholding ──────────────────────────────────────
   protected readonly w4Form = new FormGroup({
-    filingStatus: new FormControl(null, [Validators.required]),
+    filingStatus: new FormControl<string | null>(null, [Validators.required]),
     multipleJobs: new FormControl(false),
     // Step 3: Claim Dependents — 3a (qualifying children) and 3b (other dependents)
     qualifyingChildren: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
@@ -564,6 +573,9 @@ export class OnboardingWizardComponent {
   protected readonly hasStoredListADocNum  = computed(() => this.draftStatus().hasListADocNumber);
   protected readonly hasStoredListBDocNum  = computed(() => this.draftStatus().hasListBDocNumber);
   protected readonly hasStoredListCDocNum  = computed(() => this.draftStatus().hasListCDocNumber);
+  protected readonly hasStoredAlienReg         = computed(() => this.draftStatus().hasAlienRegNumber);
+  protected readonly hasStoredI94              = computed(() => this.draftStatus().hasI94Number);
+  protected readonly hasStoredForeignPassport  = computed(() => this.draftStatus().hasForeignPassportNumber);
 
   protected readonly ackViolations = FormValidationService.getViolations(this.ackForm, {
     workersComp: "Workers' Compensation Acknowledgment",
@@ -646,29 +658,44 @@ export class OnboardingWizardComponent {
     // existing encrypted value; typing a new value overwrites on next save.
     effect(() => this.applySensitiveValidators());
 
-    // Conditionally require document fields based on selected list
+    // Conditionally require document fields based on selected list. The doc-
+    // number controls are special — when hasStoredList*DocNum is true the
+    // value is already encrypted server-side and a blank wizard field is
+    // intentional ("Securely stored" indicator). Skip setting Validators.required
+    // on those specific controls so we don't override applySensitiveValidators.
     effect(() => {
       const choice = this.i9DocumentChoice();
       const ctrl = this.i9Form.controls;
-      const listAFields = [ctrl.listAType, ctrl.listADocNumber, ctrl.listAAuthority, ctrl.listAFileId];
-      const listBCFields = [ctrl.listBType, ctrl.listBDocNumber, ctrl.listBAuthority, ctrl.listBFileId,
-                            ctrl.listCType, ctrl.listCDocNumber, ctrl.listCAuthority, ctrl.listCFileId];
+      const hasStoredA = this.hasStoredListADocNum();
+      const hasStoredB = this.hasStoredListBDocNum();
+      const hasStoredC = this.hasStoredListCDocNum();
 
-      [...listAFields, ...listBCFields].forEach(c => {
-        c.clearValidators();
+      const allDocFields = [
+        ctrl.listAType, ctrl.listADocNumber, ctrl.listAAuthority, ctrl.listAFileId,
+        ctrl.listBType, ctrl.listBDocNumber, ctrl.listBAuthority, ctrl.listBFileId,
+        ctrl.listCType, ctrl.listCDocNumber, ctrl.listCAuthority, ctrl.listCFileId,
+      ];
+      allDocFields.forEach(c => { c.clearValidators(); c.updateValueAndValidity({ emitEvent: false }); });
+
+      const requireUnlessStored = (c: AbstractControl, stored: boolean) => {
+        if (!stored) {
+          c.setValidators([Validators.required]);
+          c.updateValueAndValidity({ emitEvent: false });
+        }
+      };
+      const requireAlways = (c: AbstractControl) => {
+        c.setValidators([Validators.required]);
         c.updateValueAndValidity({ emitEvent: false });
-      });
+      };
 
       if (choice === 'A') {
-        listAFields.forEach(c => {
-          c.setValidators([Validators.required]);
-          c.updateValueAndValidity({ emitEvent: false });
-        });
+        [ctrl.listAType, ctrl.listAAuthority, ctrl.listAFileId].forEach(requireAlways);
+        requireUnlessStored(ctrl.listADocNumber, hasStoredA);
       } else if (choice === 'BC') {
-        listBCFields.forEach(c => {
-          c.setValidators([Validators.required]);
-          c.updateValueAndValidity({ emitEvent: false });
-        });
+        [ctrl.listBType, ctrl.listBAuthority, ctrl.listBFileId,
+         ctrl.listCType, ctrl.listCAuthority, ctrl.listCFileId].forEach(requireAlways);
+        requireUnlessStored(ctrl.listBDocNumber, hasStoredB);
+        requireUnlessStored(ctrl.listCDocNumber, hasStoredC);
       }
 
       this.i9Form.updateValueAndValidity();
@@ -1068,12 +1095,38 @@ export class OnboardingWizardComponent {
       zipCode:  status.zipCode ?? '',
     });
 
-    // I-9 selections (doc type, authority, expiry, file id come back; doc
-    // number stays blank with Has* indicator)
+    // W-4 (all plaintext — repopulates verbatim)
+    this.w4Form.patchValue({
+      filingStatus:           status.w4FilingStatus ?? null,
+      multipleJobs:           status.w4MultipleJobs ?? false,
+      qualifyingChildren:     status.w4QualifyingChildren ?? null,
+      otherDependents:        status.w4OtherDependents ?? null,
+      otherIncome:            status.w4OtherIncome ?? null,
+      deductions:             status.w4Deductions ?? null,
+      extraWithholding:       status.w4ExtraWithholding ?? null,
+      exemptFromWithholding:  status.w4ExemptFromWithholding ?? false,
+    });
+
+    // State Tax (all plaintext)
+    this.stateForm.patchValue({
+      stateFilingStatus:           status.stateFilingStatus ?? '',
+      stateAllowances:             status.stateAllowances ?? null,
+      stateAdditionalWithholding:  status.stateAdditionalWithholding ?? null,
+      stateExempt:                 status.stateExempt ?? false,
+    });
+
+    // I-9 selections (citizenship is plaintext; doc number stays blank with
+    // Has* indicator). setValue on citizenship triggers downstream effects
+    // before the rest of the I-9 patch lands — that's intentional.
+    if (status.i9CitizenshipStatus) {
+      this.i9Form.controls.citizenshipStatus.setValue(status.i9CitizenshipStatus);
+    }
     if (status.i9DocumentChoice) {
       this.i9Form.controls.documentChoice.setValue(status.i9DocumentChoice as 'A' | 'BC');
     }
     this.i9Form.patchValue({
+      foreignPassportCountry: status.i9ForeignPassportCountry ?? '',
+      workAuthExpiry: status.i9WorkAuthExpiry ? new Date(status.i9WorkAuthExpiry) : null,
       listAType:      status.i9ListAType ?? '',
       listAAuthority: status.i9ListAAuthority ?? '',
       listAExpiry:    status.i9ListAExpiry ? new Date(status.i9ListAExpiry) : null,
@@ -1173,9 +1226,39 @@ export class OnboardingWizardComponent {
         };
         break;
       }
+      case 2: {
+        const v = this._w4Val();
+        payload = {
+          w4FilingStatus: v.filingStatus ?? undefined,
+          w4MultipleJobs: v.multipleJobs ?? undefined,
+          w4QualifyingChildren: v.qualifyingChildren ?? undefined,
+          w4OtherDependents: v.otherDependents ?? undefined,
+          w4OtherIncome: v.otherIncome ?? undefined,
+          w4Deductions: v.deductions ?? undefined,
+          w4ExtraWithholding: v.extraWithholding ?? undefined,
+          w4ExemptFromWithholding: v.exemptFromWithholding ?? undefined,
+        };
+        break;
+      }
+      case 3: {
+        const v = this._stateVal();
+        payload = {
+          stateFilingStatus: v.stateFilingStatus || undefined,
+          stateAllowances: v.stateAllowances ?? undefined,
+          stateAdditionalWithholding: v.stateAdditionalWithholding ?? undefined,
+          stateExempt: v.stateExempt ?? undefined,
+        };
+        break;
+      }
       case 4: {
         const v = this._i9Val();
         payload = {
+          i9CitizenshipStatus: v.citizenshipStatus || undefined,
+          i9AlienRegNumber: v.alienRegNumber || undefined,
+          i9I94Number: v.i94Number || undefined,
+          i9ForeignPassportNumber: v.foreignPassportNumber || undefined,
+          i9ForeignPassportCountry: v.foreignPassportCountry || undefined,
+          i9WorkAuthExpiry: v.workAuthExpiry ? toIsoDate(v.workAuthExpiry) ?? undefined : undefined,
           i9DocumentChoice: v.documentChoice ?? undefined,
           i9ListAType: v.listAType ?? undefined,
           i9ListADocNumber: v.listADocNumber || undefined,

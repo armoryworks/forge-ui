@@ -437,14 +437,38 @@
 
           @if (i9NeedsAlienInfo()) {
             <div class="step-row">
-              <app-input [label]="'onboarding.i9.alienRegNumber' | translate"
-                formControlName="alienRegNumber" [placeholder]="'onboarding.i9.alienRegPlaceholder' | translate" />
-              <app-input [label]="'onboarding.i9.i94Number' | translate"
-                formControlName="i94Number" />
+              <div class="secure-field">
+                <app-input [label]="'onboarding.i9.alienRegNumber' | translate"
+                  formControlName="alienRegNumber" [placeholder]="'onboarding.i9.alienRegPlaceholder' | translate" />
+                @if (hasStoredAlienReg()) {
+                  <p class="secure-field__hint">
+                    <span class="material-icons-outlined">lock</span>
+                    {{ 'onboarding.securelyStored' | translate }}
+                  </p>
+                }
+              </div>
+              <div class="secure-field">
+                <app-input [label]="'onboarding.i9.i94Number' | translate"
+                  formControlName="i94Number" />
+                @if (hasStoredI94()) {
+                  <p class="secure-field__hint">
+                    <span class="material-icons-outlined">lock</span>
+                    {{ 'onboarding.securelyStored' | translate }}
+                  </p>
+                }
+              </div>
             </div>
             <div class="step-row">
-              <app-input [label]="'onboarding.i9.foreignPassport' | translate"
-                formControlName="foreignPassportNumber" />
+              <div class="secure-field">
+                <app-input [label]="'onboarding.i9.foreignPassport' | translate"
+                  formControlName="foreignPassportNumber" />
+                @if (hasStoredForeignPassport()) {
+                  <p class="secure-field__hint">
+                    <span class="material-icons-outlined">lock</span>
+                    {{ 'onboarding.securelyStored' | translate }}
+                  </p>
+                }
+              </div>
               <app-input [label]="'onboarding.i9.countryOfIssuance' | translate"
                 formControlName="foreignPassportCountry" />
             </div>

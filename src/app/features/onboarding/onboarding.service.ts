@@ -129,6 +129,27 @@ export interface SaveOnboardingDraftRequest {
   city?: string;
   addressState?: string;
   zipCode?: string;
+  // W-4
+  w4FilingStatus?: string;
+  w4MultipleJobs?: boolean;
+  w4QualifyingChildren?: number;
+  w4OtherDependents?: number;
+  w4OtherIncome?: number;
+  w4Deductions?: number;
+  w4ExtraWithholding?: number;
+  w4ExemptFromWithholding?: boolean;
+  // State
+  stateFilingStatus?: string;
+  stateAllowances?: number;
+  stateAdditionalWithholding?: number;
+  stateExempt?: boolean;
+  // I-9 Section 1
+  i9CitizenshipStatus?: string;
+  i9AlienRegNumber?: string;
+  i9I94Number?: string;
+  i9ForeignPassportNumber?: string;
+  i9ForeignPassportCountry?: string;
+  i9WorkAuthExpiry?: string;
   i9DocumentChoice?: string;
   i9ListAType?: string;
   i9ListADocNumber?: string;
@@ -172,6 +193,30 @@ export interface OnboardingDraftStatus {
   city: string | null;
   addressState: string | null;
   zipCode: string | null;
+
+  // W-4
+  w4FilingStatus: string | null;
+  w4MultipleJobs: boolean | null;
+  w4QualifyingChildren: number | null;
+  w4OtherDependents: number | null;
+  w4OtherIncome: number | null;
+  w4Deductions: number | null;
+  w4ExtraWithholding: number | null;
+  w4ExemptFromWithholding: boolean | null;
+
+  // State
+  stateFilingStatus: string | null;
+  stateAllowances: number | null;
+  stateAdditionalWithholding: number | null;
+  stateExempt: boolean | null;
+
+  // I-9 Section 1
+  i9CitizenshipStatus: string | null;
+  hasAlienRegNumber: boolean;
+  hasI94Number: boolean;
+  hasForeignPassportNumber: boolean;
+  i9ForeignPassportCountry: string | null;
+  i9WorkAuthExpiry: string | null;
 
   i9DocumentChoice: string | null;
   i9ListAType: string | null;
