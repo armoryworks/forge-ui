@@ -44,6 +44,20 @@ import {
 const DRAFT_KEY = 'qbe-onboarding-draft';
 const REVIEW_STATE_KEY = 'qbe-onboarding-review-state';
 
+/**
+ * Return a shallow clone of `obj` with the listed keys removed. Used to keep
+ * regulatory-sensitive identifiers (SSN, bank account, I-9 doc numbers) out
+ * of the localStorage draft snapshot — those values exist only in memory and
+ * have to be re-entered if the user refreshes mid-wizard. See the auto-save
+ * effect's SECURITY comment for the threat model.
+ */
+function stripSensitive<T extends object>(obj: T | null | undefined, keys: readonly (keyof T)[]): Partial<T> {
+  if (!obj) return {};
+  const copy: Partial<T> = { ...obj };
+  for (const k of keys) delete copy[k];
+  return copy;
+}
+
 interface PersistedReviewState {
   formsToSign: OnboardingFormToSignItem[];
   currentFormIndex: number;
@@ -644,15 +658,30 @@ export class OnboardingWizardComponent {
       this.i9Form.updateValueAndValidity();
     });
 
-    // Auto-save to localStorage whenever any form value changes
+    // Auto-save to localStorage whenever any form value changes.
+    //
+    // SECURITY — sensitive identifiers are stripped before persistence.
+    // localStorage is plaintext, persists across sessions, is readable by any
+    // script on this origin (incl. XSS / malicious extensions / future
+    // supply-chain compromise of an npm dep), and may be replicated by
+    // browser-sync features. SSN, bank routing/account numbers, I-9 doc
+    // numbers, and foreign identity numbers (regulatory PII under GLBA /
+    // FACTA / IRS Pub 1075) MUST NOT land here. The convenience trade-off:
+    // a user who refreshes mid-wizard re-enters those specific fields.
     effect(() => {
+      const personal = this._personalVal();
+      const i9 = this._i9Val();
+      const deposit = this._depositVal();
       localStorage.setItem(DRAFT_KEY, JSON.stringify({
-        personal: this._personalVal(),
+        personal: stripSensitive(personal, ['ssn']),
         address:  this._addressVal(),
         w4:       this._w4Val(),
         state:    this._stateVal(),
-        i9:       this._i9Val(),
-        deposit:  this._depositVal(),
+        i9:       stripSensitive(i9, [
+          'alienRegNumber', 'i94Number', 'foreignPassportNumber',
+          'listADocNumber', 'listBDocNumber', 'listCDocNumber',
+        ]),
+        deposit:  stripSensitive(deposit, ['routingNumber', 'accountNumber']),
         ack:      this._ackVal(),
       }));
     });
@@ -1026,14 +1055,23 @@ export class OnboardingWizardComponent {
     try {
       const raw = localStorage.getItem(DRAFT_KEY);
       if (!raw) return false;
-      const draft = JSON.parse(raw) as Record<string, unknown>;
-      if (draft['personal']) this.personalForm.patchValue(draft['personal'] as never);
-      if (draft['address'])  this.addressForm.patchValue(draft['address'] as never);
-      if (draft['w4'])       this.w4Form.patchValue(draft['w4'] as never);
-      if (draft['state'])    this.stateForm.patchValue(draft['state'] as never);
-      if (draft['i9'])       this.i9Form.patchValue(draft['i9'] as never);
-      if (draft['deposit'])  this.depositForm.patchValue(draft['deposit'] as never);
-      if (draft['ack'])      this.ackForm.patchValue(draft['ack'] as never);
+      const draft = JSON.parse(raw) as Record<string, Record<string, unknown> | undefined>;
+      // Sanitize on read too — guards against any stale plaintext written by
+      // an older build before the auto-save effect was hardened. The next
+      // auto-save will rewrite localStorage without these fields.
+      const personal = stripSensitive(draft['personal'] ?? {}, ['ssn']);
+      const i9 = stripSensitive(draft['i9'] ?? {}, [
+        'alienRegNumber', 'i94Number', 'foreignPassportNumber',
+        'listADocNumber', 'listBDocNumber', 'listCDocNumber',
+      ]);
+      const deposit = stripSensitive(draft['deposit'] ?? {}, ['routingNumber', 'accountNumber']);
+      this.personalForm.patchValue(personal as never);
+      if (draft['address']) this.addressForm.patchValue(draft['address'] as never);
+      if (draft['w4'])      this.w4Form.patchValue(draft['w4'] as never);
+      if (draft['state'])   this.stateForm.patchValue(draft['state'] as never);
+      this.i9Form.patchValue(i9 as never);
+      this.depositForm.patchValue(deposit as never);
+      if (draft['ack'])     this.ackForm.patchValue(draft['ack'] as never);
       return true;
     } catch {
       return false;
