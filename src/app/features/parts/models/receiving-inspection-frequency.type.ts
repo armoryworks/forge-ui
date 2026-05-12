@@ -1,6 +1,6 @@
 /**
  * Pillar 4 Phase 2 — Quality cluster receiving inspection frequency.
- * Mirrors the server enum <c>QBEngineer.Core.Enums.ReceivingInspectionFrequency</c>.
+ * Mirrors the server enum <c>Forge.Core.Enums.ReceivingInspectionFrequency</c>.
  */
 export type ReceivingInspectionFrequency = 'Every' | 'FirstArticle' | 'SkipLot' | 'Random';
 

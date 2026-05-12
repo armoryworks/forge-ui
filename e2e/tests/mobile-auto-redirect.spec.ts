@@ -22,7 +22,7 @@ test.describe('Mobile Auto-Redirect', () => {
     await page.goto(`${API_BASE}/login`, { waitUntil: 'networkidle' });
 
     // Fill login form
-    await page.locator('input[type="email"], input[formcontrolname="email"]').fill('admin@qbengineer.local');
+    await page.locator('input[type="email"], input[formcontrolname="email"]').fill('admin@forge.local');
     await page.locator('input[type="password"], input[formcontrolname="password"]').fill(SEED_PASSWORD);
 
     // Submit
@@ -50,7 +50,7 @@ test.describe('Mobile Auto-Redirect', () => {
     await page.goto(`${API_BASE}/login`, { waitUntil: 'networkidle' });
 
     // Fill login form
-    await page.locator('input[type="email"], input[formcontrolname="email"]').fill('admin@qbengineer.local');
+    await page.locator('input[type="email"], input[formcontrolname="email"]').fill('admin@forge.local');
     await page.locator('input[type="password"], input[formcontrolname="password"]').fill(SEED_PASSWORD);
 
     // Submit
@@ -77,7 +77,7 @@ test.describe('Mobile Auto-Redirect', () => {
 
     // Login via API first
     const { loginViaApi } = await import('../helpers/auth.helper');
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
 
     // Navigate to login page (simulates visiting /login while already authenticated)
     await page.goto(`${API_BASE}/login`, { waitUntil: 'networkidle' });

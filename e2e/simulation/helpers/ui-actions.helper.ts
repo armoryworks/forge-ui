@@ -492,7 +492,7 @@ export async function waitForDialog(page: Page): Promise<void> {
   } catch (e) {
     // Capture screenshot + URL for debugging
     const url = page.url();
-    const screenshotPath = `e:/dev/qb-engineer-wrapper/qb-engineer-ui/e2e/screenshots/dialog-fail-${Date.now()}.png`;
+    const screenshotPath = `e:/dev/forge-wrapper/forge-ui/e2e/screenshots/dialog-fail-${Date.now()}.png`;
     await page.screenshot({ path: screenshotPath, fullPage: true }).catch((se) => console.error('screenshot failed:', se));
     throw new Error(`Dialog not visible after 8s. URL: ${url}. ${(e as Error).message}`);
   }

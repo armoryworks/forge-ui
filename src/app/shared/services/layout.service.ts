@@ -91,7 +91,7 @@ export class LayoutService {
     } else {
       const next = !this._sidebarCollapsed();
       this._sidebarCollapsed.set(next);
-      localStorage.setItem('qbe-sidebar-collapsed', String(next));
+      localStorage.setItem('forge-sidebar-collapsed', String(next));
     }
   }
 
@@ -100,7 +100,7 @@ export class LayoutService {
       this._mobileMenuOpen.set(true);
     } else if (this._sidebarCollapsed()) {
       this._sidebarCollapsed.set(false);
-      localStorage.setItem('qbe-sidebar-collapsed', 'false');
+      localStorage.setItem('forge-sidebar-collapsed', 'false');
     }
   }
 
@@ -109,7 +109,7 @@ export class LayoutService {
   }
 
   private loadCollapsedState(): boolean {
-    return localStorage.getItem('qbe-sidebar-collapsed') !== 'false';
+    return localStorage.getItem('forge-sidebar-collapsed') !== 'false';
   }
 
   private checkDisplayRoute(url: string): boolean {

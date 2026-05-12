@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 const APP_BASE = process.env['SIM_APP_BASE'] ?? 'http://localhost:4200';
 const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1';
-const EMAIL = process.env['HERO_USER'] ?? 'admin@qbengineer.local';
+const EMAIL = process.env['HERO_USER'] ?? 'admin@forge.local';
 const PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
 const OUTPUT_DIR = process.env['HERO_VIDEO_DIR'] ?? join(__dirname, 'output');
 const VIDEO_NAME = 'scan-job-start.webm';
@@ -97,12 +97,12 @@ test('records mobile scan → job result hero video', async () => {
     await page.goto(`${APP_BASE}/`, { waitUntil: 'commit' });
     await page.evaluate(
       ({ token, user }) => {
-        localStorage.setItem('qbe-token', token);
-        localStorage.setItem('qbe-user', JSON.stringify(user));
-        localStorage.setItem('qbe-onboarding-dismissed', 'true');
+        localStorage.setItem('forge-token', token);
+        localStorage.setItem('forge-user', JSON.stringify(user));
+        localStorage.setItem('forge-onboarding-dismissed', 'true');
         // Dark theme feels right for the hero — matches the scanner viewport
         // aesthetic and reads well at thumbnail sizes on the marketing page.
-        localStorage.setItem('qbe-theme', 'dark');
+        localStorage.setItem('forge-theme', 'dark');
         document.documentElement.setAttribute('data-theme', 'dark');
       },
       { token: login.token, user: login.user },

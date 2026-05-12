@@ -10,7 +10,7 @@ test.describe('Clock Event Workflow', () => {
     const page = await context.newPage();
 
     // Login
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
 
     // Navigate to time tracking
     await page.goto('/time-tracking', { waitUntil: 'networkidle' });
@@ -24,7 +24,7 @@ test.describe('Clock Event Workflow', () => {
     await expect(pageContent.first()).toBeVisible({ timeout: 10_000 });
 
     // Verify clock status via API
-    const token = await getAuthToken('admin@qbengineer.local', SEED_PASSWORD);
+    const token = await getAuthToken('admin@forge.local', SEED_PASSWORD);
     const apiContext = await request.newContext({
       baseURL: API_BASE,
       extraHTTPHeaders: { Authorization: `Bearer ${token}` },

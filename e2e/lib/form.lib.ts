@@ -269,7 +269,7 @@ export async function clearAllDrafts(page: Page): Promise<void> {
       }
     } catch {
       // IndexedDB may not support databases() — fallback
-      try { indexedDB.deleteDatabase('qb-engineer-drafts'); } catch {}
+      try { indexedDB.deleteDatabase('forge-drafts'); } catch {}
     }
   });
   await page.waitForTimeout(200);

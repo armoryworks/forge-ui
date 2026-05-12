@@ -7,7 +7,7 @@ export type DraftBroadcastEvent =
   | { type: 'draft-cleared'; key: string }
   | { type: 'entity-saved'; entityType: string; entityId: string };
 
-const CHANNEL_NAME = 'qb-engineer-draft-sync';
+const CHANNEL_NAME = 'forge-draft-sync';
 
 @Injectable({ providedIn: 'root' })
 export class DraftBroadcastService implements OnDestroy {

@@ -4,11 +4,11 @@ import { SEED_PASSWORD } from '../helpers/auth.helper';
 test('debug-w4-fill', async ({ page }) => {
   test.setTimeout(60000);
   const api = await request.newContext({ baseURL: 'http://localhost:5000/api/v1/' });
-  const { token, user } = await (await api.post('auth/login', { data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD } })).json();
+  const { token, user } = await (await api.post('auth/login', { data: { email: 'admin@forge.local', password: SEED_PASSWORD } })).json();
   await api.dispose();
   await page.goto('http://localhost:4200', { waitUntil: 'commit' });
   await page.evaluate(({t,u}: any) => {
-    localStorage.setItem('qbe-token',t); localStorage.setItem('qbe-user',JSON.stringify(u)); localStorage.setItem('language','en');
+    localStorage.setItem('forge-token',t); localStorage.setItem('forge-user',JSON.stringify(u)); localStorage.setItem('language','en');
   }, {t:token,u:user});
   await page.goto('http://localhost:4200/account/tax-forms/w4', { waitUntil: 'networkidle' });
   await page.waitForTimeout(2000);

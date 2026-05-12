@@ -1,4 +1,4 @@
-// Generates public/favicon.ico with a hex-nut silhouette in the QB Engineer
+// Generates public/favicon.ico with a hex-nut silhouette in the Forge
 // teal (#0d9488) on the dark background (#0f172a) — manufacturing cue, readable
 // at 16/32/48 px. Multi-size ICO with embedded PNGs. Run with `node scripts/generate-favicon.mjs`.
 

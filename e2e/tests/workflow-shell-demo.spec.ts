@@ -18,7 +18,7 @@ test('workflow-shell-demo renders + mode toggle works + entity edits propagate',
   // Auth
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const response = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   if (!response.ok()) throw new Error(`Login failed: ${response.status()}`);
   const loginData = await response.json();
@@ -26,8 +26,8 @@ test('workflow-shell-demo renders + mode toggle works + entity edits propagate',
 
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(({ token, user }) => {
-    localStorage.setItem('qbe-token', token);
-    localStorage.setItem('qbe-user', JSON.stringify(user));
+    localStorage.setItem('forge-token', token);
+    localStorage.setItem('forge-user', JSON.stringify(user));
   }, { token: loginData.token, user: loginData.user });
 
   await page.goto(`${BASE_URL}/workflow-shell-demo`, { waitUntil: 'networkidle' });

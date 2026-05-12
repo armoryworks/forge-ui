@@ -21,7 +21,7 @@ import { Injectable, signal } from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class CapabilityInstallStateService {
-  private static readonly STORAGE_KEY = 'qb-engineer:capability-onboarding-dismissed';
+  private static readonly STORAGE_KEY = 'forge:capability-onboarding-dismissed';
 
   private readonly _dismissed = signal<boolean>(this.readFromStorage());
 

@@ -154,7 +154,7 @@ describe('AdminService', () => {
 
   describe('getSystemSettings', () => {
     it('should GET system settings', () => {
-      const mockSettings = [{ key: 'app_name', value: 'QB Engineer' }];
+      const mockSettings = [{ key: 'app_name', value: 'Forge' }];
       let result: unknown[] = [];
 
       service.getSystemSettings().subscribe((s) => { result = s; });

@@ -6,7 +6,7 @@ interface CacheEntry {
   lastSynced: number;
 }
 
-const DB_NAME = 'qb-engineer-cache';
+const DB_NAME = 'forge-cache';
 const DB_VERSION = 1;
 const STORE_NAME = 'cache';
 

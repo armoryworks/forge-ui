@@ -46,7 +46,7 @@ export class MfaRecoveryCodesDialogComponent {
 
   protected download(): void {
     const text = [
-      'QB Engineer — Recovery Codes',
+      'Forge — Recovery Codes',
       'Keep these codes in a safe place.',
       '',
       ...this.codes(),
@@ -56,7 +56,7 @@ export class MfaRecoveryCodesDialogComponent {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'qb-engineer-recovery-codes.txt';
+    a.download = 'forge-recovery-codes.txt';
     a.click();
     URL.revokeObjectURL(url);
   }

@@ -14,7 +14,7 @@ import { chromium, type Page } from 'playwright';
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:5000/api/v1/';
 const APP_BASE = process.env.APP_BASE_URL || 'http://localhost:4200';
 const SEED_PASSWORD = process.env.SEED_USER_PASSWORD || 'Test1234!';
-const ADMIN_EMAIL = 'admin@qbengineer.local';
+const ADMIN_EMAIL = 'admin@forge.local';
 
 interface WalkthroughStep {
   element: string;
@@ -70,8 +70,8 @@ async function login(page: Page): Promise<string> {
   // Navigate to app and set auth before Angular bootstraps
   await page.goto(APP_BASE, { waitUntil: 'domcontentloaded' });
   await page.evaluate((loginData) => {
-    localStorage.setItem('qbe-token', loginData.token);
-    localStorage.setItem('qbe-user', JSON.stringify(loginData.user));
+    localStorage.setItem('forge-token', loginData.token);
+    localStorage.setItem('forge-user', JSON.stringify(loginData.user));
   }, data);
 
   // Reload so Angular bootstraps with auth already in localStorage

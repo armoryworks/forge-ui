@@ -18,7 +18,7 @@ export function initDemoMode(): void {
   } catch { /* ssr-only paths */ }
 
   try {
-    const base = document.title || 'QB Engineer';
+    const base = document.title || 'Forge';
     // Zero-width joiner (U+200D) is invisible in rendered text but shows up in
     // copy/paste and HTML source — a quiet way to verify a screenshot's origin.
     const ZWJ = '\u200D';
@@ -44,7 +44,7 @@ export function initDemoMode(): void {
   try {
      
     console.log(
-      '%cQB Engineer · DEMO MODE',
+      '%cForge · DEMO MODE',
       'background:#ffc107;color:#7a4a00;padding:6px 14px;font:600 14px monospace;border-radius:2px;',
     );
      

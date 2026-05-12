@@ -21,15 +21,44 @@
   flex-shrink: 0;
 }
 
-.app-header__logo {
+// Default product brand block (Armory Works mark + Forge wordmark + by-line).
+// Rendered when no tenant logo has been uploaded. The tenant override path
+// uses .app-header__brand-logo below.
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.app-header__brand-mark {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.app-header__brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.app-header__brand-wordmark {
+  font-family: $font-family-primary;
   font-size: var(--font-size-title);
   font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--header-text);
+}
 
-  span {
-    color: var(--accent);
-  }
+.app-header__brand-tagline {
+  font-size: $font-size-xxs;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--header-text-secondary, var(--text-secondary));
+  margin-top: 2px;
+  opacity: 0.7;
 }
 
 .app-header__brand-logo {
@@ -599,14 +628,34 @@
   flex-direction: column;
   gap: $sp-lg;
 
-  &__logo {
+  &__brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $sp-xs;
+  }
+
+  &__mark {
+    height: 64px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  &__wordmark {
+    font-family: $font-family-primary;
     font-size: $font-size-heading;
     font-weight: 700;
-    letter-spacing: -0.02em;
-    color: var(--primary);
+    letter-spacing: 0.02em;
     line-height: 1;
+    color: var(--text);
+  }
 
-    span { color: var(--text-muted); }
+  &__by {
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
   }
 
   &__tagline {

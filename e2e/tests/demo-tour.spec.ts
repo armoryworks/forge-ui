@@ -4,7 +4,7 @@ import * as path from 'node:path';
 
 /**
  * Demo-mode screenshot tour. Serves the static demo build on localhost:5500
- * (run `npx serve -s dist/qb-engineer-ui-demo/browser -l 5500` first).
+ * (run `npx serve -s dist/forge-ui-demo/browser -l 5500` first).
  *
  * Output: e2e/screenshots/demo-tour/*.png — NOT source-controlled.
  *
@@ -84,12 +84,12 @@ test.beforeAll(async () => {
 async function primeDemoAuth(page: Page): Promise<void> {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(() => {
-    localStorage.setItem('qbe-token', 'demo-session-tour');
+    localStorage.setItem('forge-token', 'demo-session-tour');
     localStorage.setItem(
-      'qbe-user',
+      'forge-user',
       JSON.stringify({
         id: 1,
-        email: 'demo@qb-engineer.com',
+        email: 'demo@forge.com',
         firstName: 'Demo',
         lastName: 'Viewer',
         initials: 'DV',

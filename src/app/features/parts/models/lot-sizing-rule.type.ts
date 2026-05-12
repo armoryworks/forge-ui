@@ -1,6 +1,6 @@
 /**
  * Pillar 4 Phase 2 — MRP cluster lot-sizing rule.
- * Mirrors the server enum <c>QBEngineer.Core.Enums.LotSizingRule</c>.
+ * Mirrors the server enum <c>Forge.Core.Enums.LotSizingRule</c>.
  */
 export type LotSizingRule =
   | 'LotForLot'

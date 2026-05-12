@@ -15,7 +15,7 @@ const API_BASE = 'http://localhost:5000/api/v1/';
  *   2) creating a terminal record via POST /display/shop-floor/terminal
  *      with a unique device-token (random UUID)
  *   3) returning the deviceToken + terminal so the caller can seed
- *      `qbe-kiosk-device-token` + `qbe-kiosk-terminal` in the kiosk
+ *      `forge-kiosk-device-token` + `forge-kiosk-terminal` in the kiosk
  *      page's localStorage before navigating to /display/shop-floor.
  */
 async function ensurePairedKiosk(token: string): Promise<{ deviceToken: string; terminal: unknown } | null> {
@@ -239,7 +239,7 @@ async function ensureClockedIn(token: string, userId: number): Promise<boolean> 
 
 /**
  * App sample-screenshot tool — captures a curated 22-frame set of the
- * QB Engineer UI for downstream consumers (marketing pages, docs sites,
+ * Forge UI for downstream consumers (marketing pages, docs sites,
  * release notes, demo decks, presentations, etc.).
  *
  * Theme: dark. Mode: headless. Frames cover three storylines:
@@ -285,12 +285,12 @@ const OUTPUT_ROOT = process.env.SAMPLES_OUT_DIR
   ? path.resolve(process.env.SAMPLES_OUT_DIR)
   : path.resolve(__dirname, '..', '..', 'public', 'sample-screenshots');
 
-const ADMIN_EMAIL = 'admin@qbengineer.local';
+const ADMIN_EMAIL = 'admin@forge.local';
 // Operator user for the mobile + kiosk tracks. Admin has no jobs
 // assigned (admins aren't operators), so the mobile "My Jobs" and
 // kiosk YOUR JOBS surfaces render empty when authed as admin. Akim is
 // a seeded Engineer who already has shop-floor jobs assigned.
-const OPERATOR_EMAIL = 'akim@qbengineer.local';
+const OPERATOR_EMAIL = 'akim@forge.local';
 
 // Curated seed-data record IDs. The seed list endpoints are sorted
 // recency-desc, which means stress-test runs of OTHER specs push their
@@ -449,7 +449,7 @@ async function tightShoot(
 /** Sets dark theme by seeding localStorage *before* the app boots. */
 async function setDarkTheme(page: Page): Promise<void> {
   await page.evaluate(() => {
-    localStorage.setItem('qbe-theme', 'dark');
+    localStorage.setItem('forge-theme', 'dark');
   });
 }
 
@@ -535,19 +535,19 @@ test.describe('App sample-screenshot batch', () => {
     });
     await desktop.addInitScript((blob: string) => {
       const state = JSON.parse(blob) as { deviceToken: string | null; terminal: unknown };
-      localStorage.setItem('qbe-theme', 'dark');
-      localStorage.setItem('qbe-user-prefs.theme', 'dark');
+      localStorage.setItem('forge-theme', 'dark');
+      localStorage.setItem('forge-user-prefs.theme', 'dark');
       // The Shop Floor kiosk has its own theme signal that reads from
-      // `sf-theme` in localStorage (independent of `qbe-theme`). Seed it
+      // `sf-theme` in localStorage (independent of `forge-theme`). Seed it
       // here so /display/shop-floor renders in dark from first paint —
       // otherwise the kiosk frames render light regardless of the rest
       // of the app's dark-theme seed.
       localStorage.setItem('sf-theme', 'dark');
       if (state.deviceToken) {
-        localStorage.setItem('qbe-kiosk-device-token', state.deviceToken);
+        localStorage.setItem('forge-kiosk-device-token', state.deviceToken);
       }
       if (state.terminal) {
-        localStorage.setItem('qbe-kiosk-terminal', JSON.stringify(state.terminal));
+        localStorage.setItem('forge-kiosk-terminal', JSON.stringify(state.terminal));
       }
     }, initStateBlob);
     const page = await desktop.newPage();
@@ -902,15 +902,15 @@ test.describe('App sample-screenshot batch', () => {
       permissions: ['camera'],
     });
     await mobile.addInitScript(() => {
-      localStorage.setItem('qbe-theme', 'dark');
-      localStorage.setItem('qbe-user-prefs.theme', 'dark');
+      localStorage.setItem('forge-theme', 'dark');
+      localStorage.setItem('forge-user-prefs.theme', 'dark');
     });
     const mPage = await mobile.newPage();
 
     // C-M-F1 — login (sign-in screen on mobile viewport)
     try {
       await mPage.goto('http://localhost:4200/login', { waitUntil: 'networkidle' });
-      await mPage.evaluate(() => localStorage.setItem('qbe-theme', 'dark'));
+      await mPage.evaluate(() => localStorage.setItem('forge-theme', 'dark'));
       await mPage.reload();
       await mPage.waitForLoadState('networkidle');
       await mPage.waitForTimeout(800);
@@ -931,7 +931,7 @@ test.describe('App sample-screenshot batch', () => {
     try {
       const sessionToUse = operatorSession ?? session;
       await seedAuth(mPage, sessionToUse);
-      await mPage.evaluate(() => localStorage.setItem('qbe-theme', 'dark'));
+      await mPage.evaluate(() => localStorage.setItem('forge-theme', 'dark'));
       await mPage.reload();
       await mPage.waitForLoadState('networkidle');
       await mPage.waitForTimeout(1200);
@@ -1031,7 +1031,7 @@ test.describe('App sample-screenshot batch', () => {
       '  marketing frame, screenshot on a real phone.',
       '',
       '- **Operator setup pre-flight**: the spec sets the operator',
-      '  (`akim@qbengineer.local`) up with PIN `1234` and barcode',
+      '  (`akim@forge.local`) up with PIN `1234` and barcode',
       '  `MKT-AKIM-1` so both kiosk auth paths (badge+PIN and tap+password)',
       '  work end-to-end. Helpers are idempotent — re-runs are safe.',
       '',

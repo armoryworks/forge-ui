@@ -1,5 +1,5 @@
 // Demo build — replaces environment.ts via angular.json fileReplacements when
-// building `ng build --configuration=demo`. Deployed to demo.qb-engineer.com
+// building `ng build --configuration=demo`. Deployed to demo.forge.com
 // and fully static: no real API, no SignalR, all data mocked in-browser.
 //
 // apiUrl / hubUrl are intentionally empty strings so that any accidental

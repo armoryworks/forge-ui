@@ -1,6 +1,6 @@
 /**
  * Bought-parts effort PR4 — tier-variance check models. Mirrors
- * `QBEngineer.Core.Models.CheckTierVarianceRequestModel` and
+ * `Forge.Core.Models.CheckTierVarianceRequestModel` and
  * `CheckTierVarianceResponseModel` exactly.
  *
  * The PO dialog calls `POST /api/v1/vendor-parts/check-tier-variance`

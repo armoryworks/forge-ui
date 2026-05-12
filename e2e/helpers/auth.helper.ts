@@ -45,8 +45,8 @@ export async function loginViaApi(
   // Seed localStorage with keys that AuthService reads on init
   await page.evaluate(
     ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
     },
     { token: loginData.token, user: loginData.user },
   );
@@ -107,8 +107,8 @@ export async function seedAuth(
   await page.goto(`${process.env['SIM_APP_BASE'] ?? 'http://localhost:4200'}/`, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
     },
     { token: session.token, user: session.user },
   );

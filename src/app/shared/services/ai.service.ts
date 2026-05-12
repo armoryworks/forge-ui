@@ -111,7 +111,7 @@ export class AiService {
   streamHelpChat(question: string, history?: AiHelpMessage[]): Observable<string> {
     const url = `${this.base}/help/stream`;
     const body = JSON.stringify({ question, history });
-    const token = localStorage.getItem('qbe-token');
+    const token = localStorage.getItem('forge-token');
 
     return new Observable<string>(subscriber => {
       const controller = new AbortController();

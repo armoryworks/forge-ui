@@ -34,7 +34,7 @@ let _userId: number = 0;
 async function loginAsAdmin(page: Page): Promise<void> {
   const api = await request.newContext({ baseURL: API_BASE });
   const res  = await api.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   const { token, user } = await res.json();
   _authToken = token;
@@ -44,8 +44,8 @@ async function loginAsAdmin(page: Page): Promise<void> {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ t, u }) => {
-      localStorage.setItem('qbe-token', t);
-      localStorage.setItem('qbe-user', JSON.stringify(u));
+      localStorage.setItem('forge-token', t);
+      localStorage.setItem('forge-user', JSON.stringify(u));
       localStorage.setItem('language', 'en');
     },
     { t: token, u: user },
@@ -331,7 +331,7 @@ async function completeI9(page: Page) {
   }
 
   const empNameInput = page.locator('input[aria-label*="Business or Organization Name"]');
-  if (await empNameInput.count() > 0) await empNameInput.fill('QB Engineer Inc.');
+  if (await empNameInput.count() > 0) await empNameInput.fill('Forge Inc.');
 
   // Re-fill fields that might be wiped by form re-initialization (savedFormData arrives async)
   await settle(page, 500);

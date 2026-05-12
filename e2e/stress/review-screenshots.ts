@@ -59,7 +59,7 @@ interface ScreenshotReview {
 
 // ── System prompt ──
 
-const SYSTEM_PROMPT = `You are a UI quality reviewer for a manufacturing ERP application called QB Engineer.
+const SYSTEM_PROMPT = `You are a UI quality reviewer for a manufacturing ERP application called Forge.
 You review screenshots for visual defects, design system violations, and usability issues.
 
 DESIGN SYSTEM RULES (violations of these are issues):

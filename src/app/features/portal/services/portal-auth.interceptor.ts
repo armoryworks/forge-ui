@@ -6,7 +6,7 @@ import { PortalService } from './portal.service';
 /**
  * Attaches the portal session JWT to outbound /portal/* requests. The
  * employee `authInterceptor` doesn't pick these up because the portal
- * token lives under `portal-token` (not `qbe-token`), so they don't
+ * token lives under `portal-token` (not `forge-token`), so they don't
  * collide. Auth + exchange endpoints are anonymous and skipped.
  */
 export const portalAuthInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn) => {

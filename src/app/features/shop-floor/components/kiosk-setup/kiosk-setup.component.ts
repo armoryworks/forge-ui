@@ -125,8 +125,8 @@ export class KioskSetupComponent {
     this.shopFloorService.setupTerminal(name, deviceToken, teamId).subscribe({
       next: (terminal) => {
         this.saving.set(false);
-        localStorage.setItem('qbe-kiosk-device-token', deviceToken);
-        localStorage.setItem('qbe-kiosk-terminal', JSON.stringify(terminal));
+        localStorage.setItem('forge-kiosk-device-token', deviceToken);
+        localStorage.setItem('forge-kiosk-terminal', JSON.stringify(terminal));
         this.authService.clearAuth(); // Clear admin session
         this.configured.emit(terminal);
       },
@@ -149,10 +149,10 @@ export class KioskSetupComponent {
   }
 
   private getDeviceToken(): string {
-    let token = localStorage.getItem('qbe-kiosk-device-token');
+    let token = localStorage.getItem('forge-kiosk-device-token');
     if (!token) {
       token = crypto.randomUUID();
-      localStorage.setItem('qbe-kiosk-device-token', token);
+      localStorage.setItem('forge-kiosk-device-token', token);
     }
     return token;
   }

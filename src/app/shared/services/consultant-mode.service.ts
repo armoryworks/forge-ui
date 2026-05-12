@@ -16,7 +16,7 @@ import { Injectable, signal } from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class ConsultantModeService {
-  private static readonly STORAGE_KEY = 'qb-engineer:consultant-mode';
+  private static readonly STORAGE_KEY = 'forge:consultant-mode';
 
   private readonly _enabled = signal<boolean>(this.readFromStorage());
 

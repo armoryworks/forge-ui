@@ -26,7 +26,7 @@ test.describe.serial('00 QB Cleanup', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
     await navigateTo(page, '/');
     await page.waitForLoadState('networkidle');
   });
@@ -75,10 +75,10 @@ test.describe.serial('00 QB Cleanup', () => {
       'The API must have MOCK_INTEGRATIONS=false for QB tests.',
       '',
       'Check:',
-      '  docker compose exec qb-engineer-api printenv | grep MOCK',
+      '  docker compose exec forge-api printenv | grep MOCK',
       '',
       'If it shows MOCK_INTEGRATIONS=true, restart with:',
-      '  MOCK_INTEGRATIONS=false docker compose up -d --build qb-engineer-api',
+      '  MOCK_INTEGRATIONS=false docker compose up -d --build forge-api',
       '',
       'Also verify your QB credentials are configured:',
       '  Check appsettings.Secrets.json for:',

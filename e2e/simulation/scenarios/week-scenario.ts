@@ -244,20 +244,20 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
   const inc = (ok: boolean) => { attempted++; if (ok) succeeded++; };
 
   // ── Role pages ─────────────────────────────────────────────────────────────
-  const adminPage    = ctx.pages['admin@qbengineer.local'];
-  const pmPage       = ctx.pages['pmorris@qbengineer.local'];
-  const engineerPage = ctx.pages['akim@qbengineer.local'];
-  const managerPage  = ctx.pages['lwilson@qbengineer.local'];
-  const officePage   = ctx.pages['cthompson@qbengineer.local'];
-  const workerPage   = ctx.pages['bkelly@qbengineer.local'];
+  const adminPage    = ctx.pages['admin@forge.local'];
+  const pmPage       = ctx.pages['pmorris@forge.local'];
+  const engineerPage = ctx.pages['akim@forge.local'];
+  const managerPage  = ctx.pages['lwilson@forge.local'];
+  const officePage   = ctx.pages['cthompson@forge.local'];
+  const workerPage   = ctx.pages['bkelly@forge.local'];
 
   // ── Role tokens (API read-only queries) ────────────────────────────────────
-  const admin    = ctx.tokens['admin@qbengineer.local'];
-  const engineer = ctx.tokens['akim@qbengineer.local'];
-  const pm       = ctx.tokens['pmorris@qbengineer.local'];
-  const manager  = ctx.tokens['lwilson@qbengineer.local'];
-  const office   = ctx.tokens['cthompson@qbengineer.local'];
-  const worker   = ctx.tokens['bkelly@qbengineer.local'];
+  const admin    = ctx.tokens['admin@forge.local'];
+  const engineer = ctx.tokens['akim@forge.local'];
+  const pm       = ctx.tokens['pmorris@forge.local'];
+  const manager  = ctx.tokens['lwilson@forge.local'];
+  const office   = ctx.tokens['cthompson@forge.local'];
+  const worker   = ctx.tokens['bkelly@forge.local'];
 
   const w = ctx.weekIndex;
 
@@ -1392,7 +1392,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await engineerPage.waitForTimeout(300);
 
         // Pick a user to @mention (not self — engineer is akim)
-        const mentionTarget = allUsers.find(u => u.email !== 'akim@qbengineer.local')
+        const mentionTarget = allUsers.find(u => u.email !== 'akim@forge.local')
           ?? allUsers[0];
 
         // Build a contextual message with @user mention + entity reference
@@ -1434,8 +1434,8 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await pmPage.waitForTimeout(300);
 
         // PM @mentions the manager or engineer
-        const mentionTarget = allUsers.find(u => u.email === 'lwilson@qbengineer.local')
-          ?? allUsers.find(u => u.email !== 'pmorris@qbengineer.local')
+        const mentionTarget = allUsers.find(u => u.email === 'lwilson@forge.local')
+          ?? allUsers.find(u => u.email !== 'pmorris@forge.local')
           ?? allUsers[0];
 
         let msg: string;
@@ -1469,7 +1469,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await workerPage.waitForTimeout(300);
 
         // Worker @mentions the engineer
-        const mentionTarget = allUsers.find(u => u.email === 'akim@qbengineer.local')
+        const mentionTarget = allUsers.find(u => u.email === 'akim@forge.local')
           ?? allUsers[0];
 
         let msg: string;
@@ -1505,8 +1505,8 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await managerPage.waitForTimeout(300);
 
         // Manager @mentions two people
-        const eng = allUsers.find(u => u.email === 'akim@qbengineer.local') ?? allUsers[0];
-        const pm = allUsers.find(u => u.email === 'pmorris@qbengineer.local') ?? allUsers[1 % allUsers.length];
+        const eng = allUsers.find(u => u.email === 'akim@forge.local') ?? allUsers[0];
+        const pm = allUsers.find(u => u.email === 'pmorris@forge.local') ?? allUsers[1 % allUsers.length];
 
         let msg: string;
         if (activeJobs.length > 1) {
@@ -1538,7 +1538,7 @@ export async function runWeek(ctx: WeekContext): Promise<WeekResult> {
         await convBtns.first().click();
         await officePage.waitForTimeout(300);
 
-        const mentionTarget = allUsers.find(u => u.email === 'lwilson@qbengineer.local')
+        const mentionTarget = allUsers.find(u => u.email === 'lwilson@forge.local')
           ?? allUsers[0];
 
         let msg: string;

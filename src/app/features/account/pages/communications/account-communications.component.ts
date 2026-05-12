@@ -126,7 +126,7 @@ export class AccountCommunicationsComponent implements OnInit {
         next: (result) => {
           // Persist provider-key for the callback page to know which
           // /complete endpoint to POST to (state alone doesn't tell us).
-          sessionStorage.setItem('qbe-oauth-imap-provider', providerKey);
+          sessionStorage.setItem('forge-oauth-imap-provider', providerKey);
           window.location.href = result.authorizeUrl;
         },
         error: () => {

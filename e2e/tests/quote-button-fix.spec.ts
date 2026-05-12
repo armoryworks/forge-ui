@@ -12,7 +12,7 @@ test('quote detail button placement', async ({ browser }) => {
 
   const api = await request.newContext({ baseURL: API_BASE });
   const login = await api.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   if (!login.ok()) throw new Error(`Login failed: ${login.status()}`);
   const auth = await login.json();
@@ -34,8 +34,8 @@ test('quote detail button placement', async ({ browser }) => {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user, lang }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
       localStorage.setItem('language', lang);
     },
     { token: auth.token, user: auth.user, lang: 'en' },

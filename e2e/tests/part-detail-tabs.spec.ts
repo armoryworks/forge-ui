@@ -17,11 +17,11 @@ const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
  */
 test.describe('Pillar 4 — Part detail tabs', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('Buy + Raw part shows the resolver-driven tab set and Sources tab mounts the vendor panel', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     // Find a Buy + Raw part. Fall back to ANY part if none match — the
@@ -63,7 +63,7 @@ test.describe('Pillar 4 — Part detail tabs', () => {
   });
 
   test('clicking Sources tab activates it and mounts the vendor list panel', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     const partsResp = await request.get(`${API_BASE}parts?pageSize=50`, {

@@ -3820,7 +3820,7 @@
     "toggleSound": "Toggle notification sound"
   },
   "auth": {
-    "appName": "QB Engineer",
+    "appName": "Armory Works Forge",
     "tagline": "Manufacturing Operations Platform",
     "alreadySignedIn": "You are already signed in",
     "goToDashboard": "Go to Dashboard",
@@ -4805,12 +4805,12 @@
     "usePhoto": "Use Photo"
   },
   "aiHelp": {
-    "title": "QB Engineer Assistant",
+    "title": "Forge Assistant",
     "clearChat": "Clear chat",
     "newConversation": "New conversation",
     "closeAssistant": "Close assistant",
     "howCanIHelp": "How can I help?",
-    "welcomeText": "Ask me anything about QB Engineer — features, workflows, how to do things.",
+    "welcomeText": "Ask me anything about Forge — features, workflows, how to do things.",
     "starterCreateJob": "How do I create a new job?",
     "starterQuoteWorkflow": "Quote to order workflow",
     "starterInventory": "How do I track inventory?",
@@ -6360,10 +6360,10 @@
     "thresholdExceedsMax": "Auto-approve threshold cannot exceed the maximum expense amount."
   },
   "welcomePage": {
-    "brandName": "QB Engineer",
+    "brandName": "Armory Works Forge",
     "demoChip": "Demo",
     "tagline": "An open ERP for engineering shops.",
-    "lede": "QB Engineer is a self-hostable shop-floor + business management platform — kanban, jobs, parts, inventory, purchasing, sales, payroll, and more — designed to run alongside your QuickBooks file or completely standalone.",
+    "lede": "Armory Works Forge is a self-hostable shop-floor + business management platform — kanban, jobs, parts, inventory, purchasing, sales, payroll, and more — designed to run alongside your QuickBooks file or completely standalone.",
     "caveat": "This is a public demo. Data resets periodically and is shared with everyone signed in.",
     "ctaSignIn": "Sign in to the demo",
     "footerLicense": "MIT-licensed open source",

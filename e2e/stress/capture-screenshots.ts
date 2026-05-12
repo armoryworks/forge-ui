@@ -73,7 +73,7 @@ async function main(): Promise<void> {
   let loginData: { token: string; user: unknown };
   try {
     const response = await apiContext.post('auth/login', {
-      data: { email: 'admin@qbengineer.local', password: PASSWORD },
+      data: { email: 'admin@forge.local', password: PASSWORD },
     });
     if (!response.ok()) {
       console.error(`Login failed: ${response.status()}`);
@@ -96,8 +96,8 @@ async function main(): Promise<void> {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
       localStorage.setItem('language', 'en');
     },
     { token: loginData.token, user: loginData.user },

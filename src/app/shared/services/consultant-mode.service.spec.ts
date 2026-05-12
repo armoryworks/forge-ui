@@ -8,7 +8,7 @@ describe('ConsultantModeService — Phase 4 Phase-E UI flag', () => {
   beforeEach(() => {
     // Make sure each test starts with no persisted flag.
     try {
-      localStorage.removeItem('qb-engineer:consultant-mode');
+      localStorage.removeItem('forge:consultant-mode');
     } catch {
       // ignore
     }
@@ -23,11 +23,11 @@ describe('ConsultantModeService — Phase 4 Phase-E UI flag', () => {
   it('toggle flips the signal and persists to localStorage', () => {
     service.toggle();
     expect(service.enabled()).toBe(true);
-    expect(localStorage.getItem('qb-engineer:consultant-mode')).toBe('1');
+    expect(localStorage.getItem('forge:consultant-mode')).toBe('1');
 
     service.toggle();
     expect(service.enabled()).toBe(false);
-    expect(localStorage.getItem('qb-engineer:consultant-mode')).toBeNull();
+    expect(localStorage.getItem('forge:consultant-mode')).toBeNull();
   });
 
   it('set(true|false) updates the signal explicitly', () => {

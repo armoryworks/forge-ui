@@ -3809,7 +3809,7 @@
     "toggleSound": "Alternar sonido de notificación"
   },
   "auth": {
-    "appName": "QB Engineer",
+    "appName": "Armory Works Forge",
     "tagline": "Plataforma de Operaciones de Manufactura",
     "alreadySignedIn": "Ya ha iniciado sesión",
     "goToDashboard": "Ir al panel",
@@ -4794,12 +4794,12 @@
     "usePhoto": "Usar Foto"
   },
   "aiHelp": {
-    "title": "Asistente QB Engineer",
+    "title": "Asistente Forge",
     "clearChat": "Limpiar chat",
     "newConversation": "Nueva conversación",
     "closeAssistant": "Cerrar asistente",
     "howCanIHelp": "¿Cómo puedo ayudar?",
-    "welcomeText": "Pregúntame lo que sea sobre QB Engineer — funciones, flujos de trabajo, cómo hacer las cosas.",
+    "welcomeText": "Pregúntame lo que sea sobre Forge — funciones, flujos de trabajo, cómo hacer las cosas.",
     "starterCreateJob": "¿Cómo creo un nuevo trabajo?",
     "starterQuoteWorkflow": "Flujo de cotización a pedido",
     "starterInventory": "¿Cómo hago seguimiento del inventario?",
@@ -6349,10 +6349,10 @@
     "thresholdExceedsMax": "El umbral de auto-aprobación no puede superar el monto máximo del gasto."
   },
   "welcomePage": {
-    "brandName": "QB Engineer",
+    "brandName": "Armory Works Forge",
     "demoChip": "Demo",
     "tagline": "Un ERP de código abierto para talleres de ingeniería.",
-    "lede": "QB Engineer es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a tu archivo de QuickBooks o de forma totalmente independiente.",
+    "lede": "Armory Works Forge es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a tu archivo de QuickBooks o de forma totalmente independiente.",
     "caveat": "Esta es una demo pública. Los datos se reinician periódicamente y se comparten con todos los usuarios conectados.",
     "ctaSignIn": "Iniciar sesión en la demo",
     "footerLicense": "Software libre con licencia MIT",

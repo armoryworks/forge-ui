@@ -12,8 +12,8 @@ async function loginAndSeedStorage(page: any, token: string, user: any) {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ tok, usr }: { tok: string; usr: any }) => {
-      localStorage.setItem('qbe-token', tok);
-      localStorage.setItem('qbe-user', JSON.stringify(usr));
+      localStorage.setItem('forge-token', tok);
+      localStorage.setItem('forge-user', JSON.stringify(usr));
       localStorage.setItem('language', 'en');
     },
     { tok: token, usr: user },
@@ -32,7 +32,7 @@ test.describe('Engineering Audit Screenshots', () => {
   test.beforeAll(async () => {
     const apiContext = await request.newContext({ baseURL: API_BASE });
     const response = await apiContext.post('auth/login', {
-      data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+      data: { email: 'admin@forge.local', password: SEED_PASSWORD },
     });
     if (!response.ok()) {
       throw new Error(`Login failed: ${response.status()} ${await response.text()}`);

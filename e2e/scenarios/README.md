@@ -96,10 +96,10 @@ For QuickBooks integration testing:
 
 ```bash
 # Switch to real QB mode
-MOCK_INTEGRATIONS=false docker compose up -d --build qb-engineer-api
+MOCK_INTEGRATIONS=false docker compose up -d --build forge-api
 
 # Switch back to mock mode
-MOCK_INTEGRATIONS=true docker compose up -d --build qb-engineer-api
+MOCK_INTEGRATIONS=true docker compose up -d --build forge-api
 ```
 
 ## How Interactive Pauses Work
@@ -115,8 +115,8 @@ At each ⏸ checkpoint, the scenario:
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Admin |
-| akim@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
-| dhart@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
-| jsilva@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
-| mreyes@qbengineer.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| admin@forge.local | (set via SEED_USER_PASSWORD env var) | Admin |
+| akim@forge.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| dhart@forge.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| jsilva@forge.local | (set via SEED_USER_PASSWORD env var) | Engineer |
+| mreyes@forge.local | (set via SEED_USER_PASSWORD env var) | Engineer |

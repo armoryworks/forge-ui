@@ -104,7 +104,7 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   // Pairing gate — true when this device has no kiosk device token (or the
   // token was revoked). Shows the admin setup flow instead of attempting to
   // load shop-floor data (which would 401).
-  protected readonly isUnpaired = signal(!localStorage.getItem('qbe-kiosk-device-token'));
+  protected readonly isUnpaired = signal(!localStorage.getItem('forge-kiosk-device-token'));
 
   // Live elapsed times — recomputed every second via tick signal
   private readonly tick = signal(0);
@@ -873,8 +873,8 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
         // 401 = kiosk token missing/revoked — flip to the pairing gate rather
         // than showing a generic "failed to load" error.
         if (err?.status === 401) {
-          localStorage.removeItem('qbe-kiosk-device-token');
-          localStorage.removeItem('qbe-kiosk-terminal');
+          localStorage.removeItem('forge-kiosk-device-token');
+          localStorage.removeItem('forge-kiosk-terminal');
           this.isUnpaired.set(true);
           this.error.set(null);
           return;

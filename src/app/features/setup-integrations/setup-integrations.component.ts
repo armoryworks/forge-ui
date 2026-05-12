@@ -99,7 +99,7 @@ export class SetupIntegrationsComponent implements OnInit {
   ngOnInit(): void {
     this.loading.set(true);
     fetch('/api/v1/admin/integrations', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('qbe-token') ?? ''}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem('forge-token') ?? ''}` },
     })
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
       .then((data: IntegrationsResponse) => {

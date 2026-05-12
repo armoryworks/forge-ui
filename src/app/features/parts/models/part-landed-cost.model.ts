@@ -1,6 +1,6 @@
 /**
  * Bought-parts effort PR3 — landed-cost surface for the part Cost tab.
- * Mirrors `QBEngineer.Core.Models.PartLandedCostResponseModel` exactly.
+ * Mirrors `Forge.Core.Models.PartLandedCostResponseModel` exactly.
  *
  * `averageLandedUnitCost` is null when the part has no receipts with
  * captured freight (pre-PR3 receipts and freight-skipped receipts both

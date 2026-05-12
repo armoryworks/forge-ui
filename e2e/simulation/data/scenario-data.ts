@@ -650,7 +650,7 @@ export const TRAINING_MODULE_SUMMARIES = [
   'Basic machine maintenance checks and lubrication schedules.',
   'Conducting and documenting first article inspections.',
   'How to document and route non-conforming material.',
-  'Navigating the QB Engineer ERP system effectively.',
+  'Navigating the Forge ERP system effectively.',
   'Professional communication with customers and vendors.',
   'Document control policies and revision management.',
   'Processing engineering change orders and updates.',
@@ -1185,7 +1185,7 @@ export const ONBOARDING_LAST_NAMES = [
   'Yamamoto', 'Fitzpatrick', 'Novak', 'Castillo', 'Johansson', 'Mbeki',
 ];
 
-export const ONBOARDING_EMAILS_DOMAIN = 'qbengineer.local';
+export const ONBOARDING_EMAILS_DOMAIN = 'forge.local';
 
 export const BANK_NAMES = [
   'Chase Bank', 'Bank of America', 'Wells Fargo', 'US Bank', 'PNC Financial',

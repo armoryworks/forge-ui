@@ -467,8 +467,8 @@ export class StressOrchestrator {
     // ensuring tokens persist across navigations
     await context.addInitScript(
       (data: { token: string; user: unknown }) => {
-        localStorage.setItem('qbe-token', data.token);
-        localStorage.setItem('qbe-user', JSON.stringify(data.user));
+        localStorage.setItem('forge-token', data.token);
+        localStorage.setItem('forge-user', JSON.stringify(data.user));
       },
       { token: body.token, user: body.user },
     );
@@ -480,8 +480,8 @@ export class StressOrchestrator {
     // Set tokens directly for this first load (addInitScript fires on future navigations)
     await page.evaluate(
       (data: { token: string; user: unknown }) => {
-        localStorage.setItem('qbe-token', data.token);
-        localStorage.setItem('qbe-user', JSON.stringify(data.user));
+        localStorage.setItem('forge-token', data.token);
+        localStorage.setItem('forge-user', JSON.stringify(data.user));
       },
       { token: body.token, user: body.user },
     );

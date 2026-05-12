@@ -73,7 +73,7 @@ describe('BroadcastService', () => {
     it('should create a BroadcastChannel with the correct name', () => {
       service.initialize();
 
-      expect(BroadcastChannel).toHaveBeenCalledWith('qb-engineer-sync');
+      expect(BroadcastChannel).toHaveBeenCalledWith('forge-sync');
     });
 
     it('should register a broadcast callback on AuthService', () => {

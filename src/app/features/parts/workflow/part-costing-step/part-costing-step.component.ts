@@ -15,7 +15,7 @@ import { PartsService } from '../../services/parts.service';
 
 /** Costing modes per the design doc D3 — Tier 1 always available, Tiers 2/3
  * gated by `CAP-COSTING-TIER2-DEPTRATES` and `CAP-COSTING-TIER3-ABC`
- * (registered in qb-engineer-server's CapabilityCatalog as of 2026-05-03).
+ * (registered in forge-api's CapabilityCatalog as of 2026-05-03).
  * Both default OFF; admin enables via /admin/capabilities. The actual
  * rate/driver/allocation engines are still pending — enabling the
  * capability today reveals the radio + a "configuration coming soon"

@@ -15,7 +15,7 @@ const BASE_URL = 'http://localhost:4200';
 
 test.describe('Workflow Pattern — Part axis-based fork (pre-beta)', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('Buy + Raw default: express recommended → continue → express form mounts', async ({ page }) => {

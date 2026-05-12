@@ -40,7 +40,7 @@ function findLatestFile(dir: string, prefix: string): string | null {
 
 async function main(): Promise<void> {
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`  QB Engineer Recursive Stress Test`);
+  console.log(`  Forge Recursive Stress Test`);
   console.log(`  Iterations: ${ITERATIONS}`);
   console.log(`  Duration per run: ${parseInt(STRESS_DURATION) / 1000}s`);
   console.log(`${'='.repeat(60)}\n`);

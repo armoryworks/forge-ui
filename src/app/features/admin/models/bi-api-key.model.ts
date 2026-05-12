@@ -1,7 +1,7 @@
 /**
  * Phase 3 / WU-04 retrofit — BI API key management surface for the admin
  * panel. Mirrors the server-side response models in
- * `qb-engineer.api/Features/Bi/`. No plaintext key field exists on
+ * `forge.api/Features/Bi/`. No plaintext key field exists on
  * `BiApiKey` — plaintext is only returned ONCE on issuance via
  * `CreateBiApiKeyResponse.plaintextKey`.
  */

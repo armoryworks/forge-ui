@@ -62,7 +62,7 @@ describe('LayoutService', () => {
 
     it('should persist collapsed state to localStorage', () => {
       service.toggleSidebar();
-      const stored = localStorage.getItem('qbe-sidebar-collapsed');
+      const stored = localStorage.getItem('forge-sidebar-collapsed');
       expect(stored).toBeTruthy();
     });
 
@@ -117,7 +117,7 @@ describe('LayoutService', () => {
 
   describe('localStorage restore', () => {
     it('should restore collapsed=false from localStorage', () => {
-      localStorage.setItem('qbe-sidebar-collapsed', 'false');
+      localStorage.setItem('forge-sidebar-collapsed', 'false');
 
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({
@@ -129,7 +129,7 @@ describe('LayoutService', () => {
     });
 
     it('should default to collapsed=true when localStorage has true', () => {
-      localStorage.setItem('qbe-sidebar-collapsed', 'true');
+      localStorage.setItem('forge-sidebar-collapsed', 'true');
 
       TestBed.resetTestingModule();
       TestBed.configureTestingModule({

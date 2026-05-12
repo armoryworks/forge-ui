@@ -1,7 +1,7 @@
 /**
  * Backward-from-part PO history row (one per (PO, line) pair).
  * Mirrors the server's PartPurchaseHistoryItemResponseModel — see
- * `qb-engineer.core/Models/PartPurchaseHistoryItemResponseModel.cs`.
+ * `forge.core/Models/PartPurchaseHistoryItemResponseModel.cs`.
  */
 export interface PartPurchaseHistoryItem {
   purchaseOrderId: number;

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 
 import { Draft } from '../models/draft.model';
 
-const DB_NAME = 'qb-engineer-drafts';
+const DB_NAME = 'forge-drafts';
 const DB_VERSION = 1;
 const STORE_NAME = 'drafts';
 

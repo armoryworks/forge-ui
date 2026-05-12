@@ -20,7 +20,7 @@ const IDENTITY_KEY = 'portal-identity';
 
 /**
  * Portal-side auth + data service. Token storage is keyed off `portal-*`
- * so it can't accidentally collide with the employee `qbe-token`.
+ * so it can't accidentally collide with the employee `forge-token`.
  * The portal interceptor reads the same key and attaches it to /portal/*
  * requests only.
  */

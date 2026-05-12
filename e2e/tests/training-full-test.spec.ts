@@ -1,6 +1,6 @@
 /**
  * Comprehensive training module test — all content types.
- * Run from qb-engineer-ui/: npx playwright test training-full-test
+ * Run from forge-ui/: npx playwright test training-full-test
  */
 import { test, expect, request, Page, BrowserContext } from '@playwright/test';
 import { SEED_PASSWORD } from '../helpers/auth.helper';
@@ -18,7 +18,7 @@ if (!fs.existsSync(SHOT_DIR)) fs.mkdirSync(SHOT_DIR, { recursive: true });
 async function loginAndSeedStorage(page: Page): Promise<void> {
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const resp   = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   if (!resp.ok()) throw new Error(`Login failed: ${resp.status()}`);
   const { token, user } = await resp.json();
@@ -27,8 +27,8 @@ async function loginAndSeedStorage(page: Page): Promise<void> {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ t, u }) => {
-      localStorage.setItem('qbe-token', t);
-      localStorage.setItem('qbe-user', JSON.stringify(u));
+      localStorage.setItem('forge-token', t);
+      localStorage.setItem('forge-user', JSON.stringify(u));
       localStorage.setItem('language', 'en');
     },
     { t: token, u: user },
@@ -317,7 +317,7 @@ test('batch-5: walkthrough module', async ({ browser }) => {
   // Create a walkthrough module via API
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const loginResp = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   const { token } = await loginResp.json();
 
@@ -468,7 +468,7 @@ test('batch-6: video module', async ({ browser }) => {
   // Create a video module via API
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const loginResp = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   const { token } = await loginResp.json();
 
@@ -490,7 +490,7 @@ test('batch-6: video module', async ({ browser }) => {
     data: {
       title: 'Platform Overview Video',
       slug: 'platform-overview-video',
-      summary: 'A video walkthrough of the QB Engineer platform for new team members.',
+      summary: 'A video walkthrough of the Forge platform for new team members.',
       contentType: 'Video',
       contentJson: JSON.stringify(videoContent),
       estimatedMinutes: 5,
@@ -604,7 +604,7 @@ test('batch-8: article mark-complete flow', async ({ browser }) => {
   const page = await ctx.newPage();
   await loginAndSeedStorage(page);
 
-  // Navigate to shortest article (Welcome to QB Engineer — 3 min = 180s target, 20s minimum)
+  // Navigate to shortest article (Welcome to Forge — 3 min = 180s target, 20s minimum)
   await page.goto(`${BASE_URL}/training/module/1`, { waitUntil: 'networkidle' });
   await waitForContent(page);
 

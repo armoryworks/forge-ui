@@ -12,8 +12,8 @@ test.describe('SignalR Announcement Pub-Sub', () => {
 
     try {
       // ── 2. Log both in as admin (admin can see the announcements admin panel) ──
-      await loginViaApi(pageA, 'admin@qbengineer.local', SEED_PASSWORD);
-      await loginViaApi(pageB, 'admin@qbengineer.local', SEED_PASSWORD);
+      await loginViaApi(pageA, 'admin@forge.local', SEED_PASSWORD);
+      await loginViaApi(pageB, 'admin@forge.local', SEED_PASSWORD);
 
       // ── 3. Subscriber (A) loads first — navigate to the admin panel and wait
       //      for both the initial list and the ChatHub SignalR connection to

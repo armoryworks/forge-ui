@@ -15,11 +15,11 @@ const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
  */
 test.describe('Customer Pricing tab — add entry', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('opens the Pricing tab on a customer and adds a price entry', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     const partsResp = await request.get(`${API_BASE}parts?pageSize=1`, {
@@ -112,7 +112,7 @@ test.describe('Customer Pricing tab — add entry', () => {
   });
 
   test('creates a new price list via the New Price List dialog and edits its name', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     const customersResp = await request.get(`${API_BASE}customers?pageSize=1&isActive=true`, {
@@ -180,7 +180,7 @@ test.describe('Customer Pricing tab — add entry', () => {
    * phase-4-output/pricelist-entry-edit-ux.md.
    */
   test('imports price list entries from a CSV via the bulk-import dialog', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     const partsResp = await request.get(`${API_BASE}parts?pageSize=1`, {
@@ -264,7 +264,7 @@ test.describe('Customer Pricing tab — add entry', () => {
    * Verifies the table-level optimistic-cache update plus the server PUT.
    */
   test('edits a price entry inline via the Unit Price cell and persists across reload', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     const partsResp = await request.get(`${API_BASE}parts?pageSize=1`, {

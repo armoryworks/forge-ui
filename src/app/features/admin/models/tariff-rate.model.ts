@@ -1,6 +1,6 @@
 /**
  * Bought-parts effort PR4 — TariffRate admin model. Mirrors
- * `QBEngineer.Core.Models.TariffRateResponseModel`.
+ * `Forge.Core.Models.TariffRateResponseModel`.
  *
  * Tariffs are SCD-2 keyed on (HtsCode, CountryOfOrigin) with effective
  * windows. Admin imports broker data and supersedes rates as needed —

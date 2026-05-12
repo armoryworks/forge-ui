@@ -276,24 +276,24 @@ function matchesAnyFrontend(
 
 test.describe('Contract Drift Detection', () => {
   test('frontend API URLs must match backend routes', () => {
-    // process.cwd() = qb-engineer-ui -> up 1 level to qb-engineer-wrapper
+    // process.cwd() = forge-ui -> up 1 level to forge-wrapper
     const rootDir = path.resolve(process.cwd(), '..');
     const controllerDir = path.join(
       rootDir,
-      'qb-engineer-server',
-      'qb-engineer.api',
+      'forge-api',
+      'forge.api',
       'Controllers',
     );
     const featureDir = path.join(
       rootDir,
-      'qb-engineer-ui',
+      'forge-ui',
       'src',
       'app',
       'features',
     );
     const sharedServicesDir = path.join(
       rootDir,
-      'qb-engineer-ui',
+      'forge-ui',
       'src',
       'app',
       'shared',

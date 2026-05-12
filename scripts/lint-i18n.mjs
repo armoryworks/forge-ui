@@ -156,7 +156,7 @@ function walk(dir, files = [], extensions) {
         || entry === 'bin' || entry === 'obj') continue;
     // Skip test directories on both sides — fixtures use synthetic keys
     // ("validators.parts.tempCustom") that are NOT real i18n strings.
-    if (entry.endsWith('.tests') || entry === 'qb-engineer.tests') continue;
+    if (entry.endsWith('.tests') || entry === 'forge.tests') continue;
     const full = join(dir, entry);
     const st = statSync(full);
     if (st.isDirectory()) walk(full, files, extensions);
@@ -181,7 +181,7 @@ const sourceFiles = walk(SRC_DIR, [], ['.ts', '.html']);
 // We scan a fixed list of sibling-repo paths so the check works in
 // repos where the server isn't checked out (CI runs separately).
 const SERVER_DIRS = [
-  resolve(REPO_ROOT, '..', 'qb-engineer-server'),
+  resolve(REPO_ROOT, '..', 'forge-api'),
 ];
 const serverFiles = [];
 for (const dir of SERVER_DIRS) {

@@ -8,7 +8,7 @@
 import { test, expect } from '@playwright/test';
 import { loginViaApi, SEED_PASSWORD } from '../../helpers/auth.helper';
 
-const ADMIN_EMAIL = 'admin@qbengineer.local';
+const ADMIN_EMAIL = 'admin@forge.local';
 const API_BASE = 'http://localhost:5000/api/v1/';
 
 test.describe('Critical User Flows', () => {

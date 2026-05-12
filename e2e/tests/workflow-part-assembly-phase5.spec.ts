@@ -16,7 +16,7 @@ const BASE_URL = 'http://localhost:4200';
 
 test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('guided flow: New Part → Assembly + Step-by-step → workflow shell mounts → basics fills', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
 
   test('promote-direct: Mark Complete on incomplete workflow surfaces missing validators (sugar over /promote-status)', async ({ page, request }) => {
     // Create a Draft part via the workflow API so we have a known target.
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     const startResp = await request.post(`http://localhost:5000/api/v1/workflows`, {
       headers: { Authorization: `Bearer ${token}` },
       data: {

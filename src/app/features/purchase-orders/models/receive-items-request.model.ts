@@ -1,6 +1,6 @@
 import { ReceiveLineRequest } from './receive-line-request.model';
 
-/** Mirrors `QBEngineer.Core.Enums.FreightAllocationMethod`. */
+/** Mirrors `Forge.Core.Enums.FreightAllocationMethod`. */
 export type FreightAllocationMethod = 'ByExtendedValue' | 'ByWeight' | 'ByQuantity' | 'Manual';
 
 export interface ReceiveItemsRequest {

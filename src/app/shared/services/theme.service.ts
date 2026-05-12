@@ -19,13 +19,13 @@ export class ThemeService {
   readonly theme = this._theme.asReadonly();
   private readonly _fontScale = signal<FontScale>('default');
   readonly fontScale = this._fontScale.asReadonly();
-  readonly appName = signal('QB Engineer');
+  readonly appName = signal('Forge');
   readonly logoUrl = signal<string | null>(null);
 
   private brandColors: { primary?: string; accent?: string } = {};
 
   constructor() {
-    const saved = localStorage.getItem('qbe-theme') as ThemeMode | null;
+    const saved = localStorage.getItem('forge-theme') as ThemeMode | null;
     // Demo builds default to dark when the user has no saved preference — the
     // armory-works parent site is dark, so launching into a light demo is
     // visually jarring. User toggles still win once set.
@@ -35,13 +35,13 @@ export class ThemeService {
     this._theme.set(initialTheme);
     this.applyTheme(initialTheme);
 
-    const savedScale = localStorage.getItem('qbe-font-scale') as FontScale | null;
+    const savedScale = localStorage.getItem('forge-font-scale') as FontScale | null;
     if (savedScale === 'comfortable' || savedScale === 'large' || savedScale === 'xl') {
       this._fontScale.set(savedScale);
     }
     this.applyFontScale(this._fontScale());
 
-    const cachedBrand = localStorage.getItem('qbe-brand-colors');
+    const cachedBrand = localStorage.getItem('forge-brand-colors');
     if (cachedBrand) {
       this.brandColors = JSON.parse(cachedBrand);
       this.applyBrandColors();
@@ -51,7 +51,7 @@ export class ThemeService {
   toggle(): void {
     const next: ThemeMode = this._theme() === 'light' ? 'dark' : 'light';
     this._theme.set(next);
-    localStorage.setItem('qbe-theme', next);
+    localStorage.setItem('forge-theme', next);
     this.applyTheme(next);
     this.applyBrandColors();
     this._broadcastThemeChange?.(next);
@@ -60,7 +60,7 @@ export class ThemeService {
   /** Called by BroadcastService to sync theme from another tab without re-broadcasting. */
   applyThemeFromBroadcast(theme: ThemeMode): void {
     this._theme.set(theme);
-    localStorage.setItem('qbe-theme', theme);
+    localStorage.setItem('forge-theme', theme);
     this.applyTheme(theme);
     this.applyBrandColors();
   }
@@ -75,13 +75,13 @@ export class ThemeService {
 
   setBrandColors(primary?: string, accent?: string): void {
     this.brandColors = { primary, accent };
-    localStorage.setItem('qbe-brand-colors', JSON.stringify(this.brandColors));
+    localStorage.setItem('forge-brand-colors', JSON.stringify(this.brandColors));
     this.applyBrandColors();
   }
 
   setFontScale(scale: FontScale): void {
     this._fontScale.set(scale);
-    localStorage.setItem('qbe-font-scale', scale);
+    localStorage.setItem('forge-font-scale', scale);
     this.applyFontScale(scale);
   }
 

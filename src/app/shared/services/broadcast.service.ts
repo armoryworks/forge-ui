@@ -12,7 +12,7 @@ type BroadcastEvent =
   | { type: 'chat-window-closed' }
   | { type: 'chat-open-conversation'; channelId?: number; userId?: number };
 
-const CHANNEL_NAME = 'qb-engineer-sync';
+const CHANNEL_NAME = 'forge-sync';
 
 @Injectable({ providedIn: 'root' })
 export class BroadcastService implements OnDestroy {

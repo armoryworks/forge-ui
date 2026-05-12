@@ -43,7 +43,7 @@ Generated 2026-05-08T06:12:23.790Z
   marketing frame, screenshot on a real phone.
 
 - **Operator setup pre-flight**: the spec sets the operator
-  (`akim@qbengineer.local`) up with PIN `1234` and barcode
+  (`akim@forge.local`) up with PIN `1234` and barcode
   `MKT-AKIM-1` so both kiosk auth paths (badge+PIN and tap+password)
   work end-to-end. Helpers are idempotent — re-runs are safe.
 

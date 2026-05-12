@@ -12,11 +12,11 @@ const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
  */
 test.describe('Dispatch C — Part pricing tab', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('opens Pricing tab, shows current price + history table, posts a new effective price', async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     // Find any non-Phantom part — Pricing tab is excluded only for Phantom.

@@ -29,15 +29,15 @@ const DOCS_DIR = path.resolve(__dirname, '../../../docs/ui-flows');
 async function loginAdmin(page: Page) {
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const res = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   const data = await res.json();
   await apiContext.dispose();
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
     },
     { token: data.token, user: data.user },
   );
@@ -297,7 +297,7 @@ test('Patch all docs with spatial landmarks', async ({ browser }) => {
   // Universal layout guide (no page navigation needed — it's always-true)
   const universalGuide = `## Finding Controls — Universal Layout
 
-Every page in QB Engineer follows the same spatial layout. Use this guide first
+Every page in Forge follows the same spatial layout. Use this guide first
 before looking at page-specific landmarks below.
 
 \`\`\`
@@ -379,7 +379,7 @@ test('Extract dialog spatial landmarks', async ({ browser }) => {
   const dialogGuide: string[] = [
     '# Dialog Controls — Spatial Guide',
     '',
-    'All dialogs in QB Engineer share the same layout structure.',
+    'All dialogs in Forge share the same layout structure.',
     '',
     '## Universal Dialog Layout',
     '',

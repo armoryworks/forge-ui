@@ -12,7 +12,7 @@
 # the stub barcode visible.
 #
 # Requires: ffmpeg on PATH (or FFMPEG env var pointing at the binary),
-# Playwright installed under qb-engineer-ui, and the Docker stack running
+# Playwright installed under forge-ui, and the Docker stack running
 # with seeded data.
 
 set -euo pipefail

@@ -29,7 +29,7 @@ import { chromium, type Page, type Browser } from 'playwright';
 const API_BASE = process.env.API_BASE_URL || 'http://localhost:5000/api/v1/';
 const APP_BASE = process.env.APP_BASE_URL || 'http://localhost:4200';
 const SEED_PASSWORD = process.env.SEED_USER_PASSWORD || 'Test1234!';
-const ADMIN_EMAIL = 'admin@qbengineer.local';
+const ADMIN_EMAIL = 'admin@forge.local';
 const FIX_MODE = process.argv.includes('--fix');
 const MAX_ITERATIONS = 3;
 
@@ -83,7 +83,7 @@ interface IterationResult {
 
 // ── Vision Model Providers ──
 
-const VERIFICATION_PROMPT = `You are verifying training documentation against a live UI screenshot for a manufacturing ERP called QB Engineer.
+const VERIFICATION_PROMPT = `You are verifying training documentation against a live UI screenshot for a manufacturing ERP called Forge.
 
 Compare the training content against what you see in the screenshot. Report discrepancies:
 
@@ -274,7 +274,7 @@ async function captureRoute(page: Page, route: string, outputPath: string): Prom
 function applyFixes(discrepancies: Discrepancy[], moduleSlug: string): number {
   // Map slug to seed file
   const featureMap: Record<string, string> = {};
-  const seedDir = path.resolve(__dirname, '../../..', 'qb-engineer-server/qb-engineer.api/Data/TrainingContent');
+  const seedDir = path.resolve(__dirname, '../../..', 'forge-api/forge.api/Data/TrainingContent');
 
   if (!fs.existsSync(seedDir)) {
     console.warn(`  Seed directory not found: ${seedDir}`);

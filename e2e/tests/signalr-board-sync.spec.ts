@@ -19,8 +19,8 @@ test.describe('SignalR Board Sync', () => {
     const pageB = await contextB.newPage();
 
     // ── 2. Log in both users ────────────────────────────────────────
-    await loginViaApi(pageA, 'admin@qbengineer.local', SEED_PASSWORD);
-    await loginViaApi(pageB, 'akim@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(pageA, 'admin@forge.local', SEED_PASSWORD);
+    await loginViaApi(pageB, 'akim@forge.local', SEED_PASSWORD);
 
     // ── 3. Both navigate to the kanban board ────────────────────────
     await pageA.goto('/kanban');
@@ -30,7 +30,7 @@ test.describe('SignalR Board Sync', () => {
     await pageB.waitForSelector('.board', { timeout: 10_000 });
 
     // ── 4. Resolve dynamic IDs from the API ─────────────────────────
-    const adminToken = await getAuthToken('admin@qbengineer.local', SEED_PASSWORD);
+    const adminToken = await getAuthToken('admin@forge.local', SEED_PASSWORD);
     const apiContext = await request.newContext({
       baseURL: API_BASE,
       extraHTTPHeaders: { Authorization: `Bearer ${adminToken}` },

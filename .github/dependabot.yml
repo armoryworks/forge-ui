@@ -1,4 +1,4 @@
-# Dependabot config for qb-engineer-ui
+# Dependabot config for forge-ui
 #
 # Weekly updates against develop. Grouped by ecosystem to reduce PR noise.
 # Major Angular updates are kept separate (they typically need manual review).

@@ -77,7 +77,7 @@ process.on('SIGTERM', async () => {
 // ── Main ────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  console.log('Starting QB Engineer Stress Test...');
+  console.log('Starting Forge Stress Test...');
   console.log(`Duration: ${Math.round(STRESS_DURATION_MS / 60_000)} minutes`);
   console.log('Press Ctrl+C to stop early.\n');
 

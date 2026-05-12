@@ -8,7 +8,7 @@ test('screenshot expense resubmit dialog with revision feedback', async ({ brows
   // 1. Admin: find a pending expense + request revision with feedback notes
   const adminApi = await request.newContext({ baseURL: API_BASE });
   const adminLogin = await adminApi.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   if (!adminLogin.ok()) throw new Error(`admin login failed: ${adminLogin.status()}`);
   const adminData = await adminLogin.json();
@@ -45,8 +45,8 @@ test('screenshot expense resubmit dialog with revision feedback', async ({ brows
   const page = await context.newPage();
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(({ token, user }) => {
-    localStorage.setItem('qbe-token', token);
-    localStorage.setItem('qbe-user', JSON.stringify(user));
+    localStorage.setItem('forge-token', token);
+    localStorage.setItem('forge-user', JSON.stringify(user));
     localStorage.setItem('language', 'en');
   }, { token: subData.token, user: subData.user });
 

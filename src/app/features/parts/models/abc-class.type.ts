@@ -1,6 +1,6 @@
 /**
  * Tier 0 — Cycle-counting frequency tier and stock-movement KPI bucket.
- * Mirrors the server enum <c>QBEngineer.Core.Enums.AbcClass</c>.
+ * Mirrors the server enum <c>Forge.Core.Enums.AbcClass</c>.
  */
 export type AbcClass = 'A' | 'B' | 'C';
 

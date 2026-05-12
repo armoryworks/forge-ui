@@ -1,7 +1,7 @@
 {
-  "name": "QB Engineer",
-  "short_name": "QB Eng",
-  "description": "Manufacturing operations platform",
+  "name": "Armory Works Forge",
+  "short_name": "Forge",
+  "description": "Armory Works Forge — manufacturing operations platform",
   "start_url": "/m/",
   "display": "standalone",
   "background_color": "#0f172a",

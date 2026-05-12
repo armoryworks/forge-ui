@@ -14,7 +14,7 @@ export interface KioskSession {
   isForeground: boolean;
 }
 
-const DB_NAME = 'qb-engineer-kiosk-sessions';
+const DB_NAME = 'forge-kiosk-sessions';
 const DB_VERSION = 1;
 const STORE_NAME = 'sessions';
 const CHECK_INTERVAL_MS = 30_000;

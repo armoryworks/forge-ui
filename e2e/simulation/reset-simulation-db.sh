@@ -7,18 +7,18 @@
 # the database entirely and let the API re-seed on startup.
 #
 # Usage:
-#   cd qb-engineer-ui/e2e/simulation
+#   cd forge-ui/e2e/simulation
 #   bash reset-simulation-db.sh
 #
 # What it does:
 #   1. Stops the API container (so nothing writes during reset)
-#   2. Drops and recreates the qb_engineer database
+#   2. Drops and recreates the forge database
 #   3. Restarts the API container (which auto-runs migrations + seeds)
 #   4. Waits for the API to become healthy
 #
 # Prerequisites:
 #   - Docker Compose stack running (at least db container)
-#   - Run from anywhere inside the qb-engineer-wrapper repo
+#   - Run from anywhere inside the forge-wrapper repo
 
 set -euo pipefail
 
@@ -32,9 +32,9 @@ fi
 
 cd "$REPO_ROOT"
 
-DB_CONTAINER="${DB_CONTAINER:-qb-engineer-db}"
-API_CONTAINER="${API_CONTAINER:-qb-engineer-api}"
-DB_NAME="${POSTGRES_DB:-qb_engineer}"
+DB_CONTAINER="${DB_CONTAINER:-forge}"
+API_CONTAINER="${API_CONTAINER:-forge-api}"
+DB_NAME="${POSTGRES_DB:-forge}"
 DB_USER="${POSTGRES_USER:-postgres}"
 
 echo "=== Simulation DB Reset ==="

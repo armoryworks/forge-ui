@@ -30,7 +30,7 @@ test.describe.serial('02a Onboarding', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
     await navigateTo(page, '/');
     await page.waitForLoadState('networkidle');
   });
@@ -49,7 +49,7 @@ test.describe.serial('02a Onboarding', () => {
 
     await fillInput(page, 'First Name', 'Carlos');
     await fillInput(page, 'Last Name', 'Rivera');
-    await fillInput(page, 'Email', 'crivera@qbengineer.local');
+    await fillInput(page, 'Email', 'crivera@forge.local');
     await fillInput(page, 'Password', 'NewHire2026!');
     await fillInput(page, 'Initials', 'CR');
     await selectOption(page, 'Role', 'Engineer');
@@ -76,14 +76,14 @@ test.describe.serial('02a Onboarding', () => {
     await checkpoint(page, 'COMPLETE EMPLOYEE REGISTRATION', [
       'A new employee account has been created:',
       '',
-      '  Email:    crivera@qbengineer.local',
+      '  Email:    crivera@forge.local',
       '  Password: NewHire2026!',
       '  Role:     Engineer',
       '',
       'YOUR TASKS:',
       '  1. Open a new browser tab (or incognito window)',
       '  2. Go to http://localhost:4200/login',
-      '  3. Log in as crivera@qbengineer.local / NewHire2026!',
+      '  3. Log in as crivera@forge.local / NewHire2026!',
       '  4. Verify the dashboard loads correctly',
       '  5. Check that the sidebar shows Engineer-appropriate items',
       '  6. (Optional) Navigate to /time-tracking — verify empty state',
@@ -98,7 +98,7 @@ test.describe.serial('02a Onboarding', () => {
     phase('Verifying new employee can log in');
 
     // Log in as the new user in this browser context
-    await loginViaApi(page, 'crivera@qbengineer.local', 'NewHire2026!');
+    await loginViaApi(page, 'crivera@forge.local', 'NewHire2026!');
     await navigateTo(page, '/dashboard');
     await brief(page, 2000);
 
@@ -108,7 +108,7 @@ test.describe.serial('02a Onboarding', () => {
     step('✓ New employee dashboard loads');
 
     // Switch back to admin
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
     step('✓ Switched back to admin session');
   });
 
@@ -117,7 +117,7 @@ test.describe.serial('02a Onboarding', () => {
       'The new employee needs a PIN for kiosk/shop floor auth.',
       '',
       'YOUR TASKS:',
-      '  1. In a separate tab, log in as crivera@qbengineer.local',
+      '  1. In a separate tab, log in as crivera@forge.local',
       '  2. Navigate to profile/settings (if available)',
       '  3. Set a kiosk PIN (e.g., 1234)',
       '  4. Alternatively: admin may set PIN from /admin/users',

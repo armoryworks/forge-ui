@@ -80,12 +80,12 @@ export async function runWeekApi(ctx: WeekContext): Promise<WeekResult> {
   const inc = (ok: boolean) => { attempted++; if (ok) succeeded++; };
 
   // Tokens
-  const admin    = ctx.tokens['admin@qbengineer.local'];
-  const pm       = ctx.tokens['pmorris@qbengineer.local'];
-  const engineer = ctx.tokens['akim@qbengineer.local'];
-  const manager  = ctx.tokens['lwilson@qbengineer.local'];
-  const office   = ctx.tokens['cthompson@qbengineer.local'];
-  const worker   = ctx.tokens['bkelly@qbengineer.local'];
+  const admin    = ctx.tokens['admin@forge.local'];
+  const pm       = ctx.tokens['pmorris@forge.local'];
+  const engineer = ctx.tokens['akim@forge.local'];
+  const manager  = ctx.tokens['lwilson@forge.local'];
+  const office   = ctx.tokens['cthompson@forge.local'];
+  const worker   = ctx.tokens['bkelly@forge.local'];
   const w = ctx.weekIndex;
 
   // ── 1. Create leads ────────────────────────────────────────────────────────

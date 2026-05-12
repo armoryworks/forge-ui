@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "qb-engineer-ui": {
+    "forge-ui": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -113,7 +113,7 @@
                   "with": "src/environments/environment.demo.ts"
                 }
               ],
-              "outputPath": "dist/qb-engineer-ui-demo",
+              "outputPath": "dist/forge-ui-demo",
               "budgets": [
                 {
                   "type": "initial",
@@ -142,18 +142,18 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "allowedHosts": ["qb-engineer-ui", "localhost"],
+            "allowedHosts": ["forge-ui", "localhost"],
             "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {
-              "buildTarget": "qb-engineer-ui:build:production"
+              "buildTarget": "forge-ui:build:production"
             },
             "development": {
-              "buildTarget": "qb-engineer-ui:build:development"
+              "buildTarget": "forge-ui:build:development"
             },
             "demo": {
-              "buildTarget": "qb-engineer-ui:build:demo"
+              "buildTarget": "forge-ui:build:demo"
             }
           },
           "defaultConfiguration": "development"

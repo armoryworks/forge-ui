@@ -14,7 +14,7 @@ import { environment } from '../../../environments/environment';
  *   • TwilioOutboundService — uses Twilio's Programmable Voice API for
  *     server-orchestrated outbound (power-dialer, voicemail-drop,
  *     recording). Lock-in to Twilio's API.
- *   • AsteriskOutboundService — self-hosted SIP via the qb-engineer-voice
+ *   • AsteriskOutboundService — self-hosted SIP via the forge-voice
  *     side repo. Asterisk handles call control; user brings their own
  *     SIP trunk (VoIP.ms, Telnyx, etc.) — commodity, swappable.
  *
@@ -102,7 +102,7 @@ export class TelLinkOutboundService implements IOutboundCallService {
 
 /**
  * Phase 1r / Batch 8 — Asterisk-backed implementation. Talks to the
- * companion qb-engineer-voice side repo over HTTP. Self-hosted SIP
+ * companion forge-voice side repo over HTTP. Self-hosted SIP
  * call control with the deployer's choice of SIP trunk (VoIP.ms /
  * Telnyx / Bandwidth / etc.) — vendor-neutral. Not active by default;
  * registered alongside TelLinkOutboundService so admin can flip
@@ -118,7 +118,7 @@ export class AsteriskOutboundService implements IOutboundCallService {
   private readonly http = inject(HttpClient);
 
   /**
-   * Base URL of the qb-engineer-voice container. Defaults to the
+   * Base URL of the forge-voice container. Defaults to the
    * docker-compose service name; deployments override via the
    * `voiceServiceUrl` field on environment.ts (optional, undefined
    * here means the impl is not configured and isAvailable=false).

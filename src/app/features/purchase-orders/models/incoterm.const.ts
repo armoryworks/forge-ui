@@ -3,7 +3,7 @@ import { SelectOption } from '../../../shared/components/select/select.component
 /**
  * Incoterms 2020 — international commerce terms defining who pays freight,
  * who insures, and when title transfers between buyer and seller. Mirrors
- * the server-side `QBEngineer.Core.Enums.Incoterm` values exactly.
+ * the server-side `Forge.Core.Enums.Incoterm` values exactly.
  *
  * Stored on `VendorPart.Incoterm` (default for that part from that vendor)
  * and overridable per `PurchaseOrder.Incoterm`. Cost-calc behavior keys off

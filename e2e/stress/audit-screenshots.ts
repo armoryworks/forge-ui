@@ -315,7 +315,7 @@ async function main(): Promise<void> {
   let loginData: { token: string; user: unknown };
   try {
     const response = await apiContext.post('auth/login', {
-      data: { email: 'admin@qbengineer.local', password: PASSWORD },
+      data: { email: 'admin@forge.local', password: PASSWORD },
     });
     if (!response.ok()) {
       console.error(`Login failed: ${response.status()}`);
@@ -338,8 +338,8 @@ async function main(): Promise<void> {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
       localStorage.setItem('language', 'en');
     },
     { token: loginData.token, user: loginData.user },
@@ -356,7 +356,7 @@ async function main(): Promise<void> {
   // ── Pass 1: Light theme ──
   console.log('── LIGHT THEME ──');
   await page.evaluate(() => {
-    localStorage.setItem('qbe-theme', 'light');
+    localStorage.setItem('forge-theme', 'light');
     document.documentElement.setAttribute('data-theme', 'light');
   });
 
@@ -383,10 +383,10 @@ async function main(): Promise<void> {
 
   // ── Pass 2: Dark theme ──
   console.log('\n── DARK THEME ──');
-  // The app reads 'qbe-theme' from localStorage on bootstrap (ThemeService constructor).
+  // The app reads 'forge-theme' from localStorage on bootstrap (ThemeService constructor).
   // Set it before navigating so the Angular app initializes in dark mode.
   await page.evaluate(() => {
-    localStorage.setItem('qbe-theme', 'dark');
+    localStorage.setItem('forge-theme', 'dark');
     document.documentElement.setAttribute('data-theme', 'dark');
   });
   // Full reload so Angular bootstraps with dark theme from localStorage
@@ -397,7 +397,7 @@ async function main(): Promise<void> {
   if (appliedTheme !== 'dark') {
     console.warn(`  ⚠ Dark theme not applied (got "${appliedTheme}"), forcing...`);
     await page.evaluate(() => {
-      localStorage.setItem('qbe-theme', 'dark');
+      localStorage.setItem('forge-theme', 'dark');
       document.documentElement.setAttribute('data-theme', 'dark');
     });
   }

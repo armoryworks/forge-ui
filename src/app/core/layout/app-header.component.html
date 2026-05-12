@@ -8,7 +8,13 @@
     @if (logoUrl()) {
       <img class="app-header__brand-logo" [src]="logoUrl()" alt="Logo" />
     } @else {
-      <div class="app-header__logo">QB<span>:</span>Eng</div>
+      <div class="app-header__brand">
+        <img class="app-header__brand-mark" src="armory-works-logo.svg" alt="Armory Works" />
+        <div class="app-header__brand-text">
+          <div class="app-header__brand-wordmark">Forge</div>
+          <div class="app-header__brand-tagline">by Armory Works</div>
+        </div>
+      </div>
     }
   </a>
   <div class="header-sep hide-tablet"></div>
@@ -220,9 +226,13 @@
   (closed)="showTrainingPanel.set(false)" />
 
 @if (showAboutDialog()) {
-  <app-dialog title="About QB Engineer" width="420px" (closed)="closeAbout()">
+  <app-dialog title="About Armory Works Forge" width="420px" (closed)="closeAbout()">
     <div class="about-dialog">
-      <div class="about-dialog__logo">QB<span>:</span>Eng</div>
+      <div class="about-dialog__brand">
+        <img class="about-dialog__mark" src="armory-works-logo.svg" alt="Armory Works" />
+        <div class="about-dialog__wordmark">Forge</div>
+        <div class="about-dialog__by">by Armory Works</div>
+      </div>
       <div class="about-dialog__tagline">Manufacturing Operations Platform</div>
 
       <div class="about-dialog__meta">

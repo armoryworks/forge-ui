@@ -6,7 +6,7 @@ import { DrainResult, OfflineQueueEntry } from '../models/offline-queue-entry.mo
 import { SyncConflict } from '../models/sync-conflict.model';
 import { SyncResult } from '../models/sync-result.model';
 
-const DB_NAME = 'qb-engineer-offline-queue';
+const DB_NAME = 'forge-offline-queue';
 const DB_VERSION = 1;
 const STORE_NAME = 'queue';
 

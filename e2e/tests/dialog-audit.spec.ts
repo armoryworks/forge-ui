@@ -8,13 +8,13 @@ async function setup(browser: any) {
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 } });
   const page = await ctx.newPage();
   const api = await request.newContext({ baseURL: API_BASE });
-  const r = await api.post('auth/login', { data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD } });
+  const r = await api.post('auth/login', { data: { email: 'admin@forge.local', password: SEED_PASSWORD } });
   const d = await r.json();
   await api.dispose();
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(({ token, user }) => {
-    localStorage.setItem('qbe-token', token);
-    localStorage.setItem('qbe-user', JSON.stringify(user));
+    localStorage.setItem('forge-token', token);
+    localStorage.setItem('forge-user', JSON.stringify(user));
   }, { token: d.token, user: d.user });
   return { page, ctx };
 }

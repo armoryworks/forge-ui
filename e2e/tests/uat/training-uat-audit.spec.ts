@@ -103,10 +103,10 @@ test.describe('UAT Training Audit', () => {
   test('capture all pages with training context', async ({ page }, testInfo) => {
     testInfo.setTimeout(300_000); // 5 minutes for 30 pages
     // Auth
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
 
     // Get auth token for API calls
-    const token = await getAuthToken('admin@qbengineer.local', SEED_PASSWORD);
+    const token = await getAuthToken('admin@forge.local', SEED_PASSWORD);
 
     // Fetch all training modules via API
     const apiContext = await request.newContext({

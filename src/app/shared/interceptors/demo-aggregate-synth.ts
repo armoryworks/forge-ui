@@ -107,7 +107,7 @@ export async function synthesizeAggregate(
   if (head === 'admin') {
     if (method !== 'GET') return {};
     if (sub === 'company-profile') return companyProfile();
-    if (sub === 'brand') return { name: 'QB Engineer Demo', logoUrl: null, primaryColor: '#0d9488' };
+    if (sub === 'brand') return { name: 'Forge Demo', logoUrl: null, primaryColor: '#0d9488' };
     if (sub === 'system-settings') {
       const settings = await store.load('system-setting');
       return settings;
@@ -294,7 +294,7 @@ function demoProfile(): unknown {
     id: 1,
     firstName: 'Demo',
     lastName: 'Viewer',
-    email: 'demo@qb-engineer.com',
+    email: 'demo@forge.com',
     phone: null,
     avatarColor: '#0d9488',
     initials: 'DV',
@@ -304,11 +304,11 @@ function demoProfile(): unknown {
 
 function companyProfile(): unknown {
   return {
-    name: 'QB Engineer Demo Co.',
+    name: 'Forge Demo Co.',
     phone: '(555) 555-0100',
-    email: 'contact@qb-engineer.example',
+    email: 'contact@forge.example',
     ein: null,
-    website: 'https://qb-engineer.com',
+    website: 'https://forge.com',
   };
 }
 

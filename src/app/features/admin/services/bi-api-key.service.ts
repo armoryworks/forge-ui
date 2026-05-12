@@ -11,7 +11,7 @@ import {
 
 /**
  * Phase 3 / WU-04 retrofit — admin-only BI API key management. Backed by
- * `qb-engineer.api/Controllers/BiApiKeysController.cs` (gated on
+ * `forge.api/Controllers/BiApiKeysController.cs` (gated on
  * `[Authorize(Roles = "Admin")]` via the default JWT scheme).
  */
 @Injectable({ providedIn: 'root' })

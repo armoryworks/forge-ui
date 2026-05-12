@@ -8,7 +8,7 @@ test.describe('Account Profile', () => {
     const page = await context.newPage();
 
     // Login
-    const loginData = await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    const loginData = await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
 
     // Navigate to profile page
     await page.goto('/account/profile', { waitUntil: 'networkidle' });

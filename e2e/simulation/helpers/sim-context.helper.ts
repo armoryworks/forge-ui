@@ -16,12 +16,12 @@ export type SimRole = 'admin' | 'engineer' | 'pm' | 'manager' | 'office' | 'work
 const SEED_PASSWORD = process.env['SEED_USER_PASSWORD'] ?? 'Test1234!';
 
 const ROLE_CREDENTIALS: Record<SimRole, { email: string; password: string }> = {
-  admin:    { email: 'admin@qbengineer.local',    password: SEED_PASSWORD },
-  engineer: { email: 'akim@qbengineer.local',     password: SEED_PASSWORD },
-  pm:       { email: 'pmorris@qbengineer.local',  password: SEED_PASSWORD },
-  manager:  { email: 'lwilson@qbengineer.local',  password: SEED_PASSWORD },
-  office:   { email: 'cthompson@qbengineer.local', password: SEED_PASSWORD },
-  worker:   { email: 'bkelly@qbengineer.local',   password: SEED_PASSWORD },
+  admin:    { email: 'admin@forge.local',    password: SEED_PASSWORD },
+  engineer: { email: 'akim@forge.local',     password: SEED_PASSWORD },
+  pm:       { email: 'pmorris@forge.local',  password: SEED_PASSWORD },
+  manager:  { email: 'lwilson@forge.local',  password: SEED_PASSWORD },
+  office:   { email: 'cthompson@forge.local', password: SEED_PASSWORD },
+  worker:   { email: 'bkelly@forge.local',   password: SEED_PASSWORD },
 };
 
 export interface SimContext {
@@ -56,7 +56,7 @@ export async function createSimContext(
   await page.evaluate(async () => {
     try {
       await new Promise<void>((resolve) => {
-        const req = indexedDB.deleteDatabase('qb-engineer-drafts');
+        const req = indexedDB.deleteDatabase('forge-drafts');
         req.onsuccess = () => resolve();
         req.onerror = () => resolve();
         req.onblocked = () => resolve();
@@ -175,12 +175,12 @@ export async function ensureUserOnboarded(page: Page, token: string): Promise<bo
   // so our generated data matches the logged-in account.
   const authUser = await page.evaluate<{ email: string; firstName: string; lastName: string } | null>(
     () => {
-      const raw = localStorage.getItem('qbe-user');
+      const raw = localStorage.getItem('forge-user');
       return raw ? JSON.parse(raw) : null;
     },
   ).catch(() => null);
 
-  const email = authUser?.email ?? 'user@qbengineer.local';
+  const email = authUser?.email ?? 'user@forge.local';
   const firstNameFromAuth = authUser?.firstName ?? 'Test';
   const lastNameFromAuth = authUser?.lastName ?? 'User';
   const seed = seedFromEmail(email);
@@ -490,8 +490,8 @@ export async function bypassOnboardingViaUI(page: Page, token: string, email: st
     logProgress(`  [bypassOnboardingViaUI] banner never became clickable for ${email} across ${routes.join(', ')}`);
     try {
       const diagnostic = await page.evaluate(() => {
-        const user = JSON.parse(localStorage.getItem('qbe-user') ?? 'null');
-        const token = localStorage.getItem('qbe-token');
+        const user = JSON.parse(localStorage.getItem('forge-user') ?? 'null');
+        const token = localStorage.getItem('forge-token');
         const bannerEl = document.querySelector('.onboarding-banner');
         const skipBtnEl = document.querySelector('[data-testid="onboarding-skip-btn"]');
         return {

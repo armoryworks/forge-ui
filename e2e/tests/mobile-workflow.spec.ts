@@ -8,7 +8,7 @@ test.describe('Mobile Workflow', () => {
     const page = await context.newPage();
 
     // Login
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
 
     // Navigate to mobile home
     await page.goto('/m/', { waitUntil: 'networkidle' });

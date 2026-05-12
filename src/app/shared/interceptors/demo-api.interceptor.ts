@@ -198,7 +198,7 @@ function loginResponse(): unknown {
 function demoUser(): unknown {
   return {
     id: 1,
-    email: 'demo@qb-engineer.com',
+    email: 'demo@forge.com',
     firstName: 'Demo',
     lastName: 'Viewer',
     initials: 'DV',

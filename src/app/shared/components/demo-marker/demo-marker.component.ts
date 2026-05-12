@@ -20,7 +20,7 @@ import { environment } from '../../../../environments/environment';
   template: `
     @if (show) {
       <div class="demo-chip" aria-hidden="true">DEMO</div>
-      <div class="demo-watermark" aria-hidden="true" data-demo-watermark="qb-engineer-demo"></div>
+      <div class="demo-watermark" aria-hidden="true" data-demo-watermark="forge-demo"></div>
     }
   `,
   styleUrl: './demo-marker.component.scss',

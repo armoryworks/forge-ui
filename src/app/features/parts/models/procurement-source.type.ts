@@ -1,6 +1,6 @@
 /**
  * Pillar 1 — How a part is sourced. Mirrors the server enum
- * <c>QBEngineer.Core.Enums.ProcurementSource</c>.
+ * <c>Forge.Core.Enums.ProcurementSource</c>.
  */
 export type ProcurementSource = 'Make' | 'Buy' | 'Subcontract' | 'Phantom';
 

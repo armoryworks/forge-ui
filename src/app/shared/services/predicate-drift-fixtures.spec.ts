@@ -7,7 +7,7 @@ import { PredicateEvaluator } from './predicate-evaluator';
  *
  * Loads the shared fixture file and asserts the TS evaluator produces the
  * expected boolean for every case. The C# side runs the same assertions
- * (`PredicateDriftFixtureTests` in qb-engineer.tests/Workflows). If both
+ * (`PredicateDriftFixtureTests` in forge.tests/Workflows). If both
  * specs pass, the two evaluators are in lock-step on the documented inputs
  * — no behavioral drift between tiers.
  *

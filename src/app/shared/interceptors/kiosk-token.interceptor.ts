@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 
 const KIOSK_HEADER = 'X-Kiosk-Device-Token';
-const KIOSK_TOKEN_KEY = 'qbe-kiosk-device-token';
+const KIOSK_TOKEN_KEY = 'forge-kiosk-device-token';
 
 // Endpoints the kiosk may call outside of /display/shop-floor that accept the
 // device token as a fallback credential (via [KioskTerminalAuth] on the server).

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QB Engineer — Under Maintenance</title>
+<title>Forge — Under Maintenance</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap');
 
@@ -311,8 +311,8 @@
   (function() {
     const path = window.location.pathname + window.location.search + window.location.hash;
     // Don't overwrite if we already saved a path (page reloads shouldn't reset it)
-    if (!sessionStorage.getItem('qbe-maintenance-return') && path !== '/' && path !== '/maintenance.html') {
-      sessionStorage.setItem('qbe-maintenance-return', path);
+    if (!sessionStorage.getItem('forge-maintenance-return') && path !== '/' && path !== '/maintenance.html') {
+      sessionStorage.setItem('forge-maintenance-return', path);
     }
   })();
 
@@ -336,8 +336,8 @@
       const ct = res.headers.get('content-type') || '';
       if (!ct.includes('application/json')) { countdown = checkInterval; return; }
       // Site is back — redirect to where the user was
-      const returnPath = sessionStorage.getItem('qbe-maintenance-return') || '/';
-      sessionStorage.removeItem('qbe-maintenance-return');
+      const returnPath = sessionStorage.getItem('forge-maintenance-return') || '/';
+      sessionStorage.removeItem('forge-maintenance-return');
       window.location.href = returnPath;
     } catch {
       // Still down — reset countdown for next check

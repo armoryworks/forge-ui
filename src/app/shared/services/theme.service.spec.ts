@@ -42,8 +42,8 @@ describe('ThemeService', () => {
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
     });
 
-    it('should default appName to QB Engineer', () => {
-      expect(service.appName()).toBe('QB Engineer');
+    it('should default appName to Forge', () => {
+      expect(service.appName()).toBe('Forge');
     });
 
     it('should default logoUrl to null', () => {
@@ -57,7 +57,7 @@ describe('ThemeService', () => {
 
       expect(service.theme()).toBe('dark');
       expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-      expect(localStorage.getItem('qbe-theme')).toBe('dark');
+      expect(localStorage.getItem('forge-theme')).toBe('dark');
     });
 
     it('should switch from dark back to light', () => {
@@ -66,7 +66,7 @@ describe('ThemeService', () => {
 
       expect(service.theme()).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-      expect(localStorage.getItem('qbe-theme')).toBe('light');
+      expect(localStorage.getItem('forge-theme')).toBe('light');
     });
   });
 
@@ -86,7 +86,7 @@ describe('ThemeService', () => {
     it('should persist brand colors to localStorage', () => {
       service.setBrandColors('#ff0000', '#00ff00');
 
-      const stored = JSON.parse(localStorage.getItem('qbe-brand-colors')!);
+      const stored = JSON.parse(localStorage.getItem('forge-brand-colors')!);
       expect(stored.primary).toBe('#ff0000');
       expect(stored.accent).toBe('#00ff00');
     });
@@ -137,7 +137,7 @@ describe('ThemeService', () => {
         hasLogo: false,
       });
 
-      expect(service.appName()).toBe('QB Engineer');
+      expect(service.appName()).toBe('Forge');
     });
   });
 });

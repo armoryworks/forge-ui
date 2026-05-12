@@ -92,8 +92,8 @@ export class OauthCallbackComponent implements OnInit {
     const code = this.route.snapshot.queryParamMap.get('code');
     const state = this.route.snapshot.queryParamMap.get('state');
     const providerError = this.route.snapshot.queryParamMap.get('error');
-    const provider = sessionStorage.getItem('qbe-oauth-imap-provider') as 'google' | 'microsoft' | null;
-    sessionStorage.removeItem('qbe-oauth-imap-provider');
+    const provider = sessionStorage.getItem('forge-oauth-imap-provider') as 'google' | 'microsoft' | null;
+    sessionStorage.removeItem('forge-oauth-imap-provider');
 
     if (providerError) {
       this.fail(this.translate.instant('account.communications.oauth.providerDeclined', {

@@ -1,4 +1,4 @@
-# CodeQL static analysis for qb-engineer-ui
+# CodeQL static analysis for forge-ui
 #
 # Free for public repos. Scans for known vulnerability patterns in JS/TS.
 # Findings appear in the Security tab.

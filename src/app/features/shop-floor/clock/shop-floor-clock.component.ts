@@ -118,7 +118,7 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
   }
 
   private checkTerminalConfig(): void {
-    const deviceToken = localStorage.getItem('qbe-kiosk-device-token');
+    const deviceToken = localStorage.getItem('forge-kiosk-device-token');
     if (!deviceToken) {
       this.kioskPhase.set('setup');
       return;
@@ -132,8 +132,8 @@ export class ShopFloorClockComponent implements OnInit, OnDestroy {
       },
       error: () => {
         // Terminal not found or deactivated — re-setup
-        localStorage.removeItem('qbe-kiosk-device-token');
-        localStorage.removeItem('qbe-kiosk-terminal');
+        localStorage.removeItem('forge-kiosk-device-token');
+        localStorage.removeItem('forge-kiosk-terminal');
         this.kioskPhase.set('setup');
       },
     });

@@ -16,7 +16,7 @@ import { getAuthToken, SEED_PASSWORD } from '../../helpers/auth.helper';
 const API_BASE = 'http://localhost:5000';
 const CONTROLLERS_DIR = path.resolve(
   process.cwd(),
-  '../qb-engineer-server/qb-engineer.api/Controllers',
+  '../forge-api/forge.api/Controllers',
 );
 
 interface ParsedEndpoint {
@@ -152,7 +152,7 @@ test.describe('API Smoke Test', () => {
 
   test.beforeAll(async () => {
     // Authenticate
-    token = await getAuthToken('admin@qbengineer.local', SEED_PASSWORD);
+    token = await getAuthToken('admin@forge.local', SEED_PASSWORD);
 
     // Discover endpoints
     const discovered = discoverEndpoints();

@@ -14,7 +14,7 @@ test('vendor + tier mutations write activity rows on Part AND Vendor', async () 
 
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const auth = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   expect(auth.ok()).toBeTruthy();
   const { token } = await auth.json();

@@ -30,7 +30,7 @@ import { checkpoint, step, phase } from '../helpers/interactive.helper';
  *
  * Before running:
  *   1. Ensure MOCK_INTEGRATIONS=false in docker-compose env
- *      (or restart API with: MOCK_INTEGRATIONS=false docker compose up -d --build qb-engineer-api)
+ *      (or restart API with: MOCK_INTEGRATIONS=false docker compose up -d --build forge-api)
  *   2. Have your Intuit developer credentials ready
  *   3. Have your sandbox company URL open for verification
  *
@@ -50,7 +50,7 @@ test.describe.serial('02e QB Sandbox', () => {
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage();
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
     await navigateTo(page, '/');
     await page.waitForLoadState('networkidle');
   });
@@ -71,7 +71,7 @@ test.describe.serial('02e QB Sandbox', () => {
     await checkpoint(page, 'CONNECT QUICKBOOKS SANDBOX', [
       'PREREQUISITES:',
       '  • API must be running with MOCK_INTEGRATIONS=false',
-      '    Run: MOCK_INTEGRATIONS=false docker compose up -d --build qb-engineer-api',
+      '    Run: MOCK_INTEGRATIONS=false docker compose up -d --build forge-api',
       '  • Your QB app credentials must be in appsettings.Secrets.json:',
       '    QuickBooks.ClientId, QuickBooks.ClientSecret',
       '  • FrontendBaseUrl must match (http://localhost:4200)',
@@ -133,7 +133,7 @@ test.describe.serial('02e QB Sandbox', () => {
       '',
       '  If the customer hasn\'t appeared yet:',
       '  • The sync queue runs every 2 minutes (Hangfire)',
-      '  • Check API logs: docker compose logs -f qb-engineer-api | grep -i sync',
+      '  • Check API logs: docker compose logs -f forge-api | grep -i sync',
       '  • Wait and refresh QB',
       '',
       'Click RESUME when verified.',

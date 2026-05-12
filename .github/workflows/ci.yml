@@ -1,4 +1,4 @@
-# PR + push CI for qb-engineer-ui
+# PR + push CI for forge-ui
 #
 # Runs on: every PR into develop or main, every push to develop or main.
 # Steps: install, lint, build, unit test (Vitest).

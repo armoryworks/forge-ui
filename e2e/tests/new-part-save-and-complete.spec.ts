@@ -15,7 +15,7 @@ const BASE_URL = 'http://localhost:4200';
 
 test.describe('New Part — full save-and-complete (axis fork)', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('Buy + Raw express: name + cost completes and lists', async ({ page }) => {

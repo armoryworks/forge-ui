@@ -1,6 +1,6 @@
 {
   "$schema": "Workflow Pattern Phase 4 — predicate evaluator drift fixtures.",
-  "$description": "Each case is a (predicate, entity, expected) tuple. Both the TS evaluator (this folder's spec) and the C# evaluator (qb-engineer.tests/Workflows/PredicateDriftFixtureTests.cs) load the same JSON and assert their result matches expected. If both pass, the two implementations are in lock-step. Adding a case here REQUIRES both spec runs to verify before committing.",
+  "$description": "Each case is a (predicate, entity, expected) tuple. Both the TS evaluator (this folder's spec) and the C# evaluator (forge.tests/Workflows/PredicateDriftFixtureTests.cs) load the same JSON and assert their result matches expected. If both pass, the two implementations are in lock-step. Adding a case here REQUIRES both spec runs to verify before committing.",
   "cases": [
     {
       "name": "fieldPresent_string_true",

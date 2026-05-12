@@ -18,7 +18,7 @@ test('parts list surfaces in-progress workflow drafts, no banner on workflow pag
 
   const apiCtx = await request.newContext({ baseURL: API_BASE });
   const auth = await apiCtx.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   expect(auth.ok()).toBeTruthy();
   const { token, user } = await auth.json();
@@ -64,8 +64,8 @@ test('parts list surfaces in-progress workflow drafts, no banner on workflow pag
   const page = await ctx.newPage();
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(({ token, user }) => {
-    localStorage.setItem('qbe-token', token);
-    localStorage.setItem('qbe-user', JSON.stringify(user));
+    localStorage.setItem('forge-token', token);
+    localStorage.setItem('forge-user', JSON.stringify(user));
   }, { token, user });
 
   await page.goto(`${BASE_URL}/parts`, { waitUntil: 'domcontentloaded' });

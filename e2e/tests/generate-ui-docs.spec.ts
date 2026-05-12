@@ -27,7 +27,7 @@ const DOCS_DIR = path.resolve(__dirname, '../../../docs/ui-flows');
 async function loginAdmin(page: Page) {
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const response = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   if (!response.ok()) throw new Error(`Login failed: ${response.status()}`);
   const data = await response.json();
@@ -36,8 +36,8 @@ async function loginAdmin(page: Page) {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
     },
     { token: data.token, user: data.user },
   );
@@ -336,7 +336,7 @@ test('00 - App Shell & Navigation', async ({ browser }) => {
   const sidebarItems = await getSidebarItems(page);
   const headerItems = await extractTexts(page, 'app-header button, .app-header button, header button');
 
-  const doc = `# QB Engineer — App Shell & Navigation
+  const doc = `# Forge — App Shell & Navigation
 
 **Generated:** ${new Date().toISOString().split('T')[0]}
 
@@ -2317,7 +2317,7 @@ test('25 - Admin Panel', async ({ browser }) => {
 ## Purpose
 
 The admin panel provides system configuration, user management, and compliance
-template management. It is the control center for the entire QB Engineer instance.
+template management. It is the control center for the entire Forge instance.
 
 ## Admin Tabs
 
@@ -2739,7 +2739,7 @@ workers get kiosk-friendly login without any technical overhead.
 // ─── Summary Index ────────────────────────────────────────────────────────────
 
 test('00 - Write Index', async () => {
-  const index = `# QB Engineer — UI Flow Documentation
+  const index = `# Forge — UI Flow Documentation
 
 **Generated:** ${new Date().toISOString().split('T')[0]}
 **Purpose:** Training documentation for the AI help system and human onboarding.

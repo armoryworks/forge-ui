@@ -33,12 +33,12 @@ const ROLE_PASSWORDS: Record<SimRole, string> = {
   manager: SEED_PASSWORD, office: SEED_PASSWORD, worker: SEED_PASSWORD,
 };
 const ROLE_EMAILS: Record<SimRole, string> = {
-  admin:    'admin@qbengineer.local',
-  engineer: 'akim@qbengineer.local',
-  pm:       'pmorris@qbengineer.local',
-  manager:  'lwilson@qbengineer.local',
-  office:   'cthompson@qbengineer.local',
-  worker:   'bkelly@qbengineer.local',
+  admin:    'admin@forge.local',
+  engineer: 'akim@forge.local',
+  pm:       'pmorris@forge.local',
+  manager:  'lwilson@forge.local',
+  office:   'cthompson@forge.local',
+  worker:   'bkelly@forge.local',
 };
 
 /**
@@ -174,7 +174,7 @@ function getWeeks(start: Date, end: Date): Array<{ start: Date; end: Date; index
 // ── Main runner ──────────────────────────────────────────────────────────────
 export async function runSimulation(): Promise<SimulationReport> {
   console.log(`\n${'═'.repeat(60)}`);
-  console.log(`QB Engineer Simulation (mode: ${SIM_MODE}, api: ${USE_API})`);
+  console.log(`Forge Simulation (mode: ${SIM_MODE}, api: ${USE_API})`);
   console.log(`Range: ${SIM_START.toISOString().slice(0, 10)} → ${SIM_END.toISOString().slice(0, 10)}`);
   console.log(`${'═'.repeat(60)}\n`);
 
@@ -210,7 +210,7 @@ export async function runSimulation(): Promise<SimulationReport> {
 
   // ── Week filtering by mode ──────────────────────────────────────────────
   let weeks = allWeeks;
-  const adminToken = tokens['admin@qbengineer.local'];
+  const adminToken = tokens['admin@forge.local'];
 
   if (SIM_MODE === 'resume' || (SIM_MODE !== 'gaps' && SIM_MODE !== 'range' && RESUME)) {
     if (adminToken) {
@@ -364,7 +364,7 @@ export async function runSimulation(): Promise<SimulationReport> {
     // Set server clock to start of this week. If 401, heal by re-logging in once
     // (server restart / session store cleared mid-run) and retry.
     try {
-      await setSimulatedClock(week.start, tokens['admin@qbengineer.local']);
+      await setSimulatedClock(week.start, tokens['admin@forge.local']);
     } catch (err) {
       const msg = String(err);
       if (msg.includes('401')) {
@@ -373,7 +373,7 @@ export async function runSimulation(): Promise<SimulationReport> {
           const session = await getAuthSession(ROLE_EMAILS['admin'], ROLE_PASSWORDS['admin']);
           tokens[ROLE_EMAILS['admin']] = session.token;
           sessions['admin'] = session;
-          await setSimulatedClock(week.start, tokens['admin@qbengineer.local']);
+          await setSimulatedClock(week.start, tokens['admin@forge.local']);
           console.log('  ✓ session healed');
         } catch (retryErr) {
           console.error(`  Failed to set clock after heal: ${retryErr} — skipping week`);
@@ -432,7 +432,7 @@ export async function runSimulation(): Promise<SimulationReport> {
   }
 
   // ── Teardown ──────────────────────────────────────────────────────────────
-  try { await resetClock(tokens['admin@qbengineer.local']); } catch { /* ignore */ }
+  try { await resetClock(tokens['admin@forge.local']); } catch { /* ignore */ }
   if (browser) await browser.close();
 
   report.completedAt = new Date().toISOString();

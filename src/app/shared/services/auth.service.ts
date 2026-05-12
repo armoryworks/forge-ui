@@ -94,8 +94,8 @@ export class AuthService {
 
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('qbe-token', response.token);
-          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+          localStorage.setItem('forge-token', response.token);
+          localStorage.setItem('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -103,12 +103,12 @@ export class AuthService {
   /** Complete auth after successful MFA validation. */
   completeMfaLogin(token: string): void {
     this._token.set(token);
-    localStorage.setItem('qbe-token', token);
+    localStorage.setItem('forge-token', token);
     // Fetch user profile from /me endpoint
     this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
       next: (user) => {
         this._user.set(user);
-        localStorage.setItem('qbe-user', JSON.stringify(user));
+        localStorage.setItem('forge-user', JSON.stringify(user));
       },
     });
   }
@@ -124,8 +124,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('qbe-token', response.token);
-          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+          localStorage.setItem('forge-token', response.token);
+          localStorage.setItem('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -141,8 +141,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('qbe-token', response.token);
-          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+          localStorage.setItem('forge-token', response.token);
+          localStorage.setItem('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -158,8 +158,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('qbe-token', response.token);
-          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+          localStorage.setItem('forge-token', response.token);
+          localStorage.setItem('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -175,8 +175,8 @@ export class AuthService {
         tap((response) => {
           this._token.set(response.token);
           this._user.set(response.user);
-          localStorage.setItem('qbe-token', response.token);
-          localStorage.setItem('qbe-user', JSON.stringify(response.user));
+          localStorage.setItem('forge-token', response.token);
+          localStorage.setItem('forge-user', JSON.stringify(response.user));
         }),
       );
   }
@@ -193,17 +193,17 @@ export class AuthService {
 
   handleSsoToken(token: string): void {
     this._token.set(token);
-    localStorage.setItem('qbe-token', token);
+    localStorage.setItem('forge-token', token);
     // Fetch user profile from /me endpoint to populate user signal
     this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
       next: (user) => {
         this._user.set(user);
-        localStorage.setItem('qbe-user', JSON.stringify(user));
+        localStorage.setItem('forge-user', JSON.stringify(user));
       },
       error: () => {
         // SSO token was valid but /me failed — clear stale state
         this._token.set(null);
-        localStorage.removeItem('qbe-token');
+        localStorage.removeItem('forge-token');
       },
     });
   }
@@ -222,8 +222,8 @@ export class AuthService {
       tap((response) => {
         this._token.set(response.token);
         this._user.set(response.user);
-        localStorage.setItem('qbe-token', response.token);
-        localStorage.setItem('qbe-user', JSON.stringify(response.user));
+        localStorage.setItem('forge-token', response.token);
+        localStorage.setItem('forge-user', JSON.stringify(response.user));
       }),
       map((response) => response.token),
       catchError(() => of(null)),
@@ -247,8 +247,8 @@ export class AuthService {
   clearAuth(): void {
     this._token.set(null);
     this._user.set(null);
-    localStorage.removeItem('qbe-token');
-    localStorage.removeItem('qbe-user');
+    localStorage.removeItem('forge-token');
+    localStorage.removeItem('forge-user');
     // Close any open MatDialog (detail dialogs, confirms, etc.) — every
     // auth-loss path funnels through here (interceptor 401 redirect,
     // explicit logout, cross-tab broadcast, SignalR auth failure, kiosk
@@ -264,7 +264,7 @@ export class AuthService {
     if (!current) return;
     const merged = { ...current, ...updated };
     this._user.set(merged);
-    localStorage.setItem('qbe-user', JSON.stringify(merged));
+    localStorage.setItem('forge-user', JSON.stringify(merged));
   }
 
   /** Set by BroadcastService to avoid circular dependency. */
@@ -283,11 +283,11 @@ export class AuthService {
   }
 
   private loadToken(): string | null {
-    return localStorage.getItem('qbe-token');
+    return localStorage.getItem('forge-token');
   }
 
   private loadUser(): AuthUser | null {
-    const raw = localStorage.getItem('qbe-user');
+    const raw = localStorage.getItem('forge-user');
     return raw ? JSON.parse(raw) : null;
   }
 }

@@ -24,7 +24,7 @@ echo "════════════════════════�
 
 # Set RECREATE_DB=true for this restart only
 cd "$COMPOSE_DIR"
-RECREATE_DB=true docker compose up -d --build qb-engineer-api
+RECREATE_DB=true docker compose up -d --build forge-api
 
 echo ""
 echo "Waiting for API to be healthy..."
@@ -45,5 +45,5 @@ for i in $(seq 1 30); do
 done
 
 echo "✗ API did not become healthy within 60 seconds."
-echo "  Check logs: docker compose logs -f qb-engineer-api"
+echo "  Check logs: docker compose logs -f forge-api"
 exit 1

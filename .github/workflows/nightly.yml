@@ -1,4 +1,4 @@
-# Nightly E2E run for qb-engineer-ui.
+# Nightly E2E run for forge-ui.
 #
 # Playwright is too slow + brittle to gate every PR. Instead it runs:
 #   - nightly at 03:00 UTC against the develop branch
@@ -56,7 +56,7 @@ jobs:
           docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:17
           # ... etc; mirror docker-compose.yml's minimal subset
         # Implementation TODO: extract the minimal docker-compose subset
-        # needed for E2E into qb-engineer-deploy/compose-e2e.yml and
+        # needed for E2E into forge-deploy/compose-e2e.yml and
         # `docker compose -f compose-e2e.yml up -d` here.
 
       - name: Run Playwright tests

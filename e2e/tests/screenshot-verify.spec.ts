@@ -12,7 +12,7 @@ test(`screenshot ${TARGET_PATH}`, async ({ browser }) => {
   // Login via API
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const response = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
 
   if (!response.ok()) {
@@ -26,8 +26,8 @@ test(`screenshot ${TARGET_PATH}`, async ({ browser }) => {
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ token, user, lang }) => {
-      localStorage.setItem('qbe-token', token);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', token);
+      localStorage.setItem('forge-user', JSON.stringify(user));
       localStorage.setItem('language', lang);
     },
     { token: loginData.token, user: loginData.user, lang: process.env.LANG_OVERRIDE || 'en' },

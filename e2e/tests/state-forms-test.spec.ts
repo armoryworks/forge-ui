@@ -15,15 +15,15 @@ const STATE_FORM_CODES = [
 
 function setLocationState(stateCode: string): void {
   execSync(
-    `docker compose exec -T qb-engineer-db psql -U postgres -d qb_engineer -c "UPDATE company_locations SET state = '${stateCode}' WHERE is_default = true;"`,
-    { cwd: 'e:/dev/qb-engineer-wrapper', stdio: 'pipe' },
+    `docker compose exec -T forge psql -U postgres -d forge -c "UPDATE company_locations SET state = '${stateCode}' WHERE is_default = true;"`,
+    { cwd: 'e:/dev/forge-wrapper', stdio: 'pipe' },
   );
 }
 
 function clearFormCache(): void {
   execSync(
-    `docker compose exec -T qb-engineer-db psql -U postgres -d qb_engineer -c "DELETE FROM state_form_definition_caches;"`,
-    { cwd: 'e:/dev/qb-engineer-wrapper', stdio: 'pipe' },
+    `docker compose exec -T forge psql -U postgres -d forge -c "DELETE FROM state_form_definition_caches;"`,
+    { cwd: 'e:/dev/forge-wrapper', stdio: 'pipe' },
   );
 }
 
@@ -35,7 +35,7 @@ test('extract and screenshot all state withholding forms', async ({ browser }) =
   // Login once
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const loginRes = await apiContext.post('auth/login', {
-    data: { email: 'admin@qbengineer.local', password: SEED_PASSWORD },
+    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
   });
   if (!loginRes.ok()) throw new Error(`Login failed: ${loginRes.status()}`);
   const loginData = await loginRes.json();
@@ -49,8 +49,8 @@ test('extract and screenshot all state withholding forms', async ({ browser }) =
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
     ({ tkn, user }) => {
-      localStorage.setItem('qbe-token', tkn);
-      localStorage.setItem('qbe-user', JSON.stringify(user));
+      localStorage.setItem('forge-token', tkn);
+      localStorage.setItem('forge-user', JSON.stringify(user));
     },
     { tkn: loginData.token, user: loginData.user },
   );

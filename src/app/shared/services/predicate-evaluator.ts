@@ -4,7 +4,7 @@
 
 /**
  * Workflow Pattern Phase 4 / D6 — Twin of the server-side
- * `QBEngineer.Api.Workflows.PredicateEvaluator` (C#). Evaluates the
+ * `Forge.Api.Workflows.PredicateEvaluator` (C#). Evaluates the
  * entity-readiness predicate DSL against an entity surface (a plain JSON-ish
  * object with camelCase keys mirroring the entity's serialized shape).
  *

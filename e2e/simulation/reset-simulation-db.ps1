@@ -6,7 +6,7 @@
 # the database entirely and let the API re-seed on startup.
 #
 # Usage:
-#   cd qb-engineer-ui\e2e\simulation
+#   cd forge-ui\e2e\simulation
 #   .\reset-simulation-db.ps1
 #
 
@@ -22,9 +22,9 @@ if (-not (Test-Path "$RepoRoot\docker-compose.yml")) {
 
 Set-Location $RepoRoot
 
-$DbContainer = if ($env:DB_CONTAINER) { $env:DB_CONTAINER } else { "qb-engineer-db" }
-$ApiContainer = if ($env:API_CONTAINER) { $env:API_CONTAINER } else { "qb-engineer-api" }
-$DbName = if ($env:POSTGRES_DB) { $env:POSTGRES_DB } else { "qb_engineer" }
+$DbContainer = if ($env:DB_CONTAINER) { $env:DB_CONTAINER } else { "forge" }
+$ApiContainer = if ($env:API_CONTAINER) { $env:API_CONTAINER } else { "forge-api" }
+$DbName = if ($env:POSTGRES_DB) { $env:POSTGRES_DB } else { "forge" }
 $DbUser = if ($env:POSTGRES_USER) { $env:POSTGRES_USER } else { "postgres" }
 
 Write-Host "=== Simulation DB Reset ===" -ForegroundColor Cyan

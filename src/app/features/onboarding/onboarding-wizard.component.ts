@@ -42,7 +42,7 @@ import {
   SaveOnboardingDraftRequest,
 } from './onboarding.service';
 
-const REVIEW_STATE_KEY = 'qbe-onboarding-review-state';
+const REVIEW_STATE_KEY = 'forge-onboarding-review-state';
 
 /**
  * Default OnboardingDraftStatus before the server response lands. All Has*

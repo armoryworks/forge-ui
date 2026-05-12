@@ -1,4 +1,4 @@
-# Release workflow for qb-engineer-ui
+# Release workflow for forge-ui
 #
 # Triggers:
 #   - push to main             -> auto-bumped semver: :X.Y.Z + :X.Y + :latest + :main-<sha>
@@ -14,9 +14,9 @@
 # bumps are an explicit `VERSION` edit + commit (next CI build picks them
 # up because the distance count resets to 0). No git tag pushing happens
 # from inside the workflow, so no recursive build loop. Mirrors the
-# qb-engineer-server release.yml shape.
+# forge-api release.yml shape.
 #
-# Image goes to GHCR (ghcr.io/danielhokanson/qb-engineer-ui) as a
+# Image goes to GHCR (ghcr.io/danielhokanson/forge-ui) as a
 # multi-arch manifest covering linux/arm64 (Raspberry Pi production target)
 # and linux/amd64 (developer workstations, x86_64 testers). The runner is a
 # native arm64 machine; amd64 is built via QEMU emulation. Cold-cache build

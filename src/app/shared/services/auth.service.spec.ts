@@ -53,8 +53,8 @@ describe('AuthService', () => {
     });
 
     it('should restore token from localStorage', () => {
-      localStorage.setItem('qbe-token', 'saved-token');
-      localStorage.setItem('qbe-user', JSON.stringify(mockUser));
+      localStorage.setItem('forge-token', 'saved-token');
+      localStorage.setItem('forge-user', JSON.stringify(mockUser));
 
       const freshService = TestBed.inject(AuthService);
       // AuthService is providedIn: 'root' so it's a singleton — we need a new injector
@@ -88,8 +88,8 @@ describe('AuthService', () => {
       const req = httpMock.expectOne(`${environment.apiUrl}/auth/login`);
       req.flush(mockLoginResponse);
 
-      expect(localStorage.getItem('qbe-token')).toBe('mock-jwt-token');
-      expect(JSON.parse(localStorage.getItem('qbe-user')!)).toEqual(mockUser);
+      expect(localStorage.getItem('forge-token')).toBe('mock-jwt-token');
+      expect(JSON.parse(localStorage.getItem('forge-user')!)).toEqual(mockUser);
     });
   });
 
@@ -107,8 +107,8 @@ describe('AuthService', () => {
       expect(service.isAuthenticated()).toBe(false);
       expect(service.token()).toBeNull();
       expect(service.user()).toBeNull();
-      expect(localStorage.getItem('qbe-token')).toBeNull();
-      expect(localStorage.getItem('qbe-user')).toBeNull();
+      expect(localStorage.getItem('forge-token')).toBeNull();
+      expect(localStorage.getItem('forge-user')).toBeNull();
     });
   });
 

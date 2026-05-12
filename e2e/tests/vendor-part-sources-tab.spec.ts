@@ -16,13 +16,13 @@ const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
  */
 test.describe('Part Sources tab — add vendor', () => {
   test.beforeEach(async ({ page }) => {
-    await loginViaApi(page, 'admin@qbengineer.local', SEED_PASSWORD);
+    await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
   test('opens Sources tab on a part and adds a vendor source', async ({ page, request }) => {
     // Use the API to look up at least one existing part + vendor (much faster
     // than driving the new-part flow if the seed already has them).
-    const token = await page.evaluate(() => localStorage.getItem('qbe-token'));
+    const token = await page.evaluate(() => localStorage.getItem('forge-token'));
     expect(token).toBeTruthy();
 
     const partsResp = await request.get(`${API_BASE}parts?pageSize=1`, {
