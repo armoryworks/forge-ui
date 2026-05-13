@@ -132,7 +132,15 @@ export class SetupComponent {
       locationState: address?.['state'] || undefined,
       locationPostalCode: address?.['postalCode'] || undefined,
     })).subscribe({
-      next: () => this.router.navigate([this.layout.getDefaultRoute()]),
+      // After the first admin is created, route into the capability
+      // discovery wizard so the install starts with a thought-through
+      // capability set rather than the bare Custom default. The wizard
+      // applies its chosen preset then routes onward; if the user bails
+      // out, they'll still land in the admin area authenticated. Falls
+      // back to the role-aware default route if the discovery route ever
+      // moves or is gated out.
+      next: () => this.router.navigate(['/admin/discovery'])
+        .then((ok) => { if (!ok) this.router.navigate([this.layout.getDefaultRoute()]); }),
       error: (err: HttpErrorResponse) => this.handleError(err),
     });
   }
