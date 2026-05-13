@@ -106,11 +106,20 @@ $grid-columns: 5;
 .sf-stat--accent .sf-stat__value { color: var(--accent-light); }
 
 // ─── Body ───
+//
+// Layout contract: :host is flex column with height:100vh + overflow:hidden.
+// Header, CTA banner, and action bar (footer) are all flex-shrink:0 so the
+// body absorbs all remaining vertical space and scrolls within itself.
+// `min-height: 0` is the flex escape hatch — without it, the body's flex
+// item min-size defaults to its content's intrinsic height, so the body
+// grows to fit the worker grid and pushes the action bar past the viewport
+// (visible at A+ font sizes, where the grid rows get taller).
 .sf-body {
   display: flex;
   flex-direction: column;
   gap: $sp-lg;
   flex: 1;
+  min-height: 0;
   padding: $sp-lg;
   overflow-y: auto;
   @include custom-scrollbar(6px);
