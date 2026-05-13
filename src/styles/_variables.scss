@@ -29,9 +29,10 @@
   --primary-btn-text: #ffffff;
   --header: #115e59;
   --header-text: #ffffff;
-  --accent: #c2410c;
-  --accent-light: #fff7ed;
-  --accent-text: #ffffff;
+  // Accent: Armory Works amber — matches the firm's brand mark
+  --accent: #f59e0b;
+  --accent-light: #fef3c7;
+  --accent-text: #1e293b;
   --success: #15803d;
   --success-light: #dcfce7;
   --success-text: #ffffff;
@@ -65,8 +66,9 @@
   --primary-btn-text: #042f2e;
   --header: #134e4a;
   --header-text: #ffffff;
-  --accent: #fb923c;
-  --accent-light: #431407;
+  // Accent: Armory Works amber (highlight tone for dark theme)
+  --accent: #fbbf24;
+  --accent-light: #451a03;
   --accent-text: #1e293b;
   --success: #4ade80;
   --success-light: #052e16;
