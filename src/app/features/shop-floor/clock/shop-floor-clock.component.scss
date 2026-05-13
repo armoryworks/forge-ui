@@ -100,11 +100,21 @@
 .sf-kpi--info .sf-kpi__value { color: var(--info); }
 
 // ─── Body ───
+//
+// Layout contract: :host is flex column with height:100vh + overflow:hidden.
+// Header, KPI strip, and clock-bar (footer) are all flex-shrink:0 so the
+// body absorbs all remaining vertical space and scrolls within itself.
+// `min-height: 0` and `grid-template-rows: minmax(0, 1fr)` are the
+// flex/grid escape hatches without them, the body grows to its content's
+// intrinsic height (defeating `flex: 1`) and pushes the footer below the
+// viewport once font scaling adds height to the worker/job lists.
 .sf-body {
   display: grid;
   grid-template-columns: 1fr 2fr;
+  grid-template-rows: minmax(0, 1fr);
   gap: $sp-lg;
   flex: 1;
+  min-height: 0;
   padding: $sp-lg;
   overflow: hidden;
 }
@@ -114,12 +124,14 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  min-height: 0;
 }
 
 .sf-section__title {
   display: flex;
   align-items: center;
   gap: $sp-md;
+  flex-shrink: 0;
   font-size: var(--font-size-md);
   font-weight: 700;
   margin: 0 0 $sp-md;
@@ -138,6 +150,8 @@
 .sf-team-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: $sp-sm;
   overflow-y: auto;
   @include custom-scrollbar(4px);
@@ -217,6 +231,8 @@
 .sf-jobs-list {
   display: flex;
   flex-direction: column;
+  flex: 1;
+  min-height: 0;
   gap: $sp-xs;
   overflow-y: auto;
   @include custom-scrollbar(4px);
