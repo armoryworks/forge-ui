@@ -1958,6 +1958,7 @@
     "contactName": "Nombre de Contacto",
     "source": "Fuente",
     "followUpDate": "Fecha de Seguimiento",
+    "notes": "Notas",
     "pipeline": "Pipeline",
     "won": "Ganado",
     "fork": {

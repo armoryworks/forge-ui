@@ -195,9 +195,15 @@ for (const dir of SERVER_DIRS) {
 // Order matters: more specific patterns first to avoid double-counting
 const PATTERNS = [
   // 'foo.bar' | translate    (single quotes, optional whitespace + chained pipes/params)
-  { name: 'pipe-single', re: /'([a-zA-Z][\w]*(?:\.[\w]+)+)'\s*\|\s*translate(?::|[\s|}])/g },
+  // Trailing (?!\w) matches `translate` followed by ANY non-identifier char —
+  // including `"` / `'` (closing attribute quote with no trailing space, e.g.
+  // [label]="'foo.bar' | translate"), `}`, `:` (translate param), `|` (pipe
+  // chain), whitespace, or EOF — without false-matching `translated`. The
+  // earlier `(?::|[\s|}])` form silently skipped every `... | translate"`
+  // binding, so missing keys in property bindings slipped through unflagged.
+  { name: 'pipe-single', re: /'([a-zA-Z][\w]*(?:\.[\w]+)+)'\s*\|\s*translate(?!\w)/g },
   // "foo.bar" | translate    (double quotes)
-  { name: 'pipe-double', re: /"([a-zA-Z][\w]*(?:\.[\w]+)+)"\s*\|\s*translate(?::|[\s|}])/g },
+  { name: 'pipe-double', re: /"([a-zA-Z][\w]*(?:\.[\w]+)+)"\s*\|\s*translate(?!\w)/g },
   // [translate]="'foo.bar'"  (Angular translate directive)
   { name: 'directive', re: /\[translate\]\s*=\s*"'([a-zA-Z][\w]*(?:\.[\w]+)+)'"/g },
   // translate.instant('foo.bar') / translate.get('foo.bar')

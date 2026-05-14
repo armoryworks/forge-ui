@@ -141,6 +141,13 @@ export class NewLeadForkDialogComponent {
   /** Whether the current shape pick reveals prototype-specific fields (project type, expected timeline). */
   protected readonly showsPrototypeFields = computed(() => this.shape() === 'Prototype');
 
+  /** True when the chosen shape reveals at least one extras section — gates the
+   *  accented `.extras-group` container so it isn't rendered as an empty bar
+   *  for shapes (e.g. Unknown / quick add) that have no shape-specific fields. */
+  protected readonly hasShapeExtras = computed(() =>
+    this.showsRfqFields() || this.showsStrategicFields()
+    || this.showsReferenceJob() || this.showsPrototypeFields());
+
   constructor() {
     // Source options come from ref-data the same way the legacy create
     // dialog populated them — reused for parity (the team's existing

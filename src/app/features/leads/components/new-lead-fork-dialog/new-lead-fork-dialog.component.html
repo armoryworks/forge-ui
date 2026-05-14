@@ -55,8 +55,10 @@
 
         <!-- Shape-specific extras: revealed conditionally. The fields land
              in `extras` group inside the form so the JSON serialisation
-             for CustomFieldValues at submit-time stays a single op. -->
-        <div formGroupName="extras" class="extras-group">
+             for CustomFieldValues at submit-time stays a single op. The
+             container only renders when the shape has extras — otherwise
+             its accent border shows as an empty orange bar. -->
+        <div formGroupName="extras" class="extras-group" [class.extras-group--hidden]="!hasShapeExtras()">
 
           @if (showsRfqFields()) {
             <h4 class="extras-section-title">

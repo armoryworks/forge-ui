@@ -111,6 +111,13 @@
   margin: $sp-sm 0;
   background: color-mix(in srgb, var(--accent) 6%, transparent);
   border-left: $border-width-accent solid var(--accent);
+
+  // Shapes with no shape-specific fields (e.g. Unknown / quick add) keep the
+  // `extras` FormGroup mounted for consistent submit serialisation, but the
+  // accented container is hidden so it doesn't render as an empty orange bar.
+  &--hidden {
+    display: none;
+  }
 }
 
 .extras-section-title {

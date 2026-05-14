@@ -1962,6 +1962,7 @@
     "contactName": "Contact Name",
     "source": "Source",
     "followUpDate": "Follow-Up Date",
+    "notes": "Notes",
     "pipeline": "Pipeline",
     "won": "Won",
     "lost": "Lost",
