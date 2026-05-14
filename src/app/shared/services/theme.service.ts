@@ -15,7 +15,7 @@ interface BrandSettings {
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private readonly http = inject(HttpClient);
-  private readonly _theme = signal<ThemeMode>('light');
+  private readonly _theme = signal<ThemeMode>('dark');
   readonly theme = this._theme.asReadonly();
   private readonly _fontScale = signal<FontScale>('default');
   readonly fontScale = this._fontScale.asReadonly();
@@ -26,12 +26,9 @@ export class ThemeService {
 
   constructor() {
     const saved = localStorage.getItem('forge-theme') as ThemeMode | null;
-    // Demo builds default to dark when the user has no saved preference — the
-    // armory-works parent site is dark, so launching into a light demo is
-    // visually jarring. User toggles still win once set.
-    const initialTheme: ThemeMode = saved === 'dark' || saved === 'light'
-      ? saved
-      : environment.demoMode ? 'dark' : 'light';
+    // Default to dark for all builds — matches the armory-works parent site and
+    // is what users have asked for. User toggles still win once set.
+    const initialTheme: ThemeMode = saved === 'dark' || saved === 'light' ? saved : 'dark';
     this._theme.set(initialTheme);
     this.applyTheme(initialTheme);
 

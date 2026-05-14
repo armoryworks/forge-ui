@@ -34,12 +34,12 @@ describe('ThemeService', () => {
   });
 
   describe('initial state', () => {
-    it('should default to light theme', () => {
-      expect(service.theme()).toBe('light');
+    it('should default to dark theme', () => {
+      expect(service.theme()).toBe('dark');
     });
 
     it('should apply data-theme attribute to document element', () => {
-      expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     });
 
     it('should default appName to Forge', () => {
@@ -52,21 +52,21 @@ describe('ThemeService', () => {
   });
 
   describe('toggle', () => {
-    it('should switch from light to dark', () => {
+    it('should switch from dark to light', () => {
       service.toggle();
-
-      expect(service.theme()).toBe('dark');
-      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-      expect(localStorage.getItem('forge-theme')).toBe('dark');
-    });
-
-    it('should switch from dark back to light', () => {
-      service.toggle(); // light → dark
-      service.toggle(); // dark → light
 
       expect(service.theme()).toBe('light');
       expect(document.documentElement.getAttribute('data-theme')).toBe('light');
       expect(localStorage.getItem('forge-theme')).toBe('light');
+    });
+
+    it('should switch from light back to dark', () => {
+      service.toggle(); // dark → light
+      service.toggle(); // light → dark
+
+      expect(service.theme()).toBe('dark');
+      expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+      expect(localStorage.getItem('forge-theme')).toBe('dark');
     });
   });
 
