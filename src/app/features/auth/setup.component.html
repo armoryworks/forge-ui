@@ -1,16 +1,15 @@
 <div class="auth-page">
   <mat-card appearance="outlined" class="auth-card" [class.auth-card--wide]="step() === 2">
     <div class="auth-card__header">
-      <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-      <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
-      <p class="auth-card__subtitle">
-        @if (step() === 1) {
-          {{ 'auth.step1Title' | translate }}
-        } @else {
-          {{ 'auth.step2Title' | translate }}
-        }
-      </p>
+      <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
     </div>
+    <p class="auth-card__status">
+      @if (step() === 1) {
+        {{ 'auth.step1Title' | translate }}
+      } @else {
+        {{ 'auth.step2Title' | translate }}
+      }
+    </p>
 
     @if (step() === 1) {
       <form class="auth-card__form" [formGroup]="accountForm" (ngSubmit)="nextStep()">

@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../shared/services/auth.service';
+import { BrandingService } from '../../shared/services/branding.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../shared/components/address-form/address-form.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
@@ -34,6 +35,7 @@ export class SetupComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  protected readonly branding = inject(BrandingService);
 
   protected readonly step = signal(1);
   protected readonly loading = this.loadingService.isLoading;

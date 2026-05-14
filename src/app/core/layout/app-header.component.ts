@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ThemeService } from '../../shared/services/theme.service';
+import { BrandingService } from '../../shared/services/branding.service';
 import { NotificationService } from '../../shared/services/notification.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { LayoutService } from '../../shared/services/layout.service';
@@ -86,7 +87,7 @@ export class AppHeaderComponent implements OnInit {
 
   protected readonly unreadCount = this.notificationService.unreadCount;
   protected readonly panelOpen = this.notificationService.panelOpen;
-  protected readonly logoUrl = this.themeService.logoUrl;
+  protected readonly branding = inject(BrandingService);
   protected readonly currentUser = this.authService.user;
   protected readonly userMenuOpen = signal(false);
   protected readonly showTrainingPanel = signal(false);

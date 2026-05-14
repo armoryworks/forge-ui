@@ -20,31 +20,25 @@
   }
 
   &__header {
+    display: flex;
+    justify-content: center;
+    padding: $sp-md 0 $sp-lg;
+  }
+
+  &__lockup {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    // The marquee SVG ships at its intended display size (170×75) — let it
+    // render at intrinsic dimensions; max-width only kicks in to prevent
+    // overflow if an admin uploads something wider.
+  }
+
+  &__status {
     text-align: center;
-    // Generous space below the header so the "Step X of Y" subtitle has
-    // visual breathing room from the form fields below. Setup wizards
-    // are focal-point pages, not dense panels — the auth-card's
-    // $sp-xl padding alone isn't enough.
-    margin-bottom: $sp-xl;
-  }
-
-  &__icon {
-    font-size: var(--font-size-heading);
-    color: var(--accent);
-  }
-
-  &__title {
-    font-family: $font-family-primary;
-    font-size: var(--font-size-title);
-    font-weight: 700;
-    color: var(--text);
-    margin: $sp-sm 0 $sp-xs;
-  }
-
-  &__subtitle {
     color: var(--text-secondary);
     font-size: var(--font-size-sm);
-    margin: 0;
+    margin: 0 0 $sp-lg;
   }
 
   &__section-title {

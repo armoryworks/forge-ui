@@ -2,10 +2,9 @@
   @if (isAlreadyLoggedIn()) {
     <mat-card appearance="outlined" class="auth-card form-stack">
       <div class="auth-card__header">
-        <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-        <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
-        <p class="auth-card__subtitle">{{ 'auth.alreadySignedIn' | translate }}</p>
+        <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
       </div>
+      <p class="auth-card__status">{{ 'auth.alreadySignedIn' | translate }}</p>
 
       <div class="auth-card__session">
         <span class="auth-card__session-user">
@@ -28,17 +27,14 @@
   } @else if (mfaRequired() && mfaUserId()) {
     <mat-card appearance="outlined" class="auth-card">
       <div class="auth-card__header">
-        <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-        <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
+        <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
       </div>
       <app-mfa-challenge [userId]="mfaUserId()!" (validated)="onMfaValidated($event)" (cancelled)="onMfaCancelled()" />
     </mat-card>
   } @else {
     <mat-card appearance="outlined" class="auth-card form-stack">
       <div class="auth-card__header">
-        <span class="material-icons-outlined auth-card__icon">precision_manufacturing</span>
-        <h1 class="auth-card__title">{{ 'auth.appName' | translate }}</h1>
-        <p class="auth-card__subtitle">{{ 'auth.tagline' | translate }}</p>
+        <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
       </div>
 
       <form class="auth-card__form form-stack" [formGroup]="form" (ngSubmit)="onSubmit()">
