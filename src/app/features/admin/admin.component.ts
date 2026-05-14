@@ -21,6 +21,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { TerminologyService } from '../../shared/services/terminology.service';
 import { ThemeService } from '../../shared/services/theme.service';
+import { BrandingService } from '../../shared/services/branding.service';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
@@ -83,6 +84,7 @@ export class AdminComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly terminologyService = inject(TerminologyService);
   private readonly themeService = inject(ThemeService);
+  private readonly branding = inject(BrandingService);
   private readonly scanner = inject(ScannerService);
   protected readonly rfid = inject(WebHidRfidService);
   private readonly authService = inject(AuthService);
@@ -222,6 +224,31 @@ export class AdminComponent {
 
   // Logo
   protected readonly logoPreviewUrl = computed(() => this.themeService.logoUrl());
+
+  // Brand lockups — preview URLs re-resolve when theme flips or after upload/reset.
+  protected readonly lockupRows = computed(() => [
+    {
+      kind: 'marquee',
+      label: 'admin.lockupMarquee',
+      hint: 'admin.lockupMarqueeHint',
+      previewUrl: this.branding.marqueeUrl(),
+      darkPreview: true,
+    },
+    {
+      kind: 'wordmark',
+      label: 'admin.lockupWordmark',
+      hint: 'admin.lockupWordmarkHint',
+      previewUrl: this.branding.wordmarkUrl(),
+      darkPreview: true,
+    },
+    {
+      kind: 'favicon',
+      label: 'admin.lockupFavicon',
+      hint: 'admin.lockupFaviconHint',
+      previewUrl: this.branding.faviconUrl(),
+      darkPreview: false,
+    },
+  ]);
 
   protected readonly settingDefinitions: { key: string; label: string; description: string; type: 'text' | 'number' | 'boolean' }[] = [
     { key: 'app.name', label: 'Application Name', description: 'Name displayed in the header and browser tab', type: 'text' },
@@ -979,6 +1006,43 @@ export class AdminComponent {
       error: () => {
         this.saving.set(false);
         this.snackbar.error(this.translate.instant('admin.logoRemoveFailed'));
+      },
+    });
+  }
+
+  // ── Brand Lockups ──
+
+  protected onLockupFileSelected(event: Event, kind: string): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+
+    this.saving.set(true);
+    this.adminService.uploadLockup(kind, file).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.branding.refresh();
+        this.snackbar.success(this.translate.instant('admin.lockupUploaded'));
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error(this.translate.instant('admin.lockupUploadFailed'));
+      },
+    });
+  }
+
+  protected resetLockup(kind: string): void {
+    this.saving.set(true);
+    this.adminService.deleteLockup(kind).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.branding.refresh();
+        this.snackbar.success(this.translate.instant('admin.lockupReset'));
+      },
+      error: () => {
+        this.saving.set(false);
+        this.snackbar.error(this.translate.instant('admin.lockupResetFailed'));
       },
     });
   }

@@ -179,6 +179,17 @@ export class AdminService {
     return this.http.delete<void>(`${environment.apiUrl}/admin/logo`);
   }
 
+  // Brand lockups — kind is 'wordmark' | 'marquee' | 'favicon'
+  uploadLockup(kind: string, file: File): Observable<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<void>(`${environment.apiUrl}/admin/branding/${kind}`, formData);
+  }
+
+  deleteLockup(kind: string): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/admin/branding/${kind}`);
+  }
+
   // Sales Tax Rates
   getSalesTaxRates(): Observable<SalesTaxRate[]> {
     return this.http.get<SalesTaxRate[]>(`${environment.apiUrl}/sales-tax-rates`);

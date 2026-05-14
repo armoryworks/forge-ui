@@ -353,6 +353,36 @@
           </div>
         </div>
 
+        <!-- Brand Lockups -->
+        <div class="settings-item settings-item--lockups">
+          <div class="settings-item__header">
+            <span class="settings-item__label">{{ 'admin.brandLockups' | translate }}</span>
+            <span class="settings-item__description">{{ 'admin.brandLockupsDescription' | translate }}</span>
+          </div>
+          <div class="lockup-list">
+            @for (row of lockupRows(); track row.kind) {
+              <div class="lockup-row">
+                <div class="lockup-row__info">
+                  <span class="lockup-row__name">{{ row.label | translate }}</span>
+                  <span class="lockup-row__hint">{{ row.hint | translate }}</span>
+                </div>
+                <div class="lockup-row__preview" [class.lockup-row__preview--dark]="row.darkPreview">
+                  <img [src]="row.previewUrl" [alt]="(row.label | translate) + ' preview'" />
+                </div>
+                <div class="lockup-row__actions">
+                  <label class="action-btn action-btn--sm action-btn--primary lockup-upload-btn">
+                    <span class="material-icons-outlined">upload</span> {{ 'admin.upload' | translate }}
+                    <input type="file" accept="image/*,.ico" hidden (change)="onLockupFileSelected($event, row.kind)" />
+                  </label>
+                  <button class="action-btn action-btn--sm" (click)="resetLockup(row.kind)">
+                    <span class="material-icons-outlined">restart_alt</span> {{ 'admin.resetToDefault' | translate }}
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
         <div class="settings-grid">
           @for (def of settingDefinitions; track def.key) {
             <div class="settings-item">

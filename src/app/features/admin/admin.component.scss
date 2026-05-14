@@ -380,6 +380,82 @@
   cursor: pointer;
 }
 
+// ── Brand Lockups ──
+// Override the default horizontal settings-item layout — the lockup list is
+// a full-width stack, so the header sits above it rather than beside it.
+.settings-item--lockups {
+  flex-direction: column;
+  align-items: stretch;
+  gap: $sp-md;
+}
+
+.lockup-list {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.lockup-row {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    width: 160px;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+  }
+
+  &__preview {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    padding: $sp-md;
+    border: $border-width-thin solid var(--border);
+
+    img {
+      max-width: 100%;
+      max-height: 56px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+    }
+
+    // Lockups are designed for dark surfaces — preview them on a dark
+    // swatch so the light-on-dark text and amber shield read correctly.
+    &--dark {
+      background: #0f172a;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $sp-sm;
+    flex-shrink: 0;
+  }
+}
+
+.lockup-upload-btn {
+  cursor: pointer;
+}
+
 // ── Scan Identifiers (User Edit Dialog) ──
 .scan-ids {
   display: flex;
