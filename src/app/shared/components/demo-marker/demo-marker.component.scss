@@ -32,10 +32,10 @@
   opacity: 0.03;
   background-repeat: repeat;
   background-size: 320px 320px;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><text x='20' y='180' fill='%23000' font-family='monospace' font-size='44' font-weight='700' transform='rotate(-30 160 160)' letter-spacing='8'>qb-demo</text></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><text x='20' y='180' fill='%23000' font-family='monospace' font-size='44' font-weight='700' transform='rotate(-30 160 160)' letter-spacing='8'>demo</text></svg>");
 
   @media (prefers-color-scheme: dark) {
     opacity: 0.05;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><text x='20' y='180' fill='%23fff' font-family='monospace' font-size='44' font-weight='700' transform='rotate(-30 160 160)' letter-spacing='8'>qb-demo</text></svg>");
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'><text x='20' y='180' fill='%23fff' font-family='monospace' font-size='44' font-weight='700' transform='rotate(-30 160 160)' letter-spacing='8'>demo</text></svg>");
   }
 }
