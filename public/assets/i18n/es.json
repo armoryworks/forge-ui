@@ -6370,7 +6370,7 @@
     "lede": "Armory Works Forge es una plataforma autohospedable de gestión de planta y de negocio — kanban, trabajos, piezas, inventario, compras, ventas, nómina y más — diseñada para ejecutarse junto a tu archivo de QuickBooks o de forma totalmente independiente.",
     "caveat": "Esta es una demo pública. Los datos se reinician periódicamente y se comparten con todos los usuarios conectados.",
     "ctaSignIn": "Iniciar sesión en la demo",
-    "footerLicense": "Software libre con licencia MIT",
+    "footerLicense": "Software libre con licencia Apache 2.0",
     "footerGithub": "Ver en GitHub"
   },
   "workflow": {
