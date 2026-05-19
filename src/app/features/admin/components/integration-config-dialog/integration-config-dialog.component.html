@@ -27,16 +27,27 @@
 
   <div [formGroup]="form">
     @for (field of fields; track field.key) {
-      @if (field.inputType === 'toggle') {
-        <app-toggle [label]="field.label" [formControlName]="field.key" />
-      } @else {
-        <app-input
-          [label]="field.label"
-          [type]="getInputType(field)"
-          [formControlName]="field.key"
-          [required]="field.isRequired"
-          [placeholder]="field.isSensitive ? ('integrationConfigDialog.enterNewValue' | translate) : ''" />
-      }
+      <div class="integration-field">
+        @if (field.inputType === 'toggle') {
+          <app-toggle [label]="field.label" [formControlName]="field.key" />
+        } @else if (field.inputType === 'enum') {
+          <app-select
+            [label]="field.label"
+            [options]="enumOptions(field)"
+            [formControlName]="field.key"
+            [required]="field.isRequired" />
+        } @else {
+          <app-input
+            [label]="field.label"
+            [type]="getInputType(field)"
+            [formControlName]="field.key"
+            [required]="field.isRequired"
+            [placeholder]="field.isSensitive ? ('integrationConfigDialog.enterNewValue' | translate) : ''" />
+        }
+        @if (field.description) {
+          <p class="integration-field__hint">{{ field.description }}</p>
+        }
+      </div>
     }
 
     @if (testResult(); as result) {

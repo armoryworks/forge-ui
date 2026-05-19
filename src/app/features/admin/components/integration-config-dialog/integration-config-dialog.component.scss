@@ -104,3 +104,17 @@
 .footer-spacer {
   flex: 1;
 }
+
+.integration-field {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+
+  &__hint {
+    margin: 0;
+    padding: 0 $sp-xs;
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+}

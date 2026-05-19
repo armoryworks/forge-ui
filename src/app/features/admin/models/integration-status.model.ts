@@ -1,10 +1,19 @@
+export interface IntegrationSettingChoice {
+  value: string;
+  label: string;
+}
+
 export interface IntegrationSettingField {
   key: string;
   label: string;
   value: string;
   isSensitive: boolean;
   isRequired: boolean;
-  inputType: 'text' | 'password' | 'number' | 'email' | 'toggle';
+  inputType: 'text' | 'password' | 'number' | 'email' | 'toggle' | 'enum' | 'url' | 'textarea';
+  /** Non-null only when inputType === 'enum' — rendered as a select dropdown. */
+  choices?: IntegrationSettingChoice[] | null;
+  /** Optional helper text shown beneath the field. */
+  description?: string | null;
 }
 
 export interface IntegrationStatus {
