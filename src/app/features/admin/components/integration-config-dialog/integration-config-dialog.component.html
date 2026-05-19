@@ -60,7 +60,7 @@
 
   <div dialog-footer>
     @if (fields.length > 0) {
-      <button class="action-btn" (click)="test()" [disabled]="testing() || saving()" [attr.aria-label]="'integrationConfigDialog.testConnection' | translate">
+      <button class="action-btn" (click)="test()" [disabled]="testing() || saving() || connecting()" [attr.aria-label]="'integrationConfigDialog.testConnection' | translate">
         @if (testing()) {
           <span class="material-icons-outlined spin">sync</span>
         } @else {
@@ -68,9 +68,20 @@
         }
         {{ 'integrationConfigDialog.test' | translate }}
       </button>
+      @if (canConnectOAuth) {
+        <button class="action-btn" (click)="connect()" [disabled]="connecting() || saving() || testing()"
+                [attr.aria-label]="'Connect to ' + data.integration.name">
+          @if (connecting()) {
+            <span class="material-icons-outlined spin">sync</span>
+          } @else {
+            <span class="material-icons-outlined">link</span>
+          }
+          Connect
+        </button>
+      }
       <span class="footer-spacer"></span>
       <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
-      <button class="action-btn action-btn--primary" [disabled]="saving()" (click)="save()">
+      <button class="action-btn action-btn--primary" [disabled]="saving() || connecting()" (click)="save()">
         @if (saving()) {
           <span class="material-icons-outlined spin">sync</span>
         }

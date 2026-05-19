@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
+import { environment } from '../../../../../environments/environment';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -11,6 +13,20 @@ import { AdminService } from '../../services/admin.service';
 import { IntegrationSettingField, IntegrationStatus } from '../../models/integration-status.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
+
+/**
+ * Provider keys whose configuration completes via a separate OAuth
+ * code-flow handshake. After saving Client ID + Secret in the dialog,
+ * the operator clicks "Connect" to kick off the authorize redirect.
+ *
+ * Wired today via the existing /api/v1/{provider}/authorize endpoints
+ * (now backed by InitiateAccountingOAuthCommand on the server side).
+ * Drive / Calendar / Gmail-OAuth will join this list when their
+ * authorize endpoints land.
+ */
+const OAUTH_CONNECTABLE_PROVIDERS = new Set([
+  'quickbooks', 'xero', 'freshbooks', 'sage', 'zoho',
+]);
 
 export interface IntegrationConfigDialogData {
   integration: IntegrationStatus;
@@ -32,12 +48,28 @@ export class IntegrationConfigDialogComponent {
   private readonly adminService = inject(AdminService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly http = inject(HttpClient);
   readonly data = inject<IntegrationConfigDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);
   readonly testing = signal(false);
+  readonly connecting = signal(false);
   readonly testResult = signal<{ success: boolean; message: string } | null>(null);
   readonly guideExpanded = signal(false);
+
+  /**
+   * True when this provider uses an OAuth code-flow handshake AND the
+   * Client ID has been entered (the isConfigured flag from the API is
+   * fed by IsConfiguredCheckKey, which is the client-id field for every
+   * OAuth provider). The Connect button is hidden when not applicable so
+   * it doesn't crowd the dialog footer for non-OAuth providers (SMTP,
+   * MinIO, USPS, etc.). Not a signal because dialog data is fixed at
+   * open-time — a getter is the right shape for "derive once from inputs".
+   */
+  get canConnectOAuth(): boolean {
+    return OAUTH_CONNECTABLE_PROVIDERS.has(this.data.integration.provider)
+      && this.data.integration.isConfigured;
+  }
 
   readonly form: FormGroup;
   readonly fields: IntegrationSettingField[];
@@ -125,6 +157,36 @@ export class IntegrationConfigDialogComponent {
       },
       error: () => {
         this.saving.set(false);
+      },
+    });
+  }
+
+  /**
+   * Kick off the provider's OAuth code-flow handshake. Hits the existing
+   * /api/v1/{provider}/authorize endpoint (now backed server-side by
+   * InitiateAccountingOAuthCommand). The response carries the
+   * authorization URL we redirect the browser to; the provider's callback
+   * lands back at /api/v1/{provider}/callback which finishes the dance
+   * and bounces to /admin?tab=integrations&provider=connected.
+   */
+  connect(): void {
+    if (!this.canConnectOAuth) return;
+
+    this.connecting.set(true);
+    const provider = this.data.integration.provider;
+    this.http.get<{ authorizationUrl: string }>(
+      `${environment.apiUrl}/${provider}/authorize`,
+    ).subscribe({
+      next: (result) => {
+        // Full-page redirect — the provider needs to control the browser
+        // for the consent screen. We'll come back via /admin?tab=integrations.
+        window.location.href = result.authorizationUrl;
+      },
+      error: () => {
+        this.connecting.set(false);
+        this.snackbar.error(
+          `Couldn't start the ${this.data.integration.name} connect flow. ` +
+          `Check that Client ID and Client Secret are saved.`);
       },
     });
   }
