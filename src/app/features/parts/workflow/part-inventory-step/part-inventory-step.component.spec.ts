@@ -70,8 +70,15 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
     httpMock.verify();
   });
 
+  // The component loads the UoM dropdown options from the API on construction.
+  // Flush that GET so each test's httpMock.verify() stays clean.
+  function flushUomLoad(): void {
+    httpMock.expectOne(`${environment.apiUrl}/inventory/uom`).flush([]);
+  }
+
   it('renders without errors when entity is null', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
+    flushUomLoad();
     mockSignalInputs(component, {
       stepId: 'inventory', componentName: 'PartInventoryStepComponent',
       runId: null, entityId: null, entity: null,
@@ -82,6 +89,7 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
 
   it('PATCHes /workflows/:runId/step when WorkflowService.saveCurrentStep() fires after a user edit', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
+    flushUomLoad();
     mockSignalInputs(component, {
       stepId: 'inventory', componentName: 'PartInventoryStepComponent',
       runId: 7, entityId: 42, entity: buildPart(),
@@ -114,6 +122,7 @@ describe('PartInventoryStepComponent (Phase 5 — save-on-Continue)', () => {
 
   it('does NOT round-trip when the form is pristine — Back/Jump on a never-touched step is a no-op', () => {
     const component = TestBed.runInInjectionContext(() => new PartInventoryStepComponent());
+    flushUomLoad();
     mockSignalInputs(component, {
       stepId: 'inventory', componentName: 'PartInventoryStepComponent',
       runId: 7, entityId: 42, entity: buildPart(),

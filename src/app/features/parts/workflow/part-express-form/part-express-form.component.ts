@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { Observable, of, switchMap, tap } from 'rxjs';
 
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -14,6 +15,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
 import { AbcClass } from '../../models/abc-class.type';
 import { PartDetail } from '../../models/part-detail.model';
+import { PartsService } from '../../services/parts.service';
 import { TraceabilityType } from '../../models/traceability-type.type';
 
 /**
@@ -42,9 +44,11 @@ import { TraceabilityType } from '../../models/traceability-type.type';
 })
 export class PartExpressFormComponent {
   private readonly workflowService = inject(WorkflowService);
+  private readonly partsService = inject(PartsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly stepId = input<string>('express');
   readonly componentName = input<string>('PartExpressFormComponent');
@@ -139,9 +143,7 @@ export class PartExpressFormComponent {
 
   constructor() {
     // Re-hydrate from the bound entity when the workflow page resolves it
-    // (e.g. resuming an in-flight run). No autosave: express mode is the
-    // "one form, one click" path — every save creates / promotes a part,
-    // so we only fire on the user's explicit Save click.
+    // (e.g. resuming an in-flight run, or switching back from guided mode).
     effect(() => {
       const part = this.part();
       if (!part) return;
@@ -153,6 +155,39 @@ export class PartExpressFormComponent {
         manualCostOverride: part.manualCostOverride ?? null,
       }, { emitEvent: false });
     });
+
+    // Register a PATCH-ONLY save so the shell flushes the express form's
+    // edits before a mode toggle (Express → Guided). Without this, switching
+    // modes discarded whatever the user typed here — the express form has no
+    // autosave and its Save button also promotes, which we must NOT do on a
+    // mode switch. persistOnly() patches the step (materializing the entity
+    // if needed) and reloads currentEntity so the guided steps hydrate from
+    // fresh data instead of the pre-edit snapshot.
+    this.workflowService.registerStepForm(
+      this.form,
+      this.violationLabels,
+      () => this.persistOnly(),
+    );
+    this.destroyRef.onDestroy(() => this.workflowService.unregisterStepForm());
+  }
+
+  /**
+   * Persist the express fields without promoting. Used by the shell's
+   * saveCurrentStep() when toggling modes. No-op when the form is pristine
+   * or the run isn't ready.
+   */
+  private persistOnly(): Observable<unknown> {
+    const runId = this.runId();
+    if (runId == null || this.form.pristine) return of(null);
+    return this.workflowService.patchStep(runId, this.stepId(), this.fieldsFromForm()).pipe(
+      switchMap((run) => {
+        if (run.entityId == null) return of(null);
+        return this.partsService.getPartById(run.entityId).pipe(
+          tap((detail) => this.workflowService.currentEntity.set(detail)),
+        );
+      }),
+      tap(() => this.form.markAsPristine()),
+    );
   }
 
   /**

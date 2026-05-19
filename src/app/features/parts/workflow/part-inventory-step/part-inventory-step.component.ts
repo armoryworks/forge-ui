@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Observable, of, switchMap, tap } from 'rxjs';
@@ -9,6 +9,7 @@ import { SelectComponent, SelectOption } from '../../../../shared/components/sel
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
+import { InventoryService } from '../../../inventory/services/inventory.service';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 
@@ -33,6 +34,7 @@ import { PartsService } from '../../services/parts.service';
 export class PartInventoryStepComponent {
   private readonly partsService = inject(PartsService);
   private readonly workflowService = inject(WorkflowService);
+  private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -45,32 +47,30 @@ export class PartInventoryStepComponent {
 
   protected readonly saving = signal(false);
 
-  // Stock UoM falls back to a small hard-coded list when no Tier 2 picker is
-  // available. The backing values map to UnitOfMeasure rows by code; the FK
-  // is resolved server-side by the parts adapter once a real UoM picker
-  // exists.
-  protected readonly stockUomOptions: SelectOption[] = [
+  // Stock UoM options come from the DB (GET /inventory/uom) — never a
+  // hard-coded list (CLAUDE.md). The form value is the UoM id (FK), which the
+  // parts adapter persists directly to Part.StockUomId. New parts are seeded
+  // with the base 'each' unit server-side, so this is normally pre-selected.
+  private readonly uoms = signal<{ id: number; code: string; name: string }[]>([]);
+  protected readonly stockUomOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('parts.workflow.inventory.stockUomNone') },
-    { value: 'ea', label: 'each (ea)' },
-    { value: 'kg', label: 'kg' },
-    { value: 'g', label: 'g' },
-    { value: 'lb', label: 'lb' },
-    { value: 'm', label: 'm' },
-    { value: 'mm', label: 'mm' },
-    { value: 'L', label: 'L' },
-    { value: 'mL', label: 'mL' },
-  ];
+    ...this.uoms().map(u => ({ value: u.id, label: `${u.name} (${u.code})` })),
+  ]);
 
   protected readonly form = new FormGroup({
     minStockThreshold: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderPoint: new FormControl<number | null>(null, [Validators.min(0)]),
     reorderQuantity: new FormControl<number | null>(null, [Validators.min(0)]),
     safetyStockDays: new FormControl<number | null>(null, [Validators.min(0)]),
-    stockUomCode: new FormControl<string | null>(null),
+    stockUomId: new FormControl<number | null>(null),
     defaultBinId: new FormControl<number | null>(null),
   });
 
   constructor() {
+    this.inventoryService.getUnitsOfMeasure().pipe(
+      tap(list => this.uoms.set(list.map(u => ({ id: u.id, code: u.code, name: u.name })))),
+    ).subscribe({ error: () => { /* dropdown stays "None"-only; non-fatal */ } });
+
     effect(() => {
       const part = this.entity() as PartDetail | null;
       if (!part) return;
@@ -79,7 +79,7 @@ export class PartInventoryStepComponent {
         reorderPoint: part.reorderPoint ?? null,
         reorderQuantity: part.reorderQuantity ?? null,
         safetyStockDays: part.safetyStockDays ?? null,
-        stockUomCode: part.stockUomCode ?? null,
+        stockUomId: part.stockUomId ?? null,
         defaultBinId: part.defaultBinId ?? null,
       }, { emitEvent: false });
     });
@@ -91,7 +91,7 @@ export class PartInventoryStepComponent {
         reorderPoint: this.translate.instant('parts.workflow.inventory.reorderPointLabel'),
         reorderQuantity: this.translate.instant('parts.workflow.inventory.reorderQuantityLabel'),
         safetyStockDays: this.translate.instant('parts.workflow.inventory.safetyStockDaysLabel'),
-        stockUomCode: this.translate.instant('parts.workflow.inventory.stockUomLabel'),
+        stockUomId: this.translate.instant('parts.workflow.inventory.stockUomLabel'),
         defaultBinId: this.translate.instant('parts.workflow.inventory.defaultBinLabel'),
       },
       () => this.save(),
@@ -110,7 +110,7 @@ export class PartInventoryStepComponent {
       reorderPoint: value.reorderPoint ?? null,
       reorderQuantity: value.reorderQuantity ?? null,
       safetyStockDays: value.safetyStockDays ?? null,
-      stockUomCode: value.stockUomCode ?? null,
+      stockUomId: value.stockUomId ?? null,
       defaultBinId: value.defaultBinId ?? null,
     }).pipe(
       switchMap((run) => {
