@@ -27,6 +27,14 @@ export interface VendorPart {
   htsCode: string | null;
   isApproved: boolean;
   isPreferred: boolean;
+  /**
+   * True when the vendor IS the part's manufacturer (direct-from-OEM).
+   * Server contract: stored ManufacturerName is null in this case — the
+   * server derives the effective name from the vendor on read, and the
+   * Create/Update handlers mirror VendorPartNumber ↔ VendorMpn to a single
+   * identifier so legacy readers see consistent values from either column.
+   */
+  isManufacturer: boolean;
   certifications: string | null;
   lastQuotedDate: string | null;
   notes: string | null;

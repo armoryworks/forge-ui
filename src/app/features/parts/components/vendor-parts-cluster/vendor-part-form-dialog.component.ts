@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, viewChildren } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -105,10 +106,24 @@ export class VendorPartFormDialogComponent {
       this.data.vendorPart?.isPreferred ?? this.data.defaultIsPreferred ?? false,
       { nonNullable: true },
     ),
+    isManufacturer: new FormControl<boolean>(
+      this.data.vendorPart?.isManufacturer ?? false,
+      { nonNullable: true },
+    ),
     lastQuotedDate: new FormControl<Date | null>(
       this.data.vendorPart?.lastQuotedDate ? new Date(this.data.vendorPart.lastQuotedDate) : null,
     ),
     notes: new FormControl<string | null>(this.data.vendorPart?.notes ?? '', [Validators.maxLength(2000)]),
+  });
+
+  /**
+   * Track the IsManufacturer toggle so the template can collapse the
+   * separate VendorPartNumber + ManufacturerName + VendorMpn columns into a
+   * single "Part Number" field when on. The server enforces the same
+   * normalization at write time — this is purely for UI clarity.
+   */
+  protected readonly isManufacturer = toSignal(this.form.controls.isManufacturer.valueChanges, {
+    initialValue: this.form.controls.isManufacturer.value,
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
@@ -170,10 +185,18 @@ export class VendorPartFormDialogComponent {
     this.saving.set(true);
     const v = this.form.getRawValue();
 
+    // When the vendor IS the manufacturer the dialog hides the separate
+    // MFR Name / MPN fields and shows a single "Part Number" input. Mirror
+    // that intent in the payload so the server doesn't get stale values
+    // from the hidden controls (the server enforces the same rules, but
+    // sending them with intent keeps the activity log clean).
+    const isMfr = v.isManufacturer;
+    const singleId = (v.vendorPartNumber || v.vendorMpn) ?? null;
+
     const payload = {
-      vendorPartNumber: v.vendorPartNumber || null,
-      manufacturerName: v.manufacturerName || null,
-      vendorMpn: v.vendorMpn || null,
+      vendorPartNumber: isMfr ? singleId : (v.vendorPartNumber || null),
+      manufacturerName: isMfr ? null : (v.manufacturerName || null),
+      vendorMpn: isMfr ? singleId : (v.vendorMpn || null),
       leadTimeDays: v.leadTimeDays ?? null,
       minOrderQty: v.minOrderQty ?? null,
       packSize: v.packSize ?? null,
@@ -181,6 +204,7 @@ export class VendorPartFormDialogComponent {
       htsCode: v.htsCode || null,
       isApproved: v.isApproved,
       isPreferred: v.isPreferred,
+      isManufacturer: isMfr,
       lastQuotedDate: v.lastQuotedDate ? toIsoDate(v.lastQuotedDate) : null,
       notes: v.notes || null,
     };

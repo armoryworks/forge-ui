@@ -20,7 +20,7 @@ function makeVendorPart(overrides: Partial<VendorPart> = {}): VendorPart {
     vendorPartNumber: 'V-100', manufacturerName: null, vendorMpn: null,
     leadTimeDays: 14, minOrderQty: 100, packSize: 25,
     countryOfOrigin: 'US', htsCode: null,
-    isApproved: true, isPreferred: false, certifications: null,
+    isApproved: true, isPreferred: false, isManufacturer: false, certifications: null,
     lastQuotedDate: null, notes: null,
     priceTiers: [],
     createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',

@@ -46,24 +46,40 @@
         </div>
       }
 
-      <div class="dialog-row">
+      <app-toggle
+        data-testid="vendor-part-is-manufacturer"
+        [label]="'vendorPart.isManufacturer' | translate"
+        formControlName="isManufacturer" />
+      <p class="vendor-part-form__hint">{{ 'vendorPart.isManufacturerHelper' | translate }}</p>
+
+      @if (isManufacturer()) {
+        <!-- Direct-from-MFR: one identifier, manufacturer name derived from vendor. -->
         <app-input
           data-testid="vendor-part-vendor-pn"
-          [label]="'vendorPart.vendorPartNumber' | translate"
+          [label]="'vendorPart.partNumber' | translate"
           formControlName="vendorPartNumber"
           [maxlength]="100" />
-        <app-input
-          data-testid="vendor-part-manufacturer-name"
-          [label]="'vendorPart.manufacturerName' | translate"
-          formControlName="manufacturerName"
-          [maxlength]="200" />
-        <app-input
-          data-testid="vendor-part-vendor-mpn"
-          [label]="'vendorPart.vendorMpn' | translate"
-          formControlName="vendorMpn"
-          [maxlength]="100" />
-      </div>
-      <p class="vendor-part-form__hint">{{ 'vendorPart.vendorMpnHelper' | translate }}</p>
+        <p class="vendor-part-form__hint">{{ 'vendorPart.partNumberWhenMfrHelper' | translate }}</p>
+      } @else {
+        <div class="dialog-row">
+          <app-input
+            data-testid="vendor-part-vendor-pn"
+            [label]="'vendorPart.vendorPartNumber' | translate"
+            formControlName="vendorPartNumber"
+            [maxlength]="100" />
+          <app-input
+            data-testid="vendor-part-manufacturer-name"
+            [label]="'vendorPart.manufacturerName' | translate"
+            formControlName="manufacturerName"
+            [maxlength]="200" />
+          <app-input
+            data-testid="vendor-part-vendor-mpn"
+            [label]="'vendorPart.vendorMpn' | translate"
+            formControlName="vendorMpn"
+            [maxlength]="100" />
+        </div>
+        <p class="vendor-part-form__hint">{{ 'vendorPart.vendorMpnHelper' | translate }}</p>
+      }
 
       <div class="dialog-row">
         <app-input
