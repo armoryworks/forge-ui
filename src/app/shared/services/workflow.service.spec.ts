@@ -119,13 +119,43 @@ describe('WorkflowService — Phase 4', () => {
     expect(service.currentRun()?.currentStepId).toBe('bom');
   });
 
-  it('jumpToStep PATCHes jump and updates run', () => {
+  it('jumpToStep PATCHes jump and returns success:true on 200', () => {
     const updated = buildRun({ currentStepId: 'basics' });
-    service.jumpToStep(1, 'basics').subscribe();
+    let result: unknown;
+    service.jumpToStep(1, 'basics').subscribe(r => (result = r));
     const req = httpMock.expectOne(`${environment.apiUrl}/workflows/1/jump`);
     expect(req.request.body).toEqual({ targetStepId: 'basics' });
     req.flush(updated);
+    expect(result).toEqual({ success: true, run: updated });
     expect(service.currentRun()?.currentStepId).toBe('basics');
+  });
+
+  it('jumpToStep maps 409 missing-validator envelope to success:false with blocking step info', () => {
+    let result: unknown;
+    service.jumpToStep(1, 'inventory').subscribe(r => (result = r));
+    const req = httpMock.expectOne(`${environment.apiUrl}/workflows/1/jump`);
+    req.flush(
+      {
+        missing: [{
+          validatorId: 'hasSourcing',
+          displayNameKey: 'k',
+          missingMessageKey: 'm',
+          blockingStepId: 'sourcing',
+          blockingStepLabelKey: 'parts.workflow.steps.sourcing.label',
+        }],
+      },
+      { status: 409, statusText: 'Conflict' },
+    );
+    expect(result).toEqual({
+      success: false,
+      missing: [{
+        validatorId: 'hasSourcing',
+        displayNameKey: 'k',
+        missingMessageKey: 'm',
+        blockingStepId: 'sourcing',
+        blockingStepLabelKey: 'parts.workflow.steps.sourcing.label',
+      }],
+    });
   });
 
   it('completeRun returns success on 200', () => {

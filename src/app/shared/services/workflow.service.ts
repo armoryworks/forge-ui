@@ -221,10 +221,29 @@ export class WorkflowService {
       .pipe(tap(run => this.currentRun.set(run)));
   }
 
-  jumpToStep(runId: number, targetStepId: string): Observable<WorkflowRun> {
+  /**
+   * Jump to a specific step. The server validates that every step between
+   * the current pointer and the target has its completion gates satisfied;
+   * if not it returns 409 with `{ missing: MissingValidator[] }` where each
+   * row carries `blockingStepId` / `blockingStepLabelKey` identifying the
+   * specific earlier step the user must finish first. The Observable
+   * resolves to a tagged result so the caller can branch without try/catch
+   * and render a useful "Finish 'Basics' first" message rather than the
+   * interceptor's generic "Conflict" toast.
+   */
+  jumpToStep(runId: number, targetStepId: string): Observable<{ success: true; run: WorkflowRun } | { success: false; missing: MissingValidator[] }> {
     return this.http
       .patch<WorkflowRun>(`${environment.apiUrl}/workflows/${runId}/jump`, { targetStepId })
-      .pipe(tap(run => this.currentRun.set(run)));
+      .pipe(
+        tap(run => this.currentRun.set(run)),
+        map(run => ({ success: true as const, run })),
+        catchError((err: HttpErrorResponse) => {
+          if (err.status === 409 && Array.isArray(err.error?.missing)) {
+            return of({ success: false as const, missing: err.error.missing as MissingValidator[] });
+          }
+          return throwError(() => err);
+        }),
+      );
   }
 
   /**

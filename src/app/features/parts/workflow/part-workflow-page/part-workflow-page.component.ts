@@ -329,16 +329,45 @@ export class PartWorkflowPageComponent {
     const run = this.run();
     if (!run) return;
     this.workflowService.jumpToStep(run.id, stepId).subscribe({
-      next: (updated) => {
-        this.run.set(updated);
-        this.workflowService.currentRun.set(updated);
-        this.router.navigate([], {
-          relativeTo: this.route,
-          queryParams: { step: stepId },
-          queryParamsHandling: 'merge',
-        });
+      next: (result) => {
+        if (result.success) {
+          this.run.set(result.run);
+          this.workflowService.currentRun.set(result.run);
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { step: stepId },
+            queryParamsHandling: 'merge',
+          });
+          return;
+        }
+        // Forward-jump blocked: a previous step's gate isn't satisfied.
+        // Each missing row carries `blockingStepLabelKey` naming the step
+        // the user has to finish first — surface that instead of the
+        // interceptor's generic "Conflict" toast.
+        this.missingValidators.set(result.missing);
+        this.surfaceJumpBlocked(result.missing);
       },
     });
+  }
+
+  /**
+   * Build a "Finish '{step}' before moving on — needs {fields}" snackbar
+   * from the missing-validators envelope. Groups by blockingStepLabelKey
+   * so a single step with multiple unmet validators reads as one message.
+   */
+  private surfaceJumpBlocked(missing: MissingValidator[]): void {
+    if (missing.length === 0) return;
+    const blockingStepLabel = missing.find((m) => !!m.blockingStepLabelKey)?.blockingStepLabelKey;
+    const fieldList = missing
+      .map((m) => this.translate.instant(m.missingMessageKey ?? m.displayNameKey))
+      .join('; ');
+    const stepName = blockingStepLabel
+      ? this.translate.instant(blockingStepLabel)
+      : null;
+    const message = stepName
+      ? this.translate.instant('parts.workflow.page.blockedByStep', { step: stepName, missing: fieldList })
+      : this.translate.instant('parts.workflow.page.missingValidators', { missing: fieldList });
+    this.snackbar.error(message);
   }
 
   /**

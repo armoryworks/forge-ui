@@ -766,7 +766,8 @@
         "definitionMissing": "Workflow definition not found.",
         "startFailed": "Couldn't start the workflow.",
         "completeSuccess": "Part promoted to Active.",
-        "missingValidators": "Cannot complete: missing {{missing}}"
+        "missingValidators": "Cannot complete: missing {{missing}}",
+        "blockedByStep": "Finish '{{step}}' before moving on — needs {{missing}}"
       },
       "promote": {
         "cta": "Promote to Active",

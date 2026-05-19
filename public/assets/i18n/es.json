@@ -745,7 +745,8 @@
         "definitionMissing": "Definición de flujo no encontrada.",
         "startFailed": "No se pudo iniciar.",
         "completeSuccess": "Pieza promovida a Activa.",
-        "missingValidators": "No se puede completar: falta {{missing}}"
+        "missingValidators": "No se puede completar: falta {{missing}}",
+        "blockedByStep": "Termina '{{step}}' antes de continuar — falta {{missing}}"
       },
       "promote": {
         "cta": "Promover a Activa",
