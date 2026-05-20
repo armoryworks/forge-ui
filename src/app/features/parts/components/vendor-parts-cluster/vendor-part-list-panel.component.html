@@ -9,6 +9,15 @@
   -->
   @if (!showInlineCard()) {
     <div class="vendor-part-panel__header">
+      @if (mode() === 'catalog') {
+        <button class="action-btn action-btn--sm"
+          data-testid="vendor-part-import-btn"
+          (click)="onImport()"
+          [attr.aria-label]="'vendorPart.bulkImport.importButton' | translate">
+          <span class="material-icons-outlined">upload_file</span>
+          {{ 'vendorPart.bulkImport.importButton' | translate }}
+        </button>
+      }
       <button class="action-btn action-btn--sm action-btn--create"
         data-testid="vendor-part-add-btn"
         (click)="onAdd()"

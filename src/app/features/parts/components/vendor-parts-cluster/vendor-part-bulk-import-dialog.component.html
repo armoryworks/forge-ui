@@ -1,0 +1,133 @@
+<app-dialog
+  [title]="'vendorPart.bulkImport.dialogTitle' | translate:{ vendor: data.vendorName }"
+  width="800px"
+  (closed)="close()">
+
+  @if (!inPreviewState()) {
+    <!-- State 1: file picker -->
+    <section class="vp-import">
+      <p class="vp-import__helper">
+        {{ 'vendorPart.bulkImport.helper' | translate }}
+      </p>
+
+      <div class="vp-import__dropzone"
+        [class.vp-import__dropzone--drag]="dragOver()"
+        (dragover)="onDragOver($event)"
+        (dragleave)="onDragLeave($event)"
+        (drop)="onDrop($event)">
+        <span class="material-icons-outlined vp-import__dropzone-icon">upload_file</span>
+        <p class="vp-import__dropzone-text">
+          {{ 'vendorPart.bulkImport.dropzone' | translate }}
+        </p>
+        <button class="action-btn"
+          data-testid="vendor-part-bulk-browse-btn"
+          (click)="browse()"
+          [attr.aria-label]="'vendorPart.bulkImport.browse' | translate">
+          {{ 'vendorPart.bulkImport.browse' | translate }}
+        </button>
+        <input #fileInput type="file" accept=".csv" hidden (change)="onFileChange($event)" />
+      </div>
+
+      @if (fileError()) {
+        <p class="vp-import__error" role="alert">{{ fileError() }}</p>
+      }
+      @if (previewLoading()) {
+        <p class="vp-import__loading text-muted">
+          <span class="material-icons-outlined">sync</span>
+          {{ 'vendorPart.bulkImport.parsing' | translate }}
+        </p>
+      }
+
+      <div class="vp-import__template">
+        <button class="action-btn action-btn--link"
+          data-testid="vendor-part-bulk-template-btn"
+          (click)="downloadTemplate()">
+          <span class="material-icons-outlined">download</span>
+          {{ 'vendorPart.bulkImport.downloadTemplate' | translate }}
+        </button>
+      </div>
+    </section>
+  } @else {
+    <!-- State 2: preview -->
+    <section class="vp-import" data-testid="vendor-part-bulk-preview">
+      <div class="vp-import__summary">
+        <span>{{ 'vendorPart.bulkImport.previewSummary' | translate:{
+          add: preview()!.addCount,
+          update: preview()!.updateCount,
+          error: preview()!.errorCount
+        } }}</span>
+      </div>
+
+      <app-data-table
+        tableId="vendor-part-bulk-import-preview"
+        [columns]="columns"
+        [data]="rows()"
+        emptyIcon="upload_file"
+        [emptyMessage]="'vendorPart.bulkImport.previewEmpty' | translate"
+        trackByField="lineNumber">
+
+        <ng-template appColumnCell="lineNumber" let-row>
+          <span>{{ row.lineNumber }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="partNumber" let-row>
+          <span>{{ row.partNumber || '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="partName" let-row>
+          <span class="text-muted">{{ row.partName || '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="vendorPartNumber" let-row>
+          <span class="text-muted">{{ row.vendorPartNumber || '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="leadTimeDays" let-row>
+          <span>{{ row.leadTimeDays !== null ? row.leadTimeDays : '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="minOrderQty" let-row>
+          <span>{{ row.minOrderQty !== null ? row.minOrderQty : '---' }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="action" let-row>
+          <span [class]="actionChipClass(row.action)">{{ actionLabel(row.action) }}</span>
+        </ng-template>
+
+        <ng-template appColumnCell="errorMessage" let-row>
+          @if (row.errorMessage) {
+            <span class="vp-import__error-cell">{{ row.errorMessage }}</span>
+          }
+        </ng-template>
+      </app-data-table>
+
+      @if (!canApply() && preview()!.errorCount > 0) {
+        <p class="vp-import__hint text-muted">
+          {{ 'vendorPart.bulkImport.applyDisabledHelper' | translate }}
+        </p>
+      }
+    </section>
+  }
+
+  <div dialog-footer>
+    @if (inPreviewState()) {
+      <button class="action-btn"
+        data-testid="vendor-part-bulk-back-btn"
+        (click)="backToPicker()">
+        {{ 'vendorPart.bulkImport.back' | translate }}
+      </button>
+      <button class="action-btn action-btn--primary"
+        data-testid="vendor-part-bulk-apply-btn"
+        [disabled]="!canApply() || applying()"
+        (click)="apply()">
+        {{ 'vendorPart.bulkImport.applyButton' | translate }}
+      </button>
+    } @else {
+      <button class="action-btn"
+        data-testid="vendor-part-bulk-cancel-btn"
+        (click)="close()">
+        {{ 'vendorPart.bulkImport.cancel' | translate }}
+      </button>
+    }
+  </div>
+</app-dialog>

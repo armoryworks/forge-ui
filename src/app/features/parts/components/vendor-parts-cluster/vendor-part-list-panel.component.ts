@@ -47,6 +47,8 @@ export class VendorPartListPanelComponent {
   readonly loading = input(false);
 
   readonly add = output<void>();
+  /** Catalog mode only — open the CSV bulk-import dialog for this vendor. */
+  readonly importCatalog = output<void>();
   readonly edit = output<VendorPart>();
   readonly delete = output<VendorPart>();
   readonly togglePreferred = output<VendorPart>();
@@ -135,6 +137,7 @@ export class VendorPartListPanelComponent {
   }
 
   protected onAdd(): void { this.add.emit(); }
+  protected onImport(): void { this.importCatalog.emit(); }
   protected onEdit(row: VendorPart): void { this.edit.emit(row); }
   protected onDelete(row: VendorPart): void { this.delete.emit(row); }
   protected onTogglePreferred(row: VendorPart): void { this.togglePreferred.emit(row); }

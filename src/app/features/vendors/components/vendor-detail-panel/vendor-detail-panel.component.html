@@ -173,6 +173,7 @@
           [vendorParts]="vendorParts()"
           [loading]="vendorPartsLoading()"
           (add)="openVendorPartCreate()"
+          (importCatalog)="openVendorPartImport()"
           (edit)="openVendorPartEdit($event)"
           (delete)="deleteVendorPart($event)"
           (togglePreferred)="toggleVendorPartPreferred($event)"

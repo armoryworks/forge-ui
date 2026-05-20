@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 import { VendorPart, VendorPartPriceTier } from '../models/vendor-part.model';
+import { VendorPartImportPreviewResponse, VendorPartImportResultResponse } from '../models/vendor-part-bulk-import.model';
 import { CheckTierVarianceRequest, CheckTierVarianceResponse } from '../../purchase-orders/models/tier-variance-check.model';
 
 /**
@@ -92,6 +93,29 @@ export class VendorPartsService {
     return this.http.post<CheckTierVarianceResponse>(
       `${environment.apiUrl}/vendor-parts/check-tier-variance`,
       request,
+    );
+  }
+
+  // ── CSV bulk import: dry-run preview + apply ───────────────────────────
+  // Two-step flow mirroring the price-list-entry importer. Both endpoints
+  // accept a multipart upload; preview never mutates the DB. The UI shows the
+  // preview table, the user confirms, and apply commits the upsert.
+
+  previewImport(vendorId: number, file: File): Observable<VendorPartImportPreviewResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VendorPartImportPreviewResponse>(
+      `${environment.apiUrl}/vendors/${vendorId}/vendor-parts/import-preview`,
+      formData,
+    );
+  }
+
+  applyImport(vendorId: number, file: File): Observable<VendorPartImportResultResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<VendorPartImportResultResponse>(
+      `${environment.apiUrl}/vendors/${vendorId}/vendor-parts/import-apply`,
+      formData,
     );
   }
 }

@@ -12,7 +12,10 @@ test(`screenshot ${TARGET_PATH}`, async ({ browser }) => {
   // Login via API
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const response = await apiContext.post('auth/login', {
-    data: { email: 'admin@forge.local', password: SEED_PASSWORD },
+    data: {
+      email: process.env.SCREENSHOT_USER_EMAIL || 'admin@forge.local',
+      password: process.env.SCREENSHOT_USER_PASSWORD || SEED_PASSWORD,
+    },
   });
 
   if (!response.ok()) {

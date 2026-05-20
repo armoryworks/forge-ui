@@ -24,6 +24,7 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { VendorScorecardTabComponent } from '../vendor-scorecard-tab/vendor-scorecard-tab.component';
 import { VendorPartListPanelComponent } from '../../../parts/components/vendor-parts-cluster/vendor-part-list-panel.component';
 import { VendorPartFormDialogComponent, VendorPartFormDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-form-dialog.component';
+import { VendorPartBulkImportDialogComponent, VendorPartBulkImportDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-bulk-import-dialog.component';
 import { VendorPartPriceTiersDialogComponent, VendorPartPriceTiersDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-price-tiers-dialog.component';
 import { VendorPartPriceTierHistoryDialogComponent, VendorPartPriceTierHistoryDialogData } from '../../../parts/components/vendor-parts-cluster/vendor-part-price-tier-history-dialog.component';
 import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
@@ -206,6 +207,21 @@ export class VendorDetailPanelComponent {
         parentEntityId: v.id,
         parentLabel: v.companyName,
       },
+    }).afterClosed().subscribe(result => {
+      if (result) this.loadVendorParts();
+    });
+  }
+
+  protected openVendorPartImport(): void {
+    const v = this.vendor();
+    if (!v) return;
+    this.dialog.open<
+      VendorPartBulkImportDialogComponent,
+      VendorPartBulkImportDialogData,
+      unknown
+    >(VendorPartBulkImportDialogComponent, {
+      width: '800px',
+      data: { vendorId: v.id, vendorName: v.companyName },
     }).afterClosed().subscribe(result => {
       if (result) this.loadVendorParts();
     });
