@@ -87,6 +87,28 @@ export class EmployeeProfileService {
     return c ? c.totalItems - c.completedItems : 0;
   });
 
+  /**
+   * F5 — count of incomplete *sections*, matching the account sidebar's
+   * grouping (Contact / Emergency / Tax Forms). The banner previously counted
+   * individual items, so "6 items remaining" didn't line up with the 3 warning
+   * triangles the sidebar shows. Same section definition as the sidebar so the
+   * two views always agree.
+   */
+  private static readonly COMPLETION_SECTIONS: readonly string[][] = [
+    ['address'],
+    ['emergency_contact'],
+    ['w4', 'i9', 'state_withholding', 'direct_deposit', 'workers_comp', 'handbook'],
+  ];
+
+  readonly incompleteSectionCount = computed(() => {
+    const c = this._completeness();
+    if (!c) return 0;
+    return EmployeeProfileService.COMPLETION_SECTIONS.filter(section => {
+      const relevant = c.items.filter(i => section.includes(i.key));
+      return relevant.length > 0 && relevant.some(i => !i.isComplete);
+    }).length;
+  });
+
   readonly canBeAssignedJobs = computed(() => this._completeness()?.canBeAssignedJobs ?? false);
 
   private static readonly KEY_ROUTE_MAP: Record<string, string> = {

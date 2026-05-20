@@ -62,50 +62,18 @@
         <app-input [label]="'common.phone' | translate" formControlName="phone" data-testid="customer-phone" />
       </div>
 
-      <!-- Phase 3 F3 — full-record fields. Optional; let the small-shop
-           onboarding flow capture credit limit, default tax/currency, and
-           billing/shipping addresses without forcing a follow-up PATCH. -->
-      <div class="dialog-row">
-        <!-- Phase 3 / WU-10 — creditLimit is decimal(18,2) money precision. -->
-        <app-input [label]="'customers.creditLimit' | translate"
-          type="number" formControlName="creditLimit"
-          step="0.01" min="0"
-          data-testid="customer-credit-limit" />
-        <app-input [label]="'customers.defaultTaxCodeId' | translate"
-          type="number" formControlName="defaultTaxCodeId"
-          data-testid="customer-default-tax-code" />
-        <app-input [label]="'customers.defaultCurrency' | translate"
-          formControlName="defaultCurrency"
-          placeholder="USD"
-          data-testid="customer-default-currency" />
-      </div>
-
-      <fieldset class="address-fieldset" formGroupName="billingAddress" data-testid="customer-billing-address">
-        <legend>{{ 'customers.billingAddress' | translate }}</legend>
-        <app-input [label]="'address.street' | translate" formControlName="street" />
-        <div class="dialog-row">
-          <app-input [label]="'address.city' | translate" formControlName="city" />
-          <app-input [label]="'address.state' | translate" formControlName="state" />
-          <app-input [label]="'address.postal' | translate" formControlName="postal" />
-          <app-input [label]="'address.country' | translate" formControlName="country" />
-        </div>
-      </fieldset>
-
-      <fieldset class="address-fieldset" formGroupName="shippingAddress" data-testid="customer-shipping-address">
-        <legend>{{ 'customers.shippingAddress' | translate }}</legend>
-        <app-input [label]="'address.street' | translate" formControlName="street" />
-        <div class="dialog-row">
-          <app-input [label]="'address.city' | translate" formControlName="city" />
-          <app-input [label]="'address.state' | translate" formControlName="state" />
-          <app-input [label]="'address.postal' | translate" formControlName="postal" />
-          <app-input [label]="'address.country' | translate" formControlName="country" />
-        </div>
-      </fieldset>
+      <!-- F17 — Quick add is intentionally just the essentials (name + a
+           couple of contact bits). Credit limit, tax/currency, and billing/
+           shipping addresses live on the Guided path and the customer detail
+           page; surfacing them here contradicted the "quick" promise. The
+           form still carries those controls (defaulted/empty) so the create
+           payload shape is unchanged. -->
+      <p class="text-muted">{{ 'customers.quickAddHint' | translate }}</p>
     </div>
 
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
-      <app-validation-button [violations]="customerViolations()" [loading]="saving()">
+      <app-validation-button [violations]="customerViolations" [loading]="saving()">
       <button class="action-btn action-btn--primary"
         data-testid="customer-save-btn"
         [disabled]="customerForm.invalid || saving()"

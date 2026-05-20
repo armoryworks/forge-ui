@@ -22,8 +22,8 @@
       <span class="material-icons-outlined onboarding-banner__icon">warning</span>
       <span class="onboarding-banner__text">
         {{ 'onboarding.completeProfile' | translate }} &mdash;
-        @if (incompleteCount() > 0) {
-          {{ incompleteCount() }} {{ incompleteCount() === 1 ? ('onboarding.itemRemaining' | translate) : ('onboarding.itemsRemaining' | translate) }}
+        @if (incompleteSectionCount() > 0) {
+          {{ incompleteSectionCount() }} {{ incompleteSectionCount() === 1 ? ('onboarding.sectionRemaining' | translate) : ('onboarding.sectionsRemaining' | translate) }}
         } @else {
           {{ 'onboarding.actionRequired' | translate }}
         }

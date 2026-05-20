@@ -40,7 +40,10 @@ export class OnboardingBannerComponent {
     return !completeness.isComplete;
   });
 
-  protected readonly incompleteCount = this.profileService.incompleteCount;
+  // F5 — count incomplete sections (Contact / Emergency / Tax Forms) so the
+  // banner agrees with the account sidebar's warning triangles, instead of an
+  // item-level count that didn't visibly map to the 3 flagged sections.
+  protected readonly incompleteSectionCount = this.profileService.incompleteSectionCount;
 
   protected dismiss(): void {
     this.dismissed.set(true);

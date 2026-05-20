@@ -1,5 +1,6 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { Observable, tap, catchError, of, map } from 'rxjs';
 
@@ -67,6 +68,7 @@ export interface SetupTokenInfo {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog);
   private readonly _token = signal<string | null>(this.loadToken());
   private readonly _user = signal<AuthUser | null>(this.loadUser());
@@ -74,6 +76,18 @@ export class AuthService {
   readonly token = this._token.asReadonly();
   readonly user = this._user.asReadonly();
   readonly isAuthenticated = computed(() => this._token() !== null);
+
+  // Proactive session-expiry watch (F10). Whenever the token changes, schedule
+  // a check at its JWT `exp` so an idle user is notified + redirected the
+  // moment their session lapses — rather than silently sitting on a stale page
+  // until their next request 401s. The reactive interceptor still covers the
+  // request-time path; this covers the "left the tab open" path.
+  private expiryTimer: ReturnType<typeof setTimeout> | null = null;
+  private expiring = false;
+
+  constructor() {
+    effect(() => this.scheduleExpiryCheck(this._token()));
+  }
 
   hasRole(role: string): boolean {
     return this._user()?.roles.includes(role) ?? false;
@@ -256,6 +270,64 @@ export class AuthService {
     // overlay from leaking onto /login. Reported bug: detail dialog
     // stayed visible over the login page after the user was logged out.
     this.dialog.closeAll();
+  }
+
+  /**
+   * (Re)arm the proactive expiry timer for the current token. Fires only for
+   * sessions that lapse while the app is open (delay > 0); an already-expired
+   * token at schedule time is left to the reactive 401 path so we never
+   * navigate during bootstrap.
+   */
+  private scheduleExpiryCheck(token: string | null): void {
+    if (this.expiryTimer) {
+      clearTimeout(this.expiryTimer);
+      this.expiryTimer = null;
+    }
+    if (!token) return;
+    this.expiring = false; // fresh/valid token — re-arm
+
+    const expMs = this.getTokenExpiryMs(token);
+    if (expMs === null) return;
+    const delay = expMs - Date.now();
+    if (delay <= 0) return; // already expired — reactive interceptor handles it
+
+    this.expiryTimer = setTimeout(() => this.onTokenExpired(), delay);
+  }
+
+  /** Parse the JWT `exp` (seconds) into epoch ms, or null if unreadable. */
+  private getTokenExpiryMs(token: string): number | null {
+    try {
+      const payload = token.split('.')[1];
+      if (!payload) return null;
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+      const claims = JSON.parse(atob(padded)) as { exp?: number };
+      return typeof claims.exp === 'number' ? claims.exp * 1000 : null;
+    } catch {
+      return null;
+    }
+  }
+
+  /** Token reached its exp: try a silent refresh; surface expiry only if it fails. */
+  private onTokenExpired(): void {
+    this.refreshAccessToken().subscribe((newToken) => {
+      if (newToken) return; // success → effect reschedules off the new token
+      this.expireSession();
+    });
+  }
+
+  /** Notify + redirect to login (login shows the snackbar via reason), preserving destination. */
+  private expireSession(): void {
+    if (this.expiring || !this._token()) return;
+    this.expiring = true;
+    const currentUrl = this.router.url;
+    this.clearAuth();
+    const queryParams: Record<string, string> = { reason: 'session_expired' };
+    if (currentUrl && currentUrl !== '/'
+      && !currentUrl.startsWith('/login') && !currentUrl.startsWith('/setup')) {
+      queryParams['returnUrl'] = currentUrl;
+    }
+    this.router.navigate(['/login'], { queryParams });
   }
 
   /** Update local user state after self-service profile edit. */

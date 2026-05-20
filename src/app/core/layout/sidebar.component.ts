@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -19,6 +19,7 @@ import { NavItem } from '../../shared/models/nav-item.model';
 export class SidebarComponent {
   protected readonly layout = inject(LayoutService);
   private readonly navTree = inject(NavTreeService);
+  private readonly router = inject(Router);
 
   protected readonly collapsed = computed(() => !this.layout.sidebarExpanded());
   protected readonly pinnedTopTree = this.navTree.pinnedTopTree;
@@ -71,6 +72,10 @@ export class SidebarComponent {
     if (this.collapsed() && !this.layout.isMobile()) {
       this.layout.expandSidebar();
     }
+    // F13 — a group click also navigates to its default sub-page so the
+    // content area changes, not just the sidebar drill-in. (Navigation
+    // re-derives the drill from the new URL, so the group stays open.)
+    this.navigateToDefault(item);
   }
 
   /**
@@ -86,6 +91,22 @@ export class SidebarComponent {
     if (this.collapsed() && !this.layout.isMobile()) {
       this.layout.expandSidebar();
     }
+    this.navigateToDefault(item);
+  }
+
+  /** Navigate to the group's first routable descendant (depth-first). */
+  private navigateToDefault(item: NavItem): void {
+    const route = this.firstLeafRoute(item);
+    if (route) this.router.navigateByUrl(route);
+  }
+
+  private firstLeafRoute(item: NavItem): string | null {
+    if (item.route) return item.route;
+    for (const child of item.children ?? []) {
+      const route = this.firstLeafRoute(child);
+      if (route) return route;
+    }
+    return null;
   }
 
   protected onBackClick(): void {

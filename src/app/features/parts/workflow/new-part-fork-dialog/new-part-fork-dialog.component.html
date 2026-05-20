@@ -4,7 +4,7 @@
     <!-- Step 1 — Procurement source -->
     <section class="new-part-fork__step" data-testid="fork-step-procurement">
       <h3 class="new-part-fork__heading">
-        <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.stepLabel' | translate: { current: 1, total: 4 } }}</span>
+        <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.setupStage' | translate }}</span>
         <span class="new-part-fork__step-sep" aria-hidden="true">·</span>
         <span class="new-part-fork__step-name">{{ 'parts.workflow.fork.step1Title' | translate }}</span>
       </h3>
@@ -31,7 +31,7 @@
     @if (procurement() !== null) {
       <section class="new-part-fork__step new-part-fork__step--reveal" data-testid="fork-step-inventory-class">
         <h3 class="new-part-fork__heading">
-          <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.stepLabel' | translate: { current: 2, total: 4 } }}</span>
+          <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.setupStage' | translate }}</span>
           <span class="new-part-fork__step-sep" aria-hidden="true">·</span>
           <span class="new-part-fork__step-name">{{ 'parts.workflow.fork.step2Title' | translate }}</span>
         </h3>
@@ -58,7 +58,7 @@
     @if (inventoryClass() !== null) {
       <section class="new-part-fork__step new-part-fork__step--reveal" data-testid="fork-step-item-kind">
         <h3 class="new-part-fork__heading">
-          <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.stepLabel' | translate: { current: 3, total: 4 } }}</span>
+          <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.setupStage' | translate }}</span>
           <span class="new-part-fork__step-sep" aria-hidden="true">·</span>
           <span class="new-part-fork__step-name">{{ 'parts.workflow.fork.step3Title' | translate }}</span>
           <span class="new-part-fork__optional-chip">{{ 'workflow.shell.optional' | translate }}</span>
@@ -76,7 +76,7 @@
     @if (inventoryClass() !== null) {
       <section class="new-part-fork__step new-part-fork__step--reveal" data-testid="fork-step-mode">
         <h3 class="new-part-fork__heading">
-          <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.stepLabel' | translate: { current: 4, total: 4 } }}</span>
+          <span class="new-part-fork__step-counter">{{ 'parts.workflow.fork.setupStage' | translate }}</span>
           <span class="new-part-fork__step-sep" aria-hidden="true">·</span>
           <span class="new-part-fork__step-name">{{ 'parts.workflow.fork.step4Title' | translate }}</span>
         </h3>

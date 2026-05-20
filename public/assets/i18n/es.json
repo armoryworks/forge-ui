@@ -623,6 +623,7 @@
       "fork": {
         "title": "How would you like to add this part?",
         "stepLabel": "Paso {{current}} de {{total}}",
+        "setupStage": "Configuración",
         "step1Title": "How is this part sourced?",
         "step1Make": "Made",
         "step1MakeDesc": "Produced in-house from raw stock or a BOM.",
@@ -1329,6 +1330,7 @@
     "title": "Clientes",
     "subtitle": "Gestionar contactos y direcciones de clientes",
     "createCustomer": "Nuevo Cliente",
+    "quickAddHint": "Solo lo esencial. Agrega términos de crédito, impuestos y direcciones más tarde desde la página del cliente — o usa la configuración guiada para el registro completo.",
     "contactsPage": {
       "title": "Todos los Contactos",
       "subtitle": "Vista plana entre clientes de cada contacto — \"¿a quién conozco en la empresa X?\".",
@@ -2807,6 +2809,8 @@
     "completeProfile": "Complete su perfil de empleado",
     "itemsRemaining": "elementos restantes",
     "itemRemaining": "elemento restante",
+    "sectionsRemaining": "secciones restantes",
+    "sectionRemaining": "sección restante",
     "actionRequired": "acción requerida",
     "completeNow": "Completar Ahora",
     "title": "Incorporación de Nuevo Empleado",

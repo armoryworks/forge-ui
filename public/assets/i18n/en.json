@@ -640,6 +640,7 @@
       "fork": {
         "title": "How would you like to add this part?",
         "stepLabel": "Step {{current}} of {{total}}",
+        "setupStage": "Set up",
         "step1Title": "How is this part sourced?",
         "step1Make": "Made",
         "step1MakeDesc": "Produced in-house from raw stock or a BOM.",
@@ -1333,6 +1334,7 @@
     "title": "Customers",
     "subtitle": "Manage customer contacts and addresses",
     "createCustomer": "New Customer",
+    "quickAddHint": "Just the essentials. Add credit terms, tax, and addresses later from the customer page — or use Guided setup for the full record.",
     "contactsPage": {
       "title": "All Contacts",
       "subtitle": "Flat cross-customer view of every contact — \"who do I know at company X?\".",
@@ -2811,6 +2813,8 @@
     "completeProfile": "Complete your employee profile",
     "itemsRemaining": "items remaining",
     "itemRemaining": "item remaining",
+    "sectionsRemaining": "sections remaining",
+    "sectionRemaining": "section remaining",
     "actionRequired": "action required",
     "completeNow": "Complete Now",
     "title": "New Employee Onboarding",

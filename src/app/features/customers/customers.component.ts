@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -115,16 +115,19 @@ export class CustomersComponent {
     }),
   });
 
-  protected readonly customerViolations = computed(() =>
-    FormValidationService.getViolations(this.customerForm, {
-      name: this.translate.instant('common.name'),
-      companyName: this.translate.instant('customers.companyName'),
-      email: this.translate.instant('common.email'),
-      phone: this.translate.instant('common.phone'),
-      creditLimit: this.translate.instant('customers.creditLimit'),
-      defaultCurrency: this.translate.instant('customers.defaultCurrency'),
-    })
-  );
+  // F14 — match the New Job pattern exactly: getViolations returns a
+  // Signal<string[]> and must be bound directly. Wrapping it in computed()
+  // re-ran getViolations (which writes a signal synchronously via startWith)
+  // inside a computed evaluation, so the indicator never lit up on pristine
+  // open like New Job's does.
+  protected readonly customerViolations = FormValidationService.getViolations(this.customerForm, {
+    name: this.translate.instant('common.name'),
+    companyName: this.translate.instant('customers.companyName'),
+    email: this.translate.instant('common.email'),
+    phone: this.translate.instant('common.phone'),
+    creditLimit: this.translate.instant('customers.creditLimit'),
+    defaultCurrency: this.translate.instant('customers.defaultCurrency'),
+  });
 
   // Table
   protected readonly customerColumns: ColumnDef[] = [
