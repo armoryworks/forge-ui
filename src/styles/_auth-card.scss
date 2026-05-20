@@ -1,0 +1,47 @@
+@use 'variables' as *;
+
+// ─── Auth-card standard ────────────────────────────────────────────────────
+// Shared layout for the unauthenticated card pages — Login, initial Setup, and
+// invite Activation (token-setup). Centered card + branding lockup header +
+// status line. Component stylesheets layer page-specific elements (SSO buttons,
+// form rows, etc.) on top of this shell.
+//
+// Lives here (global) rather than in each component's scss so all three pages
+// stay in sync — previously the block was copy-pasted into login + setup and
+// missing entirely from token-setup, which is why that page fell back to raw
+// mat-card-header and overlapped its title/subtitle.
+
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.auth-card {
+  max-width: 360px;
+  width: 100%;
+
+  &__header {
+    display: flex;
+    justify-content: center;
+    padding: $sp-md 0 $sp-lg;
+  }
+
+  &__lockup {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    // The marquee SVG ships at its intended display size (170×75) — let it
+    // render at intrinsic dimensions; max-width only kicks in to prevent
+    // overflow if an admin uploads something wider.
+  }
+
+  &__status {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0 0 $sp-md;
+  }
+}

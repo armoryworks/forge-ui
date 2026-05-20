@@ -1,24 +1,13 @@
 @use 'styles/variables' as *;
 
-.setup-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--bg);
-  padding: $sp-xl;
-}
-
-.setup-card {
-  max-width: 420px;
-  width: 100%;
-}
+// .auth-page + .auth-card shell (header / lockup / status) come from the
+// shared styles/_auth-card.scss standard; only activation-specific elements
+// live here.
 
 .setup-form {
   display: flex;
   flex-direction: column;
   gap: $sp-md;
-  margin-top: $sp-lg;
 }
 
 .setup-password-hint {

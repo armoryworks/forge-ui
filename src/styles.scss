@@ -3,6 +3,7 @@
 @use 'styles/reset';
 @use 'styles/mixins';
 @use 'styles/shared';
+@use 'styles/auth-card';
 
 // ─── Self-hosted Fonts ───
 @import '@fontsource/space-grotesk/400.css';

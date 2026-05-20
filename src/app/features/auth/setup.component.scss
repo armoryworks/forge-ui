@@ -1,17 +1,10 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
-.auth-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  background: var(--bg);
-}
-
+// .auth-page + .auth-card shell (header / lockup / status) come from the
+// shared styles/_auth-card.scss standard; only setup-specific elements live here.
 .auth-card {
-  max-width: 360px;
-  width: 100%;
+  // Setup's multi-field, two-step form wants a roomier card than the shared default.
   padding: $sp-xl;
   transition: max-width $transition-normal;
 
@@ -19,26 +12,9 @@
     max-width: 480px;
   }
 
-  &__header {
-    display: flex;
-    justify-content: center;
-    padding: $sp-md 0 $sp-lg;
-  }
-
-  &__lockup {
-    display: block;
-    max-width: 100%;
-    height: auto;
-    // The marquee SVG ships at its intended display size (170×75) — let it
-    // render at intrinsic dimensions; max-width only kicks in to prevent
-    // overflow if an admin uploads something wider.
-  }
-
+  // A touch more breathing room below the status line than the shared default.
   &__status {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: var(--font-size-sm);
-    margin: 0 0 $sp-lg;
+    margin-bottom: $sp-lg;
   }
 
   &__section-title {

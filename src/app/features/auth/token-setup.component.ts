@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } 
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { AuthService, SetupTokenInfo } from '../../shared/services/auth.service';
+import { BrandingService } from '../../shared/services/branding.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
@@ -19,7 +19,7 @@ import { ToastService } from '../../shared/services/toast.service';
 @Component({
   selector: 'app-token-setup',
   standalone: true,
-  imports: [ReactiveFormsModule, MatCardModule, MatButtonModule, TranslatePipe, InputComponent, ValidationButtonComponent],
+  imports: [ReactiveFormsModule, MatCardModule, TranslatePipe, InputComponent, ValidationButtonComponent],
   templateUrl: './token-setup.component.html',
   styleUrl: './token-setup.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +33,7 @@ export class TokenSetupComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly toast = inject(ToastService);
   private readonly translate = inject(TranslateService);
+  protected readonly branding = inject(BrandingService);
 
   protected readonly token = this.route.snapshot.paramMap.get('token') ?? '';
   protected readonly error = signal<string | null>(null);

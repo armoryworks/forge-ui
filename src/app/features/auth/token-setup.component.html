@@ -1,43 +1,36 @@
-<div class="setup-container">
-  <mat-card class="setup-card">
-    <mat-card-header>
-      @if (tokenInfo(); as info) {
-        <mat-card-title>{{ 'auth.welcomeName' | translate:{ name: welcomeName() } }}</mat-card-title>
-        <mat-card-subtitle>{{ 'auth.createAccount' | translate }}</mat-card-subtitle>
-      } @else {
-        <mat-card-title>{{ 'auth.createAccount' | translate }}</mat-card-title>
-        <mat-card-subtitle>{{ 'auth.createAccount' | translate }}</mat-card-subtitle>
-      }
-    </mat-card-header>
+<div class="auth-page">
+  <mat-card appearance="outlined" class="auth-card">
+    <div class="auth-card__header">
+      <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
+    </div>
 
-    <mat-card-content>
-      @if (error(); as err) {
-        <div class="setup-error">
-          <span class="material-icons-outlined">error_outline</span>
-          <p>{{ err }}</p>
-        </div>
-      }
+    @if (error(); as err) {
+      <div class="setup-error">
+        <span class="material-icons-outlined">error_outline</span>
+        <p>{{ err }}</p>
+      </div>
+    } @else {
+      <p class="auth-card__status">
+        @if (tokenInfo()) {
+          {{ 'auth.welcomeName' | translate:{ name: welcomeName() } }}
+        } @else {
+          {{ 'auth.createAccount' | translate }}
+        }
+      </p>
 
-      @if (!error()) {
-        <div [formGroup]="form" class="setup-form">
-          <app-input [label]="'auth.password' | translate" type="password" formControlName="password" autocomplete="new-password" data-testid="setup-password" />
-          <p class="setup-password-hint">{{ 'auth.passwordRequirements' | translate }}</p>
-          <app-input [label]="'auth.confirmPassword' | translate" type="password" formControlName="confirmPassword" autocomplete="new-password" data-testid="setup-confirm-password" />
-        </div>
-      }
-    </mat-card-content>
+      <form class="setup-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <app-input [label]="'auth.password' | translate" type="password" formControlName="password" autocomplete="new-password" data-testid="setup-password" />
+        <p class="setup-password-hint">{{ 'auth.passwordRequirements' | translate }}</p>
+        <app-input [label]="'auth.confirmPassword' | translate" type="password" formControlName="confirmPassword" autocomplete="new-password" data-testid="setup-confirm-password" />
 
-    @if (!error()) {
-      <mat-card-actions>
         <app-validation-button [violations]="violations" [loading]="loading()">
-        <button mat-flat-button color="primary"
-          [disabled]="form.invalid || loading()"
-          (click)="onSubmit()"
-          data-testid="setup-submit-btn">
-          {{ 'auth.completeSetup' | translate }}
-        </button>
+          <button class="action-btn action-btn--primary" type="submit"
+            [disabled]="form.invalid || loading()"
+            data-testid="setup-submit-btn">
+            {{ 'auth.completeSetup' | translate }}
+          </button>
         </app-validation-button>
-      </mat-card-actions>
+      </form>
     }
   </mat-card>
 </div>
