@@ -62,6 +62,7 @@ function buildRun(overrides: Partial<WorkflowRun> = {}): WorkflowRun {
     abandonedReason: null,
     lastActivityAt: '2026-04-29T00:00:00Z',
     version: 1,
+    draftPayload: null,
     ...overrides,
   };
 }

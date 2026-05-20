@@ -96,6 +96,10 @@
     "closeUserMenu": "Cerrar menú de usuario",
     "closeNotifications": "Cerrar notificaciones"
   },
+  "app": {
+    "updateAvailable": "Hay una nueva versión disponible.",
+    "reload": "Recargar"
+  },
   "common": {
     "save": "Guardar",
     "saved": "Guardado",

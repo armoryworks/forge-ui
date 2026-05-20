@@ -23,4 +23,11 @@ export interface WorkflowRun {
   abandonedReason: string | null;
   lastActivityAt: string;
   version: number;
+  /**
+   * In-flight initial payload (camelCase keys, e.g. `procurementSource` /
+   * `inventoryClass`) held until the entity materializes. Lets list pages
+   * render entity-less draft "ghost" rows reflecting the user's actual picker
+   * selections. Null once the entity row is created.
+   */
+  draftPayload: Record<string, unknown> | null;
 }

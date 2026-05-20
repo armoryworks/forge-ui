@@ -102,7 +102,16 @@ export class SignalrService {
       .withUrl(`${environment.hubUrl}/${hubPath}`, {
         accessTokenFactory: () => this.authService.token() ?? '',
       })
-      .withAutomaticReconnect([0, 1000, 2000, 5000, 10000, 30000])
+      // F24 — retry quickly and indefinitely (capped at 5s) instead of a
+      // fixed array whose 30s tail (and eventual exhaustion) left the
+      // "connection lost" banner stuck long after the backend was reachable
+      // again (e.g. a deploy/restart). The banner clears the instant a hub
+      // reconnects, so a tight cap means it recovers within ~5s of the server
+      // coming back. onclose's manual-reconnect remains the hard-close fallback.
+      .withAutomaticReconnect({
+        nextRetryDelayInMilliseconds: (ctx) =>
+          Math.min(1000 * 2 ** Math.min(ctx.previousRetryCount, 2), 5000),
+      })
       .configureLogging(environment.production ? LogLevel.Warning : LogLevel.Information)
       .build();
   }

@@ -101,8 +101,11 @@ export class PartsComponent {
       description: null,
       revision: '',
       status: 'Draft' as const,
-      procurementSource: 'Buy' as const,
-      inventoryClass: 'Component' as const,
+      // Reflect the variant the user picked in the New Part fork dialog (held
+      // in the run's DraftPayload until the entity materializes) rather than a
+      // generic Buy/Component default.
+      procurementSource: this.draftAxis<ProcurementSource>(run, 'procurementSource', 'Buy'),
+      inventoryClass: this.draftAxis<InventoryClass>(run, 'inventoryClass', 'Component'),
       bomEntryCount: 0,
       createdAt: new Date(run.startedAt),
       effectivePrice: 0,
@@ -113,6 +116,17 @@ export class PartsComponent {
     }));
     return [...ghosts, ...this.parts()];
   });
+
+  /**
+   * Reads a string axis (procurementSource / inventoryClass) from a draft
+   * run's DraftPayload, falling back to a default when the run predates the
+   * payload-surfacing change or the key is absent.
+   */
+  private draftAxis<T extends string>(run: WorkflowRun, key: string, fallback: T): T {
+    const value = run.draftPayload?.[key];
+    return typeof value === 'string' ? (value as T) : fallback;
+  }
+
   // Phase 3 F7-partial / WU-17 — surfaces server-side totalCount.
   protected readonly totalCount = signal<number>(0);
 

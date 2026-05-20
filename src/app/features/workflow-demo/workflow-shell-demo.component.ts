@@ -130,6 +130,7 @@ export class WorkflowShellDemoComponent {
     abandonedReason: null,
     lastActivityAt: '2026-04-29T00:00:00Z',
     version: 1,
+    draftPayload: null,
   }));
 
   protected onModeChanged(mode: 'express' | 'guided'): void {

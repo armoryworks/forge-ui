@@ -96,6 +96,10 @@
     "closeUserMenu": "Close user menu",
     "closeNotifications": "Close notifications"
   },
+  "app": {
+    "updateAvailable": "A new version is available.",
+    "reload": "Reload"
+  },
   "common": {
     "save": "Save",
     "saved": "Saved",

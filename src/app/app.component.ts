@@ -27,6 +27,7 @@ import { ChatHubService } from './shared/services/chat-hub.service';
 import { NotificationService } from './shared/services/notification.service';
 import { UserPreferencesService } from './shared/services/user-preferences.service';
 import { LoadingService } from './shared/services/loading.service';
+import { AppUpdateService } from './shared/services/app-update.service';
 import { RouteLoadingService } from './shared/services/route-loading.service';
 import { ThemeService } from './shared/services/theme.service';
 import { HelpTourService } from './shared/services/help-tour.service';
@@ -93,6 +94,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
   private readonly destroyRef = inject(DestroyRef);
   private readonly dialog = inject(MatDialog);
+  private readonly appUpdate = inject(AppUpdateService);
 
   /** Prevents double-launching an inline tour on direct ?walkthrough= navigation. */
   private walkthroughRunning = false;
@@ -177,6 +179,9 @@ export class AppComponent implements OnInit, OnDestroy {
     this.registerTours();
     this.keyboardShortcuts.initialize();
     this.watchWalkthroughUrl();
+    // Surface freshly-deployed versions so shipped fixes aren't masked by the
+    // service worker serving a stale cached build.
+    this.appUpdate.init();
   }
 
   ngOnDestroy(): void {
