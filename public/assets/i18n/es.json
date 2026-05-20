@@ -3892,7 +3892,7 @@
     "password": "Contraseña",
     "forgotPassword": "¿Olvidó su contraseña?",
     "loginFailed": "Correo o contraseña inválidos",
-    "sessionExpired": "Sesión expirada. Inicie sesión nuevamente.",
+    "sessionExpired": "Sesión cerrada — inicie sesión nuevamente. Es posible que la aplicación se haya actualizado.",
     "welcomeBack": "Bienvenido de nuevo",
     "signInToContinue": "Inicie sesión para continuar",
     "confirmPassword": "Confirmar contraseña",

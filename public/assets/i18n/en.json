@@ -3903,7 +3903,7 @@
     "password": "Password",
     "forgotPassword": "Forgot Password?",
     "loginFailed": "Invalid email or password",
-    "sessionExpired": "Session expired. Please log in again.",
+    "sessionExpired": "Signed out — please sign back in. The app may have just updated.",
     "welcomeBack": "Welcome back",
     "signInToContinue": "Sign in to continue",
     "confirmPassword": "Confirm Password",
