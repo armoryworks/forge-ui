@@ -5878,6 +5878,7 @@
   "employees": {
     "title": "Employees",
     "subtitle": "Manage team members",
+    "invite": "Invite Employee",
     "search": "Search",
     "searchPlaceholder": "Search by name or email...",
     "role": "Role",

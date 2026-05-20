@@ -52,6 +52,16 @@ export const routes: Routes = [
     path: '',
     canActivate: [authGuard, mobileRedirectGuard],
     children: [
+      // Sidebar nav groups (Operations / Sales / Production / People / Insights)
+      // are accordion headers, not routes. Typing their name as a URL used to
+      // render blank; redirect each to its default sub-page so deep links and
+      // address-bar guesses land somewhere sensible. (Inventory + Purchasing
+      // already resolve to real leaf routes of the same name.)
+      { path: 'operations', redirectTo: 'kanban', pathMatch: 'full' },
+      { path: 'sales', redirectTo: 'customers', pathMatch: 'full' },
+      { path: 'production', redirectTo: 'parts', pathMatch: 'full' },
+      { path: 'people', redirectTo: 'employees', pathMatch: 'full' },
+      { path: 'insights', redirectTo: 'reports', pathMatch: 'full' },
       {
         path: 'dashboard',
         loadChildren: () =>
@@ -299,4 +309,8 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/render/render.routes').then((m) => m.RENDER_ROUTES),
   },
+  // Catch-all — an unknown URL previously rendered a blank shell (no route
+  // matched). Send it back through the role-aware root redirect instead of
+  // leaving the user staring at an empty page.
+  { path: '**', redirectTo: '' },
 ];

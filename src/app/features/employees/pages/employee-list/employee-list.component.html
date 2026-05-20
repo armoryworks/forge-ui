@@ -1,4 +1,10 @@
 <app-page-header [title]="'employees.title' | translate" [subtitle]="'employees.subtitle' | translate">
+  @if (canInvite()) {
+    <button class="action-btn action-btn--create" data-testid="employees-invite-btn" (click)="inviteEmployee()">
+      <span class="material-icons-outlined">person_add</span>
+      {{ 'employees.invite' | translate }}
+    </button>
+  }
 </app-page-header>
 
 <div class="employees-layout">

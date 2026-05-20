@@ -9,6 +9,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EmployeeService } from '../../services/employee.service';
 import { EmployeeListItem } from '../../models/employee.model';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -37,6 +38,11 @@ export class EmployeeListComponent {
   private readonly refDataService = inject(ReferenceDataService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly auth = inject(AuthService);
+
+  // Employees are created/invited through Admin > Users (Admin-only). Surface
+  // the entry point here so an admin landing on an empty list has a next step.
+  protected readonly canInvite = computed(() => (this.auth.user()?.roles ?? []).includes('Admin'));
 
   protected readonly loading = signal(false);
   protected readonly employees = signal<EmployeeListItem[]>([]);
@@ -120,6 +126,10 @@ export class EmployeeListComponent {
   }
 
   protected applyFilters(): void { this.loadEmployees(); }
+
+  protected inviteEmployee(): void {
+    this.router.navigate(['/admin/users']);
+  }
 
   protected selectEmployee(item: EmployeeListItem): void {
     this.router.navigate(['/employees', item.id]);

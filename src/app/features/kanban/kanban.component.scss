@@ -134,14 +134,16 @@
   }
 }
 
+// "New Job" is a create action — green per the button taxonomy (matches
+// "+ New Customer" / "+ New Part"), not the teal primary/commit color.
 .new-job-btn {
   @include uppercase-label(var(--font-size-xs), 0.5px, 600);
   @include flex-center;
   gap: $sp-sm;
   padding: $sp-xxs $sp-md;
-  border: $border-width solid var(--primary);
-  background: var(--primary);
-  color: var(--primary-btn-text);
+  border: $border-width solid var(--action-create);
+  background: var(--action-create);
+  color: #ffffff;
   cursor: pointer;
   border-radius: $border-radius;
   margin-left: auto;
@@ -149,8 +151,8 @@
   .material-icons-outlined { font-size: $icon-size-xs; }
 
   &:hover {
-    background: var(--primary-dark);
-    border-color: var(--primary-dark);
+    background: var(--action-create-hover);
+    border-color: var(--action-create-hover);
   }
 }
 

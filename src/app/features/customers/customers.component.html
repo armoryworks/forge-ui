@@ -53,7 +53,7 @@
 
 <!-- Create Customer Dialog -->
 @if (showDialog()) {
-  <app-dialog [title]="'customers.createCustomer' | translate" (closed)="closeDialog()">
+  <app-dialog [title]="'customers.createCustomer' | translate" [dirty]="customerForm.dirty" (closed)="closeDialog()">
     <div [formGroup]="customerForm">
       <app-input [label]="'common.name' | translate" formControlName="name" [required]="true" data-testid="customer-name" />
       <app-input [label]="'customers.companyName' | translate" formControlName="companyName" data-testid="customer-company" />

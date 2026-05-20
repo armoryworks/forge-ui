@@ -5867,6 +5867,7 @@
   "employees": {
     "title": "Empleados",
     "subtitle": "Gestionar miembros del equipo",
+    "invite": "Invitar Empleado",
     "search": "Buscar",
     "searchPlaceholder": "Buscar por nombre o correo...",
     "role": "Rol",
