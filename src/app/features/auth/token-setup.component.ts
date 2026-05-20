@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ReactiveFormsModule, FormGroup, FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -11,6 +11,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../shared/services/form-validation.service';
 import { LayoutService } from '../../shared/services/layout.service';
+import { passwordStrengthValidator } from '../../shared/validators/password-strength.validator';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ToastService } from '../../shared/services/toast.service';
@@ -37,6 +38,20 @@ export class TokenSetupComponent implements OnInit {
   protected readonly error = signal<string | null>(null);
   protected readonly tokenInfo = signal<SetupTokenInfo | null>(null);
 
+  /**
+   * Friendly greeting name. Collapses to just the first name when first and
+   * last are identical (avoids "Welcome, Claude Claude") or when no last name
+   * is present.
+   */
+  protected readonly welcomeName = computed(() => {
+    const info = this.tokenInfo();
+    if (!info) return '';
+    const first = (info.firstName ?? '').trim();
+    const last = (info.lastName ?? '').trim();
+    if (!last || first.toLowerCase() === last.toLowerCase()) return first;
+    return `${first} ${last}`;
+  });
+
   ngOnInit(): void {
     if (!this.token) {
       this.error.set(this.translate.instant('auth.invalidSetupLink'));
@@ -50,7 +65,7 @@ export class TokenSetupComponent implements OnInit {
   }
 
   protected readonly form = new FormGroup({
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    password: new FormControl('', [Validators.required, passwordStrengthValidator]),
     confirmPassword: new FormControl('', [Validators.required]),
   });
 

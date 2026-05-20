@@ -1,9 +1,9 @@
 import {
-  ChangeDetectionStrategy, Component, DestroyRef, inject, input, OnInit, output, signal,
+  ChangeDetectionStrategy, Component, DestroyRef, HostListener, inject, input, OnInit, output, signal,
 } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 
@@ -25,6 +25,11 @@ export class DialogComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly draftService = inject(DraftService);
   private readonly destroyRef = inject(DestroyRef);
+  // Non-null only when this <app-dialog> is itself rendered inside a MatDialog
+  // overlay — in that case the CDK already handles Escape, so we must not
+  // double-handle it. Null for the inline usage (rendered directly in a page
+  // template), which is the case that needs the document-level Escape handler.
+  private readonly hostMatDialogRef = inject(MatDialogRef, { optional: true });
 
   readonly title = input.required<string>();
   readonly width = input<string>('420px');
@@ -94,6 +99,19 @@ export class DialogComponent implements OnInit {
       return this.draftFormGroup()!.dirty;
     }
     return this.dirty();
+  }
+
+  /**
+   * Escape closes the dialog through the same path as the X button (incl. the
+   * unsaved-changes confirm). Only active for the inline usage — MatDialog-
+   * hosted dialogs get Escape from the CDK overlay, and a nested confirm
+   * owns Escape while it's open.
+   */
+  @HostListener('document:keydown.escape')
+  protected onEscapeKey(): void {
+    if (this.hostMatDialogRef) return;
+    if (this.dialog.openDialogs.length > 0) return;
+    this.tryClose();
   }
 
   tryClose(): void {

@@ -21,6 +21,13 @@
   margin-top: $sp-lg;
 }
 
+.setup-password-hint {
+  margin: -#{$sp-sm} 0 0;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
 .setup-error {
   display: flex;
   align-items: center;

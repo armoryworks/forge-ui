@@ -2,7 +2,7 @@
   <mat-card class="setup-card">
     <mat-card-header>
       @if (tokenInfo(); as info) {
-        <mat-card-title>Welcome, {{ info.firstName }} {{ info.lastName }}</mat-card-title>
+        <mat-card-title>{{ 'auth.welcomeName' | translate:{ name: welcomeName() } }}</mat-card-title>
         <mat-card-subtitle>{{ 'auth.createAccount' | translate }}</mat-card-subtitle>
       } @else {
         <mat-card-title>{{ 'auth.createAccount' | translate }}</mat-card-title>
@@ -21,6 +21,7 @@
       @if (!error()) {
         <div [formGroup]="form" class="setup-form">
           <app-input [label]="'auth.password' | translate" type="password" formControlName="password" autocomplete="new-password" data-testid="setup-password" />
+          <p class="setup-password-hint">{{ 'auth.passwordRequirements' | translate }}</p>
           <app-input [label]="'auth.confirmPassword' | translate" type="password" formControlName="confirmPassword" autocomplete="new-password" data-testid="setup-confirm-password" />
         </div>
       }

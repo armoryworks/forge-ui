@@ -18,6 +18,8 @@ describe('DashboardService', () => {
     activity: [],
     deadlines: [],
     kpis: {} as DashboardData['kpis'],
+    customerCount: 0,
+    trackTypeCount: 0,
   };
 
   const mockLayout: DashboardLayout = {

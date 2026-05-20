@@ -11,6 +11,8 @@ interface SetupStep {
   label: string;
   route: string;
   done: boolean;
+  /** Optional query params for the navigation (e.g. open the New Job form). */
+  queryParams?: Record<string, string>;
 }
 
 const PREF_KEY = 'dashboard:getting-started-dismissed';
@@ -35,9 +37,14 @@ export class GettingStartedBannerComponent {
   protected get steps(): SetupStep[] {
     const d = this.data();
     return [
-      { label: this.translate.instant('dashboard.createFirstJob'), route: '/kanban', done: d.kpis.activeCount > 0 },
-      { label: this.translate.instant('dashboard.addCustomer'), route: '/customers', done: (d.stages?.length ?? 0) > 0 },
-      { label: this.translate.instant('dashboard.setUpTrackTypes'), route: '/admin/track-types', done: (d.stages?.length ?? 0) > 3 },
+      // CTA opens the New Job form directly (via ?new=job) rather than just
+      // landing the user on the board to hunt for the button.
+      { label: this.translate.instant('dashboard.createFirstJob'), route: '/kanban', queryParams: { new: 'job' }, done: d.kpis.activeCount > 0 },
+      // Completion keys off real counts, not unrelated kanban stage counts.
+      { label: this.translate.instant('dashboard.addCustomer'), route: '/customers', done: (d.customerCount ?? 0) > 0 },
+      // 3 track types are seeded by default (Production / R&D / Maintenance);
+      // "done" means the user added one of their own beyond those.
+      { label: this.translate.instant('dashboard.setUpTrackTypes'), route: '/admin/track-types', done: (d.trackTypeCount ?? 0) > 3 },
       { label: this.translate.instant('dashboard.exploreReports'), route: '/reports', done: false },
     ];
   }
@@ -55,7 +62,7 @@ export class GettingStartedBannerComponent {
   }
 
   protected goTo(step: SetupStep): void {
-    this.router.navigate([step.route]);
+    this.router.navigate([step.route], step.queryParams ? { queryParams: step.queryParams } : undefined);
   }
 
   protected dismiss(): void {

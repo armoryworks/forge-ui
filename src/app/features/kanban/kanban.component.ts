@@ -25,6 +25,7 @@ import { SelectOption } from '../../shared/components/select/select.component';
 import { SelectComponent } from '../../shared/components/select/select.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
+import { CapDirective } from '../../shared/directives/cap.directive';
 import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
@@ -45,6 +46,7 @@ export type ViewMode = 'board' | 'team';
     PageHeaderComponent, MatMenuModule, MatTooltipModule,
     CdkDropList, CdkDrag,
     SelectComponent, AvatarComponent,
+    CapDirective,
     TranslatePipe,
   ],
   templateUrl: './kanban.component.html',
@@ -228,6 +230,13 @@ export class KanbanComponent implements OnInit, OnDestroy {
           const detail = this.detailDialog.getDetailFromUrl();
           if (detail?.entityType === 'job') {
             this.openJobDetail(detail.entityId);
+          }
+          // Open the New Job form if navigated with ?new=job (e.g. the
+          // dashboard "Create your first job" CTA). Clear the param after so
+          // a refresh doesn't reopen the dialog.
+          if (this.route.snapshot.queryParamMap.get('new') === 'job') {
+            this.openCreateDialog();
+            this.router.navigate([], { queryParams: { new: null }, queryParamsHandling: 'merge', replaceUrl: true });
           }
         },
         error: () => this.error.set(this.translate.instant('kanban.loadTrackTypesFailed')),

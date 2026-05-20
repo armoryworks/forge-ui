@@ -12,4 +12,6 @@ export interface DashboardData {
   activity: ActivityEntry[];
   deadlines: DeadlineEntry[];
   kpis: DashboardKPIs;
+  customerCount: number;
+  trackTypeCount: number;
 }

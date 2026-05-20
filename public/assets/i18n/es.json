@@ -3889,6 +3889,8 @@
     "signInToContinue": "Inicie sesión para continuar",
     "confirmPassword": "Confirmar contraseña",
     "createAccount": "Crear cuenta",
+    "welcomeName": "Bienvenido, {{name}}",
+    "passwordRequirements": "Al menos 8 caracteres, incluyendo una letra mayúscula, una minúscula y un número.",
     "creating": "Creando...",
     "completingSignIn": "Completando inicio de sesión...",
     "setupComplete": "Configuración de cuenta completa. ¡Bienvenido!",
