@@ -1,0 +1,30 @@
+<app-dialog [title]="'vendors.fork.title' | translate" width="560px" (closed)="close()">
+  <p class="fork-hint">{{ 'vendors.fork.hint' | translate }}</p>
+
+  <div class="fork-choices">
+    @for (choice of choices; track choice.value) {
+      <button class="fork-card"
+        [class.fork-card--primary]="choice.value === 'quick'"
+        [attr.data-testid]="'vendor-fork-' + choice.value"
+        (click)="pick(choice.value)">
+        <div class="fork-card__icon">
+          <span class="material-icons-outlined">{{ choice.icon }}</span>
+        </div>
+        <div class="fork-card__body">
+          <div class="fork-card__title">
+            {{ choice.titleKey | translate }}
+            @if (choice.badgeKey) {
+              <span class="fork-card__badge">{{ choice.badgeKey | translate }}</span>
+            }
+          </div>
+          <div class="fork-card__desc">{{ choice.descKey | translate }}</div>
+        </div>
+        <span class="material-icons-outlined fork-card__chevron">chevron_right</span>
+      </button>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+  </div>
+</app-dialog>

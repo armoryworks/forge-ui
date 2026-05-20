@@ -4035,6 +4035,59 @@
     "poStatusPartial": "Partial",
     "lines": "Lines",
     "expected": "Expected",
+    "fork": {
+      "title": "New Vendor",
+      "hint": "Choose how to set up this vendor.",
+      "quickTitle": "Quick add",
+      "quickDesc": "Just the essentials — company name and basic contact. Flesh out the rest later.",
+      "quickBadge": "Fast",
+      "guidedTitle": "Guided setup",
+      "guidedDesc": "Step-by-step for strategic or approved vendors — classification, address, terms, and the parts they supply."
+    },
+    "guided": {
+      "title": "New Vendor — Guided Setup",
+      "creating": "Creating vendor…",
+      "create": "Create Vendor",
+      "step1Title": "Identity",
+      "step1Hint": "Who is this vendor and how do you reach them?",
+      "step2Title": "Relationship",
+      "step2Hint": "What kind of vendor relationship is this? Optional — it tailors the rest of the setup.",
+      "step3Title": "Address",
+      "step3Hint": "Remit-to / primary address. All fields optional.",
+      "step4Title": "Terms",
+      "step4Hint": "Payment terms and any notes about working with this vendor.",
+      "step5Title": "Supplied Parts",
+      "step5Hint": "Add the parts or consumables this vendor supplies. Optional — you can add them later from the vendor's Catalog tab.",
+      "step6Title": "Review",
+      "step6Hint": "Confirm the details, then create the vendor.",
+      "type": {
+        "Transactional": "Transactional",
+        "TransactionalDesc": "Everyday supplier for routine purchases.",
+        "TransactionalPlaybook": "Keep it light — capture the basics and order as needed.",
+        "Strategic": "Strategic partner",
+        "StrategicDesc": "Key supplier worth investing in the relationship.",
+        "StrategicPlaybook": "Capture the account manager and core capabilities so the team knows who to call.",
+        "Subcontractor": "Subcontractor",
+        "SubcontractorDesc": "Performs outsourced operations on your parts.",
+        "SubcontractorPlaybook": "Record the processes they run and any certifications you rely on.",
+        "Distributor": "Distributor",
+        "DistributorDesc": "Resells parts made by other manufacturers.",
+        "DistributorPlaybook": "Note the lines they carry so you know what to source through them."
+      },
+      "extras": {
+        "accountManager": "Account Manager",
+        "capabilities": "Core Capabilities",
+        "processes": "Processes / Operations",
+        "certifications": "Certifications",
+        "linesCarried": "Lines Carried"
+      },
+      "supply": {
+        "part": "Part",
+        "add": "Add Part",
+        "empty": "No supplied parts added yet.",
+        "count": "Supplied parts"
+      }
+    },
     "detail": {
       "catalogTab": "Catalog",
       "catalogEmpty": "This vendor has no parts in the catalog yet.",

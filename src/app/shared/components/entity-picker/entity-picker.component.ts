@@ -63,6 +63,14 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
    */
   readonly createNewLabel = input<string | null>(null);
   readonly createNew = output<string>();
+  /**
+   * Emits the full selected entity row when the user picks a result, or
+   * `null` when the selection is cleared by typing. Lets consumers capture
+   * the display label (not just the id) — e.g. a multi-add list that needs
+   * to show "PN-123 — Widget" for each picked row. Additive; existing
+   * consumers that only bind the form value ignore it.
+   */
+  readonly selected = output<Record<string, unknown> | null>();
 
   protected readonly searchControl = new FormControl('');
   protected readonly results = signal<Record<string, unknown>[]>([]);
@@ -160,6 +168,7 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
     this.selectedValue = entity['id'];
     this.searchControl.setValue(String(entity[this.displayField()] ?? ''), { emitEvent: false });
     this.onChange(this.selectedValue);
+    this.selected.emit(entity);
   }
 
   /**
@@ -178,6 +187,7 @@ export class EntityPickerComponent implements ControlValueAccessor, OnInit {
     if (this.selectedValue !== null) {
       this.selectedValue = null;
       this.onChange(null);
+      this.selected.emit(null);
     }
   }
 

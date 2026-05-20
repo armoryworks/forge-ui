@@ -4024,6 +4024,59 @@
     "poStatusPartial": "Parcial",
     "lines": "Líneas",
     "expected": "Esperado",
+    "fork": {
+      "title": "Nuevo Proveedor",
+      "hint": "Elige cómo configurar este proveedor.",
+      "quickTitle": "Alta rápida",
+      "quickDesc": "Solo lo esencial — nombre de empresa y contacto básico. Completa el resto más tarde.",
+      "quickBadge": "Rápido",
+      "guidedTitle": "Configuración guiada",
+      "guidedDesc": "Paso a paso para proveedores estratégicos o aprobados — clasificación, dirección, términos y las piezas que suministran."
+    },
+    "guided": {
+      "title": "Nuevo Proveedor — Configuración Guiada",
+      "creating": "Creando proveedor…",
+      "create": "Crear Proveedor",
+      "step1Title": "Identidad",
+      "step1Hint": "¿Quién es este proveedor y cómo contactarlo?",
+      "step2Title": "Relación",
+      "step2Hint": "¿Qué tipo de relación es esta? Opcional — adapta el resto de la configuración.",
+      "step3Title": "Dirección",
+      "step3Hint": "Dirección de pago / principal. Todos los campos son opcionales.",
+      "step4Title": "Términos",
+      "step4Hint": "Términos de pago y notas sobre el trabajo con este proveedor.",
+      "step5Title": "Piezas Suministradas",
+      "step5Hint": "Agrega las piezas o consumibles que suministra este proveedor. Opcional — puedes agregarlas más tarde desde la pestaña Catálogo del proveedor.",
+      "step6Title": "Revisar",
+      "step6Hint": "Confirma los detalles y luego crea el proveedor.",
+      "type": {
+        "Transactional": "Transaccional",
+        "TransactionalDesc": "Proveedor habitual para compras rutinarias.",
+        "TransactionalPlaybook": "Mantenlo sencillo — captura lo básico y ordena según sea necesario.",
+        "Strategic": "Socio estratégico",
+        "StrategicDesc": "Proveedor clave en el que vale la pena invertir en la relación.",
+        "StrategicPlaybook": "Captura el gerente de cuenta y las capacidades principales para que el equipo sepa a quién llamar.",
+        "Subcontractor": "Subcontratista",
+        "SubcontractorDesc": "Realiza operaciones subcontratadas sobre tus piezas.",
+        "SubcontractorPlaybook": "Registra los procesos que ejecutan y las certificaciones en las que confías.",
+        "Distributor": "Distribuidor",
+        "DistributorDesc": "Revende piezas fabricadas por otros fabricantes.",
+        "DistributorPlaybook": "Anota las líneas que manejan para saber qué abastecer a través de ellos."
+      },
+      "extras": {
+        "accountManager": "Gerente de Cuenta",
+        "capabilities": "Capacidades Principales",
+        "processes": "Procesos / Operaciones",
+        "certifications": "Certificaciones",
+        "linesCarried": "Líneas Manejadas"
+      },
+      "supply": {
+        "part": "Pieza",
+        "add": "Agregar Pieza",
+        "empty": "Aún no se han agregado piezas suministradas.",
+        "count": "Piezas suministradas"
+      }
+    },
     "detail": {
       "catalogTab": "Catálogo",
       "catalogEmpty": "Este proveedor aún no tiene piezas en el catálogo.",

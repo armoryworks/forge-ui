@@ -2,13 +2,16 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { debounceTime, distinctUntilChanged, startWith } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { debounceTime, distinctUntilChanged, forkJoin, map, of, startWith, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { VendorService } from './services/vendor.service';
 import { VendorListItem } from './models/vendor-list-item.model';
 import { VendorDialogComponent } from './components/vendor-dialog/vendor-dialog.component';
 import { VendorDetailDialogComponent, VendorDetailDialogData } from './components/vendor-detail-dialog/vendor-detail-dialog.component';
+import { NewVendorForkDialogComponent, VendorCreatePath } from './components/new-vendor-fork-dialog/new-vendor-fork-dialog.component';
+import { GuidedVendorDialogComponent, GuidedVendorResult } from './components/guided-vendor-dialog/guided-vendor-dialog.component';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
@@ -17,6 +20,9 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { LoadingService } from '../../shared/services/loading.service';
+import { SnackbarService } from '../../shared/services/snackbar.service';
+import { VendorPartsService } from '../parts/services/vendor-parts.service';
 import { EntityCompletenessChipComponent } from '../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
 import { EntityCompletenessBadgeComponent } from '../../shared/components/entity-completeness-badge/entity-completeness-badge.component';
 
@@ -39,6 +45,10 @@ export class VendorsComponent {
   private readonly vendorService = inject(VendorService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly matDialog = inject(MatDialog);
+  private readonly loadingService = inject(LoadingService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly vendorPartsService = inject(VendorPartsService);
 
   protected readonly loading = signal(false);
   protected readonly vendors = signal<VendorListItem[]>([]);
@@ -145,8 +155,66 @@ export class VendorsComponent {
     });
   }
 
+  /**
+   * Entry point opens the fork dialog first; the chosen path routes to the
+   * matching downstream flow:
+   *   quick  → existing inline vendor dialog (flat form)
+   *   guided → multi-step guided wizard (classification, address, terms,
+   *            supplied parts)
+   */
   protected openCreateVendor(): void {
+    this.matDialog.open<NewVendorForkDialogComponent, void, VendorCreatePath | undefined>(
+      NewVendorForkDialogComponent, { width: '560px' },
+    ).afterClosed().subscribe(path => {
+      if (!path) return;
+      switch (path) {
+        case 'quick': this.openQuickCreateVendor(); break;
+        case 'guided': this.openGuidedCreateVendor(); break;
+      }
+    });
+  }
+
+  /** Quick add — the original flat inline dialog. */
+  private openQuickCreateVendor(): void {
     this.showDialog.set(true);
+  }
+
+  /**
+   * Guided wizard — strategic / AVL vendors. The wizard collects the vendor
+   * fields plus an in-memory list of supplied parts; on confirm we create
+   * the vendor, then chain a VendorPart create per supply item (the parts
+   * need the new vendor id), then surface the vendor detail.
+   */
+  private openGuidedCreateVendor(): void {
+    this.matDialog.open<GuidedVendorDialogComponent, void, GuidedVendorResult | undefined>(
+      GuidedVendorDialogComponent, { width: '680px' },
+    ).afterClosed().subscribe(result => {
+      if (!result) return;
+      const { request, supplyItems } = result;
+      const create$ = this.vendorService.createVendor(request).pipe(
+        switchMap(created => {
+          if (supplyItems.length === 0) return of(created);
+          return forkJoin(
+            supplyItems.map(si => this.vendorPartsService.create({
+              vendorId: created.id,
+              partId: si.partId,
+              vendorPartNumber: si.vendorPartNumber,
+              leadTimeDays: si.leadTimeDays,
+              minOrderQty: si.minOrderQty,
+              isPreferred: si.isPreferred,
+            })),
+          ).pipe(map(() => created));
+        }),
+      );
+
+      this.loadingService.track(this.translate.instant('vendors.guided.creating'), create$).subscribe({
+        next: (created) => {
+          this.snackbar.success(this.translate.instant('vendors.vendorCreated'));
+          this.loadVendors();
+          this.openVendorDetail(created);
+        },
+      });
+    });
   }
 
   protected closeDialog(): void { this.showDialog.set(false); }
