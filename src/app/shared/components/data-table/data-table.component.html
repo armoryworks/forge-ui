@@ -111,6 +111,13 @@
                 </button>
                 <button
                   class="data-table__gear-btn"
+                  [attr.aria-label]="'shared.exportExcel' | translate"
+                  [matTooltip]="'shared.exportExcel' | translate" matTooltipPosition="above"
+                  (click)="exportExcel()">
+                  <span class="material-icons-outlined">grid_on</span>
+                </button>
+                <button
+                  class="data-table__gear-btn"
                   [attr.aria-label]="'shared.manageColumns' | translate"
                   [matTooltip]="'shared.manageColumns' | translate" matTooltipPosition="above"
                   (click)="toggleColumnManager($event)"

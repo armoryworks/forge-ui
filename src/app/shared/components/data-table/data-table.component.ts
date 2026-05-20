@@ -22,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { OverlayModule } from '@angular/cdk/overlay';
 
 import { unparse } from 'papaparse';
+import writeXlsxFile, { type CellObject, type SheetData } from 'write-excel-file/browser';
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { ColumnDef } from '../../models/column-def.model';
@@ -453,6 +454,38 @@ export class DataTableComponent implements OnInit {
     link.download = `${this.tableId()}-export.csv`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  // ─── Excel Export ───
+  exportExcel(): void {
+    const cols = this.visibleColumns();
+    const header: CellObject[] = cols.map(col => ({ value: col.header, fontWeight: 'bold' }));
+    const body = this.filteredData().map(row => {
+      const rec = row as Record<string, unknown>;
+      return cols.map(col => this.toExcelCell(rec[col.field], col));
+    });
+    const data: SheetData = [header, ...body];
+    void writeXlsxFile(data).toFile(`${this.tableId()}-export.xlsx`);
+  }
+
+  private toExcelCell(raw: unknown, col: ColumnDef): CellObject | null {
+    if (raw === null || raw === undefined || raw === '') {
+      return null;
+    }
+    if (typeof raw === 'boolean') {
+      return { type: Boolean, value: raw };
+    }
+    if (col.type === 'number') {
+      const n = typeof raw === 'number' ? raw : Number(raw);
+      return Number.isNaN(n) ? { type: String, value: String(raw) } : { type: Number, value: n };
+    }
+    if (col.type === 'date') {
+      const d = raw instanceof Date ? raw : new Date(raw as string);
+      return Number.isNaN(d.getTime())
+        ? { type: String, value: String(raw) }
+        : { type: Date, value: d, format: 'mm/dd/yyyy' };
+    }
+    return { type: String, value: String(raw) };
   }
 
   // ─── Filter ───

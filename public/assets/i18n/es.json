@@ -3672,6 +3672,7 @@
     "helpTour": "Tour de ayuda de la página",
     "startHelpTour": "Iniciar tour de ayuda",
     "exportCsv": "Exportar CSV",
+    "exportExcel": "Exportar Excel",
     "manageColumns": "Gestionar columnas",
     "filterColumn": "Filtrar {{column}}",
     "columnMenu": "Opciones de {{column}}",

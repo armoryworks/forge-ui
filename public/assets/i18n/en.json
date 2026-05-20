@@ -3676,6 +3676,7 @@
     "helpTour": "Page help tour",
     "startHelpTour": "Start page help tour",
     "exportCsv": "Export CSV",
+    "exportExcel": "Export Excel",
     "manageColumns": "Manage columns",
     "filterColumn": "Filter {{column}}",
     "columnMenu": "{{column}} options",
