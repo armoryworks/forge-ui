@@ -89,9 +89,13 @@
   --text: #f1f5f9;
   --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
-  // Action colors — lighter for contrast against dark backgrounds
-  --action-create: #22c55e;
-  --action-create-hover: #16a34a;
+  // Action colors — lighter for contrast against dark backgrounds.
+  // Create green is toned down to GitHub's dark-mode primary (Primer
+  // btn-primary): muted #238636 rest / #2ea043 hover, rather than the vivid
+  // Tailwind green-500, which read as too saturated and also gave weak white-
+  // text contrast.
+  --action-create: #238636;
+  --action-create-hover: #2ea043;
   --action-destructive: #ef4444;
   --action-destructive-hover: #dc2626;
 }
