@@ -20,6 +20,14 @@ import { ETagCacheService } from '../services/etag-cache.service';
  * harmlessly attaches If-Match if it has one, but the server treats it as
  * a no-op for those endpoints.
  *
+ * Documented permissive exceptions (explicitly last-write-wins by eng-lead ruling):
+ *  - /jobs/bulk/* — bulk stage/assign/priority/archive operations. No per-resource
+ *    ETag array protocol exists; the server enforces outcome-idempotency via
+ *    outbox deduplication instead.
+ *  - /jobs/{id}/position — presentational board ordering only. Enforcing If-Match
+ *    would require N GETs for an N-card column reorder (30 round-trips on a
+ *    15-card board). No business/financial invariant depends on position.
+ *
  * On 412 Precondition Failed responses, the ConcurrencyConflictService is
  * notified so the UI can prompt the user to reload.
  *

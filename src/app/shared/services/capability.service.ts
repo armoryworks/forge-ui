@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { Observable, catchError, map, of, tap, throwError } from 'rxjs';
+import { Observable, catchError, finalize, map, of, share, tap, throwError } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { CapabilityAuditEntry } from '../models/capability-audit-entry.model';
@@ -33,6 +33,7 @@ export class CapabilityService {
 
   private readonly _descriptor = signal<CapabilityDescriptor | null>(null);
   private readonly _loading = signal(false);
+  private _inFlight: Observable<void> | null = null;
 
   readonly descriptor = this._descriptor.asReadonly();
   readonly loading = this._loading.asReadonly();
@@ -97,8 +98,9 @@ export class CapabilityService {
    * `isKnown` and the call falls through to the server).
    */
   load(): Observable<void> {
+    if (this._inFlight) return this._inFlight;
     this._loading.set(true);
-    return this.http
+    this._inFlight = this.http
       .get<CapabilityDescriptor>(`${environment.apiUrl}/capabilities/descriptor`)
       .pipe(
         tap((d) => this._descriptor.set(d)),
@@ -111,7 +113,10 @@ export class CapabilityService {
         }),
         tap(() => this._loading.set(false)),
         map(() => void 0),
+        finalize(() => { this._inFlight = null; }),
+        share(),
       );
+    return this._inFlight;
   }
 
   /**
@@ -177,6 +182,7 @@ export class CapabilityService {
 
   /** Clears the in-memory descriptor on logout. */
   clear(): void {
+    this._inFlight = null;
     this._descriptor.set(null);
   }
 

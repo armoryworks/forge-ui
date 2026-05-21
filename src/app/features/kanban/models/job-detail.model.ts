@@ -36,4 +36,6 @@ export interface JobDetail {
   createdAt: Date;
   updatedAt: Date;
   coverPhotoUrl: string | null;
+  /** Captured by the ETag interceptor body-capture path when present. */
+  rowVersion?: number | string | null;
 }

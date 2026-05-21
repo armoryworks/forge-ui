@@ -61,10 +61,20 @@ export class AiService {
   readonly capabilityDisabled = signal(false);
 
   checkAvailability(): void {
-    // Layer-3 pre-check: when the descriptor already says AI is off, skip
-    // the network call entirely. This is the user-visible fix — devtools
-    // network tab stays clean. The catchError below remains as layer-2
-    // insurance for the boot-time race window.
+    // Descriptor may not be loaded yet at header init time. Wait for it
+    // before testing the capability. capability.load() is deduped (F-001):
+    // the in-flight observable is returned if already loading, so no extra
+    // HTTP request fires.
+    if (this.capability.descriptor() === null) {
+      this.capability.load().subscribe({ next: () => this._fireAvailabilityCheck() });
+      return;
+    }
+    this._fireAvailabilityCheck();
+  }
+
+  private _fireAvailabilityCheck(): void {
+    // Layer-3 pre-check: descriptor is loaded — if AI is known-disabled,
+    // skip the network call. Devtools network tab stays clean.
     if (this.capability.isKnown('CAP-EXT-AI-ASSISTANT')
       && !this.capability.isEnabled('CAP-EXT-AI-ASSISTANT')) {
       this.available.set(false);

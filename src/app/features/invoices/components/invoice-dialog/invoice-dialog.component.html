@@ -86,7 +86,7 @@
           <app-currency-display [value]="lineTotal()" [currency]="null" />
         </div>
         <div class="dlg-total-row">
-          <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() }}%)</span>
+          <span>{{ 'quotes.tax' | translate }} ({{ taxRateValue() | number:'1.0-4' }}%)</span>
           <app-currency-display [value]="taxAmount()" [currency]="null" />
         </div>
         <div class="dlg-total-row dlg-total-row--grand">

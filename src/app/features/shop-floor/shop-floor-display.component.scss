@@ -7,7 +7,14 @@ $grid-columns: 5;
 :host {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  // The font-scale control sets `zoom` (and a matching `--sf-zoom`) on this
+  // host. `zoom` scales the used height, so a plain `100vh` would render as
+  // `zoom * 100vh` and overflow the viewport, dropping the action bar below
+  // the fold. Dividing by `--sf-zoom` cancels that out: the host stays exactly
+  // one viewport tall at every scale, `overflow: hidden` clips at the viewport,
+  // and `.sf-body` (flex:1 + min-height:0 + overflow-y:auto) takes the extra
+  // content as internal scroll. Default 1 keeps unzoomed render at 100vh.
+  height: calc(100vh / var(--sf-zoom, 1));
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
@@ -1462,7 +1469,9 @@ $grid-columns: 5;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  // Fill the (zoom-corrected) host rather than re-introducing a raw 100vh that
+  // would overflow under zoom — see the `:host` height note above.
+  height: 100%;
   gap: $sp-lg;
 }
 

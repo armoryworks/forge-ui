@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { map } from 'rxjs';
+import { map, switchMap } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, CdkDragStart, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
@@ -438,7 +438,10 @@ export class KanbanComponent implements OnInit, OnDestroy {
         event.currentIndex,
       );
 
-      this.kanbanService.moveJobStage(job.id, targetStage.id).subscribe({
+      // JIT GET seeds the ETag cache so the PATCH carries If-Match.
+      this.kanbanService.getJobDetail(job.id).pipe(
+        switchMap(() => this.kanbanService.moveJobStage(job.id, targetStage.id)),
+      ).subscribe({
         error: () => {
           transferArrayItem(
             event.container.data,
@@ -485,15 +488,17 @@ export class KanbanComponent implements OnInit, OnDestroy {
     );
 
     if (stageChanged) {
-      this.kanbanService.moveJobStage(job.id, targetStage.id).subscribe({
-        error: () => this.reloadBoard(),
-      });
+      // JIT GET seeds the ETag cache so the PATCH carries If-Match.
+      this.kanbanService.getJobDetail(job.id).pipe(
+        switchMap(() => this.kanbanService.moveJobStage(job.id, targetStage.id)),
+      ).subscribe({ error: () => this.reloadBoard() });
     }
 
     if (assigneeChanged) {
-      this.kanbanService.updateJob(job.id, { assigneeId: targetUserId }).subscribe({
-        error: () => this.reloadBoard(),
-      });
+      // JIT GET seeds the ETag cache so the PUT carries If-Match.
+      this.kanbanService.getJobDetail(job.id).pipe(
+        switchMap(() => this.kanbanService.updateJob(job.id, { assigneeId: targetUserId })),
+      ).subscribe({ error: () => this.reloadBoard() });
     }
   }
 

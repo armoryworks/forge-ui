@@ -778,6 +778,14 @@ export class ShopFloorDisplayComponent implements OnInit, OnDestroy {
   private applyFontSize(): void {
     const el = this.elRef.nativeElement as HTMLElement;
     const scale = FONT_SIZES[this.fontSizeIndex()] / FONT_SIZES[0];
+    // `zoom` magnifies the host's whole box — including its `height: 100vh` —
+    // so at scale > 1 the host grows taller than the viewport and the bottom
+    // action bar falls off-screen (`min-height: 0` on .sf-body can't help; the
+    // overflow is at the host level, not inside the body). Expose the scale to
+    // SCSS so `:host` can divide it back out of its height
+    // (`calc(100vh / var(--sf-zoom))`), keeping the host exactly viewport-sized
+    // at any zoom while the body still absorbs the extra content and scrolls.
+    el.style.setProperty('--sf-zoom', `${scale}`);
     el.style.zoom = `${scale}`;
     localStorage.setItem('sf-font-index', String(this.fontSizeIndex()));
   }

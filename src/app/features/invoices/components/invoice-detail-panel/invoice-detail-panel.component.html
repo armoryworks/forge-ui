@@ -99,7 +99,7 @@
           <span class="totals-value"><app-currency-display [value]="inv.subtotal" [currency]="null" /></span>
         </div>
         <div class="totals-row">
-          <span class="totals-label">{{ 'invoices.tax' | translate }} ({{ inv.taxRate * 100 }}%)</span>
+          <span class="totals-label">{{ 'invoices.tax' | translate }} ({{ inv.taxRate * 100 | number:'1.0-4' }}%)</span>
           <span class="totals-value"><app-currency-display [value]="inv.taxAmount" [currency]="null" /></span>
         </div>
         <div class="totals-row totals-row--total">
