@@ -81,6 +81,58 @@
 
   &__right { text-align: right; }
   &__mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+  &__margin { color: var(--success, #15803d); font-weight: 600; }
+  &__muted { color: var(--text-muted); }
+
+  &__breakdown-row td {
+    padding: 0 $sp-md $sp-xs;
+    border-bottom: $border-width-thin solid var(--border);
+    background: var(--row-alt, #f8fffe);
+  }
+}
+
+// --- Per-line cost breakdown (§9 estimating-engine-contract) ---
+.cost-breakdown {
+  display: flex;
+  align-items: baseline;
+  gap: $sp-md;
+  flex-wrap: wrap;
+
+  &__label {
+    font-size: $font-size-xxs;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  &__cells {
+    display: flex;
+    gap: $sp-md;
+    flex-wrap: wrap;
+  }
+
+  &__cell {
+    display: flex;
+    gap: 4px;
+    align-items: baseline;
+    font-size: $font-size-xs;
+
+    &--total {
+      font-weight: 700;
+      color: var(--text);
+    }
+  }
+
+  &__key {
+    color: var(--text-muted);
+  }
+
+  &__val {
+    font-family: $font-family-mono;
+    color: var(--text-secondary);
+  }
 }
 
 // --- Totals ---

@@ -77,7 +77,7 @@
                   type="number"
                   placeholder="—"
                   [value]="op.workCenterId ?? ''"
-                  (change)="setOpField(i, 'workCenterId', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'workCenterId', $any($event.target).value)"
                   min="1" />
               </div>
               <div class="op-field">
@@ -86,7 +86,7 @@
                   class="op-input"
                   type="number"
                   [value]="op.setupMinutes"
-                  (change)="setOpField(i, 'setupMinutes', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'setupMinutes', $any($event.target).value)"
                   min="0" step="0.1" />
               </div>
               <div class="op-field">
@@ -95,7 +95,7 @@
                   class="op-input"
                   type="number"
                   [value]="op.runMinutesEach"
-                  (change)="setOpField(i, 'runMinutesEach', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'runMinutesEach', $any($event.target).value)"
                   min="0" step="0.01" />
               </div>
               <div class="op-field">
@@ -104,7 +104,7 @@
                   class="op-input"
                   type="number"
                   [value]="op.runMinutesLot"
-                  (change)="setOpField(i, 'runMinutesLot', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'runMinutesLot', $any($event.target).value)"
                   min="0" step="0.1" />
               </div>
               <div class="op-field">
@@ -113,7 +113,7 @@
                   class="op-input"
                   type="number"
                   [value]="op.scrapFactor"
-                  (change)="setOpField(i, 'scrapFactor', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'scrapFactor', $any($event.target).value)"
                   min="0" max="99" step="0.1" />
               </div>
               <div class="op-field">
@@ -122,7 +122,7 @@
                   class="op-input"
                   type="number"
                   [value]="op.laborRatePerHour"
-                  (change)="setOpField(i, 'laborRatePerHour', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'laborRatePerHour', $any($event.target).value)"
                   min="0" step="0.01" />
               </div>
               <div class="op-field">
@@ -131,7 +131,7 @@
                   class="op-input"
                   type="number"
                   [value]="op.burdenRatePerHour"
-                  (change)="setOpField(i, 'burdenRatePerHour', ($event.target as HTMLInputElement).value)"
+                  (change)="setOpField(i, 'burdenRatePerHour', $any($event.target).value)"
                   min="0" step="0.01" />
               </div>
               <div class="op-field op-field--checkbox">
@@ -151,7 +151,7 @@
                     class="op-input"
                     type="number"
                     [value]="op.subcontractUnitCost"
-                    (change)="setOpField(i, 'subcontractUnitCost', ($event.target as HTMLInputElement).value)"
+                    (change)="setOpField(i, 'subcontractUnitCost', $any($event.target).value)"
                     min="0" step="0.01" />
                 </div>
                 <div class="op-field">
@@ -160,7 +160,7 @@
                     class="op-input"
                     type="number"
                     [value]="op.subcontractMinimum"
-                    (change)="setOpField(i, 'subcontractMinimum', ($event.target as HTMLInputElement).value)"
+                    (change)="setOpField(i, 'subcontractMinimum', $any($event.target).value)"
                     min="0" step="0.01" />
                 </div>
               </div>
@@ -215,33 +215,33 @@
                     type="number"
                     [placeholder]="'estimate.matPartIdLabel' | translate"
                     [value]="getPendingMat(i).partId ?? ''"
-                    (change)="setPendingMatField(i, 'partId', ($event.target as HTMLInputElement).value)"
+                    (change)="setPendingMatField(i, 'partId', $any($event.target).value)"
                     min="1" />
                   <input
                     class="op-input"
                     type="number"
                     [placeholder]="'estimate.matQtyLabel' | translate"
                     [value]="getPendingMat(i).qtyPerUnit"
-                    (change)="setPendingMatField(i, 'qtyPerUnit', ($event.target as HTMLInputElement).value)"
+                    (change)="setPendingMatField(i, 'qtyPerUnit', $any($event.target).value)"
                     min="0.0001" step="0.0001" />
                   <input
                     class="op-input"
                     type="number"
                     [placeholder]="'estimate.matDropLabel' | translate"
                     [value]="getPendingMat(i).dropFactor"
-                    (change)="setPendingMatField(i, 'dropFactor', ($event.target as HTMLInputElement).value)"
+                    (change)="setPendingMatField(i, 'dropFactor', $any($event.target).value)"
                     min="0" max="99" step="0.1" />
                   <input
                     class="op-input"
                     [placeholder]="'estimate.matUomLabel' | translate"
                     [value]="getPendingMat(i).uom"
-                    (change)="setPendingMatField(i, 'uom', ($event.target as HTMLInputElement).value)" />
+                    (change)="setPendingMatField(i, 'uom', $any($event.target).value)" />
                   <input
                     class="op-input"
                     type="number"
                     [placeholder]="'estimate.matCostLabel' | translate"
                     [value]="getPendingMat(i).unitCost"
-                    (change)="setPendingMatField(i, 'unitCost', ($event.target as HTMLInputElement).value)"
+                    (change)="setPendingMatField(i, 'unitCost', $any($event.target).value)"
                     min="0" step="0.0001" />
                   <button
                     class="action-btn action-btn--sm"
@@ -287,7 +287,7 @@
                     <input
                       class="op-input op-input--wide"
                       [value]="nre.description"
-                      (change)="setNreField(ni, 'description', ($event.target as HTMLInputElement).value)"
+                      (change)="setNreField(ni, 'description', $any($event.target).value)"
                       [placeholder]="'estimate.nreDescriptionPlaceholder' | translate" />
                   </td>
                   <td class="mat-table__right">
@@ -295,7 +295,7 @@
                       class="op-input op-input--right"
                       type="number"
                       [value]="nre.amount"
-                      (change)="setNreField(ni, 'amount', ($event.target as HTMLInputElement).value)"
+                      (change)="setNreField(ni, 'amount', $any($event.target).value)"
                       min="0" step="0.01" />
                   </td>
                   <td>
@@ -403,7 +403,7 @@
     <button class="action-btn" type="button" (click)="close()">
       {{ 'common.close' | translate }}
     </button>
-    <app-validation-button [form]="form" [violations]="violations">
+    <app-validation-button [violations]="violations">
       <button
         class="action-btn action-btn--primary"
         data-testid="estimate-compute-btn"

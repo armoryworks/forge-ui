@@ -72,6 +72,7 @@
                 <th scope="col">{{ 'common.description' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'quotes.qty' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'quotes.unitPrice' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'quotes.margin' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
               </tr>
             </thead>
@@ -82,8 +83,46 @@
                   <td>{{ line.description }}</td>
                   <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right lines-table__margin">
+                    @if (line.effectiveMargin !== null) {
+                      {{ line.effectiveMargin * 100 | number:'1.1-1' }}%
+                    } @else {
+                      <span class="lines-table__muted">—</span>
+                    }
+                  </td>
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                 </tr>
+                @if (line.costBreakdown) {
+                  <tr class="lines-table__breakdown-row">
+                    <td colspan="6">
+                      <div class="cost-breakdown">
+                        <span class="cost-breakdown__label">{{ 'quotes.costBreakdown' | translate }}</span>
+                        <div class="cost-breakdown__cells">
+                          <div class="cost-breakdown__cell">
+                            <span class="cost-breakdown__key">{{ 'estimate.laborLabel' | translate }}</span>
+                            <app-currency-display class="cost-breakdown__val" [value]="line.costBreakdown.labor" [currency]="null" />
+                          </div>
+                          <div class="cost-breakdown__cell">
+                            <span class="cost-breakdown__key">{{ 'estimate.burdenLabel' | translate }}</span>
+                            <app-currency-display class="cost-breakdown__val" [value]="line.costBreakdown.burden" [currency]="null" />
+                          </div>
+                          <div class="cost-breakdown__cell">
+                            <span class="cost-breakdown__key">{{ 'estimate.materialLabel' | translate }}</span>
+                            <app-currency-display class="cost-breakdown__val" [value]="line.costBreakdown.material" [currency]="null" />
+                          </div>
+                          <div class="cost-breakdown__cell">
+                            <span class="cost-breakdown__key">{{ 'estimate.ospLabel' | translate }}</span>
+                            <app-currency-display class="cost-breakdown__val" [value]="line.costBreakdown.osp" [currency]="null" />
+                          </div>
+                          <div class="cost-breakdown__cell cost-breakdown__cell--total">
+                            <span class="cost-breakdown__key">{{ 'estimate.totalCostLabel' | translate }}</span>
+                            <app-currency-display class="cost-breakdown__val" [value]="line.costBreakdown.total" [currency]="null" />
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>
