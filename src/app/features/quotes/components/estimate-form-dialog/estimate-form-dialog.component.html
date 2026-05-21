@@ -1,0 +1,419 @@
+<app-dialog
+  [title]="'estimate.dialogTitle' | translate"
+  width="1200px"
+  [splitLayout]="true"
+  (closed)="close()">
+
+  <div class="dlg-body">
+
+    <!-- ── LEFT: Inputs ───────────────────────────────────────────────────── -->
+    <div class="dlg-main" [formGroup]="form">
+
+      <!-- Part + Breaks + Pricing -->
+      <div class="dlg-section">
+        <span class="dlg-section__title">{{ 'estimate.setupTitle' | translate }}</span>
+        <div class="setup-grid">
+          <app-input
+            data-testid="estimate-part-id"
+            [label]="'estimate.partIdLabel' | translate"
+            type="number"
+            formControlName="partId"
+            [required]="true"
+            min="1" />
+          <app-input
+            data-testid="estimate-break-qtys"
+            [label]="'estimate.breakQuantitiesLabel' | translate"
+            formControlName="breakQuantitiesStr"
+            [required]="true" />
+        </div>
+        <div class="pricing-row">
+          <app-select
+            data-testid="estimate-pricing-mode"
+            [label]="'estimate.pricingModeLabel' | translate"
+            formControlName="pricingMode"
+            [options]="pricingModeOptions" />
+          <app-input
+            data-testid="estimate-pricing-value"
+            [label]="pricingValueLabel()"
+            type="number"
+            formControlName="pricingValue"
+            [required]="true"
+            suffix="%"
+            step="0.1"
+            min="0"
+            max="99.99" />
+        </div>
+      </div>
+
+      <!-- Operations -->
+      <div class="dlg-section">
+        <div class="dlg-section__header">
+          <span class="dlg-section__title">{{ 'estimate.operationsTitle' | translate }}</span>
+          <button class="action-btn action-btn--sm" type="button" (click)="addOp()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'estimate.addOperation' | translate }}
+          </button>
+        </div>
+
+        @for (op of operations(); track $index; let i = $index) {
+          <div class="op-card">
+            <div class="op-card__header">
+              <span class="op-card__step">{{ 'estimate.stepLabel' | translate }} {{ op.stepNumber }}</span>
+              <button
+                class="icon-btn icon-btn--danger"
+                type="button"
+                [attr.aria-label]="'common.remove' | translate"
+                (click)="removeOp(i)">
+                <span class="material-icons-outlined">delete_outline</span>
+              </button>
+            </div>
+
+            <!-- Main routing fields -->
+            <div class="op-fields">
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.workCenterLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  placeholder="—"
+                  [value]="op.workCenterId ?? ''"
+                  (change)="setOpField(i, 'workCenterId', ($event.target as HTMLInputElement).value)"
+                  min="1" />
+              </div>
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.setupMinLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  [value]="op.setupMinutes"
+                  (change)="setOpField(i, 'setupMinutes', ($event.target as HTMLInputElement).value)"
+                  min="0" step="0.1" />
+              </div>
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.runMinEachLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  [value]="op.runMinutesEach"
+                  (change)="setOpField(i, 'runMinutesEach', ($event.target as HTMLInputElement).value)"
+                  min="0" step="0.01" />
+              </div>
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.runMinLotLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  [value]="op.runMinutesLot"
+                  (change)="setOpField(i, 'runMinutesLot', ($event.target as HTMLInputElement).value)"
+                  min="0" step="0.1" />
+              </div>
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.scrapPctLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  [value]="op.scrapFactor"
+                  (change)="setOpField(i, 'scrapFactor', ($event.target as HTMLInputElement).value)"
+                  min="0" max="99" step="0.1" />
+              </div>
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.laborRateLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  [value]="op.laborRatePerHour"
+                  (change)="setOpField(i, 'laborRatePerHour', ($event.target as HTMLInputElement).value)"
+                  min="0" step="0.01" />
+              </div>
+              <div class="op-field">
+                <label class="op-label">{{ 'estimate.burdenRateLabel' | translate }}</label>
+                <input
+                  class="op-input"
+                  type="number"
+                  [value]="op.burdenRatePerHour"
+                  (change)="setOpField(i, 'burdenRatePerHour', ($event.target as HTMLInputElement).value)"
+                  min="0" step="0.01" />
+              </div>
+              <div class="op-field op-field--checkbox">
+                <label class="op-label">{{ 'estimate.subcontractLabel' | translate }}</label>
+                <input
+                  type="checkbox"
+                  [checked]="op.isSubcontract"
+                  (change)="toggleSubcontract(i)" />
+              </div>
+            </div>
+
+            @if (op.isSubcontract) {
+              <div class="op-fields op-fields--osp">
+                <div class="op-field">
+                  <label class="op-label">{{ 'estimate.ospUnitCostLabel' | translate }}</label>
+                  <input
+                    class="op-input"
+                    type="number"
+                    [value]="op.subcontractUnitCost"
+                    (change)="setOpField(i, 'subcontractUnitCost', ($event.target as HTMLInputElement).value)"
+                    min="0" step="0.01" />
+                </div>
+                <div class="op-field">
+                  <label class="op-label">{{ 'estimate.ospMinimumLabel' | translate }}</label>
+                  <input
+                    class="op-input"
+                    type="number"
+                    [value]="op.subcontractMinimum"
+                    (change)="setOpField(i, 'subcontractMinimum', ($event.target as HTMLInputElement).value)"
+                    min="0" step="0.01" />
+                </div>
+              </div>
+            }
+
+            <!-- Materials sub-panel -->
+            <button
+              class="action-btn action-btn--sm action-btn--ghost"
+              type="button"
+              (click)="toggleMaterials(i)">
+              <span class="material-icons-outlined">{{ op.showMaterials ? 'expand_less' : 'expand_more' }}</span>
+              {{ 'estimate.materialsLabel' | translate }} ({{ op.materials.length }})
+            </button>
+
+            @if (op.showMaterials) {
+              <div class="mat-panel">
+                @if (op.materials.length > 0) {
+                  <table class="mat-table" aria-label="Materials">
+                    <thead>
+                      <tr>
+                        <th>{{ 'estimate.matPartIdLabel' | translate }}</th>
+                        <th class="mat-table__right">{{ 'estimate.matQtyLabel' | translate }}</th>
+                        <th class="mat-table__right">{{ 'estimate.matDropLabel' | translate }}</th>
+                        <th>{{ 'estimate.matUomLabel' | translate }}</th>
+                        <th class="mat-table__right">{{ 'estimate.matCostLabel' | translate }}</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (mat of op.materials; track $index; let mi = $index) {
+                        <tr>
+                          <td>{{ mat.partId }}</td>
+                          <td class="mat-table__right">{{ mat.qtyPerUnit | number:'1.0-4' }}</td>
+                          <td class="mat-table__right">{{ mat.dropFactor | number:'1.0-2' }}%</td>
+                          <td>{{ mat.uom }}</td>
+                          <td class="mat-table__right"><app-currency-display [value]="mat.unitCost" [currency]="null" /></td>
+                          <td>
+                            <button class="icon-btn icon-btn--danger" type="button" (click)="removeMaterial(i, mi)">
+                              <span class="material-icons-outlined">close</span>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                }
+
+                <!-- Add material row -->
+                <div class="mat-add-row">
+                  <input
+                    class="op-input"
+                    type="number"
+                    [placeholder]="'estimate.matPartIdLabel' | translate"
+                    [value]="getPendingMat(i).partId ?? ''"
+                    (change)="setPendingMatField(i, 'partId', ($event.target as HTMLInputElement).value)"
+                    min="1" />
+                  <input
+                    class="op-input"
+                    type="number"
+                    [placeholder]="'estimate.matQtyLabel' | translate"
+                    [value]="getPendingMat(i).qtyPerUnit"
+                    (change)="setPendingMatField(i, 'qtyPerUnit', ($event.target as HTMLInputElement).value)"
+                    min="0.0001" step="0.0001" />
+                  <input
+                    class="op-input"
+                    type="number"
+                    [placeholder]="'estimate.matDropLabel' | translate"
+                    [value]="getPendingMat(i).dropFactor"
+                    (change)="setPendingMatField(i, 'dropFactor', ($event.target as HTMLInputElement).value)"
+                    min="0" max="99" step="0.1" />
+                  <input
+                    class="op-input"
+                    [placeholder]="'estimate.matUomLabel' | translate"
+                    [value]="getPendingMat(i).uom"
+                    (change)="setPendingMatField(i, 'uom', ($event.target as HTMLInputElement).value)" />
+                  <input
+                    class="op-input"
+                    type="number"
+                    [placeholder]="'estimate.matCostLabel' | translate"
+                    [value]="getPendingMat(i).unitCost"
+                    (change)="setPendingMatField(i, 'unitCost', ($event.target as HTMLInputElement).value)"
+                    min="0" step="0.0001" />
+                  <button
+                    class="action-btn action-btn--sm"
+                    type="button"
+                    [disabled]="!getPendingMat(i).partId"
+                    (click)="addMaterial(i)">
+                    <span class="material-icons-outlined">add</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (operations().length === 0) {
+          <p class="empty-hint">{{ 'estimate.noOperationsHint' | translate }}</p>
+        }
+      </div>
+
+      <!-- NRE / Tooling -->
+      <div class="dlg-section">
+        <div class="dlg-section__header">
+          <span class="dlg-section__title">{{ 'estimate.nreTitle' | translate }}</span>
+          <button class="action-btn action-btn--sm" type="button" (click)="addNre()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'estimate.addNre' | translate }}
+          </button>
+        </div>
+
+        @if (nreLines().length > 0) {
+          <table class="mat-table" aria-label="NRE lines">
+            <thead>
+              <tr>
+                <th>{{ 'common.description' | translate }}</th>
+                <th class="mat-table__right">{{ 'common.amount' | translate }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (nre of nreLines(); track $index; let ni = $index) {
+                <tr>
+                  <td>
+                    <input
+                      class="op-input op-input--wide"
+                      [value]="nre.description"
+                      (change)="setNreField(ni, 'description', ($event.target as HTMLInputElement).value)"
+                      [placeholder]="'estimate.nreDescriptionPlaceholder' | translate" />
+                  </td>
+                  <td class="mat-table__right">
+                    <input
+                      class="op-input op-input--right"
+                      type="number"
+                      [value]="nre.amount"
+                      (change)="setNreField(ni, 'amount', ($event.target as HTMLInputElement).value)"
+                      min="0" step="0.01" />
+                  </td>
+                  <td>
+                    <button class="icon-btn icon-btn--danger" type="button" (click)="removeNre(ni)">
+                      <span class="material-icons-outlined">close</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT: Result ─────────────────────────────────────────────────── -->
+    <div class="dlg-sidebar">
+
+      @if (result(); as res) {
+        <!-- Realized margin summary -->
+        @if (res.breaks.length > 0) {
+          <div class="margin-summary">
+            <span class="margin-summary__label">{{ 'estimate.realizedMarginLabel' | translate }}</span>
+            <span class="margin-summary__value">
+              {{ marginPct(res.breaks[0].effectiveMargin) }}
+            </span>
+            @if (res.breaks.length > 1) {
+              <span class="margin-summary__range">
+                — {{ marginPct(res.breaks[res.breaks.length - 1].effectiveMargin) }}
+              </span>
+            }
+          </div>
+        }
+
+        <!-- Warnings -->
+        @if (res.warnings.length > 0) {
+          <div class="warnings-panel">
+            <span class="warnings-panel__icon material-icons-outlined">warning_amber</span>
+            <ul class="warnings-panel__list">
+              @for (w of res.warnings; track $index) {
+                <li>{{ w }}</li>
+              }
+            </ul>
+          </div>
+        }
+
+        <!-- Cost breakdown table -->
+        <div class="results-section">
+          <span class="dlg-section__title">{{ 'estimate.resultsTitle' | translate }}</span>
+          <div class="breaks-scroll">
+            <table class="breaks-table" aria-label="Cost breakdown by quantity break">
+              <thead>
+                <tr>
+                  <th class="breaks-table__right">{{ 'estimate.breakQtyLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.laborLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.burdenLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.materialLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.ospLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.nreLabel' | translate }}</th>
+                  <th class="breaks-table__right breaks-table__total">{{ 'estimate.totalCostLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.unitCostLabel' | translate }}</th>
+                  <th class="breaks-table__right breaks-table__price">{{ 'estimate.unitPriceLabel' | translate }}</th>
+                  <th class="breaks-table__right">{{ 'estimate.extPriceLabel' | translate }}</th>
+                  <th class="breaks-table__right breaks-table__margin">{{ 'estimate.marginLabel' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (brk of res.breaks; track brk.quantity) {
+                  <tr>
+                    <td class="breaks-table__right breaks-table__qty">{{ brk.quantity | number }}</td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.cost.laborCost" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.cost.burdenCost" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.cost.materialCost" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.cost.ospCost" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.cost.nreCost" [currency]="null" /></td>
+                    <td class="breaks-table__right breaks-table__total"><app-currency-display [value]="brk.cost.totalCost" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.unitCost" [currency]="null" /></td>
+                    <td class="breaks-table__right breaks-table__price"><app-currency-display [value]="brk.unitPrice" [currency]="null" /></td>
+                    <td class="breaks-table__right"><app-currency-display [value]="brk.extendedPrice" [currency]="null" /></td>
+                    <td class="breaks-table__right breaks-table__margin">{{ marginPct(brk.effectiveMargin) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="input-hash">
+            <span class="input-hash__label">{{ 'estimate.inputHashLabel' | translate }}</span>
+            <code class="input-hash__value">{{ res.inputHash }}</code>
+          </div>
+        </div>
+
+      } @else {
+        <div class="result-placeholder">
+          <span class="material-icons-outlined result-placeholder__icon">functions</span>
+          <p>{{ 'estimate.noResultYet' | translate }}</p>
+        </div>
+      }
+
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <ng-container dialog-footer>
+    <button class="action-btn" type="button" (click)="close()">
+      {{ 'common.close' | translate }}
+    </button>
+    <app-validation-button [form]="form" [violations]="violations">
+      <button
+        class="action-btn action-btn--primary"
+        data-testid="estimate-compute-btn"
+        type="button"
+        [disabled]="computing()"
+        (click)="compute()">
+        <span class="material-icons-outlined">{{ computing() ? 'hourglass_empty' : 'calculate' }}</span>
+        {{ (computing() ? 'estimate.computing' : 'estimate.compute') | translate }}
+      </button>
+    </app-validation-button>
+  </ng-container>
+
+</app-dialog>
