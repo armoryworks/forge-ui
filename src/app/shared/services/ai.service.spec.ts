@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { of } from 'rxjs';
 
 import {
   AiService,
@@ -43,6 +44,12 @@ describe('AiService', () => {
 
     service = TestBed.inject(AiService);
     httpMock = TestBed.inject(HttpTestingController);
+
+    // checkAvailability() now loads the capability descriptor first when it isn't
+    // loaded yet (wave-0 header-init race fix, via the deduped CapabilityService.load).
+    // Stub that load to resolve synchronously with no HTTP so the descriptor step is
+    // transparent and these checkAvailability assertions exercise the gate logic directly.
+    vi.spyOn(TestBed.inject(CapabilityService), 'load').mockReturnValue(of(void 0));
   });
 
   afterEach(() => {
