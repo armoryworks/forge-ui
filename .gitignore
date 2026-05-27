@@ -62,6 +62,7 @@ __screenshots__/
 .DS_Store
 Thumbs.db
 
-# Analysis/audit probe scratch (regenerable; the deliverables live in forge-analysis)
-/ph38-*.cjs
-/sweep-*.cjs
+# Analysis/audit probe scratch at repo ROOT (regenerable; deliverables live in
+# forge-analysis). Configs are .js/.ts, so no legit root .mjs/.cjs to keep.
+/*.mjs
+/*.cjs
