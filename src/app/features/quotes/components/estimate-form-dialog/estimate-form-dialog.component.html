@@ -71,8 +71,9 @@
             <!-- Main routing fields -->
             <div class="op-fields">
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.workCenterLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-wc-' + i">{{ 'estimate.workCenterLabel' | translate }}</label>
                 <input
+                  [id]="'opf-wc-' + i"
                   class="op-input"
                   type="number"
                   placeholder="—"
@@ -81,8 +82,9 @@
                   min="1" />
               </div>
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.setupMinLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-sm-' + i">{{ 'estimate.setupMinLabel' | translate }}</label>
                 <input
+                  [id]="'opf-sm-' + i"
                   class="op-input"
                   type="number"
                   [value]="op.setupMinutes"
@@ -90,8 +92,9 @@
                   min="0" step="0.1" />
               </div>
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.runMinEachLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-re-' + i">{{ 'estimate.runMinEachLabel' | translate }}</label>
                 <input
+                  [id]="'opf-re-' + i"
                   class="op-input"
                   type="number"
                   [value]="op.runMinutesEach"
@@ -99,8 +102,9 @@
                   min="0" step="0.01" />
               </div>
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.runMinLotLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-rl-' + i">{{ 'estimate.runMinLotLabel' | translate }}</label>
                 <input
+                  [id]="'opf-rl-' + i"
                   class="op-input"
                   type="number"
                   [value]="op.runMinutesLot"
@@ -108,8 +112,9 @@
                   min="0" step="0.1" />
               </div>
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.scrapPctLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-sc-' + i">{{ 'estimate.scrapPctLabel' | translate }}</label>
                 <input
+                  [id]="'opf-sc-' + i"
                   class="op-input"
                   type="number"
                   [value]="op.scrapFactor"
@@ -117,8 +122,9 @@
                   min="0" max="99" step="0.1" />
               </div>
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.laborRateLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-lr-' + i">{{ 'estimate.laborRateLabel' | translate }}</label>
                 <input
+                  [id]="'opf-lr-' + i"
                   class="op-input"
                   type="number"
                   [value]="op.laborRatePerHour"
@@ -126,8 +132,9 @@
                   min="0" step="0.01" />
               </div>
               <div class="op-field">
-                <label class="op-label">{{ 'estimate.burdenRateLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-br-' + i">{{ 'estimate.burdenRateLabel' | translate }}</label>
                 <input
+                  [id]="'opf-br-' + i"
                   class="op-input"
                   type="number"
                   [value]="op.burdenRatePerHour"
@@ -135,8 +142,9 @@
                   min="0" step="0.01" />
               </div>
               <div class="op-field op-field--checkbox">
-                <label class="op-label">{{ 'estimate.subcontractLabel' | translate }}</label>
+                <label class="op-label" [attr.for]="'opf-sub-' + i">{{ 'estimate.subcontractLabel' | translate }}</label>
                 <input
+                  [id]="'opf-sub-' + i"
                   type="checkbox"
                   [checked]="op.isSubcontract"
                   (change)="toggleSubcontract(i)" />
@@ -146,8 +154,9 @@
             @if (op.isSubcontract) {
               <div class="op-fields op-fields--osp">
                 <div class="op-field">
-                  <label class="op-label">{{ 'estimate.ospUnitCostLabel' | translate }}</label>
+                  <label class="op-label" [attr.for]="'opf-ospu-' + i">{{ 'estimate.ospUnitCostLabel' | translate }}</label>
                   <input
+                  [id]="'opf-ospu-' + i"
                     class="op-input"
                     type="number"
                     [value]="op.subcontractUnitCost"
@@ -155,8 +164,9 @@
                     min="0" step="0.01" />
                 </div>
                 <div class="op-field">
-                  <label class="op-label">{{ 'estimate.ospMinimumLabel' | translate }}</label>
+                  <label class="op-label" [attr.for]="'opf-ospm-' + i">{{ 'estimate.ospMinimumLabel' | translate }}</label>
                   <input
+                  [id]="'opf-ospm-' + i"
                     class="op-input"
                     type="number"
                     [value]="op.subcontractMinimum"
