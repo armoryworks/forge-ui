@@ -61,3 +61,7 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Analysis/audit probe scratch (regenerable; the deliverables live in forge-analysis)
+/ph38-*.cjs
+/sweep-*.cjs
