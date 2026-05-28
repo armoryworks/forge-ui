@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -214,31 +214,38 @@ export class MrpComponent {
   ];
 
   constructor() {
-    // Load data when tab changes
+    // Load data when the tab changes. The dispatch is wrapped in untracked() so the
+    // effect depends ONLY on activeTab() — NOT on the loadingX() signals that each load
+    // method reads for its in-flight guard. Without untracked, a completed/errored load
+    // (e.g. a CapabilityDisabledError when CAP-PLAN-MRP is off) sets loadingX=false, which
+    // re-triggered this effect, which re-fired the load — a self-feeding loop that never
+    // settled, leaving the loading overlay stuck (the "page hangs" symptom).
     effect(() => {
       const tab = this.activeTab();
-      switch (tab) {
-        case 'dashboard':
-          this.loadRuns();
-          this.loadPlannedOrders();
-          this.loadExceptions();
-          break;
-        case 'planned-orders':
-          this.loadPlannedOrders();
-          break;
-        case 'exceptions':
-          this.loadExceptions();
-          break;
-        case 'runs':
-          this.loadRuns();
-          break;
-        case 'master-schedule':
-          this.loadMasterSchedules();
-          break;
-        case 'forecasts':
-          this.loadForecasts();
-          break;
-      }
+      untracked(() => {
+        switch (tab) {
+          case 'dashboard':
+            this.loadRuns();
+            this.loadPlannedOrders();
+            this.loadExceptions();
+            break;
+          case 'planned-orders':
+            this.loadPlannedOrders();
+            break;
+          case 'exceptions':
+            this.loadExceptions();
+            break;
+          case 'runs':
+            this.loadRuns();
+            break;
+          case 'master-schedule':
+            this.loadMasterSchedules();
+            break;
+          case 'forecasts':
+            this.loadForecasts();
+            break;
+        }
+      });
     });
   }
 
