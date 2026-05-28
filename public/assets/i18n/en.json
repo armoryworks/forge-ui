@@ -5588,7 +5588,10 @@
       "operationUnlocked": "Operation unlocked",
       "locked": "Schedule locked",
       "operations": "Operations scheduled",
-      "unlocked": "Schedule unlocked"
+      "unlocked": "Schedule unlocked",
+      "workCenterCreated": "Work center created",
+      "workCenterUpdated": "Work center updated",
+      "workCenterDeleted": "Work center deleted"
     },
     "load": "Load",
     "noDispatch": "No dispatch items",
@@ -5602,7 +5605,26 @@
       "dueDate": "Due Date",
       "fifo": "FIFO",
       "priority": "Priority"
+    },
+    "newWorkCenter": "New Work Center",
+    "deleteWorkCenter": {
+      "title": "Delete Work Center?",
+      "message": "Delete work center \"{{name}}\"? This removes it from scheduling. You can recreate it later."
     }
+  },
+  "workCenterDialog": {
+    "newTitle": "New Work Center",
+    "editTitle": "Edit Work Center",
+    "code": "Code",
+    "name": "Name",
+    "description": "Description",
+    "dailyCapacityHours": "Daily Capacity (hours)",
+    "efficiencyPercent": "Efficiency %",
+    "numberOfMachines": "Number of Machines",
+    "sortOrder": "Sort Order",
+    "laborCostPerHour": "Labor Cost / Hour",
+    "burdenRatePerHour": "Burden Rate / Hour",
+    "create": "Create Work Center"
   },
   "oee": {
     "title": "OEE Dashboard",

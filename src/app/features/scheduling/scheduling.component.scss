@@ -18,3 +18,8 @@
 .tab-panel {
   min-height: 300px;
 }
+
+.row-actions {
+  display: flex;
+  gap: $sp-sm;
+}

@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header.component';
@@ -16,13 +17,16 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 import { SchedulingService } from './services/scheduling.service';
+import { WorkCenterDialogComponent } from './components/work-center-dialog/work-center-dialog.component';
 import { toDateOnly } from '../../shared/utils/date.utils';
 import {
   ScheduleRun,
   ScheduledOperation,
   WorkCenter,
+  CreateWorkCenterRequest,
   DispatchListItem,
   WorkCenterLoad,
   Shift,
@@ -46,6 +50,7 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
     SpacerDirective,
     EmptyStateComponent,
     LoadingBlockDirective,
+    WorkCenterDialogComponent,
     TranslatePipe,
   ],
   templateUrl: './scheduling.component.html',
@@ -58,6 +63,7 @@ export class SchedulingComponent {
   private readonly schedulingService = inject(SchedulingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly dialog = inject(MatDialog);
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -78,6 +84,11 @@ export class SchedulingComponent {
   protected readonly dispatchList = signal<DispatchListItem[]>([]);
   protected readonly workCenterLoad = signal<WorkCenterLoad | null>(null);
   protected readonly loading = signal(false);
+
+  // Work center create/edit dialog
+  protected readonly showWorkCenterDialog = signal(false);
+  protected readonly editingWorkCenter = signal<WorkCenter | null>(null);
+  protected readonly savingWorkCenter = signal(false);
 
   // Work center select for dispatch/load
   protected readonly selectedWorkCenterControl = new FormControl<number | null>(null);
@@ -129,6 +140,7 @@ export class SchedulingComponent {
     { field: 'isActive', header: this.translate.instant('scheduling.cols.active'), sortable: true, width: '70px' },
     { field: 'assetName', header: this.translate.instant('scheduling.cols.asset'), sortable: true },
     { field: 'locationName', header: this.translate.instant('scheduling.cols.location'), sortable: true },
+    { field: 'actions', header: '', width: '90px' },
   ];
 
   protected readonly shiftColumns: ColumnDef[] = [
@@ -212,6 +224,66 @@ export class SchedulingComponent {
   private loadWorkCenters(): void {
     this.schedulingService.getWorkCenters().subscribe({
       next: wcs => this.workCenters.set(wcs),
+    });
+  }
+
+  // Work center create / edit / delete
+  protected openCreateWorkCenter(): void {
+    this.editingWorkCenter.set(null);
+    this.showWorkCenterDialog.set(true);
+  }
+
+  protected openEditWorkCenter(wc: WorkCenter): void {
+    this.editingWorkCenter.set(wc);
+    this.showWorkCenterDialog.set(true);
+  }
+
+  protected closeWorkCenterDialog(): void {
+    this.showWorkCenterDialog.set(false);
+  }
+
+  protected saveWorkCenter(data: Partial<WorkCenter>): void {
+    this.savingWorkCenter.set(true);
+    const editing = this.editingWorkCenter();
+
+    const onError = () => this.savingWorkCenter.set(false);
+    const onSuccess = (messageKey: string) => {
+      this.savingWorkCenter.set(false);
+      this.closeWorkCenterDialog();
+      this.loadWorkCenters();
+      this.snackbar.success(this.translate.instant(messageKey));
+    };
+
+    if (editing) {
+      this.schedulingService.updateWorkCenter(editing.id, data).subscribe({
+        next: () => onSuccess('scheduling.snackbar.workCenterUpdated'),
+        error: onError,
+      });
+    } else {
+      this.schedulingService.createWorkCenter(data as CreateWorkCenterRequest).subscribe({
+        next: () => onSuccess('scheduling.snackbar.workCenterCreated'),
+        error: onError,
+      });
+    }
+  }
+
+  protected deleteWorkCenter(wc: WorkCenter): void {
+    this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('scheduling.deleteWorkCenter.title'),
+        message: this.translate.instant('scheduling.deleteWorkCenter.message', { name: wc.name }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.schedulingService.deleteWorkCenter(wc.id).subscribe({
+        next: () => {
+          this.loadWorkCenters();
+          this.snackbar.success(this.translate.instant('scheduling.snackbar.workCenterDeleted'));
+        },
+      });
     });
   }
 

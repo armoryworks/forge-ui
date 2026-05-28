@@ -1,0 +1,47 @@
+<app-dialog
+  [title]="isEdit() ? ('workCenterDialog.editTitle' | translate) : ('workCenterDialog.newTitle' | translate)"
+  width="520px"
+  [draftConfig]="draftConfig"
+  [draftFormGroup]="form"
+  (closed)="closed.emit()">
+
+  <div [formGroup]="form">
+    <div class="dialog-row">
+      <app-input [label]="'workCenterDialog.code' | translate" formControlName="code" [required]="true" [maxlength]="50" />
+      <app-input [label]="'workCenterDialog.name' | translate" formControlName="name" [required]="true" [maxlength]="200" />
+    </div>
+
+    <app-textarea [label]="'workCenterDialog.description' | translate" formControlName="description" [rows]="2" />
+
+    <div class="dialog-row">
+      <app-input [label]="'workCenterDialog.dailyCapacityHours' | translate" type="number" formControlName="dailyCapacityHours" [required]="true" />
+      <app-input [label]="'workCenterDialog.efficiencyPercent' | translate" type="number" formControlName="efficiencyPercent" [required]="true" suffix="%" />
+    </div>
+
+    <div class="dialog-row">
+      <app-input [label]="'workCenterDialog.numberOfMachines' | translate" type="number" formControlName="numberOfMachines" [required]="true" />
+      <app-input [label]="'workCenterDialog.sortOrder' | translate" type="number" formControlName="sortOrder" />
+    </div>
+
+    <div class="dialog-row">
+      <app-currency-input [label]="'workCenterDialog.laborCostPerHour' | translate" formControlName="laborCostPerHour" />
+      <app-currency-input [label]="'workCenterDialog.burdenRatePerHour' | translate" formControlName="burdenRatePerHour" />
+    </div>
+
+    @if (isEdit()) {
+      <app-toggle [label]="'common.active' | translate" formControlName="isActive" />
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="closed.emit()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ isEdit() ? ('common.saveChanges' | translate) : ('workCenterDialog.create' | translate) }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

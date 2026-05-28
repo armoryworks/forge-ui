@@ -5589,13 +5589,35 @@
       "operationUnlocked": "Operación desbloqueada",
       "locked": "Schedule locked",
       "operations": "Operations scheduled",
-      "unlocked": "Schedule unlocked"
+      "unlocked": "Schedule unlocked",
+      "workCenterCreated": "Centro de trabajo creado",
+      "workCenterUpdated": "Centro de trabajo actualizado",
+      "workCenterDeleted": "Centro de trabajo eliminado"
     },
     "priorityRules": {
       "dueDate": "Due Date",
       "fifo": "FIFO",
       "priority": "Priority"
+    },
+    "newWorkCenter": "Nuevo Centro de Trabajo",
+    "deleteWorkCenter": {
+      "title": "¿Eliminar Centro de Trabajo?",
+      "message": "¿Eliminar el centro de trabajo \"{{name}}\"? Se quitará de la programación. Puede recrearlo más tarde."
     }
+  },
+  "workCenterDialog": {
+    "newTitle": "Nuevo Centro de Trabajo",
+    "editTitle": "Editar Centro de Trabajo",
+    "code": "Código",
+    "name": "Nombre",
+    "description": "Descripción",
+    "dailyCapacityHours": "Capacidad Diaria (horas)",
+    "efficiencyPercent": "Eficiencia %",
+    "numberOfMachines": "Número de Máquinas",
+    "sortOrder": "Orden",
+    "laborCostPerHour": "Costo de Mano de Obra / Hora",
+    "burdenRatePerHour": "Tasa de Carga / Hora",
+    "create": "Crear Centro de Trabajo"
   },
   "oee": {
     "title": "Panel OEE",
