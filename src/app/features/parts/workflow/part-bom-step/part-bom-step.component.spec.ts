@@ -55,6 +55,7 @@ function buildEntry(id: number): BOMEntry {
     childName: `Child ${id}`,
     quantity: 1, referenceDesignator: null, sortOrder: id,
     sourceType: 'Buy', leadTimeDays: null, notes: null,
+    uomId: null, uomCode: null, uomLabel: null,
   };
 }
 

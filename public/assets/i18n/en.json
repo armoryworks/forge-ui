@@ -1185,7 +1185,10 @@
       "effectiveFrom": "Effective From",
       "effectiveTo": "Effective To",
       "addTier": "Add Tier",
-      "empty": "No price tiers — add one to enable per-quantity pricing."
+      "empty": "No price tiers — add one to enable per-quantity pricing.",
+      "option": "Purchase Option",
+      "perBase": "Per Base Unit",
+      "perBaseUnit": "Per base unit"
     },
     "priceTierHistory": "Price tier history",
     "priceTierHistoryEmpty": "No tier history yet."

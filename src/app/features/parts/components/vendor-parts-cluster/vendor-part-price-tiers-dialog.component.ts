@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog, MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -15,7 +16,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
-import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { CURRENCY_OPTIONS } from '../../../../shared/models/currency.const';
@@ -24,7 +25,9 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 import { VendorPartsService } from '../../services/vendor-parts.service';
+import { PurchaseOptionsService } from '../../services/purchase-options.service';
 import { VendorPart, VendorPartPriceTier } from '../../models/vendor-part.model';
+import { PartPurchaseOption } from '../../models/part-purchase-option.model';
 
 export interface VendorPartPriceTiersDialogData {
   vendorPart: VendorPart;
@@ -54,17 +57,40 @@ export class VendorPartPriceTiersDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<VendorPartPriceTiersDialogComponent>);
   protected readonly data = inject<VendorPartPriceTiersDialogData>(MAT_DIALOG_DATA);
 
+  private readonly purchaseOptionsService = inject(PurchaseOptionsService);
+
   protected readonly tiers = signal<VendorPartPriceTier[]>(this.data.vendorPart.priceTiers ?? []);
   protected readonly saving = signal(false);
   protected readonly currencyOptions = CURRENCY_OPTIONS;
+
+  // UoM purchase-options effort — the part's purchase options, so a tier can price a specific
+  // size/form and the editor can preview the derived per-base-unit cost.
+  protected readonly options = signal<PartPurchaseOption[]>([]);
+  private readonly optionById = computed(() => new Map(this.options().map(o => [o.id, o])));
+  protected readonly optionSelectOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('vendorPart.priceTiers.perBaseUnit') },
+    ...this.options().map(o => ({
+      value: o.id,
+      label: o.contentUomLabel ? `${o.label} (${o.contentQuantity} ${o.contentUomLabel})` : o.label,
+    })),
+  ]);
+
+  constructor() {
+    // Single GET that completes — fire-and-forget per the subscription-lifecycle rule.
+    this.purchaseOptionsService.list(this.data.vendorPart.partId).subscribe({
+      next: (opts) => this.options.set(opts),
+    });
+  }
 
   protected readonly title = computed(() =>
     `${this.data.vendorPart.partNumber} — ${this.data.vendorPart.vendorCompanyName}`,
   );
 
   protected readonly columns: ColumnDef[] = [
+    { field: 'optionLabel', header: this.translate.instant('vendorPart.priceTiers.option'), width: '120px' },
     { field: 'minQuantity', header: this.translate.instant('vendorPart.priceTiers.minQuantity'), sortable: true, width: '90px', align: 'right' },
     { field: 'unitPrice', header: this.translate.instant('vendorPart.priceTiers.unitPrice'), sortable: true, width: '110px', align: 'right' },
+    { field: 'perBaseDisplay', header: this.translate.instant('vendorPart.priceTiers.perBase'), width: '120px', align: 'right' },
     { field: 'currency', header: this.translate.instant('vendorPart.priceTiers.currency'), width: '70px', align: 'center' },
     { field: 'effectiveFrom', header: this.translate.instant('vendorPart.priceTiers.effectiveFrom'), sortable: true, width: '110px' },
     { field: 'effectiveTo', header: this.translate.instant('vendorPart.priceTiers.effectiveTo'), sortable: true, width: '110px' },
@@ -73,6 +99,7 @@ export class VendorPartPriceTiersDialogComponent {
   ];
 
   protected readonly form = new FormGroup({
+    purchaseOptionId: new FormControl<number | null>(null),
     minQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     currency: new FormControl<string>('USD', { nonNullable: true, validators: [Validators.required, Validators.maxLength(3), Validators.minLength(3)] }),
@@ -87,6 +114,33 @@ export class VendorPartPriceTiersDialogComponent {
     currency: this.translate.instant('vendorPart.priceTiers.currency'),
   });
 
+  // Live "≈ $/base-unit" preview: when the tier prices a purchase option, divide the entered
+  // option price by the option's content ($50 / 32 sqft = $1.5625/sqft). Null when no option.
+  private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+  protected readonly perBasePreview = computed<string | null>(() => {
+    const v = this.formValue();
+    const optId = v.purchaseOptionId ?? null;
+    const price = v.unitPrice ?? null;
+    if (optId == null || price == null) return null;
+    const opt = this.optionById().get(optId);
+    if (!opt || opt.contentQuantity <= 0) return null;
+    const perBase = price / opt.contentQuantity;
+    return `≈ ${perBase.toFixed(4)} / ${opt.contentUomLabel ?? ''}`.trim();
+  });
+
+  // Tier rows decorated with the resolved option label + per-base-unit display for the table.
+  protected readonly tierRows = computed(() =>
+    this.tiers().map(t => {
+      const opt = t.purchaseOptionId != null ? this.optionById().get(t.purchaseOptionId) : undefined;
+      const perBase = opt && opt.contentQuantity > 0 ? t.unitPrice / opt.contentQuantity : null;
+      return {
+        ...t,
+        optionLabel: opt ? opt.label : '—',
+        perBaseDisplay: perBase != null ? `${perBase.toFixed(4)} / ${opt!.contentUomLabel ?? ''}`.trim() : '—',
+      };
+    }),
+  );
+
   close(): void {
     this.dialogRef.close();
   }
@@ -98,6 +152,7 @@ export class VendorPartPriceTiersDialogComponent {
     this.vendorPartsService.addPriceTier(this.data.vendorPart.id, {
       minQuantity: v.minQuantity!,
       unitPrice: v.unitPrice!,
+      purchaseOptionId: v.purchaseOptionId ?? null,
       // Currency moved to VendorPart-level — server snapshots from parent.
       effectiveFrom: v.effectiveFrom ? toIsoDate(v.effectiveFrom) : null,
       effectiveTo: v.effectiveTo ? toIsoDate(v.effectiveTo) : null,
@@ -105,7 +160,7 @@ export class VendorPartPriceTiersDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.form.reset({ currency: 'USD', effectiveFrom: new Date() });
+        this.form.reset({ currency: 'USD', effectiveFrom: new Date(), purchaseOptionId: null });
         this.refreshTiers();
       },
       error: () => this.saving.set(false),

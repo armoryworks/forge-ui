@@ -1184,7 +1184,10 @@
       "effectiveFrom": "Vigente desde",
       "effectiveTo": "Vigente hasta",
       "addTier": "Añadir nivel",
-      "empty": "Sin niveles — añade uno para precios por cantidad."
+      "empty": "Sin niveles — añade uno para precios por cantidad.",
+      "option": "Opción de Compra",
+      "perBase": "Por Unidad Base",
+      "perBaseUnit": "Por unidad base"
     },
     "priceTierHistory": "Historial de niveles de precio",
     "priceTierHistoryEmpty": "Sin historial de niveles todavía.",

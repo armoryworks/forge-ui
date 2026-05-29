@@ -32,3 +32,12 @@
   color: var(--text-muted);
 }
 
+// Live per-base-unit preview beside the option/price inputs.
+.price-tiers-dialog__perbase {
+  display: flex;
+  align-items: center;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+  font-family: $font-family-mono;
+}
+
