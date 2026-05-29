@@ -25,6 +25,7 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { InventoryService } from '../../../inventory/services/inventory.service';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -180,9 +181,14 @@ export class PartDetailPanelComponent {
    */
   @ViewChild('bomChildPartPicker') protected bomChildPartPicker?: EntityPickerComponent;
 
+  // UoM purchase-options effort — consumption-UoM picker for BOM entries.
+  private readonly inventoryService = inject(InventoryService);
+  protected readonly uomOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
+
   protected readonly bomForm = new FormGroup({
     childPartId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl(1, [Validators.required, Validators.min(0.01)]),
+    uomId: new FormControl<number | null>(null),
     sourceType: new FormControl('Buy'),
     referenceDesignator: new FormControl(''),
     leadTimeDays: new FormControl<number | null>(null),
@@ -245,6 +251,16 @@ export class PartDetailPanelComponent {
   ];
 
   constructor() {
+    this.inventoryService.getUnitsOfMeasure().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (uoms) => {
+        const options: SelectOption[] = [{ value: null, label: '-- None --' }];
+        for (const u of (uoms ?? []).filter(x => x.isActive)) {
+          options.push({ value: u.id, label: u.symbol ? `${u.name} (${u.symbol})` : u.name });
+        }
+        this.uomOptions.set(options);
+      },
+    });
+
     effect(() => {
       const id = this.partId();
       if (id) {
@@ -457,7 +473,7 @@ export class PartDetailPanelComponent {
 
   protected openAddBom(): void {
     this.bomForm.reset({
-      childPartId: null, quantity: 1, referenceDesignator: '',
+      childPartId: null, quantity: 1, uomId: null, referenceDesignator: '',
       sourceType: 'Buy', leadTimeDays: null, notes: '',
     });
     this.showBomDialog.set(true);
@@ -501,6 +517,7 @@ export class PartDetailPanelComponent {
     this.partsService.createBOMEntry(p.id, {
       childPartId: form.childPartId!,
       quantity: form.quantity!,
+      uomId: form.uomId ?? undefined,
       referenceDesignator: form.referenceDesignator || undefined,
       sourceType: (form.sourceType as BOMSourceType) ?? 'Buy',
       leadTimeDays: form.leadTimeDays ?? undefined,

@@ -545,6 +545,7 @@
     "noBomEntries": "Sin entradas de lista de materiales",
     "addBomEntry": "Agregar Entrada de BOM",
     "childPart": "Pieza Hija",
+    "bomUom": "UM de Consumo",
     "sourceType": "Fuente",
     "referenceDesignator": "Designador de Referencia",
     "leadTimeDays": "Tiempo de Entrega (días)",

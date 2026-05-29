@@ -545,6 +545,7 @@
     "noBomEntries": "No BOM entries",
     "addBomEntry": "Add BOM Entry",
     "childPart": "Child Part",
+    "bomUom": "Consumption UoM",
     "sourceType": "Source",
     "referenceDesignator": "Reference Designator",
     "leadTimeDays": "Lead Time (days)",

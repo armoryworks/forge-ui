@@ -363,11 +363,15 @@
 
       <div class="dialog-row">
         <app-input data-testid="bom-quantity" [label]="'common.quantity' | translate" type="number" formControlName="quantity" />
-        <app-select data-testid="bom-source-type" [label]="'parts.sourceType' | translate" formControlName="sourceType" [options]="sourceTypeOptions" />
+        <app-select data-testid="bom-uom" [label]="'parts.bomUom' | translate" formControlName="uomId" [options]="uomOptions()" />
       </div>
 
       <div class="dialog-row">
+        <app-select data-testid="bom-source-type" [label]="'parts.sourceType' | translate" formControlName="sourceType" [options]="sourceTypeOptions" />
         <app-input data-testid="bom-ref-designator" [label]="'parts.referenceDesignator' | translate" formControlName="referenceDesignator" />
+      </div>
+
+      <div class="dialog-row">
         <app-input data-testid="bom-lead-time" [label]="'parts.leadTimeDays' | translate" type="number" formControlName="leadTimeDays" />
       </div>
 
