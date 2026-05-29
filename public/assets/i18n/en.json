@@ -4191,6 +4191,8 @@
     "selectVendor": "Select vendor...",
     "showInactiveVendors": "Show inactive vendors",
     "showInactiveParts": "Show obsolete parts",
+    "purchaseOption": "Purchase Option",
+    "perBaseUnit": "Per base unit",
     "vendorDeactivatedWarning": "Vendor '{{name}}' is deactivated. Reactivate it or choose another.",
     "jobId": "Job ID",
     "partId": "Part ID",

@@ -4196,6 +4196,8 @@
     "tabOrders": "Orders",
     "showInactiveVendors": "Mostrar proveedores inactivos",
     "showInactiveParts": "Mostrar piezas obsoletas",
+    "purchaseOption": "Opción de Compra",
+    "perBaseUnit": "Por unidad base",
     "vendorDeactivatedWarning": "El proveedor '{{name}}' está desactivado. Reactívalo o elige otro.",
     "shortClose": "Cierre parcial",
     "shortCloseTitle": "Cierre parcial de orden de compra",
