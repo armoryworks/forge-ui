@@ -3904,6 +3904,7 @@
     "setupComplete": "Configuración de cuenta completa. ¡Bienvenido!",
     "ssoFailed": "Error de autenticación SSO. Inténtelo de nuevo.",
     "noAccountFound": "No se encontró cuenta. Contacte a su administrador para crear una cuenta primero.",
+    "ssoDomainNotPermitted": "Su dominio de correo no está permitido para el inicio de sesión SSO. Contacte a su administrador.",
     "invalidSetupLink": "Enlace de configuración inválido. Contacte a su administrador.",
     "expiredSetupCode": "Código de configuración inválido o expirado. Contacte a su administrador."
   },

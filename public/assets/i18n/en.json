@@ -3911,6 +3911,7 @@
     "setupComplete": "Account setup complete. Welcome!",
     "ssoFailed": "SSO authentication failed. Please try again.",
     "noAccountFound": "No account found. Contact your administrator to create an account first.",
+    "ssoDomainNotPermitted": "Your email domain isn't permitted for SSO sign-in. Contact your administrator.",
     "invalidSetupLink": "Invalid setup link. Please contact your administrator.",
     "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator."
   },
