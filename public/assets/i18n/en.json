@@ -976,6 +976,20 @@
         "sales": "Sales UoM",
         "helper": "Stock = inventory unit. Purchase = vendor invoice unit. Sales = customer invoice unit."
       },
+      "purchaseOptions": {
+        "title": "Purchase Options",
+        "helper": "The sizes/forms this part is bought in (e.g. a 4×8 sheet = 32 sqft, a bag of 100 = 100 ea). Content is in the part's stock UoM; vendors price each option.",
+        "empty": "No purchase options yet — the part is bought per single stock unit.",
+        "label": "Label",
+        "content": "Content (stock UoM)",
+        "uom": "Content UoM",
+        "add": "Add Purchase Option",
+        "added": "Purchase option added",
+        "updated": "Purchase option updated",
+        "removed": "Purchase option removed",
+        "deleteTitle": "Remove Purchase Option?",
+        "deleteMessage": "Remove \"{{label}}\"? Existing purchase orders that reference it are unaffected."
+      },
       "mrp": {
         "title": "MRP Planning",
         "isMrpPlanned": "MRP-Planned",

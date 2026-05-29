@@ -41,6 +41,7 @@ import { BomTreeComponent } from '../bom-tree/bom-tree.component';
 import { BomRevisionHistoryComponent } from '../bom-revision-history/bom-revision-history.component';
 import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-tab.component';
 import { VendorSourcesPanelComponent } from '../vendor-sources-panel/vendor-sources-panel.component';
+import { PartPurchaseOptionsClusterComponent } from '../part-clusters/part-purchase-options-cluster/part-purchase-options-cluster.component';
 import { VendorPartsService } from '../../services/vendor-parts.service';
 import { VendorPart } from '../../models/vendor-part.model';
 import { PartIdentityClusterComponent } from '../part-clusters/part-identity-cluster.component';
@@ -91,7 +92,7 @@ type BomViewMode = 'table' | 'tree';
     StlViewerComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,
     BomTreeComponent, BomRevisionHistoryComponent,
-    SerialNumbersTabComponent, VendorSourcesPanelComponent,
+    SerialNumbersTabComponent, VendorSourcesPanelComponent, PartPurchaseOptionsClusterComponent,
     PartIdentityClusterComponent, PartInventoryClusterComponent, PartCostClusterComponent,
     PartActivityClusterComponent, PartFilesClusterComponent,
     PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,

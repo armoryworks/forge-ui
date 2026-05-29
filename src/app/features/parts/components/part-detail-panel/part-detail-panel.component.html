@@ -135,6 +135,10 @@
             (preferredVendorChanged)="onPreferredVendorChanged($event)"
             (changed)="reloadVendorParts()"
             (cancelled)="cancelEdit()" />
+
+          <app-part-purchase-options-cluster
+            [partId]="part.id"
+            [editing]="editing()" />
           </div>
         }
 

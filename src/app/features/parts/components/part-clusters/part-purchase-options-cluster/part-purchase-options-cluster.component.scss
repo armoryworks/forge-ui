@@ -1,0 +1,32 @@
+@use 'styles/variables' as *;
+
+.po-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: $sp-md 0;
+  font-size: $font-size-base;
+
+  th {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-align: left;
+    padding: $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  td {
+    padding: $sp-sm;
+    border-bottom: $border-width-thin solid var(--border);
+  }
+
+  &__actions-col { width: 64px; }
+
+  &__actions {
+    display: flex;
+    gap: $sp-sm;
+    justify-content: flex-end;
+  }
+}

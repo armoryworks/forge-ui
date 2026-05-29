@@ -958,6 +958,20 @@
         "sales": "UM de Venta",
         "helper": "Inventario = unidad de stock. Compra = unidad de factura del proveedor. Venta = unidad de factura del cliente."
       },
+      "purchaseOptions": {
+        "title": "Opciones de Compra",
+        "helper": "Los tamaños/formas en que se compra esta pieza (p. ej. una lámina 4×8 = 32 sqft, una bolsa de 100 = 100 ea). El contenido está en la UM de inventario; los proveedores cotizan cada opción.",
+        "empty": "Aún no hay opciones de compra — la pieza se compra por unidad de inventario.",
+        "label": "Etiqueta",
+        "content": "Contenido (UM de inventario)",
+        "uom": "UM del Contenido",
+        "add": "Agregar Opción de Compra",
+        "added": "Opción de compra agregada",
+        "updated": "Opción de compra actualizada",
+        "removed": "Opción de compra eliminada",
+        "deleteTitle": "¿Eliminar Opción de Compra?",
+        "deleteMessage": "¿Eliminar \"{{label}}\"? Las órdenes de compra existentes que la referencian no se ven afectadas."
+      },
       "mrp": {
         "title": "Planificación MRP",
         "isMrpPlanned": "Planificado por MRP",
