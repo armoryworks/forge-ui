@@ -18,8 +18,8 @@
 
       <ng-template appColumnCell="kind" let-row>
         <span class="connections-panel__kind">
-          <span class="material-icons-outlined">{{ kindDescriptors[$any(row).kind].icon }}</span>
-          {{ kindDescriptors[$any(row).kind].label }}
+          <span class="material-icons-outlined">{{ describeKind(row).icon }}</span>
+          {{ describeKind(row).label }}
         </span>
       </ng-template>
 

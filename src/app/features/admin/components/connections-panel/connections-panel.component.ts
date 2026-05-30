@@ -61,8 +61,8 @@ export class ConnectionsPanelComponent implements OnInit {
 
   /**
    * One-source-of-truth map from server enum to display label + icon. Used
-   * by the Kind cell template. Adding a new IntegrationKind on the server
-   * means one line here.
+   * by the Kind cell template via <see cref="describeKind"/>. Adding a new
+   * IntegrationKind on the server means one line here.
    */
   protected readonly kindDescriptors: Record<IntegrationKind, KindDescriptor> = {
     BiApiKey: { label: this.translate.instant('adminPanels.connections.kinds.BiApiKey'), icon: 'vpn_key' },
@@ -72,6 +72,18 @@ export class ConnectionsPanelComponent implements OnInit {
     CommunicationSync: { label: this.translate.instant('adminPanels.connections.kinds.CommunicationSync'), icon: 'email' },
     CloudStorageLink: { label: this.translate.instant('adminPanels.connections.kinds.CloudStorageLink'), icon: 'cloud' },
   };
+
+  /**
+   * Typed lookup wrapper for the template. The data-table row type lands
+   * as `unknown` in the templated cell binding, so $any(row).kind isn't
+   * assignable as a Record<IntegrationKind, …> key under strict template
+   * type-checking. This helper takes the IntegrationRecord projection and
+   * routes through the typed map, falling back to a generic descriptor
+   * for any kind the client hasn't been updated for yet.
+   */
+  protected describeKind(row: IntegrationRecord): KindDescriptor {
+    return this.kindDescriptors[row.kind] ?? { label: row.kind, icon: 'extension' };
+  }
 
   ngOnInit(): void {
     this.load();
