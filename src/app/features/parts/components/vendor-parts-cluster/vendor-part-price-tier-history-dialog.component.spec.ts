@@ -40,6 +40,7 @@ function makeTier(overrides: Partial<VendorPartPriceTier> = {}): VendorPartPrice
     effectiveFrom: '2026-01-01T00:00:00Z',
     effectiveTo: null,
     notes: null,
+    purchaseOptionId: null,
     ...overrides,
   };
 }

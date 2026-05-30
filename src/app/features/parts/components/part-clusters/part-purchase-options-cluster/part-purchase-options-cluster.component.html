@@ -1,0 +1,71 @@
+<div class="cluster">
+  <h3 class="cluster__title">{{ 'parts.detail.purchaseOptions.title' | translate }}</h3>
+  <p class="cluster__value cluster__value--muted">{{ 'parts.detail.purchaseOptions.helper' | translate }}</p>
+
+  @if (options().length === 0 && rowMode() !== 'new') {
+    <p class="cluster__value cluster__value--muted" data-testid="po-empty">
+      {{ 'parts.detail.purchaseOptions.empty' | translate }}
+    </p>
+  } @else if (options().length > 0) {
+    <table class="po-table">
+      <thead>
+        <tr>
+          <th scope="col">{{ 'parts.detail.purchaseOptions.label' | translate }}</th>
+          <th scope="col">{{ 'parts.detail.purchaseOptions.content' | translate }}</th>
+          <th scope="col">{{ 'parts.detail.purchaseOptions.uom' | translate }}</th>
+          @if (editing()) { <th scope="col" class="po-table__actions-col" aria-label="actions"></th> }
+        </tr>
+      </thead>
+      <tbody>
+        @for (o of options(); track o.id) {
+          <tr>
+            <td>{{ o.label }}</td>
+            <td>{{ o.contentQuantity }}</td>
+            <td>{{ o.contentUomLabel ?? '—' }}</td>
+            @if (editing()) {
+              <td class="po-table__actions">
+                <button type="button" class="icon-btn" (click)="startEdit(o)" [attr.aria-label]="'common.edit' | translate">
+                  <span class="material-icons-outlined">edit</span>
+                </button>
+                <button type="button" class="icon-btn icon-btn--danger" (click)="remove(o)" [attr.aria-label]="'common.delete' | translate">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (editing()) {
+    @if (rowMode() === null) {
+      <button type="button" class="action-btn action-btn--create action-btn--sm" data-testid="po-add" (click)="startAdd()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'parts.detail.purchaseOptions.add' | translate }}
+      </button>
+    } @else {
+      <div class="cluster__form-row" [formGroup]="form">
+        <app-input data-testid="po-label"
+          [label]="'parts.detail.purchaseOptions.label' | translate"
+          formControlName="label" [required]="true" [maxlength]="200" />
+        <app-input data-testid="po-content" type="number"
+          [label]="'parts.detail.purchaseOptions.content' | translate"
+          formControlName="contentQuantity" [required]="true" />
+        <app-select data-testid="po-uom"
+          [label]="'parts.detail.purchaseOptions.uom' | translate"
+          formControlName="contentUomId" [options]="uomOptions()" />
+      </div>
+      <div class="cluster__actions">
+        <button type="button" class="action-btn" (click)="cancelRow()">{{ 'common.cancel' | translate }}</button>
+        <app-validation-button [violations]="violations" [loading]="saving()">
+          <button type="button" class="action-btn action-btn--primary" data-testid="po-save"
+            [disabled]="form.invalid || saving()" (click)="saveRow()">
+            <span class="material-icons-outlined">save</span>
+            {{ 'common.save' | translate }}
+          </button>
+        </app-validation-button>
+      </div>
+    }
+  }
+</div>
