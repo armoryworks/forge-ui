@@ -35,6 +35,7 @@ describe('SystemApiKeyService', () => {
         userEmail: 'tuyere-cms@forge.local', isActive: true,
         lastUsedAt: null, expiresAt: null, scopes: null, allowedIps: null,
         createdAt: '2026-05-30T00:00:00Z',
+        roleTemplateId: null, roleTemplateName: null,
       }];
       let result: SystemApiKey[] = [];
 
