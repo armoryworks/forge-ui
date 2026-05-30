@@ -2405,6 +2405,7 @@
       "auditLog": "Registro de Auditoría",
       "biApiKeys": "Claves API de BI",
       "systemApiKeys": "Claves API del Sistema",
+      "connections": "Conexiones",
       "compliance": "Cumplimiento",
       "timeCorrections": "Correcciones de Tiempo",
       "events": "Eventos",
@@ -6012,6 +6013,31 @@
         "created": "Creada",
         "expires": "Expira",
         "lastUsed": "Último Uso"
+      }
+    },
+    "connections": {
+      "headerCount": "conexiones",
+      "lede": "Vista federada de sólo lectura de cada credencial y conexión emitida o aceptada por esta instalación. Haga clic en Administrar en cualquier fila para ir a su superficie administrativa nativa.",
+      "noRows": "No hay integraciones conectadas todavía",
+      "installLevel": "(a nivel de instalación)",
+      "never": "Nunca",
+      "manage": "Administrar",
+      "manageAria": "Abrir la página de administración nativa de esta integración",
+      "kinds": {
+        "BiApiKey": "Clave BI",
+        "SystemApiKey": "Clave del Sistema",
+        "EdiTradingPartner": "Socio EDI",
+        "QuickBooksOAuth": "QuickBooks",
+        "CommunicationSync": "Sincronización de Comunicaciones",
+        "CloudStorageLink": "Almacenamiento en la Nube"
+      },
+      "cols": {
+        "kind": "Tipo",
+        "name": "Nombre",
+        "owner": "Propietario",
+        "status": "Estado",
+        "lastUsed": "Último Uso",
+        "created": "Creada"
       }
     },
     "systemApiKeys": {

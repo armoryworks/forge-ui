@@ -1,0 +1,26 @@
+@use 'styles/variables' as *;
+
+.connections-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__lede {
+    flex: 1;
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__kind {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-sm;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--text-muted);
+    }
+  }
+}

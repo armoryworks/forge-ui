@@ -1,0 +1,65 @@
+<div class="connections-panel">
+  <div class="panel-header">
+    <span class="panel-header__count">
+      {{ count() }} {{ 'adminPanels.connections.headerCount' | translate }}
+    </span>
+    <p class="connections-panel__lede">
+      {{ 'adminPanels.connections.lede' | translate }}
+    </p>
+  </div>
+
+  <div [appLoadingBlock]="isLoading()">
+    <app-data-table
+      tableId="admin-connections"
+      [columns]="columns"
+      [data]="rows()"
+      emptyIcon="lan"
+      [emptyMessage]="'adminPanels.connections.noRows' | translate">
+
+      <ng-template appColumnCell="kind" let-row>
+        <span class="connections-panel__kind">
+          <span class="material-icons-outlined">{{ kindDescriptors[$any(row).kind].icon }}</span>
+          {{ kindDescriptors[$any(row).kind].label }}
+        </span>
+      </ng-template>
+
+      <ng-template appColumnCell="ownerEmail" let-row>
+        @if (row.ownerEmail) {
+          {{ row.ownerEmail }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.connections.installLevel' | translate }}</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="status" let-row>
+        <span class="chip" [class]="statusChipClass(row.status)">{{ row.status }}</span>
+      </ng-template>
+
+      <ng-template appColumnCell="lastUsedAt" let-row>
+        @if (row.lastUsedAt) {
+          {{ row.lastUsedAt | date:'MM/dd/yyyy hh:mm' }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.connections.never' | translate }}</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="createdAt" let-row>
+        @if (row.createdAt) {
+          {{ row.createdAt | date:'MM/dd/yyyy' }}
+        } @else {
+          <span class="text-muted">—</span>
+        }
+      </ng-template>
+
+      <ng-template appColumnCell="actions" let-row>
+        <button class="action-btn action-btn--sm"
+          data-testid="connections-manage-btn"
+          [attr.aria-label]="'adminPanels.connections.manageAria' | translate"
+          (click)="manage(row); $event.stopPropagation()">
+          <span class="material-icons-outlined">open_in_new</span>
+          {{ 'adminPanels.connections.manage' | translate }}
+        </button>
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>

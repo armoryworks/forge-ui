@@ -2405,6 +2405,7 @@
       "auditLog": "Audit Log",
       "biApiKeys": "BI API Keys",
       "systemApiKeys": "System API Keys",
+      "connections": "Connections",
       "compliance": "Compliance",
       "timeCorrections": "Time Corrections",
       "events": "Events",
@@ -6019,6 +6020,31 @@
         "created": "Created",
         "expires": "Expires",
         "lastUsed": "Last Used"
+      }
+    },
+    "connections": {
+      "headerCount": "connections",
+      "lede": "Federated read-only view of every credential and connection issued or accepted by this install. Click Manage on any row to go to its native admin surface.",
+      "noRows": "No integrations connected yet",
+      "installLevel": "(install-level)",
+      "never": "Never",
+      "manage": "Manage",
+      "manageAria": "Open native admin page for this integration",
+      "kinds": {
+        "BiApiKey": "BI Key",
+        "SystemApiKey": "System Key",
+        "EdiTradingPartner": "EDI Partner",
+        "QuickBooksOAuth": "QuickBooks",
+        "CommunicationSync": "Comms Sync",
+        "CloudStorageLink": "Cloud Storage"
+      },
+      "cols": {
+        "kind": "Kind",
+        "name": "Name",
+        "owner": "Owner",
+        "status": "Status",
+        "lastUsed": "Last Used",
+        "created": "Created"
       }
     },
     "systemApiKeys": {

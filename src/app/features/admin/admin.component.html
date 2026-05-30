@@ -497,6 +497,13 @@
       </div>
     }
 
+    <!-- Connections Tab — federated read-only registry of every credential / connection -->
+    @if (activeTab() === 'connections') {
+      <div class="tab-panel">
+        <app-connections-panel />
+      </div>
+    }
+
     <!-- EDI Tab -->
     @if (activeTab() === 'edi') {
       <div class="tab-panel">
