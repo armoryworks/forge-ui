@@ -26,6 +26,15 @@
           <span class="text-muted">{{ 'adminPanels.systemApiKeys.unknownUser' | translate }}</span>
         }
       </ng-template>
+      <ng-template appColumnCell="roleTemplateName" let-row>
+        @if (row.roleTemplateName) {
+          <span class="chip chip--info" [matTooltip]="'adminPanels.systemApiKeys.roleTemplateTooltip' | translate">
+            {{ row.roleTemplateName }}
+          </span>
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.systemApiKeys.roleTemplateNone' | translate }}</span>
+        }
+      </ng-template>
       <ng-template appColumnCell="status" let-row>
         @if (row.isActive) {
           <span class="chip chip--success">{{ 'adminPanels.systemApiKeys.statusActive' | translate }}</span>
@@ -83,13 +92,12 @@
         {{ 'adminPanels.systemApiKeys.userHint' | translate }}
       </p>
       <app-select
-        [label]="'adminPanels.systemApiKeys.fields.role' | translate"
-        formControlName="roleBinding"
-        [options]="roleOptions()"
-        data-testid="system-api-key-role" />
-      <p class="system-api-keys-panel__hint system-api-keys-panel__hint--reserved">
-        <span class="material-icons-outlined">schedule</span>
-        {{ 'adminPanels.systemApiKeys.roleHint' | translate }}
+        [label]="'adminPanels.systemApiKeys.fields.roleTemplate' | translate"
+        formControlName="roleTemplateId"
+        [options]="roleTemplateOptions()"
+        data-testid="system-api-key-role-template" />
+      <p class="system-api-keys-panel__hint">
+        {{ 'adminPanels.systemApiKeys.roleTemplateHint' | translate }}
       </p>
       <app-datepicker
         [label]="'adminPanels.systemApiKeys.fields.expiresAt' | translate"

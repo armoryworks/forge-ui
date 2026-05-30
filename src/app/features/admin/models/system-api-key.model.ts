@@ -20,6 +20,15 @@ export interface SystemApiKey {
   scopes: string[] | null;
   allowedIps: string[] | null;
   createdAt: string;
+
+  /**
+   * Optional role-template binding. When set, the auth handler narrows the
+   * bound user's role set to the intersection of (user roles) ∩ (template
+   * IncludedRoleNames). When null, the key inherits the user's full grants.
+   */
+  roleTemplateId: number | null;
+  /** Denormalized for the list display; null when no template is bound. */
+  roleTemplateName: string | null;
 }
 
 export interface CreateSystemApiKeyRequest {
@@ -30,12 +39,10 @@ export interface CreateSystemApiKeyRequest {
   allowedIps?: string[] | null;
 
   /**
-   * Forward-compat hook for per-key role-template scoping. The backend
-   * silently ignores this today (auth derives from the bound user's roles),
-   * but shipping the field now means the eventual scoping change is a
-   * data-source swap in the form, not a payload-shape change. See
-   * `docs/api-key-integrations.md` §1 — "per-key scope grants are tracked
-   * as future work."
+   * Optional role-template id. When set, the key's effective role set at
+   * auth time is the intersection of (bound user's roles) ∩ (template's
+   * IncludedRoleNames) — the template can only narrow, never expand. When
+   * null/omitted, the key inherits the user's full grant set.
    */
   roleTemplateId?: number | null;
 }

@@ -6025,7 +6025,9 @@
       "noExpiry": "Sin expiración",
       "unknownUser": "(usuario desconocido)",
       "userHint": "La clave se autenticará COMO este usuario. Las filas de auditoría y actividad se atribuyen a él; sus roles determinan cada comprobación de autorización.",
-      "roleHint": "La vinculación de rol está reservada para el próximo alcance por clave. Hoy la clave hereda los roles del usuario vinculado; esta selección aún no tiene efecto.",
+      "roleTemplateHint": "Alcance opcional. Cuando se selecciona una plantilla, los roles efectivos de la clave se restringen a la intersección de los roles del usuario vinculado y la plantilla — nunca se amplían. Deje «Ninguna» para heredar el conjunto completo de roles del usuario.",
+      "roleTemplateNone": "Ninguna — heredar los roles del usuario",
+      "roleTemplateTooltip": "Roles efectivos = roles del usuario ∩ roles de la plantilla",
       "expiryHint": "Opcional. Dejar en blanco para una clave sin expiración.",
       "revokeAria": "Revocar clave",
       "revokeTitle": "¿Revocar Clave API del Sistema?",
@@ -6042,13 +6044,14 @@
       "fields": {
         "name": "Nombre",
         "user": "Usuario Vinculado",
-        "role": "Vinculación de Rol (reservado)",
+        "roleTemplate": "Plantilla de Rol",
         "expiresAt": "Expira el",
         "plaintext": "Clave en Texto Plano (se muestra una sola vez)"
       },
       "cols": {
         "name": "Nombre",
         "user": "Actúa Como",
+        "roleTemplate": "Alcance",
         "prefix": "Prefijo",
         "status": "Estado",
         "created": "Creada",

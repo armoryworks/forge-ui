@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -23,7 +24,6 @@ import { FormValidationService } from '../../../../shared/services/form-validati
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
-import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { AdminService } from '../../services/admin.service';
 import { SystemApiKeyService } from '../../services/system-api-key.service';
 import {
@@ -38,15 +38,12 @@ import {
  * real ApplicationUser (audit + activity rows attribute correctly), so
  * issuance requires picking a bound user.
  *
- * The "Role binding" picker is a forward-compat hook. Today it has no
- * payload effect — the key inherits the bound user's roles. When per-key
- * role-template scoping ships (docs/api-key-integrations.md §1, "per-key
- * scope grants" future-work note), the picker's data source swaps from
- * RefDataService.getRolesAsOptions() (current hardcoded role catalog) to
- * the role-template service, and submitCreate() starts populating
- * `roleTemplateId` in the request payload. Both swaps are isolated to
- * this file; the request/response model interface already carries the
- * optional field.
+ * The "Role-template binding" picker scopes the key's effective role set
+ * at auth time to the intersection of (bound user's roles) ∩ (template's
+ * IncludedRoleNames) — the template can only narrow, never expand. When
+ * left null, the key inherits the user's full grant set. Picker options
+ * come from `AdminService.getRoleTemplates()`; selecting "None" disables
+ * scoping.
  */
 @Component({
   selector: 'app-system-api-keys-panel',
@@ -63,6 +60,7 @@ import {
     SelectComponent,
     DatepickerComponent,
     ValidationButtonComponent,
+    MatTooltipModule,
   ],
   templateUrl: './system-api-keys-panel.component.html',
   styleUrl: './system-api-keys-panel.component.scss',
@@ -71,7 +69,6 @@ import {
 export class SystemApiKeysPanelComponent implements OnInit {
   private readonly service = inject(SystemApiKeyService);
   private readonly adminService = inject(AdminService);
-  private readonly refData = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
   private readonly dialog = inject(MatDialog);
   private readonly translate = inject(TranslateService);
@@ -79,7 +76,7 @@ export class SystemApiKeysPanelComponent implements OnInit {
   protected readonly isLoading = signal(false);
   protected readonly keys = signal<SystemApiKey[]>([]);
   protected readonly userOptions = signal<SelectOption[]>([]);
-  protected readonly roleOptions = signal<SelectOption[]>([]);
+  protected readonly roleTemplateOptions = signal<SelectOption[]>([]);
   protected readonly showCreateDialog = signal(false);
   protected readonly creating = signal(false);
 
@@ -93,6 +90,7 @@ export class SystemApiKeysPanelComponent implements OnInit {
   protected readonly columns: ColumnDef[] = [
     { field: 'name', header: this.translate.instant('adminPanels.systemApiKeys.cols.name'), sortable: true },
     { field: 'userEmail', header: this.translate.instant('adminPanels.systemApiKeys.cols.user'), sortable: true },
+    { field: 'roleTemplateName', header: this.translate.instant('adminPanels.systemApiKeys.cols.roleTemplate'), sortable: true, width: '180px' },
     { field: 'keyPrefix', header: this.translate.instant('adminPanels.systemApiKeys.cols.prefix'), width: '160px' },
     { field: 'status', header: this.translate.instant('adminPanels.systemApiKeys.cols.status'), width: '100px' },
     { field: 'createdAt', header: this.translate.instant('adminPanels.systemApiKeys.cols.created'), sortable: true, type: 'date', width: '140px' },
@@ -101,23 +99,17 @@ export class SystemApiKeysPanelComponent implements OnInit {
     { field: 'actions', header: '', width: '100px', align: 'right' },
   ];
 
-  /**
-   * `roleBinding` is intentionally NOT in the submit payload today — see the
-   * class doc. It's a first-class form field so the visual surface stays
-   * stable across the eventual swap to role-template scoping; today it
-   * captures admin intent but doesn't constrain the key.
-   */
   protected readonly form = new FormGroup({
     name: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     userId: new FormControl<number | null>(null, [Validators.required]),
-    roleBinding: new FormControl<string | null>(null),
+    roleTemplateId: new FormControl<number | null>(null),
     expiresAt: new FormControl<Date | null>(null),
   });
 
   protected readonly violations = FormValidationService.getViolations(this.form, {
     name: this.translate.instant('adminPanels.systemApiKeys.fields.name'),
     userId: this.translate.instant('adminPanels.systemApiKeys.fields.user'),
-    roleBinding: this.translate.instant('adminPanels.systemApiKeys.fields.role'),
+    roleTemplateId: this.translate.instant('adminPanels.systemApiKeys.fields.roleTemplate'),
     expiresAt: this.translate.instant('adminPanels.systemApiKeys.fields.expiresAt'),
   });
 
@@ -146,11 +138,23 @@ export class SystemApiKeysPanelComponent implements OnInit {
           label: `${u.lastName}, ${u.firstName} (${u.email})`,
         })));
     });
-    this.refData.getRolesAsOptions().subscribe((opts) => this.roleOptions.set(opts));
+    // Active templates only (deactivated ones can't be assigned). Prepend a
+    // "None — inherit user's roles" entry so admins can explicitly opt out
+    // of scoping rather than relying on "leave blank".
+    this.adminService.getRoleTemplates(false).subscribe((templates) => {
+      const noneLabel = this.translate.instant('adminPanels.systemApiKeys.roleTemplateNone');
+      this.roleTemplateOptions.set([
+        { value: null, label: noneLabel },
+        ...templates.map((t) => ({
+          value: t.id,
+          label: `${t.name} (${t.includedRoleNames.join(', ')})`,
+        })),
+      ]);
+    });
   }
 
   protected openCreate(): void {
-    this.form.reset({ name: '', userId: null, roleBinding: null, expiresAt: null });
+    this.form.reset({ name: '', userId: null, roleTemplateId: null, expiresAt: null });
     FormValidationService.clearServerErrors(this.form);
     this.showCreateDialog.set(true);
   }
@@ -165,13 +169,10 @@ export class SystemApiKeysPanelComponent implements OnInit {
     FormValidationService.clearServerErrors(this.form);
 
     const v = this.form.getRawValue();
-    // Per-key role-template scoping is reserved (see class doc); we shape the
-    // request without roleTemplateId today and add it here when the backend
-    // is ready. `roleBinding` is captured for the admin's reference but not
-    // transmitted — the underlying authz is still the bound user's roles.
     const request: CreateSystemApiKeyRequest = {
       name: v.name!,
       userId: v.userId!,
+      roleTemplateId: v.roleTemplateId ?? null,
       expiresAt: v.expiresAt ? toIsoDate(v.expiresAt) : null,
     };
 

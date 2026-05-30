@@ -6032,7 +6032,9 @@
       "noExpiry": "No expiry",
       "unknownUser": "(unknown user)",
       "userHint": "The key will authenticate AS this user. Audit and activity rows attribute to them; their roles drive every authorization check.",
-      "roleHint": "Role binding is reserved for forthcoming per-key scoping. Today the key inherits the bound user's roles; this selection has no effect yet.",
+      "roleTemplateHint": "Optional scoping. When a template is picked, the key's effective roles are narrowed to the intersection of the bound user's roles and the template — never expanded. Leave as \"None\" to inherit the user's full role set.",
+      "roleTemplateNone": "None — inherit user's roles",
+      "roleTemplateTooltip": "Effective roles = user's roles ∩ template's roles",
       "expiryHint": "Optional. Leave blank for a non-expiring key.",
       "revokeAria": "Revoke key",
       "revokeTitle": "Revoke System API Key?",
@@ -6049,13 +6051,14 @@
       "fields": {
         "name": "Name",
         "user": "Bound User",
-        "role": "Role Binding (reserved)",
+        "roleTemplate": "Role Template",
         "expiresAt": "Expires At",
         "plaintext": "Plaintext Key (shown once)"
       },
       "cols": {
         "name": "Name",
         "user": "Acts As",
+        "roleTemplate": "Scope",
         "prefix": "Prefix",
         "status": "Status",
         "created": "Created",
