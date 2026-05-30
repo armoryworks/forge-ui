@@ -195,6 +195,7 @@ export class NavTreeService {
             { icon: 'tune', label: 'Settings', i18nKey: 'admin.tabs.settings', route: '/admin/settings', allowedRoles: ['Admin'] },
             { icon: 'manage_search', label: 'Audit Log', i18nKey: 'admin.tabs.auditLog', route: '/admin/audit-log', allowedRoles: ['Admin'] },
             { icon: 'vpn_key', label: 'BI API Keys', i18nKey: 'admin.tabs.biApiKeys', route: '/admin/bi-api-keys', allowedRoles: ['Admin'] },
+            { icon: 'key', label: 'System API Keys', i18nKey: 'admin.tabs.systemApiKeys', route: '/admin/system-api-keys', allowedRoles: ['Admin'] },
             { icon: 'edit_note', label: 'Time Corrections', i18nKey: 'admin.tabs.timeCorrections', route: '/admin/time-corrections', allowedRoles: ['Admin', 'Manager'] },
           ],
         },

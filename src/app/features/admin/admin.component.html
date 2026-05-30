@@ -490,6 +490,13 @@
       </div>
     }
 
+    <!-- System API Keys Tab — user-bound headless integrations (Tuyere et al.) -->
+    @if (activeTab() === 'system-api-keys') {
+      <div class="tab-panel">
+        <app-system-api-keys-panel />
+      </div>
+    }
+
     <!-- EDI Tab -->
     @if (activeTab() === 'edi') {
       <div class="tab-panel">

@@ -1,0 +1,164 @@
+<div class="system-api-keys-panel">
+  <div class="panel-header">
+    <span class="panel-header__count">
+      {{ keys().length }} {{ 'adminPanels.systemApiKeys.headerCount' | translate }}
+    </span>
+    <span class="system-api-keys-panel__spacer"></span>
+    <button class="action-btn action-btn--create"
+      data-testid="system-api-key-create-btn"
+      (click)="openCreate()">
+      <span class="material-icons-outlined">key</span>
+      {{ 'adminPanels.systemApiKeys.newKey' | translate }}
+    </button>
+  </div>
+
+  <div [appLoadingBlock]="isLoading()">
+    <app-data-table
+      tableId="admin-system-api-keys"
+      [columns]="columns"
+      [data]="keys()"
+      emptyIcon="key"
+      [emptyMessage]="'adminPanels.systemApiKeys.noKeys' | translate">
+      <ng-template appColumnCell="userEmail" let-row>
+        @if (row.userEmail) {
+          {{ row.userEmail }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.systemApiKeys.unknownUser' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="status" let-row>
+        @if (row.isActive) {
+          <span class="chip chip--success">{{ 'adminPanels.systemApiKeys.statusActive' | translate }}</span>
+        } @else {
+          <span class="chip chip--neutral">{{ 'adminPanels.systemApiKeys.statusRevoked' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="lastUsedAt" let-row>
+        @if (row.lastUsedAt) {
+          {{ row.lastUsedAt | date:'MM/dd/yyyy hh:mm' }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.systemApiKeys.never' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="expiresAt" let-row>
+        @if (row.expiresAt) {
+          {{ row.expiresAt | date:'MM/dd/yyyy' }}
+        } @else {
+          <span class="text-muted">{{ 'adminPanels.systemApiKeys.noExpiry' | translate }}</span>
+        }
+      </ng-template>
+      <ng-template appColumnCell="actions" let-row>
+        @if (row.isActive) {
+          <button class="icon-btn icon-btn--danger"
+            [attr.aria-label]="'adminPanels.systemApiKeys.revokeAria' | translate"
+            (click)="revoke(row); $event.stopPropagation()">
+            <span class="material-icons-outlined">block</span>
+          </button>
+        }
+      </ng-template>
+    </app-data-table>
+  </div>
+</div>
+
+<!-- Create dialog -->
+@if (showCreateDialog()) {
+  <app-dialog
+    [title]="'adminPanels.systemApiKeys.newKey' | translate"
+    width="520px"
+    (closed)="closeCreate()">
+    <div [formGroup]="form" class="system-api-keys-panel__form">
+      <app-input
+        [label]="'adminPanels.systemApiKeys.fields.name' | translate"
+        formControlName="name"
+        [required]="true"
+        [maxlength]="200"
+        data-testid="system-api-key-name" />
+      <app-select
+        [label]="'adminPanels.systemApiKeys.fields.user' | translate"
+        formControlName="userId"
+        [options]="userOptions()"
+        [required]="true"
+        data-testid="system-api-key-user" />
+      <p class="system-api-keys-panel__hint">
+        {{ 'adminPanels.systemApiKeys.userHint' | translate }}
+      </p>
+      <app-select
+        [label]="'adminPanels.systemApiKeys.fields.role' | translate"
+        formControlName="roleBinding"
+        [options]="roleOptions()"
+        data-testid="system-api-key-role" />
+      <p class="system-api-keys-panel__hint system-api-keys-panel__hint--reserved">
+        <span class="material-icons-outlined">schedule</span>
+        {{ 'adminPanels.systemApiKeys.roleHint' | translate }}
+      </p>
+      <app-datepicker
+        [label]="'adminPanels.systemApiKeys.fields.expiresAt' | translate"
+        formControlName="expiresAt" />
+      <p class="system-api-keys-panel__hint">
+        {{ 'adminPanels.systemApiKeys.expiryHint' | translate }}
+      </p>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreate()">
+        {{ 'common.cancel' | translate }}
+      </button>
+      <app-validation-button [violations]="violations">
+        <button class="action-btn action-btn--primary"
+          data-testid="system-api-key-submit-btn"
+          [disabled]="form.invalid || creating()"
+          (click)="submitCreate()">
+          <span class="material-icons-outlined">key</span>
+          {{ 'adminPanels.systemApiKeys.issueButton' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+<!-- One-time plaintext reveal -->
+@if (issuedKey(); as issued) {
+  <app-dialog
+    [title]="'adminPanels.systemApiKeys.issuedTitle' | translate"
+    width="560px"
+    (closed)="dismissIssuedKey()">
+    <div class="system-api-keys-panel__reveal">
+      <div class="system-api-keys-panel__warning">
+        <span class="material-icons-outlined">warning</span>
+        <div>
+          <strong>{{ 'adminPanels.systemApiKeys.issuedWarningTitle' | translate }}</strong>
+          <p>{{ 'adminPanels.systemApiKeys.issuedWarning' | translate }}</p>
+        </div>
+      </div>
+
+      <span class="system-api-keys-panel__field-label">
+        {{ 'adminPanels.systemApiKeys.fields.name' | translate }}
+      </span>
+      <div class="system-api-keys-panel__readout">{{ issued.name }}</div>
+
+      <span class="system-api-keys-panel__field-label">
+        {{ 'adminPanels.systemApiKeys.fields.plaintext' | translate }}
+      </span>
+      <div class="system-api-keys-panel__plaintext-row">
+        <code class="system-api-keys-panel__plaintext"
+          data-testid="system-api-key-plaintext">{{ issued.plaintextKey }}</code>
+        <button class="action-btn action-btn--secondary"
+          data-testid="system-api-key-copy-btn"
+          (click)="copyPlaintext()">
+          <span class="material-icons-outlined">
+            {{ plaintextCopied() ? 'check' : 'content_copy' }}
+          </span>
+          @if (plaintextCopied()) {
+            {{ 'adminPanels.systemApiKeys.copied' | translate }}
+          } @else {
+            {{ 'adminPanels.systemApiKeys.copy' | translate }}
+          }
+        </button>
+      </div>
+    </div>
+    <div dialog-footer>
+      <button class="action-btn action-btn--primary" (click)="dismissIssuedKey()">
+        {{ 'adminPanels.systemApiKeys.dismissReveal' | translate }}
+      </button>
+    </div>
+  </app-dialog>
+}
