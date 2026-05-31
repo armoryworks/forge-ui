@@ -42,6 +42,31 @@
     gap: $sp-md;
   }
 
+  &__capability-banner {
+    display: flex;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+    border-left: $border-width-accent solid var(--error);
+    color: var(--text);
+
+    .material-icons-outlined {
+      color: var(--error);
+      font-size: $icon-size-xl;
+    }
+
+    strong {
+      display: block;
+      font-weight: 600;
+    }
+
+    p {
+      margin: $sp-xs 0 0 0;
+      font-size: $font-size-sm;
+      color: var(--text-muted);
+    }
+  }
+
   &__warning {
     display: flex;
     gap: $sp-md;

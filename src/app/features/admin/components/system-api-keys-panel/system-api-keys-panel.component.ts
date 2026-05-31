@@ -19,6 +19,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { isCapabilityDisabledError } from '../../../../shared/errors/capability-disabled.error';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -81,6 +82,15 @@ export class SystemApiKeysPanelComponent implements OnInit {
   protected readonly creating = signal(false);
 
   /**
+   * Server-rejected capability state — mirrors the bi-api-keys-panel fix
+   * (2026-05-31). Both endpoints sit behind CAP-IDEN-AUTH-API-KEYS which
+   * is IsDefaultOn=false, so on a fresh install the silent capability-
+   * disabled 403 has to be surfaced explicitly or the panel reads as
+   * broken.
+   */
+  protected readonly capabilityDisabled = signal<string | null>(null);
+
+  /**
    * Issuance plaintext — shown exactly once. Once dismissed there is no
    * recovery path on the server side; the only artifact left is the prefix.
    */
@@ -123,9 +133,15 @@ export class SystemApiKeysPanelComponent implements OnInit {
     this.service.list().subscribe({
       next: (keys) => {
         this.keys.set(keys);
+        this.capabilityDisabled.set(null);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: (err: unknown) => {
+        this.isLoading.set(false);
+        if (isCapabilityDisabledError(err)) {
+          this.capabilityDisabled.set(err.message);
+        }
+      },
     });
   }
 
@@ -187,8 +203,16 @@ export class SystemApiKeysPanelComponent implements OnInit {
           this.translate.instant('adminPanels.systemApiKeys.issuedSuccess', { name: response.name }),
         );
       },
-      error: (err: HttpErrorResponse) => {
+      error: (err: HttpErrorResponse | unknown) => {
         this.creating.set(false);
+        if (isCapabilityDisabledError(err)) {
+          this.capabilityDisabled.set(err.message);
+          this.closeCreate();
+          this.snackbar.error(
+            this.translate.instant('adminPanels.systemApiKeys.capabilityDisabled'),
+          );
+          return;
+        }
         FormValidationService.applyServerError(this.form, err);
       },
     });

@@ -17,6 +17,7 @@ import {
   ConfirmDialogComponent,
   ConfirmDialogData,
 } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { isCapabilityDisabledError } from '../../../../shared/errors/capability-disabled.error';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -66,6 +67,16 @@ export class BiApiKeysPanelComponent implements OnInit {
   protected readonly creating = signal(false);
 
   /**
+   * Server-rejected capability state — set when GET or POST returns
+   * 403 capability-disabled. Drives a banner over the table so the admin
+   * sees WHY actions are no-oping instead of staring at a quiet button.
+   * Without this signal the silent-by-design CapabilityDisabledError path
+   * surfaces as "the issue key doesn't do anything" — the exact bug this
+   * field was added to repair (2026-05-31).
+   */
+  protected readonly capabilityDisabled = signal<string | null>(null);
+
+  /**
    * Holds the issuance response so we can show the plaintext one-time. Once
    * the user dismisses the reveal dialog we drop the value — there is no
    * way to recover it from the server.
@@ -102,9 +113,19 @@ export class BiApiKeysPanelComponent implements OnInit {
     this.biApiKeyService.list().subscribe({
       next: (keys) => {
         this.keys.set(keys);
+        this.capabilityDisabled.set(null);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: (err: unknown) => {
+        this.isLoading.set(false);
+        if (isCapabilityDisabledError(err)) {
+          // The endpoint is gated behind CAP-IDEN-AUTH-API-KEYS, which is
+          // default-off. Without the banner the panel just renders an
+          // empty table with no explanation — the operator thinks BI keys
+          // are working and just empty.
+          this.capabilityDisabled.set(err.message);
+        }
+      },
     });
   }
 
@@ -141,8 +162,21 @@ export class BiApiKeysPanelComponent implements OnInit {
           this.translate.instant('adminPanels.biApiKeys.issuedSuccess', { name: response.name }),
         );
       },
-      error: (err: HttpErrorResponse) => {
+      error: (err: HttpErrorResponse | unknown) => {
         this.creating.set(false);
+        if (isCapabilityDisabledError(err)) {
+          // The HTTP interceptor swallows the 403 envelope for capability-
+          // disabled (intentional — it's a config state, not a fault). The
+          // panel has to surface SOMETHING or the user sees the button
+          // briefly disable then re-enable with no other feedback, which
+          // reads as "the button is broken." Snackbar + banner cover it.
+          this.capabilityDisabled.set(err.message);
+          this.closeCreate();
+          this.snackbar.error(
+            this.translate.instant('adminPanels.biApiKeys.capabilityDisabled'),
+          );
+          return;
+        }
         // Phase 3 / WU-02 envelope — surface per-field errors back on the form.
         FormValidationService.applyServerError(this.form, err);
       },

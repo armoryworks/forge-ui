@@ -8,6 +8,16 @@
     </p>
   </div>
 
+  @if (capabilityDisabled(); as message) {
+    <div class="connections-panel__capability-banner" role="alert" data-testid="connections-capability-banner">
+      <span class="material-icons-outlined">block</span>
+      <div>
+        <strong>{{ 'adminPanels.connections.capabilityDisabledTitle' | translate }}</strong>
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  }
+
   <div [appLoadingBlock]="isLoading()">
     <app-data-table
       tableId="admin-connections"

@@ -7,6 +7,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { isCapabilityDisabledError } from '../../../../shared/errors/capability-disabled.error';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 
 import { ConnectionsRegistryService } from '../../services/connections-registry.service';
@@ -48,6 +49,14 @@ export class ConnectionsPanelComponent implements OnInit {
   protected readonly isLoading = signal(false);
   protected readonly rows = signal<IntegrationRecord[]>([]);
   protected readonly count = computed(() => this.rows().length);
+
+  /**
+   * Server-rejected capability state. Connections list lives behind the
+   * same CAP-IDEN-AUTH-API-KEYS gate; without surfacing the silent 403
+   * the panel looks like an install with zero integrations rather than
+   * an install with the capability turned off.
+   */
+  protected readonly capabilityDisabled = signal<string | null>(null);
 
   protected readonly columns: ColumnDef[] = [
     { field: 'kind', header: this.translate.instant('adminPanels.connections.cols.kind'), sortable: true, width: '180px' },
@@ -94,9 +103,15 @@ export class ConnectionsPanelComponent implements OnInit {
     this.service.list().subscribe({
       next: (rows) => {
         this.rows.set(rows);
+        this.capabilityDisabled.set(null);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: (err: unknown) => {
+        this.isLoading.set(false);
+        if (isCapabilityDisabledError(err)) {
+          this.capabilityDisabled.set(err.message);
+        }
+      },
     });
   }
 

@@ -6,11 +6,22 @@
     <span class="bi-api-keys-panel__spacer"></span>
     <button class="action-btn action-btn--create"
       data-testid="bi-api-key-create-btn"
+      [disabled]="capabilityDisabled() !== null"
       (click)="openCreate()">
       <span class="material-icons-outlined">vpn_key</span>
       {{ 'adminPanels.biApiKeys.newKey' | translate }}
     </button>
   </div>
+
+  @if (capabilityDisabled(); as message) {
+    <div class="bi-api-keys-panel__capability-banner" role="alert" data-testid="bi-api-key-capability-banner">
+      <span class="material-icons-outlined">block</span>
+      <div>
+        <strong>{{ 'adminPanels.biApiKeys.capabilityDisabledTitle' | translate }}</strong>
+        <p>{{ message }}</p>
+      </div>
+    </div>
+  }
 
   <div [appLoadingBlock]="isLoading()">
     <app-data-table
