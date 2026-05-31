@@ -29,8 +29,6 @@ import { CustomerDetailDialogComponent, CustomerDetailDialogData, CustomerDetail
 import { NewCustomerForkDialogComponent, CustomerCreatePath } from './components/new-customer-fork-dialog/new-customer-fork-dialog.component';
 import { LeadPickerDialogComponent } from './components/new-customer-fork-dialog/lead-picker-dialog.component';
 import { LeadItem } from '../leads/models/lead-item.model';
-import { LeadConvertDialogComponent, LeadConvertDialogData } from '../leads/components/lead-convert-dialog/lead-convert-dialog.component';
-import { ConvertLeadRequest } from '../leads/models/convert-lead-request.model';
 import { LeadsService } from '../leads/services/leads.service';
 
 @Component({
@@ -284,25 +282,31 @@ export class CustomersComponent {
     this.showDialog.set(true);
   }
 
-  /** Convert from lead — pick a lead, then run the existing convert stepper. */
+  /**
+   * Convert from lead — pick a lead, then run the one-click convert.
+   *
+   * Two-step UX simplification (2026-05-31): the second dialog
+   * (LeadConvertDialogComponent, a mat-stepper for credit/tax/addresses)
+   * was retired alongside the vendor + customer wizard migrations. The
+   * server-side convertLead handler has always been atomic; the wizard
+   * around it was UX scaffolding, not a technical necessity. Pick a
+   * lead → POST with empty body → navigate to the new customer. The
+   * credit/tax/address fields the wizard collected now move to the
+   * customer detail page after conversion (admins can fill them there
+   * via the existing edit flows).
+   */
   private openLeadPicker(): void {
     this.dialog.open<LeadPickerDialogComponent, void, LeadItem | undefined>(
       LeadPickerDialogComponent, { width: '560px' },
     ).afterClosed().subscribe(lead => {
       if (!lead) return;
-      this.dialog.open<LeadConvertDialogComponent, LeadConvertDialogData, ConvertLeadRequest | undefined>(
-        LeadConvertDialogComponent,
-        { width: '640px', data: { lead } satisfies LeadConvertDialogData },
-      ).afterClosed().subscribe(request => {
-        if (!request) return;
-        this.executeLeadConversion(lead.id, request);
-      });
+      this.executeLeadConversion(lead.id);
     });
   }
 
-  private executeLeadConversion(leadId: number, request: ConvertLeadRequest): void {
+  private executeLeadConversion(leadId: number): void {
     this.saving.set(true);
-    this.leadsService.convertLead(leadId, request).subscribe({
+    this.leadsService.convertLead(leadId, { createJob: false }).subscribe({
       next: (result) => {
         this.saving.set(false);
         this.snackbar.success(this.translate.instant('leads.convertedOnly'));
