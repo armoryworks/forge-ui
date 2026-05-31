@@ -1,0 +1,31 @@
+<section class="vendor-workflow-step" [appLoadingBlock]="saving()" data-testid="vendor-identity-step">
+  <header class="vendor-workflow-step__header">
+    <h2 class="vendor-workflow-step__title">{{ 'vendors.workflow.identity.title' | translate }}</h2>
+    <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.identity.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="vendor-workflow-step__form">
+    <app-input
+      [label]="'vendors.workflow.identity.companyNameLabel' | translate"
+      formControlName="companyName"
+      [required]="true"
+      [maxlength]="200"
+      data-testid="vendor-identity-company-name" />
+    <app-input
+      [label]="'vendors.workflow.identity.contactNameLabel' | translate"
+      formControlName="contactName"
+      [maxlength]="200"
+      data-testid="vendor-identity-contact-name" />
+    <app-input
+      [label]="'vendors.workflow.identity.emailLabel' | translate"
+      type="email"
+      formControlName="email"
+      [maxlength]="256"
+      data-testid="vendor-identity-email" />
+    <app-input
+      [label]="'vendors.workflow.identity.phoneLabel' | translate"
+      formControlName="phone"
+      mask="phone"
+      data-testid="vendor-identity-phone" />
+  </form>
+</section>

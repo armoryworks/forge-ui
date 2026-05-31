@@ -4184,7 +4184,66 @@
       "addPartToCatalog": "Añadir pieza"
     },
     "offTierVariancePct": "% Variación Fuera de Tarifa",
-    "offTierVariancePctPlaceholder": "Predeterminado: 5%"
+    "offTierVariancePctPlaceholder": "Predeterminado: 5%",
+    "workflow": {
+      "page": {
+        "newTitle": "Nuevo Proveedor",
+        "loadingTitle": "Cargando…",
+        "loading": "Cargando flujo de trabajo…",
+        "loadFailed": "No se pudo cargar el flujo de trabajo del proveedor.",
+        "definitionMissing": "La definición del flujo de trabajo del proveedor no está configurada.",
+        "startFailed": "No se pudo iniciar el flujo de trabajo del proveedor.",
+        "completeSuccess": "Proveedor guardado.",
+        "missingValidators": "No se puede completar — {{ missing }}.",
+        "blockedByStep": "Termine '{{ step }}' antes de continuar — {{ missing }}."
+      },
+      "steps": {
+        "identity": "Identidad",
+        "address": "Dirección",
+        "terms": "Términos",
+        "supplyItems": "Artículos de Suministro",
+        "review": "Revisión"
+      },
+      "identity": {
+        "title": "Identidad",
+        "hint": "¿Quién es este proveedor y cómo se le contacta?",
+        "companyNameLabel": "Nombre de la Empresa",
+        "contactNameLabel": "Contacto Principal",
+        "emailLabel": "Correo Electrónico",
+        "phoneLabel": "Teléfono",
+        "saveFailed": "No se pudo guardar la identidad del proveedor."
+      },
+      "address": {
+        "title": "Dirección",
+        "hint": "Dirección de remisión o principal. Opcional — puede agregarla más tarde.",
+        "label": "Dirección",
+        "saveFailed": "No se pudo guardar la dirección del proveedor."
+      },
+      "terms": {
+        "title": "Términos",
+        "hint": "Términos de pago, pedido mínimo y cualquier nota interna.",
+        "paymentTermsLabel": "Términos de Pago",
+        "minOrderAmountLabel": "Monto Mínimo de Pedido",
+        "offTierVariancePctLabel": "% Variación Fuera de Tarifa",
+        "notesLabel": "Notas",
+        "saveFailed": "No se pudieron guardar los términos del proveedor."
+      },
+      "supplyItems": {
+        "title": "Artículos de Suministro",
+        "hint": "Partes y consumibles que suministra este proveedor.",
+        "followUpMessage": "Después de guardar el proveedor, agregue artículos de suministro desde la pestaña Catálogo en la página de detalle del proveedor."
+      },
+      "review": {
+        "title": "Revisión",
+        "hint": "Confirme los detalles a continuación y luego marque como Completado para guardar.",
+        "loading": "Cargando proveedor…"
+      },
+      "express": {
+        "title": "Nuevo Proveedor",
+        "hint": "Capture lo esencial en un solo formulario. Puede agregar dirección, términos y artículos de suministro más tarde desde la página de detalle del proveedor.",
+        "saveFailed": "No se pudo guardar el proveedor."
+      }
+    }
   },
   "purchaseOrders": {
     "title": "Órdenes de Compra",
@@ -6660,6 +6719,18 @@
         "salesHooks": "Configuración de Ventas"
       }
     },
+    "vendors": {
+      "definitions": {
+        "guidedV1": "Configuración de nuevo proveedor"
+      },
+      "steps": {
+        "identity": "Identidad",
+        "address": "Dirección",
+        "terms": "Términos",
+        "supplyItems": "Artículos de Suministro",
+        "review": "Revisión"
+      }
+    },
     "shell": {
       "actions": {
         "back": "Back",
@@ -6738,6 +6809,10 @@
       "hasSourcingMissing": "Aún no se ha seleccionado el proveedor preferido.",
       "hasInventory": "Inventario",
       "hasInventoryMissing": "Aún no se ha establecido la unidad de medida del stock."
+    },
+    "vendors": {
+      "hasIdentity": "Identidad",
+      "hasIdentityMissing": "El nombre de la empresa es obligatorio."
     }
   },
   "address": {

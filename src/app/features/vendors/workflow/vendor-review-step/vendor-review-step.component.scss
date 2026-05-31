@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+.vendor-workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-lg;
+
+  &__header { display: flex; flex-direction: column; gap: $sp-xs; width: 100%; max-width: 720px; }
+  &__title  { margin: 0; font-size: $font-size-lg; color: var(--text); }
+  &__hint   { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: $sp-lg;
+    row-gap: $sp-sm;
+    margin: 0;
+    width: 100%;
+    max-width: 720px;
+    padding: $sp-lg;
+    border: $border-width-thin solid var(--border);
+    background: var(--surface);
+    font-size: $font-size-sm;
+
+    dt {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    dd {
+      margin: 0;
+      color: var(--text);
+    }
+  }
+
+  &__summary-notes {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}

@@ -1,0 +1,44 @@
+<section class="vendor-workflow-step" data-testid="vendor-review-step">
+  <header class="vendor-workflow-step__header">
+    <h2 class="vendor-workflow-step__title">{{ 'vendors.workflow.review.title' | translate }}</h2>
+    <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.review.hint' | translate }}</p>
+  </header>
+
+  @if (vendor(); as v) {
+    <dl class="vendor-workflow-step__summary">
+      <dt>{{ 'vendors.workflow.identity.companyNameLabel' | translate }}</dt>
+      <dd>{{ v.companyName }}</dd>
+
+      @if (v.contactName) {
+        <dt>{{ 'vendors.workflow.identity.contactNameLabel' | translate }}</dt>
+        <dd>{{ v.contactName }}</dd>
+      }
+      @if (v.email) {
+        <dt>{{ 'vendors.workflow.identity.emailLabel' | translate }}</dt>
+        <dd>{{ v.email }}</dd>
+      }
+      @if (v.phone) {
+        <dt>{{ 'vendors.workflow.identity.phoneLabel' | translate }}</dt>
+        <dd>{{ v.phone }}</dd>
+      }
+      @if (addressLine()) {
+        <dt>{{ 'vendors.workflow.address.title' | translate }}</dt>
+        <dd>{{ addressLine() }}</dd>
+      }
+      @if (v.paymentTerms) {
+        <dt>{{ 'vendors.workflow.terms.paymentTermsLabel' | translate }}</dt>
+        <dd>{{ v.paymentTerms }}</dd>
+      }
+      @if (v.offTierVariancePct !== null) {
+        <dt>{{ 'vendors.workflow.terms.offTierVariancePctLabel' | translate }}</dt>
+        <dd>{{ v.offTierVariancePct }}%</dd>
+      }
+      @if (v.notes) {
+        <dt>{{ 'vendors.workflow.terms.notesLabel' | translate }}</dt>
+        <dd class="vendor-workflow-step__summary-notes">{{ v.notes }}</dd>
+      }
+    </dl>
+  } @else {
+    <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.review.loading' | translate }}</p>
+  }
+</section>

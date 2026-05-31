@@ -4191,7 +4191,66 @@
       "addPartToCatalog": "Add Part"
     },
     "offTierVariancePct": "Off-Tier Variance %",
-    "offTierVariancePctPlaceholder": "Default: 5%"
+    "offTierVariancePctPlaceholder": "Default: 5%",
+    "workflow": {
+      "page": {
+        "newTitle": "New Vendor",
+        "loadingTitle": "Loading…",
+        "loading": "Loading workflow…",
+        "loadFailed": "Could not load the vendor workflow.",
+        "definitionMissing": "The vendor workflow definition is not configured.",
+        "startFailed": "Could not start the vendor workflow.",
+        "completeSuccess": "Vendor saved.",
+        "missingValidators": "Cannot complete — {{ missing }}.",
+        "blockedByStep": "Finish '{{ step }}' before moving on — {{ missing }}."
+      },
+      "steps": {
+        "identity": "Identity",
+        "address": "Address",
+        "terms": "Terms",
+        "supplyItems": "Supply Items",
+        "review": "Review"
+      },
+      "identity": {
+        "title": "Identity",
+        "hint": "Who is this vendor and how do you reach them?",
+        "companyNameLabel": "Company Name",
+        "contactNameLabel": "Primary Contact",
+        "emailLabel": "Email",
+        "phoneLabel": "Phone",
+        "saveFailed": "Could not save the vendor's identity."
+      },
+      "address": {
+        "title": "Address",
+        "hint": "Remit-to or primary address. Optional — you can add this later.",
+        "label": "Address",
+        "saveFailed": "Could not save the vendor's address."
+      },
+      "terms": {
+        "title": "Terms",
+        "hint": "Payment terms, minimum order, and any internal notes.",
+        "paymentTermsLabel": "Payment Terms",
+        "minOrderAmountLabel": "Minimum Order Amount",
+        "offTierVariancePctLabel": "Off-Tier Variance %",
+        "notesLabel": "Notes",
+        "saveFailed": "Could not save the vendor's terms."
+      },
+      "supplyItems": {
+        "title": "Supply Items",
+        "hint": "Parts and consumables this vendor supplies.",
+        "followUpMessage": "After saving the vendor, add supply items from the vendor's Catalog tab on the detail page."
+      },
+      "review": {
+        "title": "Review",
+        "hint": "Confirm the details below, then Mark Complete to save.",
+        "loading": "Loading vendor…"
+      },
+      "express": {
+        "title": "New Vendor",
+        "hint": "Capture the essentials in one form. You can fill in address, terms, and supply items later from the vendor detail page.",
+        "saveFailed": "Could not save the vendor."
+      }
+    }
   },
   "purchaseOrders": {
     "title": "Purchase Orders",
@@ -6667,6 +6726,18 @@
         "salesHooks": "Sales Setup"
       }
     },
+    "vendors": {
+      "definitions": {
+        "guidedV1": "New vendor setup"
+      },
+      "steps": {
+        "identity": "Identity",
+        "address": "Address",
+        "terms": "Terms",
+        "supplyItems": "Supply Items",
+        "review": "Review"
+      }
+    },
     "shell": {
       "actions": {
         "back": "Back",
@@ -6745,6 +6816,10 @@
       "hasSourcingMissing": "Preferred vendor not yet selected.",
       "hasInventory": "Inventory",
       "hasInventoryMissing": "Stock unit of measure not yet set."
+    },
+    "vendors": {
+      "hasIdentity": "Identity",
+      "hasIdentityMissing": "Company name is required."
     }
   },
   "recentCommunications": {

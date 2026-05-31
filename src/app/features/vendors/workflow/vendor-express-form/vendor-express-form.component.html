@@ -1,0 +1,42 @@
+<section class="vendor-workflow-step" [appLoadingBlock]="saving()" data-testid="vendor-express-form">
+  <header class="vendor-workflow-step__header">
+    <h2 class="vendor-workflow-step__title">{{ 'vendors.workflow.express.title' | translate }}</h2>
+    <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.express.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="vendor-workflow-step__form">
+    <app-input
+      [label]="'vendors.workflow.identity.companyNameLabel' | translate"
+      formControlName="companyName"
+      [required]="true"
+      [maxlength]="200"
+      data-testid="vendor-express-company-name" />
+    <app-input
+      [label]="'vendors.workflow.identity.contactNameLabel' | translate"
+      formControlName="contactName"
+      [maxlength]="200"
+      data-testid="vendor-express-contact-name" />
+    <app-input
+      [label]="'vendors.workflow.identity.emailLabel' | translate"
+      type="email"
+      formControlName="email"
+      [maxlength]="256"
+      data-testid="vendor-express-email" />
+    <app-input
+      [label]="'vendors.workflow.identity.phoneLabel' | translate"
+      formControlName="phone"
+      mask="phone"
+      data-testid="vendor-express-phone" />
+    <app-select
+      [label]="'vendors.workflow.terms.paymentTermsLabel' | translate"
+      formControlName="paymentTerms"
+      [options]="paymentTermsOptions"
+      data-testid="vendor-express-payment-terms" />
+    <app-textarea
+      [label]="'vendors.workflow.terms.notesLabel' | translate"
+      formControlName="notes"
+      [rows]="3"
+      [maxlength]="4000"
+      data-testid="vendor-express-notes" />
+  </form>
+</section>
