@@ -1777,6 +1777,52 @@
       "emptyHelp": "Add a part to start pricing this list.",
       "addEntry": "Add Entry",
       "confirmDelete": "Remove this price entry?"
+    },
+    "workflow": {
+      "page": {
+        "newTitle": "New Customer",
+        "loadingTitle": "Loading…",
+        "loading": "Loading workflow…",
+        "loadFailed": "Could not load the customer workflow.",
+        "definitionMissing": "The customer workflow definition is not configured.",
+        "startFailed": "Could not start the customer workflow.",
+        "completeSuccess": "Customer saved.",
+        "missingValidators": "Cannot complete — {{ missing }}.",
+        "blockedByStep": "Finish '{{ step }}' before moving on — {{ missing }}."
+      },
+      "identity": {
+        "title": "Identity",
+        "hint": "Who is this customer and how do you reach them?",
+        "nameLabel": "Name",
+        "companyNameLabel": "Company",
+        "emailLabel": "Email",
+        "phoneLabel": "Phone",
+        "saveFailed": "Could not save the customer's identity."
+      },
+      "addresses": {
+        "title": "Addresses",
+        "hint": "Billing and shipping addresses.",
+        "followUpMessage": "After saving the customer, add billing and shipping addresses from the customer's Addresses tab on the detail page."
+      },
+      "creditAndTax": {
+        "title": "Credit & Tax",
+        "hint": "Credit limit, default currency, and tax-exemption status.",
+        "creditLimitLabel": "Credit Limit",
+        "defaultCurrencyLabel": "Default Currency",
+        "isTaxExemptLabel": "Tax Exempt",
+        "taxExemptionIdLabel": "Tax Exemption ID",
+        "saveFailed": "Could not save the customer's credit and tax settings."
+      },
+      "review": {
+        "title": "Review",
+        "hint": "Confirm the details below, then Mark Complete to save.",
+        "loading": "Loading customer…"
+      },
+      "express": {
+        "title": "New Customer",
+        "hint": "Capture the essentials in one form. Addresses can be added later from the customer detail page.",
+        "saveFailed": "Could not save the customer."
+      }
     }
   },
   "priceListEntry": {
@@ -6738,6 +6784,17 @@
         "review": "Review"
       }
     },
+    "customers": {
+      "definitions": {
+        "guidedV1": "New customer setup"
+      },
+      "steps": {
+        "identity": "Identity",
+        "addresses": "Addresses",
+        "creditAndTax": "Credit & Tax",
+        "review": "Review"
+      }
+    },
     "shell": {
       "actions": {
         "back": "Back",
@@ -6820,6 +6877,10 @@
     "vendors": {
       "hasIdentity": "Identity",
       "hasIdentityMissing": "Company name is required."
+    },
+    "customers": {
+      "hasIdentity": "Identity",
+      "hasIdentityMissing": "Name is required."
     }
   },
   "recentCommunications": {

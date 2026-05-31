@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { CustomersComponent } from './customers.component';
 import { CustomerDetailComponent } from './pages/customer-detail/customer-detail.component';
+import { provideCustomerWorkflowSteps } from './workflow/register-customer-workflow-steps';
 
 /**
  * Phase 1r / Batch 3 — Customers becomes a sub-route hub matching the
@@ -18,7 +19,7 @@ import { CustomerDetailComponent } from './pages/customer-detail/customer-detail
  * admin, saved segments, bulk import.
  */
 export const CUSTOMERS_ROUTES: Routes = [
-  { path: '', component: CustomersComponent },
+  { path: '', component: CustomersComponent, providers: [provideCustomerWorkflowSteps()] },
   {
     path: 'contacts',
     loadComponent: () =>

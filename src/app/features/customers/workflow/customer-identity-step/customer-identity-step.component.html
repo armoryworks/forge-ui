@@ -1,0 +1,31 @@
+<section class="customer-workflow-step" [appLoadingBlock]="saving()" data-testid="customer-identity-step">
+  <header class="customer-workflow-step__header">
+    <h2 class="customer-workflow-step__title">{{ 'customers.workflow.identity.title' | translate }}</h2>
+    <p class="customer-workflow-step__hint">{{ 'customers.workflow.identity.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="customer-workflow-step__form">
+    <app-input
+      [label]="'customers.workflow.identity.nameLabel' | translate"
+      formControlName="name"
+      [required]="true"
+      [maxlength]="200"
+      data-testid="customer-identity-name" />
+    <app-input
+      [label]="'customers.workflow.identity.companyNameLabel' | translate"
+      formControlName="companyName"
+      [maxlength]="200"
+      data-testid="customer-identity-company-name" />
+    <app-input
+      [label]="'customers.workflow.identity.emailLabel' | translate"
+      type="email"
+      formControlName="email"
+      [maxlength]="256"
+      data-testid="customer-identity-email" />
+    <app-input
+      [label]="'customers.workflow.identity.phoneLabel' | translate"
+      formControlName="phone"
+      mask="phone"
+      data-testid="customer-identity-phone" />
+  </form>
+</section>
