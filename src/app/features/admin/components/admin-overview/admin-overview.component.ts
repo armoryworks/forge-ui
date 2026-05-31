@@ -13,6 +13,20 @@ import { ConnectionsRegistryService } from '../../services/connections-registry.
 import { AdminUser } from '../../models/admin-user.model';
 import { AuditLogEntry } from '../../models/audit-log-entry.model';
 import { IntegrationRecord } from '../../models/integration-record.model';
+import { ScheduledTask } from '../../models/scheduled-task.model';
+import { StorageUsage } from '../../models/storage-usage.model';
+
+/**
+ * Compliance statuses that warrant admin attention — Overdue items risk
+ * regulatory non-compliance, ReverificationDue is the work-authorization
+ * expiration warning window. NotStarted / InProgress are tracked separately
+ * via missingComplianceItems on the user row.
+ */
+const I9_ATTENTION_STATUSES = new Set([
+  'Section2Overdue',
+  'ReverificationDue',
+  'ReverificationOverdue',
+]);
 
 /**
  * Admin → Overview landing page. Replaces the prior `/admin → /admin/users`
@@ -50,6 +64,8 @@ export class AdminOverviewComponent implements OnInit {
   protected readonly auditEntries = signal<AuditLogEntry[]>([]);
   protected readonly connections = signal<IntegrationRecord[]>([]);
   protected readonly connectionsAvailable = signal(true);
+  protected readonly scheduledTasks = signal<ScheduledTask[]>([]);
+  protected readonly storageUsage = signal<StorageUsage[]>([]);
 
   /** Active-user count drives the People card's headline number. */
   protected readonly activeUserCount = computed(
@@ -89,6 +105,64 @@ export class AdminOverviewComponent implements OnInit {
     () => this.connections().filter(r => r.status === 'Expired').length,
   );
 
+  /** Compliance: count of active users with any unmet compliance item. The
+      missingComplianceItems array is the server's catch-all "what's still
+      open against this user" — uses the same field the per-user detail
+      panel surfaces, so the count here matches what the admin will see
+      after drilling in. */
+  protected readonly complianceOpenCount = computed(
+    () => this.users().filter(u =>
+      u.isActive && u.missingComplianceItems.length > 0,
+    ).length,
+  );
+
+  /** Subset specifically gated on I-9 work-authorization status —
+      Section2Overdue / ReverificationDue / ReverificationOverdue are the
+      regulator-facing items where a missed deadline carries actual
+      consequences. Shown as a sub-alert chip on the Compliance card. */
+  protected readonly i9AttentionCount = computed(
+    () => this.users().filter(u =>
+      u.isActive && u.i9Status !== null && I9_ATTENTION_STATUSES.has(u.i9Status),
+    ).length,
+  );
+
+  /** Scheduled tasks active right now (admin-defined recurring tasks; see
+      ScheduledTasksController). Inactive rows are excluded — they exist as
+      drafts / paused but shouldn't count toward "what's running." */
+  protected readonly activeScheduledTaskCount = computed(
+    () => this.scheduledTasks().filter(t => t.isActive).length,
+  );
+
+  /** Soonest upcoming run across active tasks, or null when nothing is
+      scheduled. Drives the "Next: <date>" sub-line on the card. */
+  protected readonly nextScheduledRun = computed(() => {
+    const upcoming = this.scheduledTasks()
+      .filter(t => t.isActive && t.nextRunAt !== null)
+      .map(t => new Date(t.nextRunAt!).getTime());
+    if (upcoming.length === 0) return null;
+    return new Date(Math.min(...upcoming));
+  });
+
+  /** Sum of file counts across every entity bucket. */
+  protected readonly totalFileCount = computed(
+    () => this.storageUsage().reduce((acc, b) => acc + b.fileCount, 0),
+  );
+
+  /** Sum of bytes across every entity bucket, pre-formatted for display. */
+  protected readonly totalStorageDisplay = computed(
+    () => formatBytes(this.storageUsage().reduce((acc, b) => acc + b.totalSizeBytes, 0)),
+  );
+
+  /** Biggest entity-type bucket by size — gives the admin a quick "where
+      is the storage going" data point on the card without needing a
+      dedicated drill-in page. */
+  protected readonly topStorageEntity = computed(() => {
+    const buckets = this.storageUsage();
+    if (buckets.length === 0) return null;
+    const top = [...buckets].sort((a, b) => b.totalSizeBytes - a.totalSizeBytes)[0];
+    return { entityType: top.entityType, display: formatBytes(top.totalSizeBytes) };
+  });
+
   ngOnInit(): void {
     this.loadAll();
   }
@@ -97,7 +171,7 @@ export class AdminOverviewComponent implements OnInit {
     // Parallel loads via separate subscriptions — each card degrades
     // independently. We don't gate the page on every call succeeding because
     // an install with one disabled capability shouldn't blank the dashboard.
-    let pending = 3;
+    let pending = 5;
     const done = () => {
       if (--pending === 0) this.isLoading.set(false);
     };
@@ -121,9 +195,38 @@ export class AdminOverviewComponent implements OnInit {
         done();
       },
     });
+
+    this.adminService.getScheduledTasks().subscribe({
+      next: (tasks) => { this.scheduledTasks.set(tasks); done(); },
+      error: () => done(),
+    });
+
+    this.adminService.getStorageUsage().subscribe({
+      next: (usage) => { this.storageUsage.set(usage); done(); },
+      error: () => done(),
+    });
   }
 
   protected goTo(route: string): void {
     this.router.navigateByUrl(route);
   }
+}
+
+/**
+ * Compact byte → human-readable formatter used by the Storage card. Picks
+ * the closest binary unit (KiB / MiB / GiB / TiB) and trims to one decimal
+ * once past KB. Local-only — not promoted to a shared util because no other
+ * surface needs byte-formatting today; lift it when the second consumer
+ * shows up.
+ */
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  const units = ['KB', 'MB', 'GB', 'TB'];
+  let unitIndex = -1;
+  let value = bytes;
+  do {
+    value /= 1024;
+    unitIndex++;
+  } while (value >= 1024 && unitIndex < units.length - 1);
+  return `${value.toFixed(1)} ${units[unitIndex]}`;
 }

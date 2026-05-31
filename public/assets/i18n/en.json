@@ -93,6 +93,23 @@
       "capabilityDisabled": "BI / integration API keys are disabled on this install.",
       "cta": "View Connections"
     },
+    "compliance": {
+      "title": "Compliance",
+      "openLabel": "users with open items",
+      "i9Alert": "{{ count }} I-9 work-authorization deadline reached or missed",
+      "cta": "View Compliance"
+    },
+    "scheduledTasks": {
+      "title": "Scheduled Tasks",
+      "activeLabel": "active",
+      "nextRun": "Next:",
+      "noUpcoming": "No upcoming runs scheduled."
+    },
+    "storage": {
+      "title": "Storage",
+      "filesLabel": "across {{ count }} files",
+      "noFiles": "No files stored yet."
+    },
     "recentAudit": {
       "title": "Recent Audit",
       "empty": "No audit activity recorded yet.",

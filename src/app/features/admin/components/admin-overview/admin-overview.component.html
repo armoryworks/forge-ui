@@ -94,6 +94,79 @@
       </footer>
     </section>
 
+    <!-- Compliance -->
+    <section class="admin-overview-card" data-testid="overview-card-compliance">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">fact_check</span>
+        <h3>{{ 'adminOverview.compliance.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ complianceOpenCount() }}</span>
+        <span class="admin-overview-card__label">{{ 'adminOverview.compliance.openLabel' | translate }}</span>
+      </div>
+      @if (i9AttentionCount() > 0) {
+        <p class="admin-overview-card__alert" role="status">
+          <span class="material-icons-outlined">warning</span>
+          {{ 'adminOverview.compliance.i9Alert' | translate: { count: i9AttentionCount() } }}
+        </p>
+      }
+      <footer class="admin-overview-card__footer">
+        <button class="action-btn action-btn--sm"
+          data-testid="overview-card-compliance-go"
+          (click)="goTo('/admin/compliance')">
+          {{ 'adminOverview.compliance.cta' | translate }}
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </footer>
+    </section>
+
+    <!-- Scheduled Tasks (info-only — no admin page exists today) -->
+    <section class="admin-overview-card" data-testid="overview-card-scheduled-tasks">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">schedule</span>
+        <h3>{{ 'adminOverview.scheduledTasks.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ activeScheduledTaskCount() }}</span>
+        <span class="admin-overview-card__label">{{ 'adminOverview.scheduledTasks.activeLabel' | translate }}</span>
+      </div>
+      @if (nextScheduledRun(); as next) {
+        <p class="admin-overview-card__sub">
+          <span class="material-icons-outlined">arrow_forward</span>
+          {{ 'adminOverview.scheduledTasks.nextRun' | translate }}
+          <span class="admin-overview-card__sub-value">{{ next | date:'MM/dd/yyyy hh:mm a' }}</span>
+        </p>
+      } @else {
+        <p class="admin-overview-card__sub admin-overview-card__sub--muted">
+          {{ 'adminOverview.scheduledTasks.noUpcoming' | translate }}
+        </p>
+      }
+    </section>
+
+    <!-- Storage (info-only — no admin page exists today) -->
+    <section class="admin-overview-card" data-testid="overview-card-storage">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">storage</span>
+        <h3>{{ 'adminOverview.storage.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ totalStorageDisplay() }}</span>
+        <span class="admin-overview-card__label">
+          {{ 'adminOverview.storage.filesLabel' | translate: { count: totalFileCount() } }}
+        </span>
+      </div>
+      @if (topStorageEntity(); as top) {
+        <p class="admin-overview-card__sub">
+          <span class="admin-overview-card__sub-value">{{ top.entityType }}</span>
+          <span class="admin-overview-card__sub-muted">{{ top.display }}</span>
+        </p>
+      } @else {
+        <p class="admin-overview-card__sub admin-overview-card__sub--muted">
+          {{ 'adminOverview.storage.noFiles' | translate }}
+        </p>
+      }
+    </section>
+
     <!-- Recent Audit -->
     <section class="admin-overview-card admin-overview-card--wide" data-testid="overview-card-audit">
       <header class="admin-overview-card__header">

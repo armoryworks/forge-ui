@@ -93,6 +93,23 @@
       "capabilityDisabled": "Las claves API de BI / integración están desactivadas en esta instalación.",
       "cta": "Ver Conexiones"
     },
+    "compliance": {
+      "title": "Cumplimiento",
+      "openLabel": "usuarios con elementos pendientes",
+      "i9Alert": "{{ count }} plazo de I-9 (autorización de trabajo) vencido o cumplido",
+      "cta": "Ver Cumplimiento"
+    },
+    "scheduledTasks": {
+      "title": "Tareas Programadas",
+      "activeLabel": "activas",
+      "nextRun": "Siguiente:",
+      "noUpcoming": "No hay ejecuciones programadas."
+    },
+    "storage": {
+      "title": "Almacenamiento",
+      "filesLabel": "en {{ count }} archivos",
+      "noFiles": "Aún no hay archivos almacenados."
+    },
     "recentAudit": {
       "title": "Actividad Reciente",
       "empty": "Aún no se ha registrado actividad de auditoría.",

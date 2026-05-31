@@ -129,6 +129,35 @@
     }
   }
 
+  &__sub {
+    display: flex;
+    align-items: baseline;
+    gap: $sp-xs;
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text);
+
+    .material-icons-outlined {
+      font-size: $icon-size-xs;
+      color: var(--text-muted);
+    }
+
+    &--muted {
+      color: var(--text-muted);
+    }
+  }
+
+  &__sub-value {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__sub-muted {
+    margin-left: auto;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
   &__empty {
     margin: 0;
     font-size: $font-size-sm;
