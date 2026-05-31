@@ -71,6 +71,34 @@
     "capabilities": "Capacidades",
     "system": "Sistema"
   },
+  "adminOverview": {
+    "title": "Resumen de Administración",
+    "subtitle": "Cómo se ve esta instalación ahora mismo. Cada tarjeta enlaza con su pestaña nativa.",
+    "unassignedRole": "Sin asignar",
+    "people": {
+      "title": "Personas",
+      "activeLabel": "usuarios activos",
+      "cta": "Ver Usuarios"
+    },
+    "capabilities": {
+      "title": "Capacidades",
+      "ofTotal": "de {{ total }} habilitadas",
+      "hint": "Active o desactive qué funciones ejecuta esta instalación. Desactivar una capacidad oculta su UI y rechaza sus endpoints.",
+      "cta": "Administrar Capacidades"
+    },
+    "connections": {
+      "title": "Conexiones",
+      "activeLabel": "integraciones",
+      "expiredAlert": "{{ count }} clave expirada — revísela antes de que los clientes reciban 401",
+      "capabilityDisabled": "Las claves API de BI / integración están desactivadas en esta instalación.",
+      "cta": "Ver Conexiones"
+    },
+    "recentAudit": {
+      "title": "Actividad Reciente",
+      "empty": "Aún no se ha registrado actividad de auditoría.",
+      "cta": "Ver Registro Completo"
+    }
+  },
   "header": {
     "home": "Inicio",
     "showMoreBreadcrumbs": "Mostrar ruta de navegación completa",
@@ -2406,6 +2434,7 @@
     "subtitle": "Usuarios, tipos de pista, datos de referencia y configuración del sistema",
     "subtitleEmployee": "Cumplimiento, nómina y documentos de empleados",
     "tabs": {
+      "overview": "Resumen",
       "users": "Usuarios",
       "trackTypes": "Tipos de Pista",
       "referenceData": "Datos de Referencia",

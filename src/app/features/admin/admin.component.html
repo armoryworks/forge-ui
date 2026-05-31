@@ -2,6 +2,13 @@
 
 <div class="admin-content">
   <div class="admin-body" [appLoadingBlock]="loading()">
+    <!-- Overview Tab — landing surface for /admin -->
+    @if (activeTab() === 'overview') {
+      <div class="tab-panel">
+        <app-admin-overview />
+      </div>
+    }
+
     <!-- Users Tab -->
     @if (activeTab() === 'users') {
       <div class="tab-panel">

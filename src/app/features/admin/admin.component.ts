@@ -36,6 +36,7 @@ import { FormValidationService } from '../../shared/services/form-validation.ser
 import { ValidationButtonComponent } from '../../shared/components/validation-button/validation-button.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
+import { AdminOverviewComponent } from './components/admin-overview/admin-overview.component';
 import { TrainingPanelComponent } from './components/training-panel/training-panel.component';
 import { IntegrationsPanelComponent } from './components/integrations-panel/integrations-panel.component';
 import { BarcodeInfoComponent } from '../../shared/components/barcode-info/barcode-info.component';
@@ -73,7 +74,7 @@ import { RoleTemplate } from './models/role-template.model';
     ReactiveFormsModule, AvatarComponent, PageHeaderComponent, DialogComponent,
     InputComponent, SelectComponent, ToggleComponent, DatepickerComponent, DataTableComponent,
     ColumnCellDirective, ValidationButtonComponent, TrackTypeDialogComponent,
-    EmptyStateComponent, LoadingBlockDirective, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
+    EmptyStateComponent, LoadingBlockDirective, AdminOverviewComponent, TrainingPanelComponent, IntegrationsPanelComponent, AiAssistantsPanelComponent, TeamsPanelComponent, RoleTemplatesPanelComponent, ComplianceTemplatesPanelComponent, UserCompliancePanelComponent, CompanyLocationDialogComponent, SalesTaxPanelComponent, AuditLogPanelComponent, TimeCorrectionsPanelComponent, EventsPanelComponent, AnnouncementsPanelComponent, EdiPanelComponent, MfaPolicyPanelComponent, DomainEventFailuresPanelComponent, IntegrationOutboxPanelComponent, AutoPoSettingsComponent, ExpenseSettingsPanelComponent, BiApiKeysPanelComponent, SystemApiKeysPanelComponent, ConnectionsPanelComponent, BarcodeInfoComponent, DatePipe, LowerCasePipe, TranslatePipe, MatTooltipModule,
   ],
   templateUrl: './admin.component.html',
   styleUrl: './admin.component.scss',
@@ -96,8 +97,8 @@ export class AdminComponent {
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
-  private static readonly VALID_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
-  private static readonly ADMIN_ONLY_TABS = new Set(['users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
+  private static readonly VALID_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'training', 'ai-assistants', 'teams', 'role-templates', 'compliance', 'sales-tax', 'audit-log', 'time-corrections', 'events', 'announcements', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
+  private static readonly ADMIN_ONLY_TABS = new Set(['overview', 'users', 'track-types', 'reference-data', 'terminology', 'settings', 'integrations', 'ai-assistants', 'teams', 'role-templates', 'sales-tax', 'audit-log', 'edi', 'mfa', 'automations', 'auto-po', 'integration-outbox', 'expenses', 'bi-api-keys', 'system-api-keys', 'connections']);
   private static readonly MANAGER_AND_ADMIN_TABS = new Set(['training', 'time-corrections', 'events', 'announcements']);
 
   protected readonly isAdmin = computed(() => this.authService.hasRole('Admin'));
@@ -110,7 +111,12 @@ export class AdminComponent {
       map(params => {
         const isAdmin = this.authService.hasRole('Admin');
         const isManager = this.authService.hasRole('Manager');
-        const defaultTab = isAdmin ? 'users' : 'compliance';
+        // Admins land on the new Overview dashboard (replaces the prior
+        // bare-`/admin` → `/admin/users` redirect). Non-admin managers /
+        // office managers continue to land on Compliance because Overview
+        // is admin-gated and the rest of the admin shell only has a couple
+        // of tabs available to them.
+        const defaultTab = isAdmin ? 'overview' : 'compliance';
         const tab = params.get('tab') ?? defaultTab;
         if (!AdminComponent.VALID_TABS.has(tab)) return defaultTab;
         if (AdminComponent.ADMIN_ONLY_TABS.has(tab) && !isAdmin) return 'compliance';
@@ -118,7 +124,7 @@ export class AdminComponent {
         return tab;
       }),
     ),
-    { initialValue: this.authService.hasRole('Admin') ? 'users' : 'compliance' },
+    { initialValue: this.authService.hasRole('Admin') ? 'overview' : 'compliance' },
   );
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);

@@ -137,6 +137,7 @@ export class NavTreeService {
       icon: 'settings', label: 'Admin', i18nKey: 'nav.admin', routePrefix: '/admin',
       allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
       children: [
+        { icon: 'dashboard', label: 'Overview', i18nKey: 'admin.tabs.overview', route: '/admin/overview', allowedRoles: ['Admin'] },
         {
           icon: 'manage_accounts', label: 'Users & Access', i18nKey: 'adminGroups.usersAccess',
           children: [

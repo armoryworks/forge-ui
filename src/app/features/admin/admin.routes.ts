@@ -2,7 +2,12 @@ import { Routes } from '@angular/router';
 import { AdminComponent } from './admin.component';
 
 export const ADMIN_ROUTES: Routes = [
-  { path: '', redirectTo: 'users', pathMatch: 'full' },
+  // Admin Overview is the landing surface for /admin. Previously redirected
+  // to /admin/users which forced the people-management page to act as both
+  // entry point and full-screen task page even when the admin was here to
+  // do something else. Overview is a launchpad — people / capabilities /
+  // integrations / recent audit — that deep-links into the relevant tab.
+  { path: '', redirectTo: 'overview', pathMatch: 'full' },
   // Phase 4 Phase-A — diagnostic page that renders the loaded capability descriptor.
   // Listed before the catch-all `:tab` route so it wins. Phase C added the
   // working `/admin/capabilities` page below; the debug page stays as a

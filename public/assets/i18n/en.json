@@ -71,6 +71,34 @@
     "capabilities": "Capabilities",
     "system": "System"
   },
+  "adminOverview": {
+    "title": "Admin Overview",
+    "subtitle": "What this install looks like right now. Each tile deep-links into its native tab.",
+    "unassignedRole": "Unassigned",
+    "people": {
+      "title": "People",
+      "activeLabel": "active users",
+      "cta": "View Users"
+    },
+    "capabilities": {
+      "title": "Capabilities",
+      "ofTotal": "of {{ total }} enabled",
+      "hint": "Toggle which features this install runs. Disabling a capability hides its UI and rejects its API endpoints.",
+      "cta": "Manage Capabilities"
+    },
+    "connections": {
+      "title": "Connections",
+      "activeLabel": "integrations",
+      "expiredAlert": "{{ count }} expired key — review before clients hit 401",
+      "capabilityDisabled": "BI / integration API keys are disabled on this install.",
+      "cta": "View Connections"
+    },
+    "recentAudit": {
+      "title": "Recent Audit",
+      "empty": "No audit activity recorded yet.",
+      "cta": "View Full Audit Log"
+    }
+  },
   "header": {
     "home": "Home",
     "showMoreBreadcrumbs": "Show full navigation path",
@@ -2406,6 +2434,7 @@
     "subtitle": "Users, track types, reference data, and system configuration",
     "subtitleEmployee": "Compliance, payroll, and employee documents",
     "tabs": {
+      "overview": "Overview",
       "users": "Users",
       "trackTypes": "Track Types",
       "referenceData": "Reference Data",
