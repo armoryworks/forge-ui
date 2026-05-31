@@ -28,8 +28,6 @@ import { EntityCompletenessBadgeComponent } from '../../shared/components/entity
 import { CustomerDetailDialogComponent, CustomerDetailDialogData, CustomerDetailDialogResult } from './components/customer-detail-dialog/customer-detail-dialog.component';
 import { NewCustomerForkDialogComponent, CustomerCreatePath } from './components/new-customer-fork-dialog/new-customer-fork-dialog.component';
 import { LeadPickerDialogComponent } from './components/new-customer-fork-dialog/lead-picker-dialog.component';
-import { GuidedCustomerDialogComponent } from './components/guided-customer-dialog/guided-customer-dialog.component';
-import { CreateCustomerRequest } from './models/create-customer-request.model';
 import { LeadItem } from '../leads/models/lead-item.model';
 import { LeadConvertDialogComponent, LeadConvertDialogData } from '../leads/components/lead-convert-dialog/lead-convert-dialog.component';
 import { ConvertLeadRequest } from '../leads/models/convert-lead-request.model';
@@ -321,26 +319,14 @@ export class CustomersComponent {
     });
   }
 
-  /** Guided wizard — net-new strategic accounts. */
+  /**
+   * Guided wizard — routes to the WorkflowComponent-backed customer page
+   * (mirrors the parts + vendor pattern). The old MatDialog-based guided
+   * wizard was retired 2026-05-31 along with the mat-stepper substrate.
+   */
   private openGuidedCreateCustomer(): void {
-    this.dialog.open<GuidedCustomerDialogComponent, void, CreateCustomerRequest | undefined>(
-      GuidedCustomerDialogComponent, { width: '720px' },
-    ).afterClosed().subscribe(request => {
-      if (!request) return;
-      this.saving.set(true);
-      this.customerService.createCustomer(request).subscribe({
-        next: (created) => {
-          this.saving.set(false);
-          this.snackbar.success(this.translate.instant('customers.customerCreated'));
-          this.router.navigate(['/customers', created.id]);
-        },
-        error: (err: HttpErrorResponse) => {
-          this.saving.set(false);
-          // Guided dialog has already closed; surface server error via
-          // toast (the global interceptor handles unhandled cases).
-          if (!err) return;
-        },
-      });
+    this.router.navigate(['/customers/new'], {
+      queryParams: { workflow: 'customer-guided-v1' },
     });
   }
 

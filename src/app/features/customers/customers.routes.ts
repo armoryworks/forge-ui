@@ -21,6 +21,16 @@ import { provideCustomerWorkflowSteps } from './workflow/register-customer-workf
 export const CUSTOMERS_ROUTES: Routes = [
   { path: '', component: CustomersComponent, providers: [provideCustomerWorkflowSteps()] },
   {
+    // Guided + express customer creation, mounted on the shared
+    // WorkflowComponent shell. Lives BEFORE the :id route so the literal
+    // "new" segment doesn't resolve as a customer id.
+    path: 'new',
+    providers: [provideCustomerWorkflowSteps()],
+    loadComponent: () =>
+      import('./workflow/customer-workflow-page/customer-workflow-page.component')
+        .then(m => m.CustomerWorkflowPageComponent),
+  },
+  {
     path: 'contacts',
     loadComponent: () =>
       import('./pages/contacts/customer-contacts.component')

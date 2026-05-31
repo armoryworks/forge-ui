@@ -1,0 +1,24 @@
+@if (run() && definition()) {
+  <div class="customer-workflow-page__shell"
+    [class.customer-workflow-page__shell--express]="run()?.mode === 'express'">
+    <app-workflow
+      data-testid="customer-workflow-shell"
+      [run]="run()"
+      [definition]="definition()"
+      [entity]="customer()"
+      [validators]="validators()"
+      [entityTitle]="entityTitle()"
+      [missingValidators]="missingValidators()"
+      (modeChanged)="onModeChanged($event)"
+      (stepJumped)="onStepJumped($event)"
+      (stepAdvanced)="onStepAdvanced($event)"
+      (stepBacked)="onStepBacked($event)"
+      (stepSkipped)="onStepSkipped($event)"
+      (completeRequested)="onCompleteRequested()"
+      (closed)="onClosed()" />
+  </div>
+} @else {
+  <div class="customer-workflow-page__loading">
+    {{ 'customers.workflow.page.loading' | translate }}
+  </div>
+}
