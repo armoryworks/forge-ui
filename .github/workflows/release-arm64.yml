@@ -11,15 +11,21 @@
 
 name: Release arm64
 
+# Trigger model (2026-05-31, mirrors forge-api + forge-ui amd64): daily
+# 06:00 UTC schedule + workflow_dispatch + tag pushes. The per-push-to-
+# main trigger was removed to stop the asset churn. should-build guard
+# short-circuits the scheduled run when HEAD's short sha is already
+# published as `main-<sha>-arm64`.
 on:
-  push:
-    branches: [main]
-    tags: ['v*.*.*']
+  schedule:
+    - cron: '0 6 * * *'    # 06:00 UTC daily
   workflow_dispatch:
+  push:
+    tags: ['v*.*.*']
 
 permissions:
   contents: read
-  packages: write
+  packages: read
 
 concurrency:
   group: release-arm64-${{ github.ref }}
@@ -31,7 +37,47 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  should-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      should: ${{ steps.check.outputs.should }}
+      reason: ${{ steps.check.outputs.reason }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decide
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [[ "${{ github.event_name }}" != "schedule" ]]; then
+            echo "should=true" >> "$GITHUB_OUTPUT"
+            echo "reason=trigger=${{ github.event_name }} (non-schedule)" >> "$GITHUB_OUTPUT"
+            echo "Non-schedule trigger — proceeding"
+            exit 0
+          fi
+          short_sha=$(git rev-parse --short=7 HEAD)
+          expected="main-${short_sha}-arm64"
+          repo_name="${GITHUB_REPOSITORY##*/}"
+          echo "Looking for prior image tag: ${expected}"
+          tags=$(gh api --paginate \
+              -H "Accept: application/vnd.github+json" \
+              "/orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/${repo_name}/versions" \
+              --jq '.[].metadata.container.tags[]?' 2>/dev/null || true)
+          if echo "$tags" | grep -Fxq "$expected"; then
+            echo "should=false" >> "$GITHUB_OUTPUT"
+            echo "reason=already-published sha=${short_sha}" >> "$GITHUB_OUTPUT"
+            echo "Image for ${short_sha} already published — skipping scheduled build"
+          else
+            echo "should=true" >> "$GITHUB_OUTPUT"
+            echo "reason=new-commits-since-last-build sha=${short_sha}" >> "$GITHUB_OUTPUT"
+            echo "No prior image for ${short_sha} — proceeding"
+          fi
+
   test:
+    needs: should-build
+    if: needs.should-build.outputs.should == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -51,9 +97,13 @@ jobs:
         run: npm run test -- --watch=false
 
   build-and-push:
-    needs: test
+    needs: [should-build, test]
+    if: needs.should-build.outputs.should == 'true'
     runs-on: ubuntu-24.04-arm
     timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
         with:
