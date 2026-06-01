@@ -71,7 +71,7 @@ export class RfqDialogComponent {
         this.parts.set(list);
         this.partOptions.set([
           { value: null, label: this.translate.instant('purchasing.selectPart') },
-          ...list.map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })),
+          ...list.map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })),
         ]);
       },
     });

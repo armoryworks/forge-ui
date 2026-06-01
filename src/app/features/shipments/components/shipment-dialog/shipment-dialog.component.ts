@@ -57,7 +57,7 @@ export class ShipmentDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
 
   protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
+    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
 
   protected readonly salesOrderOptions = computed<AutocompleteOption[]>(() =>
     this.salesOrders().map(so => ({
