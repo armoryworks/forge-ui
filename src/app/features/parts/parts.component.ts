@@ -106,7 +106,7 @@ export class PartsComponent {
       // generic Buy/Component default.
       procurementSource: this.draftAxis<ProcurementSource>(run, 'procurementSource', 'Buy'),
       inventoryClass: this.draftAxis<InventoryClass>(run, 'inventoryClass', 'Component'),
-      bomEntryCount: 0,
+      bomLineCount: 0,
       createdAt: new Date(run.startedAt),
       effectivePrice: 0,
       effectivePriceCurrency: 'USD',
@@ -189,7 +189,7 @@ export class PartsComponent {
       { value: 'Active', label: this.translate.instant('parts.statusActive') }, { value: 'Draft', label: this.translate.instant('parts.statusDraft') }, { value: 'Prototype', label: this.translate.instant('parts.statusPrototype') }, { value: 'Obsolete', label: this.translate.instant('parts.statusObsolete') },
     ]},
     { field: 'effectivePrice', header: this.translate.instant('parts.effectivePrice'), sortable: true, width: '110px', align: 'right' },
-    { field: 'bomEntryCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
+    { field: 'bomLineCount', header: this.translate.instant('parts.bom'), width: '60px', align: 'center' },
     // Hidden by default — power users opt in via column-manager. Renders the
     // full completeness chip (click → popover with per-capability gaps).
     { field: 'completeness', header: this.translate.instant('entityCompleteness.columnHeader'), width: '160px', align: 'center', visible: false },

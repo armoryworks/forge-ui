@@ -6,7 +6,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { PartsService } from '../../services/parts.service';
 import { Operation, OperationMaterial } from '../../models/operation.model';
-import { BOMEntry } from '../../models/bom-entry.model';
+import { BOMLine } from '../../models/bom-line.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
@@ -33,7 +33,7 @@ export interface OperationDialogData {
   operation?: Operation;
   nextStepNumber?: number;
   operations?: Operation[];
-  bomEntries?: BOMEntry[];
+  bomLines?: BOMLine[];
 }
 
 @Component({
@@ -114,17 +114,17 @@ export class OperationDialogComponent implements OnInit {
     ];
   });
 
-  // BOM entries available for material assignment
-  protected readonly bomEntryOptions = computed<SelectOption[]>(() => {
-    const entries = this.data.bomEntries ?? [];
-    const assignedIds = new Set(this.materials().map(m => m.bomEntryId));
+  // BOM lines available for material assignment
+  protected readonly bomLineOptions = computed<SelectOption[]>(() => {
+    const entries = this.data.bomLines ?? [];
+    const assignedIds = new Set(this.materials().map(m => m.bomLineId));
     return entries
       .filter(e => !assignedIds.has(e.id))
       .map(e => ({ value: e.id, label: `${e.childPartNumber} — ${e.childName}` }));
   });
 
   // Add material form controls
-  protected readonly newMaterialBomEntryId = new FormControl<number | null>(null);
+  protected readonly newMaterialBomLineId = new FormControl<number | null>(null);
   protected readonly newMaterialQuantity = new FormControl<number>(1);
 
   // Comment control
@@ -210,18 +210,18 @@ export class OperationDialogComponent implements OnInit {
   }
 
   protected addMaterial(): void {
-    const bomEntryId = this.newMaterialBomEntryId.value;
+    const bomLineId = this.newMaterialBomLineId.value;
     const quantity = this.newMaterialQuantity.value ?? 1;
-    if (!bomEntryId) return;
+    if (!bomLineId) return;
 
     this.addingMaterial.set(true);
     this.partsService.createOperationMaterial(this.data.partId, this.data.operation!.id, {
-      bomEntryId,
+      bomLineId,
       quantity,
     }).subscribe({
       next: (mat) => {
         this.materials.update(list => [...list, mat]);
-        this.newMaterialBomEntryId.reset();
+        this.newMaterialBomLineId.reset();
         this.newMaterialQuantity.setValue(1);
         this.addingMaterial.set(false);
         this.snackbar.success(this.translate.instant('parts.materialAdded'));

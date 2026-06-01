@@ -93,7 +93,7 @@ function buildValidators(): EntityValidator[] {
     },
     {
       id: 2, entityType: 'Part', validatorId: 'hasBom',
-      predicate: JSON.stringify({ type: 'relationExists', relation: 'bomEntries', minCount: 1 }),
+      predicate: JSON.stringify({ type: 'relationExists', relation: 'bomLines', minCount: 1 }),
       displayNameKey: 'k', missingMessageKey: 'm', isSeedData: true,
     },
   ];
@@ -322,7 +322,7 @@ describe('WorkflowComponent — shell logic (Phase 4)', () => {
   it('completionMap reflects passing predicates as complete', () => {
     const { component } = buildShell({
       run: buildRun({ currentStepId: 'bom' }),
-      entity: { name: 'Widget', bomEntries: [{ id: 1 }] },
+      entity: { name: 'Widget', bomLines: [{ id: 1 }] },
     });
     const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
     expect(map.get('basics')).toBe(true);
@@ -332,7 +332,7 @@ describe('WorkflowComponent — shell logic (Phase 4)', () => {
   it('completionMap reflects failing predicates as incomplete', () => {
     const { component } = buildShell({
       run: buildRun({ currentStepId: 'bom' }),
-      entity: { name: 'Widget', bomEntries: [] },
+      entity: { name: 'Widget', bomLines: [] },
     });
     const map = pick<() => Map<string, boolean>>(component, 'completionMap')();
     expect(map.get('basics')).toBe(true);

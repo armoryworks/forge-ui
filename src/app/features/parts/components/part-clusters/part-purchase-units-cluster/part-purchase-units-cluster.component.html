@@ -1,18 +1,18 @@
 <div class="cluster">
-  <h3 class="cluster__title">{{ 'parts.detail.purchaseOptions.title' | translate }}</h3>
-  <p class="cluster__value cluster__value--muted">{{ 'parts.detail.purchaseOptions.helper' | translate }}</p>
+  <h3 class="cluster__title">{{ 'parts.detail.purchaseUnits.title' | translate }}</h3>
+  <p class="cluster__value cluster__value--muted">{{ 'parts.detail.purchaseUnits.helper' | translate }}</p>
 
   @if (options().length === 0 && rowMode() !== 'new') {
     <p class="cluster__value cluster__value--muted" data-testid="po-empty">
-      {{ 'parts.detail.purchaseOptions.empty' | translate }}
+      {{ 'parts.detail.purchaseUnits.empty' | translate }}
     </p>
   } @else if (options().length > 0) {
     <table class="po-table">
       <thead>
         <tr>
-          <th scope="col">{{ 'parts.detail.purchaseOptions.label' | translate }}</th>
-          <th scope="col">{{ 'parts.detail.purchaseOptions.content' | translate }}</th>
-          <th scope="col">{{ 'parts.detail.purchaseOptions.uom' | translate }}</th>
+          <th scope="col">{{ 'parts.detail.purchaseUnits.label' | translate }}</th>
+          <th scope="col">{{ 'parts.detail.purchaseUnits.content' | translate }}</th>
+          <th scope="col">{{ 'parts.detail.purchaseUnits.uom' | translate }}</th>
           @if (editing()) { <th scope="col" class="po-table__actions-col" aria-label="actions"></th> }
         </tr>
       </thead>
@@ -42,18 +42,18 @@
     @if (rowMode() === null) {
       <button type="button" class="action-btn action-btn--create action-btn--sm" data-testid="po-add" (click)="startAdd()">
         <span class="material-icons-outlined">add</span>
-        {{ 'parts.detail.purchaseOptions.add' | translate }}
+        {{ 'parts.detail.purchaseUnits.add' | translate }}
       </button>
     } @else {
       <div class="cluster__form-row" [formGroup]="form">
         <app-input data-testid="po-label"
-          [label]="'parts.detail.purchaseOptions.label' | translate"
+          [label]="'parts.detail.purchaseUnits.label' | translate"
           formControlName="label" [required]="true" [maxlength]="200" />
         <app-input data-testid="po-content" type="number"
-          [label]="'parts.detail.purchaseOptions.content' | translate"
+          [label]="'parts.detail.purchaseUnits.content' | translate"
           formControlName="contentQuantity" [required]="true" />
         <app-select data-testid="po-uom"
-          [label]="'parts.detail.purchaseOptions.uom' | translate"
+          [label]="'parts.detail.purchaseUnits.uom' | translate"
           formControlName="contentUomId" [options]="uomOptions()" />
       </div>
       <div class="cluster__actions">

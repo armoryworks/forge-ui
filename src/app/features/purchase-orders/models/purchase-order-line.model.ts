@@ -11,7 +11,7 @@ export interface PurchaseOrderLine {
   unitPrice: number;
   lineTotal: number;
   notes: string | null;
-  /** UoM purchase-options effort — the ordered size/form (null = per base unit). */
-  purchaseOptionId: number | null;
-  purchaseOptionLabel: string | null;
+  /** UoM purchase-units effort — the ordered size/form (null = per base unit). */
+  purchaseUnitId: number | null;
+  purchaseUnitLabel: string | null;
 }

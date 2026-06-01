@@ -22,7 +22,7 @@ export const DEMO_URL_MAP: Readonly<Record<string, string>> = Object.freeze({
   'part-alternates': 'part-alternate',
   'part-prices': 'part-price',
   'part-revisions': 'part-revision',
-  bom: 'bomentry',
+  bom: 'bomline',
   operations: 'operation',
 
   inventory: 'bin-content',

@@ -108,11 +108,11 @@
       }
 
       <!-- Add material form -->
-      @if (bomEntryOptions().length > 0) {
+      @if (bomLineOptions().length > 0) {
         <div class="add-material-row">
-          <app-select [label]="'parts.bomEntry' | translate" [formControl]="newMaterialBomEntryId" [options]="bomEntryOptions()" />
+          <app-select [label]="'parts.bomLine' | translate" [formControl]="newMaterialBomLineId" [options]="bomLineOptions()" />
           <app-input [label]="'common.quantity' | translate" type="number" [formControl]="newMaterialQuantity" />
-          <button class="action-btn action-btn--sm" [disabled]="!newMaterialBomEntryId.value || addingMaterial()" (click)="addMaterial()" aria-label="Add material">
+          <button class="action-btn action-btn--sm" [disabled]="!newMaterialBomLineId.value || addingMaterial()" (click)="addMaterial()" aria-label="Add material">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}
           </button>

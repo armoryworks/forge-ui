@@ -1,5 +1,5 @@
 export interface CreateOperationMaterialRequest {
-  bomEntryId: number;
+  bomLineId: number;
   quantity: number;
   notes?: string;
 }

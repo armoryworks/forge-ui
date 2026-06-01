@@ -1,6 +1,6 @@
 import { BOMSourceType } from './bom-source-type.type';
 
-export interface BOMEntry {
+export interface BOMLine {
   id: number;
   childPartId: number;
   childPartNumber: string;
@@ -13,7 +13,7 @@ export interface BOMEntry {
   sourceType: BOMSourceType;
   leadTimeDays: number | null;
   notes: string | null;
-  /** UoM purchase-options effort — consumption UoM (null = child's stock UoM). */
+  /** UoM purchase-units effort — consumption UoM (null = child's stock UoM). */
   uomId: number | null;
   uomCode: string | null;
   uomLabel: string | null;

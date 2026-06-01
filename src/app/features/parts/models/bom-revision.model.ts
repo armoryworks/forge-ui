@@ -19,7 +19,7 @@ export interface BomRevisionSummary {
   isCurrent: boolean;
 }
 
-export interface BomRevisionEntrySnapshot {
+export interface BomRevisionLineSnapshot {
   id: number;
   partId: number;
   partNumber: string;
@@ -43,7 +43,7 @@ export interface BomRevisionDetail {
   createdByUserId: number | null;
   createdAt: string;
   isCurrent: boolean;
-  entries: BomRevisionEntrySnapshot[];
+  entries: BomRevisionLineSnapshot[];
 }
 
 /** Phase 3 H4 / WU-20 — Job → BOM-at-release surface shape. */

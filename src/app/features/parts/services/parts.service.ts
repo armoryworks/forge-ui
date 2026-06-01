@@ -8,8 +8,8 @@ import { PartListItem } from '../models/part-list-item.model';
 import { PartDetail } from '../models/part-detail.model';
 import { CreatePartRequest } from '../models/create-part-request.model';
 import { UpdatePartRequest } from '../models/update-part-request.model';
-import { CreateBOMEntryRequest } from '../models/create-bom-entry-request.model';
-import { UpdateBOMEntryRequest } from '../models/update-bom-entry-request.model';
+import { CreateBOMLineRequest } from '../models/create-bom-line-request.model';
+import { UpdateBOMLineRequest } from '../models/update-bom-line-request.model';
 import { PartStatus } from '../models/part-status.type';
 import { ProcurementSource } from '../models/procurement-source.type';
 import { InventoryClass } from '../models/inventory-class.type';
@@ -96,16 +96,16 @@ export class PartsService {
     return this.http.patch<PartDetail>(`${this.base}/${id}`, request);
   }
 
-  createBOMEntry(partId: number, request: CreateBOMEntryRequest): Observable<PartDetail> {
+  createBOMLine(partId: number, request: CreateBOMLineRequest): Observable<PartDetail> {
     return this.http.post<PartDetail>(`${this.base}/${partId}/bom`, request);
   }
 
-  updateBOMEntry(partId: number, bomEntryId: number, request: UpdateBOMEntryRequest): Observable<PartDetail> {
-    return this.http.patch<PartDetail>(`${this.base}/${partId}/bom/${bomEntryId}`, request);
+  updateBOMLine(partId: number, bomLineId: number, request: UpdateBOMLineRequest): Observable<PartDetail> {
+    return this.http.patch<PartDetail>(`${this.base}/${partId}/bom/${bomLineId}`, request);
   }
 
-  deleteBOMEntry(partId: number, bomEntryId: number): Observable<PartDetail> {
-    return this.http.delete<PartDetail>(`${this.base}/${partId}/bom/${bomEntryId}`);
+  deleteBOMLine(partId: number, bomLineId: number): Observable<PartDetail> {
+    return this.http.delete<PartDetail>(`${this.base}/${partId}/bom/${bomLineId}`);
   }
 
   deletePart(id: number): Observable<void> {

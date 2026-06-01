@@ -16,7 +16,7 @@ export const PARTS_TOUR: TourDefinition = {
     {
       element: 'app-detail-side-panel',
       title: 'Part Detail Panel',
-      description: 'View specs, BOM entries, usage (where-used), and file attachments in the side panel.',
+      description: 'View specs, BOM lines, usage (where-used), and file attachments in the side panel.',
       side: 'left',
     },
   ],

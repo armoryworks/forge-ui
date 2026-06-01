@@ -69,7 +69,7 @@ export class WorkflowShellDemoComponent {
       isSeedData: true,
     },
     { id: 2, entityType: 'Part', validatorId: 'hasBom',
-      predicate: JSON.stringify({ type: 'relationExists', relation: 'bomEntries', minCount: 1 }),
+      predicate: JSON.stringify({ type: 'relationExists', relation: 'bomLines', minCount: 1 }),
       displayNameKey: 'workflow.demo.readiness.bom',
       missingMessageKey: 'workflow.demo.readiness.bomMissing',
       isSeedData: true,
@@ -99,7 +99,7 @@ export class WorkflowShellDemoComponent {
     name: '',
     type: '',
     material: '',
-    bomEntries: [] as unknown[],
+    bomLines: [] as unknown[],
     operations: [] as unknown[],
     manualCostOverride: null,
     currentCostCalculationId: null,
@@ -190,10 +190,10 @@ export class WorkflowShellDemoComponent {
     this.entity.update(e => ({ ...e, [field]: value }));
   }
 
-  protected addBomEntry(): void {
+  protected addBomLine(): void {
     this.entity.update(e => ({
       ...e,
-      bomEntries: [...((e['bomEntries'] as unknown[]) ?? []), { id: Date.now() }],
+      bomLines: [...((e['bomLines'] as unknown[]) ?? []), { id: Date.now() }],
     }));
   }
 
@@ -207,6 +207,6 @@ export class WorkflowShellDemoComponent {
   protected getName = (): string => (this.entity()['name'] as string) ?? '';
   protected getType = (): string => (this.entity()['type'] as string) ?? '';
   protected getMaterial = (): string => (this.entity()['material'] as string) ?? '';
-  protected getBomCount = (): number => ((this.entity()['bomEntries'] as unknown[]) ?? []).length;
+  protected getBomCount = (): number => ((this.entity()['bomLines'] as unknown[]) ?? []).length;
   protected getOperationCount = (): number => ((this.entity()['operations'] as unknown[]) ?? []).length;
 }

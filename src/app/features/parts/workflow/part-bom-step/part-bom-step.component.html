@@ -13,7 +13,7 @@
     </button>
   </header>
 
-  @if (bomEntries().length === 0) {
+  @if (bomLines().length === 0) {
     <app-empty-state
       icon="account_tree"
       [message]="'parts.workflow.bom.emptyMessage' | translate"
@@ -22,7 +22,7 @@
     <app-data-table
       tableId="parts-workflow-bom"
       [columns]="bomColumns"
-      [data]="bomEntries()">
+      [data]="bomLines()">
       <ng-template appColumnCell="actions" let-row>
         <button class="icon-btn icon-btn--danger"
           type="button"

@@ -1,6 +1,6 @@
 import { BOMSourceType } from './bom-source-type.type';
 
-export interface UpdateBOMEntryRequest {
+export interface UpdateBOMLineRequest {
   quantity?: number;
   referenceDesignator?: string;
   sourceType?: BOMSourceType;

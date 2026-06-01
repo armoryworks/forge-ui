@@ -27,7 +27,7 @@ export interface PartListItem {
   // Pillar 1 — three orthogonal axes (legacy single-axis partType retired pre-beta).
   procurementSource: ProcurementSource;
   inventoryClass: InventoryClass;
-  bomEntryCount: number;
+  bomLineCount: number;
   createdAt: Date;
   /**
    * Effective sales price as resolved server-side via IPartPricingResolver.

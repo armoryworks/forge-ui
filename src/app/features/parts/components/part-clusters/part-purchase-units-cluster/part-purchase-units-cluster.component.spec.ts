@@ -8,17 +8,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { Observable, of } from 'rxjs';
 
 import { mockSignalInputs } from '../../../../../../testing/signal-input-harness';
-import { PartPurchaseOptionsClusterComponent } from './part-purchase-options-cluster.component';
-import { PurchaseOptionsService } from '../../../services/purchase-options.service';
+import { PartPurchaseUnitsClusterComponent } from './part-purchase-units-cluster.component';
+import { PurchaseUnitsService } from '../../../services/purchase-units.service';
 import { InventoryService } from '../../../../inventory/services/inventory.service';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
-import { PartPurchaseOption } from '../../../models/part-purchase-option.model';
+import { PartPurchaseUnit } from '../../../models/part-purchase-unit.model';
 
 class FakeLoader implements TranslateLoader {
   getTranslation(): Observable<Record<string, string>> { return of({}); }
 }
 
-function opt(over: Partial<PartPurchaseOption> = {}): PartPurchaseOption {
+function opt(over: Partial<PartPurchaseUnit> = {}): PartPurchaseUnit {
   return {
     id: 1, partId: 7, label: '4x8 sheet', contentQuantity: 32,
     contentUomId: null, contentUomCode: null, contentUomLabel: null,
@@ -26,7 +26,7 @@ function opt(over: Partial<PartPurchaseOption> = {}): PartPurchaseOption {
   };
 }
 
-describe('PartPurchaseOptionsClusterComponent', () => {
+describe('PartPurchaseUnitsClusterComponent', () => {
   let service: {
     list: ReturnType<typeof vi.fn>;
     create: ReturnType<typeof vi.fn>;
@@ -43,13 +43,13 @@ describe('PartPurchaseOptionsClusterComponent', () => {
     };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
-      imports: [PartPurchaseOptionsClusterComponent],
+      imports: [PartPurchaseUnitsClusterComponent],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         provideAnimations(),
         provideTranslateService({ loader: { provide: TranslateLoader, useClass: FakeLoader } }),
-        { provide: PurchaseOptionsService, useValue: service },
+        { provide: PurchaseUnitsService, useValue: service },
         { provide: InventoryService, useValue: { getUnitsOfMeasure: () => of([{ id: 1, name: 'Square Foot', symbol: 'sqft', isActive: true, category: 'Area' }]) } },
         { provide: SnackbarService, useValue: { success: vi.fn() } },
         { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of(false) }) } },
@@ -57,17 +57,17 @@ describe('PartPurchaseOptionsClusterComponent', () => {
     });
   });
 
-  it('loads the part purchase options on init', () => {
-    const c = TestBed.runInInjectionContext(() => new PartPurchaseOptionsClusterComponent());
+  it('loads the part purchase units on init', () => {
+    const c = TestBed.runInInjectionContext(() => new PartPurchaseUnitsClusterComponent());
     mockSignalInputs(c, { partId: 7, editing: true });
     TestBed.flushEffects();
-    const x = c as unknown as { options(): PartPurchaseOption[] };
+    const x = c as unknown as { options(): PartPurchaseUnit[] };
     expect(service.list).toHaveBeenCalledWith(7);
     expect(x.options().length).toBe(1);
   });
 
   it('creates a new option via the service on save', () => {
-    const c = TestBed.runInInjectionContext(() => new PartPurchaseOptionsClusterComponent());
+    const c = TestBed.runInInjectionContext(() => new PartPurchaseUnitsClusterComponent());
     mockSignalInputs(c, { partId: 7, editing: true });
     TestBed.flushEffects();
     const x = c as unknown as {

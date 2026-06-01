@@ -11,28 +11,28 @@ import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
 import { InventoryService } from '../../../../inventory/services/inventory.service';
-import { PurchaseOptionsService } from '../../../services/purchase-options.service';
-import { PartPurchaseOption } from '../../../models/part-purchase-option.model';
+import { PurchaseUnitsService } from '../../../services/purchase-units.service';
+import { PartPurchaseUnit } from '../../../models/part-purchase-unit.model';
 
 /**
- * UoM purchase-options effort — authors a part's purchasable sizes/forms (4×8 sheet = 32 sqft,
+ * UoM purchase-units effort — authors a part's purchasable sizes/forms (4×8 sheet = 32 sqft,
  * 1 kg bar = 1000 g, bag of 100 = 100 ea). Self-contained CRUD (own data + API), shown on the
  * Sourcing tab alongside vendor sources; reusable verbatim in the guided part-creation workflow.
  * Content quantity is in the part's base/stock UoM — vendors then price each option.
  */
 @Component({
-  selector: 'app-part-purchase-options-cluster',
+  selector: 'app-part-purchase-units-cluster',
   standalone: true,
   imports: [
     ReactiveFormsModule, TranslatePipe,
     InputComponent, SelectComponent, ValidationButtonComponent,
   ],
-  templateUrl: './part-purchase-options-cluster.component.html',
-  styleUrls: ['../part-clusters.shared.scss', './part-purchase-options-cluster.component.scss'],
+  templateUrl: './part-purchase-units-cluster.component.html',
+  styleUrls: ['../part-clusters.shared.scss', './part-purchase-units-cluster.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PartPurchaseOptionsClusterComponent {
-  private readonly service = inject(PurchaseOptionsService);
+export class PartPurchaseUnitsClusterComponent {
+  private readonly service = inject(PurchaseUnitsService);
   private readonly inventoryService = inject(InventoryService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -42,7 +42,7 @@ export class PartPurchaseOptionsClusterComponent {
   readonly partId = input.required<number>();
   readonly editing = input(false);
 
-  protected readonly options = signal<PartPurchaseOption[]>([]);
+  protected readonly options = signal<PartPurchaseUnit[]>([]);
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly uomOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
@@ -96,7 +96,7 @@ export class PartPurchaseOptionsClusterComponent {
     this.rowMode.set('new');
   }
 
-  protected startEdit(option: PartPurchaseOption): void {
+  protected startEdit(option: PartPurchaseUnit): void {
     this.form.reset({
       label: option.label,
       contentQuantity: option.contentQuantity,
@@ -132,7 +132,7 @@ export class PartPurchaseOptionsClusterComponent {
         contentUomId: v.contentUomId ?? null,
         sortOrder: this.options().length,
       }).pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({ next: () => done('parts.detail.purchaseOptions.added'), error: fail });
+        .subscribe({ next: () => done('parts.detail.purchaseUnits.added'), error: fail });
     } else {
       const existing = this.options().find(o => o.id === mode);
       this.service.update(partId, mode, {
@@ -142,16 +142,16 @@ export class PartPurchaseOptionsClusterComponent {
         sortOrder: existing?.sortOrder ?? 0,
         isActive: existing?.isActive ?? true,
       }).pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({ next: () => done('parts.detail.purchaseOptions.updated'), error: fail });
+        .subscribe({ next: () => done('parts.detail.purchaseUnits.updated'), error: fail });
     }
   }
 
-  protected remove(option: PartPurchaseOption): void {
+  protected remove(option: PartPurchaseUnit): void {
     this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('parts.detail.purchaseOptions.deleteTitle'),
-        message: this.translate.instant('parts.detail.purchaseOptions.deleteMessage', { label: option.label }),
+        title: this.translate.instant('parts.detail.purchaseUnits.deleteTitle'),
+        message: this.translate.instant('parts.detail.purchaseUnits.deleteMessage', { label: option.label }),
         confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
@@ -160,7 +160,7 @@ export class PartPurchaseOptionsClusterComponent {
       this.service.delete(this.partId(), option.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.load(this.partId());
-          this.snackbar.success(this.translate.instant('parts.detail.purchaseOptions.removed'));
+          this.snackbar.success(this.translate.instant('parts.detail.purchaseUnits.removed'));
         },
       });
     });

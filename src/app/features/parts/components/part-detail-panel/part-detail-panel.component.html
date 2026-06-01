@@ -41,8 +41,8 @@
           (click)="selectTab(tab.id)">
           <span class="material-icons-outlined detail-tab__icon">{{ tab.iconName }}</span>
           {{ tab.labelKey | translate }}
-          @if (tab.id === 'bom' && part.bomEntries.length > 0) {
-            <span class="tab-badge">{{ part.bomEntries.length }}</span>
+          @if (tab.id === 'bom' && part.bomLines.length > 0) {
+            <span class="tab-badge">{{ part.bomLines.length }}</span>
           }
           @if (tab.id === 'files' && partFiles().length > 0) {
             <span class="tab-badge">{{ partFiles().length }}</span>
@@ -136,7 +136,7 @@
             (changed)="reloadVendorParts()"
             (cancelled)="cancelEdit()" />
 
-          <app-part-purchase-options-cluster
+          <app-part-purchase-units-cluster
             [partId]="part.id"
             [editing]="editing()" />
           </div>
@@ -217,7 +217,7 @@
         @case ('bom') {
           <div class="detail-body--padded">
           <div class="bom-header">
-            <span class="bom-count-label">{{ part.bomEntries.length }} {{ 'parts.bomComponents' | translate }}</span>
+            <span class="bom-count-label">{{ part.bomLines.length }} {{ 'parts.bomComponents' | translate }}</span>
             <div class="bom-header__actions">
               <div class="view-toggle" role="group" [attr.aria-label]="'parts.viewModeLabel' | translate">
                 <button class="icon-btn" [class.icon-btn--active]="bomViewMode() === 'table'"
@@ -243,15 +243,15 @@
           </div>
 
           @if (bomViewMode() === 'tree') {
-            <app-bom-tree [entries]="part.bomEntries" (entryDelete)="deleteBomEntry($event)" />
+            <app-bom-tree [entries]="part.bomLines" (entryDelete)="deleteBomLine($event)" />
             <app-bom-revision-history [partId]="part.id" [refreshToken]="bomRefreshToken()" />
           } @else {
             <app-data-table
               tableId="part-bom"
               [columns]="bomColumns"
-              [data]="part.bomEntries"
+              [data]="part.bomLines"
               emptyIcon="inventory_2"
-              [emptyMessage]="'parts.noBomEntries' | translate">
+              [emptyMessage]="'parts.noBomLines' | translate">
               <ng-template appColumnCell="childPartNumber" let-row>
                 <div class="bom-part-info">
                   <span class="bom-part-number">{{ $any(row).childPartNumber }}</span>
@@ -270,7 +270,7 @@
                 <span class="text-muted">{{ $any(row).referenceDesignator ?? '---' }}</span>
               </ng-template>
               <ng-template appColumnCell="actions" let-row>
-                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomEntry($any(row))" [attr.aria-label]="'common.remove' | translate">
+                <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" (click)="deleteBomLine($any(row))" [attr.aria-label]="'common.remove' | translate">
                   <span class="material-icons-outlined">delete</span>
                 </button>
               </ng-template>
@@ -347,9 +347,9 @@
   </div>
 }
 
-<!-- BOM Entry Dialog -->
+<!-- BOM Line Dialog -->
 @if (showBomDialog()) {
-  <app-dialog [title]="'parts.addBomEntry' | translate" (closed)="closeBomDialog()">
+  <app-dialog [title]="'parts.addBomLine' | translate" (closed)="closeBomDialog()">
     <div [formGroup]="bomForm">
       <app-entity-picker #bomChildPartPicker
         data-testid="bom-child-part"
@@ -383,7 +383,7 @@
       <app-validation-button [violations]="bomViolations">
         <button class="action-btn action-btn--primary" data-testid="bom-save-btn"
           [disabled]="bomForm.invalid"
-          (click)="saveBomEntry()">{{ 'parts.addEntry' | translate }}</button>
+          (click)="saveBomLine()">{{ 'parts.addEntry' | translate }}</button>
       </app-validation-button>
     </div>
   </app-dialog>

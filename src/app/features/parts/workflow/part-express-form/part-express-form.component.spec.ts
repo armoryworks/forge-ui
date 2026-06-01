@@ -42,7 +42,7 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
     salesUomId: null, salesUomCode: null, salesUomLabel: null,
     requiresReceivingInspection: false, receivingInspectionTemplateId: null,
     inspectionFrequency: null, inspectionSkipAfterN: null,
-    bomEntries: [], usedIn: [],
+    bomLines: [], usedIn: [],
     createdAt: new Date(), updatedAt: new Date(),
     effectivePrice: 0, effectivePriceCurrency: 'USD', effectivePriceSource: 'Default',
     ...overrides,

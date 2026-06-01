@@ -140,15 +140,15 @@ describe('PartsService', () => {
     });
   });
 
-  // ── createBOMEntry ────────────────────────────────────────────────────────
+  // ── createBOMLine ────────────────────────────────────────────────────────
 
-  describe('createBOMEntry', () => {
-    it('should POST a new BOM entry for the part', () => {
+  describe('createBOMLine', () => {
+    it('should POST a new BOM line for the part', () => {
       const request = { childPartId: 5, quantity: 3 } as any;
-      const mockResponse = { id: 1, partNumber: 'P-001', bomEntries: [] };
+      const mockResponse = { id: 1, partNumber: 'P-001', bomLines: [] };
       let result: unknown = null;
 
-      service.createBOMEntry(1, request).subscribe((p) => { result = p; });
+      service.createBOMLine(1, request).subscribe((p) => { result = p; });
 
       const req = httpMock.expectOne(`${baseUrl}/1/bom`);
       expect(req.request.method).toBe('POST');

@@ -60,6 +60,6 @@ export interface VendorPartPriceTier {
   effectiveFrom: string;
   effectiveTo: string | null;
   notes: string | null;
-  /** UoM purchase-options effort — which PartPurchaseOption this tier prices (null = per base unit). */
-  purchaseOptionId: number | null;
+  /** UoM purchase-units effort — which PartPurchaseUnit this tier prices (null = per base unit). */
+  purchaseUnitId: number | null;
 }

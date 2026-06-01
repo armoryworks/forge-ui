@@ -25,9 +25,9 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 
 import { VendorPartsService } from '../../services/vendor-parts.service';
-import { PurchaseOptionsService } from '../../services/purchase-options.service';
+import { PurchaseUnitsService } from '../../services/purchase-units.service';
 import { VendorPart, VendorPartPriceTier } from '../../models/vendor-part.model';
-import { PartPurchaseOption } from '../../models/part-purchase-option.model';
+import { PartPurchaseUnit } from '../../models/part-purchase-unit.model';
 
 export interface VendorPartPriceTiersDialogData {
   vendorPart: VendorPart;
@@ -57,15 +57,15 @@ export class VendorPartPriceTiersDialogComponent {
   private readonly dialogRef = inject(MatDialogRef<VendorPartPriceTiersDialogComponent>);
   protected readonly data = inject<VendorPartPriceTiersDialogData>(MAT_DIALOG_DATA);
 
-  private readonly purchaseOptionsService = inject(PurchaseOptionsService);
+  private readonly purchaseUnitsService = inject(PurchaseUnitsService);
 
   protected readonly tiers = signal<VendorPartPriceTier[]>(this.data.vendorPart.priceTiers ?? []);
   protected readonly saving = signal(false);
   protected readonly currencyOptions = CURRENCY_OPTIONS;
 
-  // UoM purchase-options effort — the part's purchase options, so a tier can price a specific
+  // UoM purchase-units effort — the part's purchase units, so a tier can price a specific
   // size/form and the editor can preview the derived per-base-unit cost.
-  protected readonly options = signal<PartPurchaseOption[]>([]);
+  protected readonly options = signal<PartPurchaseUnit[]>([]);
   private readonly optionById = computed(() => new Map(this.options().map(o => [o.id, o])));
   protected readonly optionSelectOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('vendorPart.priceTiers.perBaseUnit') },
@@ -77,7 +77,7 @@ export class VendorPartPriceTiersDialogComponent {
 
   constructor() {
     // Single GET that completes — fire-and-forget per the subscription-lifecycle rule.
-    this.purchaseOptionsService.list(this.data.vendorPart.partId).subscribe({
+    this.purchaseUnitsService.list(this.data.vendorPart.partId).subscribe({
       next: (opts) => this.options.set(opts),
     });
   }
@@ -99,7 +99,7 @@ export class VendorPartPriceTiersDialogComponent {
   ];
 
   protected readonly form = new FormGroup({
-    purchaseOptionId: new FormControl<number | null>(null),
+    purchaseUnitId: new FormControl<number | null>(null),
     minQuantity: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     unitPrice: new FormControl<number | null>(null, [Validators.required, Validators.min(0)]),
     currency: new FormControl<string>('USD', { nonNullable: true, validators: [Validators.required, Validators.maxLength(3), Validators.minLength(3)] }),
@@ -114,12 +114,12 @@ export class VendorPartPriceTiersDialogComponent {
     currency: this.translate.instant('vendorPart.priceTiers.currency'),
   });
 
-  // Live "≈ $/base-unit" preview: when the tier prices a purchase option, divide the entered
+  // Live "≈ $/base-unit" preview: when the tier prices a purchase unit, divide the entered
   // option price by the option's content ($50 / 32 sqft = $1.5625/sqft). Null when no option.
   private readonly formValue = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
   protected readonly perBasePreview = computed<string | null>(() => {
     const v = this.formValue();
-    const optId = v.purchaseOptionId ?? null;
+    const optId = v.purchaseUnitId ?? null;
     const price = v.unitPrice ?? null;
     if (optId == null || price == null) return null;
     const opt = this.optionById().get(optId);
@@ -131,7 +131,7 @@ export class VendorPartPriceTiersDialogComponent {
   // Tier rows decorated with the resolved option label + per-base-unit display for the table.
   protected readonly tierRows = computed(() =>
     this.tiers().map(t => {
-      const opt = t.purchaseOptionId != null ? this.optionById().get(t.purchaseOptionId) : undefined;
+      const opt = t.purchaseUnitId != null ? this.optionById().get(t.purchaseUnitId) : undefined;
       const perBase = opt && opt.contentQuantity > 0 ? t.unitPrice / opt.contentQuantity : null;
       return {
         ...t,
@@ -152,7 +152,7 @@ export class VendorPartPriceTiersDialogComponent {
     this.vendorPartsService.addPriceTier(this.data.vendorPart.id, {
       minQuantity: v.minQuantity!,
       unitPrice: v.unitPrice!,
-      purchaseOptionId: v.purchaseOptionId ?? null,
+      purchaseUnitId: v.purchaseUnitId ?? null,
       // Currency moved to VendorPart-level — server snapshots from parent.
       effectiveFrom: v.effectiveFrom ? toIsoDate(v.effectiveFrom) : null,
       effectiveTo: v.effectiveTo ? toIsoDate(v.effectiveTo) : null,
@@ -160,7 +160,7 @@ export class VendorPartPriceTiersDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
-        this.form.reset({ currency: 'USD', effectiveFrom: new Date(), purchaseOptionId: null });
+        this.form.reset({ currency: 'USD', effectiveFrom: new Date(), purchaseUnitId: null });
         this.refreshTiers();
       },
       error: () => this.saving.set(false),

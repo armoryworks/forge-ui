@@ -96,8 +96,8 @@
       "count": 0
     },
     {
-      "entity": "BOMEntry",
-      "file": "bomentry.json",
+      "entity": "BOMLine",
+      "file": "bomline.json",
       "count": 0
     },
     {

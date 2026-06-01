@@ -8,12 +8,12 @@
   grid-template-columns: 1fr 90px 120px auto;
 }
 
-// UoM purchase-options effort — option selector row above the add-line grid.
+// UoM purchase-units effort — option selector row above the add-line grid.
 .add-line-option {
   margin-bottom: $sp-sm;
 }
 
-// Chosen purchase option shown beside a staged line's description.
+// Chosen purchase unit shown beside a staged line's description.
 .po-line-option-chip {
   display: inline-block;
   margin-left: $sp-sm;
