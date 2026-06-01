@@ -6,7 +6,7 @@ import { PartStatus } from './part-status.type';
 import { ProcurementSource } from './procurement-source.type';
 import { ReceivingInspectionFrequency } from './receiving-inspection-frequency.type';
 import { TraceabilityType } from './traceability-type.type';
-import { BOMEntry } from './bom-entry.model';
+import { BOMLine } from './bom-line.model';
 import { BOMUsage } from './bom-usage.model';
 
 export interface PartDetail {
@@ -93,7 +93,7 @@ export interface PartDetail {
   receivingInspectionTemplateId: number | null;
   inspectionFrequency: ReceivingInspectionFrequency | null;
   inspectionSkipAfterN: number | null;
-  bomEntries: BOMEntry[];
+  bomLines: BOMLine[];
   usedIn: BOMUsage[];
   createdAt: Date;
   updatedAt: Date;

@@ -22,7 +22,12 @@
               @for (line of lines(); track $index) {
                 <tr>
                   <td class="lines-table__mono">{{ line.partNumber }}</td>
-                  <td>{{ line.description }}</td>
+                  <td>
+                    {{ line.description }}
+                    @if (line.purchaseUnitLabel) {
+                      <span class="po-line-option-chip">{{ line.purchaseUnitLabel }}</span>
+                    }
+                  </td>
                   <!-- Phase 3 / WU-10 — quantity may be fractional. Display up to 4 decimals;
                        trailing zeros collapse via Angular's number pipe. -->
                   <td class="lines-table__right">{{ line.orderedQuantity | number:'1.0-4' }}</td>
@@ -59,6 +64,17 @@
                  (change)="showInactiveParts.set($any($event.target).checked)" />
           {{ 'purchaseOrders.showInactiveParts' | translate }}
         </label>
+
+        <!-- UoM purchase-units effort — when the chosen part has purchase units, pick the
+             size/form here; quantity then counts in options and price is per option. -->
+        @if (lineOptions().length > 0) {
+          <div class="add-line-option" [formGroup]="lineForm">
+            <app-select data-testid="po-line-option"
+              [label]="'purchaseOrders.purchaseUnit' | translate"
+              [options]="lineOptionSelectOptions()"
+              formControlName="purchaseUnitId" />
+          </div>
+        }
 
         <!-- Add Line Form -->
         <div class="add-line add-line--4col" [formGroup]="lineForm">

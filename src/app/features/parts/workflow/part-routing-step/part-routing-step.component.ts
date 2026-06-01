@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, si
 import { TranslatePipe } from '@ngx-translate/core';
 
 import { RoutingComponent } from '../../components/routing/routing.component';
-import { BOMEntry } from '../../models/bom-entry.model';
+import { BOMLine } from '../../models/bom-line.model';
 import { PartDetail } from '../../models/part-detail.model';
 import { PartsService } from '../../services/parts.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
@@ -32,7 +32,7 @@ export class PartRoutingStepComponent {
   readonly entity = input<unknown>(null);
 
   protected readonly part = computed<PartDetail | null>(() => (this.entity() as PartDetail | null) ?? null);
-  protected readonly bomEntries = computed<BOMEntry[]>(() => this.part()?.bomEntries ?? []);
+  protected readonly bomLines = computed<BOMLine[]>(() => this.part()?.bomLines ?? []);
 
   /** Bumped via a polling-style effect so the step rail's hasRouting gate
    * refreshes after Routing's add/edit/delete operations finish. */

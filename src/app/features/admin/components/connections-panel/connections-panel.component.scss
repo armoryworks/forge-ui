@@ -1,0 +1,51 @@
+@use 'styles/variables' as *;
+
+.connections-panel {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+
+  &__lede {
+    flex: 1;
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-muted);
+  }
+
+  &__kind {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-xs;
+    font-size: $font-size-sm;
+
+    .material-icons-outlined {
+      font-size: $icon-size-sm;
+      color: var(--text-muted);
+    }
+  }
+
+  &__capability-banner {
+    display: flex;
+    gap: $sp-md;
+    padding: $sp-md;
+    background: color-mix(in srgb, var(--error) 8%, transparent);
+    border-left: $border-width-accent solid var(--error);
+    color: var(--text);
+
+    .material-icons-outlined {
+      color: var(--error);
+      font-size: $icon-size-xl;
+    }
+
+    strong {
+      display: block;
+      font-weight: 600;
+    }
+
+    p {
+      margin: $sp-xs 0 0 0;
+      font-size: $font-size-sm;
+      color: var(--text-muted);
+    }
+  }
+}

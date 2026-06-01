@@ -15,7 +15,7 @@ import { WorkflowService } from '../../../../shared/services/workflow.service';
 
 import { PartsService } from '../../services/parts.service';
 import { PartDetail } from '../../models/part-detail.model';
-import { BOMEntry } from '../../models/bom-entry.model';
+import { BOMLine } from '../../models/bom-line.model';
 import { BOMSourceType } from '../../models/bom-source-type.type';
 import { PartInventorySummary } from '../../models/part-inventory-summary.model';
 import { PartPurchaseHistoryItem } from '../../models/part-purchase-history-item.model';
@@ -25,6 +25,7 @@ import { FileAttachment } from '../../../../shared/models/file.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../../shared/components/select/select.component';
+import { InventoryService } from '../../../inventory/services/inventory.service';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -41,6 +42,7 @@ import { BomTreeComponent } from '../bom-tree/bom-tree.component';
 import { BomRevisionHistoryComponent } from '../bom-revision-history/bom-revision-history.component';
 import { SerialNumbersTabComponent } from '../serial-numbers-tab/serial-numbers-tab.component';
 import { VendorSourcesPanelComponent } from '../vendor-sources-panel/vendor-sources-panel.component';
+import { PartPurchaseUnitsClusterComponent } from '../part-clusters/part-purchase-units-cluster/part-purchase-units-cluster.component';
 import { VendorPartsService } from '../../services/vendor-parts.service';
 import { VendorPart } from '../../models/vendor-part.model';
 import { PartIdentityClusterComponent } from '../part-clusters/part-identity-cluster.component';
@@ -91,7 +93,7 @@ type BomViewMode = 'table' | 'tree';
     StlViewerComponent, BarcodeInfoComponent,
     DataTableComponent, ColumnCellDirective,
     BomTreeComponent, BomRevisionHistoryComponent,
-    SerialNumbersTabComponent, VendorSourcesPanelComponent,
+    SerialNumbersTabComponent, VendorSourcesPanelComponent, PartPurchaseUnitsClusterComponent,
     PartIdentityClusterComponent, PartInventoryClusterComponent, PartCostClusterComponent,
     PartActivityClusterComponent, PartFilesClusterComponent,
     PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,
@@ -179,9 +181,14 @@ export class PartDetailPanelComponent {
    */
   @ViewChild('bomChildPartPicker') protected bomChildPartPicker?: EntityPickerComponent;
 
+  // UoM purchase-units effort — consumption-UoM picker for BOM lines.
+  private readonly inventoryService = inject(InventoryService);
+  protected readonly uomOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
+
   protected readonly bomForm = new FormGroup({
     childPartId: new FormControl<number | null>(null, [Validators.required]),
     quantity: new FormControl(1, [Validators.required, Validators.min(0.01)]),
+    uomId: new FormControl<number | null>(null),
     sourceType: new FormControl('Buy'),
     referenceDesignator: new FormControl(''),
     leadTimeDays: new FormControl<number | null>(null),
@@ -244,6 +251,16 @@ export class PartDetailPanelComponent {
   ];
 
   constructor() {
+    this.inventoryService.getUnitsOfMeasure().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (uoms) => {
+        const options: SelectOption[] = [{ value: null, label: '-- None --' }];
+        for (const u of (uoms ?? []).filter(x => x.isActive)) {
+          options.push({ value: u.id, label: u.symbol ? `${u.name} (${u.symbol})` : u.name });
+        }
+        this.uomOptions.set(options);
+      },
+    });
+
     effect(() => {
       const id = this.partId();
       if (id) {
@@ -456,7 +473,7 @@ export class PartDetailPanelComponent {
 
   protected openAddBom(): void {
     this.bomForm.reset({
-      childPartId: null, quantity: 1, referenceDesignator: '',
+      childPartId: null, quantity: 1, uomId: null, referenceDesignator: '',
       sourceType: 'Buy', leadTimeDays: null, notes: '',
     });
     this.showBomDialog.set(true);
@@ -492,14 +509,15 @@ export class PartDetailPanelComponent {
     });
   }
 
-  protected saveBomEntry(): void {
+  protected saveBomLine(): void {
     if (this.bomForm.invalid) return;
     const p = this.part();
     if (!p) return;
     const form = this.bomForm.getRawValue();
-    this.partsService.createBOMEntry(p.id, {
+    this.partsService.createBOMLine(p.id, {
       childPartId: form.childPartId!,
       quantity: form.quantity!,
+      uomId: form.uomId ?? undefined,
       referenceDesignator: form.referenceDesignator || undefined,
       sourceType: (form.sourceType as BOMSourceType) ?? 'Buy',
       leadTimeDays: form.leadTimeDays ?? undefined,
@@ -509,29 +527,29 @@ export class PartDetailPanelComponent {
         this.part.set(detail);
         this.closeBomDialog();
         this.bomRefreshToken.update(v => v + 1);
-        this.snackbar.success(this.translate.instant('parts.bomEntryAdded'));
+        this.snackbar.success(this.translate.instant('parts.bomLineAdded'));
       },
     });
   }
 
-  protected deleteBomEntry(entry: BOMEntry): void {
+  protected deleteBomLine(entry: BOMLine): void {
     const p = this.part();
     if (!p) return;
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('parts.deleteBomEntry'),
+        title: this.translate.instant('parts.deleteBomLine'),
         message: this.translate.instant('parts.deleteBomMessage'),
         confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
       } satisfies ConfirmDialogData,
     }).afterClosed().subscribe(confirmed => {
       if (!confirmed) return;
-      this.partsService.deleteBOMEntry(p.id, entry.id).subscribe({
+      this.partsService.deleteBOMLine(p.id, entry.id).subscribe({
         next: (detail) => {
           this.part.set(detail);
           this.bomRefreshToken.update(v => v + 1);
-          this.snackbar.success(this.translate.instant('parts.bomEntryDeleted'));
+          this.snackbar.success(this.translate.instant('parts.bomLineDeleted'));
         },
       });
     });

@@ -3,7 +3,6 @@ import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
-import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -12,8 +11,6 @@ import { LeadsService } from '../../services/leads.service';
 import { OutreachCampaignsService } from '../../services/outreach-campaigns.service';
 import { LeadItem, CapabilityFitStatus, NdaState, ExportControlClearance } from '../../models/lead-item.model';
 import { LeadStatus } from '../../models/lead-status.type';
-import { ConvertLeadRequest } from '../../models/convert-lead-request.model';
-import { LeadConvertDialogComponent, LeadConvertDialogData } from '../lead-convert-dialog/lead-convert-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
@@ -37,7 +34,6 @@ import { RecentCommunicationsComponent } from '../../../../shared/components/rec
 export class LeadDetailPanelComponent {
   private readonly leadsService = inject(LeadsService);
   private readonly campaignsService = inject(OutreachCampaignsService);
-  private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
@@ -284,31 +280,31 @@ export class LeadDetailPanelComponent {
     this.editRequested.emit(lead);
   }
 
+  /**
+   * One-click lead conversion (2026-05-31, see CLAUDE.md "Guided Wizards"
+   * section). The legacy multi-step convert dialog was retired alongside
+   * the vendor + customer wizard migrations: convertLead has always been
+   * an atomic server operation (creates Customer, links Lead, rolls
+   * forward AccountContacts + outreach preferences in one SaveChanges),
+   * so the mat-stepper that wrapped it was UX scaffolding, not a
+   * technical necessity. The credit/tax/address fields that used to live
+   * in the dialog now move to the customer detail page after conversion.
+   * Click → POST with empty body → navigate to the new customer.
+   */
   protected convertLead(): void {
     const lead = this.lead();
     if (!lead) return;
 
-    this.dialog.open<
-      LeadConvertDialogComponent, LeadConvertDialogData, ConvertLeadRequest | undefined
-    >(LeadConvertDialogComponent, {
-      width: '640px',
-      data: { lead } satisfies LeadConvertDialogData,
-    }).afterClosed().subscribe(request => {
-      if (!request) return;
-      this.executeConversion(lead.id, request);
-    });
-  }
-
-  private executeConversion(leadId: number, request: ConvertLeadRequest): void {
     this.saving.set(true);
-    this.leadsService.convertLead(leadId, request).subscribe({
-      next: () => {
+    this.leadsService.convertLead(lead.id, { createJob: false }).subscribe({
+      next: (result) => {
         this.saving.set(false);
-        const msg = request.createJob
-          ? this.translate.instant('leads.convertedWithJob')
-          : this.translate.instant('leads.convertedOnly');
-        this.snackbar.success(msg);
-        this.loadLead(leadId);
+        this.snackbar.success(this.translate.instant('leads.convertedOnly'));
+        if (result.customerId) {
+          this.router.navigate(['/customers', result.customerId, 'overview']);
+        } else {
+          this.loadLead(lead.id);
+        }
       },
       error: () => {
         this.saving.set(false);

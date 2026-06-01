@@ -76,7 +76,7 @@ export class QuoteDialogComponent {
   ]);
 
   protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.description}` })));
+    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
 
   readonly form = new FormGroup({
     customerId: new FormControl<number | null>(null, [Validators.required]),

@@ -1,0 +1,41 @@
+@use 'styles/variables' as *;
+
+// Identical layout to every other vendor workflow step. Kept here rather
+// than promoted to _shared.scss so it stays scoped to the vendor feature;
+// promote if a third entity migrates and copies this same block.
+.vendor-workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  position: relative;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    width: 100%;
+    max-width: 720px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: $font-size-lg;
+    color: var(--text);
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-md;
+    width: 100%;
+    max-width: 720px;
+  }
+}

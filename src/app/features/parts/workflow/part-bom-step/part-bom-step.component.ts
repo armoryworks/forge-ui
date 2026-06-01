@@ -19,7 +19,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { WorkflowService } from '../../../../shared/services/workflow.service';
-import { BOMEntry } from '../../models/bom-entry.model';
+import { BOMLine } from '../../models/bom-line.model';
 import { BOMSourceType } from '../../models/bom-source-type.type';
 import { PartDetail } from '../../models/part-detail.model';
 import { ProcurementSource } from '../../models/procurement-source.type';
@@ -76,7 +76,7 @@ export class PartBomStepComponent {
   readonly entityId = input<number | null>(null);
   readonly entity = input<unknown>(null);
 
-  protected readonly bomEntries = signal<BOMEntry[]>([]);
+  protected readonly bomLines = signal<BOMLine[]>([]);
   protected readonly saving = signal(false);
   protected readonly showAddDialog = signal(false);
   /**
@@ -131,7 +131,7 @@ export class PartBomStepComponent {
     // upstream entity changes (e.g., another step modified the part).
     effect(() => {
       const part = this.part();
-      this.bomEntries.set(part?.bomEntries ?? []);
+      this.bomLines.set(part?.bomLines ?? []);
     });
 
     // When the user picks a child part, fetch its detail so we can resolve
@@ -180,7 +180,7 @@ export class PartBomStepComponent {
     if (id == null) return;
     const v = this.form.getRawValue();
     this.saving.set(true);
-    this.partsService.createBOMEntry(id, {
+    this.partsService.createBOMLine(id, {
       childPartId: v.childPartId!,
       quantity: v.quantity,
       sourceType: v.sourceType,
@@ -190,10 +190,10 @@ export class PartBomStepComponent {
     }).subscribe({
       next: (detail) => {
         this.saving.set(false);
-        this.bomEntries.set(detail.bomEntries ?? []);
+        this.bomLines.set(detail.bomLines ?? []);
         this.workflowService.currentEntity.set(detail);
         this.showAddDialog.set(false);
-        this.snackbar.success(this.translate.instant('parts.bomEntryAdded'));
+        this.snackbar.success(this.translate.instant('parts.bomLineAdded'));
       },
       error: () => {
         this.saving.set(false);
@@ -219,13 +219,13 @@ export class PartBomStepComponent {
     });
   }
 
-  protected deleteEntry(entry: BOMEntry): void {
+  protected deleteEntry(entry: BOMLine): void {
     const id = this.entityId();
     if (id == null) return;
     this.dialog.open(ConfirmDialogComponent, {
       width: '400px',
       data: {
-        title: this.translate.instant('parts.deleteBomEntry'),
+        title: this.translate.instant('parts.deleteBomLine'),
         message: this.translate.instant('parts.deleteBomMessage'),
         confirmLabel: this.translate.instant('common.delete'),
         severity: 'danger',
@@ -233,12 +233,12 @@ export class PartBomStepComponent {
     }).afterClosed().subscribe((confirmed) => {
       if (!confirmed) return;
       this.saving.set(true);
-      this.partsService.deleteBOMEntry(id, entry.id).subscribe({
+      this.partsService.deleteBOMLine(id, entry.id).subscribe({
         next: (detail) => {
           this.saving.set(false);
-          this.bomEntries.set(detail.bomEntries ?? []);
+          this.bomLines.set(detail.bomLines ?? []);
           this.workflowService.currentEntity.set(detail);
-          this.snackbar.success(this.translate.instant('parts.bomEntryDeleted'));
+          this.snackbar.success(this.translate.instant('parts.bomLineDeleted'));
         },
         error: () => this.saving.set(false),
       });

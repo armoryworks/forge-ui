@@ -71,6 +71,51 @@
     "capabilities": "Capacidades",
     "system": "Sistema"
   },
+  "adminOverview": {
+    "title": "Resumen de Administración",
+    "subtitle": "Cómo se ve esta instalación ahora mismo. Cada tarjeta enlaza con su pestaña nativa.",
+    "unassignedRole": "Sin asignar",
+    "people": {
+      "title": "Personas",
+      "activeLabel": "usuarios activos",
+      "cta": "Ver Usuarios"
+    },
+    "capabilities": {
+      "title": "Capacidades",
+      "ofTotal": "de {{ total }} habilitadas",
+      "hint": "Active o desactive qué funciones ejecuta esta instalación. Desactivar una capacidad oculta su UI y rechaza sus endpoints.",
+      "cta": "Administrar Capacidades"
+    },
+    "connections": {
+      "title": "Conexiones",
+      "activeLabel": "integraciones",
+      "expiredAlert": "{{ count }} clave expirada — revísela antes de que los clientes reciban 401",
+      "capabilityDisabled": "Las claves API de BI / integración están desactivadas en esta instalación.",
+      "cta": "Ver Conexiones"
+    },
+    "compliance": {
+      "title": "Cumplimiento",
+      "openLabel": "usuarios con elementos pendientes",
+      "i9Alert": "{{ count }} plazo de I-9 (autorización de trabajo) vencido o cumplido",
+      "cta": "Ver Cumplimiento"
+    },
+    "scheduledTasks": {
+      "title": "Tareas Programadas",
+      "activeLabel": "activas",
+      "nextRun": "Siguiente:",
+      "noUpcoming": "No hay ejecuciones programadas."
+    },
+    "storage": {
+      "title": "Almacenamiento",
+      "filesLabel": "en {{ count }} archivos",
+      "noFiles": "Aún no hay archivos almacenados."
+    },
+    "recentAudit": {
+      "title": "Actividad Reciente",
+      "empty": "Aún no se ha registrado actividad de auditoría.",
+      "cta": "Ver Registro Completo"
+    }
+  },
   "header": {
     "home": "Inicio",
     "showMoreBreadcrumbs": "Mostrar ruta de navegación completa",
@@ -542,14 +587,15 @@
     "bomRefDes": "Ref Des",
     "bomNotes": "Notes",
     "bomSourceAuto": "Source: {{source}} (auto, based on component type)",
-    "noBomEntries": "Sin entradas de lista de materiales",
-    "addBomEntry": "Agregar Entrada de BOM",
+    "noBomLines": "Sin entradas de lista de materiales",
+    "addBomLine": "Agregar Línea de BOM",
     "childPart": "Pieza Hija",
+    "bomUom": "UM de Consumo",
     "sourceType": "Fuente",
     "referenceDesignator": "Designador de Referencia",
     "leadTimeDays": "Tiempo de Entrega (días)",
-    "deleteBomEntry": "¿Eliminar Entrada de BOM?",
-    "deleteBomMessage": "Esto eliminará permanentemente esta entrada de BOM de la pieza.",
+    "deleteBomLine": "¿Eliminar Línea de BOM?",
+    "deleteBomMessage": "Esto eliminará permanentemente esta línea de BOM de la pieza.",
     "parentPart": "Pieza Padre",
     "notUsedInAssemblies": "No se usa en ningún ensamblaje",
     "noFilesAttached": "Sin archivos adjuntos",
@@ -557,8 +603,8 @@
     "deletePartMessage": "Esto eliminará permanentemente \"{partNumber}\".",
     "partUpdated": "Pieza actualizada.",
     "partCreated": "Pieza creada.",
-    "bomEntryAdded": "Entrada de BOM agregada.",
-    "bomEntryDeleted": "Entrada de BOM eliminada.",
+    "bomLineAdded": "Línea de BOM agregada.",
+    "bomLineDeleted": "Línea de BOM eliminada.",
     "partDeleted": "Pieza eliminada.",
     "accountingUnlinked": "Artículo contable desvinculado.",
     "routing": "Enrutamiento",
@@ -586,8 +632,8 @@
     "operationActivity": "Actividad",
     "referencedOperation": "Referencia a Operación",
     "noMaterials": "Sin materiales asignados a esta operación",
-    "noMaterialsHint": "Agregue entradas de BOM a esta pieza primero, luego asígnelas a operaciones.",
-    "bomEntry": "Entrada de BOM",
+    "noMaterialsHint": "Agregue líneas de BOM a esta pieza primero, luego asígnelas a operaciones.",
+    "bomLine": "Línea de BOM",
     "materialAdded": "Material asignado a la operación.",
     "materialRemoved": "Material eliminado de la operación.",
     "statusActive": "Activo",
@@ -615,7 +661,7 @@
     "viewModeLabel": "Modo de vista",
     "noThumbnail": "Sin imagen",
     "step": "Paso",
-    "operation": "Op",
+    "operation": "Operación",
     "fileDeleted": "Archivo eliminado",
     "inventoryReplenishment": "Inventario y Reposición",
     "minStockThreshold": "Umbral Mínimo de Stock",
@@ -958,6 +1004,20 @@
         "sales": "UM de Venta",
         "helper": "Inventario = unidad de stock. Compra = unidad de factura del proveedor. Venta = unidad de factura del cliente."
       },
+      "purchaseUnits": {
+        "title": "Unidades de Compra",
+        "helper": "Los tamaños/formas en que se compra esta pieza (p. ej. una lámina 4×8 = 32 sqft, una bolsa de 100 = 100 ea). El contenido está en la UM de inventario; los proveedores cotizan cada unidad.",
+        "empty": "Aún no hay unidades de compra — la pieza se compra por unidad de inventario.",
+        "label": "Etiqueta",
+        "content": "Contenido (UM de inventario)",
+        "uom": "UM del Contenido",
+        "add": "Agregar Unidad de Compra",
+        "added": "Unidad de compra agregada",
+        "updated": "Unidad de compra actualizada",
+        "removed": "Unidad de compra eliminada",
+        "deleteTitle": "¿Eliminar Unidad de Compra?",
+        "deleteMessage": "¿Eliminar \"{{label}}\"? Las órdenes de compra existentes que la referencian no se ven afectadas."
+      },
       "mrp": {
         "title": "Planificación MRP",
         "isMrpPlanned": "Planificado por MRP",
@@ -1169,7 +1229,10 @@
       "effectiveFrom": "Vigente desde",
       "effectiveTo": "Vigente hasta",
       "addTier": "Añadir nivel",
-      "empty": "Sin niveles — añade uno para precios por cantidad."
+      "empty": "Sin niveles — añade uno para precios por cantidad.",
+      "option": "Unidad de Compra",
+      "perBase": "Por Unidad Base",
+      "perBaseUnit": "Por unidad base"
     },
     "priceTierHistory": "Historial de niveles de precio",
     "priceTierHistoryEmpty": "Sin historial de niveles todavía.",
@@ -1714,7 +1777,53 @@
     "defaultTaxCodeId": "ID de código fiscal predeterminado",
     "defaultCurrency": "Moneda predeterminada (ISO 4217)",
     "billingAddress": "Dirección de facturación",
-    "shippingAddress": "Dirección de envío"
+    "shippingAddress": "Dirección de envío",
+    "workflow": {
+      "page": {
+        "newTitle": "Nuevo Cliente",
+        "loadingTitle": "Cargando…",
+        "loading": "Cargando flujo de trabajo…",
+        "loadFailed": "No se pudo cargar el flujo de trabajo del cliente.",
+        "definitionMissing": "La definición del flujo de trabajo del cliente no está configurada.",
+        "startFailed": "No se pudo iniciar el flujo de trabajo del cliente.",
+        "completeSuccess": "Cliente guardado.",
+        "missingValidators": "No se puede completar — {{ missing }}.",
+        "blockedByStep": "Termine '{{ step }}' antes de continuar — {{ missing }}."
+      },
+      "identity": {
+        "title": "Identidad",
+        "hint": "¿Quién es este cliente y cómo se le contacta?",
+        "nameLabel": "Nombre",
+        "companyNameLabel": "Empresa",
+        "emailLabel": "Correo Electrónico",
+        "phoneLabel": "Teléfono",
+        "saveFailed": "No se pudo guardar la identidad del cliente."
+      },
+      "addresses": {
+        "title": "Direcciones",
+        "hint": "Direcciones de facturación y envío.",
+        "followUpMessage": "Después de guardar el cliente, agregue las direcciones de facturación y envío desde la pestaña Direcciones en la página de detalle del cliente."
+      },
+      "creditAndTax": {
+        "title": "Crédito e Impuestos",
+        "hint": "Límite de crédito, moneda predeterminada y estado de exención fiscal.",
+        "creditLimitLabel": "Límite de Crédito",
+        "defaultCurrencyLabel": "Moneda Predeterminada",
+        "isTaxExemptLabel": "Exento de Impuestos",
+        "taxExemptionIdLabel": "ID de Exención Fiscal",
+        "saveFailed": "No se pudo guardar la configuración de crédito e impuestos del cliente."
+      },
+      "review": {
+        "title": "Revisión",
+        "hint": "Confirme los detalles a continuación y luego marque como Completado para guardar.",
+        "loading": "Cargando cliente…"
+      },
+      "express": {
+        "title": "Nuevo Cliente",
+        "hint": "Capture lo esencial en un solo formulario. Las direcciones pueden agregarse más tarde desde la página de detalle del cliente.",
+        "saveFailed": "No se pudo guardar el cliente."
+      }
+    }
   },
   "priceListEntry": {
     "partLabel": "Pieza",
@@ -2388,6 +2497,7 @@
     "subtitle": "Usuarios, tipos de pista, datos de referencia y configuración del sistema",
     "subtitleEmployee": "Cumplimiento, nómina y documentos de empleados",
     "tabs": {
+      "overview": "Resumen",
       "users": "Usuarios",
       "trackTypes": "Tipos de Pista",
       "referenceData": "Datos de Referencia",
@@ -2404,6 +2514,8 @@
       "currencies": "Monedas y FX",
       "auditLog": "Registro de Auditoría",
       "biApiKeys": "Claves API de BI",
+      "systemApiKeys": "Claves API del Sistema",
+      "connections": "Conexiones",
       "compliance": "Cumplimiento",
       "timeCorrections": "Correcciones de Tiempo",
       "events": "Eventos",
@@ -3490,7 +3602,7 @@
     "entityTimeEntry": "Registro de Tiempo",
     "entityClockEvent": "Evento de Reloj",
     "entityFileAttachment": "Archivo Adjunto",
-    "entityBOMEntry": "Entrada de BOM",
+    "entityBOMLine": "Línea de BOM",
     "entityStorageLocation": "Ubicación de Almacenamiento",
     "entityBinContent": "Contenido de Contenedor",
     "entityPriceList": "Lista de Precios",
@@ -3904,6 +4016,7 @@
     "setupComplete": "Configuración de cuenta completa. ¡Bienvenido!",
     "ssoFailed": "Error de autenticación SSO. Inténtelo de nuevo.",
     "noAccountFound": "No se encontró cuenta. Contacte a su administrador para crear una cuenta primero.",
+    "ssoDomainNotPermitted": "Su dominio de correo no está permitido para el inicio de sesión SSO. Contacte a su administrador.",
     "invalidSetupLink": "Enlace de configuración inválido. Contacte a su administrador.",
     "expiredSetupCode": "Código de configuración inválido o expirado. Contacte a su administrador."
   },
@@ -4117,7 +4230,66 @@
       "addPartToCatalog": "Añadir pieza"
     },
     "offTierVariancePct": "% Variación Fuera de Tarifa",
-    "offTierVariancePctPlaceholder": "Predeterminado: 5%"
+    "offTierVariancePctPlaceholder": "Predeterminado: 5%",
+    "workflow": {
+      "page": {
+        "newTitle": "Nuevo Proveedor",
+        "loadingTitle": "Cargando…",
+        "loading": "Cargando flujo de trabajo…",
+        "loadFailed": "No se pudo cargar el flujo de trabajo del proveedor.",
+        "definitionMissing": "La definición del flujo de trabajo del proveedor no está configurada.",
+        "startFailed": "No se pudo iniciar el flujo de trabajo del proveedor.",
+        "completeSuccess": "Proveedor guardado.",
+        "missingValidators": "No se puede completar — {{ missing }}.",
+        "blockedByStep": "Termine '{{ step }}' antes de continuar — {{ missing }}."
+      },
+      "steps": {
+        "identity": "Identidad",
+        "address": "Dirección",
+        "terms": "Términos",
+        "supplyItems": "Artículos de Suministro",
+        "review": "Revisión"
+      },
+      "identity": {
+        "title": "Identidad",
+        "hint": "¿Quién es este proveedor y cómo se le contacta?",
+        "companyNameLabel": "Nombre de la Empresa",
+        "contactNameLabel": "Contacto Principal",
+        "emailLabel": "Correo Electrónico",
+        "phoneLabel": "Teléfono",
+        "saveFailed": "No se pudo guardar la identidad del proveedor."
+      },
+      "address": {
+        "title": "Dirección",
+        "hint": "Dirección de remisión o principal. Opcional — puede agregarla más tarde.",
+        "label": "Dirección",
+        "saveFailed": "No se pudo guardar la dirección del proveedor."
+      },
+      "terms": {
+        "title": "Términos",
+        "hint": "Términos de pago, pedido mínimo y cualquier nota interna.",
+        "paymentTermsLabel": "Términos de Pago",
+        "minOrderAmountLabel": "Monto Mínimo de Pedido",
+        "offTierVariancePctLabel": "% Variación Fuera de Tarifa",
+        "notesLabel": "Notas",
+        "saveFailed": "No se pudieron guardar los términos del proveedor."
+      },
+      "supplyItems": {
+        "title": "Artículos de Suministro",
+        "hint": "Partes y consumibles que suministra este proveedor.",
+        "followUpMessage": "Después de guardar el proveedor, agregue artículos de suministro desde la pestaña Catálogo en la página de detalle del proveedor."
+      },
+      "review": {
+        "title": "Revisión",
+        "hint": "Confirme los detalles a continuación y luego marque como Completado para guardar.",
+        "loading": "Cargando proveedor…"
+      },
+      "express": {
+        "title": "Nuevo Proveedor",
+        "hint": "Capture lo esencial en un solo formulario. Puede agregar dirección, términos y artículos de suministro más tarde desde la página de detalle del proveedor.",
+        "saveFailed": "No se pudo guardar el proveedor."
+      }
+    }
   },
   "purchaseOrders": {
     "title": "Órdenes de Compra",
@@ -4178,6 +4350,8 @@
     "tabOrders": "Orders",
     "showInactiveVendors": "Mostrar proveedores inactivos",
     "showInactiveParts": "Mostrar piezas obsoletas",
+    "purchaseUnit": "Unidad de Compra",
+    "perBaseUnit": "Por unidad base",
     "vendorDeactivatedWarning": "El proveedor '{{name}}' está desactivado. Reactívalo o elige otro.",
     "shortClose": "Cierre parcial",
     "shortCloseTitle": "Cierre parcial de orden de compra",
@@ -5991,6 +6165,8 @@
       "revokeConfirm": "Revocar",
       "revokedSuccess": "Clave \"{{ name }}\" revocada",
       "issuedSuccess": "Clave \"{{ name }}\" emitida",
+      "capabilityDisabled": "Las claves API de BI / integración están desactivadas para esta instalación. Active CAP-IDEN-AUTH-API-KEYS en Capacidades para emitir claves.",
+      "capabilityDisabledTitle": "Capacidad desactivada",
       "issuedTitle": "Clave API Emitida",
       "issuedWarningTitle": "Copie esta clave ahora",
       "issuedWarning": "Esta es la única vez que se mostrará la clave completa. El servidor sólo almacena el hash — una vez que cierre este diálogo, el texto plano no podrá recuperarse.",
@@ -6005,6 +6181,79 @@
       },
       "cols": {
         "name": "Nombre",
+        "prefix": "Prefijo",
+        "status": "Estado",
+        "created": "Creada",
+        "expires": "Expira",
+        "lastUsed": "Último Uso"
+      }
+    },
+    "connections": {
+      "headerCount": "conexiones",
+      "lede": "Vista federada de sólo lectura de cada credencial y conexión emitida o aceptada por esta instalación. Haga clic en Administrar en cualquier fila para ir a su superficie administrativa nativa.",
+      "noRows": "No hay integraciones conectadas todavía",
+      "capabilityDisabledTitle": "Capacidad desactivada",
+      "installLevel": "(a nivel de instalación)",
+      "never": "Nunca",
+      "manage": "Administrar",
+      "manageAria": "Abrir la página de administración nativa de esta integración",
+      "kinds": {
+        "BiApiKey": "Clave BI",
+        "SystemApiKey": "Clave del Sistema",
+        "EdiTradingPartner": "Socio EDI",
+        "QuickBooksOAuth": "QuickBooks",
+        "CommunicationSync": "Sincronización de Comunicaciones",
+        "CloudStorageLink": "Almacenamiento en la Nube"
+      },
+      "cols": {
+        "kind": "Tipo",
+        "name": "Nombre",
+        "owner": "Propietario",
+        "status": "Estado",
+        "lastUsed": "Último Uso",
+        "created": "Creada"
+      }
+    },
+    "systemApiKeys": {
+      "headerCount": "claves",
+      "newKey": "Nueva Clave API del Sistema",
+      "noKeys": "Aún no se han emitido claves API del sistema",
+      "issueButton": "Emitir Clave",
+      "statusActive": "Activa",
+      "statusRevoked": "Revocada",
+      "never": "Nunca",
+      "noExpiry": "Sin expiración",
+      "unknownUser": "(usuario desconocido)",
+      "userHint": "La clave se autenticará COMO este usuario. Las filas de auditoría y actividad se atribuyen a él; sus roles determinan cada comprobación de autorización.",
+      "roleTemplateHint": "Alcance opcional. Cuando se selecciona una plantilla, los roles efectivos de la clave se restringen a la intersección de los roles del usuario vinculado y la plantilla — nunca se amplían. Deje «Ninguna» para heredar el conjunto completo de roles del usuario.",
+      "roleTemplateNone": "Ninguna — heredar los roles del usuario",
+      "roleTemplateTooltip": "Roles efectivos = roles del usuario ∩ roles de la plantilla",
+      "expiryHint": "Opcional. Dejar en blanco para una clave sin expiración.",
+      "revokeAria": "Revocar clave",
+      "revokeTitle": "¿Revocar Clave API del Sistema?",
+      "revokeMessage": "¿Revocar la clave \"{{ name }}\" ({{ prefix }}…) vinculada a {{ user }}? Cualquier cliente que use esta clave empezará a recibir 401 de inmediato. Esto no se puede deshacer.",
+      "revokeConfirm": "Revocar",
+      "revokedSuccess": "Clave \"{{ name }}\" revocada",
+      "issuedSuccess": "Clave \"{{ name }}\" emitida",
+      "capabilityDisabled": "Las claves API del sistema están desactivadas para esta instalación. Active CAP-IDEN-AUTH-API-KEYS en Capacidades para emitir claves.",
+      "capabilityDisabledTitle": "Capacidad desactivada",
+      "issuedTitle": "Clave API Emitida",
+      "issuedWarningTitle": "Copie esta clave ahora",
+      "issuedWarning": "Esta es la única vez que se mostrará la clave completa. El servidor sólo almacena el hash — una vez que cierre este diálogo, el texto plano no podrá recuperarse.",
+      "copy": "Copiar",
+      "copied": "Copiada",
+      "dismissReveal": "He copiado la clave",
+      "fields": {
+        "name": "Nombre",
+        "user": "Usuario Vinculado",
+        "roleTemplate": "Plantilla de Rol",
+        "expiresAt": "Expira el",
+        "plaintext": "Clave en Texto Plano (se muestra una sola vez)"
+      },
+      "cols": {
+        "name": "Nombre",
+        "user": "Actúa Como",
+        "roleTemplate": "Alcance",
         "prefix": "Prefijo",
         "status": "Estado",
         "created": "Creada",
@@ -6516,6 +6765,29 @@
         "salesHooks": "Configuración de Ventas"
       }
     },
+    "vendors": {
+      "definitions": {
+        "guidedV1": "Configuración de nuevo proveedor"
+      },
+      "steps": {
+        "identity": "Identidad",
+        "address": "Dirección",
+        "terms": "Términos",
+        "supplyItems": "Artículos de Suministro",
+        "review": "Revisión"
+      }
+    },
+    "customers": {
+      "definitions": {
+        "guidedV1": "Configuración de nuevo cliente"
+      },
+      "steps": {
+        "identity": "Identidad",
+        "addresses": "Direcciones",
+        "creditAndTax": "Crédito e Impuestos",
+        "review": "Revisión"
+      }
+    },
     "shell": {
       "actions": {
         "back": "Back",
@@ -6594,6 +6866,14 @@
       "hasSourcingMissing": "Aún no se ha seleccionado el proveedor preferido.",
       "hasInventory": "Inventario",
       "hasInventoryMissing": "Aún no se ha establecido la unidad de medida del stock."
+    },
+    "vendors": {
+      "hasIdentity": "Identidad",
+      "hasIdentityMissing": "El nombre de la empresa es obligatorio."
+    },
+    "customers": {
+      "hasIdentity": "Identidad",
+      "hasIdentityMissing": "El nombre es obligatorio."
     }
   },
   "address": {
@@ -6651,7 +6931,7 @@
     "setupMinLabel": "Preparación (min)",
     "runMinEachLabel": "Ejec./u (min)",
     "runMinLotLabel": "Ejec./lote (min)",
-    "scrapPctLabel": "Merma %",
+    "scrapPctLabel": "Factor de Merma %",
     "laborRateLabel": "Tarifa mano de obra",
     "burdenRateLabel": "Tarifa de carga",
     "subcontractLabel": "Subcontratación",

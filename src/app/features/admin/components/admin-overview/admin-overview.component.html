@@ -1,0 +1,201 @@
+<div class="admin-overview" [appLoadingBlock]="isLoading()">
+  <div class="admin-overview__intro">
+    <h2>{{ 'adminOverview.title' | translate }}</h2>
+    <p>{{ 'adminOverview.subtitle' | translate }}</p>
+  </div>
+
+  <div class="admin-overview__grid">
+    <!-- People -->
+    <section class="admin-overview-card" data-testid="overview-card-people">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">manage_accounts</span>
+        <h3>{{ 'adminOverview.people.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ activeUserCount() }}</span>
+        <span class="admin-overview-card__label">{{ 'adminOverview.people.activeLabel' | translate }}</span>
+      </div>
+      @if (roleBreakdown().length > 0) {
+        <ul class="admin-overview-card__chips" aria-label="Role breakdown">
+          @for (entry of roleBreakdown(); track entry.role) {
+            <li class="chip chip--muted">
+              <span class="admin-overview-card__chip-count">{{ entry.count }}</span>
+              {{ entry.role }}
+            </li>
+          }
+        </ul>
+      }
+      <footer class="admin-overview-card__footer">
+        <button class="action-btn action-btn--sm"
+          data-testid="overview-card-people-go"
+          (click)="goTo('/admin/users')">
+          {{ 'adminOverview.people.cta' | translate }}
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </footer>
+    </section>
+
+    <!-- Capabilities -->
+    <section class="admin-overview-card" data-testid="overview-card-capabilities">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">toggle_on</span>
+        <h3>{{ 'adminOverview.capabilities.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ capabilityEnabled() }}</span>
+        <span class="admin-overview-card__label">
+          {{ 'adminOverview.capabilities.ofTotal' | translate: { total: capabilityTotal() } }}
+        </span>
+      </div>
+      <p class="admin-overview-card__hint">
+        {{ 'adminOverview.capabilities.hint' | translate }}
+      </p>
+      <footer class="admin-overview-card__footer">
+        <button class="action-btn action-btn--sm"
+          data-testid="overview-card-capabilities-go"
+          (click)="goTo('/admin/capabilities')">
+          {{ 'adminOverview.capabilities.cta' | translate }}
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </footer>
+    </section>
+
+    <!-- Integrations / Connections -->
+    <section class="admin-overview-card" data-testid="overview-card-connections">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">hub</span>
+        <h3>{{ 'adminOverview.connections.title' | translate }}</h3>
+      </header>
+      @if (connectionsAvailable()) {
+        <div class="admin-overview-card__metric">
+          <span class="admin-overview-card__number">{{ connectionCount() }}</span>
+          <span class="admin-overview-card__label">{{ 'adminOverview.connections.activeLabel' | translate }}</span>
+        </div>
+        @if (expiredKeyCount() > 0) {
+          <p class="admin-overview-card__alert" role="status">
+            <span class="material-icons-outlined">warning</span>
+            {{ 'adminOverview.connections.expiredAlert' | translate: { count: expiredKeyCount() } }}
+          </p>
+        }
+      } @else {
+        <p class="admin-overview-card__disabled">
+          <span class="material-icons-outlined">block</span>
+          {{ 'adminOverview.connections.capabilityDisabled' | translate }}
+        </p>
+      }
+      <footer class="admin-overview-card__footer">
+        <button class="action-btn action-btn--sm"
+          data-testid="overview-card-connections-go"
+          [disabled]="!connectionsAvailable()"
+          (click)="goTo('/admin/connections')">
+          {{ 'adminOverview.connections.cta' | translate }}
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </footer>
+    </section>
+
+    <!-- Compliance -->
+    <section class="admin-overview-card" data-testid="overview-card-compliance">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">fact_check</span>
+        <h3>{{ 'adminOverview.compliance.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ complianceOpenCount() }}</span>
+        <span class="admin-overview-card__label">{{ 'adminOverview.compliance.openLabel' | translate }}</span>
+      </div>
+      @if (i9AttentionCount() > 0) {
+        <p class="admin-overview-card__alert" role="status">
+          <span class="material-icons-outlined">warning</span>
+          {{ 'adminOverview.compliance.i9Alert' | translate: { count: i9AttentionCount() } }}
+        </p>
+      }
+      <footer class="admin-overview-card__footer">
+        <button class="action-btn action-btn--sm"
+          data-testid="overview-card-compliance-go"
+          (click)="goTo('/admin/compliance')">
+          {{ 'adminOverview.compliance.cta' | translate }}
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </footer>
+    </section>
+
+    <!-- Scheduled Tasks (info-only — no admin page exists today) -->
+    <section class="admin-overview-card" data-testid="overview-card-scheduled-tasks">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">schedule</span>
+        <h3>{{ 'adminOverview.scheduledTasks.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ activeScheduledTaskCount() }}</span>
+        <span class="admin-overview-card__label">{{ 'adminOverview.scheduledTasks.activeLabel' | translate }}</span>
+      </div>
+      @if (nextScheduledRun(); as next) {
+        <p class="admin-overview-card__sub">
+          <span class="material-icons-outlined">arrow_forward</span>
+          {{ 'adminOverview.scheduledTasks.nextRun' | translate }}
+          <span class="admin-overview-card__sub-value">{{ next | date:'MM/dd/yyyy hh:mm a' }}</span>
+        </p>
+      } @else {
+        <p class="admin-overview-card__sub admin-overview-card__sub--muted">
+          {{ 'adminOverview.scheduledTasks.noUpcoming' | translate }}
+        </p>
+      }
+    </section>
+
+    <!-- Storage (info-only — no admin page exists today) -->
+    <section class="admin-overview-card" data-testid="overview-card-storage">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">storage</span>
+        <h3>{{ 'adminOverview.storage.title' | translate }}</h3>
+      </header>
+      <div class="admin-overview-card__metric">
+        <span class="admin-overview-card__number">{{ totalStorageDisplay() }}</span>
+        <span class="admin-overview-card__label">
+          {{ 'adminOverview.storage.filesLabel' | translate: { count: totalFileCount() } }}
+        </span>
+      </div>
+      @if (topStorageEntity(); as top) {
+        <p class="admin-overview-card__sub">
+          <span class="admin-overview-card__sub-value">{{ top.entityType }}</span>
+          <span class="admin-overview-card__sub-muted">{{ top.display }}</span>
+        </p>
+      } @else {
+        <p class="admin-overview-card__sub admin-overview-card__sub--muted">
+          {{ 'adminOverview.storage.noFiles' | translate }}
+        </p>
+      }
+    </section>
+
+    <!-- Recent Audit -->
+    <section class="admin-overview-card admin-overview-card--wide" data-testid="overview-card-audit">
+      <header class="admin-overview-card__header">
+        <span class="material-icons-outlined">history</span>
+        <h3>{{ 'adminOverview.recentAudit.title' | translate }}</h3>
+      </header>
+      @if (auditEntries().length === 0) {
+        <p class="admin-overview-card__empty">
+          {{ 'adminOverview.recentAudit.empty' | translate }}
+        </p>
+      } @else {
+        <ul class="admin-overview-card__audit-list">
+          @for (entry of auditEntries(); track entry.id) {
+            <li class="admin-overview-card__audit-row">
+              <span class="admin-overview-card__audit-action">{{ entry.action }}</span>
+              <span class="admin-overview-card__audit-actor">{{ entry.userName }}</span>
+              <span class="admin-overview-card__audit-when">{{ entry.createdAt | date:'MM/dd/yyyy hh:mm a' }}</span>
+            </li>
+          }
+        </ul>
+      }
+      <footer class="admin-overview-card__footer">
+        <button class="action-btn action-btn--sm"
+          data-testid="overview-card-audit-go"
+          (click)="goTo('/admin/audit-log')">
+          {{ 'adminOverview.recentAudit.cta' | translate }}
+          <span class="material-icons-outlined">chevron_right</span>
+        </button>
+      </footer>
+    </section>
+  </div>
+</div>

@@ -75,9 +75,9 @@ describe('VendorPartListPanelComponent', () => {
     const noTier = makeVendorPart({ priceTiers: [] });
     const withTiers = makeVendorPart({
       priceTiers: [
-        { id: 1, vendorPartId: 1, minQuantity: 1, unitPrice: 10, currency: 'USD', effectiveFrom: '2026-01-01', effectiveTo: null, notes: null },
-        { id: 2, vendorPartId: 1, minQuantity: 50, unitPrice: 8.5, currency: 'USD', effectiveFrom: '2026-01-01', effectiveTo: null, notes: null },
-        { id: 3, vendorPartId: 1, minQuantity: 100, unitPrice: 9, currency: 'USD', effectiveFrom: '2026-01-01', effectiveTo: null, notes: null },
+        { id: 1, vendorPartId: 1, minQuantity: 1, unitPrice: 10, currency: 'USD', effectiveFrom: '2026-01-01', effectiveTo: null, notes: null, purchaseUnitId: null },
+        { id: 2, vendorPartId: 1, minQuantity: 50, unitPrice: 8.5, currency: 'USD', effectiveFrom: '2026-01-01', effectiveTo: null, notes: null, purchaseUnitId: null },
+        { id: 3, vendorPartId: 1, minQuantity: 100, unitPrice: 9, currency: 'USD', effectiveFrom: '2026-01-01', effectiveTo: null, notes: null, purchaseUnitId: null },
       ],
     });
     expect(component.getLowestTier(noTier)).toBeNull();

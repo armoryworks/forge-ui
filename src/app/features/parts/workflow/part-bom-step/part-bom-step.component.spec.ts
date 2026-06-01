@@ -5,7 +5,7 @@ import { provideTranslateService, TranslateLoader } from '@ngx-translate/core';
 import { Observable, of } from 'rxjs';
 
 import { environment } from '../../../../../environments/environment';
-import { BOMEntry } from '../../models/bom-entry.model';
+import { BOMLine } from '../../models/bom-line.model';
 import { PartDetail } from '../../models/part-detail.model';
 import { mockSignalInputs } from '../../../../../testing/signal-input-harness';
 import { PartBomStepComponent } from './part-bom-step.component';
@@ -42,19 +42,20 @@ function buildPart(overrides: Partial<PartDetail> = {}): PartDetail {
     salesUomId: null, salesUomCode: null, salesUomLabel: null,
     requiresReceivingInspection: false, receivingInspectionTemplateId: null,
     inspectionFrequency: null, inspectionSkipAfterN: null,
-    bomEntries: [], usedIn: [],
+    bomLines: [], usedIn: [],
     createdAt: new Date(), updatedAt: new Date(),
     effectivePrice: 0, effectivePriceCurrency: 'USD', effectivePriceSource: 'Default',
     ...overrides,
   };
 }
 
-function buildEntry(id: number): BOMEntry {
+function buildEntry(id: number): BOMLine {
   return {
     id, childPartId: id * 100, childPartNumber: `CHILD-${id}`,
     childName: `Child ${id}`,
     quantity: 1, referenceDesignator: null, sortOrder: id,
     sourceType: 'Buy', leadTimeDays: null, notes: null,
+    uomId: null, uomCode: null, uomLabel: null,
   };
 }
 
@@ -79,14 +80,14 @@ describe('PartBomStepComponent (Phase 5)', () => {
     const component = TestBed.runInInjectionContext(() => new PartBomStepComponent());
     mockSignalInputs(component, {
       stepId: 'bom', componentName: 'PartBomStepComponent',
-      entityId: 42, entity: buildPart({ bomEntries: [buildEntry(1), buildEntry(2)] }),
+      entityId: 42, entity: buildPart({ bomLines: [buildEntry(1), buildEntry(2)] }),
     });
     TestBed.flushEffects();
-    const c = component as unknown as { bomEntries(): BOMEntry[] };
-    expect(c.bomEntries().length).toBe(2);
+    const c = component as unknown as { bomLines(): BOMLine[] };
+    expect(c.bomLines().length).toBe(2);
   });
 
-  it('save POSTs a new BOM entry to /parts/:id/bom', () => {
+  it('save POSTs a new BOM line to /parts/:id/bom', () => {
     const component = TestBed.runInInjectionContext(() => new PartBomStepComponent());
     mockSignalInputs(component, {
       stepId: 'bom', componentName: 'PartBomStepComponent',
@@ -108,9 +109,9 @@ describe('PartBomStepComponent (Phase 5)', () => {
     const req = httpMock.expectOne(`${environment.apiUrl}/parts/42/bom`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toMatchObject({ childPartId: 7, quantity: 2, sourceType: 'Buy' });
-    req.flush(buildPart({ bomEntries: [buildEntry(99)] }));
-    const c2 = component as unknown as { bomEntries(): BOMEntry[] };
-    expect(c2.bomEntries().length).toBe(1);
+    req.flush(buildPart({ bomLines: [buildEntry(99)] }));
+    const c2 = component as unknown as { bomLines(): BOMLine[] };
+    expect(c2.bomLines().length).toBe(1);
   });
 
   it('auto-sets sourceType from child part procurement (Make → Make)', () => {

@@ -2,6 +2,13 @@
 
 <div class="admin-content">
   <div class="admin-body" [appLoadingBlock]="loading()">
+    <!-- Overview Tab — landing surface for /admin -->
+    @if (activeTab() === 'overview') {
+      <div class="tab-panel">
+        <app-admin-overview />
+      </div>
+    }
+
     <!-- Users Tab -->
     @if (activeTab() === 'users') {
       <div class="tab-panel">
@@ -487,6 +494,20 @@
     @if (activeTab() === 'bi-api-keys') {
       <div class="tab-panel">
         <app-bi-api-keys-panel />
+      </div>
+    }
+
+    <!-- System API Keys Tab — user-bound headless integrations (Tuyere et al.) -->
+    @if (activeTab() === 'system-api-keys') {
+      <div class="tab-panel">
+        <app-system-api-keys-panel />
+      </div>
+    }
+
+    <!-- Connections Tab — federated read-only registry of every credential / connection -->
+    @if (activeTab() === 'connections') {
+      <div class="tab-panel">
+        <app-connections-panel />
       </div>
     }
 

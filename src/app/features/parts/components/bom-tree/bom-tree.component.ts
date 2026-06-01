@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal } f
 
 import { TranslatePipe } from '@ngx-translate/core';
 
-import { BOMEntry } from '../../models/bom-entry.model';
+import { BOMLine } from '../../models/bom-line.model';
 import { BomTreeNode } from '../../models/bom-tree-node.model';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
@@ -15,12 +15,12 @@ import { EmptyStateComponent } from '../../../../shared/components/empty-state/e
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BomTreeComponent {
-  readonly entries = input<BOMEntry[]>([]);
-  readonly entryDelete = output<BOMEntry>();
+  readonly entries = input<BOMLine[]>([]);
+  readonly entryDelete = output<BOMLine>();
 
   protected readonly expandedIds = signal<Set<number>>(new Set());
 
-  /** Builds tree nodes from flat BOM entry list (all entries are root-level children). */
+  /** Builds tree nodes from flat BOM line list (all entries are root-level children). */
   protected readonly treeNodes = computed<BomTreeNode[]>(() => {
     return this.entries().map(entry => ({
       entry,
@@ -67,7 +67,7 @@ export class BomTreeComponent {
     }
   }
 
-  protected onDelete(entry: BOMEntry): void {
+  protected onDelete(entry: BOMLine): void {
     this.entryDelete.emit(entry);
   }
 }

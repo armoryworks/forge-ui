@@ -1,0 +1,40 @@
+<section class="customer-workflow-step" data-testid="customer-review-step">
+  <header class="customer-workflow-step__header">
+    <h2 class="customer-workflow-step__title">{{ 'customers.workflow.review.title' | translate }}</h2>
+    <p class="customer-workflow-step__hint">{{ 'customers.workflow.review.hint' | translate }}</p>
+  </header>
+
+  @if (customer(); as c) {
+    <dl class="customer-workflow-step__summary">
+      <dt>{{ 'customers.workflow.identity.nameLabel' | translate }}</dt>
+      <dd>{{ c.name }}</dd>
+
+      @if (c.companyName) {
+        <dt>{{ 'customers.workflow.identity.companyNameLabel' | translate }}</dt>
+        <dd>{{ c.companyName }}</dd>
+      }
+      @if (c.email) {
+        <dt>{{ 'customers.workflow.identity.emailLabel' | translate }}</dt>
+        <dd>{{ c.email }}</dd>
+      }
+      @if (c.phone) {
+        <dt>{{ 'customers.workflow.identity.phoneLabel' | translate }}</dt>
+        <dd>{{ c.phone }}</dd>
+      }
+      @if (c.creditLimit !== null && c.creditLimit !== undefined) {
+        <dt>{{ 'customers.workflow.creditAndTax.creditLimitLabel' | translate }}</dt>
+        <dd>{{ c.creditLimit }}</dd>
+      }
+      @if (c.defaultCurrency) {
+        <dt>{{ 'customers.workflow.creditAndTax.defaultCurrencyLabel' | translate }}</dt>
+        <dd>{{ c.defaultCurrency }}</dd>
+      }
+      @if (c.isTaxExempt) {
+        <dt>{{ 'customers.workflow.creditAndTax.isTaxExemptLabel' | translate }}</dt>
+        <dd>{{ c.taxExemptionId ?? '—' }}</dd>
+      }
+    </dl>
+  } @else {
+    <p class="customer-workflow-step__hint">{{ 'customers.workflow.review.loading' | translate }}</p>
+  }
+</section>

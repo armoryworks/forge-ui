@@ -1,5 +1,5 @@
 @if (flattenedNodes().length === 0) {
-  <app-empty-state icon="inventory_2" [message]="'parts.noBomEntries' | translate" />
+  <app-empty-state icon="inventory_2" [message]="'parts.noBomLines' | translate" />
 } @else {
   <div class="bom-tree" role="tree" [attr.aria-label]="'parts.bom' | translate">
     @for (node of flattenedNodes(); track node.entry.id) {

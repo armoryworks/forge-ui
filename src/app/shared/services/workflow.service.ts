@@ -350,6 +350,27 @@ export class WorkflowService {
    * the old step before mounting the new one, so when this fires the prior
    * registration's destroy hook has already cleared. Defensive
    * unregisterStepForm() handles the rare overlap.
+   *
+   * TODO (workflow-framework / collect-and-commit mode, 2026-05-31):
+   * The current contract assumes every step persists incrementally — the
+   * save callback hits the patchStep endpoint, which writes to the entity
+   * row immediately. That's the right default for editing an entity that
+   * already exists in its own right (a Part being filled out, a Vendor
+   * being configured), but it doesn't fit "collect data across steps,
+   * commit atomically at the end" flows — most notably the now-retired
+   * lead-convert wizard, which needed a single transactional create-
+   * Customer-and-link-Lead-and-roll-forward-Contacts operation at
+   * completion time. Lead-convert dropped to a one-click action instead.
+   *
+   * The framework extension that would have rescued it: a per-workflow-
+   * definition mode flag (e.g. <c>persistence: 'patch' | 'deferred'</c>)
+   * that, when 'deferred', has registerStepForm stash the form value
+   * into a run-scoped draft buffer instead of hitting patchStep, and
+   * runs a single "commit" handler on completeRun. The IWorkflowEntityCreator
+   * + IWorkflowFieldApplier pair already separates create vs. apply —
+   * deferred mode would just sequence them: hold ApplyAsync calls until
+   * the end. Until that lands, multi-step collect-then-commit flows live
+   * outside the framework (lead-convert is the worked example).
    */
   registerStepForm(
     form: FormGroup,

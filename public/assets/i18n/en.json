@@ -71,6 +71,51 @@
     "capabilities": "Capabilities",
     "system": "System"
   },
+  "adminOverview": {
+    "title": "Admin Overview",
+    "subtitle": "What this install looks like right now. Each tile deep-links into its native tab.",
+    "unassignedRole": "Unassigned",
+    "people": {
+      "title": "People",
+      "activeLabel": "active users",
+      "cta": "View Users"
+    },
+    "capabilities": {
+      "title": "Capabilities",
+      "ofTotal": "of {{ total }} enabled",
+      "hint": "Toggle which features this install runs. Disabling a capability hides its UI and rejects its API endpoints.",
+      "cta": "Manage Capabilities"
+    },
+    "connections": {
+      "title": "Connections",
+      "activeLabel": "integrations",
+      "expiredAlert": "{{ count }} expired key — review before clients hit 401",
+      "capabilityDisabled": "BI / integration API keys are disabled on this install.",
+      "cta": "View Connections"
+    },
+    "compliance": {
+      "title": "Compliance",
+      "openLabel": "users with open items",
+      "i9Alert": "{{ count }} I-9 work-authorization deadline reached or missed",
+      "cta": "View Compliance"
+    },
+    "scheduledTasks": {
+      "title": "Scheduled Tasks",
+      "activeLabel": "active",
+      "nextRun": "Next:",
+      "noUpcoming": "No upcoming runs scheduled."
+    },
+    "storage": {
+      "title": "Storage",
+      "filesLabel": "across {{ count }} files",
+      "noFiles": "No files stored yet."
+    },
+    "recentAudit": {
+      "title": "Recent Audit",
+      "empty": "No audit activity recorded yet.",
+      "cta": "View Full Audit Log"
+    }
+  },
   "header": {
     "home": "Home",
     "showMoreBreadcrumbs": "Show full navigation path",
@@ -542,14 +587,15 @@
     "bomRefDes": "Ref Des",
     "bomNotes": "Notes",
     "bomSourceAuto": "Source: {{source}} (auto, based on component type)",
-    "noBomEntries": "No BOM entries",
-    "addBomEntry": "Add BOM Entry",
+    "noBomLines": "No BOM lines",
+    "addBomLine": "Add BOM Line",
     "childPart": "Child Part",
+    "bomUom": "Consumption UoM",
     "sourceType": "Source",
     "referenceDesignator": "Reference Designator",
     "leadTimeDays": "Lead Time (days)",
-    "deleteBomEntry": "Delete BOM Entry?",
-    "deleteBomMessage": "This will permanently remove this BOM entry from the part.",
+    "deleteBomLine": "Delete BOM Line?",
+    "deleteBomMessage": "This will permanently remove this BOM line from the part.",
     "parentPart": "Parent Part",
     "notUsedInAssemblies": "Not used in any assemblies",
     "noFilesAttached": "No files attached",
@@ -557,8 +603,8 @@
     "deletePartMessage": "This will permanently delete \"{partNumber}\".",
     "partUpdated": "Part updated.",
     "partCreated": "Part created.",
-    "bomEntryAdded": "BOM entry added.",
-    "bomEntryDeleted": "BOM entry deleted.",
+    "bomLineAdded": "BOM line added.",
+    "bomLineDeleted": "BOM line deleted.",
     "bomRevisionHistory": "Revision history",
     "bomRevisionHistoryHint": "Each component change creates an immutable snapshot.",
     "bomRevisionHistoryEmpty": "No revisions yet",
@@ -603,8 +649,8 @@
     "operationActivity": "Activity",
     "referencedOperation": "References Operation",
     "noMaterials": "No materials assigned to this operation",
-    "noMaterialsHint": "Add BOM entries to this part first, then assign them to operations.",
-    "bomEntry": "BOM Entry",
+    "noMaterialsHint": "Add BOM lines to this part first, then assign them to operations.",
+    "bomLine": "BOM Line",
     "materialAdded": "Material assigned to operation.",
     "materialRemoved": "Material removed from operation.",
     "statusActive": "Active",
@@ -632,7 +678,7 @@
     "viewModeLabel": "View mode",
     "noThumbnail": "No image",
     "step": "Step",
-    "operation": "Op",
+    "operation": "Operation",
     "fileDeleted": "File deleted",
     "inventoryReplenishment": "Inventory & Replenishment",
     "minStockThreshold": "Min Stock Threshold",
@@ -716,7 +762,7 @@
         "addEntry": "Add Component",
         "dialogTitle": "Add Component",
         "childPart": "Part",
-        "saveFailed": "Couldn't save BOM entry.",
+        "saveFailed": "Couldn't save BOM line.",
         "emptyMessage": "No components yet.",
         "emptyHelp": "Add components from the parts catalog to define this assembly's BOM.",
         "rationale": "<strong>The BOM is the recipe.</strong> Without it, MRP can't explode demand into component requirements, cost roll-up has nothing to sum, and shop orders can't issue material. <br><br>Each row is a child part + quantity (with optional scrap factor). For Make + Subassembly / FinishedGood combos this step is required for promotion; for Make + Component it's optional (single-piece fab from raw stock is valid)."
@@ -976,6 +1022,20 @@
         "sales": "Sales UoM",
         "helper": "Stock = inventory unit. Purchase = vendor invoice unit. Sales = customer invoice unit."
       },
+      "purchaseUnits": {
+        "title": "Purchase Units",
+        "helper": "The sizes/forms this part is bought in (e.g. a 4×8 sheet = 32 sqft, a bag of 100 = 100 ea). Content is in the part's stock UoM; vendors price each unit.",
+        "empty": "No purchase units yet — the part is bought per single stock unit.",
+        "label": "Label",
+        "content": "Content (stock UoM)",
+        "uom": "Content UoM",
+        "add": "Add Purchase Unit",
+        "added": "Purchase unit added",
+        "updated": "Purchase unit updated",
+        "removed": "Purchase unit removed",
+        "deleteTitle": "Remove Purchase Unit?",
+        "deleteMessage": "Remove \"{{label}}\"? Existing purchase orders that reference it are unaffected."
+      },
       "mrp": {
         "title": "MRP Planning",
         "isMrpPlanned": "MRP-Planned",
@@ -1170,7 +1230,10 @@
       "effectiveFrom": "Effective From",
       "effectiveTo": "Effective To",
       "addTier": "Add Tier",
-      "empty": "No price tiers — add one to enable per-quantity pricing."
+      "empty": "No price tiers — add one to enable per-quantity pricing.",
+      "option": "Purchase Unit",
+      "perBase": "Per Base Unit",
+      "perBaseUnit": "Per base unit"
     },
     "priceTierHistory": "Price tier history",
     "priceTierHistoryEmpty": "No tier history yet."
@@ -1714,6 +1777,52 @@
       "emptyHelp": "Add a part to start pricing this list.",
       "addEntry": "Add Entry",
       "confirmDelete": "Remove this price entry?"
+    },
+    "workflow": {
+      "page": {
+        "newTitle": "New Customer",
+        "loadingTitle": "Loading…",
+        "loading": "Loading workflow…",
+        "loadFailed": "Could not load the customer workflow.",
+        "definitionMissing": "The customer workflow definition is not configured.",
+        "startFailed": "Could not start the customer workflow.",
+        "completeSuccess": "Customer saved.",
+        "missingValidators": "Cannot complete — {{ missing }}.",
+        "blockedByStep": "Finish '{{ step }}' before moving on — {{ missing }}."
+      },
+      "identity": {
+        "title": "Identity",
+        "hint": "Who is this customer and how do you reach them?",
+        "nameLabel": "Name",
+        "companyNameLabel": "Company",
+        "emailLabel": "Email",
+        "phoneLabel": "Phone",
+        "saveFailed": "Could not save the customer's identity."
+      },
+      "addresses": {
+        "title": "Addresses",
+        "hint": "Billing and shipping addresses.",
+        "followUpMessage": "After saving the customer, add billing and shipping addresses from the customer's Addresses tab on the detail page."
+      },
+      "creditAndTax": {
+        "title": "Credit & Tax",
+        "hint": "Credit limit, default currency, and tax-exemption status.",
+        "creditLimitLabel": "Credit Limit",
+        "defaultCurrencyLabel": "Default Currency",
+        "isTaxExemptLabel": "Tax Exempt",
+        "taxExemptionIdLabel": "Tax Exemption ID",
+        "saveFailed": "Could not save the customer's credit and tax settings."
+      },
+      "review": {
+        "title": "Review",
+        "hint": "Confirm the details below, then Mark Complete to save.",
+        "loading": "Loading customer…"
+      },
+      "express": {
+        "title": "New Customer",
+        "hint": "Capture the essentials in one form. Addresses can be added later from the customer detail page.",
+        "saveFailed": "Could not save the customer."
+      }
     }
   },
   "priceListEntry": {
@@ -2388,6 +2497,7 @@
     "subtitle": "Users, track types, reference data, and system configuration",
     "subtitleEmployee": "Compliance, payroll, and employee documents",
     "tabs": {
+      "overview": "Overview",
       "users": "Users",
       "trackTypes": "Track Types",
       "referenceData": "Reference Data",
@@ -2404,6 +2514,8 @@
       "currencies": "Currencies & FX",
       "auditLog": "Audit Log",
       "biApiKeys": "BI API Keys",
+      "systemApiKeys": "System API Keys",
+      "connections": "Connections",
       "compliance": "Compliance",
       "timeCorrections": "Time Corrections",
       "events": "Events",
@@ -3490,7 +3602,7 @@
     "entityTimeEntry": "Time Entry",
     "entityClockEvent": "Clock Event",
     "entityFileAttachment": "File Attachment",
-    "entityBOMEntry": "BOM Entry",
+    "entityBOMLine": "BOM Line",
     "entityStorageLocation": "Storage Location",
     "entityBinContent": "Bin Content",
     "entityPriceList": "Price List",
@@ -3911,6 +4023,7 @@
     "setupComplete": "Account setup complete. Welcome!",
     "ssoFailed": "SSO authentication failed. Please try again.",
     "noAccountFound": "No account found. Contact your administrator to create an account first.",
+    "ssoDomainNotPermitted": "Your email domain isn't permitted for SSO sign-in. Contact your administrator.",
     "invalidSetupLink": "Invalid setup link. Please contact your administrator.",
     "expiredSetupCode": "Invalid or expired setup code. Please contact your administrator."
   },
@@ -4124,7 +4237,66 @@
       "addPartToCatalog": "Add Part"
     },
     "offTierVariancePct": "Off-Tier Variance %",
-    "offTierVariancePctPlaceholder": "Default: 5%"
+    "offTierVariancePctPlaceholder": "Default: 5%",
+    "workflow": {
+      "page": {
+        "newTitle": "New Vendor",
+        "loadingTitle": "Loading…",
+        "loading": "Loading workflow…",
+        "loadFailed": "Could not load the vendor workflow.",
+        "definitionMissing": "The vendor workflow definition is not configured.",
+        "startFailed": "Could not start the vendor workflow.",
+        "completeSuccess": "Vendor saved.",
+        "missingValidators": "Cannot complete — {{ missing }}.",
+        "blockedByStep": "Finish '{{ step }}' before moving on — {{ missing }}."
+      },
+      "steps": {
+        "identity": "Identity",
+        "address": "Address",
+        "terms": "Terms",
+        "supplyItems": "Supply Items",
+        "review": "Review"
+      },
+      "identity": {
+        "title": "Identity",
+        "hint": "Who is this vendor and how do you reach them?",
+        "companyNameLabel": "Company Name",
+        "contactNameLabel": "Primary Contact",
+        "emailLabel": "Email",
+        "phoneLabel": "Phone",
+        "saveFailed": "Could not save the vendor's identity."
+      },
+      "address": {
+        "title": "Address",
+        "hint": "Remit-to or primary address. Optional — you can add this later.",
+        "label": "Address",
+        "saveFailed": "Could not save the vendor's address."
+      },
+      "terms": {
+        "title": "Terms",
+        "hint": "Payment terms, minimum order, and any internal notes.",
+        "paymentTermsLabel": "Payment Terms",
+        "minOrderAmountLabel": "Minimum Order Amount",
+        "offTierVariancePctLabel": "Off-Tier Variance %",
+        "notesLabel": "Notes",
+        "saveFailed": "Could not save the vendor's terms."
+      },
+      "supplyItems": {
+        "title": "Supply Items",
+        "hint": "Parts and consumables this vendor supplies.",
+        "followUpMessage": "After saving the vendor, add supply items from the vendor's Catalog tab on the detail page."
+      },
+      "review": {
+        "title": "Review",
+        "hint": "Confirm the details below, then Mark Complete to save.",
+        "loading": "Loading vendor…"
+      },
+      "express": {
+        "title": "New Vendor",
+        "hint": "Capture the essentials in one form. You can fill in address, terms, and supply items later from the vendor detail page.",
+        "saveFailed": "Could not save the vendor."
+      }
+    }
   },
   "purchaseOrders": {
     "title": "Purchase Orders",
@@ -4173,6 +4345,8 @@
     "selectVendor": "Select vendor...",
     "showInactiveVendors": "Show inactive vendors",
     "showInactiveParts": "Show obsolete parts",
+    "purchaseUnit": "Purchase Unit",
+    "perBaseUnit": "Per base unit",
     "vendorDeactivatedWarning": "Vendor '{{name}}' is deactivated. Reactivate it or choose another.",
     "jobId": "Job ID",
     "partId": "Part ID",
@@ -5998,6 +6172,8 @@
       "revokeConfirm": "Revoke",
       "revokedSuccess": "Key \"{{ name }}\" revoked",
       "issuedSuccess": "Key \"{{ name }}\" issued",
+      "capabilityDisabled": "BI / integration API keys are disabled for this installation. Enable CAP-IDEN-AUTH-API-KEYS in Capabilities to issue keys.",
+      "capabilityDisabledTitle": "Capability disabled",
       "issuedTitle": "API Key Issued",
       "issuedWarningTitle": "Copy this key now",
       "issuedWarning": "This is the only time the full key will be shown. The server stores only a hash — once you dismiss this dialog the plaintext cannot be recovered.",
@@ -6012,6 +6188,79 @@
       },
       "cols": {
         "name": "Name",
+        "prefix": "Prefix",
+        "status": "Status",
+        "created": "Created",
+        "expires": "Expires",
+        "lastUsed": "Last Used"
+      }
+    },
+    "connections": {
+      "headerCount": "connections",
+      "lede": "Federated read-only view of every credential and connection issued or accepted by this install. Click Manage on any row to go to its native admin surface.",
+      "noRows": "No integrations connected yet",
+      "capabilityDisabledTitle": "Capability disabled",
+      "installLevel": "(install-level)",
+      "never": "Never",
+      "manage": "Manage",
+      "manageAria": "Open native admin page for this integration",
+      "kinds": {
+        "BiApiKey": "BI Key",
+        "SystemApiKey": "System Key",
+        "EdiTradingPartner": "EDI Partner",
+        "QuickBooksOAuth": "QuickBooks",
+        "CommunicationSync": "Comms Sync",
+        "CloudStorageLink": "Cloud Storage"
+      },
+      "cols": {
+        "kind": "Kind",
+        "name": "Name",
+        "owner": "Owner",
+        "status": "Status",
+        "lastUsed": "Last Used",
+        "created": "Created"
+      }
+    },
+    "systemApiKeys": {
+      "headerCount": "keys",
+      "newKey": "New System API Key",
+      "noKeys": "No system API keys issued yet",
+      "issueButton": "Issue Key",
+      "statusActive": "Active",
+      "statusRevoked": "Revoked",
+      "never": "Never",
+      "noExpiry": "No expiry",
+      "unknownUser": "(unknown user)",
+      "userHint": "The key will authenticate AS this user. Audit and activity rows attribute to them; their roles drive every authorization check.",
+      "roleTemplateHint": "Optional scoping. When a template is picked, the key's effective roles are narrowed to the intersection of the bound user's roles and the template — never expanded. Leave as \"None\" to inherit the user's full role set.",
+      "roleTemplateNone": "None — inherit user's roles",
+      "roleTemplateTooltip": "Effective roles = user's roles ∩ template's roles",
+      "expiryHint": "Optional. Leave blank for a non-expiring key.",
+      "revokeAria": "Revoke key",
+      "revokeTitle": "Revoke System API Key?",
+      "revokeMessage": "Revoke key \"{{ name }}\" ({{ prefix }}…) bound to {{ user }}? Any client using this key will start receiving 401 immediately. This cannot be undone.",
+      "revokeConfirm": "Revoke",
+      "revokedSuccess": "Key \"{{ name }}\" revoked",
+      "issuedSuccess": "Key \"{{ name }}\" issued",
+      "capabilityDisabled": "System API keys are disabled for this installation. Enable CAP-IDEN-AUTH-API-KEYS in Capabilities to issue keys.",
+      "capabilityDisabledTitle": "Capability disabled",
+      "issuedTitle": "API Key Issued",
+      "issuedWarningTitle": "Copy this key now",
+      "issuedWarning": "This is the only time the full key will be shown. The server stores only a hash — once you dismiss this dialog the plaintext cannot be recovered.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "dismissReveal": "I have copied the key",
+      "fields": {
+        "name": "Name",
+        "user": "Bound User",
+        "roleTemplate": "Role Template",
+        "expiresAt": "Expires At",
+        "plaintext": "Plaintext Key (shown once)"
+      },
+      "cols": {
+        "name": "Name",
+        "user": "Acts As",
+        "roleTemplate": "Scope",
         "prefix": "Prefix",
         "status": "Status",
         "created": "Created",
@@ -6523,6 +6772,29 @@
         "salesHooks": "Sales Setup"
       }
     },
+    "vendors": {
+      "definitions": {
+        "guidedV1": "New vendor setup"
+      },
+      "steps": {
+        "identity": "Identity",
+        "address": "Address",
+        "terms": "Terms",
+        "supplyItems": "Supply Items",
+        "review": "Review"
+      }
+    },
+    "customers": {
+      "definitions": {
+        "guidedV1": "New customer setup"
+      },
+      "steps": {
+        "identity": "Identity",
+        "addresses": "Addresses",
+        "creditAndTax": "Credit & Tax",
+        "review": "Review"
+      }
+    },
     "shell": {
       "actions": {
         "back": "Back",
@@ -6601,6 +6873,14 @@
       "hasSourcingMissing": "Preferred vendor not yet selected.",
       "hasInventory": "Inventory",
       "hasInventoryMissing": "Stock unit of measure not yet set."
+    },
+    "vendors": {
+      "hasIdentity": "Identity",
+      "hasIdentityMissing": "Company name is required."
+    },
+    "customers": {
+      "hasIdentity": "Identity",
+      "hasIdentityMissing": "Name is required."
     }
   },
   "recentCommunications": {
@@ -6651,7 +6931,7 @@
     "setupMinLabel": "Setup (min)",
     "runMinEachLabel": "Run/ea (min)",
     "runMinLotLabel": "Run/lot (min)",
-    "scrapPctLabel": "Scrap %",
+    "scrapPctLabel": "Scrap Factor %",
     "laborRateLabel": "Labor Rate",
     "burdenRateLabel": "Burden Rate",
     "subcontractLabel": "Subcontract",

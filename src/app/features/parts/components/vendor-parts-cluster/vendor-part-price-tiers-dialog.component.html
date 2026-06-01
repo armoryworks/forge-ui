@@ -12,7 +12,7 @@
       <app-data-table
         tableId="vendor-part-price-tiers"
         [columns]="columns"
-        [data]="tiers()"
+        [data]="tierRows()"
         emptyIcon="payments"
         [emptyMessage]="'vendorPart.priceTiers.empty' | translate">
 
@@ -46,6 +46,16 @@
       <header class="price-tiers-dialog__add-header">
         {{ 'vendorPart.priceTiers.addTier' | translate }}
       </header>
+      <div class="dialog-row">
+        <app-select
+          data-testid="price-tier-option"
+          [label]="'vendorPart.priceTiers.option' | translate"
+          [options]="optionSelectOptions()"
+          formControlName="purchaseUnitId" />
+        @if (perBasePreview(); as preview) {
+          <div class="price-tiers-dialog__perbase" data-testid="price-tier-perbase">{{ preview }}</div>
+        }
+      </div>
       <div class="dialog-row">
         <app-input
           data-testid="price-tier-min-qty"

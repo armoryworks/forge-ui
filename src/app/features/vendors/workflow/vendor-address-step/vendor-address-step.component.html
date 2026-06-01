@@ -1,0 +1,10 @@
+<section class="vendor-workflow-step" [appLoadingBlock]="saving()" data-testid="vendor-address-step">
+  <header class="vendor-workflow-step__header">
+    <h2 class="vendor-workflow-step__title">{{ 'vendors.workflow.address.title' | translate }}</h2>
+    <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.address.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="vendor-workflow-step__form">
+    <app-address-form formControlName="address" />
+  </form>
+</section>

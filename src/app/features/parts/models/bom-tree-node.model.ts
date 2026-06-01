@@ -1,7 +1,7 @@
-import { BOMEntry } from './bom-entry.model';
+import { BOMLine } from './bom-line.model';
 
 export interface BomTreeNode {
-  entry: BOMEntry;
+  entry: BOMLine;
   level: number;
   isExpanded: boolean;
   hasChildren: boolean;

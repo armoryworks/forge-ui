@@ -19,6 +19,8 @@ export interface UpsertVendorPartPriceTierRequest {
   effectiveFrom?: string | null;
   effectiveTo?: string | null;
   notes?: string | null;
+  /** UoM purchase-units effort — which PartPurchaseUnit this tier prices (null = per base unit). */
+  purchaseUnitId?: number | null;
 }
 
 /**

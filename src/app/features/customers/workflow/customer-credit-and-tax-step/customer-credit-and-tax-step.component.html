@@ -1,0 +1,30 @@
+<section class="customer-workflow-step" [appLoadingBlock]="saving()" data-testid="customer-credit-and-tax-step">
+  <header class="customer-workflow-step__header">
+    <h2 class="customer-workflow-step__title">{{ 'customers.workflow.creditAndTax.title' | translate }}</h2>
+    <p class="customer-workflow-step__hint">{{ 'customers.workflow.creditAndTax.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="customer-workflow-step__form">
+    <app-currency-input
+      [label]="'customers.workflow.creditAndTax.creditLimitLabel' | translate"
+      formControlName="creditLimit"
+      data-testid="customer-credit-limit" />
+    <app-select
+      [label]="'customers.workflow.creditAndTax.defaultCurrencyLabel' | translate"
+      formControlName="defaultCurrency"
+      [options]="currencyOptions"
+      data-testid="customer-default-currency" />
+    <app-toggle
+      [label]="'customers.workflow.creditAndTax.isTaxExemptLabel' | translate"
+      formControlName="isTaxExempt"
+      data-testid="customer-is-tax-exempt" />
+    @if (form.controls.isTaxExempt.value) {
+      <app-input
+        [label]="'customers.workflow.creditAndTax.taxExemptionIdLabel' | translate"
+        formControlName="taxExemptionId"
+        [required]="true"
+        [maxlength]="100"
+        data-testid="customer-tax-exemption-id" />
+    }
+  </form>
+</section>

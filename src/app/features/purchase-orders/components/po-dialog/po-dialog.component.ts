@@ -15,6 +15,8 @@ import { CheckTierVarianceResult } from '../../models/tier-variance-check.model'
 import { INCOTERM_OPTIONS } from '../../models/incoterm.const';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
 import { VendorPartsService } from '../../../parts/services/vendor-parts.service';
+import { PurchaseUnitsService } from '../../../parts/services/purchase-units.service';
+import { PartPurchaseUnit } from '../../../parts/models/part-purchase-unit.model';
 import { OffTierPromptDialogComponent, OffTierPromptResult } from '../off-tier-prompt-dialog/off-tier-prompt-dialog.component';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -37,6 +39,9 @@ interface LineEntry {
   description: string;
   orderedQuantity: number;
   unitPrice: number;
+  // UoM purchase-units effort — the ordered size/form (null = per base unit).
+  purchaseUnitId: number | null;
+  purchaseUnitLabel: string | null;
 }
 
 @Component({
@@ -59,6 +64,7 @@ export class PoDialogComponent {
   private readonly vendorService = inject(VendorService);
   private readonly partsService = inject(PartsService);
   private readonly vendorPartsService = inject(VendorPartsService);
+  private readonly purchaseUnitsService = inject(PurchaseUnitsService);
   private readonly referenceDataService = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -103,9 +109,12 @@ export class PoDialogComponent {
       .filter(p => includeInactive || p.status !== 'Obsolete')
       .map(p => ({
         value: p.id,
+        // Name is the canonical, required identifier (description is optional/
+        // nullable). Labelling with description rendered "<part> — null" for
+        // parts without notes — use name to match the parts grid. See #6.
         label: p.status === 'Obsolete'
-          ? `${p.partNumber} — ${p.description} (deactivated)`
-          : `${p.partNumber} — ${p.description}`,
+          ? `${p.partNumber} — ${p.name} (deactivated)`
+          : `${p.partNumber} — ${p.name}`,
       }));
   });
 
@@ -181,12 +190,25 @@ export class PoDialogComponent {
 
   protected readonly lineForm = new FormGroup({
     partId: new FormControl<number | null>(null, [Validators.required]),
+    purchaseUnitId: new FormControl<number | null>(null),
     // Phase 3 / WU-10 / F8-partial — fractional qty allowed (decimal(18,4) on
     // server). Min is 0.0001 — no zero / negative. Default still 1 for the
     // common whole-unit case (caller can override).
     orderedQuantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
     unitPrice: new FormControl<number>(0, [Validators.required, Validators.min(0)]),
   });
+
+  // UoM purchase-units effort — the selected part's purchase units, loaded when a part is
+  // picked. When the part has options the line-add row shows a size/form selector; ordering then
+  // counts in options and the price is per option (receiving converts to base UoM server-side).
+  protected readonly lineOptions = signal<PartPurchaseUnit[]>([]);
+  protected readonly lineOptionSelectOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('purchaseOrders.perBaseUnit') },
+    ...this.lineOptions().map(o => ({
+      value: o.id,
+      label: o.contentUomLabel ? `${o.label} (${o.contentQuantity} ${o.contentUomLabel})` : o.label,
+    })),
+  ]);
 
   protected readonly lineTotal = computed(() =>
     this.lines().reduce((sum, l) => sum + l.orderedQuantity * l.unitPrice, 0)
@@ -234,10 +256,16 @@ export class PoDialogComponent {
   }
 
   private onPartSelected(partId: number | null): void {
+    // Reset the option selector for the newly chosen part, then load its options.
+    this.lineForm.controls.purchaseUnitId.setValue(null, { emitEvent: false });
+    this.lineOptions.set([]);
     if (partId == null) {
       this.priceIsDefault.set(false);
       return;
     }
+    this.purchaseUnitsService.list(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (opts) => this.lineOptions.set(opts),
+    });
     const part = this.parts().find(p => p.id === partId);
     // Use the resolver-supplied effective price. When source is "Default" the
     // resolver returned 0 (no pricing configured) — don't pre-fill in that case.
@@ -254,6 +282,7 @@ export class PoDialogComponent {
     const f = this.lineForm.getRawValue();
     const part = this.parts().find(p => p.id === f.partId);
     if (!part) return;
+    const option = f.purchaseUnitId != null ? this.lineOptions().find(o => o.id === f.purchaseUnitId) : undefined;
     this.lines.update(prev => [...prev, {
       partId: part.id,
       partNumber: part.partNumber,
@@ -262,8 +291,11 @@ export class PoDialogComponent {
       description: part.name,
       orderedQuantity: f.orderedQuantity!,
       unitPrice: f.unitPrice!,
+      purchaseUnitId: f.purchaseUnitId ?? null,
+      purchaseUnitLabel: option ? option.label : null,
     }]);
-    this.lineForm.reset({ partId: null, orderedQuantity: 1, unitPrice: 0 });
+    this.lineForm.reset({ partId: null, purchaseUnitId: null, orderedQuantity: 1, unitPrice: 0 });
+    this.lineOptions.set([]);
     this.priceIsDefault.set(false);
   }
 
@@ -370,6 +402,7 @@ export class PoDialogComponent {
       partId: l.partId,
       quantity: l.orderedQuantity,
       unitPrice: l.unitPrice,
+      purchaseUnitId: l.purchaseUnitId ?? null,
     }));
 
     this.poService.createPurchaseOrder({

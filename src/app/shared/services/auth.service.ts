@@ -205,21 +205,23 @@ export class AuthService {
     window.location.href = `${environment.apiUrl}/auth/sso/${provider}/login`;
   }
 
-  handleSsoToken(token: string): void {
-    this._token.set(token);
-    localStorage.setItem('forge-token', token);
-    // Fetch user profile from /me endpoint to populate user signal
-    this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
-      next: (user) => {
-        this._user.set(user);
-        localStorage.setItem('forge-user', JSON.stringify(user));
-      },
-      error: () => {
-        // SSO token was valid but /me failed — clear stale state
-        this._token.set(null);
-        localStorage.removeItem('forge-token');
-      },
-    });
+  /**
+   * Exchange the opaque single-use code from the SSO callback redirect for the
+   * real session. The JWT is deliberately NOT carried in the callback URL (it
+   * would leak into proxy logs / Referer / history) — the server hands back a
+   * short-lived code, and we trade it here via POST for the LoginResponse.
+   */
+  exchangeSsoCode(code: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/sso/exchange-code`, { code })
+      .pipe(
+        tap((response) => {
+          this._token.set(response.token);
+          this._user.set(response.user);
+          localStorage.setItem('forge-token', response.token);
+          localStorage.setItem('forge-user', JSON.stringify(response.user));
+        }),
+      );
   }
 
   getLinkedSsoProviders(): Observable<LinkedSsoProvider[]> {

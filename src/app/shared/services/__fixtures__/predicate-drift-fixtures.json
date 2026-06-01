@@ -52,14 +52,14 @@
     },
     {
       "name": "relationExists_default_min_count_true",
-      "predicate": { "type": "relationExists", "relation": "bomEntries" },
-      "entity": { "bomEntries": [{ "id": 1 }] },
+      "predicate": { "type": "relationExists", "relation": "bomLines" },
+      "entity": { "bomLines": [{ "id": 1 }] },
       "expected": true
     },
     {
       "name": "relationExists_empty_false",
-      "predicate": { "type": "relationExists", "relation": "bomEntries" },
-      "entity": { "bomEntries": [] },
+      "predicate": { "type": "relationExists", "relation": "bomLines" },
+      "entity": { "bomLines": [] },
       "expected": false
     },
     {
@@ -117,7 +117,7 @@
               { "type": "fieldPresent", "field": "material" }
             ]
           },
-          { "type": "relationExists", "relation": "bomEntries", "minCount": 1 },
+          { "type": "relationExists", "relation": "bomLines", "minCount": 1 },
           { "type": "relationExists", "relation": "operations", "minCount": 1 },
           {
             "type": "any",
@@ -132,7 +132,7 @@
         "name": "ASM-100",
         "type": "Assembly",
         "material": "Aluminum",
-        "bomEntries": [{ "id": 1 }],
+        "bomLines": [{ "id": 1 }],
         "operations": [{ "id": 9 }],
         "manualCostOverride": 99.99
       },

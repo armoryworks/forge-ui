@@ -25,14 +25,23 @@ export class SsoCallbackComponent implements OnInit {
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
-    const token = params['sso_token'];
+    const code = params['code'];
     const error = params['error'];
 
-    if (token) {
-      this.authService.handleSsoToken(token);
-      this.router.navigate([this.layout.getDefaultRoute()], { replaceUrl: true });
+    if (code) {
+      // Trade the single-use code for the real session (JWT never rides the URL).
+      this.authService.exchangeSsoCode(code).subscribe({
+        next: () => this.router.navigate([this.layout.getDefaultRoute()], { replaceUrl: true }),
+        error: () => {
+          this.snackbar.error(this.translate.instant('auth.ssoFailed'));
+          this.router.navigate(['/login'], { replaceUrl: true });
+        },
+      });
     } else if (error === 'sso_failed') {
       this.snackbar.error(this.translate.instant('auth.ssoFailed'));
+      this.router.navigate(['/login'], { replaceUrl: true });
+    } else if (error === 'domain_not_permitted') {
+      this.snackbar.error(this.translate.instant('auth.ssoDomainNotPermitted'));
       this.router.navigate(['/login'], { replaceUrl: true });
     } else if (error === 'no_account') {
       this.snackbar.error(this.translate.instant('auth.noAccountFound'));

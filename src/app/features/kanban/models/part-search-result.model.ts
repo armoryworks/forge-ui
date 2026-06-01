@@ -6,6 +6,6 @@ export interface PartSearchResult {
   status: string;
   procurementSource: string;
   inventoryClass: string;
-  bomEntryCount: number;
+  bomLineCount: number;
   createdAt: Date;
 }

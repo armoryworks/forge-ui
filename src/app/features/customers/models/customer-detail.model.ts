@@ -22,4 +22,15 @@ export interface CustomerDetail {
   isItarControlled?: boolean;
   isReferenceOk?: boolean;
   referenceNotes?: string | null;
+  // Phase B of the customer workflow migration (2026-05-31) — credit + tax
+  // fields the new guided wizard's Credit & Tax step writes and re-hydrates
+  // from. The server entity carries them; the response mapper may or may not
+  // be sending them yet (CustomerMapper ignores most fields today). When the
+  // mapper catches up, these properties round-trip correctly with no UI
+  // change. Until then, the workflow step re-mounts to blank fields on
+  // re-entry — same as a fresh entry, no regression.
+  creditLimit?: number | null;
+  defaultCurrency?: string | null;
+  isTaxExempt?: boolean;
+  taxExemptionId?: string | null;
 }

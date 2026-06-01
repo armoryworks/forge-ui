@@ -137,6 +137,20 @@
 // the top-level body wrapper modifier.
 .detail-body--padded {
   padding: $sp-lg;
+
+  // On the Sourcing tab the vendor-sources panel ends in a sticky Save/Cancel
+  // bar that bleeds to the body edges via a negative bottom margin (it was
+  // designed to pin to the dialog's bottom when it was the last element). The
+  // purchase-units cluster now follows it, so without clearance the bar's
+  // negative margin + shadow slid over the cluster's heading in edit mode.
+  // Give the cluster its own block + top clearance to clear the bar and to
+  // visually separate the two sections.
+  // $sp-2xl (32px) clears the bar's negative bottom margin ($sp-lg, 16px)
+  // plus its drop shadow (~6px) with ~10px of breathing room left over.
+  app-part-purchase-units-cluster {
+    display: block;
+    margin-top: $sp-2xl;
+  }
 }
 
 // Placeholder used by the tab-shell for not-yet-extracted clusters

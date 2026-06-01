@@ -1,0 +1,30 @@
+<section class="vendor-workflow-step" [appLoadingBlock]="saving()" data-testid="vendor-terms-step">
+  <header class="vendor-workflow-step__header">
+    <h2 class="vendor-workflow-step__title">{{ 'vendors.workflow.terms.title' | translate }}</h2>
+    <p class="vendor-workflow-step__hint">{{ 'vendors.workflow.terms.hint' | translate }}</p>
+  </header>
+
+  <form [formGroup]="form" class="vendor-workflow-step__form">
+    <app-select
+      [label]="'vendors.workflow.terms.paymentTermsLabel' | translate"
+      formControlName="paymentTerms"
+      [options]="paymentTermsOptions"
+      data-testid="vendor-terms-payment-terms" />
+    <app-currency-input
+      [label]="'vendors.workflow.terms.minOrderAmountLabel' | translate"
+      formControlName="minOrderAmount"
+      data-testid="vendor-terms-min-order-amount" />
+    <app-input
+      [label]="'vendors.workflow.terms.offTierVariancePctLabel' | translate"
+      type="number"
+      formControlName="offTierVariancePct"
+      suffix="%"
+      data-testid="vendor-terms-off-tier-pct" />
+    <app-textarea
+      [label]="'vendors.workflow.terms.notesLabel' | translate"
+      formControlName="notes"
+      [rows]="4"
+      [maxlength]="4000"
+      data-testid="vendor-terms-notes" />
+  </form>
+</section>

@@ -90,7 +90,7 @@ export class AiAssistantDialogComponent implements OnInit {
     { value: 'TimeEntry', label: this.translate.instant('aiAssistants.entityTimeEntry') },
     { value: 'ClockEvent', label: this.translate.instant('aiAssistants.entityClockEvent') },
     { value: 'FileAttachment', label: this.translate.instant('aiAssistants.entityFileAttachment') },
-    { value: 'BOMEntry', label: this.translate.instant('aiAssistants.entityBOMEntry') },
+    { value: 'BOMLine', label: this.translate.instant('aiAssistants.entityBOMLine') },
     { value: 'StorageLocation', label: this.translate.instant('aiAssistants.entityStorageLocation') },
     { value: 'BinContent', label: this.translate.instant('aiAssistants.entityBinContent') },
     { value: 'PriceList', label: this.translate.instant('aiAssistants.entityPriceList') },

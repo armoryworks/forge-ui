@@ -1,0 +1,15 @@
+@use 'styles/variables' as *;
+
+.vendor-workflow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $sp-lg;
+  padding: $sp-lg;
+  position: relative;
+
+  &__header { display: flex; flex-direction: column; gap: $sp-xs; width: 100%; max-width: 720px; }
+  &__title  { margin: 0; font-size: $font-size-lg; color: var(--text); }
+  &__hint   { margin: 0; font-size: $font-size-sm; color: var(--text-secondary); }
+  &__form   { display: flex; flex-direction: column; gap: $sp-md; width: 100%; max-width: 720px; }
+}

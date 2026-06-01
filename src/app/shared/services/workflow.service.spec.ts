@@ -280,13 +280,13 @@ describe('WorkflowService — Phase 4', () => {
       }),
       buildValidator({
         validatorId: 'hasBom',
-        predicate: JSON.stringify({ type: 'relationExists', relation: 'bomEntries', minCount: 1 }),
+        predicate: JSON.stringify({ type: 'relationExists', relation: 'bomLines', minCount: 1 }),
       }),
     ];
     service.setContext({
       run: buildRun(),
       definition: def,
-      entity: { name: 'Widget', bomEntries: [] },
+      entity: { name: 'Widget', bomLines: [] },
       validators,
     });
 
