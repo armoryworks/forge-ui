@@ -109,9 +109,12 @@ export class PoDialogComponent {
       .filter(p => includeInactive || p.status !== 'Obsolete')
       .map(p => ({
         value: p.id,
+        // Name is the canonical, required identifier (description is optional/
+        // nullable). Labelling with description rendered "<part> — null" for
+        // parts without notes — use name to match the parts grid. See #6.
         label: p.status === 'Obsolete'
-          ? `${p.partNumber} — ${p.description} (deactivated)`
-          : `${p.partNumber} — ${p.description}`,
+          ? `${p.partNumber} — ${p.name} (deactivated)`
+          : `${p.partNumber} — ${p.name}`,
       }));
   });
 
