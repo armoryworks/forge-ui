@@ -61,7 +61,7 @@ export class NotificationPanelComponent {
       case 'job': return { path: ['/board'], query: { job: entityId } };
       case 'quote': return { path: ['/quotes'], query: { id: entityId } };
       case 'salesorder': return { path: ['/sales-orders'], query: { id: entityId } };
-      case 'purchaseorder': return { path: ['/purchase-orders'], query: { id: entityId } };
+      case 'purchaseorder': return { path: ['/purchase-orders'], query: { detail: `purchase-order:${entityId}` } };
       case 'invoice': return { path: ['/invoices'], query: { id: entityId } };
       case 'expense': return { path: ['/expenses'], query: { id: entityId } };
       case 'lead': return { path: ['/leads'], query: { id: entityId } };

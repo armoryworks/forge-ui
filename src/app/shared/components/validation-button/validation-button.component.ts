@@ -52,11 +52,18 @@ export class ValidationButtonComponent {
    * otherwise wrap each plain message in a synthetic ViolationItem so
    * the template renders the same shape (controlName empty for the
    * legacy path, which simply means click-to-jump is a no-op).
+   *
+   * Filter out empty/null messages so the popover doesn't open with blank content.
    */
   protected readonly violationList = computed<ViolationItem[]>(() => {
     const items = this.violationItems();
-    if (items) return items();
-    return this.violations()().map(message => ({ controlName: '', message }));
+    if (items) {
+      return items().map(i => ({ controlName: i.controlName, message: (i.message ?? '').toString().trim() }))
+        .filter(i => !!i.message);
+    }
+    return this.violations()()
+      .map(message => ({ controlName: '', message: (message ?? '').toString().trim() }))
+      .filter(i => !!i.message);
   });
   protected readonly count = computed(() => this.violationList().length);
   protected readonly showTrigger = computed(() => this.count() > 0 && !this.loading());

@@ -18,8 +18,9 @@ import { VendorPartsService } from '../../../parts/services/vendor-parts.service
 import { PurchaseUnitsService } from '../../../parts/services/purchase-units.service';
 import { PartPurchaseUnit } from '../../../parts/models/part-purchase-unit.model';
 import { OffTierPromptDialogComponent, OffTierPromptResult } from '../off-tier-prompt-dialog/off-tier-prompt-dialog.component';
+import { AuthService } from '../../../../shared/services/auth.service';
 import { forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { catchError, map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -42,6 +43,8 @@ interface LineEntry {
   // UoM purchase-units effort — the ordered size/form (null = per base unit).
   purchaseUnitId: number | null;
   purchaseUnitLabel: string | null;
+  /** Reason supplied when the unit price was manually overridden. */
+  overrideReason?: string | null;
 }
 
 @Component({
@@ -67,6 +70,7 @@ export class PoDialogComponent {
   private readonly purchaseUnitsService = inject(PurchaseUnitsService);
   private readonly referenceDataService = inject(ReferenceDataService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly auth = inject(AuthService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -79,6 +83,8 @@ export class PoDialogComponent {
   protected readonly lines = signal<LineEntry[]>([]);
   /** True while the unit price reflects the part's list price and hasn't been manually edited. */
   protected readonly priceIsDefault = signal(false);
+  /** Temporary storage for an override reason supplied while editing the add-line row. */
+  protected readonly pendingLineOverrideReason = signal<string | null>(null);
 
   /**
    * Phase 3 H2 / WU-12 — when false (default), the vendor & part pickers
@@ -107,15 +113,15 @@ export class PoDialogComponent {
     const includeInactive = this.showInactiveParts();
     return this.parts()
       .filter(p => includeInactive || p.status !== 'Obsolete')
-      .map(p => ({
-        value: p.id,
-        // Name is the canonical, required identifier (description is optional/
-        // nullable). Labelling with description rendered "<part> — null" for
-        // parts without notes — use name to match the parts grid. See #6.
-        label: p.status === 'Obsolete'
-          ? `${p.partNumber} — ${p.name} (deactivated)`
-          : `${p.partNumber} — ${p.name}`,
-      }));
+      .map(p => {
+        const displayName = p.name ?? p.description ?? '(no name)';
+        return {
+          value: p.id,
+          label: p.status === 'Obsolete'
+            ? `${p.partNumber} — ${displayName} (deactivated)`
+            : `${p.partNumber} — ${displayName}`,
+        };
+      });
   });
 
   /**
@@ -246,8 +252,90 @@ export class PoDialogComponent {
     });
 
     // When price is manually changed, clear the "list price" indicator
-    this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+    let lastComputedPrice: number | null = null;
+    this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val) => {
+      // If the change came from our computed update (we set with emitEvent:false),
+      // just flip the flag to indicate default price.
+      if (this.priceIsDefault()) {
+        // If user edits while price was default, enforce permission + reason
+        const userCanOverride = this.auth.hasRole('Admin') || this.auth.hasRole('Manager');
+        if (!userCanOverride && lastComputedPrice !== null && val !== lastComputedPrice) {
+          // Revert and notify
+          this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
+          this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresPermission'));
+          return;
+        }
+        if (userCanOverride && lastComputedPrice !== null && val !== lastComputedPrice) {
+          const reason = window.prompt(this.translate.instant('purchaseOrders.enterOverrideReason') || 'Please provide a reason for the manual price override');
+          if (!reason || reason.trim().length === 0) {
+            this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
+            this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresReason'));
+            return;
+          }
+          // Record the reason for the pending add-line (will be attached when the line is added).
+          this.pendingLineOverrideReason.set(reason.trim());
+          this.snackbar.info(this.translate.instant('purchaseOrders.overrideRecorded'));
+        }
+      }
       this.priceIsDefault.set(false);
+    });
+
+    // Recompute price when quantity or purchase unit changes (if price still default).
+    // Debounce to avoid cascading requests during form reset or rapid user input.
+    this.lineForm.controls.orderedQuantity.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.maybeRecomputePrice((price) => lastComputedPrice = price));
+    this.lineForm.controls.purchaseUnitId.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.maybeRecomputePrice((price) => lastComputedPrice = price));
+    this.form.controls.vendorId.valueChanges
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.maybeRecomputePrice((price) => lastComputedPrice = price));
+  }
+
+  private maybeRecomputePrice(snapshotLastComputed?: (price: number | null) => void): void {
+    if (!this.priceIsDefault()) return;
+    const partId = this.lineForm.controls.partId.value;
+    const vendorId = this.form.controls.vendorId.value;
+    const qty = this.lineForm.controls.orderedQuantity.value ?? 1;
+    const purchaseUnitId = this.lineForm.controls.purchaseUnitId.value ?? null;
+    if (!partId) return;
+
+    // Try vendor-specific tiers first
+    this.vendorPartsService.listForPart(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (list) => {
+        let chosenPrice: number | null = null;
+        // Prefer vendor-specific row for selected vendor
+        const vendorRow = vendorId ? list.find(vp => vp.vendorId === vendorId) : undefined;
+        const candidateRows = vendorRow ? [vendorRow, ...list.filter(vp => vp.vendorId !== vendorId)] : list;
+        for (const vp of candidateRows) {
+          // Filter tiers by purchaseUnitId match (exact) or null fallback
+          const tiers = vp.priceTiers
+            .filter(t => t.purchaseUnitId === purchaseUnitId || t.purchaseUnitId === null)
+            .filter(t => t.minQuantity <= (qty || 0))
+            .sort((a, b) => b.minQuantity - a.minQuantity);
+          if (tiers.length > 0) {
+            chosenPrice = tiers[0].unitPrice;
+            break;
+          }
+        }
+
+        if (chosenPrice == null) {
+          // Fallback to part effective price
+          const part = this.parts().find(p => p.id === partId);
+          if (part && part.effectivePrice > 0) chosenPrice = part.effectivePrice;
+        }
+
+        if (chosenPrice != null) {
+          this.lineForm.controls.unitPrice.setValue(chosenPrice, { emitEvent: false });
+          this.priceIsDefault.set(true);
+          if (snapshotLastComputed) snapshotLastComputed(chosenPrice);
+        }
+      },
+      error: (err) => {
+        console.error(`Failed to recompute price for part ${partId}:`, err);
+        // Don't disturb user input on vendorParts failure
+      },
     });
   }
 
@@ -265,6 +353,10 @@ export class PoDialogComponent {
     }
     this.purchaseUnitsService.list(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (opts) => this.lineOptions.set(opts),
+      error: (err) => {
+        console.error(`Failed to load purchase units for part ${partId}:`, err);
+        this.lineOptions.set([]);
+      },
     });
     const part = this.parts().find(p => p.id === partId);
     // Use the resolver-supplied effective price. When source is "Default" the
@@ -293,10 +385,12 @@ export class PoDialogComponent {
       unitPrice: f.unitPrice!,
       purchaseUnitId: f.purchaseUnitId ?? null,
       purchaseUnitLabel: option ? option.label : null,
+      overrideReason: this.pendingLineOverrideReason(),
     }]);
     this.lineForm.reset({ partId: null, purchaseUnitId: null, orderedQuantity: 1, unitPrice: 0 });
     this.lineOptions.set([]);
     this.priceIsDefault.set(false);
+    this.pendingLineOverrideReason.set(null);
   }
 
   protected removeLine(index: number): void {
@@ -403,6 +497,7 @@ export class PoDialogComponent {
       quantity: l.orderedQuantity,
       unitPrice: l.unitPrice,
       purchaseUnitId: l.purchaseUnitId ?? null,
+      manualOverrideReason: l.overrideReason ?? undefined,
     }));
 
     this.poService.createPurchaseOrder({
