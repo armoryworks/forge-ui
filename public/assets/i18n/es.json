@@ -4308,6 +4308,7 @@
     "partNumber": "Pieza #",
     "qty": "Cant",
     "unitPrice": "Precio Unit.",
+    "priceOverridden": "Precio anulado manualmente",
     "expectedDelivery": "Entrega Esperada",
     "submitted": "Enviada",
     "acknowledged": "Confirmada",
