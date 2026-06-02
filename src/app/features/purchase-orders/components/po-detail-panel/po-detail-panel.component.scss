@@ -112,3 +112,13 @@
   .action-btn--danger,
   .action-btn--destructive { margin-right: auto; }
 }
+
+// Inline indicator that a line's unit price was manually overridden; the
+// reason is shown on hover via matTooltip.
+.price-override-icon {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  vertical-align: middle;
+  margin-left: $sp-xs;
+  cursor: help;
+}

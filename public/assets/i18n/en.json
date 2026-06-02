@@ -4315,6 +4315,7 @@
     "partNumber": "Part #",
     "qty": "Qty",
     "unitPrice": "Unit Price",
+    "priceOverridden": "Price manually overridden",
     "expectedDelivery": "Expected Delivery",
     "submitted": "Submitted",
     "acknowledged": "Acknowledged",

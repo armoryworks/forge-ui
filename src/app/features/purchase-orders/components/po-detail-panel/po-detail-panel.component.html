@@ -224,7 +224,14 @@
                       }
                     </td>
                   }
-                  <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
+                  <td class="lines-table__right">
+                    {{ line.unitPrice | number:'1.2-4' }}
+                    @if (line.manualOverrideReason) {
+                      <span class="material-icons-outlined price-override-icon"
+                            [matTooltip]="line.manualOverrideReason"
+                            [attr.aria-label]="'purchaseOrders.priceOverridden' | translate">edit_note</span>
+                    }
+                  </td>
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
                 </tr>
               }

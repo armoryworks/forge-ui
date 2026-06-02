@@ -14,4 +14,6 @@ export interface PurchaseOrderLine {
   /** UoM purchase-units effort — the ordered size/form (null = per base unit). */
   purchaseUnitId: number | null;
   purchaseUnitLabel: string | null;
+  /** Reason captured when the unit price was manually overridden (null otherwise). */
+  manualOverrideReason: string | null;
 }
