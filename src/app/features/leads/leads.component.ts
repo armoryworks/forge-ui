@@ -36,6 +36,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
+import { AccountDialogComponent, AccountDialogData } from './components/account-dialog/account-dialog.component';
+import { CreateAccountRequest } from './models/account.model';
 
 type ViewMode = 'table' | 'pipeline';
 
@@ -359,6 +361,34 @@ export class LeadsComponent {
       });
     }
     this.showBulkAssignDialog.set(true);
+  }
+
+  protected openNewAccountForBulk(): void {
+    this.openNewAccount('bulk');
+  }
+
+  protected openNewAccountForLead(): void {
+    this.openNewAccount('lead');
+  }
+
+  private openNewAccount(target: 'lead' | 'bulk'): void {
+    this.dialog.open<AccountDialogComponent, AccountDialogData, CreateAccountRequest | undefined>(
+      AccountDialogComponent,
+      { width: '640px', data: {} },
+    ).afterClosed().subscribe(payload => {
+      if (!payload) return;
+      this.accountsService.create(payload).subscribe({
+        next: (account) => {
+          this.snackbar.success(this.translate.instant('leads.accounts.created'));
+          this.accounts.update(rows => [...rows, account]);
+          if (target === 'lead') {
+            this.leadForm.get('accountId')?.setValue(account.id);
+          } else {
+            this.bulkAccountControl.setValue(account.id);
+          }
+        },
+      });
+    });
   }
 
   protected closeBulkAssignDialog(): void {
