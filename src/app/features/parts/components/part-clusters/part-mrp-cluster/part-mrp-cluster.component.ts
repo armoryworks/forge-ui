@@ -35,6 +35,7 @@ export class PartMrpClusterComponent {
   readonly saving = input(false);
 
   readonly save = output<Partial<PartDetail>>();
+  readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   protected readonly lotSizingOptions: SelectOption[] = [
@@ -91,10 +92,10 @@ export class PartMrpClusterComponent {
     });
   }
 
-  protected onSave(): void {
+  protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.save.emit({
+    (close ? this.saveAndClose : this.save).emit({
       isMrpPlanned: v.isMrpPlanned,
       lotSizingRule: v.lotSizingRule ?? null,
       fixedOrderQuantity: v.fixedOrderQuantity ?? null,

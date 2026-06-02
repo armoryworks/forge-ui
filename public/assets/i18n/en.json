@@ -147,6 +147,7 @@
   },
   "common": {
     "save": "Save",
+    "saveAndClose": "Save & Close",
     "saved": "Saved",
     "lastUpdated": "Last Updated",
     "saveChanges": "Save Changes",

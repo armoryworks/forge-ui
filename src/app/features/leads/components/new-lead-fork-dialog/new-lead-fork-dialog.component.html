@@ -49,9 +49,16 @@
              primary axis is engagement shape, but a rep who already knows
              which B2B parent the lead belongs to shouldn't have to wait
              for a follow-up edit to assign it. -->
-        <app-select data-testid="lead-account-picker"
-                    [label]="'leads.accounts.fieldName' | translate"
-                    formControlName="accountId" [options]="accountOptions()" />
+        <div class="dialog-row dialog-row--spaced">
+          <app-select data-testid="lead-account-picker"
+                      [label]="'leads.accounts.fieldName' | translate"
+                      formControlName="accountId" [options]="accountOptions()" />
+          <button class="action-btn action-btn--secondary" type="button"
+                  (click)="openNewAccount()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'leads.accounts.newAccount' | translate }}
+          </button>
+        </div>
 
         <!-- Shape-specific extras: revealed conditionally. The fields land
              in `extras` group inside the form so the JSON serialisation

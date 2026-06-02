@@ -71,11 +71,13 @@ export class PartPricingClusterComponent {
 
   /**
    * Pricing cluster manages its own state (history is independent from
-   * the PartDetail aggregate). Parent panel still wires `save` / `cancelled`
-   * to maintain a uniform contract with the other clusters; both events
-   * are emitted with empty payloads.
+   * the PartDetail aggregate). Parent panel still wires `save` /
+   * `saveAndClose` / `cancelled` to maintain a uniform contract with the
+   * other clusters; pricing never emits them (prices persist per-row via
+   * addPrice), so there is no part-level "Save & Close" button here.
    */
   readonly save = output<Partial<PartDetail>>();
+  readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   protected readonly history = signal<PartPrice[]>([]);

@@ -147,6 +147,7 @@
   },
   "common": {
     "save": "Guardar",
+    "saveAndClose": "Guardar y Cerrar",
     "saved": "Guardado",
     "lastUpdated": "Última Actualización",
     "saveChanges": "Guardar Cambios",

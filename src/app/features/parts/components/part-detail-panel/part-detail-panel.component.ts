@@ -360,7 +360,7 @@ export class PartDetailPanelComponent {
    * cluster emits a `Partial<PartDetail>` patch; we forward it to the
    * server and refresh the bound part signal.
    */
-  protected saveClusterPatch(patch: Partial<PartDetail>): void {
+  protected saveClusterPatch(patch: Partial<PartDetail>, closeAfterSave = false): void {
     const p = this.part();
     if (!p) return;
     // Map PartDetail subset → UpdatePartRequest. Only the fields the
@@ -416,7 +416,9 @@ export class PartDetailPanelComponent {
       next: (detail) => {
         this.part.set(detail);
         this.saving.set(false);
-        this.editing.set(false);
+        // Plain "Save" keeps the panel in edit mode (preferred when editing
+        // across multiple tabs); only "Save & Close" exits edit mode.
+        if (closeAfterSave) this.editing.set(false);
         this.snackbar.success('Part updated');
       },
       error: () => this.saving.set(false),

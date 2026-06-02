@@ -39,6 +39,7 @@ export class PartMaterialClusterComponent implements OnInit {
   readonly saving = input(false);
 
   readonly save = output<Partial<PartDetail>>();
+  readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   protected readonly materialSpecOptions = signal<SelectOption[]>([{ value: null, label: '-- None --' }]);
@@ -171,7 +172,7 @@ export class PartMaterialClusterComponent implements OnInit {
     return { value: ml / this.volumeToMl[u], unit: u };
   }
 
-  protected onSave(): void {
+  protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
 
@@ -186,7 +187,7 @@ export class PartMaterialClusterComponent implements OnInit {
       ? null
       : v.volume * (this.volumeToMl[v.volumeDisplayUnit] ?? 1);
 
-    this.save.emit({
+    (close ? this.saveAndClose : this.save).emit({
       materialSpecId: v.materialSpecId ?? null,
       weightEach,
       weightDisplayUnit: v.weightDisplayUnit,
