@@ -224,10 +224,17 @@
       @if (editingLead()) {
         <!-- Phase 1r / Batch 12 — account picker only shows on edit since
              new-lead intake doesn't have an account context yet. -->
-        <app-select data-testid="lead-account"
-          [label]="'leads.accounts.fieldName' | translate"
-          formControlName="accountId"
-          [options]="accountOptions()" />
+        <div class="dialog-row dialog-row--spaced">
+          <app-select data-testid="lead-account"
+            [label]="'leads.accounts.fieldName' | translate"
+            formControlName="accountId"
+            [options]="accountOptions()" />
+          <button class="action-btn action-btn--secondary" type="button"
+            (click)="openNewAccountForLead()">
+            <span class="material-icons-outlined">add</span>
+            {{ 'leads.accounts.newAccount' | translate }}
+          </button>
+        </div>
       }
 
       <app-textarea data-testid="lead-notes" [label]="'common.notes' | translate" formControlName="notes" />
@@ -266,11 +273,18 @@
 @if (showBulkAssignDialog()) {
   <app-dialog [title]="'leads.bulkAssignTitle' | translate" width="480px" (closed)="closeBulkAssignDialog()">
     <p class="hint">{{ 'leads.bulkAssignHint' | translate:{ count: selectedLeads().length } }}</p>
-    <app-select
-      [label]="'leads.accounts.fieldName' | translate"
-      [formControl]="bulkAccountControl"
-      [options]="accountOptions()"
-      data-testid="bulk-assign-account-picker" />
+    <div class="dialog-row dialog-row--spaced">
+      <app-select
+        [label]="'leads.accounts.fieldName' | translate"
+        [formControl]="bulkAccountControl"
+        [options]="accountOptions()"
+        data-testid="bulk-assign-account-picker" />
+      <button class="action-btn action-btn--secondary" type="button"
+        (click)="openNewAccountForBulk()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'leads.accounts.newAccount' | translate }}
+      </button>
+    </div>
     <div dialog-footer>
       <button class="action-btn" (click)="closeBulkAssignDialog()">{{ 'common.cancel' | translate }}</button>
       <button class="action-btn action-btn--primary"

@@ -16,7 +16,9 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CreateLeadRequest } from '../../models/create-lead-request.model';
 import { LeadEngagementShape } from '../../models/lead-engagement-shape.type';
 import { AccountsService } from '../../services/accounts.service';
-import { Account } from '../../models/account.model';
+import { Account, CreateAccountRequest } from '../../models/account.model';
+import { MatDialog } from '@angular/material/dialog';
+import { AccountDialogComponent, AccountDialogData } from '../account-dialog/account-dialog.component';
 
 interface ShapeChoice {
   value: LeadEngagementShape;
@@ -61,6 +63,7 @@ export class NewLeadForkDialogComponent {
   protected readonly translate = inject(TranslateService);
   private readonly refDataService = inject(ReferenceDataService);
   private readonly accountsService = inject(AccountsService);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly currentStep = signal(0);
   protected readonly shape = signal<LeadEngagementShape>('Unknown');
@@ -165,6 +168,25 @@ export class NewLeadForkDialogComponent {
         { value: null, label: this.translate.instant('leads.accounts.noneOption') },
         ...accounts.map(a => ({ value: a.id, label: a.name })),
       ]),
+    });
+  }
+
+  protected openNewAccount(): void {
+    this.dialog.open<AccountDialogComponent, AccountDialogData, CreateAccountRequest | undefined>(
+      AccountDialogComponent,
+      { width: '640px', data: {} },
+    ).afterClosed().subscribe(payload => {
+      if (!payload) return;
+      this.accountsService.create(payload).subscribe({
+        next: (account) => {
+          this.accountOptions.update(options => [
+            ...options,
+            { value: account.id, label: account.name },
+          ]);
+          this.form.get('accountId')?.setValue(account.id);
+          this.translate.instant('leads.accounts.created');
+        },
+      });
     });
   }
 
