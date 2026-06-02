@@ -11,6 +11,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ReferenceDataService } from '../../../../shared/services/reference-data.service';
+import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { toIsoDate, todayStart } from '../../../../shared/utils/date.utils';
 import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { CreateLeadRequest } from '../../models/create-lead-request.model';
@@ -64,6 +65,7 @@ export class NewLeadForkDialogComponent {
   private readonly refDataService = inject(ReferenceDataService);
   private readonly accountsService = inject(AccountsService);
   private readonly dialog = inject(MatDialog);
+  private readonly snackbar = inject(SnackbarService);
 
   protected readonly currentStep = signal(0);
   protected readonly shape = signal<LeadEngagementShape>('Unknown');
@@ -184,7 +186,7 @@ export class NewLeadForkDialogComponent {
             { value: account.id, label: account.name },
           ]);
           this.form.get('accountId')?.setValue(account.id);
-          this.translate.instant('leads.accounts.created');
+          this.snackbar.success(this.translate.instant('leads.accounts.created'));
         },
       });
     });
