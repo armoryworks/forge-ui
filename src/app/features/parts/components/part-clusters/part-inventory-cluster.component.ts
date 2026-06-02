@@ -34,6 +34,7 @@ export class PartInventoryClusterComponent {
   readonly saving = input(false);
 
   readonly save = output<Partial<PartDetail>>();
+  readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   protected readonly form = new FormGroup({
@@ -79,10 +80,10 @@ export class PartInventoryClusterComponent {
     });
   }
 
-  protected onSave(): void {
+  protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.save.emit({
+    (close ? this.saveAndClose : this.save).emit({
       minStockThreshold: v.minStockThreshold ?? null,
       reorderPoint: v.reorderPoint ?? null,
       reorderQuantity: v.reorderQuantity ?? null,

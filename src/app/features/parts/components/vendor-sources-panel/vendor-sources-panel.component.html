@@ -196,6 +196,14 @@
           {{ 'common.save' | translate }}
         </button>
       </app-validation-button>
+      <app-validation-button [violations]="panelViolations">
+        <button type="button" class="action-btn action-btn--secondary"
+          [disabled]="!panelValid()"
+          data-testid="vendor-sources-save-close"
+          (click)="onSaveAll(true)">
+          {{ 'common.saveAndClose' | translate }}
+        </button>
+      </app-validation-button>
     </div>
   }
 

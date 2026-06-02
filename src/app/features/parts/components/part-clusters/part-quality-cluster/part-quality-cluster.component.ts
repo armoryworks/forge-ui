@@ -44,6 +44,7 @@ export class PartQualityClusterComponent {
   readonly saving = input(false);
 
   readonly save = output<Partial<PartDetail>>();
+  readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   /**
@@ -103,10 +104,10 @@ export class PartQualityClusterComponent {
     });
   }
 
-  protected onSave(): void {
+  protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.save.emit({
+    (close ? this.saveAndClose : this.save).emit({
       requiresReceivingInspection: v.requiresReceivingInspection,
       receivingInspectionTemplateId: v.receivingInspectionTemplateId ?? null,
       inspectionFrequency: v.inspectionFrequency ?? null,

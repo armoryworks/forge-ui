@@ -1126,7 +1126,7 @@ export class VendorSourcesPanelComponent {
    * acts as a visible "I'm done" affordance — the lack of one was the
    * top user complaint about this panel.
    */
-  protected onSaveAll(): void {
+  protected onSaveAll(close = false): void {
     // Catch any empty-row values the user typed but never tabbed out of
     // before clicking Save. Promotes them into pendingTiersByVp so
     // Phase 2 picks them up. Without this sweep, in-flight typing is
@@ -1244,7 +1244,8 @@ export class VendorSourcesPanelComponent {
             this.formsTicker.update(n => n + 1);
             if (partId != null) this.reload(partId);
             this.changed.emit();
-            this.cancelled.emit();
+            // Plain "Save" stays in edit mode; only "Save & Close" exits.
+            if (close) this.cancelled.emit();
           },
           error: () => {
             this.snackbar.error(this.translate.instant('vendorSources.tierSaveFailed'));

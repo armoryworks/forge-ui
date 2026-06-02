@@ -27,6 +27,14 @@
           {{ 'common.save' | translate }}
         </button>
       </app-validation-button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--secondary" type="button"
+          [disabled]="form.invalid || saving()"
+          data-testid="part-inventory-save-close"
+          (click)="onSave(true)">
+          {{ 'common.saveAndClose' | translate }}
+        </button>
+      </app-validation-button>
     </div>
   }
 </div>

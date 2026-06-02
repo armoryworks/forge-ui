@@ -63,6 +63,14 @@
           Save
         </button>
       </app-validation-button>
+      <app-validation-button [violations]="violations" [loading]="saving()">
+        <button class="action-btn action-btn--secondary" type="button"
+          data-testid="part-mrp-save-close"
+          [disabled]="form.invalid || saving()"
+          (click)="onSave(true)">
+          {{ 'common.saveAndClose' | translate }}
+        </button>
+      </app-validation-button>
     </div>
   }
 </div>

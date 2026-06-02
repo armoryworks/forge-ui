@@ -38,6 +38,7 @@ export class PartIdentityClusterComponent {
   readonly saving = input(false);
 
   readonly save = output<Partial<PartDetail>>();
+  readonly saveAndClose = output<Partial<PartDetail>>();
   readonly cancelled = output<void>();
 
   protected readonly form = new FormGroup({
@@ -78,10 +79,10 @@ export class PartIdentityClusterComponent {
     });
   }
 
-  protected onSave(): void {
+  protected onSave(close = false): void {
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.save.emit({
+    (close ? this.saveAndClose : this.save).emit({
       name: v.name,
       description: v.description ?? null,
       revision: v.revision,
