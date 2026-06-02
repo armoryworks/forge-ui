@@ -51,7 +51,14 @@ export class AutocompleteComponent implements ControlValueAccessor {
 
   protected readonly filteredOptions = computed(() => {
     const all = this.options();
-    const search = this.searchValue() ?? '';
+    // On selection, mat-autocomplete writes the chosen option OBJECT (the
+    // <mat-option [value]="opt">) into the bound control, so this stream can
+    // carry a non-string. Coerce anything non-string to an empty query so the
+    // filter never calls .toLowerCase() on it — the recurring t.toLowerCase
+    // TypeError that otherwise throws every change-detection cycle and breaks
+    // the dropdown for the next selection.
+    const raw = this.searchValue();
+    const search = typeof raw === 'string' ? raw : '';
     const display = this.displayField();
     const min = this.minChars();
 
