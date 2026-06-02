@@ -19,6 +19,7 @@ on:
 permissions:
   contents: read
   issues: write              # to file failure issues
+  packages: read             # to pull forge-api / forge-ui images from GHCR
 
 env:
   # Force JavaScript-based actions (checkout, etc.) to run on the runner's
@@ -33,6 +34,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      # The E2E backing stack lives in the sibling forge-deploy repo
+      # (compose-e2e.yml). forge-deploy is public, so the default token can
+      # clone it; if it is ever made private, supply a read-only PAT via
+      #   token: ${{ secrets.FORGE_DEPLOY_RO_TOKEN }}
+      - name: Check out forge-deploy (compose-e2e.yml)
+        uses: actions/checkout@v4
+        with:
+          repository: armoryworks/forge-deploy
+          path: forge-deploy
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -50,17 +61,27 @@ jobs:
         run: npm run build
 
       # The full Docker stack is needed for Playwright to hit a real backend.
-      # We pull the latest server image rather than building from scratch.
+      # We pull the latest published images rather than building from scratch.
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Brings up postgres + minio + forge-api (:5000) + forge-ui (:4200),
+      # bound to 127.0.0.1. --wait blocks until every service is healthy, so
+      # the suite never races a not-yet-ready backend (the old stub started
+      # only postgres → every API call hit ECONNREFUSED ::1:5000).
       - name: Start backing services
-        run: |
-          docker run -d --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:17
-          # ... etc; mirror docker-compose.yml's minimal subset
-        # Implementation TODO: extract the minimal docker-compose subset
-        # needed for E2E into forge-deploy/compose-e2e.yml and
-        # `docker compose -f compose-e2e.yml up -d` here.
+        run: docker compose -f forge-deploy/compose-e2e.yml up -d --wait
 
       - name: Run Playwright tests
         run: npm run e2e
+
+      - name: Stop backing services
+        if: always()
+        run: docker compose -f forge-deploy/compose-e2e.yml down -v
 
       - name: Upload traces on failure
         if: failure()
