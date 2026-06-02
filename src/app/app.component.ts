@@ -112,6 +112,16 @@ export class AppComponent implements OnInit, OnDestroy {
     // Reactively connect/disconnect hubs based on auth state
     effect(() => {
       if (this.authService.isAuthenticated()) {
+        // Run login-time init exactly once per authenticated session. This
+        // effect re-runs whenever any signal it reads changes; without this
+        // latch, one-shot actions — notably draftRecovery.onLogin() — fire
+        // again and stack a second draft-recovery dialog (the double-backdrop
+        // bug). connect()/load() are idempotent, but gating the whole block is
+        // the clean fix. Set the latch BEFORE the side effects so a synchronous
+        // re-entrant run can't slip through.
+        if (this.wasAuthenticated) return;
+        this.wasAuthenticated = true;
+
         // Hub connections + non-capability-gated init runs immediately —
         // these don't depend on the capability descriptor.
         this.notificationHub.connect();
@@ -137,7 +147,6 @@ export class AppComponent implements OnInit, OnDestroy {
             this.currencyService.load().subscribe();
           },
         });
-        this.wasAuthenticated = true;
       } else {
         this.capabilityService.clear();
         this.signalr.stopAll();
