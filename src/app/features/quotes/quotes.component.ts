@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
@@ -18,6 +18,7 @@ import { CurrencyDisplayComponent } from '../../shared/components/currency-displ
 import { QuoteDialogComponent } from './components/quote-dialog/quote-dialog.component';
 import { QuoteDetailDialogComponent, QuoteDetailDialogData, QuoteDetailDialogResult } from './components/quote-detail-dialog/quote-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-quotes',
@@ -32,10 +33,11 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './quotes.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class QuotesComponent {
+export class QuotesComponent implements OnInit {
   private readonly quoteService = inject(QuoteService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -67,6 +69,12 @@ export class QuotesComponent {
 
   constructor() {
     this.loadQuotes();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('quote')) {
+      this.openCreateDialog();
+    }
   }
 
   protected loadQuotes(): void {

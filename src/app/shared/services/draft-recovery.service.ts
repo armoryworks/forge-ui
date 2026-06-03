@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 
 import { DraftService } from './draft.service';
+import { DraftResumeService } from './draft-resume.service';
 import {
   DraftRecoveryPromptComponent,
   DraftRecoveryPromptData,
@@ -124,7 +125,18 @@ export class DraftRecoveryService {
         if (result.draft) {
           // Restoring one resets TTL on all
           this.draftService.resetAllTtl();
-          this.router.navigateByUrl(result.draft.route);
+          const draft = result.draft;
+          // New-entity drafts (create dialogs) only resume if the destination
+          // list reopens the dialog — carry a resumeDraft hint it can consume.
+          // Existing-entity drafts navigate straight to their route as before.
+          const isNew = draft.entityId === 'new' || draft.entityId === 'fork-new';
+          if (isNew) {
+            this.router.navigate([draft.route], {
+              queryParams: DraftResumeService.params(draft.entityType, draft.entityId),
+            });
+          } else {
+            this.router.navigateByUrl(draft.route);
+          }
         }
         break;
 

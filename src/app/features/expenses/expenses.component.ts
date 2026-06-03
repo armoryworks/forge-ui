@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 
 import { DatePipe, CurrencyPipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
@@ -29,6 +29,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-expenses',
@@ -44,7 +45,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   styleUrl: './expenses.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ExpensesComponent {
+export class ExpensesComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly expensesService = inject(ExpensesService);
@@ -53,6 +54,7 @@ export class ExpensesComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -130,6 +132,12 @@ export class ExpensesComponent {
       error: () => this.settings.set(null),
     });
     this.loadExpenses();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('expense')) {
+      this.openCreateExpense();
+    }
   }
 
   private applyPolicyValidators(): void {

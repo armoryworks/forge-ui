@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -38,6 +38,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { AccountDialogComponent, AccountDialogData } from './components/account-dialog/account-dialog.component';
 import { CreateAccountRequest } from './models/account.model';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 type ViewMode = 'table' | 'pipeline';
 
@@ -58,7 +59,7 @@ const VIEW_MODE_KEY = 'leads-view-mode';
   styleUrl: './leads.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LeadsComponent {
+export class LeadsComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly leadsService = inject(LeadsService);
@@ -72,6 +73,7 @@ export class LeadsComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly scanner = inject(ScannerService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -236,6 +238,12 @@ export class LeadsComponent {
     this.statusFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => { this.syncUrl(); this.loadLeads(); });
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('lead')) {
+      this.openCreateLead();
+    }
   }
 
   /** Mirror filter state into the URL. Mirrors the parts pattern. */

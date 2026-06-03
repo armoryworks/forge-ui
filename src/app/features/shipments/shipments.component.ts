@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -19,6 +19,7 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { ShipmentDialogComponent } from './components/shipment-dialog/shipment-dialog.component';
 import { ShipmentDetailDialogComponent, ShipmentDetailDialogData } from './components/shipment-detail-dialog/shipment-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-shipments',
@@ -33,11 +34,12 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './shipments.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShipmentsComponent {
+export class ShipmentsComponent implements OnInit {
   private readonly shipmentService = inject(ShipmentService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly showCreateDialog = signal(false);
   protected readonly loading = signal(false);
@@ -79,6 +81,12 @@ export class ShipmentsComponent {
 
   constructor() {
     this.loadShipments();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('shipment')) {
+      this.openCreateDialog();
+    }
   }
 
   protected loadShipments(): void {
