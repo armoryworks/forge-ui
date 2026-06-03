@@ -86,7 +86,7 @@ export class ComplianceTemplateDialogComponent {
   protected readonly draftConfig: DraftConfig = {
     entityType: 'compliance-template',
     entityId: this.data?.id?.toString() ?? 'new',
-    route: '/admin/compliance',
+    route: '/admin?tab=compliance',
   };
 
   protected close(): void {

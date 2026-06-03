@@ -13,6 +13,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-ai-assistants-panel',
@@ -29,6 +30,7 @@ export class AiAssistantsPanelComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly assistants = signal<AiAssistant[]>([]);
   protected readonly loading = signal(false);
@@ -50,6 +52,7 @@ export class AiAssistantsPanelComponent implements OnInit {
 
   ngOnInit(): void {
     this.load();
+    if (this.draftResume.consume('ai-assistant')) { this.openCreate(); }
   }
 
   private load(): void {

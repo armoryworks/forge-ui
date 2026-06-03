@@ -52,7 +52,7 @@ export class SalesTaxDialogComponent {
   protected draftConfig: DraftConfig = {
     entityType: 'sales-tax-rate',
     entityId: 'new',
-    route: '/admin/settings',
+    route: '/admin?tab=sales-tax',
   };
 
   readonly form = new FormGroup({

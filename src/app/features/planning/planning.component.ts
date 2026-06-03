@@ -25,6 +25,7 @@ import { InputComponent } from '../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../shared/components/select/select.component';
 import { AvatarComponent } from '../../shared/components/avatar/avatar.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
@@ -51,6 +52,7 @@ export class PlanningComponent implements OnInit {
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly draftResume = inject(DraftResumeService);
 
   // State
   protected readonly loading = signal(true);
@@ -128,6 +130,10 @@ export class PlanningComponent implements OnInit {
         this.loadCycle(cycleId);
       }
     });
+
+    if (this.draftResume.consume('planning-cycle')) {
+      this.openCreateCycleDialog();
+    }
   }
 
   private loadData(): void {

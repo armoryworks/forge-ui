@@ -34,7 +34,7 @@ export class CompanyLocationDialogComponent {
   protected readonly draftConfig: DraftConfig = {
     entityType: 'company-location',
     entityId: 'new',
-    route: '/admin/settings',
+    route: '/admin?tab=settings',
   };
 
   readonly form = new FormGroup({

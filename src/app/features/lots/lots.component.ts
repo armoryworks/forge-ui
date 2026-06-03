@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -15,6 +15,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-lots',
@@ -29,11 +30,12 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './lots.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LotsComponent {
+export class LotsComponent implements OnInit {
   private readonly service = inject(LotService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly lots = signal<LotListItem[]>([]);
@@ -55,6 +57,10 @@ export class LotsComponent {
 
   constructor() {
     this.load();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('lot')) { this.openCreate(); }
   }
 
   protected load(): void {

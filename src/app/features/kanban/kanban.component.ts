@@ -30,6 +30,7 @@ import { BoardHubService } from '../../shared/services/board-hub.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { ScannerService } from '../../shared/services/scanner.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
 import { AuthService } from '../../shared/services/auth.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -66,6 +67,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly userPreferences = inject(UserPreferencesService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly trackTypes = signal<TrackType[]>([]);
   protected readonly selectedTrackTypeId = signal<number | null>(null);
@@ -238,6 +240,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
             this.openCreateDialog();
             this.router.navigate([], { queryParams: { new: null }, queryParamsHandling: 'merge', replaceUrl: true });
           }
+          if (this.draftResume.consume('job')) { this.openCreateDialog(); }
         },
         error: () => this.error.set(this.translate.instant('kanban.loadTrackTypesFailed')),
       });

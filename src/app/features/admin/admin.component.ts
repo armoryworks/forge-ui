@@ -1,6 +1,6 @@
 import { DatePipe, LowerCasePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -64,6 +64,7 @@ import { ConnectionsPanelComponent } from './components/connections-panel/connec
 import { CompanyLocationDialogComponent } from './components/company-location-dialog/company-location-dialog.component';
 import { AuthService } from '../../shared/services/auth.service';
 import { ReferenceDataService } from '../../shared/services/reference-data.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { CompanyLocation, CompanyProfile } from './models/company-location.model';
 import { RoleTemplate } from './models/role-template.model';
 
@@ -80,7 +81,7 @@ import { RoleTemplate } from './models/role-template.model';
   styleUrl: './admin.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AdminComponent {
+export class AdminComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
@@ -92,6 +93,7 @@ export class AdminComponent {
   protected readonly rfid = inject(WebHidRfidService);
   private readonly authService = inject(AuthService);
   private readonly refDataService = inject(ReferenceDataService);
+  private readonly draftResume = inject(DraftResumeService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
@@ -367,6 +369,16 @@ export class AdminComponent {
 
     // Auto-reconnect to a previously paired RFID reader
     this.rfid.reconnect();
+  }
+
+  ngOnInit(): void {
+    // Draft-recovery "Go to" hint: reopen the matching create dialog. activeTab
+    // already derives from ?tab=, so the relevant tab's section is rendered.
+    if (this.draftResume.consume('company-location')) {
+      this.openCreateLocation();
+    } else if (this.draftResume.consume('track-type')) {
+      this.openCreateTrackType();
+    }
   }
 
   protected switchTab(tab: string): void {

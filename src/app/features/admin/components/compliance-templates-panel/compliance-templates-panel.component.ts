@@ -10,6 +10,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { AdminService } from '../../services/admin.service';
 import { ComplianceFormTemplate, ComplianceFormType } from '../../../account/models/compliance-form.model';
 import { ComplianceTemplateDialogComponent } from '../compliance-template-dialog/compliance-template-dialog.component';
@@ -29,6 +30,7 @@ const SYSTEM_FORM_TYPES: Set<ComplianceFormType> = new Set([
 })
 export class ComplianceTemplatesPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
+  private readonly draftResume = inject(DraftResumeService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -60,6 +62,9 @@ export class ComplianceTemplatesPanelComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadTemplates();
+    if (this.draftResume.consume('compliance-template')) {
+      this.openCreateDialog();
+    }
   }
 
   protected loadTemplates(): void {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { EntityCompletenessChipComponent } from '../../shared/components/entity-completeness-chip/entity-completeness-chip.component';
@@ -40,7 +41,7 @@ import { EntityCompletenessBadgeComponent } from '../../shared/components/entity
   styleUrl: './vendors.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class VendorsComponent {
+export class VendorsComponent implements OnInit {
   private readonly vendorService = inject(VendorService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
@@ -48,6 +49,7 @@ export class VendorsComponent {
   private readonly loadingService = inject(LoadingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly router = inject(Router);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly vendors = signal<VendorListItem[]>([]);
@@ -101,6 +103,12 @@ export class VendorsComponent {
     this.activeFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadVendors());
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('vendor')) {
+      this.openCreateVendor();
+    }
   }
 
   protected loadVendors(): void {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,6 +19,7 @@ import { AccountingService } from '../../shared/services/accounting.service';
 import { PaymentDialogComponent } from './components/payment-dialog/payment-dialog.component';
 import { PaymentDetailDialogComponent, PaymentDetailDialogData } from './components/payment-detail-dialog/payment-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-payments',
@@ -33,12 +34,13 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './payments.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PaymentsComponent {
+export class PaymentsComponent implements OnInit {
   // ⚡ ACCOUNTING BOUNDARY
   private readonly paymentService = inject(PaymentService);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly isStandalone = this.accountingService.isStandalone;
   protected readonly providerName = this.accountingService.providerName;
@@ -95,6 +97,10 @@ export class PaymentsComponent {
     this.methodFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadPayments());
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('payment')) { this.openCreateDialog(); }
   }
 
   protected loadPayments(): void {
