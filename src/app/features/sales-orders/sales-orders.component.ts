@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -19,6 +19,7 @@ import { CurrencyDisplayComponent } from '../../shared/components/currency-displ
 import { SoDialogComponent } from './components/so-dialog/so-dialog.component';
 import { SalesOrderDetailDialogComponent, SalesOrderDetailDialogData } from './components/sales-order-detail-dialog/sales-order-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 @Component({
@@ -34,10 +35,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
   styleUrl: './sales-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SalesOrdersComponent {
+export class SalesOrdersComponent implements OnInit {
   private readonly soService = inject(SalesOrderService);
   private readonly customerService = inject(CustomerService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -89,6 +91,12 @@ export class SalesOrdersComponent {
     this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
     });
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('sales-order')) {
+      this.openCreateDialog();
+    }
   }
 
   protected loadSalesOrders(): void {

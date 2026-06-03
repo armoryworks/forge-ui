@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal, computed, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, computed, untracked, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -24,6 +24,7 @@ import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { AuthService } from '../../shared/services/auth.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 type PoTab = 'orders' | 'suggestions' | 'settings';
 
@@ -41,7 +42,7 @@ type PoTab = 'orders' | 'suggestions' | 'settings';
   styleUrl: './purchase-orders.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PurchaseOrdersComponent {
+export class PurchaseOrdersComponent implements OnInit {
   private readonly poService = inject(PurchaseOrderService);
   private readonly vendorService = inject(VendorService);
   private readonly detailDialog = inject(DetailDialogService);
@@ -49,6 +50,7 @@ export class PurchaseOrdersComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
+  private readonly draftResume = inject(DraftResumeService);
 
   private static readonly VALID_TABS: PoTab[] = ['orders', 'suggestions', 'settings'];
 
@@ -136,6 +138,12 @@ export class PurchaseOrdersComponent {
     this.statusFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadPurchaseOrders());
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('purchase-order')) {
+      this.openCreatePo();
+    }
   }
 
   protected switchTab(tab: PoTab): void {

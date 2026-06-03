@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -24,6 +24,7 @@ import { InvoiceDialogComponent } from './components/invoice-dialog/invoice-dial
 import { UninvoicedJobsPanelComponent } from './components/uninvoiced-jobs-panel/uninvoiced-jobs-panel.component';
 import { InvoiceDetailDialogComponent, InvoiceDetailDialogData, InvoiceDetailDialogResult } from './components/invoice-detail-dialog/invoice-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 // ⚡ ACCOUNTING BOUNDARY
 @Component({
@@ -40,9 +41,10 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './invoices.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class InvoicesComponent {
+export class InvoicesComponent implements OnInit {
   private readonly invoiceService = inject(InvoiceService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
   private readonly snackbar = inject(SnackbarService);
   private readonly accountingService = inject(AccountingService);
   private readonly translate = inject(TranslateService);
@@ -105,6 +107,12 @@ export class InvoicesComponent {
     this.statusFilterControl.valueChanges
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadInvoices());
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('invoice')) {
+      this.openCreateDialog();
+    }
   }
 
   protected loadInvoices(): void {
