@@ -79,7 +79,7 @@ export class TrainingModuleDialogComponent implements OnInit {
   protected readonly draftConfig: DraftConfig = {
     entityType: 'training-module',
     entityId: this.data?.id?.toString() ?? 'new',
-    route: '/admin/training',
+    route: '/admin?tab=training',
   };
 
   protected contentJsonLabel(): string {

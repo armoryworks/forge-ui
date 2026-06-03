@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -23,6 +23,7 @@ import { ToggleComponent } from '../../shared/components/toggle/toggle.component
 import { SnackbarService } from '../../shared/services/snackbar.service';
 import { AssetDetailDialogComponent, AssetDetailDialogData, AssetDetailDialogResult } from './components/asset-detail-dialog/asset-detail-dialog.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-assets',
@@ -32,7 +33,7 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './assets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AssetsComponent {
+export class AssetsComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly assetsService = inject(AssetsService);
@@ -40,6 +41,7 @@ export class AssetsComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
@@ -133,6 +135,12 @@ export class AssetsComponent {
 
   constructor() {
     this.loadAssets();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('asset')) {
+      this.openCreateAsset();
+    }
   }
 
   protected loadAssets(): void {

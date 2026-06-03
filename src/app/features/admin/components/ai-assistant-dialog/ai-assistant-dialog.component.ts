@@ -102,7 +102,7 @@ export class AiAssistantDialogComponent implements OnInit {
   protected readonly draftConfig: DraftConfig = {
     entityType: 'ai-assistant',
     entityId: this.data.assistant?.id?.toString() ?? 'new',
-    route: '/admin/ai-assistants',
+    route: '/admin?tab=ai-assistants',
   };
 
   ngOnInit(): void {

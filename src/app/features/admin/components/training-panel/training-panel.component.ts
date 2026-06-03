@@ -15,6 +15,7 @@ import { InputComponent } from '../../../../shared/components/input/input.compon
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { DetailDialogService } from '../../../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { TrainingService } from '../../../training/services/training.service';
 
 export interface TrainingModuleRow {
@@ -70,6 +71,7 @@ export class TrainingPanelComponent implements OnInit {
   private readonly snackbar = inject(SnackbarService);
   private readonly trainingService = inject(TrainingService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
   private readonly translate = inject(TranslateService);
 
   private readonly base = `${environment.apiUrl}/training`;
@@ -113,6 +115,12 @@ export class TrainingPanelComponent implements OnInit {
     this.loadModules();
     this.loadPaths();
     this.loadProgress();
+
+    if (this.draftResume.consume('training-path')) {
+      this.openCreatePathDialog();
+    } else if (this.draftResume.consume('training-module')) {
+      this.openCreateModuleDialog();
+    }
   }
 
   protected switchSubTab(tab: PanelSubTab): void {

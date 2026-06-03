@@ -75,7 +75,7 @@ export class OperationDialogComponent implements OnInit {
   protected readonly draftConfig: DraftConfig = {
     entityType: 'operation',
     entityId: this.data.operation?.id?.toString() ?? 'new',
-    route: '/parts',
+    route: `/parts?detail=part:${this.data.partId}`,
   };
 
   protected readonly formGroup = new FormGroup({

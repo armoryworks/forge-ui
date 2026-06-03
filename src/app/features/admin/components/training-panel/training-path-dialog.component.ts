@@ -58,7 +58,7 @@ export class TrainingPathDialogComponent implements OnInit {
   protected readonly draftConfig: DraftConfig = {
     entityType: 'training-path',
     entityId: this.data?.id?.toString() ?? 'new',
-    route: '/admin/training',
+    route: '/admin?tab=training',
   };
 
   ngOnInit(): void {

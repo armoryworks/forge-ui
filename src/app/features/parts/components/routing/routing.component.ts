@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, input, signal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -11,6 +11,7 @@ import { OperationDialogComponent, OperationDialogData } from '../operation-dial
 import { RoutingFlowViewComponent } from '../routing-flow-view/routing-flow-view.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
@@ -24,11 +25,12 @@ type RoutingViewMode = 'list' | 'flow';
   styleUrl: './routing.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class RoutingComponent {
+export class RoutingComponent implements OnInit {
   private readonly partsService = inject(PartsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly draftResume = inject(DraftResumeService);
 
   readonly partId = input.required<number>();
   readonly bomLines = input<BOMLine[]>([]);
@@ -44,6 +46,15 @@ export class RoutingComponent {
         this.loadOperations(id);
       }
     });
+  }
+
+  ngOnInit(): void {
+    // Resume a new-Operation draft: when the part detail deep-linked here with
+    // ?resumeDraft=operation:new, reopen the operation create dialog. consume()
+    // returns true once then strips the param so a refresh won't reopen it.
+    if (this.draftResume.consume('operation')) {
+      this.openAddOperation();
+    }
   }
 
   private loadOperations(partId?: number): void {

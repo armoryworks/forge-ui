@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +15,7 @@ import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
+import { DraftResumeService } from '../../../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-sales-tax-panel',
@@ -26,11 +27,12 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   templateUrl: './sales-tax-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SalesTaxPanelComponent {
+export class SalesTaxPanelComponent implements OnInit {
   private readonly adminService = inject(AdminService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly rates = signal<SalesTaxRateRow[]>([]);
@@ -49,6 +51,12 @@ export class SalesTaxPanelComponent {
 
   constructor() {
     this.load();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('sales-tax-rate')) {
+      this.openCreate();
+    }
   }
 
   protected load(): void {

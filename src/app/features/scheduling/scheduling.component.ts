@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -16,6 +16,7 @@ import { SpacerDirective } from '../../shared/directives/spacer.directive';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -57,13 +58,14 @@ const VALID_TABS = new Set<SchedulingTab>(['gantt', 'dispatch', 'work-centers', 
   styleUrl: './scheduling.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SchedulingComponent {
+export class SchedulingComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly schedulingService = inject(SchedulingService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
+  private readonly draftResume = inject(DraftResumeService);
 
   // Tab state from URL
   protected readonly activeTab = toSignal(
@@ -202,6 +204,12 @@ export class SchedulingComponent {
           break;
       }
     });
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('work-center')) {
+      this.openCreateWorkCenter();
+    }
   }
 
   protected switchTab(tab: string): void {

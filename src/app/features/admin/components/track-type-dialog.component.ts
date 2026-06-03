@@ -52,7 +52,7 @@ export class TrackTypeDialogComponent {
   protected readonly draftConfig = computed<DraftConfig>(() => ({
     entityType: 'track-type',
     entityId: this.trackType()?.id?.toString() ?? 'new',
-    route: '/admin/board',
+    route: '/admin?tab=track-types',
   }));
 
   constructor() {

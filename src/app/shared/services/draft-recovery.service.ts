@@ -131,9 +131,12 @@ export class DraftRecoveryService {
           // Existing-entity drafts navigate straight to their route as before.
           const isNew = draft.entityId === 'new' || draft.entityId === 'fork-new';
           if (isNew) {
-            this.router.navigate([draft.route], {
-              queryParams: DraftResumeService.params(draft.entityType, draft.entityId),
-            });
+            // Append the resume hint to the route and navigate by URL, so routes
+            // that already carry query params (e.g. /admin?tab=sales-tax or
+            // /parts?detail=part:42) keep them.
+            const sep = draft.route.includes('?') ? '&' : '?';
+            const hint = `${DraftResumeService.PARAM}=${encodeURIComponent(`${draft.entityType}:${draft.entityId}`)}`;
+            this.router.navigateByUrl(`${draft.route}${sep}${hint}`);
           } else {
             this.router.navigateByUrl(draft.route);
           }

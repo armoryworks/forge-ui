@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnDestroy, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { startWith } from 'rxjs';
@@ -23,6 +23,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 import { SnackbarService } from '../../shared/services/snackbar.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-time-tracking',
@@ -45,7 +46,7 @@ import { SnackbarService } from '../../shared/services/snackbar.service';
   styleUrl: './time-tracking.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TimeTrackingComponent implements OnDestroy {
+export class TimeTrackingComponent implements OnInit, OnDestroy {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
 
   private readonly service = inject(TimeTrackingService);
@@ -54,6 +55,7 @@ export class TimeTrackingComponent implements OnDestroy {
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly entries = signal<TimeEntry[]>([]);
@@ -137,6 +139,12 @@ export class TimeTrackingComponent implements OnDestroy {
 
     this.dateFromControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadEntries());
     this.dateToControl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadEntries());
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('time-entry')) {
+      this.openManualEntry();
+    }
   }
 
   ngOnDestroy(): void {

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -15,6 +15,7 @@ import { ColumnCellDirective } from '../../shared/directives/column-cell.directi
 import { ColumnDef } from '../../shared/models/column-def.model';
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
+import { DraftResumeService } from '../../shared/services/draft-resume.service';
 
 @Component({
   selector: 'app-customer-returns',
@@ -30,10 +31,11 @@ import { DetailDialogService } from '../../shared/services/detail-dialog.service
   styleUrl: './customer-returns.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CustomerReturnsComponent {
+export class CustomerReturnsComponent implements OnInit {
   private readonly service = inject(CustomerReturnService);
   private readonly translate = inject(TranslateService);
   private readonly detailDialog = inject(DetailDialogService);
+  private readonly draftResume = inject(DraftResumeService);
 
   protected readonly loading = signal(false);
   protected readonly returns = signal<CustomerReturnListItem[]>([]);
@@ -71,6 +73,10 @@ export class CustomerReturnsComponent {
 
   constructor() {
     this.load();
+  }
+
+  ngOnInit(): void {
+    if (this.draftResume.consume('customer-return')) { this.openCreate(); }
   }
 
   protected load(): void {

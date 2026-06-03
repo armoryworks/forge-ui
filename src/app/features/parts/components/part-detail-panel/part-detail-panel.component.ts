@@ -274,6 +274,15 @@ export class PartDetailPanelComponent {
       if (tabFromUrl) {
         this.activeTabId.set(tabFromUrl);
       }
+
+      // Resuming a new-Operation draft (?resumeDraft=operation:new) deep-links
+      // into this part's routing tab so <app-routing> mounts and consumes the
+      // param to reopen the operation create dialog. We only steer the tab here;
+      // the param is intentionally NOT consumed (RoutingComponent owns that).
+      const resumeDraft = this.route.snapshot.queryParamMap.get('resumeDraft');
+      if (resumeDraft?.startsWith('operation:')) {
+        this.activeTabId.set('routing');
+      }
     }
 
     // When the loaded part changes, ensure the active tab is in the resolved
