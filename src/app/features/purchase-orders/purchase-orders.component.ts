@@ -73,6 +73,10 @@ export class PurchaseOrdersComponent implements OnInit {
 
   // Dialogs
   protected readonly showCreateDialog = signal(false);
+  // Id of the PO whose detail dialog is currently open (via row click or the
+  // ?detail= URL param). Guards the queryParamMap reaction against reopening
+  // when DetailDialogService re-stamps the same param on open.
+  private readonly openedDetailId = signal<number | null>(null);
 
   // Filters
   protected readonly searchControl = new FormControl('');
@@ -125,6 +129,22 @@ export class PurchaseOrdersComponent implements OnInit {
       });
     });
 
+    // Auto-open the PO detail from `?detail=purchase-order:{id}`. Reacting to
+    // queryParamMap (not the list-load callback) fixes the dashboard 'goto'
+    // double-click bug: the param emits on the initial navigation AND on a
+    // re-navigation while the component is already mounted (tab unchanged), and
+    // the dialog opens by id without waiting on the list HTTP round-trip.
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(() => {
+      const detail = this.detailDialog.getDetailFromUrl();
+      if (detail?.entityType === 'purchase-order') {
+        if (this.openedDetailId() !== detail.entityId) {
+          this.openPurchaseOrderDetail({ id: detail.entityId } as PurchaseOrderListItem);
+        }
+      } else {
+        this.openedDetailId.set(null);
+      }
+    });
+
     // Phase 3 F7-broad / WU-22 — debounced search + filter changes refire the
     // standardised paged endpoint.
     this.searchControl.valueChanges
@@ -170,10 +190,6 @@ export class PurchaseOrdersComponent implements OnInit {
         this.purchaseOrders.set(paged.items);
         this.totalCount.set(paged.totalCount);
         this.loading.set(false);
-        const detail = this.detailDialog.getDetailFromUrl();
-        if (detail?.entityType === 'purchase-order') {
-          this.openPurchaseOrderDetail({ id: detail.entityId } as PurchaseOrderListItem);
-        }
       },
       error: () => this.loading.set(false),
     });
@@ -188,12 +204,14 @@ export class PurchaseOrdersComponent implements OnInit {
   protected applyFilters(): void { this.loadPurchaseOrders(); }
 
   protected openPurchaseOrderDetail(item: PurchaseOrderListItem): void {
+    this.openedDetailId.set(item.id);
     this.detailDialog.open<PoDetailDialogComponent, PoDetailDialogData, boolean>(
       'purchase-order',
       item.id,
       PoDetailDialogComponent,
       { purchaseOrderId: item.id },
     ).afterClosed().subscribe(changed => {
+      this.openedDetailId.set(null);
       if (changed) this.loadPurchaseOrders();
     });
   }
