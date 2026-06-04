@@ -84,6 +84,13 @@ interface FlatTierRow {
   currency: string;
   effectiveFrom: string;
   effectiveTo: string | null;
+  /** Linked purchase option (null = priced per base unit / "1 per each"). */
+  purchaseUnitId: number | null;
+  /** Human label for the option, or the "1 / each" default. */
+  purchaseUnitLabel: string;
+  /** unitPrice normalized to per-base-unit (÷ the option's content qty) so
+   *  rows across vendors with different pack sizes compare apples-to-apples. */
+  perBaseUnitPrice: number;
 }
 
 /**
@@ -270,6 +277,7 @@ export class VendorSourcesPanelComponent {
     for (const vp of this.vendorParts()) {
       for (const t of vp.priceTiers ?? []) {
         if (!this.showTierHistory() && t.effectiveTo) continue;
+        const content = this.contentQtyFor(t.purchaseUnitId);
         rows.push({
           tierId: t.id,
           vendorPartId: vp.id,
@@ -280,14 +288,42 @@ export class VendorSourcesPanelComponent {
           currency: t.currency,
           effectiveFrom: t.effectiveFrom,
           effectiveTo: t.effectiveTo,
+          purchaseUnitId: t.purchaseUnitId,
+          purchaseUnitLabel: this.optionLabelFor(t.purchaseUnitId),
+          perBaseUnitPrice: t.unitPrice / content,
         });
       }
     }
+    // Sort by normalized per-base cost so the genuinely cheapest source reads
+    // first, regardless of each vendor's pack size; ties break by min qty then
+    // vendor name.
     rows.sort((a, b) =>
-      a.minQuantity - b.minQuantity
+      a.perBaseUnitPrice - b.perBaseUnitPrice
+      || a.minQuantity - b.minQuantity
       || a.vendorCompanyName.localeCompare(b.vendorCompanyName));
     return rows;
   });
+
+  /** Base units contained in one of the given purchase option (null/unknown/≤0
+   *  ⇒ 1, i.e. priced per base unit). Mirrors the server normalization. */
+  private contentQtyFor(purchaseUnitId: number | null): number {
+    if (purchaseUnitId == null) return 1;
+    const o = this.purchaseUnits().find(u => u.id === purchaseUnitId);
+    return o && o.contentQuantity > 0 ? o.contentQuantity : 1;
+  }
+
+  /** Per-base-unit cost hint shown while editing a tier that's priced per a
+   *  purchase option (e.g. "≈ $0.50 / ea"). Null when no option is selected
+   *  (price is already per base unit) or price is blank. */
+  protected perBaseHint(form: FormGroup, currency: string): string | null {
+    const price = form.get('unitPrice')?.value as number | null;
+    const optId = form.get('purchaseUnitId')?.value as number | null;
+    if (price == null || optId == null) return null;
+    const o = this.purchaseUnits().find(u => u.id === optId);
+    if (!o || o.contentQuantity <= 0) return null;
+    const perBase = price / o.contentQuantity;
+    return `≈ ${this.currencySymbol(currency)}${perBase.toFixed(4)} / ${o.contentUomLabel ?? 'ea'}`;
+  }
 
   /** Per-card "expanded?" check used by the compare-mode accordion. */
   protected isExpanded(vpId: number): boolean {
@@ -399,6 +435,7 @@ export class VendorSourcesPanelComponent {
   // ─── Loading ────────────────────────────────────────────────────────
   private load(partId: number): void {
     this.loading.set(true);
+    this.loadPurchaseUnits(partId);
     this.vendorPartsService.listForPart(partId).subscribe({
       next: (list) => {
         this.vendorParts.set(list);
@@ -1047,12 +1084,18 @@ export class VendorSourcesPanelComponent {
     return null;
   }
 
-  /** Reload tiers — pulls history when the toggle is on. */
-  private reload(partId: number): void {
-    this.loading.set(true);
+  /** Loads the part's purchase options into the signal that the tier option
+   *  select + per-base normalization read. Called from both entry paths. */
+  private loadPurchaseUnits(partId: number): void {
     this.purchaseUnitsService.list(partId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({ next: (units) => this.purchaseUnits.set(units) });
+  }
+
+  /** Reload tiers — pulls history when the toggle is on. */
+  private reload(partId: number): void {
+    this.loading.set(true);
+    this.loadPurchaseUnits(partId);
     this.vendorPartsService.listForPart(partId, this.showTierHistory()).subscribe({
       next: (list) => {
         this.vendorParts.set(list);

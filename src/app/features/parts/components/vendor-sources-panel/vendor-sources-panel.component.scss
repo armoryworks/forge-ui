@@ -520,6 +520,15 @@
   color: var(--text-muted);
 }
 
+// Per-base-unit cost hint under the purchase-option select while editing a
+// tier (e.g. "≈ $0.50 / ea"). Quiet caption — it's a derived helper value.
+.tier-row__per-base {
+  display: block;
+  margin-top: $sp-xxs;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
 .vendor-source__tiers-empty {
   margin: 0;
   padding: $sp-sm;

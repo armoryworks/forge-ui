@@ -17,6 +17,10 @@ export interface CheckTierVarianceLine {
   partId: number;
   quantity: number;
   unitPrice: number;
+  /** The purchase option the price/qty are in (null = per base unit). The
+   *  server matches the tier for the same option so the comparison is
+   *  apples-to-apples. */
+  purchaseUnitId?: number | null;
 }
 
 export interface CheckTierVarianceResponse {

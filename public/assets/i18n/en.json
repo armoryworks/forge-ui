@@ -1143,7 +1143,8 @@
     "pricing": {
       "title": "Pricing across all vendors",
       "col": {
-        "vendor": "Vendor"
+        "vendor": "Vendor",
+        "perBase": "Per base unit"
       },
       "empty": {
         "message": "No pricing tiers across any vendor source.",

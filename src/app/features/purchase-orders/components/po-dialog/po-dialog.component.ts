@@ -430,6 +430,7 @@ export class PoDialogComponent {
         partId: l.partId,
         quantity: l.orderedQuantity,
         unitPrice: l.unitPrice,
+        purchaseUnitId: l.purchaseUnitId ?? null,
       })),
     }).subscribe({
       next: (result) => {

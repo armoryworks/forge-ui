@@ -1143,7 +1143,8 @@
     "pricing": {
       "title": "Precios entre todos los proveedores",
       "col": {
-        "vendor": "Proveedor"
+        "vendor": "Proveedor",
+        "perBase": "Por unidad base"
       },
       "empty": {
         "message": "Sin niveles de precio en ningún proveedor.",
