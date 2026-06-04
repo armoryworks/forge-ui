@@ -429,6 +429,7 @@
         <colgroup>
           <col class="vendor-source__tier-col--qty" />
           <col class="vendor-source__tier-col--price" />
+          <col class="vendor-source__tier-col--option" />
           <col class="vendor-source__tier-col--from" />
           @if (showTierHistory()) {
             <col class="vendor-source__tier-col--to" />
@@ -439,6 +440,7 @@
           <tr>
             <th>{{ 'vendorSources.tier.minQty' | translate }}</th>
             <th>{{ 'vendorSources.tier.unitPrice' | translate }} ({{ currency }})</th>
+            <th>{{ 'vendorSources.tier.option' | translate }}</th>
             <th>{{ 'vendorSources.tier.effectiveFrom' | translate }}</th>
             @if (showTierHistory()) {
               <th>{{ 'vendorSources.tier.effectiveTo' | translate }}</th>
@@ -456,6 +458,7 @@
                     [attr.data-testid]="'tier-row-' + tier.id">
                   <td>{{ tier.minQuantity }}+</td>
                   <td>{{ currencySymbol(tier.currency) }}{{ tier.unitPrice }}</td>
+                  <td>{{ optionLabelFor(tier.purchaseUnitId) }}</td>
                   <td>{{ tier.effectiveFrom | date:'mediumDate' }}</td>
                   @if (showTierHistory()) {
                     <td class="vendor-source__tier-cell--to">{{ tier.effectiveTo | date:'mediumDate' }}</td>
@@ -475,6 +478,8 @@
                     <td><app-currency-input label="" formControlName="unitPrice"
                       [currencySymbol]="currencySymbol(currency)"
                       [required]="editing()" [isReadonly]="!editing()" /></td>
+                    <td><app-select label="" formControlName="purchaseUnitId"
+                      [options]="purchaseUnitOptions()" [isReadonly]="!editing()" /></td>
                     <td><app-datepicker label="" formControlName="effectiveFrom"
                       [isReadonly]="!editing()" /></td>
                     @if (showTierHistory()) {
@@ -530,6 +535,7 @@
                   <td><app-currency-input label="" formControlName="unitPrice" [currencySymbol]="currencySymbol(currency)"
                     [required]="slot.kind === 'pending'"
                     [placeholder]="slot.kind === 'empty' ? ('vendorSources.tier.placeholderPrice' | translate) : null" /></td>
+                  <td><app-select label="" formControlName="purchaseUnitId" [options]="purchaseUnitOptions()" /></td>
                   <td><app-datepicker label="" formControlName="effectiveFrom" /></td>
                   @if (showTierHistory()) {
                     <td class="vendor-source__tier-cell--to">

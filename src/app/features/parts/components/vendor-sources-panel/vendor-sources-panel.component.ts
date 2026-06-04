@@ -34,6 +34,8 @@ import { VendorListItem } from '../../../vendors/models/vendor-list-item.model';
 import { VendorQuickCreateDialogComponent, VendorQuickCreateDialogData } from '../../../vendors/components/vendor-quick-create-dialog/vendor-quick-create-dialog.component';
 import { VendorPart, VendorPartPriceTier } from '../../models/vendor-part.model';
 import { VendorPartsService } from '../../services/vendor-parts.service';
+import { PartPurchaseUnit } from '../../models/part-purchase-unit.model';
+import { PurchaseUnitsService } from '../../services/purchase-units.service';
 import { toDateOnly, toIsoDate } from '../../../../shared/utils/date.utils';
 
 /**
@@ -140,6 +142,7 @@ interface FlatTierRow {
 })
 export class VendorSourcesPanelComponent {
   private readonly vendorPartsService = inject(VendorPartsService);
+  private readonly purchaseUnitsService = inject(PurchaseUnitsService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
@@ -328,6 +331,35 @@ export class VendorSourcesPanelComponent {
    * when an existing row goes into cell-edit mode.
    */
   protected readonly tierForms = new Map<string, FormGroup>();
+
+  /**
+   * Part-level purchase options (vendor-agnostic pack sizes / forms, e.g.
+   * "Box of 100"). Each price tier may link to one; null means the price is
+   * per a single base unit — i.e. "1 / each". Loaded per part on reload().
+   */
+  protected readonly purchaseUnits = signal<PartPurchaseUnit[]>([]);
+
+  /** Select options for the per-tier purchase-option picker. Leads with the
+   *  null "1 / each" default for parts/tiers with no defined purchase unit. */
+  protected readonly purchaseUnitOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('vendorSources.tier.perEach') },
+    ...this.purchaseUnits()
+      .filter(o => o.isActive)
+      .map(o => ({ value: o.id, label: this.purchaseUnitLabel(o) })),
+  ]);
+
+  /** Human label for a purchase option: "Box (100 ea)" or just the label. */
+  private purchaseUnitLabel(o: PartPurchaseUnit): string {
+    return o.contentUomLabel ? `${o.label} (${o.contentQuantity} ${o.contentUomLabel})` : o.label;
+  }
+
+  /** Resolve a tier's linked purchase-option label for read-only display.
+   *  Null/unknown → the "1 / each" default. */
+  protected optionLabelFor(purchaseUnitId: number | null | undefined): string {
+    if (purchaseUnitId == null) return this.translate.instant('vendorSources.tier.perEach');
+    const o = this.purchaseUnits().find(u => u.id === purchaseUnitId);
+    return o ? this.purchaseUnitLabel(o) : '—';
+  }
 
   /** Currency options for the source-level select. ISO-4217 short list. */
   protected readonly currencyOptions: SelectOption[] = [
@@ -599,6 +631,7 @@ export class VendorSourcesPanelComponent {
         minQuantity: [null as number | null, [Validators.required, Validators.min(1)]],
         unitPrice: [null as number | null, [Validators.required, Validators.min(0)]],
         effectiveFrom: [new Date(), [Validators.required]],
+        purchaseUnitId: [null as number | null],
       });
       this.tierForms.set(key, form);
     }
@@ -798,11 +831,13 @@ export class VendorSourcesPanelComponent {
           minQuantity: [null as number | null, [Validators.required, Validators.min(1)]],
           unitPrice: [null as number | null, [Validators.required, Validators.min(0)]],
           effectiveFrom: [new Date(), [Validators.required]],
+          purchaseUnitId: [null as number | null],
         });
         form.reset({
           minQuantity: tier.minQuantity,
           unitPrice: tier.unitPrice,
           effectiveFrom: new Date(tier.effectiveFrom),
+          purchaseUnitId: tier.purchaseUnitId ?? null,
         });
         if (!existing) {
           form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
@@ -910,6 +945,7 @@ export class VendorSourcesPanelComponent {
       minQuantity: [null as number | null, [Validators.required, Validators.min(1)]],
       unitPrice: [null as number | null, [Validators.required, Validators.min(0)]],
       effectiveFrom: [new Date(), [Validators.required]],
+      purchaseUnitId: [null as number | null],
     });
     form.statusChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.formsTicker.update(n => n + 1);
@@ -1014,6 +1050,9 @@ export class VendorSourcesPanelComponent {
   /** Reload tiers — pulls history when the toggle is on. */
   private reload(partId: number): void {
     this.loading.set(true);
+    this.purchaseUnitsService.list(partId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ next: (units) => this.purchaseUnits.set(units) });
     this.vendorPartsService.listForPart(partId, this.showTierHistory()).subscribe({
       next: (list) => {
         this.vendorParts.set(list);
@@ -1187,6 +1226,7 @@ export class VendorSourcesPanelComponent {
               this.vendorPartsService.addPriceTier(vpId, {
                 minQuantity: v.minQuantity!,
                 unitPrice: v.unitPrice!,
+                purchaseUnitId: v.purchaseUnitId ?? null,
                 // toIsoDate sends midnight-UTC of the picked LOCAL date
                 // (YYYY-MM-DDT00:00:00Z). Plain .toISOString() would
                 // send midnight-LOCAL converted to UTC, which lands
@@ -1216,6 +1256,7 @@ export class VendorSourcesPanelComponent {
               this.vendorPartsService.addPriceTier(vp.id, {
                 minQuantity: v.minQuantity!,
                 unitPrice: v.unitPrice!,
+                purchaseUnitId: v.purchaseUnitId ?? null,
                 // toIsoDate sends midnight-UTC of the picked LOCAL date
                 // (YYYY-MM-DDT00:00:00Z). Plain .toISOString() would
                 // send midnight-LOCAL converted to UTC, which lands

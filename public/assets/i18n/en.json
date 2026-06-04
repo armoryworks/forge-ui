@@ -1118,6 +1118,8 @@
     "tier": {
       "minQty": "Min qty",
       "unitPrice": "Unit price",
+      "option": "Purchase option",
+      "perEach": "1 / each",
       "currency": "Currency",
       "effectiveFrom": "Effective from",
       "effectiveTo": "Effective to",

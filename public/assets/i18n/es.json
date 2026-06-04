@@ -1118,6 +1118,8 @@
     "tier": {
       "minQty": "Cant. mín.",
       "unitPrice": "Precio unitario",
+      "option": "Opción de compra",
+      "perEach": "1 / c/u",
       "currency": "Moneda",
       "effectiveFrom": "Vigente desde",
       "effectiveTo": "Vigente hasta",
