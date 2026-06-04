@@ -5,4 +5,5 @@ export interface UpdateUserRequest {
   avatarColor?: string;
   isActive?: boolean;
   role?: string;
+  email?: string;
 }

@@ -423,7 +423,9 @@ export class AdminComponent implements OnInit {
       isActive: user.isActive,
       roleTemplateId: user.roleTemplateId ?? null,
     });
-    this.userForm.controls.email.disable();
+    // Email is editable in edit mode so admins can correct a typo'd address
+    // (it has no other write path — previously only fixable via direct DB edit).
+    this.userForm.controls.email.enable();
     this.avatarColor.set(user.avatarColor ?? '#0d9488');
     this.scanIdentifiers.set([]);
     this.newScanValue.reset();
@@ -452,6 +454,7 @@ export class AdminComponent implements OnInit {
         avatarColor: this.avatarColor(),
         isActive: form.isActive!,
         role: form.role!,
+        email: form.email !== editing.email ? form.email! : undefined,
       }).subscribe({
         next: () => {
           // Update work location if changed
@@ -531,7 +534,7 @@ export class AdminComponent implements OnInit {
           this.editingUser.set(newUser);
           this.setupToken.set(result.setupToken);
           this.setupTokenExpiresAt.set(result.setupTokenExpiresAt);
-          this.userForm.controls.email.disable();
+          this.userForm.controls.email.enable();
           this.loadScanIdentifiers(result.id);
           this.snackbar.success(this.translate.instant('admin.userCreated', { name: form.firstName }));
         },
