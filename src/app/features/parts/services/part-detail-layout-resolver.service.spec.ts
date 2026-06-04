@@ -11,25 +11,25 @@ describe('PartDetailLayoutResolverService', () => {
     service = TestBed.inject(PartDetailLayoutResolverService);
   });
 
-  it('Buy + Raw → identity, sourcing, purchaseHistory, inventory, quality, cost, pricing, activity, files', () => {
+  it('Buy + Raw → identity, sourcing, purchaseHistory, inventory, quality, cost, pricing, files', () => {
     const ids = service.resolve('Buy', 'Raw').map(t => t.id);
-    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'activity', 'files']);
+    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'files']);
   });
 
-  it('Make + Subassembly → identity, material, purchaseHistory, bom, routing, inventory, mrp, cost, pricing, quality, alternates, activity, files', () => {
+  it('Make + Subassembly → identity, material, purchaseHistory, bom, routing, inventory, mrp, cost, pricing, quality, alternates, files', () => {
     // PURCHASE_HISTORY is anchored after the FIRST inventory/bom/material
     // tab present (here: material), per the universal-inclusion rule.
     const ids = service.resolve('Make', 'Subassembly').map(t => t.id);
     expect(ids).toEqual([
-      'identity', 'material', 'purchaseHistory', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'pricing', 'quality', 'alternates', 'activity', 'files',
+      'identity', 'material', 'purchaseHistory', 'bom', 'routing', 'inventory', 'mrp', 'cost', 'pricing', 'quality', 'alternates', 'files',
     ]);
   });
 
-  it('Phantom + Subassembly → identity, bom, purchaseHistory, activity, files', () => {
+  it('Phantom + Subassembly → identity, bom, purchaseHistory, files', () => {
     // Phantom layouts are minimal — bom only — but purchaseHistory still
     // appears (anchored after bom) per the universal-inclusion rule.
     const ids = service.resolve('Phantom', 'Subassembly').map(t => t.id);
-    expect(ids).toEqual(['identity', 'bom', 'purchaseHistory', 'activity', 'files']);
+    expect(ids).toEqual(['identity', 'bom', 'purchaseHistory', 'files']);
     expect(ids).not.toContain('pricing');
   });
 
@@ -41,7 +41,7 @@ describe('PartDetailLayoutResolverService', () => {
   it('unknown combo defaults to Buy + Component layout (includes pricing)', () => {
     // Phantom + Raw is not a viable combo per Section 2 — should default.
     const ids = service.resolve('Phantom', 'Raw').map(t => t.id);
-    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'alternates', 'activity', 'files']);
+    expect(ids).toEqual(['identity', 'sourcing', 'purchaseHistory', 'inventory', 'quality', 'cost', 'pricing', 'alternates', 'files']);
   });
 
   it('purchaseHistory tab is included for every Buy / Subcontract combo', () => {
@@ -78,15 +78,16 @@ describe('PartDetailLayoutResolverService', () => {
     }
   });
 
-  it('Identity always first; Activity then Files always last across every combo', () => {
+  it('Identity always first; Files always last across every combo (Activity is a footer, not a tab)', () => {
     const procs = ['Buy', 'Make', 'Subcontract', 'Phantom'] as const;
     const classes = ['Raw', 'Component', 'Subassembly', 'FinishedGood', 'Consumable', 'Tool'] as const;
     for (const p of procs) {
       for (const c of classes) {
         const layout = service.resolve(p, c);
+        const ids = layout.map(t => t.id);
         expect(layout[0].id, `first tab for ${p}+${c}`).toBe('identity');
-        expect(layout[layout.length - 2].id, `second-to-last for ${p}+${c}`).toBe('activity');
         expect(layout[layout.length - 1].id, `last tab for ${p}+${c}`).toBe('files');
+        expect(ids, `no activity tab for ${p}+${c}`).not.toContain('activity');
       }
     }
   });
@@ -102,7 +103,7 @@ describe('PartDetailLayoutResolverService', () => {
     // PURCHASE_HISTORY anchored after the first material/bom tab (here:
     // material) per the universal-inclusion rule.
     const ids = service.resolve('Make', 'Tool').map(t => t.id);
-    expect(ids).toEqual(['identity', 'material', 'purchaseHistory', 'bom', 'routing', 'activity', 'files']);
+    expect(ids).toEqual(['identity', 'material', 'purchaseHistory', 'bom', 'routing', 'files']);
     expect(ids).not.toContain('pricing');
   });
 

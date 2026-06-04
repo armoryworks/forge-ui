@@ -131,6 +131,14 @@
   padding: 0;
 }
 
+// Persistent Activity footer (Conversation/Notes/History) rendered below the
+// active tab's content. A single divider separates it from the tab body —
+// whitespace alone elsewhere, per the no-redundant-chrome rule.
+.detail-activity {
+  padding: $sp-md $sp-lg;
+  border-top: $border-width-thin solid var(--border);
+}
+
 // Tabs that aren't yet wrapped in an extracted cluster component
 // (sourcing, bom, routing, alternates, serials, viewer, plus the
 // promote-section under identity) keep getting body padding via

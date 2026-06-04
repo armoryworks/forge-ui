@@ -9,8 +9,9 @@ const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
  *
  * Verifies that opening a Buy + Raw part shows the layout returned by
  * `PartDetailLayoutResolverService.resolve('Buy', 'Raw')`:
- *   identity, sourcing, inventory, quality, cost, activity, files
+ *   identity, sourcing, inventory, quality, cost, files
  * (Spec source: phase-4-output/part-type-field-relevance.md § 6 — B1 row.)
+ * Activity is a persistent footer (app-entity-activity-section), not a tab.
  *
  * Then switches to the Sources tab and asserts the vendor list panel
  * mounts (Pillar 1+3 reuse).
@@ -50,9 +51,10 @@ test.describe('Pillar 4 — Part detail tabs', () => {
       'class', /detail-tab--active/,
     );
 
-    // Activity and Files are always last
-    await expect(page.locator('[data-testid="part-tab-activity"]')).toBeVisible();
+    // Files is always the last tab. Activity is no longer a tab — it renders
+    // as a persistent footer below the tab body, visible on every tab.
     await expect(page.locator('[data-testid="part-tab-files"]')).toBeVisible();
+    await expect(page.locator('.detail-activity app-entity-activity-section')).toBeVisible();
 
     // For Buy combos we expect the Sources tab. For non-Phantom combos we
     // also expect Inventory + Cost.

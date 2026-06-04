@@ -48,7 +48,7 @@ import { VendorPart } from '../../models/vendor-part.model';
 import { PartIdentityClusterComponent } from '../part-clusters/part-identity-cluster.component';
 import { PartInventoryClusterComponent } from '../part-clusters/part-inventory-cluster.component';
 import { PartCostClusterComponent } from '../part-clusters/part-cost-cluster.component';
-import { PartActivityClusterComponent } from '../part-clusters/part-activity-cluster.component';
+import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { PartPricingClusterComponent } from '../part-clusters/part-pricing-cluster/part-pricing-cluster.component';
 import { PartFilesClusterComponent } from '../part-clusters/part-files-cluster.component';
 import { PartMaterialClusterComponent } from '../part-clusters/part-material-cluster/part-material-cluster.component';
@@ -71,10 +71,12 @@ type BomViewMode = 'table' | 'tree';
  *
  * Tabs are now driven by `PartDetailLayoutResolverService.resolve(...)`,
  * which maps the (procurementSource, inventoryClass) axes to an ordered
- * list of tab descriptors. Identity is always first; Activity → Files
- * always last. Tab id is bound to `?tab=<id>` so refresh holds.
+ * list of tab descriptors. Identity is always first; Files always last.
+ * Tab id is bound to `?tab=<id>` so refresh holds. Activity is a persistent
+ * footer below the tab body (not a tab), so Conversation/Notes/History is
+ * visible on every tab — matching Job/Vendor/Lot and the universal pattern.
  *
- * Cluster tabs (identity, inventory, cost, activity, files, material,
+ * Cluster tabs (identity, inventory, cost, files, material,
  * uom, mrp, quality, routing, alternates) render the
  * new `<app-part-*-cluster>` components. Existing inline implementations
  * are reused for sourcing (vendor list panel) and BOM (rich inline UI
@@ -95,7 +97,7 @@ type BomViewMode = 'table' | 'tree';
     BomTreeComponent, BomRevisionHistoryComponent,
     SerialNumbersTabComponent, VendorSourcesPanelComponent, PartPurchaseUnitsClusterComponent,
     PartIdentityClusterComponent, PartInventoryClusterComponent, PartCostClusterComponent,
-    PartActivityClusterComponent, PartFilesClusterComponent,
+    EntityActivitySectionComponent, PartFilesClusterComponent,
     PartMaterialClusterComponent, PartUomClusterComponent, PartMrpClusterComponent,
     PartRoutingClusterComponent, PartAlternatesClusterComponent,
     PartQualityClusterComponent, PartPricingClusterComponent,

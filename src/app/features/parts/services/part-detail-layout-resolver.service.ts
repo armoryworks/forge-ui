@@ -8,9 +8,14 @@ import { ProcurementSource } from '../models/procurement-source.type';
  *
  * Order matters in the layout array returned by
  * {@link PartDetailLayoutResolverService.resolve}: Identity is always first,
- * Activity then Files are always last. Cluster placement in between is
- * driven by the (procurementSource, inventoryClass) combination per
+ * Files is always last. Cluster placement in between is driven by the
+ * (procurementSource, inventoryClass) combination per
  * `phase-4-output/part-type-field-relevance.md` Section 6.
+ *
+ * Activity is intentionally NOT a tab — it renders as a persistent footer
+ * below the tab body (matching Job/Vendor/Lot and the universal
+ * entity-detail-pattern), so the Conversation/Notes/History section is
+ * visible on every tab rather than buried behind one.
  */
 export type PartDetailTabId =
   | 'identity'
@@ -25,7 +30,6 @@ export type PartDetailTabId =
   | 'quality'
   | 'alternates'
   | 'material'
-  | 'activity'
   | 'files';
 
 /** A single tab descriptor returned by the resolver. */
@@ -52,7 +56,6 @@ const PRICING: TabLayoutEntry = { id: 'pricing', labelKey: 'parts.detail.tabs.pr
 const QUALITY: TabLayoutEntry = { id: 'quality', labelKey: 'parts.detail.tabs.quality', iconName: 'fact_check' };
 const ALTERNATES: TabLayoutEntry = { id: 'alternates', labelKey: 'parts.detail.tabs.alternates', iconName: 'swap_horiz' };
 const MATERIAL: TabLayoutEntry = { id: 'material', labelKey: 'parts.detail.tabs.material', iconName: 'category' };
-const ACTIVITY: TabLayoutEntry = { id: 'activity', labelKey: 'parts.detail.tabs.activity', iconName: 'timeline' };
 const FILES: TabLayoutEntry = { id: 'files', labelKey: 'parts.detail.tabs.files', iconName: 'attach_file' };
 
 /**
@@ -60,7 +63,8 @@ const FILES: TabLayoutEntry = { id: 'files', labelKey: 'parts.detail.tabs.files'
  * (procurementSource × inventoryClass) axes to an ordered tab layout.
  *
  * Returns the default Buy + Component layout for any unknown combination.
- * Identity is always first; Activity → Files always last.
+ * Identity is always first; Files always last. (Activity is a persistent
+ * footer, not a tab — see the PartDetailTabId doc above.)
  *
  * Spec source of truth: `phase-4-output/part-type-field-relevance.md` § 6.
  */
@@ -74,7 +78,7 @@ export class PartDetailLayoutResolverService {
     // direction (2026-05-05): always show it. The empty state covers the
     // "no POs reference this part" case cleanly.
     const middleWithPo = this.injectPurchaseHistory(middle);
-    return [IDENTITY, ...middleWithPo, ACTIVITY, FILES];
+    return [IDENTITY, ...middleWithPo, FILES];
   }
 
   /**

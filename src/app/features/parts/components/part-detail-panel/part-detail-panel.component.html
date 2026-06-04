@@ -326,10 +326,6 @@
             (cancelled)="cancelEdit()" />
         }
 
-        @case ('activity') {
-          <app-part-activity-cluster [partId]="part.id" />
-        }
-
         @case ('files') {
           <app-part-files-cluster [partId]="part.id" />
         }
@@ -346,6 +342,13 @@
           }
         }
       }
+
+      <!-- Activity is a persistent footer across all tabs (matches Job/Vendor/Lot
+           and the universal entity-detail-pattern), not a standalone tab — so
+           Conversation/Notes/History is visible regardless of the active tab. -->
+      <div class="detail-activity">
+        <app-entity-activity-section entityType="Part" [entityId]="part.id" />
+      </div>
     </div>
   </div>
 } @else {
