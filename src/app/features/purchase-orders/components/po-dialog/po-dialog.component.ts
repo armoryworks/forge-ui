@@ -18,6 +18,7 @@ import { VendorPartsService } from '../../../parts/services/vendor-parts.service
 import { PurchaseUnitsService } from '../../../parts/services/purchase-units.service';
 import { PartPurchaseUnit } from '../../../parts/models/part-purchase-unit.model';
 import { OffTierPromptDialogComponent, OffTierPromptResult } from '../off-tier-prompt-dialog/off-tier-prompt-dialog.component';
+import { resolveAutoLinePrice, classifyManualOverride } from './po-line-price.util';
 import { AuthService } from '../../../../shared/services/auth.service';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -256,26 +257,30 @@ export class PoDialogComponent {
     this.lineForm.controls.unitPrice.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((val) => {
       // If the change came from our computed update (we set with emitEvent:false),
       // just flip the flag to indicate default price.
-      if (this.priceIsDefault()) {
-        // If user edits while price was default, enforce permission + reason
-        const userCanOverride = this.auth.hasRole('Admin') || this.auth.hasRole('Manager');
-        if (!userCanOverride && lastComputedPrice !== null && val !== lastComputedPrice) {
-          // Revert and notify
+      // Permission + reason gating for editing a default-filled price. The
+      // branch decision lives in classifyManualOverride (unit-tested, forge#8).
+      const userCanOverride = this.auth.hasRole('Admin') || this.auth.hasRole('Manager');
+      const classification = classifyManualOverride({
+        priceIsDefault: this.priceIsDefault(),
+        canOverride: userCanOverride,
+        lastComputedPrice,
+        newValue: val,
+      });
+      if (classification === 'deny-permission') {
+        this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
+        this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresPermission'));
+        return;
+      }
+      if (classification === 'needs-reason') {
+        const reason = window.prompt(this.translate.instant('purchaseOrders.enterOverrideReason') || 'Please provide a reason for the manual price override');
+        if (!reason || reason.trim().length === 0) {
           this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
-          this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresPermission'));
+          this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresReason'));
           return;
         }
-        if (userCanOverride && lastComputedPrice !== null && val !== lastComputedPrice) {
-          const reason = window.prompt(this.translate.instant('purchaseOrders.enterOverrideReason') || 'Please provide a reason for the manual price override');
-          if (!reason || reason.trim().length === 0) {
-            this.lineForm.controls.unitPrice.setValue(lastComputedPrice, { emitEvent: false });
-            this.snackbar.error(this.translate.instant('purchaseOrders.overrideRequiresReason'));
-            return;
-          }
-          // Record the reason for the pending add-line (will be attached when the line is added).
-          this.pendingLineOverrideReason.set(reason.trim());
-          this.snackbar.info(this.translate.instant('purchaseOrders.overrideRecorded'));
-        }
+        // Record the reason for the pending add-line (attached when the line is added).
+        this.pendingLineOverrideReason.set(reason.trim());
+        this.snackbar.info(this.translate.instant('purchaseOrders.overrideRecorded'));
       }
       this.priceIsDefault.set(false);
     });
@@ -304,27 +309,11 @@ export class PoDialogComponent {
     // Try vendor-specific tiers first
     this.vendorPartsService.listForPart(partId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => {
-        let chosenPrice: number | null = null;
-        // Prefer vendor-specific row for selected vendor
-        const vendorRow = vendorId ? list.find(vp => vp.vendorId === vendorId) : undefined;
-        const candidateRows = vendorRow ? [vendorRow, ...list.filter(vp => vp.vendorId !== vendorId)] : list;
-        for (const vp of candidateRows) {
-          // Filter tiers by purchaseUnitId match (exact) or null fallback
-          const tiers = vp.priceTiers
-            .filter(t => t.purchaseUnitId === purchaseUnitId || t.purchaseUnitId === null)
-            .filter(t => t.minQuantity <= (qty || 0))
-            .sort((a, b) => b.minQuantity - a.minQuantity);
-          if (tiers.length > 0) {
-            chosenPrice = tiers[0].unitPrice;
-            break;
-          }
-        }
-
-        if (chosenPrice == null) {
-          // Fallback to part effective price
-          const part = this.parts().find(p => p.id === partId);
-          if (part && part.effectivePrice > 0) chosenPrice = part.effectivePrice;
-        }
+        // Selection rules (vendor preference, option-match/null fallback,
+        // qty-break, then part effective price) live in resolveAutoLinePrice
+        // so they're unit-tested in isolation (forge#8).
+        const part = this.parts().find(p => p.id === partId);
+        const chosenPrice = resolveAutoLinePrice(list, vendorId, qty, purchaseUnitId, part?.effectivePrice);
 
         if (chosenPrice != null) {
           this.lineForm.controls.unitPrice.setValue(chosenPrice, { emitEvent: false });
