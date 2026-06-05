@@ -8,6 +8,7 @@ import { PagedResponse, PagedQuery } from '../../../shared/models/paged-response
 import { PurchaseOrderListItem } from '../models/purchase-order-list-item.model';
 import { PurchaseOrderDetail } from '../models/purchase-order-detail.model';
 import { CreatePurchaseOrderRequest } from '../models/create-purchase-order-request.model';
+import { PriceOverrideReviewRequest, PriceOverrideReviewResponse } from '../models/price-override-review.model';
 import { UpdatePurchaseOrderRequest } from '../models/update-purchase-order-request.model';
 import { ReceiveItemsRequest } from '../models/receive-items-request.model';
 import { PurchaseOrderRelease, CreatePurchaseOrderReleaseRequest, UpdatePurchaseOrderReleaseRequest } from '../models/purchase-order-release.model';
@@ -64,6 +65,15 @@ export class PurchaseOrderService {
 
   createPurchaseOrder(request: CreatePurchaseOrderRequest): Observable<PurchaseOrderDetail> {
     return this.http.post<PurchaseOrderDetail>(this.base, request);
+  }
+
+  /**
+   * AI-assisted review of a manual unit-price override (forge#6). Returns the
+   * deterministic variance + risk band plus an optional AI assessment and a
+   * suggested justification. Requires CAP-EXT-AI-ASSISTANT server-side.
+   */
+  reviewPriceOverride(request: PriceOverrideReviewRequest): Observable<PriceOverrideReviewResponse> {
+    return this.http.post<PriceOverrideReviewResponse>(`${this.base}/price-variance-review`, request);
   }
 
   updatePurchaseOrder(id: number, request: UpdatePurchaseOrderRequest): Observable<void> {
