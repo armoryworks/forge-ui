@@ -1,0 +1,39 @@
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border-color, #e0e0e0);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface-color, #fff);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--primary-color, #1976d2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.tile-icon {
+  font-size: 2rem;
+  color: var(--primary-color, #1976d2);
+}
+
+.tile-label {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.tile-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #666);
+}

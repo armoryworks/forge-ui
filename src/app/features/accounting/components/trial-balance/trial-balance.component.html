@@ -1,0 +1,50 @@
+<app-page-header title="Trial Balance" subtitle="Debits and credits by account">
+</app-page-header>
+
+<div class="toolbar">
+  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
+  @if (report(); as r) {
+    <span class="balance-chip" [class.ok]="r.isBalanced" [class.bad]="!r.isBalanced">
+      {{ r.isBalanced ? 'Balanced' : 'Out of balance' }}
+    </span>
+  }
+</div>
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (report(); as r) {
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th>Account #</th>
+        <th>Account</th>
+        <th class="num">Debit</th>
+        <th class="num">Credit</th>
+        <th class="num">Net</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of r.rows; track row.glAccountId) {
+        <tr>
+          <td>{{ row.accountNumber }}</td>
+          <td>{{ row.accountName }}</td>
+          <td class="num"><app-currency-display [value]="row.debitTotal" /></td>
+          <td class="num"><app-currency-display [value]="row.creditTotal" /></td>
+          <td class="num"><app-currency-display [value]="row.netBalance" /></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="5" class="muted">No ledger activity.</td></tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">Total</td>
+        <td class="num"><app-currency-display [value]="r.totalDebit" /></td>
+        <td class="num"><app-currency-display [value]="r.totalCredit" /></td>
+        <td class="num"></td>
+      </tr>
+    </tfoot>
+  </table>
+}

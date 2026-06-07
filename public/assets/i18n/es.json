@@ -50,7 +50,11 @@
     "scheduling": "Programación",
     "oee": "OEE",
     "approvals": "Aprobaciones",
-    "back": "Atrás"
+    "back": "Atrás",
+    "trialBalance": "Balance de Comprobación",
+    "profitLoss": "Pérdidas y Ganancias",
+    "balanceSheet": "Balance General",
+    "cashFlow": "Flujo de Caja"
   },
   "navGroups": {
     "operations": "Operaciones",
@@ -61,7 +65,8 @@
     "inventory": "Inventario",
     "purchasing": "Compras",
     "people": "Personas",
-    "insights": "Análisis"
+    "insights": "Análisis",
+    "accounting": "Contabilidad"
   },
   "adminGroups": {
     "usersAccess": "Usuarios y Acceso",

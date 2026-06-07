@@ -1,0 +1,54 @@
+<app-page-header title="Profit &amp; Loss" subtitle="Income and expense over the period">
+</app-page-header>
+
+<div class="toolbar">
+  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
+</div>
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (report(); as r) {
+  @if (!r.cogsPosted && r.marginCaveat) {
+    <p class="caveat">{{ r.marginCaveat }}</p>
+  }
+
+  <table class="ledger-table">
+    <tbody>
+      <tr class="section-head"><td colspan="2">Income</td></tr>
+      @for (line of r.income; track line.glAccountId) {
+        <tr>
+          <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
+          <td class="num"><app-currency-display [value]="line.amount" /></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="2" class="muted">No income.</td></tr>
+      }
+      <tr class="subtotal">
+        <td>Total income</td>
+        <td class="num"><app-currency-display [value]="r.totalIncome" /></td>
+      </tr>
+
+      <tr class="section-head"><td colspan="2">Expense</td></tr>
+      @for (line of r.expense; track line.glAccountId) {
+        <tr>
+          <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
+          <td class="num"><app-currency-display [value]="line.amount" /></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="2" class="muted">No expense.</td></tr>
+      }
+      <tr class="subtotal">
+        <td>Total expense</td>
+        <td class="num"><app-currency-display [value]="r.totalExpense" /></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Net income</td>
+        <td class="num"><app-currency-display [value]="r.netIncome" /></td>
+      </tr>
+    </tfoot>
+  </table>
+}

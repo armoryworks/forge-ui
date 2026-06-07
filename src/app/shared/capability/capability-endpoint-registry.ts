@@ -59,6 +59,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'shop-floor/machine', capability: 'CAP-MFG-MACHINE-CONNECT' },
 
   // ── Top-level prefixes ──
+  { prefix: 'accounting', capability: 'CAP-ACCT-FULLGL' },
   { prefix: 'ai-assistants', capability: 'CAP-EXT-AI-ASSISTANT' },
   { prefix: 'ai', capability: 'CAP-EXT-AI-ASSISTANT' },
   { prefix: 'announcements', capability: 'CAP-EXT-ANNOUNCEMENTS' },

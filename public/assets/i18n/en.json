@@ -50,7 +50,11 @@
     "scheduling": "Scheduling",
     "oee": "OEE",
     "approvals": "Approvals",
-    "back": "Back"
+    "back": "Back",
+    "trialBalance": "Trial Balance",
+    "profitLoss": "Profit & Loss",
+    "balanceSheet": "Balance Sheet",
+    "cashFlow": "Cash Flow"
   },
   "navGroups": {
     "operations": "Operations",
@@ -61,7 +65,8 @@
     "inventory": "Inventory",
     "purchasing": "Purchasing",
     "people": "People",
-    "insights": "Insights"
+    "insights": "Insights",
+    "accounting": "Accounting"
   },
   "adminGroups": {
     "usersAccess": "Users & Access",

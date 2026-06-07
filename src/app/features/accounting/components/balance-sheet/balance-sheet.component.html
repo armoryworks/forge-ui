@@ -1,0 +1,71 @@
+<app-page-header title="Balance Sheet" subtitle="Assets, liabilities and equity as of date">
+</app-page-header>
+
+<div class="toolbar">
+  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
+  @if (report(); as r) {
+    <span class="balance-chip" [class.ok]="r.isBalanced" [class.bad]="!r.isBalanced">
+      {{ r.isBalanced ? 'Balanced' : 'Out of balance' }}
+    </span>
+  }
+</div>
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (report(); as r) {
+  <table class="ledger-table">
+    <tbody>
+      <tr class="section-head"><td colspan="2">Assets</td></tr>
+      @for (line of r.assets; track line.glAccountId) {
+        <tr>
+          <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
+          <td class="num"><app-currency-display [value]="line.amount" /></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="2" class="muted">No assets.</td></tr>
+      }
+      <tr class="subtotal">
+        <td>Total assets</td>
+        <td class="num"><app-currency-display [value]="r.totalAssets" /></td>
+      </tr>
+
+      <tr class="section-head"><td colspan="2">Liabilities</td></tr>
+      @for (line of r.liabilities; track line.glAccountId) {
+        <tr>
+          <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
+          <td class="num"><app-currency-display [value]="line.amount" /></td>
+        </tr>
+      } @empty {
+        <tr><td colspan="2" class="muted">No liabilities.</td></tr>
+      }
+      <tr class="subtotal">
+        <td>Total liabilities</td>
+        <td class="num"><app-currency-display [value]="r.totalLiabilities" /></td>
+      </tr>
+
+      <tr class="section-head"><td colspan="2">Equity</td></tr>
+      @for (line of r.equity; track line.glAccountId) {
+        <tr>
+          <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
+          <td class="num"><app-currency-display [value]="line.amount" /></td>
+        </tr>
+      }
+      <tr>
+        <td>Current-year earnings</td>
+        <td class="num"><app-currency-display [value]="r.currentYearEarnings" /></td>
+      </tr>
+      <tr class="subtotal">
+        <td>Total equity</td>
+        <td class="num"><app-currency-display [value]="r.totalEquityWithEarnings" /></td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total liabilities &amp; equity</td>
+        <td class="num"><app-currency-display [value]="r.totalLiabilitiesAndEquity" /></td>
+      </tr>
+    </tfoot>
+  </table>
+}

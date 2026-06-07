@@ -3,6 +3,7 @@ import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
 import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { capabilityGuard } from './shared/guards/capability.guard';
 import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { roleGuard } from './shared/guards/role.guard';
@@ -110,6 +111,14 @@ export const routes: Routes = [
         path: 'expenses',
         loadChildren: () =>
           import('./features/expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES),
+      },
+      {
+        // Dark GL accounting suite — guarded by CAP-ACCT-FULLGL so the whole area is unreachable by URL
+        // until the capability is switched on (mirrors the server-side gate).
+        path: 'accounting',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-ACCT-FULLGL')],
+        loadChildren: () =>
+          import('./features/accounting/accounting.routes').then((m) => m.ACCOUNTING_ROUTES),
       },
       {
         path: 'assets',
