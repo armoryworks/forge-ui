@@ -58,7 +58,8 @@
     "arAging": "AR Aging",
     "apAging": "AP Aging",
     "grni": "GRNI",
-    "periodClose": "Period Close"
+    "periodClose": "Period Close",
+    "bankRec": "Bank Reconciliation"
   },
   "navGroups": {
     "operations": "Operations",

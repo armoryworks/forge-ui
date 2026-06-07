@@ -42,4 +42,9 @@ export const ACCOUNTING_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/period-close/period-close.component').then((m) => m.PeriodCloseComponent),
   },
+  {
+    path: 'bank-rec',
+    loadComponent: () =>
+      import('./components/bank-rec/bank-rec.component').then((m) => m.BankRecComponent),
+  },
 ];

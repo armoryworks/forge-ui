@@ -58,7 +58,8 @@
     "arAging": "Antigüedad CxC",
     "apAging": "Antigüedad CxP",
     "grni": "GRNI",
-    "periodClose": "Cierre de Período"
+    "periodClose": "Cierre de Período",
+    "bankRec": "Conciliación Bancaria"
   },
   "navGroups": {
     "operations": "Operaciones",

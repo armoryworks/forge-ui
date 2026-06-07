@@ -191,6 +191,23 @@ export interface YearEndCloseResult {
 // ── Bank reconciliation ────────────────────────────────────────────────────
 export type BankReconciliationStatus = 'Draft' | 'Finalized';
 
+export interface CashAccountModel {
+  glAccountId: number;
+  accountNumber: string;
+  name: string;
+}
+
+export interface BankReconciliationSummary {
+  reconciliationId: number;
+  cashGlAccountId: number;
+  cashAccountName: string;
+  statementDate: string;
+  statementEndingBalance: number;
+  status: BankReconciliationStatus;
+  difference: number;
+  isReconciled: boolean;
+}
+
 export interface BankReconciliationItemRow {
   itemId: number;
   journalLineId: number;

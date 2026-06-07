@@ -7,7 +7,9 @@ import {
   ApAging,
   ArAging,
   BalanceSheet,
+  BankReconciliationSummary,
   BankReconciliationWorksheet,
+  CashAccountModel,
   CashFlowStatement,
   FiscalPeriodModel,
   FiscalPeriodStatus,
@@ -90,6 +92,18 @@ export class GeneralLedgerService {
   }
 
   // ── Bank reconciliation ──
+  getCashAccounts(bookId: number): Observable<CashAccountModel[]> {
+    return this.http.get<CashAccountModel[]>(`${this.base}/cash-accounts`, {
+      params: new HttpParams().set('bookId', bookId),
+    });
+  }
+
+  getBankReconciliations(bookId: number): Observable<BankReconciliationSummary[]> {
+    return this.http.get<BankReconciliationSummary[]>(`${this.base}/bank-reconciliations`, {
+      params: new HttpParams().set('bookId', bookId),
+    });
+  }
+
   startBankReconciliation(
     bookId: number, cashGlAccountId: number, statementDate: string, statementEndingBalance: number,
   ): Observable<BankReconciliationWorksheet> {
