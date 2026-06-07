@@ -54,7 +54,10 @@
     "trialBalance": "Balance de Comprobación",
     "profitLoss": "Pérdidas y Ganancias",
     "balanceSheet": "Balance General",
-    "cashFlow": "Flujo de Caja"
+    "cashFlow": "Flujo de Caja",
+    "arAging": "Antigüedad CxC",
+    "apAging": "Antigüedad CxP",
+    "grni": "GRNI"
   },
   "navGroups": {
     "operations": "Operaciones",

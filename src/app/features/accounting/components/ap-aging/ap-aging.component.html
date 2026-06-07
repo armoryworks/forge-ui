@@ -1,0 +1,51 @@
+<app-page-header title="AP Aging" subtitle="Open payables by vendor and age">
+</app-page-header>
+
+<div class="toolbar">
+  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
+  @if (report(); as r) {
+    <span class="balance-chip" [class.ok]="r.reconciliation.isReconciled" [class.bad]="!r.reconciliation.isReconciled">
+      {{ r.reconciliation.isReconciled ? 'Ties to AP control' : 'Out of balance' }}
+    </span>
+  }
+</div>
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else if (error()) {
+  <p class="error">{{ error() }}</p>
+} @else if (report(); as r) {
+  <table class="ledger-table">
+    <thead>
+      <tr>
+        <th>Vendor</th>
+        @for (b of r.totalsByBucket; track b.label) {
+          <th class="num">{{ b.label }}</th>
+        }
+        <th class="num">Open</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of r.vendors; track row.vendorId) {
+        <tr>
+          <td>{{ row.vendorName }}</td>
+          @for (b of row.buckets; track b.label) {
+            <td class="num"><app-currency-display [value]="b.amount" /></td>
+          }
+          <td class="num"><app-currency-display [value]="row.openBalance" /></td>
+        </tr>
+      } @empty {
+        <tr><td [attr.colspan]="r.totalsByBucket.length + 2" class="muted">No open payables.</td></tr>
+      }
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>Total</td>
+        @for (b of r.totalsByBucket; track b.label) {
+          <td class="num"><app-currency-display [value]="b.amount" /></td>
+        }
+        <td class="num"><app-currency-display [value]="r.grandTotal" /></td>
+      </tr>
+    </tfoot>
+  </table>
+}

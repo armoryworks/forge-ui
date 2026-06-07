@@ -54,7 +54,10 @@
     "trialBalance": "Trial Balance",
     "profitLoss": "Profit & Loss",
     "balanceSheet": "Balance Sheet",
-    "cashFlow": "Cash Flow"
+    "cashFlow": "Cash Flow",
+    "arAging": "AR Aging",
+    "apAging": "AP Aging",
+    "grni": "GRNI"
   },
   "navGroups": {
     "operations": "Operations",

@@ -23,4 +23,18 @@ export const ACCOUNTING_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/cash-flow/cash-flow.component').then((m) => m.CashFlowComponent),
   },
+  {
+    path: 'ar-aging',
+    loadComponent: () =>
+      import('./components/ar-aging/ar-aging.component').then((m) => m.ArAgingComponent),
+  },
+  {
+    path: 'ap-aging',
+    loadComponent: () =>
+      import('./components/ap-aging/ap-aging.component').then((m) => m.ApAgingComponent),
+  },
+  {
+    path: 'grni',
+    loadComponent: () => import('./components/grni/grni.component').then((m) => m.GrniComponent),
+  },
 ];

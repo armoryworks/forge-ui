@@ -28,5 +28,8 @@ export class AccountingComponent {
     { route: 'profit-loss', label: 'Profit & Loss', icon: 'trending_up', description: 'Income and expense over a period.' },
     { route: 'balance-sheet', label: 'Balance Sheet', icon: 'account_balance', description: 'Assets, liabilities and equity as of a date.' },
     { route: 'cash-flow', label: 'Cash Flow', icon: 'waterfall_chart', description: 'Indirect-method cash flow, reconciled to the cash account.' },
+    { route: 'ar-aging', label: 'AR Aging', icon: 'trending_flat', description: 'Open receivables by customer and age bucket.' },
+    { route: 'ap-aging', label: 'AP Aging', icon: 'schedule', description: 'Open payables by vendor and age bucket.' },
+    { route: 'grni', label: 'GRNI Reconciliation', icon: 'inventory_2', description: 'Goods received not invoiced — GL vs operational.' },
   ];
 }
