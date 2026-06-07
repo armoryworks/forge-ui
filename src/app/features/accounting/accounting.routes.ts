@@ -37,4 +37,9 @@ export const ACCOUNTING_ROUTES: Routes = [
     path: 'grni',
     loadComponent: () => import('./components/grni/grni.component').then((m) => m.GrniComponent),
   },
+  {
+    path: 'period-close',
+    loadComponent: () =>
+      import('./components/period-close/period-close.component').then((m) => m.PeriodCloseComponent),
+  },
 ];

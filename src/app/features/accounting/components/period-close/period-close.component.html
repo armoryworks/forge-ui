@@ -1,0 +1,58 @@
+<app-page-header title="Period Close" subtitle="Soft-close, hard-close, reopen, and year-end close">
+</app-page-header>
+
+<div class="toolbar">
+  <button type="button" class="btn" (click)="load()" [disabled]="loading() || busy()">Refresh</button>
+  @if (busy()) { <span class="muted">Working…</span> }
+</div>
+
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else {
+  @for (year of years(); track year.id) {
+    <section class="year">
+      <header class="year-head">
+        <span class="year-name">{{ year.name }}</span>
+        <span class="status-chip" [class]="'st-' + year.status">{{ year.status }}</span>
+        @if (year.status === 'Open') {
+          <button type="button" class="btn danger" (click)="closeYear(year.id)" [disabled]="busy()">
+            Close year (RE roll)
+          </button>
+        }
+      </header>
+
+      <table class="ledger-table">
+        <thead>
+          <tr><th>#</th><th>Period</th><th>Dates</th><th>Status</th><th class="actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (p of year.periods; track p.id) {
+            <tr>
+              <td>{{ p.periodNumber }}</td>
+              <td>{{ p.name }}</td>
+              <td>{{ p.startDate }} – {{ p.endDate }}</td>
+              <td><span class="status-chip" [class]="'st-' + p.status">{{ p.status }}</span></td>
+              <td class="actions">
+                @if (p.status === 'Open') {
+                  <button type="button" class="btn sm" (click)="setPeriod(p.id, 'SoftClosed')" [disabled]="busy()">Soft-close</button>
+                  <button type="button" class="btn sm" (click)="setPeriod(p.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                } @else if (p.status === 'SoftClosed') {
+                  <button type="button" class="btn sm" (click)="setPeriod(p.id, 'Open')" [disabled]="busy()">Reopen</button>
+                  <button type="button" class="btn sm" (click)="setPeriod(p.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                } @else {
+                  <span class="muted">Locked</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </section>
+  } @empty {
+    <p class="muted">No fiscal years configured.</p>
+  }
+}

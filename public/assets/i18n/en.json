@@ -57,7 +57,8 @@
     "cashFlow": "Cash Flow",
     "arAging": "AR Aging",
     "apAging": "AP Aging",
-    "grni": "GRNI"
+    "grni": "GRNI",
+    "periodClose": "Period Close"
   },
   "navGroups": {
     "operations": "Operations",

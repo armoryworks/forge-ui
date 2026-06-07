@@ -11,6 +11,7 @@ import {
   CashFlowStatement,
   FiscalPeriodModel,
   FiscalPeriodStatus,
+  FiscalYearModel,
   GrniReconciliation,
   ProfitAndLoss,
   TrialBalance,
@@ -73,6 +74,12 @@ export class GeneralLedgerService {
   }
 
   // ── Period / year close ──
+  getFiscalCalendar(bookId: number): Observable<FiscalYearModel[]> {
+    return this.http.get<FiscalYearModel[]>(`${this.base}/fiscal-calendar`, {
+      params: new HttpParams().set('bookId', bookId),
+    });
+  }
+
   setPeriodStatus(periodId: number, target: FiscalPeriodStatus): Observable<FiscalPeriodModel> {
     const verb = target === 'SoftClosed' ? 'soft-close' : target === 'HardClosed' ? 'hard-close' : 'reopen';
     return this.http.post<FiscalPeriodModel>(`${this.base}/periods/${periodId}/${verb}`, {});

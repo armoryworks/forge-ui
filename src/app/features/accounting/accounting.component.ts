@@ -31,5 +31,6 @@ export class AccountingComponent {
     { route: 'ar-aging', label: 'AR Aging', icon: 'trending_flat', description: 'Open receivables by customer and age bucket.' },
     { route: 'ap-aging', label: 'AP Aging', icon: 'schedule', description: 'Open payables by vendor and age bucket.' },
     { route: 'grni', label: 'GRNI Reconciliation', icon: 'inventory_2', description: 'Goods received not invoiced — GL vs operational.' },
+    { route: 'period-close', label: 'Period Close', icon: 'event_available', description: 'Soft/hard-close periods, reopen, and run the year-end close.' },
   ];
 }

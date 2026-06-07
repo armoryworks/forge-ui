@@ -57,7 +57,8 @@
     "cashFlow": "Flujo de Caja",
     "arAging": "Antigüedad CxC",
     "apAging": "Antigüedad CxP",
-    "grni": "GRNI"
+    "grni": "GRNI",
+    "periodClose": "Cierre de Período"
   },
   "navGroups": {
     "operations": "Operaciones",

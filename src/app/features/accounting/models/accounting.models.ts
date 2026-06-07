@@ -169,6 +169,17 @@ export interface FiscalPeriodModel {
   status: FiscalPeriodStatus;
 }
 
+export type FiscalYearStatus = 'Open' | 'Closed';
+
+export interface FiscalYearModel {
+  id: number;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: FiscalYearStatus;
+  periods: FiscalPeriodModel[];
+}
+
 export interface YearEndCloseResult {
   fiscalYearId: number;
   journalEntryId: number | null;
