@@ -1,7 +1,7 @@
-<app-page-header title="AP Aging" subtitle="Open payables by vendor and age">
+<app-page-header [title]="'accounting.apAging.title' | translate" [subtitle]="'accounting.apAging.subtitle' | translate">
   @if (report(); as r) {
     <span class="chip" [class.chip--success]="r.reconciliation.isReconciled" [class.chip--error]="!r.reconciliation.isReconciled">
-      {{ r.reconciliation.isReconciled ? 'Ties to AP control' : 'Out of balance' }}
+      {{ (r.reconciliation.isReconciled ? 'accounting.apAging.tiesToControl' : 'accounting.common.outOfBalance') | translate }}
     </span>
   }</app-page-header>
 
@@ -17,7 +17,7 @@
     [loading]="loading()"
     [stickyFirstColumn]="true"
     emptyIcon="request_quote"
-    emptyMessage="No open payables">
+    [emptyMessage]="'accounting.apAging.empty' | translate">
     <!-- Currency cells for the aging buckets. The shared data-table's content
          query is descendants:false, so cells can't live inside @for — a fixed
          pool of direct-child templates covers the standard 4-bucket ladder
@@ -35,11 +35,11 @@
 
   @if (report(); as r) {
     <div class="totals-strip">
-      <span class="totals-strip__label">Total</span>
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
       @for (b of r.totalsByBucket; track b.label) {
         <span class="totals-strip__metric">{{ b.label }} <app-currency-display [value]="b.amount" /></span>
       }
-      <span class="totals-strip__metric">Open <app-currency-display [value]="r.grandTotal" /></span>
+      <span class="totals-strip__metric">{{ 'accounting.common.open' | translate }} <app-currency-display [value]="r.grandTotal" /></span>
     </div>
   }
 </div>

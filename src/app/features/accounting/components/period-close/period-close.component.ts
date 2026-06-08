@@ -3,6 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
@@ -17,13 +19,14 @@ const DEFAULT_BOOK_ID = 1;
 @Component({
   selector: 'app-period-close',
   standalone: true,
-  imports: [PageHeaderComponent, DataTableComponent, ColumnCellDirective],
+  imports: [TranslatePipe, PageHeaderComponent, DataTableComponent, ColumnCellDirective],
   templateUrl: './period-close.component.html',
   styleUrl: './period-close.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PeriodCloseComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
   private readonly dialog = inject(MatDialog);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -33,11 +36,11 @@ export class PeriodCloseComponent implements OnInit {
   protected readonly years = signal<FiscalYearModel[]>([]);
 
   protected readonly periodColumns: ColumnDef[] = [
-    { field: 'periodNumber', header: '#', sortable: true, type: 'number', align: 'right', width: '60px' },
-    { field: 'name', header: 'Period', sortable: true },
-    { field: 'dates', header: 'Dates', width: '220px' },
-    { field: 'status', header: 'Status', sortable: true, width: '130px' },
-    { field: 'actions', header: 'Actions', align: 'right', width: '240px' },
+    { field: 'periodNumber', header: this.translate.instant('accounting.periodClose.number'), sortable: true, type: 'number', align: 'right', width: '60px' },
+    { field: 'name', header: this.translate.instant('accounting.periodClose.period'), sortable: true },
+    { field: 'dates', header: this.translate.instant('accounting.periodClose.dates'), width: '220px' },
+    { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, width: '130px' },
+    { field: 'actions', header: this.translate.instant('accounting.common.actions'), align: 'right', width: '240px' },
   ];
 
   constructor() {
@@ -60,7 +63,7 @@ export class PeriodCloseComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.error.set('Could not load the fiscal calendar.');
+          this.error.set(this.translate.instant('accounting.errors.fiscalCalendarLoadFailed'));
           this.loading.set(false);
         },
       });
@@ -75,9 +78,9 @@ export class PeriodCloseComponent implements OnInit {
       .open(ConfirmDialogComponent, {
         width: '420px',
         data: {
-          title: 'Close fiscal year?',
-          message: 'This posts the retained-earnings roll and hard-closes every period in the year. It cannot be undone.',
-          confirmLabel: 'Close year',
+          title: this.translate.instant('accounting.periodClose.confirmTitle'),
+          message: this.translate.instant('accounting.periodClose.confirmMessage'),
+          confirmLabel: this.translate.instant('accounting.periodClose.confirmLabel'),
           severity: 'warn',
         } satisfies ConfirmDialogData,
       })
@@ -105,6 +108,6 @@ export class PeriodCloseComponent implements OnInit {
 
   private messageOf(e: unknown): string {
     const err = e as { error?: { message?: string; detail?: string } };
-    return err?.error?.message ?? err?.error?.detail ?? 'The action could not be completed.';
+    return err?.error?.message ?? err?.error?.detail ?? this.translate.instant('accounting.errors.actionFailed');
   }
 }

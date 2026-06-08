@@ -1,7 +1,7 @@
-<app-page-header title="Trial Balance" subtitle="Debits and credits by account">
+<app-page-header [title]="'accounting.trialBalance.title' | translate" [subtitle]="'accounting.trialBalance.subtitle' | translate">
   @if (report(); as r) {
     <span class="chip" [class.chip--success]="r.isBalanced" [class.chip--error]="!r.isBalanced">
-      {{ r.isBalanced ? 'Balanced' : 'Out of balance' }}
+      {{ (r.isBalanced ? 'accounting.trialBalance.balanced' : 'accounting.common.outOfBalance') | translate }}
     </span>
   }</app-page-header>
 
@@ -16,7 +16,7 @@
     [data]="report()?.rows ?? []"
     [loading]="loading()"
     emptyIcon="balance"
-    emptyMessage="No ledger activity">
+    [emptyMessage]="'accounting.trialBalance.empty' | translate">
     <ng-template appColumnCell="debitTotal" let-row>
       <app-currency-display [value]="row.debitTotal" />
     </ng-template>
@@ -30,9 +30,9 @@
 
   @if (report(); as r) {
     <div class="totals-strip">
-      <span class="totals-strip__label">Total</span>
-      <span class="totals-strip__metric">Debit <app-currency-display [value]="r.totalDebit" /></span>
-      <span class="totals-strip__metric">Credit <app-currency-display [value]="r.totalCredit" /></span>
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="r.totalDebit" /></span>
+      <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="r.totalCredit" /></span>
     </div>
   }
 </div>

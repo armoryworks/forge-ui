@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -23,13 +25,14 @@ interface GrniPoTableRow {
 @Component({
   selector: 'app-grni',
   standalone: true,
-  imports: [PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
+  imports: [TranslatePipe, PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
   templateUrl: './grni.component.html',
   styleUrl: './grni.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class GrniComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -44,10 +47,10 @@ export class GrniComponent implements OnInit {
       field: `b${i}`, header: b.label, sortable: true, type: 'number', align: 'right', width: '120px',
     }));
     return [
-      { field: 'poNumber', header: 'PO', sortable: true, width: '120px' },
-      { field: 'vendorName', header: 'Vendor', sortable: true },
+      { field: 'poNumber', header: this.translate.instant('accounting.common.po'), sortable: true, width: '120px' },
+      { field: 'vendorName', header: this.translate.instant('accounting.common.vendor'), sortable: true },
       ...buckets,
-      { field: 'openAmount', header: 'Open', sortable: true, type: 'number', align: 'right', width: '130px' },
+      { field: 'openAmount', header: this.translate.instant('accounting.common.open'), sortable: true, type: 'number', align: 'right', width: '130px' },
     ];
   });
 
@@ -62,11 +65,11 @@ export class GrniComponent implements OnInit {
   });
 
   protected readonly uncoveredColumns: ColumnDef[] = [
-    { field: 'receiptNumber', header: 'Receipt', sortable: true, width: '140px' },
-    { field: 'purchaseOrderId', header: 'PO', sortable: true, type: 'number', align: 'right', width: '90px' },
-    { field: 'quantityReceived', header: 'Qty', sortable: true, type: 'number', align: 'right', width: '90px' },
-    { field: 'receivedDate', header: 'Received', sortable: true, type: 'date', width: '130px' },
-    { field: 'reason', header: 'Reason' },
+    { field: 'receiptNumber', header: this.translate.instant('accounting.grni.receipt'), sortable: true, width: '140px' },
+    { field: 'purchaseOrderId', header: this.translate.instant('accounting.common.po'), sortable: true, type: 'number', align: 'right', width: '90px' },
+    { field: 'quantityReceived', header: this.translate.instant('accounting.grni.qty'), sortable: true, type: 'number', align: 'right', width: '90px' },
+    { field: 'receivedDate', header: this.translate.instant('accounting.grni.received'), sortable: true, type: 'date', width: '130px' },
+    { field: 'reason', header: this.translate.instant('accounting.grni.reason') },
   ];
 
   constructor() {
@@ -89,7 +92,7 @@ export class GrniComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.error.set('Could not load the GRNI reconciliation.');
+          this.error.set(this.translate.instant('accounting.errors.grniLoadFailed'));
           this.loading.set(false);
         },
       });

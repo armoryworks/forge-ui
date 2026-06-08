@@ -1,4 +1,4 @@
-<app-page-header title="Profit &amp; Loss" subtitle="Income and expense over the period"></app-page-header>
+<app-page-header [title]="'accounting.profitLoss.title' | translate" [subtitle]="'accounting.profitLoss.subtitle' | translate"></app-page-header>
 
 <div class="page-content">
   @if (error()) {
@@ -6,7 +6,7 @@
   }
 
   @if (loading() && !report()) {
-    <p class="acct-muted">Loading…</p>
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     @if (!r.cogsPosted && r.marginCaveat) {
       <p class="acct-caveat">{{ r.marginCaveat }}</p>
@@ -14,37 +14,37 @@
 
     <table class="statement" aria-label="Profit and loss statement">
       <tbody>
-        <tr class="statement__section"><td colspan="2">Income</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.profitLoss.income' | translate }}</td></tr>
         @for (line of r.income; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">No income.</td></tr>
+          <tr><td colspan="2" class="acct-muted">{{ 'accounting.profitLoss.noIncome' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
-          <td>Total income</td>
+          <td>{{ 'accounting.profitLoss.totalIncome' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalIncome" /></td>
         </tr>
 
-        <tr class="statement__section"><td colspan="2">Expense</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.profitLoss.expense' | translate }}</td></tr>
         @for (line of r.expense; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">No expense.</td></tr>
+          <tr><td colspan="2" class="acct-muted">{{ 'accounting.profitLoss.noExpense' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
-          <td>Total expense</td>
+          <td>{{ 'accounting.profitLoss.totalExpense' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalExpense" /></td>
         </tr>
       </tbody>
       <tfoot>
         <tr>
-          <td>Net income</td>
+          <td>{{ 'accounting.profitLoss.netIncome' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netIncome" /></td>
         </tr>
       </tfoot>

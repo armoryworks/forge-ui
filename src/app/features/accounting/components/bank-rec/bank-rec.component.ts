@@ -3,6 +3,8 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, concatMap, from, last } from 'rxjs';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -29,6 +31,7 @@ const DEFAULT_BOOK_ID = 1;
   standalone: true,
   imports: [
     ReactiveFormsModule,
+    TranslatePipe,
     PageHeaderComponent,
     CurrencyDisplayComponent,
     DataTableComponent,
@@ -44,6 +47,7 @@ const DEFAULT_BOOK_ID = 1;
 })
 export class BankRecComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -71,8 +75,8 @@ export class BankRecComponent implements OnInit {
   protected readonly finalizeViolations = computed<string[]>(() => {
     const ws = this.worksheet();
     if (!ws || ws.status !== 'Draft') return [];
-    if (this.dirtyCount() > 0) return ['Save your cleared selection first — click Update cleared'];
-    if (!ws.isReconciled) return ['Difference must be $0.00 to finalize'];
+    if (this.dirtyCount() > 0) return [this.translate.instant('accounting.bankRec.saveSelectionFirst')];
+    if (!ws.isReconciled) return [this.translate.instant('accounting.bankRec.differenceMustBeZero')];
     return [];
   });
 
@@ -84,26 +88,26 @@ export class BankRecComponent implements OnInit {
   });
 
   protected readonly startViolations = FormValidationService.getViolations(this.startForm, {
-    cashAccountId: 'Cash account',
-    statementDate: 'Statement date',
+    cashAccountId: this.translate.instant('accounting.bankRec.cashAccount'),
+    statementDate: this.translate.instant('accounting.bankRec.statementDate'),
   });
 
   protected readonly cashAccountOptions = computed<SelectOption[]>(() =>
     this.cashAccounts().map((a) => ({ value: a.glAccountId, label: `${a.accountNumber} · ${a.name}` })));
 
   protected readonly reconColumns: ColumnDef[] = [
-    { field: 'cashAccountName', header: 'Account', sortable: true },
-    { field: 'statementDate', header: 'Statement date', sortable: true, type: 'date', width: '150px' },
-    { field: 'statementEndingBalance', header: 'Ending balance', sortable: true, type: 'number', align: 'right', width: '150px' },
-    { field: 'status', header: 'Status', sortable: true, width: '120px' },
-    { field: 'difference', header: 'Difference', sortable: true, type: 'number', align: 'right', width: '140px' },
+    { field: 'cashAccountName', header: this.translate.instant('accounting.bankRec.account'), sortable: true },
+    { field: 'statementDate', header: this.translate.instant('accounting.bankRec.statementDate'), sortable: true, type: 'date', width: '150px' },
+    { field: 'statementEndingBalance', header: this.translate.instant('accounting.bankRec.endingBalance'), sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'status', header: this.translate.instant('accounting.common.status'), sortable: true, width: '120px' },
+    { field: 'difference', header: this.translate.instant('accounting.bankRec.difference'), sortable: true, type: 'number', align: 'right', width: '140px' },
   ];
 
   protected readonly itemColumns: ColumnDef[] = [
-    { field: 'isCleared', header: 'Cleared', align: 'center', width: '90px' },
-    { field: 'entryDate', header: 'Date', sortable: true, type: 'date', width: '130px' },
-    { field: 'description', header: 'Description', sortable: true },
-    { field: 'amount', header: 'Amount', sortable: true, type: 'number', align: 'right', width: '140px' },
+    { field: 'isCleared', header: this.translate.instant('accounting.bankRec.cleared'), align: 'center', width: '90px' },
+    { field: 'entryDate', header: this.translate.instant('accounting.common.date'), sortable: true, type: 'date', width: '130px' },
+    { field: 'description', header: this.translate.instant('accounting.common.description'), sortable: true },
+    { field: 'amount', header: this.translate.instant('accounting.common.amount'), sortable: true, type: 'number', align: 'right', width: '140px' },
   ];
 
   constructor() {
@@ -126,7 +130,7 @@ export class BankRecComponent implements OnInit {
           this.startForm.controls.cashAccountId.setValue(a[0].glAccountId);
         }
       },
-      error: () => this.error.set('Could not load cash accounts.'),
+      error: () => this.error.set(this.translate.instant('accounting.errors.cashAccountsLoadFailed')),
     });
     this.gl.getBankReconciliations(DEFAULT_BOOK_ID).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (r) => {
@@ -134,7 +138,7 @@ export class BankRecComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Could not load reconciliations.');
+        this.error.set(this.translate.instant('accounting.errors.reconciliationsLoadFailed'));
         this.loading.set(false);
       },
     });
@@ -144,7 +148,7 @@ export class BankRecComponent implements OnInit {
     const { cashAccountId, statementDate, endingBalance } = this.startForm.getRawValue();
     const iso = toIsoDate(statementDate);
     if (cashAccountId == null || !iso) {
-      this.error.set('Pick a cash account and statement date.');
+      this.error.set(this.translate.instant('accounting.errors.pickAccountAndDate'));
       return;
     }
     this.run(this.gl.startBankReconciliation(DEFAULT_BOOK_ID, cashAccountId, iso, endingBalance ?? 0));
@@ -207,7 +211,7 @@ export class BankRecComponent implements OnInit {
       error: (e: unknown) => {
         this.busy.set(false);
         const err = e as { error?: { message?: string; detail?: string } };
-        this.error.set(err?.error?.message ?? err?.error?.detail ?? 'The action could not be completed.');
+        this.error.set(err?.error?.message ?? err?.error?.detail ?? this.translate.instant('accounting.errors.actionFailed'));
       },
     });
   }

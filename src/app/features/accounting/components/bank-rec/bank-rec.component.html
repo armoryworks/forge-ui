@@ -1,16 +1,16 @@
-<app-page-header title="Bank Reconciliation" subtitle="Match cleared cash entries to a bank statement">
+<app-page-header [title]="'accounting.bankRec.title' | translate" [subtitle]="'accounting.bankRec.subtitle' | translate">
   @if (worksheet(); as ws) {
     <span class="chip" [class.chip--success]="ws.status === 'Finalized'" [class.chip--info]="ws.status === 'Draft'">
       {{ ws.status }}
     </span>
     <span class="chip" [class.chip--success]="ws.isReconciled" [class.chip--warning]="!ws.isReconciled">
-      @if (ws.isReconciled) { Reconciled } @else { Difference <app-currency-display [value]="ws.difference" /> }
+      @if (ws.isReconciled) { {{ 'accounting.common.reconciled' | translate }} } @else { {{ 'accounting.bankRec.difference' | translate }} <app-currency-display [value]="ws.difference" /> }
     </span>
     @if (ws.status === 'Draft') {
       <app-validation-button [violations]="finalizeViolations" [loading]="busy()">
         <button type="button" class="action-btn action-btn--primary" (click)="finalize()" [disabled]="busy() || !ws.isReconciled || dirtyCount() > 0">
           <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">check</span>
-          Finalize
+          {{ 'accounting.bankRec.finalize' | translate }}
         </button>
       </app-validation-button>
     }
@@ -26,15 +26,15 @@
     <!-- ── Worksheet ── -->
     <button type="button" class="action-btn" (click)="closeWorksheet()">
       <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">chevron_left</span>
-      Back to list
+      {{ 'accounting.bankRec.backToList' | translate }}
     </button>
 
     <table class="summary-table" aria-label="Reconciliation summary">
       <tbody>
-        <tr><td>Book (GL) cash balance</td><td class="num"><app-currency-display [value]="ws.bookBalance" /></td></tr>
-        <tr><td>Statement ending balance</td><td class="num"><app-currency-display [value]="ws.statementEndingBalance" /></td></tr>
-        <tr><td>Cleared</td><td class="num"><app-currency-display [value]="ws.clearedTotal" /></td></tr>
-        <tr class="summary-table__total"><td>Outstanding</td><td class="num"><app-currency-display [value]="ws.outstandingTotal" /></td></tr>
+        <tr><td>{{ 'accounting.bankRec.bookBalance' | translate }}</td><td class="num"><app-currency-display [value]="ws.bookBalance" /></td></tr>
+        <tr><td>{{ 'accounting.bankRec.statementEndingBalance' | translate }}</td><td class="num"><app-currency-display [value]="ws.statementEndingBalance" /></td></tr>
+        <tr><td>{{ 'accounting.bankRec.cleared' | translate }}</td><td class="num"><app-currency-display [value]="ws.clearedTotal" /></td></tr>
+        <tr class="summary-table__total"><td>{{ 'accounting.bankRec.outstanding' | translate }}</td><td class="num"><app-currency-display [value]="ws.outstandingTotal" /></td></tr>
       </tbody>
     </table>
 
@@ -44,7 +44,7 @@
         [columns]="itemColumns"
         [data]="ws.items"
         emptyIcon="account_balance_wallet"
-        emptyMessage="No outstanding cash lines">
+        [emptyMessage]="'accounting.bankRec.emptyItems' | translate">
         <!-- Cleared is a transient client-side selection: ticking only stages the change — nothing
              persists until "Update cleared" is clicked (the app's button-driven, no-autosave model). -->
         <ng-template appColumnCell="isCleared" let-row>
@@ -64,32 +64,32 @@
     @if (ws.status === 'Draft') {
       <div class="acct-bankrec-actions">
         @if (dirtyCount() > 0) {
-          <span class="acct-muted">{{ dirtyCount() }} unsaved {{ dirtyCount() === 1 ? 'change' : 'changes' }} — totals recompute on save</span>
+          <span class="acct-muted">{{ (dirtyCount() === 1 ? 'accounting.bankRec.unsavedChangeSingular' : 'accounting.bankRec.unsavedChangePlural') | translate:{ count: dirtyCount() } }}</span>
         }
         <button type="button" class="action-btn action-btn--primary" [disabled]="dirtyCount() === 0 || busy()" (click)="applyCleared()">
           <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">save</span>
-          Update cleared@if (dirtyCount() > 0) {&nbsp;({{ dirtyCount() }})}
+          {{ 'accounting.bankRec.updateCleared' | translate }}@if (dirtyCount() > 0) {&nbsp;({{ dirtyCount() }})}
         </button>
       </div>
     }
   } @else {
     <!-- ── Start new + list ── -->
     <section class="acct-startrec" [formGroup]="startForm">
-      <h2 class="acct-subhead">Start a reconciliation</h2>
+      <h2 class="acct-subhead">{{ 'accounting.bankRec.startReconciliation' | translate }}</h2>
       <div class="acct-startrec__row">
-        <app-select label="Cash account" formControlName="cashAccountId" [options]="cashAccountOptions()" [required]="true" />
-        <app-datepicker label="Statement date" formControlName="statementDate" [required]="true" />
-        <app-currency-input label="Ending balance" formControlName="endingBalance" />
+        <app-select [label]="'accounting.bankRec.cashAccount' | translate" formControlName="cashAccountId" [options]="cashAccountOptions()" [required]="true" />
+        <app-datepicker [label]="'accounting.bankRec.statementDate' | translate" formControlName="statementDate" [required]="true" />
+        <app-currency-input [label]="'accounting.bankRec.endingBalance' | translate" formControlName="endingBalance" />
         <app-validation-button [violations]="startViolations" [loading]="busy()">
           <button type="button" class="action-btn action-btn--create" [disabled]="startForm.invalid || busy()" (click)="start()">
             <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">add</span>
-            Start
+            {{ 'accounting.bankRec.start' | translate }}
           </button>
         </app-validation-button>
       </div>
     </section>
 
-    <h2 class="acct-subhead">Reconciliations</h2>
+    <h2 class="acct-subhead">{{ 'accounting.bankRec.reconciliations' | translate }}</h2>
     <div class="acct-table-block">
       <app-data-table
         tableId="acct-bankrec-list"
@@ -99,7 +99,7 @@
         [clickableRows]="true"
         (rowClick)="open($any($event).reconciliationId)"
         emptyIcon="account_balance_wallet"
-        emptyMessage="No reconciliations yet">
+        [emptyMessage]="'accounting.bankRec.emptyList' | translate">
         <ng-template appColumnCell="statementEndingBalance" let-row>
           <app-currency-display [value]="row.statementEndingBalance" />
         </ng-template>

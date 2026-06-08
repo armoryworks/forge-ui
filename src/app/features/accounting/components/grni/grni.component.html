@@ -1,7 +1,7 @@
-<app-page-header title="GRNI Reconciliation" subtitle="Goods received not invoiced — GL vs operational">
+<app-page-header [title]="'accounting.grni.title' | translate" [subtitle]="'accounting.grni.subtitle' | translate">
   @if (report(); as r) {
     <span class="chip" [class.chip--success]="r.isReconciled" [class.chip--error]="!r.isReconciled">
-      {{ r.isReconciled ? 'Reconciled' : 'Variance' }}
+      {{ (r.isReconciled ? 'accounting.common.reconciled' : 'accounting.grni.variance') | translate }}
     </span>
   }</app-page-header>
 
@@ -11,26 +11,26 @@
   }
 
   @if (loading() && !report()) {
-    <p class="acct-muted">Loading…</p>
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <table class="summary-table" aria-label="GRNI summary">
       <tbody>
         <tr>
-          <td>GL GRNI balance</td>
+          <td>{{ 'accounting.grni.glBalance' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.glBalance" /></td>
         </tr>
         <tr>
-          <td>Operational open (received not billed)</td>
+          <td>{{ 'accounting.grni.operationalOpen' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.operationalOpen" /></td>
         </tr>
         <tr class="summary-table__total">
-          <td>Variance</td>
+          <td>{{ 'accounting.grni.variance' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.variance" /></td>
         </tr>
       </tbody>
     </table>
 
-    <h2 class="acct-subhead">Open GRNI by purchase order</h2>
+    <h2 class="acct-subhead">{{ 'accounting.grni.openByPurchaseOrder' | translate }}</h2>
     <div class="acct-table-block">
       <app-data-table
         tableId="acct-grni-po"
@@ -38,7 +38,7 @@
         [data]="poRows()"
         [stickyFirstColumn]="true"
         emptyIcon="inventory_2"
-        emptyMessage="No open GRNI">
+        [emptyMessage]="'accounting.grni.emptyOpen' | translate">
         <!-- Currency cells for the aging buckets. The shared data-table's content
              query is descendants:false, so cells can't live inside @for — a fixed
              pool of direct-child templates covers the standard 4-bucket ladder;
@@ -56,22 +56,22 @@
     </div>
 
     <div class="totals-strip">
-      <span class="totals-strip__label">Total</span>
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
       @for (b of r.totalsByBucket; track b.label) {
         <span class="totals-strip__metric">{{ b.label }} <app-currency-display [value]="b.amount" /></span>
       }
-      <span class="totals-strip__metric">Open <app-currency-display [value]="r.grandTotal" /></span>
+      <span class="totals-strip__metric">{{ 'accounting.common.open' | translate }} <app-currency-display [value]="r.grandTotal" /></span>
     </div>
 
     @if (r.uncoveredReceipts.length) {
-      <h2 class="acct-subhead">Uncovered receipts ({{ r.uncoveredReceipts.length }}{{ r.uncoveredTruncated ? '+' : '' }})</h2>
+      <h2 class="acct-subhead">{{ 'accounting.grni.uncoveredReceipts' | translate }} ({{ r.uncoveredReceipts.length }}{{ r.uncoveredTruncated ? '+' : '' }})</h2>
       <div class="acct-table-block">
         <app-data-table
           tableId="acct-grni-uncovered"
           [columns]="uncoveredColumns"
           [data]="r.uncoveredReceipts"
           emptyIcon="inventory_2"
-          emptyMessage="No uncovered receipts">
+          [emptyMessage]="'accounting.grni.emptyUncovered' | translate">
           <ng-template appColumnCell="receiptNumber" let-row>
             {{ row.receiptNumber || '—' }}
           </ng-template>

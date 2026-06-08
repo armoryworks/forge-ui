@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -16,13 +18,14 @@ const DEFAULT_BOOK_ID = 1;
 @Component({
   selector: 'app-trial-balance',
   standalone: true,
-  imports: [PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
+  imports: [TranslatePipe, PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
   templateUrl: './trial-balance.component.html',
   styleUrl: './trial-balance.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TrialBalanceComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -30,11 +33,11 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly report = signal<TrialBalance | null>(null);
 
   protected readonly columns: ColumnDef[] = [
-    { field: 'accountNumber', header: 'Account #', sortable: true, width: '130px' },
-    { field: 'accountName', header: 'Account', sortable: true },
-    { field: 'debitTotal', header: 'Debit', sortable: true, type: 'number', align: 'right', width: '150px' },
-    { field: 'creditTotal', header: 'Credit', sortable: true, type: 'number', align: 'right', width: '150px' },
-    { field: 'netBalance', header: 'Net', sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'accountNumber', header: this.translate.instant('accounting.trialBalance.accountNumber'), sortable: true, width: '130px' },
+    { field: 'accountName', header: this.translate.instant('accounting.trialBalance.account'), sortable: true },
+    { field: 'debitTotal', header: this.translate.instant('accounting.common.debit'), sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'creditTotal', header: this.translate.instant('accounting.common.credit'), sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'netBalance', header: this.translate.instant('accounting.trialBalance.net'), sortable: true, type: 'number', align: 'right', width: '150px' },
   ];
 
   constructor() {
@@ -57,7 +60,7 @@ export class TrialBalanceComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.error.set('Could not load the trial balance.');
+          this.error.set(this.translate.instant('accounting.errors.trialBalanceLoadFailed'));
           this.loading.set(false);
         },
       });

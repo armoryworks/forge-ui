@@ -1,7 +1,7 @@
-<app-page-header title="Cash Flow" subtitle="Indirect method — reconciled to the cash account">
+<app-page-header [title]="'accounting.cashFlow.title' | translate" [subtitle]="'accounting.cashFlow.subtitle' | translate">
   @if (report(); as r) {
     <span class="chip" [class.chip--success]="r.isReconciled" [class.chip--error]="!r.isReconciled">
-      {{ r.isReconciled ? 'Reconciled' : 'Out of balance' }}
+      {{ (r.isReconciled ? 'accounting.common.reconciled' : 'accounting.common.outOfBalance') | translate }}
     </span>
   }</app-page-header>
 
@@ -11,13 +11,13 @@
   }
 
   @if (loading() && !report()) {
-    <p class="acct-muted">Loading…</p>
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <table class="statement" aria-label="Cash flow statement, indirect method">
       <tbody>
-        <tr class="statement__section"><td colspan="2">Operating activities</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.cashFlow.operatingActivities' | translate }}</td></tr>
         <tr>
-          <td>Net income</td>
+          <td>{{ 'accounting.cashFlow.netIncome' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netIncome" /></td>
         </tr>
         @for (line of r.operatingAdjustments; track line.glAccountId) {
@@ -27,12 +27,12 @@
           </tr>
         }
         <tr class="statement__subtotal">
-          <td>Net cash from operating</td>
+          <td>{{ 'accounting.cashFlow.netCashFromOperating' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netCashFromOperating" /></td>
         </tr>
 
         @if (r.investing.length) {
-          <tr class="statement__section"><td colspan="2">Investing activities</td></tr>
+          <tr class="statement__section"><td colspan="2">{{ 'accounting.cashFlow.investingActivities' | translate }}</td></tr>
           @for (line of r.investing; track line.glAccountId) {
             <tr>
               <td>{{ line.accountName }}</td>
@@ -40,32 +40,32 @@
             </tr>
           }
           <tr class="statement__subtotal">
-            <td>Net cash from investing</td>
+            <td>{{ 'accounting.cashFlow.netCashFromInvesting' | translate }}</td>
             <td class="num"><app-currency-display [value]="r.netCashFromInvesting" /></td>
           </tr>
         }
 
-        <tr class="statement__section"><td colspan="2">Financing activities</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.cashFlow.financingActivities' | translate }}</td></tr>
         @for (line of r.financing; track line.glAccountId) {
           <tr>
             <td>{{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">No financing activity.</td></tr>
+          <tr><td colspan="2" class="acct-muted">{{ 'accounting.cashFlow.noFinancing' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
-          <td>Net cash from financing</td>
+          <td>{{ 'accounting.cashFlow.netCashFromFinancing' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netCashFromFinancing" /></td>
         </tr>
       </tbody>
       <tfoot>
         <tr>
-          <td>Net change in cash</td>
+          <td>{{ 'accounting.cashFlow.netChangeInCash' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.netChangeInCash" /></td>
         </tr>
         <tr class="statement__reconcile">
-          <td>Actual cash movement</td>
+          <td>{{ 'accounting.cashFlow.actualCashMovement' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.actualCashChange" /></td>
         </tr>
       </tfoot>

@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
@@ -12,13 +14,14 @@ const DEFAULT_BOOK_ID = 1;
 @Component({
   selector: 'app-balance-sheet',
   standalone: true,
-  imports: [PageHeaderComponent, CurrencyDisplayComponent],
+  imports: [TranslatePipe, PageHeaderComponent, CurrencyDisplayComponent],
   templateUrl: './balance-sheet.component.html',
   styleUrl: './balance-sheet.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BalanceSheetComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -45,7 +48,7 @@ export class BalanceSheetComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.error.set('Could not load the balance sheet.');
+          this.error.set(this.translate.instant('accounting.errors.balanceSheetLoadFailed'));
           this.loading.set(false);
         },
       });

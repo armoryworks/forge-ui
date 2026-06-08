@@ -1,5 +1,5 @@
-<app-page-header title="Period Close" subtitle="Soft-close, hard-close, reopen, and year-end close">
-  @if (busy()) { <span class="acct-muted">Working…</span> }</app-page-header>
+<app-page-header [title]="'accounting.periodClose.title' | translate" [subtitle]="'accounting.periodClose.subtitle' | translate">
+  @if (busy()) { <span class="acct-muted">{{ 'accounting.common.working' | translate }}</span> }</app-page-header>
 
 <div class="page-content">
   @if (error()) {
@@ -7,7 +7,7 @@
   }
 
   @if (loading() && years().length === 0) {
-    <p class="acct-muted">Loading…</p>
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else {
     @for (year of years(); track year.id) {
       <section class="acct-year">
@@ -18,7 +18,7 @@
           </span>
           @if (year.status === 'Open') {
             <button type="button" class="action-btn action-btn--warn action-btn--sm" (click)="closeYear(year.id)" [disabled]="busy()">
-              Close year (RE roll)
+              {{ 'accounting.periodClose.closeYear' | translate }}
             </button>
           }
         </header>
@@ -29,7 +29,7 @@
             [columns]="periodColumns"
             [data]="year.periods"
             emptyIcon="event_busy"
-            emptyMessage="No periods">
+            [emptyMessage]="'accounting.periodClose.empty' | translate">
             <ng-template appColumnCell="dates" let-row>
               {{ row.startDate }} – {{ row.endDate }}
             </ng-template>
@@ -44,23 +44,23 @@
             <ng-template appColumnCell="actions" let-row>
               @if (row.status === 'Open') {
                 <div class="acct-period-actions">
-                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'SoftClosed')" [disabled]="busy()">Soft-close</button>
-                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'SoftClosed')" [disabled]="busy()">{{ 'accounting.periodClose.softClose' | translate }}</button>
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">{{ 'accounting.periodClose.hardClose' | translate }}</button>
                 </div>
               } @else if (row.status === 'SoftClosed') {
                 <div class="acct-period-actions">
-                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'Open')" [disabled]="busy()">Reopen</button>
-                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'Open')" [disabled]="busy()">{{ 'accounting.periodClose.reopen' | translate }}</button>
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">{{ 'accounting.periodClose.hardClose' | translate }}</button>
                 </div>
               } @else {
-                <span class="acct-muted">Locked</span>
+                <span class="acct-muted">{{ 'accounting.periodClose.locked' | translate }}</span>
               }
             </ng-template>
           </app-data-table>
         </div>
       </section>
     } @empty {
-      <p class="acct-muted">No fiscal years configured.</p>
+      <p class="acct-muted">{{ 'accounting.periodClose.noFiscalYears' | translate }}</p>
     }
   }
 </div>

@@ -1,7 +1,7 @@
-<app-page-header title="Balance Sheet" subtitle="Assets, liabilities and equity as of date">
+<app-page-header [title]="'accounting.balanceSheet.title' | translate" [subtitle]="'accounting.balanceSheet.subtitle' | translate">
   @if (report(); as r) {
     <span class="chip" [class.chip--success]="r.isBalanced" [class.chip--error]="!r.isBalanced">
-      {{ r.isBalanced ? 'Balanced' : 'Out of balance' }}
+      {{ (r.isBalanced ? 'accounting.balanceSheet.balanced' : 'accounting.common.outOfBalance') | translate }}
     </span>
   }</app-page-header>
 
@@ -11,39 +11,39 @@
   }
 
   @if (loading() && !report()) {
-    <p class="acct-muted">Loading…</p>
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
   } @else if (report(); as r) {
     <table class="statement" aria-label="Balance sheet">
       <tbody>
-        <tr class="statement__section"><td colspan="2">Assets</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.balanceSheet.assets' | translate }}</td></tr>
         @for (line of r.assets; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">No assets.</td></tr>
+          <tr><td colspan="2" class="acct-muted">{{ 'accounting.balanceSheet.noAssets' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
-          <td>Total assets</td>
+          <td>{{ 'accounting.balanceSheet.totalAssets' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalAssets" /></td>
         </tr>
 
-        <tr class="statement__section"><td colspan="2">Liabilities</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.balanceSheet.liabilities' | translate }}</td></tr>
         @for (line of r.liabilities; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
           </tr>
         } @empty {
-          <tr><td colspan="2" class="acct-muted">No liabilities.</td></tr>
+          <tr><td colspan="2" class="acct-muted">{{ 'accounting.balanceSheet.noLiabilities' | translate }}</td></tr>
         }
         <tr class="statement__subtotal">
-          <td>Total liabilities</td>
+          <td>{{ 'accounting.balanceSheet.totalLiabilities' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalLiabilities" /></td>
         </tr>
 
-        <tr class="statement__section"><td colspan="2">Equity</td></tr>
+        <tr class="statement__section"><td colspan="2">{{ 'accounting.balanceSheet.equity' | translate }}</td></tr>
         @for (line of r.equity; track line.glAccountId) {
           <tr>
             <td>{{ line.accountNumber }} · {{ line.accountName }}</td>
@@ -51,17 +51,17 @@
           </tr>
         }
         <tr>
-          <td>Current-year earnings</td>
+          <td>{{ 'accounting.balanceSheet.currentYearEarnings' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.currentYearEarnings" /></td>
         </tr>
         <tr class="statement__subtotal">
-          <td>Total equity</td>
+          <td>{{ 'accounting.balanceSheet.totalEquity' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalEquityWithEarnings" /></td>
         </tr>
       </tbody>
       <tfoot>
         <tr>
-          <td>Total liabilities &amp; equity</td>
+          <td>{{ 'accounting.balanceSheet.totalLiabilitiesAndEquity' | translate }}</td>
           <td class="num"><app-currency-display [value]="r.totalLiabilitiesAndEquity" /></td>
         </tr>
       </tfoot>

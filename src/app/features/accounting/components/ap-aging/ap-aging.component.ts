@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
@@ -22,13 +24,14 @@ interface AgingTableRow {
 @Component({
   selector: 'app-ap-aging',
   standalone: true,
-  imports: [PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
+  imports: [TranslatePipe, PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
   templateUrl: './ap-aging.component.html',
   styleUrl: './ap-aging.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApAgingComponent implements OnInit {
   private readonly gl = inject(GeneralLedgerService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly loading = signal(false);
@@ -43,9 +46,9 @@ export class ApAgingComponent implements OnInit {
       field: `b${i}`, header: b.label, sortable: true, type: 'number', align: 'right', width: '120px',
     }));
     return [
-      { field: 'partyName', header: 'Vendor', sortable: true },
+      { field: 'partyName', header: this.translate.instant('accounting.common.vendor'), sortable: true },
       ...buckets,
-      { field: 'openBalance', header: 'Open', sortable: true, type: 'number', align: 'right', width: '130px' },
+      { field: 'openBalance', header: this.translate.instant('accounting.common.open'), sortable: true, type: 'number', align: 'right', width: '130px' },
     ];
   });
 
@@ -79,7 +82,7 @@ export class ApAgingComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.error.set('Could not load the AP aging.');
+          this.error.set(this.translate.instant('accounting.errors.apAgingLoadFailed'));
           this.loading.set(false);
         },
       });
