@@ -48,11 +48,15 @@
             </ng-template>
             <ng-template appColumnCell="actions" let-row>
               @if (row.status === 'Open') {
-                <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'SoftClosed')" [disabled]="busy()">Soft-close</button>
-                <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                <div class="acct-period-actions">
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'SoftClosed')" [disabled]="busy()">Soft-close</button>
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                </div>
               } @else if (row.status === 'SoftClosed') {
-                <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'Open')" [disabled]="busy()">Reopen</button>
-                <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                <div class="acct-period-actions">
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'Open')" [disabled]="busy()">Reopen</button>
+                  <button type="button" class="action-btn action-btn--sm" (click)="setPeriod(row.id, 'HardClosed')" [disabled]="busy()">Hard-close</button>
+                </div>
               } @else {
                 <span class="acct-muted">Locked</span>
               }

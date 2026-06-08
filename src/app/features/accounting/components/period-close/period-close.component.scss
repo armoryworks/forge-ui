@@ -1,6 +1,15 @@
 @use 'styles/variables' as *;
 @use 'app/features/accounting/accounting-shared' as *;
 
+// Period-row action buttons render inline (Reopen / Soft-close / Hard-close),
+// right-aligned to match the Actions column.
+.acct-period-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: $sp-sm;
+  justify-content: flex-end;
+}
+
 .acct-year {
   display: flex;
   flex-direction: column;

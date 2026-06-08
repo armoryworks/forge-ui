@@ -43,7 +43,9 @@ export class GeneralLedgerService {
   }
 
   getProfitAndLoss(bookId: number, fromDate?: string | null, toDate?: string | null): Observable<ProfitAndLoss> {
-    return this.http.get<ProfitAndLoss>(`${this.base}/profit-and-loss`, { params: this.range(bookId, fromDate, toDate) });
+    // Server route is /accounting/pnl (AccountingGlController [HttpGet("pnl")]); the old
+    // /profit-and-loss path 404'd.
+    return this.http.get<ProfitAndLoss>(`${this.base}/pnl`, { params: this.range(bookId, fromDate, toDate) });
   }
 
   getBalanceSheet(bookId: number, asOfDate?: string | null): Observable<BalanceSheet> {
