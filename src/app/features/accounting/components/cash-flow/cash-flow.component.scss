@@ -7,9 +7,9 @@
 
 .btn {
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--border-color, #ccc);
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--surface-color, #fff);
+  background: var(--surface);
   cursor: pointer;
 
   &:disabled {
@@ -24,12 +24,12 @@
   border-radius: 999px;
 
   &.ok {
-    background: rgba(46, 125, 50, 0.12);
+    background: var(--success-light);
     color: var(--success);
   }
 
   &.bad {
-    background: rgba(198, 40, 40, 0.12);
+    background: var(--error-light);
     color: var(--error);
   }
 }
@@ -42,7 +42,7 @@
 
   td {
     padding: 0.4rem 0.6rem;
-    border-bottom: 1px solid var(--border-color, #f0f0f0);
+    border-bottom: 1px solid var(--border);
     text-align: left;
   }
 
@@ -55,7 +55,7 @@
   tr.section-head td {
     font-weight: 600;
     padding-top: 0.9rem;
-    border-bottom: 1px solid var(--border-color, #ccc);
+    border-bottom: 1px solid var(--border);
   }
 
   tr.subtotal td {
@@ -64,13 +64,13 @@
 
   tfoot td {
     font-weight: 700;
-    border-top: 2px solid var(--border-color, #ccc);
+    border-top: 2px solid var(--border);
     padding-top: 0.6rem;
   }
 }
 
 .muted {
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary);
 }
 
 .error {
@@ -79,6 +79,6 @@
 
 .ledger-table tr.reconcile td {
   font-weight: 400;
-  color: var(--text-secondary, #777);
+  color: var(--text-secondary);
   border-top: none;
 }

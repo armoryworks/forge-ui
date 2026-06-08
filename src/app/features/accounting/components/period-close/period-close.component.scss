@@ -7,9 +7,9 @@
 
 .btn {
   padding: 0.4rem 0.9rem;
-  border: 1px solid var(--border-color, #ccc);
+  border: 1px solid var(--border);
   border-radius: 6px;
-  background: var(--surface-color, #fff);
+  background: var(--surface);
   cursor: pointer;
 
   &:disabled {
@@ -49,22 +49,22 @@
   font-size: 0.75rem;
   padding: 0.15rem 0.55rem;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--bg);
 
   &.st-Open {
-    background: rgba(46, 125, 50, 0.12);
+    background: var(--success-light);
     color: var(--success);
   }
 
   &.st-SoftClosed {
-    background: rgba(249, 168, 37, 0.15);
+    background: var(--warning-light);
     color: var(--warning);
   }
 
   &.st-HardClosed,
   &.st-Closed {
-    background: rgba(120, 120, 120, 0.18);
-    color: #444;
+    background: var(--bg);
+    color: var(--text);
   }
 }
 
@@ -76,7 +76,7 @@
   th,
   td {
     padding: 0.4rem 0.6rem;
-    border-bottom: 1px solid var(--border-color, #eee);
+    border-bottom: 1px solid var(--border);
     text-align: left;
   }
 
@@ -88,7 +88,7 @@
 }
 
 .muted {
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary);
 }
 
 .error {
