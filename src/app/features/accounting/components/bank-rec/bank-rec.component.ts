@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable } from 'rxjs';
+import { Observable, concatMap, from, last } from 'rxjs';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
@@ -52,6 +52,28 @@ export class BankRecComponent implements OnInit {
   protected readonly cashAccounts = signal<CashAccountModel[]>([]);
   protected readonly reconciliations = signal<BankReconciliationSummary[]>([]);
   protected readonly worksheet = signal<BankReconciliationWorksheet | null>(null);
+
+  // Transient, client-only "cleared" selection (set of journal-line ids). Ticking a row mutates only
+  // this set — nothing persists until the user clicks "Update cleared". Seeded from the saved isCleared
+  // state whenever a worksheet loads so reopening a draft shows what is already cleared.
+  protected readonly selectedLineIds = signal<ReadonlySet<number>>(new Set());
+
+  /** Lines whose local tick differs from the server's saved cleared flag — drives the Update-cleared button. */
+  protected readonly dirtyCount = computed(() => {
+    const ws = this.worksheet();
+    if (!ws) return 0;
+    const sel = this.selectedLineIds();
+    return ws.items.filter((i) => sel.has(i.journalLineId) !== i.isCleared).length;
+  });
+
+  /** Why Finalize is blocked — surfaced via the validation-button stereotype on the disabled button. */
+  protected readonly finalizeViolations = computed<string[]>(() => {
+    const ws = this.worksheet();
+    if (!ws || ws.status !== 'Draft') return [];
+    if (this.dirtyCount() > 0) return ['Save your cleared selection first — click Update cleared'];
+    if (!ws.isReconciled) return ['Difference must be $0.00 to finalize'];
+    return [];
+  });
 
   // Start-new form (reactive — no ngModel).
   protected readonly startForm = new FormGroup({
@@ -125,10 +147,33 @@ export class BankRecComponent implements OnInit {
     this.run(this.gl.getBankReconciliation(reconciliationId));
   }
 
-  protected toggle(journalLineId: number, cleared: boolean): void {
+  /** Toggle a line's local (unsaved) cleared selection. Persists nothing until applyCleared(). */
+  protected toggleLine(journalLineId: number): void {
+    this.selectedLineIds.update((prev) => {
+      const next = new Set(prev);
+      if (next.has(journalLineId)) next.delete(journalLineId);
+      else next.add(journalLineId);
+      return next;
+    });
+  }
+
+  /** Commit every line whose local tick differs from the saved state, then refresh the recomputed worksheet. */
+  protected applyCleared(): void {
     const ws = this.worksheet();
     if (!ws || ws.status !== 'Draft') return;
-    this.run(this.gl.setBankReconciliationItemCleared(ws.reconciliationId, journalLineId, cleared));
+    const sel = this.selectedLineIds();
+    const changes = ws.items
+      .filter((i) => sel.has(i.journalLineId) !== i.isCleared)
+      .map((i) => ({ journalLineId: i.journalLineId, cleared: sel.has(i.journalLineId) }));
+    if (!changes.length) return;
+    // No bulk endpoint today, so chain the per-line writes in order; the last response carries the
+    // recomputed totals/difference.
+    this.run(
+      from(changes).pipe(
+        concatMap((c) => this.gl.setBankReconciliationItemCleared(ws.reconciliationId, c.journalLineId, c.cleared)),
+        last(),
+      ),
+    );
   }
 
   protected finalize(): void {
@@ -139,6 +184,7 @@ export class BankRecComponent implements OnInit {
 
   protected closeWorksheet(): void {
     this.worksheet.set(null);
+    this.selectedLineIds.set(new Set());
   }
 
   private run(action: Observable<BankReconciliationWorksheet>, opts?: { refreshList?: boolean }): void {
@@ -147,6 +193,7 @@ export class BankRecComponent implements OnInit {
     action.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (ws) => {
         this.worksheet.set(ws);
+        this.syncSelection(ws);
         this.busy.set(false);
         if (opts?.refreshList) this.load();
       },
@@ -156,5 +203,10 @@ export class BankRecComponent implements OnInit {
         this.error.set(err?.error?.message ?? err?.error?.detail ?? 'The action could not be completed.');
       },
     });
+  }
+
+  /** Reset the local selection to mirror the worksheet's saved cleared flags (clears the dirty state). */
+  private syncSelection(ws: BankReconciliationWorksheet): void {
+    this.selectedLineIds.set(new Set(ws.items.filter((i) => i.isCleared).map((i) => i.journalLineId)));
   }
 }

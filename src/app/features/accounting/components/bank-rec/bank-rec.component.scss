@@ -9,3 +9,11 @@
     gap: $sp-lg;
   }
 }
+
+// Commit bar for the worksheet's "cleared" selection — explicit save, no autosave.
+.acct-bankrec-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-md;
+}

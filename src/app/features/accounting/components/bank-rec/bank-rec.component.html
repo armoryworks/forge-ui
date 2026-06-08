@@ -7,10 +7,12 @@
       @if (ws.isReconciled) { Reconciled } @else { Difference <app-currency-display [value]="ws.difference" /> }
     </span>
     @if (ws.status === 'Draft') {
-      <button type="button" class="action-btn action-btn--primary" (click)="finalize()" [disabled]="busy() || !ws.isReconciled">
-        <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">check</span>
-        Finalize
-      </button>
+      <app-validation-button [violations]="finalizeViolations" [loading]="busy()">
+        <button type="button" class="action-btn action-btn--primary" (click)="finalize()" [disabled]="busy() || !ws.isReconciled || dirtyCount() > 0">
+          <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">check</span>
+          Finalize
+        </button>
+      </app-validation-button>
     }
   }
 </app-page-header>
@@ -43,13 +45,14 @@
         [data]="ws.items"
         emptyIcon="account_balance_wallet"
         emptyMessage="No outstanding cash lines">
-        <!-- Per-row action checkbox (toggles persisted "cleared" state) — not a reactive form field, so a labelled native checkbox rather than an <app-toggle> CVA. -->
+        <!-- Cleared is a transient client-side selection: ticking only stages the change — nothing
+             persists until "Update cleared" is clicked (the app's button-driven, no-autosave model). -->
         <ng-template appColumnCell="isCleared" let-row>
           <input
             type="checkbox"
-            [checked]="row.isCleared"
+            [checked]="selectedLineIds().has(row.journalLineId)"
             [disabled]="busy() || ws.status !== 'Draft'"
-            (change)="toggle(row.journalLineId, !row.isCleared)"
+            (change)="toggleLine(row.journalLineId)"
             [attr.aria-label]="'Mark ' + (row.description || 'entry') + ' cleared'" />
         </ng-template>
         <ng-template appColumnCell="amount" let-row>
@@ -57,6 +60,18 @@
         </ng-template>
       </app-data-table>
     </div>
+
+    @if (ws.status === 'Draft') {
+      <div class="acct-bankrec-actions">
+        @if (dirtyCount() > 0) {
+          <span class="acct-muted">{{ dirtyCount() }} unsaved {{ dirtyCount() === 1 ? 'change' : 'changes' }} — totals recompute on save</span>
+        }
+        <button type="button" class="action-btn action-btn--primary" [disabled]="dirtyCount() === 0 || busy()" (click)="applyCleared()">
+          <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">save</span>
+          Update cleared@if (dirtyCount() > 0) {&nbsp;({{ dirtyCount() }})}
+        </button>
+      </div>
+    }
   } @else {
     <!-- ── Start new + list ── -->
     <section class="acct-startrec" [formGroup]="startForm">
