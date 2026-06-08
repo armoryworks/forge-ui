@@ -3,19 +3,14 @@
     <span class="chip" [class.chip--success]="r.isReconciled" [class.chip--error]="!r.isReconciled">
       {{ r.isReconciled ? 'Reconciled' : 'Out of balance' }}
     </span>
-  }
-  <button type="button" class="action-btn" (click)="load()" [disabled]="loading()">
-    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
-    Refresh
-  </button>
-</app-page-header>
+  }</app-page-header>
 
 <div class="page-content">
   @if (error()) {
     <p class="acct-error" role="alert">{{ error() }}</p>
   }
 
-  @if (loading()) {
+  @if (loading() && !report()) {
     <p class="acct-muted">Loading…</p>
   } @else if (report(); as r) {
     <table class="statement" aria-label="Cash flow statement, indirect method">

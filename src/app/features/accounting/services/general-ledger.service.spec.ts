@@ -30,7 +30,7 @@ describe('GeneralLedgerService', () => {
 
   it('passes a date range to the P&L', () => {
     service.getProfitAndLoss(1, '2026-01-01', '2026-12-31').subscribe();
-    const req = httpMock.expectOne((r) => r.url === `${base}/profit-and-loss`);
+    const req = httpMock.expectOne((r) => r.url === `${base}/pnl`);
     expect(req.request.params.get('fromDate')).toBe('2026-01-01');
     expect(req.request.params.get('toDate')).toBe('2026-12-31');
     req.flush({});

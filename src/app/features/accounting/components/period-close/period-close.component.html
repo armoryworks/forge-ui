@@ -1,17 +1,12 @@
 <app-page-header title="Period Close" subtitle="Soft-close, hard-close, reopen, and year-end close">
-  @if (busy()) { <span class="acct-muted">Working…</span> }
-  <button type="button" class="action-btn" (click)="load()" [disabled]="loading() || busy()">
-    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
-    Refresh
-  </button>
-</app-page-header>
+  @if (busy()) { <span class="acct-muted">Working…</span> }</app-page-header>
 
 <div class="page-content">
   @if (error()) {
     <p class="acct-error" role="alert">{{ error() }}</p>
   }
 
-  @if (loading()) {
+  @if (loading() && years().length === 0) {
     <p class="acct-muted">Loading…</p>
   } @else {
     @for (year of years(); track year.id) {

@@ -6,6 +6,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { TrialBalance } from '../../models/accounting.models';
 
@@ -35,6 +36,10 @@ export class TrialBalanceComponent implements OnInit {
     { field: 'creditTotal', header: 'Credit', sortable: true, type: 'number', align: 'right', width: '150px' },
     { field: 'netBalance', header: 'Net', sortable: true, type: 'number', align: 'right', width: '150px' },
   ];
+
+  constructor() {
+    autoRefreshOnGlChange(() => this.load());
+  }
 
   ngOnInit(): void {
     this.load();

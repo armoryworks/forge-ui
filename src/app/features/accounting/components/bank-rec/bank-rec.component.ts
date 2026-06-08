@@ -14,6 +14,7 @@ import { CurrencyInputComponent } from '../../../../shared/components/currency-i
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { toIsoDate } from '../../../../shared/utils/date.utils';
+import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import {
   BankReconciliationSummary,
@@ -104,6 +105,12 @@ export class BankRecComponent implements OnInit {
     { field: 'description', header: 'Description', sortable: true },
     { field: 'amount', header: 'Amount', sortable: true, type: 'number', align: 'right', width: '140px' },
   ];
+
+  constructor() {
+    // Auto-refresh the reconciliations LIST on any GL change; never the open worksheet (would discard the
+    // in-progress, unsaved cleared selection).
+    autoRefreshOnGlChange(() => this.load());
+  }
 
   ngOnInit(): void {
     this.load();

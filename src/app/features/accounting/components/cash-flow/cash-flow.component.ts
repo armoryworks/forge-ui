@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { CashFlowStatement } from '../../models/accounting.models';
 
@@ -23,6 +24,10 @@ export class CashFlowComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly report = signal<CashFlowStatement | null>(null);
+
+  constructor() {
+    autoRefreshOnGlChange(() => this.load());
+  }
 
   ngOnInit(): void {
     this.load();

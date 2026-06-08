@@ -3,12 +3,7 @@
     <span class="chip" [class.chip--success]="r.reconciliation.isReconciled" [class.chip--error]="!r.reconciliation.isReconciled">
       {{ r.reconciliation.isReconciled ? 'Ties to AP control' : 'Out of balance' }}
     </span>
-  }
-  <button type="button" class="action-btn" (click)="load()" [disabled]="loading()">
-    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
-    Refresh
-  </button>
-</app-page-header>
+  }</app-page-header>
 
 <div class="page-content page-content--table">
   @if (error()) {

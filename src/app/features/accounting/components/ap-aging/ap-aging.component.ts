@@ -6,6 +6,7 @@ import { CurrencyDisplayComponent } from '../../../../shared/components/currency
 import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
+import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { ApAging } from '../../models/accounting.models';
 
@@ -57,6 +58,10 @@ export class ApAgingComponent implements OnInit {
       return row;
     });
   });
+
+  constructor() {
+    autoRefreshOnGlChange(() => this.load());
+  }
 
   ngOnInit(): void {
     this.load();

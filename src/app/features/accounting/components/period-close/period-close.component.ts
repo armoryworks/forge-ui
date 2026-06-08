@@ -8,6 +8,7 @@ import { DataTableComponent } from '../../../../shared/components/data-table/dat
 import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
 import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { autoRefreshOnGlChange } from '../../../../shared/utils/accounting-auto-refresh.util';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { FiscalPeriodStatus, FiscalYearModel } from '../../models/accounting.models';
 
@@ -38,6 +39,10 @@ export class PeriodCloseComponent implements OnInit {
     { field: 'status', header: 'Status', sortable: true, width: '130px' },
     { field: 'actions', header: 'Actions', align: 'right', width: '240px' },
   ];
+
+  constructor() {
+    autoRefreshOnGlChange(() => this.load());
+  }
 
   ngOnInit(): void {
     this.load();
