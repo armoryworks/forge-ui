@@ -25,12 +25,12 @@
 
   &.ok {
     background: rgba(46, 125, 50, 0.12);
-    color: #2e7d32;
+    color: var(--success);
   }
 
   &.bad {
     background: rgba(198, 40, 40, 0.12);
-    color: #c62828;
+    color: var(--error);
   }
 }
 
@@ -74,7 +74,7 @@
 }
 
 .error {
-  color: #c62828;
+  color: var(--error);
 }
 
 .ledger-table tr.reconcile td {

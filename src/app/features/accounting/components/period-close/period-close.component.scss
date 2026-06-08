@@ -24,8 +24,8 @@
   }
 
   &.danger {
-    border-color: #c62828;
-    color: #c62828;
+    border-color: var(--error);
+    color: var(--error);
   }
 }
 
@@ -53,12 +53,12 @@
 
   &.st-Open {
     background: rgba(46, 125, 50, 0.12);
-    color: #2e7d32;
+    color: var(--success);
   }
 
   &.st-SoftClosed {
     background: rgba(249, 168, 37, 0.15);
-    color: #b26a00;
+    color: var(--warning);
   }
 
   &.st-HardClosed,
@@ -92,5 +92,5 @@
 }
 
 .error {
-  color: #c62828;
+  color: var(--error);
 }

@@ -24,8 +24,8 @@
   }
 
   &.danger {
-    border-color: #c62828;
-    color: #c62828;
+    border-color: var(--error);
+    color: var(--error);
   }
 }
 
@@ -53,12 +53,12 @@
 
   &.st-Open {
     background: rgba(46, 125, 50, 0.12);
-    color: #2e7d32;
+    color: var(--success);
   }
 
   &.st-SoftClosed {
     background: rgba(249, 168, 37, 0.15);
-    color: #b26a00;
+    color: var(--warning);
   }
 
   &.st-HardClosed,
@@ -92,13 +92,13 @@
 }
 
 .error {
-  color: #c62828;
+  color: var(--error);
 }
 
-.btn.primary { border-color: var(--primary-color, #1976d2); color: var(--primary-color, #1976d2); }
+.btn.primary { border-color: var(--primary-color, var(--primary)); color: var(--primary-color, var(--primary)); }
 .balance-chip { font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 999px; }
-.balance-chip.ok { background: rgba(46,125,50,0.12); color: #2e7d32; }
-.balance-chip.bad { background: rgba(198,40,40,0.12); color: #c62828; }
+.balance-chip.ok { background: rgba(46,125,50,0.12); color: var(--success); }
+.balance-chip.bad { background: rgba(198,40,40,0.12); color: var(--error); }
 .start-form { margin: 1rem 0; }
 .form-row { display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; }
 .form-row label { display: flex; flex-direction: column; font-size: 0.85rem; gap: 0.25rem; }
