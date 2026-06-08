@@ -1,17 +1,27 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { ApAging } from '../../models/accounting.models';
 
 const DEFAULT_BOOK_ID = 1;
 
+/** Flattened aging row — bucket amounts hoisted to top-level b{i} fields so the shared table can render/sort them. */
+interface AgingTableRow {
+  partyName: string;
+  openBalance: number;
+  [bucketKey: string]: string | number;
+}
+
 @Component({
   selector: 'app-ap-aging',
   standalone: true,
-  imports: [PageHeaderComponent, CurrencyDisplayComponent],
+  imports: [PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
   templateUrl: './ap-aging.component.html',
   styleUrl: './ap-aging.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,6 +33,30 @@ export class ApAgingComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly report = signal<ApAging | null>(null);
+
+  /** Dynamic columns: Vendor + one per aging bucket + Open, derived from the report's bucket set. */
+  protected readonly columns = computed<ColumnDef[]>(() => {
+    const r = this.report();
+    if (!r) return [];
+    const buckets: ColumnDef[] = r.totalsByBucket.map((b, i) => ({
+      field: `b${i}`, header: b.label, sortable: true, type: 'number', align: 'right', width: '120px',
+    }));
+    return [
+      { field: 'partyName', header: 'Vendor', sortable: true },
+      ...buckets,
+      { field: 'openBalance', header: 'Open', sortable: true, type: 'number', align: 'right', width: '130px' },
+    ];
+  });
+
+  protected readonly rows = computed<AgingTableRow[]>(() => {
+    const r = this.report();
+    if (!r) return [];
+    return r.vendors.map((v) => {
+      const row: AgingTableRow = { partyName: v.vendorName ?? '—', openBalance: v.openBalance };
+      v.buckets.forEach((b, i) => (row[`b${i}`] = b.amount));
+      return row;
+    });
+  });
 
   ngOnInit(): void {
     this.load();

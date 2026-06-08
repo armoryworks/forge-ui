@@ -1,82 +1,87 @@
 <app-page-header title="GRNI Reconciliation" subtitle="Goods received not invoiced — GL vs operational">
-</app-page-header>
-
-<div class="toolbar">
-  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
   @if (report(); as r) {
-    <span class="balance-chip" [class.ok]="r.isReconciled" [class.bad]="!r.isReconciled">
+    <span class="chip" [class.chip--success]="r.isReconciled" [class.chip--error]="!r.isReconciled">
       {{ r.isReconciled ? 'Reconciled' : 'Variance' }}
     </span>
   }
-</div>
+  <button type="button" class="action-btn" (click)="load()" [disabled]="loading()">
+    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
+    Refresh
+  </button>
+</app-page-header>
 
-@if (loading()) {
-  <p class="muted">Loading…</p>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (report(); as r) {
-  <table class="ledger-table summary">
-    <tbody>
-      <tr><td>GL GRNI balance</td><td class="num"><app-currency-display [value]="r.glBalance" /></td></tr>
-      <tr><td>Operational open (received not billed)</td><td class="num"><app-currency-display [value]="r.operationalOpen" /></td></tr>
-      <tr class="subtotal"><td>Variance</td><td class="num"><app-currency-display [value]="r.variance" /></td></tr>
-    </tbody>
-  </table>
+<div class="page-content">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
 
-  <h3>Open GRNI by purchase order</h3>
-  <table class="ledger-table">
-    <thead>
-      <tr>
-        <th>PO</th>
-        <th>Vendor</th>
-        @for (b of r.totalsByBucket; track b.label) {
-          <th class="num">{{ b.label }}</th>
-        }
-        <th class="num">Open</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (po of r.purchaseOrders; track po.purchaseOrderId) {
-        <tr>
-          <td>{{ po.poNumber }}</td>
-          <td>{{ po.vendorName }}</td>
-          @for (b of po.buckets; track b.label) {
-            <td class="num"><app-currency-display [value]="b.amount" /></td>
-          }
-          <td class="num"><app-currency-display [value]="po.openAmount" /></td>
-        </tr>
-      } @empty {
-        <tr><td [attr.colspan]="r.totalsByBucket.length + 3" class="muted">No open GRNI.</td></tr>
-      }
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="2">Total</td>
-        @for (b of r.totalsByBucket; track b.label) {
-          <td class="num"><app-currency-display [value]="b.amount" /></td>
-        }
-        <td class="num"><app-currency-display [value]="r.grandTotal" /></td>
-      </tr>
-    </tfoot>
-  </table>
-
-  @if (r.uncoveredReceipts.length) {
-    <h3>Uncovered receipts <span class="muted">({{ r.uncoveredReceipts.length }}{{ r.uncoveredTruncated ? '+' : '' }})</span></h3>
-    <table class="ledger-table">
-      <thead>
-        <tr><th>Receipt</th><th>PO</th><th class="num">Qty</th><th>Received</th><th>Reason</th></tr>
-      </thead>
+  @if (loading()) {
+    <p class="acct-muted">Loading…</p>
+  } @else if (report(); as r) {
+    <table class="summary-table" aria-label="GRNI summary">
       <tbody>
-        @for (u of r.uncoveredReceipts; track u.receivingRecordId) {
-          <tr>
-            <td>{{ u.receiptNumber || '—' }}</td>
-            <td>{{ u.purchaseOrderId }}</td>
-            <td class="num">{{ u.quantityReceived }}</td>
-            <td>{{ u.receivedDate }}</td>
-            <td>{{ u.reason }}</td>
-          </tr>
-        }
+        <tr>
+          <td>GL GRNI balance</td>
+          <td class="num"><app-currency-display [value]="r.glBalance" /></td>
+        </tr>
+        <tr>
+          <td>Operational open (received not billed)</td>
+          <td class="num"><app-currency-display [value]="r.operationalOpen" /></td>
+        </tr>
+        <tr class="summary-table__total">
+          <td>Variance</td>
+          <td class="num"><app-currency-display [value]="r.variance" /></td>
+        </tr>
       </tbody>
     </table>
+
+    <h2 class="acct-subhead">Open GRNI by purchase order</h2>
+    <div class="acct-table-block">
+      <app-data-table
+        tableId="acct-grni-po"
+        [columns]="poColumns()"
+        [data]="poRows()"
+        [stickyFirstColumn]="true"
+        emptyIcon="inventory_2"
+        emptyMessage="No open GRNI">
+        <!-- Currency cells for the aging buckets. The shared data-table's content
+             query is descendants:false, so cells can't live inside @for — a fixed
+             pool of direct-child templates covers the standard 4-bucket ladder;
+             templates with no matching column are ignored. -->
+        <ng-template appColumnCell="b0" let-row><app-currency-display [value]="row.b0" /></ng-template>
+        <ng-template appColumnCell="b1" let-row><app-currency-display [value]="row.b1" /></ng-template>
+        <ng-template appColumnCell="b2" let-row><app-currency-display [value]="row.b2" /></ng-template>
+        <ng-template appColumnCell="b3" let-row><app-currency-display [value]="row.b3" /></ng-template>
+        <ng-template appColumnCell="b4" let-row><app-currency-display [value]="row.b4" /></ng-template>
+        <ng-template appColumnCell="b5" let-row><app-currency-display [value]="row.b5" /></ng-template>
+        <ng-template appColumnCell="openAmount" let-row>
+          <app-currency-display [value]="row.openAmount" />
+        </ng-template>
+      </app-data-table>
+    </div>
+
+    <div class="totals-strip">
+      <span class="totals-strip__label">Total</span>
+      @for (b of r.totalsByBucket; track b.label) {
+        <span class="totals-strip__metric">{{ b.label }} <app-currency-display [value]="b.amount" /></span>
+      }
+      <span class="totals-strip__metric">Open <app-currency-display [value]="r.grandTotal" /></span>
+    </div>
+
+    @if (r.uncoveredReceipts.length) {
+      <h2 class="acct-subhead">Uncovered receipts ({{ r.uncoveredReceipts.length }}{{ r.uncoveredTruncated ? '+' : '' }})</h2>
+      <div class="acct-table-block">
+        <app-data-table
+          tableId="acct-grni-uncovered"
+          [columns]="uncoveredColumns"
+          [data]="r.uncoveredReceipts"
+          emptyIcon="inventory_2"
+          emptyMessage="No uncovered receipts">
+          <ng-template appColumnCell="receiptNumber" let-row>
+            {{ row.receiptNumber || '—' }}
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
   }
-}
+</div>

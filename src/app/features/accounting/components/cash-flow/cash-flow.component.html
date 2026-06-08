@@ -1,75 +1,79 @@
 <app-page-header title="Cash Flow" subtitle="Indirect method — reconciled to the cash account">
-</app-page-header>
-
-<div class="toolbar">
-  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
   @if (report(); as r) {
-    <span class="balance-chip" [class.ok]="r.isReconciled" [class.bad]="!r.isReconciled">
+    <span class="chip" [class.chip--success]="r.isReconciled" [class.chip--error]="!r.isReconciled">
       {{ r.isReconciled ? 'Reconciled' : 'Out of balance' }}
     </span>
   }
-</div>
+  <button type="button" class="action-btn" (click)="load()" [disabled]="loading()">
+    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
+    Refresh
+  </button>
+</app-page-header>
 
-@if (loading()) {
-  <p class="muted">Loading…</p>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (report(); as r) {
-  <table class="ledger-table">
-    <tbody>
-      <tr class="section-head"><td colspan="2">Operating activities</td></tr>
-      <tr>
-        <td>Net income</td>
-        <td class="num"><app-currency-display [value]="r.netIncome" /></td>
-      </tr>
-      @for (line of r.operatingAdjustments; track line.glAccountId) {
+<div class="page-content">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading()) {
+    <p class="acct-muted">Loading…</p>
+  } @else if (report(); as r) {
+    <table class="statement" aria-label="Cash flow statement, indirect method">
+      <tbody>
+        <tr class="statement__section"><td colspan="2">Operating activities</td></tr>
         <tr>
-          <td>{{ line.accountName }}</td>
-          <td class="num"><app-currency-display [value]="line.amount" /></td>
+          <td>Net income</td>
+          <td class="num"><app-currency-display [value]="r.netIncome" /></td>
         </tr>
-      }
-      <tr class="subtotal">
-        <td>Net cash from operating</td>
-        <td class="num"><app-currency-display [value]="r.netCashFromOperating" /></td>
-      </tr>
-
-      @if (r.investing.length) {
-        <tr class="section-head"><td colspan="2">Investing activities</td></tr>
-        @for (line of r.investing; track line.glAccountId) {
+        @for (line of r.operatingAdjustments; track line.glAccountId) {
           <tr>
             <td>{{ line.accountName }}</td>
             <td class="num"><app-currency-display [value]="line.amount" /></td>
           </tr>
         }
-        <tr class="subtotal">
-          <td>Net cash from investing</td>
-          <td class="num"><app-currency-display [value]="r.netCashFromInvesting" /></td>
+        <tr class="statement__subtotal">
+          <td>Net cash from operating</td>
+          <td class="num"><app-currency-display [value]="r.netCashFromOperating" /></td>
         </tr>
-      }
 
-      <tr class="section-head"><td colspan="2">Financing activities</td></tr>
-      @for (line of r.financing; track line.glAccountId) {
-        <tr>
-          <td>{{ line.accountName }}</td>
-          <td class="num"><app-currency-display [value]="line.amount" /></td>
+        @if (r.investing.length) {
+          <tr class="statement__section"><td colspan="2">Investing activities</td></tr>
+          @for (line of r.investing; track line.glAccountId) {
+            <tr>
+              <td>{{ line.accountName }}</td>
+              <td class="num"><app-currency-display [value]="line.amount" /></td>
+            </tr>
+          }
+          <tr class="statement__subtotal">
+            <td>Net cash from investing</td>
+            <td class="num"><app-currency-display [value]="r.netCashFromInvesting" /></td>
+          </tr>
+        }
+
+        <tr class="statement__section"><td colspan="2">Financing activities</td></tr>
+        @for (line of r.financing; track line.glAccountId) {
+          <tr>
+            <td>{{ line.accountName }}</td>
+            <td class="num"><app-currency-display [value]="line.amount" /></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="2" class="acct-muted">No financing activity.</td></tr>
+        }
+        <tr class="statement__subtotal">
+          <td>Net cash from financing</td>
+          <td class="num"><app-currency-display [value]="r.netCashFromFinancing" /></td>
         </tr>
-      } @empty {
-        <tr><td colspan="2" class="muted">No financing activity.</td></tr>
-      }
-      <tr class="subtotal">
-        <td>Net cash from financing</td>
-        <td class="num"><app-currency-display [value]="r.netCashFromFinancing" /></td>
-      </tr>
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>Net change in cash</td>
-        <td class="num"><app-currency-display [value]="r.netChangeInCash" /></td>
-      </tr>
-      <tr class="reconcile">
-        <td>Actual cash movement</td>
-        <td class="num"><app-currency-display [value]="r.actualCashChange" /></td>
-      </tr>
-    </tfoot>
-  </table>
-}
+      </tbody>
+      <tfoot>
+        <tr>
+          <td>Net change in cash</td>
+          <td class="num"><app-currency-display [value]="r.netChangeInCash" /></td>
+        </tr>
+        <tr class="statement__reconcile">
+          <td>Actual cash movement</td>
+          <td class="num"><app-currency-display [value]="r.actualCashChange" /></td>
+        </tr>
+      </tfoot>
+    </table>
+  }
+</div>

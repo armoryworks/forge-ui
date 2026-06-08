@@ -1,95 +1,102 @@
 <app-page-header title="Bank Reconciliation" subtitle="Match cleared cash entries to a bank statement">
-</app-page-header>
-
-@if (error()) { <p class="error">{{ error() }}</p> }
-
-@if (worksheet(); as ws) {
-  <!-- ── Worksheet ── -->
-  <div class="toolbar">
-    <button type="button" class="btn" (click)="closeWorksheet()">← Back to list</button>
-    <span class="status-chip" [class]="'st-' + ws.status">{{ ws.status }}</span>
-    <span class="balance-chip" [class.ok]="ws.isReconciled" [class.bad]="!ws.isReconciled">
-      {{ ws.isReconciled ? 'Reconciled' : 'Difference ' }}
-      @if (!ws.isReconciled) { <app-currency-display [value]="ws.difference" /> }
+  @if (worksheet(); as ws) {
+    <span class="chip" [class.chip--success]="ws.status === 'Finalized'" [class.chip--info]="ws.status === 'Draft'">
+      {{ ws.status }}
+    </span>
+    <span class="chip" [class.chip--success]="ws.isReconciled" [class.chip--warning]="!ws.isReconciled">
+      @if (ws.isReconciled) { Reconciled } @else { Difference <app-currency-display [value]="ws.difference" /> }
     </span>
     @if (ws.status === 'Draft') {
-      <button type="button" class="btn primary" (click)="finalize()" [disabled]="busy() || !ws.isReconciled">Finalize</button>
+      <button type="button" class="action-btn action-btn--primary" (click)="finalize()" [disabled]="busy() || !ws.isReconciled">
+        <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">check</span>
+        Finalize
+      </button>
     }
-  </div>
+  }
+</app-page-header>
 
-  <table class="ledger-table summary">
-    <tbody>
-      <tr><td>Book (GL) cash balance</td><td class="num"><app-currency-display [value]="ws.bookBalance" /></td></tr>
-      <tr><td>Statement ending balance</td><td class="num"><app-currency-display [value]="ws.statementEndingBalance" /></td></tr>
-      <tr><td>Cleared</td><td class="num"><app-currency-display [value]="ws.clearedTotal" /></td></tr>
-      <tr><td>Outstanding</td><td class="num"><app-currency-display [value]="ws.outstandingTotal" /></td></tr>
-    </tbody>
-  </table>
+<div class="page-content">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
 
-  <table class="ledger-table">
-    <thead>
-      <tr><th>Cleared</th><th>Date</th><th>Description</th><th class="num">Amount</th></tr>
-    </thead>
-    <tbody>
-      @for (item of ws.items; track item.itemId) {
-        <tr>
-          <td>
-            <input type="checkbox" [checked]="item.isCleared" [disabled]="busy() || ws.status !== 'Draft'"
-                   (change)="toggle(item.journalLineId, !item.isCleared)" />
-          </td>
-          <td>{{ item.entryDate }}</td>
-          <td>{{ item.description || '—' }}</td>
-          <td class="num"><app-currency-display [value]="item.amount" /></td>
-        </tr>
-      } @empty {
-        <tr><td colspan="4" class="muted">No outstanding cash lines.</td></tr>
-      }
-    </tbody>
-  </table>
-} @else {
-  <!-- ── Start new + list ── -->
-  <section class="start-form">
-    <h3>Start a reconciliation</h3>
-    <div class="form-row">
-      <label>Cash account
-        <select [(ngModel)]="cashAccountId" [disabled]="busy()">
-          @for (a of cashAccounts(); track a.glAccountId) {
-            <option [ngValue]="a.glAccountId">{{ a.accountNumber }} · {{ a.name }}</option>
-          }
-        </select>
-      </label>
-      <label>Statement date
-        <input type="date" [(ngModel)]="statementDate" [disabled]="busy()" />
-      </label>
-      <label>Ending balance
-        <input type="number" step="0.01" [(ngModel)]="endingBalance" [disabled]="busy()" />
-      </label>
-      <button type="button" class="btn primary" (click)="start()" [disabled]="busy()">Start</button>
-    </div>
-  </section>
+  @if (worksheet(); as ws) {
+    <!-- ── Worksheet ── -->
+    <button type="button" class="action-btn" (click)="closeWorksheet()">
+      <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">chevron_left</span>
+      Back to list
+    </button>
 
-  <h3>Reconciliations</h3>
-  @if (loading()) {
-    <p class="muted">Loading…</p>
-  } @else {
-    <table class="ledger-table">
-      <thead>
-        <tr><th>Account</th><th>Statement date</th><th class="num">Ending balance</th><th>Status</th><th class="num">Difference</th><th></th></tr>
-      </thead>
+    <table class="summary-table" aria-label="Reconciliation summary">
       <tbody>
-        @for (r of reconciliations(); track r.reconciliationId) {
-          <tr>
-            <td>{{ r.cashAccountName }}</td>
-            <td>{{ r.statementDate }}</td>
-            <td class="num"><app-currency-display [value]="r.statementEndingBalance" /></td>
-            <td><span class="status-chip" [class]="'st-' + r.status">{{ r.status }}</span></td>
-            <td class="num"><app-currency-display [value]="r.difference" /></td>
-            <td><button type="button" class="btn sm" (click)="open(r.reconciliationId)" [disabled]="busy()">Open</button></td>
-          </tr>
-        } @empty {
-          <tr><td colspan="6" class="muted">No reconciliations yet.</td></tr>
-        }
+        <tr><td>Book (GL) cash balance</td><td class="num"><app-currency-display [value]="ws.bookBalance" /></td></tr>
+        <tr><td>Statement ending balance</td><td class="num"><app-currency-display [value]="ws.statementEndingBalance" /></td></tr>
+        <tr><td>Cleared</td><td class="num"><app-currency-display [value]="ws.clearedTotal" /></td></tr>
+        <tr class="summary-table__total"><td>Outstanding</td><td class="num"><app-currency-display [value]="ws.outstandingTotal" /></td></tr>
       </tbody>
     </table>
+
+    <div class="acct-table-block">
+      <app-data-table
+        tableId="acct-bankrec-items"
+        [columns]="itemColumns"
+        [data]="ws.items"
+        emptyIcon="account_balance_wallet"
+        emptyMessage="No outstanding cash lines">
+        <!-- Per-row action checkbox (toggles persisted "cleared" state) — not a reactive form field, so a labelled native checkbox rather than an <app-toggle> CVA. -->
+        <ng-template appColumnCell="isCleared" let-row>
+          <input
+            type="checkbox"
+            [checked]="row.isCleared"
+            [disabled]="busy() || ws.status !== 'Draft'"
+            (change)="toggle(row.journalLineId, !row.isCleared)"
+            [attr.aria-label]="'Mark ' + (row.description || 'entry') + ' cleared'" />
+        </ng-template>
+        <ng-template appColumnCell="amount" let-row>
+          <app-currency-display [value]="row.amount" />
+        </ng-template>
+      </app-data-table>
+    </div>
+  } @else {
+    <!-- ── Start new + list ── -->
+    <section class="acct-startrec" [formGroup]="startForm">
+      <h2 class="acct-subhead">Start a reconciliation</h2>
+      <div class="acct-startrec__row">
+        <app-select label="Cash account" formControlName="cashAccountId" [options]="cashAccountOptions()" [required]="true" />
+        <app-datepicker label="Statement date" formControlName="statementDate" [required]="true" />
+        <app-currency-input label="Ending balance" formControlName="endingBalance" />
+        <app-validation-button [violations]="startViolations" [loading]="busy()">
+          <button type="button" class="action-btn action-btn--create" [disabled]="startForm.invalid || busy()" (click)="start()">
+            <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">add</span>
+            Start
+          </button>
+        </app-validation-button>
+      </div>
+    </section>
+
+    <h2 class="acct-subhead">Reconciliations</h2>
+    <div class="acct-table-block">
+      <app-data-table
+        tableId="acct-bankrec-list"
+        [columns]="reconColumns"
+        [data]="reconciliations()"
+        [loading]="loading()"
+        [clickableRows]="true"
+        (rowClick)="open($any($event).reconciliationId)"
+        emptyIcon="account_balance_wallet"
+        emptyMessage="No reconciliations yet">
+        <ng-template appColumnCell="statementEndingBalance" let-row>
+          <app-currency-display [value]="row.statementEndingBalance" />
+        </ng-template>
+        <ng-template appColumnCell="difference" let-row>
+          <app-currency-display [value]="row.difference" />
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span class="chip" [class.chip--success]="row.status === 'Finalized'" [class.chip--info]="row.status === 'Draft'">
+            {{ row.status }}
+          </span>
+        </ng-template>
+      </app-data-table>
+    </div>
   }
-}
+</div>

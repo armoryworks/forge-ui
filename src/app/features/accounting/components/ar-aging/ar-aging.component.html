@@ -1,51 +1,50 @@
 <app-page-header title="AR Aging" subtitle="Open receivables by customer and age">
-</app-page-header>
-
-<div class="toolbar">
-  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
   @if (report(); as r) {
-    <span class="balance-chip" [class.ok]="r.reconciliation.isReconciled" [class.bad]="!r.reconciliation.isReconciled">
+    <span class="chip" [class.chip--success]="r.reconciliation.isReconciled" [class.chip--error]="!r.reconciliation.isReconciled">
       {{ r.reconciliation.isReconciled ? 'Ties to AR control' : 'Out of balance' }}
     </span>
   }
-</div>
+  <button type="button" class="action-btn" (click)="load()" [disabled]="loading()">
+    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
+    Refresh
+  </button>
+</app-page-header>
 
-@if (loading()) {
-  <p class="muted">Loading…</p>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (report(); as r) {
-  <table class="ledger-table">
-    <thead>
-      <tr>
-        <th>Customer</th>
-        @for (b of r.totalsByBucket; track b.label) {
-          <th class="num">{{ b.label }}</th>
-        }
-        <th class="num">Open</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (row of r.customers; track row.customerId) {
-        <tr>
-          <td>{{ row.customerName }}</td>
-          @for (b of row.buckets; track b.label) {
-            <td class="num"><app-currency-display [value]="b.amount" /></td>
-          }
-          <td class="num"><app-currency-display [value]="row.openBalance" /></td>
-        </tr>
-      } @empty {
-        <tr><td [attr.colspan]="r.totalsByBucket.length + 2" class="muted">No open receivables.</td></tr>
+<div class="page-content page-content--table">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-ar-aging"
+    [columns]="columns()"
+    [data]="rows()"
+    [loading]="loading()"
+    [stickyFirstColumn]="true"
+    emptyIcon="receipt_long"
+    emptyMessage="No open receivables">
+    <!-- Currency cells for the aging buckets. The shared data-table's content
+         query is descendants:false, so cells can't live inside @for — a fixed
+         pool of direct-child templates covers the standard 4-bucket ladder
+         (0-30 / 31-60 / 61-90 / 91+); templates with no matching column are ignored. -->
+    <ng-template appColumnCell="b0" let-row><app-currency-display [value]="row.b0" /></ng-template>
+    <ng-template appColumnCell="b1" let-row><app-currency-display [value]="row.b1" /></ng-template>
+    <ng-template appColumnCell="b2" let-row><app-currency-display [value]="row.b2" /></ng-template>
+    <ng-template appColumnCell="b3" let-row><app-currency-display [value]="row.b3" /></ng-template>
+    <ng-template appColumnCell="b4" let-row><app-currency-display [value]="row.b4" /></ng-template>
+    <ng-template appColumnCell="b5" let-row><app-currency-display [value]="row.b5" /></ng-template>
+    <ng-template appColumnCell="openBalance" let-row>
+      <app-currency-display [value]="row.openBalance" />
+    </ng-template>
+  </app-data-table>
+
+  @if (report(); as r) {
+    <div class="totals-strip">
+      <span class="totals-strip__label">Total</span>
+      @for (b of r.totalsByBucket; track b.label) {
+        <span class="totals-strip__metric">{{ b.label }} <app-currency-display [value]="b.amount" /></span>
       }
-    </tbody>
-    <tfoot>
-      <tr>
-        <td>Total</td>
-        @for (b of r.totalsByBucket; track b.label) {
-          <td class="num"><app-currency-display [value]="b.amount" /></td>
-        }
-        <td class="num"><app-currency-display [value]="r.grandTotal" /></td>
-      </tr>
-    </tfoot>
-  </table>
-}
+      <span class="totals-strip__metric">Open <app-currency-display [value]="r.grandTotal" /></span>
+    </div>
+  }
+</div>

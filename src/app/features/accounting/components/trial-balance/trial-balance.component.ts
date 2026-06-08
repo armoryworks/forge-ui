@@ -3,6 +3,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { DataTableComponent } from '../../../../shared/components/data-table/data-table.component';
+import { ColumnCellDirective } from '../../../../shared/directives/column-cell.directive';
+import { ColumnDef } from '../../../../shared/models/column-def.model';
 import { GeneralLedgerService } from '../../services/general-ledger.service';
 import { TrialBalance } from '../../models/accounting.models';
 
@@ -12,7 +15,7 @@ const DEFAULT_BOOK_ID = 1;
 @Component({
   selector: 'app-trial-balance',
   standalone: true,
-  imports: [PageHeaderComponent, CurrencyDisplayComponent],
+  imports: [PageHeaderComponent, CurrencyDisplayComponent, DataTableComponent, ColumnCellDirective],
   templateUrl: './trial-balance.component.html',
   styleUrl: './trial-balance.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +27,14 @@ export class TrialBalanceComponent implements OnInit {
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly report = signal<TrialBalance | null>(null);
+
+  protected readonly columns: ColumnDef[] = [
+    { field: 'accountNumber', header: 'Account #', sortable: true, width: '130px' },
+    { field: 'accountName', header: 'Account', sortable: true },
+    { field: 'debitTotal', header: 'Debit', sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'creditTotal', header: 'Credit', sortable: true, type: 'number', align: 'right', width: '150px' },
+    { field: 'netBalance', header: 'Net', sortable: true, type: 'number', align: 'right', width: '150px' },
+  ];
 
   ngOnInit(): void {
     this.load();

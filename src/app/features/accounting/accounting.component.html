@@ -3,12 +3,14 @@
   subtitle="General ledger reports and period close">
 </app-page-header>
 
-<div class="tile-grid">
-  @for (tile of tiles; track tile.route) {
-    <a class="tile" [routerLink]="tile.route">
-      <span class="material-icons tile-icon">{{ tile.icon }}</span>
-      <span class="tile-label">{{ tile.label }}</span>
-      <span class="tile-desc">{{ tile.description }}</span>
-    </a>
-  }
+<div class="page-content">
+  <div class="tile-grid">
+    @for (tile of tiles; track tile.route) {
+      <a class="tile" [routerLink]="tile.route">
+        <span class="material-icons-outlined tile-icon" aria-hidden="true">{{ tile.icon }}</span>
+        <span class="tile-label">{{ tile.label }}</span>
+        <span class="tile-desc">{{ tile.description }}</span>
+      </a>
+    }
+  </div>
 </div>

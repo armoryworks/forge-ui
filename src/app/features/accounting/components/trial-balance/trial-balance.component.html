@@ -1,50 +1,43 @@
 <app-page-header title="Trial Balance" subtitle="Debits and credits by account">
-</app-page-header>
-
-<div class="toolbar">
-  <button type="button" class="btn" (click)="load()" [disabled]="loading()">Refresh</button>
   @if (report(); as r) {
-    <span class="balance-chip" [class.ok]="r.isBalanced" [class.bad]="!r.isBalanced">
+    <span class="chip" [class.chip--success]="r.isBalanced" [class.chip--error]="!r.isBalanced">
       {{ r.isBalanced ? 'Balanced' : 'Out of balance' }}
     </span>
   }
-</div>
+  <button type="button" class="action-btn" (click)="load()" [disabled]="loading()">
+    <span class="material-icons-outlined acct-refresh-icon" aria-hidden="true">refresh</span>
+    Refresh
+  </button>
+</app-page-header>
 
-@if (loading()) {
-  <p class="muted">Loading…</p>
-} @else if (error()) {
-  <p class="error">{{ error() }}</p>
-} @else if (report(); as r) {
-  <table class="ledger-table">
-    <thead>
-      <tr>
-        <th>Account #</th>
-        <th>Account</th>
-        <th class="num">Debit</th>
-        <th class="num">Credit</th>
-        <th class="num">Net</th>
-      </tr>
-    </thead>
-    <tbody>
-      @for (row of r.rows; track row.glAccountId) {
-        <tr>
-          <td>{{ row.accountNumber }}</td>
-          <td>{{ row.accountName }}</td>
-          <td class="num"><app-currency-display [value]="row.debitTotal" /></td>
-          <td class="num"><app-currency-display [value]="row.creditTotal" /></td>
-          <td class="num"><app-currency-display [value]="row.netBalance" /></td>
-        </tr>
-      } @empty {
-        <tr><td colspan="5" class="muted">No ledger activity.</td></tr>
-      }
-    </tbody>
-    <tfoot>
-      <tr>
-        <td colspan="2">Total</td>
-        <td class="num"><app-currency-display [value]="r.totalDebit" /></td>
-        <td class="num"><app-currency-display [value]="r.totalCredit" /></td>
-        <td class="num"></td>
-      </tr>
-    </tfoot>
-  </table>
-}
+<div class="page-content page-content--table">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-trial-balance"
+    [columns]="columns"
+    [data]="report()?.rows ?? []"
+    [loading]="loading()"
+    emptyIcon="balance"
+    emptyMessage="No ledger activity">
+    <ng-template appColumnCell="debitTotal" let-row>
+      <app-currency-display [value]="row.debitTotal" />
+    </ng-template>
+    <ng-template appColumnCell="creditTotal" let-row>
+      <app-currency-display [value]="row.creditTotal" />
+    </ng-template>
+    <ng-template appColumnCell="netBalance" let-row>
+      <app-currency-display [value]="row.netBalance" />
+    </ng-template>
+  </app-data-table>
+
+  @if (report(); as r) {
+    <div class="totals-strip">
+      <span class="totals-strip__label">Total</span>
+      <span class="totals-strip__metric">Debit <app-currency-display [value]="r.totalDebit" /></span>
+      <span class="totals-strip__metric">Credit <app-currency-display [value]="r.totalCredit" /></span>
+    </div>
+  }
+</div>
