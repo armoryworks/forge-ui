@@ -16,6 +16,7 @@ import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
+import { ActiveCurrencyService } from '../../../../shared/services/active-currency.service';
 import { toIsoDate, todayEnd } from '../../../../shared/utils/date.utils';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -24,6 +25,8 @@ interface ApplicationEntry {
   invoiceId: number;
   invoiceNumber: string;
   amount: number;
+  /** Settlement FX rate for this application; 1 for base-currency invoices. */
+  settlementFxRate: number;
 }
 
 // ⚡ ACCOUNTING BOUNDARY
@@ -43,6 +46,7 @@ export class PaymentDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly paymentService = inject(PaymentService);
   private readonly customerService = inject(CustomerService);
+  private readonly currencyService = inject(ActiveCurrencyService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -55,6 +59,14 @@ export class PaymentDialogComponent {
   /** Phase 1l — payment dates record when payment was received; not future. */
   protected readonly today = todayEnd();
   protected readonly applications = signal<ApplicationEntry[]>([]);
+
+  // ── Multi-currency (additive) ──────────────────────────────────────────────
+  // The per-application settlement FX-rate input is hidden for single-currency
+  // installs. We don't know each applied invoice's currency from this form, so
+  // we gate purely on ">1 active currency exists" and let the user enter the
+  // settlement rate; it defaults to 1 (correct for base-currency invoices).
+  protected readonly activeCurrencyCount = signal(0);
+  protected readonly showSettlementFxRate = computed(() => this.activeCurrencyCount() > 1);
 
   protected readonly customerOptions = computed<SelectOption[]>(() => [
     { value: null, label: this.translate.instant('payments.selectCustomer') },
@@ -94,6 +106,7 @@ export class PaymentDialogComponent {
     invoiceId: new FormControl<number | null>(null, [Validators.required]),
     invoiceNumber: new FormControl('', [Validators.required]),
     amount: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01)]),
+    settlementFxRate: new FormControl<number>(1, [Validators.required, Validators.min(0.0000001)]),
   });
 
   protected readonly totalApplied = computed(() =>
@@ -107,7 +120,17 @@ export class PaymentDialogComponent {
     snapshotFn: () => ({ ...this.paymentForm.getRawValue(), applications: this.applications() }),
     restoreFn: (data) => {
       this.paymentForm.patchValue(data);
-      if (Array.isArray(data['applications'])) this.applications.set(data['applications'] as ApplicationEntry[]);
+      if (Array.isArray(data['applications'])) {
+        // Older drafts predate settlementFxRate — default it to 1 on restore.
+        this.applications.set(
+          (data['applications'] as Partial<ApplicationEntry>[]).map(a => ({
+            invoiceId: a.invoiceId!,
+            invoiceNumber: a.invoiceNumber ?? '',
+            amount: a.amount!,
+            settlementFxRate: a.settlementFxRate ?? 1,
+          })),
+        );
+      }
       this.paymentForm.markAsDirty();
     },
   };
@@ -115,6 +138,12 @@ export class PaymentDialogComponent {
   constructor() {
     this.customerService.getCustomers(undefined, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.customers.set(list),
+    });
+
+    // Load active currencies only to decide whether the per-application
+    // settlement FX-rate input should appear (>1 active currency).
+    this.currencyService.listActiveCurrencies().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (list) => this.activeCurrencyCount.set(list.length),
     });
   }
 
@@ -129,8 +158,9 @@ export class PaymentDialogComponent {
       invoiceId: f.invoiceId!,
       invoiceNumber: f.invoiceNumber!,
       amount: f.amount!,
+      settlementFxRate: f.settlementFxRate ?? 1,
     }]);
-    this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null });
+    this.appForm.reset({ invoiceId: null, invoiceNumber: '', amount: null, settlementFxRate: 1 });
   }
 
   protected removeApplication(index: number): void {
@@ -145,6 +175,9 @@ export class PaymentDialogComponent {
     const appRequests: CreatePaymentApplicationRequest[] = this.applications().map(a => ({
       invoiceId: a.invoiceId,
       amount: a.amount,
+      // Only attach a non-default settlement rate for multi-currency installs;
+      // single-currency stays byte-for-byte unchanged (server defaults to 1).
+      settlementFxRate: this.showSettlementFxRate() ? (a.settlementFxRate ?? 1) : undefined,
     }));
 
     this.paymentService.createPayment({

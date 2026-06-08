@@ -7,3 +7,8 @@
 .add-line--4col {
   grid-template-columns: 80px 1fr 120px auto;
 }
+
+// Multi-currency installs add a settlement FX-rate column before the button.
+.add-line--5col {
+  grid-template-columns: 80px 1fr 120px 110px auto;
+}

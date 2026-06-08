@@ -71,6 +71,12 @@
         <app-datepicker [label]="'invoices.dueDate' | translate" formControlName="dueDate" data-testid="invoice-due-date" />
         <app-select [label]="'invoices.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="invoice-credit-terms" />
         <app-input [label]="'invoices.taxRate' | translate" type="number" formControlName="taxRate" suffix="%" data-testid="invoice-tax-rate" />
+        @if (showCurrencySelector()) {
+          <app-select [label]="'accounting.currency.currency' | translate" formControlName="currencyId" [options]="currencyOptions()" [required]="true" data-testid="invoice-currency" />
+        }
+        @if (showFxRate()) {
+          <app-input [label]="'accounting.currency.fxRate' | translate" type="number" formControlName="fxRate" step="0.0000001" min="0.0000001" [required]="true" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="invoice-fx-rate" />
+        }
         <app-input [label]="'invoices.shipmentId' | translate" type="number" formControlName="shipmentId" [placeholder]="'common.optional' | translate" />
       </div>
 

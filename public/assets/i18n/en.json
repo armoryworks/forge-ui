@@ -7003,6 +7003,12 @@
       "outOfBalance": "Out of balance",
       "reconciled": "Reconciled"
     },
+    "currency": {
+      "currency": "Currency",
+      "fxRate": "FX Rate",
+      "fxRatePlaceholder": "1.000000",
+      "settlementFxRate": "Settlement FX Rate"
+    },
     "errors": {
       "trialBalanceLoadFailed": "Could not load the trial balance.",
       "profitLossLoadFailed": "Could not load the profit & loss statement.",

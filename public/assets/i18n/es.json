@@ -7003,6 +7003,12 @@
       "outOfBalance": "Sin cuadrar",
       "reconciled": "Conciliado"
     },
+    "currency": {
+      "currency": "Moneda",
+      "fxRate": "Tipo de cambio",
+      "fxRatePlaceholder": "1,000000",
+      "settlementFxRate": "Tipo de cambio de liquidación"
+    },
     "errors": {
       "trialBalanceLoadFailed": "No se pudo cargar el balance de comprobación.",
       "profitLossLoadFailed": "No se pudo cargar el estado de resultados.",
