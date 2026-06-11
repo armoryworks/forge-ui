@@ -1,0 +1,150 @@
+@if (bill(); as bill) {
+  <div class="detail-panel" [appLoadingBlock]="loading()">
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon">receipt_long</span>
+        <div>
+          <div class="detail-name">{{ bill.billNumber }}</div>
+          <div class="detail-vendor"><app-entity-link type="vendor" [entityId]="bill.vendorId">{{ bill.vendorName }}</app-entity-link></div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Status & Info -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.status' | translate }}</span>
+          <span class="info-value">
+            <span [class]="getStatusClass(bill.status)">{{ getStatusLabel(bill.status) }}</span>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.vendor' | translate }}</span>
+          <span class="info-value"><app-entity-link type="vendor" [entityId]="bill.vendorId">{{ bill.vendorName }}</app-entity-link></span>
+        </div>
+        @if (bill.vendorInvoiceNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'payables.vendorInvoiceNumber' | translate }}</span>
+            <span class="info-value">{{ bill.vendorInvoiceNumber }}</span>
+          </div>
+        }
+        @if (bill.purchaseOrderId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'payables.purchaseOrder' | translate }}</span>
+            <span class="info-value"><app-entity-link type="purchase-order" [entityId]="bill.purchaseOrderId">PO #{{ bill.purchaseOrderId }}</app-entity-link></span>
+          </div>
+        }
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.billDate' | translate }}</span>
+          <span class="info-value">{{ bill.billDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'common.dueDate' | translate }}</span>
+          <span class="info-value">{{ bill.dueDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+
+      @if (bill.notes) {
+        <div class="info-section">
+          <span class="info-label">{{ 'common.notes' | translate }}</span>
+          <div class="info-notes">{{ bill.notes }}</div>
+        </div>
+      }
+
+      <!-- Line Items -->
+      <div class="lines-section">
+        <span class="info-label">{{ 'payables.lineItems' | translate }} ({{ bill.lines.length }})</span>
+        @if (bill.lines.length > 0) {
+          <table class="lines-table" aria-label="Vendor bill line items">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">{{ 'common.description' | translate }}</th>
+                @if (bill.purchaseOrderId) {
+                  <th scope="col" class="lines-table__right">{{ 'payables.poLine' | translate }}</th>
+                }
+                <th scope="col" class="lines-table__right">{{ 'payables.qty' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'payables.unitPrice' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of bill.lines; track line.id) {
+                <tr>
+                  <td class="lines-table__mono">{{ line.lineNumber }}</td>
+                  <td>{{ line.description }}</td>
+                  @if (bill.purchaseOrderId) {
+                    <td class="lines-table__right lines-table__mono">{{ line.purchaseOrderLineId ?? '—' }}</td>
+                  }
+                  <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-row">
+          <span class="totals-label">{{ 'payables.subtotal' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="bill.subtotal" [currency]="null" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'payables.tax' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="bill.taxAmount" [currency]="null" /></span>
+        </div>
+        <div class="totals-row totals-row--total">
+          <span class="totals-label">{{ 'common.total' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="bill.total" [currency]="null" /></span>
+        </div>
+        <div class="totals-row">
+          <span class="totals-label">{{ 'payables.paid' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="bill.amountPaid" [currency]="null" /></span>
+        </div>
+        <div class="totals-row totals-row--balance">
+          <span class="totals-label">{{ 'payables.balanceDue' | translate }}</span>
+          <span class="totals-value"><app-currency-display [value]="bill.balanceDue" [currency]="null" /></span>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'common.created' | translate }}</span>
+          <span class="info-value">{{ bill.createdAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Actions — destructive on far left, primary furthest right. -->
+      <div class="detail-actions">
+        @if (canVoid(bill)) {
+          <button class="action-btn action-btn--danger" data-testid="void-bill-btn" (click)="voidBill()">
+            <span class="material-icons-outlined">block</span>
+            {{ 'payables.void' | translate }}
+          </button>
+        }
+        @if (canApprove(bill)) {
+          <button class="action-btn action-btn--primary" data-testid="approve-bill-btn" (click)="approveBill()">
+            <span class="material-icons-outlined">check</span>
+            {{ 'payables.approve' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+} @else {
+  <div class="detail-panel" [appLoadingBlock]="loading()">
+    <div class="detail-empty">
+      <span class="material-icons-outlined">receipt_long</span>
+      <span>{{ 'payables.loadingBill' | translate }}</span>
+    </div>
+  </div>
+}

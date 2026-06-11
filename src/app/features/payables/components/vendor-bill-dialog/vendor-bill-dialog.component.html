@@ -1,0 +1,115 @@
+<app-dialog [title]="'payables.newBill' | translate" width="800px" (closed)="close()">
+  <div class="bill-form" [formGroup]="billForm">
+    <div class="dialog-row">
+      <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" data-testid="bill-vendor" />
+      <app-input [label]="'payables.vendorInvoiceNumber' | translate" formControlName="vendorInvoiceNumber" [placeholder]="'common.optional' | translate" data-testid="bill-vendor-invoice-number" />
+    </div>
+
+    <div class="dialog-row">
+      <app-datepicker [label]="'payables.billDate' | translate" formControlName="billDate" [max]="today" [required]="true" data-testid="bill-date" />
+      <app-datepicker [label]="'common.dueDate' | translate" formControlName="dueDate" [required]="true" data-testid="bill-due-date" />
+    </div>
+
+    <div class="dialog-row">
+      <app-currency-input [label]="'payables.tax' | translate" formControlName="taxAmount" data-testid="bill-tax-amount" />
+      @if (showCurrencySelector()) {
+        <app-select [label]="'accounting.currency.currency' | translate" formControlName="currencyId" [options]="currencyOptions()" [required]="true" data-testid="bill-currency" />
+      }
+    </div>
+
+    @if (showFxRate()) {
+      <app-input [label]="'accounting.currency.fxRate' | translate" type="number" formControlName="fxRate" step="0.0000001" min="0.0000001" [required]="true" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="bill-fx-rate" />
+    }
+
+    <!-- Mode: standalone lines vs. lines pulled from a PO's unbilled receipts -->
+    <app-toggle [label]="'payables.fromPurchaseOrder' | translate" [formControl]="fromPoControl" data-testid="bill-from-po-toggle" />
+
+    @if (fromPo()) {
+      <app-select [label]="'payables.purchaseOrder' | translate" formControlName="purchaseOrderId" [options]="poOptions()" data-testid="bill-po-select" />
+
+      @if (poHasNoBillableLines()) {
+        <div class="lines-empty">{{ 'payables.noBillableLines' | translate }}</div>
+      } @else if (poLineMeta().length > 0) {
+        <div class="bill-lines">
+          <span class="bill-lines__title">{{ 'payables.lineItems' | translate }}</span>
+          <div class="po-line po-line--header">
+            <span>{{ 'payables.part' | translate }}</span>
+            <span class="po-line__right">{{ 'payables.received' | translate }}</span>
+            <span class="po-line__right">{{ 'payables.billableUpTo' | translate }}</span>
+            <span>{{ 'payables.qtyToBill' | translate }}</span>
+            <span>{{ 'payables.unitPrice' | translate }}</span>
+          </div>
+          <div formArrayName="poLines">
+            @for (group of poLines.controls; track group; let i = $index) {
+              <div class="po-line" [formGroupName]="i">
+                <span class="po-line__part">
+                  <span class="po-line__part-number">{{ poLineMeta()[i].partNumber }}</span>
+                  <span class="po-line__desc">{{ poLineMeta()[i].description }}</span>
+                </span>
+                <span class="po-line__right">{{ poLineMeta()[i].receivedQuantity | number:'1.0-4' }}</span>
+                <span class="po-line__right">{{ 'payables.billableUpToValue' | translate:{ max: poLineMeta()[i].unbilledReceivedQuantity } }}</span>
+                <app-input [label]="'payables.qtyToBill' | translate" type="number" formControlName="quantityToBill" min="0" [max]="poLineMeta()[i].unbilledReceivedQuantity" step="0.0001" data-testid="bill-po-line-qty" />
+                <app-input [label]="'payables.unitPrice' | translate" type="number" formControlName="unitPrice" min="0" step="0.0001" data-testid="bill-po-line-price" />
+              </div>
+            }
+          </div>
+          <div class="po-line__hint">{{ 'payables.ppvHint' | translate }}</div>
+        </div>
+      }
+    } @else {
+      <div class="bill-lines">
+        <span class="bill-lines__title">{{ 'payables.lineItems' | translate }}</span>
+        @if (standaloneLines.length === 0) {
+          <div class="lines-empty">{{ 'payables.noLinesYet' | translate }}</div>
+        }
+        <div formArrayName="lines">
+          @for (group of standaloneLines.controls; track group; let i = $index) {
+            <div class="line-row" [formGroupName]="i">
+              <app-entity-picker [label]="'common.part' | translate" entityType="parts" displayField="partNumber" secondaryDisplayField="name" formControlName="partId" />
+              <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" data-testid="bill-line-desc" />
+              <app-input [label]="'payables.qty' | translate" type="number" formControlName="quantity" step="0.0001" min="0.0001" data-testid="bill-line-qty" />
+              <app-input [label]="'payables.unitPrice' | translate" type="number" formControlName="unitPrice" step="0.0001" min="0" data-testid="bill-line-price" />
+              <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeLine(i)">
+                <span class="material-icons-outlined">delete</span>
+              </button>
+            </div>
+          }
+        </div>
+        <button class="action-btn action-btn--sm bill-lines__add" data-testid="bill-add-line-btn" (click)="addLine()">
+          <span class="material-icons-outlined">add</span>
+          {{ 'payables.addLine' | translate }}
+        </button>
+      </div>
+    }
+
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" data-testid="bill-notes" />
+
+    <!-- Totals -->
+    <div class="bill-totals">
+      <div class="dlg-total-row">
+        <span>{{ 'payables.subtotal' | translate }}</span>
+        <app-currency-display [value]="linesTotal()" [currency]="null" />
+      </div>
+      <div class="dlg-total-row">
+        <span>{{ 'payables.tax' | translate }}</span>
+        <app-currency-display [value]="taxAmountValue() ?? 0" [currency]="null" />
+      </div>
+      <div class="dlg-total-row dlg-total-row--grand">
+        <span>{{ 'common.total' | translate }}</span>
+        <app-currency-display [value]="grandTotal()" [currency]="null" />
+      </div>
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        data-testid="bill-save-btn"
+        [disabled]="billForm.invalid || activeLineCount() === 0 || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span> {{ 'payables.createBill' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

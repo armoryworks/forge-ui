@@ -1,0 +1,90 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.bill-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.bill-lines {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+
+  &__title {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__add {
+    align-self: flex-start;
+  }
+}
+
+// Standalone line row: part picker | description | qty | price | remove
+.line-row {
+  display: grid;
+  grid-template-columns: 160px 1fr 90px 110px auto;
+  gap: $sp-sm;
+  align-items: center;
+}
+
+// PO line row: part/desc | received | billable | qty input | price input
+.po-line {
+  display: grid;
+  grid-template-columns: 1fr 80px 110px 110px 110px;
+  gap: $sp-sm;
+  align-items: center;
+  padding: $sp-xs 0;
+
+  &--header {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+    border-bottom: $border-width-thin solid var(--border);
+    padding-bottom: $sp-sm;
+  }
+
+  &__right { text-align: right; }
+
+  &__part {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xs;
+    min-width: 0;
+  }
+
+  &__part-number {
+    font-family: $font-family-mono;
+    font-size: $font-size-xs;
+    font-weight: 600;
+  }
+
+  &__desc {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    @include truncate;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+}
+
+.bill-totals {
+  border-top: $border-width-thin solid var(--border);
+  padding-top: $sp-sm;
+}
+
+.lines-empty {
+  padding: $sp-lg;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: $font-size-sm;
+  border: $border-width-thin dashed var(--border);
+}

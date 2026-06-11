@@ -1,0 +1,110 @@
+<app-page-header [title]="'payables.title' | translate" [subtitle]="'payables.subtitle' | translate">
+  @if (activeTab() === 'bills') {
+    <button class="action-btn action-btn--create" data-testid="new-vendor-bill-btn" (click)="openBillDialog()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'payables.newBill' | translate }}
+    </button>
+  }
+  @if (activeTab() === 'payments') {
+    <button class="action-btn action-btn--create" data-testid="new-vendor-payment-btn" (click)="openPaymentDialog()">
+      <span class="material-icons-outlined">add</span>
+      {{ 'payables.newPayment' | translate }}
+    </button>
+  }
+</app-page-header>
+
+<div class="payables-content">
+  <div class="tab-bar">
+    <button class="tab" [class.tab--active]="activeTab() === 'bills'" (click)="switchTab('bills')">
+      <span class="material-icons-outlined">receipt_long</span>
+      {{ 'payables.tabBills' | translate }}
+    </button>
+    <button class="tab" [class.tab--active]="activeTab() === 'payments'" (click)="switchTab('payments')">
+      <span class="material-icons-outlined">payments</span>
+      {{ 'payables.tabPayments' | translate }}
+    </button>
+  </div>
+
+  @if (activeTab() === 'bills') {
+    <div class="filters-bar">
+      <app-select [label]="'payables.vendor' | translate" [formControl]="billVendorFilterControl" [options]="vendorOptions()" />
+      <app-select [label]="'common.status' | translate" [formControl]="billStatusFilterControl" [options]="statusOptions" />
+    </div>
+
+    <div class="tab-content" [appLoadingBlock]="billsLoading()">
+      <app-data-table tableId="payables-bills" [columns]="billColumns" [data]="bills()"
+        emptyIcon="receipt_long" [emptyMessage]="'payables.noBillsFound' | translate"
+        [clickableRows]="true"
+        (rowClick)="openBillDetail($any($event))">
+        <ng-template appColumnCell="billNumber" let-row>
+          <span class="doc-number">{{ row.billNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="vendorInvoiceNumber" let-row>
+          <span class="doc-number">{{ row.vendorInvoiceNumber || '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="billDate" let-row>
+          <span class="text-muted">{{ row.billDate | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="dueDate" let-row>
+          <span class="text-muted">{{ row.dueDate | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="total" let-row>
+          <app-currency-display [value]="row.total" [currency]="null" />
+        </ng-template>
+        <ng-template appColumnCell="amountPaid" let-row>
+          <app-currency-display [value]="row.amountPaid" [currency]="null" />
+        </ng-template>
+        <ng-template appColumnCell="balanceDue" let-row>
+          <span [class.text-warning]="row.balanceDue > 0">
+            <app-currency-display [value]="row.balanceDue" [currency]="null" />
+          </span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  @if (activeTab() === 'payments') {
+    <div class="filters-bar">
+      <app-select [label]="'payables.vendor' | translate" [formControl]="paymentVendorFilterControl" [options]="vendorOptions()" />
+    </div>
+
+    <div class="tab-content" [appLoadingBlock]="paymentsLoading()">
+      <app-data-table tableId="payables-payments" [columns]="paymentColumns" [data]="payments()"
+        emptyIcon="payments" [emptyMessage]="'payables.noPaymentsFound' | translate"
+        [clickableRows]="true"
+        (rowClick)="openPaymentDetail($any($event))">
+        <ng-template appColumnCell="paymentNumber" let-row>
+          <span class="doc-number">{{ row.paymentNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="method" let-row>
+          <span>{{ getMethodLabel(row.method) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="amount" let-row>
+          <app-currency-display [value]="row.amount" [currency]="null" />
+        </ng-template>
+        <ng-template appColumnCell="appliedAmount" let-row>
+          <app-currency-display [value]="row.appliedAmount" [currency]="null" />
+        </ng-template>
+        <ng-template appColumnCell="unappliedAmount" let-row>
+          <span [class.text-warning]="row.unappliedAmount > 0">
+            <app-currency-display [value]="row.unappliedAmount" [currency]="null" />
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="paymentDate" let-row>
+          <span class="text-muted">{{ row.paymentDate | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>
+
+@if (showBillDialog()) {
+  <app-vendor-bill-dialog (closed)="closeBillDialog()" (saved)="onBillSaved()" />
+}
+
+@if (showPaymentDialog()) {
+  <app-vendor-payment-dialog (closed)="closePaymentDialog()" (saved)="onPaymentSaved()" />
+}

@@ -204,6 +204,14 @@ export const routes: Routes = [
           import('./features/payments/payments.routes').then((m) => m.PAYMENTS_ROUTES),
       },
       {
+        // AP Payables (vendor bills + vendor payments) — gated on the same
+        // CAP-P2P-PO capability as the server-side controllers.
+        path: 'payables',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-P2P-PO')],
+        loadChildren: () =>
+          import('./features/payables/payables.routes').then((m) => m.PAYABLES_ROUTES),
+      },
+      {
         path: 'notifications',
         loadChildren: () =>
           import('./features/notifications/notifications.routes').then((m) => m.NOTIFICATION_ROUTES),

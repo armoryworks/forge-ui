@@ -1,0 +1,38 @@
+@use 'styles/variables' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.payables-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tab-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.filters-bar {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-md $sp-lg;
+  border-bottom: $border-width-thin solid var(--border);
+  flex-shrink: 0;
+}
+
+.doc-number { font-family: $font-family-mono; font-weight: 600; }
+
+.text-warning { color: var(--warning); }

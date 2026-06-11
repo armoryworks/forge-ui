@@ -1007,7 +1007,7 @@ if (detail?.entityType === 'part') {
 }
 ```
 
-**Entity type strings** (used in URLs): `job`, `part`, `asset`, `lead`, `invoice`, `quote`, `vendor`, `sales-order`, `purchase-order`, `shipment`, `payment`, `customer-return`, `lot`, `training`
+**Entity type strings** (used in URLs): `job`, `part`, `asset`, `lead`, `invoice`, `quote`, `vendor`, `sales-order`, `purchase-order`, `shipment`, `payment`, `customer-return`, `lot`, `training`, `vendor-bill`, `vendor-payment`
 
 **URL format:** `?detail=job:1055` — set on open, cleared on close (`replaceUrl: true`). Shareable, bookmarkable, survives refresh.
 
@@ -1051,7 +1051,7 @@ Inline clickable link for cross-entity references. Navigates to the target entit
 
 **Inputs:** `type` (LinkableEntityType, required), `entityId` (number, required). Content projected as the display text.
 
-**Supported types:** `job`, `part`, `vendor`, `purchase-order`, `sales-order`, `invoice`, `payment`, `shipment`, `quote`, `lead`, `asset`, `lot`, `rfq`, `customer-return`, `training`, `customer`
+**Supported types:** `job`, `part`, `vendor`, `purchase-order`, `sales-order`, `invoice`, `payment`, `shipment`, `quote`, `lead`, `asset`, `lot`, `rfq`, `customer-return`, `training`, `customer`, `vendor-bill`, `vendor-payment`
 
 **Applied to:** RFQ detail (part, PO), Invoice detail (customer, SO, shipment), Shipment detail (SO, invoice), Sales Order detail (customer, quote), Quote detail (customer, SO), PO detail (vendor, job), Job detail (customer, part, parent job, sub-jobs, linked jobs, parts), Asset detail (source job/part), Payment detail (customer)
 

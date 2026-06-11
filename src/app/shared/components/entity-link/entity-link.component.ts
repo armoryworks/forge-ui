@@ -9,7 +9,7 @@ export type LinkableEntityType =
   | 'job' | 'part' | 'vendor' | 'purchase-order' | 'sales-order'
   | 'invoice' | 'payment' | 'shipment' | 'quote' | 'lead'
   | 'asset' | 'lot' | 'rfq' | 'customer-return' | 'training'
-  | 'customer';
+  | 'customer' | 'vendor-bill' | 'vendor-payment';
 
 /** Route base path for each entity type. */
 const ENTITY_ROUTES: Record<LinkableEntityType, string> = {
@@ -29,6 +29,8 @@ const ENTITY_ROUTES: Record<LinkableEntityType, string> = {
   'customer-return': '/customer-returns',
   'training': '/training',
   'customer': '/customers',
+  'vendor-bill': '/payables/bills',
+  'vendor-payment': '/payables/payments',
 };
 
 /**
