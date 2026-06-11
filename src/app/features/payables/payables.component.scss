@@ -36,3 +36,28 @@
 .doc-number { font-family: $font-family-mono; font-weight: 600; }
 
 .text-warning { color: var(--warning); }
+
+// Bill status cell — status chip + optional "Payment failed" flag side by side.
+.status-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+// Failed-transmission triage strip — error-left-border style, matches the
+// .acct-error banner stereotype from the GL accounting screens.
+.transmission-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  flex-shrink: 0;
+  margin: $sp-md $sp-lg 0;
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-base;
+  color: var(--error);
+  border-left: $border-width-accent solid var(--error);
+  background: var(--error-light);
+}
+
+.transmission-banner__icon { font-size: $icon-size-md; }
+.transmission-banner__action { margin-left: auto; }

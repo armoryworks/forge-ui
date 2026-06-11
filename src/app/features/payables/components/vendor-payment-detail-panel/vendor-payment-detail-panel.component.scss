@@ -57,6 +57,21 @@
 
 .text-warning { color: var(--warning); }
 
+// --- Bank Transmission ---
+.info-value--mono { font-family: $font-family-mono; font-size: $font-size-xs; }
+
+.transmission-error {
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.transmission-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
 // --- Applications Table ---
 .lines-section {
   display: flex;

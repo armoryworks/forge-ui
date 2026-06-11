@@ -7244,6 +7244,28 @@
     "violationOverApplied": "Los montos aplicados exceden el monto del pago",
     "violationInvalidApplications": "Una o más aplicaciones a facturas no son válidas",
     "createPayment": "Crear Pago",
-    "paymentCreated": "Pago a proveedor creado."
+    "paymentCreated": "Pago a proveedor creado.",
+    "transmission": {
+      "column": "Transmisión",
+      "statusQueued": "En cola",
+      "statusRetrying": "Reintentando",
+      "statusRetryingCount": "Reintentando {{attempts}}/5",
+      "statusSucceeded": "Exitosa",
+      "statusFailed": "Fallida",
+      "statusCancelled": "Cancelada",
+      "paymentFailed": "Pago fallido",
+      "billBanner": "Una transmisión bancaria de un pago aplicado a esta factura ha fallado — reprocésela desde el pago.",
+      "triageBanner": "{{count}} transmisión(es) de pago fallida(s) requieren atención",
+      "viewPayments": "Ver pagos",
+      "sectionTitle": "Transmisión bancaria",
+      "attempts": "Intentos",
+      "submissionRef": "Ref. de Envío",
+      "nextAttemptAt": "Próximo Intento",
+      "lastError": "Último Error",
+      "retry": "Reintentar transmisión",
+      "retryTitle": "¿Reintentar Transmisión?",
+      "retryMessage": "¿Reintentar el envío bancario del pago \"{{number}}\"? Esto pone en cola un nuevo ciclo de hasta 5 intentos.",
+      "retryQueued": "Transmisión puesta en cola para reintento."
+    }
   }
 }

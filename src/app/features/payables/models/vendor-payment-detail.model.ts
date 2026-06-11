@@ -16,4 +16,11 @@ export interface VendorPaymentDetail {
   notes: string | null;
   createdAt: string;
   applications: VendorPaymentApplication[];
+  /** Latest bank transmission state — all null/0 for non-electronic payments. */
+  transmissionId: number | null;
+  transmissionStatus: string | null;
+  transmissionAttempts: number;
+  transmissionLastError: string | null;
+  transmissionSubmissionRef: string | null;
+  transmissionNextAttemptAt: string | null;
 }

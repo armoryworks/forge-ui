@@ -63,6 +63,51 @@
         </div>
       }
 
+      <!-- Bank Transmission (electronic payments only) -->
+      @if (payment.transmissionStatus; as transmissionStatus) {
+        <div class="info-section" data-testid="transmission-section">
+          <span class="info-label">{{ 'payables.transmission.sectionTitle' | translate }}</span>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">{{ 'common.status' | translate }}</span>
+              <span class="info-value">
+                <span [class]="getTransmissionChipClass(transmissionStatus)">{{ getTransmissionStatusLabel(transmissionStatus) }}</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{{ 'payables.transmission.attempts' | translate }}</span>
+              <span class="info-value">{{ payment.transmissionAttempts }}/5</span>
+            </div>
+            @if (transmissionStatus === 'Succeeded' && payment.transmissionSubmissionRef) {
+              <div class="info-item">
+                <span class="info-label">{{ 'payables.transmission.submissionRef' | translate }}</span>
+                <span class="info-value info-value--mono">{{ payment.transmissionSubmissionRef }}</span>
+              </div>
+            }
+            @if (transmissionStatus === 'Retrying' && payment.transmissionNextAttemptAt) {
+              <div class="info-item">
+                <span class="info-label">{{ 'payables.transmission.nextAttemptAt' | translate }}</span>
+                <span class="info-value">{{ payment.transmissionNextAttemptAt | date:'MM/dd/yyyy hh:mm' }}</span>
+              </div>
+            }
+          </div>
+          @if (payment.transmissionLastError) {
+            <div class="info-item">
+              <span class="info-label">{{ 'payables.transmission.lastError' | translate }}</span>
+              <div class="transmission-error">{{ payment.transmissionLastError }}</div>
+            </div>
+          }
+          @if (transmissionStatus === 'Failed') {
+            <div class="transmission-actions">
+              <button class="action-btn action-btn--primary" data-testid="retry-transmission-btn" (click)="retryTransmission()">
+                <span class="material-icons-outlined">refresh</span>
+                {{ 'payables.transmission.retry' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
       <!-- Bill Applications -->
       <div class="lines-section">
         <span class="info-label">{{ 'payables.applications' | translate }} ({{ payment.applications.length }})</span>

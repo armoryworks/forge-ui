@@ -8,6 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { VendorBillService } from './services/vendor-bill.service';
 import { VendorPaymentService } from './services/vendor-payment.service';
+import { PaymentTransmissionService } from './services/payment-transmission.service';
 import { VendorBillListItem } from './models/vendor-bill-list-item.model';
 import { VendorPaymentListItem } from './models/vendor-payment-list-item.model';
 import { VendorService } from '../vendors/services/vendor.service';
@@ -48,6 +49,7 @@ const VALID_TABS: PayablesTab[] = ['bills', 'payments'];
 export class PayablesComponent {
   private readonly billService = inject(VendorBillService);
   private readonly paymentService = inject(VendorPaymentService);
+  private readonly transmissionService = inject(PaymentTransmissionService);
   private readonly vendorService = inject(VendorService);
   private readonly detailDialog = inject(DetailDialogService);
   private readonly translate = inject(TranslateService);
@@ -69,6 +71,9 @@ export class PayablesComponent {
 
   protected readonly showBillDialog = signal(false);
   protected readonly showPaymentDialog = signal(false);
+
+  /** Failed bank transmission count — drives the triage banner on both tabs. */
+  protected readonly failedTransmissionCount = signal(0);
 
   // Filters
   protected readonly billVendorFilterControl = new FormControl<number | null>(null);
@@ -122,7 +127,20 @@ export class PayablesComponent {
     { field: 'unappliedAmount', header: this.translate.instant('payables.unapplied'), sortable: true, width: '100px', align: 'right' },
     { field: 'paymentDate', header: this.translate.instant('common.date'), sortable: true, type: 'date', width: '110px' },
     { field: 'referenceNumber', header: this.translate.instant('payables.referenceNumber'), sortable: true, width: '120px' },
+    { field: 'transmissionStatus', header: this.translate.instant('payables.transmission.column'), sortable: true, filterable: true, type: 'enum', width: '130px', filterOptions: [
+      { value: 'Queued', label: this.translate.instant('payables.transmission.statusQueued') },
+      { value: 'Retrying', label: this.translate.instant('payables.transmission.statusRetrying') },
+      { value: 'Succeeded', label: this.translate.instant('payables.transmission.statusSucceeded') },
+      { value: 'Failed', label: this.translate.instant('payables.transmission.statusFailed') },
+      { value: 'Cancelled', label: this.translate.instant('payables.transmission.statusCancelled') },
+    ]},
   ];
+
+  /** Error tint on rows whose latest bank transmission failed (table-supported --row-tint hook). */
+  protected readonly paymentRowStyle = (row: unknown): Record<string, string> => {
+    const payment = row as VendorPaymentListItem;
+    return payment.transmissionStatus === 'Failed' ? { '--row-tint': 'var(--error)' } : {};
+  };
 
   constructor() {
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed()).subscribe({
@@ -150,12 +168,16 @@ export class PayablesComponent {
       .pipe(distinctUntilChanged(), takeUntilDestroyed())
       .subscribe(() => this.loadPayments());
 
+    this.loadFailedTransmissions();
+
     // Approving / paying posts GL when FULLGL is on — keep both lists live.
-    // (No-op while FULLGL is off: the hub never fires.) Open dialogs are
-    // intentionally NOT auto-refreshed.
+    // (No-op while FULLGL is off: the hub never fires.) Transmission status
+    // changes broadcast the same accountingChanged push, so the triage banner
+    // stays live too. Open dialogs are intentionally NOT auto-refreshed.
     autoRefreshOnGlChange(() => {
       this.loadBills();
       this.loadPayments();
+      this.loadFailedTransmissions();
     });
   }
 
@@ -187,6 +209,12 @@ export class PayablesComponent {
         this.autoOpenFromUrl();
       },
       error: () => this.paymentsLoading.set(false),
+    });
+  }
+
+  private loadFailedTransmissions(): void {
+    this.transmissionService.getPaymentTransmissions('Failed').subscribe({
+      next: (list) => this.failedTransmissionCount.set(list.length),
     });
   }
 
@@ -262,5 +290,25 @@ export class PayablesComponent {
     const key = 'payables.method' + method;
     const translated = this.translate.instant(key);
     return translated !== key ? translated : method;
+  }
+
+  protected getTransmissionChipClass(status: string): string {
+    const map: Record<string, string> = {
+      Queued: 'chip--info',
+      Retrying: 'chip--warning',
+      Succeeded: 'chip--success',
+      Failed: 'chip--error',
+      Cancelled: 'chip--muted',
+    };
+    return `chip ${map[status] ?? ''}`.trim();
+  }
+
+  protected getTransmissionLabel(status: string, attempts: number): string {
+    if (status === 'Retrying') {
+      return this.translate.instant('payables.transmission.statusRetryingCount', { attempts });
+    }
+    const key = 'payables.transmission.status' + status;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : status;
   }
 }

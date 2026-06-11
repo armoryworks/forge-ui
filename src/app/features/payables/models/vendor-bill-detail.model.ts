@@ -21,4 +21,6 @@ export interface VendorBillDetail {
   notes: string | null;
   createdAt: string;
   lines: VendorBillLine[];
+  /** True when any payment applied to this bill has a failed latest bank transmission. */
+  hasFailedTransmission: boolean;
 }

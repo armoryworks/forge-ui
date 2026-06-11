@@ -14,6 +14,18 @@
 </app-page-header>
 
 <div class="payables-content">
+  @if (failedTransmissionCount() > 0) {
+    <div class="transmission-banner" role="alert" data-testid="failed-transmission-banner">
+      <span class="material-icons-outlined transmission-banner__icon">error</span>
+      <span>{{ 'payables.transmission.triageBanner' | translate: { count: failedTransmissionCount() } }}</span>
+      @if (activeTab() !== 'payments') {
+        <button class="action-btn action-btn--sm transmission-banner__action" (click)="switchTab('payments')">
+          {{ 'payables.transmission.viewPayments' | translate }}
+        </button>
+      }
+    </div>
+  }
+
   <div class="tab-bar">
     <button class="tab" [class.tab--active]="activeTab() === 'bills'" (click)="switchTab('bills')">
       <span class="material-icons-outlined">receipt_long</span>
@@ -43,7 +55,12 @@
           <span class="doc-number">{{ row.vendorInvoiceNumber || '—' }}</span>
         </ng-template>
         <ng-template appColumnCell="status" let-row>
-          <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+          <span class="status-cell">
+            <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+            @if (row.hasFailedTransmission) {
+              <span class="chip chip--error">{{ 'payables.transmission.paymentFailed' | translate }}</span>
+            }
+          </span>
         </ng-template>
         <ng-template appColumnCell="billDate" let-row>
           <span class="text-muted">{{ row.billDate | date:'MM/dd/yyyy' }}</span>
@@ -74,7 +91,7 @@
     <div class="tab-content" [appLoadingBlock]="paymentsLoading()">
       <app-data-table tableId="payables-payments" [columns]="paymentColumns" [data]="payments()"
         emptyIcon="payments" [emptyMessage]="'payables.noPaymentsFound' | translate"
-        [clickableRows]="true"
+        [clickableRows]="true" [rowStyle]="paymentRowStyle"
         (rowClick)="openPaymentDetail($any($event))">
         <ng-template appColumnCell="paymentNumber" let-row>
           <span class="doc-number">{{ row.paymentNumber }}</span>
@@ -95,6 +112,13 @@
         </ng-template>
         <ng-template appColumnCell="paymentDate" let-row>
           <span class="text-muted">{{ row.paymentDate | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="transmissionStatus" let-row>
+          @if (row.transmissionStatus) {
+            <span [class]="getTransmissionChipClass(row.transmissionStatus)">{{ getTransmissionLabel(row.transmissionStatus, row.transmissionAttempts) }}</span>
+          } @else {
+            <span class="text-muted">—</span>
+          }
         </ng-template>
       </app-data-table>
     </div>

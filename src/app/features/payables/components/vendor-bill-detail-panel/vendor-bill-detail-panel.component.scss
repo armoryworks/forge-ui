@@ -56,6 +56,21 @@
   white-space: pre-wrap;
 }
 
+// Failed-transmission alert — error-left-border banner, matches the
+// .acct-error stereotype from the GL accounting screens.
+.transmission-banner {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-base;
+  color: var(--error);
+  border-left: $border-width-accent solid var(--error);
+  background: var(--error-light);
+}
+
+.transmission-banner__icon { font-size: $icon-size-md; }
+
 // --- Lines Table ---
 .lines-section {
   display: flex;

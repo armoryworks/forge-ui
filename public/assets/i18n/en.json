@@ -7244,6 +7244,28 @@
     "violationOverApplied": "Applied amounts exceed the payment amount",
     "violationInvalidApplications": "One or more bill applications are invalid",
     "createPayment": "Create Payment",
-    "paymentCreated": "Vendor payment created."
+    "paymentCreated": "Vendor payment created.",
+    "transmission": {
+      "column": "Transmission",
+      "statusQueued": "Queued",
+      "statusRetrying": "Retrying",
+      "statusRetryingCount": "Retrying {{attempts}}/5",
+      "statusSucceeded": "Succeeded",
+      "statusFailed": "Failed",
+      "statusCancelled": "Cancelled",
+      "paymentFailed": "Payment failed",
+      "billBanner": "A bank transmission for a payment applied to this bill has failed — reprocess it from the payment.",
+      "triageBanner": "{{count}} failed payment transmission(s) need attention",
+      "viewPayments": "View payments",
+      "sectionTitle": "Bank transmission",
+      "attempts": "Attempts",
+      "submissionRef": "Submission Ref",
+      "nextAttemptAt": "Next Attempt",
+      "lastError": "Last Error",
+      "retry": "Retry transmission",
+      "retryTitle": "Retry Transmission?",
+      "retryMessage": "Re-attempt the bank submission for payment \"{{number}}\"? This queues a fresh cycle of up to 5 attempts.",
+      "retryQueued": "Transmission queued for retry."
+    }
   }
 }

@@ -11,4 +11,8 @@ export interface VendorPaymentListItem {
   paymentDate: string;
   referenceNumber: string | null;
   createdAt: string;
+  /** Latest bank transmission state — null when never transmitted (cash/check). */
+  transmissionStatus: string | null;
+  transmissionAttempts: number;
+  transmissionId: number | null;
 }

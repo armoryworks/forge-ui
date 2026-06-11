@@ -12,4 +12,6 @@ export interface VendorBillListItem {
   amountPaid: number;
   balanceDue: number;
   createdAt: string;
+  /** True when any payment applied to this bill has a failed latest bank transmission. */
+  hasFailedTransmission: boolean;
 }

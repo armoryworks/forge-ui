@@ -16,6 +16,13 @@
     </div>
 
     <div class="detail-body">
+      @if (bill.hasFailedTransmission) {
+        <div class="transmission-banner" role="alert" data-testid="bill-failed-transmission-banner">
+          <span class="material-icons-outlined transmission-banner__icon">error</span>
+          <span>{{ 'payables.transmission.billBanner' | translate }}</span>
+        </div>
+      }
+
       <!-- Status & Info -->
       <div class="info-grid">
         <div class="info-item">
