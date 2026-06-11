@@ -16,7 +16,8 @@ export interface VendorPaymentDetailDialogData {
   template: `
     <app-vendor-payment-detail-panel
       [paymentId]="data.paymentId"
-      (closed)="close()" />
+      (closed)="close()"
+      (paymentChanged)="changed = true" />
   `,
   styles: [`:host { display: block; width: 100%; height: 100%; }`],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,7 +27,9 @@ export class VendorPaymentDetailDialogComponent {
 
   protected readonly data = inject<VendorPaymentDetailDialogData>(MAT_DIALOG_DATA);
 
+  protected changed = false;
+
   protected close(): void {
-    this.dialogRef.close(false);
+    this.dialogRef.close(this.changed);
   }
 }

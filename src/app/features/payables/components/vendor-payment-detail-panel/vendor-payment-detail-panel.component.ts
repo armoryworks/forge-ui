@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -9,8 +10,12 @@ import { VendorPaymentService } from '../../services/vendor-payment.service';
 import { PaymentTransmissionService } from '../../services/payment-transmission.service';
 import { VendorPaymentDetail } from '../../models/vendor-payment-detail.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
+import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 
@@ -19,8 +24,9 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   selector: 'app-vendor-payment-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, TranslatePipe,
+    DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
+    DialogComponent, TextareaComponent, ValidationButtonComponent,
     EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './vendor-payment-detail-panel.component.html',
@@ -36,6 +42,7 @@ export class VendorPaymentDetailPanelComponent {
 
   readonly paymentId = input.required<number>();
   readonly closed = output<void>();
+  readonly paymentChanged = output<void>();
 
   protected readonly loading = signal(false);
   protected readonly payment = signal<VendorPaymentDetail | null>(null);
@@ -44,6 +51,25 @@ export class VendorPaymentDetailPanelComponent {
   protected readonly showFxColumn = computed(() =>
     (this.payment()?.applications ?? []).some(a => a.settlementFxRate !== 1),
   );
+
+  // --- Void (mirrors the PO short-close reason dialog; AR delete-style action placement) ---
+  // Hidden once the bank transmission Succeeded — money already moved, the server 409s.
+  protected readonly canVoid = computed(() => {
+    const payment = this.payment();
+    return !!payment && payment.transmissionStatus !== 'Succeeded';
+  });
+
+  protected readonly showVoidDialog = signal(false);
+  protected readonly voidSaving = signal(false);
+  protected readonly voidForm = new FormGroup({
+    reason: new FormControl<string>('', {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(3), Validators.maxLength(2000)],
+    }),
+  });
+  protected readonly voidViolations = FormValidationService.getViolations(this.voidForm, {
+    reason: this.translate.instant('payables.voidReason'),
+  });
 
   constructor() {
     effect(() => {
@@ -103,6 +129,30 @@ export class VendorPaymentDetailPanelComponent {
           this.snackbar.success(this.translate.instant('payables.transmission.retryQueued'));
         },
       });
+    });
+  }
+
+  protected openVoidDialog(): void {
+    this.voidForm.reset();
+    this.showVoidDialog.set(true);
+  }
+
+  protected confirmVoid(): void {
+    const payment = this.payment();
+    if (!payment || this.voidForm.invalid) return;
+    const reason = this.voidForm.getRawValue().reason.trim();
+    this.voidSaving.set(true);
+    // 409 (transmission already Succeeded / already voided) surfaces via the
+    // global error interceptor toast — only close + reload on success.
+    this.paymentService.voidVendorPayment(payment.id, reason).subscribe({
+      next: () => {
+        this.voidSaving.set(false);
+        this.showVoidDialog.set(false);
+        this.snackbar.success(this.translate.instant('payables.paymentVoided'));
+        this.paymentChanged.emit();
+        this.closed.emit();
+      },
+      error: () => this.voidSaving.set(false),
     });
   }
 

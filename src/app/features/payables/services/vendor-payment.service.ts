@@ -26,4 +26,13 @@ export class VendorPaymentService {
   createVendorPayment(request: CreateVendorPaymentRequest): Observable<VendorPaymentListItem> {
     return this.http.post<VendorPaymentListItem>(this.base, request);
   }
+
+  /**
+   * Voids a vendor payment: cancels any pending bank transmission, reverses the
+   * GL entry, drops bill applications (bills reopen), and soft-deletes the
+   * payment. Server rejects (409) once the transmission has Succeeded.
+   */
+  voidVendorPayment(id: number, reason: string): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/void`, { reason });
+  }
 }

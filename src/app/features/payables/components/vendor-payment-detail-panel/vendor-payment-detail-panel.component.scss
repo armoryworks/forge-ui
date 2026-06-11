@@ -106,3 +106,23 @@
   font-size: $font-size-sm;
   border: $border-width-thin dashed var(--border);
 }
+
+// --- Actions (mirrors payment-detail-panel) ---
+.detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $sp-md;
+  padding-top: $sp-md;
+  border-top: $border-width-thin solid var(--border);
+  justify-content: flex-end;
+
+  .action-btn--danger,
+  .action-btn--destructive { margin-right: auto; }
+}
+
+// --- Void dialog ---
+.void-message {
+  margin: 0;
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+}

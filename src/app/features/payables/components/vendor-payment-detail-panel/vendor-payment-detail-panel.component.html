@@ -140,6 +140,42 @@
           <div class="lines-empty">{{ 'payables.noApplications' | translate }}</div>
         }
       </div>
+
+      <!-- Actions -->
+      @if (canVoid()) {
+        <div class="detail-actions">
+          <button class="action-btn action-btn--danger" data-testid="void-payment-btn" (click)="openVoidDialog()">
+            <span class="material-icons-outlined">block</span>
+            {{ 'payables.voidPayment' | translate }}
+          </button>
+        </div>
+      }
     </div>
+
+    <!-- Void Payment Dialog — collects the required reason (mirrors the PO short-close dialog) -->
+    @if (showVoidDialog()) {
+      <app-dialog [title]="'payables.voidPaymentTitle' | translate" width="480px" (closed)="showVoidDialog.set(false)">
+        <div [formGroup]="voidForm">
+          <p class="void-message">{{ 'payables.voidPaymentMessage' | translate: { number: payment.paymentNumber } }}</p>
+          <app-textarea
+            [label]="'payables.voidReason' | translate"
+            formControlName="reason"
+            [required]="true"
+            data-testid="void-reason" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" (click)="showVoidDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+          <app-validation-button [violations]="voidViolations" [loading]="voidSaving()">
+            <button class="action-btn action-btn--destructive"
+              data-testid="void-confirm-btn"
+              [disabled]="voidForm.invalid || voidSaving()"
+              (click)="confirmVoid()">
+              <span class="material-icons-outlined">block</span>
+              {{ 'payables.void' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </app-dialog>
+    }
   }
 </div>

@@ -7245,6 +7245,11 @@
     "violationInvalidApplications": "Una o más aplicaciones a facturas no son válidas",
     "createPayment": "Crear Pago",
     "paymentCreated": "Pago a proveedor creado.",
+    "voidPayment": "Anular Pago",
+    "voidPaymentTitle": "¿Anular Pago?",
+    "voidPaymentMessage": "¿Anular el pago \"{{number}}\"? Se cancela cualquier transmisión bancaria pendiente, se revierte el asiento contable y las facturas aplicadas se reabren para pago. Esta acción no se puede deshacer.",
+    "voidReason": "Motivo de Anulación",
+    "paymentVoided": "Pago anulado.",
     "transmission": {
       "column": "Transmisión",
       "statusQueued": "En cola",

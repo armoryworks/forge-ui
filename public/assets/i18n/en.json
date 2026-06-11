@@ -7245,6 +7245,11 @@
     "violationInvalidApplications": "One or more bill applications are invalid",
     "createPayment": "Create Payment",
     "paymentCreated": "Vendor payment created.",
+    "voidPayment": "Void Payment",
+    "voidPaymentTitle": "Void Payment?",
+    "voidPaymentMessage": "Void payment \"{{number}}\"? Any pending bank transmission is cancelled, the ledger entry is reversed, and the applied bills reopen for payment. This action cannot be undone.",
+    "voidReason": "Void Reason",
+    "paymentVoided": "Payment voided.",
     "transmission": {
       "column": "Transmission",
       "statusQueued": "Queued",
