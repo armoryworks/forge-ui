@@ -113,7 +113,7 @@ export class NavTreeService {
         { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-PO', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
     {

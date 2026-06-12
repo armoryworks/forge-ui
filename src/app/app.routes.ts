@@ -205,9 +205,11 @@ export const routes: Routes = [
       },
       {
         // AP Payables (vendor bills + vendor payments) — gated on the same
-        // CAP-P2P-PO capability as the server-side controllers.
+        // CAP-P2P-BILL capability as the server-side VendorBillsController
+        // (split from CAP-P2P-PO; vendor payments ride CAP-P2P-PAY, which
+        // depends on CAP-P2P-BILL).
         path: 'payables',
-        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-P2P-PO')],
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-P2P-BILL')],
         loadChildren: () =>
           import('./features/payables/payables.routes').then((m) => m.PAYABLES_ROUTES),
       },
