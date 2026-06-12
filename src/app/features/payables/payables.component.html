@@ -11,6 +11,22 @@
       {{ 'payables.newPayment' | translate }}
     </button>
   }
+  @if (activeTab() === 'batches') {
+    <button class="action-btn" data-testid="new-prenote-batch-btn" (click)="openBatchDialog(true)">
+      <span class="material-icons-outlined">fact_check</span>
+      {{ 'payables.batches.newPrenote' | translate }}
+    </button>
+    <button class="action-btn action-btn--create" data-testid="new-payment-batch-btn" (click)="openBatchDialog(false)">
+      <span class="material-icons-outlined">add</span>
+      {{ 'payables.batches.newBatch' | translate }}
+    </button>
+  }
+  @if (activeTab() === 'accounts') {
+    <button class="action-btn action-btn--create" data-testid="new-bank-account-btn" (click)="openAccountDialog(null)">
+      <span class="material-icons-outlined">add</span>
+      {{ 'payables.bankAccounts.newAccount' | translate }}
+    </button>
+  }
 </app-page-header>
 
 <div class="payables-content">
@@ -35,6 +51,16 @@
       <span class="material-icons-outlined">payments</span>
       {{ 'payables.tabPayments' | translate }}
     </button>
+    @if (nachaEnabled()) {
+      <button class="tab" [class.tab--active]="activeTab() === 'batches'" (click)="switchTab('batches')">
+        <span class="material-icons-outlined">account_balance</span>
+        {{ 'payables.tabBatches' | translate }}
+      </button>
+      <button class="tab" [class.tab--active]="activeTab() === 'accounts'" (click)="switchTab('accounts')">
+        <span class="material-icons-outlined">credit_card</span>
+        {{ 'payables.tabAccounts' | translate }}
+      </button>
+    }
   </div>
 
   @if (activeTab() === 'bills') {
@@ -126,10 +152,129 @@
       </app-data-table>
     </div>
   }
+
+  @if (activeTab() === 'batches') {
+    <div class="tab-content" [appLoadingBlock]="batchesLoading()">
+      <app-data-table tableId="payables-batches" [columns]="batchColumns" [data]="batches()"
+        emptyIcon="account_balance" [emptyMessage]="'payables.batches.noneFound' | translate">
+        <ng-template appColumnCell="batchNumber" let-row>
+          <span class="doc-number">{{ row.batchNumber }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span class="status-cell">
+            <span [class]="getBatchStatusClass(row.status)">{{ getBatchStatusLabel(row.status) }}</span>
+            @if (row.isPrenote) {
+              <span class="chip chip--info">{{ 'payables.batches.prenoteChip' | translate }}</span>
+            }
+          </span>
+        </ng-template>
+        <ng-template appColumnCell="totalAmount" let-row>
+          <app-currency-display [value]="row.totalAmount" [currency]="null" />
+        </ng-template>
+        <ng-template appColumnCell="effectiveEntryDate" let-row>
+          <span class="text-muted">{{ row.effectiveEntryDate | date:'MM/dd/yyyy' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="releasedByName" let-row>
+          <span class="text-muted">{{ row.releasedByName ?? '—' }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <div class="action-cell">
+            @if (row.status === 'Draft') {
+              <button class="icon-btn" [matTooltip]="'payables.batches.generate' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.batches.generate' | translate"
+                (click)="generateBatch(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">build</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" [matTooltip]="'payables.batches.cancel' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.batches.cancel' | translate"
+                (click)="cancelBatch(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">block</span>
+              </button>
+            }
+            @if (row.status === 'Generated' || row.status === 'Released') {
+              <button class="icon-btn" [matTooltip]="'payables.batches.download' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.batches.download' | translate"
+                (click)="downloadBatch(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">download</span>
+              </button>
+            }
+            @if (row.status === 'Generated') {
+              <button class="icon-btn icon-btn--success" [matTooltip]="'payables.batches.release' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.batches.release' | translate"
+                (click)="releaseBatch(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">verified</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" [matTooltip]="'payables.batches.cancel' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.batches.cancel' | translate"
+                (click)="cancelBatch(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">block</span>
+              </button>
+            }
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
+  @if (activeTab() === 'accounts') {
+    <div class="tab-content" [appLoadingBlock]="accountsLoading()">
+      <app-data-table tableId="payables-bank-accounts" [columns]="accountColumns" [data]="accounts()"
+        emptyIcon="credit_card" [emptyMessage]="'payables.bankAccounts.noneFound' | translate">
+        <ng-template appColumnCell="routingNumberMasked" let-row>
+          <span class="doc-number">{{ row.routingNumberMasked }}</span>
+        </ng-template>
+        <ng-template appColumnCell="accountNumberMasked" let-row>
+          <span class="doc-number">{{ row.accountNumberMasked }}</span>
+        </ng-template>
+        <ng-template appColumnCell="status" let-row>
+          <span [class]="getAccountStatusClass(row.status)">{{ getAccountStatusLabel(row.status) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <div class="action-cell">
+            @if (row.status === 'PendingApproval') {
+              <button class="icon-btn icon-btn--success" [matTooltip]="'payables.bankAccounts.approve' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.bankAccounts.approve' | translate"
+                (click)="approveAccount(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">check</span>
+              </button>
+            }
+            @if (row.status === 'PrenoteSent') {
+              <button class="icon-btn icon-btn--success" [matTooltip]="'payables.bankAccounts.markVerified' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.bankAccounts.markVerified' | translate"
+                (click)="verifyAccount(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">verified</span>
+              </button>
+            }
+            @if (row.status !== 'Disabled') {
+              <button class="icon-btn" [matTooltip]="'payables.bankAccounts.edit' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.bankAccounts.edit' | translate"
+                (click)="openAccountDialog(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">edit</span>
+              </button>
+              <button class="icon-btn icon-btn--danger" [matTooltip]="'payables.bankAccounts.disable' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'payables.bankAccounts.disable' | translate"
+                (click)="disableAccount(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">block</span>
+              </button>
+            }
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+
 </div>
 
 @if (showBillDialog()) {
   <app-vendor-bill-dialog (closed)="closeBillDialog()" (saved)="onBillSaved()" />
+}
+
+@if (showBatchDialog()) {
+  <app-payment-batch-create-dialog [prenote]="batchDialogPrenote()" (closed)="closeBatchDialog()" (saved)="onBatchSaved()" />
+}
+
+@if (showAccountDialog()) {
+  <app-vendor-bank-account-dialog [account]="editingAccount()" (closed)="closeAccountDialog()" (saved)="onAccountSaved()" />
 }
 
 @if (showPaymentDialog()) {

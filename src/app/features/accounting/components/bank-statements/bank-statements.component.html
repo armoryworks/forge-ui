@@ -1,0 +1,103 @@
+<app-page-header [title]="'accounting.bankStatements.title' | translate"
+  [subtitle]="'accounting.bankStatements.subtitle' | translate">
+  <button class="action-btn action-btn--create" data-testid="import-statement-btn"
+    [disabled]="importing()" (click)="pickFile()">
+    <span class="material-icons-outlined">upload_file</span>
+    {{ 'accounting.bankStatements.import' | translate }}
+  </button>
+</app-page-header>
+
+<!-- Hidden picker — the visible affordance is the Import button above. -->
+<input #fileInput type="file" accept=".ofx,.qfx,.csv,.txt" class="file-input-hidden"
+  [attr.aria-label]="'accounting.bankStatements.import' | translate"
+  (change)="onFileSelected($event)" />
+
+<div class="statements-content">
+  <div class="filters-bar">
+    <app-select [label]="'accounting.bankStatements.cashAccount' | translate"
+      [formControl]="cashAccountControl" [options]="cashAccountOptions()" />
+  </div>
+
+  <div class="imports-section" [appLoadingBlock]="importsLoading() || importing()">
+    <app-data-table tableId="bank-statement-imports" [columns]="importColumns" [data]="imports()"
+      emptyIcon="upload_file" [emptyMessage]="'accounting.bankStatements.noImports' | translate"
+      [clickableRows]="true" (rowClick)="selectImport($any($event))">
+      <ng-template appColumnCell="fileName" let-row>
+        <span class="doc-number" [class.row--selected-file]="row.id === selectedImport()?.id">{{ row.fileName }}</span>
+      </ng-template>
+      <ng-template appColumnCell="matchState" let-row>
+        <span class="match-chips">
+          @if (row.suggestedCount > 0) {
+            <span class="chip chip--info">{{ row.suggestedCount }} {{ 'accounting.bankStatements.suggested' | translate }}</span>
+          }
+          @if (row.unmatchedCount > 0) {
+            <span class="chip chip--warning">{{ row.unmatchedCount }} {{ 'accounting.bankStatements.unmatched' | translate }}</span>
+          }
+          @if (row.confirmedCount > 0) {
+            <span class="chip chip--success">{{ row.confirmedCount }} {{ 'accounting.bankStatements.confirmed' | translate }}</span>
+          }
+        </span>
+      </ng-template>
+      <ng-template appColumnCell="createdAt" let-row>
+        <span class="text-muted">{{ row.createdAt | date:'MM/dd/yyyy' }}</span>
+      </ng-template>
+    </app-data-table>
+  </div>
+
+  @if (selectedImport(); as selected) {
+    <div class="lines-section" [appLoadingBlock]="linesLoading()">
+      <div class="lines-section__header">
+        <span class="lines-section__title">{{ selected.fileName }}</span>
+        <button class="action-btn action-btn--sm" data-testid="auto-match-btn" (click)="autoMatch()">
+          <span class="material-icons-outlined">join_inner</span>
+          {{ 'accounting.bankStatements.rerunAutoMatch' | translate }}
+        </button>
+      </div>
+
+      <app-data-table tableId="bank-statement-lines" [columns]="lineColumns" [data]="lines()"
+        emptyIcon="receipt" [emptyMessage]="'accounting.bankStatements.noLines' | translate">
+        <ng-template appColumnCell="postedDate" let-row>
+          <span class="text-muted">{{ row.postedDate }}</span>
+        </ng-template>
+        <ng-template appColumnCell="amount" let-row>
+          <span [class.text-warning]="row.amount < 0">{{ row.amount | currency }}</span>
+        </ng-template>
+        <ng-template appColumnCell="matchStatus" let-row>
+          <span [class]="getMatchChipClass(row.matchStatus)">{{ getMatchLabel(row.matchStatus) }}</span>
+        </ng-template>
+        <ng-template appColumnCell="matched" let-row>
+          @if (row.matchedEntryNumber) {
+            <span class="text-muted">#{{ row.matchedEntryNumber }} · {{ row.matchedEntryDate }} · {{ row.matchedMemo ?? '' }}</span>
+          } @else {
+            <span class="text-muted">—</span>
+          }
+        </ng-template>
+        <ng-template appColumnCell="actions" let-row>
+          <div class="action-cell">
+            @if (row.matchStatus === 'Suggested') {
+              <button class="icon-btn icon-btn--success" [matTooltip]="'accounting.bankStatements.confirm' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'accounting.bankStatements.confirm' | translate"
+                (click)="confirmLine(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">check</span>
+              </button>
+            }
+            @if (row.matchStatus === 'Unmatched' || row.matchStatus === 'Suggested') {
+              <button class="icon-btn" [matTooltip]="'accounting.bankStatements.ignore' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'accounting.bankStatements.ignore' | translate"
+                (click)="ignoreLine(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">visibility_off</span>
+              </button>
+            }
+            @if (row.matchStatus === 'Confirmed' || row.matchStatus === 'Ignored') {
+              <button class="icon-btn icon-btn--danger" [matTooltip]="'accounting.bankStatements.unmatch' | translate" matTooltipPosition="above"
+                [attr.aria-label]="'accounting.bankStatements.unmatch' | translate"
+                (click)="unmatchLine(row); $event.stopPropagation()">
+                <span class="material-icons-outlined">undo</span>
+              </button>
+            }
+          </div>
+        </ng-template>
+      </app-data-table>
+    </div>
+  }
+</div>

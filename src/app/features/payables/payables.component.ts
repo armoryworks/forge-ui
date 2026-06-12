@@ -1,12 +1,18 @@
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, map } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+import { MatDialog } from '@angular/material/dialog';
 
 import { VendorBillService } from './services/vendor-bill.service';
+import { BankingService } from './services/banking.service';
+import { VendorBankAccount } from './models/vendor-bank-account.model';
+import { PaymentBatchListItem } from './models/payment-batch-list-item.model';
 import { VendorPaymentService } from './services/vendor-payment.service';
 import { PaymentTransmissionService } from './services/payment-transmission.service';
 import { VendorBillListItem } from './models/vendor-bill-list-item.model';
@@ -21,15 +27,20 @@ import { LoadingBlockDirective } from '../../shared/directives/loading-block.dir
 import { CurrencyDisplayComponent } from '../../shared/components/currency-display/currency-display.component';
 import { DetailDialogService } from '../../shared/services/detail-dialog.service';
 import { autoRefreshOnGlChange } from '../../shared/utils/accounting-auto-refresh.util';
+import { CapabilityService } from '../../shared/services/capability.service';
+import { SnackbarService } from '../../shared/services/snackbar.service';
+import { ConfirmDialogComponent, ConfirmDialogData } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
 import { VendorBillDialogComponent } from './components/vendor-bill-dialog/vendor-bill-dialog.component';
 import { VendorPaymentDialogComponent } from './components/vendor-payment-dialog/vendor-payment-dialog.component';
 import { VendorBillDetailDialogComponent, VendorBillDetailDialogData } from './components/vendor-bill-detail-dialog/vendor-bill-detail-dialog.component';
+import { PaymentBatchCreateDialogComponent } from './components/payment-batch-create-dialog/payment-batch-create-dialog.component';
+import { VendorBankAccountDialogComponent } from './components/vendor-bank-account-dialog/vendor-bank-account-dialog.component';
 import { VendorPaymentDetailDialogComponent, VendorPaymentDetailDialogData } from './components/vendor-payment-detail-dialog/vendor-payment-detail-dialog.component';
 
-type PayablesTab = 'bills' | 'payments';
+type PayablesTab = 'bills' | 'payments' | 'batches' | 'accounts';
 
-const VALID_TABS: PayablesTab[] = ['bills', 'payments'];
+const VALID_TABS: PayablesTab[] = ['bills', 'payments', 'batches', 'accounts'];
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of the Invoices + Payments pages.
 @Component({
@@ -41,6 +52,8 @@ const VALID_TABS: PayablesTab[] = ['bills', 'payments'];
     DataTableComponent, ColumnCellDirective, LoadingBlockDirective,
     CurrencyDisplayComponent,
     VendorBillDialogComponent, VendorPaymentDialogComponent,
+    PaymentBatchCreateDialogComponent, VendorBankAccountDialogComponent,
+    MatTooltipModule,
   ],
   templateUrl: './payables.component.html',
   styleUrl: './payables.component.scss',
@@ -55,6 +68,16 @@ export class PayablesComponent {
   private readonly translate = inject(TranslateService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly bankingService = inject(BankingService);
+  private readonly capabilities = inject(CapabilityService);
+  private readonly snackbar = inject(SnackbarService);
+  private readonly matDialog = inject(MatDialog);
+
+  /** BANK-002 Phase A tabs (batches + bank accounts) show only when NACHA is enabled. */
+  protected readonly nachaEnabled = computed(() => {
+    this.capabilities.capabilities(); // reactive dependency on the loaded snapshot
+    return this.capabilities.isEnabled('CAP-BANK-NACHA');
+  });
 
   protected readonly activeTab = toSignal(
     this.route.paramMap.pipe(map(p => {
@@ -71,6 +94,16 @@ export class PayablesComponent {
 
   protected readonly showBillDialog = signal(false);
   protected readonly showPaymentDialog = signal(false);
+
+  // BANK-002 Phase A — batches + vendor bank accounts
+  protected readonly batchesLoading = signal(false);
+  protected readonly batches = signal<PaymentBatchListItem[]>([]);
+  protected readonly accountsLoading = signal(false);
+  protected readonly accounts = signal<VendorBankAccount[]>([]);
+  protected readonly showBatchDialog = signal(false);
+  protected readonly batchDialogPrenote = signal(false);
+  protected readonly showAccountDialog = signal(false);
+  protected readonly editingAccount = signal<VendorBankAccount | null>(null);
 
   /** Failed bank transmission count — drives the triage banner on both tabs. */
   protected readonly failedTransmissionCount = signal(0);
@@ -136,6 +169,27 @@ export class PayablesComponent {
     ]},
   ];
 
+  protected readonly batchColumns: ColumnDef[] = [
+    { field: 'batchNumber', header: this.translate.instant('payables.batches.number'), sortable: true, width: '120px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, width: '160px' },
+    { field: 'entryCount', header: this.translate.instant('payables.batches.entries'), sortable: true, width: '80px', align: 'right' },
+    { field: 'totalAmount', header: this.translate.instant('common.total'), sortable: true, width: '110px', align: 'right' },
+    { field: 'effectiveEntryDate', header: this.translate.instant('payables.batches.effectiveDate'), sortable: true, type: 'date', width: '120px' },
+    { field: 'createdByName', header: this.translate.instant('payables.batches.createdBy'), sortable: true },
+    { field: 'releasedByName', header: this.translate.instant('payables.batches.releasedBy'), sortable: true },
+    { field: 'actions', header: this.translate.instant('common.actions'), width: '150px', align: 'right' },
+  ];
+
+  protected readonly accountColumns: ColumnDef[] = [
+    { field: 'vendorName', header: this.translate.instant('payables.vendor'), sortable: true },
+    { field: 'nickname', header: this.translate.instant('payables.bankAccounts.nickname'), sortable: true },
+    { field: 'accountType', header: this.translate.instant('payables.bankAccounts.type'), sortable: true, width: '100px' },
+    { field: 'routingNumberMasked', header: this.translate.instant('payables.bankAccounts.routing'), width: '120px' },
+    { field: 'accountNumberMasked', header: this.translate.instant('payables.bankAccounts.account'), width: '140px' },
+    { field: 'status', header: this.translate.instant('common.status'), sortable: true, width: '140px' },
+    { field: 'actions', header: this.translate.instant('common.actions'), width: '150px', align: 'right' },
+  ];
+
   /** Error tint on rows whose latest bank transmission failed (table-supported --row-tint hook). */
   protected readonly paymentRowStyle = (row: unknown): Record<string, string> => {
     const payment = row as VendorPaymentListItem;
@@ -155,7 +209,9 @@ export class PayablesComponent {
     effect(() => {
       const tab = this.activeTab();
       if (tab === 'bills') this.loadBills();
-      else this.loadPayments();
+      else if (tab === 'payments') this.loadPayments();
+      else if (tab === 'batches') this.loadBatches();
+      else this.loadAccounts();
     });
 
     this.billVendorFilterControl.valueChanges
@@ -178,6 +234,10 @@ export class PayablesComponent {
       this.loadBills();
       this.loadPayments();
       this.loadFailedTransmissions();
+      if (this.nachaEnabled()) {
+        if (this.activeTab() === 'batches') this.loadBatches();
+        if (this.activeTab() === 'accounts') this.loadAccounts();
+      }
     });
   }
 
@@ -266,6 +326,163 @@ export class PayablesComponent {
     this.closePaymentDialog();
     this.loadPayments();
     this.loadBills();
+  }
+
+  // --- BANK-002 Phase A: batches + vendor bank accounts ---
+  protected loadBatches(): void {
+    if (!this.nachaEnabled()) return;
+    this.batchesLoading.set(true);
+    this.bankingService.getBatches().subscribe({
+      next: (list) => { this.batches.set(list); this.batchesLoading.set(false); },
+      error: () => this.batchesLoading.set(false),
+    });
+  }
+
+  protected loadAccounts(): void {
+    if (!this.nachaEnabled()) return;
+    this.accountsLoading.set(true);
+    this.bankingService.getBankAccounts().subscribe({
+      next: (list) => { this.accounts.set(list); this.accountsLoading.set(false); },
+      error: () => this.accountsLoading.set(false),
+    });
+  }
+
+  protected openBatchDialog(prenote: boolean): void {
+    this.batchDialogPrenote.set(prenote);
+    this.showBatchDialog.set(true);
+  }
+  protected closeBatchDialog(): void { this.showBatchDialog.set(false); }
+  protected onBatchSaved(): void {
+    this.closeBatchDialog();
+    this.loadBatches();
+  }
+
+  protected generateBatch(batch: PaymentBatchListItem): void {
+    this.bankingService.generateBatch(batch.id).subscribe({
+      next: () => { this.loadBatches(); this.snackbar.success(this.translate.instant('payables.batches.generated')); },
+    });
+  }
+
+  protected downloadBatch(batch: PaymentBatchListItem): void {
+    this.bankingService.downloadBatchFile(batch.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${batch.batchNumber}.ach`;
+        a.click();
+        URL.revokeObjectURL(url);
+      },
+    });
+  }
+
+  protected releaseBatch(batch: PaymentBatchListItem): void {
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('payables.batches.releaseTitle'),
+        message: this.translate.instant('payables.batches.releaseMessage', { number: batch.batchNumber }),
+        confirmLabel: this.translate.instant('payables.batches.release'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.bankingService.releaseBatch(batch.id).subscribe({
+        next: () => { this.loadBatches(); this.snackbar.success(this.translate.instant('payables.batches.released')); },
+      });
+    });
+  }
+
+  protected cancelBatch(batch: PaymentBatchListItem): void {
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('payables.batches.cancelTitle'),
+        message: this.translate.instant('payables.batches.cancelMessage', { number: batch.batchNumber }),
+        confirmLabel: this.translate.instant('payables.batches.cancel'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.bankingService.cancelBatch(batch.id).subscribe({
+        next: () => { this.loadBatches(); this.snackbar.success(this.translate.instant('payables.batches.cancelled')); },
+      });
+    });
+  }
+
+  protected openAccountDialog(account: VendorBankAccount | null): void {
+    this.editingAccount.set(account);
+    this.showAccountDialog.set(true);
+  }
+  protected closeAccountDialog(): void {
+    this.showAccountDialog.set(false);
+    this.editingAccount.set(null);
+  }
+  protected onAccountSaved(): void {
+    this.closeAccountDialog();
+    this.loadAccounts();
+  }
+
+  protected approveAccount(account: VendorBankAccount): void {
+    this.bankingService.approveBankAccount(account.id).subscribe({
+      next: () => { this.loadAccounts(); this.snackbar.success(this.translate.instant('payables.bankAccounts.approved')); },
+    });
+  }
+
+  protected verifyAccount(account: VendorBankAccount): void {
+    this.bankingService.markBankAccountVerified(account.id).subscribe({
+      next: () => { this.loadAccounts(); this.snackbar.success(this.translate.instant('payables.bankAccounts.verified')); },
+    });
+  }
+
+  protected disableAccount(account: VendorBankAccount): void {
+    this.matDialog.open(ConfirmDialogComponent, {
+      width: '420px',
+      data: {
+        title: this.translate.instant('payables.bankAccounts.disableTitle'),
+        message: this.translate.instant('payables.bankAccounts.disableMessage', { nickname: account.nickname }),
+        confirmLabel: this.translate.instant('payables.bankAccounts.disable'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.bankingService.disableBankAccount(account.id).subscribe({
+        next: () => this.loadAccounts(),
+      });
+    });
+  }
+
+  protected getBatchStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      Draft: 'chip--info',
+      Generated: 'chip--primary',
+      Released: 'chip--success',
+      Cancelled: 'chip--muted',
+    };
+    return `chip ${map[status] ?? ''}`.trim();
+  }
+
+  protected getBatchStatusLabel(status: string): string {
+    const key = 'payables.batches.status' + status;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : status;
+  }
+
+  protected getAccountStatusClass(status: string): string {
+    const map: Record<string, string> = {
+      PendingApproval: 'chip--warning',
+      Approved: 'chip--info',
+      PrenoteSent: 'chip--primary',
+      Verified: 'chip--success',
+      Disabled: 'chip--muted',
+    };
+    return `chip ${map[status] ?? ''}`.trim();
+  }
+
+  protected getAccountStatusLabel(status: string): string {
+    const key = 'payables.bankAccounts.status' + status;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : status;
   }
 
   // --- Helpers ---

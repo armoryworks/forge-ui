@@ -233,3 +233,40 @@ export interface BankReconciliationWorksheet {
   roundingTolerance: number;
   isReconciled: boolean;
 }
+
+// ── BANK-001: bank statement import + auto-match staging ──────────────────
+export type BankStatementMatchStatus = 'Unmatched' | 'Suggested' | 'Confirmed' | 'Ignored';
+
+export interface BankStatementImportModel {
+  id: number;
+  cashGlAccountId: number;
+  fileName: string;
+  format: string;
+  lineCount: number;
+  duplicateCount: number;
+  unmatchedCount: number;
+  suggestedCount: number;
+  confirmedCount: number;
+  ignoredCount: number;
+  createdAt: string;
+}
+
+export interface BankStatementLineModel {
+  id: number;
+  postedDate: string;
+  amount: number;
+  description: string;
+  matchStatus: BankStatementMatchStatus;
+  matchedJournalLineId: number | null;
+  matchedEntryNumber: number | null;
+  matchedEntryDate: string | null;
+  matchedMemo: string | null;
+  confirmedAt: string | null;
+}
+
+export interface ImportBankStatementResultModel {
+  importId: number;
+  imported: number;
+  duplicates: number;
+  suggested: number;
+}

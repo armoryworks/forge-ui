@@ -1,0 +1,76 @@
+<app-dialog [title]="(prenote() ? 'payables.batches.newPrenote' : 'payables.batches.newBatch') | translate"
+  width="800px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-datepicker [label]="'payables.batches.effectiveDate' | translate"
+      formControlName="effectiveEntryDate" [required]="true" />
+
+    @if (prenote()) {
+      <div class="batch-hint">
+        <span class="material-icons-outlined">fact_check</span>
+        {{ 'payables.batches.prenoteHint' | translate }}
+      </div>
+    } @else {
+      <div class="eligible-section" [appLoadingBlock]="loading()">
+        <span class="eligible-section__label">{{ 'payables.batches.eligiblePayments' | translate }}</span>
+        @if (eligible().length === 0 && !loading()) {
+          <div class="eligible-section__empty">{{ 'payables.batches.noneEligible' | translate }}</div>
+        } @else {
+          <table class="eligible-table" [attr.aria-label]="'payables.batches.eligiblePayments' | translate">
+            <thead>
+              <tr>
+                <th scope="col"></th>
+                <th scope="col">{{ 'payables.paymentNumber' | translate }}</th>
+                <th scope="col">{{ 'payables.vendor' | translate }}</th>
+                <th scope="col" class="eligible-table__right">{{ 'payables.amount' | translate }}</th>
+                <th scope="col">{{ 'common.date' | translate }}</th>
+                <th scope="col">{{ 'payables.batches.destination' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (payment of eligible(); track payment.vendorPaymentId) {
+                <tr [class.eligible-table__row--blocked]="payment.bankAccountId === null"
+                  (click)="toggle(payment)">
+                  <td>
+                    @if (payment.bankAccountId !== null) {
+                      <span class="material-icons-outlined eligible-table__check"
+                        [class.eligible-table__check--on]="isSelected(payment)">
+                        {{ isSelected(payment) ? 'check_box' : 'check_box_outline_blank' }}
+                      </span>
+                    } @else {
+                      <span class="material-icons-outlined eligible-table__blocked-icon">warning</span>
+                    }
+                  </td>
+                  <td class="eligible-table__mono">{{ payment.paymentNumber }}</td>
+                  <td>{{ payment.vendorName }}</td>
+                  <td class="eligible-table__right">{{ payment.amount | currency }}</td>
+                  <td>{{ payment.paymentDate | date:'MM/dd/yyyy' }}</td>
+                  <td>
+                    @if (payment.accountNumberMasked) {
+                      <span class="eligible-table__mono">{{ payment.accountNumberMasked }}</span>
+                    } @else {
+                      <span class="chip chip--warning">{{ 'payables.batches.needsAccount' | translate }}</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="eligible-section__total">
+            {{ 'payables.batches.selectedTotal' | translate }}: <strong>{{ selectedTotal() | currency }}</strong>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="create-batch-btn"
+        [disabled]="form.invalid || saving()" (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'payables.batches.assemble' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

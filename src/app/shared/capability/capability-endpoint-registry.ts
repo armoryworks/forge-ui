@@ -66,6 +66,7 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'approvals', capability: 'CAP-P2P-APPROVALS' },
   { prefix: 'assets', capability: 'CAP-MD-ASSETS' },
   { prefix: 'auto-po', capability: 'CAP-P2P-AUTOPO' },
+  { prefix: 'banking', capability: 'CAP-BANK-NACHA' },
   { prefix: 'bi', capability: 'CAP-CROSS-BI-EXPORT' },
   { prefix: 'chat', capability: 'CAP-EXT-CHAT' },
   { prefix: 'company-locations', capability: 'CAP-MD-LOCATIONS' },

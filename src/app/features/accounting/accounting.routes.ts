@@ -52,4 +52,9 @@ export const ACCOUNTING_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/exports/exports.component').then((m) => m.ExportsComponent),
   },
+  {
+    path: 'bank-statements',
+    loadComponent: () =>
+      import('./components/bank-statements/bank-statements.component').then((m) => m.BankStatementsComponent),
+  },
 ];

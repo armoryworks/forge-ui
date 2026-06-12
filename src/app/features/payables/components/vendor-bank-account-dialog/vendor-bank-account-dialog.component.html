@@ -1,0 +1,36 @@
+<app-dialog [title]="(account() ? 'payables.bankAccounts.editTitle' : 'payables.bankAccounts.newTitle') | translate"
+  width="520px" (closed)="close()">
+  <div [formGroup]="form">
+    <app-select [label]="'payables.vendor' | translate" formControlName="vendorId"
+      [options]="vendorOptions()" [required]="true" />
+
+    <div class="dialog-row">
+      <app-input [label]="'payables.bankAccounts.nickname' | translate" formControlName="nickname" [required]="true" />
+      <app-select [label]="'payables.bankAccounts.type' | translate" formControlName="accountType"
+        [options]="typeOptions" [required]="true" />
+    </div>
+
+    <div class="dialog-row">
+      <app-input [label]="'payables.bankAccounts.routing' | translate" formControlName="routingNumber"
+        [maxlength]="9" [required]="true" />
+      <app-input [label]="'payables.bankAccounts.account' | translate" formControlName="accountNumber"
+        [maxlength]="17" [required]="true" />
+    </div>
+
+    <div class="dual-control-hint">
+      <span class="material-icons-outlined">shield</span>
+      {{ (account() ? 'payables.bankAccounts.changeHint' : 'payables.bankAccounts.createHint') | translate }}
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary" data-testid="save-bank-account-btn"
+        [disabled]="form.invalid || saving()" (click)="save()">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>
