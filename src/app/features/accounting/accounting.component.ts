@@ -37,5 +37,6 @@ export class AccountingComponent {
     { route: 'grni', label: this.translate.instant('accounting.dashboard.grni'), icon: 'inventory_2', description: this.translate.instant('accounting.dashboard.grniDesc') },
     { route: 'period-close', label: this.translate.instant('accounting.dashboard.periodClose'), icon: 'event_available', description: this.translate.instant('accounting.dashboard.periodCloseDesc') },
     { route: 'bank-rec', label: this.translate.instant('accounting.dashboard.bankRec'), icon: 'account_balance_wallet', description: this.translate.instant('accounting.dashboard.bankRecDesc') },
+    { route: 'exports', label: this.translate.instant('accounting.dashboard.exports'), icon: 'download', description: this.translate.instant('accounting.dashboard.exportsDesc') },
   ];
 }

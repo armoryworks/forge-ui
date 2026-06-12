@@ -47,4 +47,9 @@ export const ACCOUNTING_ROUTES: Routes = [
     loadComponent: () =>
       import('./components/bank-rec/bank-rec.component').then((m) => m.BankRecComponent),
   },
+  {
+    path: 'exports',
+    loadComponent: () =>
+      import('./components/exports/exports.component').then((m) => m.ExportsComponent),
+  },
 ];
