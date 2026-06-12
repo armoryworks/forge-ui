@@ -7382,7 +7382,9 @@
       "selectAtLeastOne": "Select at least one payment.",
       "assemble": "Assemble Batch",
       "created": "Batch {{number}} assembled",
-      "prenoteHint": "Every approved (not yet prenoted) vendor bank account will receive a zero-dollar verification entry. After the bank's return window passes with no return, mark the accounts verified."
+      "prenoteHint": "Every approved (not yet prenoted) vendor bank account will receive a zero-dollar verification entry. After the bank's return window passes with no return, mark the accounts verified.",
+      "importReturns": "Import Returns File",
+      "returnsApplied": "Returns applied: {{returned}} payment(s) returned, {{prenotes}} prenote rejection(s), {{nocs}} correction notice(s)"
     },
     "bankAccounts": {
       "nickname": "Nickname",

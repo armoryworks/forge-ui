@@ -12,6 +12,10 @@
     </button>
   }
   @if (activeTab() === 'batches') {
+    <button class="action-btn" data-testid="import-returns-btn" (click)="pickReturnsFile()">
+      <span class="material-icons-outlined">assignment_return</span>
+      {{ 'payables.batches.importReturns' | translate }}
+    </button>
     <button class="action-btn" data-testid="new-prenote-batch-btn" (click)="openBatchDialog(true)">
       <span class="material-icons-outlined">fact_check</span>
       {{ 'payables.batches.newPrenote' | translate }}
@@ -28,6 +32,11 @@
     </button>
   }
 </app-page-header>
+
+<!-- Hidden picker for the bank's ACH return/NOC file (Phase C manual channel). -->
+<input #returnsFileInput type="file" accept=".ach,.txt,.dat" class="returns-file-input"
+  [attr.aria-label]="'payables.batches.importReturns' | translate"
+  (change)="onReturnsFileSelected($event)" />
 
 <div class="payables-content">
   @if (failedTransmissionCount() > 0) {

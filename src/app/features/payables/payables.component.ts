@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -344,6 +344,29 @@ export class PayablesComponent {
     this.bankingService.getBankAccounts().subscribe({
       next: (list) => { this.accounts.set(list); this.accountsLoading.set(false); },
       error: () => this.accountsLoading.set(false),
+    });
+  }
+
+  @ViewChild('returnsFileInput') private returnsFileInput!: ElementRef<HTMLInputElement>;
+
+  protected pickReturnsFile(): void {
+    this.returnsFileInput.nativeElement.click();
+  }
+
+  protected onReturnsFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.bankingService.importReturns(file).subscribe({
+      next: (result) => {
+        this.snackbar.success(this.translate.instant('payables.batches.returnsApplied', {
+          returned: result.paymentsReturned, prenotes: result.prenotesRejected, nocs: result.nocs,
+        }));
+        this.loadBatches();
+        this.loadAccounts();
+        this.loadFailedTransmissions();
+      },
     });
   }
 

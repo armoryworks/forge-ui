@@ -7382,7 +7382,9 @@
       "selectAtLeastOne": "Seleccione al menos un pago.",
       "assemble": "Armar lote",
       "created": "Lote {{number}} armado",
-      "prenoteHint": "Cada cuenta bancaria de proveedor aprobada (aún sin prenotificar) recibirá una entrada de verificación de cero dólares. Cuando pase la ventana de devoluciones del banco sin devolución, marque las cuentas como verificadas."
+      "prenoteHint": "Cada cuenta bancaria de proveedor aprobada (aún sin prenotificar) recibirá una entrada de verificación de cero dólares. Cuando pase la ventana de devoluciones del banco sin devolución, marque las cuentas como verificadas.",
+      "importReturns": "Importar archivo de devoluciones",
+      "returnsApplied": "Devoluciones aplicadas: {{returned}} pago(s) devuelto(s), {{prenotes}} prenotificación(es) rechazada(s), {{nocs}} aviso(s) de corrección"
     },
     "bankAccounts": {
       "nickname": "Alias",

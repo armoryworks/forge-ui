@@ -7,6 +7,7 @@ import { VendorBankAccount } from '../models/vendor-bank-account.model';
 import { PaymentBatchListItem } from '../models/payment-batch-list-item.model';
 import { PaymentBatchDetail } from '../models/payment-batch-detail.model';
 import { BatchEligiblePayment } from '../models/batch-eligible-payment.model';
+import { BankReturnsImportResult } from '../models/bank-returns-import-result.model';
 
 // ⚡ BANKING BOUNDARY — BANK-002 Phase A: vendor bank accounts (dual control + prenote) and
 // NACHA payment batches (assemble → generate → download → portal upload → release = SoD).
@@ -84,5 +85,12 @@ export class BankingService {
 
   cancelBatch(id: number): Observable<PaymentBatchDetail> {
     return this.http.post<PaymentBatchDetail>(`${this.base}/payment-batches/${id}/cancel`, {});
+  }
+
+  /** Phase C: apply a bank ACH return/NOC file (idempotent server-side). */
+  importReturns(file: File): Observable<BankReturnsImportResult> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<BankReturnsImportResult>(`${this.base}/returns/import`, form);
   }
 }
