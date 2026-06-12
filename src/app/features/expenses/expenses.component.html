@@ -29,7 +29,14 @@
         <span class="amount-cell">{{ expense.amount | currency }}</span>
       </ng-template>
       <ng-template appColumnCell="status" let-expense>
-        <span [class]="getStatusClass(expense.status)">{{ getStatusLabel(expense.status) }}</span>
+        <span class="status-cell">
+          <span [class]="getStatusClass(expense.status)">{{ getStatusLabel(expense.status) }}</span>
+          @if (expense.linkedVendorBillId) {
+            <app-entity-link type="vendor-bill" [entityId]="expense.linkedVendorBillId">
+              <span class="chip chip--info">{{ expense.linkedVendorBillNumber }}</span>
+            </app-entity-link>
+          }
+        </span>
       </ng-template>
       <ng-template appColumnCell="actions" let-expense>
         @if (expense.status === 'Pending') {
@@ -73,6 +80,13 @@
       </div>
 
       <app-select data-testid="expense-category" [label]="'expenses.category' | translate" formControlName="category" [options]="categoryOptions()" />
+
+      <!-- Vendor-settled: naming a vendor routes the expense to Accounts Payable — on approval it is
+           promoted into a vendor bill and paid through Payables. Empty = out-of-pocket (cash). -->
+      <app-select data-testid="expense-vendor" [label]="'expenses.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" />
+      @if (expenseForm.controls.vendorId.value) {
+        <div class="vendor-hint">{{ 'expenses.vendorHint' | translate }}</div>
+      }
 
       <app-textarea data-testid="expense-description" [label]="'common.description' | translate" formControlName="description" />
 

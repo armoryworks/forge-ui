@@ -2395,7 +2395,9 @@
     "colVendor": "Proveedor",
     "colFrequency": "Frecuencia",
     "colNextDue": "Próximo Vencimiento",
-    "colActive": "Activo"
+    "colActive": "Activo",
+    "noVendor": "-- Ninguno (de bolsillo / tarjeta) --",
+    "vendorHint": "Al aprobarse, este gasto se convierte en una factura de proveedor en Cuentas por Pagar y se paga desde allí."
   },
   "timeTracking": {
     "title": "Control de Tiempo",
@@ -7311,6 +7313,8 @@
       "retryTitle": "¿Reintentar Transmisión?",
       "retryMessage": "¿Reintentar el envío bancario del pago \"{{number}}\"? Esto pone en cola un nuevo ciclo de hasta 5 intentos.",
       "retryQueued": "Transmisión puesta en cola para reintento."
-    }
+    },
+    "fromExpense": "Del gasto EXP-{{id}}",
+    "sourceExpense": "Gasto de origen"
   }
 }

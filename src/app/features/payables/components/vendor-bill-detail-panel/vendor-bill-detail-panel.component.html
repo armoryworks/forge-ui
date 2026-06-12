@@ -47,6 +47,14 @@
             <span class="info-value"><app-entity-link type="purchase-order" [entityId]="bill.purchaseOrderId">PO #{{ bill.purchaseOrderId }}</app-entity-link></span>
           </div>
         }
+        @if (bill.sourceExpenseId) {
+          <div class="info-item">
+            <span class="info-label">{{ 'payables.sourceExpense' | translate }}</span>
+            <span class="info-value">
+              <span class="chip chip--info">{{ 'payables.fromExpense' | translate: { id: bill.sourceExpenseId } }}</span>
+            </span>
+          </div>
+        }
         <div class="info-item">
           <span class="info-label">{{ 'payables.billDate' | translate }}</span>
           <span class="info-value">{{ bill.billDate | date:'MM/dd/yyyy' }}</span>

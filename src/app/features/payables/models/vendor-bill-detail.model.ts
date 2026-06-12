@@ -23,4 +23,6 @@ export interface VendorBillDetail {
   lines: VendorBillLine[];
   /** True when any payment applied to this bill has a failed latest bank transmission. */
   hasFailedTransmission: boolean;
+  /** Set when the bill was auto-promoted from a vendor-settled expense approval — voided via the expense, not directly. */
+  sourceExpenseId: number | null;
 }

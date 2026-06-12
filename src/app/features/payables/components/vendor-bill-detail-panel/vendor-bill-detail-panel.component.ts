@@ -58,7 +58,11 @@ export class VendorBillDetailPanelComponent {
   }
 
   protected canVoid(bill: VendorBillDetail): boolean {
-    return (bill.status === 'Draft' || bill.status === 'Approved') && bill.amountPaid === 0;
+    // A bill promoted from an expense is voided by rejecting / revising the EXPENSE (the server
+    // rejects a direct void) — hide the button so the lifecycle has one driver.
+    return (bill.status === 'Draft' || bill.status === 'Approved')
+      && bill.amountPaid === 0
+      && bill.sourceExpenseId === null;
   }
 
   protected approveBill(): void {

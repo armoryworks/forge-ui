@@ -57,6 +57,9 @@
         <ng-template appColumnCell="status" let-row>
           <span class="status-cell">
             <span [class]="getStatusClass(row.status)">{{ getStatusLabel(row.status) }}</span>
+            @if (row.sourceExpenseId) {
+              <span class="chip chip--info">{{ 'payables.fromExpense' | translate: { id: row.sourceExpenseId } }}</span>
+            }
             @if (row.hasFailedTransmission) {
               <span class="chip chip--error">{{ 'payables.transmission.paymentFailed' | translate }}</span>
             }

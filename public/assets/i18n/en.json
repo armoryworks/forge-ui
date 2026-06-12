@@ -2395,7 +2395,9 @@
     "colVendor": "Vendor",
     "colFrequency": "Frequency",
     "colNextDue": "Next Due",
-    "colActive": "Active"
+    "colActive": "Active",
+    "noVendor": "-- None (out of pocket / card) --",
+    "vendorHint": "On approval, this expense becomes a vendor bill in Payables and is paid from there."
   },
   "timeTracking": {
     "title": "Time Tracking",
@@ -7311,6 +7313,8 @@
       "retryTitle": "Retry Transmission?",
       "retryMessage": "Re-attempt the bank submission for payment \"{{number}}\"? This queues a fresh cycle of up to 5 attempts.",
       "retryQueued": "Transmission queued for retry."
-    }
+    },
+    "fromExpense": "From expense EXP-{{id}}",
+    "sourceExpense": "Source expense"
   }
 }

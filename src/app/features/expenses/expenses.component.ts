@@ -30,6 +30,8 @@ import { ReferenceDataService } from '../../shared/services/reference-data.servi
 import { LoadingBlockDirective } from '../../shared/directives/loading-block.directive';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { DraftResumeService } from '../../shared/services/draft-resume.service';
+import { EntityLinkComponent } from '../../shared/components/entity-link/entity-link.component';
+import { VendorService } from '../vendors/services/vendor.service';
 
 @Component({
   selector: 'app-expenses',
@@ -39,7 +41,7 @@ import { DraftResumeService } from '../../shared/services/draft-resume.service';
     PageHeaderComponent, DialogComponent,
     InputComponent, CurrencyInputComponent, SelectComponent, TextareaComponent, DatepickerComponent,
     DataTableComponent, ColumnCellDirective, ValidationButtonComponent, LoadingBlockDirective,
-    TranslatePipe, MatTooltipModule,
+    TranslatePipe, MatTooltipModule, EntityLinkComponent,
   ],
   templateUrl: './expenses.component.html',
   styleUrl: './expenses.component.scss',
@@ -50,6 +52,7 @@ export class ExpensesComponent implements OnInit {
 
   private readonly expensesService = inject(ExpensesService);
   private readonly refDataService = inject(ReferenceDataService);
+  private readonly vendorService = inject(VendorService);
   private readonly dialog = inject(MatDialog);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -82,6 +85,9 @@ export class ExpensesComponent implements OnInit {
     expenseDate: new FormControl<Date | null>(new Date(), [Validators.required]),
     category: new FormControl('', [Validators.required]),
     description: new FormControl(''),
+    // Vendor-settled: naming a vendor routes the expense to AP — approval promotes it into a
+    // vendor bill paid through Payables. Null = out-of-pocket (cash).
+    vendorId: new FormControl<number | null>(null),
   });
 
   protected readonly receiptMissing = computed(() => {
@@ -125,8 +131,18 @@ export class ExpensesComponent implements OnInit {
 
   protected readonly categoryOptions = signal<SelectOption[]>([]);
 
+  protected readonly vendorOptions = signal<SelectOption[]>([
+    { value: null, label: this.translate.instant('expenses.noVendor') },
+  ]);
+
   constructor() {
     this.refDataService.getAsOptions('expense_category', { valueField: 'label' }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(opts => this.categoryOptions.set(opts));
+    this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (vendors) => this.vendorOptions.set([
+        { value: null, label: this.translate.instant('expenses.noVendor') },
+        ...vendors.map(v => ({ value: v.id, label: v.companyName })),
+      ]),
+    });
     this.expensesService.getSettings().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (s) => this.settings.set(s),
       error: () => this.settings.set(null),
@@ -178,6 +194,7 @@ export class ExpensesComponent implements OnInit {
       expenseDate: new Date(),
       category: '',
       description: '',
+      vendorId: null,
     });
     this.showDialog.set(true);
   }
@@ -192,6 +209,7 @@ export class ExpensesComponent implements OnInit {
       expenseDate: new Date(expense.expenseDate),
       category: expense.category,
       description: expense.description ?? '',
+      vendorId: expense.vendorId,
     });
     this.showDialog.set(true);
   }
@@ -239,6 +257,7 @@ export class ExpensesComponent implements OnInit {
       description: form.description ?? '',
       expenseDate: toIsoDate(form.expenseDate) ?? new Date().toISOString().split('T')[0],
       receiptFileId: this.receiptFileId() ?? undefined,
+      vendorId: form.vendorId ?? undefined,
     };
 
     const editing = this.editingExpense();
