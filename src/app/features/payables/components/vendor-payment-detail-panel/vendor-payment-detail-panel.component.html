@@ -141,6 +141,12 @@
         }
       </div>
 
+      <!-- History — same shared section as the AR sibling (PaymentDetailPanel). -->
+      <app-entity-activity-section
+        entityType="VendorPayment"
+        [entityId]="paymentId()"
+        [tabs]="activityTabs" />
+
       <!-- Actions -->
       @if (canVoid()) {
         <div class="detail-actions">

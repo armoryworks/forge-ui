@@ -130,6 +130,9 @@
         </div>
       </div>
 
+      <!-- Activity — same shared section as the AR sibling (InvoiceDetailPanel). -->
+      <app-entity-activity-section entityType="VendorBill" [entityId]="billId()" />
+
       <!-- Actions — destructive on far left, primary furthest right. -->
       <div class="detail-actions">
         @if (canVoid(bill)) {

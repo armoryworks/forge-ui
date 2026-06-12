@@ -8,6 +8,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { VendorBillService } from '../../services/vendor-bill.service';
 import { VendorBillDetail } from '../../models/vendor-bill-detail.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -20,7 +21,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
   imports: [
     DatePipe, DecimalPipe, TranslatePipe,
     MatTooltipModule, LoadingBlockDirective,
-    EntityLinkComponent, CurrencyDisplayComponent,
+    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './vendor-bill-detail-panel.component.html',
   styleUrl: './vendor-bill-detail-panel.component.scss',

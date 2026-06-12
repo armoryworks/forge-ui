@@ -11,6 +11,7 @@ import { PaymentTransmissionService } from '../../services/payment-transmission.
 import { VendorPaymentDetail } from '../../models/vendor-payment-detail.model';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
+import { EntityActivitySectionComponent, ActivityFilterTab } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -27,7 +28,7 @@ import { LoadingBlockDirective } from '../../../../shared/directives/loading-blo
     DatePipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     DialogComponent, TextareaComponent, ValidationButtonComponent,
-    EntityLinkComponent, CurrencyDisplayComponent,
+    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './vendor-payment-detail-panel.component.html',
   styleUrl: './vendor-payment-detail-panel.component.scss',
@@ -46,6 +47,8 @@ export class VendorPaymentDetailPanelComponent {
 
   protected readonly loading = signal(false);
   protected readonly payment = signal<VendorPaymentDetail | null>(null);
+  /** History-only, mirroring the AR sibling (PaymentDetailPanel). */
+  protected readonly activityTabs: ActivityFilterTab[] = ['history'];
 
   /** Show the settlement FX column only when any application settled at a rate ≠ 1. */
   protected readonly showFxColumn = computed(() =>

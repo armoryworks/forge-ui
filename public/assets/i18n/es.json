@@ -7234,7 +7234,18 @@
     "createBill": "Crear Factura",
     "billCreated": "Factura de proveedor creada.",
     "violationNoLines": "Agregue al menos una línea con cantidad mayor que cero",
-    "violationInvalidLines": "Una o más líneas no son válidas",
+    "lineViolations": {
+      "descriptionRequired": "Línea {{line}}: la descripción es obligatoria",
+      "quantityInvalid": "Línea {{line}}: la cantidad debe ser mayor que 0",
+      "qtyToBillNegative": "Línea {{line}}: la cantidad a facturar no puede ser negativa",
+      "quantityExceedsBillable": "Línea {{line}}: la cantidad excede lo facturable (máx. {{max}})",
+      "unitPriceInvalid": "Línea {{line}}: el precio unitario debe ser 0 o mayor"
+    },
+    "applicationViolations": {
+      "amountExceedsBalance": "Aplicación {{row}}: el monto excede el saldo de la factura (máx. {{max}})",
+      "amountInvalid": "Aplicación {{row}}: el monto no puede ser negativo",
+      "fxRateInvalid": "Aplicación {{row}}: el tipo de cambio de liquidación debe ser mayor que 0"
+    },
     "applications": "Aplicaciones a Facturas",
     "noApplications": "Sin aplicaciones a facturas",
     "selectMethod": "Seleccionar método...",
@@ -7242,7 +7253,6 @@
     "noPayableBills": "No hay facturas por pagar para este proveedor — seleccione un proveedor con facturas aprobadas o registre un pago sin aplicar.",
     "totalApplied": "Total Aplicado",
     "violationOverApplied": "Los montos aplicados exceden el monto del pago",
-    "violationInvalidApplications": "Una o más aplicaciones a facturas no son válidas",
     "createPayment": "Crear Pago",
     "paymentCreated": "Pago a proveedor creado.",
     "voidPayment": "Anular Pago",

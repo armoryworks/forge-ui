@@ -7234,7 +7234,18 @@
     "createBill": "Create Bill",
     "billCreated": "Vendor bill created.",
     "violationNoLines": "Add at least one line with a quantity greater than zero",
-    "violationInvalidLines": "One or more line items are invalid",
+    "lineViolations": {
+      "descriptionRequired": "Line {{line}}: description is required",
+      "quantityInvalid": "Line {{line}}: quantity must be greater than 0",
+      "qtyToBillNegative": "Line {{line}}: quantity to bill cannot be negative",
+      "quantityExceedsBillable": "Line {{line}}: quantity exceeds billable (max {{max}})",
+      "unitPriceInvalid": "Line {{line}}: unit price must be 0 or greater"
+    },
+    "applicationViolations": {
+      "amountExceedsBalance": "Application {{row}}: amount exceeds the bill balance (max {{max}})",
+      "amountInvalid": "Application {{row}}: amount cannot be negative",
+      "fxRateInvalid": "Application {{row}}: settlement FX rate must be greater than 0"
+    },
     "applications": "Bill Applications",
     "noApplications": "No bill applications",
     "selectMethod": "Select method...",
@@ -7242,7 +7253,6 @@
     "noPayableBills": "No payable bills for this vendor — select a vendor with approved bills, or record an unapplied payment.",
     "totalApplied": "Total Applied",
     "violationOverApplied": "Applied amounts exceed the payment amount",
-    "violationInvalidApplications": "One or more bill applications are invalid",
     "createPayment": "Create Payment",
     "paymentCreated": "Vendor payment created.",
     "voidPayment": "Void Payment",

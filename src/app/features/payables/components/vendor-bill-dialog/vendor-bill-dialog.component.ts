@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -19,6 +19,7 @@ import { ToggleComponent } from '../../../../shared/components/toggle/toggle.com
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -48,6 +49,22 @@ type PoLineGroup = FormGroup<{
   unitPrice: FormControl<number>;
 }>;
 
+/** Draft shape of one standalone line row (matches StandaloneLineGroup's raw value). */
+interface DraftStandaloneLine {
+  partId: number | null;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
+
+/** Draft shape of one PO-mode row — keyed by purchaseOrderLineId so a restore
+ *  can re-match drafted edits against the freshly re-fetched PO. */
+interface DraftPoLine {
+  purchaseOrderLineId: number | null;
+  quantityToBill: number;
+  unitPrice: number;
+}
+
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of InvoiceDialog. Two modes:
 // standalone lines, or lines pulled from a vendor PO's unbilled receipts
 // (3-way match — price edits against the PO price become PPV on posting).
@@ -65,6 +82,7 @@ type PoLineGroup = FormGroup<{
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VendorBillDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly billService = inject(VendorBillService);
   private readonly vendorService = inject(VendorService);
   private readonly purchaseOrderService = inject(PurchaseOrderService);
@@ -141,6 +159,14 @@ export class VendorBillDialogComponent {
   /** Reactivity tick for the computed totals — fires on any nested line edit. */
   private readonly formValue = toSignal(this.billForm.valueChanges, { initialValue: null });
 
+  /** Status tick mirroring FormValidationService.getViolations' subscription, but on
+   *  the root form: statusChanges bubbles up from FormArray children, so row edits,
+   *  adds, and removals all re-run the per-line violation walk below. */
+  private readonly formStatus = toSignal(
+    this.billForm.statusChanges.pipe(startWith(this.billForm.status)),
+    { initialValue: this.billForm.status },
+  );
+
   protected readonly linesTotal = computed(() => {
     this.formValue();
     if (this.fromPo()) {
@@ -179,18 +205,33 @@ export class VendorBillDialogComponent {
     notes: this.translate.instant('common.notes'),
   });
 
-  /** Form-level violations + line-array aggregates (FormArray children aren't scanned). */
+  /** Form-level violations + per-row line violations. FormValidationService.getViolations
+   *  only scans TOP-LEVEL controls (50+ consumers depend on that), so the FormArray
+   *  children are enumerated locally into human row-numbered messages. */
   protected readonly violations = computed<string[]>(() => {
     this.formValue();
+    this.formStatus();
     const v = [...this.formViolations()];
     if (this.activeLineCount() === 0) {
       v.push(this.translate.instant('payables.violationNoLines'));
     }
-    if (this.fromPo() ? this.poLines.invalid : this.standaloneLines.invalid) {
-      v.push(this.translate.instant('payables.violationInvalidLines'));
-    }
+    v.push(...(this.fromPo() ? this.collectPoLineViolations() : this.collectStandaloneLineViolations()));
     return v;
   });
+
+  // ── Draft recovery — Form Draft system via <app-dialog [draftConfig]> ──────
+  // Same adapter pattern as InvoiceDialog/PaymentDialog (AR siblings). The
+  // FormArrays + mode metadata need custom snapshot/restore (see fns below).
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'vendor-bill',
+    entityId: 'new',
+    route: '/payables/bills',
+    snapshotFn: () => this.buildDraftSnapshot(),
+    restoreFn: (data) => this.restoreDraftSnapshot(data),
+  };
+
+  /** PO-mode draft rows waiting for the fresh PO fetch; applied in loadPoLines. */
+  private pendingPoLineRestore: DraftPoLine[] | null = null;
 
   constructor() {
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -320,6 +361,7 @@ export class VendorBillDialogComponent {
           }));
         }
         this.poHasNoBillableLines.set(billable.length === 0);
+        this.applyPendingPoLineRestore();
         this.loadingPoLines.set(false);
       },
       error: () => this.loadingPoLines.set(false),
@@ -331,6 +373,138 @@ export class VendorBillDialogComponent {
     this.poLines.clear();
     this.poLineMeta.set([]);
     this.poHasNoBillableLines.set(false);
+  }
+
+  // ── Per-line violation enumeration ────────────────────────────────────────
+  private collectStandaloneLineViolations(): string[] {
+    const messages: string[] = [];
+    this.standaloneLines.controls.forEach((group, i) => {
+      const line = i + 1;
+      if (group.controls.description.hasError('required')) {
+        messages.push(this.translate.instant('payables.lineViolations.descriptionRequired', { line }));
+      }
+      if (group.controls.quantity.hasError('required') || group.controls.quantity.hasError('min')) {
+        messages.push(this.translate.instant('payables.lineViolations.quantityInvalid', { line }));
+      }
+      if (group.controls.unitPrice.hasError('required') || group.controls.unitPrice.hasError('min')) {
+        messages.push(this.translate.instant('payables.lineViolations.unitPriceInvalid', { line }));
+      }
+    });
+    return messages;
+  }
+
+  private collectPoLineViolations(): string[] {
+    const messages: string[] = [];
+    const meta = this.poLineMeta();
+    this.poLines.controls.forEach((group, i) => {
+      const line = i + 1;
+      const qty = group.controls.quantityToBill;
+      if (qty.hasError('max')) {
+        messages.push(this.translate.instant('payables.lineViolations.quantityExceedsBillable', {
+          line, max: meta[i]?.unbilledReceivedQuantity ?? 0,
+        }));
+      }
+      if (qty.hasError('required') || qty.hasError('min')) {
+        messages.push(this.translate.instant('payables.lineViolations.qtyToBillNegative', { line }));
+      }
+      if (group.controls.unitPrice.hasError('required') || group.controls.unitPrice.hasError('min')) {
+        messages.push(this.translate.instant('payables.lineViolations.unitPriceInvalid', { line }));
+      }
+    });
+    return messages;
+  }
+
+  // ── Draft snapshot / restore ──────────────────────────────────────────────
+  private buildDraftSnapshot(): Record<string, unknown> {
+    const f = this.billForm.getRawValue();
+    const meta = this.poLineMeta();
+    return {
+      vendorId: f.vendorId,
+      vendorInvoiceNumber: f.vendorInvoiceNumber,
+      purchaseOrderId: f.purchaseOrderId,
+      billDate: f.billDate,
+      dueDate: f.dueDate,
+      taxAmount: f.taxAmount,
+      currencyId: f.currencyId,
+      fxRate: f.fxRate,
+      notes: f.notes,
+      fromPo: this.fromPoControl.value,
+      lines: f.lines,
+      // PO rows carry their purchaseOrderLineId so restore can re-match them
+      // against the re-fetched PO (billable balances may have moved meanwhile).
+      poLines: f.poLines.map((row, i): DraftPoLine => ({
+        purchaseOrderLineId: meta[i]?.purchaseOrderLineId ?? null,
+        quantityToBill: row.quantityToBill,
+        unitPrice: row.unitPrice,
+      })),
+    };
+  }
+
+  /**
+   * Standalone-mode drafts restore fully (rows rebuilt one-by-one, then patched).
+   * PO-mode drafts restore the header + vendor + PO selection and re-derive the
+   * line rows from the FRESH PO: the drafted qty/price are patched back onto rows
+   * whose purchaseOrderLineId still matches (queued in pendingPoLineRestore,
+   * applied at the end of the async loadPoLines). Drafted rows whose PO line is
+   * no longer billable are dropped; drafted quantities now above the fresh
+   * billable max are kept as-is so the per-line violation enumeration flags them.
+   */
+  private restoreDraftSnapshot(data: Record<string, unknown>): void {
+    const fromPo = data['fromPo'] === true;
+
+    // Header scalars first — vendorId must be in place before the from-PO
+    // toggle flips so loadVendorPos() queries the right vendor's POs.
+    this.billForm.patchValue({
+      vendorId: (data['vendorId'] as number | null) ?? null,
+      vendorInvoiceNumber: (data['vendorInvoiceNumber'] as string | null) ?? '',
+      billDate: this.reviveDate(data['billDate']),
+      dueDate: this.reviveDate(data['dueDate']),
+      taxAmount: (data['taxAmount'] as number | null) ?? 0,
+      currencyId: (data['currencyId'] as number | null) ?? this.billForm.controls.currencyId.value,
+      fxRate: (data['fxRate'] as number | null) ?? 1,
+      notes: (data['notes'] as string | null) ?? '',
+    });
+
+    if (fromPo) {
+      this.pendingPoLineRestore = Array.isArray(data['poLines'])
+        ? (data['poLines'] as DraftPoLine[])
+        : [];
+      // Triggers the normal pipeline: toggle → clear lines + load vendor POs,
+      // then the PO pick → async loadPoLines → applyPendingPoLineRestore.
+      this.fromPoControl.setValue(true);
+      this.billForm.controls.purchaseOrderId.setValue(
+        (data['purchaseOrderId'] as number | null) ?? null,
+      );
+    } else {
+      const rows = Array.isArray(data['lines']) ? (data['lines'] as DraftStandaloneLine[]) : [];
+      this.standaloneLines.clear();
+      for (const row of rows) {
+        this.addLine();
+        this.standaloneLines.at(this.standaloneLines.length - 1).patchValue(row);
+      }
+    }
+  }
+
+  private applyPendingPoLineRestore(): void {
+    const drafted = this.pendingPoLineRestore;
+    if (!drafted) return;
+    this.pendingPoLineRestore = null;
+    const meta = this.poLineMeta();
+    this.poLines.controls.forEach((group, i) => {
+      const match = drafted.find(d => d.purchaseOrderLineId === meta[i]?.purchaseOrderLineId);
+      if (match) {
+        group.patchValue({ quantityToBill: match.quantityToBill, unitPrice: match.unitPrice });
+      }
+    });
+    this.billForm.markAsDirty();
+  }
+
+  /** Drafts round-trip IndexedDB's structured clone (Dates survive), but revive
+   *  defensively in case a serialized draft hands back an ISO string. */
+  private reviveDate(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value === 'string' && value) return new Date(value);
+    return null;
   }
 
   // ── Save ──────────────────────────────────────────────────────────────────
@@ -386,6 +560,7 @@ export class VendorBillDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('payables.billCreated'));
         this.saved.emit();
       },

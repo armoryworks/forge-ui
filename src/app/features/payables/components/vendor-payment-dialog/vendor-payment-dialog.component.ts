@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewChild, computed, inject, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -17,6 +17,7 @@ import { DatepickerComponent } from '../../../../shared/components/datepicker/da
 import { TextareaComponent } from '../../../../shared/components/textarea/textarea.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { DraftConfig } from '../../../../shared/models/draft-config.model';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../../shared/components/validation-button/validation-button.component';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
@@ -28,6 +29,14 @@ type ApplicationGroup = FormGroup<{
   amount: FormControl<number>;
   settlementFxRate: FormControl<number>;
 }>;
+
+/** Draft shape of one application row — keyed by vendorBillId so a restore can
+ *  re-match drafted amounts against the re-fetched payable-bills grid. */
+interface DraftApplicationRow {
+  vendorBillId: number | null;
+  amount: number;
+  settlementFxRate: number;
+}
 
 // ⚡ ACCOUNTING BOUNDARY — AP counterpart of (customer) PaymentDialog. Picking
 // a vendor loads its payable (Approved | PartiallyPaid) bills into an
@@ -45,6 +54,7 @@ type ApplicationGroup = FormGroup<{
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class VendorPaymentDialogComponent {
+  @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly paymentService = inject(VendorPaymentService);
   private readonly billService = inject(VendorBillService);
   private readonly vendorService = inject(VendorService);
@@ -95,6 +105,14 @@ export class VendorPaymentDialogComponent {
   /** Reactivity tick for computed totals — fires on any nested application edit. */
   private readonly formValue = toSignal(this.paymentForm.valueChanges, { initialValue: null });
 
+  /** Status tick mirroring FormValidationService.getViolations' subscription, but on
+   *  the root form: statusChanges bubbles up from FormArray children, so application
+   *  row edits (and grid rebuilds on vendor change) re-run the per-row walk below. */
+  private readonly formStatus = toSignal(
+    this.paymentForm.statusChanges.pipe(startWith(this.paymentForm.status)),
+    { initialValue: this.paymentForm.status },
+  );
+
   protected readonly appliedTotal = computed(() => {
     this.formValue();
     return this.applications.controls.reduce((sum, g) => sum + (g.controls.amount.value ?? 0), 0);
@@ -118,18 +136,34 @@ export class VendorPaymentDialogComponent {
     notes: this.translate.instant('common.notes'),
   });
 
-  /** Form-level violations + application-grid aggregates. */
+  /** Form-level violations + per-row application violations. FormValidationService
+   *  .getViolations only scans TOP-LEVEL controls (50+ consumers depend on that), so
+   *  the applications FormArray is enumerated locally into row-numbered messages. */
   protected readonly violations = computed<string[]>(() => {
     this.formValue();
+    this.formStatus();
     const v = [...this.formViolations()];
     if (this.overApplied()) {
       v.push(this.translate.instant('payables.violationOverApplied'));
     }
-    if (this.applications.invalid) {
-      v.push(this.translate.instant('payables.violationInvalidApplications'));
-    }
+    v.push(...this.collectApplicationViolations());
     return v;
   });
+
+  // ── Draft recovery — Form Draft system via <app-dialog [draftConfig]> ──────
+  // Same adapter pattern as InvoiceDialog/PaymentDialog (AR siblings). The
+  // selected vendor's bills are re-fetched on restore; the draft snapshots
+  // vendorId + the application rows keyed by vendorBillId (see fns below).
+  protected readonly draftConfig: DraftConfig = {
+    entityType: 'vendor-payment',
+    entityId: 'new',
+    route: '/payables/payments',
+    snapshotFn: () => this.buildDraftSnapshot(),
+    restoreFn: (data) => this.restoreDraftSnapshot(data),
+  };
+
+  /** Drafted application rows waiting for the bills re-fetch; applied in loadPayableBills. */
+  private pendingApplicationRestore: DraftApplicationRow[] | null = null;
 
   constructor() {
     this.vendorService.getVendorDropdown().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -176,10 +210,100 @@ export class VendorPaymentDialogComponent {
             }),
           }));
         }
+        this.applyPendingApplicationRestore();
         this.billsLoading.set(false);
       },
       error: () => this.billsLoading.set(false),
     });
+  }
+
+  // ── Per-row application violation enumeration ─────────────────────────────
+  private collectApplicationViolations(): string[] {
+    const messages: string[] = [];
+    const bills = this.payableBills();
+    this.applications.controls.forEach((group, i) => {
+      const row = i + 1;
+      const amount = group.controls.amount;
+      if (amount.hasError('max')) {
+        messages.push(this.translate.instant('payables.applicationViolations.amountExceedsBalance', {
+          row, max: bills[i]?.balanceDue ?? 0,
+        }));
+      }
+      if (amount.hasError('required') || amount.hasError('min')) {
+        messages.push(this.translate.instant('payables.applicationViolations.amountInvalid', { row }));
+      }
+      const fx = group.controls.settlementFxRate;
+      if (fx.hasError('required') || fx.hasError('min')) {
+        messages.push(this.translate.instant('payables.applicationViolations.fxRateInvalid', { row }));
+      }
+    });
+    return messages;
+  }
+
+  // ── Draft snapshot / restore ──────────────────────────────────────────────
+  private buildDraftSnapshot(): Record<string, unknown> {
+    const f = this.paymentForm.getRawValue();
+    const bills = this.payableBills();
+    return {
+      vendorId: f.vendorId,
+      method: f.method,
+      amount: f.amount,
+      paymentDate: f.paymentDate,
+      referenceNumber: f.referenceNumber,
+      notes: f.notes,
+      // Rows carry their vendorBillId so restore can re-match them against the
+      // re-fetched grid (payable bills may have changed since the draft).
+      applications: f.applications.map((row, i): DraftApplicationRow => ({
+        vendorBillId: bills[i]?.id ?? null,
+        amount: row.amount,
+        settlementFxRate: row.settlementFxRate,
+      })),
+    };
+  }
+
+  /**
+   * The applications grid is derived from the vendor's CURRENT payable bills,
+   * so restore re-fetches rather than rebuilding stale rows: queue the drafted
+   * rows, patch the header (vendorId triggers the normal async loadPayableBills),
+   * then applyPendingApplicationRestore patches amounts back onto rows whose
+   * vendorBillId still matches. Drafted rows whose bill is no longer payable are
+   * dropped; drafted amounts now above the fresh balance are kept as-is so the
+   * per-row violation enumeration flags them.
+   */
+  private restoreDraftSnapshot(data: Record<string, unknown>): void {
+    this.pendingApplicationRestore = Array.isArray(data['applications'])
+      ? (data['applications'] as DraftApplicationRow[])
+      : [];
+    this.paymentForm.patchValue({
+      vendorId: (data['vendorId'] as number | null) ?? null,
+      method: (data['method'] as string | null) ?? null,
+      amount: (data['amount'] as number | null) ?? null,
+      paymentDate: this.reviveDate(data['paymentDate']),
+      referenceNumber: (data['referenceNumber'] as string | null) ?? '',
+      notes: (data['notes'] as string | null) ?? '',
+    });
+  }
+
+  private applyPendingApplicationRestore(): void {
+    const drafted = this.pendingApplicationRestore;
+    if (!drafted) return;
+    this.pendingApplicationRestore = null;
+    const bills = this.payableBills();
+    this.applications.controls.forEach((group, i) => {
+      const match = drafted.find(d => d.vendorBillId === bills[i]?.id);
+      if (match) {
+        group.patchValue({ amount: match.amount, settlementFxRate: match.settlementFxRate });
+      }
+    });
+    this.paymentForm.markAsDirty();
+  }
+
+  /** Drafts round-trip IndexedDB's structured clone (Dates survive), but revive
+   *  defensively in case a serialized draft hands back an ISO string. */
+  private reviveDate(value: unknown): Date | null {
+    if (value instanceof Date) return value;
+    if (typeof value === 'string' && value) return new Date(value);
+    return null;
   }
 
   protected save(): void {
@@ -210,6 +334,7 @@ export class VendorPaymentDialogComponent {
     }).subscribe({
       next: () => {
         this.saving.set(false);
+        this.dialogRef.clearDraft();
         this.snackbar.success(this.translate.instant('payables.paymentCreated'));
         this.saved.emit();
       },

@@ -1,4 +1,4 @@
-<app-dialog [title]="'payables.newPayment' | translate" width="800px" (closed)="close()">
+<app-dialog [title]="'payables.newPayment' | translate" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="paymentForm" (closed)="close()">
   <div class="payment-form" [formGroup]="paymentForm">
     <div class="dialog-row">
       <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" data-testid="vendor-payment-vendor" />
