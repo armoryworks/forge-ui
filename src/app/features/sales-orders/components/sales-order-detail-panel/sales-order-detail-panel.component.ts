@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { MatDialog } from '@angular/material/dialog';
@@ -16,6 +17,9 @@ import { EntityActivitySectionComponent } from '../../../../shared/components/en
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
+import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
+import { InputComponent } from '../../../../shared/components/input/input.component';
+import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
@@ -28,10 +32,11 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'docu
   selector: 'app-sales-order-detail-panel',
   standalone: true,
   imports: [
-    DatePipe, DecimalPipe, TranslatePipe,
+    DatePipe, DecimalPipe, TranslatePipe, ReactiveFormsModule,
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
+    EntityPickerComponent, InputComponent, CurrencyInputComponent,
     ScheduleTimelineComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
@@ -52,6 +57,16 @@ export class SalesOrderDetailPanelComponent {
   protected readonly so = signal<SalesOrderDetail | null>(null);
   protected readonly loading = signal(false);
   protected readonly activeTab = signal<TabId>('overview');
+
+  // --- Line editing (Draft only). editingLineId: null = closed, 0 = adding, >0 = editing. ---
+  protected readonly editingLineId = signal<number | null>(null);
+  protected readonly savingLine = signal(false);
+  protected readonly lineForm = new FormGroup({
+    partId: new FormControl<number | null>(null),
+    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    quantity: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
+    unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+  });
   protected readonly expandedLines = signal<Set<number>>(new Set());
   protected readonly scheduleMilestones = signal<ScheduleMilestone[]>([]);
   protected readonly scheduleLoading = signal(false);
@@ -288,6 +303,90 @@ export class SalesOrderDetailPanelComponent {
   protected canConfirm(status: string): boolean { return status === 'Draft'; }
   protected canCancel(status: string): boolean { return status === 'Draft' || status === 'Confirmed'; }
   protected canDelete(status: string): boolean { return status === 'Draft'; }
+
+  // --- Line editing ---
+  protected canEditLines(status: string): boolean { return status === 'Draft'; }
+
+  protected startAddLine(): void {
+    this.lineForm.reset({ partId: null, description: '', quantity: 1, unitPrice: 0 });
+    this.editingLineId.set(0);
+  }
+
+  protected editLine(line: SalesOrderLine): void {
+    this.lineForm.reset({
+      partId: line.partId,
+      description: line.description,
+      quantity: line.quantity,
+      unitPrice: line.unitPrice,
+    });
+    this.editingLineId.set(line.id);
+  }
+
+  protected cancelLineEdit(): void {
+    this.editingLineId.set(null);
+  }
+
+  /** Prefill the description from the chosen catalog part when blank. */
+  protected onPartSelected(part: Record<string, unknown> | null): void {
+    if (!part) return;
+    const name = (part['name'] as string) ?? '';
+    if (name && !this.lineForm.controls.description.value) {
+      this.lineForm.controls.description.setValue(name);
+    }
+  }
+
+  protected saveLine(): void {
+    const so = this.so();
+    const editing = this.editingLineId();
+    if (!so || editing === null || this.lineForm.invalid) return;
+    const v = this.lineForm.getRawValue();
+    this.savingLine.set(true);
+    const req = editing === 0
+      ? this.soService.addSalesOrderLine(so.id, {
+          partId: v.partId ?? undefined,
+          description: v.description,
+          quantity: v.quantity,
+          unitPrice: v.unitPrice,
+        })
+      : this.soService.updateSalesOrderLine(so.id, editing, {
+          description: v.description,
+          quantity: v.quantity,
+          unitPrice: v.unitPrice,
+        });
+    req.subscribe({
+      next: (detail) => {
+        this.so.set(detail);
+        this.editingLineId.set(null);
+        this.savingLine.set(false);
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant(editing === 0 ? 'salesOrders.lineAdded' : 'salesOrders.lineUpdated'));
+      },
+      error: () => this.savingLine.set(false),
+    });
+  }
+
+  protected deleteLine(line: SalesOrderLine): void {
+    const so = this.so();
+    if (!so) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('salesOrders.deleteLineTitle'),
+        message: this.translate.instant('salesOrders.deleteLineMessage', { description: line.description }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.soService.deleteSalesOrderLine(so.id, line.id).subscribe({
+        next: (detail) => {
+          this.so.set(detail);
+          this.changed.emit();
+          this.snackbar.success(this.translate.instant('salesOrders.lineRemoved'));
+        },
+      });
+    });
+  }
 
   // --- Documents ---
   protected downloadFile(doc: FileAttachment): void {

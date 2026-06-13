@@ -1779,7 +1779,20 @@
       "convertTitle": "Convert to Quote?",
       "convertMessage": "Convert \"{{title}}\" to a formal quote? The estimate will be marked as Accepted.",
       "convertConfirmLabel": "Convert",
-      "createdQuote": "Created quote {{number}}"
+      "createdQuote": "Created quote {{number}}",
+      "lines": "Line items",
+      "addLine": "Add line",
+      "editLine": "Edit line",
+      "qty": "Qty",
+      "amount": "Amount",
+      "lumpSum": "Lump sum",
+      "catalogPartOptional": "Catalog part (optional)",
+      "lineHint": "Only draft estimates can be itemized.",
+      "lineAdded": "Line added",
+      "lineUpdated": "Line updated",
+      "lineRemoved": "Line removed",
+      "deleteLineTitle": "Remove line?",
+      "deleteLineMessage": "Remove \"{{description}}\" from this estimate?"
     },
     "pricing": {
       "lists": "Price lists",
@@ -4556,7 +4569,14 @@
     "lineItemsPriority": "Priority",
     "lineItemsDueDate": "Due Date",
     "lineItemsExpandLine": "Expand line item jobs",
-    "lineItemsCollapseLine": "Collapse line item jobs"
+    "lineItemsCollapseLine": "Collapse line item jobs",
+    "addLine": "Add line",
+    "editLine": "Edit line",
+    "lineAdded": "Line added",
+    "lineUpdated": "Line updated",
+    "lineRemoved": "Line removed",
+    "deleteLineTitle": "Remove line?",
+    "deleteLineMessage": "Remove \"{{description}}\" from this order?"
   },
   "quotes": {
     "title": "Quotes",
@@ -4607,7 +4627,14 @@
     "details": "Quote Details",
     "noLinesYet": "No lines yet",
     "costBreakdown": "Cost Breakdown",
-    "margin": "Margin"
+    "margin": "Margin",
+    "addLine": "Add line",
+    "editLine": "Edit line",
+    "lineAdded": "Line added",
+    "lineUpdated": "Line updated",
+    "lineRemoved": "Line removed",
+    "deleteLineTitle": "Remove line?",
+    "deleteLineMessage": "Remove \"{{description}}\" from this quote?"
   },
   "shipments": {
     "title": "Shipments",

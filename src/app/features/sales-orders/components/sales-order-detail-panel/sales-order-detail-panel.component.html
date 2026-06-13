@@ -239,6 +239,14 @@
       <!-- Line Items Tab -->
       @if (activeTab() === 'lines') {
         <div class="tab-panel" role="tabpanel">
+          @if (canEditLines(so.status)) {
+            <div class="lines-section__head">
+              <button data-testid="so-add-line-btn" class="action-btn action-btn--sm" (click)="startAddLine()" [disabled]="editingLineId() !== null">
+                <span class="material-icons-outlined">add</span>
+                {{ 'salesOrders.addLine' | translate }}
+              </button>
+            </div>
+          }
           @if (so.lines.length > 0) {
             <table class="lines-table" aria-label="Sales order line items">
               <thead>
@@ -251,6 +259,9 @@
                   <th scope="col" class="lines-table__right">{{ 'salesOrders.shipped' | translate }}/{{ 'salesOrders.remaining' | translate }}</th>
                   <th scope="col" class="lines-table__right">{{ 'salesOrders.unitPrice' | translate }}</th>
                   <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                  @if (canEditLines(so.status)) {
+                    <th scope="col" class="lines-table__right">{{ 'common.actions' | translate }}</th>
+                  }
                 </tr>
               </thead>
               <tbody>
@@ -283,6 +294,16 @@
                     </td>
                     <td class="lines-table__right">{{ line.unitPrice | number:'1.2-4' }}</td>
                     <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                    @if (canEditLines(so.status)) {
+                      <td class="lines-table__right lines-table__actions">
+                        <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="editLine(line)">
+                          <span class="material-icons-outlined">edit</span>
+                        </button>
+                        <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'common.delete' | translate" (click)="deleteLine(line)">
+                          <span class="material-icons-outlined">delete</span>
+                        </button>
+                      </td>
+                    }
                   </tr>
                   <!-- Warning row for no jobs -->
                   @if (isLineWarning(line)) {
@@ -342,6 +363,31 @@
               <span class="material-icons-outlined empty-state__icon">list_alt</span>
               <span class="empty-state__message">{{ 'salesOrders.noLines' | translate }}</span>
             </div>
+          }
+
+          @if (canEditLines(so.status) && editingLineId() !== null) {
+            <form class="line-edit-form" [formGroup]="lineForm" (ngSubmit)="saveLine()">
+              <div class="line-edit-form__title">
+                {{ (editingLineId() === 0 ? 'salesOrders.addLine' : 'salesOrders.editLine') | translate }}
+              </div>
+              @if (editingLineId() === 0) {
+                <app-entity-picker
+                  data-testid="so-line-part"
+                  [label]="'common.part' | translate"
+                  entityType="parts"
+                  displayField="name"
+                  secondaryDisplayField="partNumber"
+                  formControlName="partId"
+                  (selected)="onPartSelected($event)" />
+              }
+              <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
+              <app-input [label]="'salesOrders.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
+              <app-currency-input [label]="'salesOrders.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
+              <div class="line-edit-form__actions">
+                <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
+                <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>
+              </div>
+            </form>
           }
         </div>
       }

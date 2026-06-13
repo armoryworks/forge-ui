@@ -66,6 +66,87 @@
       }
       <app-textarea [label]="'customers.estimates.notes' | translate" formControlName="notes" [rows]="2" />
     </div>
+
+    @if (isEditing() && editingDetail()) {
+      <div class="estimate-lines">
+        <div class="lines-section__head">
+          <span class="info-label">{{ 'customers.estimates.lines' | translate }} ({{ estimateLines().length }})</span>
+          @if (canEditLines()) {
+            <button type="button" class="action-btn action-btn--sm" (click)="startAddLine()" [disabled]="editingLineId() !== null">
+              <span class="material-icons-outlined">add</span>
+              {{ 'customers.estimates.addLine' | translate }}
+            </button>
+          }
+        </div>
+
+        @if (estimateLines().length > 0) {
+          <table class="lines-table" aria-label="Estimate line items">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'common.part' | translate }}</th>
+                <th scope="col">{{ 'common.description' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'customers.estimates.qty' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'customers.estimates.amount' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                @if (canEditLines()) {
+                  <th scope="col" class="lines-table__right">{{ 'common.actions' | translate }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (line of estimateLines(); track line.id) {
+                <tr>
+                  <td class="lines-table__mono">{{ line.partNumber ?? ('customers.estimates.lumpSum' | translate) }}</td>
+                  <td>{{ line.description }}</td>
+                  <td class="lines-table__right">{{ line.quantity | number:'1.0-4' }}</td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.unitPrice" [currency]="null" /></td>
+                  <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                  @if (canEditLines()) {
+                    <td class="lines-table__right lines-table__actions">
+                      <button type="button" class="icon-btn" [attr.aria-label]="'common.edit' | translate" (click)="editLine(line)">
+                        <span class="material-icons-outlined">edit</span>
+                      </button>
+                      <button type="button" class="icon-btn icon-btn--danger" [attr.aria-label]="'common.delete' | translate" (click)="deleteLine(line)">
+                        <span class="material-icons-outlined">delete</span>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        @if (canEditLines() && editingLineId() !== null) {
+          <form class="line-edit-form" [formGroup]="lineForm" (ngSubmit)="saveLine()">
+            <div class="line-edit-form__title">
+              {{ (editingLineId() === 0 ? 'customers.estimates.addLine' : 'customers.estimates.editLine') | translate }}
+            </div>
+            @if (editingLineId() === 0) {
+              <app-entity-picker
+                [label]="'customers.estimates.catalogPartOptional' | translate"
+                entityType="parts"
+                displayField="name"
+                secondaryDisplayField="partNumber"
+                formControlName="partId"
+                (selected)="onPartSelected($event)" />
+            }
+            <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
+            <app-input [label]="'customers.estimates.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
+            <app-currency-input [label]="'customers.estimates.amount' | translate" formControlName="unitPrice" [required]="true" />
+            <div class="line-edit-form__actions">
+              <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
+              <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>
+            </div>
+          </form>
+        }
+
+        @if (!canEditLines()) {
+          <div class="estimate-lines__hint">{{ 'customers.estimates.lineHint' | translate }}</div>
+        }
+      </div>
+    }
+
     <div dialog-footer>
       <button class="action-btn" (click)="closeDialog()">{{ 'common.cancel' | translate }}</button>
       <app-validation-button [violations]="violations()" [loading]="saving()">

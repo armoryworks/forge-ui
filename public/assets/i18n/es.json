@@ -1774,7 +1774,20 @@
       "convertTitle": "¿Convertir a cotización?",
       "convertMessage": "¿Convertir \"{{title}}\" en una cotización formal? La estimación se marcará como Aceptada.",
       "convertConfirmLabel": "Convertir",
-      "createdQuote": "Cotización {{number}} creada"
+      "createdQuote": "Cotización {{number}} creada",
+      "lines": "Partidas",
+      "addLine": "Agregar línea",
+      "editLine": "Editar línea",
+      "qty": "Cant.",
+      "amount": "Importe",
+      "lumpSum": "Suma global",
+      "catalogPartOptional": "Pieza de catálogo (opcional)",
+      "lineHint": "Solo las estimaciones en borrador se pueden detallar.",
+      "lineAdded": "Línea agregada",
+      "lineUpdated": "Línea actualizada",
+      "lineRemoved": "Línea eliminada",
+      "deleteLineTitle": "¿Eliminar línea?",
+      "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta estimación?"
     },
     "pricing": {
       "lists": "Listas de precios",
@@ -4549,7 +4562,14 @@
       "upcoming": "Próximo",
       "noSchedule": "Sin hitos de programación disponibles",
       "timelineLabel": "Cronograma de programación"
-    }
+    },
+    "addLine": "Agregar línea",
+    "editLine": "Editar línea",
+    "lineAdded": "Línea agregada",
+    "lineUpdated": "Línea actualizada",
+    "lineRemoved": "Línea eliminada",
+    "deleteLineTitle": "¿Eliminar línea?",
+    "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta orden de venta?"
   },
   "quotes": {
     "title": "Cotizaciones",
@@ -4600,7 +4620,14 @@
     "details": "Detalles de Cotización",
     "noLinesYet": "Sin líneas aún",
     "costBreakdown": "Desglose de costos",
-    "margin": "Margen"
+    "margin": "Margen",
+    "addLine": "Agregar línea",
+    "editLine": "Editar línea",
+    "lineAdded": "Línea agregada",
+    "lineUpdated": "Línea actualizada",
+    "lineRemoved": "Línea eliminada",
+    "deleteLineTitle": "¿Eliminar línea?",
+    "deleteLineMessage": "¿Eliminar \"{{description}}\" de esta cotización?"
   },
   "shipments": {
     "title": "Envíos",

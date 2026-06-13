@@ -8,6 +8,23 @@ import { QuoteDetail } from '../models/quote-detail.model';
 import { CreateQuoteRequest } from '../models/create-quote-request.model';
 import { SalesOrderListItem } from '../../sales-orders/models/sales-order-list-item.model';
 
+/** Payload to add a quote line (partId omitted = lump-sum / ad-hoc line). */
+export interface QuoteLineInput {
+  partId?: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+}
+
+/** Payload to edit an existing quote line (the part link is fixed at add time). */
+export interface UpdateLineInput {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class QuoteService {
   private readonly http = inject(HttpClient);
@@ -30,6 +47,21 @@ export class QuoteService {
 
   updateQuote(id: number, request: { shippingAddressId?: number; expirationDate?: string; notes?: string; taxRate?: number }): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}`, request);
+  }
+
+  /** Append a line to a draft quote. Returns the refreshed quote detail. */
+  addQuoteLine(id: number, line: QuoteLineInput): Observable<QuoteDetail> {
+    return this.http.post<QuoteDetail>(`${this.base}/${id}/lines`, line);
+  }
+
+  /** Edit an existing line on a draft quote. Returns the refreshed quote detail. */
+  updateQuoteLine(id: number, lineId: number, line: UpdateLineInput): Observable<QuoteDetail> {
+    return this.http.put<QuoteDetail>(`${this.base}/${id}/lines/${lineId}`, line);
+  }
+
+  /** Remove a line from a draft quote (a quote must keep at least one line). */
+  deleteQuoteLine(id: number, lineId: number): Observable<QuoteDetail> {
+    return this.http.delete<QuoteDetail>(`${this.base}/${id}/lines/${lineId}`);
   }
 
   sendQuote(id: number): Observable<void> {

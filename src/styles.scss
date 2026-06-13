@@ -588,3 +588,25 @@ html[data-font-size='xl'] {
     scrollbar-color: var(--text-muted) var(--bg);
   }
 }
+
+/* SALES-LINE-CRUD: shared inline line-editor styles (quote / SO / estimate panels) */
+.lines-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.lines-table__actions { white-space: nowrap; }
+.line-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.line-edit-form__title { font-weight: 600; font-size: 0.85rem; }
+.line-edit-form__actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.estimate-lines { margin-top: 1rem; }
+.estimate-lines__hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem; }
