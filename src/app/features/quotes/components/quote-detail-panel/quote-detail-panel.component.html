@@ -63,7 +63,15 @@
 
       <!-- Line Items -->
       <div class="lines-section">
-        <span class="info-label">{{ 'quotes.lineItems' | translate }} ({{ quote.lines.length }})</span>
+        <div class="lines-section__head">
+          <span class="info-label">{{ 'quotes.lineItems' | translate }} ({{ quote.lines.length }})</span>
+          @if (canEditLines(quote.status)) {
+            <button data-testid="quote-add-line-btn" class="action-btn action-btn--sm" (click)="startAddLine()" [disabled]="editingLineId() !== null">
+              <span class="material-icons-outlined">add</span>
+              {{ 'quotes.addLine' | translate }}
+            </button>
+          }
+        </div>
         @if (quote.lines.length > 0) {
           <table class="lines-table" aria-label="Quote line items">
             <thead>
@@ -74,6 +82,9 @@
                 <th scope="col" class="lines-table__right">{{ 'quotes.unitPrice' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'quotes.margin' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'common.total' | translate }}</th>
+                @if (canEditLines(quote.status)) {
+                  <th scope="col" class="lines-table__right">{{ 'common.actions' | translate }}</th>
+                }
               </tr>
             </thead>
             <tbody>
@@ -91,10 +102,20 @@
                     }
                   </td>
                   <td class="lines-table__right"><app-currency-display [value]="line.lineTotal" [currency]="null" /></td>
+                  @if (canEditLines(quote.status)) {
+                    <td class="lines-table__right lines-table__actions">
+                      <button class="icon-btn" [matTooltip]="'common.edit' | translate" matTooltipPosition="above" [attr.aria-label]="'common.edit' | translate" (click)="editLine(line)">
+                        <span class="material-icons-outlined">edit</span>
+                      </button>
+                      <button class="icon-btn icon-btn--danger" [matTooltip]="'common.delete' | translate" matTooltipPosition="above" [attr.aria-label]="'common.delete' | translate" (click)="deleteLine(line)">
+                        <span class="material-icons-outlined">delete</span>
+                      </button>
+                    </td>
+                  }
                 </tr>
                 @if (line.costBreakdown) {
                   <tr class="lines-table__breakdown-row">
-                    <td colspan="6">
+                    <td [attr.colspan]="canEditLines(quote.status) ? 7 : 6">
                       <div class="cost-breakdown">
                         <span class="cost-breakdown__label">{{ 'quotes.costBreakdown' | translate }}</span>
                         <div class="cost-breakdown__cells">
@@ -126,6 +147,31 @@
               }
             </tbody>
           </table>
+        }
+
+        @if (canEditLines(quote.status) && editingLineId() !== null) {
+          <form class="line-edit-form" [formGroup]="lineForm" (ngSubmit)="saveLine()">
+            <div class="line-edit-form__title">
+              {{ (editingLineId() === 0 ? 'quotes.addLine' : 'quotes.editLine') | translate }}
+            </div>
+            @if (editingLineId() === 0) {
+              <app-entity-picker
+                data-testid="quote-line-part"
+                [label]="'common.part' | translate"
+                entityType="parts"
+                displayField="name"
+                secondaryDisplayField="partNumber"
+                formControlName="partId"
+                (selected)="onPartSelected($event)" />
+            }
+            <app-input [label]="'common.description' | translate" formControlName="description" [required]="true" />
+            <app-input [label]="'quotes.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" />
+            <app-currency-input [label]="'quotes.unitPrice' | translate" formControlName="unitPrice" [required]="true" />
+            <div class="line-edit-form__actions">
+              <button type="button" class="action-btn" (click)="cancelLineEdit()">{{ 'common.cancel' | translate }}</button>
+              <button type="submit" class="action-btn action-btn--primary" [disabled]="lineForm.invalid || savingLine()">{{ 'common.save' | translate }}</button>
+            </div>
+          </form>
         }
       </div>
 

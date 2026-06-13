@@ -3,7 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { Estimate, EstimateDetail, EstimateStatus } from '../models/estimate.model';
+import { Estimate, EstimateDetail, EstimateLineInput, EstimateStatus } from '../models/estimate.model';
+
+/** Payload to edit an existing estimate line (part link fixed at add time). */
+export interface UpdateEstimateLineInput {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+}
 
 export interface CreateEstimateRequest {
   customerId: number;
@@ -53,5 +61,20 @@ export class EstimateService {
 
   convertToQuote(id: number): Observable<{ id: number; quoteNumber: string }> {
     return this.http.post<{ id: number; quoteNumber: string }>(`${this.base}/${id}/convert`, {});
+  }
+
+  /** Add a line to an estimate (catalog part or lump-sum). Returns refreshed detail. */
+  addEstimateLine(id: number, line: EstimateLineInput): Observable<EstimateDetail> {
+    return this.http.post<EstimateDetail>(`${this.base}/${id}/lines`, line);
+  }
+
+  /** Edit an existing estimate line. Returns the refreshed estimate detail. */
+  updateEstimateLine(id: number, lineId: number, line: UpdateEstimateLineInput): Observable<EstimateDetail> {
+    return this.http.put<EstimateDetail>(`${this.base}/${id}/lines/${lineId}`, line);
+  }
+
+  /** Remove an estimate line. Returns the refreshed estimate detail. */
+  deleteEstimateLine(id: number, lineId: number): Observable<EstimateDetail> {
+    return this.http.delete<EstimateDetail>(`${this.base}/${id}/lines/${lineId}`);
   }
 }

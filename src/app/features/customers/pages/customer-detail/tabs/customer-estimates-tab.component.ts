@@ -1,11 +1,11 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EstimateService } from '../../../services/estimate.service';
-import { Estimate, EstimateStatus } from '../../../models/estimate.model';
+import { Estimate, EstimateDetail, EstimateLine, EstimateStatus } from '../../../models/estimate.model';
 import { FormValidationService } from '../../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../../shared/services/snackbar.service';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -19,6 +19,7 @@ import { TextareaComponent } from '../../../../../shared/components/textarea/tex
 import { DatepickerComponent } from '../../../../../shared/components/datepicker/datepicker.component';
 import { DialogComponent } from '../../../../../shared/components/dialog/dialog.component';
 import { ValidationButtonComponent } from '../../../../../shared/components/validation-button/validation-button.component';
+import { EntityPickerComponent } from '../../../../../shared/components/entity-picker/entity-picker.component';
 import { ColumnDef } from '../../../../../shared/models/column-def.model';
 import { SelectOption } from '../../../../../shared/components/select/select.component';
 import { toIsoDate } from '../../../../../shared/utils/date.utils';
@@ -35,10 +36,10 @@ const STATUS_OPTIONS: SelectOption[] = [
   selector: 'app-customer-estimates-tab',
   standalone: true,
   imports: [
-    DatePipe, ReactiveFormsModule, TranslatePipe,
+    DatePipe, DecimalPipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     InputComponent, CurrencyInputComponent, CurrencyDisplayComponent, SelectComponent, TextareaComponent, DatepickerComponent,
-    DialogComponent, ValidationButtonComponent,
+    DialogComponent, ValidationButtonComponent, EntityPickerComponent,
   ],
   templateUrl: './customer-estimates-tab.component.html',
   styleUrl: '../customer-detail-tabs.scss',
@@ -82,6 +83,27 @@ export class CustomerEstimatesTabComponent implements OnInit {
     status: new FormControl<EstimateStatus>('Draft'),
   });
 
+  // --- Estimate line items (itemize an existing estimate: catalog parts +/or
+  // lump-sum "unknown" lines). Lines are managed on a SAVED estimate; a brand-new
+  // estimate is created header-first, then itemized on reopen. ---
+  protected readonly editingDetail = signal<EstimateDetail | null>(null);
+  protected readonly estimateLines = signal<EstimateLine[]>([]);
+  // editingLineId: null = line editor closed, 0 = adding, >0 = editing that line.
+  protected readonly editingLineId = signal<number | null>(null);
+  protected readonly savingLine = signal(false);
+  protected readonly lineForm = new FormGroup({
+    partId: new FormControl<number | null>(null),
+    description: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    quantity: new FormControl<number>(1, { nonNullable: true, validators: [Validators.required, Validators.min(0.0001)] }),
+    unitPrice: new FormControl<number>(0, { nonNullable: true, validators: [Validators.required, Validators.min(0)] }),
+  });
+
+  // Lines are editable only on a saved, Draft, not-yet-converted estimate.
+  protected readonly canEditLines = computed(() => {
+    const d = this.editingDetail();
+    return !!d && d.status === 'Draft' && !d.convertedAt;
+  });
+
   protected readonly violations = computed(() =>
     FormValidationService.getViolations(this.estimateForm, {
       title: this.translate.instant('customers.estimates.title'),
@@ -122,6 +144,7 @@ export class CustomerEstimatesTabComponent implements OnInit {
   protected openCreate(): void {
     this.editingId.set(null);
     this.estimateForm.reset({ estimatedAmount: 0, status: 'Draft' });
+    this.resetLineState();
     this.showDialog.set(true);
   }
 
@@ -133,13 +156,29 @@ export class CustomerEstimatesTabComponent implements OnInit {
       status: estimate.status,
       validUntil: estimate.validUntil ? new Date(estimate.validUntil) : null,
     });
+    this.resetLineState();
     this.showDialog.set(true);
+    // Fetch full detail for the line grid (the list row carries no lines).
+    this.estimateService.getEstimate(estimate.id).subscribe({
+      next: detail => {
+        this.editingDetail.set(detail);
+        this.estimateLines.set(detail.lines ?? []);
+        this.estimateForm.patchValue({ description: detail.description ?? '', notes: detail.notes ?? '' });
+      },
+    });
   }
 
   protected closeDialog(): void {
     this.showDialog.set(false);
     this.estimateForm.reset();
     this.editingId.set(null);
+    this.resetLineState();
+  }
+
+  private resetLineState(): void {
+    this.editingDetail.set(null);
+    this.estimateLines.set([]);
+    this.editingLineId.set(null);
   }
 
   protected saveEstimate(): void {
@@ -202,6 +241,95 @@ export class CustomerEstimatesTabComponent implements OnInit {
         },
       });
     });
+  }
+
+  // --- Estimate line editing ---
+  protected startAddLine(): void {
+    this.lineForm.reset({ partId: null, description: '', quantity: 1, unitPrice: 0 });
+    this.editingLineId.set(0);
+  }
+
+  protected editLine(line: EstimateLine): void {
+    this.lineForm.reset({
+      partId: line.partId,
+      description: line.description,
+      quantity: line.quantity,
+      unitPrice: line.unitPrice,
+    });
+    this.editingLineId.set(line.id);
+  }
+
+  protected cancelLineEdit(): void {
+    this.editingLineId.set(null);
+  }
+
+  /** Prefill the description from the chosen catalog part when blank. */
+  protected onPartSelected(part: Record<string, unknown> | null): void {
+    if (!part) return;
+    const name = (part['name'] as string) ?? '';
+    if (name && !this.lineForm.controls.description.value) {
+      this.lineForm.controls.description.setValue(name);
+    }
+  }
+
+  protected saveLine(): void {
+    const id = this.editingId();
+    const editing = this.editingLineId();
+    if (!id || editing === null || this.lineForm.invalid) return;
+    const v = this.lineForm.getRawValue();
+    this.savingLine.set(true);
+    // No part chosen → a lump-sum / ad-hoc "unknown" line (partId omitted).
+    const req = editing === 0
+      ? this.estimateService.addEstimateLine(id, {
+          partId: v.partId ?? undefined,
+          description: v.description,
+          quantity: v.quantity,
+          unitPrice: v.unitPrice,
+        })
+      : this.estimateService.updateEstimateLine(id, editing, {
+          description: v.description,
+          quantity: v.quantity,
+          unitPrice: v.unitPrice,
+        });
+    req.subscribe({
+      next: detail => {
+        this.applyDetail(detail);
+        this.editingLineId.set(null);
+        this.savingLine.set(false);
+        this.snackbar.success(this.translate.instant(editing === 0 ? 'customers.estimates.lineAdded' : 'customers.estimates.lineUpdated'));
+      },
+      error: () => this.savingLine.set(false),
+    });
+  }
+
+  protected deleteLine(line: EstimateLine): void {
+    const id = this.editingId();
+    if (!id) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: {
+        title: this.translate.instant('customers.estimates.deleteLineTitle'),
+        message: this.translate.instant('customers.estimates.deleteLineMessage', { description: line.description }),
+        confirmLabel: this.translate.instant('common.delete'),
+        severity: 'danger',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      this.estimateService.deleteEstimateLine(id, line.id).subscribe({
+        next: detail => {
+          this.applyDetail(detail);
+          this.snackbar.success(this.translate.instant('customers.estimates.lineRemoved'));
+        },
+      });
+    });
+  }
+
+  /** Reflect a server-refreshed detail: lines + the synced estimated amount, and the list row. */
+  private applyDetail(detail: EstimateDetail): void {
+    this.editingDetail.set(detail);
+    this.estimateLines.set(detail.lines ?? []);
+    this.estimateForm.patchValue({ estimatedAmount: detail.estimatedAmount });
+    this.loadEstimates();
   }
 
   protected convertToQuote(estimate: Estimate): void {

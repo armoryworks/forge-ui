@@ -19,6 +19,23 @@ export interface SalesOrderListQuery extends PagedQuery {
   dateField?: 'orderDate' | 'shipDate';
 }
 
+/** Payload to add a sales-order line (partId omitted = lump-sum / ad-hoc line). */
+export interface SalesOrderLineInput {
+  partId?: number;
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+}
+
+/** Payload to edit an existing sales-order line (part link fixed at add time). */
+export interface UpdateSalesOrderLineInput {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  notes?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SalesOrderService {
   private readonly http = inject(HttpClient);
@@ -87,6 +104,21 @@ export class SalesOrderService {
     taxRate?: number;
   }): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}`, request);
+  }
+
+  /** Append a line to a draft sales order. Returns the refreshed order detail. */
+  addSalesOrderLine(id: number, line: SalesOrderLineInput): Observable<SalesOrderDetail> {
+    return this.http.post<SalesOrderDetail>(`${this.base}/${id}/lines`, line);
+  }
+
+  /** Edit an existing line on a draft sales order. Returns the refreshed detail. */
+  updateSalesOrderLine(id: number, lineId: number, line: UpdateSalesOrderLineInput): Observable<SalesOrderDetail> {
+    return this.http.put<SalesOrderDetail>(`${this.base}/${id}/lines/${lineId}`, line);
+  }
+
+  /** Remove a line from a draft sales order (must keep at least one line). */
+  deleteSalesOrderLine(id: number, lineId: number): Observable<SalesOrderDetail> {
+    return this.http.delete<SalesOrderDetail>(`${this.base}/${id}/lines/${lineId}`);
   }
 
   confirmSalesOrder(id: number): Observable<void> {
