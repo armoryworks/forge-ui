@@ -1,0 +1,16 @@
+<app-page-header
+  [title]="'accounting.dashboard.title' | translate"
+  [subtitle]="'accounting.dashboard.subtitle' | translate">
+</app-page-header>
+
+<div class="page-content">
+  <div class="tile-grid">
+    @for (tile of tiles; track tile.route) {
+      <a class="tile" [routerLink]="tile.route">
+        <span class="material-icons-outlined tile-icon" aria-hidden="true">{{ tile.icon }}</span>
+        <span class="tile-label">{{ tile.label }}</span>
+        <span class="tile-desc">{{ tile.description }}</span>
+      </a>
+    }
+  </div>
+</div>

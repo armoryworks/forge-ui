@@ -101,3 +101,14 @@
   align-items: center;
   gap: $sp-xs;
 }
+
+.status-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.vendor-hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}

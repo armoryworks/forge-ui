@@ -1,0 +1,162 @@
+@use 'styles/variables' as *;
+
+// Shared styling for the GL accounting screens. Design-system tokens only —
+// sharp corners ($border-radius: 0), token spacing/typography, theme colour vars.
+// The flat record lists use <app-data-table>; these rules cover what the shared
+// table does not: the error/caveat banners, the totals strip (the table has no
+// footer), the 2-column key/value summary, and the hierarchical statements
+// (P&L / balance sheet / cash flow) that are reports, not sortable grids.
+
+// ─── Page-level banners ───
+.acct-error {
+  margin: 0;
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-base;
+  color: var(--error);
+  border-left: $border-width-accent solid var(--error);
+  background: var(--error-light);
+}
+
+.acct-caveat {
+  margin: 0;
+  padding: $sp-sm $sp-md;
+  font-size: $font-size-base;
+  color: var(--text);
+  border-left: $border-width-accent solid var(--warning);
+  background: var(--warning-light);
+}
+
+.acct-muted {
+  color: var(--text-muted);
+  font-size: $font-size-base;
+}
+
+// ─── Table block ───
+// Lets an <app-data-table> size to its content when stacked with other sections
+// on one page (the table host is flex:1 and would otherwise split the available
+// height with its siblings). Used on the multi-section pages; single-table pages
+// keep the table as a direct .page-content--table child so it scrolls internally.
+.acct-table-block {
+  min-width: 0;
+}
+
+// ─── Section subheading (navigational label, per UI Layout rules) ───
+.acct-subhead {
+  margin: $sp-md 0 $sp-sm;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  font-size: $font-size-xxs;
+  color: var(--text-muted);
+}
+
+// ─── Header action: refresh icon button sizing ───
+.acct-refresh-icon {
+  font-size: $icon-size-md;
+  margin-right: $sp-xs;
+}
+
+// ─── Totals strip — stands in for the data-table footer the shared table lacks ───
+.totals-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: $sp-lg;
+  padding: $sp-sm $sp-md;
+  border-top: $border-width solid var(--border);
+  font-size: $font-size-base;
+
+  &__label {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+  }
+
+  &__metric {
+    display: inline-flex;
+    align-items: center;
+    gap: $sp-sm;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+// ─── Two-column key/value summary block (GRNI summary, bank-rec worksheet header) ───
+.summary-table {
+  width: 100%;
+  max-width: 420px;
+  border-collapse: collapse;
+  font-size: $font-size-base;
+
+  th,
+  td {
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    text-align: left;
+  }
+
+  td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  tr.summary-table__total td,
+  tr.summary-table__total th {
+    font-weight: 700;
+    border-top: $border-width solid var(--border);
+  }
+}
+
+// ─── Hierarchical financial statement (P&L, balance sheet, cash flow) ───
+.statement {
+  width: 100%;
+  max-width: 640px;
+  border-collapse: collapse;
+  font-size: $font-size-base;
+
+  th,
+  td {
+    padding: $sp-sm $sp-md;
+    border-bottom: $border-width-thin solid var(--border);
+    text-align: left;
+    font-weight: 400;
+  }
+
+  td.num,
+  th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    width: 12rem;
+  }
+
+  tr.statement__section td {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    font-size: $font-size-xxs;
+    color: var(--text-muted);
+    padding-top: $sp-md;
+  }
+
+  tr.statement__subtotal td {
+    font-weight: 600;
+  }
+
+  tfoot td {
+    font-weight: 700;
+    border-top: $border-width solid var(--border);
+    padding-top: $sp-sm;
+  }
+
+  tr.statement__reconcile td {
+    color: var(--text-secondary);
+    font-weight: 400;
+    border-bottom: 0;
+  }
+
+  .acct-muted {
+    color: var(--text-muted);
+  }
+}

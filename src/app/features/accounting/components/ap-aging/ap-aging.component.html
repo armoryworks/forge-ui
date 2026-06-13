@@ -1,0 +1,45 @@
+<app-page-header [title]="'accounting.apAging.title' | translate" [subtitle]="'accounting.apAging.subtitle' | translate">
+  @if (report(); as r) {
+    <span class="chip" [class.chip--success]="r.reconciliation.isReconciled" [class.chip--error]="!r.reconciliation.isReconciled">
+      {{ (r.reconciliation.isReconciled ? 'accounting.apAging.tiesToControl' : 'accounting.common.outOfBalance') | translate }}
+    </span>
+  }</app-page-header>
+
+<div class="page-content page-content--table">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-ap-aging"
+    [columns]="columns()"
+    [data]="rows()"
+    [loading]="loading()"
+    [stickyFirstColumn]="true"
+    emptyIcon="request_quote"
+    [emptyMessage]="'accounting.apAging.empty' | translate">
+    <!-- Currency cells for the aging buckets. The shared data-table's content
+         query is descendants:false, so cells can't live inside @for — a fixed
+         pool of direct-child templates covers the standard 4-bucket ladder
+         (0-30 / 31-60 / 61-90 / 91+); templates with no matching column are ignored. -->
+    <ng-template appColumnCell="b0" let-row><app-currency-display [value]="row.b0" /></ng-template>
+    <ng-template appColumnCell="b1" let-row><app-currency-display [value]="row.b1" /></ng-template>
+    <ng-template appColumnCell="b2" let-row><app-currency-display [value]="row.b2" /></ng-template>
+    <ng-template appColumnCell="b3" let-row><app-currency-display [value]="row.b3" /></ng-template>
+    <ng-template appColumnCell="b4" let-row><app-currency-display [value]="row.b4" /></ng-template>
+    <ng-template appColumnCell="b5" let-row><app-currency-display [value]="row.b5" /></ng-template>
+    <ng-template appColumnCell="openBalance" let-row>
+      <app-currency-display [value]="row.openBalance" />
+    </ng-template>
+  </app-data-table>
+
+  @if (report(); as r) {
+    <div class="totals-strip">
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      @for (b of r.totalsByBucket; track b.label) {
+        <span class="totals-strip__metric">{{ b.label }} <app-currency-display [value]="b.amount" /></span>
+      }
+      <span class="totals-strip__metric">{{ 'accounting.common.open' | translate }} <app-currency-display [value]="r.grandTotal" /></span>
+    </div>
+  }
+</div>

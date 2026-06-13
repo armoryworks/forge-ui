@@ -1,0 +1,73 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.part-map {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  min-height: 200px;
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    gap: $sp-md;
+  }
+
+  &__hint {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+
+  &__csv-input {
+    display: none;
+  }
+
+  &__empty {
+    font-size: $font-size-base;
+    color: var(--text-muted);
+    padding: $sp-xl 0;
+    text-align: center;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: $font-size-sm;
+
+    th {
+      @include uppercase-label($font-size-xxs);
+      color: var(--text-muted);
+      text-align: left;
+      padding: $sp-sm $sp-md;
+      border-bottom: $border-width-thin solid var(--border);
+    }
+
+    td {
+      padding: $sp-xs $sp-md;
+      border-bottom: $border-width-thin solid var(--border);
+    }
+  }
+
+  &__table-actions {
+    width: 48px;
+    text-align: right;
+  }
+
+  &__input {
+    width: 100%;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    color: var(--text);
+    font-family: $font-family-mono;
+    font-size: $font-size-sm;
+    padding: $sp-sm;
+  }
+
+  &__resolved {
+    color: var(--text-secondary);
+  }
+}

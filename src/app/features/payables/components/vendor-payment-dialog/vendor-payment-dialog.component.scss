@@ -1,0 +1,74 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+:host {
+  display: block;
+}
+
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.apps {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  position: relative;
+
+  &__title {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__empty {
+    padding: $sp-lg;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: $font-size-sm;
+    border: $border-width-thin dashed var(--border);
+  }
+}
+
+// Application row: bill # | due date | balance | amount [| fx rate]
+.app-line {
+  display: grid;
+  grid-template-columns: 110px 100px 110px 1fr;
+  gap: $sp-sm;
+  align-items: center;
+  padding: $sp-xs 0;
+
+  &--fx {
+    grid-template-columns: 110px 100px 110px 1fr 130px;
+  }
+
+  &--header {
+    @include uppercase-label($font-size-xxs, 0.5px, 700);
+    color: var(--text-muted);
+    border-bottom: $border-width-thin solid var(--border);
+    padding-bottom: $sp-sm;
+    grid-template-columns: 110px 100px 110px 1fr;
+
+    &.app-line--fx { grid-template-columns: 110px 100px 110px 1fr 130px; }
+  }
+
+  &__right { text-align: right; }
+  &__mono { font-family: $font-family-mono; font-size: $font-size-xs; font-weight: 600; }
+  &__muted { color: var(--text-muted); font-size: $font-size-xs; }
+}
+
+.payment-totals {
+  border-top: $border-width-thin solid var(--border);
+  padding-top: $sp-sm;
+
+  &__over {
+    color: var(--error);
+    font-weight: 700;
+  }
+
+  &__warning {
+    font-size: $font-size-xs;
+    color: var(--error);
+  }
+}

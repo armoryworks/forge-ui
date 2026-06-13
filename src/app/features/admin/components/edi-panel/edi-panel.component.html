@@ -12,6 +12,12 @@
 
   @if (subTab() === 'partners') {
     <div class="edi-panel__toolbar">
+      <span class="gap-note" [matTooltip]="'adminPanels.edi.partNumberGap.tooltip' | translate"
+        matTooltipPosition="below" tabindex="0"
+        [attr.aria-label]="'adminPanels.edi.partNumberGap.tooltip' | translate">
+        <span class="material-icons-outlined">info</span>
+        {{ 'adminPanels.edi.partNumberGap.label' | translate }}
+      </span>
       <button class="action-btn action-btn--create" (click)="openCreatePartner()">
         <span class="material-icons-outlined">add</span>
         {{ 'adminPanels.edi.newPartner' | translate }}
@@ -44,6 +50,11 @@
             <button class="icon-btn" aria-label="Test connection" (click)="testConnection(row); $event.stopPropagation()">
               <span class="material-icons-outlined">wifi_tethering</span>
             </button>
+            <button class="icon-btn" [attr.aria-label]="'adminPanels.edi.partMap.title' | translate"
+              [matTooltip]="'adminPanels.edi.partMap.title' | translate" matTooltipPosition="above"
+              (click)="openPartNumberMap(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">swap_horiz</span>
+            </button>
             <button class="icon-btn" aria-label="Edit partner" (click)="openEditPartner(row); $event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>
             </button>
@@ -60,6 +71,12 @@
     <div class="filters-bar">
       <app-select [label]="'adminPanels.edi.direction' | translate" [formControl]="directionFilter" [options]="directionOptions" (selectionChange)="loadTransactions()" />
       <app-select [label]="'adminPanels.edi.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadTransactions()" />
+      <span class="gap-note" [matTooltip]="'adminPanels.edi.partNumberGap.tooltip' | translate"
+        matTooltipPosition="below" tabindex="0"
+        [attr.aria-label]="'adminPanels.edi.partNumberGap.tooltip' | translate">
+        <span class="material-icons-outlined">info</span>
+        {{ 'adminPanels.edi.partNumberGap.label' | translate }}
+      </span>
     </div>
 
     <div [appLoadingBlock]="loading()">
@@ -107,6 +124,33 @@
         <app-toggle [label]="'adminPanels.edi.autoProcess' | translate" formControlName="autoProcess" />
         <app-toggle [label]="'adminPanels.edi.requireAck' | translate" formControlName="requireAcknowledgment" />
       </div>
+      <div class="gap-note gap-note--inline" [matTooltip]="'adminPanels.edi.partNumberGap.tooltip' | translate" matTooltipPosition="above" tabindex="0">
+        <span class="material-icons-outlined">info</span>
+        {{ 'adminPanels.edi.partNumberGap.dialogHint' | translate }}
+      </div>
+
+      @if (transportMethodValue() === 'Sftp') {
+        <div class="sftp-section">
+          <span class="sftp-section__label">{{ 'adminPanels.edi.sftp.title' | translate }}</span>
+          <div class="dialog-row">
+            <app-input [label]="'adminPanels.edi.sftp.host' | translate" formControlName="sftpHost" />
+            <app-input [label]="'adminPanels.edi.sftp.port' | translate" type="number" formControlName="sftpPort" />
+          </div>
+          <div class="dialog-row">
+            <app-input [label]="'adminPanels.edi.sftp.username' | translate" formControlName="sftpUsername" />
+            <app-input [label]="'adminPanels.edi.sftp.password' | translate" type="password" formControlName="sftpPassword" />
+          </div>
+          <div class="dialog-row">
+            <app-input [label]="'adminPanels.edi.sftp.outboundDir' | translate" formControlName="sftpOutboundDir" />
+            <app-input [label]="'adminPanels.edi.sftp.inboundDir' | translate" formControlName="sftpInboundDir" />
+          </div>
+          <div class="sftp-section__hint">
+            <span class="material-icons-outlined">shield</span>
+            {{ ((editingPartner()?.transportSftp?.hasPassword) ? 'adminPanels.edi.sftp.passwordKeptHint' : 'adminPanels.edi.sftp.passwordHint') | translate }}
+          </div>
+        </div>
+      }
+
       <app-textarea [label]="'adminPanels.edi.notes' | translate" formControlName="notes" />
     </div>
     <div dialog-footer>
@@ -166,4 +210,8 @@
       <button class="action-btn action-btn--primary" (click)="showTransactionDetail.set(false)">Close</button>
     </div>
   </app-dialog>
+}
+
+@if (mapPartner(); as p) {
+  <app-edi-part-number-map-dialog [partner]="p" (closed)="closePartNumberMap()" />
 }

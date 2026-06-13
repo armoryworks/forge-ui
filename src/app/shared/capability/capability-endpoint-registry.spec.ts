@@ -20,6 +20,18 @@ describe('resolveCapabilityForUrl', () => {
       expect(resolveCapabilityForUrl('/api/v1/planning-cycles/5/entries')).toBe('CAP-PLAN-MRP');
     });
 
+    it('resolves AP split endpoints to their dedicated capabilities', () => {
+      expect(resolveCapabilityForUrl('/api/v1/vendor-bills')).toBe('CAP-P2P-BILL');
+      expect(resolveCapabilityForUrl('/api/v1/vendor-bills/3/approve')).toBe('CAP-P2P-BILL');
+      expect(resolveCapabilityForUrl('/api/v1/vendor-payments')).toBe('CAP-P2P-PAY');
+      expect(resolveCapabilityForUrl('/api/v1/payment-transmissions')).toBe('CAP-P2P-PAY');
+      expect(resolveCapabilityForUrl('/api/v1/payment-transmissions/7/retry')).toBe('CAP-P2P-PAY');
+      // PO endpoints themselves keep the baseline purchasing capability.
+      expect(resolveCapabilityForUrl('/api/v1/purchase-orders')).toBe('CAP-P2P-PO');
+      // And the vendor master is untouched by the split.
+      expect(resolveCapabilityForUrl('/api/v1/vendors/5')).toBe('CAP-MD-VENDORS');
+    });
+
     it('handles absolute URLs by extracting the api/v1 segment', () => {
       expect(resolveCapabilityForUrl('http://localhost:5000/api/v1/announcements')).toBe('CAP-EXT-ANNOUNCEMENTS');
       expect(resolveCapabilityForUrl('https://example.com/api/v1/ai/status?foo=bar')).toBe('CAP-EXT-AI-ASSISTANT');

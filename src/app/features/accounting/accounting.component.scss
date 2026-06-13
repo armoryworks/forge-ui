@@ -1,0 +1,45 @@
+@use 'styles/variables' as *;
+
+.tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: $sp-lg;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  padding: $sp-xl;
+  border: $border-width-thin solid var(--border);
+  border-radius: $border-radius;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    box-shadow: $shadow-dropdown;
+  }
+
+  &:focus-visible {
+    outline: $border-width solid var(--primary);
+    outline-offset: $border-width;
+  }
+}
+
+.tile-icon {
+  font-size: $icon-size-xxl;
+  color: var(--primary);
+}
+
+.tile-label {
+  font-weight: 600;
+  font-size: $font-size-md;
+}
+
+.tile-desc {
+  font-size: $font-size-base;
+  color: var(--text-secondary);
+}

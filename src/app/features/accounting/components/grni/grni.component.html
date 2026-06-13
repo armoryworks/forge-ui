@@ -1,0 +1,82 @@
+<app-page-header [title]="'accounting.grni.title' | translate" [subtitle]="'accounting.grni.subtitle' | translate">
+  @if (report(); as r) {
+    <span class="chip" [class.chip--success]="r.isReconciled" [class.chip--error]="!r.isReconciled">
+      {{ (r.isReconciled ? 'accounting.common.reconciled' : 'accounting.grni.variance') | translate }}
+    </span>
+  }</app-page-header>
+
+<div class="page-content">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  @if (loading() && !report()) {
+    <p class="acct-muted">{{ 'accounting.common.loading' | translate }}</p>
+  } @else if (report(); as r) {
+    <table class="summary-table" aria-label="GRNI summary">
+      <tbody>
+        <tr>
+          <td>{{ 'accounting.grni.glBalance' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.glBalance" /></td>
+        </tr>
+        <tr>
+          <td>{{ 'accounting.grni.operationalOpen' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.operationalOpen" /></td>
+        </tr>
+        <tr class="summary-table__total">
+          <td>{{ 'accounting.grni.variance' | translate }}</td>
+          <td class="num"><app-currency-display [value]="r.variance" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 class="acct-subhead">{{ 'accounting.grni.openByPurchaseOrder' | translate }}</h2>
+    <div class="acct-table-block">
+      <app-data-table
+        tableId="acct-grni-po"
+        [columns]="poColumns()"
+        [data]="poRows()"
+        [stickyFirstColumn]="true"
+        emptyIcon="inventory_2"
+        [emptyMessage]="'accounting.grni.emptyOpen' | translate">
+        <!-- Currency cells for the aging buckets. The shared data-table's content
+             query is descendants:false, so cells can't live inside @for — a fixed
+             pool of direct-child templates covers the standard 4-bucket ladder;
+             templates with no matching column are ignored. -->
+        <ng-template appColumnCell="b0" let-row><app-currency-display [value]="row.b0" /></ng-template>
+        <ng-template appColumnCell="b1" let-row><app-currency-display [value]="row.b1" /></ng-template>
+        <ng-template appColumnCell="b2" let-row><app-currency-display [value]="row.b2" /></ng-template>
+        <ng-template appColumnCell="b3" let-row><app-currency-display [value]="row.b3" /></ng-template>
+        <ng-template appColumnCell="b4" let-row><app-currency-display [value]="row.b4" /></ng-template>
+        <ng-template appColumnCell="b5" let-row><app-currency-display [value]="row.b5" /></ng-template>
+        <ng-template appColumnCell="openAmount" let-row>
+          <app-currency-display [value]="row.openAmount" />
+        </ng-template>
+      </app-data-table>
+    </div>
+
+    <div class="totals-strip">
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      @for (b of r.totalsByBucket; track b.label) {
+        <span class="totals-strip__metric">{{ b.label }} <app-currency-display [value]="b.amount" /></span>
+      }
+      <span class="totals-strip__metric">{{ 'accounting.common.open' | translate }} <app-currency-display [value]="r.grandTotal" /></span>
+    </div>
+
+    @if (r.uncoveredReceipts.length) {
+      <h2 class="acct-subhead">{{ 'accounting.grni.uncoveredReceipts' | translate }} ({{ r.uncoveredReceipts.length }}{{ r.uncoveredTruncated ? '+' : '' }})</h2>
+      <div class="acct-table-block">
+        <app-data-table
+          tableId="acct-grni-uncovered"
+          [columns]="uncoveredColumns"
+          [data]="r.uncoveredReceipts"
+          emptyIcon="inventory_2"
+          [emptyMessage]="'accounting.grni.emptyUncovered' | translate">
+          <ng-template appColumnCell="receiptNumber" let-row>
+            {{ row.receiptNumber || '—' }}
+          </ng-template>
+        </app-data-table>
+      </div>
+    }
+  }
+</div>

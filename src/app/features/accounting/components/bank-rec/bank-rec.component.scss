@@ -1,0 +1,19 @@
+@use 'styles/variables' as *;
+@use 'app/features/accounting/accounting-shared' as *;
+
+.acct-startrec {
+  &__row {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: $sp-lg;
+  }
+}
+
+// Commit bar for the worksheet's "cleared" selection — explicit save, no autosave.
+.acct-bankrec-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: $sp-md;
+}

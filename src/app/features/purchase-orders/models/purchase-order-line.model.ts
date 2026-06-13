@@ -6,6 +6,8 @@ export interface PurchaseOrderLine {
   orderedQuantity: number;
   receivedQuantity: number;
   remainingQuantity: number;
+  /** AP 3-way match — received − billed = max quantity still billable on this line. */
+  unbilledReceivedQuantity: number;
   // Phase 3 / WU-14 / H3 — qty marked cancelled-not-received at short-close time.
   cancelledShortCloseQuantity: number;
   unitPrice: number;

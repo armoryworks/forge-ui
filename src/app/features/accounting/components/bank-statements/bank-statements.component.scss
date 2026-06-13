@@ -1,0 +1,49 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.file-input-hidden {
+  display: none;
+}
+
+.statements-content {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-lg;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.filters-bar {
+  display: flex;
+  gap: $sp-lg;
+}
+
+.match-chips {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+}
+
+.lines-section {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-sm;
+  border-top: $border-width-thin solid var(--border);
+  padding-top: $sp-md;
+
+  &__header {
+    @include flex-between;
+  }
+
+  &__title {
+    @include uppercase-label($font-size-xxs);
+    color: var(--text-muted);
+  }
+}
+
+.action-cell {
+  display: inline-flex;
+  gap: $sp-sm;
+  justify-content: flex-end;
+}

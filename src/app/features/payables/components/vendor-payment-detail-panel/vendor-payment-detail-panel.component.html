@@ -1,0 +1,195 @@
+<div class="detail-panel" [appLoadingBlock]="loading()">
+  @if (payment(); as payment) {
+    <div class="detail-header">
+      <div class="detail-header__info">
+        <span class="material-icons-outlined detail-icon">payments</span>
+        <div>
+          <div class="detail-name">{{ payment.paymentNumber }}</div>
+          <div class="detail-vendor">{{ payment.vendorName }}</div>
+        </div>
+      </div>
+      <div class="detail-header__actions">
+        <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <!-- Info Grid -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.vendor' | translate }}</span>
+          <span class="info-value">
+            <app-entity-link type="vendor" [entityId]="payment.vendorId">{{ payment.vendorName }}</app-entity-link>
+          </span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.method' | translate }}</span>
+          <span class="info-value">{{ getMethodLabel(payment.method) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.paymentDate' | translate }}</span>
+          <span class="info-value">{{ payment.paymentDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        @if (payment.referenceNumber) {
+          <div class="info-item">
+            <span class="info-label">{{ 'payables.referenceNumber' | translate }}</span>
+            <span class="info-value">{{ payment.referenceNumber }}</span>
+          </div>
+        }
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.amount' | translate }}</span>
+          <span class="info-value"><app-currency-display [value]="payment.amount" [currency]="null" /></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.applied' | translate }}</span>
+          <span class="info-value"><app-currency-display [value]="payment.appliedAmount" [currency]="null" /></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'payables.unapplied' | translate }}</span>
+          <span class="info-value" [class.text-warning]="payment.unappliedAmount > 0"><app-currency-display [value]="payment.unappliedAmount" [currency]="null" /></span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">{{ 'common.created' | translate }}</span>
+          <span class="info-value">{{ payment.createdAt | date:'MM/dd/yyyy' }}</span>
+        </div>
+      </div>
+
+      @if (payment.notes) {
+        <div class="info-section">
+          <span class="info-label">{{ 'common.notes' | translate }}</span>
+          <div class="info-notes">{{ payment.notes }}</div>
+        </div>
+      }
+
+      <!-- Bank Transmission (electronic payments only) -->
+      @if (payment.transmissionStatus; as transmissionStatus) {
+        <div class="info-section" data-testid="transmission-section">
+          <span class="info-label">{{ 'payables.transmission.sectionTitle' | translate }}</span>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">{{ 'common.status' | translate }}</span>
+              <span class="info-value">
+                <span [class]="getTransmissionChipClass(transmissionStatus)">{{ getTransmissionStatusLabel(transmissionStatus) }}</span>
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">{{ 'payables.transmission.attempts' | translate }}</span>
+              <span class="info-value">{{ payment.transmissionAttempts }}/5</span>
+            </div>
+            @if (transmissionStatus === 'Succeeded' && payment.transmissionSubmissionRef) {
+              <div class="info-item">
+                <span class="info-label">{{ 'payables.transmission.submissionRef' | translate }}</span>
+                <span class="info-value info-value--mono">{{ payment.transmissionSubmissionRef }}</span>
+              </div>
+            }
+            @if (transmissionStatus === 'Retrying' && payment.transmissionNextAttemptAt) {
+              <div class="info-item">
+                <span class="info-label">{{ 'payables.transmission.nextAttemptAt' | translate }}</span>
+                <span class="info-value">{{ payment.transmissionNextAttemptAt | date:'MM/dd/yyyy hh:mm' }}</span>
+              </div>
+            }
+          </div>
+          @if (payment.transmissionLastError) {
+            <div class="info-item">
+              <span class="info-label">{{ 'payables.transmission.lastError' | translate }}</span>
+              <div class="transmission-error">{{ payment.transmissionLastError }}</div>
+            </div>
+          }
+          @if (transmissionStatus === 'Failed') {
+            <div class="transmission-actions">
+              <button class="action-btn action-btn--primary" data-testid="retry-transmission-btn" (click)="retryTransmission()">
+                <span class="material-icons-outlined">refresh</span>
+                {{ 'payables.transmission.retry' | translate }}
+              </button>
+            </div>
+          }
+          @if (transmissionStatus === 'Queued' && payment.method === 'Wire') {
+            <div class="transmission-actions">
+              <button class="action-btn action-btn--primary" data-testid="attest-wire-btn" (click)="attestWire()">
+                <span class="material-icons-outlined">verified</span>
+                {{ 'payables.wire.attest' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Bill Applications -->
+      <div class="lines-section">
+        <span class="info-label">{{ 'payables.applications' | translate }} ({{ payment.applications.length }})</span>
+        @if (payment.applications.length > 0) {
+          <table class="lines-table" aria-label="Vendor payment applications">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'payables.billNumber' | translate }}</th>
+                <th scope="col" class="lines-table__right">{{ 'payables.amount' | translate }}</th>
+                @if (showFxColumn()) {
+                  <th scope="col" class="lines-table__right">{{ 'accounting.currency.settlementFxRate' | translate }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (app of payment.applications; track app.vendorBillId) {
+                <tr>
+                  <td class="lines-table__mono">
+                    <app-entity-link type="vendor-bill" [entityId]="app.vendorBillId">{{ app.billNumber }}</app-entity-link>
+                  </td>
+                  <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
+                  @if (showFxColumn()) {
+                    <td class="lines-table__right">{{ app.settlementFxRate }}</td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        } @else {
+          <div class="lines-empty">{{ 'payables.noApplications' | translate }}</div>
+        }
+      </div>
+
+      <!-- History — same shared section as the AR sibling (PaymentDetailPanel). -->
+      <app-entity-activity-section
+        entityType="VendorPayment"
+        [entityId]="paymentId()"
+        [tabs]="activityTabs" />
+
+      <!-- Actions -->
+      @if (canVoid()) {
+        <div class="detail-actions">
+          <button class="action-btn action-btn--danger" data-testid="void-payment-btn" (click)="openVoidDialog()">
+            <span class="material-icons-outlined">block</span>
+            {{ 'payables.voidPayment' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Void Payment Dialog — collects the required reason (mirrors the PO short-close dialog) -->
+    @if (showVoidDialog()) {
+      <app-dialog [title]="'payables.voidPaymentTitle' | translate" width="480px" (closed)="showVoidDialog.set(false)">
+        <div [formGroup]="voidForm">
+          <p class="void-message">{{ 'payables.voidPaymentMessage' | translate: { number: payment.paymentNumber } }}</p>
+          <app-textarea
+            [label]="'payables.voidReason' | translate"
+            formControlName="reason"
+            [required]="true"
+            data-testid="void-reason" />
+        </div>
+        <div dialog-footer>
+          <button class="action-btn" (click)="showVoidDialog.set(false)">{{ 'common.cancel' | translate }}</button>
+          <app-validation-button [violations]="voidViolations" [loading]="voidSaving()">
+            <button class="action-btn action-btn--destructive"
+              data-testid="void-confirm-btn"
+              [disabled]="voidForm.invalid || voidSaving()"
+              (click)="confirmVoid()">
+              <span class="material-icons-outlined">block</span>
+              {{ 'payables.void' | translate }}
+            </button>
+          </app-validation-button>
+        </div>
+      </app-dialog>
+    }
+  }
+</div>

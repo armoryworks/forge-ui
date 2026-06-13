@@ -12,6 +12,9 @@
               <tr>
                 <th scope="col">{{ 'payments.invoiceNumber' | translate }}</th>
                 <th scope="col" class="lines-table__right">{{ 'payments.amount' | translate }}</th>
+                @if (showSettlementFxRate()) {
+                  <th scope="col" class="lines-table__right">{{ 'accounting.currency.settlementFxRate' | translate }}</th>
+                }
                 <th scope="col"><span class="sr-only">{{ 'common.actions' | translate }}</span></th>
               </tr>
             </thead>
@@ -20,6 +23,9 @@
                 <tr>
                   <td class="lines-table__mono">{{ app.invoiceNumber }}</td>
                   <td class="lines-table__right"><app-currency-display [value]="app.amount" [currency]="null" /></td>
+                  @if (showSettlementFxRate()) {
+                    <td class="lines-table__right">{{ app.settlementFxRate }}</td>
+                  }
                   <td>
                     <button class="icon-btn icon-btn--danger" [matTooltip]="'common.remove' | translate" matTooltipPosition="above" [attr.aria-label]="'common.remove' | translate" (click)="removeApplication($index)">
                       <span class="material-icons-outlined">close</span>
@@ -32,6 +38,9 @@
               <tr>
                 <td class="lines-table__right lines-table__bold">{{ 'payments.totalApplied' | translate }}</td>
                 <td class="lines-table__right lines-table__bold"><app-currency-display [value]="totalApplied()" [currency]="null" /></td>
+                @if (showSettlementFxRate()) {
+                  <td></td>
+                }
                 <td></td>
               </tr>
             </tfoot>
@@ -41,10 +50,13 @@
         }
 
         <!-- Add Application Form -->
-        <div class="add-line add-line--4col" [formGroup]="appForm">
+        <div class="add-line" [class.add-line--4col]="!showSettlementFxRate()" [class.add-line--5col]="showSettlementFxRate()" [formGroup]="appForm">
           <app-input [label]="'payments.invoiceId' | translate" type="number" formControlName="invoiceId" />
           <app-input [label]="'payments.invoiceNumber' | translate" formControlName="invoiceNumber" />
           <app-input [label]="'payments.amount' | translate" type="number" formControlName="amount" [placeholder]="'payments.amountPlaceholder' | translate" />
+          @if (showSettlementFxRate()) {
+            <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate" step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="payment-settlement-fx-rate" />
+          }
           <button class="action-btn action-btn--sm" (click)="addApplication()" [disabled]="appForm.invalid" aria-label="Add invoice application">
             <span class="material-icons-outlined">add</span>
             {{ 'common.add' | translate }}

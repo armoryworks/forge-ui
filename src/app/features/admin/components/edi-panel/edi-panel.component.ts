@@ -1,10 +1,13 @@
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { EdiPartNumberMapDialogComponent } from '../edi-part-number-map-dialog/edi-part-number-map-dialog.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { EdiService } from '../../services/edi.service';
-import { EdiTradingPartner } from '../../models/edi-trading-partner.model';
+import { EdiTradingPartner, EdiTradingPartnerSaveRequest } from '../../models/edi-trading-partner.model';
 import { EdiTransaction } from '../../models/edi-transaction.model';
 import { EdiTransactionDetail } from '../../models/edi-transaction-detail.model';
 import { EdiFormat } from '../../models/edi-format.model';
@@ -28,6 +31,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
   selector: 'app-edi-panel',
   standalone: true,
   imports: [
+    EdiPartNumberMapDialogComponent,
+    MatTooltipModule,
     DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, ToggleComponent,
@@ -52,6 +57,7 @@ export class EdiPanelComponent {
   protected readonly showPartnerDialog = signal(false);
   protected readonly showTransactionDetail = signal(false);
   protected readonly editingPartner = signal<EdiTradingPartner | null>(null);
+  protected readonly mapPartner = signal<EdiTradingPartner | null>(null);
 
   protected readonly statusFilter = new FormControl<EdiTransactionStatus | ''>('');
   protected readonly directionFilter = new FormControl<EdiDirection | ''>('');
@@ -121,7 +127,18 @@ export class EdiPanelComponent {
     autoProcess: new FormControl(true, { nonNullable: true }),
     requireAcknowledgment: new FormControl(true, { nonNullable: true }),
     notes: new FormControl(''),
+    // SFTP transport (shown when transportMethod === 'Sftp'; stored encrypted server-side).
+    sftpHost: new FormControl(''),
+    sftpPort: new FormControl<number>(22),
+    sftpUsername: new FormControl(''),
+    sftpPassword: new FormControl(''),       // write-only: blank on edit keeps the stored password
+    sftpOutboundDir: new FormControl('/inbound'),
+    sftpInboundDir: new FormControl('/outbound'),
   });
+
+  protected readonly transportMethodValue = toSignal(
+    this.partnerForm.controls.transportMethod.valueChanges,
+    { initialValue: 'Manual' as EdiTransportMethod });
 
   protected readonly partnerViolations = FormValidationService.getViolations(this.partnerForm, {
     name: 'Name',
@@ -162,8 +179,20 @@ export class EdiPanelComponent {
 
   protected openCreatePartner(): void {
     this.editingPartner.set(null);
-    this.partnerForm.reset({ name: '', qualifierId: 'ZZ', qualifierValue: '', defaultFormat: 'X12', transportMethod: 'Manual', autoProcess: true, requireAcknowledgment: true });
+    this.partnerForm.reset({
+      name: '', qualifierId: 'ZZ', qualifierValue: '', defaultFormat: 'X12', transportMethod: 'Manual',
+      autoProcess: true, requireAcknowledgment: true,
+      sftpHost: '', sftpPort: 22, sftpUsername: '', sftpPassword: '', sftpOutboundDir: '/inbound', sftpInboundDir: '/outbound',
+    });
     this.showPartnerDialog.set(true);
+  }
+
+  protected openPartNumberMap(partner: EdiTradingPartner): void {
+    this.mapPartner.set(partner);
+  }
+
+  protected closePartNumberMap(): void {
+    this.mapPartner.set(null);
   }
 
   protected openEditPartner(partner: EdiTradingPartner): void {
@@ -177,6 +206,12 @@ export class EdiPanelComponent {
       autoProcess: partner.autoProcess,
       requireAcknowledgment: partner.requireAcknowledgment,
       notes: partner.notes,
+      sftpHost: partner.transportSftp?.host ?? '',
+      sftpPort: partner.transportSftp?.port ?? 22,
+      sftpUsername: partner.transportSftp?.username ?? '',
+      sftpPassword: '', // never echoed; blank keeps the stored password
+      sftpOutboundDir: partner.transportSftp?.outboundDir ?? '/inbound',
+      sftpInboundDir: partner.transportSftp?.inboundDir ?? '/outbound',
     });
     this.showPartnerDialog.set(true);
   }
@@ -187,9 +222,31 @@ export class EdiPanelComponent {
     const val = this.partnerForm.getRawValue();
     const editing = this.editingPartner();
 
+    // Typed transport fields ride only for the SFTP method (the server composes + encrypts).
+    const payload: EdiTradingPartnerSaveRequest = {
+      name: val.name,
+      qualifierId: val.qualifierId,
+      qualifierValue: val.qualifierValue,
+      defaultFormat: val.defaultFormat,
+      transportMethod: val.transportMethod,
+      autoProcess: val.autoProcess,
+      requireAcknowledgment: val.requireAcknowledgment,
+      notes: val.notes ?? null,
+      transportSftp: val.transportMethod === 'Sftp'
+        ? {
+            host: val.sftpHost ?? '',
+            port: val.sftpPort ?? 22,
+            username: val.sftpUsername ?? '',
+            password: val.sftpPassword || null,
+            outboundDir: val.sftpOutboundDir ?? '/inbound',
+            inboundDir: val.sftpInboundDir ?? '/outbound',
+          }
+        : null,
+    };
+
     const obs = editing
-      ? this.ediService.updateTradingPartner(editing.id, val)
-      : this.ediService.createTradingPartner(val);
+      ? this.ediService.updateTradingPartner(editing.id, payload)
+      : this.ediService.createTradingPartner(payload);
 
     obs.subscribe({
       next: () => {

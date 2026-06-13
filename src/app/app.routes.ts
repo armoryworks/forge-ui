@@ -3,6 +3,7 @@ import { LoginComponent } from './features/auth/login.component';
 import { SetupComponent } from './features/auth/setup.component';
 import { TokenSetupComponent } from './features/auth/token-setup.component';
 import { authGuard } from './shared/guards/auth.guard';
+import { capabilityGuard } from './shared/guards/capability.guard';
 import { demoOnlyGuard } from './shared/guards/demo-only.guard';
 import { mobileRedirectGuard } from './shared/guards/mobile-redirect.guard';
 import { roleGuard } from './shared/guards/role.guard';
@@ -112,6 +113,14 @@ export const routes: Routes = [
           import('./features/expenses/expenses.routes').then((m) => m.EXPENSES_ROUTES),
       },
       {
+        // Dark GL accounting suite — guarded by CAP-ACCT-FULLGL so the whole area is unreachable by URL
+        // until the capability is switched on (mirrors the server-side gate).
+        path: 'accounting',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-ACCT-FULLGL')],
+        loadChildren: () =>
+          import('./features/accounting/accounting.routes').then((m) => m.ACCOUNTING_ROUTES),
+      },
+      {
         path: 'assets',
         canActivate: [roleGuard('Admin', 'Manager')],
         loadChildren: () =>
@@ -193,6 +202,16 @@ export const routes: Routes = [
         canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager')],
         loadChildren: () =>
           import('./features/payments/payments.routes').then((m) => m.PAYMENTS_ROUTES),
+      },
+      {
+        // AP Payables (vendor bills + vendor payments) — gated on the same
+        // CAP-P2P-BILL capability as the server-side VendorBillsController
+        // (split from CAP-P2P-PO; vendor payments ride CAP-P2P-PAY, which
+        // depends on CAP-P2P-BILL).
+        path: 'payables',
+        canActivate: [roleGuard('Admin', 'Manager', 'OfficeManager'), capabilityGuard('CAP-P2P-BILL')],
+        loadChildren: () =>
+          import('./features/payables/payables.routes').then((m) => m.PAYABLES_ROUTES),
       },
       {
         path: 'notifications',

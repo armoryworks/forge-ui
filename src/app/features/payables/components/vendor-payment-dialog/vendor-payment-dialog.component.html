@@ -1,0 +1,76 @@
+<app-dialog [title]="'payables.newPayment' | translate" width="800px" [draftConfig]="draftConfig" [draftFormGroup]="paymentForm" (closed)="close()">
+  <div class="payment-form" [formGroup]="paymentForm">
+    <div class="dialog-row">
+      <app-select [label]="'payables.vendor' | translate" formControlName="vendorId" [options]="vendorOptions()" [required]="true" data-testid="vendor-payment-vendor" />
+      <app-select [label]="'payables.method' | translate" formControlName="method" [options]="methodOptions" [required]="true" data-testid="vendor-payment-method" />
+    </div>
+
+    <div class="dialog-row">
+      <app-currency-input [label]="'payables.amount' | translate" formControlName="amount" [required]="true" data-testid="vendor-payment-amount" />
+      <app-datepicker [label]="'payables.paymentDate' | translate" formControlName="paymentDate" [max]="today" [required]="true" data-testid="vendor-payment-date" />
+    </div>
+
+    <app-input [label]="'payables.referenceNumber' | translate" formControlName="referenceNumber" [placeholder]="'common.optional' | translate" data-testid="vendor-payment-ref" />
+
+    <!-- Bill applications -->
+    <div class="apps" [appLoadingBlock]="billsLoading()">
+      <span class="apps__title">{{ 'payables.applications' | translate }}</span>
+
+      @if (payableBills().length > 0) {
+        <div class="app-line app-line--header" [class.app-line--fx]="showSettlementFxRate()">
+          <span>{{ 'payables.billNumber' | translate }}</span>
+          <span>{{ 'common.dueDate' | translate }}</span>
+          <span class="app-line__right">{{ 'payables.balanceDue' | translate }}</span>
+          <span>{{ 'payables.amountToApply' | translate }}</span>
+          @if (showSettlementFxRate()) {
+            <span>{{ 'accounting.currency.settlementFxRate' | translate }}</span>
+          }
+        </div>
+        <div formArrayName="applications">
+          @for (group of applications.controls; track group; let i = $index) {
+            <div class="app-line" [class.app-line--fx]="showSettlementFxRate()" [formGroupName]="i">
+              <span class="app-line__mono">{{ payableBills()[i].billNumber }}</span>
+              <span class="app-line__muted">{{ payableBills()[i].dueDate | date:'MM/dd/yyyy' }}</span>
+              <span class="app-line__right"><app-currency-display [value]="payableBills()[i].balanceDue" [currency]="null" /></span>
+              <app-input [label]="'payables.amountToApply' | translate" type="number" formControlName="amount" min="0" [max]="payableBills()[i].balanceDue" step="0.01" data-testid="vendor-payment-app-amount" />
+              @if (showSettlementFxRate()) {
+                <app-input [label]="'accounting.currency.settlementFxRate' | translate" type="number" formControlName="settlementFxRate" step="0.0000001" min="0.0000001" [placeholder]="'accounting.currency.fxRatePlaceholder' | translate" data-testid="vendor-payment-app-fx" />
+              }
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="apps__empty">{{ 'payables.noPayableBills' | translate }}</div>
+      }
+    </div>
+
+    <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" data-testid="vendor-payment-notes" />
+
+    <!-- Applied / unapplied live summary -->
+    <div class="payment-totals">
+      <div class="dlg-total-row">
+        <span>{{ 'payables.totalApplied' | translate }}</span>
+        <app-currency-display [value]="appliedTotal()" [currency]="null" />
+      </div>
+      <div class="dlg-total-row" [class.payment-totals__over]="overApplied()">
+        <span>{{ 'payables.unapplied' | translate }}</span>
+        <app-currency-display [value]="unappliedTotal()" [currency]="null" />
+      </div>
+      @if (overApplied()) {
+        <div class="payment-totals__warning">{{ 'payables.violationOverApplied' | translate }}</div>
+      }
+    </div>
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        data-testid="vendor-payment-save-btn"
+        [disabled]="paymentForm.invalid || overApplied() || saving()"
+        (click)="save()">
+        <span class="material-icons-outlined">save</span> {{ 'payables.createPayment' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

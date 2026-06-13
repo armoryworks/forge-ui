@@ -4,11 +4,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 
 import { AuthService } from './auth.service';
+import { CapabilityService } from './capability.service';
 import { NavItem } from '../models/nav-item.model';
 
 @Injectable({ providedIn: 'root' })
 export class NavTreeService {
   private readonly auth = inject(AuthService);
+  private readonly capabilities = inject(CapabilityService);
   private readonly router = inject(Router);
 
   private readonly currentUrl = toSignal(
@@ -111,6 +113,7 @@ export class NavTreeService {
         { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
     {
@@ -127,6 +130,23 @@ export class NavTreeService {
       children: [
         { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
         { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai' },
+      ],
+    },
+    {
+      // Dark GL accounting suite — the whole group is hidden unless CAP-ACCT-FULLGL is enabled.
+      icon: 'account_balance', label: 'Accounting', i18nKey: 'navGroups.accounting',
+      capability: 'CAP-ACCT-FULLGL',
+      allowedRoles: ['Admin', 'Manager', 'OfficeManager'],
+      children: [
+        { icon: 'balance', label: 'Trial Balance', i18nKey: 'nav.trialBalance', route: '/accounting/trial-balance' },
+        { icon: 'trending_up', label: 'Profit & Loss', i18nKey: 'nav.profitLoss', route: '/accounting/profit-loss' },
+        { icon: 'account_balance', label: 'Balance Sheet', i18nKey: 'nav.balanceSheet', route: '/accounting/balance-sheet' },
+        { icon: 'waterfall_chart', label: 'Cash Flow', i18nKey: 'nav.cashFlow', route: '/accounting/cash-flow' },
+        { icon: 'trending_flat', label: 'AR Aging', i18nKey: 'nav.arAging', route: '/accounting/ar-aging' },
+        { icon: 'schedule', label: 'AP Aging', i18nKey: 'nav.apAging', route: '/accounting/ap-aging' },
+        { icon: 'inventory_2', label: 'GRNI', i18nKey: 'nav.grni', route: '/accounting/grni' },
+        { icon: 'event_available', label: 'Period Close', i18nKey: 'nav.periodClose', route: '/accounting/period-close', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'account_balance_wallet', label: 'Bank Reconciliation', i18nKey: 'nav.bankRec', route: '/accounting/bank-rec', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
   ];
@@ -248,6 +268,7 @@ export class NavTreeService {
   }
 
   private isAllowed(item: NavItem): boolean {
+    if (item.capability && !this.capabilities.isEnabled(item.capability)) return false;
     if (!item.allowedRoles) return true;
     return this.auth.hasAnyRole(item.allowedRoles);
   }

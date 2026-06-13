@@ -117,7 +117,10 @@ export class LayoutService {
   }
 
   private checkAccountRoute(url: string): boolean {
-    return url.startsWith('/account');
+    // Match the /account settings area precisely — NOT /accounting (the GL suite). A bare startsWith('/account')
+    // collides on the prefix, so every /accounting/* route was misdetected as an account route and the app
+    // sidebar was hidden. Require a segment boundary (end, /, ?, or #) after "/account".
+    return /^\/account(\/|\?|#|$)/.test(url);
   }
 
   private checkAuthRoute(url: string): boolean {

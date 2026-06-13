@@ -59,12 +59,14 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'shop-floor/machine', capability: 'CAP-MFG-MACHINE-CONNECT' },
 
   // ── Top-level prefixes ──
+  { prefix: 'accounting', capability: 'CAP-ACCT-FULLGL' },
   { prefix: 'ai-assistants', capability: 'CAP-EXT-AI-ASSISTANT' },
   { prefix: 'ai', capability: 'CAP-EXT-AI-ASSISTANT' },
   { prefix: 'announcements', capability: 'CAP-EXT-ANNOUNCEMENTS' },
   { prefix: 'approvals', capability: 'CAP-P2P-APPROVALS' },
   { prefix: 'assets', capability: 'CAP-MD-ASSETS' },
   { prefix: 'auto-po', capability: 'CAP-P2P-AUTOPO' },
+  { prefix: 'banking', capability: 'CAP-BANK-NACHA' },
   { prefix: 'bi', capability: 'CAP-CROSS-BI-EXPORT' },
   { prefix: 'chat', capability: 'CAP-EXT-CHAT' },
   { prefix: 'company-locations', capability: 'CAP-MD-LOCATIONS' },
@@ -94,6 +96,9 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'notifications', capability: 'CAP-CROSS-NOTIFICATIONS' },
   { prefix: 'onboarding', capability: 'CAP-HR-HIRE' },
   { prefix: 'parts', capability: 'CAP-MD-PARTS' },
+  // AP split: dedicated codes for vendor bills / payments (PO endpoints
+  // themselves keep CAP-P2P-PO).
+  { prefix: 'payment-transmissions', capability: 'CAP-P2P-PAY' },
   { prefix: 'payments', capability: 'CAP-O2C-CASH' },
   { prefix: 'payroll', capability: 'CAP-HR-PAYROLL' },
   { prefix: 'pick-waves', capability: 'CAP-O2C-PICKPACK' },
@@ -130,6 +135,10 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'track-types', capability: 'CAP-EXT-KANBAN' },
   { prefix: 'training', capability: 'CAP-HR-TRAINING' },
   { prefix: 'users', capability: 'CAP-IDEN-USERS' },
+  // AP split: dedicated codes for vendor bills / payments (PO endpoints
+  // themselves keep CAP-P2P-PO).
+  { prefix: 'vendor-bills', capability: 'CAP-P2P-BILL' },
+  { prefix: 'vendor-payments', capability: 'CAP-P2P-PAY' },
   { prefix: 'vendors', capability: 'CAP-MD-VENDORS' },
   { prefix: 'work-centers', capability: 'CAP-MD-WORKCENTERS' },
 ];

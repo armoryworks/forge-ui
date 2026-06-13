@@ -1,0 +1,38 @@
+<app-page-header [title]="'accounting.trialBalance.title' | translate" [subtitle]="'accounting.trialBalance.subtitle' | translate">
+  @if (report(); as r) {
+    <span class="chip" [class.chip--success]="r.isBalanced" [class.chip--error]="!r.isBalanced">
+      {{ (r.isBalanced ? 'accounting.trialBalance.balanced' : 'accounting.common.outOfBalance') | translate }}
+    </span>
+  }</app-page-header>
+
+<div class="page-content page-content--table">
+  @if (error()) {
+    <p class="acct-error" role="alert">{{ error() }}</p>
+  }
+
+  <app-data-table
+    tableId="acct-trial-balance"
+    [columns]="columns"
+    [data]="report()?.rows ?? []"
+    [loading]="loading()"
+    emptyIcon="balance"
+    [emptyMessage]="'accounting.trialBalance.empty' | translate">
+    <ng-template appColumnCell="debitTotal" let-row>
+      <app-currency-display [value]="row.debitTotal" />
+    </ng-template>
+    <ng-template appColumnCell="creditTotal" let-row>
+      <app-currency-display [value]="row.creditTotal" />
+    </ng-template>
+    <ng-template appColumnCell="netBalance" let-row>
+      <app-currency-display [value]="row.netBalance" />
+    </ng-template>
+  </app-data-table>
+
+  @if (report(); as r) {
+    <div class="totals-strip">
+      <span class="totals-strip__label">{{ 'accounting.common.total' | translate }}</span>
+      <span class="totals-strip__metric">{{ 'accounting.common.debit' | translate }} <app-currency-display [value]="r.totalDebit" /></span>
+      <span class="totals-strip__metric">{{ 'accounting.common.credit' | translate }} <app-currency-display [value]="r.totalCredit" /></span>
+    </div>
+  }
+</div>
