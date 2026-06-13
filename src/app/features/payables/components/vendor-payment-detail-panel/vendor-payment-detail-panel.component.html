@@ -105,6 +105,14 @@
               </button>
             </div>
           }
+          @if (transmissionStatus === 'Queued' && payment.method === 'Wire') {
+            <div class="transmission-actions">
+              <button class="action-btn action-btn--primary" data-testid="attest-wire-btn" (click)="attestWire()">
+                <span class="material-icons-outlined">verified</span>
+                {{ 'payables.wire.attest' | translate }}
+              </button>
+            </div>
+          }
         </div>
       }
 

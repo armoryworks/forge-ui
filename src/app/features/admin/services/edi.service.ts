@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-import { EdiTradingPartner } from '../models/edi-trading-partner.model';
+import { EdiTradingPartner, EdiTradingPartnerSaveRequest } from '../models/edi-trading-partner.model';
 import { EdiTransaction } from '../models/edi-transaction.model';
 import { EdiTransactionDetail } from '../models/edi-transaction-detail.model';
 import { EdiMapping } from '../models/edi-mapping.model';
@@ -34,11 +34,11 @@ export class EdiService {
     return this.http.get<EdiTradingPartner>(`${this.baseUrl}/trading-partners/${id}`);
   }
 
-  createTradingPartner(partner: Partial<EdiTradingPartner>): Observable<EdiTradingPartner> {
+  createTradingPartner(partner: EdiTradingPartnerSaveRequest): Observable<EdiTradingPartner> {
     return this.http.post<EdiTradingPartner>(`${this.baseUrl}/trading-partners`, partner);
   }
 
-  updateTradingPartner(id: number, partner: Partial<EdiTradingPartner>): Observable<EdiTradingPartner> {
+  updateTradingPartner(id: number, partner: EdiTradingPartnerSaveRequest): Observable<EdiTradingPartner> {
     return this.http.put<EdiTradingPartner>(`${this.baseUrl}/trading-partners/${id}`, partner);
   }
 

@@ -107,6 +107,28 @@
         <app-toggle [label]="'adminPanels.edi.autoProcess' | translate" formControlName="autoProcess" />
         <app-toggle [label]="'adminPanels.edi.requireAck' | translate" formControlName="requireAcknowledgment" />
       </div>
+      @if (transportMethodValue() === 'Sftp') {
+        <div class="sftp-section">
+          <span class="sftp-section__label">{{ 'adminPanels.edi.sftp.title' | translate }}</span>
+          <div class="dialog-row">
+            <app-input [label]="'adminPanels.edi.sftp.host' | translate" formControlName="sftpHost" />
+            <app-input [label]="'adminPanels.edi.sftp.port' | translate" type="number" formControlName="sftpPort" />
+          </div>
+          <div class="dialog-row">
+            <app-input [label]="'adminPanels.edi.sftp.username' | translate" formControlName="sftpUsername" />
+            <app-input [label]="'adminPanels.edi.sftp.password' | translate" type="password" formControlName="sftpPassword" />
+          </div>
+          <div class="dialog-row">
+            <app-input [label]="'adminPanels.edi.sftp.outboundDir' | translate" formControlName="sftpOutboundDir" />
+            <app-input [label]="'adminPanels.edi.sftp.inboundDir' | translate" formControlName="sftpInboundDir" />
+          </div>
+          <div class="sftp-section__hint">
+            <span class="material-icons-outlined">shield</span>
+            {{ ((editingPartner()?.transportSftp?.hasPassword) ? 'adminPanels.edi.sftp.passwordKeptHint' : 'adminPanels.edi.sftp.passwordHint') | translate }}
+          </div>
+        </div>
+      }
+
       <app-textarea [label]="'adminPanels.edi.notes' | translate" formControlName="notes" />
     </div>
     <div dialog-footer>

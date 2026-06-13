@@ -6412,6 +6412,17 @@
         "connectionSuccess": "Conexión exitosa",
         "connectionFailed": "Conexión fallida:",
         "retryQueued": "Transacción en cola para reintento"
+      },
+      "sftp": {
+        "title": "Transporte SFTP",
+        "host": "Servidor",
+        "port": "Puerto",
+        "username": "Usuario",
+        "password": "Contraseña",
+        "outboundDir": "Directorio de salida (enviamos)",
+        "inboundDir": "Directorio de entrada (consultamos)",
+        "passwordHint": "La contraseña se cifra en reposo y no vuelve a mostrarse.",
+        "passwordKeptHint": "Hay una contraseña guardada. Déjela en blanco para conservarla; escriba una nueva para reemplazarla."
       }
     },
     "events": {
@@ -7413,6 +7424,12 @@
       "createHint": "Los números se cifran en reposo y solo se muestran enmascarados. Un segundo usuario debe aprobar antes de prenotificar o pagar con esta cuenta.",
       "changeHint": "Cambiar los números devuelve esta cuenta a Pendiente de aprobación — un segundo usuario debe re-aprobar, y la prenotificación se repite.",
       "savedPendingApproval": "Cuenta bancaria guardada — pendiente de aprobación de control dual"
+    },
+    "wire": {
+      "attest": "Atestiguar transferencia",
+      "attestTitle": "¿Atestiguar la transferencia?",
+      "attestMessage": "Confirme que la transferencia {{number}} se ingresó en el portal del banco. La atestación debe hacerla un usuario distinto al creador del pago, marca la transferencia como transmitida y compensa el efectivo en tránsito.",
+      "attested": "Transferencia atestiguada — marcada como transmitida"
     }
   }
 }

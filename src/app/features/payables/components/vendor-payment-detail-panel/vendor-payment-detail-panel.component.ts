@@ -110,6 +110,31 @@ export class VendorPaymentDetailPanelComponent {
     return translated !== key ? translated : status;
   }
 
+  protected attestWire(): void {
+    const payment = this.payment();
+    if (!payment) return;
+    this.dialog.open(ConfirmDialogComponent, {
+      width: '440px',
+      data: {
+        title: this.translate.instant('payables.wire.attestTitle'),
+        message: this.translate.instant('payables.wire.attestMessage', { number: payment.paymentNumber }),
+        confirmLabel: this.translate.instant('payables.wire.attest'),
+        severity: 'warn',
+      } satisfies ConfirmDialogData,
+    }).afterClosed().subscribe(confirmed => {
+      if (!confirmed) return;
+      // SoD (attester must differ from the creator) is enforced server-side; a 409 surfaces
+      // via the global error toast.
+      this.paymentService.attestWire(payment.id).subscribe({
+        next: () => {
+          this.snackbar.success(this.translate.instant('payables.wire.attested'));
+          this.loadPayment(payment.id);
+          this.paymentChanged.emit();
+        },
+      });
+    });
+  }
+
   protected retryTransmission(): void {
     const payment = this.payment();
     if (!payment || payment.transmissionId === null) return;

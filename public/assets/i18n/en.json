@@ -6419,6 +6419,17 @@
         "connectionSuccess": "Connection successful",
         "connectionFailed": "Connection failed:",
         "retryQueued": "Transaction queued for retry"
+      },
+      "sftp": {
+        "title": "SFTP Transport",
+        "host": "Host",
+        "port": "Port",
+        "username": "Username",
+        "password": "Password",
+        "outboundDir": "Outbound Directory (we send)",
+        "inboundDir": "Inbound Directory (we poll)",
+        "passwordHint": "The password is encrypted at rest and never displayed again.",
+        "passwordKeptHint": "A password is stored. Leave blank to keep it; type a new one to replace it."
       }
     },
     "events": {
@@ -7413,6 +7424,12 @@
       "createHint": "The numbers are encrypted at rest and shown masked only. A second user must approve before this account can be prenoted or paid.",
       "changeHint": "Changing the numbers resets this account to Pending Approval — a second user must re-approve, and the prenote runs again.",
       "savedPendingApproval": "Bank account saved — pending dual-control approval"
+    },
+    "wire": {
+      "attest": "Attest Wire",
+      "attestTitle": "Attest wire entry?",
+      "attestMessage": "Confirm wire {{number}} was entered at the bank portal. Attestation must be done by a different user than the payment creator, marks the wire transmitted, and clears cash-in-transit.",
+      "attested": "Wire attested — marked transmitted"
     }
   }
 }

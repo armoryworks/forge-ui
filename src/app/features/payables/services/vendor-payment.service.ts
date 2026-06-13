@@ -32,6 +32,11 @@ export class VendorPaymentService {
    * GL entry, drops bill applications (bills reopen), and soft-deletes the
    * payment. Server rejects (409) once the transmission has Succeeded.
    */
+  /** banking.wire.manual-attestation: a SECOND user attests the wire was entered at the bank. */
+  attestWire(id: number): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/attest-wire`, { bankReference: null });
+  }
+
   voidVendorPayment(id: number, reason: string): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/void`, { reason });
   }
