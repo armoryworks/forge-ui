@@ -30,7 +30,14 @@ env:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The serial suite (workers: 1, ~185 tests) needs ~70 min of test time on
+    # top of ~12 min of setup (npm ci + playwright install + build + compose
+    # up). At 60 the runner SIGTERM'd mid-run, guillotining ~50 in-flight tests
+    # with a misleading "N failed" wall (all aborted at the same instant). Give
+    # the serial run real headroom; playwright.config's globalTimeout (100 min)
+    # stops it gracefully below this ceiling if it ever overruns.
+    # Durable follow-up: shard/parallelize the suite to bring this back down.
+    timeout-minutes: 120
 
     steps:
       - uses: actions/checkout@v4
