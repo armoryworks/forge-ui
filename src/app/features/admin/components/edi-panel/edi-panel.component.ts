@@ -1,4 +1,5 @@
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -29,6 +30,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
   selector: 'app-edi-panel',
   standalone: true,
   imports: [
+    MatTooltipModule,
     DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
     SelectComponent, InputComponent, TextareaComponent, ToggleComponent,

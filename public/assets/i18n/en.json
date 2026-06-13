@@ -6430,6 +6430,11 @@
         "inboundDir": "Inbound Directory (we poll)",
         "passwordHint": "The password is encrypted at rest and never displayed again.",
         "passwordKeptHint": "A password is stored. Leave blank to keep it; type a new one to replace it."
+      },
+      "partNumberGap": {
+        "label": "Part-number translation",
+        "dialogHint": "Inbound 850 lines match the partner's part numbers against OUR part numbers exactly. Hover for what happens when they differ.",
+        "tooltip": "KNOWN LIMITATION — per-partner part-number translation is not built yet. Inbound 850 lines resolve only by exact match against our part numbers. If this partner sends THEIR OWN part numbers, the sales order is still created, but those lines arrive without a part: the partner's number is kept in the order line's notes for manual completion. When a customer needs translated numbers, the per-partner mapping (EdiMapping) is the planned seam — see docs/edi/EDI_CORE_PLAN.md §Known functional gap."
       }
     },
     "events": {

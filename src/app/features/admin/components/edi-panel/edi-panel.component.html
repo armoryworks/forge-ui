@@ -12,6 +12,12 @@
 
   @if (subTab() === 'partners') {
     <div class="edi-panel__toolbar">
+      <span class="gap-note" [matTooltip]="'adminPanels.edi.partNumberGap.tooltip' | translate"
+        matTooltipPosition="below" tabindex="0"
+        [attr.aria-label]="'adminPanels.edi.partNumberGap.tooltip' | translate">
+        <span class="material-icons-outlined">info</span>
+        {{ 'adminPanels.edi.partNumberGap.label' | translate }}
+      </span>
       <button class="action-btn action-btn--create" (click)="openCreatePartner()">
         <span class="material-icons-outlined">add</span>
         {{ 'adminPanels.edi.newPartner' | translate }}
@@ -60,6 +66,12 @@
     <div class="filters-bar">
       <app-select [label]="'adminPanels.edi.direction' | translate" [formControl]="directionFilter" [options]="directionOptions" (selectionChange)="loadTransactions()" />
       <app-select [label]="'adminPanels.edi.status' | translate" [formControl]="statusFilter" [options]="statusOptions" (selectionChange)="loadTransactions()" />
+      <span class="gap-note" [matTooltip]="'adminPanels.edi.partNumberGap.tooltip' | translate"
+        matTooltipPosition="below" tabindex="0"
+        [attr.aria-label]="'adminPanels.edi.partNumberGap.tooltip' | translate">
+        <span class="material-icons-outlined">info</span>
+        {{ 'adminPanels.edi.partNumberGap.label' | translate }}
+      </span>
     </div>
 
     <div [appLoadingBlock]="loading()">
@@ -107,6 +119,11 @@
         <app-toggle [label]="'adminPanels.edi.autoProcess' | translate" formControlName="autoProcess" />
         <app-toggle [label]="'adminPanels.edi.requireAck' | translate" formControlName="requireAcknowledgment" />
       </div>
+      <div class="gap-note gap-note--inline" [matTooltip]="'adminPanels.edi.partNumberGap.tooltip' | translate" matTooltipPosition="above" tabindex="0">
+        <span class="material-icons-outlined">info</span>
+        {{ 'adminPanels.edi.partNumberGap.dialogHint' | translate }}
+      </div>
+
       @if (transportMethodValue() === 'Sftp') {
         <div class="sftp-section">
           <span class="sftp-section__label">{{ 'adminPanels.edi.sftp.title' | translate }}</span>

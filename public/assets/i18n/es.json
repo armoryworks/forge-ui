@@ -6423,6 +6423,11 @@
         "inboundDir": "Directorio de entrada (consultamos)",
         "passwordHint": "La contraseña se cifra en reposo y no vuelve a mostrarse.",
         "passwordKeptHint": "Hay una contraseña guardada. Déjela en blanco para conservarla; escriba una nueva para reemplazarla."
+      },
+      "partNumberGap": {
+        "label": "Traducción de números de pieza",
+        "dialogHint": "Las líneas 850 entrantes comparan los números de pieza del socio EXACTAMENTE contra NUESTROS números. Pase el cursor para ver qué ocurre cuando difieren.",
+        "tooltip": "LIMITACIÓN CONOCIDA — la traducción de números de pieza por socio aún no está construida. Las líneas 850 entrantes solo se resuelven por coincidencia exacta con nuestros números de pieza. Si este socio envía SUS PROPIOS números, la orden de venta se crea igualmente, pero esas líneas llegan sin pieza: el número del socio se conserva en las notas de la línea para completarlo manualmente. Cuando un cliente necesite números traducidos, el mapeo por socio (EdiMapping) es el punto de integración previsto — vea docs/edi/EDI_CORE_PLAN.md §Known functional gap."
       }
     },
     "events": {

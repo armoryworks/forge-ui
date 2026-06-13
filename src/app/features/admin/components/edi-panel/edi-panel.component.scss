@@ -4,7 +4,8 @@
 .edi-panel {
   &__toolbar {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
+    align-items: center;
     padding: $sp-md 0;
   }
 
@@ -103,5 +104,23 @@
     .material-icons-outlined {
       font-size: $icon-size-sm;
     }
+  }
+}
+
+.gap-note {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-sm;
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+  cursor: help;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+    color: var(--info);
+  }
+
+  &--inline {
+    font-size: $font-size-xs;
   }
 }
