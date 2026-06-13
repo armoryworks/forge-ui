@@ -3,6 +3,12 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   timeout: 30_000,
+  // Whole-run ceiling, set below the nightly job's timeout-minutes (120) so the
+  // suite stops itself gracefully — with a clear "globalTimeout exceeded"
+  // report — instead of being SIGTERM'd by the runner mid-test (which marks
+  // every in-flight test failed at the same instant and reads as a mass
+  // failure). 100 min leaves ~20 min for teardown + artifact upload.
+  globalTimeout: 100 * 60_000,
   retries: 0,
   workers: 1,
   reporter: [['list'], ['html', { outputFolder: './playwright-report', open: 'never' }]],
