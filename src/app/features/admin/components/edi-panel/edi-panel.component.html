@@ -50,6 +50,11 @@
             <button class="icon-btn" aria-label="Test connection" (click)="testConnection(row); $event.stopPropagation()">
               <span class="material-icons-outlined">wifi_tethering</span>
             </button>
+            <button class="icon-btn" [attr.aria-label]="'adminPanels.edi.partMap.title' | translate"
+              [matTooltip]="'adminPanels.edi.partMap.title' | translate" matTooltipPosition="above"
+              (click)="openPartNumberMap(row); $event.stopPropagation()">
+              <span class="material-icons-outlined">swap_horiz</span>
+            </button>
             <button class="icon-btn" aria-label="Edit partner" (click)="openEditPartner(row); $event.stopPropagation()">
               <span class="material-icons-outlined">edit</span>
             </button>
@@ -205,4 +210,8 @@
       <button class="action-btn action-btn--primary" (click)="showTransactionDetail.set(false)">Close</button>
     </div>
   </app-dialog>
+}
+
+@if (mapPartner(); as p) {
+  <app-edi-part-number-map-dialog [partner]="p" (closed)="closePartNumberMap()" />
 }

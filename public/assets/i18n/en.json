@@ -6433,8 +6433,22 @@
       },
       "partNumberGap": {
         "label": "Part-number translation",
-        "dialogHint": "Inbound 850 lines match the partner's part numbers against OUR part numbers exactly. Hover for what happens when they differ.",
-        "tooltip": "KNOWN LIMITATION — per-partner part-number translation is not built yet. Inbound 850 lines resolve only by exact match against our part numbers. If this partner sends THEIR OWN part numbers, the sales order is still created, but those lines arrive without a part: the partner's number is kept in the order line's notes for manual completion. When a customer needs translated numbers, the per-partner mapping (EdiMapping) is the planned seam — see docs/edi/EDI_CORE_PLAN.md §Known functional gap."
+        "dialogHint": "Inbound 850 lines match the partner's part numbers against ours — directly, or via this partner's Part-Number Map (the ⇄ action). Unmapped lines are still created with the partner's number in the order-line notes.",
+        "tooltip": "Per-partner part-number translation IS built — open a partner's Part-Number Map (the ⇄ action) to map their part numbers to ours (typed rows or CSV import). Inbound 850 lines translate through that map before matching our catalog; an unmapped or unresolved line is still created with the partner's number kept in the order-line notes for manual completion. Not yet built: UOM / pack-quantity translation — see docs/edi/EDI_CORE_PLAN.md."
+      },
+      "partMap": {
+        "title": "Part-Number Map",
+        "addRow": "Add Row",
+        "importCsv": "Import CSV",
+        "hint": "Partner's part number → our part number. Imported 850 lines translate through this before matching our catalog.",
+        "empty": "No part-number mappings yet. Add rows or import a CSV (PartnerPartNumber, OurPartNumber).",
+        "partnerNumber": "Partner Part #",
+        "ourNumber": "Our Part #",
+        "resolved": "Resolves To",
+        "unresolved": "No matching part",
+        "unresolvedTooltip": "Our part number above matches no part in the catalog — the mapping saves, but an 850 line using it will still arrive unresolved until the part exists.",
+        "saved": "Part-number map saved",
+        "imported": "Imported {{imported}} new, updated {{updated}} ({{unresolved}} with no matching part)"
       }
     },
     "events": {

@@ -1,0 +1,74 @@
+<app-dialog [title]="('adminPanels.edi.partMap.title' | translate) + ' — ' + partner().name" width="800px" (closed)="close()">
+  <div class="part-map" [appLoadingBlock]="loading()">
+    <div class="part-map__toolbar">
+      <button class="action-btn action-btn--create action-btn--sm" data-testid="add-map-row-btn" (click)="addRow()">
+        <span class="material-icons-outlined">add</span>
+        {{ 'adminPanels.edi.partMap.addRow' | translate }}
+      </button>
+      <button class="action-btn action-btn--sm" data-testid="import-map-csv-btn" (click)="pickCsv()">
+        <span class="material-icons-outlined">upload_file</span>
+        {{ 'adminPanels.edi.partMap.importCsv' | translate }}
+      </button>
+      <span class="part-map__spacer"></span>
+      <span class="part-map__hint">{{ 'adminPanels.edi.partMap.hint' | translate }}</span>
+    </div>
+
+    <input #csvInput type="file" accept=".csv,.txt" class="part-map__csv-input"
+      [attr.aria-label]="'adminPanels.edi.partMap.importCsv' | translate" (change)="onCsvSelected($event)" />
+
+    @if (rows().length === 0) {
+      <div class="part-map__empty">{{ 'adminPanels.edi.partMap.empty' | translate }}</div>
+    } @else {
+      <table class="part-map__table" [attr.aria-label]="'adminPanels.edi.partMap.title' | translate">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'adminPanels.edi.partMap.partnerNumber' | translate }}</th>
+            <th scope="col">{{ 'adminPanels.edi.partMap.ourNumber' | translate }}</th>
+            <th scope="col">{{ 'adminPanels.edi.partMap.resolved' | translate }}</th>
+            <th scope="col" class="part-map__table-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track trackByIndex($index); let i = $index) {
+            <tr>
+              <td>
+                <input class="part-map__input" [value]="row.partnerPartNumber"
+                  [attr.aria-label]="'adminPanels.edi.partMap.partnerNumber' | translate"
+                  (input)="onPartnerNumberChange(i, $any($event.target).value)" />
+              </td>
+              <td>
+                <input class="part-map__input" [value]="row.ourPartNumber"
+                  [attr.aria-label]="'adminPanels.edi.partMap.ourNumber' | translate"
+                  (input)="onOurNumberChange(i, $any($event.target).value)" />
+              </td>
+              <td>
+                @if (row.ourPartId) {
+                  <span class="part-map__resolved">{{ row.ourPartDescription }}</span>
+                } @else if (row.ourPartNumber) {
+                  <span class="chip chip--warning" [matTooltip]="'adminPanels.edi.partMap.unresolvedTooltip' | translate">
+                    {{ 'adminPanels.edi.partMap.unresolved' | translate }}
+                  </span>
+                }
+              </td>
+              <td class="part-map__table-actions">
+                <button class="icon-btn icon-btn--danger" [attr.aria-label]="'common.remove' | translate"
+                  (click)="removeRow(i)">
+                  <span class="material-icons-outlined">delete</span>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.close' | translate }}</button>
+    <button class="action-btn action-btn--primary" data-testid="save-map-btn"
+      [disabled]="saving()" (click)="save()">
+      <span class="material-icons-outlined">save</span>
+      {{ 'common.save' | translate }}
+    </button>
+  </div>
+</app-dialog>

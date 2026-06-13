@@ -6,6 +6,8 @@ import { EdiTradingPartner, EdiTradingPartnerSaveRequest } from '../models/edi-t
 import { EdiTransaction } from '../models/edi-transaction.model';
 import { EdiTransactionDetail } from '../models/edi-transaction-detail.model';
 import { EdiMapping } from '../models/edi-mapping.model';
+import { EdiPartNumberMapRow } from '../models/edi-part-number-map-row.model';
+import { EdiPartNumberMapImportResult } from '../models/edi-part-number-map-import-result.model';
 import { EdiDirection } from '../models/edi-direction.model';
 import { EdiTransactionStatus } from '../models/edi-transaction-status.model';
 
@@ -106,5 +108,23 @@ export class EdiService {
 
   deleteMapping(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/mappings/${id}`);
+  }
+
+  // ── Part-number translation ──────────────────────────────
+
+  getPartNumberMap(partnerId: number): Observable<EdiPartNumberMapRow[]> {
+    return this.http.get<EdiPartNumberMapRow[]>(`${this.baseUrl}/trading-partners/${partnerId}/part-number-map`);
+  }
+
+  savePartNumberMap(partnerId: number, rows: EdiPartNumberMapRow[]): Observable<EdiPartNumberMapRow[]> {
+    return this.http.put<EdiPartNumberMapRow[]>(
+      `${this.baseUrl}/trading-partners/${partnerId}/part-number-map`, { rows });
+  }
+
+  importPartNumberMap(partnerId: number, file: File): Observable<EdiPartNumberMapImportResult> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<EdiPartNumberMapImportResult>(
+      `${this.baseUrl}/trading-partners/${partnerId}/part-number-map/import`, form);
   }
 }

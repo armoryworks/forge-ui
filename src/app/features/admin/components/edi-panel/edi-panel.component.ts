@@ -1,5 +1,6 @@
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { EdiPartNumberMapDialogComponent } from '../edi-part-number-map-dialog/edi-part-number-map-dialog.component';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -30,6 +31,7 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
   selector: 'app-edi-panel',
   standalone: true,
   imports: [
+    EdiPartNumberMapDialogComponent,
     MatTooltipModule,
     DatePipe, ReactiveFormsModule, TranslatePipe,
     DataTableComponent, ColumnCellDirective,
@@ -55,6 +57,7 @@ export class EdiPanelComponent {
   protected readonly showPartnerDialog = signal(false);
   protected readonly showTransactionDetail = signal(false);
   protected readonly editingPartner = signal<EdiTradingPartner | null>(null);
+  protected readonly mapPartner = signal<EdiTradingPartner | null>(null);
 
   protected readonly statusFilter = new FormControl<EdiTransactionStatus | ''>('');
   protected readonly directionFilter = new FormControl<EdiDirection | ''>('');
@@ -182,6 +185,14 @@ export class EdiPanelComponent {
       sftpHost: '', sftpPort: 22, sftpUsername: '', sftpPassword: '', sftpOutboundDir: '/inbound', sftpInboundDir: '/outbound',
     });
     this.showPartnerDialog.set(true);
+  }
+
+  protected openPartNumberMap(partner: EdiTradingPartner): void {
+    this.mapPartner.set(partner);
+  }
+
+  protected closePartNumberMap(): void {
+    this.mapPartner.set(null);
   }
 
   protected openEditPartner(partner: EdiTradingPartner): void {
