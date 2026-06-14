@@ -92,8 +92,8 @@ jobs:
       - name: Start backing services
         run: docker compose -f forge-deploy/compose-e2e.yml up -d --wait
 
-      - name: Run Playwright tests (shard ${{ matrix.shard }}/${{ env.SHARD_TOTAL }})
-        run: npx playwright test --config=e2e/playwright.config.ts --shard=${{ matrix.shard }}/${{ env.SHARD_TOTAL }} --reporter=blob
+      - name: Run functional tests (shard ${{ matrix.shard }}/${{ env.SHARD_TOTAL }})
+        run: npx playwright test --config=e2e/playwright.config.ts --project=functional --shard=${{ matrix.shard }}/${{ env.SHARD_TOTAL }} --reporter=blob
 
       - name: Stop backing services
         if: always()
@@ -139,4 +139,64 @@ jobs:
         with:
           name: playwright-report-merged-${{ github.run_id }}
           path: playwright-report/
+          retention-days: 14
+
+  # Non-gating: the heavy screenshot / doc-generation / visual-audit specs.
+  # They produce artifacts, not behavior assertions, and are RAM-hungry enough
+  # to flake on ubuntu-latest — so a failure here MUST NOT redden the nightly.
+  # continue-on-error keeps the workflow green when only docgen fails.
+  docgen:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out forge-deploy (compose-e2e.yml)
+        uses: actions/checkout@v4
+        with:
+          repository: armoryworks/forge-deploy
+          path: forge-deploy
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start backing services
+        run: docker compose -f forge-deploy/compose-e2e.yml up -d --wait
+
+      - name: Generate docs / screenshots (best-effort)
+        run: npx playwright test --config=e2e/playwright.config.ts --project=docgen --reporter=list
+
+      - name: Stop backing services
+        if: always()
+        run: docker compose -f forge-deploy/compose-e2e.yml down -v
+
+      - name: Upload generated artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docgen-artifacts-${{ github.run_id }}
+          path: |
+            e2e/screenshots/
+            e2e/test-output/
+            playwright-report/
           retention-days: 14
