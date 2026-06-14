@@ -1,11 +1,22 @@
 # Nightly E2E run for forge-ui.
 #
 # Playwright is too slow + brittle to gate every PR. Instead it runs:
-#   - nightly at 03:00 UTC against the develop branch
+#   - nightly at 03:00 UTC
 #   - on demand via workflow_dispatch
 #   - on push to release/* branches
 #
-# Failures open an issue with the failing test names + screenshots.
+# The suite is SHARDED across parallel runners (Playwright --shard). Each shard
+# runs ~1/4 of the specs on its own backing stack, so per-runner wall-clock and
+# the cumulative memory/disk degradation that builds up over a ~50-min serial
+# run (the dominant source of the connection-refused / timeout flakiness on the
+# small ubuntu-latest runner) are both cut down. A final job merges the per-shard
+# blob reports into one HTML report.
+#
+# NOTE on sharding + stateful specs: Playwright shards at FILE granularity, so
+# describe.serial blocks stay intact on one shard. Each shard gets a FRESH
+# seeded stack, so within-file data fixtures are fine. The only hazard is a test
+# that depends on data created by a DIFFERENT spec file — those must be
+# self-contained (the invariant-probes etc. create their own fixtures).
 
 name: Nightly E2E
 
@@ -18,7 +29,6 @@ on:
 
 permissions:
   contents: read
-  issues: write              # to file failure issues
   packages: read             # to pull forge-api / forge-ui images from GHCR
 
 env:
@@ -26,18 +36,18 @@ env:
   # Node.js 24 binary. Node 20 is deprecated on GitHub-hosted runners
   # (forced default June 2026, removed September 2026).
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SHARD_TOTAL: 4
 
 jobs:
   e2e:
+    strategy:
+      fail-fast: false        # one bad shard must not cancel the others
+      matrix:
+        shard: [1, 2, 3, 4]
     runs-on: ubuntu-latest
-    # The serial suite (workers: 1, ~185 tests) needs ~70 min of test time on
-    # top of ~12 min of setup (npm ci + playwright install + build + compose
-    # up). At 60 the runner SIGTERM'd mid-run, guillotining ~50 in-flight tests
-    # with a misleading "N failed" wall (all aborted at the same instant). Give
-    # the serial run real headroom; playwright.config's globalTimeout (100 min)
-    # stops it gracefully below this ceiling if it ever overruns.
-    # Durable follow-up: shard/parallelize the suite to bring this back down.
-    timeout-minutes: 120
+    # Each shard runs ~1/4 of the specs (~13-18 min) + ~12 min setup. 60 is
+    # ample headroom; playwright.config's globalTimeout is the graceful inner cap.
+    timeout-minutes: 60
 
     steps:
       - uses: actions/checkout@v4
@@ -78,24 +88,115 @@ jobs:
 
       # Brings up postgres + minio + forge-api (:5000) + forge-ui (:4200),
       # bound to 127.0.0.1. --wait blocks until every service is healthy, so
-      # the suite never races a not-yet-ready backend (the old stub started
-      # only postgres → every API call hit ECONNREFUSED ::1:5000).
+      # the suite never races a not-yet-ready backend.
       - name: Start backing services
         run: docker compose -f forge-deploy/compose-e2e.yml up -d --wait
 
-      - name: Run Playwright tests
-        run: npm run e2e
+      - name: Run functional tests (shard ${{ matrix.shard }}/${{ env.SHARD_TOTAL }})
+        run: npx playwright test --config=e2e/playwright.config.ts --project=functional --shard=${{ matrix.shard }}/${{ env.SHARD_TOTAL }} --reporter=blob
 
       - name: Stop backing services
         if: always()
         run: docker compose -f forge-deploy/compose-e2e.yml down -v
 
-      - name: Upload traces on failure
-        if: failure()
+      - name: Upload blob report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ github.run_id }}
+          name: blob-report-${{ matrix.shard }}
+          path: blob-report/
+          retention-days: 7
+
+  merge-report:
+    # Always run so a unified report is produced even when some shards failed.
+    if: always()
+    needs: [e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download all blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge into one HTML report
+        run: npx playwright merge-reports --reporter=html ./all-blob-reports
+
+      - name: Upload merged HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-merged-${{ github.run_id }}
+          path: playwright-report/
+          retention-days: 14
+
+  # Non-gating: the heavy screenshot / doc-generation / visual-audit specs.
+  # They produce artifacts, not behavior assertions, and are RAM-hungry enough
+  # to flake on ubuntu-latest — so a failure here MUST NOT redden the nightly.
+  # continue-on-error keeps the workflow green when only docgen fails.
+  docgen:
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check out forge-deploy (compose-e2e.yml)
+        uses: actions/checkout@v4
+        with:
+          repository: armoryworks/forge-deploy
+          path: forge-deploy
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start backing services
+        run: docker compose -f forge-deploy/compose-e2e.yml up -d --wait
+
+      - name: Generate docs / screenshots (best-effort)
+        run: npx playwright test --config=e2e/playwright.config.ts --project=docgen --reporter=list
+
+      - name: Stop backing services
+        if: always()
+        run: docker compose -f forge-deploy/compose-e2e.yml down -v
+
+      - name: Upload generated artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: docgen-artifacts-${{ github.run_id }}
           path: |
+            e2e/screenshots/
             e2e/test-output/
             playwright-report/
           retention-days: 14

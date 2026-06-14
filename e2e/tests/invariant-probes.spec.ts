@@ -274,34 +274,49 @@ test.describe.serial('Invariant probes — Wave 0', () => {
   });
 
   // -------------------------------------------------------------------------
-  // INV-SO2 — SO-line qty is structurally immutable (no edit endpoint)
+  // INV-SO2 — SO lines are EDITABLE while the order is in Draft.
   //
-  // Uses probe SO (probe-owned, no mutation risk).
-  // PUT /orders/{probeSOId}/lines/{probeSOLineId} → 404 or 405 (route absent)
+  // Updated invariant (was: "no edit endpoint"). The sales pipeline now supports
+  // line editing on draft documents: PUT /orders/{id}/lines/{lineId} succeeds on
+  // a Draft order and 409s once Confirmed (the Confirmed-lock is gated in the
+  // handler). The probe SO is freshly created (Draft) and shared with INV-IN2,
+  // so we capture the line, assert the edit lands, then restore it to keep the
+  // probe SO pristine.
   // -------------------------------------------------------------------------
-  test('INV-SO2 SO-line qty has no direct edit endpoint', async () => {
+  test('INV-SO2 SO-line is editable on a Draft order', async () => {
     const { probeSOId, probeSOLineId, probeSOLineQty, adminToken } = fixtures;
 
+    // Capture the original line so we can restore it afterward.
+    const { body: soBefore } = await apiGet(adminToken, `orders/${probeSOId}`);
+    const before = (soBefore as { lines: Array<{ id: number; quantity: number; unitPrice: number; description: string }> })
+      .lines.find(l => l.id === probeSOLineId)!;
+
     const ctx = await playwrightRequest.newContext({ baseURL: API_BASE });
+    const newQty = probeSOLineQty + 99;
     const resp = await ctx.put(`orders/${probeSOId}/lines/${probeSOLineId}`, {
-      data: { quantity: probeSOLineQty + 99, description: 'Probe attempt' },
+      data: { description: before.description, quantity: newQty, unitPrice: before.unitPrice },
       headers: { Authorization: `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
     });
     const attemptStatus = resp.status();
-    await ctx.dispose();
 
     expect(
-      [404, 405].includes(attemptStatus),
-      `INV-SO2 FAIL: PUT /orders/${probeSOId}/lines/${probeSOLineId} returned ${attemptStatus}; expected 404/405 (no edit endpoint). 200/204 = SO-line qty is mutable, invariant broken.`,
-    ).toBe(true);
+      attemptStatus,
+      `INV-SO2 FAIL: PUT line on a Draft SO returned ${attemptStatus}; expected 200 (Draft SO lines are editable).`,
+    ).toBe(200);
 
-    // State check: qty must be unchanged
+    // Verify the edit landed.
     const { body: soAfter } = await apiGet(adminToken, `orders/${probeSOId}`);
-    const soData = soAfter as { lines: Array<{ id: number; quantity: number }> };
-    const lineAfter = soData.lines.find(l => l.id === probeSOLineId);
-    expect(lineAfter?.quantity, 'INV-SO2: line qty changed despite no edit endpoint').toBe(probeSOLineQty);
+    const after = (soAfter as { lines: Array<{ id: number; quantity: number }> }).lines.find(l => l.id === probeSOLineId);
+    expect(after?.quantity, 'INV-SO2: line qty did not update despite a 200').toBe(newQty);
 
-    console.log(`INV-SO2 PASS: PUT returns ${attemptStatus}, line qty stable at ${probeSOLineQty}`);
+    // Restore the original line so the shared probe SO stays pristine for INV-IN2.
+    await ctx.put(`orders/${probeSOId}/lines/${probeSOLineId}`, {
+      data: { description: before.description, quantity: before.quantity, unitPrice: before.unitPrice },
+      headers: { Authorization: `Bearer ${adminToken}`, 'Content-Type': 'application/json' },
+    });
+    await ctx.dispose();
+
+    console.log(`INV-SO2 PASS: Draft SO-line editable (PUT ${attemptStatus}), restored to qty ${probeSOLineQty}`);
   });
 
   // -------------------------------------------------------------------------
