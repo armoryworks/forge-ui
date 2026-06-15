@@ -36,32 +36,45 @@ test('discovery wizard renders, advances steps, and surfaces recommendation', as
   // Navigate to discovery
   await page.goto(`${BASE_URL}/admin/discovery`, { waitUntil: 'networkidle' });
 
-  // First question should be Q-O1 (headcount)
+  // The wizard opens on the top-of-funnel fork Q-S1 (added ahead of the Q-O*
+  // opening block). Assert by the stable data-question-id rather than the raw
+  // code being present in the rendered text.
   const firstQuestion = page.locator('[data-testid="discovery-question"]').first();
   await expect(firstQuestion).toBeVisible({ timeout: 10000 });
-  await expect(firstQuestion).toContainText('Q-O1');
+  await expect(firstQuestion).toHaveAttribute('data-question-id', 'Q-S1');
 
-  // Pick "1-2" headcount
+  // Q-S1 — pick "products" to fall through to the manufacturing opening
+  // questions (Q-O1..Q-O6). "services" routes to Pro Services; "both" → Hybrid.
+  await page.locator('input[name="Q-S1"][value="products"]').click();
+  await page.waitForTimeout(300);
+  await page.locator('[data-testid="discovery-next-btn"]').click();
+
+  // Q-O1 (headcount) — pick "1-2"
+  await expect(firstQuestion).toHaveAttribute('data-question-id', 'Q-O1');
   await page.locator('input[name="Q-O1"][value="1-2"]').click();
   await page.waitForTimeout(300);
   await page.locator('[data-testid="discovery-next-btn"]').click();
 
   // Q-O2 (free-text walk-through)
-  await expect(firstQuestion).toContainText('Q-O2');
+  await expect(firstQuestion).toHaveAttribute('data-question-id', 'Q-O2');
   // Skip free-text — just advance
   await page.locator('[data-testid="discovery-next-btn"]').click();
 
-  // Q-O3 (make / resell)
-  await page.locator('input[name="Q-O3"][value="make"]').click();
+  // Q-O3 (make / resell / services) — now MultiChoice, so options render as
+  // mat-checkboxes with no name/value; select by the option's label text.
+  await expect(firstQuestion).toHaveAttribute('data-question-id', 'Q-O3');
+  await page.getByRole('checkbox', { name: /We make physical products/ }).check();
   await page.waitForTimeout(300);
   await page.locator('[data-testid="discovery-next-btn"]').click();
 
-  // Q-O4 (regulated). Click the radio input directly.
-  await page.locator('input[name="Q-O4"][value="no"]').click({ timeout: 5000 });
+  // Q-O4 (regulated) — also MultiChoice (check-all-that-apply). Pick "none".
+  await expect(firstQuestion).toHaveAttribute('data-question-id', 'Q-O4');
+  await page.getByRole('checkbox', { name: /none of these apply/i }).check();
   await page.waitForTimeout(300);
   await page.locator('[data-testid="discovery-next-btn"]').click();
 
-  // Q-O5 (sites)
+  // Q-O5 (sites) — SingleChoice radio.
+  await expect(firstQuestion).toHaveAttribute('data-question-id', 'Q-O5');
   await page.locator('input[name="Q-O5"][value="1"]').click();
   await page.waitForTimeout(300);
   await page.locator('[data-testid="discovery-next-btn"]').click();
