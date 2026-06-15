@@ -50,7 +50,10 @@ test.describe('SignalR Board Sync', () => {
     const jobsRes = await apiContext.get('jobs', {
       params: { trackTypeId: productionTrack.id.toString(), isArchived: 'false' },
     });
-    const jobs: { id: number; jobNumber: string; currentStageId: number }[] = await jobsRes.json();
+    // GET /jobs returns the standard paged envelope { items, totalCount, ... };
+    // tolerate a bare array too in case the shape changes back.
+    const jobsBody = await jobsRes.json();
+    const jobs: { id: number; jobNumber: string; currentStageId: number }[] = jobsBody.items ?? jobsBody;
     const targetJob = jobs.find(j => j.jobNumber === 'J-1050');
     if (!targetJob) throw new Error('Seed job J-1050 not found. Is the database seeded?');
 
