@@ -89,7 +89,7 @@ test.describe('Pillar 4 — Part detail tabs', () => {
 
     // The shared VendorPartListPanelComponent is mounted by the panel
     // when the sourcing tab activates.
-    await expect(page.locator('app-vendor-part-list-panel')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('app-vendor-sources-panel')).toBeVisible({ timeout: 10000 });
 
     // URL persists ?tab=sourcing for refresh-stability (URL-as-source-of-truth rule).
     await expect.poll(() => page.url(), { timeout: 5000 }).toContain('tab=sourcing');
