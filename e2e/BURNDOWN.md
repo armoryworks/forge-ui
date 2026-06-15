@@ -29,7 +29,7 @@ Root cause was twofold and is now diagnosed:
 | `signalr-board-sync` setup | `GET /jobs` now paged `{items}` | read `.items` |
 | `new-part-save-and-complete:58` empty cost | test asserted wrong behavior — cost is gated at **promote**, not pre-submit (`manualCostOverride` carries only `Validators.min(0)`). Investigating surfaced a **real** form-rehydration **clobber** race: a guard-less `effect()` re-patched the express form from a late/refreshed `entity()` emission, silently overwriting typed input (`emitEvent:false` → no dirty mark) | forge-ui PR #14: pristine-guard the re-hydration effect (`if (!part \|\| form.dirty) return`) + discriminating unit regression; rewrote the test to assert Save **enabled** with empty cost, cost gated server-side at promote |
 
-## Remaining backlog (~14) — NOT clean selector swaps
+## Remaining backlog (~12) — NOT clean selector swaps
 
 ### A. Workflow UI redesigned (×5) — needs flow rewrite
 `workflow-part-assembly-phase5` (×3), `workflow-part-raw-material-phase6`,
@@ -77,14 +77,21 @@ Lesson: the blind `waitForSaveConfirmation` sleep let silent 4xx/5xx + dropped
 submits pass as green — replaced with deterministic `POST` assertions.
 
 ### E. Content / heuristic
-- `discovery-flow-smoke` — asserts the first wizard question contains `"Q-O1"`;
-  content changed. Update to the current first-question id/text.
+- ~~`discovery-flow-smoke`~~ — **RESOLVED (forge-ui PR #16).** Not just content:
+  the wizard gained a top-of-funnel fork **Q-S1** (products/services/both) ahead
+  of Q-O*, and Q-O3/Q-O4 became `MultiChoice` (mat-checkboxes, no name/value).
+  Rewrote to assert by `data-question-id`, add the Q-S1 step, and pick MultiChoice
+  options by label text.
 - `smoke/contract-drift` — 16 frontend↔backend mismatches: several are the test's
   own URL-extraction false positives (`{params}`, `{qs}` it can't resolve);
   a few may be real param-pattern mismatches (`accounting/exports/{kind}.csv`,
   `customers/{customerId}/price-lists`). Harden the extractor + audit the real ones.
-- `vendor-part-sources-tab` add-vendor flow — selector fixed; the add-vendor
-  interaction has a further issue to chase.
+- ~~`vendor-part-sources-tab` add-vendor flow~~ — **RESOLVED (forge-ui PR #17).**
+  The "further issue" was a full redesign, not a selector: add-vendor is now
+  editing-mode only (`part-detail-edit-toggle` → `vendor-sources-add` → inline
+  `app-entity-picker`), and picking a vendor immediately POSTs `/vendor-parts`
+  (the form dialog + PN/lead-time/save step are gone). Rewrote the flow, assert
+  the create POST, and pick an unlinked vendor so re-runs stay idempotent.
 
 ## How to reproduce locally
 The bundled Chromium doesn't support very new host OSes; point Playwright at a
