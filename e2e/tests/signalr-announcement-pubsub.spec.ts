@@ -1,9 +1,37 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, request } from '@playwright/test';
 
-import { loginViaApi, SEED_PASSWORD } from '../helpers/auth.helper';
+import { getAuthToken, loginViaApi, SEED_PASSWORD } from '../helpers/auth.helper';
+
+const API_BASE = 'http://localhost:5000/api/v1/';
+
+/**
+ * Whether an installation capability is enabled (the descriptor endpoint is not
+ * itself gated). Company Announcements (CAP-EXT-ANNOUNCEMENTS) ships OFF by
+ * default; where it's disabled the SPA short-circuits the announcement create
+ * POST client-side, so the create dialog never closes and there is nothing for
+ * the subscriber to receive. We can't safely flip a global, installation-wide
+ * capability from within a sharded suite, so this test runs wherever the feature
+ * is enabled and skips (with a clear reason) where it isn't.
+ */
+async function isCapabilityEnabled(code: string): Promise<boolean> {
+  const token = await getAuthToken('admin@forge.local', SEED_PASSWORD);
+  const ctx = await request.newContext({
+    baseURL: API_BASE,
+    extraHTTPHeaders: { Authorization: `Bearer ${token}` },
+  });
+  const res = await ctx.get('capabilities/descriptor');
+  const body = await res.json();
+  await ctx.dispose();
+  return (body.capabilities ?? []).some(
+    (c: { code: string; enabled: boolean }) => c.code === code && c.enabled,
+  );
+}
 
 test.describe('SignalR Announcement Pub-Sub', () => {
   test('announcement created in one browser appears in the subscriber via SignalR (no reload)', async ({ browser }) => {
+    test.skip(!(await isCapabilityEnabled('CAP-EXT-ANNOUNCEMENTS')),
+      'CAP-EXT-ANNOUNCEMENTS disabled in this installation — announcement create is gated off.');
+
     // ── 1. Two independent browser contexts ───────────────────────────
     const contextA = await browser.newContext();
     const contextB = await browser.newContext();
