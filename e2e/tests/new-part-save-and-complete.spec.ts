@@ -55,7 +55,7 @@ test.describe('New Part — full save-and-complete (axis fork)', () => {
     await expect(page.locator('text=' + uniqueName).first()).toBeVisible({ timeout: 10000 });
   });
 
-  test('Buy + Raw express: empty cost is blocked PRE-submit (form invalid)', async ({ page }) => {
+  test('Buy + Raw express: empty cost does NOT block Save, but is gated at promote', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
     await page.locator('[data-testid="new-part-btn"]').click();
     await page.locator('[data-testid="fork-procurement-Buy"]').click();
@@ -63,13 +63,32 @@ test.describe('New Part — full save-and-complete (axis fork)', () => {
     await page.locator('[data-testid="fork-continue"]').click();
     await page.waitForURL(/\/parts\/(new|\d+)\?.*workflow=part-buy-raw-v1/, { timeout: 15000 });
 
+    // Let the express form finish mounting/hydrating before typing. The form
+    // re-hydrates from the bound entity; the component guards that patch behind
+    // a pristine check, but settling first keeps this assertion about behavior,
+    // not load timing.
     const nameInput = page.locator('[data-testid="express-name"] input');
+    await expect(nameInput).toBeVisible();
+    await page.waitForLoadState('networkidle');
     await nameInput.click();
     await nameInput.fill(`e2e-nocost-${Date.now()}`);
-    await nameInput.press('Tab');
+    await nameInput.blur();
 
-    // Save button should be disabled (form invalid because cost required)
-    await expect(page.locator('[data-testid="express-save-btn"]')).toBeDisabled();
+    const saveBtn = page.locator('[data-testid="express-save-btn"]');
+
+    // manualCostOverride is NOT a form-level requirement: with a valid name,
+    // Save is ENABLED even with no cost entered. (The cost field carries only
+    // Validators.min(0).) The old assertion here wrongly expected a disabled
+    // button.
+    await expect(saveBtn).toBeEnabled();
+
+    // Cost is enforced server-side at the promote/complete step. Clicking Save
+    // patches the step, but completeRun's hasCost gate rejects the missing
+    // cost: an error toast shows and we stay on the workflow (the part is NOT
+    // promoted — no navigation to the parts list).
+    await saveBtn.click();
+    await expect(page.locator('.toast--error')).toBeVisible({ timeout: 10000 });
+    await expect(page).toHaveURL(/workflow=part-buy-raw-v1/);
   });
 
   test('Buy + Raw express: empty name is blocked PRE-submit (form invalid)', async ({ page }) => {

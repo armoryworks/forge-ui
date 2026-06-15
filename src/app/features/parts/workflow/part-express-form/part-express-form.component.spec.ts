@@ -85,6 +85,31 @@ describe('PartExpressFormComponent (Phase 5)', () => {
     });
   });
 
+  it('does not clobber in-progress edits when the entity re-emits (dirty guard)', () => {
+    const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
+    const inputs = mockSignalInputs(component, {
+      stepId: 'express', componentName: 'PartExpressFormComponent',
+      entityId: 99, entity: buildPart({ name: 'Original' }),
+    });
+    TestBed.flushEffects();
+    const c = component as unknown as {
+      form: { value: Record<string, unknown>; patchValue(v: unknown): void; markAsDirty(): void };
+    };
+    // Pristine form hydrates from the entity.
+    expect(c.form.value['name']).toBe('Original');
+
+    // User edits → form becomes dirty.
+    c.form.patchValue({ name: 'User typed this' });
+    c.form.markAsDirty();
+
+    // A late / refreshed entity emission arrives (slow load resolving, or a
+    // mid-edit refresh). It must NOT overwrite the unsaved edit.
+    inputs.entity.set(buildPart({ name: 'Stale server snapshot' }));
+    TestBed.flushEffects();
+
+    expect(c.form.value['name']).toBe('User typed this');
+  });
+
   it('axisLabel renders the procurement+inventory pair from the entity', () => {
     const component = TestBed.runInInjectionContext(() => new PartExpressFormComponent());
     mockSignalInputs(component, {

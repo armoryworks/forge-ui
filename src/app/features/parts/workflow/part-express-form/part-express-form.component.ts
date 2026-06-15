@@ -144,9 +144,14 @@ export class PartExpressFormComponent {
   constructor() {
     // Re-hydrate from the bound entity when the workflow page resolves it
     // (e.g. resuming an in-flight run, or switching back from guided mode).
+    // Only hydrate while the form is PRISTINE — once the user has typed, their
+    // edits must win. Without this guard, a late/refreshed entity() emission
+    // silently overwrites in-progress input (and with emitEvent:false it leaves
+    // no dirty mark) — a data-loss race on slow loads / mid-edit refreshes, and
+    // the source of the express-form e2e flake.
     effect(() => {
       const part = this.part();
-      if (!part) return;
+      if (!part || this.form.dirty) return;
       this.form.patchValue({
         name: part.name ?? '',
         description: part.description ?? '',
