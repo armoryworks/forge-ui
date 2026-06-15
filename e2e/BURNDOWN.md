@@ -27,8 +27,9 @@ Root cause was twofold and is now diagnosed:
 | `critical-flows` create-job | `app-dialog, app-job-dialog` → 2 elements (strict mode); backlog doesn't surface new jobs | wait on title input; verify via POST-response id |
 | `part-detail-tabs` Sources | `app-vendor-part-list-panel` → `app-vendor-sources-panel` | selector swap |
 | `signalr-board-sync` setup | `GET /jobs` now paged `{items}` | read `.items` |
+| `new-part-save-and-complete:58` empty cost | test asserted wrong behavior — cost is gated at **promote**, not pre-submit (`manualCostOverride` carries only `Validators.min(0)`). Investigating surfaced a **real** form-rehydration **clobber** race: a guard-less `effect()` re-patched the express form from a late/refreshed `entity()` emission, silently overwriting typed input (`emitEvent:false` → no dirty mark) | forge-ui PR #14: pristine-guard the re-hydration effect (`if (!part \|\| form.dirty) return`) + discriminating unit regression; rewrote the test to assert Save **enabled** with empty cost, cost gated server-side at promote |
 
-## Remaining backlog (~20) — NOT clean selector swaps
+## Remaining backlog (~19) — NOT clean selector swaps
 
 ### A. Workflow UI redesigned (×5) — needs flow rewrite
 `workflow-part-assembly-phase5` (×3), `workflow-part-raw-material-phase6`,
@@ -40,10 +41,10 @@ current workflow shell (`part-workflow-page`) exposes a different flow:
 someone familiar with the redesigned part-workflow shell). Not a 1:1 remap.
 
 ### B. Possible real regressions — needs product judgment (don't blindly "fix")
-- `new-part-save-and-complete:58` — expects `[data-testid="express-save-btn"]`
-  **disabled** when cost is empty (pre-submit invalid). It's **enabled**. Either
-  validation moved to submit-time (update the test) or empty cost is no longer
-  blocked (**real bug**). Confirm intended behavior before changing the test.
+- ~~`new-part-save-and-complete:58`~~ — **RESOLVED (forge-ui PR #14).** Intended
+  behavior confirmed: empty cost is *not* blocked pre-submit; it's gated at the
+  promote step. Investigating it surfaced and fixed a real form-rehydration
+  clobber race (see the fixed table above). Test rewritten to match.
 - `validation-popover-triggers` — `app-validation-popover-content` exists but the
   popover doesn't auto-show on field change. Behavioral — confirm the directive's
   auto-show is intended/working.
