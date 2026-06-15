@@ -15,6 +15,9 @@ const API_BASE = 'http://localhost:5000/api/v1/';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
+/** Admin bearer token captured at login — reused for capability lookups. */
+let authToken = '';
+
 async function login(page: Page) {
   const apiContext = await request.newContext({ baseURL: API_BASE });
   const response = await apiContext.post('auth/login', {
@@ -23,6 +26,7 @@ async function login(page: Page) {
   expect(response.ok()).toBeTruthy();
   const loginData = await response.json();
   await apiContext.dispose();
+  authToken = loginData.token;
 
   await page.goto(BASE_URL, { waitUntil: 'commit' });
   await page.evaluate(
@@ -32,6 +36,25 @@ async function login(page: Page) {
     },
     { token: loginData.token, user: loginData.user },
   );
+}
+
+/**
+ * Whether an installation capability is enabled. Several creation flows
+ * (e.g. Leads / CAP-O2C-LEAD) are gated by capabilities that ship OFF by
+ * default; the SPA short-circuits their API calls client-side, so a test that
+ * assumes the feature is on can never see a network response. The descriptor
+ * endpoint is intentionally NOT capability-gated.
+ */
+async function isCapabilityEnabled(code: string): Promise<boolean> {
+  const ctx = await request.newContext({
+    baseURL: API_BASE,
+    extraHTTPHeaders: { Authorization: `Bearer ${authToken}` },
+  });
+  const res = await ctx.get('capabilities/descriptor');
+  const body = await res.json();
+  await ctx.dispose();
+  const entry = (body.capabilities ?? []).find((c: { code: string }) => c.code === code);
+  return entry?.enabled === true;
 }
 
 /** Fill an app-input by its mat-label text */
@@ -51,6 +74,16 @@ async function selectOption(page: Page, label: string, optionText: string) {
   const select = page.locator('app-select').filter({ hasText: label }).locator('mat-select');
   await select.click();
   await page.locator('mat-option').filter({ hasText: optionText }).click();
+}
+
+/**
+ * Select an app-select option by the wrapper's data-testid — robust to label
+ * text / i18n changes, and (unlike the label-filtered variant) not confused by
+ * a datepicker overlay sitting on top of the form.
+ */
+async function selectByTestId(page: Page, testId: string, optionText: string | RegExp) {
+  await page.locator(`[data-testid="${testId}"] mat-select`).click();
+  await page.locator('mat-option').filter({ hasText: optionText }).first().click();
 }
 
 /** Wait for snackbar confirmation or toast, then dismiss */
@@ -241,24 +274,36 @@ test.describe('Smoke Test — Data Creation & Report Verification', () => {
 
     await newJobBtn.click();
 
-    // Wait for dialog backdrop to appear (the .dialog-backdrop inside app-dialog)
-    const dialogTitle = page.locator('.dialog__title', { hasText: 'New Job' });
-    await dialogTitle.waitFor({ state: 'visible', timeout: 10_000 });
-    await page.waitForTimeout(300);
+    // Dialog open → title input visible. Target by data-testid (robust to the
+    // dialog markup) rather than the localized header text.
+    const titleInput = page.locator('[data-testid="job-title"] input');
+    await expect(titleInput).toBeVisible({ timeout: 10_000 });
+    await titleInput.fill('Smoke Test Job - Quality Check');
 
-    await fillInput(page, 'Title', 'Smoke Test Job - Quality Check');
+    // Set priority BEFORE touching the date. The previous order opened the
+    // datepicker (via .click()) whose calendar overlay then covered the
+    // Priority select, hanging the whole test for the full 120s timeout.
+    await selectByTestId(page, 'job-priority', 'Urgent');
 
-    // Set a past due date to create an overdue job
-    const dueDateInput = page.locator('app-datepicker').filter({ hasText: 'Due Date' }).locator('input');
-    await dueDateInput.click();
+    // Past due date → overdue job. The app-datepicker parses MM/dd/yyyy but
+    // only commits the Date to the form control on blur (change). Filling then
+    // pressing Escape left the input holding uncommitted text → a parse error
+    // marked the form invalid → onSubmit()'s `if (form.invalid) return` silently
+    // dropped the create (no POST). Blur to commit the parsed date.
+    const dueDateInput = page.locator('[data-testid="job-due-date"] input');
     await dueDateInput.fill('03/01/2026');
-    await page.keyboard.press('Escape'); // close datepicker overlay
+    await dueDateInput.blur();
 
-    await selectOption(page, 'Priority', 'Urgent');
-
-    const createBtn = page.locator('button.action-btn--primary').filter({ hasText: 'Create Job' });
-    await createBtn.click();
-    await waitForSaveConfirmation(page);
+    // Deterministic confirmation: assert the create POST succeeds instead of a
+    // blind 1.5s sleep (which also let silent 4xx/5xx pass unnoticed).
+    const saveBtn = page.locator('[data-testid="job-save-btn"]');
+    await expect(saveBtn).toBeEnabled({ timeout: 5_000 });
+    const createResp = page.waitForResponse(
+      (r) => r.url().includes('/api/v1/jobs') && r.request().method() === 'POST',
+      { timeout: 15_000 },
+    );
+    await saveBtn.click();
+    expect((await createResp).status()).toBeLessThan(400);
     await screenshot(page, '2b-kanban-second-job');
   });
 
@@ -354,43 +399,66 @@ test.describe('Smoke Test — Data Creation & Report Verification', () => {
     await screenshot(page, '2f-expense-2');
   });
 
-  test('2g. Create a lead', async () => {
-    await page.goto(`${BASE_URL}/leads`, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(2000);
-
-    const newLeadBtn = page.locator('button').filter({ hasText: /New Lead|add/ }).first();
+  // Create-lead is now a two-step fork dialog: step 1 picks an engagement
+  // "shape", step 2 reveals the form. The Unknown / quick-add shape
+  // (.shape-card--quick) adds no required extra fields, so the base fields —
+  // all data-testid'd — are enough to submit.
+  async function createLeadViaFork(
+    page: Page,
+    data: { company: string; contact?: string; email?: string; phone?: string; notes?: string },
+  ) {
+    const newLeadBtn = page.locator('[data-testid="new-lead-btn"]');
+    await expect(newLeadBtn).toBeVisible({ timeout: 15_000 });
     await newLeadBtn.click();
-    await page.waitForTimeout(500);
 
-    await fillInput(page, 'Company Name', 'Acme Manufacturing Co.');
-    await fillInput(page, 'Contact Name', 'John Smith');
-    await fillInput(page, 'Email', 'john@acmemfg.com');
-    await fillInput(page, 'Phone', '5551112222');
-    await selectOption(page, 'Source', 'Referral');
-    await fillTextarea(page, 'Notes', 'Smoke test lead - interested in widget production');
+    // Step 1 — pick the quick-add shape to reveal the form.
+    await page.locator('.shape-card--quick').click();
 
-    const createBtn = page.locator('button.action-btn--primary').filter({ hasText: /Create Lead|Save/ });
+    // Step 2 — base fields (present for every shape).
+    await page.locator('[data-testid="lead-company-name"] input').fill(data.company);
+    if (data.contact) await page.locator('[data-testid="lead-contact-name"] input').fill(data.contact);
+    if (data.email) await page.locator('[data-testid="lead-email"] input').fill(data.email);
+    if (data.phone) await page.locator('[data-testid="lead-phone"] input').fill(data.phone);
+    if (data.notes) await page.locator('[data-testid="lead-notes"] textarea').fill(data.notes);
+
+    // Deterministic confirmation: companyName is the only required field, so
+    // the create button enables once it's filled. Assert the POST succeeds
+    // (the dialog routes the payload to LeadsService.createLead → POST /leads).
+    const createBtn = page.locator('[data-testid="lead-fork-create-btn"]');
+    await expect(createBtn).toBeEnabled({ timeout: 5_000 });
+    const createResp = page.waitForResponse(
+      (r) => /\/api\/v1\/leads(\?|$)/.test(r.url()) && r.request().method() === 'POST',
+      { timeout: 15_000 },
+    );
     await createBtn.click();
-    await waitForSaveConfirmation(page);
+    expect((await createResp).status()).toBeLessThan(400);
+  }
+
+  test('2g. Create a lead', async () => {
+    // Lead management (CAP-O2C-LEAD) ships OFF by default; where it's disabled
+    // the SPA short-circuits the create POST, so there's nothing to assert.
+    test.skip(!(await isCapabilityEnabled('CAP-O2C-LEAD')),
+      'CAP-O2C-LEAD disabled in this installation — lead creation is gated off.');
+    await page.goto(`${BASE_URL}/leads`, { waitUntil: 'domcontentloaded' });
+    await createLeadViaFork(page, {
+      company: 'Acme Manufacturing Co.',
+      contact: 'John Smith',
+      email: 'john@acmemfg.com',
+      phone: '5551112222',
+      notes: 'Smoke test lead - interested in widget production',
+    });
     await screenshot(page, '2g-lead');
   });
 
   test('2h. Create a second lead', async () => {
+    test.skip(!(await isCapabilityEnabled('CAP-O2C-LEAD')),
+      'CAP-O2C-LEAD disabled in this installation — lead creation is gated off.');
     await page.goto(`${BASE_URL}/leads`, { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1500);
-
-    const newLeadBtn = page.locator('button').filter({ hasText: /New Lead|add/ }).first();
-    await newLeadBtn.click();
-    await page.waitForTimeout(500);
-
-    await fillInput(page, 'Company Name', 'TechParts Inc.');
-    await fillInput(page, 'Contact Name', 'Sarah Johnson');
-    await fillInput(page, 'Email', 'sarah@techparts.io');
-    await selectOption(page, 'Source', 'Website');
-
-    const createBtn = page.locator('button.action-btn--primary').filter({ hasText: /Create Lead|Save/ });
-    await createBtn.click();
-    await waitForSaveConfirmation(page);
+    await createLeadViaFork(page, {
+      company: 'TechParts Inc.',
+      contact: 'Sarah Johnson',
+      email: 'sarah@techparts.io',
+    });
     await screenshot(page, '2h-lead-2');
   });
 
