@@ -91,8 +91,8 @@ test.describe('Part Sources tab — add vendor', () => {
     await saveBtn.click();
 
     // The dialog closes and the Sources table shows the new row (the vendor's company name)
-    await expect(page.locator('app-vendor-part-list-panel')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator(`app-vendor-part-list-panel:has-text("${vendor.companyName ?? ''}")`).first())
+    await expect(page.locator('app-vendor-sources-panel')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator(`app-vendor-sources-panel:has-text("${vendor.companyName ?? ''}")`).first())
       .toBeVisible({ timeout: 10000 });
   });
 });
