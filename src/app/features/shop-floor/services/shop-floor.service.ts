@@ -70,14 +70,4 @@ export class ShopFloorService {
   setupTerminal(name: string, deviceToken: string, teamId: number): Observable<KioskTerminal> {
     return this.http.post<KioskTerminal>(`${this.base}/terminal`, { name, deviceToken, teamId });
   }
-
-  // PIN validation (original user or manager/admin override)
-  validatePin(userId: number, pin: string): Observable<{ valid: boolean; validatedUserId?: number }> {
-    return this.http.post<{ valid: boolean; validatedUserId?: number }>(`${this.base}/validate-pin`, { userId, pin });
-  }
-
-  // Reverse a recent action
-  reverseAction(entryId: number): Observable<void> {
-    return this.http.post<void>(`${this.base}/reverse-action`, { entryId });
-  }
 }
