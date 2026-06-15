@@ -425,26 +425,18 @@ test.describe('Contract Drift Detection', () => {
     console.log('');
 
     // ── Known / reviewed drift ─────────────────────────────────────────────
-    // Genuine frontend calls with NO forge.api backend route — confirmed by
-    // audit (not extractor artifacts; those are fixed in the extractor above).
-    // Allowlisted so the gate stays green, while ANY new/unlisted drift still
-    // fails. Each entry is a real follow-up for the owning team.
-    const KNOWN_DRIFT: { pattern: string; reason: string }[] = [
-      // auto-po.service.ts targets /purchase-orders/suggestions, but the backend
-      // serves these under AutoPoController at /auto-po/suggestions. Real path
-      // mismatch — fix the FE base or add a PO alias route.
-      { pattern: 'api/v1/purchase-orders/suggestions/{id}/convert', reason: 'auto-po base path mismatch (BE: /auto-po/suggestions)' },
-      { pattern: 'api/v1/purchase-orders/suggestions/{id}/dismiss', reason: 'auto-po base path mismatch (BE: /auto-po/suggestions)' },
-      // Shop-floor kiosk / display endpoints: no [Route]/[Http*] exists anywhere
-      // in forge.api. Either served by a separate display/kiosk surface or not
-      // yet implemented. Flagged for the shop-floor team.
-      { pattern: 'api/v1/shop-floor/scan-devices/{id}', reason: 'shop-floor scan/display endpoint absent from forge.api' },
-      { pattern: 'api/v1/shop-floor/scan-devices/self-pair', reason: 'shop-floor scan/display endpoint absent from forge.api' },
-      { pattern: 'api/v1/inventory/scan-validations/{partId}', reason: 'shop-floor scan/display endpoint absent from forge.api' },
-      { pattern: 'api/v1/display/shop-floor/job-validations/{jobId}', reason: 'shop-floor scan/display endpoint absent from forge.api' },
-      { pattern: 'api/v1/display/shop-floor/validate-pin', reason: 'shop-floor scan/display endpoint absent from forge.api' },
-      { pattern: 'api/v1/display/shop-floor/reverse-action', reason: 'shop-floor scan/display endpoint absent from forge.api' },
-    ];
+    // Genuine frontend calls with NO forge.api backend route, kept here (with a
+    // reason) so the gate stays green while ANY new/unlisted drift still fails.
+    // Currently EMPTY — the previously-allowlisted drift was all fixed:
+    //   • auto-po.service repointed to /auto-po/suggestions (was
+    //     /purchase-orders/suggestions, which 404'd).
+    //   • dead shop-floor frontend (ScanDeviceService, ScanValidationService,
+    //     ShopFloorService.validatePin/reverseAction) calling phantom
+    //     /shop-floor/scan-devices, /inventory/scan-validations,
+    //     /display/shop-floor/* endpoints was removed.
+    // Add an entry only after auditing that the endpoint is genuinely external /
+    // intentionally unbuilt — never to silence a real broken call.
+    const KNOWN_DRIFT: { pattern: string; reason: string }[] = [];
     const knownSet = new Set(KNOWN_DRIFT.map((k) => k.pattern));
     const unexpectedDrift = driftUrls.filter((u) => !knownSet.has(u.pattern));
     const staleAllowlist = [...knownSet].filter(

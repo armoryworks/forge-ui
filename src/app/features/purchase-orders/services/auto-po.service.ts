@@ -8,7 +8,10 @@ import { AutoPoSuggestion } from '../models/auto-po-suggestion.model';
 @Injectable({ providedIn: 'root' })
 export class AutoPoService {
   private readonly http = inject(HttpClient);
-  private readonly base = `${environment.apiUrl}/purchase-orders/suggestions`;
+  // Backend serves auto-PO suggestions under AutoPoController at
+  // /api/v1/auto-po/suggestions (NOT /purchase-orders/suggestions — that base
+  // 404'd on convert/dismiss).
+  private readonly base = `${environment.apiUrl}/auto-po/suggestions`;
 
   getSuggestions(status?: string): Observable<AutoPoSuggestion[]> {
     let params = new HttpParams();
