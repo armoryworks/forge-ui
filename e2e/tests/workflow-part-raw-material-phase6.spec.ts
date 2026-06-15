@@ -61,7 +61,8 @@ test.describe('Workflow Pattern — Part axis-based fork (pre-beta)', () => {
     // Guided shell mounts with the make-subassembly definition.
     await page.waitForURL(/\/parts\/(?:new|\d+)\?.*workflow=part-make-subassembly-v1/, { timeout: 15000 });
     await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
+    // The guided step rail container was renamed workflow-rail → workflow-steps.
+    await expect(page.locator('[data-testid="workflow-steps"]')).toBeVisible();
 
     await page.screenshot({ path: 'e2e/screenshots/fork-make-subassembly-guided.png', fullPage: true });
   });

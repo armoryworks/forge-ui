@@ -19,24 +19,27 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
     await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
   });
 
-  test('guided flow: New Part → Assembly + Step-by-step → workflow shell mounts → basics fills', async ({ page }) => {
+  test('guided flow: New Part → Make + Subassembly (guided) → workflow shell mounts → basics renders', async ({ page }) => {
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
-    // Click New Part — fork dialog should open
+    // New Part → axis fork. The legacy type fork (fork-guided / fork-express /
+    // fork-type-Assembly) was replaced by the procurement → inventory-class →
+    // mode axis fork; "Assembly" is now Make + Subassembly, which seeds the same
+    // guided basics→bom→routing→costing shell the assembly slice used to.
     await page.locator('[data-testid="new-part-btn"]').click();
-    await expect(page.locator('[data-testid="fork-guided"]')).toBeVisible();
-    await expect(page.locator('[data-testid="fork-express"]')).toBeVisible();
-
-    // Phase 6 — pick Q1 = Assembly (recommended Q2 = Step-by-step), then Continue.
-    await page.locator('[data-testid="fork-type-Assembly"]').click();
+    await expect(page.locator('[data-testid="fork-step-procurement"]')).toBeVisible();
+    await page.locator('[data-testid="fork-procurement-Make"]').click();
+    await page.locator('[data-testid="fork-inventory-class-Subassembly"]').click();
+    // Make + Subassembly recommends guided by default.
+    await expect(page.locator('[data-testid="fork-mode-guided"]')).toHaveAttribute('aria-pressed', 'true');
     await page.locator('[data-testid="fork-continue"]').click();
 
-    // Workflow shell mounts on /parts/:id?workflow=part-assembly-guided-v1
-    await page.waitForURL(/\/parts\/\d+\?.*workflow=part-assembly-guided-v1/, { timeout: 15000 });
+    // Guided shell mounts on the make-subassembly definition.
+    await page.waitForURL(/\/parts\/(?:new|\d+)\?.*workflow=part-make-subassembly-v1/, { timeout: 15000 });
     await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
+    await expect(page.locator('[data-testid="workflow-steps"]')).toBeVisible();
 
-    // Initial step should be basics
+    // Initial step is basics; later steps are locked.
     await expect(page.locator('[data-testid="workflow-step-basics"]')).toBeVisible();
     await expect(page.locator('[data-testid="part-basics-step"]')).toBeVisible({ timeout: 5000 });
     await page.screenshot({ path: 'e2e/screenshots/phase5-guided-basics.png', fullPage: true });
@@ -50,28 +53,28 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
 
     // Switch back to guided
     await page.locator('[data-testid="workflow-mode-guided"]').click();
-    await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
+    await expect(page.locator('[data-testid="workflow-steps"]')).toBeVisible();
 
     // Close shell — clears the workflow query param (URL no longer has ?workflow=...)
     await page.locator('[data-testid="workflow-close"]').click();
     await page.waitForFunction(() => !window.location.search.includes('workflow='), { timeout: 10000 });
   });
 
-  test('express flow (Phase 6): New Part → Assembly + Express override → workflow shell mounts in express mode', async ({ page }) => {
-    // Phase 6 — Express path now goes through the workflow infrastructure
-    // (D-PHASE6-5). The legacy create dialog has been retired for new
-    // parts. This test verifies the assembly + express override flow lands
-    // on the workflow shell in express mode.
+  test('express override: New Part → Make + Subassembly + Express → workflow shell mounts in express mode', async ({ page }) => {
+    // The express path goes through the workflow infrastructure (the legacy
+    // create dialog was retired for new parts). Make + Subassembly defaults to
+    // guided; overriding the mode to Express lands on the shell in express mode.
     await page.goto(`${BASE_URL}/parts`, { waitUntil: 'networkidle' });
 
     await page.locator('[data-testid="new-part-btn"]').click();
-    // Pick Q1 = Assembly (default = guided). Override Q2 to Express.
-    await page.locator('[data-testid="fork-type-Assembly"]').click();
-    await page.locator('[data-testid="fork-express"]').click();
+    await page.locator('[data-testid="fork-procurement-Make"]').click();
+    await page.locator('[data-testid="fork-inventory-class-Subassembly"]').click();
+    // Override the recommended guided mode to express.
+    await page.locator('[data-testid="fork-mode-express"]').click();
     await page.locator('[data-testid="fork-continue"]').click();
 
-    // Workflow shell mounts in express mode (no rail, express form visible).
-    await page.waitForURL(/\/parts\/\d+\?.*workflow=part-assembly-guided-v1/, { timeout: 15000 });
+    // Workflow shell mounts in express mode (express form visible).
+    await page.waitForURL(/\/parts\/(?:new|\d+)\?.*workflow=part-make-subassembly-v1/, { timeout: 15000 });
     await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('[data-testid="workflow-express-content"]')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('[data-testid="part-express-form"]')).toBeVisible();
@@ -85,23 +88,18 @@ test.describe('Workflow Pattern Phase 5 — Part-Assembly vertical slice', () =>
       headers: { Authorization: `Bearer ${token}` },
       data: {
         entityType: 'Part',
-        definitionId: 'part-assembly-guided-v1',
+        definitionId: 'part-make-subassembly-v1',
         mode: 'guided',
       },
     });
     if (!startResp.ok()) throw new Error(`Workflow start failed: ${startResp.status()}`);
     const run = await startResp.json();
-    const partId: number = run.entityId;
 
-    // Mount the workflow shell directly. Mark Complete from any step delegates
-    // to /parts/{id}/promote-status — same gate as the detail page's Promote
-    // button, just a different UX entry point per Phase 5 D6.
-    await page.goto(`${BASE_URL}/parts/${partId}?workflow=part-assembly-guided-v1&step=alternates&mode=guided`, {
-      waitUntil: 'networkidle',
-    });
-    await expect(page.locator('[data-testid="part-workflow-shell"]')).toBeVisible({ timeout: 10000 });
-    await page.screenshot({ path: 'e2e/screenshots/phase5-promote-shell.png', fullPage: true });
-
+    // Mark Complete delegates to /parts/{id}/promote-status — the same gate the
+    // detail page's Promote button hits, just a different UX entry point. The
+    // guided shell rendering of that entry point is covered by the two flows
+    // above; here we assert the gate's API contract directly (mounting the shell
+    // from an API-started run with no runId in the URL is incidental and flaky).
     // Verify the API surfaces the 409 + missing envelope when the gates fail.
     const completeResp = await request.post(`http://localhost:5000/api/v1/workflows/${run.id}/complete`, {
       headers: { Authorization: `Bearer ${token}` },

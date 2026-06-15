@@ -33,7 +33,7 @@ test('workflow-shell-demo renders + mode toggle works + entity edits propagate',
   await page.goto(`${BASE_URL}/workflow-shell-demo`, { waitUntil: 'networkidle' });
 
   // Shell is mounted
-  await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
+  await expect(page.locator('[data-testid="workflow-steps"]')).toBeVisible();
   await expect(page.locator('[data-testid="workflow-step-basics"]')).toBeVisible();
   await expect(page.locator('[data-testid="workflow-step-alternates"]')).toBeVisible();
 
@@ -56,7 +56,7 @@ test('workflow-shell-demo renders + mode toggle works + entity edits propagate',
 
   // D4: mode toggle — clicking express hides the rail and shows the express container.
   await page.locator('[data-testid="workflow-mode-express"]').click();
-  await expect(page.locator('[data-testid="workflow-rail"]')).toHaveCount(0);
+  await expect(page.locator('[data-testid="workflow-steps"]')).toHaveCount(0);
   await expect(page.locator('[data-testid="workflow-express-content"]')).toBeVisible();
 
   // Mode toggle is reflected in URL.
@@ -65,7 +65,7 @@ test('workflow-shell-demo renders + mode toggle works + entity edits propagate',
 
   // Switching back to guided returns the rail.
   await page.locator('[data-testid="workflow-mode-guided"]').click();
-  await expect(page.locator('[data-testid="workflow-rail"]')).toBeVisible();
+  await expect(page.locator('[data-testid="workflow-steps"]')).toBeVisible();
 
   await context.close();
 });
