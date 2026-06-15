@@ -29,16 +29,20 @@ Root cause was twofold and is now diagnosed:
 | `signalr-board-sync` setup | `GET /jobs` now paged `{items}` | read `.items` |
 | `new-part-save-and-complete:58` empty cost | test asserted wrong behavior — cost is gated at **promote**, not pre-submit (`manualCostOverride` carries only `Validators.min(0)`). Investigating surfaced a **real** form-rehydration **clobber** race: a guard-less `effect()` re-patched the express form from a late/refreshed `entity()` emission, silently overwriting typed input (`emitEvent:false` → no dirty mark) | forge-ui PR #14: pristine-guard the re-hydration effect (`if (!part \|\| form.dirty) return`) + discriminating unit regression; rewrote the test to assert Save **enabled** with empty cost, cost gated server-side at promote |
 
-## Remaining backlog (~12) — NOT clean selector swaps
+## Remaining backlog (~7) — NOT clean selector swaps
 
-### A. Workflow UI redesigned (×5) — needs flow rewrite
+### A. Workflow UI redesigned (×5) — RESOLVED (forge-ui PR #18)
 `workflow-part-assembly-phase5` (×3), `workflow-part-raw-material-phase6`,
-`workflow-shell-demo`. The tests use `data-testid="fork-guided"` and
-`"workflow-rail"`, which **no longer exist** (0 occurrences in `src`). The
-current workflow shell (`part-workflow-page`) exposes a different flow:
-`fork-item-kind`, `fork-continue`, `customer-workflow-shell`, `express-*`.
-**Action:** rewrite the interaction flow against the current workflow UX (needs
-someone familiar with the redesigned part-workflow shell). Not a 1:1 remap.
+`workflow-shell-demo`. Two redesigns: the rail container was renamed
+`workflow-rail` → `workflow-steps`, and the part fork moved from a type fork
+(`fork-guided`/`fork-express`/`fork-type-Assembly`) to the axis fork
+(procurement → inventory-class → mode). raw-material was already on the axis fork
+(one stale `workflow-rail`); shell-demo only needed the rail rename; assembly was
+retargeted from the retired "Assembly" type to Make + Subassembly
+(`part-make-subassembly-v1`, same guided basics→bom→routing→costing shell). The
+legacy `part-assembly-guided-v1` definition is no longer startable (`POST
+/workflows` 404s), so the promote-gate test asserts the 409 + missing envelope
+via the API directly. All 8 cases pass.
 
 ### B. Possible real regressions — needs product judgment (don't blindly "fix")
 - ~~`new-part-save-and-complete:58`~~ — **RESOLVED (forge-ui PR #14).** Intended
