@@ -10,8 +10,12 @@ test.describe('Mobile Workflow', () => {
     // Login
     await loginViaApi(page, 'admin@forge.local', SEED_PASSWORD);
 
-    // Navigate to mobile home
-    await page.goto('/m/', { waitUntil: 'networkidle' });
+    // Navigate to mobile home. Use '/m' WITHOUT a trailing slash: nginx
+    // 301-redirects '/m/' to a port-less 'http://localhost/m' (it drops the
+    // :4200), which the browser then can't connect to (ERR_CONNECTION_REFUSED).
+    // Also prefer 'domcontentloaded' over 'networkidle' — the SPA holds a
+    // SignalR socket open, so the network never goes fully idle.
+    await page.goto('/m', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
     // Verify mobile home loaded
@@ -22,7 +26,7 @@ test.describe('Mobile Workflow', () => {
     await expect(homeContent.first()).toBeVisible({ timeout: 10_000 });
 
     // Navigate to mobile clock page
-    await page.goto('/m/clock', { waitUntil: 'networkidle' });
+    await page.goto('/m/clock', { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(2000);
 
     // Verify clock page loaded

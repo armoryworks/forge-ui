@@ -53,14 +53,29 @@ test.describe('SignalR Board Sync', () => {
     // GET /jobs returns the standard paged envelope { items, totalCount, ... };
     // tolerate a bare array too in case the shape changes back.
     const jobsBody = await jobsRes.json();
-    const jobs: { id: number; jobNumber: string; currentStageId: number }[] = jobsBody.items ?? jobsBody;
+    // The jobs list identifies the stage by name (stageName), not a stage id.
+    const jobs: { id: number; jobNumber: string; stageName: string }[] = jobsBody.items ?? jobsBody;
     const targetJob = jobs.find(j => j.jobNumber === 'J-1050');
     if (!targetJob) throw new Error('Seed job J-1050 not found. Is the database seeded?');
 
-    // Determine source and target for the move
-    const isInQuoteRequested = targetJob.currentStageId === quoteRequestedStage.id;
-    const fromStage = isInQuoteRequested ? quoteRequestedStage : quotedStage;
-    const toStage = isInQuoteRequested ? quotedStage : quoteRequestedStage;
+    // Determine source and target for the move. Use J-1050's ACTUAL current
+    // stage as the source rather than assuming quote_requested vs quoted — a
+    // prior run (or seed drift) may have left it in any stage, which made the
+    // old binary assumption point at the wrong column. The target is any other
+    // stage in the same track; the cleanup step moves it back, so the test stays
+    // idempotent across reruns.
+    const fromStage = productionTrack.stages.find(s => s.name === targetJob.stageName);
+    if (!fromStage) {
+      throw new Error(
+        `J-1050 is in stage "${targetJob.stageName}", which is not a visible ` +
+          `production-track column; cannot run board-sync.`,
+      );
+    }
+    const toStage = [quotedStage, quoteRequestedStage, ...productionTrack.stages]
+      .find(s => s.id !== fromStage.id);
+    if (!toStage) {
+      throw new Error('Production track has only one stage; cannot move J-1050.');
+    }
 
     // ── 5. Verify J-1050 is visible on both boards before the move ──
     const jobCardOnA = pageA.locator('.card__job-number:text-is("J-1050")');

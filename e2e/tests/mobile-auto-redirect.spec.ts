@@ -28,8 +28,12 @@ test.describe('Mobile Auto-Redirect', () => {
     // Submit
     await page.locator('button[type="submit"], button:has-text("Sign In"), button:has-text("Log In")').first().click();
 
-    // Should land on /dashboard (not /m/)
-    await expect(page).toHaveURL(/\/dashboard/, { timeout: 15_000 });
+    // Desktop login lands on the desktop shell — NOT the mobile /m/ route.
+    // The nominal target is /dashboard, but an incomplete-profile user is routed
+    // through the onboarding gate (/account/profile) first. Both are desktop
+    // routes; accept either so the assertion doesn't depend on prior tests'
+    // profile-completion state, while still proving it didn't go mobile.
+    await expect(page).toHaveURL(/\/(dashboard|account)(\/|$)/, { timeout: 15_000 });
 
     await context.close();
   });
