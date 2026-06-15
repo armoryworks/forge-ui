@@ -29,7 +29,7 @@ Root cause was twofold and is now diagnosed:
 | `signalr-board-sync` setup | `GET /jobs` now paged `{items}` | read `.items` |
 | `new-part-save-and-complete:58` empty cost | test asserted wrong behavior — cost is gated at **promote**, not pre-submit (`manualCostOverride` carries only `Validators.min(0)`). Investigating surfaced a **real** form-rehydration **clobber** race: a guard-less `effect()` re-patched the express form from a late/refreshed `entity()` emission, silently overwriting typed input (`emitEvent:false` → no dirty mark) | forge-ui PR #14: pristine-guard the re-hydration effect (`if (!part \|\| form.dirty) return`) + discriminating unit regression; rewrote the test to assert Save **enabled** with empty cost, cost gated server-side at promote |
 
-## Remaining backlog (~19) — NOT clean selector swaps
+## Remaining backlog (~14) — NOT clean selector swaps
 
 ### A. Workflow UI redesigned (×5) — needs flow rewrite
 `workflow-part-assembly-phase5` (×3), `workflow-part-raw-material-phase6`,
@@ -55,11 +55,26 @@ someone familiar with the redesigned part-workflow shell). Not a 1:1 remap.
 - `mobile-auto-redirect`, `mobile-workflow` — mobile routing / `/m/` redirect;
   the submit/redirect step fails. Investigate desktop-vs-mobile redirect logic.
 
-### D. Slow serial cluster (×5) — needs helper review
-`smoke-data-creation` 2b/2e/2f/2g/2h (create job/expense/lead). Serial, 120s
-timeouts via the shared `waitForSaveConfirmation` helper. Likely the same
-"list doesn't live-refresh after create" pattern as create-job; verify via the
-create API response instead.
+### D. Slow serial cluster (×5) — RESOLVED (forge-ui PR #15)
+`smoke-data-creation` 2b/2e/2f/2g/2h. Triaged each against the local stack — the
+"120s helper timeout" was a misread; `waitForSaveConfirmation` is just a 1.5s
+sleep. The per-test 120s budget was being eaten by hanging interactions:
+- **2e/2f (expenses)** — pass locally; the nightly failures were the
+  resource-starvation flakiness already addressed by the functional/docgen split
+  + sharding. No change.
+- **2b (job + due date)** — real bug. The `app-datepicker` commits its `Date`
+  only on blur/change; the test filled then pressed Escape, leaving uncommitted
+  text → parse error → `form.invalid` → `onSubmit()` dropped the create with no
+  POST (the screenshot-only test never noticed). Fixed: testid selectors, set
+  priority before the date (the calendar overlay was the original hang), blur to
+  commit, assert `POST /jobs`.
+- **2g/2h (leads)** — `CAP-O2C-LEAD` ships `IsDefaultOn: false`; the SPA's
+  capability-gate interceptor short-circuits `POST /leads` client-side, so it
+  never hits the network. Made the tests capability-aware (`test.skip` when the
+  descriptor reports it disabled) and rewrote the flow for the new two-step fork
+  dialog so they pass wherever leads is enabled.
+Lesson: the blind `waitForSaveConfirmation` sleep let silent 4xx/5xx + dropped
+submits pass as green — replaced with deterministic `POST` assertions.
 
 ### E. Content / heuristic
 - `discovery-flow-smoke` — asserts the first wizard question contains `"Q-O1"`;
