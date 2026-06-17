@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, input, OnInit, output, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, filter, switchMap } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { TimeTrackingService } from '../../time-tracking/services/time-tracking.service';
@@ -149,7 +149,10 @@ export class JobDetailPanelComponent implements OnInit {
       debounceTime(300),
       distinctUntilChanged(),
       filter(v => (v?.length ?? 0) >= 2),
-      switchMap(term => this.kanbanService.searchParts(term!)),
+      // catchError inside the switchMap so a transient search failure yields empty
+      // results instead of erroring (and permanently killing) the outer valueChanges
+      // subscription for the panel's lifetime — see issue #28.
+      switchMap(term => this.kanbanService.searchParts(term!).pipe(catchError(() => of([])))),
     ).subscribe(results => {
       const linkedPartIds = new Set(this.jobParts().map(jp => jp.partId));
       this.partSearchResults.set(

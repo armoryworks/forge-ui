@@ -1,7 +1,8 @@
 import {
-  ChangeDetectionStrategy, Component, computed, inject,
+  ChangeDetectionStrategy, Component, computed, DestroyRef, inject,
   input, OnInit, output, signal, ViewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -9,11 +10,13 @@ import { KanbanService } from '../services/kanban.service';
 import { JobDetail } from '../models/job-detail.model';
 import { CustomerRef } from '../models/customer-ref.model';
 import { UserRef } from '../models/user-ref.model';
+import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { TrackType } from '../../../shared/models/track-type.model';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { SelectComponent, SelectOption } from '../../../shared/components/select/select.component';
 import { TextareaComponent } from '../../../shared/components/textarea/textarea.component';
 import { DatepickerComponent } from '../../../shared/components/datepicker/datepicker.component';
+import { ToggleComponent } from '../../../shared/components/toggle/toggle.component';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { FormValidationService } from '../../../shared/services/form-validation.service';
 import { ValidationButtonComponent } from '../../../shared/components/validation-button/validation-button.component';
@@ -33,6 +36,7 @@ export type DialogMode = 'create' | 'edit';
     SelectComponent,
     TextareaComponent,
     DatepickerComponent,
+    ToggleComponent,
     ValidationButtonComponent,
     TranslatePipe,
   ],
@@ -44,6 +48,7 @@ export class JobDialogComponent implements OnInit {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly kanbanService = inject(KanbanService);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly mode = input.required<DialogMode>();
   readonly job = input<JobDetail | null>(null);
@@ -58,6 +63,10 @@ export class JobDialogComponent implements OnInit {
   protected readonly loadingRefs = signal(true);
   protected readonly priorities = PRIORITIES;
 
+  // #27 — inline association of the new job with an open sales-order line.
+  protected readonly salesOrderLines = signal<AssignableSalesOrderLine[]>([]);
+  protected readonly showAssignedControl = new FormControl(false, { nonNullable: true });
+
   protected readonly jobForm = new FormGroup({
     title: new FormControl('', [Validators.required, Validators.maxLength(200)]),
     description: new FormControl(''),
@@ -66,7 +75,18 @@ export class JobDialogComponent implements OnInit {
     assigneeId: new FormControl<number | null>(null),
     priority: new FormControl('Normal'),
     dueDate: new FormControl<Date | null>(null),
+    salesOrderLineId: new FormControl<number | null>(null),
   });
+
+  protected readonly salesOrderLineOptions = computed<SelectOption[]>(() => [
+    { value: null, label: this.translate.instant('kanban.noneOption') },
+    ...this.salesOrderLines().map(l => ({
+      value: l.id,
+      label: l.assignedJobCount > 0
+        ? `${l.orderNumber} · L${l.lineNumber} — ${l.description} · ${this.translate.instant('kanban.alreadyAssigned')}`
+        : `${l.orderNumber} · L${l.lineNumber} — ${l.description}`,
+    })),
+  ]);
 
   protected readonly violations = FormValidationService.getViolations(this.jobForm, {
     title: 'Title',
@@ -128,6 +148,29 @@ export class JobDialogComponent implements OnInit {
       this.users.set(users);
       this.loadingRefs.set(false);
     });
+
+    // #27 — SO-line association is offered only when creating a job. Default to the
+    // unassigned lines; the toggle reloads to include already-assigned lines.
+    if (this.mode() === 'create') {
+      this.loadAssignableSoLines(false);
+      this.showAssignedControl.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(show => this.loadAssignableSoLines(show));
+    }
+  }
+
+  private loadAssignableSoLines(includeAssigned: boolean): void {
+    this.kanbanService.getAssignableSalesOrderLines(includeAssigned).subscribe({
+      next: lines => {
+        this.salesOrderLines.set(lines);
+        // If the currently-selected line dropped out of the narrowed list, clear it.
+        const selected = this.jobForm.controls.salesOrderLineId.value;
+        if (selected != null && !lines.some(l => l.id === selected)) {
+          this.jobForm.controls.salesOrderLineId.setValue(null);
+        }
+      },
+      error: () => { /* picker stays empty; global interceptor surfaces hard errors */ },
+    });
   }
 
   protected onSubmit(): void {
@@ -148,6 +191,7 @@ export class JobDialogComponent implements OnInit {
         customerId: f.customerId,
         priority: f.priority ?? 'Normal',
         dueDate: dueDateIso,
+        salesOrderLineId: f.salesOrderLineId,
       }).subscribe({
         next: (detail) => {
           this.saving.set(false);
