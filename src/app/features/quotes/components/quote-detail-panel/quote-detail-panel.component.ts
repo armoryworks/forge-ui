@@ -208,12 +208,24 @@ export class QuoteDetailPanelComponent {
     this.editingLineId.set(null);
   }
 
-  /** Prefill the description from the chosen catalog part when blank. */
+  /** Prefill description + customer-specific unit price from the chosen catalog part. */
   protected onPartSelected(part: Record<string, unknown> | null): void {
     if (!part) return;
     const name = (part['name'] as string) ?? '';
     if (name && !this.lineForm.controls.description.value) {
       this.lineForm.controls.description.setValue(name);
+    }
+    // #26: pre-populate the row's unit price from the customer's price list when a
+    // catalog part is picked. Leaves the field for manual entry when no price resolves.
+    const q = this.quote();
+    const partId = part['id'] as number | undefined;
+    if (q && partId) {
+      this.quoteService.resolvePrice(q.customerId, partId).subscribe({
+        next: price => {
+          if (price != null) this.lineForm.controls.unitPrice.setValue(price);
+        },
+        error: () => { /* price stays manual-entry; global interceptor surfaces hard errors */ },
+      });
     }
   }
 

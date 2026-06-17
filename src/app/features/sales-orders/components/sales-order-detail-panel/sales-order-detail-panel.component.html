@@ -150,6 +150,28 @@
             }
           </div>
 
+          <!-- SO-only header fields edit (#8 / SO-8 / AUDIT-S3b — Draft only) -->
+          @if (canEditHeader()) {
+            @if (!editingHeader()) {
+              <div class="header-edit-trigger">
+                <button class="action-btn action-btn--sm" data-testid="so-edit-header-btn" (click)="startEditHeader()">
+                  <span class="material-icons-outlined">edit</span> {{ 'salesOrders.editDetails' | translate }}
+                </button>
+              </div>
+            } @else {
+              <form class="line-edit-form" [formGroup]="headerForm" (ngSubmit)="saveHeader()">
+                <div class="line-edit-form__title">{{ 'salesOrders.editDetails' | translate }}</div>
+                <app-input [label]="'salesOrders.customerPOLabel' | translate" formControlName="customerPO" data-testid="so-header-po" />
+                <app-select [label]="'salesOrders.creditTerms' | translate" formControlName="creditTerms" [options]="creditTermsOptions" data-testid="so-header-terms" />
+                <app-datepicker [label]="'salesOrders.requestedDeliveryDate' | translate" formControlName="requestedDeliveryDate" data-testid="so-header-delivery" />
+                <div class="line-edit-form__actions">
+                  <button type="button" class="action-btn" (click)="cancelHeaderEdit()">{{ 'common.cancel' | translate }}</button>
+                  <button type="submit" class="action-btn action-btn--primary" data-testid="so-header-save" [disabled]="savingHeader()">{{ 'common.save' | translate }}</button>
+                </div>
+              </form>
+            }
+          }
+
           <!-- Fulfillment Summary -->
           @if (fulfillmentSummary(); as fs) {
             <div class="fulfillment-summary">

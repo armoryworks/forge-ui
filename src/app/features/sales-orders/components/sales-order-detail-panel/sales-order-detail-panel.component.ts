@@ -19,8 +19,12 @@ import { EntityLinkComponent } from '../../../../shared/components/entity-link/e
 import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { EntityPickerComponent } from '../../../../shared/components/entity-picker/entity-picker.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
+import { SelectComponent } from '../../../../shared/components/select/select.component';
+import { DatepickerComponent } from '../../../../shared/components/datepicker/datepicker.component';
 import { CurrencyInputComponent } from '../../../../shared/components/currency-input/currency-input.component';
 import { FileUploadZoneComponent, UploadedFile } from '../../../../shared/components/file-upload-zone/file-upload-zone.component';
+import { CREDIT_TERMS_OPTIONS } from '../../../../shared/models/credit-terms.const';
+import { toIsoDate } from '../../../../shared/utils/date.utils';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 import { FileAttachment } from '../../../../shared/models/file.model';
 import { ScheduleTimelineComponent } from '../schedule-timeline/schedule-timeline.component';
@@ -36,7 +40,7 @@ type TabId = 'overview' | 'lines' | 'schedule' | 'shipments' | 'returns' | 'docu
     MatTooltipModule, LoadingBlockDirective,
     BarcodeInfoComponent, EntityActivitySectionComponent,
     EntityLinkComponent, CurrencyDisplayComponent, FileUploadZoneComponent, EmptyStateComponent,
-    EntityPickerComponent, InputComponent, CurrencyInputComponent,
+    EntityPickerComponent, InputComponent, SelectComponent, DatepickerComponent, CurrencyInputComponent,
     ScheduleTimelineComponent,
   ],
   templateUrl: './sales-order-detail-panel.component.html',
@@ -129,6 +133,20 @@ export class SalesOrderDetailPanelComponent {
     if (status === 'Draft' || status === 'Cancelled') return [];
     return so.lines.filter(l => l.jobs.length === 0);
   });
+
+  // --- Header editing (#8 / SO-8 / AUDIT-S3b — Draft only) ---
+  // SO-only header fields (CustomerPO / CreditTerms / RequestedDelivery) had no edit
+  // path after a quote→order convert; the overview rendered them read-only and only
+  // when already set, so post-convert (all null) there was no way to populate them.
+  protected readonly editingHeader = signal(false);
+  protected readonly savingHeader = signal(false);
+  protected readonly creditTermsOptions = CREDIT_TERMS_OPTIONS;
+  protected readonly headerForm = new FormGroup({
+    customerPO: new FormControl<string>('', { nonNullable: true }),
+    creditTerms: new FormControl<string | null>(null),
+    requestedDeliveryDate: new FormControl<Date | null>(null),
+  });
+  protected readonly canEditHeader = computed(() => this.so()?.status === 'Draft');
 
   constructor() {
     effect(() => {
@@ -326,12 +344,24 @@ export class SalesOrderDetailPanelComponent {
     this.editingLineId.set(null);
   }
 
-  /** Prefill the description from the chosen catalog part when blank. */
+  /** Prefill description + customer-specific unit price from the chosen catalog part. */
   protected onPartSelected(part: Record<string, unknown> | null): void {
     if (!part) return;
     const name = (part['name'] as string) ?? '';
     if (name && !this.lineForm.controls.description.value) {
       this.lineForm.controls.description.setValue(name);
+    }
+    // #26: pre-populate the row's unit price from the customer's price list when a
+    // catalog part is picked. Leaves the field for manual entry when no price resolves.
+    const so = this.so();
+    const partId = part['id'] as number | undefined;
+    if (so && partId) {
+      this.soService.resolvePrice(so.customerId, partId).subscribe({
+        next: price => {
+          if (price != null) this.lineForm.controls.unitPrice.setValue(price);
+        },
+        error: () => { /* price stays manual-entry; global interceptor surfaces hard errors */ },
+      });
     }
   }
 
@@ -362,6 +392,44 @@ export class SalesOrderDetailPanelComponent {
         this.snackbar.success(this.translate.instant(editing === 0 ? 'salesOrders.lineAdded' : 'salesOrders.lineUpdated'));
       },
       error: () => this.savingLine.set(false),
+    });
+  }
+
+  protected startEditHeader(): void {
+    const so = this.so();
+    if (!so) return;
+    this.headerForm.reset({
+      customerPO: so.customerPO ?? '',
+      creditTerms: so.creditTerms ?? null,
+      requestedDeliveryDate: so.requestedDeliveryDate ? new Date(so.requestedDeliveryDate) : null,
+    });
+    this.editingHeader.set(true);
+  }
+
+  protected cancelHeaderEdit(): void {
+    this.editingHeader.set(false);
+  }
+
+  protected saveHeader(): void {
+    const so = this.so();
+    if (!so) return;
+    const v = this.headerForm.getRawValue();
+    this.savingHeader.set(true);
+    // `|| undefined` so a blank field is omitted rather than sent — the server only
+    // applies non-null fields, and an empty creditTerms string would fail enum-parse.
+    this.soService.updateSalesOrder(so.id, {
+      customerPO: v.customerPO || undefined,
+      creditTerms: v.creditTerms || undefined,
+      requestedDeliveryDate: toIsoDate(v.requestedDeliveryDate) || undefined,
+    }).subscribe({
+      next: () => {
+        this.savingHeader.set(false);
+        this.editingHeader.set(false);
+        this.loadDetail(so.id);
+        this.changed.emit();
+        this.snackbar.success(this.translate.instant('salesOrders.headerUpdated'));
+      },
+      error: () => this.savingHeader.set(false),
     });
   }
 

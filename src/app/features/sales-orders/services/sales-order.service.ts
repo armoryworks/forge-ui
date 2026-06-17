@@ -90,6 +90,19 @@ export class SalesOrderService {
     return this.http.get<SalesOrderDetail>(`${this.base}/${id}`);
   }
 
+  /**
+   * AUDIT-19-S1 / #26 — the customer-specific price-list unit price for a part,
+   * or null when there's no applicable entry. Called on part-select to pre-fill
+   * the line's unit price. The resolver lives on the quotes surface, so this hits
+   * `/quotes/resolve-price` (shared by quote + SO line editors).
+   */
+  resolvePrice(customerId: number, partId: number): Observable<number | null> {
+    const params = new HttpParams()
+      .set('customerId', String(customerId))
+      .set('partId', String(partId));
+    return this.http.get<number | null>(`${environment.apiUrl}/quotes/resolve-price`, { params });
+  }
+
   createSalesOrder(request: CreateSalesOrderRequest): Observable<SalesOrderDetail> {
     return this.http.post<SalesOrderDetail>(this.base, request);
   }

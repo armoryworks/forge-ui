@@ -23,6 +23,13 @@
         <app-select data-testid="job-priority" [label]="'kanban.priority' | translate" formControlName="priority" [options]="priorityOptions" />
         <app-datepicker data-testid="job-due-date" [label]="'kanban.dueDate' | translate" formControlName="dueDate" />
       </div>
+
+      @if (mode() === 'create') {
+        <div class="so-line-assoc">
+          <app-select data-testid="job-so-line" [label]="'kanban.salesOrderLine' | translate" formControlName="salesOrderLineId" [options]="salesOrderLineOptions()" />
+          <app-toggle data-testid="job-so-line-show-assigned" [label]="'kanban.showAssignedLines' | translate" [formControl]="showAssignedControl" />
+        </div>
+      }
     </div>
   }
 

@@ -41,6 +41,18 @@ export class QuoteService {
     return this.http.get<QuoteDetail>(`${this.base}/${id}`);
   }
 
+  /**
+   * AUDIT-19-S1 / #26 — the customer-specific price-list unit price for a part,
+   * or null when there's no applicable entry. Called on part-select to pre-fill
+   * the line's unit price. Returns a bare decimal (or null) per the server contract.
+   */
+  resolvePrice(customerId: number, partId: number): Observable<number | null> {
+    const params = new HttpParams()
+      .set('customerId', String(customerId))
+      .set('partId', String(partId));
+    return this.http.get<number | null>(`${this.base}/resolve-price`, { params });
+  }
+
   createQuote(request: CreateQuoteRequest): Observable<QuoteDetail> {
     return this.http.post<QuoteDetail>(this.base, request);
   }

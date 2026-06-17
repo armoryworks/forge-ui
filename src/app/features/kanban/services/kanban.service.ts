@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, map, forkJoin } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
@@ -20,6 +20,7 @@ import { TimeEntry } from '../../time-tracking/models/time-entry.model';
 import { JobPart } from '../models/job-part.model';
 import { JobNote } from '../models/job-note.model';
 import { PartSearchResult } from '../models/part-search-result.model';
+import { AssignableSalesOrderLine } from '../models/assignable-sales-order-line.model';
 import { CustomFieldValues } from '../models/custom-field-values.model';
 import { DisposeJobRequest } from '../models/dispose-job-request.model';
 import { ChildJob } from '../models/child-job.model';
@@ -100,8 +101,20 @@ export class KanbanService {
     customerId?: number | null;
     priority?: string;
     dueDate?: string | null;
+    salesOrderLineId?: number | null;
   }): Observable<JobDetail> {
     return this.http.post<JobDetail>(`${environment.apiUrl}/jobs`, command);
+  }
+
+  /**
+   * #27 — sales-order lines available to associate with a new job. Defaults to lines
+   * not actively assigned to an open job; pass includeAssigned=true to show the rest.
+   */
+  getAssignableSalesOrderLines(includeAssigned = false, search?: string): Observable<AssignableSalesOrderLine[]> {
+    let params = new HttpParams().set('includeAssigned', String(includeAssigned));
+    if (search) params = params.set('search', search);
+    return this.http.get<AssignableSalesOrderLine[]>(
+      `${environment.apiUrl}/orders/assignable-lines`, { params });
   }
 
   updateJob(id: number, changes: Partial<JobDetail>): Observable<unknown> {
@@ -156,9 +169,14 @@ export class KanbanService {
   }
 
   searchParts(search: string): Observable<PartSearchResult[]> {
-    return this.http.get<PartSearchResult[]>(
+    // WU-22 — /parts returns the standard paged envelope ({ items, totalCount,
+    // page, pageSize }); unwrap to the flat array the part typeahead expects.
+    // Without this the component's results.filter(...) ran on the envelope object,
+    // threw, and the (error-handler-less) subscription died silently — the search
+    // showed nothing (issue #28). The legacy ?search= alias still works server-side.
+    return this.http.get<PagedResponse<PartSearchResult>>(
       `${environment.apiUrl}/parts`, { params: { search } }
-    );
+    ).pipe(map(p => p.items));
   }
 
   // Custom field values
