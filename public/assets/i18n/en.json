@@ -4086,6 +4086,15 @@
     "locationName": "Location Name",
     "settingUp": "Setting up...",
     "completeSetup": "Complete Setup",
+    "setupForkTitle": "How would you like to set up Forge?",
+    "fork": {
+      "quickName": "Quick start",
+      "quickDesc": "Pick the modules you need and get going. You can add more later.",
+      "fullName": "Full guided setup",
+      "fullDesc": "Walk through every area step by step and let Forge recommend a fit."
+    },
+    "modulesTitle": "Which modules do you want?",
+    "modulesHint": "Turn on what you need now. Anything off can be turned on later from Admin.",
     "login": "Log In",
     "logout": "Log Out",
     "email": "Email",

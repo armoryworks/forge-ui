@@ -4079,6 +4079,15 @@
     "locationName": "Nombre de la ubicación",
     "settingUp": "Configurando...",
     "completeSetup": "Completar configuración",
+    "setupForkTitle": "¿Cómo desea configurar Forge?",
+    "fork": {
+      "quickName": "Inicio rápido",
+      "quickDesc": "Elija los módulos que necesita y comience. Puede añadir más después.",
+      "fullName": "Configuración guiada completa",
+      "fullDesc": "Recorra cada área paso a paso y deje que Forge recomiende lo más adecuado."
+    },
+    "modulesTitle": "¿Qué módulos desea?",
+    "modulesHint": "Active lo que necesita ahora. Lo que quede apagado puede activarse después desde Administración.",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
     "email": "Correo electrónico",

@@ -1,74 +1,138 @@
 <div class="auth-page">
-  <mat-card appearance="outlined" class="auth-card" [class.auth-card--wide]="step() === 2">
+  <mat-card appearance="outlined" class="auth-card" [class.auth-card--wide]="step() === 2 || step() === 3">
     <div class="auth-card__header">
       <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
     </div>
     <p class="auth-card__status">
-      @if (step() === 1) {
-        {{ 'auth.step1Title' | translate }}
-      } @else {
-        {{ 'auth.step2Title' | translate }}
+      @switch (step()) {
+        @case (0) { {{ 'auth.setupForkTitle' | translate }} }
+        @case (1) { {{ 'auth.step1Title' | translate }} }
+        @case (2) { {{ 'auth.step2Title' | translate }} }
+        @case (3) { {{ 'auth.modulesTitle' | translate }} }
       }
     </p>
 
-    @if (step() === 1) {
-      <form class="auth-card__form" [formGroup]="accountForm" (ngSubmit)="nextStep()">
-        <div class="auth-card__row">
-          <app-input [label]="'auth.firstName' | translate" formControlName="firstName" autocomplete="given-name" [required]="true" />
-          <app-input [label]="'auth.lastName' | translate" formControlName="lastName" autocomplete="family-name" [required]="true" />
-        </div>
-
-        <app-input [label]="'auth.email' | translate" type="email" formControlName="email" autocomplete="email" [required]="true" />
-        <app-input [label]="'auth.password' | translate" type="password" formControlName="password"
-          autocomplete="new-password" [required]="true" />
-        <app-input [label]="'auth.confirmPassword' | translate" type="password" formControlName="confirmPassword"
-          autocomplete="new-password" [required]="true" />
-
-        <app-validation-button [violations]="accountViolations">
-        <button mat-flat-button color="primary" type="submit"
-          [disabled]="accountForm.invalid">
-          {{ 'common.next' | translate }}
-        </button>
-        </app-validation-button>
-      </form>
-    } @else {
-      <form class="auth-card__form" [formGroup]="companyForm" (ngSubmit)="onSubmit()">
-        <app-input [label]="'auth.companyName' | translate" formControlName="companyName" [required]="true" />
-
-        <div class="auth-card__row">
-          <app-input [label]="'common.phone' | translate" formControlName="companyPhone" mask="phone" />
-          <app-input [label]="'common.email' | translate" formControlName="companyEmail" type="email" />
-        </div>
-
-        <div class="auth-card__row">
-          <app-input [label]="'auth.ein' | translate" formControlName="companyEin" mask="ein" [placeholder]="'auth.einPlaceholder' | translate" />
-          <app-input [label]="'auth.website' | translate" formControlName="companyWebsite" [placeholder]="'auth.websitePlaceholder' | translate" />
-        </div>
-
-        <h4 class="auth-card__section-title">{{ 'auth.primaryLocation' | translate }}</h4>
-
-        <app-input [label]="'auth.locationName' | translate" formControlName="locationName" />
-
-        <app-address-form
-          formControlName="address"
-          [showVerify]="false"
-          [fixedCountry]="'US'"
-          [compact]="true" />
-
-        <div class="auth-card__buttons">
-          <button mat-stroked-button type="button" (click)="prevStep()">{{ 'common.back' | translate }}</button>
-          <app-validation-button [violations]="companyViolations" [loading]="loading()">
-          <button mat-flat-button color="primary" type="submit"
-            [disabled]="companyForm.invalid || loading()">
-            @if (loading()) {
-              {{ 'auth.settingUp' | translate }}
-            } @else {
-              {{ 'auth.completeSetup' | translate }}
-            }
+    @switch (step()) {
+      <!-- Step 0: the fork — choose the setup path (mutually exclusive) -->
+      @case (0) {
+        <div class="setup-fork">
+          <button type="button" class="setup-fork__option" (click)="choosePath('quick')">
+            <span class="material-icons-outlined setup-fork__icon">bolt</span>
+            <span class="setup-fork__name">{{ 'auth.fork.quickName' | translate }}</span>
+            <span class="setup-fork__desc">{{ 'auth.fork.quickDesc' | translate }}</span>
           </button>
-          </app-validation-button>
+          <button type="button" class="setup-fork__option" (click)="choosePath('full')">
+            <span class="material-icons-outlined setup-fork__icon">explore</span>
+            <span class="setup-fork__name">{{ 'auth.fork.fullName' | translate }}</span>
+            <span class="setup-fork__desc">{{ 'auth.fork.fullDesc' | translate }}</span>
+          </button>
         </div>
-      </form>
+      }
+
+      <!-- Step 1: admin account -->
+      @case (1) {
+        <form class="auth-card__form" [formGroup]="accountForm" (ngSubmit)="toCompany()">
+          <div class="auth-card__row">
+            <app-input [label]="'auth.firstName' | translate" formControlName="firstName" autocomplete="given-name" [required]="true" />
+            <app-input [label]="'auth.lastName' | translate" formControlName="lastName" autocomplete="family-name" [required]="true" />
+          </div>
+
+          <app-input [label]="'auth.email' | translate" type="email" formControlName="email" autocomplete="email" [required]="true" />
+          <app-input [label]="'auth.password' | translate" type="password" formControlName="password"
+            autocomplete="new-password" [required]="true" />
+          <app-input [label]="'auth.confirmPassword' | translate" type="password" formControlName="confirmPassword"
+            autocomplete="new-password" [required]="true" />
+
+          <div class="auth-card__buttons">
+            <button mat-stroked-button type="button" (click)="back()">{{ 'common.back' | translate }}</button>
+            <app-validation-button [violations]="accountViolations">
+            <button mat-flat-button color="primary" type="submit"
+              [disabled]="accountForm.invalid">
+              {{ 'common.next' | translate }}
+            </button>
+            </app-validation-button>
+          </div>
+        </form>
+      }
+
+      <!-- Step 2: company details -->
+      @case (2) {
+        <form class="auth-card__form" [formGroup]="companyForm" (ngSubmit)="submitCompany()">
+          <app-input [label]="'auth.companyName' | translate" formControlName="companyName" [required]="true" />
+
+          <div class="auth-card__row">
+            <app-input [label]="'common.phone' | translate" formControlName="companyPhone" mask="phone" />
+            <app-input [label]="'common.email' | translate" formControlName="companyEmail" type="email" />
+          </div>
+
+          <div class="auth-card__row">
+            <app-input [label]="'auth.ein' | translate" formControlName="companyEin" mask="ein" [placeholder]="'auth.einPlaceholder' | translate" />
+            <app-input [label]="'auth.website' | translate" formControlName="companyWebsite" [placeholder]="'auth.websitePlaceholder' | translate" />
+          </div>
+
+          <h4 class="auth-card__section-title">{{ 'auth.primaryLocation' | translate }}</h4>
+
+          <app-input [label]="'auth.locationName' | translate" formControlName="locationName" />
+
+          <app-address-form
+            formControlName="address"
+            [showVerify]="false"
+            [fixedCountry]="'US'"
+            [compact]="true" />
+
+          <div class="auth-card__buttons">
+            <button mat-stroked-button type="button" (click)="back()">{{ 'common.back' | translate }}</button>
+            <app-validation-button [violations]="companyViolations" [loading]="loading()">
+            <button mat-flat-button color="primary" type="submit"
+              [disabled]="companyForm.invalid || loading()">
+              @if (loading()) {
+                {{ 'auth.settingUp' | translate }}
+              } @else if (path() === 'quick') {
+                {{ 'common.next' | translate }}
+              } @else {
+                {{ 'auth.completeSetup' | translate }}
+              }
+            </button>
+            </app-validation-button>
+          </div>
+        </form>
+      }
+
+      <!-- Step 3: module picker (quick branch) -->
+      @case (3) {
+        <div class="auth-card__form">
+          <p class="setup-modules__hint">{{ 'auth.modulesHint' | translate }}</p>
+          <div class="setup-modules">
+            @for (m of moduleCards(); track m.id) {
+              <button type="button" class="setup-module" [class.setup-module--on]="m.selected"
+                [attr.aria-pressed]="m.selected" (click)="toggleModule(m.id)">
+                <span class="material-icons-outlined setup-module__check">
+                  {{ m.selected ? 'check_box' : 'check_box_outline_blank' }}
+                </span>
+                <span class="setup-module__body">
+                  <span class="setup-module__name">{{ m.name }}</span>
+                  <span class="setup-module__summary">{{ m.summary }}</span>
+                  @if (m.prerequisiteNote) {
+                    <span class="setup-module__prereq">{{ m.prerequisiteNote }}</span>
+                  }
+                </span>
+              </button>
+            }
+          </div>
+
+          <div class="auth-card__buttons">
+            <button mat-stroked-button type="button" (click)="back()">{{ 'common.back' | translate }}</button>
+            <button mat-flat-button color="primary" type="button"
+              [disabled]="loading()" (click)="onSubmit()">
+              @if (loading()) {
+                {{ 'auth.settingUp' | translate }}
+              } @else {
+                {{ 'auth.completeSetup' | translate }}
+              }
+            </button>
+          </div>
+        </div>
+      }
     }
   </mat-card>
 </div>

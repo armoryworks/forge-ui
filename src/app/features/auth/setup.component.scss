@@ -61,3 +61,115 @@
     }
   }
 }
+
+// ── Step 0: the fork (two mutually-exclusive doors) ──
+.setup-fork {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $sp-md;
+
+  &__option {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $sp-xs;
+    padding: $sp-lg;
+    text-align: left;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    &:hover,
+    &:focus-visible {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+  }
+
+  &__icon {
+    font-size: $icon-size-xl;
+    color: var(--primary);
+  }
+
+  &__name {
+    font-size: $font-size-lg;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__desc {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+}
+
+// ── Step 3: module checklist ──
+.setup-modules {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $sp-sm;
+  margin-bottom: $sp-md;
+
+  &__hint {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+    margin: 0 0 $sp-sm;
+  }
+}
+
+.setup-module {
+  display: flex;
+  align-items: flex-start;
+  gap: $sp-md;
+  padding: $sp-md;
+  text-align: left;
+  background: var(--surface);
+  border: $border-width-thin solid var(--border);
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--primary);
+  }
+
+  &--on {
+    border-color: var(--primary);
+    background: var(--primary-light);
+  }
+
+  &__check {
+    font-size: $icon-size-lg;
+    color: var(--text-muted);
+    flex-shrink: 0;
+
+    .setup-module--on & {
+      color: var(--primary);
+    }
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    min-width: 0;
+  }
+
+  &__name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  &__summary {
+    font-size: $font-size-sm;
+    color: var(--text-secondary);
+  }
+
+  &__prereq {
+    font-size: $font-size-xs;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}

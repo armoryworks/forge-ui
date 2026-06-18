@@ -52,6 +52,16 @@ export interface SetupRequest {
   locationCity?: string;
   locationState?: string;
   locationPostalCode?: string;
+  // Quick-start branch: the module ids the shop chose. Omitted on the Full branch.
+  selectedModules?: string[];
+}
+
+export interface SetupModule {
+  id: string;
+  name: string;
+  summary: string;
+  prerequisiteNote: string;
+  defaultSelected: boolean;
 }
 
 export interface CompleteSetupRequest {
@@ -129,6 +139,11 @@ export class AuthService {
 
   checkSetupStatus(): Observable<SetupStatusResponse> {
     return this.http.get<SetupStatusResponse>(`${environment.apiUrl}/auth/status`);
+  }
+
+  // The first-run module picker list (anonymous — shown during setup).
+  getSetupModules(): Observable<SetupModule[]> {
+    return this.http.get<SetupModule[]>(`${environment.apiUrl}/auth/setup/modules`);
   }
 
   setup(data: SetupRequest): Observable<LoginResponse> {

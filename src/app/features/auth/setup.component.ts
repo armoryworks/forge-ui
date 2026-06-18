@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, FormGroup, FormControl, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { AuthService } from '../../shared/services/auth.service';
+import { AuthService, SetupModule } from '../../shared/services/auth.service';
 import { BrandingService } from '../../shared/services/branding.service';
 import { InputComponent } from '../../shared/components/input/input.component';
 import { AddressFormComponent } from '../../shared/components/address-form/address-form.component';
@@ -37,8 +37,20 @@ export class SetupComponent {
   private readonly translate = inject(TranslateService);
   protected readonly branding = inject(BrandingService);
 
-  protected readonly step = signal(1);
+  // step 0 = the fork (choose path), 1 = admin account, 2 = company,
+  // 3 = module picker (quick branch only). The first step is a mutually
+  // exclusive fork; the chosen path drives the rest of the flow.
+  protected readonly step = signal(0);
+  protected readonly path = signal<'quick' | 'full' | null>(null);
   protected readonly loading = this.loadingService.isLoading;
+
+  // ── Module picker (quick branch) ──
+  protected readonly modules = signal<SetupModule[]>([]);
+  protected readonly selectedModuleIds = signal<Set<string>>(new Set());
+  protected readonly moduleCards = computed(() => {
+    const selected = this.selectedModuleIds();
+    return this.modules().map(m => ({ ...m, selected: selected.has(m.id) }));
+  });
 
   // Step 1: Admin Account
   // confirmPassword catches typos on the masked password field — this is
@@ -101,21 +113,68 @@ export class SetupComponent {
     address: 'Address',
   });
 
-  protected nextStep(): void {
+  // The fork. Quick = pick modules yourself; Full = guided discovery.
+  protected choosePath(path: 'quick' | 'full'): void {
+    this.path.set(path);
+    if (path === 'quick') this.loadModules();
+    this.step.set(1);
+  }
+
+  private loadModules(): void {
+    if (this.modules().length > 0) return;
+    this.authService.getSetupModules().subscribe({
+      next: (mods) => {
+        this.modules.set(mods);
+        this.selectedModuleIds.set(new Set(mods.filter(m => m.defaultSelected).map(m => m.id)));
+      },
+      error: () => { /* leave empty; the user can still finish on catalog defaults */ },
+    });
+  }
+
+  protected toggleModule(id: string): void {
+    const next = new Set(this.selectedModuleIds());
+    if (next.has(id)) next.delete(id); else next.add(id);
+    this.selectedModuleIds.set(next);
+  }
+
+  // Step 1 (account) -> step 2 (company).
+  protected toCompany(): void {
     if (this.accountForm.invalid) return;
     this.step.set(2);
   }
 
-  protected prevStep(): void {
-    this.step.set(1);
+  // Step 2 (company) -> step 3 (modules), quick branch only.
+  protected toModules(): void {
+    if (this.companyForm.invalid) return;
+    this.step.set(3);
+  }
+
+  // Step 2 primary action: quick branch advances to the module picker; full
+  // branch finishes here and routes into guided discovery.
+  protected submitCompany(): void {
+    if (this.path() === 'quick') this.toModules();
+    else this.onSubmit();
+  }
+
+  // Back: from step 1 returns to the fork (re-choose path); otherwise one step.
+  protected back(): void {
+    const s = this.step();
+    if (s <= 1) {
+      this.step.set(0);
+      this.path.set(null);
+    } else {
+      this.step.set(s - 1);
+    }
   }
 
   protected onSubmit(): void {
-    if (this.accountForm.invalid) return;
+    if (this.accountForm.invalid || this.companyForm.invalid) return;
 
     const account = this.accountForm.getRawValue();
     const company = this.companyForm.getRawValue();
     const address = company.address as Record<string, string> | null;
+    const isQuick = this.path() === 'quick';
+    const selectedModules = isQuick ? Array.from(this.selectedModuleIds()) : undefined;
 
     this.loadingService.track(this.translate.instant('auth.settingUp'), this.authService.setup({
       email: account.email!,
@@ -133,18 +192,28 @@ export class SetupComponent {
       locationCity: address?.['city'] || undefined,
       locationState: address?.['state'] || undefined,
       locationPostalCode: address?.['postalCode'] || undefined,
+      selectedModules,
     })).subscribe({
-      // After the first admin is created, route into the capability
-      // discovery wizard so the install starts with a thought-through
-      // capability set rather than the bare Custom default. The wizard
-      // applies its chosen preset then routes onward; if the user bails
-      // out, they'll still land in the admin area authenticated. Falls
-      // back to the role-aware default route if the discovery route ever
-      // moves or is gated out.
-      next: () => this.router.navigate(['/admin/discovery'])
-        .then((ok) => { if (!ok) this.router.navigate([this.layout.getDefaultRoute()]); }),
+      next: () => {
+        // Quick branch: land on the home that fits the chosen modules. Full
+        // branch: route into the guided discovery wizard so the install starts
+        // with a thought-through capability set. Either falls back to the
+        // role-aware default route if navigation is blocked.
+        const target = isQuick ? this.landingRouteFor(this.selectedModuleIds()) : '/admin/discovery';
+        this.router.navigate([target])
+          .then((ok) => { if (!ok) this.router.navigate([this.layout.getDefaultRoute()]); });
+      },
       error: (err: HttpErrorResponse) => this.handleError(err),
     });
+  }
+
+  // Inventory-only installs land on the inventory home; broader selections use
+  // the role-aware default route (the dashboard).
+  private landingRouteFor(selected: Set<string>): string {
+    if (selected.has('inventory') && !selected.has('production') && !selected.has('sales')) {
+      return '/inventory';
+    }
+    return this.layout.getDefaultRoute();
   }
 
   private handleError(err: HttpErrorResponse): void {
