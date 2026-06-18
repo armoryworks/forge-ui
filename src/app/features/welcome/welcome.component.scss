@@ -94,6 +94,171 @@
   color: var(--text-secondary);
 }
 
+.welcome__question {
+  margin: 0;
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.welcome__hint {
+  margin: -$sp-md 0 0;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+}
+
+.welcome__choices {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.welcome__choice {
+  display: flex;
+  align-items: center;
+  gap: $sp-lg;
+  width: 100%;
+  padding: $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: $font-family-primary;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+    background: var(--surface);
+  }
+}
+
+.welcome__choice-icon {
+  flex-shrink: 0;
+  font-size: $icon-size-xl;
+  color: var(--primary);
+}
+
+.welcome__choice-text {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-xs;
+  flex: 1;
+  min-width: 0;
+}
+
+.welcome__choice-label {
+  font-size: $font-size-md;
+  font-weight: 600;
+}
+
+.welcome__choice-desc {
+  font-size: $font-size-sm;
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+
+.welcome__choice-arrow {
+  flex-shrink: 0;
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+}
+
+.welcome__back {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: $sp-xs;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: $font-family-primary;
+  font-size: $font-size-sm;
+  cursor: pointer;
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
+.welcome__addons {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+}
+
+.welcome__addon {
+  display: flex;
+  align-items: center;
+  gap: $sp-md;
+  width: 100%;
+  padding: $sp-md $sp-lg;
+  border: $border-width-thin solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  font-family: $font-family-primary;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color $transition-fast, background $transition-fast;
+
+  &:hover {
+    border-color: var(--primary);
+  }
+}
+
+.welcome__addon--on {
+  border-color: var(--primary);
+  background: var(--primary-light);
+
+  .welcome__addon-check {
+    color: var(--primary);
+  }
+}
+
+.welcome__addon-check {
+  flex-shrink: 0;
+  font-size: $icon-size-lg;
+  color: var(--text-muted);
+}
+
+.welcome__addon-icon {
+  flex-shrink: 0;
+  font-size: $icon-size-md;
+  color: var(--text-secondary);
+}
+
+.welcome__addon-label {
+  flex: 1;
+  font-size: $font-size-md;
+  font-weight: 500;
+}
+
+.welcome__cta {
+  align-self: flex-start;
+  border: none;
+}
+
+.welcome__everything {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: $font-family-primary;
+  font-size: $font-size-sm;
+  text-decoration: underline;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--primary);
+  }
+}
+
 .welcome__caveat {
   display: flex;
   align-items: flex-start;

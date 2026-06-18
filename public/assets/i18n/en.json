@@ -6886,7 +6886,39 @@
     "caveat": "This is a public demo. Data resets periodically and is shared with everyone signed in.",
     "ctaSignIn": "Sign in to the demo",
     "footerLicense": "Apache 2.0 licensed open source",
-    "footerGithub": "View on GitHub"
+    "footerGithub": "View on GitHub",
+    "setup": {
+      "focusTitle": "What do you want to focus on?",
+      "focusHint": "Pick the closest fit — you can turn more on later.",
+      "focus": {
+        "stock": {
+          "label": "Track what's in stock",
+          "desc": "See on-hand quantities, receive items, and use them."
+        },
+        "buying": {
+          "label": "Buy and stock materials",
+          "desc": "Order from suppliers and receive parts into stock."
+        },
+        "selling": {
+          "label": "Sell and ship to customers",
+          "desc": "Quote, take orders, and ship them out."
+        },
+        "making": {
+          "label": "Make or build products",
+          "desc": "Turn materials into finished products and track the work."
+        }
+      },
+      "addonsTitle": "Anything else you'd like to try?",
+      "addonsHint": "Optional — turn these on if they sound useful.",
+      "addon": {
+        "invoicing": "Send invoices to customers",
+        "quality": "Quality checks and inspections",
+        "planning": "Scheduling and planning"
+      },
+      "back": "Back",
+      "explore": "Explore the demo",
+      "everythingLink": "Or just show me everything"
+    }
   },
   "workflow": {
     "parts": {

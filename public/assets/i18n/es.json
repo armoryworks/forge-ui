@@ -6879,7 +6879,39 @@
     "caveat": "Esta es una demo pública. Los datos se reinician periódicamente y se comparten con todos los usuarios conectados.",
     "ctaSignIn": "Iniciar sesión en la demo",
     "footerLicense": "Software libre con licencia Apache 2.0",
-    "footerGithub": "Ver en GitHub"
+    "footerGithub": "Ver en GitHub",
+    "setup": {
+      "focusTitle": "¿En qué te quieres enfocar?",
+      "focusHint": "Elige lo más parecido — puedes activar más después.",
+      "focus": {
+        "stock": {
+          "label": "Controlar el inventario",
+          "desc": "Ver las cantidades disponibles, recibir artículos y usarlos."
+        },
+        "buying": {
+          "label": "Comprar y almacenar materiales",
+          "desc": "Pedir a proveedores y recibir piezas en el inventario."
+        },
+        "selling": {
+          "label": "Vender y enviar a clientes",
+          "desc": "Cotizar, tomar pedidos y enviarlos."
+        },
+        "making": {
+          "label": "Fabricar o ensamblar productos",
+          "desc": "Convertir materiales en productos terminados y seguir el trabajo."
+        }
+      },
+      "addonsTitle": "¿Algo más que quieras probar?",
+      "addonsHint": "Opcional — actívalo si te resulta útil.",
+      "addon": {
+        "invoicing": "Enviar facturas a clientes",
+        "quality": "Controles e inspecciones de calidad",
+        "planning": "Programación y planificación"
+      },
+      "back": "Atrás",
+      "explore": "Explorar la demo",
+      "everythingLink": "O muéstrame todo"
+    }
   },
   "workflow": {
     "parts": {

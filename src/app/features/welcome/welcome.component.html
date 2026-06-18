@@ -7,19 +7,62 @@
 
     <h1 class="welcome__tagline">{{ 'welcomePage.tagline' | translate }}</h1>
 
-    <p class="welcome__lede">{{ 'welcomePage.lede' | translate }}</p>
+    @if (step() === 'focus') {
+      <p class="welcome__question">{{ 'welcomePage.setup.focusTitle' | translate }}</p>
+      <p class="welcome__hint">{{ 'welcomePage.setup.focusHint' | translate }}</p>
+
+      <div class="welcome__choices">
+        @for (choice of focusChoices; track choice.id) {
+          <button type="button" class="welcome__choice" (click)="chooseFocus(choice)">
+            <span class="material-icons-outlined welcome__choice-icon" aria-hidden="true">{{ choice.icon }}</span>
+            <span class="welcome__choice-text">
+              <span class="welcome__choice-label">{{ 'welcomePage.setup.focus.' + choice.id + '.label' | translate }}</span>
+              <span class="welcome__choice-desc">{{ 'welcomePage.setup.focus.' + choice.id + '.desc' | translate }}</span>
+            </span>
+            <span class="material-icons-outlined welcome__choice-arrow" aria-hidden="true">chevron_right</span>
+          </button>
+        }
+      </div>
+    } @else {
+      <button type="button" class="welcome__back" (click)="back()">
+        <span class="material-icons-outlined" aria-hidden="true">arrow_back</span>
+        {{ 'welcomePage.setup.back' | translate }}
+      </button>
+
+      <p class="welcome__question">{{ 'welcomePage.setup.addonsTitle' | translate }}</p>
+      <p class="welcome__hint">{{ 'welcomePage.setup.addonsHint' | translate }}</p>
+
+      <div class="welcome__addons">
+        @for (addon of addonRows(); track addon.id) {
+          <button
+            type="button"
+            class="welcome__addon"
+            [class.welcome__addon--on]="addon.on"
+            [attr.aria-pressed]="addon.on"
+            (click)="toggleAddon(addon.module)">
+            <span class="material-icons-outlined welcome__addon-check" aria-hidden="true">
+              {{ addon.on ? 'check_box' : 'check_box_outline_blank' }}
+            </span>
+            <span class="material-icons-outlined welcome__addon-icon" aria-hidden="true">{{ addon.icon }}</span>
+            <span class="welcome__addon-label">{{ 'welcomePage.setup.addon.' + addon.id | translate }}</span>
+          </button>
+        }
+      </div>
+
+      <button type="button" class="welcome__cta welcome__cta--primary" (click)="explore()">
+        <span class="material-icons-outlined" aria-hidden="true">arrow_forward</span>
+        {{ 'welcomePage.setup.explore' | translate }}
+      </button>
+    }
+
+    <button type="button" class="welcome__everything" (click)="showEverything()">
+      {{ 'welcomePage.setup.everythingLink' | translate }}
+    </button>
 
     <p class="welcome__caveat">
       <span class="material-icons-outlined" aria-hidden="true">info</span>
       {{ 'welcomePage.caveat' | translate }}
     </p>
-
-    <div class="welcome__cta-row">
-      <a class="welcome__cta welcome__cta--primary" routerLink="/login">
-        <span class="material-icons-outlined" aria-hidden="true">login</span>
-        {{ 'welcomePage.ctaSignIn' | translate }}
-      </a>
-    </div>
 
     <footer class="welcome__footer">
       <span>{{ 'welcomePage.footerLicense' | translate }}</span>
