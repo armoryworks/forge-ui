@@ -1,0 +1,1267 @@
+{
+  "capabilities": [
+    {
+      "code": "CAP-IDEN-AUTH-PASSWORD",
+      "area": "IDEN",
+      "name": "Password authentication",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-IDEN-AUTH-MFA",
+      "area": "IDEN",
+      "name": "Multi-factor authentication (TOTP)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-IDEN-AUTH-SSO",
+      "area": "IDEN",
+      "name": "Single sign-on (Google / Microsoft / OIDC)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-IDEN-AUTH-API-KEYS",
+      "area": "IDEN",
+      "name": "BI / integration API keys",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-IDEN-AUTH-KIOSK",
+      "area": "IDEN",
+      "name": "Kiosk / RFID / NFC / barcode auth tier",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-IDEN-USERS",
+      "area": "IDEN",
+      "name": "System user management",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-IDEN-ROLES",
+      "area": "IDEN",
+      "name": "Role-based access control",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-IDEN-TENANT-CONFIG",
+      "area": "IDEN",
+      "name": "Company / tenant configuration",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "area": "IDEN",
+      "name": "System-wide audit log",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CUSTOMERS",
+      "area": "MD",
+      "name": "Customer master",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CUSTOMER-CONTACTS",
+      "area": "MD",
+      "name": "Customer \u2014 multiple contacts",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CUSTOMER-ADDRESSES",
+      "area": "MD",
+      "name": "Customer \u2014 multiple addresses",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CUSTOMER-INTERACTIONS",
+      "area": "MD",
+      "name": "Customer \u2014 interaction log (CRM)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MD-VENDORS",
+      "area": "MD",
+      "name": "Vendor master",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-PARTS",
+      "area": "MD",
+      "name": "Part / item master",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-BOM",
+      "area": "MD",
+      "name": "Bill of materials",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-ROUTING",
+      "area": "MD",
+      "name": "Operation routings",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-WORKCENTERS",
+      "area": "MD",
+      "name": "Work centers",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-LOCATIONS",
+      "area": "MD",
+      "name": "Locations / plants",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CALENDARS",
+      "area": "MD",
+      "name": "Calendars (shifts, holidays, downtime)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-EMPLOYEES",
+      "area": "MD",
+      "name": "Employee master",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-ASSETS",
+      "area": "MD",
+      "name": "Fixed asset master",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-PRICELIST",
+      "area": "MD",
+      "name": "Customer price lists",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MD-UOM",
+      "area": "MD",
+      "name": "Units of measure",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CURRENCIES",
+      "area": "MD",
+      "name": "Currencies and exchange rates",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-TAXCODES",
+      "area": "MD",
+      "name": "Sales tax codes / VAT codes",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MD-CONTRACTS-CONSIGNMENT",
+      "area": "MD",
+      "name": "Consignment / customer-managed contracts",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MD-ECO",
+      "area": "MD",
+      "name": "Engineering change orders",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MD-PART-COMPLIANCE",
+      "area": "MD",
+      "name": "Part \u2014 compliance fields",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-P2P-PO",
+      "area": "P2P",
+      "name": "Purchase orders",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-P2P-BILL",
+      "area": "P2P",
+      "name": "Vendor bills \u002B 3-way match",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-P2P-PAY",
+      "area": "P2P",
+      "name": "Vendor payments \u002B bank transmissions",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-P2P-RFQ",
+      "area": "P2P",
+      "name": "Request for quote (multi-vendor sourcing)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-P2P-RECEIVE",
+      "area": "P2P",
+      "name": "Receiving \u002B 3-way match",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-P2P-AUTOPO",
+      "area": "P2P",
+      "name": "Automated PO generation (replenishment)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-P2P-DROPSHIP",
+      "area": "P2P",
+      "name": "Drop-ship (vendor-direct-to-customer)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-P2P-BACKTOBACK",
+      "area": "P2P",
+      "name": "Back-to-back (PO triggered by SO)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-P2P-SUBCONTRACT",
+      "area": "P2P",
+      "name": "Subcontract send-out and receive-back",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-P2P-APPROVALS",
+      "area": "P2P",
+      "name": "PO / requisition approval workflow",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-LEAD",
+      "area": "O2C",
+      "name": "Lead management",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-CREDIT-LIMITS",
+      "area": "O2C",
+      "name": "Credit limits / hold / terms enforcement",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-QUOTE",
+      "area": "O2C",
+      "name": "Quote / estimate",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-CPQ",
+      "area": "O2C",
+      "name": "Configure-price-quote",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-SO",
+      "area": "O2C",
+      "name": "Sales orders",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-RECURRING",
+      "area": "O2C",
+      "name": "Recurring / subscription orders",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-PICKPACK",
+      "area": "O2C",
+      "name": "Pick / pack",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-SHIP",
+      "area": "O2C",
+      "name": "Shipment \u002B carrier integration",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-INVOICE",
+      "area": "O2C",
+      "name": "Customer invoice (operational)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-CASH",
+      "area": "O2C",
+      "name": "Cash receipt / payment application",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-O2C-COLLECTIONS",
+      "area": "O2C",
+      "name": "AR collections / dunning",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-CREDITMEMO",
+      "area": "O2C",
+      "name": "Customer credit memo (standalone)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-RMA",
+      "area": "O2C",
+      "name": "Customer return / RMA",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-O2C-DELIVERABLE",
+      "area": "O2C",
+      "name": "Deliverable / artifact tracking",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MFG-WO-RELEASE",
+      "area": "MFG",
+      "name": "Work order release",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MFG-MATL-ISSUE",
+      "area": "MFG",
+      "name": "Material issue to WO",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MFG-BACKFLUSH",
+      "area": "MFG",
+      "name": "Backflush completion",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MFG-LABOR",
+      "area": "MFG",
+      "name": "Labor reporting / time entry to WO",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MFG-MULTIOP",
+      "area": "MFG",
+      "name": "Multi-operation routing execution",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MFG-COMPLETE",
+      "area": "MFG",
+      "name": "WO completion \u002B scrap \u002B rework",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MFG-WOVARIANCE",
+      "area": "MFG",
+      "name": "WO variance review",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-COSTING-TIER2-DEPTRATES",
+      "area": "MFG",
+      "name": "Tier 2 \u2014 Departmental cost rates",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-COSTING-TIER3-ABC",
+      "area": "MFG",
+      "name": "Tier 3 \u2014 Activity-based costing",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MFG-SHOPFLOOR",
+      "area": "MFG",
+      "name": "Shop-floor execution surface",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-MFG-STOPPAGE",
+      "area": "MFG",
+      "name": "Stoppage / downtime tracking",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MFG-MACHINE-CONNECT",
+      "area": "MFG",
+      "name": "Machine data ingest (IoT)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-MRP",
+      "area": "PLAN",
+      "name": "Material requirements planning",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-MPS",
+      "area": "PLAN",
+      "name": "Master production schedule",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-FORECAST",
+      "area": "PLAN",
+      "name": "Demand forecast",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-CAPACITY",
+      "area": "PLAN",
+      "name": "Finite capacity scheduling",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-SAFETYSTOCK",
+      "area": "PLAN",
+      "name": "Safety stock \u002B reorder point",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-ATP",
+      "area": "PLAN",
+      "name": "Available-to-promise",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PLAN-ABC",
+      "area": "PLAN",
+      "name": "ABC classification",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-CORE",
+      "area": "INV",
+      "name": "Core inventory tracking",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-INV-MULTILOC",
+      "area": "INV",
+      "name": "Multi-location inventory",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-CYCLECOUNT",
+      "area": "INV",
+      "name": "Cycle counting",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-INV-ADJUST",
+      "area": "INV",
+      "name": "Manual inventory override",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-INV-PHYSICAL",
+      "area": "INV",
+      "name": "Annual physical inventory",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-LOTS",
+      "area": "INV",
+      "name": "Lot tracking \u002B expiry (FEFO)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-SERIALS",
+      "area": "INV",
+      "name": "Serial number tracking",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-RESERVE",
+      "area": "INV",
+      "name": "Inventory reservation",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-PICKWAVE",
+      "area": "INV",
+      "name": "Pick wave / wave picking",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-INV-HAZMAT",
+      "area": "INV",
+      "name": "Hazmat / SDS classification",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-INSPECTION",
+      "area": "QC",
+      "name": "Inspection plans \u002B receiving inspection",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-NCR",
+      "area": "QC",
+      "name": "Non-conformance \u002B disposition",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-CAPA",
+      "area": "QC",
+      "name": "Corrective and preventive action",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-FMEA",
+      "area": "QC",
+      "name": "Failure mode and effects analysis",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-PPAP",
+      "area": "QC",
+      "name": "Production part approval process",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-SPC",
+      "area": "QC",
+      "name": "Statistical process control",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-GAGE",
+      "area": "QC",
+      "name": "Gage / measurement device calibration",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-RECALL",
+      "area": "QC",
+      "name": "Recall / lot trace",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-COA",
+      "area": "QC",
+      "name": "Certificate of analysis (lot)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-QC-COMPLIANCE-FORMS",
+      "area": "QC",
+      "name": "Compliance form pipeline (W-4, I-9, state withholding)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MAINT-PM",
+      "area": "MAINT",
+      "name": "Preventive maintenance scheduling",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MAINT-BREAKDOWN",
+      "area": "MAINT",
+      "name": "Breakdown / corrective WO",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MAINT-PREDICTIVE",
+      "area": "MAINT",
+      "name": "Predictive maintenance (ML)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-MAINT-ASSETLIFECYCLE",
+      "area": "MAINT",
+      "name": "Asset transfer \u002B retirement \u002B custodian",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-ACCT-EXTERNAL",
+      "area": "ACCT",
+      "name": "External accounting integration",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ACCT-BUILTIN",
+      "area": "ACCT",
+      "name": "Built-in lightweight accounting (CRUD)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-ACCT-FULLGL",
+      "area": "ACCT",
+      "name": "Built-in full general ledger",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ACCT-EXPENSES",
+      "area": "ACCT",
+      "name": "Expense entry",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-ACCT-PERIOD",
+      "area": "ACCT",
+      "name": "Period close \u002B lock",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ACCT-DEPRECIATION",
+      "area": "ACCT",
+      "name": "Asset depreciation schedule",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ACCT-FXREVAL",
+      "area": "ACCT",
+      "name": "Multi-currency revaluation",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ACCT-QBO-EXPORT",
+      "area": "ACCT",
+      "name": "QuickBooks journal-summary export",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PAYROLL-RUN",
+      "area": "ACCT",
+      "name": "Payroll run \u002B journal posting",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-BANK-NACHA",
+      "area": "P2P",
+      "name": "NACHA / ACH payment origination",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-ACCT-MIGRATION",
+      "area": "ACCT",
+      "name": "Accounting mode migration wizard",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-HR-HIRE",
+      "area": "HR",
+      "name": "Hire \u002B onboarding workflow",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-HR-TERMINATION",
+      "area": "HR",
+      "name": "Employee termination \u002B offboarding",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-HR-LEAVE",
+      "area": "HR",
+      "name": "PTO / leave management",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-HR-TIMETRACK",
+      "area": "HR",
+      "name": "Time tracking \u002B clock events",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-HR-SHIFTS",
+      "area": "HR",
+      "name": "Shift management \u002B assignment",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-HR-PAYROLL",
+      "area": "HR",
+      "name": "Payroll posting / feed",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-HR-TRAINING",
+      "area": "HR",
+      "name": "Training \u002B certification tracking",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-HR-REVIEW",
+      "area": "HR",
+      "name": "Performance reviews",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-RPT-OPERATIONAL",
+      "area": "RPT",
+      "name": "Operational reports (sales / vendor / labor / scrap / cycle / stockout)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-RPT-FINANCIALS",
+      "area": "RPT",
+      "name": "Financial statements (P\u0026L, BS, CF, TB)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-RPT-INVVAL",
+      "area": "RPT",
+      "name": "Inventory valuation",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-RPT-MRPEX",
+      "area": "RPT",
+      "name": "MRP exception report",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-RPT-OEE",
+      "area": "RPT",
+      "name": "Overall equipment effectiveness",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-RPT-DASHBOARDS",
+      "area": "RPT",
+      "name": "Dashboards (multi-widget)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-PERMS-MATRIX",
+      "area": "CROSS",
+      "name": "Permission matrix enforcement",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-ACTIVITY-LOG",
+      "area": "CROSS",
+      "name": "Per-entity activity log",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-LIST-UX",
+      "area": "CROSS",
+      "name": "List view UX (search / filter / sort / paginate)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-BULK-OPS",
+      "area": "CROSS",
+      "name": "Bulk operations",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-DOCS",
+      "area": "CROSS",
+      "name": "Document generation (PO / invoice / packing slip / BOL / statement / RMA / CM)",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-ATTACHMENTS",
+      "area": "CROSS",
+      "name": "File attachments to records",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-NOTIFICATIONS",
+      "area": "CROSS",
+      "name": "Notifications \u0026 alerts",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-INTEG-EDI",
+      "area": "CROSS",
+      "name": "EDI document exchange (850/855/856/810)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-CROSS-INTEG-FILE",
+      "area": "CROSS",
+      "name": "File-based import / export",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-CROSS-WEBHOOKS",
+      "area": "CROSS",
+      "name": "Outbound webhooks",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-CROSS-BI-EXPORT",
+      "area": "CROSS",
+      "name": "BI tool data export",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-CROSS-CONCURRENCY",
+      "area": "CROSS",
+      "name": "Optimistic locking \u002B conflict resolution",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-EXT-KANBAN",
+      "area": "EXT",
+      "name": "Kanban-style job board",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-EXT-KANBAN-REPLENISHMENT",
+      "area": "EXT",
+      "name": "Replenishment kanban",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-MOBILE",
+      "area": "EXT",
+      "name": "Mobile-first parallel UI",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-EXT-SHOPFLOOR-KIOSK",
+      "area": "EXT",
+      "name": "Shop-floor kiosk surface",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CHAT",
+      "area": "EXT",
+      "name": "In-app real-time chat",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CHAT-INTEGRATION",
+      "area": "EXT",
+      "name": "Outbound chat-platform integrations (Slack/Teams/Discord/Google Chat)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-AI-ASSISTANT",
+      "area": "EXT",
+      "name": "AI assistant \u002B RAG document Q\u0026A",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-ANDON",
+      "area": "EXT",
+      "name": "Andon-style visual signaling",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-PROJECTS",
+      "area": "EXT",
+      "name": "Project / sprint backlog tooling",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-ANNOUNCEMENTS",
+      "area": "EXT",
+      "name": "Company announcements (broadcast \u002B acknowledgment)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CUSTOMER-PORTAL",
+      "area": "EXT",
+      "name": "Customer self-service portal",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-EMAIL-SYNC",
+      "area": "EXT",
+      "name": "Email sync \u2014 track inbound/outbound communications",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-VOIP-SYNC",
+      "area": "EXT",
+      "name": "VoIP sync \u2014 track call communications",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CLOUD-STORAGE",
+      "area": "EXT",
+      "name": "Cloud storage integration (umbrella)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CLOUD-STORAGE-GDRIVE",
+      "area": "EXT",
+      "name": "Google Drive provider",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CLOUD-STORAGE-ONEDRIVE",
+      "area": "EXT",
+      "name": "OneDrive provider",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-EXT-CLOUD-STORAGE-DROPBOX",
+      "area": "EXT",
+      "name": "Dropbox provider",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-IDEN-CAPABILITY-ADMIN",
+      "area": "IDEN",
+      "name": "Capability administration",
+      "isDefaultOn": true
+    },
+    {
+      "code": "CAP-PS-ENGAGEMENT",
+      "area": "PS",
+      "name": "Engagement axis fields \u002B Engagement track surfaces",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PS-TIME-BILLABLE",
+      "area": "PS",
+      "name": "Billable / non-billable time split",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PS-RATE-CARDS",
+      "area": "PS",
+      "name": "Per-resource / per-role bill rates",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PS-PROJECT-COST",
+      "area": "PS",
+      "name": "Engagement costing (T\u0026M, fixed-bid)",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PS-RETAINER",
+      "area": "PS",
+      "name": "Retainer / prepaid-hours billing",
+      "isDefaultOn": false
+    },
+    {
+      "code": "CAP-PS-UTILIZATION",
+      "area": "PS",
+      "name": "Utilization dashboard widgets",
+      "isDefaultOn": false
+    }
+  ],
+  "foundations": [
+    "CAP-IDEN-AUTH-PASSWORD",
+    "CAP-IDEN-USERS",
+    "CAP-IDEN-ROLES",
+    "CAP-IDEN-TENANT-CONFIG",
+    "CAP-IDEN-AUDIT-SYSTEM-LOG",
+    "CAP-IDEN-CAPABILITY-ADMIN",
+    "CAP-CROSS-PERMS-MATRIX",
+    "CAP-CROSS-ACTIVITY-LOG",
+    "CAP-CROSS-LIST-UX",
+    "CAP-CROSS-BULK-OPS",
+    "CAP-CROSS-DOCS",
+    "CAP-CROSS-ATTACHMENTS",
+    "CAP-CROSS-NOTIFICATIONS",
+    "CAP-CROSS-INTEG-FILE",
+    "CAP-CROSS-CONCURRENCY",
+    "CAP-MD-PARTS",
+    "CAP-MD-UOM",
+    "CAP-MD-LOCATIONS",
+    "CAP-MD-CURRENCIES",
+    "CAP-MD-TAXCODES",
+    "CAP-RPT-OPERATIONAL",
+    "CAP-RPT-DASHBOARDS",
+    "CAP-EXT-MOBILE"
+  ],
+  "modules": {
+    "inventory": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-INV-ADJUST",
+      "CAP-INV-CORE",
+      "CAP-INV-CYCLECOUNT",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-INVVAL",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "purchasing": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-P2P-BILL",
+      "CAP-P2P-PAY",
+      "CAP-P2P-PO",
+      "CAP-P2P-RECEIVE",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "sales": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMER-ADDRESSES",
+      "CAP-MD-CUSTOMER-CONTACTS",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-O2C-QUOTE",
+      "CAP-O2C-SO",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "production": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-KANBAN",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-INV-CORE",
+      "CAP-MD-BOM",
+      "CAP-MD-CALENDARS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-EMPLOYEES",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-ROUTING",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-MD-WORKCENTERS",
+      "CAP-MFG-COMPLETE",
+      "CAP-MFG-LABOR",
+      "CAP-MFG-MATL-ISSUE",
+      "CAP-MFG-MULTIOP",
+      "CAP-MFG-SHOPFLOOR",
+      "CAP-MFG-WO-RELEASE",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "shipping": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-INV-CORE",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-O2C-PICKPACK",
+      "CAP-O2C-SHIP",
+      "CAP-O2C-SO",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "invoicing": [
+      "CAP-ACCT-BUILTIN",
+      "CAP-ACCT-EXPENSES",
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-EMPLOYEES",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-O2C-CASH",
+      "CAP-O2C-INVOICE",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "quality": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-QC-INSPECTION",
+      "CAP-QC-NCR",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "planning": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-INV-CORE",
+      "CAP-MD-BOM",
+      "CAP-MD-CALENDARS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-MD-WORKCENTERS",
+      "CAP-O2C-QUOTE",
+      "CAP-PLAN-ATP",
+      "CAP-PLAN-CAPACITY",
+      "CAP-PLAN-FORECAST",
+      "CAP-PLAN-MPS",
+      "CAP-PLAN-MRP",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-MRPEX",
+      "CAP-RPT-OPERATIONAL"
+    ],
+    "people": [
+      "CAP-CROSS-ACTIVITY-LOG",
+      "CAP-CROSS-ATTACHMENTS",
+      "CAP-CROSS-BULK-OPS",
+      "CAP-CROSS-CONCURRENCY",
+      "CAP-CROSS-DOCS",
+      "CAP-CROSS-INTEG-FILE",
+      "CAP-CROSS-LIST-UX",
+      "CAP-CROSS-NOTIFICATIONS",
+      "CAP-CROSS-PERMS-MATRIX",
+      "CAP-EXT-MOBILE",
+      "CAP-HR-HIRE",
+      "CAP-HR-TERMINATION",
+      "CAP-HR-TIMETRACK",
+      "CAP-IDEN-AUDIT-SYSTEM-LOG",
+      "CAP-IDEN-AUTH-PASSWORD",
+      "CAP-IDEN-CAPABILITY-ADMIN",
+      "CAP-IDEN-ROLES",
+      "CAP-IDEN-TENANT-CONFIG",
+      "CAP-IDEN-USERS",
+      "CAP-MD-CURRENCIES",
+      "CAP-MD-CUSTOMERS",
+      "CAP-MD-EMPLOYEES",
+      "CAP-MD-LOCATIONS",
+      "CAP-MD-PARTS",
+      "CAP-MD-TAXCODES",
+      "CAP-MD-UOM",
+      "CAP-MD-VENDORS",
+      "CAP-RPT-DASHBOARDS",
+      "CAP-RPT-OPERATIONAL"
+    ]
+  }
+}

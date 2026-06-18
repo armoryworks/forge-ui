@@ -1,0 +1,130 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.demo-switcher {
+  position: fixed;
+  right: $sp-lg;
+  bottom: $sp-lg;
+  z-index: $z-dropdown;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: $sp-sm;
+
+  &__chip {
+    @include flex-center;
+    gap: $sp-xs;
+    padding: $sp-sm $sp-md;
+    background: var(--warning);
+    color: #7a4a00;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: $font-size-sm;
+    box-shadow: $shadow-dropdown;
+
+    .material-icons-outlined { font-size: $icon-size-sm; }
+  }
+
+  &__panel {
+    width: 280px;
+    background: var(--surface);
+    border: $border-width-thin solid var(--border);
+    box-shadow: $shadow-dropdown;
+    padding: $sp-md;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-sm;
+  }
+
+  &__head {
+    @include flex-between;
+    align-items: center;
+  }
+
+  &__title {
+    @include uppercase-label($font-size-xs, 0.5px, 700);
+    color: var(--text-muted);
+  }
+
+  &__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+
+    .material-icons-outlined { font-size: $icon-size-sm; }
+  }
+
+  &__hint {
+    margin: 0;
+    font-size: $font-size-xs;
+    color: var(--text-secondary);
+  }
+
+  &__presets {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $sp-sm;
+  }
+
+  &__preset {
+    padding: $sp-xs $sp-sm;
+    font-size: $font-size-sm;
+    background: var(--bg);
+    border: $border-width-thin solid var(--border);
+    cursor: pointer;
+    color: var(--text);
+
+    &:hover { border-color: var(--primary); }
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: $sp-xxs;
+    max-height: 280px;
+    overflow-y: auto;
+    @include custom-scrollbar(6px);
+  }
+
+  &__item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: $sp-sm;
+    padding: $sp-xs $sp-sm;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+
+    &:hover { background: var(--bg); }
+  }
+
+  &__check {
+    font-size: $icon-size-sm;
+    color: var(--text-muted);
+
+    .demo-switcher__item--on & { color: var(--primary); }
+  }
+
+  &__item-name {
+    flex: 1;
+    font-size: $font-size-sm;
+  }
+
+  &__tag {
+    font-size: $font-size-xxs;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--warning);
+    border: $border-width-thin solid var(--warning);
+    padding: 0 $sp-xs;
+  }
+}

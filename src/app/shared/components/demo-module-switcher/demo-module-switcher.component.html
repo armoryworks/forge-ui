@@ -1,0 +1,42 @@
+@if (show) {
+  <div class="demo-switcher">
+    @if (open()) {
+      <div class="demo-switcher__panel" role="dialog" aria-label="Demo module switcher">
+        <div class="demo-switcher__head">
+          <span class="demo-switcher__title">Demo modules</span>
+          <button type="button" class="demo-switcher__close" aria-label="Close" (click)="togglePanel()">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <p class="demo-switcher__hint">Switch what's turned on to show the modular build live.</p>
+
+        <div class="demo-switcher__presets">
+          <button type="button" class="demo-switcher__preset" (click)="selectFull()">Full suite</button>
+          <button type="button" class="demo-switcher__preset" (click)="selectInventory()">Inventory only</button>
+        </div>
+
+        <ul class="demo-switcher__list">
+          @for (m of rows(); track m.id) {
+            <li>
+              <button type="button" class="demo-switcher__item" [class.demo-switcher__item--on]="m.on"
+                [attr.aria-pressed]="m.on" (click)="toggleModule(m.id)">
+                <span class="material-icons-outlined demo-switcher__check">
+                  {{ m.on ? 'check_box' : 'check_box_outline_blank' }}
+                </span>
+                <span class="demo-switcher__item-name">{{ m.name }}</span>
+                @if (m.preview) {
+                  <span class="demo-switcher__tag">preview</span>
+                }
+              </button>
+            </li>
+          }
+        </ul>
+      </div>
+    }
+
+    <button type="button" class="demo-switcher__chip" (click)="togglePanel()" [attr.aria-expanded]="open()">
+      <span class="material-icons-outlined">tune</span>
+      <span class="demo-switcher__chip-label">Modules: {{ summary() }}</span>
+    </button>
+  </div>
+}

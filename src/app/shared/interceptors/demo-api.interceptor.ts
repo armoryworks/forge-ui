@@ -4,6 +4,7 @@ import { Observable, defer, from, of } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { DemoDataStore } from '../services/demo-data-store.service';
+import { DemoModuleStateService } from '../services/demo-module-state.service';
 import { synthesizeAggregate } from './demo-aggregate-synth';
 import { resolveDemoPath } from './demo-url-map';
 
@@ -51,6 +52,13 @@ export const demoApiInterceptor: HttpInterceptorFn = (req, next) => {
   // Auth endpoints — synthesize a logged-in admin session without ever hitting a server.
   const authResp = handleAuth(url, req.method, req.body);
   if (authResp) return ok(authResp);
+
+  // Capability descriptor — serve the cordoned set for the demo's active modules
+  // so the in-app module switcher reconfigures nav + *appCap live.
+  const demoState = inject(DemoModuleStateService);
+  if (req.method === 'GET' && safePath(url).endsWith('/capabilities/descriptor')) {
+    return defer(() => from(demoState.buildDescriptor().then(d => httpOk(d))));
+  }
 
   return defer(() => from(handleApi(store, req)));
 };
