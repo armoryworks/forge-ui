@@ -58,14 +58,22 @@ Legend: ✅ handled + covered · ⚠️ partial / soft-gap · 🔲 unbuilt (no f
 | Inventory gate — can't ship unaccounted goods | ✅ | `INV-SH1` |
 | Ledger immutability — no hard delete; reversing entries only | ✅ | `acct_journal_*` triggers; soft-delete only |
 | Effective-dating (old address inactive, not overwritten) | ✅ | data architecture |
-| **Carrier label-scan-to-ship** (integrated carriers) | 🔲 unbuilt | shipping epic |
-| **Restricted manual delivery** | 🔲 unbuilt | shipping epic |
-| **Mark-delivered automation** (tracking) | 🔲 unbuilt | shipping epic |
-| **Custom / shadow shipper** | 🔲 unbuilt | shipping epic |
+| **Carrier scan-to-ship gate** (coverage-bound ScanCode) | ✅ **built** (slice 1) | `carrier-scan-to-ship` spec |
+| **Custom / shadow shipper** | ✅ **built** (slice 1) | `Carrier` entity + POST /carriers |
+| **Label QR wrapper rendering** (the printed master QR) | 🔲 unbuilt | carrier epic slice 2 |
+| **Mark-delivered automation** (poll / webhook per carrier) | ⚠️ field stored, not wired | `DeliveryUpdateMode`; slice 2 |
+| **Integration surfacing on the shipping UI** | 🔲 unbuilt | carrier epic slice 2 |
 | Production over-complete (good > started − scrap) | ⚠️ soft known-gap | `INV-SF2` |
 
 ## Next (80/20, by impact)
-1. **Carrier epic** — label + scan-to-ship + restricted manual delivery + custom shipper (the four 🔲 above). Needs the ★ product decisions (scan target == tracking #? what counts as "automation-capable").
+1. **Carrier epic slice 2** — render the printed label wrapper with the master QR (the scanned `ScanCode`), surface carrier selection + integration status on the shipping UI, and wire delivery automation off `Carrier.DeliveryUpdateMode` (poll for Api carriers, webhook where configured, manual otherwise).
 2. **Harden the soft gaps** — `INV-INV2` over-issue (non-`PartId` lines), `INV-SF2` over-complete: flip the probes' soft assertions once the guards land.
 3. **In-transit exceptions** — lost/stolen/damaged: the notes' "knowable failure types" the golden path doesn't yet model.
 4. **Refund** — F-033-J stub → real handler.
+
+### Carrier epic — slice 1 (built)
+`Carrier` entity (integration kind + per-carrier `RequiresScanToShip` + `DeliveryUpdateMode`),
+`Shipment.CarrierId` + coverage-bound `Shipment.ScanCode` (`v1.{shipmentNumber}.{coverageHash}` over
+the sorted `(salesOrderLineId, quantity)` set), the scan-to-ship gate in `ShipShipment` (409 unless
+the scanned value matches), `GET`/`POST /api/v1/carriers` (custom shippers), and a seed of UPS/FedEx/
+USPS/DHL + Will Call. Schema landed additively via forge-db. Asserted by `carrier-scan-to-ship.spec.ts`.
