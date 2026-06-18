@@ -20,6 +20,9 @@ COPY nginx.demo.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/forge-ui-demo/browser /usr/share/nginx/html
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:80/ || exit 1
+# 127.0.0.1 (not localhost): nginx here listens on IPv4 only, but in some container
+# environments `localhost` resolves to IPv6 [::1] first, so a localhost healthcheck
+# gets "connection refused" and the container flaps unhealthy while serving fine.
 
 EXPOSE 80
