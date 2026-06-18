@@ -259,13 +259,18 @@ export class NavTreeService {
   private filterTree(tree: NavItem[]): NavItem[] {
     return tree
       .filter(item => this.isAllowed(item))
-      .map(item => ({
-        ...item,
-        children: item.children ? this.filterTree(item.children) : undefined,
-      }))
-      .filter(item => {
-        if (!item.children) return true;
-        return item.children.length > 0;
+      .flatMap(item => {
+        // Leaf — keep as-is.
+        if (!item.children) return [item];
+        const children = this.filterTree(item.children);
+        // Empty group (all children gated/role-filtered out) — drop it.
+        if (children.length === 0) return [];
+        // A group reduced to a single child is a pointless expandable: promote
+        // the lone child up a level so the user doesn't drill through an empty
+        // shell. Happens naturally when modules are narrowed. (The promoted
+        // child keeps its own label/route; the redundant wrapper disappears.)
+        if (children.length === 1) return children;
+        return [{ ...item, children }];
       });
   }
 

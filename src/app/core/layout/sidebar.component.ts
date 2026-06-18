@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -55,10 +55,23 @@ export class SidebarComponent {
   );
 
   constructor() {
+    // Reset the manual drill-in only when the user navigates AWAY from it.
+    // While they navigate WITHIN the drilled group (e.g. clicking "Sales" lands
+    // on the customer list, which is a descendant URL), keep the drill pinned at
+    // the clicked tier so the nav doesn't auto-skip past it into a child group's
+    // sub-items. Reset when the new URL's trail diverges from the override.
     effect(() => {
-      this.navTree.drillTrail();
+      const trail = this.navTree.drillTrail();
+      const override = untracked(() => this.drillOverride());
+      if (override && this.isAncestorPrefix(override, trail)) return;
       this.drillOverride.set(null);
     });
+  }
+
+  /** True when `prefix` is a non-empty ancestor path of `trail` (same refs, in order). */
+  private isAncestorPrefix(prefix: NavItem[], trail: NavItem[]): boolean {
+    if (prefix.length === 0 || prefix.length > trail.length) return false;
+    return prefix.every((item, i) => item === trail[i]);
   }
 
   protected toggleCollapse(): void {
