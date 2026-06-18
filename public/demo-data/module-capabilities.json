@@ -964,7 +964,6 @@
     "CAP-MD-LOCATIONS",
     "CAP-MD-CURRENCIES",
     "CAP-MD-TAXCODES",
-    "CAP-RPT-OPERATIONAL",
     "CAP-RPT-DASHBOARDS",
     "CAP-EXT-MOBILE"
   ],
@@ -990,15 +989,12 @@
       "CAP-INV-CORE",
       "CAP-INV-CYCLECOUNT",
       "CAP-MD-CURRENCIES",
-      "CAP-MD-CUSTOMERS",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-INVVAL",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-INVVAL"
     ],
     "purchasing": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1018,7 +1014,6 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-MD-CURRENCIES",
-      "CAP-MD-CUSTOMERS",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
@@ -1028,8 +1023,7 @@
       "CAP-P2P-PAY",
       "CAP-P2P-PO",
       "CAP-P2P-RECEIVE",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ],
     "sales": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1056,11 +1050,9 @@
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-O2C-QUOTE",
       "CAP-O2C-SO",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ],
     "production": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1084,14 +1076,12 @@
       "CAP-MD-BOM",
       "CAP-MD-CALENDARS",
       "CAP-MD-CURRENCIES",
-      "CAP-MD-CUSTOMERS",
       "CAP-MD-EMPLOYEES",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-ROUTING",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-MD-WORKCENTERS",
       "CAP-MFG-COMPLETE",
       "CAP-MFG-LABOR",
@@ -1099,8 +1089,7 @@
       "CAP-MFG-MULTIOP",
       "CAP-MFG-SHOPFLOOR",
       "CAP-MFG-WO-RELEASE",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ],
     "shipping": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1126,12 +1115,10 @@
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-O2C-PICKPACK",
       "CAP-O2C-SHIP",
       "CAP-O2C-SO",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ],
     "invoicing": [
       "CAP-ACCT-BUILTIN",
@@ -1153,17 +1140,14 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-MD-CURRENCIES",
-      "CAP-MD-CUSTOMERS",
       "CAP-MD-EMPLOYEES",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-O2C-CASH",
       "CAP-O2C-INVOICE",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ],
     "quality": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1183,16 +1167,13 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-MD-CURRENCIES",
-      "CAP-MD-CUSTOMERS",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-QC-INSPECTION",
       "CAP-QC-NCR",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ],
     "planning": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1220,7 +1201,6 @@
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
       "CAP-MD-WORKCENTERS",
       "CAP-O2C-QUOTE",
       "CAP-PLAN-ATP",
@@ -1229,8 +1209,7 @@
       "CAP-PLAN-MPS",
       "CAP-PLAN-MRP",
       "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-MRPEX",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-MRPEX"
     ],
     "people": [
       "CAP-CROSS-ACTIVITY-LOG",
@@ -1253,15 +1232,12 @@
       "CAP-IDEN-TENANT-CONFIG",
       "CAP-IDEN-USERS",
       "CAP-MD-CURRENCIES",
-      "CAP-MD-CUSTOMERS",
       "CAP-MD-EMPLOYEES",
       "CAP-MD-LOCATIONS",
       "CAP-MD-PARTS",
       "CAP-MD-TAXCODES",
       "CAP-MD-UOM",
-      "CAP-MD-VENDORS",
-      "CAP-RPT-DASHBOARDS",
-      "CAP-RPT-OPERATIONAL"
+      "CAP-RPT-DASHBOARDS"
     ]
   }
 }
