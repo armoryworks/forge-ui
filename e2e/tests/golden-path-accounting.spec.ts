@@ -164,25 +164,31 @@ test.describe.serial('Standalone-accounting golden path', () => {
     expect(over.status, 'over-ship must be blocked').toBeGreaterThanOrEqual(400);
   });
 
-  test('7. partial invoice then remainder → fully invoiced == SO total', async () => {
-    const mkInvoice = (qty: number) => api(token, 'post', 'invoices', {
+  test('7. invoice the shipment → fully invoiced == SO total', async () => {
+    // Domain rule (unique ix_invoices_shipment_id): one invoice per shipment.
+    // Partial invoicing is therefore driven by partial *shipments* (ship some →
+    // invoice that shipment → ship the rest → invoice that shipment), not multiple
+    // invoices against one shipment. This golden path ships in full, so it invoices
+    // once for the full shipped quantity. (A partial-shipment variant is a worthwhile
+    // follow-up to assert the partial-increment loop.)
+    const inv = await api(token, 'post', 'invoices', {
       customerId, salesOrderId: created.soId, shipmentId: created.shipmentIds[0] ?? null,
       invoiceDate: isoNow(), dueDate: isoPlusDays(30), taxRate: 0, notes: 'GOLDEN-PATH',
-      lines: [{ partId, description: 'GOLDEN-PATH item', quantity: qty, unitPrice: PRICE }],
+      lines: [{ partId, description: 'GOLDEN-PATH item', quantity: QTY, unitPrice: PRICE }],
     });
+    expect(inv.status, `invoice: ${JSON.stringify(inv.body)}`).toBe(201);
+    created.invoiceIds.push(inv.body.id);
+    expect(Number(inv.body.total)).toBe(SO_TOTAL);
 
-    const inv1 = await mkInvoice(4);
-    expect(inv1.status, `invoice#1: ${JSON.stringify(inv1.body)}`).toBe(201);
-    created.invoiceIds.push(inv1.body.id);
-    expect(Number(inv1.body.total)).toBe(4 * PRICE);
+    // Send the invoice to the customer — a Draft invoice can't take payment.
+    const send = await api(token, 'post', `invoices/${inv.body.id}/send`);
+    expect(send.status, `send invoice: ${JSON.stringify(send.body)}`).toBeLessThan(300);
 
-    const inv2 = await mkInvoice(6);
-    expect(inv2.status, `invoice#2: ${JSON.stringify(inv2.body)}`).toBe(201);
-    created.invoiceIds.push(inv2.body.id);
-
-    const invoices = (await api(token, 'get', `orders/${created.soId}/invoices`)).body as Array<{ total: number }>;
-    const invoiced = (invoices ?? []).reduce((s, i) => s + Number(i.total), 0);
-    expect(invoiced, 'sum of invoices must equal SO total when fully invoiced').toBe(SO_TOTAL);
+    // orders/{id}/invoices list items expose `totalAmount` (the detail model uses `total`).
+    const listBody = (await api(token, 'get', `orders/${created.soId}/invoices`)).body;
+    const invoices = (Array.isArray(listBody) ? listBody : (listBody?.items ?? [])) as Array<{ totalAmount: number }>;
+    const invoiced = invoices.reduce((s, i) => s + Number(i.totalAmount), 0);
+    expect(invoiced, 'fully invoiced == SO total').toBe(SO_TOTAL);
   });
 
   test('8. pay each invoice → BalanceDue 0', async () => {
@@ -202,9 +208,13 @@ test.describe.serial('Standalone-accounting golden path', () => {
   });
 
   test('9. ledger balances — fully invoiced, fully paid', async () => {
-    const invoices = (await api(token, 'get', `orders/${created.soId}/invoices`)).body as Array<{ total: number; balanceDue: number }>;
-    const invoiced = (invoices ?? []).reduce((s, i) => s + Number(i.total), 0);
-    const outstanding = (invoices ?? []).reduce((s, i) => s + Number(i.balanceDue), 0);
+    // Use invoice details for the reliable total / balanceDue fields.
+    let invoiced = 0, outstanding = 0;
+    for (const id of created.invoiceIds) {
+      const inv = (await api(token, 'get', `invoices/${id}`)).body;
+      invoiced += Number(inv.total);
+      outstanding += Number(inv.balanceDue);
+    }
     expect(invoiced, 'fully invoiced').toBe(SO_TOTAL);
     expect(outstanding, 'fully paid — AR balance settles to zero').toBe(0);
 
