@@ -75,24 +75,28 @@
     <app-getting-started-banner [data]="d" />
 
     <div class="dashboard-content">
-      <div class="dashboard-kpis">
-        <app-kpi-chip
-          [value]="'' + d.kpis.activeCount"
-          [label]="'dashboard.active' | translate"
-          [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
-          changeDirection="up" />
-        <app-kpi-chip
-          [value]="'' + d.kpis.overdueCount"
-          valueColor="warn"
-          [label]="'dashboard.overdue' | translate"
-          [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
-          changeDirection="down" />
-        <app-kpi-chip
-          [value]="d.kpis.totalHours"
-          [label]="'dashboard.hours' | translate"
-          [change]="d.kpis.hoursStatus"
-          changeDirection="up" />
-      </div>
+      <!-- Job-centric KPIs only when the Production/jobs module is enabled —
+           an inventory-only install gets the Inventory Snapshot widget instead. -->
+      @if (showJobKpis()) {
+        <div class="dashboard-kpis">
+          <app-kpi-chip
+            [value]="'' + d.kpis.activeCount"
+            [label]="'dashboard.active' | translate"
+            [change]="d.kpis.activeChange > 0 ? '+' + d.kpis.activeChange : '' + d.kpis.activeChange"
+            changeDirection="up" />
+          <app-kpi-chip
+            [value]="'' + d.kpis.overdueCount"
+            valueColor="warn"
+            [label]="'dashboard.overdue' | translate"
+            [change]="d.kpis.overdueChange > 0 ? '+' + d.kpis.overdueChange : '' + d.kpis.overdueChange"
+            changeDirection="down" />
+          <app-kpi-chip
+            [value]="d.kpis.totalHours"
+            [label]="'dashboard.hours' | translate"
+            [change]="d.kpis.hoursStatus"
+            changeDirection="up" />
+        </div>
+      }
 
       <div class="grid-stack" #gridContainer>
         @for (widget of activeWidgets(); track widget.id) {
@@ -133,6 +137,9 @@
                   }
                   @case ('activity') {
                     <app-activity-widget [entries]="d.activity" />
+                  }
+                  @case ('low-stock') {
+                    <app-low-stock-widget />
                   }
                   @case ('deadlines') {
                     <app-deadlines-widget [deadlines]="d.deadlines" />

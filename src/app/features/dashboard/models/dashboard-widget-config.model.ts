@@ -3,6 +3,12 @@ export interface DashboardWidgetConfig {
   title: string;
   icon: string;
   component: string;
+  /**
+   * Capability gating this widget. Omitted = universal (always shown). Lets the
+   * dashboard reflect the active modules — an inventory-only install never shows
+   * the job/order/accounting widgets.
+   */
+  capability?: string;
   defaultX: number;
   defaultY: number;
   defaultW: number;

@@ -1,0 +1,33 @@
+<div class="inv-snapshot">
+  <div class="inv-snapshot__stats">
+    <div class="inv-stat">
+      <span class="inv-stat__value">{{ partCount() }}</span>
+      <span class="inv-stat__label">{{ 'dashboard.invParts' | translate }}</span>
+    </div>
+    <div class="inv-stat">
+      <span class="inv-stat__value">{{ totalOnHand() }}</span>
+      <span class="inv-stat__label">{{ 'dashboard.invOnHand' | translate }}</span>
+    </div>
+    <div class="inv-stat" [class.inv-stat--alert]="lowStockCount() > 0">
+      <span class="inv-stat__value">{{ lowStockCount() }}</span>
+      <span class="inv-stat__label">{{ 'dashboard.invLowStock' | translate }}</span>
+    </div>
+  </div>
+
+  @if (lowStock().length > 0) {
+    <div class="inv-low">
+      @for (row of lowStock(); track row.partId) {
+        <div class="inv-low__row">
+          <span class="inv-low__part">{{ row.partNumber }}</span>
+          <span class="inv-low__desc">{{ row.description }}</span>
+          <span class="inv-low__qty">{{ row.currentStock }} / {{ row.minStockThreshold }}</span>
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="inv-snapshot__ok">
+      <span class="material-icons-outlined" aria-hidden="true">check_circle</span>
+      {{ 'dashboard.invAllStocked' | translate }}
+    </p>
+  }
+</div>

@@ -33,6 +33,7 @@ import { OpenOrdersWidgetComponent } from './components/open-orders-widget.compo
 import { EodPromptWidgetComponent } from './components/eod-prompt-widget.component';
 import { MarginSummaryWidgetComponent } from './widgets/margin-summary-widget/margin-summary-widget.component';
 import { ActionItemsWidgetComponent } from './components/action-items-widget.component';
+import { LowStockWidgetComponent } from './components/low-stock-widget.component';
 import { AmbientModeComponent } from './components/ambient-mode.component';
 import { FocusModeComponent } from './components/focus-mode.component';
 import { GettingStartedBannerComponent } from './components/getting-started-banner.component';
@@ -44,6 +45,7 @@ import { DashboardService } from './services/dashboard.service';
 import { IdleService } from '../../shared/services/idle.service';
 import { LoadingService } from '../../shared/services/loading.service';
 import { UserPreferencesService } from '../../shared/services/user-preferences.service';
+import { CapabilityService } from '../../shared/services/capability.service';
 import { AMBIENT_IDLE_PREF_KEY, DEFAULT_AMBIENT_IDLE_MS } from '../../shared/models/ambient-idle.model';
 
 import type { GridStack, GridStackNode } from 'gridstack';
@@ -66,6 +68,7 @@ const LAYOUT_PREF_KEY = 'dashboard:layout:v5';
     OpenOrdersWidgetComponent,
     EodPromptWidgetComponent,
     MarginSummaryWidgetComponent,
+    LowStockWidgetComponent,
     AmbientModeComponent,
     FocusModeComponent,
     GettingStartedBannerComponent,
@@ -84,6 +87,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly idleService = inject(IdleService);
   private readonly ngZone = inject(NgZone);
   private readonly translate = inject(TranslateService);
+  private readonly capabilities = inject(CapabilityService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -109,14 +113,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     WIDGET_REGISTRY.map(w => w.id)
   );
 
+  // A widget shows only if its module is enabled. Reading the capability
+  // snapshot signal keeps these computeds reactive to module changes (the demo
+  // module switcher, or a real capability toggle).
+  private widgetAllowed(w: DashboardWidgetConfig): boolean {
+    return !w.capability || this.capabilities.isEnabled(w.capability);
+  }
+
+  // Job KPIs (active/overdue jobs, hours) only make sense with the jobs module.
+  protected readonly showJobKpis = computed(() => {
+    this.capabilities.descriptor();
+    return this.capabilities.isEnabled('CAP-EXT-KANBAN');
+  });
+
   protected readonly activeWidgets = computed(() => {
+    this.capabilities.descriptor();
     const ids = this.activeWidgetIds();
-    return WIDGET_REGISTRY.filter(w => ids.includes(w.id));
+    return WIDGET_REGISTRY.filter(w => ids.includes(w.id) && this.widgetAllowed(w));
   });
 
   protected readonly availableWidgets = computed(() => {
+    this.capabilities.descriptor();
     const ids = this.activeWidgetIds();
-    return WIDGET_REGISTRY.filter(w => !ids.includes(w.id));
+    return WIDGET_REGISTRY.filter(w => !ids.includes(w.id) && this.widgetAllowed(w));
   });
 
   protected readonly showAddMenu = signal(false);
