@@ -33,6 +33,15 @@ export class BrandingService {
   }
 
   private urlFor(kind: LockupKind): string {
+    // The demo build runs with no backend (environment.apiUrl === ''), so the
+    // dynamic branding endpoint isn't reachable: a native <img> request falls
+    // through nginx to index.html and renders broken (the demo's HttpClient
+    // interceptor can't intercept a raw <img> load). Serve the bundled default
+    // lockups instead — theme-aware, except favicon which has no light variant.
+    if (!environment.apiUrl) {
+      const lightSuffix = kind !== 'favicon' && this.theme.theme() === 'light' ? '-light' : '';
+      return `/branding-defaults/forge-${kind}${lightSuffix}.svg`;
+    }
     const bust = this.cacheBust();
     const bustParam = bust ? `&t=${bust}` : '';
     return `${environment.apiUrl}/admin/branding/${kind}?theme=${this.theme.theme()}${bustParam}`;
