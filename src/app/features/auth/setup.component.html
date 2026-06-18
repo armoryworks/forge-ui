@@ -4,11 +4,10 @@
       <img class="auth-card__lockup" [src]="branding.marqueeUrl()" alt="Forge — Manufacturing Operations Platform" />
     </div>
     <p class="auth-card__status">
-      @switch (step()) {
-        @case (0) { {{ 'auth.setupForkTitle' | translate }} }
-        @case (1) { {{ 'auth.step1Title' | translate }} }
-        @case (2) { {{ 'auth.step2Title' | translate }} }
-        @case (3) { {{ 'auth.modulesTitle' | translate }} }
+      @if (step() === 0) {
+        {{ 'auth.setupForkTitle' | translate }}
+      } @else {
+        {{ 'auth.stepCounter' | translate:{ current: step(), total: totalSteps() } }} — {{ stepTitleKey() | translate }}
       }
     </p>
 

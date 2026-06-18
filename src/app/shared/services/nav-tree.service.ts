@@ -36,11 +36,11 @@ export class NavTreeService {
     {
       icon: 'space_dashboard', label: 'Operations', i18nKey: 'navGroups.operations',
       children: [
-        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
-        { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
-        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar' },
-        { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'view_kanban', label: 'Board', i18nKey: 'nav.kanban', route: '/kanban', shortcut: ['Q', 'K'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'Engineer', 'ProductionWorker'] },
+        { icon: 'inbox', label: 'Backlog', i18nKey: 'nav.backlog', route: '/backlog', shortcut: ['Q', 'B'], capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM', 'Engineer'] },
+        { icon: 'event_note', label: 'Planning', i18nKey: 'nav.planning', route: '/planning', capability: 'CAP-EXT-KANBAN', allowedRoles: ['Admin', 'Manager', 'PM'] },
+        { icon: 'calendar_month', label: 'Calendar', i18nKey: 'nav.calendar', route: '/calendar', capability: 'CAP-EXT-KANBAN' },
+        { icon: 'rule', label: 'Approvals', i18nKey: 'nav.approvals', route: '/approvals', capability: 'CAP-P2P-APPROVALS', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
       ],
     },
     {
@@ -53,6 +53,7 @@ export class NavTreeService {
         // customer work is *management*, not *acquisition*.
         {
           icon: 'people', label: 'Customers', i18nKey: 'nav.customers',
+          capability: 'CAP-MD-CUSTOMERS',
           allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'],
           children: [
             { icon: 'list', label: 'All Customers', i18nKey: 'nav.customersAll', route: '/customers' },
@@ -69,6 +70,7 @@ export class NavTreeService {
         // entity links. Same submenu pattern Admin uses.
         {
           icon: 'people_outline', label: 'Leads', i18nKey: 'nav.leads',
+          capability: 'CAP-O2C-LEAD',
           allowedRoles: ['Admin', 'Manager', 'PM'],
           children: [
             { icon: 'list', label: 'All Leads', i18nKey: 'nav.leadsAll', route: '/leads' },
@@ -80,56 +82,56 @@ export class NavTreeService {
             { icon: 'business', label: 'Accounts', i18nKey: 'nav.leadsAccounts', route: '/leads/accounts' },
           ],
         },
-        { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'event_repeat', label: 'Recurring Orders', i18nKey: 'nav.recurringOrders', route: '/sales-orders/recurring', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
-        { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_quote', label: 'Quotes', i18nKey: 'nav.quotes', route: '/quotes', capability: 'CAP-O2C-QUOTE', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'shopping_cart', label: 'Sales Orders', i18nKey: 'nav.salesOrders', route: '/sales-orders', capability: 'CAP-O2C-SO', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'event_repeat', label: 'Recurring Orders', i18nKey: 'nav.recurringOrders', route: '/sales-orders/recurring', capability: 'CAP-O2C-RECURRING', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'outbox', label: 'Shipments', i18nKey: 'nav.shipments', route: '/shipments', capability: 'CAP-O2C-SHIP', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'assignment_return', label: 'Customer Returns', i18nKey: 'nav.customerReturns', route: '/customer-returns', capability: 'CAP-O2C-RMA', allowedRoles: ['Admin', 'Manager', 'PM', 'OfficeManager'] },
+        { icon: 'receipt', label: 'Invoices', i18nKey: 'nav.invoices', route: '/invoices', capability: 'CAP-O2C-INVOICE', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'payments', label: 'Payments', i18nKey: 'nav.payments', route: '/payments', capability: 'CAP-O2C-CASH', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
     {
       icon: 'precision_manufacturing', label: 'Production', i18nKey: 'navGroups.production',
       children: [
         { icon: 'category', label: 'Parts', i18nKey: 'nav.parts', route: '/parts', shortcut: ['Q', 'P'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'PM'] },
-        { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
-        { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'hub', label: 'MRP', i18nKey: 'nav.mrp', route: '/mrp', capability: 'CAP-PLAN-MRP', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'event_available', label: 'Scheduling', i18nKey: 'nav.scheduling', route: '/scheduling', capability: 'CAP-PLAN-CAPACITY', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'batch_prediction', label: 'Lots', i18nKey: 'nav.lots', route: '/lots', capability: 'CAP-INV-LOTS', allowedRoles: ['Admin', 'Manager', 'Engineer'] },
+        { icon: 'speed', label: 'OEE', i18nKey: 'nav.oee', route: '/oee', capability: 'CAP-RPT-OEE', allowedRoles: ['Admin', 'Manager'] },
       ],
     },
     {
       icon: 'inventory_2', label: 'Inventory', i18nKey: 'navGroups.inventory',
       children: [
         { icon: 'inventory', label: 'Stock', i18nKey: 'nav.inventory', route: '/inventory', shortcut: ['Q', 'I'], allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
-        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'precision_manufacturing', label: 'Maintenance', i18nKey: 'nav.maintenance', route: '/maintenance/predictions', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'build', label: 'Assets', i18nKey: 'nav.assets', route: '/assets', capability: 'CAP-MD-ASSETS', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'precision_manufacturing', label: 'Maintenance', i18nKey: 'nav.maintenance', route: '/maintenance/predictions', capability: 'CAP-MAINT-PM', allowedRoles: ['Admin', 'Manager'] },
       ],
     },
     {
       icon: 'local_shipping', label: 'Purchasing', i18nKey: 'navGroups.purchasing',
       children: [
-        { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
-        { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'storefront', label: 'Vendors', i18nKey: 'nav.vendors', route: '/vendors', capability: 'CAP-MD-VENDORS', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'description', label: 'Purchase Orders', i18nKey: 'nav.purchaseOrders', route: '/purchase-orders', capability: 'CAP-P2P-PO', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
+        { icon: 'request_page', label: 'RFQs', i18nKey: 'nav.purchasing', route: '/purchasing', capability: 'CAP-P2P-RFQ', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
         { icon: 'request_quote', label: 'Payables', i18nKey: 'nav.payables', route: '/payables', capability: 'CAP-P2P-BILL', allowedRoles: ['Admin', 'Manager', 'OfficeManager'] },
       ],
     },
     {
       icon: 'groups', label: 'People', i18nKey: 'navGroups.people',
       children: [
-        { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', allowedRoles: ['Admin', 'Manager'] },
-        { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'] },
-        { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
-        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
+        { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', capability: 'CAP-MD-EMPLOYEES', allowedRoles: ['Admin', 'Manager'] },
+        { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'], capability: 'CAP-HR-TIMETRACK' },
+        { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', capability: 'CAP-ACCT-EXPENSES', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
+        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library', capability: 'CAP-HR-TRAINING' },
       ],
     },
     {
       icon: 'insights', label: 'Insights', i18nKey: 'navGroups.insights',
       children: [
         { icon: 'bar_chart', label: 'Reports', i18nKey: 'nav.reports', route: '/reports', shortcut: ['Q', 'R'], allowedRoles: ['Admin', 'Manager', 'PM'] },
-        { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai' },
+        { icon: 'smart_toy', label: 'AI', i18nKey: 'nav.ai', route: '/ai', capability: 'CAP-EXT-AI-ASSISTANT' },
       ],
     },
     {
@@ -152,7 +154,7 @@ export class NavTreeService {
   ];
 
   private readonly allBottomTree: NavItem[] = [
-    { icon: 'storefront', label: 'Shop Floor', i18nKey: 'nav.shopFloor', route: '/display/shop-floor', allowedRoles: ['Admin', 'Manager'] },
+    { icon: 'storefront', label: 'Shop Floor', i18nKey: 'nav.shopFloor', route: '/display/shop-floor', capability: 'CAP-MFG-SHOPFLOOR', allowedRoles: ['Admin', 'Manager'] },
     {
       icon: 'settings', label: 'Admin', i18nKey: 'nav.admin', routePrefix: '/admin',
       allowedRoles: ['Admin', 'Manager', 'OfficeManager'],

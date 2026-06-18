@@ -52,6 +52,18 @@ export class SetupComponent {
     return this.modules().map(m => ({ ...m, selected: selected.has(m.id) }));
   });
 
+  // Branch-aware step counter: the quick branch has 3 steps (admin, company,
+  // modules), the full branch has 2 (admin, company).
+  protected readonly totalSteps = computed(() => this.path() === 'quick' ? 3 : 2);
+  protected readonly stepTitleKey = computed(() => {
+    switch (this.step()) {
+      case 1: return 'auth.step1Title';
+      case 2: return 'auth.step2Title';
+      case 3: return 'auth.modulesTitle';
+      default: return 'auth.setupForkTitle';
+    }
+  });
+
   // Step 1: Admin Account
   // confirmPassword catches typos on the masked password field — this is
   // the FIRST admin account on the install, so a typo locks the user
