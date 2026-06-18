@@ -35,15 +35,22 @@
           <div class="lines-empty">{{ 'shipments.noLinesYet' | translate }}</div>
         }
 
-        <!-- Add Line Form -->
-        <div class="add-line add-line--3col" [formGroup]="lineForm">
-          <app-autocomplete [label]="'common.part' | translate" [options]="partOptions()" displayField="label" valueField="value" formControlName="partId" [required]="true" />
-          <app-input [label]="'shipments.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" data-testid="shipment-line-qty" />
-          <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
-            <span class="material-icons-outlined">add</span>
-            {{ 'common.add' | translate }}
-          </button>
-        </div>
+        <!-- Add Line Form — constrained to the selected order's open lines so a
+             shipment can only fulfil what was ordered (qty capped at remaining). -->
+        @if (!shipmentForm.controls.salesOrderId.value) {
+          <div class="lines-empty">{{ 'shipments.selectOrderFirst' | translate }}</div>
+        } @else if (orderLineOptions().length > 0) {
+          <div class="add-line add-line--3col" [formGroup]="lineForm">
+            <app-autocomplete [label]="'shipments.orderLine' | translate" [options]="orderLineOptions()" displayField="label" valueField="value" formControlName="salesOrderLineId" [required]="true" data-testid="shipment-line-so-line" />
+            <app-input [label]="'shipments.qty' | translate" type="number" formControlName="quantity" [required]="true" step="0.0001" min="0.0001" data-testid="shipment-line-qty" />
+            <button class="action-btn action-btn--sm" (click)="addLine()" [disabled]="lineForm.invalid" aria-label="Add line item">
+              <span class="material-icons-outlined">add</span>
+              {{ 'common.add' | translate }}
+            </button>
+          </div>
+        } @else {
+          <div class="lines-empty">{{ 'shipments.allLinesShipped' | translate }}</div>
+        }
       </div>
     </div>
 

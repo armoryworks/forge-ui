@@ -6,10 +6,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 
 import { ShipmentService } from '../../services/shipment.service';
-import { PartsService } from '../../../parts/services/parts.service';
-import { PartListItem } from '../../../parts/models/part-list-item.model';
 import { SalesOrderService } from '../../../sales-orders/services/sales-order.service';
 import { SalesOrderListItem } from '../../../sales-orders/models/sales-order-list-item.model';
+import { SalesOrderLine } from '../../../sales-orders/models/sales-order-line.model';
 import { CreateShipmentLineRequest } from '../../models/create-shipment-line-request.model';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { InputComponent } from '../../../../shared/components/input/input.component';
@@ -21,7 +20,8 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
 interface LineEntry {
-  partId: number;
+  salesOrderLineId: number;
+  partId: number | null;
   partNumber: string;
   description: string;
   quantity: number;
@@ -42,7 +42,6 @@ interface LineEntry {
 export class ShipmentDialogComponent {
   @ViewChild(DialogComponent) private dialogRef!: DialogComponent;
   private readonly shipmentService = inject(ShipmentService);
-  private readonly partsService = inject(PartsService);
   private readonly salesOrderService = inject(SalesOrderService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
@@ -52,18 +51,39 @@ export class ShipmentDialogComponent {
   readonly saved = output<void>();
 
   protected readonly saving = signal(false);
-  protected readonly parts = signal<PartListItem[]>([]);
   protected readonly salesOrders = signal<SalesOrderListItem[]>([]);
+  // Lines of the SELECTED sales order — line entry is constrained to these, so a
+  // shipment can only fulfil what was ordered (and never more than remaining).
+  protected readonly orderLines = signal<SalesOrderLine[]>([]);
   protected readonly lines = signal<LineEntry[]>([]);
-
-  protected readonly partOptions = computed<AutocompleteOption[]>(() =>
-    this.parts().map(p => ({ value: p.id, label: `${p.partNumber} — ${p.name}` })));
 
   protected readonly salesOrderOptions = computed<AutocompleteOption[]>(() =>
     this.salesOrders().map(so => ({
       value: so.id,
       label: `${so.orderNumber} — ${so.customerName}${so.customerPO ? ' (' + so.customerPO + ')' : ''}`,
     })));
+
+  // Remaining-to-ship on a SO line, net of what's already been added to this
+  // shipment in the dialog.
+  private remainingFor(salesOrderLineId: number): number {
+    const line = this.orderLines().find(l => l.id === salesOrderLineId);
+    if (!line) return 0;
+    const added = this.lines()
+      .filter(l => l.salesOrderLineId === salesOrderLineId)
+      .reduce((sum, l) => sum + l.quantity, 0);
+    return line.remainingQuantity - added;
+  }
+
+  // Only SO lines that still have something left to ship are pickable.
+  protected readonly orderLineOptions = computed<AutocompleteOption[]>(() => {
+    this.lines(); // re-evaluate as lines are added
+    return this.orderLines()
+      .filter(l => this.remainingFor(l.id) > 0)
+      .map(l => ({
+        value: l.id,
+        label: `${l.partNumber ? l.partNumber + ' — ' : ''}${l.description} · ${this.remainingFor(l.id)} ${this.translate.instant('shipments.remainingShort')}`,
+      }));
+  });
 
   protected readonly shipmentForm = new FormGroup({
     salesOrderId: new FormControl<number | null>(null, [Validators.required]),
@@ -75,7 +95,7 @@ export class ShipmentDialogComponent {
   });
 
   private readonly formViolations = FormValidationService.getViolations(this.shipmentForm, {
-    salesOrderId: 'Sales Order ID',
+    salesOrderId: 'Sales Order',
     carrier: 'Carrier',
     trackingNumber: 'Tracking Number',
     shippingCost: 'Shipping Cost',
@@ -89,7 +109,7 @@ export class ShipmentDialogComponent {
   ]);
 
   protected readonly lineForm = new FormGroup({
-    partId: new FormControl<number | null>(null, [Validators.required]),
+    salesOrderLineId: new FormControl<number | null>(null, [Validators.required]),
     // Phase 3 / WU-23 (F8-broad): fractional UoM-aware quantities accepted.
     quantity: new FormControl<number>(1, [Validators.required, Validators.min(0.0001)]),
   });
@@ -107,12 +127,32 @@ export class ShipmentDialogComponent {
   };
 
   constructor() {
-    this.partsService.getParts('Active').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (list) => this.parts.set(list),
-    });
     this.salesOrderService.getSalesOrders().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (list) => this.salesOrders.set(list),
     });
+
+    // When the order changes, load its lines and clear any lines staged against
+    // the previous order.
+    this.shipmentForm.controls.salesOrderId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((id) => {
+        this.lines.set([]);
+        this.lineForm.reset({ salesOrderLineId: null, quantity: 1 });
+        if (!id) { this.orderLines.set([]); return; }
+        this.salesOrderService.getSalesOrderById(id).subscribe({
+          next: (order) => this.orderLines.set(order.lines ?? []),
+          error: () => this.orderLines.set([]),
+        });
+      });
+
+    // Picking a SO line prefills the quantity with what's left to ship on it.
+    this.lineForm.controls.salesOrderLineId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((lineId) => {
+        if (lineId == null) return;
+        const remaining = this.remainingFor(lineId);
+        if (remaining > 0) this.lineForm.controls.quantity.setValue(remaining);
+      });
   }
 
   protected close(): void {
@@ -122,17 +162,27 @@ export class ShipmentDialogComponent {
   protected addLine(): void {
     if (this.lineForm.invalid) return;
     const f = this.lineForm.getRawValue();
-    const part = this.parts().find(p => p.id === f.partId);
-    if (!part) return;
+    const lineId = f.salesOrderLineId!;
+    const orderLine = this.orderLines().find(l => l.id === lineId);
+    if (!orderLine) return;
+
+    const remaining = this.remainingFor(lineId);
+    const qty = f.quantity!;
+    if (qty > remaining) {
+      this.snackbar.error(this.translate.instant('shipments.exceedsRemaining', {
+        remaining, part: orderLine.partNumber || orderLine.description,
+      }));
+      return;
+    }
+
     this.lines.update(prev => [...prev, {
-      partId: part.id,
-      partNumber: part.partNumber,
-      // Phase-4 Name+Description split: line carries the part's short
-      // identifier — Name is now the canonical short identifier.
-      description: part.name,
-      quantity: f.quantity!,
+      salesOrderLineId: lineId,
+      partId: orderLine.partId,
+      partNumber: orderLine.partNumber ?? '',
+      description: orderLine.description,
+      quantity: qty,
     }]);
-    this.lineForm.reset({ partId: null, quantity: 1 });
+    this.lineForm.reset({ salesOrderLineId: null, quantity: 1 });
   }
 
   protected removeLine(index: number): void {
@@ -145,7 +195,8 @@ export class ShipmentDialogComponent {
 
     const f = this.shipmentForm.getRawValue();
     const lineRequests: CreateShipmentLineRequest[] = this.lines().map(l => ({
-      partId: l.partId,
+      salesOrderLineId: l.salesOrderLineId,
+      partId: l.partId ?? undefined,
       quantity: l.quantity,
     }));
 

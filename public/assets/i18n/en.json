@@ -4766,7 +4766,12 @@
     "newShipmentTitle": "New Shipment",
     "optional": "Optional",
     "noLinesYet": "No lines yet",
-    "shipmentDetails": "Shipment Details"
+    "shipmentDetails": "Shipment Details",
+    "orderLine": "Order line",
+    "selectOrderFirst": "Select a sales order to add line items",
+    "allLinesShipped": "All order lines are fully shipped",
+    "remainingShort": "left",
+    "exceedsRemaining": "Cannot ship more than {{remaining}} remaining for {{part}}"
   },
   "planning": {
     "title": "Planning",

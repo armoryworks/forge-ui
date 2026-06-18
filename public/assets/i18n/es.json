@@ -4759,7 +4759,12 @@
     "newShipmentTitle": "Nuevo Envío",
     "optional": "Opcional",
     "noLinesYet": "Sin líneas aún",
-    "shipmentDetails": "Detalles del Envío"
+    "shipmentDetails": "Detalles del Envío",
+    "orderLine": "Línea del pedido",
+    "selectOrderFirst": "Seleccione una orden de venta para agregar líneas",
+    "allLinesShipped": "Todas las líneas del pedido están completamente enviadas",
+    "remainingShort": "restante",
+    "exceedsRemaining": "No se puede enviar más de {{remaining}} restante de {{part}}"
   },
   "planning": {
     "title": "Planificación",
