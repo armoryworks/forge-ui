@@ -69,6 +69,44 @@ export async function synthesizeAggregate(
     return {};
   }
 
+  // Inventory sub-resources. Without these, DEMO_URL_MAP's blunt
+  // `inventory -> bin-content` fallback hands every /inventory/* call the
+  // bin-content shape (e.g. /inventory/parts rendered rows with blank cells).
+  if (head === 'inventory' && method === 'GET' && sub) {
+    if (sub === 'parts') return synthesizeInventoryParts(store, query);
+    if (sub === 'low-stock') return synthesizeLowStock(store);
+    if (sub === 'movements') return store.load('bin-movement');
+    if (sub === 'reservations') return store.load('reservation');
+    if (sub === 'pending-inspection') return store.load('receiving-inspection');
+    if (sub === 'receiving-history') return store.load('receiving-record');
+    if (sub === 'cycle-counts') {
+      const rows = await store.load('cycle-count');
+      if (segs[2] && /^\d+$/.test(segs[2])) return rows.find(r => String(r['id']) === segs[2]) ?? null;
+      return rows;
+    }
+    if (sub === 'uom') {
+      if (segs[2] === 'conversions') return store.load('uom-conversion');
+      return store.load('unit-of-measure');
+    }
+    if (sub === 'locations') {
+      const rows = await store.load('storage-location');
+      if (segs[2] === 'bins') {
+        const bins = rows.filter(r => String(r['locationType'] ?? '').toLowerCase() === 'bin');
+        return { items: bins, totalCount: bins.length, page: 1, pageSize: bins.length };
+      }
+      if (segs[2] && /^\d+$/.test(segs[2])) {
+        if (segs[3] === 'contents') {
+          const binc = await store.load('bin-content');
+          return binc.filter(b => String(b['locationId']) === segs[2]);
+        }
+        return rows.find(r => String(r['id']) === segs[2]) ?? null;
+      }
+      return rows;
+    }
+    // Unknown inventory subresource — empty list is safe (never bin-content).
+    return [];
+  }
+
   if (head === 'search' && method === 'GET') {
     return { results: [], total: 0 };
   }
@@ -267,6 +305,79 @@ async function synthesizeDashboard(store: DemoDataStore): Promise<unknown> {
       hoursStatus: 'stable',
     },
   };
+}
+
+/** Group bin-content rows by the part they hold (entityType=Part, entityId=part.id). */
+async function loadPartStock(store: DemoDataStore): Promise<{ parts: Row[]; byPart: Map<string, Row[]> }> {
+  const [parts, bins] = await Promise.all([store.load('part'), store.load('bin-content')]);
+  const byPart = new Map<string, Row[]>();
+  for (const b of bins) {
+    if (String(b['entityType'] ?? '').toLowerCase() !== 'part') continue;
+    const pid = String(b['entityId']);
+    const list = byPart.get(pid) ?? [];
+    list.push(b);
+    byPart.set(pid, list);
+  }
+  return { parts, byPart };
+}
+
+function partOnHand(binRows: Row[]): number {
+  return binRows.reduce((s, b) => s + Number(b['quantity'] ?? 0), 0);
+}
+
+/** /inventory/parts — InventoryPartSummary[] from part.json joined to bin on-hand. */
+async function synthesizeInventoryParts(store: DemoDataStore, query: URLSearchParams): Promise<unknown[]> {
+  const { parts, byPart } = await loadPartStock(store);
+  const search = (query.get('search') ?? '').trim().toLowerCase();
+  return parts
+    .filter(p => p['deletedAt'] == null)
+    .filter(p => {
+      if (!search) return true;
+      return String(p['partNumber'] ?? '').toLowerCase().includes(search)
+        || String(p['description'] ?? '').toLowerCase().includes(search);
+    })
+    .map(p => {
+      const binRows = byPart.get(String(p['id'])) ?? [];
+      const onHand = partOnHand(binRows);
+      return {
+        partId: p['id'],
+        partNumber: String(p['partNumber'] ?? ''),
+        description: String(p['description'] ?? ''),
+        onHand,
+        reserved: 0,
+        available: onHand,
+        binLocations: binRows.map(b => ({
+          locationId: Number(b['locationId'] ?? 0),
+          locationName: String(b['locationName'] ?? ''),
+          locationPath: String(b['locationPath'] ?? b['locationName'] ?? ''),
+          quantity: Number(b['quantity'] ?? 0),
+          reservedQuantity: 0,
+          availableQuantity: Number(b['quantity'] ?? 0),
+          status: String(b['status'] ?? 'Stored'),
+          lotNumber: b['lotNumber'] ?? null,
+          lotId: null,
+          lotExpirationDate: null,
+          supplierLotNumber: null,
+        })),
+      };
+    });
+}
+
+/** /inventory/low-stock — parts whose on-hand fell below their min threshold. */
+async function synthesizeLowStock(store: DemoDataStore): Promise<unknown[]> {
+  const { parts, byPart } = await loadPartStock(store);
+  return parts
+    .filter(p => p['deletedAt'] == null)
+    .map(p => ({ p, onHand: partOnHand(byPart.get(String(p['id'])) ?? []), min: Number(p['minStockThreshold'] ?? 0) }))
+    .filter(({ onHand, min }) => min > 0 && onHand < min)
+    .map(({ p, onHand }) => ({
+      partId: p['id'],
+      partNumber: String(p['partNumber'] ?? ''),
+      description: String(p['description'] ?? ''),
+      currentStock: onHand,
+      minStockThreshold: Number(p['minStockThreshold'] ?? 0),
+      reorderPoint: p['reorderPoint'] ?? null,
+    }));
 }
 
 function buildTasks(activeJobs: Row[], users: Row[]): unknown[] {
