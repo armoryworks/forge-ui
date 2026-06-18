@@ -144,6 +144,9 @@ async function handleApi(store: DemoDataStore, req: HttpRequest<unknown>): Promi
     }
     case 'POST': {
       const body = (req.body ?? {}) as Row;
+      // Creating a shipment must roll its line quantities back onto the sales
+      // order's lines so the demo reflects shipped/remaining like the real API.
+      if (key === 'shipments') await applyShipmentToOrderLines(store, body);
       const created = store.append(file, body);
       return httpOk(created, 201);
     }
@@ -161,6 +164,27 @@ async function handleApi(store: DemoDataStore, req: HttpRequest<unknown>): Promi
     }
     default:
       return httpOk({});
+  }
+}
+
+/**
+ * Demo-only: roll a new shipment's line quantities onto the sales order's lines
+ * (increment shippedQuantity) so the SO detail's remaining/shipped reflect the
+ * shipment — mirroring what CreateShipment does on the real API.
+ */
+async function applyShipmentToOrderLines(store: DemoDataStore, body: Row): Promise<void> {
+  const lines = Array.isArray(body['lines']) ? (body['lines'] as Row[]) : [];
+  if (lines.length === 0) return;
+  const soLines = await store.load('sales-order-line');
+  for (const l of lines) {
+    const lineId = l['salesOrderLineId'];
+    const qty = Number(l['quantity'] ?? 0);
+    if (lineId === undefined || lineId === null || qty <= 0) continue;
+    const soLine = soLines.find(r => String(r['id']) === String(lineId));
+    if (!soLine) continue;
+    store.update('sales-order-line', lineId as number | string, {
+      shippedQuantity: Number(soLine['shippedQuantity'] ?? 0) + qty,
+    });
   }
 }
 
