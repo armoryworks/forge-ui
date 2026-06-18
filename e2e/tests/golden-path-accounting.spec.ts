@@ -184,6 +184,15 @@ test.describe.serial('Standalone-accounting golden path', () => {
     const send = await api(token, 'post', `invoices/${inv.body.id}/send`);
     expect(send.status, `send invoice: ${JSON.stringify(send.body)}`).toBeLessThan(300);
 
+    // INV-IN2: a second invoice for the same shipment is rejected with 409 (the
+    // domain guard), not a 500 from the unique-index violation.
+    const dup = await api(token, 'post', 'invoices', {
+      customerId, salesOrderId: created.soId, shipmentId: created.shipmentIds[0] ?? null,
+      invoiceDate: isoNow(), dueDate: isoPlusDays(30), taxRate: 0,
+      lines: [{ partId, description: 'dup', quantity: 1, unitPrice: PRICE }],
+    });
+    expect(dup.status, 'double-invoicing a shipment must return 409').toBe(409);
+
     // orders/{id}/invoices list items expose `totalAmount` (the detail model uses `total`).
     const listBody = (await api(token, 'get', `orders/${created.soId}/invoices`)).body;
     const invoices = (Array.isArray(listBody) ? listBody : (listBody?.items ?? [])) as Array<{ totalAmount: number }>;
@@ -218,9 +227,8 @@ test.describe.serial('Standalone-accounting golden path', () => {
     expect(invoiced, 'fully invoiced').toBe(SO_TOTAL);
     expect(outstanding, 'fully paid — AR balance settles to zero').toBe(0);
 
-    // Finding probe: does the SO auto-advance to Completed once shipped+invoiced+paid?
-    // Logged (not asserted) so the run reports built-vs-dark without a hard failure.
+    // Terminal O2C state: a fully shipped order whose invoices are all paid is done.
     const so = (await api(token, 'get', `orders/${created.soId}`)).body;
-    console.log(`[golden-path] SO ${created.soId} final status after full ship+invoice+pay = ${so.status}`);
+    expect(String(so.status), 'SO advances to Completed when fully shipped + invoiced + paid').toBe('Completed');
   });
 });
