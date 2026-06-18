@@ -1,0 +1,165 @@
+<div class="inv-home">
+  <header class="inv-home__hero">
+    <div class="inv-home__hero-text">
+      <h1 class="inv-home__title">{{ 'inventory.home.title' | translate }}</h1>
+      <p class="inv-home__subtitle">{{ 'inventory.home.subtitle' | translate }}</p>
+    </div>
+    <a class="action-btn inv-home__manage" routerLink="/inventory/stock">
+      <span class="material-icons-outlined">tune</span>
+      {{ 'inventory.home.manage' | translate }}
+    </a>
+  </header>
+
+  <nav class="tab-bar" role="tablist" aria-label="Inventory views">
+    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'kiosk'"
+      [attr.aria-selected]="activeTab() === 'kiosk'" (click)="switchTab('kiosk')">
+      <span class="material-icons-outlined">touch_app</span>{{ 'inventory.home.tabs.kiosk' | translate }}
+    </button>
+    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'tasks'"
+      [attr.aria-selected]="activeTab() === 'tasks'" (click)="switchTab('tasks')">
+      <span class="material-icons-outlined">checklist</span>{{ 'inventory.home.tabs.tasks' | translate }}
+    </button>
+    <button class="tab" role="tab" [class.tab--active]="activeTab() === 'dashboard'"
+      [attr.aria-selected]="activeTab() === 'dashboard'" (click)="switchTab('dashboard')">
+      <span class="material-icons-outlined">insights</span>{{ 'inventory.home.tabs.dashboard' | translate }}
+    </button>
+  </nav>
+
+  <!-- ── Kiosk: big-button, one action at a time ── -->
+  @if (activeTab() === 'kiosk') {
+    <section class="tab-panel inv-home__kiosk">
+      <p class="inv-home__hint">{{ 'inventory.home.kioskHint' | translate }}</p>
+      <app-quick-action-panel [actions]="kioskActions()" [columns]="2" (actionClick)="onKioskAction($event)" />
+    </section>
+  }
+
+  <!-- ── Tasks: search, low stock, on-hand list with quick actions ── -->
+  @if (activeTab() === 'tasks') {
+    <section class="tab-panel inv-home__tasks">
+      <div class="inv-home__toolbar">
+        <app-input class="inv-home__search" [label]="'inventory.home.searchLabel' | translate"
+          [formControl]="searchControl" />
+        <span class="inv-home__toolbar-spacer"></span>
+        <button class="action-btn action-btn--create" (click)="openVerb('receive')">
+          <span class="material-icons-outlined">add_box</span>{{ 'inventory.home.verbs.receive' | translate }}
+        </button>
+        <button class="action-btn" (click)="openVerb('use')">
+          <span class="material-icons-outlined">remove_circle_outline</span>{{ 'inventory.home.verbs.use' | translate }}
+        </button>
+        <button class="action-btn" (click)="openVerb('count')">
+          <span class="material-icons-outlined">fact_check</span>{{ 'inventory.home.verbs.count' | translate }}
+        </button>
+      </div>
+
+      @if (lowStock().length > 0) {
+        <div class="inv-home__lowstock">
+          <span class="inv-home__lowstock-label">
+            <span class="material-icons-outlined">warning_amber</span>{{ 'inventory.home.lowStock' | translate }}
+          </span>
+          @for (a of lowStock(); track a.partId) {
+            <button class="chip chip--warning" (click)="openVerb('receive')" [attr.aria-label]="'inventory.home.verbs.receive' | translate">
+              {{ a.partNumber }} · {{ a.currentStock | number }}
+            </button>
+          }
+        </div>
+      }
+
+      <div class="inv-home__table" [appLoadingBlock]="loading()">
+        @if (filteredParts().length > 0) {
+          <app-data-table tableId="inventory-home-stock" [columns]="stockColumns" [data]="filteredParts()">
+            <ng-template appColumnCell="actions" let-row>
+              <div class="inv-home__row-actions">
+                <button class="icon-btn" (click)="openVerb('receive', row)" [attr.aria-label]="'inventory.home.verbs.receive' | translate">
+                  <span class="material-icons-outlined">add_box</span>
+                </button>
+                <button class="icon-btn" (click)="openVerb('use', row)" [attr.aria-label]="'inventory.home.verbs.use' | translate">
+                  <span class="material-icons-outlined">remove_circle_outline</span>
+                </button>
+              </div>
+            </ng-template>
+          </app-data-table>
+        } @else {
+          <app-empty-state icon="inventory_2" [message]="'inventory.home.empty' | translate">
+            <button class="action-btn action-btn--create" (click)="openVerb('receive')">
+              <span class="material-icons-outlined">add_box</span>{{ 'inventory.home.emptyCta' | translate }}
+            </button>
+          </app-empty-state>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- ── Dashboard: at-a-glance numbers ── -->
+  @if (activeTab() === 'dashboard') {
+    <section class="tab-panel inv-home__dashboard" [appLoadingBlock]="loading()">
+      <div class="inv-home__stats">
+        <div class="inv-home__stat">
+          <span class="inv-home__stat-value">{{ totalParts() | number }}</span>
+          <span class="inv-home__stat-label">{{ 'inventory.home.stat.parts' | translate }}</span>
+        </div>
+        <div class="inv-home__stat">
+          <span class="inv-home__stat-value">{{ totalOnHand() | number }}</span>
+          <span class="inv-home__stat-label">{{ 'inventory.home.stat.onHand' | translate }}</span>
+        </div>
+        <div class="inv-home__stat" [class.inv-home__stat--warn]="lowStockCount() > 0">
+          <span class="inv-home__stat-value">{{ lowStockCount() | number }}</span>
+          <span class="inv-home__stat-label">{{ 'inventory.home.stat.lowStock' | translate }}</span>
+        </div>
+      </div>
+
+      <h2 class="inv-home__section-title">{{ 'inventory.home.lowStock' | translate }}</h2>
+      @if (lowStock().length > 0) {
+        <ul class="inv-home__lowstock-list">
+          @for (a of lowStock(); track a.partId) {
+            <li class="inv-home__lowstock-item">
+              <span class="inv-home__lowstock-part">{{ a.partNumber }}</span>
+              <span class="inv-home__lowstock-desc">{{ a.description }}</span>
+              <span class="inv-home__lowstock-qty">{{ a.currentStock | number }} / {{ a.minStockThreshold | number }}</span>
+              <button class="action-btn action-btn--sm action-btn--create" (click)="openVerb('receive')">
+                {{ 'inventory.home.verbs.receive' | translate }}
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <app-empty-state icon="check_circle" [message]="'inventory.home.lowStockNone' | translate" />
+      }
+    </section>
+  }
+</div>
+
+<!-- ── Verb dialog (Receive / Use / Count) ── -->
+@if (verbDialog(); as vd) {
+  <app-dialog [title]="verbTitle()" width="480px" (closed)="closeVerb()">
+    <div [formGroup]="verbForm">
+      @if (vd.partLabel) {
+        <div class="verb-part">
+          <span class="verb-part__label">{{ 'inventory.home.dialog.part' | translate }}</span>
+          <span class="verb-part__value">{{ vd.partLabel }}</span>
+        </div>
+      } @else {
+        <app-entity-picker [label]="'inventory.home.dialog.part' | translate"
+          entityType="parts" displayField="partNumber" formControlName="partId" />
+      }
+      <app-input [label]="'inventory.home.dialog.quantity' | translate" formControlName="quantity" type="number" />
+      <ng-container *appCap="'CAP-INV-MULTILOC'">
+        <app-select [label]="'inventory.home.dialog.location' | translate"
+          formControlName="locationId" [options]="locationOptions()" />
+      </ng-container>
+      @if (vd.mode === 'receive') {
+        <app-input [label]="'inventory.home.dialog.lot' | translate" formControlName="lotNumber" />
+      }
+      <app-input [label]="'inventory.home.dialog.reason' | translate" formControlName="reason" />
+      <app-textarea [label]="'common.notes' | translate" formControlName="notes" [rows]="2" />
+    </div>
+
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeVerb()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="verbViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary" [disabled]="verbForm.invalid || saving()" (click)="submitVerb()">
+          {{ ('inventory.home.dialog.' + vd.mode + 'Submit') | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}

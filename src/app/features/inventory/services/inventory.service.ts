@@ -13,6 +13,9 @@ import { PlaceBinContentRequest } from '../models/place-bin-content-request.mode
 import { ReceivingRecord } from '../models/receiving-record.model';
 import { TransferStockRequest } from '../models/transfer-stock-request.model';
 import { AdjustStockRequest } from '../models/adjust-stock-request.model';
+import { ReceiveStockRequest } from '../models/receive-stock-request.model';
+import { UseStockRequest } from '../models/use-stock-request.model';
+import { SetOnHandRequest } from '../models/set-on-hand-request.model';
 import { CycleCount } from '../models/cycle-count.model';
 import { Reservation } from '../models/reservation.model';
 import { CreateReservationRequest } from '../models/create-reservation-request.model';
@@ -96,6 +99,23 @@ export class InventoryService {
 
   adjustStock(request: AdjustStockRequest): Observable<void> {
     return this.http.post<void>(`${this.base}/adjust`, request);
+  }
+
+  // ── Friendly stock verbs (standalone inventory: no PO / no shipment needed) ──
+
+  // Receive (stock-in): add stock without a purchase order. Additive.
+  receiveStock(request: ReceiveStockRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/receive-stock`, request);
+  }
+
+  // Use (stock-out): consume stock without a shipment or job issue.
+  useStock(request: UseStockRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/use-stock`, request);
+  }
+
+  // Count (set-on-hand): set the absolute on-hand quantity after a physical count.
+  setOnHandQuantity(request: SetOnHandRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/set-on-hand`, request);
   }
 
   // ── Cycle Counts ──

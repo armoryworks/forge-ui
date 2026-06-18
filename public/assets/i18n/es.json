@@ -1257,6 +1257,54 @@
     "manufacturerName": "Fabricante"
   },
   "inventory": {
+    "home": {
+      "title": "Inventario",
+      "subtitle": "Reciba, use y cuente su stock.",
+      "manage": "Administrar",
+      "kioskHint": "Elija lo que desea hacer.",
+      "searchLabel": "Buscar piezas",
+      "lowStock": "Stock bajo",
+      "lowStockNone": "Nada está bajo de stock.",
+      "empty": "Aún no hay stock.",
+      "emptyCta": "Recibir stock",
+      "tabs": {
+        "kiosk": "Rápido",
+        "tasks": "Tareas",
+        "dashboard": "Resumen"
+      },
+      "verbs": {
+        "receive": "Recibir",
+        "use": "Usar",
+        "count": "Contar",
+        "find": "Buscar pieza"
+      },
+      "stat": {
+        "parts": "Piezas registradas",
+        "onHand": "Unidades disponibles",
+        "lowStock": "Stock bajo"
+      },
+      "dialog": {
+        "part": "Pieza",
+        "quantity": "Cantidad",
+        "location": "Ubicación",
+        "lot": "Número de lote",
+        "reason": "Motivo",
+        "receiveTitle": "Recibir stock",
+        "useTitle": "Usar stock",
+        "countTitle": "Contar stock",
+        "receiveSubmit": "Recibir",
+        "useSubmit": "Usar",
+        "countSubmit": "Guardar conteo"
+      },
+      "snackbar": {
+        "received": "Stock recibido.",
+        "used": "Stock usado.",
+        "counted": "Conteo registrado."
+      },
+      "defaultReason": {
+        "count": "Conteo físico"
+      }
+    },
     "title": "Inventario",
     "location": "Ubicación",
     "bin": "Contenedor",

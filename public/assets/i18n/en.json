@@ -1257,6 +1257,54 @@
     "priceTierHistoryEmpty": "No tier history yet."
   },
   "inventory": {
+    "home": {
+      "title": "Inventory",
+      "subtitle": "Receive, use, and count your stock.",
+      "manage": "Manage",
+      "kioskHint": "Pick what you want to do.",
+      "searchLabel": "Search parts",
+      "lowStock": "Low stock",
+      "lowStockNone": "Nothing is low on stock.",
+      "empty": "No stock yet.",
+      "emptyCta": "Receive stock",
+      "tabs": {
+        "kiosk": "Quick",
+        "tasks": "Tasks",
+        "dashboard": "Overview"
+      },
+      "verbs": {
+        "receive": "Receive",
+        "use": "Use",
+        "count": "Count",
+        "find": "Find a part"
+      },
+      "stat": {
+        "parts": "Parts tracked",
+        "onHand": "Units on hand",
+        "lowStock": "Low on stock"
+      },
+      "dialog": {
+        "part": "Part",
+        "quantity": "Quantity",
+        "location": "Location",
+        "lot": "Lot number",
+        "reason": "Reason",
+        "receiveTitle": "Receive stock",
+        "useTitle": "Use stock",
+        "countTitle": "Count stock",
+        "receiveSubmit": "Receive",
+        "useSubmit": "Use",
+        "countSubmit": "Save count"
+      },
+      "snackbar": {
+        "received": "Stock received.",
+        "used": "Stock used.",
+        "counted": "Count recorded."
+      },
+      "defaultReason": {
+        "count": "Physical count"
+      }
+    },
     "title": "Inventory",
     "location": "Location",
     "bin": "Bin",
