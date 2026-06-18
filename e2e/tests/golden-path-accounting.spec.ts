@@ -21,8 +21,8 @@
  *     --config=e2e/playwright.config.ts
  */
 
-import { test, expect, type Page, request as playwrightRequest } from '@playwright/test';
-import { loginViaApi, getAuthToken, SEED_PASSWORD } from '../helpers/auth.helper';
+import { test, expect, request as playwrightRequest } from '@playwright/test';
+import { getAuthToken, SEED_PASSWORD } from '../helpers/auth.helper';
 
 const API_BASE = process.env['SIM_API_BASE'] ?? 'http://localhost:5000/api/v1/';
 const ADMIN_EMAIL = 'admin@forge.local';
@@ -57,29 +57,27 @@ async function api(
   await ctx.dispose();
   return { status: resp.status(), body: raw !== null ? normalizeCasing(raw) : null };
 }
-const unwrap = <T>(b: unknown): T[] => Array.isArray(b) ? b as T[] : ((b as { items?: T[] })?.items ?? []);
 const isoNow = () => new Date().toISOString();
 const isoPlusDays = (d: number) => { const t = new Date(); t.setDate(t.getDate() + d); return t.toISOString(); };
 
 test.describe.serial('Standalone-accounting golden path', () => {
-  let page: Page;
   let token: string;
   let customerId: number;
-  let partId: number | null = null;
+  // Lines are description-only — keeps the test independent of any parts seed.
+  const partId: number | null = null;
 
-  const created: { quoteId?: number; soId?: number; soLineId?: number; invoiceIds: number[]; paymentIds: number[]; shipmentIds: number[] } =
+  const created: { customerId?: number; quoteId?: number; soId?: number; soLineId?: number; invoiceIds: number[]; paymentIds: number[]; shipmentIds: number[] } =
     { invoiceIds: [], paymentIds: [], shipmentIds: [] };
 
-  test.beforeAll(async ({ browser }) => {
+  test.beforeAll(async () => {
     token = await getAuthToken(ADMIN_EMAIL, SEED_PASSWORD);
-    page = await browser.newPage();
-    await loginViaApi(page, ADMIN_EMAIL, SEED_PASSWORD);
 
-    const cust = unwrap<{ id: number }>((await api(token, 'get', 'customers?pageSize=1')).body);
-    if (!cust.length) throw new Error('golden-path: no seeded customer');
-    customerId = cust[0].id;
-    const parts = unwrap<{ id: number }>((await api(token, 'get', 'parts?pageSize=1')).body);
-    partId = parts[0]?.id ?? null;
+    // Self-sufficient: create our own customer so the test runs on a minimal
+    // seed (no demo-data dependency).
+    const c = await api(token, 'post', 'customers', { name: `GOLDEN-PATH Co ${new Date().toISOString()}` });
+    if (c.status !== 201) throw new Error(`golden-path: customer create failed (${c.status}): ${JSON.stringify(c.body)}`);
+    customerId = c.body.id;
+    created.customerId = customerId;
   });
 
   test.afterAll(async () => {
@@ -92,7 +90,7 @@ test.describe.serial('Standalone-accounting golden path', () => {
     if (created.soId) await api(token, 'post', `orders/${created.soId}/cancel`).catch(() => {});
     if (created.soId) await api(token, 'delete', `orders/${created.soId}`).catch(() => {});
     if (created.quoteId) await api(token, 'delete', `quotes/${created.quoteId}`).catch(() => {});
-    await page?.close();
+    if (created.customerId) await api(token, 'delete', `customers/${created.customerId}`).catch(() => {});
   });
 
   test('1. quote created with a valid-through date (Draft)', async () => {
