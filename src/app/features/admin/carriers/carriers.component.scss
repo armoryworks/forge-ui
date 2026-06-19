@@ -1,0 +1,21 @@
+@use 'styles/variables' as *;
+
+.toolbar__hint {
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}
+
+.scan-icon {
+  font-size: $icon-size-md;
+  color: var(--primary);
+}
+
+.muted-dash {
+  color: var(--text-muted);
+}
+
+.creds-note {
+  margin: 0 0 $sp-md;
+  font-size: $font-size-sm;
+  color: var(--text-secondary);
+}

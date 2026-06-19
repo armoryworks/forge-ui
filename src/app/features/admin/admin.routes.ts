@@ -122,6 +122,13 @@ export const ADMIN_ROUTES: Routes = [
     loadComponent: () =>
       import('./currencies/currencies.component').then((m) => m.CurrenciesComponent),
   },
+  // Shipping carriers — list carriers, create custom shippers, and enter per-carrier API
+  // credentials (encrypted, write-only). Routed before the `:tab` catch-all.
+  {
+    path: 'carriers',
+    loadComponent: () =>
+      import('./carriers/carriers.component').then((m) => m.CarriersComponent),
+  },
   // Phase 1m option-3 — /admin/configuration was the parallel admin
   // surface for the descriptor-driven settings. Retired: the existing
   // /admin/integrations page (rendered inside AdminComponent's

@@ -1,0 +1,119 @@
+<app-page-layout [pageTitle]="'admin.carriers.title' | translate">
+  <ng-container toolbar>
+    <app-toolbar>
+      <span class="toolbar__hint">{{ 'admin.carriers.hint' | translate }}</span>
+      <span appSpacer></span>
+      <button class="action-btn action-btn--create" (click)="openCreate()" data-testid="carrier-new-btn">
+        <span class="material-icons-outlined">add</span>
+        {{ 'admin.carriers.newCarrier' | translate }}
+      </button>
+    </app-toolbar>
+  </ng-container>
+
+  <ng-container content>
+    <div [appLoadingBlock]="loading()">
+      <app-data-table
+        tableId="admin-carriers"
+        [columns]="columns"
+        [data]="carriers()"
+        emptyIcon="local_shipping"
+        [emptyMessage]="'admin.carriers.empty' | translate">
+
+        <ng-template appColumnCell="requiresScanToShip" let-row>
+          @if (row.requiresScanToShip) {
+            <span class="material-icons-outlined scan-icon" [attr.aria-label]="'admin.carriers.scanRequired' | translate"
+              [attr.title]="'admin.carriers.scanRequired' | translate">qr_code_scanner</span>
+          } @else {
+            <span class="muted-dash">—</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="credentialsConfigured" let-row>
+          @if (row.credentialsConfigured) {
+            <span class="chip chip--success">{{ 'admin.carriers.configured' | translate }}</span>
+          } @else if (row.integrationKind === 'Api') {
+            <span class="chip chip--warning">{{ 'admin.carriers.notConfigured' | translate }}</span>
+          } @else {
+            <span class="muted-dash">—</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="isActive" let-row>
+          @if (row.isActive) {
+            <span class="chip chip--success">{{ 'common.active' | translate }}</span>
+          } @else {
+            <span class="chip chip--muted">{{ 'common.inactive' | translate }}</span>
+          }
+        </ng-template>
+
+        <ng-template appColumnCell="actions" let-row>
+          @if (row.integrationKind === 'Api') {
+            <button class="icon-btn" [attr.aria-label]="'admin.carriers.editCredentials' | translate"
+              [attr.title]="'admin.carriers.editCredentials' | translate"
+              (click)="openCredentials($any(row))" data-testid="carrier-credentials-btn">
+              <span class="material-icons-outlined">key</span>
+            </button>
+          }
+        </ng-template>
+      </app-data-table>
+    </div>
+  </ng-container>
+</app-page-layout>
+
+@if (showCreateDialog()) {
+  <app-dialog [title]="'admin.carriers.newCarrier' | translate" width="480px" (closed)="closeCreate()">
+    <div [formGroup]="createForm">
+      <app-input [label]="'admin.carriers.fieldName' | translate"
+        formControlName="name" [required]="true" data-testid="carrier-name" />
+      <app-input [label]="'admin.carriers.fieldCode' | translate" formControlName="code" />
+      <app-select [label]="'admin.carriers.fieldKind' | translate"
+        formControlName="integrationKind" [options]="integrationKindOptions" [required]="true" />
+      <app-select [label]="'admin.carriers.fieldDeliveryMode' | translate"
+        formControlName="deliveryUpdateMode" [options]="deliveryModeOptions" [required]="true" />
+      @if (createForm.controls.integrationKind.value === 'Api') {
+        <app-input [label]="'admin.carriers.fieldServiceId' | translate"
+          formControlName="integrationServiceId"
+          [placeholder]="'admin.carriers.serviceIdPlaceholder' | translate" />
+      }
+      <app-toggle [label]="'admin.carriers.fieldRequiresScan' | translate" formControlName="requiresScanToShip" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCreate()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="createViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          [disabled]="createForm.invalid || saving()" (click)="saveCreate()" data-testid="carrier-create-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
+
+@if (showCredentialsDialog()) {
+  <app-dialog
+    [title]="('admin.carriers.credentialsFor' | translate) + ' ' + (credentialsCarrier()?.name ?? '')"
+    width="480px" (closed)="closeCredentials()">
+    <div [formGroup]="credentialsForm">
+      <p class="creds-note">{{ 'admin.carriers.credentialsNote' | translate }}</p>
+      <app-input [label]="'admin.carriers.fieldClientId' | translate"
+        formControlName="clientId" [required]="true" data-testid="carrier-client-id" />
+      <app-input [label]="'admin.carriers.fieldSecret' | translate" type="password"
+        formControlName="secret" [required]="true"
+        [placeholder]="'admin.carriers.secretPlaceholder' | translate" data-testid="carrier-secret" />
+      <app-input [label]="'admin.carriers.fieldAccountNumber' | translate" formControlName="accountNumber" />
+      <app-select [label]="'admin.carriers.fieldEnvironment' | translate"
+        formControlName="environment" [options]="environmentOptions" [required]="true" />
+    </div>
+    <div dialog-footer>
+      <button class="action-btn" (click)="closeCredentials()">{{ 'common.cancel' | translate }}</button>
+      <app-validation-button [violations]="credentialsViolations" [loading]="saving()">
+        <button class="action-btn action-btn--primary"
+          [disabled]="credentialsForm.invalid || saving()" (click)="saveCredentials()" data-testid="carrier-credentials-save-btn">
+          <span class="material-icons-outlined">save</span>
+          {{ 'common.save' | translate }}
+        </button>
+      </app-validation-button>
+    </div>
+  </app-dialog>
+}
