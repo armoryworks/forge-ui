@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { map, switchMap } from 'rxjs';
@@ -266,7 +267,13 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.loadingService.track('Loading board...', this.kanbanService.getBoard(trackTypeId))
       .subscribe({
         next: (columns) => this.columns.set(columns),
-        error: () => this.error.set(this.translate.instant('kanban.loadBoardFailed')),
+        // A cancelled in-flight request surfaces as status 0 — e.g. a
+        // SignalR-driven reloadBoard() superseded this load. That's not a
+        // failure; the surviving load owns the result. Only surface real errors.
+        error: (err: HttpErrorResponse) => {
+          if (err?.status === 0) return;
+          this.error.set(this.translate.instant('kanban.loadBoardFailed'));
+        },
       });
   }
 
