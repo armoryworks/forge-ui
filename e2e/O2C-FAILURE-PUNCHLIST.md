@@ -61,12 +61,13 @@ Legend: ✅ handled + covered · ⚠️ partial / soft-gap · 🔲 unbuilt (no f
 | **Carrier scan-to-ship gate** (coverage-bound ScanCode) | ✅ **built** (slice 1) | `carrier-scan-to-ship` spec |
 | **Custom / shadow shipper** | ✅ **built** (slice 1) | `Carrier` entity + POST /carriers |
 | **Label QR on the packing slip** (master + per-SO QRs) | ✅ **built** (slice 2a) | `PackingSlipPdfDocument` + QRCoder |
-| **Mark-delivered automation** (poll / webhook per carrier) | ⚠️ field stored, not wired | `DeliveryUpdateMode`; slice 2b |
+| **Mark-delivered automation** (poll job + webhook, per `DeliveryUpdateMode`) | ✅ **machinery built** (slice 2b-1) | `ShipmentDeliverySweepJob` + `/shipping/tracking-webhook` |
+| **EasyPost adapter** (the live tracking/label data source) | 🔲 unbuilt | carrier epic slice 2b-2 (behind `IShippingService`) |
 | **Integration surfacing on the shipping UI** | 🔲 unbuilt | carrier epic slice 2c |
 | Production over-complete (good > started − scrap) | ⚠️ soft known-gap | `INV-SF2` |
 
 ## Next (80/20, by impact)
-1. **Carrier epic slice 2b/2c** — back `IShippingService` with a multi-carrier aggregator (EasyPost recommended; official MIT C# SDK, 100+ carriers, tracking webhooks) and wire delivery automation off `Carrier.DeliveryUpdateMode` (poll for Api carriers, webhook where configured, manual otherwise); then surface carrier selection + integration status + the scan workflow on the shipping UI. *(Slice 2a — master + per-SO QRs on the packing slip — is done.)*
+1. **Carrier epic slice 2b-2 / 2c** — implement the **EasyPost adapter** behind a `Shipping:Provider` seam (`Mock` | `Direct` | `EasyPost`) so EasyPost is the live tracking/label source for the already-built delivery automation, while the direct custom-coded carriers stay a peer option; then surface carrier selection + integration status + the scan workflow on the shipping UI. *(Slice 2a — packing-slip QRs — and slice 2b-1 — the provider-agnostic delivery-automation machinery, poll job + webhook — are done.)*
 2. **Harden the soft gaps** — `INV-INV2` over-issue (non-`PartId` lines), `INV-SF2` over-complete: flip the probes' soft assertions once the guards land.
 3. **In-transit exceptions** — lost/stolen/damaged: the notes' "knowable failure types" the golden path doesn't yet model.
 4. **Refund** — F-033-J stub → real handler.
