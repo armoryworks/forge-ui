@@ -1,8 +1,12 @@
 # Order-to-Cash — Failure-Workflow Punch List
 
-The standalone-accounting **happy path** is asserted by
-[`tests/golden-path-accounting.spec.ts`](tests/golden-path-accounting.spec.ts) (9/9 green).
-This list is the *failure* companion: for each edge of that path, the knowable
+The O2C **happy path** is asserted by two golden-path specs:
+[`tests/golden-path-accounting.spec.ts`](tests/golden-path-accounting.spec.ts) (9/9 — the
+accounting+shipping arc: quote→ship→invoice→pay→Completed) and
+[`tests/golden-path-manufacturing.spec.ts`](tests/golden-path-manufacturing.spec.ts) (7/7 — the
+make-to-order arc: confirm→jobs→production→one-click ship→invoice→pay→Completed, including the
+rule that the job kanban never marks the SO Shipped — only a real shipment does).
+This list is the *failure* companion: for each edge of those paths, the knowable
 failure types and whether the system handles them — the "plan failures before
 code" artifact. Most ✅ rows already have a probe in
 [`tests/invariant-probes.spec.ts`](tests/invariant-probes.spec.ts); the oracle is
