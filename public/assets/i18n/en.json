@@ -2819,6 +2819,7 @@
       "configured": "Configured",
       "notConfigured": "Not configured",
       "editCredentials": "Edit credentials",
+      "test": "Test connection",
       "fieldName": "Carrier Name",
       "fieldCode": "Code",
       "fieldKind": "Integration",

@@ -2819,6 +2819,7 @@
       "configured": "Configurado",
       "notConfigured": "Sin configurar",
       "editCredentials": "Editar credenciales",
+      "test": "Probar conexión",
       "fieldName": "Nombre del transportista",
       "fieldCode": "Código",
       "fieldKind": "Integración",

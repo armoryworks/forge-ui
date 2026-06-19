@@ -53,6 +53,14 @@
               (click)="openCredentials($any(row))" data-testid="carrier-credentials-btn">
               <span class="material-icons-outlined">key</span>
             </button>
+            <button class="icon-btn" [attr.aria-label]="'admin.carriers.test' | translate"
+              [attr.title]="'admin.carriers.test' | translate"
+              [disabled]="testingId() === row.id || !row.credentialsConfigured"
+              (click)="testCarrier($any(row))" data-testid="carrier-test-btn">
+              <span class="material-icons-outlined" [class.spin]="testingId() === row.id">
+                {{ testingId() === row.id ? 'sync' : 'wifi_tethering' }}
+              </span>
+            </button>
           }
         </ng-template>
       </app-data-table>

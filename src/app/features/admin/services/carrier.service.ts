@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
-import { Carrier, CreateCarrierRequest, UpdateCarrierCredentialsRequest } from '../models/carrier.model';
+import { Carrier, CarrierTestResult, CreateCarrierRequest, UpdateCarrierCredentialsRequest } from '../models/carrier.model';
 
 @Injectable({ providedIn: 'root' })
 export class CarrierService {
@@ -23,5 +23,10 @@ export class CarrierService {
   /** Store API credentials for a carrier. The secret is encrypted server-side and never returned. */
   updateCredentials(id: number, request: UpdateCarrierCredentialsRequest): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}/credentials`, request);
+  }
+
+  /** Test the carrier's live API connection (a sample rate-shop using the stored credentials). */
+  test(id: number): Observable<CarrierTestResult> {
+    return this.http.post<CarrierTestResult>(`${this.base}/${id}/test`, {});
   }
 }

@@ -37,3 +37,9 @@ export interface UpdateCarrierCredentialsRequest {
   accountNumber?: string | null;
   environment: string; // 'sandbox' | 'production'
 }
+
+/** Result of a live carrier connection test (a sample rate-shop against the carrier API). */
+export interface CarrierTestResult {
+  success: boolean;
+  message: string;
+}

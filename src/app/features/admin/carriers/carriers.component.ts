@@ -52,6 +52,7 @@ export class CarriersComponent {
   protected readonly showCreateDialog = signal(false);
   protected readonly showCredentialsDialog = signal(false);
   protected readonly credentialsCarrier = signal<Carrier | null>(null);
+  protected readonly testingId = signal<number | null>(null);
 
   protected readonly columns: ColumnDef[] = [
     { field: 'name', header: 'Carrier', sortable: true },
@@ -60,7 +61,7 @@ export class CarriersComponent {
     { field: 'requiresScanToShip', header: 'Scan', width: '80px', align: 'center' },
     { field: 'credentialsConfigured', header: 'Credentials', width: '130px', align: 'center' },
     { field: 'isActive', header: 'Active', width: '80px', align: 'center' },
-    { field: 'actions', header: '', width: '90px', align: 'right' },
+    { field: 'actions', header: '', width: '120px', align: 'right' },
   ];
 
   protected readonly integrationKindOptions: SelectOption[] = [
@@ -169,6 +170,18 @@ export class CarriersComponent {
   protected closeCredentials(): void {
     this.showCredentialsDialog.set(false);
     this.credentialsCarrier.set(null);
+  }
+
+  protected testCarrier(row: Carrier): void {
+    this.testingId.set(row.id);
+    this.service.test(row.id).subscribe({
+      next: (r) => {
+        this.testingId.set(null);
+        if (r.success) this.snackbar.success(r.message);
+        else this.snackbar.error(r.message);
+      },
+      error: () => this.testingId.set(null),
+    });
   }
 
   protected saveCredentials(): void {
