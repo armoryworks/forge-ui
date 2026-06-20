@@ -16,7 +16,6 @@ import { ValidationButtonComponent } from '../../../../shared/components/validat
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { FormValidationService } from '../../../../shared/services/form-validation.service';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
-import { CustomerAddressService } from '../../../../shared/services/customer-address.service';
 import { CustomerAddress } from '../../../../shared/models/customer-address.model';
 import { Address } from '../../../../shared/models/address.model';
 
@@ -43,7 +42,6 @@ const ADD_NEW = -1;
 })
 export class EditShipmentDialogComponent implements OnInit {
   private readonly shipmentService = inject(ShipmentService);
-  private readonly customerAddressService = inject(CustomerAddressService);
   private readonly snackbar = inject(SnackbarService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -123,7 +121,7 @@ export class EditShipmentDialogComponent implements OnInit {
 
   private loadAddresses(): void {
     this.loadingAddresses.set(true);
-    this.customerAddressService.list(this.shipment().customerId)
+    this.shipmentService.getCustomerAddresses(this.shipment().id)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: rows => {
@@ -141,7 +139,7 @@ export class EditShipmentDialogComponent implements OnInit {
     this.saving.set(true);
     if (this.form.controls.shipTo.value === ADD_NEW) {
       const a = this.form.controls.newAddress.value!;
-      this.customerAddressService.create(this.shipment().customerId, {
+      this.shipmentService.createCustomerAddress(this.shipment().id, {
         label: this.form.controls.newLabel.value.trim() || this.translate.instant('shipments.edit.defaultLabel'),
         addressType: this.form.controls.newType.value,
         line1: a.line1.trim(),

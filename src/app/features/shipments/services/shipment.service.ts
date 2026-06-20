@@ -11,6 +11,8 @@ import { CreateShipmentPackageRequest } from '../models/create-shipment-package-
 import { ShippingRate } from '../models/shipping-rate.model';
 import { ShippingLabel } from '../models/shipping-label.model';
 import { ShipmentTracking } from '../models/shipment-tracking.model';
+import { CustomerAddress } from '../../../shared/models/customer-address.model';
+import { CreateCustomerAddressRequest } from '../../../shared/models/create-customer-address-request.model';
 
 @Injectable({ providedIn: 'root' })
 export class ShipmentService {
@@ -34,6 +36,19 @@ export class ShipmentService {
 
   updateShipment(id: number, request: { carrier?: string; trackingNumber?: string; shippingCost?: number; weight?: number; notes?: string; shippingAddressId?: number }): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}`, request);
+  }
+
+  /**
+   * Ship-to address list/create scoped to the shipment (gated by the shipping capability, not the
+   * customer master-data addresses module) — so a ship-to address can be set even when
+   * CAP-MD-CUSTOMER-ADDRESSES is disabled on the install.
+   */
+  getCustomerAddresses(shipmentId: number): Observable<CustomerAddress[]> {
+    return this.http.get<CustomerAddress[]>(`${this.base}/${shipmentId}/customer-addresses`);
+  }
+
+  createCustomerAddress(shipmentId: number, request: CreateCustomerAddressRequest): Observable<CustomerAddress> {
+    return this.http.post<CustomerAddress>(`${this.base}/${shipmentId}/customer-addresses`, request);
   }
 
   shipShipment(id: number): Observable<void> {
