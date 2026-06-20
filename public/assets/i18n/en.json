@@ -4810,6 +4810,8 @@
     "soLineId": "SO Line ID",
     "qty": "Qty",
     "shippingRates": "Shipping Rates",
+    "downloadShipDoc": "Download ship document",
+    "shipDocFailed": "Could not generate the ship document.",
     "labelCreated": "Label Created",
     "downloadLabel": "Download Label",
     "noRates": "No rates available for this shipment.",

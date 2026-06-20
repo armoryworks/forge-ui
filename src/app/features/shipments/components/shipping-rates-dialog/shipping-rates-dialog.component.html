@@ -13,12 +13,10 @@
             <span class="label-result__label">{{ 'shipments.trackingNumber' | translate }}</span>
             <span class="label-result__value label-result__value--mono">{{ label.trackingNumber }}</span>
           </div>
-          @if (label.labelUrl) {
-            <a class="action-btn action-btn--sm label-result__link" [href]="label.labelUrl" target="_blank" rel="noopener noreferrer">
-              <span class="material-icons-outlined">download</span>
-              {{ 'shipments.downloadLabel' | translate }}
-            </a>
-          }
+          <button type="button" class="action-btn action-btn--sm label-result__link" (click)="downloadShipDocument()">
+            <span class="material-icons-outlined">download</span>
+            {{ 'shipments.downloadShipDoc' | translate }}
+          </button>
         </div>
       </div>
     } @else {

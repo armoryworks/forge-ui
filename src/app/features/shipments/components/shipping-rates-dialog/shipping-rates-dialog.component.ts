@@ -80,6 +80,23 @@ export class ShippingRatesDialogComponent implements OnInit {
       this.creatingLabel.set(false);
       this.snackbar.success(this.translate.instant('shipments.labelCreatedSuccess'));
       this.labelCreated.emit(label);
+      // Auto-download the combined wrapped ship document (carrier label + company/QR/carrier badge).
+      this.downloadShipDocument();
+    });
+  }
+
+  /** Fetch the combined ship-document PDF and trigger a browser download. */
+  protected downloadShipDocument(): void {
+    this.shipmentService.getShipDocument(this.shipmentId()).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ship-document-${this.shipmentId()}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.snackbar.error(this.translate.instant('shipments.shipDocFailed')),
     });
   }
 
