@@ -15,6 +15,7 @@ import { EditShipmentDialogComponent } from '../edit-shipment-dialog/edit-shipme
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
+import { CurrencyDisplayComponent } from '../../../../shared/components/currency-display/currency-display.component';
 import { LoadingBlockDirective } from '../../../../shared/directives/loading-block.directive';
 import { SnackbarService } from '../../../../shared/services/snackbar.service';
 
@@ -25,7 +26,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
     DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
     MatTooltipModule,
     TrackingTimelineComponent, ShippingRatesDialogComponent, EditShipmentDialogComponent, LoadingBlockDirective,
-    EntityActivitySectionComponent, EntityLinkComponent,
+    EntityActivitySectionComponent, EntityLinkComponent, CurrencyDisplayComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
   styleUrl: './shipment-detail-panel.component.scss',

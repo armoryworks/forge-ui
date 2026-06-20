@@ -5,7 +5,7 @@
         <span class="material-icons-outlined detail-icon">local_shipping</span>
         <div>
           <div class="detail-name">{{ shipment.shipmentNumber }}</div>
-          <div class="detail-subtitle">{{ shipment.customerName }}</div>
+          <div class="detail-subtitle"><app-entity-link type="customer" [entityId]="shipment.customerId">{{ shipment.customerName }}</app-entity-link></div>
         </div>
       </div>
       <div class="detail-header__actions">
@@ -32,7 +32,7 @@
         </div>
         <div class="info-item">
           <span class="info-label">{{ 'shipments.customer' | translate }}</span>
-          <span class="info-value">{{ shipment.customerName }}</span>
+          <span class="info-value"><app-entity-link type="customer" [entityId]="shipment.customerId">{{ shipment.customerName }}</app-entity-link></span>
         </div>
         @if (shipment.carrier) {
           <div class="info-item">
@@ -67,7 +67,7 @@
         @if (shipment.shippingCost) {
           <div class="info-item">
             <span class="info-label">{{ 'shipments.shippingCost' | translate }}</span>
-            <span class="info-value">{{ shipment.shippingCost | currency }}</span>
+            <span class="info-value"><app-currency-display [value]="shipment.shippingCost" [currency]="null" /></span>
           </div>
         }
         @if (shipment.invoiceId) {
@@ -136,9 +136,6 @@
         </div>
       }
 
-      <!-- Activity Section -->
-      <app-entity-activity-section entityType="Shipment" [entityId]="shipment.id" />
-
       <!-- Actions -->
       <div class="detail-actions">
         @if (canEdit(shipment.status)) {
@@ -170,6 +167,9 @@
           </button>
         }
       </div>
+
+      <!-- Activity -->
+      <app-entity-activity-section entityType="Shipment" [entityId]="shipment.id" />
     </div>
   }
 </div>
