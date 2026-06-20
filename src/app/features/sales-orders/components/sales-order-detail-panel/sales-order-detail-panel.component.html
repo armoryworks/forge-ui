@@ -32,7 +32,7 @@
         {{ 'salesOrders.lineItems' | translate }}
         <span class="tab__count">{{ so.lines.length }}</span>
         @if (linesWithNoJobs().length > 0) {
-          <span class="material-icons-outlined tab__warning" [attr.aria-label]="'salesOrders.lineItemsNoJobWarning' | translate">warning</span>
+          <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.lineItemsNoJobWarning' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.lineItemsNoJobWarning' | translate">warning</span>
         }
       </button>
       <button class="tab" role="tab"
@@ -42,7 +42,7 @@
         aria-label="Schedule tab">
         {{ 'salesOrders.schedule.tab' | translate }}
         @if (scheduleAtRiskCount() > 0) {
-          <span class="material-icons-outlined tab__warning" aria-label="At risk milestones">warning</span>
+          <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.atRisk' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.atRisk' | translate">warning</span>
         }
       </button>
       <button class="tab" role="tab"
@@ -55,7 +55,7 @@
           <span class="tab__count">{{ shipmentCount() }}</span>
         }
         @if (hasShipmentWarning()) {
-          <span class="material-icons-outlined tab__warning" aria-label="Partially shipped">warning</span>
+          <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.partiallyShipped' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.partiallyShipped' | translate">warning</span>
         }
       </button>
       <button class="tab" role="tab"
@@ -65,7 +65,7 @@
         aria-label="Returns tab">
         {{ 'salesOrders.returns' | translate }}
         @if (openReturnCount() > 0) {
-          <span class="material-icons-outlined tab__warning" aria-label="Open returns">warning</span>
+          <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.openReturns' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.openReturns' | translate">warning</span>
         }
       </button>
       <button class="tab" role="tab"
@@ -88,7 +88,7 @@
           <span class="tab__count">{{ invoiceCount() }}</span>
         }
         @if (hasUninvoicedShipments()) {
-          <span class="material-icons-outlined tab__warning" aria-label="Uninvoiced shipments">warning</span>
+          <span class="material-icons-outlined tab__warning" [matTooltip]="'salesOrders.tabWarning.uninvoiced' | translate" matTooltipPosition="above" [attr.aria-label]="'salesOrders.tabWarning.uninvoiced' | translate">warning</span>
         }
       </button>
       <button class="tab" role="tab"
@@ -655,7 +655,11 @@
       @if (activeTab() === 'invoices') {
         <div class="tab-panel" role="tabpanel">
           @if (invoices().length === 0) {
-            <app-empty-state icon="receipt_long" message="{{ 'salesOrders.noInvoices' | translate }}" />
+            @if (hasUninvoicedShipments()) {
+              <app-empty-state icon="receipt_long" message="{{ 'salesOrders.invoicesUninvoicedEmpty' | translate }}" />
+            } @else {
+              <app-empty-state icon="receipt_long" message="{{ 'salesOrders.noInvoices' | translate }}" />
+            }
           } @else {
             @for (invoice of invoices(); track invoice.id) {
               <div class="so-detail__invoice-card">

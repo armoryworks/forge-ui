@@ -4627,6 +4627,13 @@
     "linesShipped": "Líneas Enviadas",
     "noJobCreated": "No se ha creado un trabajo para esta línea",
     "lineItemsNoJobWarning": "Algunas líneas no tienen trabajos asociados",
+    "invoicesUninvoicedEmpty": "Aún no hay facturas — esta orden tiene artículos enviados que no se han facturado.",
+    "tabWarning": {
+      "atRisk": "El cronograma tiene hitos en riesgo",
+      "partiallyShipped": "La orden está enviada solo parcialmente",
+      "openReturns": "Hay devoluciones abiertas",
+      "uninvoiced": "Los artículos enviados aún no se han facturado"
+    },
     "lineItemsJobNumber": "Trabajo #",
     "lineItemsStage": "Etapa",
     "lineItemsAssignee": "Asignado",

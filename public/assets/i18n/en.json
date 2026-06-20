@@ -4666,6 +4666,13 @@
       "timelineLabel": "Schedule timeline"
     },
     "lineItemsNoJobWarning": "Some line items have no associated jobs",
+    "invoicesUninvoicedEmpty": "No invoices yet — this order has shipped items that haven't been invoiced.",
+    "tabWarning": {
+      "atRisk": "Schedule has at-risk milestones",
+      "partiallyShipped": "Order is only partially shipped",
+      "openReturns": "There are open returns",
+      "uninvoiced": "Shipped items haven't been invoiced yet"
+    },
     "lineItemsJobNumber": "Job #",
     "lineItemsStage": "Stage",
     "lineItemsAssignee": "Assignee",
