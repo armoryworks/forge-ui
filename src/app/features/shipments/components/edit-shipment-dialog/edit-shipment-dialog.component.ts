@@ -60,6 +60,9 @@ export class EditShipmentDialogComponent implements OnInit {
     trackingNumber: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     shippingCost: new FormControl<number | null>(null),
     weight: new FormControl<number | null>(null),
+    length: new FormControl<number | null>(null),
+    width: new FormControl<number | null>(null),
+    height: new FormControl<number | null>(null),
     notes: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(1000)] }),
     newLabel: new FormControl<string>('', { nonNullable: true, validators: [Validators.maxLength(100)] }),
     newType: new FormControl<string>('Shipping', { nonNullable: true }),
@@ -114,6 +117,9 @@ export class EditShipmentDialogComponent implements OnInit {
       trackingNumber: s.trackingNumber ?? '',
       shippingCost: s.shippingCost,
       weight: s.weight,
+      length: s.length,
+      width: s.width,
+      height: s.height,
       notes: s.notes ?? '',
     });
     this.loadAddresses();
@@ -165,6 +171,9 @@ export class EditShipmentDialogComponent implements OnInit {
       trackingNumber: v.trackingNumber.trim(),
       shippingCost: v.shippingCost ?? undefined,
       weight: v.weight ?? undefined,
+      length: v.length ?? undefined,
+      width: v.width ?? undefined,
+      height: v.height ?? undefined,
       notes: v.notes.trim(),
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {

@@ -4764,6 +4764,10 @@
       "trackingNumber": "Tracking #",
       "shippingCost": "Shipping cost",
       "weight": "Weight (lb)",
+      "dimsHint": "Package dimensions (in) — used for rating and the label. Weight is derived from parts if left blank.",
+      "length": "Length (in)",
+      "width": "Width (in)",
+      "height": "Height (in)",
       "notes": "Notes",
       "saved": "Shipment updated.",
       "defaultLabel": "Ship-to"

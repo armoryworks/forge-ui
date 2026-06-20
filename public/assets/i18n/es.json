@@ -4757,6 +4757,10 @@
       "trackingNumber": "N.º de seguimiento",
       "shippingCost": "Costo de envío",
       "weight": "Peso (lb)",
+      "dimsHint": "Dimensiones del paquete (pulg) — usadas para la tarifa y la etiqueta. El peso se deriva de las piezas si se deja en blanco.",
+      "length": "Largo (pulg)",
+      "width": "Ancho (pulg)",
+      "height": "Alto (pulg)",
       "notes": "Notas",
       "saved": "Envío actualizado.",
       "defaultLabel": "Envío a"

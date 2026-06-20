@@ -15,6 +15,9 @@ export interface ShipmentDetail {
   deliveredDate: Date | null;
   shippingCost: number | null;
   weight: number | null;
+  length: number | null;
+  width: number | null;
+  height: number | null;
   notes: string | null;
   invoiceId: number | null;
   lines: ShipmentLine[];

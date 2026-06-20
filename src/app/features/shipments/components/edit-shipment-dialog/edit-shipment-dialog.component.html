@@ -27,6 +27,12 @@
       <app-currency-input [label]="'shipments.edit.shippingCost' | translate" formControlName="shippingCost" />
     </div>
     <app-input [label]="'shipments.edit.weight' | translate" type="number" formControlName="weight" />
+    <span class="dims-hint">{{ 'shipments.edit.dimsHint' | translate }}</span>
+    <div class="dims-row">
+      <app-input [label]="'shipments.edit.length' | translate" type="number" formControlName="length" />
+      <app-input [label]="'shipments.edit.width' | translate" type="number" formControlName="width" />
+      <app-input [label]="'shipments.edit.height' | translate" type="number" formControlName="height" />
+    </div>
     <app-textarea [label]="'shipments.edit.notes' | translate" formControlName="notes" [rows]="3" />
   </div>
 

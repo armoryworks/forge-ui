@@ -1,5 +1,16 @@
 @use 'styles/variables' as *;
 
+.dims-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $sp-md;
+}
+
+.dims-hint {
+  font-size: $font-size-xs;
+  color: var(--text-muted);
+}
+
 .new-address {
   display: flex;
   flex-direction: column;
