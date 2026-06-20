@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal, output, OnInit } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
 
 import { ShipmentService } from '../../services/shipment.service';
@@ -32,16 +33,24 @@ export class ShippingRatesDialogComponent implements OnInit {
   protected readonly selectedRate = signal<ShippingRate | null>(null);
   protected readonly creatingLabel = signal(false);
   protected readonly createdLabel = signal<ShippingLabel | null>(null);
+  // Surfaces the server's real reason (e.g. "Shipment has no shipping address assigned")
+  // instead of a generic "No rates available", so the user knows what to fix.
+  protected readonly errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadRates();
   }
 
+  private serverMessage(err: HttpErrorResponse, fallbackKey: string): string {
+    return err.error?.detail ?? err.error?.title ?? this.translate.instant(fallbackKey);
+  }
+
   private loadRates(): void {
     this.loadingRates.set(true);
+    this.errorMessage.set(null);
     this.shipmentService.getRates(this.shipmentId()).pipe(
-      catchError(() => {
-        this.snackbar.error(this.translate.instant('shipments.failedRates'));
+      catchError((err: HttpErrorResponse) => {
+        this.errorMessage.set(this.serverMessage(err, 'shipments.failedRates'));
         return of([]);
       }),
     ).subscribe(rates => {
@@ -58,9 +67,10 @@ export class ShippingRatesDialogComponent implements OnInit {
     const rate = this.selectedRate();
     if (!rate) return;
     this.creatingLabel.set(true);
+    this.errorMessage.set(null);
     this.shipmentService.createLabel(this.shipmentId(), rate.carrierId, rate.serviceName).pipe(
-      catchError(() => {
-        this.snackbar.error(this.translate.instant('shipments.failedLabel'));
+      catchError((err: HttpErrorResponse) => {
+        this.errorMessage.set(this.serverMessage(err, 'shipments.failedLabel'));
         this.creatingLabel.set(false);
         return of(null);
       }),

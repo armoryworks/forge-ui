@@ -1,0 +1,43 @@
+<app-dialog [title]="'shipments.edit.title' | translate" width="520px" (closed)="close()">
+  <div [formGroup]="form" [appLoadingBlock]="loadingAddresses()">
+    <app-select
+      [label]="'shipments.edit.shipTo' | translate"
+      formControlName="shipTo"
+      [options]="shipToOptions()"
+      [required]="true"
+      data-testid="shipment-edit-shipto" />
+
+    @if (addingNew()) {
+      <div class="new-address">
+        <app-input
+          [label]="'shipments.edit.addressLabel' | translate"
+          formControlName="newLabel"
+          [placeholder]="'shipments.edit.addressLabelPlaceholder' | translate" />
+        <app-select
+          [label]="'shipments.edit.addressTypeField' | translate"
+          formControlName="newType"
+          [options]="addressTypeOptions" />
+        <app-address-form formControlName="newAddress" [compact]="true" />
+        <app-toggle [label]="'shipments.edit.setDefault' | translate" formControlName="newDefault" />
+      </div>
+    }
+
+    <div class="dialog-row">
+      <app-input [label]="'shipments.edit.trackingNumber' | translate" formControlName="trackingNumber" />
+      <app-currency-input [label]="'shipments.edit.shippingCost' | translate" formControlName="shippingCost" />
+    </div>
+    <app-input [label]="'shipments.edit.weight' | translate" type="number" formControlName="weight" />
+    <app-textarea [label]="'shipments.edit.notes' | translate" formControlName="notes" [rows]="3" />
+  </div>
+
+  <div dialog-footer>
+    <button class="action-btn" (click)="close()">{{ 'common.cancel' | translate }}</button>
+    <app-validation-button [violations]="violations" [loading]="saving()">
+      <button class="action-btn action-btn--primary"
+        [disabled]="form.invalid || saving()" (click)="save()" data-testid="shipment-edit-save-btn">
+        <span class="material-icons-outlined">save</span>
+        {{ 'common.save' | translate }}
+      </button>
+    </app-validation-button>
+  </div>
+</app-dialog>

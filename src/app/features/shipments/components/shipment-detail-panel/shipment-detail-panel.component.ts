@@ -11,6 +11,7 @@ import { ShipmentTracking } from '../../models/shipment-tracking.model';
 import { ShippingLabel } from '../../models/shipping-label.model';
 import { TrackingTimelineComponent } from '../tracking-timeline/tracking-timeline.component';
 import { ShippingRatesDialogComponent } from '../shipping-rates-dialog/shipping-rates-dialog.component';
+import { EditShipmentDialogComponent } from '../edit-shipment-dialog/edit-shipment-dialog.component';
 import { ConfirmDialogComponent, ConfirmDialogData } from '../../../../shared/components/confirm-dialog/confirm-dialog.component';
 import { EntityActivitySectionComponent } from '../../../../shared/components/entity-activity-section/entity-activity-section.component';
 import { EntityLinkComponent } from '../../../../shared/components/entity-link/entity-link.component';
@@ -23,7 +24,7 @@ import { SnackbarService } from '../../../../shared/services/snackbar.service';
   imports: [
     DatePipe, CurrencyPipe, DecimalPipe, TranslatePipe,
     MatTooltipModule,
-    TrackingTimelineComponent, ShippingRatesDialogComponent, LoadingBlockDirective,
+    TrackingTimelineComponent, ShippingRatesDialogComponent, EditShipmentDialogComponent, LoadingBlockDirective,
     EntityActivitySectionComponent, EntityLinkComponent,
   ],
   templateUrl: './shipment-detail-panel.component.html',
@@ -47,6 +48,7 @@ export class ShipmentDetailPanelComponent implements OnInit {
   protected readonly trackingData = signal<ShipmentTracking | null>(null);
   protected readonly trackingLoading = signal(false);
   protected readonly showRatesDialog = signal(false);
+  protected readonly showEditDialog = signal(false);
 
   constructor() {
     effect(() => {
@@ -74,6 +76,15 @@ export class ShipmentDetailPanelComponent implements OnInit {
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  // --- Edit Dialog ---
+  protected openEditDialog(): void { this.showEditDialog.set(true); }
+  protected closeEditDialog(): void { this.showEditDialog.set(false); }
+  protected onShipmentEdited(): void {
+    this.showEditDialog.set(false);
+    this.refreshDetail();
+    this.shipmentChanged.emit();
   }
 
   // --- Rates Dialog ---
@@ -174,6 +185,10 @@ export class ShipmentDetailPanelComponent implements OnInit {
 
   protected canDeliver(status: string): boolean {
     return status === 'Shipped' || status === 'InTransit';
+  }
+
+  protected canEdit(status: string): boolean {
+    return status !== 'Delivered' && status !== 'Cancelled';
   }
 
   private refreshDetail(): void {

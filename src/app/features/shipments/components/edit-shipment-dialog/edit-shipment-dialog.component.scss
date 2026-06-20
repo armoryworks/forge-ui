@@ -1,0 +1,10 @@
+@use 'styles/variables' as *;
+
+.new-address {
+  display: flex;
+  flex-direction: column;
+  gap: $sp-md;
+  padding: $sp-md;
+  border: $border-width-thin solid var(--border);
+  margin-bottom: $sp-md;
+}

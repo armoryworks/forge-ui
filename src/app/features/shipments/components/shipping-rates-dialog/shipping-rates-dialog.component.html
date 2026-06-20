@@ -22,7 +22,13 @@
         </div>
       </div>
     } @else {
-      @if (rates().length === 0 && !loadingRates()) {
+      @if (errorMessage(); as msg) {
+        <div class="rates-error">
+          <span class="material-icons-outlined">error_outline</span>
+          <span>{{ msg }}</span>
+        </div>
+      }
+      @if (rates().length === 0 && !loadingRates() && !errorMessage()) {
         <div class="rates-empty">
           <span class="material-icons-outlined rates-empty__icon">local_shipping</span>
           <span class="rates-empty__text">{{ 'shipments.noRates' | translate }}</span>

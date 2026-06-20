@@ -33,6 +33,7 @@ describe('ShipmentService', () => {
   const mockShipmentDetail: ShipmentDetail = {
     id: 1,
     shipmentNumber: 'SHIP-001',
+    customerId: 1,
     status: 'Pending',
     carrier: 'FedEx',
     trackingNumber: null,

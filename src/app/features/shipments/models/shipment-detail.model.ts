@@ -6,6 +6,7 @@ export interface ShipmentDetail {
   salesOrderId: number;
   salesOrderNumber: string;
   customerName: string;
+  customerId: number;
   shippingAddressId: number | null;
   status: string;
   carrier: string | null;

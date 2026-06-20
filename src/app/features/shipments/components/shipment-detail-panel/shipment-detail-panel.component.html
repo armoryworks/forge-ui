@@ -141,6 +141,12 @@
 
       <!-- Actions -->
       <div class="detail-actions">
+        @if (canEdit(shipment.status)) {
+          <button class="action-btn" data-testid="shipment-edit-btn" (click)="openEditDialog()">
+            <span class="material-icons-outlined">edit</span>
+            {{ 'shipments.edit.action' | translate }}
+          </button>
+        }
         @if (canShip(shipment.status)) {
           <button class="action-btn" data-testid="shipment-get-rates-btn" (click)="openRatesDialog()">
             <span class="material-icons-outlined">request_quote</span>
@@ -173,4 +179,11 @@
     [shipmentId]="shipment()!.id"
     (closed)="closeRatesDialog()"
     (labelCreated)="onLabelCreated($event)" />
+}
+
+@if (showEditDialog() && shipment()) {
+  <app-edit-shipment-dialog
+    [shipment]="shipment()!"
+    (closed)="closeEditDialog()"
+    (saved)="onShipmentEdited()" />
 }

@@ -5,6 +5,17 @@
   display: block;
 }
 
+.rates-error {
+  display: flex;
+  align-items: center;
+  gap: $sp-sm;
+  padding: $sp-md;
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+  border: $border-width-thin solid var(--error);
+  font-size: $font-size-sm;
+}
+
 // --- Rates Table ---
 .rates-table {
   width: 100%;

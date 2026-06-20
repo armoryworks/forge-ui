@@ -32,7 +32,7 @@ export class ShipmentService {
     return this.http.post<ShipmentDetail>(this.base, request);
   }
 
-  updateShipment(id: number, request: { carrier?: string; trackingNumber?: string; shippingCost?: number; weight?: number; notes?: string }): Observable<void> {
+  updateShipment(id: number, request: { carrier?: string; trackingNumber?: string; shippingCost?: number; weight?: number; notes?: string; shippingAddressId?: number }): Observable<void> {
     return this.http.put<void>(`${this.base}/${id}`, request);
   }
 
