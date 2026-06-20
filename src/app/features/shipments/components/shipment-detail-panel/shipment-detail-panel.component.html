@@ -9,6 +9,16 @@
         </div>
       </div>
       <div class="detail-header__actions">
+        @if (canEdit(shipment.status)) {
+          <button class="icon-btn"
+            [matTooltip]="'shipments.edit.action' | translate"
+            matTooltipPosition="above"
+            data-testid="shipment-edit-btn"
+            (click)="openEditDialog()"
+            [attr.aria-label]="'shipments.edit.action' | translate">
+            <span class="material-icons-outlined">edit</span>
+          </button>
+        }
         <button class="icon-btn" [matTooltip]="'common.close' | translate" matTooltipPosition="above" [attr.aria-label]="'common.close' | translate" (click)="close()">
           <span class="material-icons-outlined">close</span>
         </button>
@@ -138,12 +148,6 @@
 
       <!-- Actions -->
       <div class="detail-actions">
-        @if (canEdit(shipment.status)) {
-          <button class="action-btn" data-testid="shipment-edit-btn" (click)="openEditDialog()">
-            <span class="material-icons-outlined">edit</span>
-            {{ 'shipments.edit.action' | translate }}
-          </button>
-        }
         @if (canShip(shipment.status)) {
           <button class="action-btn" data-testid="shipment-get-rates-btn" (click)="openRatesDialog()">
             <span class="material-icons-outlined">request_quote</span>
