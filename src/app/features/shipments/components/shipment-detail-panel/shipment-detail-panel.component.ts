@@ -192,6 +192,33 @@ export class ShipmentDetailPanelComponent implements OnInit {
     return status !== 'Delivered' && status !== 'Cancelled';
   }
 
+  // --- Wrapped ship document (versioned) ---
+  protected downloadShipDoc(): void {
+    this.shipmentService.getShipDocument(this.shipmentId()).subscribe({
+      next: (blob) => this.saveBlob(blob),
+      error: () => this.snackbar.error(this.translate.instant('shipments.shipDocFailed')),
+    });
+  }
+
+  protected regenerateShipDoc(): void {
+    this.shipmentService.regenerateShipDocument(this.shipmentId()).subscribe({
+      next: (blob) => {
+        this.saveBlob(blob);
+        this.snackbar.success(this.translate.instant('shipments.shipDocRegenerated'));
+      },
+      error: () => this.snackbar.error(this.translate.instant('shipments.shipDocFailed')),
+    });
+  }
+
+  private saveBlob(blob: Blob): void {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ship-document-${this.shipmentId()}.pdf`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   private refreshDetail(): void {
     const shipment = this.shipment();
     if (!shipment) return;

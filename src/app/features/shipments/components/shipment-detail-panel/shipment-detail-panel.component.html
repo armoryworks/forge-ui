@@ -170,6 +170,16 @@
             {{ 'shipments.markDelivered' | translate }}
           </button>
         }
+        @if (shipment.trackingNumber) {
+          <button class="action-btn" data-testid="shipment-download-doc-btn" (click)="downloadShipDoc()">
+            <span class="material-icons-outlined">download</span>
+            {{ 'shipments.downloadShipDoc' | translate }}
+          </button>
+          <button class="action-btn" data-testid="shipment-regen-doc-btn" (click)="regenerateShipDoc()">
+            <span class="material-icons-outlined">sync</span>
+            {{ 'shipments.regenerateShipDoc' | translate }}
+          </button>
+        }
       </div>
 
       <!-- Activity -->

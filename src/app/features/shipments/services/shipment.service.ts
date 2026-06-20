@@ -56,6 +56,11 @@ export class ShipmentService {
     return this.http.get(`${this.base}/${shipmentId}/ship-document`, { responseType: 'blob' });
   }
 
+  /** Regenerate the wrapped ship document — supersedes the current version (prior archived). Returns the new PDF. */
+  regenerateShipDocument(shipmentId: number): Observable<Blob> {
+    return this.http.post(`${this.base}/${shipmentId}/ship-document/regenerate`, {}, { responseType: 'blob' });
+  }
+
   shipShipment(id: number): Observable<void> {
     return this.http.post<void>(`${this.base}/${id}/ship`, {});
   }

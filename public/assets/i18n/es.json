@@ -4808,6 +4808,8 @@
     "qty": "Cant",
     "shippingRates": "Tarifas de Envío",
     "downloadShipDoc": "Descargar documento de envío",
+    "regenerateShipDoc": "Regenerar documento",
+    "shipDocRegenerated": "Documento de envío regenerado (versión anterior archivada).",
     "shipDocFailed": "No se pudo generar el documento de envío.",
     "labelCreated": "Etiqueta Creada",
     "downloadLabel": "Descargar Etiqueta",

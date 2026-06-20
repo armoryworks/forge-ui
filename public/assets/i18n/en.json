@@ -4815,6 +4815,8 @@
     "qty": "Qty",
     "shippingRates": "Shipping Rates",
     "downloadShipDoc": "Download ship document",
+    "regenerateShipDoc": "Regenerate document",
+    "shipDocRegenerated": "Ship document regenerated (previous version archived).",
     "shipDocFailed": "Could not generate the ship document.",
     "labelCreated": "Label Created",
     "downloadLabel": "Download Label",
