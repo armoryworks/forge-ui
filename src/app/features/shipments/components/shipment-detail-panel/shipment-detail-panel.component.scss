@@ -1,6 +1,18 @@
 @use 'styles/variables' as *;
 @use 'styles/mixins' as *;
 
+.ship-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: $sp-xs;
+  font-size: $font-size-sm;
+  color: var(--text-muted);
+
+  .material-icons-outlined {
+    font-size: $icon-size-sm;
+  }
+}
+
 :host {
   display: flex;
   flex-direction: column;

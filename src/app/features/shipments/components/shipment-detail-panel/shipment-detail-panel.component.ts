@@ -192,6 +192,16 @@ export class ShipmentDetailPanelComponent implements OnInit {
     return status !== 'Delivered' && status !== 'Cancelled';
   }
 
+  /**
+   * An integrated (API) carrier ships by creating the label — which assigns the tracking number — not by
+   * a manual "Mark Shipped". So hide Mark Shipped for an API carrier until a label/tracking exists.
+   */
+  protected canMarkShipped(shipment: ShipmentDetail): boolean {
+    if (!this.canShip(shipment.status)) return false;
+    if (shipment.carrierIsApi && !shipment.trackingNumber) return false;
+    return true;
+  }
+
   // --- Wrapped ship document (versioned) ---
   protected downloadShipDoc(): void {
     this.shipmentService.getShipDocument(this.shipmentId()).subscribe({

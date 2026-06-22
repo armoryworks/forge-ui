@@ -4784,6 +4784,8 @@
     "closeTracking": "Cerrar seguimiento",
     "getRates": "Obtener Tarifas",
     "markShipped": "Marcar Enviado",
+    "labelRequired": "Cree la etiqueta para enviar",
+    "labelRequiredHint": "Este transportista está integrado — el envío se realiza creando la etiqueta (que asigna el número de seguimiento). Obtenga tarifas y luego cree la etiqueta.",
     "track": "Rastrear",
     "markDelivered": "Marcar Entregado",
     "allStatuses": "Todos los Estados",

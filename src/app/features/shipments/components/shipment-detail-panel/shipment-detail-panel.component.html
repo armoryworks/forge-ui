@@ -153,10 +153,17 @@
             <span class="material-icons-outlined">request_quote</span>
             {{ 'shipments.getRates' | translate }}
           </button>
-          <button class="action-btn action-btn--primary" data-testid="shipment-mark-shipped-btn" (click)="markShipped()">
-            <span class="material-icons-outlined">local_shipping</span>
-            {{ 'shipments.markShipped' | translate }}
-          </button>
+          @if (canMarkShipped(shipment)) {
+            <button class="action-btn action-btn--primary" data-testid="shipment-mark-shipped-btn" (click)="markShipped()">
+              <span class="material-icons-outlined">local_shipping</span>
+              {{ 'shipments.markShipped' | translate }}
+            </button>
+          } @else {
+            <span class="ship-hint" [matTooltip]="'shipments.labelRequiredHint' | translate" matTooltipPosition="above">
+              <span class="material-icons-outlined">info</span>
+              {{ 'shipments.labelRequired' | translate }}
+            </span>
+          }
         }
         @if (shipment.trackingNumber && !trackingData()) {
           <button class="action-btn" data-testid="shipment-load-tracking-btn" (click)="loadTracking()">

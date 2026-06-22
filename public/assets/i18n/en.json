@@ -4791,6 +4791,8 @@
     "closeTracking": "Close tracking",
     "getRates": "Get Rates",
     "markShipped": "Mark Shipped",
+    "labelRequired": "Create label to ship",
+    "labelRequiredHint": "This carrier is integrated — shipping happens by creating the label (which assigns the tracking number). Get rates, then create the label.",
     "track": "Track",
     "markDelivered": "Mark Delivered",
     "allStatuses": "All Statuses",

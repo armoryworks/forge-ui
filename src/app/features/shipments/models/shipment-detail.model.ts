@@ -10,6 +10,7 @@ export interface ShipmentDetail {
   shippingAddressId: number | null;
   status: string;
   carrier: string | null;
+  carrierIsApi: boolean;
   trackingNumber: string | null;
   shippedDate: Date | null;
   deliveredDate: Date | null;

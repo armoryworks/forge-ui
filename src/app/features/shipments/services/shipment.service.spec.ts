@@ -36,6 +36,7 @@ describe('ShipmentService', () => {
     customerId: 1,
     status: 'Pending',
     carrier: 'FedEx',
+    carrierIsApi: false,
     trackingNumber: null,
     shippedDate: null,
     deliveredDate: null,
