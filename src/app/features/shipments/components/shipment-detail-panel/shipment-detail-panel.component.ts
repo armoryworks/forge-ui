@@ -206,7 +206,7 @@ export class ShipmentDetailPanelComponent implements OnInit {
   protected downloadShipDoc(): void {
     this.shipmentService.getShipDocument(this.shipmentId()).subscribe({
       next: (blob) => this.saveBlob(blob),
-      error: () => this.snackbar.error(this.translate.instant('shipments.shipDocFailed')),
+      error: (err) => this.showBlobError(err),
     });
   }
 
@@ -216,8 +216,24 @@ export class ShipmentDetailPanelComponent implements OnInit {
         this.saveBlob(blob);
         this.snackbar.success(this.translate.instant('shipments.shipDocRegenerated'));
       },
-      error: () => this.snackbar.error(this.translate.instant('shipments.shipDocFailed')),
+      error: (err) => this.showBlobError(err),
     });
+  }
+
+  /** Blob endpoints return their error as a Blob — read + parse it so the user sees the real reason. */
+  private async showBlobError(err: unknown): Promise<void> {
+    const fallback = this.translate.instant('shipments.shipDocFailed');
+    const body = (err as { error?: unknown })?.error;
+    if (body instanceof Blob) {
+      try {
+        const parsed = JSON.parse(await body.text()) as { detail?: string; title?: string };
+        this.snackbar.error(parsed.detail ?? parsed.title ?? fallback);
+        return;
+      } catch {
+        // not JSON — fall through
+      }
+    }
+    this.snackbar.error(fallback);
   }
 
   private saveBlob(blob: Blob): void {
