@@ -124,7 +124,7 @@ export class NavTreeService {
         { icon: 'badge', label: 'Employees', i18nKey: 'nav.employees', route: '/employees', capability: 'CAP-MD-EMPLOYEES', allowedRoles: ['Admin', 'Manager'] },
         { icon: 'schedule', label: 'Time', i18nKey: 'nav.timeTracking', route: '/time-tracking', shortcut: ['Q', 'T'], capability: 'CAP-HR-TIMETRACK' },
         { icon: 'receipt_long', label: 'Expenses', i18nKey: 'nav.expenses', route: '/expenses', capability: 'CAP-ACCT-EXPENSES', allowedRoles: ['Admin', 'Manager', 'Engineer', 'OfficeManager'] },
-        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library', capability: 'CAP-HR-TRAINING' },
+        { icon: 'school', label: 'Training', i18nKey: 'nav.training', route: '/training/library' },
       ],
     },
     {

@@ -133,7 +133,6 @@ export const CAPABILITY_ENDPOINT_REGISTRY: readonly CapabilityEndpointEntry[] = 
   { prefix: 'status-tracking', capability: 'CAP-CROSS-ACTIVITY-LOG' },
   { prefix: 'time-tracking', capability: 'CAP-HR-TIMETRACK' },
   { prefix: 'track-types', capability: 'CAP-EXT-KANBAN' },
-  { prefix: 'training', capability: 'CAP-HR-TRAINING' },
   { prefix: 'users', capability: 'CAP-IDEN-USERS' },
   // AP split: dedicated codes for vendor bills / payments (PO endpoints
   // themselves keep CAP-P2P-PO).
